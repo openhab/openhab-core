@@ -106,7 +106,9 @@ public class TagResource implements RESTResource {
 
         List<EnrichedSemanticTagDTO> tagsDTO = semanticTagRegistry.getAll().stream()
                 .sorted((element1, element2) -> element1.getUID().compareTo(element2.getUID()))
-                .map(t -> new EnrichedSemanticTagDTO(t.localized(locale), isEditable(t))).collect(Collectors.toList());
+                .map(t -> new EnrichedSemanticTagDTO(t.localized(locale), semanticTagRegistry.isEditable(t),
+                        semanticTagRegistry.isRemovable(t)))
+                .collect(Collectors.toList());
         return JSONResponse.createResponse(Status.OK, tagsDTO, null);
     }
 
@@ -127,7 +129,8 @@ public class TagResource implements RESTResource {
         if (tag != null) {
             List<EnrichedSemanticTagDTO> tagsDTO = semanticTagRegistry.getSubTree(tag).stream()
                     .sorted((element1, element2) -> element1.getUID().compareTo(element2.getUID()))
-                    .map(t -> new EnrichedSemanticTagDTO(t.localized(locale), isEditable(t)))
+                    .map(t -> new EnrichedSemanticTagDTO(t.localized(locale), semanticTagRegistry.isEditable(t),
+                            semanticTagRegistry.isRemovable(t)))
                     .collect(Collectors.toList());
             return JSONResponse.createResponse(Status.OK, tagsDTO, null);
         } else {
@@ -179,7 +182,7 @@ public class TagResource implements RESTResource {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK, was deleted."),
                     @ApiResponse(responseCode = "404", description = "Custom tag not found."),
-                    @ApiResponse(responseCode = "405", description = "Custom tag not editable.") })
+                    @ApiResponse(responseCode = "405", description = "Custom tag not removable.") })
     public Response remove(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @PathParam("tagId") @Parameter(description = "tag id") String tagId) {
@@ -193,16 +196,14 @@ public class TagResource implements RESTResource {
             return getTagResponse(Status.NOT_FOUND, null, locale, "Tag " + uid + " does not exist!");
         }
 
+        // Check that tag is removable, 405 otherwise
+        if (!semanticTagRegistry.isRemovable(tag)) {
+            return getTagResponse(Status.METHOD_NOT_ALLOWED, null, locale, "Tag " + uid + " is not removable.");
+        }
+
         // Get tags in reverse order
         List<String> uids = semanticTagRegistry.getSubTree(tag).stream().map(t -> t.getUID())
                 .sorted((element1, element2) -> element2.compareTo(element1)).collect(Collectors.toList());
-        for (String id : uids) {
-            // ask whether the tag exists as a managed tag, so it can get updated, 405 otherwise
-            if (managedSemanticTagProvider.get(id) == null) {
-                return getTagResponse(Status.METHOD_NOT_ALLOWED, null, locale, "Tag " + id + " is not editable.");
-            }
-        }
-
         uids.forEach(id -> managedSemanticTagProvider.remove(id));
 
         return Response.ok(null, MediaType.TEXT_PLAIN).build();
@@ -231,8 +232,8 @@ public class TagResource implements RESTResource {
             return getTagResponse(Status.NOT_FOUND, null, locale, "Tag " + uid + " does not exist!");
         }
 
-        // ask whether the tag exists as a managed tag, so it can get updated, 405 otherwise
-        if (managedSemanticTagProvider.get(uid) == null) {
+        // Check that tag is editable, 405 otherwise
+        if (!semanticTagRegistry.isEditable(tag)) {
             return getTagResponse(Status.METHOD_NOT_ALLOWED, null, locale, "Tag " + uid + " is not editable.");
         }
 
@@ -246,12 +247,10 @@ public class TagResource implements RESTResource {
 
     private Response getTagResponse(Status status, @Nullable SemanticTag tag, Locale locale,
             @Nullable String errorMsg) {
-        EnrichedSemanticTagDTO tagDTO = tag != null ? new EnrichedSemanticTagDTO(tag.localized(locale), isEditable(tag))
+        EnrichedSemanticTagDTO tagDTO = tag != null
+                ? new EnrichedSemanticTagDTO(tag.localized(locale), semanticTagRegistry.isEditable(tag),
+                        semanticTagRegistry.isRemovable(tag))
                 : null;
         return JSONResponse.createResponse(status, tagDTO, errorMsg);
-    }
-
-    private boolean isEditable(SemanticTag tag) {
-        return managedSemanticTagProvider.get(tag.getUID()) != null;
     }
 }

@@ -138,6 +138,21 @@ public class SemanticTagRegistryImpl extends AbstractRegistry<SemanticTag, Strin
     }
 
     @Override
+    public boolean isEditable(SemanticTag tag) {
+        return managedProvider.get(tag.getUID()) != null;
+    }
+
+    @Override
+    public boolean isRemovable(SemanticTag tag) {
+        for (SemanticTag t : getSubTree(tag)) {
+            if (!isEditable(t)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Override
     protected void onAddElement(SemanticTag tag) throws IllegalArgumentException {
         logger.trace("onAddElement {}", tag.getUID());
         super.onAddElement(tag);

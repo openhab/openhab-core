@@ -65,4 +65,24 @@ public interface SemanticTagRegistry extends Registry<SemanticTag, String> {
      * @return a list of all tags having the provided tag as ancestor, including the provided tag itself
      */
     List<SemanticTag> getSubTree(SemanticTag tag);
+
+    /**
+     * Indicates if a tag is editable.
+     *
+     * To be editable, a tag must be managed.
+     *
+     * @param tag a tag in the registry
+     * @return true if the provided tag is editable, false if not
+     */
+    boolean isEditable(SemanticTag tag);
+
+    /**
+     * Indicates if a tag is removable.
+     *
+     * To be removable, a tag and all its sub tags must be managed.
+     *
+     * @param tag a tag in the registry
+     * @return true if the provided tag is removable, false if not
+     */
+    boolean isRemovable(SemanticTag tag);
 }

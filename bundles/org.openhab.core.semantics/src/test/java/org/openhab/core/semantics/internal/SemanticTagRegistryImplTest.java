@@ -12,10 +12,12 @@
  */
 package org.openhab.core.semantics.internal;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,6 +30,8 @@ import org.openhab.core.semantics.Location;
 import org.openhab.core.semantics.ManagedSemanticTagProvider;
 import org.openhab.core.semantics.Point;
 import org.openhab.core.semantics.Property;
+import org.openhab.core.semantics.SemanticTag;
+import org.openhab.core.semantics.SemanticTagImpl;
 import org.openhab.core.semantics.SemanticTagRegistry;
 import org.openhab.core.semantics.Tag;
 import org.openhab.core.semantics.model.DefaultSemanticTagProvider;
@@ -42,6 +46,9 @@ public class SemanticTagRegistryImplTest {
     private @Mock @NonNullByDefault({}) ManagedSemanticTagProvider managedSemanticTagProviderMock;
     private @NonNullByDefault({}) SemanticTagRegistry semanticTagRegistry;
 
+    private @NonNullByDefault({}) SemanticTag userLocationTag;
+    private @NonNullByDefault({}) SemanticTag userSubLocationTag;
+
     private @NonNullByDefault({}) Class<? extends Tag> roomTagClass;
     private @NonNullByDefault({}) Class<? extends Tag> bathroomTagClass;
     private @NonNullByDefault({}) Class<? extends Tag> cleaningRobotTagClass;
@@ -50,7 +57,10 @@ public class SemanticTagRegistryImplTest {
 
     @BeforeEach
     public void setup() throws Exception {
-        when(managedSemanticTagProviderMock.getAll()).thenReturn(List.of());
+        userLocationTag = new SemanticTagImpl("Location_UserLocation", "Custom label", "Custom description",
+                " Synonym1, Synonym2 , Synonym With Space ");
+        userSubLocationTag = new SemanticTagImpl("Location_UserLocation_UserSubLocation", null, null, List.of());
+        when(managedSemanticTagProviderMock.getAll()).thenReturn(List.of(userLocationTag, userSubLocationTag));
         semanticTagRegistry = new SemanticTagRegistryImpl(new DefaultSemanticTagProvider(),
                 managedSemanticTagProviderMock);
 
@@ -84,5 +94,50 @@ public class SemanticTagRegistryImplTest {
         assertEquals("Point_Measurement", semanticTagRegistry.buildId(measurementTagClass));
         assertEquals("Property", semanticTagRegistry.buildId(Property.class));
         assertEquals("Property_Temperature", semanticTagRegistry.buildId(temperatureTagClass));
+    }
+
+    @Test
+    public void testIsEditable() {
+        when(managedSemanticTagProviderMock.get(eq("Location"))).thenReturn(null);
+        when(managedSemanticTagProviderMock.get(eq("Location_Indoor"))).thenReturn(null);
+        when(managedSemanticTagProviderMock.get(eq("Location_Indoor_Room"))).thenReturn(null);
+        when(managedSemanticTagProviderMock.get(eq("Location_Indoor_Room_Bathroom"))).thenReturn(null);
+        when(managedSemanticTagProviderMock.get(eq("Location_UserLocation"))).thenReturn(userLocationTag);
+        when(managedSemanticTagProviderMock.get(eq("Location_UserLocation_UserSubLocation")))
+                .thenReturn(userSubLocationTag);
+
+        assertFalse(semanticTagRegistry.isEditable(Objects.requireNonNull(semanticTagRegistry.get("Location"))));
+        assertFalse(semanticTagRegistry.isEditable(Objects.requireNonNull(semanticTagRegistry.get("Location_Indoor"))));
+        assertFalse(semanticTagRegistry
+                .isEditable(Objects.requireNonNull(semanticTagRegistry.get("Location_Indoor_Room"))));
+        assertFalse(semanticTagRegistry
+                .isEditable(Objects.requireNonNull(semanticTagRegistry.get("Location_Indoor_Room_Bathroom"))));
+        assertTrue(semanticTagRegistry
+                .isEditable(Objects.requireNonNull(semanticTagRegistry.get("Location_UserLocation"))));
+        assertTrue(semanticTagRegistry
+                .isEditable(Objects.requireNonNull(semanticTagRegistry.get("Location_UserLocation_UserSubLocation"))));
+    }
+
+    @Test
+    public void testIsRemovable() {
+        when(managedSemanticTagProviderMock.get(eq("Location"))).thenReturn(null);
+        when(managedSemanticTagProviderMock.get(eq("Location_Indoor"))).thenReturn(null);
+        when(managedSemanticTagProviderMock.get(eq("Location_Indoor_Room"))).thenReturn(null);
+        when(managedSemanticTagProviderMock.get(eq("Location_Indoor_Room_Bathroom"))).thenReturn(null);
+        when(managedSemanticTagProviderMock.get(eq("Location_UserLocation"))).thenReturn(userLocationTag);
+        when(managedSemanticTagProviderMock.get(eq("Location_UserLocation_UserSubLocation")))
+                .thenReturn(userSubLocationTag);
+
+        assertFalse(semanticTagRegistry.isRemovable(Objects.requireNonNull(semanticTagRegistry.get("Location"))));
+        assertFalse(
+                semanticTagRegistry.isRemovable(Objects.requireNonNull(semanticTagRegistry.get("Location_Indoor"))));
+        assertFalse(semanticTagRegistry
+                .isRemovable(Objects.requireNonNull(semanticTagRegistry.get("Location_Indoor_Room"))));
+        assertFalse(semanticTagRegistry
+                .isRemovable(Objects.requireNonNull(semanticTagRegistry.get("Location_Indoor_Room_Bathroom"))));
+        assertTrue(semanticTagRegistry
+                .isRemovable(Objects.requireNonNull(semanticTagRegistry.get("Location_UserLocation"))));
+        assertTrue(semanticTagRegistry
+                .isRemovable(Objects.requireNonNull(semanticTagRegistry.get("Location_UserLocation_UserSubLocation"))));
     }
 }
