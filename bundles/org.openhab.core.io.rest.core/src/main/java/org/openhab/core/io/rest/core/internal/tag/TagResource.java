@@ -201,10 +201,7 @@ public class TagResource implements RESTResource {
             return getTagResponse(Status.METHOD_NOT_ALLOWED, null, locale, "Tag " + uid + " is not removable.");
         }
 
-        // Get tags in reverse order
-        List<String> uids = semanticTagRegistry.getSubTree(tag).stream().map(t -> t.getUID())
-                .sorted((element1, element2) -> element2.compareTo(element1)).collect(Collectors.toList());
-        uids.forEach(id -> managedSemanticTagProvider.remove(id));
+        semanticTagRegistry.removeSubTree(tag);
 
         return Response.ok(null, MediaType.TEXT_PLAIN).build();
     }

@@ -85,4 +85,13 @@ public interface SemanticTagRegistry extends Registry<SemanticTag, String> {
      * @return true if the provided tag is removable, false if not
      */
     boolean isRemovable(SemanticTag tag);
+
+    /**
+     * Removes the provided tag and all tags having the provided tag as ancestor.
+     *
+     * Only removable (managed) tags are removed.
+     *
+     * @param tag a tag in the registry
+     */
+    void removeSubTree(SemanticTag tag);
 }

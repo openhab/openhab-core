@@ -153,6 +153,14 @@ public class SemanticTagRegistryImpl extends AbstractRegistry<SemanticTag, Strin
     }
 
     @Override
+    public void removeSubTree(SemanticTag tag) {
+        // Get tags id in reverse order
+        List<String> ids = getSubTree(tag).stream().filter(t -> isRemovable(t)).map(t -> t.getUID())
+                .sorted((element1, element2) -> element2.compareTo(element1)).collect(Collectors.toList());
+        ids.forEach(id -> managedProvider.remove(id));
+    }
+
+    @Override
     protected void onAddElement(SemanticTag tag) throws IllegalArgumentException {
         logger.trace("onAddElement {}", tag.getUID());
         super.onAddElement(tag);
