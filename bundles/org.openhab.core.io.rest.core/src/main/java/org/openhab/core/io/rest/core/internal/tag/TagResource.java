@@ -106,9 +106,7 @@ public class TagResource implements RESTResource {
 
         List<EnrichedSemanticTagDTO> tagsDTO = semanticTagRegistry.getAll().stream()
                 .sorted(Comparator.comparing(SemanticTag::getUID))
-                .map(t -> new EnrichedSemanticTagDTO(t.localized(locale), semanticTagRegistry.isEditable(t),
-                        semanticTagRegistry.isRemovable(t)))
-                .toList();
+                .map(t -> new EnrichedSemanticTagDTO(t.localized(locale), semanticTagRegistry.isEditable(t))).toList();
         return JSONResponse.createResponse(Status.OK, tagsDTO, null);
     }
 
@@ -129,8 +127,7 @@ public class TagResource implements RESTResource {
         if (tag != null) {
             List<EnrichedSemanticTagDTO> tagsDTO = semanticTagRegistry.getSubTree(tag).stream()
                     .sorted(Comparator.comparing(SemanticTag::getUID))
-                    .map(t -> new EnrichedSemanticTagDTO(t.localized(locale), semanticTagRegistry.isEditable(t),
-                            semanticTagRegistry.isRemovable(t)))
+                    .map(t -> new EnrichedSemanticTagDTO(t.localized(locale), semanticTagRegistry.isEditable(t)))
                     .toList();
             return JSONResponse.createResponse(Status.OK, tagsDTO, null);
         } else {
@@ -197,7 +194,7 @@ public class TagResource implements RESTResource {
         }
 
         // Check that tag is removable, 405 otherwise
-        if (!semanticTagRegistry.isRemovable(tag)) {
+        if (!semanticTagRegistry.isEditable(tag)) {
             return getTagResponse(Status.METHOD_NOT_ALLOWED, null, locale, "Tag " + uid + " is not removable.");
         }
 
@@ -245,8 +242,7 @@ public class TagResource implements RESTResource {
     private Response getTagResponse(Status status, @Nullable SemanticTag tag, Locale locale,
             @Nullable String errorMsg) {
         EnrichedSemanticTagDTO tagDTO = tag != null
-                ? new EnrichedSemanticTagDTO(tag.localized(locale), semanticTagRegistry.isEditable(tag),
-                        semanticTagRegistry.isRemovable(tag))
+                ? new EnrichedSemanticTagDTO(tag.localized(locale), semanticTagRegistry.isEditable(tag))
                 : null;
         return JSONResponse.createResponse(status, tagDTO, errorMsg);
     }

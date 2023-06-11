@@ -147,19 +147,9 @@ public class SemanticTagRegistryImpl extends AbstractRegistry<SemanticTag, Strin
     }
 
     @Override
-    public boolean isRemovable(SemanticTag tag) {
-        for (SemanticTag t : getSubTree(tag)) {
-            if (!isEditable(t)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    @Override
     public void removeSubTree(SemanticTag tag) {
         // Get tags id in reverse order
-        List<String> ids = getSubTree(tag).stream().filter(this::isRemovable).map(SemanticTag::getUID)
+        List<String> ids = getSubTree(tag).stream().filter(this::isEditable).map(SemanticTag::getUID)
                 .sorted(Comparator.reverseOrder()).toList();
         ids.forEach(managedProvider::remove);
     }

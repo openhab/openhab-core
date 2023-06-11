@@ -29,15 +29,13 @@ public class EnrichedSemanticTagDTO {
     String description;
     List<String> synonyms;
     boolean editable;
-    boolean removable;
 
-    public EnrichedSemanticTagDTO(SemanticTag tag, boolean editable, boolean removable) {
+    public EnrichedSemanticTagDTO(SemanticTag tag, boolean editable) {
         this.uid = tag.getUID();
         this.name = tag.getUID().substring(tag.getUID().lastIndexOf("_") + 1);
         this.label = tag.getLabel();
         this.description = tag.getDescription();
         this.synonyms = tag.getSynonyms();
         this.editable = editable;
-        this.removable = removable;
     }
 }

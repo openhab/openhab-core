@@ -69,16 +69,6 @@ public interface SemanticTagRegistry extends Registry<SemanticTag, String> {
     boolean isEditable(SemanticTag tag);
 
     /**
-     * Indicates if a tag is removable.
-     *
-     * To be removable, a tag and all its sub tags must be managed.
-     *
-     * @param tag a tag in the registry
-     * @return true if the provided tag is removable, false if not
-     */
-    boolean isRemovable(SemanticTag tag);
-
-    /**
      * Removes the provided tag and all tags having the provided tag as ancestor.
      *
      * Only removable (managed) tags are removed.

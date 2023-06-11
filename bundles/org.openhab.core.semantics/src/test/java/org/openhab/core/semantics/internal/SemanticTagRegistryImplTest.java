@@ -117,27 +117,4 @@ public class SemanticTagRegistryImplTest {
         assertTrue(semanticTagRegistry
                 .isEditable(Objects.requireNonNull(semanticTagRegistry.get("Location_UserLocation_UserSubLocation"))));
     }
-
-    @Test
-    public void testIsRemovable() {
-        when(managedSemanticTagProviderMock.get(eq("Location"))).thenReturn(null);
-        when(managedSemanticTagProviderMock.get(eq("Location_Indoor"))).thenReturn(null);
-        when(managedSemanticTagProviderMock.get(eq("Location_Indoor_Room"))).thenReturn(null);
-        when(managedSemanticTagProviderMock.get(eq("Location_Indoor_Room_Bathroom"))).thenReturn(null);
-        when(managedSemanticTagProviderMock.get(eq("Location_UserLocation"))).thenReturn(userLocationTag);
-        when(managedSemanticTagProviderMock.get(eq("Location_UserLocation_UserSubLocation")))
-                .thenReturn(userSubLocationTag);
-
-        assertFalse(semanticTagRegistry.isRemovable(Objects.requireNonNull(semanticTagRegistry.get("Location"))));
-        assertFalse(
-                semanticTagRegistry.isRemovable(Objects.requireNonNull(semanticTagRegistry.get("Location_Indoor"))));
-        assertFalse(semanticTagRegistry
-                .isRemovable(Objects.requireNonNull(semanticTagRegistry.get("Location_Indoor_Room"))));
-        assertFalse(semanticTagRegistry
-                .isRemovable(Objects.requireNonNull(semanticTagRegistry.get("Location_Indoor_Room_Bathroom"))));
-        assertTrue(semanticTagRegistry
-                .isRemovable(Objects.requireNonNull(semanticTagRegistry.get("Location_UserLocation"))));
-        assertTrue(semanticTagRegistry
-                .isRemovable(Objects.requireNonNull(semanticTagRegistry.get("Location_UserLocation_UserSubLocation"))));
-    }
 }
