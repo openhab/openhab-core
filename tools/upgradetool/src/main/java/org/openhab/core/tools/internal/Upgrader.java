@@ -12,6 +12,10 @@
  */
 package org.openhab.core.tools.internal;
 
+import static org.openhab.core.thing.DefaultSystemChannelTypeProvider.SYSTEM_CHANNEL_TYPE_UID_ATMOSPHERIC_HUMIDITY;
+import static org.openhab.core.thing.DefaultSystemChannelTypeProvider.SYSTEM_CHANNEL_TYPE_UID_BATTERY_LEVEL;
+import static org.openhab.core.thing.DefaultSystemChannelTypeProvider.SYSTEM_CHANNEL_TYPE_UID_COLOR_TEMPERATURE_ABS;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.ZonedDateTime;
@@ -27,6 +31,7 @@ import org.openhab.core.items.Metadata;
 import org.openhab.core.items.MetadataKey;
 import org.openhab.core.library.items.NumberItem;
 import org.openhab.core.storage.json.internal.JsonStorage;
+import org.openhab.core.thing.dto.ThingDTO;
 import org.openhab.core.thing.internal.link.ItemChannelLinkConfigDescriptionProvider;
 import org.openhab.core.thing.link.ItemChannelLink;
 import org.openhab.core.types.util.UnitUtils;
@@ -53,6 +58,7 @@ public class Upgrader {
         this.force = force;
 
         Path upgradeJsonDatabasePath = Path.of(baseDir, "jsondb", "org.openhab.core.tools.UpgradeTool");
+
         upgradeRecords = new JsonStorage<>(upgradeJsonDatabasePath.toFile(), null, 5, 0, 0, List.of());
     }
 
@@ -67,17 +73,29 @@ public class Upgrader {
     }
 
     public void itemCopyUnitToMetadata() {
+        boolean noLink;
+
         if (!checkUpgradeRecord(ITEM_COPY_UNIT_TO_METADATA)) {
             return;
         }
         Path itemJsonDatabasePath = Path.of(baseDir, "jsondb", "org.openhab.core.items.Item.json");
         Path metadataJsonDatabasePath = Path.of(baseDir, "jsondb", "org.openhab.core.items.Metadata.json");
+        Path linkJsonDatabasePath = Path.of(baseDir, "jsondb", "org.openhab.core.thing.link.ItemChannelLink.json");
+        Path thingJsonDatabasePath = Path.of(baseDir, "jsondb", "org.openhab.core.thing.Thing.json");
         logger.info("Copying item unit from state description to metadata in database '{}'", itemJsonDatabasePath);
 
         if (!Files.isReadable(itemJsonDatabasePath)) {
             logger.error("Cannot access item database '{}', check path and access rights.", itemJsonDatabasePath);
             return;
         }
+
+        if (!Files.isReadable(linkJsonDatabasePath) || !Files.isReadable(thingJsonDatabasePath)) {
+            logger.warn("Cannot access thing or link database '{}', update may be incomplete.", linkJsonDatabasePath);
+            noLink = true;
+        } else {
+            noLink = false;
+        }
+
         // missing metadata database is also fine, we create one in that case
         if (!Files.isWritable(metadataJsonDatabasePath) && Files.exists(metadataJsonDatabasePath)) {
             logger.error("Cannot access metadata database '{}', check path and access rights.",
@@ -89,6 +107,10 @@ public class Upgrader {
                 null, 5, 0, 0, List.of());
         JsonStorage<Metadata> metadataStorage = new JsonStorage<>(metadataJsonDatabasePath.toFile(), null, 5, 0, 0,
                 List.of());
+        JsonStorage<ItemChannelLink> linkStorage = noLink ? null
+                : new JsonStorage<>(linkJsonDatabasePath.toFile(), null, 5, 0, 0, List.of());
+        JsonStorage<ThingDTO> thingStorage = noLink ? null
+                : new JsonStorage<>(thingJsonDatabasePath.toFile(), null, 5, 0, 0, List.of());
 
         itemStorage.getKeys().forEach(itemName -> {
             ManagedItemProvider.PersistedItem item = itemStorage.get(itemName);
@@ -96,9 +118,49 @@ public class Upgrader {
                 if (metadataStorage.containsKey(NumberItem.UNIT_METADATA_NAMESPACE + ":" + itemName)) {
                     logger.debug("{}: Already contains a 'unit' metadata, skipping it", itemName);
                 } else {
+                    String unit = null;
+                    if (!noLink) {
+                        List<ItemChannelLink> links = linkStorage.getValues().stream().map(Objects::requireNonNull)
+                                .filter(link -> itemName.equals(link.getItemName())).toList();
+                        // check if we can find the channel for these links
+                        for (ItemChannelLink link : links) {
+                            ThingDTO thing = thingStorage.get(link.getLinkedUID().getThingUID().toString());
+                            if (thing == null) {
+                                logger.info(
+                                        "{}: Could not find thing for channel '{}'. Check if you need to set unit metadata.",
+                                        itemName, link.getLinkedUID());
+                                continue;
+                            }
+                            String channelTypeUID = thing.channels.stream()
+                                    .filter(channel -> link.getLinkedUID().toString().equals(channel.uid))
+                                    .map(channel -> channel.channelTypeUID).findFirst().orElse(null);
+                            if (channelTypeUID == null) {
+                                continue;
+                            }
+                            // replace . with :, if the database is already correct, we can ignore that
+                            channelTypeUID = channelTypeUID.replace(".", ":");
+                            if (channelTypeUID.startsWith("system")) {
+                                if (channelTypeUID.equals(SYSTEM_CHANNEL_TYPE_UID_BATTERY_LEVEL.toString())
+                                        || channelTypeUID
+                                                .equals(SYSTEM_CHANNEL_TYPE_UID_ATMOSPHERIC_HUMIDITY.toString())) {
+                                    unit = "%";
+                                } else if (channelTypeUID
+                                        .equals(SYSTEM_CHANNEL_TYPE_UID_COLOR_TEMPERATURE_ABS.toString())) {
+                                    unit = "K";
+                                }
+                            } else {
+                                logger.warn(
+                                        "{}: Could not determine if channel '{}' sets a state description. Check if you need to set unit metadata.",
+                                        itemName, link.getLinkedUID());
+                            }
+                        }
+                    }
+
+                    // metadata state description has higher priority, so we check that and override the unit if
+                    // necessary
                     Metadata metadata = metadataStorage.get("stateDescription:" + itemName);
                     if (metadata == null) {
-                        logger.debug("{}: Nothing to do, no state description found.", itemName);
+                        logger.debug("{}: No state description in metadata found.", itemName);
                     } else {
                         String pattern = (String) metadata.getConfiguration().get("pattern");
                         if (pattern != null) {
@@ -109,17 +171,19 @@ public class Upgrader {
                             } else {
                                 Unit<?> stateDescriptionUnit = UnitUtils.parseUnit(pattern);
                                 if (stateDescriptionUnit != null) {
-                                    String unit = stateDescriptionUnit.toString();
-                                    MetadataKey defaultUnitMetadataKey = new MetadataKey(
-                                            NumberItem.UNIT_METADATA_NAMESPACE, itemName);
-                                    Metadata defaultUnitMetadata = new Metadata(defaultUnitMetadataKey, unit, null);
-                                    metadataStorage.put(defaultUnitMetadataKey.toString(), defaultUnitMetadata);
-                                    logger.info("{}: Wrote 'unit={}' to metadata.", itemName, unit);
+                                    unit = stateDescriptionUnit.toString();
                                 }
                             }
                         } else {
                             logger.debug("{}: Nothing to do, no pattern found.", itemName);
                         }
+                    }
+                    if (unit != null) {
+                        MetadataKey defaultUnitMetadataKey = new MetadataKey(NumberItem.UNIT_METADATA_NAMESPACE,
+                                itemName);
+                        Metadata defaultUnitMetadata = new Metadata(defaultUnitMetadataKey, unit, null);
+                        metadataStorage.put(defaultUnitMetadataKey.toString(), defaultUnitMetadata);
+                        logger.info("{}: Wrote 'unit={}' to metadata.", itemName, unit);
                     }
                 }
             }
