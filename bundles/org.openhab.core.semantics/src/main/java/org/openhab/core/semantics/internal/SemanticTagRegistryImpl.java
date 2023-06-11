@@ -109,7 +109,8 @@ public class SemanticTagRegistryImpl extends AbstractRegistry<SemanticTag, Strin
     }
 
     @Override
-    public boolean isNewIdValid(String id) {
+    public boolean canBeAdded(SemanticTag tag) {
+        String id = tag.getUID();
         // check that a tag with this id does not already exist in the registry
         if (get(id) != null) {
             return false;
@@ -121,9 +122,13 @@ public class SemanticTagRegistryImpl extends AbstractRegistry<SemanticTag, Strin
         }
         String name = id.substring(lastSeparator + 1);
         String parentId = id.substring(0, lastSeparator);
+        SemanticTag parent = get(parentId);
         // Check that the tag name has a valid syntax and the parent tag already exists
+        // and is either a default tag or a managed tag
         // Check also that a semantic tag class with the same name does not already exist
-        return name.matches("[A-Z][a-zA-Z0-9]+") && get(parentId) != null && getTagClassById(name) == null;
+        return name.matches("[A-Z][a-zA-Z0-9]+") && parent != null
+                && (managedProvider.get(parentId) != null || defaultSemanticTagProvider.getAll().contains(parent))
+                && getTagClassById(name) == null;
     }
 
     @Override

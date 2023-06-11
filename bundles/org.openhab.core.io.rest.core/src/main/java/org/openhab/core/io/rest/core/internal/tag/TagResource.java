@@ -161,12 +161,13 @@ public class TagResource implements RESTResource {
             return getTagResponse(Status.CONFLICT, tag, locale, "Tag " + uid + " already exists!");
         }
 
-        // Check that the provided uid is a valid new tag id
-        if (!semanticTagRegistry.isNewIdValid(uid)) {
+        tag = new SemanticTagImpl(uid, data.label, data.description, data.synonyms);
+
+        // Check that a tag with this uid can be added in the registry
+        if (!semanticTagRegistry.canBeAdded(tag)) {
             return getTagResponse(Status.BAD_REQUEST, null, locale, "Invalid tag identifier " + uid);
         }
 
-        tag = new SemanticTagImpl(uid, data.label, data.description, data.synonyms);
         managedSemanticTagProvider.add(tag);
 
         return getTagResponse(Status.CREATED, tag, locale, null);
