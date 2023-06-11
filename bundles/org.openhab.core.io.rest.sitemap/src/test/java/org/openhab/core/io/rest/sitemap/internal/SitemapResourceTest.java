@@ -168,17 +168,26 @@ public class SitemapResourceTest extends JavaTest {
     }
 
     @Test
+    public void whenLongPollingWholeSitemapShouldObserveAllItems() {
+        ItemEvent itemEvent = mock(ItemEvent.class);
+        when(itemEvent.getItemName()).thenReturn(item.getName());
+        executeWithDelay(() -> sitemapResource.receive(itemEvent));
+
+        // non-null is sufficient here.
+        when(headersMock.getRequestHeader(HTTP_HEADER_X_ATMOSPHERE_TRANSPORT)).thenReturn(List.of());
+
+        Response response = sitemapResource.getPageData(headersMock, null, SITEMAP_MODEL_NAME, null, false);
+
+        SitemapDTO sitemapDTO = (SitemapDTO) response.getEntity();
+        // assert that the item state change did trigger the blocking method to return
+        assertThat(sitemapDTO.timeout, is(false));
+    }
+
+    @Test
     public void whenLongPollingShouldObserveItems() {
         ItemEvent itemEvent = mock(ItemEvent.class);
         when(itemEvent.getItemName()).thenReturn(item.getName());
-        new Thread(() -> {
-            try {
-                Thread.sleep(STATE_UPDATE_WAIT_TIME); // wait for the #getPageData call and listeners to attach to the
-                                                      // item
-                sitemapResource.receive(itemEvent);
-            } catch (InterruptedException e) {
-            }
-        }).start();
+        executeWithDelay(() -> sitemapResource.receive(itemEvent));
 
         // non-null is sufficient here.
         when(headersMock.getRequestHeader(HTTP_HEADER_X_ATMOSPHERE_TRANSPORT)).thenReturn(List.of());
@@ -187,22 +196,15 @@ public class SitemapResourceTest extends JavaTest {
                 false);
 
         PageDTO pageDTO = (PageDTO) response.getEntity();
-        assertThat(pageDTO.timeout, is(false)); // assert that the item state change did trigger the blocking method to
-                                                // return
+        // assert that the item state change did trigger the blocking method to return
+        assertThat(pageDTO.timeout, is(false));
     }
 
     @Test
     public void whenLongPollingShouldObserveItemsFromVisibilityRules() {
         ItemEvent itemEvent = mock(ItemEvent.class);
         when(itemEvent.getItemName()).thenReturn(visibilityRuleItem.getName());
-        new Thread(() -> {
-            try {
-                Thread.sleep(STATE_UPDATE_WAIT_TIME); // wait for the #getPageData call and listeners to attach to the
-                                                      // item
-                sitemapResource.receive(itemEvent);
-            } catch (InterruptedException e) {
-            }
-        }).start();
+        executeWithDelay(() -> sitemapResource.receive(itemEvent));
 
         // non-null is sufficient here.
         when(headersMock.getRequestHeader(HTTP_HEADER_X_ATMOSPHERE_TRANSPORT)).thenReturn(List.of());
@@ -211,22 +213,15 @@ public class SitemapResourceTest extends JavaTest {
                 false);
 
         PageDTO pageDTO = (PageDTO) response.getEntity();
-        assertThat(pageDTO.timeout, is(false)); // assert that the item state change did trigger the blocking method to
-                                                // return
+        // assert that the item state change did trigger the blocking method to return
+        assertThat(pageDTO.timeout, is(false));
     }
 
     @Test
     public void whenLongPollingShouldObserveItemsFromLabelColorConditions() {
         ItemEvent itemEvent = mock(ItemEvent.class);
         when(itemEvent.getItemName()).thenReturn(labelColorItem.getName());
-        new Thread(() -> {
-            try {
-                Thread.sleep(STATE_UPDATE_WAIT_TIME); // wait for the #getPageData call and listeners to attach to the
-                                                      // item
-                sitemapResource.receive(itemEvent);
-            } catch (InterruptedException e) {
-            }
-        }).start();
+        executeWithDelay(() -> sitemapResource.receive(itemEvent));
 
         // non-null is sufficient here.
         when(headersMock.getRequestHeader(HTTP_HEADER_X_ATMOSPHERE_TRANSPORT)).thenReturn(List.of());
@@ -235,22 +230,15 @@ public class SitemapResourceTest extends JavaTest {
                 false);
 
         PageDTO pageDTO = (PageDTO) response.getEntity();
-        assertThat(pageDTO.timeout, is(false)); // assert that the item state change did trigger the blocking method to
-                                                // return
+        // assert that the item state change did trigger the blocking method to return
+        assertThat(pageDTO.timeout, is(false));
     }
 
     @Test
     public void whenLongPollingShouldObserveItemsFromValueColorConditions() {
         ItemEvent itemEvent = mock(ItemEvent.class);
         when(itemEvent.getItemName()).thenReturn(valueColorItem.getName());
-        new Thread(() -> {
-            try {
-                Thread.sleep(STATE_UPDATE_WAIT_TIME); // wait for the #getPageData call and listeners to attach to the
-                                                      // item
-                sitemapResource.receive(itemEvent);
-            } catch (InterruptedException e) {
-            }
-        }).start();
+        executeWithDelay(() -> sitemapResource.receive(itemEvent));
 
         // non-null is sufficient here.
         when(headersMock.getRequestHeader(HTTP_HEADER_X_ATMOSPHERE_TRANSPORT)).thenReturn(List.of());
@@ -267,14 +255,7 @@ public class SitemapResourceTest extends JavaTest {
     public void whenLongPollingShouldObserveItemsFromIconColorConditions() {
         ItemEvent itemEvent = mock(ItemEvent.class);
         when(itemEvent.getItemName()).thenReturn(iconColorItem.getName());
-        new Thread(() -> {
-            try {
-                Thread.sleep(STATE_UPDATE_WAIT_TIME); // wait for the #getPageData call and listeners to attach to the
-                                                      // item
-                sitemapResource.receive(itemEvent);
-            } catch (InterruptedException e) {
-            }
-        }).start();
+        executeWithDelay(() -> sitemapResource.receive(itemEvent));
 
         // non-null is sufficient here.
         when(headersMock.getRequestHeader(HTTP_HEADER_X_ATMOSPHERE_TRANSPORT)).thenReturn(List.of());
@@ -291,14 +272,7 @@ public class SitemapResourceTest extends JavaTest {
     public void whenLongPollingShouldObserveItemsFromIconConditions() {
         ItemEvent itemEvent = mock(ItemEvent.class);
         when(itemEvent.getItemName()).thenReturn(iconItem.getName());
-        new Thread(() -> {
-            try {
-                Thread.sleep(STATE_UPDATE_WAIT_TIME); // wait for the #getPageData call and listeners to attach to the
-                                                      // item
-                sitemapResource.receive(itemEvent);
-            } catch (InterruptedException e) {
-            }
-        }).start();
+        executeWithDelay(() -> sitemapResource.receive(itemEvent));
 
         // non-null is sufficient here.
         when(headersMock.getRequestHeader(HTTP_HEADER_X_ATMOSPHERE_TRANSPORT)).thenReturn(List.of());
@@ -307,8 +281,19 @@ public class SitemapResourceTest extends JavaTest {
                 false);
 
         PageDTO pageDTO = (PageDTO) response.getEntity();
-        assertThat(pageDTO.timeout, is(false)); // assert that the item state change did trigger the blocking method to
-                                                // return
+        // assert that the item state change did trigger the blocking method to return
+        assertThat(pageDTO.timeout, is(false));
+    }
+
+    private static void executeWithDelay(Runnable executionWithDelay) {
+        new Thread(() -> {
+            try {
+                // wait for the #getPageData call and listeners to attach to the item
+                Thread.sleep(STATE_UPDATE_WAIT_TIME);
+                executionWithDelay.run();
+            } catch (InterruptedException e) {
+            }
+        }).start();
     }
 
     @Test

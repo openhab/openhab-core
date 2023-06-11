@@ -26,5 +26,7 @@ public class SitemapDTO {
 
     public String link;
 
+    public boolean timeout;
+
     public PageDTO homepage;
 }
