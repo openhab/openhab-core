@@ -371,7 +371,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
                 }
             }
         } catch (ItemNotFoundException e) {
-            logger.error("Cannot retrieve item '{}' for widget {}", itemName, w.eClass().getInstanceTypeName());
+            logger.warn("Cannot retrieve item '{}' for widget {}", itemName, w.eClass().getInstanceTypeName());
         }
 
         boolean considerTransform = false;
@@ -457,7 +457,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
                 label = label.trim();
                 int index = label.indexOf("[");
                 if (index >= 0) {
-                    label = label.substring(0, label.indexOf("[") + 1) + formatPattern + "]";
+                    label = label.substring(0, index + 1) + formatPattern + "]";
                 }
             }
         }
@@ -519,7 +519,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
             }
 
         } catch (ItemNotFoundException e) {
-            logger.error("Cannot retrieve item '{}' for widget {}", itemName, w.eClass().getInstanceTypeName());
+            logger.warn("Cannot retrieve item '{}' for widget {}", itemName, w.eClass().getInstanceTypeName());
         }
 
         return pattern;
@@ -662,7 +662,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
                 Item item = getItem(itemName);
                 return convertState(w, item, item.getState());
             } catch (ItemNotFoundException e) {
-                logger.error("Cannot retrieve item '{}' for widget {}", itemName, w.eClass().getInstanceTypeName());
+                logger.warn("Cannot retrieve item '{}' for widget {}", itemName, w.eClass().getInstanceTypeName());
             }
         }
         return UnDefType.UNDEF;
@@ -1262,7 +1262,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
             try {
                 item = itemRegistry.getItem(itemName);
             } catch (ItemNotFoundException e) {
-                logger.error("Cannot retrieve visibility item {} for widget {}", rule.getItem(),
+                logger.warn("Cannot retrieve visibility item {} for widget {}", rule.getItem(),
                         w.eClass().getInstanceTypeName());
 
                 // Default to visible!
@@ -1393,7 +1393,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
                 return numberItem.getUnitSymbol();
             }
         } catch (ItemNotFoundException e) {
-            logger.debug("Failed to retrieve item during widget rendering: {}", e.getMessage());
+            logger.warn("Failed to retrieve item during widget rendering, item does not exist: {}", e.getMessage());
         }
 
         return "";
