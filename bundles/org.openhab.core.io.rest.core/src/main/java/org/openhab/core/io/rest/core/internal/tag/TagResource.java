@@ -12,9 +12,9 @@
  */
 package org.openhab.core.io.rest.core.internal.tag;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
-import java.util.stream.Collectors;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.Consumes;
@@ -105,10 +105,10 @@ public class TagResource implements RESTResource {
         final Locale locale = localeService.getLocale(language);
 
         List<EnrichedSemanticTagDTO> tagsDTO = semanticTagRegistry.getAll().stream()
-                .sorted((element1, element2) -> element1.getUID().compareTo(element2.getUID()))
+                .sorted(Comparator.comparing(SemanticTag::getUID))
                 .map(t -> new EnrichedSemanticTagDTO(t.localized(locale), semanticTagRegistry.isEditable(t),
                         semanticTagRegistry.isRemovable(t)))
-                .collect(Collectors.toList());
+                .toList();
         return JSONResponse.createResponse(Status.OK, tagsDTO, null);
     }
 
@@ -128,10 +128,10 @@ public class TagResource implements RESTResource {
         SemanticTag tag = semanticTagRegistry.get(uid);
         if (tag != null) {
             List<EnrichedSemanticTagDTO> tagsDTO = semanticTagRegistry.getSubTree(tag).stream()
-                    .sorted((element1, element2) -> element1.getUID().compareTo(element2.getUID()))
+                    .sorted(Comparator.comparing(SemanticTag::getUID))
                     .map(t -> new EnrichedSemanticTagDTO(t.localized(locale), semanticTagRegistry.isEditable(t),
                             semanticTagRegistry.isRemovable(t)))
-                    .collect(Collectors.toList());
+                    .toList();
             return JSONResponse.createResponse(Status.OK, tagsDTO, null);
         } else {
             return getTagResponse(Status.NOT_FOUND, null, locale, "Tag " + uid + " does not exist!");

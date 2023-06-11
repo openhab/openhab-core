@@ -13,7 +13,7 @@
 package org.openhab.core.semantics;
 
 import java.util.Collection;
-import java.util.stream.Collectors;
+import java.util.Comparator;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -57,8 +57,7 @@ public class ManagedSemanticTagProvider extends AbstractManagedProvider<Semantic
     @Override
     public Collection<SemanticTag> getAll() {
         // Sort tags by uid to be sure that tag classes will be created in the right order
-        return super.getAll().stream().sorted((element1, element2) -> element1.getUID().compareTo(element2.getUID()))
-                .collect(Collectors.toList());
+        return super.getAll().stream().sorted(Comparator.comparing(SemanticTag::getUID)).toList();
     }
 
     @Override

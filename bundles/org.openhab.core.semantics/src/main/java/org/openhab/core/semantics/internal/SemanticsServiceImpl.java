@@ -13,6 +13,7 @@
 package org.openhab.core.semantics.internal;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -126,7 +127,7 @@ public class SemanticsServiceImpl implements SemanticsService {
     public @Nullable Class<? extends Tag> getByLabel(String tagLabel, Locale locale) {
         Optional<SemanticTag> tag = semanticTagRegistry.getAll().stream()
                 .filter(t -> t.localized(locale).getLabel().equalsIgnoreCase(tagLabel))
-                .sorted((element1, element2) -> element1.getUID().compareTo(element2.getUID())).findFirst();
+                .sorted(Comparator.comparing(SemanticTag::getUID)).findFirst();
         return tag.isPresent() ? semanticTagRegistry.getTagClassById(tag.get().getUID()) : null;
     }
 
@@ -134,8 +135,7 @@ public class SemanticsServiceImpl implements SemanticsService {
     public List<Class<? extends Tag>> getByLabelOrSynonym(String tagLabelOrSynonym, Locale locale) {
         List<SemanticTag> tags = semanticTagRegistry.getAll().stream()
                 .filter(t -> getLabelAndSynonyms(t, locale).contains(tagLabelOrSynonym.toLowerCase(locale)))
-                .sorted((element1, element2) -> element1.getUID().compareTo(element2.getUID()))
-                .collect(Collectors.toList());
+                .sorted(Comparator.comparing(SemanticTag::getUID)).toList();
         List<Class<? extends Tag>> tagList = new ArrayList<>();
         tags.forEach(t -> {
             Class<? extends Tag> tag = semanticTagRegistry.getTagClassById(t.getUID());

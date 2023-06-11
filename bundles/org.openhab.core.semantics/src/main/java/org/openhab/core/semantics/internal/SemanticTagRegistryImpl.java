@@ -13,8 +13,8 @@
 package org.openhab.core.semantics.internal;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -118,14 +118,14 @@ public class SemanticTagRegistryImpl extends AbstractRegistry<SemanticTag, Strin
         String name = id.substring(lastSeparator + 1);
         String parentId = id.substring(0, lastSeparator);
         // Check that the tag name has a valid syntax and the parent tag already exists
-        // Check also that a semantic tag class with the same does not already exist
+        // Check also that a semantic tag class with the same name does not already exist
         return name.matches("[A-Z][a-zA-Z0-9]+") && get(parentId) != null && getTagClassById(name) == null;
     }
 
     @Override
     public List<SemanticTag> getSubTree(SemanticTag tag) {
         List<String> ids = getAll().stream().map(t -> t.getUID()).filter(uid -> uid.startsWith(tag.getUID() + "_"))
-                .collect(Collectors.toList());
+                .toList();
         List<SemanticTag> tags = new ArrayList<>();
         tags.add(tag);
         ids.forEach(id -> {
@@ -155,9 +155,9 @@ public class SemanticTagRegistryImpl extends AbstractRegistry<SemanticTag, Strin
     @Override
     public void removeSubTree(SemanticTag tag) {
         // Get tags id in reverse order
-        List<String> ids = getSubTree(tag).stream().filter(t -> isRemovable(t)).map(t -> t.getUID())
-                .sorted((element1, element2) -> element2.compareTo(element1)).collect(Collectors.toList());
-        ids.forEach(id -> managedProvider.remove(id));
+        List<String> ids = getSubTree(tag).stream().filter(this::isRemovable).map(SemanticTag::getUID)
+                .sorted(Comparator.reverseOrder()).toList();
+        ids.forEach(managedProvider::remove);
     }
 
     @Override
@@ -220,10 +220,6 @@ public class SemanticTagRegistryImpl extends AbstractRegistry<SemanticTag, Strin
                 newTag = (Class<? extends Tag>) Class.forName(className, false, CLASS_LOADER);
                 logger.debug("'{}' semantic {} tag already exists.", className, type);
             } catch (ClassNotFoundException e) {
-                newTag = null;
-            }
-
-            if (newTag == null) {
                 // Create the tag interface
                 ClassWriter classWriter = new ClassWriter(0);
                 classWriter.visit(Opcodes.V11, Opcodes.ACC_PUBLIC + Opcodes.ACC_ABSTRACT + Opcodes.ACC_INTERFACE,
@@ -235,9 +231,9 @@ public class SemanticTagRegistryImpl extends AbstractRegistry<SemanticTag, Strin
                 try {
                     newTag = (Class<? extends Tag>) CLASS_LOADER.defineClass(className, byteCode);
                     logger.debug("'{}' semantic {} tag created.", className, type);
-                } catch (Exception e) {
-                    logger.warn("Failed to create semantic tag '{}': {}", className, e.getMessage());
-                    throw new IllegalArgumentException("Failed to create semantic tag '" + className + "'", e);
+                } catch (Exception ex) {
+                    logger.warn("Failed to create semantic tag '{}': {}", className, ex.getMessage());
+                    throw new IllegalArgumentException("Failed to create semantic tag '" + className + "'", ex);
                 }
             }
         }
