@@ -61,7 +61,7 @@ public class SemanticsServiceImplTest {
 
     private @NonNullByDefault({}) Class<? extends Tag> roomTagClass;
     private @NonNullByDefault({}) Class<? extends Tag> bathroomTagClass;
-    private @NonNullByDefault({}) Class<? extends Tag> LivingRoomTagClass;
+    private @NonNullByDefault({}) Class<? extends Tag> livingRoomTagClass;
     private @NonNullByDefault({}) Class<? extends Tag> userLocationTagClass;
     private @NonNullByDefault({}) Class<? extends Tag> cleaningRobotTagClass;
 
@@ -92,7 +92,7 @@ public class SemanticsServiceImplTest {
 
         roomTagClass = semanticTagRegistry.getTagClassById("Location_Indoor_Room");
         bathroomTagClass = semanticTagRegistry.getTagClassById("Location_Indoor_Room_Bathroom");
-        LivingRoomTagClass = semanticTagRegistry.getTagClassById("Location_Indoor_Room_LivingRoom");
+        livingRoomTagClass = semanticTagRegistry.getTagClassById("Location_Indoor_Room_LivingRoom");
         userLocationTagClass = semanticTagRegistry.getTagClassById("Location_UserLocation");
         cleaningRobotTagClass = semanticTagRegistry.getTagClassById("Equipment_CleaningRobot");
 
@@ -113,7 +113,7 @@ public class SemanticsServiceImplTest {
         assertEquals(1, items.size());
         assertTrue(items.contains(pointItem));
 
-        items = service.getItemsInLocation((Class<? extends Location>) LivingRoomTagClass);
+        items = service.getItemsInLocation((Class<? extends Location>) livingRoomTagClass);
         assertTrue(items.isEmpty());
     }
 

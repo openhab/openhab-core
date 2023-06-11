@@ -37,10 +37,10 @@ import org.openhab.core.semantics.model.DefaultSemanticTagProvider;
 @ExtendWith(MockitoExtension.class)
 public class SemanticTagsTest {
 
-    private static String CUSTOM_LOCATION = "CustomLocation";
-    private static String CUSTOM_EQUIPMENT = "CustomEquipment";
-    private static String CUSTOM_POINT = "CustomPoint";
-    private static String CUSTOM_PROPERTY = "CustomProperty";
+    private static final String CUSTOM_LOCATION = "CustomLocation";
+    private static final String CUSTOM_EQUIPMENT = "CustomEquipment";
+    private static final String CUSTOM_POINT = "CustomPoint";
+    private static final String CUSTOM_PROPERTY = "CustomProperty";
 
     private @Mock @NonNullByDefault({}) ManagedSemanticTagProvider managedSemanticTagProviderMock;
 

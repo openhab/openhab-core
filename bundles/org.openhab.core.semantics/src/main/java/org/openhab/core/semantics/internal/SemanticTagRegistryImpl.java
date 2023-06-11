@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.objectweb.asm.ClassWriter;
@@ -110,7 +109,7 @@ public class SemanticTagRegistryImpl extends AbstractRegistry<SemanticTag, Strin
     }
 
     @Override
-    public boolean isNewIdValid(@NonNull String id) {
+    public boolean isNewIdValid(String id) {
         // check that a tag with this id does not already exist in the registry
         if (get(id) != null) {
             return false;
