@@ -151,8 +151,8 @@ public class EventHandler implements AutoCloseable {
             EventFilter filter = eventSubscriber.getEventFilter();
             if (filter == null || filter.apply(event)) {
                 logger.trace("Delegate event to subscriber ({}).", eventSubscriber.getClass());
-                ExecutorRecord executorRecord = Objects
-                        .requireNonNull(executors.computeIfAbsent(eventSubscriber.getClass(), this::createExecutorRecord));
+                ExecutorRecord executorRecord = Objects.requireNonNull(
+                        executors.computeIfAbsent(eventSubscriber.getClass(), this::createExecutorRecord));
                 int queueSize = executorRecord.count().incrementAndGet();
                 if (queueSize > 1000) {
                     logger.warn(
