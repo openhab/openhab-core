@@ -87,12 +87,17 @@ public class SemanticTagRegistryImpl extends AbstractRegistry<SemanticTag, Strin
         return SemanticTags.getById(tagId);
     }
 
-    @Override
-    public String buildId(Class<? extends Tag> tag) {
+    /**
+     * Builds the fully qualified id for a semantic tag class.
+     *
+     * @param tag the semantic tag class
+     * @return the fully qualified id
+     */
+    public static String buildId(Class<? extends Tag> tag) {
         return buildId("", tag);
     }
 
-    private String buildId(String relativeId, Class<?> tag) {
+    private static String buildId(String relativeId, Class<?> tag) {
         if (!Location.class.isAssignableFrom(tag) && !Equipment.class.isAssignableFrom(tag)
                 && !Point.class.isAssignableFrom(tag) && !Property.class.isAssignableFrom(tag)) {
             return relativeId;

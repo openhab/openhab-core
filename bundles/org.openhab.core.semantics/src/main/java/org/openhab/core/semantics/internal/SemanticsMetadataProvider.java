@@ -73,13 +73,11 @@ public class SemanticsMetadataProvider extends AbstractProvider<Metadata>
     });
 
     private final ItemRegistry itemRegistry;
-    private final SemanticTagRegistry semanticTagRegistry;
 
     @Activate
     public SemanticsMetadataProvider(final @Reference ItemRegistry itemRegistry,
             final @Reference SemanticTagRegistry semanticTagRegistry) {
         this.itemRegistry = itemRegistry;
-        this.semanticTagRegistry = semanticTagRegistry;
     }
 
     @Activate
@@ -114,7 +112,7 @@ public class SemanticsMetadataProvider extends AbstractProvider<Metadata>
         if (type != null) {
             processProperties(item, configuration);
             processHierarchy(item, configuration);
-            Metadata md = new Metadata(key, semanticTagRegistry.buildId(type), configuration);
+            Metadata md = new Metadata(key, SemanticTagRegistryImpl.buildId(type), configuration);
             Metadata oldMd = semantics.put(item.getName(), md);
             if (oldMd == null) {
                 notifyListenersAboutAddedElement(md);
@@ -151,7 +149,7 @@ public class SemanticsMetadataProvider extends AbstractProvider<Metadata>
             if (entityClass.isAssignableFrom(type)) {
                 Class<? extends Property> p = SemanticTags.getProperty(item);
                 if (p != null) {
-                    configuration.put(relation.getValue(), semanticTagRegistry.buildId(p));
+                    configuration.put(relation.getValue(), SemanticTagRegistryImpl.buildId(p));
                 }
             }
         }

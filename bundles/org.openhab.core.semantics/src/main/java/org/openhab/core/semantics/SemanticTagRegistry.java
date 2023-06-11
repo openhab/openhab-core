@@ -39,14 +39,6 @@ public interface SemanticTagRegistry extends Registry<SemanticTag, String> {
     Class<? extends Tag> getTagClassById(String tagId);
 
     /**
-     * Builds the fully qualified id for a semantic tag class.
-     *
-     * @param tag the semantic tag class
-     * @return the fully qualified id
-     */
-    String buildId(Class<? extends Tag> tag);
-
-    /**
      * Checks if a new tag id is valid.
      *
      * To be valid, no tag with this id must already exist in the registry, the tag name extracted from this id

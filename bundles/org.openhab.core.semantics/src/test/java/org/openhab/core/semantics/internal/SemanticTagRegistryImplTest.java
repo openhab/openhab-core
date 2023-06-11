@@ -85,15 +85,15 @@ public class SemanticTagRegistryImplTest {
 
     @Test
     public void testBuildId() {
-        assertEquals("Location", semanticTagRegistry.buildId(Location.class));
-        assertEquals("Location_Indoor_Room", semanticTagRegistry.buildId(roomTagClass));
-        assertEquals("Location_Indoor_Room_Bathroom", semanticTagRegistry.buildId(bathroomTagClass));
-        assertEquals("Equipment", semanticTagRegistry.buildId(Equipment.class));
-        assertEquals("Equipment_CleaningRobot", semanticTagRegistry.buildId(cleaningRobotTagClass));
-        assertEquals("Point", semanticTagRegistry.buildId(Point.class));
-        assertEquals("Point_Measurement", semanticTagRegistry.buildId(measurementTagClass));
-        assertEquals("Property", semanticTagRegistry.buildId(Property.class));
-        assertEquals("Property_Temperature", semanticTagRegistry.buildId(temperatureTagClass));
+        assertEquals("Location", SemanticTagRegistryImpl.buildId(Location.class));
+        assertEquals("Location_Indoor_Room", SemanticTagRegistryImpl.buildId(roomTagClass));
+        assertEquals("Location_Indoor_Room_Bathroom", SemanticTagRegistryImpl.buildId(bathroomTagClass));
+        assertEquals("Equipment", SemanticTagRegistryImpl.buildId(Equipment.class));
+        assertEquals("Equipment_CleaningRobot", SemanticTagRegistryImpl.buildId(cleaningRobotTagClass));
+        assertEquals("Point", SemanticTagRegistryImpl.buildId(Point.class));
+        assertEquals("Point_Measurement", SemanticTagRegistryImpl.buildId(measurementTagClass));
+        assertEquals("Property", SemanticTagRegistryImpl.buildId(Property.class));
+        assertEquals("Property_Temperature", SemanticTagRegistryImpl.buildId(temperatureTagClass));
     }
 
     @Test

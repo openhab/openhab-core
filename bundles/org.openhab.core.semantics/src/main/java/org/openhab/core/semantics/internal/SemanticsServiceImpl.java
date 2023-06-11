@@ -148,7 +148,7 @@ public class SemanticsServiceImpl implements SemanticsService {
 
     @Override
     public List<String> getLabelAndSynonyms(Class<? extends Tag> tagClass, Locale locale) {
-        SemanticTag tag = semanticTagRegistry.get(semanticTagRegistry.buildId(tagClass));
+        SemanticTag tag = semanticTagRegistry.get(SemanticTagRegistryImpl.buildId(tagClass));
         return tag == null ? List.of() : getLabelAndSynonyms(tag, locale);
     }
 
