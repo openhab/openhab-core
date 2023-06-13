@@ -27,7 +27,6 @@ import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.dto.ItemDTO;
 import org.openhab.core.items.dto.ItemDTOMapper;
-import org.openhab.core.library.items.NumberItem;
 import org.openhab.core.transform.TransformationException;
 import org.openhab.core.transform.TransformationHelper;
 import org.openhab.core.types.StateDescription;
@@ -94,10 +93,6 @@ public class EnrichedItemDTOMapper {
 
         EnrichedItemDTO enrichedItemDTO;
 
-        String unitSymbol = null;
-        if (item instanceof NumberItem numberItem) {
-            unitSymbol = numberItem.getUnitSymbol();
-        }
         if (item instanceof GroupItem groupItem) {
             EnrichedItemDTO[] memberDTOs;
             if (drillDown) {
@@ -116,10 +111,10 @@ public class EnrichedItemDTOMapper {
                 memberDTOs = new EnrichedItemDTO[0];
             }
             enrichedItemDTO = new EnrichedGroupItemDTO(itemDTO, memberDTOs, link, state, transformedState,
-                    stateDescription, unitSymbol);
+                    stateDescription);
         } else {
             enrichedItemDTO = new EnrichedItemDTO(itemDTO, link, state, transformedState, stateDescription,
-                    item.getCommandDescription(locale), unitSymbol);
+                    item.getCommandDescription(locale));
         }
 
         return enrichedItemDTO;
