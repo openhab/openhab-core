@@ -310,13 +310,13 @@ public class ThingResource implements RESTResource {
     public Response getAll(@Context Request request,
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @QueryParam("summary") @Parameter(description = "summary fields only") @Nullable Boolean summary,
-            @DefaultValue("false") @QueryParam("cacheable") @Parameter(description = "provides a cacheable list and checks the If-Modified-Since header") boolean cacheable) {
+            @DefaultValue("false") @QueryParam("staticDataOnly") @Parameter(description = "provides a cacheable list of values not expected to change regularly and checks the If-Modified-Since header") boolean staticDataOnly) {
         final Locale locale = localeService.getLocale(language);
 
         Stream<EnrichedThingDTO> thingStream = thingRegistry.stream().map(t -> convertToEnrichedThingDTO(t, locale))
                 .distinct();
 
-        if (cacheable) {
+        if (staticDataOnly) {
             if (cacheableListLastModified != null) {
                 Response.ResponseBuilder responseBuilder = request.evaluatePreconditions(cacheableListLastModified);
                 if (responseBuilder != null) {

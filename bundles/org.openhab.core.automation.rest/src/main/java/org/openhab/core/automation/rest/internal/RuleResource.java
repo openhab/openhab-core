@@ -163,9 +163,9 @@ public class RuleResource implements RESTResource {
     public Response get(@Context Request request, @QueryParam("prefix") final @Nullable String prefix,
             @QueryParam("tags") final @Nullable List<String> tags,
             @QueryParam("summary") @Parameter(description = "summary fields only") @Nullable Boolean summary,
-            @DefaultValue("false") @QueryParam("cacheable") @Parameter(description = "provides a cacheable list and honors the If-Modified-Since header, all other parameters are ignored") boolean cacheable) {
+            @DefaultValue("false") @QueryParam("staticDataOnly") @Parameter(description = "provides a cacheable list of values not expected to change regularly and honors the If-Modified-Since header, all other parameters are ignored") boolean staticDataOnly) {
 
-        if (cacheable) {
+        if (staticDataOnly) {
             if (cacheableListLastModified != null) {
                 Response.ResponseBuilder responseBuilder = request.evaluatePreconditions(cacheableListLastModified);
                 if (responseBuilder != null) {
@@ -593,25 +593,25 @@ public class RuleResource implements RESTResource {
         }
     }
 
-    private void resetCacheableListLastModified() {
-        cacheableListLastModified = null;
+    private void resetStaticListLastModified() {
+        staticListLastModified = null;
     }
 
     private class ResetLastModifiedChangeListener implements RegistryChangeListener<Rule> {
 
         @Override
         public void added(Rule element) {
-            resetCacheableListLastModified();
+            resetStaticListLastModified();
         }
 
         @Override
         public void removed(Rule element) {
-            resetCacheableListLastModified();
+            resetStaticListLastModified();
         }
 
         @Override
         public void updated(Rule oldElement, Rule element) {
-            resetCacheableListLastModified();
+            resetStaticListLastModified();
         }
     }
 }

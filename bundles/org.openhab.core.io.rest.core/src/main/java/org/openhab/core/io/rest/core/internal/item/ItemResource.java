@@ -235,13 +235,13 @@ public class ItemResource implements RESTResource {
             @QueryParam("metadata") @Parameter(description = "metadata selector - a comma separated list or a regular expression (suppressed if no value given)") @Nullable String namespaceSelector,
             @DefaultValue("false") @QueryParam("recursive") @Parameter(description = "get member items recursively") boolean recursive,
             @QueryParam("fields") @Parameter(description = "limit output to the given fields (comma separated)") @Nullable String fields,
-            @DefaultValue("false") @QueryParam("cacheable") @Parameter(description = "provides a cacheable list and checks the If-Modified-Since header, all other parameters are ignored except \"metadata\"") boolean cacheable) {
+            @DefaultValue("false") @QueryParam("staticDataOnly") @Parameter(description = "provides a cacheable list of values not expected to change regularly and checks the If-Modified-Since header, all other parameters are ignored except \"metadata\"") boolean staticDataOnly) {
         final Locale locale = localeService.getLocale(language);
         final Set<String> namespaces = splitAndFilterNamespaces(namespaceSelector, locale);
 
         final UriBuilder uriBuilder = uriBuilder(uriInfo, httpHeaders);
 
-        if (cacheable) {
+        if (staticDataOnly) {
             Date lastModifiedDate = Date.from(Instant.now());
             if (cacheableListsLastModified.containsKey(namespaceSelector)) {
                 lastModifiedDate = cacheableListsLastModified.get(namespaceSelector);
