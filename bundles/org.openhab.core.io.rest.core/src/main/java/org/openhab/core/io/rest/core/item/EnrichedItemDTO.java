@@ -24,6 +24,7 @@ import org.openhab.core.types.StateDescription;
  *
  * @author Dennis Nobel - Initial contribution
  * @author Kai Kreuzer - Added metadata
+ * @author Mark Herwege - Added default unit symbol
  */
 public class EnrichedItemDTO extends ItemDTO {
 
@@ -31,12 +32,13 @@ public class EnrichedItemDTO extends ItemDTO {
     public String state;
     public String transformedState;
     public StateDescription stateDescription;
+    public String unitSymbol;
     public CommandDescription commandDescription;
     public Map<String, Object> metadata;
     public Boolean editable;
 
     public EnrichedItemDTO(ItemDTO itemDTO, String link, String state, String transformedState,
-            StateDescription stateDescription, CommandDescription commandDescription) {
+            StateDescription stateDescription, CommandDescription commandDescription, String unitSymbol) {
         this.type = itemDTO.type;
         this.name = itemDTO.name;
         this.label = itemDTO.label;
@@ -48,5 +50,6 @@ public class EnrichedItemDTO extends ItemDTO {
         this.transformedState = transformedState;
         this.stateDescription = stateDescription;
         this.commandDescription = commandDescription;
+        this.unitSymbol = unitSymbol;
     }
 }
