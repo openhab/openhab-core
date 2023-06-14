@@ -116,7 +116,7 @@ public class TagResource implements RESTResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "getSemanticTagAndSubTags", summary = "Gets a semantic tag and its sub tags.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = EnrichedSemanticTagDTO.class)))),
-            @ApiResponse(responseCode = "404", description = "Tag not found.") })
+            @ApiResponse(responseCode = "404", description = "Semantic tag not found.") })
     public Response getTagAndSubTags(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @PathParam("tagId") @Parameter(description = "tag id") String tagId) {
@@ -182,8 +182,8 @@ public class TagResource implements RESTResource {
     @Operation(operationId = "removeSemanticTag", summary = "Removes a semantic tag and its sub tags from the registry.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK, was deleted."),
-                    @ApiResponse(responseCode = "404", description = "Custom tag not found."),
-                    @ApiResponse(responseCode = "405", description = "Custom tag not removable.") })
+                    @ApiResponse(responseCode = "404", description = "Semantic tag not found."),
+                    @ApiResponse(responseCode = "405", description = "Semantic tag not removable.") })
     public Response remove(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @PathParam("tagId") @Parameter(description = "tag id") String tagId) {
@@ -214,8 +214,8 @@ public class TagResource implements RESTResource {
     @Operation(operationId = "updateSemanticTag", summary = "Updates a semantic tag.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = EnrichedSemanticTagDTO.class))),
-                    @ApiResponse(responseCode = "404", description = "Custom tag not found."),
-                    @ApiResponse(responseCode = "405", description = "Custom tag not editable.") })
+                    @ApiResponse(responseCode = "404", description = "Semantic tag not found."),
+                    @ApiResponse(responseCode = "405", description = "Semantic tag not editable.") })
     public Response update(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @PathParam("tagId") @Parameter(description = "tag id") String tagId,
