@@ -87,12 +87,16 @@ public interface AudioSink {
      * interface, the sink should hereafter get rid of it by calling the dispose method.
      *
      * @param audioStream the audio stream to play or null to keep quiet
-     * @throws UnsupportedAudioFormatException If audioStream format is not supported
-     * @throws UnsupportedAudioStreamException If audioStream is not supported
+     * @return A future completed when the sound is fully played. The method can instead complete with
+     *         UnsupportedAudioFormatException if the audioStream format is not supported, or
+     *         UnsupportedAudioStreamException If audioStream is not supported
      */
-    default CompletableFuture<@Nullable Void> processAndComplete(@Nullable AudioStream audioStream)
-            throws UnsupportedAudioFormatException, UnsupportedAudioStreamException {
-        process(audioStream);
+    default CompletableFuture<@Nullable Void> processAndComplete(@Nullable AudioStream audioStream) {
+        try {
+            process(audioStream);
+        } catch (UnsupportedAudioFormatException | UnsupportedAudioStreamException e) {
+            return CompletableFuture.failedFuture(e);
+        }
         return CompletableFuture.completedFuture(null);
     }
 

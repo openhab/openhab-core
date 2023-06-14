@@ -38,8 +38,6 @@ import org.openhab.core.audio.AudioSource;
 import org.openhab.core.audio.AudioStream;
 import org.openhab.core.audio.FileAudioStream;
 import org.openhab.core.audio.URLAudioStream;
-import org.openhab.core.audio.UnsupportedAudioFormatException;
-import org.openhab.core.audio.UnsupportedAudioStreamException;
 import org.openhab.core.audio.utils.ToneSynthesizer;
 import org.openhab.core.config.core.ConfigOptionProvider;
 import org.openhab.core.config.core.ConfigurableService;
@@ -122,14 +120,11 @@ public class AudioManagerImpl implements AudioManager, ConfigOptionProvider {
     public void play(@Nullable AudioStream audioStream, @Nullable String sinkId, @Nullable PercentType volume) {
         AudioSink sink = getSink(sinkId);
         if (sink != null) {
-            Runnable volumeRestauration = null;
-            try {
-                volumeRestauration = handleVolumeCommand(volume, sink);
-                sink.processAndComplete(audioStream).thenRun(volumeRestauration);
-            } catch (UnsupportedAudioFormatException | UnsupportedAudioStreamException e) {
-                volumeRestauration.run();
-                logger.warn("Error playing '{}': {}", audioStream, e.getMessage(), e);
-            }
+            Runnable restoreVolume = handleVolumeCommand(volume, sink);
+            sink.processAndComplete(audioStream).exceptionally((exception) -> {
+                logger.warn("Error playing '{}': {}", audioStream, exception.getMessage(), exception);
+                return null;
+            }).thenRun(restoreVolume);
         } else {
             logger.warn("Failed playing audio stream '{}' as no audio sink was found.", audioStream);
         }

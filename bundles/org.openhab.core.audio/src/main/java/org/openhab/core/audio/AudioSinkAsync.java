@@ -38,25 +38,24 @@ public abstract class AudioSinkAsync implements AudioSink {
 
     private final Logger logger = LoggerFactory.getLogger(AudioSinkAsync.class);
 
-    private final Map<AudioStream, CompletableFuture<@Nullable Void>> runnableByAudioStream = new HashMap<>();
+    protected final Map<AudioStream, CompletableFuture<@Nullable Void>> runnableByAudioStream = new HashMap<>();
 
     @Override
-    public CompletableFuture<@Nullable Void> processAndComplete(@Nullable AudioStream audioStream)
-            throws UnsupportedAudioFormatException, UnsupportedAudioStreamException {
+    public CompletableFuture<@Nullable Void> processAndComplete(@Nullable AudioStream audioStream) {
         CompletableFuture<@Nullable Void> completableFuture = new CompletableFuture<@Nullable Void>();
-        try {
-            if (audioStream != null) {
-                runnableByAudioStream.put(audioStream, completableFuture);
-            }
-            processAsynchronously(audioStream);
-            return completableFuture;
-        } finally {
-            if (audioStream == null) {
-                // No need to delay the post process task
-                runnableByAudioStream.remove(audioStream);
-                completableFuture.complete(null);
-            }
+        if (audioStream != null) {
+            runnableByAudioStream.put(audioStream, completableFuture);
         }
+        try {
+            processAsynchronously(audioStream);
+        } catch (UnsupportedAudioFormatException | UnsupportedAudioStreamException e) {
+            completableFuture.completeExceptionally(e);
+        }
+        if (audioStream == null) {
+            // No need to delay the post process task
+            completableFuture.complete(null);
+        }
+        return completableFuture;
     }
 
     @Override

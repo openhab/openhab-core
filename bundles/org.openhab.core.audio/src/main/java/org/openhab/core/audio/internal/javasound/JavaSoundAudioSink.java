@@ -13,7 +13,6 @@
 package org.openhab.core.audio.internal.javasound;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 import java.util.Scanner;
@@ -87,6 +86,7 @@ public class JavaSoundAudioSink extends AudioSinkAsync {
             audioPlayer.start();
             try {
                 audioPlayer.join();
+                playbackFinished(audioStream);
             } catch (InterruptedException e) {
                 LOGGER.error("Playing audio has been interrupted.");
             }
@@ -177,7 +177,7 @@ public class JavaSoundAudioSink extends AudioSinkAsync {
                 return true;
             });
             if (volumes[0] != null) {
-                return new PercentType(new BigDecimal(volumes[0] * 100f));
+                return new PercentType(Math.round(volumes[0] * 100f));
             } else {
                 LOGGER.warn("Cannot determine master volume level - assuming 100%");
                 return PercentType.HUNDRED;

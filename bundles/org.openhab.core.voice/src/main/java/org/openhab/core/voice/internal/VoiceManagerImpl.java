@@ -40,8 +40,6 @@ import org.openhab.core.audio.AudioManager;
 import org.openhab.core.audio.AudioSink;
 import org.openhab.core.audio.AudioSource;
 import org.openhab.core.audio.AudioStream;
-import org.openhab.core.audio.UnsupportedAudioFormatException;
-import org.openhab.core.audio.UnsupportedAudioStreamException;
 import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.config.core.ConfigOptionProvider;
 import org.openhab.core.config.core.ConfigurableService;
@@ -228,7 +226,6 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     public void say(String text, @Nullable String voiceId, @Nullable String sinkId, @Nullable PercentType volume) {
         Objects.requireNonNull(text, "Text cannot be said as it is null.");
 
-        Runnable volumeRestauration = null;
         try {
             TTSService tts = null;
             Voice voice = null;
@@ -272,16 +269,16 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
                 throw new TTSException(
                         "Failed playing audio stream '" + audioStream + "' as audio sink doesn't support it");
             }
-            volumeRestauration = audioManager.handleVolumeCommand(volume, sink);
-            sink.processAndComplete(audioStream).thenRun(volumeRestauration);
-        } catch (TTSException | UnsupportedAudioFormatException | UnsupportedAudioStreamException e) {
+            Runnable restoreVolume = audioManager.handleVolumeCommand(volume, sink);
+            sink.processAndComplete(audioStream).exceptionally(exception -> {
+                logger.warn("Error playing '{}': {}", audioStream, exception.getMessage(), exception);
+                return null;
+            }).thenRun(restoreVolume);
+        } catch (TTSException e) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Error saying '{}': {}", text, e.getMessage(), e);
             } else {
                 logger.warn("Error saying '{}': {}", text, e.getMessage());
-            }
-            if (volumeRestauration != null) {
-                volumeRestauration.run();
             }
         }
     }

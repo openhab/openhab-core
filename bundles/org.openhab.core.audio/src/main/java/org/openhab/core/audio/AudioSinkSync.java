@@ -36,10 +36,12 @@ public abstract class AudioSinkSync implements AudioSink {
     private final Logger logger = LoggerFactory.getLogger(AudioSinkSync.class);
 
     @Override
-    public CompletableFuture<@Nullable Void> processAndComplete(@Nullable AudioStream audioStream)
-            throws UnsupportedAudioFormatException, UnsupportedAudioStreamException {
+    public CompletableFuture<@Nullable Void> processAndComplete(@Nullable AudioStream audioStream) {
         try {
             processSynchronously(audioStream);
+            return CompletableFuture.completedFuture(null);
+        } catch (UnsupportedAudioFormatException | UnsupportedAudioStreamException e) {
+            return CompletableFuture.failedFuture(e);
         } finally {
             // as the stream is not needed anymore, we should dispose of it
             if (audioStream instanceof Disposable disposableAudioStream) {
@@ -55,7 +57,6 @@ public abstract class AudioSinkSync implements AudioSink {
                 }
             }
         }
-        return CompletableFuture.completedFuture(null);
     }
 
     @Override
