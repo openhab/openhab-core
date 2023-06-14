@@ -163,7 +163,7 @@ public class TagResource implements RESTResource {
 
         tag = new SemanticTagImpl(uid, data.label, data.description, data.synonyms);
 
-        // Check that a tag with this uid can be added in the registry
+        // Check that a tag with this uid can be added to the registry
         if (!semanticTagRegistry.canBeAdded(tag)) {
             return getTagResponse(Status.BAD_REQUEST, null, locale, "Invalid tag identifier " + uid);
         }

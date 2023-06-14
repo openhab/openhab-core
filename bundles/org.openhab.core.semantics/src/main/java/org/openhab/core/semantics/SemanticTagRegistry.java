@@ -39,14 +39,14 @@ public interface SemanticTagRegistry extends Registry<SemanticTag, String> {
     Class<? extends Tag> getTagClassById(String tagId);
 
     /**
-     * Checks if a new managed tag can be added in the registry.
+     * Checks if a tag with a given id can be added to the registry.
      *
      * To be added, no tag with this id must already exist in the registry, the tag name extracted from this id
      * must have a valid syntax, the parent tag extracted from this id must already exists in the registry and
      * should be either a default semantic tag or a managed semantic tag, and no tag with a same name must already
      * exist in the registry.
      *
-     * @param tag a tag to be added in the registry
+     * @param tag a tag to be added to the registry
      * @return true if the tag can be added, false if not
      */
     boolean canBeAdded(SemanticTag tag);
