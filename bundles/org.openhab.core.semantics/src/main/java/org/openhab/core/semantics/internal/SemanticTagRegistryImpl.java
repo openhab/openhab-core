@@ -237,7 +237,7 @@ public class SemanticTagRegistryImpl extends AbstractRegistry<SemanticTag, Strin
             }
         }
 
-        addTagSet(newTag);
+        addTagSet(uid, newTag);
         logger.debug("'{}' semantic {} tag added.", className, type);
     }
 
@@ -248,9 +248,9 @@ public class SemanticTagRegistryImpl extends AbstractRegistry<SemanticTag, Strin
         removeTagSet(tag.getUID());
     }
 
-    private void addTagSet(Class<? extends Tag> tagSet) {
-        String id = buildId(tagSet);
-        logger.trace("addTagSet {}", id);
+    private void addTagSet(String tagId, Class<? extends Tag> tagSet) {
+        logger.trace("addTagSet {}", tagId);
+        String id = tagId;
         while (id.indexOf("_") != -1) {
             SemanticTags.addTagSet(id, tagSet);
             id = id.substring(id.indexOf("_") + 1);
@@ -264,7 +264,7 @@ public class SemanticTagRegistryImpl extends AbstractRegistry<SemanticTag, Strin
         if (tagSet == null) {
             return;
         }
-        String id = buildId(tagSet);
+        String id = tagId;
         while (id.indexOf("_") != -1) {
             SemanticTags.removeTagSet(id, tagSet);
             id = id.substring(id.indexOf("_") + 1);
