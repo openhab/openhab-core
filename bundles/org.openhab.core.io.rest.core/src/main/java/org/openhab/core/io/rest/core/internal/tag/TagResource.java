@@ -131,7 +131,7 @@ public class TagResource implements RESTResource {
                     .toList();
             return JSONResponse.createResponse(Status.OK, tagsDTO, null);
         } else {
-            return getTagResponse(Status.NOT_FOUND, null, locale, "Tag " + uid + " does not exist!");
+            return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Tag " + uid + " does not exist!");
         }
     }
 
@@ -149,7 +149,7 @@ public class TagResource implements RESTResource {
         final Locale locale = localeService.getLocale(language);
 
         if (data.uid == null) {
-            return getTagResponse(Status.BAD_REQUEST, null, locale, "Tag identifier is required!");
+            return JSONResponse.createErrorResponse(Status.BAD_REQUEST, "Tag identifier is required!");
         }
 
         String uid = data.uid.trim();
@@ -158,19 +158,22 @@ public class TagResource implements RESTResource {
         SemanticTag tag = semanticTagRegistry.get(uid);
         if (tag != null) {
             // report a conflict
-            return getTagResponse(Status.CONFLICT, tag, locale, "Tag " + uid + " already exists!");
+            return JSONResponse.createResponse(Status.CONFLICT,
+                    new EnrichedSemanticTagDTO(tag.localized(locale), semanticTagRegistry.isEditable(tag)),
+                    "Tag " + uid + " already exists!");
         }
 
         tag = new SemanticTagImpl(uid, data.label, data.description, data.synonyms);
 
         // Check that a tag with this uid can be added to the registry
         if (!semanticTagRegistry.canBeAdded(tag)) {
-            return getTagResponse(Status.BAD_REQUEST, null, locale, "Invalid tag identifier " + uid);
+            return JSONResponse.createErrorResponse(Status.BAD_REQUEST, "Invalid tag identifier " + uid);
         }
 
         managedSemanticTagProvider.add(tag);
 
-        return getTagResponse(Status.CREATED, tag, locale, null);
+        return JSONResponse.createResponse(Status.CREATED,
+                new EnrichedSemanticTagDTO(tag.localized(locale), semanticTagRegistry.isEditable(tag)), null);
     }
 
     @DELETE
@@ -191,12 +194,12 @@ public class TagResource implements RESTResource {
         // check whether tag exists and throw 404 if not
         SemanticTag tag = semanticTagRegistry.get(uid);
         if (tag == null) {
-            return getTagResponse(Status.NOT_FOUND, null, locale, "Tag " + uid + " does not exist!");
+            return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Tag " + uid + " does not exist!");
         }
 
         // Check that tag is removable, 405 otherwise
         if (!semanticTagRegistry.isEditable(tag)) {
-            return getTagResponse(Status.METHOD_NOT_ALLOWED, null, locale, "Tag " + uid + " is not removable.");
+            return JSONResponse.createErrorResponse(Status.METHOD_NOT_ALLOWED, "Tag " + uid + " is not removable.");
         }
 
         semanticTagRegistry.removeSubTree(tag);
@@ -224,12 +227,12 @@ public class TagResource implements RESTResource {
         // check whether tag exists and throw 404 if not
         SemanticTag tag = semanticTagRegistry.get(uid);
         if (tag == null) {
-            return getTagResponse(Status.NOT_FOUND, null, locale, "Tag " + uid + " does not exist!");
+            return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Tag " + uid + " does not exist!");
         }
 
         // Check that tag is editable, 405 otherwise
         if (!semanticTagRegistry.isEditable(tag)) {
-            return getTagResponse(Status.METHOD_NOT_ALLOWED, null, locale, "Tag " + uid + " is not editable.");
+            return JSONResponse.createErrorResponse(Status.METHOD_NOT_ALLOWED, "Tag " + uid + " is not editable.");
         }
 
         tag = new SemanticTagImpl(uid, data.label != null ? data.label : tag.getLabel(),
@@ -237,14 +240,7 @@ public class TagResource implements RESTResource {
                 data.synonyms != null ? data.synonyms : tag.getSynonyms());
         managedSemanticTagProvider.update(tag);
 
-        return getTagResponse(Status.OK, tag, locale, null);
-    }
-
-    private Response getTagResponse(Status status, @Nullable SemanticTag tag, Locale locale,
-            @Nullable String errorMsg) {
-        EnrichedSemanticTagDTO tagDTO = tag != null
-                ? new EnrichedSemanticTagDTO(tag.localized(locale), semanticTagRegistry.isEditable(tag))
-                : null;
-        return JSONResponse.createResponse(status, tagDTO, errorMsg);
+        return JSONResponse.createResponse(Status.OK,
+                new EnrichedSemanticTagDTO(tag.localized(locale), semanticTagRegistry.isEditable(tag)), null);
     }
 }
