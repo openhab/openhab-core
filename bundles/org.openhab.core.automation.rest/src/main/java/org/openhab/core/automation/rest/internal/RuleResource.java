@@ -610,7 +610,7 @@ public class RuleResource implements RESTResource {
     }
 
     private void resetStaticListLastModified() {
-        staticListLastModified = null;
+        cacheableListLastModified = null;
     }
 
     private class ResetLastModifiedChangeListener implements RegistryChangeListener<Rule> {
