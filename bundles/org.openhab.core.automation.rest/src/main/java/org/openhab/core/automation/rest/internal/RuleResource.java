@@ -17,9 +17,11 @@ import static org.openhab.core.automation.RulePredicates.*;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
@@ -29,6 +31,7 @@ import java.util.stream.Stream;
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -36,8 +39,10 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.SecurityContext;
@@ -69,6 +74,7 @@ import org.openhab.core.automation.rest.internal.dto.EnrichedRuleDTO;
 import org.openhab.core.automation.rest.internal.dto.EnrichedRuleDTOMapper;
 import org.openhab.core.automation.util.ModuleBuilder;
 import org.openhab.core.automation.util.RuleBuilder;
+import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.config.core.ConfigUtil;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.events.Event;
@@ -80,6 +86,7 @@ import org.openhab.core.io.rest.Stream2JSONInputStream;
 import org.openhab.core.library.types.DateTimeType;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.jaxrs.whiteboard.JaxrsWhiteboardConstants;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JSONRequired;
@@ -128,8 +135,10 @@ public class RuleResource implements RESTResource {
     private final RuleManager ruleManager;
     private final RuleRegistry ruleRegistry;
     private final ManagedRuleProvider managedRuleProvider;
+    private final ResetLastModifiedChangeListener resetLastModifiedChangeListener = new ResetLastModifiedChangeListener();
 
     private @Context @NonNullByDefault({}) UriInfo uriInfo;
+    private @Nullable Date cacheableListLastModified = null;
 
     @Activate
     public RuleResource( //
@@ -141,6 +150,13 @@ public class RuleResource implements RESTResource {
         this.ruleManager = ruleManager;
         this.ruleRegistry = ruleRegistry;
         this.managedRuleProvider = managedRuleProvider;
+
+        this.ruleRegistry.addRegistryChangeListener(resetLastModifiedChangeListener);
+    }
+
+    @Deactivate
+    void deactivate() {
+        this.ruleRegistry.removeRegistryChangeListener(resetLastModifiedChangeListener);
     }
 
     @GET
@@ -148,13 +164,38 @@ public class RuleResource implements RESTResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "getRules", summary = "Get available rules, optionally filtered by tags and/or prefix.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = EnrichedRuleDTO.class)))) })
-    public Response get(@Context SecurityContext securityContext, @QueryParam("prefix") final @Nullable String prefix,
-            @QueryParam("tags") final @Nullable List<String> tags,
-            @QueryParam("summary") @Parameter(description = "summary fields only") @Nullable Boolean summary) {
+    public Response get(@Context SecurityContext securityContext, @Context Request request,
+            @QueryParam("prefix") final @Nullable String prefix, @QueryParam("tags") final @Nullable List<String> tags,
+            @QueryParam("summary") @Parameter(description = "summary fields only") @Nullable Boolean summary,
+            @DefaultValue("false") @QueryParam("staticDataOnly") @Parameter(description = "provides a cacheable list of values not expected to change regularly and honors the If-Modified-Since header, all other parameters are ignored") boolean staticDataOnly) {
+
         if ((summary == null || !summary) && !securityContext.isUserInRole(Role.ADMIN)) {
             // users may only access the summary
             return JSONResponse.createErrorResponse(Status.UNAUTHORIZED, "Authentication required");
         }
+
+        if (staticDataOnly) {
+            if (cacheableListLastModified != null) {
+                Response.ResponseBuilder responseBuilder = request.evaluatePreconditions(cacheableListLastModified);
+                if (responseBuilder != null) {
+                    // send 304 Not Modified
+                    return responseBuilder.build();
+                }
+            } else {
+                cacheableListLastModified = Date.from(Instant.now().truncatedTo(ChronoUnit.SECONDS));
+            }
+
+            Stream<EnrichedRuleDTO> rules = ruleRegistry.stream()
+                    .map(rule -> EnrichedRuleDTOMapper.map(rule, ruleManager, managedRuleProvider));
+
+            CacheControl cc = new CacheControl();
+            cc.setMustRevalidate(true);
+            cc.setPrivate(true);
+            rules = dtoMapper.limitToFields(rules, "uid,templateUID,name,visibility,description,tags,editable");
+            return Response.ok(new Stream2JSONInputStream(rules)).lastModified(cacheableListLastModified)
+                    .cacheControl(cc).build();
+        }
+
         // match all
         Predicate<Rule> p = r -> true;
 
@@ -565,6 +606,28 @@ public class RuleResource implements RESTResource {
             return action == null ? null : ActionDTOMapper.map(action);
         } else {
             return null;
+        }
+    }
+
+    private void resetStaticListLastModified() {
+        cacheableListLastModified = null;
+    }
+
+    private class ResetLastModifiedChangeListener implements RegistryChangeListener<Rule> {
+
+        @Override
+        public void added(Rule element) {
+            resetStaticListLastModified();
+        }
+
+        @Override
+        public void removed(Rule element) {
+            resetStaticListLastModified();
+        }
+
+        @Override
+        public void updated(Rule oldElement, Rule element) {
+            resetStaticListLastModified();
         }
     }
 }

@@ -12,9 +12,12 @@
  */
 package org.openhab.core.io.rest.core.internal.item;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -40,9 +43,11 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
@@ -52,6 +57,7 @@ import javax.ws.rs.core.UriInfo;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.auth.Role;
+import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.io.rest.DTOMapper;
 import org.openhab.core.io.rest.JSONResponse;
@@ -68,6 +74,7 @@ import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemBuilderFactory;
 import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.items.ItemRegistryChangeListener;
 import org.openhab.core.items.ManagedItemProvider;
 import org.openhab.core.items.Metadata;
 import org.openhab.core.items.MetadataKey;
@@ -88,6 +95,7 @@ import org.openhab.core.types.State;
 import org.openhab.core.types.TypeParser;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.jaxrs.whiteboard.JaxrsWhiteboardConstants;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JSONRequired;
@@ -174,6 +182,10 @@ public class ItemResource implements RESTResource {
     private final ManagedItemProvider managedItemProvider;
     private final MetadataRegistry metadataRegistry;
     private final MetadataSelectorMatcher metadataSelectorMatcher;
+    private final ItemRegistryChangeListener resetLastModifiedItemChangeListener = new ResetLastModifiedItemChangeListener();
+    private final RegistryChangeListener<Metadata> resetLastModifiedMetadataChangeListener = new ResetLastModifiedMetadataChangeListener();
+
+    private Map<@Nullable String, Date> cacheableListsLastModified = new HashMap<>();
 
     @Activate
     public ItemResource(//
@@ -193,6 +205,15 @@ public class ItemResource implements RESTResource {
         this.managedItemProvider = managedItemProvider;
         this.metadataRegistry = metadataRegistry;
         this.metadataSelectorMatcher = metadataSelectorMatcher;
+
+        this.itemRegistry.addRegistryChangeListener(resetLastModifiedItemChangeListener);
+        this.metadataRegistry.addRegistryChangeListener(resetLastModifiedMetadataChangeListener);
+    }
+
+    @Deactivate
+    void deactivate() {
+        this.itemRegistry.removeRegistryChangeListener(resetLastModifiedItemChangeListener);
+        this.metadataRegistry.removeRegistryChangeListener(resetLastModifiedMetadataChangeListener);
     }
 
     private UriBuilder uriBuilder(final UriInfo uriInfo, final HttpHeaders httpHeaders) {
@@ -207,16 +228,46 @@ public class ItemResource implements RESTResource {
     @Operation(operationId = "getItems", summary = "Get all available items.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = EnrichedItemDTO.class)))) })
     public Response getItems(final @Context UriInfo uriInfo, final @Context HttpHeaders httpHeaders,
+            @Context Request request,
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @QueryParam("type") @Parameter(description = "item type filter") @Nullable String type,
             @QueryParam("tags") @Parameter(description = "item tag filter") @Nullable String tags,
             @DefaultValue(".*") @QueryParam("metadata") @Parameter(description = "metadata selector - a comma separated list or a regular expression (returns all if no value given)") @Nullable String namespaceSelector,
             @DefaultValue("false") @QueryParam("recursive") @Parameter(description = "get member items recursively") boolean recursive,
-            @QueryParam("fields") @Parameter(description = "limit output to the given fields (comma separated)") @Nullable String fields) {
+            @QueryParam("fields") @Parameter(description = "limit output to the given fields (comma separated)") @Nullable String fields,
+            @DefaultValue("false") @QueryParam("staticDataOnly") @Parameter(description = "provides a cacheable list of values not expected to change regularly and checks the If-Modified-Since header, all other parameters are ignored except \"metadata\"") boolean staticDataOnly) {
         final Locale locale = localeService.getLocale(language);
         final Set<String> namespaces = splitAndFilterNamespaces(namespaceSelector, locale);
 
         final UriBuilder uriBuilder = uriBuilder(uriInfo, httpHeaders);
+
+        if (staticDataOnly) {
+            Date lastModifiedDate = Date.from(Instant.now());
+            if (cacheableListsLastModified.containsKey(namespaceSelector)) {
+                lastModifiedDate = cacheableListsLastModified.get(namespaceSelector);
+                Response.ResponseBuilder responseBuilder = request.evaluatePreconditions(lastModifiedDate);
+                if (responseBuilder != null) {
+                    // send 304 Not Modified
+                    return responseBuilder.build();
+                }
+            } else {
+                lastModifiedDate = Date.from(Instant.now().truncatedTo(ChronoUnit.SECONDS));
+                cacheableListsLastModified.put(namespaceSelector, lastModifiedDate);
+            }
+
+            Stream<EnrichedItemDTO> itemStream = getItems(null, null).stream() //
+                    .map(item -> EnrichedItemDTOMapper.map(item, false, null, uriBuilder, locale)) //
+                    .peek(dto -> addMetadata(dto, namespaces, null)) //
+                    .peek(dto -> dto.editable = isEditable(dto.name));
+            itemStream = dtoMapper.limitToFields(itemStream,
+                    "name,label,type,groupType,function,category,editable,groupNames,link,tags,metadata");
+
+            CacheControl cc = new CacheControl();
+            cc.setMustRevalidate(true);
+            cc.setPrivate(true);
+            return Response.ok(new Stream2JSONInputStream(itemStream)).lastModified(lastModifiedDate).cacheControl(cc)
+                    .build();
+        }
 
         Stream<EnrichedItemDTO> itemStream = getItems(type, tags).stream() //
                 .map(item -> EnrichedItemDTOMapper.map(item, recursive, null, uriBuilder, locale)) //
@@ -934,5 +985,49 @@ public class ItemResource implements RESTResource {
 
     private boolean isEditable(String itemName) {
         return managedItemProvider.get(itemName) != null;
+    }
+
+    private void resetCacheableListsLastModified() {
+        this.cacheableListsLastModified.clear();
+    }
+
+    private class ResetLastModifiedItemChangeListener implements ItemRegistryChangeListener {
+        @Override
+        public void added(Item element) {
+            resetCacheableListsLastModified();
+        }
+
+        @Override
+        public void allItemsChanged(Collection<String> oldItemNames) {
+            resetCacheableListsLastModified();
+        }
+
+        @Override
+        public void removed(Item element) {
+            resetCacheableListsLastModified();
+        }
+
+        @Override
+        public void updated(Item oldElement, Item element) {
+            resetCacheableListsLastModified();
+        }
+    }
+
+    private class ResetLastModifiedMetadataChangeListener implements RegistryChangeListener<Metadata> {
+
+        @Override
+        public void added(Metadata element) {
+            resetCacheableListsLastModified();
+        }
+
+        @Override
+        public void removed(Metadata element) {
+            resetCacheableListsLastModified();
+        }
+
+        @Override
+        public void updated(Metadata oldElement, Metadata element) {
+            resetCacheableListsLastModified();
+        }
     }
 }
