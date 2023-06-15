@@ -96,7 +96,7 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
     public Set<Thing> getBoundThings(final String itemName) {
         return ((Stream<Thing>) getBoundChannels(itemName).stream()
                 .map(channelUID -> thingRegistry.get(channelUID.getThingUID())).filter(Objects::nonNull))
-                        .collect(Collectors.toSet());
+                .collect(Collectors.toSet());
     }
 
     @Reference

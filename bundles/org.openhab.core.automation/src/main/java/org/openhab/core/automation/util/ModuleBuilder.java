@@ -55,12 +55,12 @@ public abstract class ModuleBuilder<B extends ModuleBuilder<B, T>, T extends Mod
 
     @SuppressWarnings("unchecked")
     public static <B extends ModuleBuilder<B, T>, T extends Module> ModuleBuilder<B, T> create(Module module) {
-        if (module instanceof Action) {
-            return (ModuleBuilder<B, T>) createAction((Action) module);
-        } else if (module instanceof Condition) {
-            return (ModuleBuilder<B, T>) createCondition((Condition) module);
-        } else if (module instanceof Trigger) {
-            return (ModuleBuilder<B, T>) createTrigger((Trigger) module);
+        if (module instanceof Action action) {
+            return (ModuleBuilder<B, T>) createAction(action);
+        } else if (module instanceof Condition condition) {
+            return (ModuleBuilder<B, T>) createCondition(condition);
+        } else if (module instanceof Trigger trigger) {
+            return (ModuleBuilder<B, T>) createTrigger(trigger);
         } else {
             throw new IllegalArgumentException("Parameter must be an instance of Action, Condition or Trigger.");
         }

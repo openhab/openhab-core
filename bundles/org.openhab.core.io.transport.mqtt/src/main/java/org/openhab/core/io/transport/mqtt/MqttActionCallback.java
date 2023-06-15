@@ -22,7 +22,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  */
 @NonNullByDefault
 public interface MqttActionCallback {
-    public void onSuccess(String topic);
+    void onSuccess(String topic);
 
-    public void onFailure(String topic, Throwable error);
+    void onFailure(String topic, Throwable error);
 }

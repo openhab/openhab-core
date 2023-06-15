@@ -51,10 +51,10 @@ public class AbstractDiscoveryServiceTest implements DiscoveryListener {
     private static final String VALUE1 = "value1";
     private static final String VALUE2 = "value2";
     private final Map<String, Object> properties = Map.of(KEY1, VALUE1, KEY2, VALUE2);
-    private static final String DISCOVERY_THING2_INFERED_KEY = "discovery."
-            + THING_UID2.getAsString().replaceAll(":", ".") + ".label";
-    private static final String DISCOVERY_THING4_INFERED_KEY = "discovery."
-            + THING_UID4.getAsString().replaceAll(":", ".") + ".label";
+    private static final String DISCOVERY_THING2_INFERED_KEY = "discovery." + THING_UID2.getAsString().replace(":", ".")
+            + ".label";
+    private static final String DISCOVERY_THING4_INFERED_KEY = "discovery." + THING_UID4.getAsString().replace(":", ".")
+            + ".label";
     private static final String DISCOVERY_LABEL = "Result Test";
     private static final String DISCOVERY_LABEL_KEY1 = "@text/test";
     private static final String DISCOVERY_LABEL_KEY2 = "@text/test2 [ \"50\", \"number\" ]";

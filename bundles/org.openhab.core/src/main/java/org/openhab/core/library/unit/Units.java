@@ -55,6 +55,7 @@ import org.openhab.core.library.dimension.DataTransferRate;
 import org.openhab.core.library.dimension.Density;
 import org.openhab.core.library.dimension.ElectricConductivity;
 import org.openhab.core.library.dimension.Intensity;
+import org.openhab.core.library.dimension.RadiationSpecificActivity;
 import org.openhab.core.library.dimension.VolumetricFlowRate;
 
 import si.uom.NonSI;
@@ -139,6 +140,8 @@ public final class Units extends CustomUnits {
             new ProductUnit<>(VOLT_AMPERE.multiply(tech.units.indriya.unit.Units.HOUR)), Energy.class);
     public static final Unit<Force> NEWTON = addUnit(tech.units.indriya.unit.Units.NEWTON);
     public static final Unit<Frequency> HERTZ = addUnit(tech.units.indriya.unit.Units.HERTZ);
+    public static final Unit<Frequency> RPM = addUnit(
+            new ProductUnit<>(AbstractUnit.ONE.divide(tech.units.indriya.unit.Units.MINUTE)));
     public static final Unit<Intensity> IRRADIANCE = addUnit(
             new ProductUnit<>(tech.units.indriya.unit.Units.WATT.divide(tech.units.indriya.unit.Units.SQUARE_METRE)));
     public static final Unit<Intensity> MICROWATT_PER_SQUARE_CENTIMETRE = addUnit(
@@ -158,8 +161,14 @@ public final class Units extends CustomUnits {
             MultiplyConverter.ofRational(BigInteger.valueOf(100000), BigInteger.ONE)));
     public static final Unit<Pressure> MILLIBAR = addUnit(MetricPrefix.MILLI(BAR));
     public static final Unit<Radioactivity> BECQUEREL = addUnit(tech.units.indriya.unit.Units.BECQUEREL);
-    public static final Unit<Density> BECQUEREL_PER_CUBIC_METRE = addUnit(new ProductUnit<>(
+    public static final Unit<Radioactivity> CURIE = addUnit(NonSI.CURIE);
+    public static final Unit<Radioactivity> MILLI_CURIE = addUnit(MetricPrefix.MILLI(CURIE));
+    public static final Unit<Radioactivity> MICRO_CURIE = addUnit(MetricPrefix.MICRO(CURIE));
+    public static final Unit<Radioactivity> NANO_CURIE = addUnit(MetricPrefix.NANO(CURIE));
+    public static final Unit<Radioactivity> PICO_CURIE = addUnit(MetricPrefix.PICO(CURIE));
+    public static final Unit<RadiationSpecificActivity> BECQUEREL_PER_CUBIC_METRE = addUnit(new ProductUnit<>(
             tech.units.indriya.unit.Units.BECQUEREL.divide(tech.units.indriya.unit.Units.CUBIC_METRE)));
+
     public static final Unit<RadiationDoseAbsorbed> GRAY = addUnit(tech.units.indriya.unit.Units.GRAY);
     public static final Unit<RadiationDoseEffective> SIEVERT = addUnit(tech.units.indriya.unit.Units.SIEVERT);
     public static final Unit<Speed> MILLIMETRE_PER_HOUR = addUnit(
@@ -232,6 +241,11 @@ public final class Units extends CustomUnits {
         SimpleUnitFormat.getInstance().label(BIT_PER_SECOND, "bit/s");
         SimpleUnitFormat.getInstance().label(BYTE, "B");
         SimpleUnitFormat.getInstance().alias(BYTE, "o");
+        SimpleUnitFormat.getInstance().label(CURIE, "Ci");
+        SimpleUnitFormat.getInstance().label(MILLI_CURIE, "mCi");
+        SimpleUnitFormat.getInstance().label(MICRO_CURIE, "µCi");
+        SimpleUnitFormat.getInstance().label(NANO_CURIE, "nCi");
+        SimpleUnitFormat.getInstance().label(PICO_CURIE, "pCi");
         SimpleUnitFormat.getInstance().label(CUBICMETRE_PER_DAY, "m³/d");
         SimpleUnitFormat.getInstance().label(CUBICMETRE_PER_HOUR, "m³/h");
         SimpleUnitFormat.getInstance().label(CUBICMETRE_PER_MINUTE, "m³/min");
@@ -276,6 +290,7 @@ public final class Units extends CustomUnits {
         SimpleUnitFormat.getInstance().label(PEBIBYTE, "PiB");
         SimpleUnitFormat.getInstance().alias(PEBIBYTE, "Pio");
         SimpleUnitFormat.getInstance().label(PETABIT, "Pbit");
+        SimpleUnitFormat.getInstance().label(RPM, "rpm");
         SimpleUnitFormat.getInstance().label(STANDARD_GRAVITY, "gₙ");
         SimpleUnitFormat.getInstance().label(SIEMENS_PER_METRE, "S/m");
         SimpleUnitFormat.getInstance().label(TERABYTE, "TB");

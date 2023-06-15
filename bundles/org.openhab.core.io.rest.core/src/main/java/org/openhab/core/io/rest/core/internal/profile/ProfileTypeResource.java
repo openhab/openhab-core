@@ -13,6 +13,7 @@
 package org.openhab.core.io.rest.core.internal.profile;
 
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Locale;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -114,7 +115,8 @@ public class ProfileTypeResource implements RESTResource {
     protected Stream<ProfileTypeDTO> getProfileTypes(@Nullable Locale locale, @Nullable String channelTypeUID,
             @Nullable String itemType) {
         return profileTypeRegistry.getProfileTypes(locale).stream().filter(matchesChannelUID(channelTypeUID, locale))
-                .filter(matchesItemType(itemType)).map(profileType -> ProfileTypeDTOMapper.map(profileType));
+                .filter(matchesItemType(itemType)).sorted(Comparator.comparing(ProfileType::getLabel))
+                .map(profileType -> ProfileTypeDTOMapper.map(profileType));
     }
 
     private Predicate<ProfileType> matchesChannelUID(@Nullable String channelTypeUID, @Nullable Locale locale) {
@@ -150,9 +152,7 @@ public class ProfileTypeResource implements RESTResource {
     }
 
     private boolean triggerProfileMatchesProfileType(ProfileType profileType, ChannelType channelType) {
-        if (profileType instanceof TriggerProfileType) {
-            TriggerProfileType triggerProfileType = (TriggerProfileType) profileType;
-
+        if (profileType instanceof TriggerProfileType triggerProfileType) {
             if (triggerProfileType.getSupportedChannelTypeUIDs().isEmpty()) {
                 return true;
             }
@@ -165,9 +165,7 @@ public class ProfileTypeResource implements RESTResource {
     }
 
     private boolean stateProfileMatchesProfileType(ProfileType profileType, ChannelType channelType) {
-        if (profileType instanceof StateProfileType) {
-            StateProfileType stateProfileType = (StateProfileType) profileType;
-
+        if (profileType instanceof StateProfileType stateProfileType) {
             if (stateProfileType.getSupportedItemTypesOfChannel().isEmpty()) {
                 return true;
             }

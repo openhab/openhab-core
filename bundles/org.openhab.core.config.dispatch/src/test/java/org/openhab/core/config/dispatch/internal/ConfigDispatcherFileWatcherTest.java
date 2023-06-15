@@ -14,19 +14,18 @@ package org.openhab.core.config.dispatch.internal;
 
 import static org.mockito.Mockito.*;
 
-import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardWatchEventKinds;
-import java.nio.file.WatchEvent;
-import java.nio.file.WatchEvent.Kind;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.openhab.core.service.WatchService;
 
 /**
  * @author Stefan Triller - Initial contribution
@@ -35,95 +34,63 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @NonNullByDefault
 public class ConfigDispatcherFileWatcherTest {
 
-    private @NonNullByDefault({}) TestConfigDispatcherFileWatcher configDispatcherFileWatcher;
+    private @NonNullByDefault({}) ConfigDispatcherFileWatcher configDispatcherFileWatcher;
 
     private @Mock @NonNullByDefault({}) ConfigDispatcher configDispatcherMock;
+    private @Mock @NonNullByDefault({}) WatchService watchService;
+
+    private @TempDir @NonNullByDefault({}) Path tempDir;
+
+    private @NonNullByDefault({}) Path cfgPath;
+    private @NonNullByDefault({}) Path nonCfgPath;
 
     @BeforeEach
-    public void setUp() throws Exception {
-        configDispatcherFileWatcher = new TestConfigDispatcherFileWatcher(configDispatcherMock);
+    public void setUp() throws IOException {
+        configDispatcherFileWatcher = new ConfigDispatcherFileWatcher(configDispatcherMock, watchService);
+        verify(configDispatcherMock).processConfigFile(any());
+
+        when(watchService.getWatchPath()).thenReturn(tempDir.toAbsolutePath());
+
+        cfgPath = tempDir.resolve("myPath.cfg");
+        nonCfgPath = tempDir.resolve("myPath");
+
+        Files.createFile(cfgPath);
+        Files.createFile(nonCfgPath);
     }
 
     @Test
-    public void configurationFileCreated() {
-        String path = "myPath.cfg";
-        configDispatcherFileWatcher.processWatchEvent(new TestWatchEvent(), StandardWatchEventKinds.ENTRY_CREATE,
-                new File(path).toPath());
-
-        verify(configDispatcherMock).processConfigFile(new File(path));
+    public void configurationFileCreated() throws IOException {
+        configDispatcherFileWatcher.processWatchEvent(WatchService.Kind.CREATE, cfgPath);
+        verify(configDispatcherMock).processConfigFile(cfgPath.toAbsolutePath().toFile());
     }
 
     @Test
-    public void configurationFileModified() {
-        String path = "myPath.cfg";
-        configDispatcherFileWatcher.processWatchEvent(new TestWatchEvent(), StandardWatchEventKinds.ENTRY_MODIFY,
-                new File(path).toPath());
-
-        verify(configDispatcherMock).processConfigFile(new File(path));
+    public void configurationFileModified() throws IOException {
+        configDispatcherFileWatcher.processWatchEvent(WatchService.Kind.MODIFY, cfgPath);
+        verify(configDispatcherMock).processConfigFile(cfgPath.toAbsolutePath().toFile());
     }
 
     @Test
     public void nonConfigurationFileCreated() {
-        String path = "myPath";
-        configDispatcherFileWatcher.processWatchEvent(new TestWatchEvent(), StandardWatchEventKinds.ENTRY_CREATE,
-                new File(path).toPath());
-
-        verifyNoInteractions(configDispatcherMock);
+        configDispatcherFileWatcher.processWatchEvent(WatchService.Kind.CREATE, nonCfgPath);
+        verifyNoMoreInteractions(configDispatcherMock);
     }
 
     @Test
     public void nonConfigurationFileModified() {
-        String path = "myPath";
-        configDispatcherFileWatcher.processWatchEvent(new TestWatchEvent(), StandardWatchEventKinds.ENTRY_MODIFY,
-                new File(path).toPath());
-
-        verifyNoInteractions(configDispatcherMock);
+        configDispatcherFileWatcher.processWatchEvent(WatchService.Kind.MODIFY, nonCfgPath);
+        verifyNoMoreInteractions(configDispatcherMock);
     }
 
     @Test
     public void configurationFileRemoved() {
-        String path = "myPath.cfg";
-        configDispatcherFileWatcher.processWatchEvent(new TestWatchEvent(), StandardWatchEventKinds.ENTRY_DELETE,
-                new File(path).toPath());
-
-        verify(configDispatcherMock).fileRemoved(new File(path).getAbsolutePath());
+        configDispatcherFileWatcher.processWatchEvent(WatchService.Kind.DELETE, cfgPath);
+        verify(configDispatcherMock).fileRemoved(cfgPath.toAbsolutePath().toString());
     }
 
     @Test
     public void nonConfigurationFileRemoved() {
-        String path = "myPath";
-        configDispatcherFileWatcher.processWatchEvent(new TestWatchEvent(), StandardWatchEventKinds.ENTRY_DELETE,
-                new File(path).toPath());
-
-        verifyNoInteractions(configDispatcherMock);
-    }
-
-    public static class TestConfigDispatcherFileWatcher extends ConfigDispatcherFileWatcher {
-        public TestConfigDispatcherFileWatcher(ConfigDispatcher configDispatcher) {
-            super(configDispatcher);
-        }
-
-        @Override
-        protected void processWatchEvent(WatchEvent<?> event, Kind<?> kind, Path path) {
-            super.processWatchEvent(event, kind, path);
-        }
-    }
-
-    private static class TestWatchEvent implements WatchEvent<@Nullable Path> {
-
-        @Override
-        public Kind<@Nullable Path> kind() {
-            return StandardWatchEventKinds.ENTRY_CREATE;
-        }
-
-        @Override
-        public int count() {
-            return 0;
-        }
-
-        @Override
-        public @Nullable Path context() {
-            return null;
-        }
+        configDispatcherFileWatcher.processWatchEvent(WatchService.Kind.DELETE, nonCfgPath);
+        verifyNoMoreInteractions(configDispatcherMock);
     }
 }

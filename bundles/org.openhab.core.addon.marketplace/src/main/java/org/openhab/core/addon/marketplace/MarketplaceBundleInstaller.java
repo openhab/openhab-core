@@ -22,7 +22,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.OpenHAB;
@@ -79,8 +79,8 @@ public abstract class MarketplaceBundleInstaller {
     protected void installFromCache(BundleContext bundleContext, String addonId) throws MarketplaceHandlerException {
         Path addonPath = getAddonCacheDirectory(addonId);
         if (Files.isDirectory(addonPath)) {
-            try {
-                List<Path> bundleFiles = Files.list(addonPath).collect(Collectors.toList());
+            try (Stream<Path> files = Files.list(addonPath)) {
+                List<Path> bundleFiles = files.toList();
                 if (bundleFiles.size() != 1) {
                     throw new MarketplaceHandlerException(
                             "The local cache folder doesn't contain a single file: " + addonPath, null);
@@ -122,8 +122,10 @@ public abstract class MarketplaceBundleInstaller {
         try {
             Path addonPath = getAddonCacheDirectory(addonId);
             if (Files.isDirectory(addonPath)) {
-                for (Path bundleFile : Files.list(addonPath).collect(Collectors.toList())) {
-                    Files.delete(bundleFile);
+                try (Stream<Path> files = Files.list(addonPath)) {
+                    for (Path path : files.toList()) {
+                        Files.delete(path);
+                    }
                 }
             }
             Files.delete(addonPath);
@@ -147,9 +149,9 @@ public abstract class MarketplaceBundleInstaller {
      * @param bundleContext the {@link BundleContext} to use to look up the bundles
      */
     protected void ensureCachedBundlesAreInstalled(BundleContext bundleContext) {
-        try {
-            if (Files.isDirectory(BUNDLE_CACHE_PATH)) {
-                Files.list(BUNDLE_CACHE_PATH).filter(Files::isDirectory).map(this::addonIdFromPath)
+        if (Files.isDirectory(BUNDLE_CACHE_PATH)) {
+            try (Stream<Path> files = Files.list(BUNDLE_CACHE_PATH)) {
+                files.filter(Files::isDirectory).map(this::addonIdFromPath)
                         .filter(addonId -> !isBundleInstalled(bundleContext, addonId)).forEach(addonId -> {
                             logger.info("Reinstalling missing marketplace bundle: {}", addonId);
                             try {
@@ -158,9 +160,9 @@ public abstract class MarketplaceBundleInstaller {
                                 logger.warn("Failed reinstalling add-on from cache", e);
                             }
                         });
+            } catch (IOException e) {
+                logger.warn("Failed to re-install bundles: {}", e.getMessage());
             }
-        } catch (IOException e) {
-            logger.warn("Failed to re-install bundles: {}", e.getMessage());
         }
     }
 

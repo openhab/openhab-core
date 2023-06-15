@@ -14,6 +14,7 @@ package org.openhab.core.thing;
 
 import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -177,5 +178,28 @@ public class Channel {
 
     public @Nullable AutoUpdatePolicy getAutoUpdatePolicy() {
         return autoUpdatePolicy;
+    }
+
+    @Override
+    public boolean equals(@Nullable Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Channel channel = (Channel) o;
+        return Objects.equals(acceptedItemType, channel.acceptedItemType) && kind == channel.kind
+                && Objects.equals(uid, channel.uid) && Objects.equals(channelTypeUID, channel.channelTypeUID)
+                && Objects.equals(label, channel.label) && Objects.equals(description, channel.description)
+                && Objects.equals(configuration, channel.configuration)
+                && Objects.equals(properties, channel.properties) && Objects.equals(defaultTags, channel.defaultTags)
+                && autoUpdatePolicy == channel.autoUpdatePolicy;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(acceptedItemType, kind, uid, channelTypeUID, label, description, configuration, properties,
+                defaultTags, autoUpdatePolicy);
     }
 }

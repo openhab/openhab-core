@@ -31,7 +31,7 @@ public interface ThingManager {
      * @return {@code false} when the {@link Thing} has {@link ThingStatus} with {@link ThingStatusDetail#DISABLED}.
      *         Returns {@code true} in all other cases.
      */
-    public boolean isEnabled(ThingUID thingUID);
+    boolean isEnabled(ThingUID thingUID);
 
     /**
      * This method is used for changing <b>enabled</b> state of the {@link Thing}
@@ -41,5 +41,5 @@ public interface ThingManager {
      * @param thingUID UID of the {@link Thing}.
      * @param isEnabled a new <b>enabled / disabled</b> state of the {@link Thing}.
      */
-    public void setEnabled(ThingUID thingUID, boolean isEnabled);
+    void setEnabled(ThingUID thingUID, boolean isEnabled);
 }

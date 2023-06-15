@@ -65,9 +65,6 @@ public class LocalizedKey {
         if (!Objects.equals(key, other.key)) {
             return false;
         }
-        if (!Objects.equals(locale, other.locale)) {
-            return false;
-        }
-        return true;
+        return Objects.equals(locale, other.locale);
     }
 }

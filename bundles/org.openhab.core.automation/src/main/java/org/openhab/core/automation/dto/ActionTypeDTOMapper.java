@@ -60,8 +60,8 @@ public class ActionTypeDTOMapper extends ModuleTypeDTOMapper {
         }
         final List<ActionTypeDTO> dtos = new ArrayList<>(types.size());
         for (final ActionType type : types) {
-            if (type instanceof CompositeActionType) {
-                dtos.add(map((CompositeActionType) type));
+            if (type instanceof CompositeActionType actionType) {
+                dtos.add(map(actionType));
             } else {
                 dtos.add(map(type));
             }

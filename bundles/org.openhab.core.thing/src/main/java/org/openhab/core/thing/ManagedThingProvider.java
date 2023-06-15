@@ -63,6 +63,7 @@ public class ManagedThingProvider extends AbstractManagedProvider<Thing, ThingUI
         return null;
     }
 
+    @Override
     protected ThingStorageEntity toPersistableElement(Thing element) {
         return new ThingStorageEntity(ThingDTOMapper.map(element), element instanceof BridgeImpl);
     }

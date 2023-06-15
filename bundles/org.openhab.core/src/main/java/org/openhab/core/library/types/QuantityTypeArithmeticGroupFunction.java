@@ -59,10 +59,10 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
         }
 
         protected boolean isSameDimension(@Nullable Item item) {
-            if (item instanceof GroupItem) {
-                return isSameDimension(((GroupItem) item).getBaseItem());
+            if (item instanceof GroupItem groupItem) {
+                return isSameDimension(groupItem.getBaseItem());
             }
-            return item instanceof NumberItem && dimension.equals(((NumberItem) item).getDimension());
+            return item instanceof NumberItem ni && dimension.equals(ni.getDimension());
         }
     }
 

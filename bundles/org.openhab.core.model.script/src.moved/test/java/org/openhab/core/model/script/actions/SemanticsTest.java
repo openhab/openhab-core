@@ -18,6 +18,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.when;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,14 +26,15 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.openhab.core.i18n.UnitProvider;
 import org.openhab.core.items.GenericItem;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.model.script.internal.engine.action.SemanticsActionService;
-import org.openhab.core.semantics.model.equipment.CleaningRobot;
 import org.openhab.core.semantics.model.equipment.Battery;
+import org.openhab.core.semantics.model.equipment.CleaningRobot;
 import org.openhab.core.semantics.model.location.Bathroom;
 import org.openhab.core.semantics.model.location.Indoor;
 
@@ -43,20 +45,22 @@ import org.openhab.core.semantics.model.location.Indoor;
  */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
+@NonNullByDefault
 public class SemanticsTest {
 
-    private @Mock ItemRegistry mockedItemRegistry;
+    private @Mock @NonNullByDefault({}) ItemRegistry itemRegistryMock;
+    private @Mock @NonNullByDefault({}) UnitProvider unitProviderMock;
 
-    private GroupItem indoorLocationItem;
-    private GroupItem bathroomLocationItem;
-    private GroupItem equipmentItem;
-    private GenericItem temperaturePointItem;
-    private GenericItem humidityPointItem;
-    private GenericItem subEquipmentItem;
+    private @NonNullByDefault({}) GroupItem indoorLocationItem;
+    private @NonNullByDefault({}) GroupItem bathroomLocationItem;
+    private @NonNullByDefault({}) GroupItem equipmentItem;
+    private @NonNullByDefault({}) GenericItem temperaturePointItem;
+    private @NonNullByDefault({}) GenericItem humidityPointItem;
+    private @NonNullByDefault({}) GenericItem subEquipmentItem;
 
     @BeforeEach
     public void setup() throws ItemNotFoundException {
-        CoreItemFactory itemFactory = new CoreItemFactory();
+        CoreItemFactory itemFactory = new CoreItemFactory(unitProviderMock);
 
         indoorLocationItem = new GroupItem("TestHouse");
         indoorLocationItem.addTag("Indoor");
@@ -94,13 +98,13 @@ public class SemanticsTest {
         equipmentItem.addMember(subEquipmentItem);
         subEquipmentItem.addGroupName(equipmentItem.getName());
 
-        when(mockedItemRegistry.getItem("TestHouse")).thenReturn(indoorLocationItem);
-        when(mockedItemRegistry.getItem("TestBathRoom")).thenReturn(bathroomLocationItem);
-        when(mockedItemRegistry.getItem("Test08")).thenReturn(equipmentItem);
-        when(mockedItemRegistry.getItem("TestTemperature")).thenReturn(temperaturePointItem);
-        when(mockedItemRegistry.getItem("TestHumidity")).thenReturn(humidityPointItem);
+        when(itemRegistryMock.getItem("TestHouse")).thenReturn(indoorLocationItem);
+        when(itemRegistryMock.getItem("TestBathRoom")).thenReturn(bathroomLocationItem);
+        when(itemRegistryMock.getItem("Test08")).thenReturn(equipmentItem);
+        when(itemRegistryMock.getItem("TestTemperature")).thenReturn(temperaturePointItem);
+        when(itemRegistryMock.getItem("TestHumidity")).thenReturn(humidityPointItem);
 
-        new SemanticsActionService(mockedItemRegistry);
+        new SemanticsActionService(itemRegistryMock);
     }
 
     @Test

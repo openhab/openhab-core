@@ -64,7 +64,7 @@ public class SyntheticBundleInstaller {
     private static final String BUNDLE_POOL_PATH = "/test-bundle-pool";
 
     private static final String XML_THING_TYPE = "openhab.xmlThingTypes";
-    private static final String XML_BINDING_INFO = "openhab.xmlBindingInfo";
+    private static final String XML_ADDON_INFO = "openhab.xmlAddonInfo";
     private static final String XML_CONFIG = "openhab.xmlConfig";
 
     /**
@@ -91,7 +91,7 @@ public class SyntheticBundleInstaller {
      * Install synthetic bundle, denoted by its name, into the test runtime (by using the given bundle context).
      *
      * @param bundleContext the bundle context of the test runtime
-     * @param testBundleNamethe symbolic name of the sub-directory of {@value #BUNDLE_POOL_PATH}, which contains the
+     * @param testBundleName the symbolic name of the sub-directory of {@value #BUNDLE_POOL_PATH}, which contains the
      *            files
      *            for the synthetic bundle
      * @param extensionsToInclude a list of extension to be included into the synthetic bundle. In order to use the list
@@ -232,10 +232,7 @@ public class SyntheticBundleInstaller {
         String bundlePath = BUNDLE_POOL_PATH + "/" + testBundleName + "/";
         byte[] syntheticBundleBytes = createSyntheticBundle(bundleContext.getBundle(), bundlePath, testBundleName,
                 extensionsToInclude);
-
-        Bundle syntheticBundle = bundleContext.installBundle(testBundleName,
-                new ByteArrayInputStream(syntheticBundleBytes));
-        return syntheticBundle;
+        return bundleContext.installBundle(testBundleName, new ByteArrayInputStream(syntheticBundleBytes));
     }
 
     private static boolean isBundleAvailable(BundleContext context, String bsn) {
@@ -251,15 +248,15 @@ public class SyntheticBundleInstaller {
     }
 
     private static boolean isXmlThingTypeBundleAvailable(BundleContext context) {
-        return isBundleAvailable(context, "org.openhab.core.thing.xml");
+        return isBundleAvailable(context, "org.openhab.core.thing");
     }
 
-    private static boolean isXmlBindingInfoBundleAvailable(BundleContext context) {
-        return isBundleAvailable(context, "org.openhab.core.binding.xml");
+    private static boolean isXmlAddonInfoBundleAvailable(BundleContext context) {
+        return isBundleAvailable(context, "org.openhab.core.addon");
     }
 
     private static boolean isXmlConfigBundleAvailable(BundleContext context) {
-        return isBundleAvailable(context, "org.openhab.core.config.xml");
+        return isBundleAvailable(context, "org.openhab.core.config");
     }
 
     /**
@@ -271,8 +268,8 @@ public class SyntheticBundleInstaller {
         if (isXmlThingTypeBundleAvailable(context)) {
             waitForReadyMarker(context, XML_THING_TYPE, bundle);
         }
-        if (isXmlBindingInfoBundleAvailable(context)) {
-            waitForReadyMarker(context, XML_BINDING_INFO, bundle);
+        if (isXmlAddonInfoBundleAvailable(context)) {
+            waitForReadyMarker(context, XML_ADDON_INFO, bundle);
         }
         if (isXmlConfigBundleAvailable(context)) {
             waitForReadyMarker(context, XML_CONFIG, bundle);
@@ -396,8 +393,7 @@ public class SyntheticBundleInstaller {
     private static String convertToFileEntry(URI baseURI, URL entryURL) throws URISyntaxException {
         URI entryURI = entryURL.toURI();
         URI relativeURI = baseURI.relativize(entryURI);
-        String fileEntry = relativeURI.toString();
-        return fileEntry;
+        return relativeURI.toString();
     }
 
     private static Manifest getManifest(Bundle bundle, String bundlePath) throws IOException {

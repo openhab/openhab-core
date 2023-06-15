@@ -12,6 +12,7 @@
  */
 package org.openhab.core.model.script.actions;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -70,6 +71,12 @@ public class Voice {
         say(text, null, null, volume);
     }
 
+    @ActionDoc(text = "says a given text with the default voice and the given volume")
+    public static void say(@ParamDoc(name = "text") Object text,
+            @ParamDoc(name = "volume", text = "volume in the range [0;1]") float volume) {
+        say(text, null, null, floatVolumeToPercentType(volume));
+    }
+
     /**
      * Says the given text with a given voice.
      *
@@ -100,6 +107,12 @@ public class Voice {
     public static void say(@ParamDoc(name = "text") Object text, @ParamDoc(name = "voice") @Nullable String voice,
             @ParamDoc(name = "volume", text = "the volume to be used") PercentType volume) {
         say(text, voice, null, volume);
+    }
+
+    @ActionDoc(text = "says a given text with a given voice and the given volume")
+    public static void say(@ParamDoc(name = "text") Object text, @ParamDoc(name = "voice") @Nullable String voice,
+            @ParamDoc(name = "volume", text = "volume in the range [0;1]") float volume) {
+        say(text, voice, null, floatVolumeToPercentType(volume));
     }
 
     /**
@@ -137,6 +150,13 @@ public class Voice {
         if (!output.isBlank()) {
             VoiceActionService.voiceManager.say(output, voice, sink, volume);
         }
+    }
+
+    @ActionDoc(text = "says a given text with a given voice and the given volume through the given sink")
+    public static void say(@ParamDoc(name = "text") Object text, @ParamDoc(name = "voice") @Nullable String voice,
+            @ParamDoc(name = "sink") @Nullable String sink,
+            @ParamDoc(name = "volume", text = "volume in the range [0;1]") float volume) {
+        say(text, voice, sink, floatVolumeToPercentType(volume));
     }
 
     /**
@@ -448,5 +468,18 @@ public class Voice {
     private static org.openhab.core.voice.@Nullable Voice getVoice(String id) {
         return VoiceActionService.voiceManager.getAllVoices().stream().filter(voice -> voice.getUID().equals(id))
                 .findAny().orElse(null);
+    }
+
+    /**
+     * Converts a float volume to a {@link PercentType} volume and checks if float volume is in the [0;1] range.
+     * 
+     * @param volume
+     * @return
+     */
+    private static PercentType floatVolumeToPercentType(float volume) {
+        if (volume < 0 || volume > 1) {
+            throw new IllegalArgumentException("Volume value must be in the range [0;1]!");
+        }
+        return new PercentType(new BigDecimal(volume * 100f));
     }
 }

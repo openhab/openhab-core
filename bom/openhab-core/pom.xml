@@ -66,7 +66,7 @@
     </dependency>
     <dependency>
       <groupId>org.openhab.core.bundles</groupId>
-      <artifactId>org.openhab.core.addon.xml</artifactId>
+      <artifactId>org.openhab.core.addon</artifactId>
       <version>${project.version}</version>
       <scope>compile</scope>
     </dependency>
@@ -85,12 +85,6 @@
     <dependency>
       <groupId>org.openhab.core.bundles</groupId>
       <artifactId>org.openhab.core.semantics</artifactId>
-      <version>${project.version}</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.openhab.core.bundles</groupId>
-      <artifactId>org.openhab.core.thing.xml</artifactId>
       <version>${project.version}</version>
       <scope>compile</scope>
     </dependency>
@@ -354,12 +348,6 @@
     </dependency>
     <dependency>
       <groupId>org.openhab.core.bundles</groupId>
-      <artifactId>org.openhab.core.config.xml</artifactId>
-      <version>${project.version}</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.openhab.core.bundles</groupId>
       <artifactId>org.openhab.core.automation</artifactId>
       <version>${project.version}</version>
       <scope>compile</scope>
@@ -523,6 +511,12 @@
     <dependency>
       <groupId>org.openhab.core.bundles</groupId>
       <artifactId>org.openhab.core.storage.json</artifactId>
+      <version>${project.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.openhab.core.bundles</groupId>
+      <artifactId>org.openhab.core.addon.eclipse</artifactId>
       <version>${project.version}</version>
       <scope>compile</scope>
     </dependency>

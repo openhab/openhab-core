@@ -38,5 +38,4 @@ public class ThingRuntimeActivator implements ModelParser {
     public String getExtension() {
         return "things";
     }
-
 }

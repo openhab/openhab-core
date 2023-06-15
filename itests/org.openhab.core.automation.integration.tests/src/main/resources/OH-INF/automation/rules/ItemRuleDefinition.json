@@ -17,9 +17,8 @@
 				"id": "ItemStateChangeTriggerID",
 				"type": "core.GenericEventTrigger",
 				"configuration": {
-					"eventSource": "myMotionItem",
-					"eventTopic": "openhab/items/*",
-					"eventTypes": "ItemStateEvent"
+					"topic": "openhab/items/myMotionItem/*",
+					"types": "ItemStateEvent"
 				}
 			}
 		],

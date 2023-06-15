@@ -85,7 +85,7 @@ public class PointType implements ComplexType, Command, State {
 
     public PointType(String value) {
         if (!value.isEmpty()) {
-            List<String> elements = Arrays.stream(value.split(",")).map(in -> in.trim()).collect(Collectors.toList());
+            List<String> elements = Arrays.stream(value.split(",")).map(String::trim).collect(Collectors.toList());
             if (elements.size() >= 2) {
                 canonicalize(new DecimalType(elements.get(0)), new DecimalType(elements.get(1)));
                 if (elements.size() == 3) {
@@ -264,10 +264,7 @@ public class PointType implements ComplexType, Command, State {
             return false;
         }
         PointType other = (PointType) obj;
-        if (!getLatitude().equals(other.getLatitude()) || !getLongitude().equals(other.getLongitude())
-                || !getAltitude().equals(other.getAltitude())) {
-            return false;
-        }
-        return true;
+        return !(!getLatitude().equals(other.getLatitude()) || !getLongitude().equals(other.getLongitude())
+                || !getAltitude().equals(other.getAltitude()));
     }
 }

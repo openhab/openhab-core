@@ -88,10 +88,10 @@ abstract class AbstractInvocationHandler<T> {
 
     void handleExecutionException(Method method, ExecutionException e) {
         Throwable cause = e.getCause();
-        if (cause instanceof DuplicateExecutionException) {
-            handleDuplicate(method, (DuplicateExecutionException) cause);
-        } else if (cause instanceof InvocationTargetException) {
-            handleException(method, (InvocationTargetException) cause);
+        if (cause instanceof DuplicateExecutionException exception) {
+            handleDuplicate(method, exception);
+        } else if (cause instanceof InvocationTargetException exception) {
+            handleException(method, exception);
         }
     }
 

@@ -23,6 +23,7 @@ import org.openhab.core.io.rest.core.item.EnrichedItemDTO;
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Chris Jackson - Initial contribution
+ * @author Laurent Garnier - New field iconcolor
  */
 public class WidgetDTO {
 
@@ -35,17 +36,18 @@ public class WidgetDTO {
     public String icon;
     public String labelcolor;
     public String valuecolor;
+    public String iconcolor;
 
     // widget-specific attributes
     public final List<MappingDTO> mappings = new ArrayList<>();
     public Boolean switchSupport;
     public Integer sendFrequency;
-    public String separator;
     public Integer refresh;
     public Integer height;
     public BigDecimal minValue;
     public BigDecimal maxValue;
     public BigDecimal step;
+    public String inputHint;
     public String url;
     public String encoding;
     public String service;

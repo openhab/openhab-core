@@ -39,7 +39,6 @@ import org.openhab.core.auth.UsernamePasswordCredentials;
 import org.openhab.core.i18n.LocaleProvider;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.http.HttpService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,13 +51,12 @@ import org.slf4j.LoggerFactory;
 @NonNullByDefault
 public abstract class AbstractAuthPageServlet extends HttpServlet {
 
-    protected static final long serialVersionUID = 5340598701104679840L;
+    private static final long serialVersionUID = 5340598701104679840L;
 
     private static final String MESSAGES_BUNDLE_NAME = "messages";
 
     private final Logger logger = LoggerFactory.getLogger(AbstractAuthPageServlet.class);
 
-    protected HttpService httpService;
     protected UserRegistry userRegistry;
     protected AuthenticationProvider authProvider;
     protected LocaleProvider localeProvider;
@@ -69,10 +67,8 @@ public abstract class AbstractAuthPageServlet extends HttpServlet {
 
     protected String pageTemplate;
 
-    public AbstractAuthPageServlet(BundleContext bundleContext, @Reference HttpService httpService,
-            @Reference UserRegistry userRegistry, @Reference AuthenticationProvider authProvider,
-            @Reference LocaleProvider localeProvider) {
-        this.httpService = httpService;
+    public AbstractAuthPageServlet(BundleContext bundleContext, @Reference UserRegistry userRegistry,
+            @Reference AuthenticationProvider authProvider, @Reference LocaleProvider localeProvider) {
         this.userRegistry = userRegistry;
         this.authProvider = authProvider;
         this.localeProvider = localeProvider;

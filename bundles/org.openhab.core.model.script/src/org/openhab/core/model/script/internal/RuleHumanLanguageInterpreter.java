@@ -47,13 +47,13 @@ import org.slf4j.LoggerFactory;
 @NonNullByDefault
 @Component(immediate = true, service = HumanLanguageInterpreter.class, configurationPid = "org.openhab.rulehli", //
         property = Constants.SERVICE_PID + "=org.openhab.rulehli")
-@ConfigurableService(category = "voice", label = "Rule Voice Interpreter", description_uri = RuleHumanLanguageInterpreter.CONFIG_URI)
+@ConfigurableService(category = "system", label = "Rule Voice Interpreter", description_uri = RuleHumanLanguageInterpreter.CONFIG_URI)
 public class RuleHumanLanguageInterpreter implements HumanLanguageInterpreter {
 
     private final Logger logger = LoggerFactory.getLogger(RuleHumanLanguageInterpreter.class);
 
     // constants for the configuration properties
-    protected static final String CONFIG_URI = "voice:rulehli";
+    protected static final String CONFIG_URI = "system:rulehli";
 
     private String itemName = "VoiceCommand";
 
@@ -112,5 +112,4 @@ public class RuleHumanLanguageInterpreter implements HumanLanguageInterpreter {
     public Set<String> getSupportedGrammarFormats() {
         return Collections.emptySet();
     }
-
 }

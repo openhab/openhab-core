@@ -50,6 +50,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.OpenHAB;
 import org.openhab.core.addon.AddonEventFactory;
+import org.openhab.core.addon.AddonType;
 import org.openhab.core.common.NamedThreadFactory;
 import org.openhab.core.config.core.ConfigParser;
 import org.openhab.core.config.core.ConfigurableService;
@@ -81,25 +82,15 @@ public class FeatureInstaller implements ConfigurationListener {
 
     protected static final String CONFIG_URI = "system:addons";
 
-    public static final String EXTENSION_TYPE_AUTOMATION = "automation";
-    public static final String EXTENSION_TYPE_BINDING = "binding";
-    public static final String EXTENSION_TYPE_MISC = "misc";
-    public static final String EXTENSION_TYPE_PERSISTENCE = "persistence";
-    public static final String EXTENSION_TYPE_TRANSFORMATION = "transformation";
-    public static final String EXTENSION_TYPE_UI = "ui";
-    public static final String EXTENSION_TYPE_VOICE = "voice";
-    public static final Set<String> EXTENSION_TYPES = Set.of(EXTENSION_TYPE_AUTOMATION, EXTENSION_TYPE_BINDING,
-            EXTENSION_TYPE_MISC, EXTENSION_TYPE_PERSISTENCE, EXTENSION_TYPE_TRANSFORMATION, EXTENSION_TYPE_UI,
-            EXTENSION_TYPE_VOICE);
-
     public static final String PREFIX = "openhab-";
-    public static final String PREFIX_PACKAGE = "package-";
-    public static final String MINIMAL_PACKAGE = "minimal";
 
     private static final String CFG_REMOTE = "remote";
     private static final String PAX_URL_PID = "org.ops4j.pax.url.mvn";
     private static final String ADDONS_PID = "org.openhab.addons";
     private static final String PROPERTY_MVN_REPOS = "org.ops4j.pax.url.mvn.repositories";
+
+    public static final List<String> ADDON_TYPES = AddonType.DEFAULT_TYPES.stream().map(AddonType::getId)
+            .collect(Collectors.toList());
 
     private final Logger logger = LoggerFactory.getLogger(FeatureInstaller.class);
 
@@ -198,13 +189,6 @@ public class FeatureInstaller implements ConfigurationListener {
                 waitForConfigUpdateEvent();
             }
 
-            if (installPackage(config)) {
-                changed = true;
-                // our package selection has changed, so let's wait for the values to be available in config admin
-                // which we will receive as another call to modified
-                continue;
-            }
-
             if (installAddons(config)) {
                 changed = true;
             }
@@ -285,7 +269,7 @@ public class FeatureInstaller implements ConfigurationListener {
     private void changeAddonConfig(String type, String id, BiFunction<Collection<String>, String, Boolean> method)
             throws IOException {
         Configuration cfg = configurationAdmin.getConfiguration(OpenHAB.ADDONS_SERVICE_PID, null);
-        Dictionary<String, Object> props = cfg.getProperties();
+        Dictionary<String, Object> props = Objects.requireNonNullElse(cfg.getProperties(), new Hashtable<>());
         Object typeProp = props.get(type);
         String[] addonIds = typeProp != null ? typeProp.toString().split(",") : new String[0];
         Set<String> normalizedIds = new HashSet<>(); // sets don't allow duplicates
@@ -329,8 +313,8 @@ public class FeatureInstaller implements ConfigurationListener {
                     return false;
                 }
                 Object repos = properties.get(PROPERTY_MVN_REPOS);
-                if (repos instanceof String) {
-                    return List.of(((String) repos).split(",")).contains(onlineRepoUrl);
+                if (repos instanceof String string) {
+                    return List.of(string.split(",")).contains(onlineRepoUrl);
                 }
             } catch (IOException e) {
                 logger.error("Failed getting the add-on management online/offline mode: {}", e.getMessage(),
@@ -357,8 +341,8 @@ public class FeatureInstaller implements ConfigurationListener {
                         new Hashtable<>());
                 List<String> repoCfg = new ArrayList<>();
                 Object repos = properties.get(PROPERTY_MVN_REPOS);
-                if (repos instanceof String) {
-                    repoCfg.addAll(Arrays.asList(((String) repos).split(",")));
+                if (repos instanceof String string) {
+                    repoCfg.addAll(Arrays.asList(string.split(",")));
                     repoCfg.remove("");
                 }
                 if (enabled && !repoCfg.contains(onlineRepoUrl)) {
@@ -388,7 +372,7 @@ public class FeatureInstaller implements ConfigurationListener {
         final Set<String> targetAddons = new HashSet<>(); // the target we want to have installed afterwards
         final Set<String> installAddons = new HashSet<>(); // the ones to be installed (the diff)
 
-        for (String type : EXTENSION_TYPES) {
+        for (String type : ADDON_TYPES) {
             Object configValue = config.get(type);
             if (configValue instanceof String addonString) {
                 try {
@@ -517,27 +501,6 @@ public class FeatureInstaller implements ConfigurationListener {
         } catch (Exception e) {
             logger.debug("Failed uninstalling '{}': {}", name, e.getMessage());
         }
-    }
-
-    private boolean installPackage(final Map<String, Object> config) {
-        boolean configChanged = false;
-        Object packageName = config.get(OpenHAB.CFG_PACKAGE);
-        if (packageName instanceof String currentPackage) {
-            String fullName = PREFIX + PREFIX_PACKAGE + currentPackage.strip();
-            if (!MINIMAL_PACKAGE.equals(currentPackage)) {
-                configChanged = installFeature(fullName);
-            }
-
-            // uninstall all other packages
-            try {
-                Stream.of(featuresService.listFeatures()).map(Feature::getName)
-                        .filter(feature -> feature.startsWith(PREFIX + PREFIX_PACKAGE) && !feature.equals(fullName))
-                        .forEach(this::uninstallFeature);
-            } catch (Exception e) {
-                logger.error("Failed retrieving features: {}", e.getMessage(), debugException(e));
-            }
-        }
-        return configChanged;
     }
 
     private void postInstalledEvent(String featureName) {

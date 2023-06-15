@@ -14,11 +14,12 @@ package org.openhab.core.automation.rest.internal;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.Consumes;
@@ -43,8 +44,9 @@ import org.openhab.core.automation.type.ActionType;
 import org.openhab.core.automation.type.Input;
 import org.openhab.core.automation.type.ModuleTypeRegistry;
 import org.openhab.core.automation.type.Output;
-import org.openhab.core.automation.util.ActionBuilder;
+import org.openhab.core.automation.util.ModuleBuilder;
 import org.openhab.core.config.core.Configuration;
+import org.openhab.core.io.rest.LocaleService;
 import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
 import org.openhab.core.io.rest.Stream2JSONInputStream;
@@ -62,8 +64,6 @@ import org.osgi.service.jaxrs.whiteboard.propertytypes.JSONRequired;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsName;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -89,14 +89,16 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 public class ThingActionsResource implements RESTResource {
     public static final String PATH_THINGS = "actions";
 
-    private final Logger logger = LoggerFactory.getLogger(ThingActionsResource.class);
+    private final LocaleService localeService;
     private final ModuleTypeRegistry moduleTypeRegistry;
 
-    Map<ThingUID, Map<String, ThingActions>> thingActionsMap = new HashMap<>();
+    Map<ThingUID, Map<String, ThingActions>> thingActionsMap = new ConcurrentHashMap<>();
     private List<ModuleHandlerFactory> moduleHandlerFactories = new ArrayList<>();
 
     @Activate
-    public ThingActionsResource(@Reference ModuleTypeRegistry moduleTypeRegistry) {
+    public ThingActionsResource(@Reference LocaleService localeService,
+            @Reference ModuleTypeRegistry moduleTypeRegistry) {
+        this.localeService = localeService;
         this.moduleTypeRegistry = moduleTypeRegistry;
     }
 
@@ -106,7 +108,7 @@ public class ThingActionsResource implements RESTResource {
         String scope = getScope(thingActions);
         if (handler != null && scope != null) {
             ThingUID thingUID = handler.getThing().getUID();
-            thingActionsMap.computeIfAbsent(thingUID, thingUid -> new HashMap<>()).put(scope, thingActions);
+            thingActionsMap.computeIfAbsent(thingUID, thingUid -> new ConcurrentHashMap<>()).put(scope, thingActions);
         }
     }
 
@@ -143,6 +145,7 @@ public class ThingActionsResource implements RESTResource {
             @ApiResponse(responseCode = "204", description = "No actions found.") })
     public Response getActions(@PathParam("thingUID") @Parameter(description = "thingUID") String thingUID,
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language) {
+        Locale locale = localeService.getLocale(language);
         ThingUID aThingUID = new ThingUID(thingUID);
 
         List<ThingActionDTO> actions = new ArrayList<>();
@@ -163,7 +166,7 @@ public class ThingActionsResource implements RESTResource {
                 }
 
                 String actionUid = thingActionsEntry.getKey() + "." + method.getName();
-                ActionType actionType = (ActionType) moduleTypeRegistry.get(actionUid);
+                ActionType actionType = (ActionType) moduleTypeRegistry.get(actionUid, locale);
                 if (actionType == null) {
                     continue;
                 }
@@ -203,7 +206,7 @@ public class ThingActionsResource implements RESTResource {
 
         Configuration configuration = new Configuration();
         configuration.put("config", thingUID);
-        Action action = ActionBuilder.createAction().withConfiguration(configuration)
+        Action action = ModuleBuilder.createAction().withConfiguration(configuration)
                 .withId(UUID.randomUUID().toString()).withTypeUID(actionTypeUid).build();
 
         ModuleHandlerFactory moduleHandlerFactory = moduleHandlerFactories.stream()

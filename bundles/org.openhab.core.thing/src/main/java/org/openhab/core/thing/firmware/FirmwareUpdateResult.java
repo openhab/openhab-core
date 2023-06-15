@@ -29,5 +29,5 @@ public enum FirmwareUpdateResult {
     ERROR,
 
     /** Indicates that the firmware update was canceled. */
-    CANCELED;
+    CANCELED
 }

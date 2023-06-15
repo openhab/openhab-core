@@ -555,12 +555,12 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
             try {
                 ModuleHandler moduleHandler = getModuleHandler(m, rUID);
                 if (moduleHandler != null) {
-                    if (mm instanceof WrappedAction) {
-                        ((WrappedAction) mm).setModuleHandler((ActionHandler) moduleHandler);
-                    } else if (mm instanceof WrappedCondition) {
-                        ((WrappedCondition) mm).setModuleHandler((ConditionHandler) moduleHandler);
-                    } else if (mm instanceof WrappedTrigger) {
-                        ((WrappedTrigger) mm).setModuleHandler((TriggerHandler) moduleHandler);
+                    if (mm instanceof WrappedAction action) {
+                        action.setModuleHandler((ActionHandler) moduleHandler);
+                    } else if (mm instanceof WrappedCondition condition) {
+                        condition.setModuleHandler((ConditionHandler) moduleHandler);
+                    } else if (mm instanceof WrappedTrigger trigger) {
+                        trigger.setModuleHandler((TriggerHandler) moduleHandler);
                     }
                 } else {
                     if (sb == null) {
@@ -1183,10 +1183,10 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
                         updateContext(ruleUID, action.getId(), outputs);
                     }
                 } catch (Throwable t) {
-                    String errMessage = "Fail to execute action: " + action.getId();
+                    String errMessage = "Failed to execute action: " + action.getId() + "(" + t.getMessage() + ")";
                     if (stopOnFirstFail) {
-                        RuntimeException re = new RuntimeException(errMessage, t);
-                        throw re;
+                        logger.debug("Action {}-{} threw an exception: ", ruleUID, action.getId(), t);
+                        throw new RuntimeException(errMessage, t);
                     } else {
                         logger.warn(errMessage, t);
                     }

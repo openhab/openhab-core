@@ -60,8 +60,7 @@ public class ItemDTOMapper {
         if (itemDTO.type != null) {
             ItemBuilder builder = itemBuilderFactory.newItemBuilder(itemDTO.type, itemDTO.name);
 
-            if (itemDTO instanceof GroupItemDTO && GroupItem.TYPE.equals(itemDTO.type)) {
-                GroupItemDTO groupItemDTO = (GroupItemDTO) itemDTO;
+            if (itemDTO instanceof GroupItemDTO groupItemDTO && GroupItem.TYPE.equals(itemDTO.type)) {
                 Item baseItem = null;
                 if (groupItemDTO.groupType != null && !groupItemDTO.groupType.isEmpty()) {
                     baseItem = itemBuilderFactory.newItemBuilder(groupItemDTO.groupType, itemDTO.name).build();
@@ -107,8 +106,7 @@ public class ItemDTOMapper {
     }
 
     private static void fillProperties(ItemDTO itemDTO, Item item) {
-        if (item instanceof GroupItem) {
-            GroupItem groupItem = (GroupItem) item;
+        if (item instanceof GroupItem groupItem) {
             GroupItemDTO groupItemDTO = (GroupItemDTO) itemDTO;
             Item baseItem = groupItem.getBaseItem();
             if (baseItem != null) {

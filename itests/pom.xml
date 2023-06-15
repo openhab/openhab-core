@@ -24,16 +24,15 @@
     <module>org.openhab.core.automation.module.timer.tests</module>
     <module>org.openhab.core.automation.module.script.tests</module>
     <module>org.openhab.core.automation.integration.tests</module>
-    <module>org.openhab.core.addon.xml.tests</module>
+    <module>org.openhab.core.addon.tests</module>
     <module>org.openhab.core.config.core.tests</module>
     <module>org.openhab.core.config.discovery.mdns.tests</module>
     <module>org.openhab.core.config.discovery.tests</module>
     <module>org.openhab.core.config.discovery.usbserial.tests</module>
     <module>org.openhab.core.config.dispatch.tests</module>
-    <module>org.openhab.core.config.xml.tests</module>
     <module>org.openhab.core.ephemeris.tests</module>
+    <module>org.openhab.core.io.net.tests</module>
     <module>org.openhab.core.io.rest.core.tests</module>
-    <module>org.openhab.core.model.core.tests</module>
     <module>org.openhab.core.model.item.tests</module>
     <module>org.openhab.core.model.rule.tests</module>
     <module>org.openhab.core.model.script.tests</module>
@@ -41,7 +40,6 @@
     <module>org.openhab.core.model.thing.tests</module>
     <module>org.openhab.core.storage.json.tests</module>
     <module>org.openhab.core.thing.tests</module>
-    <module>org.openhab.core.thing.xml.tests</module>
     <module>org.openhab.core.voice.tests</module>
   </modules>
 

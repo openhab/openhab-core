@@ -70,11 +70,8 @@ public class ItemStateConverterImpl implements ItemStateConverter {
             }
         }
 
-        if (item instanceof NumberItem && state instanceof QuantityType) {
-            NumberItem numberItem = (NumberItem) item;
+        if (item instanceof NumberItem numberItem && state instanceof QuantityType quantityState) {
             if (numberItem.getDimension() != null) {
-                QuantityType<?> quantityState = (QuantityType<?>) state;
-
                 // in case the item does define a unit it takes precedence over all other conversions:
                 Unit<?> itemUnit = parseItemUnit(numberItem);
                 if (itemUnit != null) {
@@ -94,8 +91,6 @@ public class ItemStateConverterImpl implements ItemStateConverter {
                         && UnitUtils.isDifferentMeasurementSystem(conversionUnit, quantityState.getUnit())) {
                     return convertOrUndef(quantityState, conversionUnit);
                 }
-
-                return state;
             } else {
                 State convertedState = state.as(DecimalType.class);
                 if (convertedState != null) {

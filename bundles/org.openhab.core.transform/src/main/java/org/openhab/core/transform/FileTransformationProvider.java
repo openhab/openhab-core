@@ -12,27 +12,29 @@
  */
 package org.openhab.core.transform;
 
+import static org.openhab.core.service.WatchService.Kind.CREATE;
+import static org.openhab.core.service.WatchService.Kind.DELETE;
+import static org.openhab.core.service.WatchService.Kind.MODIFY;
 import static org.openhab.core.transform.Transformation.FUNCTION;
 
 import java.io.IOException;
-import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardWatchEventKinds;
-import java.nio.file.WatchEvent;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.OpenHAB;
 import org.openhab.core.common.registry.ProviderChangeListener;
-import org.openhab.core.service.AbstractWatchService;
+import org.openhab.core.service.WatchService;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,38 +46,38 @@ import org.slf4j.LoggerFactory;
  */
 @NonNullByDefault
 @Component(service = TransformationProvider.class, immediate = true)
-public class FileTransformationProvider extends AbstractWatchService implements TransformationProvider {
-    private static final WatchEvent.Kind<?>[] WATCH_EVENTS = { StandardWatchEventKinds.ENTRY_CREATE,
-            StandardWatchEventKinds.ENTRY_DELETE, StandardWatchEventKinds.ENTRY_MODIFY };
+public class FileTransformationProvider implements WatchService.WatchEventListener, TransformationProvider {
     private static final Set<String> IGNORED_EXTENSIONS = Set.of("txt", "swp");
     private static final Pattern FILENAME_PATTERN = Pattern
             .compile("(?<filename>.+?)(_(?<language>[a-z]{2}))?\\.(?<extension>[^.]*)$");
-    private static final Path TRANSFORMATION_PATH = Path.of(OpenHAB.getConfigFolder(),
-            TransformationService.TRANSFORM_FOLDER_NAME);
 
     private final Logger logger = LoggerFactory.getLogger(FileTransformationProvider.class);
 
     private final Set<ProviderChangeListener<Transformation>> listeners = ConcurrentHashMap.newKeySet();
     private final Map<Path, Transformation> transformationConfigurations = new ConcurrentHashMap<>();
     private final Path transformationPath;
+    private final WatchService watchService;
 
-    public FileTransformationProvider() {
-        this(TRANSFORMATION_PATH);
-    }
+    @Activate
+    public FileTransformationProvider(
+            @Reference(target = WatchService.CONFIG_WATCHER_FILTER) WatchService watchService) {
+        this.watchService = watchService;
+        this.transformationPath = watchService.getWatchPath().resolve(TransformationService.TRANSFORM_FOLDER_NAME);
 
-    // constructor package private used for testing
-    FileTransformationProvider(Path transformationPath) {
-        super(transformationPath.toString());
-        this.transformationPath = transformationPath;
-
+        watchService.registerListener(this, transformationPath);
         // read initial contents
-        try {
-            Files.walk(transformationPath, FileVisitOption.FOLLOW_LINKS).filter(Files::isRegularFile)
-                    .forEach(f -> processPath(StandardWatchEventKinds.ENTRY_CREATE, f));
+        try (Stream<Path> files = Files.walk(transformationPath)) {
+            files.filter(Files::isRegularFile).map(transformationPath::relativize)
+                    .forEach(f -> processWatchEvent(CREATE, f));
         } catch (IOException e) {
             logger.warn("Could not list files in '{}', transformation configurations might be missing: {}",
                     transformationPath, e.getMessage());
         }
+    }
+
+    @Deactivate
+    public void deactivate() {
+        watchService.unregisterListener(this);
     }
 
     @Override
@@ -94,30 +96,17 @@ public class FileTransformationProvider extends AbstractWatchService implements 
     }
 
     @Override
-    protected boolean watchSubDirectories() {
-        return true;
-    }
-
-    @Override
-    protected WatchEvent.Kind<?> @Nullable [] getWatchEventKinds(Path directory) {
-        return WATCH_EVENTS;
-    }
-
-    @Override
-    protected void processWatchEvent(WatchEvent<?> event, WatchEvent.Kind<?> kind, Path path) {
-        processPath(kind, path);
-    }
-
-    private void processPath(WatchEvent.Kind<?> kind, Path path) {
-        if (StandardWatchEventKinds.ENTRY_DELETE.equals(kind)) {
-            Transformation oldElement = transformationConfigurations.remove(path);
-            if (oldElement != null) {
-                logger.trace("Removed configuration from file '{}", path);
-                listeners.forEach(listener -> listener.removed(this, oldElement));
-            }
-        } else if (Files.isRegularFile(path) && (StandardWatchEventKinds.ENTRY_CREATE.equals(kind)
-                || StandardWatchEventKinds.ENTRY_MODIFY.equals(kind))) {
-            try {
+    public void processWatchEvent(WatchService.Kind kind, Path path) {
+        Path finalPath = transformationPath.resolve(path);
+        try {
+            if (kind == DELETE) {
+                Transformation oldElement = transformationConfigurations.remove(path);
+                if (oldElement != null) {
+                    logger.trace("Removed configuration from file '{}", path);
+                    listeners.forEach(listener -> listener.removed(this, oldElement));
+                }
+            } else if (Files.isRegularFile(finalPath) && !Files.isHidden(finalPath)
+                    && ((kind == CREATE) || (kind == MODIFY))) {
                 String fileName = path.getFileName().toString();
                 Matcher m = FILENAME_PATTERN.matcher(fileName);
                 if (!m.matches()) {
@@ -133,8 +122,8 @@ public class FileTransformationProvider extends AbstractWatchService implements 
                     return;
                 }
 
-                String content = new String(Files.readAllBytes(path));
-                String uid = transformationPath.relativize(path).toString();
+                String content = new String(Files.readAllBytes(finalPath));
+                String uid = path.toString();
 
                 Transformation newElement = new Transformation(uid, uid, fileExtension, Map.of(FUNCTION, content));
                 Transformation oldElement = transformationConfigurations.put(path, newElement);
@@ -145,11 +134,11 @@ public class FileTransformationProvider extends AbstractWatchService implements 
                     logger.trace("Updated new configuration from file '{}'", path);
                     listeners.forEach(listener -> listener.updated(this, oldElement, newElement));
                 }
-            } catch (IOException e) {
-                logger.warn("Skipping {} event for '{}' - failed to read content: {}", kind, path, e.getMessage());
+            } else {
+                logger.trace("Skipping {} event for '{}' - not a regular file", kind, path);
             }
-        } else {
-            logger.trace("Skipping {} event for '{}' - not a regular file", kind, path);
+        } catch (IOException e) {
+            logger.warn("Skipping {} event for '{}' - failed to process it: {}", kind, path, e.getMessage());
         }
     }
 }

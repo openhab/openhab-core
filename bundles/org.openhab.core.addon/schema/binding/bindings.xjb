@@ -1,0 +1,20 @@
+<jaxb:bindings xmlns:jaxb="http://java.sun.com/xml/ns/jaxb" xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
+               xmlns:xs="http://www.w3.org/2001/XMLSchema"  jaxb:version="2.0">
+    <jaxb:globalBindings>
+        <xjc:serializable uid="1"/>
+    </jaxb:globalBindings>
+
+    <jaxb:bindings schemaLocation="../addon-1.0.0.xsd">
+        <jaxb:schemaBindings>
+            <jaxb:package name="org.openhab.core.addon.internal.dto"/>
+            <jaxb:nameXmlTransform>
+                <jaxb:typeName prefix="Xml"/>
+                <jaxb:anonymousTypeName prefix="Xml"/>
+            </jaxb:nameXmlTransform>
+        </jaxb:schemaBindings>
+        <jaxb:bindings node="//xs:element[@name='addon']">
+            <jaxb:class name="XmlAddon"/>
+        </jaxb:bindings>
+    </jaxb:bindings>
+
+</jaxb:bindings>

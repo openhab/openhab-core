@@ -95,10 +95,7 @@ public final class Metadata implements Identifiable<MetadataKey> {
             return false;
         }
         Metadata other = (Metadata) obj;
-        if (!key.equals(other.key)) {
-            return false;
-        }
-        return true;
+        return key.equals(other.key);
     }
 
     @Override

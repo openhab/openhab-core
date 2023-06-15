@@ -63,4 +63,8 @@ public class Properties {
     public static Stream<Class<? extends Property>> stream() {
         return PROPERTIES.stream();
     }
+
+    public static boolean add(Class<? extends Property> tag) {
+        return PROPERTIES.add(tag);
+    }
 }

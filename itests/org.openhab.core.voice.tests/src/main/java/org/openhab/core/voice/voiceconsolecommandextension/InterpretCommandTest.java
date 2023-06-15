@@ -51,6 +51,7 @@ public class InterpretCommandTest extends VoiceConsoleCommandExtensionTest {
 
     @BeforeEach
     public void setUp() throws IOException, InterruptedException {
+        registerVolatileStorageService();
         ttsService = new TTSServiceStub();
         hliStub = new HumanLanguageInterpreterStub();
         voice = new VoiceStub();

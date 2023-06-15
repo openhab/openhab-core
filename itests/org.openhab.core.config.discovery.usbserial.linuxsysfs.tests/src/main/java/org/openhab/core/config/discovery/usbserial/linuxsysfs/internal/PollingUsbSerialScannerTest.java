@@ -104,12 +104,14 @@ public class PollingUsbSerialScannerTest {
         pollingScanner.registerDiscoveryListener(discoveryListenerMock);
         pollingScanner.doSingleScan();
 
-        // Expectation: discovery listener called once for removing usb1, and once for adding usb2/usb3 each.
+        // Expectation: discovery listener called once for adding usb1 and usb2 (on registration)
+        // then once for removing usb1, and once again for adding usb2 (another registration)
+        // and once for usb3
 
-        verify(discoveryListenerMock, never()).usbSerialDeviceDiscovered(usb1);
+        verify(discoveryListenerMock, times(1)).usbSerialDeviceDiscovered(usb1);
         verify(discoveryListenerMock, times(1)).usbSerialDeviceRemoved(usb1);
 
-        verify(discoveryListenerMock, times(1)).usbSerialDeviceDiscovered(usb2);
+        verify(discoveryListenerMock, times(2)).usbSerialDeviceDiscovered(usb2);
         verify(discoveryListenerMock, never()).usbSerialDeviceRemoved(usb2);
 
         verify(discoveryListenerMock, times(1)).usbSerialDeviceDiscovered(usb3);

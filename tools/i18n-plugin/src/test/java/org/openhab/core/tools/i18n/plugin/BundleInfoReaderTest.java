@@ -21,7 +21,7 @@ import java.nio.file.Path;
 import org.apache.maven.plugin.logging.SystemStreamLog;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
-import org.openhab.core.addon.xml.internal.AddonInfoXmlResult;
+import org.openhab.core.addon.internal.xml.AddonInfoXmlResult;
 
 /**
  * Tests {@link BundleInfoReader}.

@@ -2,7 +2,7 @@
 	"actions": [
 		{
 			"uid": "core.RuleEnablementAction",
-			"label": "enables or disable rules",
+			"label": "enables or disables rules",
 			"description": "Enables or disables a rule or a group of rules specified by their UIDs.",
 			"configDescriptions": [
 				{

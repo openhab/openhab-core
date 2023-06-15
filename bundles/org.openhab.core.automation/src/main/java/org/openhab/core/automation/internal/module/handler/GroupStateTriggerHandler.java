@@ -29,7 +29,7 @@ import org.openhab.core.items.events.GroupItemStateChangedEvent;
 import org.openhab.core.items.events.ItemAddedEvent;
 import org.openhab.core.items.events.ItemRemovedEvent;
 import org.openhab.core.items.events.ItemStateChangedEvent;
-import org.openhab.core.items.events.ItemStateEvent;
+import org.openhab.core.items.events.ItemStateUpdatedEvent;
 import org.openhab.core.types.State;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -72,7 +72,7 @@ public class GroupStateTriggerHandler extends BaseTriggerModuleHandler implement
         this.state = (String) module.getConfiguration().get(CFG_STATE);
         this.previousState = (String) module.getConfiguration().get(CFG_PREVIOUS_STATE);
         if (UPDATE_MODULE_TYPE_ID.equals(module.getTypeUID())) {
-            this.types = Set.of(ItemStateEvent.TYPE, ItemAddedEvent.TYPE, ItemRemovedEvent.TYPE);
+            this.types = Set.of(ItemStateUpdatedEvent.TYPE, ItemAddedEvent.TYPE, ItemRemovedEvent.TYPE);
         } else {
             this.types = Set.of(ItemStateChangedEvent.TYPE, GroupItemStateChangedEvent.TYPE, ItemAddedEvent.TYPE,
                     ItemRemovedEvent.TYPE);
@@ -95,48 +95,54 @@ public class GroupStateTriggerHandler extends BaseTriggerModuleHandler implement
 
     @Override
     public void receive(Event event) {
-        if (event instanceof ItemAddedEvent) {
-            if (groupName.equals(((ItemAddedEvent) event).getItem().name)) {
+        if (event instanceof ItemAddedEvent addedEvent) {
+            if (groupName.equals(addedEvent.getItem().name)) {
                 logger.info("Group '{}' needed for rule '{}' added. Trigger '{}' will now work.", groupName, ruleUID,
                         module.getId());
                 return;
             }
-        } else if (event instanceof ItemRemovedEvent) {
-            if (groupName.equals(((ItemRemovedEvent) event).getItem().name)) {
+        } else if (event instanceof ItemRemovedEvent removedEvent) {
+            if (groupName.equals(removedEvent.getItem().name)) {
                 logger.warn("Group '{}' needed for rule '{}' removed. Trigger '{}' will no longer work.", groupName,
                         ruleUID, module.getId());
                 return;
             }
         }
 
-        if (callback instanceof TriggerHandlerCallback) {
-            TriggerHandlerCallback cb = (TriggerHandlerCallback) callback;
+        if (callback instanceof TriggerHandlerCallback cb) {
             logger.trace("Received Event: Source: {} Topic: {} Type: {}  Payload: {}", event.getSource(),
                     event.getTopic(), event.getType(), event.getPayload());
-            if (event instanceof ItemStateEvent && UPDATE_MODULE_TYPE_ID.equals(module.getTypeUID())) {
-                ItemStateEvent isEvent = (ItemStateEvent) event;
+            if (event instanceof ItemStateUpdatedEvent isEvent && UPDATE_MODULE_TYPE_ID.equals(module.getTypeUID())) {
                 String itemName = isEvent.getItemName();
                 Item item = itemRegistry.get(itemName);
+                Item group = itemRegistry.get(groupName);
                 if (item != null && item.getGroupNames().contains(groupName)) {
                     State state = isEvent.getItemState();
                     if ((this.state == null || state.toFullString().equals(this.state))) {
                         Map<String, Object> values = new HashMap<>();
+                        if (group != null) {
+                            values.put("triggeringGroup", group);
+                        }
                         values.put("triggeringItem", item);
                         values.put("state", state);
                         values.put("event", event);
                         cb.triggered(this.module, values);
                     }
                 }
-            } else if (event instanceof ItemStateChangedEvent && CHANGE_MODULE_TYPE_ID.equals(module.getTypeUID())) {
-                ItemStateChangedEvent iscEvent = (ItemStateChangedEvent) event;
+            } else if (event instanceof ItemStateChangedEvent iscEvent
+                    && CHANGE_MODULE_TYPE_ID.equals(module.getTypeUID())) {
                 String itemName = iscEvent.getItemName();
                 Item item = itemRegistry.get(itemName);
+                Item group = itemRegistry.get(groupName);
                 if (item != null && item.getGroupNames().contains(groupName)) {
                     State state = iscEvent.getItemState();
                     State oldState = iscEvent.getOldItemState();
 
                     if (stateMatches(this.state, state) && stateMatches(this.previousState, oldState)) {
                         Map<String, Object> values = new HashMap<>();
+                        if (group != null) {
+                            values.put("triggeringGroup", group);
+                        }
                         values.put("triggeringItem", item);
                         values.put("oldState", oldState);
                         values.put("newState", state);

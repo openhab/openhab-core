@@ -62,14 +62,14 @@ public class MediaModuleHandlerFactory extends BaseModuleHandlerFactory {
 
     @Override
     protected @Nullable ModuleHandler internalCreate(Module module, String ruleUID) {
-        if (module instanceof Action) {
+        if (module instanceof Action action) {
             switch (module.getTypeUID()) {
                 case SayActionHandler.TYPE_ID:
-                    return new SayActionHandler((Action) module, voiceManager);
+                    return new SayActionHandler(action, voiceManager);
                 case PlayActionHandler.TYPE_ID:
-                    return new PlayActionHandler((Action) module, audioManager);
+                    return new PlayActionHandler(action, audioManager);
                 case SynthesizeActionHandler.TYPE_ID:
-                    return new SynthesizeActionHandler((Action) module, audioManager);
+                    return new SynthesizeActionHandler(action, audioManager);
                 default:
                     break;
             }

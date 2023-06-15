@@ -116,9 +116,7 @@ public class AnnotationActionModuleTypeHelper {
                         "", ""));
             } else if (paramAnnotations.length == 1) {
                 Annotation a = paramAnnotations[0];
-                if (a instanceof ActionInput) {
-                    ActionInput inp = (ActionInput) a;
-
+                if (a instanceof ActionInput inp) {
                     // check if a type is given, otherwise use the java type specified on the parameter
                     String type;
                     if (!"".equals(inp.type())) {
@@ -174,10 +172,8 @@ public class AnnotationActionModuleTypeHelper {
             if (configParam != null) {
                 configDescriptions.add(configParam);
             }
-
-            ActionType at = new ActionType(UID, configDescriptions, mi.getLabel(), mi.getDescription(), mi.getTags(),
+            return new ActionType(UID, configDescriptions, mi.getLabel(), mi.getDescription(), mi.getTags(),
                     mi.getVisibility(), mi.getInputs(), mi.getOutputs());
-            return at;
         }
         return null;
     }

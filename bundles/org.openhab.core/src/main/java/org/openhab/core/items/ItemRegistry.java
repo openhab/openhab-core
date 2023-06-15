@@ -38,7 +38,7 @@ public interface ItemRegistry extends Registry<Item, String> {
      * @return the uniquely identified item
      * @throws ItemNotFoundException if no item matches the input
      */
-    public Item getItem(String name) throws ItemNotFoundException;
+    Item getItem(String name) throws ItemNotFoundException;
 
     /**
      * This method retrieves a single item from the registry.
@@ -49,14 +49,14 @@ public interface ItemRegistry extends Registry<Item, String> {
      * @throws ItemNotFoundException if no item matches the input
      * @throws ItemNotUniqueException if multiply items match the input
      */
-    public Item getItemByPattern(String name) throws ItemNotFoundException, ItemNotUniqueException;
+    Item getItemByPattern(String name) throws ItemNotFoundException, ItemNotUniqueException;
 
     /**
      * This method retrieves all items that are currently available in the registry
      *
      * @return a collection of all available items
      */
-    public Collection<Item> getItems();
+    Collection<Item> getItems();
 
     /**
      * This method retrieves all items with the given type
@@ -64,14 +64,14 @@ public interface ItemRegistry extends Registry<Item, String> {
      * @param type item type as defined by {@link ItemFactory}s
      * @return a collection of all items of the given type
      */
-    public Collection<Item> getItemsOfType(String type);
+    Collection<Item> getItemsOfType(String type);
 
     /**
      * This method retrieves all items that match a given search pattern
      *
      * @return a collection of all items matching the search pattern
      */
-    public Collection<Item> getItems(String pattern);
+    Collection<Item> getItems(String pattern);
 
     /**
      * Returns list of items which contains all of the given tags.
@@ -79,7 +79,7 @@ public interface ItemRegistry extends Registry<Item, String> {
      * @param tags array of tags to be present on the returned items.
      * @return list of items which contains all of the given tags.
      */
-    public Collection<Item> getItemsByTag(String... tags);
+    Collection<Item> getItemsByTag(String... tags);
 
     /**
      * Returns list of items with a certain type containing all of the given tags.
@@ -88,7 +88,7 @@ public interface ItemRegistry extends Registry<Item, String> {
      * @param tags array of tags to be present on the returned items.
      * @return list of items which contains all of the given tags.
      */
-    public Collection<Item> getItemsByTagAndType(String type, String... tags);
+    Collection<Item> getItemsByTagAndType(String type, String... tags);
 
     /**
      * Returns list of items which contains all of the given tags.
@@ -98,12 +98,13 @@ public interface ItemRegistry extends Registry<Item, String> {
      * @return list of items which contains all of the given tags, which is
      *         filtered by the given type filter.
      */
-    public <T extends Item> Collection<T> getItemsByTag(Class<T> typeFilter, String... tags);
+    <T extends Item> Collection<T> getItemsByTag(Class<T> typeFilter, String... tags);
 
     /**
      * @see ManagedItemProvider#remove(String, boolean)
      */
-    public @Nullable Item remove(String itemName, boolean recursive);
+    @Nullable
+    Item remove(String itemName, boolean recursive);
 
     /**
      * Add a hook to be informed before adding/after removing items.

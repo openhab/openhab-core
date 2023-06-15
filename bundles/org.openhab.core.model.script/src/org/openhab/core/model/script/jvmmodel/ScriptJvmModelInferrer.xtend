@@ -44,6 +44,12 @@ class ScriptJvmModelInferrer extends AbstractModelInferrer {
     /** Variable name for the input string in a "script transformation" or "script profile" */
     public static final String VAR_INPUT = "input";
 
+    /** Variable name for the group in a "member of state triggered" or "member of command triggered" rule */
+    public static final String VAR_TRIGGERING_GROUP = "triggeringGroup";
+
+    /** Variable name for the group in a "member of state triggered" or "member of command triggered" rule */
+    public static final String VAR_TRIGGERING_GROUP_NAME = "triggeringGroupName";
+
     /** Variable name for the item in a "state triggered" or "command triggered" rule */
     public static final String VAR_TRIGGERING_ITEM = "triggeringItem";
 
@@ -131,6 +137,10 @@ class ScriptJvmModelInferrer extends AbstractModelInferrer {
                 static = true
                 val inputTypeRef = script.newTypeRef(String)
                 parameters += script.toParameter(VAR_INPUT, inputTypeRef)
+                val groupTypeRef = script.newTypeRef(Item)
+                parameters += script.toParameter(VAR_TRIGGERING_GROUP, groupTypeRef)
+                val groupNameRef = script.newTypeRef(String)
+                parameters += script.toParameter(VAR_TRIGGERING_GROUP_NAME, groupNameRef)
                 val itemTypeRef = script.newTypeRef(Item)
                 parameters += script.toParameter(VAR_TRIGGERING_ITEM, itemTypeRef)
                 val itemNameRef = script.newTypeRef(String)

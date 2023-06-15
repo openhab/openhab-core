@@ -14,12 +14,10 @@ package org.openhab.core.voice;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.audio.AudioSink;
 import org.openhab.core.audio.AudioSource;
 import org.openhab.core.library.types.PercentType;
 import org.openhab.core.voice.text.HumanLanguageInterpreter;
@@ -138,73 +136,6 @@ public interface VoiceManager {
     DialogContext getLastDialogContext();
 
     /**
-     * Starts an infinite dialog sequence using all default services: keyword spotting on the default audio source,
-     * audio source listening to retrieve a question or a command (default Speech to Text service), interpretation and
-     * handling of the command, and finally playback of the answer on the default audio sink (default Text to Speech
-     * service).
-     *
-     * Only one dialog can be started for the default audio source.
-     *
-     * @throws IllegalStateException if required services are not all available or the default locale is not supported
-     *             by all these services or a dialog is already started for the default audio source
-     */
-    @Deprecated
-    void startDialog() throws IllegalStateException;
-
-    /**
-     * Starts an infinite dialog sequence: keyword spotting on the audio source, audio source listening to retrieve
-     * a question or a command (Speech to Text service), interpretation and handling of the command, and finally
-     * playback of the answer on the audio sink (Text to Speech service).
-     *
-     * Only one dialog can be started for an audio source.
-     *
-     * @param ks the keyword spotting service to use or null to use the default service
-     * @param stt the speech-to-text service to use or null to use the default service
-     * @param tts the text-to-speech service to use or null to use the default service
-     * @param hli the human language text interpreter to use or null to use the default service
-     * @param source the audio source to use or null to use the default source
-     * @param sink the audio sink to use or null to use the default sink
-     * @param locale the locale to use or null to use the default locale
-     * @param keyword the keyword to use during keyword spotting or null to use the default keyword
-     * @param listeningItem the item to switch ON while listening to a question
-     * @throws IllegalStateException if required services are not all available or the provided locale is not supported
-     *             by all these services or a dialog is already started for this audio source
-     */
-    @Deprecated
-    void startDialog(@Nullable KSService ks, @Nullable STTService stt, @Nullable TTSService tts,
-            @Nullable HumanLanguageInterpreter hli, @Nullable AudioSource source, @Nullable AudioSink sink,
-            @Nullable Locale locale, @Nullable String keyword, @Nullable String listeningItem)
-            throws IllegalStateException;
-
-    /**
-     * Starts an infinite dialog sequence: keyword spotting on the audio source, audio source listening to retrieve
-     * a question or a command (Speech to Text service), interpretation and handling of the command, and finally
-     * playback of the answer on the audio sink (Text to Speech service).
-     *
-     * Only one dialog can be started for an audio source.
-     *
-     * @param ks the keyword spotting service to use or null to use the default service
-     * @param stt the speech-to-text service to use or null to use the default service
-     * @param tts the text-to-speech service to use or null to use the default service
-     * @param voice the voice to use or null to use the default voice or any voice provided by the text-to-speech
-     *            service matching the locale
-     * @param hlis list of human language text interpreters to use, they are executed in order until the first
-     *            successful response, or empty to use the default service
-     * @param source the audio source to use or null to use the default source
-     * @param sink the audio sink to use or null to use the default sink
-     * @param locale the locale to use or null to use the default locale
-     * @param keyword the keyword to use during keyword spotting or null to use the default keyword
-     * @param listeningItem the item to switch ON while listening to a question
-     * @throws IllegalStateException if required services are not all available or the provided locale is not supported
-     *             by all these services or a dialog is already started for this audio source
-     */
-    @Deprecated
-    void startDialog(@Nullable KSService ks, @Nullable STTService stt, @Nullable TTSService tts, @Nullable Voice voice,
-            List<HumanLanguageInterpreter> hlis, @Nullable AudioSource source, @Nullable AudioSink sink,
-            @Nullable Locale locale, @Nullable String keyword, @Nullable String listeningItem)
-            throws IllegalStateException;
-
-    /**
      * Starts an infinite dialog sequence: keyword spotting on the audio source, audio source listening to retrieve
      * a question or a command (Speech to Text service), interpretation and handling of the command, and finally
      * playback of the answer on the audio sink (Text to Speech service).
@@ -234,44 +165,6 @@ public interface VoiceManager {
     void stopDialog(DialogContext context) throws IllegalStateException;
 
     /**
-     * Executes a simple dialog sequence without keyword spotting using all default services: default audio source
-     * listening to retrieve a question or a command (default Speech to Text service), interpretation and handling of
-     * the command, and finally playback of the answer on the default audio sink (default Text to Speech service).
-     *
-     * Only possible if no dialog processor is already started for the default audio source.
-     *
-     * @throws IllegalStateException if required services are not all available or the provided default locale is not
-     *             supported by all these services or a dialog is already started for the default audio source
-     */
-    @Deprecated
-    void listenAndAnswer() throws IllegalStateException;
-
-    /**
-     * Executes a simple dialog sequence without keyword spotting: audio source listening to retrieve a question or a
-     * command (Speech to Text service), interpretation and handling of the command, and finally playback of the
-     * answer on the audio sink (Text to Speech service).
-     *
-     * Only possible if no dialog processor is already started for the audio source.
-     *
-     * @param stt the speech-to-text service to use or null to use the default service
-     * @param tts the text-to-speech service to use or null to use the default service
-     * @param voice the voice to use or null to use the default voice or any voice provided by the text-to-speech
-     *            service matching the locale
-     * @param hlis list of human language text interpreters to use, they are executed in order until the first
-     *            successful response, or empty to use the default service
-     * @param source the audio source to use or null to use the default source
-     * @param sink the audio sink to use or null to use the default sink
-     * @param locale the locale to use or null to use the default locale
-     * @param listeningItem the item to switch ON while listening to a question
-     * @throws IllegalStateException if required services are not all available or the provided locale is not supported
-     *             by all these services or a dialog is already started for this audio source
-     */
-    @Deprecated
-    void listenAndAnswer(@Nullable STTService stt, @Nullable TTSService tts, @Nullable Voice voice,
-            List<HumanLanguageInterpreter> hlis, @Nullable AudioSource source, @Nullable AudioSink sink,
-            @Nullable Locale locale, @Nullable String listeningItem) throws IllegalStateException;
-
-    /**
      * Executes a simple dialog sequence without keyword spotting: audio source listening to retrieve a question or a
      * command (Speech to Text service), interpretation and handling of the command, and finally playback of the
      * answer on the audio sink (Text to Speech service).
@@ -283,6 +176,37 @@ public interface VoiceManager {
      *             started for this audio source
      */
     void listenAndAnswer(DialogContext context) throws IllegalStateException;
+
+    /**
+     * Register a dialog, so it will be persisted and started any time the required services are available.
+     *
+     * Only one registration can be done for an audio source.
+     *
+     * @param registration with the desired services ids and options for the dialog
+     * @throws IllegalStateException if there is another registration for the same source
+     */
+    void registerDialog(DialogRegistration registration) throws IllegalStateException;
+
+    /**
+     * Removes a dialog registration and stops the associate dialog.
+     *
+     * @param registration with the desired services ids and options for the dialog
+     */
+    void unregisterDialog(DialogRegistration registration);
+
+    /**
+     * Removes a dialog registration and stops the associate dialog.
+     *
+     * @param sourceId the registration audio source id.
+     */
+    void unregisterDialog(String sourceId);
+
+    /**
+     * List current dialog registrations
+     *
+     * @return a list of {@link DialogRegistration}
+     */
+    List<DialogRegistration> getDialogRegistrations();
 
     /**
      * Retrieves a TTS service.
@@ -302,7 +226,7 @@ public interface VoiceManager {
      * @return a TTS service or null, if no service with this id exists
      */
     @Nullable
-    TTSService getTTS(String id);
+    TTSService getTTS(@Nullable String id);
 
     /**
      * Retrieves all TTS services.
@@ -329,7 +253,7 @@ public interface VoiceManager {
      * @return a STT service or null, if no service with this id exists
      */
     @Nullable
-    STTService getSTT(String id);
+    STTService getSTT(@Nullable String id);
 
     /**
      * Retrieves all STT services.
@@ -356,7 +280,7 @@ public interface VoiceManager {
      * @return a KS service or null, if no service with this id exists
      */
     @Nullable
-    KSService getKS(String id);
+    KSService getKS(@Nullable String id);
 
     /**
      * Retrieves all KS services.
@@ -372,7 +296,7 @@ public interface VoiceManager {
      * @param ids Comma separated list of HLI service ids to use
      * @return a List<HumanLanguageInterpreter> or empty, if none of the services is available
      */
-    List<HumanLanguageInterpreter> getHLIsByIds(String ids);
+    List<HumanLanguageInterpreter> getHLIsByIds(@Nullable String ids);
 
     /**
      * Retrieves a HumanLanguageInterpreter collection.
@@ -401,7 +325,7 @@ public interface VoiceManager {
      * @return a HumanLanguageInterpreter or null, if no interpreter with this id exists
      */
     @Nullable
-    HumanLanguageInterpreter getHLI(String id);
+    HumanLanguageInterpreter getHLI(@Nullable String id);
 
     /**
      * Retrieves all HumanLanguageInterpreters.

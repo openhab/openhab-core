@@ -25,10 +25,10 @@ import java.util.stream.StreamSupport;
 
 import org.apache.maven.plugin.logging.Log;
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.core.addon.xml.internal.AddonInfoReader;
-import org.openhab.core.addon.xml.internal.AddonInfoXmlResult;
+import org.openhab.core.addon.internal.xml.AddonInfoReader;
+import org.openhab.core.addon.internal.xml.AddonInfoXmlResult;
 import org.openhab.core.config.core.ConfigDescription;
-import org.openhab.core.config.xml.internal.ConfigDescriptionReader;
+import org.openhab.core.config.core.xml.internal.ConfigDescriptionReader;
 import org.openhab.core.thing.xml.internal.ChannelGroupTypeXmlResult;
 import org.openhab.core.thing.xml.internal.ChannelTypeXmlResult;
 import org.openhab.core.thing.xml.internal.ThingDescriptionReader;
@@ -116,20 +116,17 @@ public class BundleInfoReader {
                     return;
                 }
                 for (Object type : types) {
-                    if (type instanceof ThingTypeXmlResult) {
-                        ThingTypeXmlResult result = (ThingTypeXmlResult) type;
+                    if (type instanceof ThingTypeXmlResult result) {
                         bundleInfo.getThingTypesXml().add(result);
                         if (bundleInfo.getAddonId().isBlank()) {
                             bundleInfo.setAddonId(result.getUID().getBindingId());
                         }
-                    } else if (type instanceof ChannelGroupTypeXmlResult) {
-                        ChannelGroupTypeXmlResult result = (ChannelGroupTypeXmlResult) type;
+                    } else if (type instanceof ChannelGroupTypeXmlResult result) {
                         bundleInfo.getChannelGroupTypesXml().add(result);
                         if (bundleInfo.getAddonId().isBlank()) {
                             bundleInfo.setAddonId(result.getUID().getBindingId());
                         }
-                    } else if (type instanceof ChannelTypeXmlResult) {
-                        ChannelTypeXmlResult result = (ChannelTypeXmlResult) type;
+                    } else if (type instanceof ChannelTypeXmlResult result) {
                         bundleInfo.getChannelTypesXml().add(result);
                         if (bundleInfo.getAddonId().isBlank()) {
                             bundleInfo.setAddonId(result.toChannelType().getUID().getBindingId());

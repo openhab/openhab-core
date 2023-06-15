@@ -201,8 +201,8 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
      */
     @Reference(cardinality = ReferenceCardinality.MANDATORY, policy = ReferencePolicy.STATIC)
     protected void setTemplateRegistry(TemplateRegistry<RuleTemplate> templateRegistry) {
-        if (templateRegistry instanceof RuleTemplateRegistry) {
-            this.templateRegistry = (RuleTemplateRegistry) templateRegistry;
+        if (templateRegistry instanceof RuleTemplateRegistry registry) {
+            this.templateRegistry = registry;
             templateRegistry.addRegistryChangeListener(this);
         }
     }
@@ -557,9 +557,7 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
         if (configValue != null) {
             Type type = configParameter.getType();
             if (configParameter.isMultiple()) {
-                if (configValue instanceof List) {
-                    @SuppressWarnings("rawtypes")
-                    List lConfigValues = (List) configValue;
+                if (configValue instanceof List lConfigValues) {
                     for (Object value : lConfigValues) {
                         if (!checkType(type, value)) {
                             throw new IllegalArgumentException("Unexpected value for configuration property \""

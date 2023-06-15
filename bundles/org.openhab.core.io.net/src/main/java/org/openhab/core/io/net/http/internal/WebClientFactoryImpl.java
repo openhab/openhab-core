@@ -12,10 +12,10 @@
  */
 package org.openhab.core.io.net.http.internal;
 
+import java.nio.ByteBuffer;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Map;
-import java.util.Objects;
 import java.util.regex.Pattern;
 
 import javax.net.ssl.SSLContext;
@@ -25,6 +25,10 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.HttpProxy;
+import org.eclipse.jetty.http.HttpHeader;
+import org.eclipse.jetty.http.HttpVersion;
+import org.eclipse.jetty.http.PreEncodedHttpField;
+import org.eclipse.jetty.http2.client.HTTP2Client;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
@@ -46,6 +50,7 @@ import org.slf4j.LoggerFactory;
  * @author Michael Bock - Initial contribution
  * @author Kai Kreuzer - added web socket support
  * @author Martin van Wingerden - Add support for ESHTrustManager
+ * @author Andrew Fiddian-Green - Added support for HTTP2 client creation
  */
 @Component(immediate = true, configurationPid = "org.openhab.webclient")
 @NonNullByDefault
@@ -76,6 +81,9 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
     private int minThreadsCustom;
     private int maxThreadsCustom;
     private int keepAliveTimeoutCustom; // in s
+
+    private boolean hpackLoadTestDone = false;
+    private @Nullable HttpClientInitializationException hpackException = null;
 
     @Activate
     public WebClientFactoryImpl(final @Reference ExtensibleTrustManager extensibleTrustManager) {
@@ -124,16 +132,26 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
 
     @Override
     public HttpClient createHttpClient(String consumerName) {
+        return createHttpClient(consumerName, null);
+    }
+
+    @Override
+    public HttpClient createHttpClient(String consumerName, @Nullable SslContextFactory sslContextFactory) {
         logger.debug("http client for consumer {} requested", consumerName);
         checkConsumerName(consumerName);
-        return createHttpClientInternal(consumerName, false, null);
+        return createHttpClientInternal(consumerName, sslContextFactory, false, null);
     }
 
     @Override
     public WebSocketClient createWebSocketClient(String consumerName) {
+        return createWebSocketClient(consumerName, null);
+    }
+
+    @Override
+    public WebSocketClient createWebSocketClient(String consumerName, @Nullable SslContextFactory sslContextFactory) {
         logger.debug("web socket client for consumer {} requested", consumerName);
         checkConsumerName(consumerName);
-        return createWebSocketClientInternal(consumerName, false, null);
+        return createWebSocketClientInternal(consumerName, sslContextFactory, false, null);
     }
 
     @Override
@@ -171,9 +189,9 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
         if (value instanceof Integer) {
             return (Integer) value;
         }
-        if (value instanceof String) {
+        if (value instanceof String string) {
             try {
-                return Integer.parseInt((String) value);
+                return Integer.parseInt(string);
             } catch (NumberFormatException e) {
                 logger.warn("ignoring invalid value {} for parameter {}", value, parameter);
                 return defaultValue;
@@ -191,7 +209,7 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
             }
 
             if (commonHttpClient == null) {
-                commonHttpClient = createHttpClientInternal("common", true, threadPool);
+                commonHttpClient = createHttpClientInternal("common", null, true, threadPool);
                 // we need to set the stop timeout AFTER the client has been started, because
                 // otherwise the Jetty client sets it back to the default value.
                 // We need the stop timeout in order to prevent blocking the deactivation of this
@@ -201,7 +219,7 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
             }
 
             if (commonWebSocketClient == null) {
-                commonWebSocketClient = createWebSocketClientInternal("common", true, threadPool);
+                commonWebSocketClient = createWebSocketClientInternal("common", null, true, threadPool);
                 logger.debug("Jetty shared web socket client created");
             }
         } catch (RuntimeException e) {
@@ -212,12 +230,13 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
         }
     }
 
-    private HttpClient createHttpClientInternal(String consumerName, boolean startClient,
-            @Nullable QueuedThreadPool threadPool) {
+    private HttpClient createHttpClientInternal(String consumerName, @Nullable SslContextFactory sslContextFactory,
+            boolean startClient, @Nullable QueuedThreadPool threadPool) {
         try {
             logger.debug("creating http client for consumer {}", consumerName);
 
-            HttpClient httpClient = new HttpClient(createSslContextFactory());
+            HttpClient httpClient = new HttpClient(
+                    sslContextFactory != null ? sslContextFactory : createSslContextFactory());
 
             // If proxy is set as property (standard Java property), provide the proxy information to Jetty HTTP
             // Client
@@ -276,12 +295,13 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
         }
     }
 
-    private WebSocketClient createWebSocketClientInternal(String consumerName, boolean startClient,
-            @Nullable QueuedThreadPool threadPool) {
+    private WebSocketClient createWebSocketClientInternal(String consumerName,
+            @Nullable SslContextFactory sslContextFactory, boolean startClient, @Nullable QueuedThreadPool threadPool) {
         try {
             logger.debug("creating web socket client for consumer {}", consumerName);
 
-            HttpClient httpClient = new HttpClient(createSslContextFactory());
+            HttpClient httpClient = new HttpClient(
+                    sslContextFactory != null ? sslContextFactory : createSslContextFactory());
             if (threadPool != null) {
                 httpClient.setExecutor(threadPool);
             } else {
@@ -302,7 +322,6 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
             }
 
             return webSocketClient;
-
         } catch (RuntimeException e) {
             throw e;
         } catch (Exception e) {
@@ -320,7 +339,6 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
     }
 
     private void checkConsumerName(String consumerName) {
-        Objects.requireNonNull(consumerName, "consumerName must not be null");
         if (consumerName.length() < MIN_CONSUMER_NAME_LENGTH) {
             throw new IllegalArgumentException(
                     "consumerName " + consumerName + " too short, minimum " + MIN_CONSUMER_NAME_LENGTH);
@@ -349,5 +367,50 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
         }
 
         return sslContextFactory;
+    }
+
+    @Override
+    public HTTP2Client createHttp2Client(String consumerName) {
+        return createHttp2Client(consumerName, null);
+    }
+
+    @Override
+    public HTTP2Client createHttp2Client(String consumerName, @Nullable SslContextFactory sslContextFactory) {
+        logger.debug("http client for consumer {} requested", consumerName);
+        checkConsumerName(consumerName);
+        return createHttp2ClientInternal(consumerName, sslContextFactory);
+    }
+
+    private HTTP2Client createHttp2ClientInternal(String consumerName, @Nullable SslContextFactory sslContextFactory) {
+        try {
+            logger.debug("creating HTTP/2 client for consumer {}", consumerName);
+
+            if (!hpackLoadTestDone) {
+                try {
+                    PreEncodedHttpField field = new PreEncodedHttpField(HttpHeader.C_METHOD, "PUT");
+                    ByteBuffer bytes = ByteBuffer.allocate(32);
+                    field.putTo(bytes, HttpVersion.HTTP_2);
+                    hpackException = null;
+                } catch (Exception e) {
+                    hpackException = new HttpClientInitializationException("Jetty HTTP/2 hpack module not loaded", e);
+                }
+                hpackLoadTestDone = true;
+            }
+            if (hpackException != null) {
+                throw hpackException;
+            }
+
+            HTTP2Client http2Client = new HTTP2Client();
+            http2Client.addBean(sslContextFactory != null ? sslContextFactory : createSslContextFactory());
+            http2Client.setExecutor(
+                    createThreadPool(consumerName, minThreadsCustom, maxThreadsCustom, keepAliveTimeoutCustom));
+
+            return http2Client;
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new HttpClientInitializationException(
+                    "unexpected checked exception during initialization of the Jetty HTTP/2 client", e);
+        }
     }
 }

@@ -30,5 +30,5 @@ public interface TimeBasedConditionHandler extends ConditionHandler {
      * @param time The time to check.
      * @return <code>true</code> if and only if the given time satisfies this condition.
      */
-    public abstract boolean isSatisfiedAt(ZonedDateTime time);
+    boolean isSatisfiedAt(ZonedDateTime time);
 }

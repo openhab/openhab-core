@@ -77,6 +77,7 @@ public class ItemRegistryImplTest extends JavaTest {
     private @NonNullByDefault({}) ManagedItemProvider itemProvider;
 
     private @Mock @NonNullByDefault({}) EventPublisher eventPublisherMock;
+    private @Mock @NonNullByDefault({}) UnitProvider unitProviderMock;
 
     @BeforeEach
     public void beforeEach() {
@@ -92,7 +93,7 @@ public class ItemRegistryImplTest extends JavaTest {
 
         // setup ManageItemProvider with necessary dependencies:
         itemProvider = new ManagedItemProvider(new VolatileStorageService(),
-                new ItemBuilderFactoryImpl(new CoreItemFactory()));
+                new ItemBuilderFactoryImpl(new CoreItemFactory(unitProviderMock)));
 
         itemProvider.add(new SwitchItem(ITEM_NAME));
         itemProvider.add(cameraItem1);
@@ -107,7 +108,6 @@ public class ItemRegistryImplTest extends JavaTest {
                 setManagedProvider(itemProvider);
                 setEventPublisher(ItemRegistryImplTest.this.eventPublisherMock);
                 setStateDescriptionService(mock(StateDescriptionService.class));
-                setUnitProvider(mock(UnitProvider.class));
                 setItemStateConverter(mock(ItemStateConverter.class));
             }
         };
@@ -132,7 +132,7 @@ public class ItemRegistryImplTest extends JavaTest {
         List<Item> items = new ArrayList<>(itemRegistry.getItemsByTag(CAMERA_TAG));
         assertThat(items, hasSize(4));
 
-        List<String> itemNames = items.stream().map(i -> i.getName()).collect(toList());
+        List<String> itemNames = items.stream().map(Item::getName).collect(toList());
         assertThat(itemNames, hasItem(CAMERA_ITEM_NAME1));
         assertThat(itemNames, hasItem(CAMERA_ITEM_NAME2));
         assertThat(itemNames, hasItem(CAMERA_ITEM_NAME3));
@@ -144,7 +144,7 @@ public class ItemRegistryImplTest extends JavaTest {
         List<Item> items = new ArrayList<>(itemRegistry.getItemsByTag(CAMERA_TAG_UPPERCASE));
         assertThat(items, hasSize(4));
 
-        List<String> itemNames = items.stream().map(i -> i.getName()).collect(toList());
+        List<String> itemNames = items.stream().map(Item::getName).collect(toList());
         assertThat(itemNames, hasItem(CAMERA_ITEM_NAME1));
         assertThat(itemNames, hasItem(CAMERA_ITEM_NAME2));
         assertThat(itemNames, hasItem(CAMERA_ITEM_NAME3));
@@ -156,7 +156,7 @@ public class ItemRegistryImplTest extends JavaTest {
         List<Item> items = new ArrayList<>(itemRegistry.getItemsByTagAndType("Switch", CAMERA_TAG));
         assertThat(items, hasSize(2));
 
-        List<String> itemNames = items.stream().map(i -> i.getName()).collect(toList());
+        List<String> itemNames = items.stream().map(Item::getName).collect(toList());
         assertThat(itemNames, hasItem(CAMERA_ITEM_NAME1));
         assertThat(itemNames, hasItem(CAMERA_ITEM_NAME2));
     }
@@ -178,7 +178,7 @@ public class ItemRegistryImplTest extends JavaTest {
         List<SwitchItem> items = new ArrayList<>(itemRegistry.getItemsByTag(SwitchItem.class, CAMERA_TAG));
         assertThat(items, hasSize(2));
 
-        List<String> itemNames = items.stream().map(i -> i.getName()).collect(toList());
+        List<String> itemNames = items.stream().map(GenericItem::getName).collect(toList());
         assertThat(itemNames, hasItem(CAMERA_ITEM_NAME1));
         assertThat(itemNames, hasItem(CAMERA_ITEM_NAME2));
     }
@@ -369,13 +369,11 @@ public class ItemRegistryImplTest extends JavaTest {
 
         assertNotNull(item.eventPublisher);
         assertNotNull(item.itemStateConverter);
-        assertNotNull(item.unitProvider);
 
         itemProvider.update(new SwitchItem("Item1"));
 
         assertNull(item.eventPublisher);
         assertNull(item.itemStateConverter);
-        assertNull(item.unitProvider);
         assertEquals(0, item.listeners.size());
     }
 
@@ -389,18 +387,6 @@ public class ItemRegistryImplTest extends JavaTest {
 
         verify(item).setStateDescriptionService(any(StateDescriptionService.class));
         verify(baseItem).setStateDescriptionService(any(StateDescriptionService.class));
-    }
-
-    @Test
-    public void assertUnitProviderGetsInjected() {
-        GenericItem item = spy(new SwitchItem("Item1"));
-        NumberItem baseItem = spy(new NumberItem("baseItem"));
-        GenericItem group = new GroupItem("Group", baseItem);
-        itemProvider.add(item);
-        itemProvider.add(group);
-
-        verify(item).setUnitProvider(any(UnitProvider.class));
-        verify(baseItem).setUnitProvider(any(UnitProvider.class));
     }
 
     @Test

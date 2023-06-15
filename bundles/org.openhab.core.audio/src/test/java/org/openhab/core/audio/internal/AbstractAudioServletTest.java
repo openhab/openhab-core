@@ -60,12 +60,12 @@ public abstract class AbstractAudioServletTest extends JavaTest {
     private @NonNullByDefault({}) HttpClient httpClient;
     private @NonNullByDefault({}) CompletableFuture<Boolean> serverStarted;
 
-    private @Mock @NonNullByDefault({}) HttpService httpServiceMock;
-    private @Mock @NonNullByDefault({}) HttpContext httpContextMock;
+    public @Mock @NonNullByDefault({}) HttpService httpServiceMock;
+    public @Mock @NonNullByDefault({}) HttpContext httpContextMock;
 
     @BeforeEach
     public void setupServerAndClient() {
-        audioServlet = new AudioServlet(httpServiceMock, httpContextMock);
+        audioServlet = new AudioServlet();
 
         ServletHolder servletHolder = new ServletHolder(audioServlet);
 

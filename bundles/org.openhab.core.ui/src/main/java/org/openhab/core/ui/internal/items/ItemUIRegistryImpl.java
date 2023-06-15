@@ -107,6 +107,7 @@ import org.slf4j.LoggerFactory;
  * @author Chris Jackson - Initial contribution
  * @author Stefan Triller - Method to convert a state into something a sitemap entity can understand
  * @author Erdoan Hadzhiyusein - Adapted the class to work with the new DateTimeType
+ * @author Laurent Garnier - new method getIconColor
  */
 @NonNullByDefault
 @Component(immediate = true, configurationPid = "org.openhab.sitemap", //
@@ -283,6 +284,9 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
             }
             if (!isReadOnly && hasStateOptions(itemName)) {
                 return SitemapFactory.eINSTANCE.createSelection();
+            }
+            if (!isReadOnly && NumberItem.class.isAssignableFrom(itemType) && hasItemTag(itemName, "Setpoint")) {
+                return SitemapFactory.eINSTANCE.createSetpoint();
             } else {
                 return SitemapFactory.eINSTANCE.createText();
             }
@@ -363,7 +367,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
 
                     // for fraction digits in state we don't want to risk format exceptions,
                     // so treat everything as floats:
-                    formatPattern = formatPattern.replaceAll("%d", "%.0f");
+                    formatPattern = formatPattern.replace("%d", "%.0f");
                 }
             }
         } catch (ItemNotFoundException e) {
@@ -406,8 +410,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
                         if (formatPattern.contains(UnitUtils.UNIT_PLACEHOLDER)) {
                             formatPattern = formatPattern.replaceAll(UnitUtils.UNIT_PLACEHOLDER, "").stripTrailing();
                         }
-                    } else if (state instanceof QuantityType) {
-                        QuantityType<?> quantityState = (QuantityType<?>) state;
+                    } else if (state instanceof QuantityType quantityState) {
                         // sanity convert current state to the item state description unit in case it was updated in the
                         // meantime. The item state is still in the "original" unit while the state description will
                         // display the new unit:
@@ -421,10 +424,10 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
                             quantityState = convertStateToWidgetUnit(quantityState, w);
                             state = quantityState;
                         }
-                    } else if (state instanceof DateTimeType) {
+                    } else if (state instanceof DateTimeType type) {
                         // Translate a DateTimeType state to the local time zone
                         try {
-                            state = ((DateTimeType) state).toLocaleZone();
+                            state = type.toLocaleZone();
                         } catch (DateTimeException ignored) {
                         }
                     }
@@ -624,8 +627,8 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         State returnState = null;
 
         State itemState = i.getState();
-        if (itemState instanceof QuantityType) {
-            itemState = convertStateToWidgetUnit((QuantityType<?>) itemState, w);
+        if (itemState instanceof QuantityType type) {
+            itemState = convertStateToWidgetUnit(type, w);
         }
 
         if (w instanceof Switch && i instanceof RollershutterItem) {
@@ -637,8 +640,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
             } else {
                 returnState = itemState.as(DecimalType.class);
             }
-        } else if (w instanceof Switch) {
-            Switch sw = (Switch) w;
+        } else if (w instanceof Switch sw) {
             if (sw.getMappings().isEmpty()) {
                 returnState = itemState.as(OnOffType.class);
             }
@@ -694,8 +696,8 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
     @Override
     public EList<Widget> getChildren(LinkableWidget w) {
         EList<Widget> widgets;
-        if (w instanceof Group && w.getChildren().isEmpty()) {
-            widgets = getDynamicGroupChildren((Group) w);
+        if (w instanceof Group group && w.getChildren().isEmpty()) {
+            widgets = getDynamicGroupChildren(group);
         } else {
             widgets = w.getChildren();
         }
@@ -740,6 +742,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         target.getVisibility().addAll(EcoreUtil.copyAll(source.getVisibility()));
         target.getLabelColor().addAll(EcoreUtil.copyAll(source.getLabelColor()));
         target.getValueColor().addAll(EcoreUtil.copyAll(source.getValueColor()));
+        target.getIconColor().addAll(EcoreUtil.copyAll(source.getIconColor()));
     }
 
     /**
@@ -756,8 +759,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         try {
             if (itemName != null) {
                 Item item = getItem(itemName);
-                if (item instanceof GroupItem) {
-                    GroupItem groupItem = (GroupItem) item;
+                if (item instanceof GroupItem groupItem) {
                     List<Item> members = new ArrayList<>(groupItem.getMembers());
                     switch (groupMembersSorting) {
                         case "LABEL":
@@ -853,6 +855,15 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
             return item.getCategory();
         } catch (ItemNotFoundException e) {
             return null;
+        }
+    }
+
+    private boolean hasItemTag(String itemName, String tag) {
+        try {
+            Item item = getItem(itemName);
+            return item.hasTag(tag);
+        } catch (ItemNotFoundException e) {
+            return false;
         }
     }
 
@@ -977,8 +988,8 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
                 try {
                     double compareDoubleValue = Double.parseDouble(unquotedValue);
                     double stateDoubleValue;
-                    if (state instanceof DecimalType) {
-                        stateDoubleValue = ((DecimalType) state).doubleValue();
+                    if (state instanceof DecimalType type) {
+                        stateDoubleValue = type.doubleValue();
                     } else {
                         stateDoubleValue = ((QuantityType<?>) state).doubleValue();
                     }
@@ -1018,8 +1029,8 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
                 } catch (NumberFormatException e) {
                     logger.debug("matchStateToValue: Decimal format exception: ", e);
                 }
-            } else if (state instanceof DateTimeType) {
-                ZonedDateTime val = ((DateTimeType) state).getZonedDateTime();
+            } else if (state instanceof DateTimeType type) {
+                ZonedDateTime val = type.getZonedDateTime();
                 ZonedDateTime now = ZonedDateTime.now();
                 long secsDif = ChronoUnit.SECONDS.between(val, now);
 
@@ -1162,6 +1173,11 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
     @Override
     public @Nullable String getValueColor(Widget w) {
         return processColorDefinition(getState(w), w.getValueColor());
+    }
+
+    @Override
+    public @Nullable String getIconColor(Widget w) {
+        return processColorDefinition(getState(w), w.getIconColor());
     }
 
     @Override
@@ -1308,10 +1324,10 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
             Item item = getItem(w.getItem());
 
             // we require the item to define a dimension, otherwise no unit will be reported to the UIs.
-            if (item instanceof NumberItem && ((NumberItem) item).getDimension() != null) {
+            if (item instanceof NumberItem numberItem && numberItem.getDimension() != null) {
                 if (w.getLabel() == null) {
                     // if no Label was assigned to the Widget we fallback to the items unit
-                    return ((NumberItem) item).getUnitSymbol();
+                    return numberItem.getUnitSymbol();
                 }
 
                 String unit = getUnitFromLabel(w.getLabel());
@@ -1319,7 +1335,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
                     return unit;
                 }
 
-                return ((NumberItem) item).getUnitSymbol();
+                return numberItem.getUnitSymbol();
             }
         } catch (ItemNotFoundException e) {
             logger.debug("Failed to retrieve item during widget rendering: {}", e.getMessage());

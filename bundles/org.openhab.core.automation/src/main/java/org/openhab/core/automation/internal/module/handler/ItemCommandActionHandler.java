@@ -75,9 +75,9 @@ public class ItemCommandActionHandler extends BaseActionModuleHandler {
                 } else {
                     Object cmd = inputs.get(COMMAND);
 
-                    if (cmd instanceof Command) {
+                    if (cmd instanceof Command command1) {
                         if (item.getAcceptedCommandTypes().contains(cmd.getClass())) {
-                            commandObj = (Command) cmd;
+                            commandObj = command1;
                         }
                     }
                 }

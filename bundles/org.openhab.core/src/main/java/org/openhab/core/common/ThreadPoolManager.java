@@ -79,14 +79,16 @@ public class ThreadPoolManager {
 
     private static Map<String, Integer> configs = new ConcurrentHashMap<>();
 
+    private static final Set<String> OSGI_PROPERTY_NAMES = Set.of(Constants.SERVICE_PID,
+            ComponentConstants.COMPONENT_ID, ComponentConstants.COMPONENT_NAME, "osgi.ds.satisfying.condition.target");
+
     protected void activate(Map<String, Object> properties) {
         modified(properties);
     }
 
     protected void modified(Map<String, Object> properties) {
         for (Entry<String, Object> entry : properties.entrySet()) {
-            if (Constants.SERVICE_PID.equals(entry.getKey()) || ComponentConstants.COMPONENT_ID.equals(entry.getKey())
-                    || ComponentConstants.COMPONENT_NAME.equals(entry.getKey())) {
+            if (OSGI_PROPERTY_NAMES.contains(entry.getKey())) {
                 continue;
             }
             String poolName = entry.getKey();
@@ -94,9 +96,9 @@ public class ThreadPoolManager {
             if (config == null) {
                 configs.remove(poolName);
             }
-            if (config instanceof String) {
+            if (config instanceof String string) {
                 try {
-                    Integer poolSize = Integer.valueOf((String) config);
+                    Integer poolSize = Integer.valueOf(string);
                     configs.put(poolName, poolSize);
                     ThreadPoolExecutor pool = (ThreadPoolExecutor) pools.get(poolName);
                     if (pool instanceof ScheduledThreadPoolExecutor) {
@@ -140,8 +142,8 @@ public class ThreadPoolManager {
                 }
             }
         }
-        if (pool instanceof ScheduledExecutorService) {
-            return new UnstoppableScheduledExecutorService(poolName, (ScheduledExecutorService) pool);
+        if (pool instanceof ScheduledExecutorService service) {
+            return new UnstoppableScheduledExecutorService(poolName, service);
         } else {
             throw new IllegalArgumentException("Pool " + poolName + " is not a scheduled pool!");
         }

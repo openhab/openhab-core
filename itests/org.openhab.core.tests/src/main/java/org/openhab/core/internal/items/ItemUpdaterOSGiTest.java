@@ -14,6 +14,7 @@ package org.openhab.core.internal.items;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -43,7 +44,7 @@ public class ItemUpdaterOSGiTest extends JavaOSGiTest {
 
     private @NonNullByDefault({}) EventPublisher eventPublisher;
     private @NonNullByDefault({}) ItemRegistry itemRegistry;
-    private final ConcurrentLinkedQueue<Event> receivedEvents = new ConcurrentLinkedQueue<>();
+    private final Queue<Event> receivedEvents = new ConcurrentLinkedQueue<>();
 
     @BeforeEach
     public void setUp() {

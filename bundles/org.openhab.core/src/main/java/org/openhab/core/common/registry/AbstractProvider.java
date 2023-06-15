@@ -36,7 +36,7 @@ public abstract class AbstractProvider<@NonNull E> implements Provider<E> {
     private enum EventType {
         ADDED,
         REMOVED,
-        UPDATED;
+        UPDATED
     }
 
     protected final Logger logger = LoggerFactory.getLogger(AbstractProvider.class);

@@ -12,7 +12,10 @@
  */
 package org.openhab.core.io.transport.serial.internal;
 
+import java.io.IOException;
 import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
@@ -36,6 +39,7 @@ import gnu.io.NoSuchPortException;
  *
  * @author Matthias Steigenberger - Initial contribution
  * @author Wouter Born - Fix serial ports missing when ports are added to system property
+ * @author Gwendal Roulleau - Workaround for long path issue by resolving symlink
  */
 @NonNullByDefault
 @Component(service = SerialPortProvider.class)
@@ -45,11 +49,19 @@ public class RxTxPortProvider implements SerialPortProvider {
 
     @Override
     public @Nullable SerialPortIdentifier getPortIdentifier(URI port) {
+        String portPathAsString = port.getPath();
         try {
-            CommPortIdentifier ident = SerialPortUtil.getPortIdentifier(port.getPath());
+            // Resolving symbolic link is needed because of a bug with nrjavaserial
+            // Until a new release with pull request #230 is included in openHAB,
+            // we keep resolving symbolic link here
+            Path portPath = Path.of(portPathAsString);
+            if (Files.isSymbolicLink(portPath)) {
+                portPathAsString = portPath.toRealPath().toString();
+            }
+            CommPortIdentifier ident = SerialPortUtil.getPortIdentifier(portPathAsString);
             return new SerialPortIdentifierImpl(ident);
-        } catch (NoSuchPortException e) {
-            logger.debug("No SerialPortIdentifier found for: {}", port.getPath());
+        } catch (NoSuchPortException | IOException e) {
+            logger.debug("No SerialPortIdentifier found for: {}", portPathAsString, e);
             return null;
         }
     }

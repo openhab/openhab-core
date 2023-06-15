@@ -103,8 +103,7 @@ public class ManagedUserBackingEngine implements BackingEngine {
     @Override
     public void addRole(String username, String role) {
         User user = userRegistry.get(username);
-        if (user instanceof ManagedUser) {
-            ManagedUser managedUser = (ManagedUser) user;
+        if (user instanceof ManagedUser managedUser) {
             managedUser.getRoles().add(role);
             userRegistry.update(managedUser);
         }
@@ -113,8 +112,7 @@ public class ManagedUserBackingEngine implements BackingEngine {
     @Override
     public void deleteRole(String username, String role) {
         User user = userRegistry.get(username);
-        if (user instanceof ManagedUser) {
-            ManagedUser managedUser = (ManagedUser) user;
+        if (user instanceof ManagedUser managedUser) {
             managedUser.getRoles().remove(role);
             userRegistry.update(managedUser);
         }

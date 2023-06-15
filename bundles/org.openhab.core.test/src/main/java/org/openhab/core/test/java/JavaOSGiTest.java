@@ -111,7 +111,7 @@ public class JavaOSGiTest extends JavaTest {
      * @return List of OSGi services or empty List if no service can be found for the given class and filter
      */
     protected <T> List<T> getServices(Class<T> clazz, Predicate<ServiceReference<T>> filter) {
-        final ServiceReference<@Nullable T> serviceReferences[] = getServices(clazz);
+        final ServiceReference<@Nullable T>[] serviceReferences = getServices(clazz);
 
         if (serviceReferences == null) {
             new MissingServiceAnalyzer(System.out, bundleContext).printMissingServiceDetails(clazz);
@@ -192,7 +192,7 @@ public class JavaOSGiTest extends JavaTest {
      * @return List of OSGi service or empty List if no matching services can be found for the given classes
      */
     protected <T, I extends T> List<I> getServices(Class<T> clazz, Class<I> implementationClass) {
-        final ServiceReference<@Nullable T> serviceReferences[] = getServices(clazz);
+        final ServiceReference<@Nullable T>[] serviceReferences = getServices(clazz);
 
         if (serviceReferences == null) {
             new MissingServiceAnalyzer(System.out, bundleContext).printMissingServiceDetails(clazz);
@@ -342,6 +342,15 @@ public class JavaOSGiTest extends JavaTest {
             throw new IllegalArgumentException(String
                     .format("The given reference (class: %s) does not implement an interface.", service.getClass()));
         }
+    }
+
+    /**
+     * Get the OSGi {@link BundleContext}
+     *
+     * @return the bundle context
+     */
+    protected BundleContext getBundleContext() {
+        return bundleContext;
     }
 
     /**

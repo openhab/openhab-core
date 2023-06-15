@@ -218,7 +218,7 @@ public class ByteArrayFileCacheTest {
     }
 
     private static File createTempTxtFile() throws IOException {
-        final File file = File.createTempFile("doorbell", "txt");
+        final File file = Files.createTempFile("doorbell", "txt").toFile();
         file.deleteOnExit();
         return file;
     }

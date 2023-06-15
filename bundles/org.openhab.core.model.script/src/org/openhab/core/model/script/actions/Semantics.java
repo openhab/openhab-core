@@ -110,7 +110,6 @@ public class Semantics {
     public static @Nullable Class<? extends Equipment> getEquipmentType(Item item) {
         Item equipmentItem = isEquipment(item) ? item : getEquipment(item);
         return equipmentItem != null ? SemanticTags.getEquipment(equipmentItem) : null;
-
     }
 
     /**

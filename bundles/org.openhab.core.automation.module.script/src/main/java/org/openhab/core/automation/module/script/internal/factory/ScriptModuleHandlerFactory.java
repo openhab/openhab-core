@@ -68,12 +68,10 @@ public class ScriptModuleHandlerFactory extends BaseModuleHandlerFactory impleme
     protected @Nullable ModuleHandler internalCreate(Module module, String ruleUID) {
         logger.trace("create {} -> {}", module.getId(), module.getTypeUID());
         String moduleTypeUID = module.getTypeUID();
-        if (ScriptConditionHandler.TYPE_ID.equals(moduleTypeUID) && module instanceof Condition) {
-            ScriptConditionHandler handler = new ScriptConditionHandler((Condition) module, ruleUID,
-                    scriptEngineManager);
-            return handler;
-        } else if (ScriptActionHandler.TYPE_ID.equals(moduleTypeUID) && module instanceof Action) {
-            ScriptActionHandler handler = new ScriptActionHandler((Action) module, ruleUID, scriptEngineManager,
+        if (ScriptConditionHandler.TYPE_ID.equals(moduleTypeUID) && module instanceof Condition condition) {
+            return new ScriptConditionHandler(condition, ruleUID, scriptEngineManager);
+        } else if (ScriptActionHandler.TYPE_ID.equals(moduleTypeUID) && module instanceof Action action) {
+            ScriptActionHandler handler = new ScriptActionHandler(action, ruleUID, scriptEngineManager,
                     this::onHandlerRemoval);
             trackedHandlers.put(handler.getEngineIdentifier(), handler);
             return handler;

@@ -22,7 +22,7 @@ import org.openhab.core.thing.binding.ThingActions;
  *
  * @author Kai Kreuzer - Initial contribution
  */
-final public class ActionClassLoader extends ClassLoader {
+public final class ActionClassLoader extends ClassLoader {
 
     public ActionClassLoader(ClassLoader cl) {
         super(cl);
@@ -31,8 +31,7 @@ final public class ActionClassLoader extends ClassLoader {
     @Override
     public Class<?> loadClass(String name) throws ClassNotFoundException {
         try {
-            Class<?> clazz = getParent().loadClass(name);
-            return clazz;
+            return getParent().loadClass(name);
         } catch (ClassNotFoundException e) {
             for (ActionService actionService : ScriptServiceUtil.getActionServices()) {
                 if (actionService.getActionClassName().equals(name)) {

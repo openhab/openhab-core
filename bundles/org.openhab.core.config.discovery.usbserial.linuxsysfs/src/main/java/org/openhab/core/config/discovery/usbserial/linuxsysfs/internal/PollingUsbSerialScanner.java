@@ -143,6 +143,9 @@ public class PollingUsbSerialScanner implements UsbSerialDiscovery {
     @Override
     public void registerDiscoveryListener(UsbSerialDiscoveryListener listener) {
         discoveryListeners.add(listener);
+        for (UsbSerialDeviceInformation deviceInfo : deltaUsbSerialScanner.getLastScanResult()) {
+            listener.usbSerialDeviceDiscovered(deviceInfo);
+        }
     }
 
     @Override

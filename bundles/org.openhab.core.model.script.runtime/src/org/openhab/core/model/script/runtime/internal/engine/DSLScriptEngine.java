@@ -32,6 +32,7 @@ import org.eclipse.xtext.xbase.XExpression;
 import org.eclipse.xtext.xbase.interpreter.IEvaluationContext;
 import org.eclipse.xtext.xbase.interpreter.impl.DefaultEvaluationContext;
 import org.openhab.core.automation.module.script.ScriptExtensionAccessor;
+import org.openhab.core.items.Item;
 import org.openhab.core.items.events.ItemEvent;
 import org.openhab.core.model.script.engine.Script;
 import org.openhab.core.model.script.engine.ScriptExecutionException;
@@ -63,7 +64,8 @@ public class DSLScriptEngine implements javax.script.ScriptEngine {
     private static final Map<String, String> IMPLICIT_VARS = Map.of("command",
             ScriptJvmModelInferrer.VAR_RECEIVED_COMMAND, "state", ScriptJvmModelInferrer.VAR_NEW_STATE, "newState",
             ScriptJvmModelInferrer.VAR_NEW_STATE, "oldState", ScriptJvmModelInferrer.VAR_PREVIOUS_STATE,
-            "triggeringItem", ScriptJvmModelInferrer.VAR_TRIGGERING_ITEM, "input", ScriptJvmModelInferrer.VAR_INPUT);
+            "triggeringItem", ScriptJvmModelInferrer.VAR_TRIGGERING_ITEM, "triggeringGroup",
+            ScriptJvmModelInferrer.VAR_TRIGGERING_GROUP, "input", ScriptJvmModelInferrer.VAR_INPUT);
 
     private final Logger logger = LoggerFactory.getLogger(DSLScriptEngine.class);
 
@@ -142,12 +144,12 @@ public class DSLScriptEngine implements javax.script.ScriptEngine {
 
     private DefaultEvaluationContext createEvaluationContext(Script script, IEvaluationContext specificContext) {
         IEvaluationContext parentContext = specificContext;
-        if (specificContext == null && script instanceof ScriptImpl) {
-            XExpression xExpression = ((ScriptImpl) script).getXExpression();
+        if (specificContext == null && script instanceof ScriptImpl impl) {
+            XExpression xExpression = impl.getXExpression();
             if (xExpression != null) {
                 Resource resource = xExpression.eResource();
-                if (resource instanceof XtextResource) {
-                    IResourceServiceProvider provider = ((XtextResource) resource).getResourceServiceProvider();
+                if (resource instanceof XtextResource xtextResource) {
+                    IResourceServiceProvider provider = xtextResource.getResourceServiceProvider();
                     parentContext = provider.get(IEvaluationContext.class);
                 }
             }
@@ -165,24 +167,27 @@ public class DSLScriptEngine implements javax.script.ScriptEngine {
             }
         }
 
-        Map<String, Object> cachePreset = scriptExtensionAccessor.findPreset("cache", (String) context.getAttribute("oh.engine-identifier", ScriptContext.ENGINE_SCOPE));
+        Map<String, Object> cachePreset = scriptExtensionAccessor.findPreset("cache",
+                (String) context.getAttribute("oh.engine-identifier", ScriptContext.ENGINE_SCOPE));
         evalContext.newValue(QualifiedName.create("sharedCache"), cachePreset.get("sharedCache"));
         evalContext.newValue(QualifiedName.create("privateCache"), cachePreset.get("privateCache"));
         // now add specific implicit vars, where we have to map the right content
         Object value = context.getAttribute(OUTPUT_EVENT);
-        if (value instanceof ChannelTriggeredEvent) {
-            ChannelTriggeredEvent event = (ChannelTriggeredEvent) value;
+        if (value instanceof ChannelTriggeredEvent event) {
             evalContext.newValue(QualifiedName.create(ScriptJvmModelInferrer.VAR_RECEIVED_EVENT), event.getEvent());
             evalContext.newValue(QualifiedName.create(ScriptJvmModelInferrer.VAR_TRIGGERING_CHANNEL),
                     event.getChannel().getAsString());
         }
-        if (value instanceof ItemEvent) {
-            ItemEvent event = (ItemEvent) value;
+        if (value instanceof ItemEvent event) {
             evalContext.newValue(QualifiedName.create(ScriptJvmModelInferrer.VAR_TRIGGERING_ITEM_NAME),
                     event.getItemName());
+            Object group = context.getAttribute(ScriptJvmModelInferrer.VAR_TRIGGERING_GROUP);
+            if (group instanceof Item groupItem) {
+                evalContext.newValue(QualifiedName.create(ScriptJvmModelInferrer.VAR_TRIGGERING_GROUP_NAME),
+                        groupItem.getName());
+            }
         }
-        if (value instanceof ThingStatusInfoChangedEvent) {
-            ThingStatusInfoChangedEvent event = (ThingStatusInfoChangedEvent) value;
+        if (value instanceof ThingStatusInfoChangedEvent event) {
             evalContext.newValue(QualifiedName.create(ScriptJvmModelInferrer.VAR_TRIGGERING_THING),
                     event.getThingUID().toString());
             evalContext.newValue(QualifiedName.create(ScriptJvmModelInferrer.VAR_PREVIOUS_STATUS),
@@ -211,7 +216,6 @@ public class DSLScriptEngine implements javax.script.ScriptEngine {
 
     @Override
     public void put(String key, Object value) {
-
     }
 
     @Override
@@ -240,7 +244,6 @@ public class DSLScriptEngine implements javax.script.ScriptEngine {
 
     @Override
     public void setContext(ScriptContext context) {
-
     }
 
     @Override
@@ -308,5 +311,4 @@ public class DSLScriptEngine implements javax.script.ScriptEngine {
             }
         };
     }
-
 }

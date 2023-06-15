@@ -51,12 +51,10 @@ public class SseUtil {
      * @return a new OutboundEvent
      */
     public static OutboundSseEvent buildEvent(OutboundSseEvent.Builder eventBuilder, EventDTO event) {
-        final OutboundSseEvent sseEvent = eventBuilder.name("message") //
+        return eventBuilder.name("message") //
                 .mediaType(MediaType.APPLICATION_JSON_TYPE) //
                 .data(event) //
                 .build();
-
-        return sseEvent;
     }
 
     /**

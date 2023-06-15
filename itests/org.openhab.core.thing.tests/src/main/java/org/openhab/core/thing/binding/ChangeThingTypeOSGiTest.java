@@ -437,12 +437,16 @@ public class ChangeThingTypeOSGiTest extends JavaOSGiTest {
     }
 
     private List<ChannelDefinition> getChannelDefinitions(ThingTypeUID thingTypeUID) throws URISyntaxException {
+        URI configDescriptionUri = new URI("scheme", "channelType:" + thingTypeUID.getId(), null);
         ChannelTypeUID channelTypeUID = new ChannelTypeUID("test:" + thingTypeUID.getId());
         ChannelType channelType = ChannelTypeBuilder.state(channelTypeUID, "channelLabel", "itemType")
                 .withDescription("description") //
                 .withCategory("category") //
-                .withConfigDescriptionURI(new URI("scheme", "channelType:" + thingTypeUID.getId(), null)).build();
+                .withConfigDescriptionURI(configDescriptionUri).build();
         channelTypes.put(channelTypeUID, channelType);
+
+        ConfigDescription configDescription = ConfigDescriptionBuilder.create(configDescriptionUri).build();
+        configDescriptions.put(configDescriptionUri, configDescription);
 
         ChannelDefinition cd = new ChannelDefinitionBuilder("channel" + thingTypeUID.getId(), channelTypeUID).build();
         return List.of(cd);

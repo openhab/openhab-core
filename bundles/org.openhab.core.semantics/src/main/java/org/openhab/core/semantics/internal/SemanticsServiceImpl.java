@@ -65,8 +65,7 @@ public class SemanticsServiceImpl implements SemanticsService {
         Set<Item> locationItems = itemRegistry.stream().filter(SemanticsPredicates.isA(locationType))
                 .collect(Collectors.toSet());
         for (Item locationItem : locationItems) {
-            if (locationItem instanceof GroupItem) {
-                GroupItem gItem = (GroupItem) locationItem;
+            if (locationItem instanceof GroupItem gItem) {
                 items.addAll(gItem
                         .getMembers(SemanticsPredicates.isA(Point.class).or(SemanticsPredicates.isA(Equipment.class))));
             }
@@ -89,8 +88,7 @@ public class SemanticsServiceImpl implements SemanticsService {
             Set<Item> locationItems = itemRegistry.stream().filter(ItemPredicates.hasLabel(labelOrSynonym)
                     .or(hasSynonym(labelOrSynonym)).and(SemanticsPredicates.isLocation())).collect(Collectors.toSet());
             for (Item locationItem : locationItems) {
-                if (locationItem instanceof GroupItem) {
-                    GroupItem gItem = (GroupItem) locationItem;
+                if (locationItem instanceof GroupItem gItem) {
                     items.addAll(gItem.getMembers(
                             SemanticsPredicates.isA(Point.class).or(SemanticsPredicates.isA(Equipment.class))));
                 }

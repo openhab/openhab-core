@@ -194,5 +194,4 @@ public class Ephemeris {
             return -1;
         }
     }
-
 }

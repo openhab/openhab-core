@@ -21,6 +21,7 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
+import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.OpenHAB;
@@ -71,12 +72,10 @@ public class BundledSoundFileHandler implements Closeable {
     public void close() {
         System.setProperty(OpenHAB.CONFIG_DIR_PROG_ARGUMENT, OpenHAB.DEFAULT_CONFIG_FOLDER);
 
-        if (tmpdir != null) {
-            try {
-                Files.walk(tmpdir).sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
-            } catch (IOException ex) {
-                logger.error("Exception while deleting files", ex);
-            }
+        try (Stream<Path> files = Files.walk(tmpdir)) {
+            files.sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
+        } catch (IOException ex) {
+            logger.error("Exception while deleting files", ex);
         }
     }
 

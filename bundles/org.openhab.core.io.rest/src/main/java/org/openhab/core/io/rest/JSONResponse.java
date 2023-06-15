@@ -210,8 +210,8 @@ public class JSONResponse {
             Response.StatusType status = Response.Status.INTERNAL_SERVER_ERROR;
 
             // in case the Exception is a WebApplicationException, it already carries a Status
-            if (e instanceof WebApplicationException) {
-                status = ((WebApplicationException) e).getResponse().getStatusInfo();
+            if (e instanceof WebApplicationException exception) {
+                status = exception.getResponse().getStatusInfo();
             }
 
             JsonElement ret = INSTANCE.createErrorJson(e.getMessage(), status, null, e);

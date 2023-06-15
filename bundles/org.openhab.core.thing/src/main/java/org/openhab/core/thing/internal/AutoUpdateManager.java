@@ -141,9 +141,7 @@ public class AutoUpdateManager {
         }
         final String itemName = commandEvent.getItemName();
         final Command command = commandEvent.getItemCommand();
-        if (command instanceof State) {
-            final State state = (State) command;
-
+        if (command instanceof State state) {
             Recommendation autoUpdate = shouldAutoUpdate(item);
 
             // consider user-override via item meta-data

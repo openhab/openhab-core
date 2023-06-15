@@ -33,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.introspect.AnnotationIntrospectorPair;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 /**
@@ -60,6 +61,8 @@ public class CommunityUIWidgetAddonHandler implements MarketplaceAddonHandler {
         this.yamlMapper = new ObjectMapper(new YAMLFactory());
         yamlMapper.findAndRegisterModules();
         this.yamlMapper.setDateFormat(new SimpleDateFormat("MMM d, yyyy, hh:mm:ss aa", Locale.ENGLISH));
+        yamlMapper.setAnnotationIntrospector(new AnnotationIntrospectorPair(new SerializedNameAnnotationIntrospector(),
+                yamlMapper.getSerializationConfig().getAnnotationIntrospector()));
     }
 
     @Override

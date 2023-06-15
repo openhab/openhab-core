@@ -30,7 +30,7 @@ public interface EventSubscriber {
      * The constant {@link #ALL_EVENT_TYPES} must be returned by the {@link #getSubscribedEventTypes()} method, if the
      * event subscriber should subscribe to all event types.
      */
-    public static String ALL_EVENT_TYPES = "ALL";
+    static String ALL_EVENT_TYPES = "ALL";
 
     /**
      * Gets the event types to which the event subscriber is subscribed to.

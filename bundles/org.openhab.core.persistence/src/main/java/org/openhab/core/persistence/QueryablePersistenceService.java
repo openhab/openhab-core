@@ -15,7 +15,6 @@ package org.openhab.core.persistence;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.core.items.Item;
 
 /**
  * A queryable persistence service which can be used to store and retrieve
@@ -37,7 +36,8 @@ public interface QueryablePersistenceService extends PersistenceService {
 
     /**
      * Returns a set of {@link PersistenceItemInfo} about items that are stored in the persistence service. This allows
-     * the persistence service to return information about items that are no long available as an {@link Item} in
+     * the persistence service to return information about items that are no long available as an
+     * {@link org.openhab.core.items.Item} in
      * openHAB. If it is not possible to retrieve the information an empty set should be returned.
      *
      * @return a set of information about the persisted items

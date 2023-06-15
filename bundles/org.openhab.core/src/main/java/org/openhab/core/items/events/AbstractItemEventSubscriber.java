@@ -40,10 +40,10 @@ public abstract class AbstractItemEventSubscriber implements EventSubscriber {
 
     @Override
     public void receive(Event event) {
-        if (event instanceof ItemStateEvent) {
-            receiveUpdate((ItemStateEvent) event);
-        } else if (event instanceof ItemCommandEvent) {
-            receiveCommand((ItemCommandEvent) event);
+        if (event instanceof ItemStateEvent stateEvent) {
+            receiveUpdate(stateEvent);
+        } else if (event instanceof ItemCommandEvent commandEvent) {
+            receiveCommand(commandEvent);
         }
     }
 

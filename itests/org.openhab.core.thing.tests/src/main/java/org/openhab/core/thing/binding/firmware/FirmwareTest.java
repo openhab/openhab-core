@@ -287,7 +287,7 @@ public class FirmwareTest extends JavaOSGiTest {
         Firmware firmware = FirmwareBuilder.create(THING_TYPE_UID, "1")
                 .withInputStream(bundleContext.getBundle().getResource(FILE_NAME).openStream())
                 .withMd5Hash("78805a221a988e79ef3f42d7c5bfd419").build();
-        assertThrows(IllegalStateException.class, () -> firmware.getBytes());
+        assertThrows(IllegalStateException.class, firmware::getBytes);
     }
 
     @Test

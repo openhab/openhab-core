@@ -267,8 +267,8 @@ public class SitemapSubscriptionService implements ModelRepositoryChangeListener
                 widgets = itemUIRegistry.getChildren(sitemap);
             } else {
                 Widget pageWidget = itemUIRegistry.getWidget(sitemap, pageId);
-                if (pageWidget instanceof LinkableWidget) {
-                    widgets = itemUIRegistry.getChildren((LinkableWidget) pageWidget);
+                if (pageWidget instanceof LinkableWidget widget) {
+                    widgets = itemUIRegistry.getChildren(widget);
                     // We add the page widget. It will help any UI to update the page title.
                     widgets.add(pageWidget);
                 }
@@ -348,8 +348,7 @@ public class SitemapSubscriptionService implements ModelRepositoryChangeListener
 
     @Override
     public void receive(Event event) {
-        if (event instanceof ItemStatePredictedEvent) {
-            ItemStatePredictedEvent prediction = (ItemStatePredictedEvent) event;
+        if (event instanceof ItemStatePredictedEvent prediction) {
             Item item = itemUIRegistry.get(prediction.getItemName());
             if (item instanceof GroupItem) {
                 // don't send out auto-update events for group items as those will calculate their state based on their
@@ -363,8 +362,7 @@ public class SitemapSubscriptionService implements ModelRepositoryChangeListener
                     pageChangeListener.changeStateTo(item, prediction.getPredictedState());
                 }
             }
-        } else if (event instanceof ChannelDescriptionChangedEvent) {
-            ChannelDescriptionChangedEvent channelDescriptionChangedEvent = (ChannelDescriptionChangedEvent) event;
+        } else if (event instanceof ChannelDescriptionChangedEvent channelDescriptionChangedEvent) {
             channelDescriptionChangedEvent.getLinkedItemNames().forEach(itemName -> {
                 for (PageChangeListener pageChangeListener : pageChangeListeners.values()) {
                     pageChangeListener.descriptionChanged(itemName);

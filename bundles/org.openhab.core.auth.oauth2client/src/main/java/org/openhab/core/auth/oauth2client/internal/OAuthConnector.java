@@ -15,10 +15,12 @@ package org.openhab.core.auth.oauth2client.internal;
 import static org.openhab.core.auth.oauth2client.internal.Keyword.*;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeParseException;
 import java.util.Base64;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
@@ -43,6 +45,7 @@ import org.slf4j.LoggerFactory;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonSyntaxException;
 
 /**
@@ -63,21 +66,20 @@ public class OAuthConnector {
     private final Logger logger = LoggerFactory.getLogger(OAuthConnector.class);
     private final Gson gson;
 
-    public OAuthConnector(HttpClientFactory httpClientFactory, @Nullable String deserializerClassName) {
+    public OAuthConnector(HttpClientFactory httpClientFactory) {
+        this(httpClientFactory, new GsonBuilder());
+    }
+
+    public OAuthConnector(HttpClientFactory httpClientFactory, GsonBuilder gsonBuilder) {
         this.httpClientFactory = httpClientFactory;
-        GsonBuilder gsonBuilder = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES);
-        if (deserializerClassName != null) {
-            try {
-                Class<?> deserializerClass = Class.forName(deserializerClassName);
-                gsonBuilder = gsonBuilder.registerTypeAdapter(AccessTokenResponse.class,
-                        deserializerClass.getConstructor().newInstance());
-            } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
-                    | InvocationTargetException | NoSuchMethodException | SecurityException
-                    | ClassNotFoundException e) {
-                logger.error("Unable to construct custom deserializer '{}'", deserializerClassName, e);
-            }
-        }
-        gson = gsonBuilder.create();
+        gson = gsonBuilder.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+                .registerTypeAdapter(Instant.class, (JsonDeserializer<Instant>) (json, typeOfT, context) -> {
+                    try {
+                        return Instant.parse(json.getAsString());
+                    } catch (DateTimeParseException e) {
+                        return LocalDateTime.parse(json.getAsString()).atZone(ZoneId.systemDefault()).toInstant();
+                    }
+                }).create();
     }
 
     /**

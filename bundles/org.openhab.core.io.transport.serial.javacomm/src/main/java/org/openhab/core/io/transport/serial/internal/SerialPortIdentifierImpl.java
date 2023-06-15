@@ -50,8 +50,8 @@ public class SerialPortIdentifierImpl implements SerialPortIdentifier {
     public SerialPort open(String owner, int timeout) throws PortInUseException {
         try {
             final CommPort cp = id.open(owner, timeout);
-            if (cp instanceof javax.comm.SerialPort) {
-                return new SerialPortImpl((javax.comm.SerialPort) cp);
+            if (cp instanceof javax.comm.SerialPort port) {
+                return new SerialPortImpl(port);
             } else {
                 throw new IllegalStateException(
                         String.format("We expect a serial port instead of '%s'", cp.getClass()));

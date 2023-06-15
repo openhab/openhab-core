@@ -15,6 +15,7 @@ package org.openhab.core.io.http.auth.internal;
 import java.io.IOException;
 import java.util.Map;
 
+import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -29,12 +30,9 @@ import org.openhab.core.i18n.LocaleProvider;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.http.HttpService;
-import org.osgi.service.http.NamespaceException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.osgi.service.http.whiteboard.propertytypes.HttpWhiteboardServletName;
+import org.osgi.service.http.whiteboard.propertytypes.HttpWhiteboardServletPattern;
 
 /**
  * A servlet serving a page allowing users to create a new API token, after confirming their identity by signing in.
@@ -43,23 +41,18 @@ import org.slf4j.LoggerFactory;
  *
  */
 @NonNullByDefault
-@Component(immediate = true)
+@Component(immediate = true, service = Servlet.class)
+@HttpWhiteboardServletName(CreateAPITokenPageServlet.SERVLET_PATH)
+@HttpWhiteboardServletPattern(CreateAPITokenPageServlet.SERVLET_PATH + "/*")
 public class CreateAPITokenPageServlet extends AbstractAuthPageServlet {
 
     private static final long serialVersionUID = 5340598701104679843L;
-
-    private final Logger logger = LoggerFactory.getLogger(CreateAPITokenPageServlet.class);
+    public static final String SERVLET_PATH = "/createApiToken";
 
     @Activate
-    public CreateAPITokenPageServlet(BundleContext bundleContext, @Reference HttpService httpService,
-            @Reference UserRegistry userRegistry, @Reference AuthenticationProvider authProvider,
-            @Reference LocaleProvider localeProvider) {
-        super(bundleContext, httpService, userRegistry, authProvider, localeProvider);
-        try {
-            httpService.registerServlet("/createApiToken", this, null, null);
-        } catch (NamespaceException | ServletException e) {
-            logger.error("Error during create API token page registration: {}", e.getMessage());
-        }
+    public CreateAPITokenPageServlet(BundleContext bundleContext, @Reference UserRegistry userRegistry,
+            @Reference AuthenticationProvider authProvider, @Reference LocaleProvider localeProvider) {
+        super(bundleContext, userRegistry, authProvider, localeProvider);
     }
 
     @Override
@@ -106,9 +99,8 @@ public class CreateAPITokenPageServlet extends AbstractAuthPageServlet {
             User user = login(username, password);
             String newApiToken;
 
-            if (user instanceof ManagedUser) {
-                if (((ManagedUser) user).getApiTokens().stream()
-                        .anyMatch(apiToken -> apiToken.getName().equals(tokenName))) {
+            if (user instanceof ManagedUser managedUser) {
+                if (managedUser.getApiTokens().stream().anyMatch(apiToken -> apiToken.getName().equals(tokenName))) {
                     resp.setContentType("text/html;charset=UTF-8");
                     resp.getWriter().append(
                             getPageBody(params, getLocalizedMessage("auth.createapitoken.name.unique.fail"), false));
@@ -176,10 +168,5 @@ public class CreateAPITokenPageServlet extends AbstractAuthPageServlet {
         hiddenFormFields += "<input type=\"hidden\" name=\"csrf_token\" value=\"" + csrfToken + "\">";
 
         return hiddenFormFields;
-    }
-
-    @Deactivate
-    public void deactivate() {
-        httpService.unregister("/createApiToken");
     }
 }

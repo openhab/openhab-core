@@ -233,7 +233,7 @@ public class ConfigDispatcher {
             Arrays.sort(files, new Comparator<File>() {
                 @Override
                 public int compare(File left, File right) {
-                    return Long.valueOf(left.lastModified()).compareTo(right.lastModified());
+                    return Long.compare(left.lastModified(), right.lastModified());
                 }
             });
             for (File file : files) {

@@ -71,7 +71,7 @@ public class AutomationCommandList extends AutomationCommand {
      */
     @Override
     public String execute() {
-        if (parsingResult != SUCCESS) {
+        if (!parsingResult.equals(SUCCESS)) {
             return parsingResult;
         }
         if (providerType == AutomationCommands.MODULE_TYPE_PROVIDER) {
@@ -293,7 +293,7 @@ public class AutomationCommandList extends AutomationCommand {
                     return rules;
                 } else {
                     for (String ruleUID : list.values()) {
-                        if (ruleUID.indexOf(id) > -1) {
+                        if (ruleUID.contains(id)) {
                             rules.add(autoCommands.getRule(ruleUID));
                         }
                     }
@@ -388,14 +388,14 @@ public class AutomationCommandList extends AutomationCommand {
             Iterator i = collection.iterator();
             while (i.hasNext()) {
                 Object element = i.next();
-                if (element instanceof ModuleType) {
-                    list.put(((ModuleType) element).getUID(), element);
+                if (element instanceof ModuleType type) {
+                    list.put(type.getUID(), element);
                 }
-                if (element instanceof RuleTemplate) {
-                    list.put(((RuleTemplate) element).getUID(), element);
+                if (element instanceof RuleTemplate template) {
+                    list.put(template.getUID(), element);
                 }
-                if (element instanceof Rule) {
-                    list.put(((Rule) element).getUID(), element);
+                if (element instanceof Rule rule) {
+                    list.put(rule.getUID(), element);
                 }
             }
         }

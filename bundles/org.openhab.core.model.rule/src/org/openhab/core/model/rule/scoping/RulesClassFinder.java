@@ -56,12 +56,10 @@ public class RulesClassFinder extends ClassFinder {
             cache.put(name, NULL_CLASS);
             throw e;
         }
-
     }
 
     @Override
     protected Class<?> forName(String name, ClassLoader classLoader) throws ClassNotFoundException {
         return Class.forName(name, false, classLoader);
     }
-
 }

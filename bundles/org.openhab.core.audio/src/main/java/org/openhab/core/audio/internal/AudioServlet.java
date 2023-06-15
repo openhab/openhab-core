@@ -25,7 +25,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.servlet.Servlet;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -36,47 +38,39 @@ import org.openhab.core.audio.AudioFormat;
 import org.openhab.core.audio.AudioHTTPServer;
 import org.openhab.core.audio.AudioStream;
 import org.openhab.core.audio.FixedLengthAudioStream;
-import org.openhab.core.io.http.servlet.OpenHABServlet;
-import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.http.HttpContext;
-import org.osgi.service.http.HttpService;
+import org.osgi.service.http.whiteboard.propertytypes.HttpWhiteboardServletName;
+import org.osgi.service.http.whiteboard.propertytypes.HttpWhiteboardServletPattern;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A servlet that serves audio streams via HTTP.
  *
  * @author Kai Kreuzer - Initial contribution
  */
+@Component(service = { AudioHTTPServer.class, Servlet.class })
+@HttpWhiteboardServletName(AudioServlet.SERVLET_PATH)
+@HttpWhiteboardServletPattern(AudioServlet.SERVLET_PATH + "/*")
 @NonNullByDefault
-@Component
-public class AudioServlet extends OpenHABServlet implements AudioHTTPServer {
+public class AudioServlet extends HttpServlet implements AudioHTTPServer {
 
     private static final long serialVersionUID = -3364664035854567854L;
 
     private static final List<String> WAV_MIME_TYPES = List.of("audio/wav", "audio/x-wav", "audio/vnd.wave");
 
-    private static final String SERVLET_NAME = "/audio";
+    static final String SERVLET_PATH = "/audio";
+
+    private final Logger logger = LoggerFactory.getLogger(AudioServlet.class);
 
     private final Map<String, AudioStream> oneTimeStreams = new ConcurrentHashMap<>();
     private final Map<String, FixedLengthAudioStream> multiTimeStreams = new ConcurrentHashMap<>();
 
     private final Map<String, Long> streamTimeouts = new ConcurrentHashMap<>();
 
-    @Activate
-    public AudioServlet(final @Reference HttpService httpService, final @Reference HttpContext httpContext) {
-        super(httpService, httpContext);
-    }
-
-    @Activate
-    protected void activate() {
-        super.activate(SERVLET_NAME);
-    }
-
     @Deactivate
     protected synchronized void deactivate() {
-        super.deactivate(SERVLET_NAME);
         multiTimeStreams.values().forEach(this::tryClose);
         multiTimeStreams.clear();
         streamTimeouts.clear();
@@ -126,8 +120,8 @@ public class AudioServlet extends OpenHABServlet implements AudioHTTPServer {
         }
 
         // try to set the content-length, if possible
-        if (stream instanceof FixedLengthAudioStream) {
-            final long size = ((FixedLengthAudioStream) stream).length();
+        if (stream instanceof FixedLengthAudioStream audioStream) {
+            final long size = audioStream.length();
             resp.setContentLength((int) size);
         }
 
@@ -217,6 +211,6 @@ public class AudioServlet extends OpenHABServlet implements AudioHTTPServer {
     }
 
     private String getRelativeURL(String streamId) {
-        return SERVLET_NAME + "/" + streamId;
+        return SERVLET_PATH + "/" + streamId;
     }
 }

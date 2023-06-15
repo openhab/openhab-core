@@ -45,6 +45,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -68,6 +69,7 @@ import org.openhab.core.automation.dto.RuleDTO;
 import org.openhab.core.automation.dto.RuleDTOMapper;
 import org.openhab.core.automation.dto.TriggerDTO;
 import org.openhab.core.automation.dto.TriggerDTOMapper;
+import org.openhab.core.automation.events.AutomationEventFactory;
 import org.openhab.core.automation.rest.internal.dto.EnrichedRuleDTO;
 import org.openhab.core.automation.rest.internal.dto.EnrichedRuleDTOMapper;
 import org.openhab.core.automation.util.ModuleBuilder;
@@ -75,6 +77,7 @@ import org.openhab.core.automation.util.RuleBuilder;
 import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.config.core.ConfigUtil;
 import org.openhab.core.config.core.Configuration;
+import org.openhab.core.events.Event;
 import org.openhab.core.io.rest.DTOMapper;
 import org.openhab.core.io.rest.JSONResponse;
 import org.openhab.core.io.rest.RESTConstants;
@@ -157,6 +160,7 @@ public class RuleResource implements RESTResource {
     }
 
     @GET
+    @RolesAllowed({ Role.USER, Role.ADMIN })
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "getRules", summary = "Get available rules, optionally filtered by tags and/or prefix.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = EnrichedRuleDTO.class)))) })
@@ -164,6 +168,11 @@ public class RuleResource implements RESTResource {
             @QueryParam("tags") final @Nullable List<String> tags,
             @QueryParam("summary") @Parameter(description = "summary fields only") @Nullable Boolean summary,
             @DefaultValue("false") @QueryParam("staticDataOnly") @Parameter(description = "provides a cacheable list of values not expected to change regularly and honors the If-Modified-Since header, all other parameters are ignored") boolean staticDataOnly) {
+
+        if ((summary == null || !summary) && !securityContext.isUserInRole(Role.ADMIN)) {
+            // users may only access the summary
+            return JSONResponse.createErrorResponse(Status.UNAUTHORIZED, "Authentication required");
+        }
 
         if (staticDataOnly) {
             if (cacheableListLastModified != null) {
@@ -365,7 +374,14 @@ public class RuleResource implements RESTResource {
                     ruleUID);
             return Response.status(Status.NOT_FOUND).build();
         } else {
-            ruleManager.runNow(ruleUID, false, context);
+            if (context == null || context.isEmpty()) {
+                // only add event to context if no context given, otherwise it might interfere with the intention of the
+                // provided context
+                Event event = AutomationEventFactory.createExecutionEvent(ruleUID, null, "manual");
+                ruleManager.runNow(ruleUID, false, Map.of("event", event));
+            } else {
+                ruleManager.runNow(ruleUID, false, context);
+            }
             return Response.ok().build();
         }
     }

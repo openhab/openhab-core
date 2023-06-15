@@ -31,5 +31,5 @@ public interface Normalizer {
      * @param value the object to be normalized
      * @return the well-defined type or the given object, if it was not possible to convert it
      */
-    public Object normalize(Object value);
+    Object normalize(Object value);
 }

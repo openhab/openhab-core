@@ -387,6 +387,20 @@ public class UnitsTest {
         assertThat(converted.toString(), anyOf(is("10000 \u00B5S/cm"), is("10000 \u03BCS/cm")));
     }
 
+    @Test
+    public void testSpecificActivity() {
+        QuantityType<?> radon = QuantityType.valueOf("37 kBq/m³");
+        QuantityType<?> converted = radon.toUnit("nCi/l");
+        assertThat(converted.doubleValue(), is(closeTo(1.00, DEFAULT_ERROR)));
+    }
+
+    @Test
+    public void testRpm() {
+        QuantityType<?> oneHertz = QuantityType.valueOf("60 rpm");
+        QuantityType<?> converted = oneHertz.toUnit("Hz");
+        assertThat(converted.doubleValue(), is(closeTo(1.00, DEFAULT_ERROR)));
+    }
+
     private static class QuantityEquals extends IsEqual<Quantity<?>> {
         private Quantity<?> quantity;
 
@@ -397,9 +411,7 @@ public class UnitsTest {
 
         @Override
         public boolean matches(@Nullable Object actualValue) {
-            if (actualValue instanceof Quantity) {
-                Quantity<?> other = (Quantity<?>) actualValue;
-
+            if (actualValue instanceof Quantity other) {
                 if (!other.getUnit().isCompatible(quantity.getUnit())) {
                     return false;
                 }

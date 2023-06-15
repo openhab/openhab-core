@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Locale;
 
 import javax.annotation.security.RolesAllowed;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -33,6 +34,7 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.UriInfo;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -57,7 +59,12 @@ import org.openhab.core.persistence.PersistenceService;
 import org.openhab.core.persistence.PersistenceServiceRegistry;
 import org.openhab.core.persistence.QueryablePersistenceService;
 import org.openhab.core.persistence.dto.ItemHistoryDTO;
+import org.openhab.core.persistence.dto.PersistenceServiceConfigurationDTO;
 import org.openhab.core.persistence.dto.PersistenceServiceDTO;
+import org.openhab.core.persistence.registry.ManagedPersistenceServiceConfigurationProvider;
+import org.openhab.core.persistence.registry.PersistenceServiceConfiguration;
+import org.openhab.core.persistence.registry.PersistenceServiceConfigurationDTOMapper;
+import org.openhab.core.persistence.registry.PersistenceServiceConfigurationRegistry;
 import org.openhab.core.types.State;
 import org.openhab.core.types.TypeParser;
 import org.osgi.service.component.annotations.Activate;
@@ -114,6 +121,8 @@ public class PersistenceResource implements RESTResource {
     private final ItemRegistry itemRegistry;
     private final LocaleService localeService;
     private final PersistenceServiceRegistry persistenceServiceRegistry;
+    private final PersistenceServiceConfigurationRegistry persistenceServiceConfigurationRegistry;
+    private final ManagedPersistenceServiceConfigurationProvider managedPersistenceServiceConfigurationProvider;
     private final TimeZoneProvider timeZoneProvider;
 
     @Activate
@@ -121,10 +130,14 @@ public class PersistenceResource implements RESTResource {
             final @Reference ItemRegistry itemRegistry, //
             final @Reference LocaleService localeService,
             final @Reference PersistenceServiceRegistry persistenceServiceRegistry,
+            final @Reference PersistenceServiceConfigurationRegistry persistenceServiceConfigurationRegistry,
+            final @Reference ManagedPersistenceServiceConfigurationProvider managedPersistenceServiceConfigurationProvider,
             final @Reference TimeZoneProvider timeZoneProvider) {
         this.itemRegistry = itemRegistry;
         this.localeService = localeService;
         this.persistenceServiceRegistry = persistenceServiceRegistry;
+        this.persistenceServiceConfigurationRegistry = persistenceServiceConfigurationRegistry;
+        this.managedPersistenceServiceConfigurationProvider = managedPersistenceServiceConfigurationProvider;
         this.timeZoneProvider = timeZoneProvider;
     }
 
@@ -140,6 +153,96 @@ public class PersistenceResource implements RESTResource {
 
         Object responseObject = getPersistenceServiceList(locale);
         return Response.ok(responseObject).build();
+    }
+
+    @GET
+    @RolesAllowed({ Role.ADMIN })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Path("{serviceId: [a-zA-Z0-9]+}")
+    @Operation(operationId = "getPersistenceServiceConfiguration", summary = "Gets a persistence service configuration.", security = {
+            @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
+                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = PersistenceServiceConfigurationDTO.class))),
+                    @ApiResponse(responseCode = "404", description = "Service configuration not found.") })
+    public Response httpGetPersistenceServiceConfiguration(@Context HttpHeaders headers,
+            @Parameter(description = "Id of the persistence service.") @PathParam("serviceId") String serviceId) {
+        PersistenceServiceConfiguration configuration = persistenceServiceConfigurationRegistry.get(serviceId);
+
+        if (configuration != null) {
+            PersistenceServiceConfigurationDTO configurationDTO = PersistenceServiceConfigurationDTOMapper
+                    .map(configuration);
+            configurationDTO.editable = managedPersistenceServiceConfigurationProvider.get(serviceId) != null;
+            return JSONResponse.createResponse(Status.OK, configurationDTO, null);
+        } else {
+            return Response.status(Status.NOT_FOUND).build();
+        }
+    }
+
+    @PUT
+    @RolesAllowed({ Role.ADMIN })
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Path("{serviceId: [a-zA-Z0-9]+}")
+    @Operation(operationId = "putPersistenceServiceConfiguration", summary = "Sets a persistence service configuration.", security = {
+            @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
+                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = PersistenceServiceConfigurationDTO.class))),
+                    @ApiResponse(responseCode = "201", description = "PersistenceServiceConfiguration created."),
+                    @ApiResponse(responseCode = "400", description = "Payload invalid."),
+                    @ApiResponse(responseCode = "405", description = "PersistenceServiceConfiguration not editable.") })
+    public Response httpPutPersistenceServiceConfiguration(@Context UriInfo uriInfo, @Context HttpHeaders headers,
+            @Parameter(description = "Id of the persistence service.") @PathParam("serviceId") String serviceId,
+            @Parameter(description = "service configuration", required = true) @Nullable PersistenceServiceConfigurationDTO serviceConfigurationDTO) {
+        if (serviceConfigurationDTO == null) {
+            return JSONResponse.createErrorResponse(Status.BAD_REQUEST, "Payload must not be null.");
+        }
+        if (!serviceId.equals(serviceConfigurationDTO.serviceId)) {
+            return JSONResponse.createErrorResponse(Status.BAD_REQUEST, "serviceId in payload '"
+                    + serviceConfigurationDTO.serviceId + "' differs from serviceId in URL '" + serviceId + "'");
+        }
+
+        PersistenceServiceConfiguration persistenceServiceConfiguration;
+        try {
+            persistenceServiceConfiguration = PersistenceServiceConfigurationDTOMapper.map(serviceConfigurationDTO);
+        } catch (IllegalArgumentException e) {
+            logger.warn("Received HTTP PUT request at '{}' with an invalid payload: '{}'.", uriInfo.getPath(),
+                    e.getMessage());
+            return JSONResponse.createErrorResponse(Status.BAD_REQUEST, e.getMessage());
+        }
+
+        if (persistenceServiceConfigurationRegistry.get(serviceId) == null) {
+            managedPersistenceServiceConfigurationProvider.add(persistenceServiceConfiguration);
+            return JSONResponse.createResponse(Status.CREATED, serviceConfigurationDTO, null);
+        } else if (managedPersistenceServiceConfigurationProvider.get(serviceId) != null) {
+            // item already exists as a managed item, update it
+            managedPersistenceServiceConfigurationProvider.update(persistenceServiceConfiguration);
+            return JSONResponse.createResponse(Status.OK, serviceConfigurationDTO, null);
+        } else {
+            // Configuration exists but cannot be updated
+            logger.warn("Cannot update existing persistence service configuration '{}', because is not managed.",
+                    serviceId);
+            return JSONResponse.createErrorResponse(Status.METHOD_NOT_ALLOWED,
+                    "Cannot update non-managed persistence service configuration " + serviceId);
+        }
+    }
+
+    @DELETE
+    @RolesAllowed({ Role.ADMIN })
+    @Path("{serviceId: [a-zA-Z0-9]+}")
+    @Operation(operationId = "deletePersistenceServiceConfiguration", summary = "Deletes a persistence service configuration.", security = {
+            @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
+                    @ApiResponse(responseCode = "200", description = "OK"),
+                    @ApiResponse(responseCode = "404", description = "Persistence service configuration not found."),
+                    @ApiResponse(responseCode = "405", description = "Persistence service configuration not editable.") })
+    public Response httpDeletePersistenceServiceConfiguration(@Context UriInfo uriInfo, @Context HttpHeaders headers,
+            @Parameter(description = "Id of the persistence service.") @PathParam("serviceId") String serviceId) {
+        if (persistenceServiceConfigurationRegistry.get(serviceId) == null) {
+            return Response.status(Status.NOT_FOUND).build();
+        }
+
+        if (managedPersistenceServiceConfigurationProvider.remove(serviceId) == null) {
+            return Response.status(Status.METHOD_NOT_ALLOWED).build();
+        } else {
+            return Response.ok().build();
+        }
     }
 
     @GET
@@ -238,7 +341,7 @@ public class PersistenceResource implements RESTResource {
     protected @Nullable ItemHistoryDTO createDTO(@Nullable String serviceId, String itemName,
             @Nullable String timeBegin, @Nullable String timeEnd, int pageNumber, int pageLength, boolean boundary) {
         // If serviceId is null, then use the default service
-        PersistenceService service = null;
+        PersistenceService service;
         String effectiveServiceId = serviceId != null ? serviceId : persistenceServiceRegistry.getDefaultId();
         service = persistenceServiceRegistry.get(effectiveServiceId);
 
@@ -283,9 +386,9 @@ public class PersistenceResource implements RESTResource {
         }
 
         Iterable<HistoricItem> result;
-        State state = null;
+        State state;
 
-        Long quantity = 0l;
+        long quantity = 0L;
 
         ItemHistoryDTO dto = new ItemHistoryDTO();
         dto.name = itemName;
@@ -363,7 +466,7 @@ public class PersistenceResource implements RESTResource {
     /**
      * Gets a list of persistence services currently configured in the system
      *
-     * @return list of persistence services as {@link ServiceBean}
+     * @return list of persistence services
      */
     private List<PersistenceServiceDTO> getPersistenceServiceList(Locale locale) {
         List<PersistenceServiceDTO> dtoList = new ArrayList<>();
@@ -389,7 +492,7 @@ public class PersistenceResource implements RESTResource {
 
     private Response getServiceItemList(@Nullable String serviceId) {
         // If serviceId is null, then use the default service
-        PersistenceService service = null;
+        PersistenceService service;
         if (serviceId == null) {
             service = persistenceServiceRegistry.getDefault();
         } else {

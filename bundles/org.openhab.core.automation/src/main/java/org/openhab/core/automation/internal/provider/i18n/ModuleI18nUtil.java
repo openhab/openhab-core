@@ -59,14 +59,14 @@ public class ModuleI18nUtil {
     @SuppressWarnings("unchecked")
     private <T extends Module> @Nullable T createLocalizedModule(T module, @Nullable String label,
             @Nullable String description) {
-        if (module instanceof Action) {
-            return (T) createLocalizedAction((Action) module, label, description);
+        if (module instanceof Action action) {
+            return (T) createLocalizedAction(action, label, description);
         }
-        if (module instanceof Condition) {
-            return (T) createLocalizedCondition((Condition) module, label, description);
+        if (module instanceof Condition condition) {
+            return (T) createLocalizedCondition(condition, label, description);
         }
-        if (module instanceof Trigger) {
-            return (T) createLocalizedTrigger((Trigger) module, label, description);
+        if (module instanceof Trigger trigger) {
+            return (T) createLocalizedTrigger(trigger, label, description);
         }
         return null;
     }

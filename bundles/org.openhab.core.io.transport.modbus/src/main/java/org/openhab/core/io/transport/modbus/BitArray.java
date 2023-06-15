@@ -113,8 +113,7 @@ public class BitArray implements Iterable<Boolean> {
 
     @Override
     public String toString() {
-        return new StringBuilder("BitArray(bits=").append(length == 0 ? "<empty>" : toBinaryString()).append(")")
-                .toString();
+        return "BitArray(bits=" + (length == 0 ? "<empty>" : toBinaryString()) + ")";
     }
 
     @Override

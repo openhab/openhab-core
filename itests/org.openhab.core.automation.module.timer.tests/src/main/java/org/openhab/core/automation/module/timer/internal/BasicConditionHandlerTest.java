@@ -15,6 +15,7 @@ package org.openhab.core.automation.module.timer.internal;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -38,6 +39,7 @@ import org.openhab.core.automation.RuleStatus;
 import org.openhab.core.automation.RuleStatusInfo;
 import org.openhab.core.automation.Trigger;
 import org.openhab.core.automation.internal.RuleEngineImpl;
+import org.openhab.core.automation.internal.module.factory.CoreModuleHandlerFactory;
 import org.openhab.core.automation.internal.module.handler.ItemCommandActionHandler;
 import org.openhab.core.automation.internal.module.handler.ItemStateTriggerHandler;
 import org.openhab.core.automation.util.ModuleBuilder;
@@ -47,14 +49,17 @@ import org.openhab.core.config.core.Configuration;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.events.EventSubscriber;
+import org.openhab.core.i18n.TimeZoneProvider;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemProvider;
+import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.events.ItemCommandEvent;
 import org.openhab.core.items.events.ItemEventFactory;
 import org.openhab.core.library.items.SwitchItem;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.service.ReadyMarker;
+import org.openhab.core.service.StartLevelService;
 import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.test.storage.VolatileStorageService;
 import org.slf4j.Logger;
@@ -81,6 +86,13 @@ public abstract class BasicConditionHandlerTest extends JavaOSGiTest {
      */
     @BeforeEach
     public void beforeBase() {
+        EventPublisher eventPublisher = getService(EventPublisher.class);
+        ItemRegistry itemRegistry = getService(ItemRegistry.class);
+        CoreModuleHandlerFactory coreModuleHandlerFactory = new CoreModuleHandlerFactory(getBundleContext(),
+                eventPublisher, itemRegistry, mock(TimeZoneProvider.class), mock(StartLevelService.class));
+        mock(CoreModuleHandlerFactory.class);
+        registerService(coreModuleHandlerFactory);
+
         ItemProvider itemProvider = new ItemProvider() {
             @Override
             public void addProviderChangeListener(ProviderChangeListener<Item> listener) {
@@ -179,7 +191,7 @@ public abstract class BasicConditionHandlerTest extends JavaOSGiTest {
         logger.info("Rule is enabled and idle");
 
         logger.info("Send and wait for item state is ON");
-        eventPublisher.post(ItemEventFactory.createStateEvent(testItemName1, OnOffType.ON));
+        eventPublisher.post(ItemEventFactory.createStateUpdatedEvent(testItemName1, OnOffType.ON));
 
         waitForAssert(() -> {
             assertThat(itemEvent, is(notNullValue()));
@@ -194,7 +206,7 @@ public abstract class BasicConditionHandlerTest extends JavaOSGiTest {
 
         // prepare the execution
         itemEvent = null;
-        eventPublisher.post(ItemEventFactory.createStateEvent(testItemName1, OnOffType.ON));
+        eventPublisher.post(ItemEventFactory.createStateUpdatedEvent(testItemName1, OnOffType.ON));
         waitForAssert(() -> {
             assertThat(itemEvent, is(nullValue()));
         });

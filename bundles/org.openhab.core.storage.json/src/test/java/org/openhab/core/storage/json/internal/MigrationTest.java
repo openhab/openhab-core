@@ -21,6 +21,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.Objects;
 
@@ -48,7 +49,7 @@ public class MigrationTest {
 
     @BeforeEach
     public void setup() throws IOException {
-        tmpFile = File.createTempFile("storage-debug", ".json");
+        tmpFile = Files.createTempFile("storage-debug", ".json").toFile();
         tmpFile.deleteOnExit();
 
         // store old class

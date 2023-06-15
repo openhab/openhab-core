@@ -13,6 +13,7 @@
 package org.openhab.core.thing.internal;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -51,7 +52,7 @@ public class ThingImpl implements Thing {
 
     private @Nullable ThingUID bridgeUID;
 
-    private final Map<ChannelUID, Channel> channels = new HashMap<>();
+    private final Map<ChannelUID, Channel> channels = new LinkedHashMap<>();
 
     private Configuration configuration = new Configuration();
 

@@ -66,8 +66,7 @@ public class AnnotationActionHandler extends BaseActionModuleHandler {
         for (int i = 0; i < annotations.length; i++) {
             Annotation[] annotationsOnParam = annotations[i];
             if (annotationsOnParam != null && annotationsOnParam.length == 1) {
-                if (annotationsOnParam[0] instanceof ActionInput) {
-                    ActionInput inputAnnotation = (ActionInput) annotationsOnParam[0];
+                if (annotationsOnParam[0] instanceof ActionInput inputAnnotation) {
                     // check if the moduleType has a configdescription with this input
                     if (hasInput(moduleType, inputAnnotation.name())) {
                         args.add(i, context.get(inputAnnotation.name()));
@@ -106,8 +105,8 @@ public class AnnotationActionHandler extends BaseActionModuleHandler {
                             method, moduleType.getUID(), ex.getMessage());
                 }
                 // we allow simple data types as return values and put them under the context key "result".
-            } else if (result instanceof Boolean) {
-                output.put(MODULE_RESULT, (boolean) result);
+            } else if (result instanceof Boolean boolean1) {
+                output.put(MODULE_RESULT, boolean1);
             } else if (result instanceof String) {
                 output.put(MODULE_RESULT, result);
             } else if (result instanceof Integer) {

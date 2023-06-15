@@ -50,9 +50,9 @@ public class ItemRegistryDelegate implements Map<String, State> {
 
     @Override
     public boolean containsKey(@Nullable Object key) {
-        if (key instanceof String) {
+        if (key instanceof String string) {
             try {
-                itemRegistry.getItem((String) key);
+                itemRegistry.getItem(string);
                 return true;
             } catch (ItemNotFoundException e) {
                 return false;

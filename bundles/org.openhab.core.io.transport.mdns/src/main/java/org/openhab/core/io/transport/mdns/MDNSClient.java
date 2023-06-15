@@ -33,7 +33,7 @@ public interface MDNSClient {
      *
      * @return a set of JmDNS instances
      */
-    public Set<JmDNS> getClientInstances();
+    Set<JmDNS> getClientInstances();
 
     /**
      * Listen for services of a given type
@@ -41,7 +41,7 @@ public interface MDNSClient {
      * @param type full qualified service type
      * @param listener listener for service updates
      */
-    public void addServiceListener(String type, ServiceListener listener);
+    void addServiceListener(String type, ServiceListener listener);
 
     /**
      * Remove listener for services of a given type
@@ -49,27 +49,27 @@ public interface MDNSClient {
      * @param type full qualified service type
      * @param listener listener for service updates
      */
-    public void removeServiceListener(String type, ServiceListener listener);
+    void removeServiceListener(String type, ServiceListener listener);
 
     /**
      * Register a service
      *
      * @param description service to register, described by (@link ServiceDescription)
      */
-    public void registerService(ServiceDescription description) throws IOException;
+    void registerService(ServiceDescription description) throws IOException;
 
     /**
      * Unregister a service. The service should have been registered.
      *
      * @param description service to remove, described by (@link ServiceDescription)
      */
-    public void unregisterService(ServiceDescription description);
+    void unregisterService(ServiceDescription description);
 
     /**
      * Unregister all services
      *
      */
-    public void unregisterAllServices();
+    void unregisterAllServices();
 
     /**
      * Returns a list of service infos of the specified type
@@ -77,7 +77,7 @@ public interface MDNSClient {
      * @param type service type name
      * @return an array of service instances
      */
-    public ServiceInfo[] list(String type);
+    ServiceInfo[] list(String type);
 
     /**
      * Returns a list of service infos of the specified type within timeout
@@ -86,11 +86,11 @@ public interface MDNSClient {
      * @param timeout the amount of time it should wait if no service info is found.
      * @return an array of service instances
      */
-    public ServiceInfo[] list(String type, Duration timeout);
+    ServiceInfo[] list(String type, Duration timeout);
 
     /**
      * Close properly JmDNS instances
      *
      */
-    public void close();
+    void close();
 }

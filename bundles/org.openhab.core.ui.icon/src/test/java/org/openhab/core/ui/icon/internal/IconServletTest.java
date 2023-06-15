@@ -36,8 +36,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openhab.core.ui.icon.IconProvider;
 import org.openhab.core.ui.icon.IconSet.Format;
-import org.osgi.service.http.HttpContext;
-import org.osgi.service.http.HttpService;
 
 /**
  * Tests for {@link IconServlet}.
@@ -49,7 +47,7 @@ import org.osgi.service.http.HttpService;
 @NonNullByDefault
 public class IconServletTest {
 
-    private class ByteArrayServletOutputStream extends ServletOutputStream {
+    private static class ByteArrayServletOutputStream extends ServletOutputStream {
 
         private ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
@@ -74,13 +72,10 @@ public class IconServletTest {
         public void reset() {
             outputStream.reset();
         }
-    };
+    }
 
     private @NonNullByDefault({}) IconServlet servlet;
     private ByteArrayServletOutputStream responseOutputStream = new ByteArrayServletOutputStream();
-
-    private @Mock @NonNullByDefault({}) HttpContext httpContextMock;
-    private @Mock @NonNullByDefault({}) HttpService httpServiceMock;
 
     private @Mock @NonNullByDefault({}) HttpServletRequest requestMock;
     private @Mock @NonNullByDefault({}) HttpServletResponse responseMock;
@@ -90,25 +85,8 @@ public class IconServletTest {
 
     @BeforeEach
     public void before() throws IOException {
-        servlet = new IconServlet(httpServiceMock, httpContextMock);
+        servlet = new IconServlet();
         responseOutputStream.reset();
-    }
-
-    @Test
-    public void testOldUrlStyle() throws ServletException, IOException {
-        when(requestMock.getRequestURI()).thenReturn("/icon/y-34.png");
-
-        when(responseMock.getOutputStream()).thenReturn(responseOutputStream);
-
-        when(provider1Mock.hasIcon("y", "classic", Format.PNG)).thenReturn(0);
-        when(provider1Mock.getIcon("y", "classic", "34", Format.PNG))
-                .thenReturn(new ByteArrayInputStream("provider 1 icon: y classic 34 png".getBytes()));
-
-        servlet.addIconProvider(provider1Mock);
-        servlet.doGet(requestMock, responseMock);
-
-        assertEquals("provider 1 icon: y classic 34 png", responseOutputStream.getOutput());
-        verify(responseMock, never()).sendError(anyInt());
     }
 
     @Test

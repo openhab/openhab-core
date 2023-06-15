@@ -57,15 +57,14 @@ public class ValueTypeToStringConverter implements IValueConverter<@Nullable Obj
         if (value == null) {
             throw new ValueConverterException("Value may not be null.", null, null);
         }
-        if (value instanceof String) {
-            return toEscapedString((String) value);
+        if (value instanceof String string) {
+            return toEscapedString(string);
         }
-        if (value instanceof BigDecimal) {
-            BigDecimal decimalValue = (BigDecimal) value;
+        if (value instanceof BigDecimal decimalValue) {
             return decimalValue.toPlainString();
         }
-        if (value instanceof Boolean) {
-            return ((Boolean) value).toString();
+        if (value instanceof Boolean boolean1) {
+            return boolean1.toString();
         }
         throw new ValueConverterException("Unknown value type: " + value.getClass().getSimpleName(), null, null);
     }

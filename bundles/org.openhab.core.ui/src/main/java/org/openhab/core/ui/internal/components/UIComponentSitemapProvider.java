@@ -45,7 +45,7 @@ import org.openhab.core.model.sitemap.sitemap.impl.DefaultImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.FrameImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.GroupImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.ImageImpl;
-import org.openhab.core.model.sitemap.sitemap.impl.ListImpl;
+import org.openhab.core.model.sitemap.sitemap.impl.InputImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.MappingImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.MapviewImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.SelectionImpl;
@@ -74,6 +74,7 @@ import org.slf4j.LoggerFactory;
  * "system:sitemap" namespace.
  *
  * @author Yannick Schaus - Initial contribution
+ * @author Laurent Garnier - icon color support for all widgets
  */
 @NonNullByDefault
 @Component(service = SitemapProvider.class)
@@ -186,7 +187,6 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
                 widget = imageWidget;
                 setWidgetPropertyFromComponentConfig(widget, component, "url", SitemapPackage.IMAGE__URL);
                 setWidgetPropertyFromComponentConfig(widget, component, "refresh", SitemapPackage.IMAGE__REFRESH);
-                addIconColor(imageWidget.getIconColor(), component);
                 break;
             case "Video":
                 VideoImpl videoWidget = (VideoImpl) SitemapFactory.eINSTANCE.createVideo();
@@ -236,10 +236,10 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
                 addWidgetMappings(selectionWidget.getMappings(), component);
                 widget = selectionWidget;
                 break;
-            case "List":
-                ListImpl listWidget = (ListImpl) SitemapFactory.eINSTANCE.createList();
-                widget = listWidget;
-                setWidgetPropertyFromComponentConfig(widget, component, "separator", SitemapPackage.LIST__SEPARATOR);
+            case "Input":
+                InputImpl inputWidget = (InputImpl) SitemapFactory.eINSTANCE.createInput();
+                widget = inputWidget;
+                setWidgetPropertyFromComponentConfig(widget, component, "inputHint", SitemapPackage.INPUT__INPUT_HINT);
                 break;
             case "Setpoint":
                 SetpointImpl setpointWidget = (SetpointImpl) SitemapFactory.eINSTANCE.createSetpoint();
@@ -269,8 +269,7 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
             setWidgetPropertyFromComponentConfig(widget, component, "icon", SitemapPackage.WIDGET__ICON);
             setWidgetPropertyFromComponentConfig(widget, component, "item", SitemapPackage.WIDGET__ITEM);
 
-            if (widget instanceof LinkableWidget) {
-                LinkableWidget linkableWidget = (LinkableWidget) widget;
+            if (widget instanceof LinkableWidget linkableWidget) {
                 if (component.getSlots() != null && component.getSlots().containsKey("widgets")) {
                     for (UIComponent childComponent : component.getSlot("widgets")) {
                         Widget childWidget = buildWidget(childComponent);
@@ -284,6 +283,7 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
             addWidgetVisibility(widget.getVisibility(), component);
             addLabelColor(widget.getLabelColor(), component);
             addValueColor(widget.getValueColor(), component);
+            addIconColor(widget.getIconColor(), component);
         }
 
         return widget;
@@ -302,7 +302,7 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
             WidgetImpl widgetImpl = (WidgetImpl) widget;
             Object normalizedValue = ConfigUtil.normalizeType(value);
             if (widgetImpl.eGet(feature, false, false) instanceof Integer) {
-                normalizedValue = (normalizedValue instanceof BigDecimal) ? ((BigDecimal) normalizedValue).intValue()
+                normalizedValue = (normalizedValue instanceof BigDecimal bd) ? bd.intValue()
                         : Integer.valueOf(normalizedValue.toString());
             } else if (widgetImpl.eGet(feature, false, false) instanceof Boolean
                     && !(normalizedValue instanceof Boolean)) {
@@ -363,7 +363,7 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
     }
 
     private void addIconColor(EList<ColorArray> iconColor, UIComponent component) {
-        addColor(iconColor, component, "valuecolor");
+        addColor(iconColor, component, "iconcolor");
     }
 
     private void addColor(EList<ColorArray> color, UIComponent component, String key) {

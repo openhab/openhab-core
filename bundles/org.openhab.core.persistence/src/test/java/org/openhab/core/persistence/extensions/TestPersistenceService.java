@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.measure.Unit;
@@ -97,7 +98,7 @@ public class TestPersistenceService implements QueryablePersistenceService {
 
                         @Override
                         public String getName() {
-                            return filter.getItemName();
+                            return Objects.requireNonNull(filter.getItemName());
                         }
                     });
                 }
@@ -132,14 +133,14 @@ public class TestPersistenceService implements QueryablePersistenceService {
 
                     @Override
                     public State getState() {
-                        Item item = itemRegistry.get(filter.getItemName());
-                        Unit<?> unit = item instanceof NumberItem ? ((NumberItem) item).getUnit() : null;
+                        Item item = itemRegistry.get(Objects.requireNonNull(filter.getItemName()));
+                        Unit<?> unit = item instanceof NumberItem ni ? ni.getUnit() : null;
                         return unit == null ? new DecimalType(year) : QuantityType.valueOf(year, unit);
                     }
 
                     @Override
                     public String getName() {
-                        return filter.getItemName();
+                        return Objects.requireNonNull(filter.getItemName());
                     }
                 });
             }

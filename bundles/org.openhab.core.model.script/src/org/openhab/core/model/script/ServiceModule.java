@@ -13,7 +13,6 @@
 package org.openhab.core.model.script;
 
 import org.openhab.core.items.ItemRegistry;
-import org.openhab.core.thing.ThingRegistry;
 import org.openhab.core.model.core.ModelRepository;
 import org.openhab.core.model.script.engine.IActionServiceProvider;
 import org.openhab.core.model.script.engine.IThingActionsProvider;
@@ -22,6 +21,7 @@ import org.openhab.core.model.script.internal.engine.ServiceTrackerActionService
 import org.openhab.core.model.script.internal.engine.ServiceTrackerThingActionsProvider;
 import org.openhab.core.model.script.script.Script;
 import org.openhab.core.model.script.script.impl.ScriptImpl;
+import org.openhab.core.thing.ThingRegistry;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;
@@ -52,5 +52,4 @@ public class ServiceModule implements Module {
         binder.bind(IThingActionsProvider.class).toInstance(new ServiceTrackerThingActionsProvider(scriptServiceUtil));
         binder.bind(Script.class).to(ScriptImpl.class);
     }
-
 }

@@ -15,6 +15,7 @@ package org.openhab.core.automation.module.timer.internal;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -37,6 +38,7 @@ import org.openhab.core.automation.RuleStatusDetail;
 import org.openhab.core.automation.RuleStatusInfo;
 import org.openhab.core.automation.Trigger;
 import org.openhab.core.automation.internal.RuleEngineImpl;
+import org.openhab.core.automation.internal.module.factory.CoreModuleHandlerFactory;
 import org.openhab.core.automation.internal.module.handler.GenericCronTriggerHandler;
 import org.openhab.core.automation.type.ModuleTypeRegistry;
 import org.openhab.core.automation.util.ModuleBuilder;
@@ -44,12 +46,16 @@ import org.openhab.core.automation.util.RuleBuilder;
 import org.openhab.core.common.registry.ProviderChangeListener;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.events.Event;
+import org.openhab.core.events.EventPublisher;
 import org.openhab.core.events.EventSubscriber;
+import org.openhab.core.i18n.TimeZoneProvider;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemProvider;
+import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.events.ItemCommandEvent;
 import org.openhab.core.library.items.SwitchItem;
 import org.openhab.core.service.ReadyMarker;
+import org.openhab.core.service.StartLevelService;
 import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.test.storage.VolatileStorageService;
 import org.slf4j.Logger;
@@ -72,6 +78,13 @@ public class RuntimeRuleTest extends JavaOSGiTest {
 
     @BeforeEach
     public void before() {
+        EventPublisher eventPublisher = getService(EventPublisher.class);
+        ItemRegistry itemRegistry = getService(ItemRegistry.class);
+        CoreModuleHandlerFactory coreModuleHandlerFactory = new CoreModuleHandlerFactory(getBundleContext(),
+                eventPublisher, itemRegistry, mock(TimeZoneProvider.class), mock(StartLevelService.class));
+        mock(CoreModuleHandlerFactory.class);
+        registerService(coreModuleHandlerFactory);
+
         ItemProvider itemProvider = new TestItemProvider(Set.of(new SwitchItem("myLampItem")));
         registerService(itemProvider);
         registerService(volatileStorageService);
@@ -105,8 +118,6 @@ public class RuntimeRuleTest extends JavaOSGiTest {
          */
         logger.info("Create rule");
         String testExpression = "* * * * * ?";
-
-        ;
         Configuration triggerConfig = new Configuration(Map.of("cronExpression", testExpression));
         List<Trigger> triggers = List.of(ModuleBuilder.createTrigger().withId("MyTimerTrigger")
                 .withTypeUID(GenericCronTriggerHandler.MODULE_TYPE_ID).withConfiguration(triggerConfig).build());
@@ -136,8 +147,7 @@ public class RuntimeRuleTest extends JavaOSGiTest {
                 final RuleStatusInfo ruleStatus = ruleEngine.getStatusInfo(rule.getUID());
                 logger.info("Rule status (should be IDLE or RUNNING): {}", ruleStatus);
                 boolean allFine;
-                if (RuleStatus.IDLE.equals(ruleStatus.getStatus())
-                        || RuleStatus.RUNNING.equals(ruleStatus.getStatus())) {
+                if (RuleStatus.IDLE == ruleStatus.getStatus() || RuleStatus.RUNNING == ruleStatus.getStatus()) {
                     allFine = true;
                 } else {
                     allFine = false;

@@ -86,19 +86,19 @@ public class ModuleTypeI18nServiceImpl implements ModuleTypeI18nService {
 
         List<ConfigDescriptionParameter> lconfigDescriptionParameters = getLocalizedConfigDescriptionParameters(
                 defModuleType.getConfigurationDescriptions(), ModuleTypeI18nUtil.MODULE_TYPE, uid, bundle, locale);
-        if (defModuleType instanceof ActionType) {
-            return createLocalizedActionType((ActionType) defModuleType, bundle, uid, locale,
-                    lconfigDescriptionParameters, llabel == null ? defModuleType.getLabel() : llabel,
+        if (defModuleType instanceof ActionType type) {
+            return createLocalizedActionType(type, bundle, uid, locale, lconfigDescriptionParameters,
+                    llabel == null ? defModuleType.getLabel() : llabel,
                     ldescription == null ? defModuleType.getDescription() : ldescription);
         }
-        if (defModuleType instanceof ConditionType) {
-            return createLocalizedConditionType((ConditionType) defModuleType, bundle, uid, locale,
-                    lconfigDescriptionParameters, llabel == null ? defModuleType.getLabel() : llabel,
+        if (defModuleType instanceof ConditionType type) {
+            return createLocalizedConditionType(type, bundle, uid, locale, lconfigDescriptionParameters,
+                    llabel == null ? defModuleType.getLabel() : llabel,
                     ldescription == null ? defModuleType.getDescription() : ldescription);
         }
-        if (defModuleType instanceof TriggerType) {
-            return createLocalizedTriggerType((TriggerType) defModuleType, bundle, uid, locale,
-                    lconfigDescriptionParameters, llabel != null ? llabel : defModuleType.getLabel(),
+        if (defModuleType instanceof TriggerType type) {
+            return createLocalizedTriggerType(type, bundle, uid, locale, lconfigDescriptionParameters,
+                    llabel != null ? llabel : defModuleType.getLabel(),
                     ldescription == null ? defModuleType.getDescription() : ldescription);
         }
         return null;
@@ -136,9 +136,9 @@ public class ModuleTypeI18nServiceImpl implements ModuleTypeI18nService {
         List<Input> inputs = moduleTypeI18nUtil.getLocalizedInputs(at.getInputs(), bundle, moduleTypeUID, locale);
         List<Output> outputs = moduleTypeI18nUtil.getLocalizedOutputs(at.getOutputs(), bundle, moduleTypeUID, locale);
         ActionType lat = null;
-        if (at instanceof CompositeActionType) {
-            List<Action> modules = moduleI18nUtil.getLocalizedModules(((CompositeActionType) at).getChildren(), bundle,
-                    moduleTypeUID, ModuleTypeI18nUtil.MODULE_TYPE, locale);
+        if (at instanceof CompositeActionType type) {
+            List<Action> modules = moduleI18nUtil.getLocalizedModules(type.getChildren(), bundle, moduleTypeUID,
+                    ModuleTypeI18nUtil.MODULE_TYPE, locale);
             lat = new CompositeActionType(moduleTypeUID, lconfigDescriptions, llabel, ldescription, at.getTags(),
                     at.getVisibility(), inputs, outputs, modules);
         } else {
@@ -165,9 +165,9 @@ public class ModuleTypeI18nServiceImpl implements ModuleTypeI18nService {
             @Nullable String llabel, @Nullable String ldescription) {
         List<Input> inputs = moduleTypeI18nUtil.getLocalizedInputs(ct.getInputs(), bundle, moduleTypeUID, locale);
         ConditionType lct = null;
-        if (ct instanceof CompositeConditionType) {
-            List<Condition> modules = moduleI18nUtil.getLocalizedModules(((CompositeConditionType) ct).getChildren(),
-                    bundle, moduleTypeUID, ModuleTypeI18nUtil.MODULE_TYPE, locale);
+        if (ct instanceof CompositeConditionType type) {
+            List<Condition> modules = moduleI18nUtil.getLocalizedModules(type.getChildren(), bundle, moduleTypeUID,
+                    ModuleTypeI18nUtil.MODULE_TYPE, locale);
             lct = new CompositeConditionType(moduleTypeUID, lconfigDescriptions, llabel, ldescription, ct.getTags(),
                     ct.getVisibility(), inputs, modules);
         } else {
@@ -194,9 +194,9 @@ public class ModuleTypeI18nServiceImpl implements ModuleTypeI18nService {
             @Nullable String llabel, @Nullable String ldescription) {
         List<Output> outputs = moduleTypeI18nUtil.getLocalizedOutputs(tt.getOutputs(), bundle, moduleTypeUID, locale);
         TriggerType ltt = null;
-        if (tt instanceof CompositeTriggerType) {
-            List<Trigger> modules = moduleI18nUtil.getLocalizedModules(((CompositeTriggerType) tt).getChildren(),
-                    bundle, moduleTypeUID, ModuleTypeI18nUtil.MODULE_TYPE, locale);
+        if (tt instanceof CompositeTriggerType type) {
+            List<Trigger> modules = moduleI18nUtil.getLocalizedModules(type.getChildren(), bundle, moduleTypeUID,
+                    ModuleTypeI18nUtil.MODULE_TYPE, locale);
             ltt = new CompositeTriggerType(moduleTypeUID, lconfigDescriptions, llabel, ldescription, tt.getTags(),
                     tt.getVisibility(), outputs, modules);
         } else {

@@ -52,8 +52,8 @@ public class ScriptConditionHandler extends AbstractScriptModuleHandler<Conditio
             setExecutionContext(scriptEngine, context);
             try {
                 Object returnVal = scriptEngine.eval(script);
-                if (returnVal instanceof Boolean) {
-                    result = (boolean) returnVal;
+                if (returnVal instanceof Boolean boolean1) {
+                    result = boolean1;
                 } else {
                     logger.error("Script did not return a boolean value, but '{}'", returnVal);
                 }

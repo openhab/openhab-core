@@ -15,7 +15,6 @@ package org.openhab.core.persistence;
 import java.time.ZonedDateTime;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.core.items.Item;
 import org.openhab.core.types.State;
 
 /**
@@ -23,7 +22,8 @@ import org.openhab.core.types.State;
  * with a certain state at a given point in time.
  *
  * <p>
- * Note that this interface does not extend {@link Item} as the persistence services could not provide an implementation
+ * Note that this interface does not extend {@link org.openhab.core.items.Item} as the persistence services could not
+ * provide an implementation
  * that correctly implement getAcceptedXTypes() and getGroupNames().
  *
  * @author Kai Kreuzer - Initial contribution

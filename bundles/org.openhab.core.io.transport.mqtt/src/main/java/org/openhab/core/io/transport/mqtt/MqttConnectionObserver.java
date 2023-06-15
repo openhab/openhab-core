@@ -33,5 +33,5 @@ public interface MqttConnectionObserver {
      * @param error An exception object (might be a MqttException) with the reason why
      *            a connection failed.
      */
-    public void connectionStateChanged(MqttConnectionState state, @Nullable Throwable error);
+    void connectionStateChanged(MqttConnectionState state, @Nullable Throwable error);
 }
