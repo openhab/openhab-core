@@ -14,6 +14,7 @@ package org.openhab.core.automation.internal.module;
 
 import static java.util.Map.entry;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -38,6 +39,7 @@ import org.openhab.core.automation.RuleStatus;
 import org.openhab.core.automation.RuleStatusDetail;
 import org.openhab.core.automation.events.RuleStatusInfoEvent;
 import org.openhab.core.automation.internal.RuleEngineImpl;
+import org.openhab.core.automation.internal.module.factory.CoreModuleHandlerFactory;
 import org.openhab.core.automation.internal.module.handler.CompareConditionHandler;
 import org.openhab.core.automation.type.ModuleTypeRegistry;
 import org.openhab.core.automation.util.ModuleBuilder;
@@ -47,6 +49,7 @@ import org.openhab.core.config.core.Configuration;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.events.EventSubscriber;
+import org.openhab.core.i18n.TimeZoneProvider;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemProvider;
@@ -56,6 +59,7 @@ import org.openhab.core.items.events.ItemEventFactory;
 import org.openhab.core.library.items.SwitchItem;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.service.ReadyMarker;
+import org.openhab.core.service.StartLevelService;
 import org.openhab.core.test.java.JavaOSGiTest;
 import org.openhab.core.test.storage.VolatileStorageService;
 import org.openhab.core.types.Command;
@@ -78,6 +82,13 @@ public class RuntimeRuleTest extends JavaOSGiTest {
 
     @BeforeEach
     public void before() {
+        EventPublisher eventPublisher = getService(EventPublisher.class);
+        ItemRegistry itemRegistry = getService(ItemRegistry.class);
+        CoreModuleHandlerFactory coreModuleHandlerFactory = new CoreModuleHandlerFactory(getBundleContext(),
+                eventPublisher, itemRegistry, mock(TimeZoneProvider.class), mock(StartLevelService.class));
+        mock(CoreModuleHandlerFactory.class);
+        registerService(coreModuleHandlerFactory);
+
         registerService(new ItemProvider() {
             @Override
             public void addProviderChangeListener(final ProviderChangeListener<Item> listener) {

@@ -78,6 +78,7 @@ public class SseItemStatesEventBuilder {
                 Item item = itemRegistry.getItem(itemName);
                 StateDTO stateDto = new StateDTO();
                 stateDto.state = item.getState().toString();
+                stateDto.type = getStateType(item.getState());
                 String displayState = getDisplayState(item, localeService.getLocale(null));
                 // Only include the display state if it's different than the raw state
                 if (stateDto.state != null && !stateDto.state.equals(displayState)) {
@@ -167,5 +168,11 @@ public class SseItemStatesEventBuilder {
         }
 
         return displayState;
+    }
+
+    // Taken from org.openhab.core.items.events.ItemEventFactory
+    private static String getStateType(State state) {
+        String stateClassName = state.getClass().getSimpleName();
+        return stateClassName.substring(0, stateClassName.length() - "Type".length());
     }
 }

@@ -115,10 +115,14 @@ public class GroupStateTriggerHandler extends BaseTriggerModuleHandler implement
             if (event instanceof ItemStateUpdatedEvent isEvent && UPDATE_MODULE_TYPE_ID.equals(module.getTypeUID())) {
                 String itemName = isEvent.getItemName();
                 Item item = itemRegistry.get(itemName);
+                Item group = itemRegistry.get(groupName);
                 if (item != null && item.getGroupNames().contains(groupName)) {
                     State state = isEvent.getItemState();
                     if ((this.state == null || state.toFullString().equals(this.state))) {
                         Map<String, Object> values = new HashMap<>();
+                        if (group != null) {
+                            values.put("triggeringGroup", group);
+                        }
                         values.put("triggeringItem", item);
                         values.put("state", state);
                         values.put("event", event);
@@ -129,12 +133,16 @@ public class GroupStateTriggerHandler extends BaseTriggerModuleHandler implement
                     && CHANGE_MODULE_TYPE_ID.equals(module.getTypeUID())) {
                 String itemName = iscEvent.getItemName();
                 Item item = itemRegistry.get(itemName);
+                Item group = itemRegistry.get(groupName);
                 if (item != null && item.getGroupNames().contains(groupName)) {
                     State state = iscEvent.getItemState();
                     State oldState = iscEvent.getOldItemState();
 
                     if (stateMatches(this.state, state) && stateMatches(this.previousState, oldState)) {
                         Map<String, Object> values = new HashMap<>();
+                        if (group != null) {
+                            values.put("triggeringGroup", group);
+                        }
                         values.put("triggeringItem", item);
                         values.put("oldState", oldState);
                         values.put("newState", state);

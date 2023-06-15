@@ -42,6 +42,7 @@ import org.openhab.core.automation.internal.module.handler.ThingStatusTriggerHan
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.i18n.TimeZoneProvider;
 import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.service.StartLevelService;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -78,14 +79,17 @@ public class CoreModuleHandlerFactory extends BaseModuleHandlerFactory implement
     private final TimeZoneProvider timeZoneProvider;
     private final EventPublisher eventPublisher;
     private final BundleContext bundleContext;
+    private final StartLevelService startLevelService;
 
     @Activate
     public CoreModuleHandlerFactory(BundleContext bundleContext, final @Reference EventPublisher eventPublisher,
-            final @Reference ItemRegistry itemRegistry, final @Reference TimeZoneProvider timeZoneProvider) {
+            final @Reference ItemRegistry itemRegistry, final @Reference TimeZoneProvider timeZoneProvider,
+            final @Reference StartLevelService startLevelService) {
         this.bundleContext = bundleContext;
         this.eventPublisher = eventPublisher;
         this.itemRegistry = itemRegistry;
         this.timeZoneProvider = timeZoneProvider;
+        this.startLevelService = startLevelService;
     }
 
     @Override
@@ -112,7 +116,7 @@ public class CoreModuleHandlerFactory extends BaseModuleHandlerFactory implement
             } else if (ItemCommandTriggerHandler.MODULE_TYPE_ID.equals(moduleTypeUID)) {
                 return new ItemCommandTriggerHandler(trigger, ruleUID, bundleContext, itemRegistry);
             } else if (SystemTriggerHandler.STARTLEVEL_MODULE_TYPE_ID.equals(moduleTypeUID)) {
-                return new SystemTriggerHandler(trigger, bundleContext);
+                return new SystemTriggerHandler(trigger, bundleContext, startLevelService);
             } else if (ThingStatusTriggerHandler.CHANGE_MODULE_TYPE_ID.equals(moduleTypeUID)
                     || ThingStatusTriggerHandler.UPDATE_MODULE_TYPE_ID.equals(moduleTypeUID)) {
                 return new ThingStatusTriggerHandler(trigger, bundleContext);

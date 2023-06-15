@@ -48,12 +48,12 @@ import com.google.inject.Injector;
  */
 @Component(immediate = true, service = ModelServer.class, configurationPid = ModelServer.CONFIGURATION_PID, //
         property = Constants.SERVICE_PID + "=org.openhab.lsp")
-@ConfigurableService(category = "misc", label = "Language Server (LSP)", description_uri = ModelServer.CONFIG_URI)
+@ConfigurableService(category = "system", label = "Language Server (LSP)", description_uri = ModelServer.CONFIG_URI)
 @NonNullByDefault
 public class ModelServer {
 
     public static final String CONFIGURATION_PID = "org.openhab.lsp";
-    protected static final String CONFIG_URI = "misc:lsp";
+    protected static final String CONFIG_URI = "system:lsp";
 
     private static final String KEY_PORT = "port";
     private static final int DEFAULT_PORT = 5007;

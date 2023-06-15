@@ -12,7 +12,9 @@
  */
 package org.openhab.core.internal.i18n;
 
+import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 
 import javax.measure.Quantity;
 import javax.measure.Unit;
@@ -44,5 +46,10 @@ public class TestUnitProvider implements UnitProvider {
     @Override
     public SystemOfUnits getMeasurementSystem() {
         return SIUnits.getInstance();
+    }
+
+    @Override
+    public Collection<Class<? extends Quantity<?>>> getAllDimensions() {
+        return Set.of();
     }
 }

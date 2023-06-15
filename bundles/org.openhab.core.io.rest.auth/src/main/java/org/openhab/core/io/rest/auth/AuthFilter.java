@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.io.rest.auth.internal;
+package org.openhab.core.io.rest.auth;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -53,6 +53,7 @@ import org.openhab.core.config.core.ConfigParser;
 import org.openhab.core.config.core.ConfigurableService;
 import org.openhab.core.io.rest.JSONResponse;
 import org.openhab.core.io.rest.RESTConstants;
+import org.openhab.core.io.rest.auth.internal.*;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -77,7 +78,8 @@ import org.slf4j.LoggerFactory;
  * @author Miguel Álvarez - Add trusted networks for implicit user role
  */
 @PreMatching
-@Component(configurationPid = "org.openhab.restauth", property = Constants.SERVICE_PID + "=org.openhab.restauth")
+@Component(configurationPid = "org.openhab.restauth", property = Constants.SERVICE_PID
+        + "=org.openhab.restauth", service = { ContainerRequestFilter.class, AuthFilter.class })
 @ConfigurableService(category = "system", label = "API Security", description_uri = AuthFilter.CONFIG_URI)
 @JaxrsExtension
 @JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
@@ -232,56 +234,80 @@ public class AuthFilter implements ContainerRequestFilter {
     public void filter(@Nullable ContainerRequestContext requestContext) throws IOException {
         if (requestContext != null) {
             try {
-                String altTokenHeader = requestContext.getHeaderString(ALT_AUTH_HEADER);
-                if (altTokenHeader != null) {
-                    requestContext.setSecurityContext(authenticateBearerToken(altTokenHeader));
-                    return;
-                }
-
-                String authHeader = requestContext.getHeaderString(HttpHeaders.AUTHORIZATION);
-                if (authHeader != null) {
-                    String[] authParts = authHeader.split(" ");
-                    if (authParts.length == 2) {
-                        String authType = authParts[0];
-                        String authValue = authParts[1];
-                        if ("Bearer".equalsIgnoreCase(authType)) {
-                            requestContext.setSecurityContext(authenticateBearerToken(authValue));
-                            return;
-                        } else if ("Basic".equalsIgnoreCase(authType)) {
-                            String[] decodedCredentials = new String(Base64.getDecoder().decode(authValue), "UTF-8")
-                                    .split(":");
-                            if (decodedCredentials.length > 2) {
-                                throw new AuthenticationException("Invalid Basic authentication credential format");
-                            }
-                            switch (decodedCredentials.length) {
-                                case 1:
-                                    requestContext.setSecurityContext(authenticateBearerToken(decodedCredentials[0]));
-                                    break;
-                                case 2:
-                                    if (!allowBasicAuth) {
-                                        throw new AuthenticationException(
-                                                "Basic authentication with username/password is not allowed");
-                                    }
-                                    requestContext.setSecurityContext(authenticateBasicAuth(authValue));
-                            }
-                        }
-                    }
-                } else if (isImplicitUserRole(requestContext)) {
-                    requestContext.setSecurityContext(new AnonymousUserSecurityContext());
+                SecurityContext sc = getSecurityContext(servletRequest, false);
+                if (sc != null) {
+                    requestContext.setSecurityContext(sc);
                 }
             } catch (AuthenticationException e) {
-                logger.warn("Unauthorized API request from {}: {}", getClientIp(requestContext), e.getMessage());
+                logger.warn("Unauthorized API request from {}: {}", getClientIp(servletRequest), e.getMessage());
                 requestContext.abortWith(JSONResponse.createErrorResponse(Status.UNAUTHORIZED, "Invalid credentials"));
             }
         }
     }
 
-    private boolean isImplicitUserRole(ContainerRequestContext requestContext) {
+    public @Nullable SecurityContext getSecurityContext(HttpServletRequest request, boolean allowQueryToken)
+            throws AuthenticationException, IOException {
+        String altTokenHeader = request.getHeader(ALT_AUTH_HEADER);
+        if (altTokenHeader != null) {
+            return authenticateBearerToken(altTokenHeader);
+        }
+        String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+        String authType = null;
+        String authValue = null;
+        boolean authFromQuery = false;
+        if (authHeader != null) {
+            String[] authParts = authHeader.split(" ");
+            if (authParts.length == 2) {
+                authType = authParts[0];
+                authValue = authParts[1];
+            }
+        } else if (allowQueryToken) {
+            Map<String, String[]> parameterMap = request.getParameterMap();
+            String[] accessToken = parameterMap.get("accessToken");
+            if (accessToken != null && accessToken.length > 0) {
+                authValue = accessToken[0];
+                authFromQuery = true;
+            }
+        }
+        if (authValue != null) {
+            if (authFromQuery) {
+                try {
+                    return authenticateBearerToken(authValue);
+                } catch (AuthenticationException e) {
+                    if (allowBasicAuth) {
+                        return authenticateBasicAuth(authValue);
+                    }
+                }
+            } else if ("Bearer".equalsIgnoreCase(authType)) {
+                return authenticateBearerToken(authValue);
+            } else if ("Basic".equalsIgnoreCase(authType)) {
+                String[] decodedCredentials = new String(Base64.getDecoder().decode(authValue), "UTF-8").split(":");
+                if (decodedCredentials.length > 2) {
+                    throw new AuthenticationException("Invalid Basic authentication credential format");
+                }
+                switch (decodedCredentials.length) {
+                    case 1:
+                        return authenticateBearerToken(decodedCredentials[0]);
+                    case 2:
+                        if (!allowBasicAuth) {
+                            throw new AuthenticationException(
+                                    "Basic authentication with username/password is not allowed");
+                        }
+                        return authenticateBasicAuth(authValue);
+                }
+            }
+        } else if (isImplicitUserRole(servletRequest)) {
+            return new AnonymousUserSecurityContext();
+        }
+        return null;
+    }
+
+    private boolean isImplicitUserRole(HttpServletRequest request) {
         if (implicitUserRole) {
             return true;
         }
         try {
-            byte[] clientAddress = InetAddress.getByName(getClientIp(requestContext)).getAddress();
+            byte[] clientAddress = InetAddress.getByName(getClientIp(request)).getAddress();
             return trustedNetworks.stream().anyMatch(networkCIDR -> networkCIDR.isInRange(clientAddress));
         } catch (IOException e) {
             logger.debug("Error validating trusted networks: {}", e.getMessage());
@@ -303,8 +329,8 @@ public class AuthFilter implements ContainerRequestFilter {
         return cidrList;
     }
 
-    private String getClientIp(ContainerRequestContext requestContext) throws UnknownHostException {
-        String ipForwarded = Objects.requireNonNullElse(requestContext.getHeaderString("x-forwarded-for"), "");
+    private String getClientIp(HttpServletRequest request) throws UnknownHostException {
+        String ipForwarded = Objects.requireNonNullElse(request.getHeader("x-forwarded-for"), "");
         String clientIp = ipForwarded.split(",")[0];
         return clientIp.isBlank() ? servletRequest.getRemoteAddr() : clientIp;
     }

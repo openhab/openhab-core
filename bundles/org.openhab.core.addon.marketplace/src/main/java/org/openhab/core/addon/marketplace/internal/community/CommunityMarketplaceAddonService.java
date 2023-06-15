@@ -90,7 +90,7 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
     private static final String COMMUNITY_BASE_URL = "https://community.openhab.org";
     private static final String COMMUNITY_MARKETPLACE_URL = COMMUNITY_BASE_URL + "/c/marketplace/69/l/latest";
     private static final String COMMUNITY_TOPIC_URL = COMMUNITY_BASE_URL + "/t/";
-    private static final Pattern BUNDLE_NAME_PATTERN = Pattern.compile(".*/(.*)-\\d+\\.\\d+\\.\\d+.*");
+    private static final Pattern BUNDLE_NAME_PATTERN = Pattern.compile(".*/(.*?)-\\d+\\.\\d+\\.\\d+.*");
 
     private static final String SERVICE_ID = "marketplace";
     private static final String ADDON_ID_PREFIX = SERVICE_ID + ":";

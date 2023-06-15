@@ -223,6 +223,12 @@ public class WatchServiceImpl implements WatchService, DirectoryChangeListener {
 
         Path path = directoryChangeEvent.path();
 
+        if (directoryChangeEvent.eventType() != DirectoryChangeEvent.EventType.DELETE
+                && directoryChangeEvent.hash() == null) {
+            logger.warn("Detected invalid event (hash must not be null for CREATE/MODIFY): {}", directoryChangeEvent);
+            return;
+        }
+
         synchronized (scheduledEvents) {
             ScheduledFuture<?> future = scheduledEvents.remove(path);
             if (future != null && !future.isDone()) {

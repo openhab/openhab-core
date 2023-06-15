@@ -12,6 +12,8 @@
  */
 package org.openhab.core.i18n;
 
+import java.util.Collection;
+
 import javax.measure.Quantity;
 import javax.measure.Unit;
 import javax.measure.spi.SystemOfUnits;
@@ -44,4 +46,6 @@ public interface UnitProvider {
      * @return the {@link SystemOfUnits} which is currently set, must not be null.
      */
     SystemOfUnits getMeasurementSystem();
+
+    Collection<Class<? extends Quantity<?>>> getAllDimensions();
 }
