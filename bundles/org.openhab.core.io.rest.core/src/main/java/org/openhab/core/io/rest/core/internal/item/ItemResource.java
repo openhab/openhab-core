@@ -88,7 +88,7 @@ import org.openhab.core.library.items.SwitchItem;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.library.types.RawType;
 import org.openhab.core.library.types.UpDownType;
-import org.openhab.core.semantics.SemanticTags;
+import org.openhab.core.semantics.SemanticTagRegistry;
 import org.openhab.core.semantics.SemanticsPredicates;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
@@ -182,6 +182,7 @@ public class ItemResource implements RESTResource {
     private final ManagedItemProvider managedItemProvider;
     private final MetadataRegistry metadataRegistry;
     private final MetadataSelectorMatcher metadataSelectorMatcher;
+    private final SemanticTagRegistry semanticTagRegistry;
     private final ItemRegistryChangeListener resetLastModifiedItemChangeListener = new ResetLastModifiedItemChangeListener();
     private final RegistryChangeListener<Metadata> resetLastModifiedMetadataChangeListener = new ResetLastModifiedMetadataChangeListener();
 
@@ -196,7 +197,8 @@ public class ItemResource implements RESTResource {
             final @Reference LocaleService localeService, //
             final @Reference ManagedItemProvider managedItemProvider,
             final @Reference MetadataRegistry metadataRegistry,
-            final @Reference MetadataSelectorMatcher metadataSelectorMatcher) {
+            final @Reference MetadataSelectorMatcher metadataSelectorMatcher,
+            final @Reference SemanticTagRegistry semanticTagRegistry) {
         this.dtoMapper = dtoMapper;
         this.eventPublisher = eventPublisher;
         this.itemBuilderFactory = itemBuilderFactory;
@@ -205,6 +207,7 @@ public class ItemResource implements RESTResource {
         this.managedItemProvider = managedItemProvider;
         this.metadataRegistry = metadataRegistry;
         this.metadataSelectorMatcher = metadataSelectorMatcher;
+        this.semanticTagRegistry = semanticTagRegistry;
 
         this.itemRegistry.addRegistryChangeListener(resetLastModifiedItemChangeListener);
         this.metadataRegistry.addRegistryChangeListener(resetLastModifiedMetadataChangeListener);
@@ -865,7 +868,8 @@ public class ItemResource implements RESTResource {
             @PathParam("semanticClass") @Parameter(description = "semantic class") String semanticClassName) {
         Locale locale = localeService.getLocale(language);
 
-        Class<? extends org.openhab.core.semantics.Tag> semanticClass = SemanticTags.getById(semanticClassName);
+        Class<? extends org.openhab.core.semantics.Tag> semanticClass = semanticTagRegistry
+                .getTagClassById(semanticClassName);
         if (semanticClass == null) {
             return Response.status(Status.NOT_FOUND).build();
         }

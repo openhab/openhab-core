@@ -13,20 +13,14 @@
 package org.openhab.core.semantics;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.common.registry.Provider;
 
 /**
- * This is the super interface for all types that represent an Equipment.
- * The interface describes the relations to other entity types.
+ * The {@link SemanticTagProvider} is responsible for providing semantic tags.
  *
- * @author Kai Kreuzer - Initial contribution
+ * @author Laurent Garnier - Initial contribution
  */
 @NonNullByDefault
-public interface Equipment extends Tag {
+public interface SemanticTagProvider extends Provider<SemanticTag> {
 
-    @Nullable
-    Equipment isPartOf();
-
-    @Nullable
-    Location hasLocation();
 }
