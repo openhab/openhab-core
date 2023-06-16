@@ -27,7 +27,7 @@ Filter:
 ;
 
 FilterDetails:
-	ThresholdFilter | TimeFilter | EqualsFilter | NotEqualsFilter
+	ThresholdFilter | TimeFilter | EqualsFilter | NotEqualsFilter | IncludeFilter | NotIncludeFilter
 ;
 
 ThresholdFilter:
@@ -45,6 +45,15 @@ EqualsFilter:
 NotEqualsFilter:
    '!' values+=STRING (',' values+=STRING)*
 ;
+
+IncludeFilter:
+  '[]' lower=DECIMAL upper=DECIMAL unit=STRING?
+;
+
+NotIncludeFilter:
+  '][' lower=DECIMAL upper=DECIMAL unit=STRING?
+;
+
 
 PersistenceConfiguration:
 	items+=(AllConfig | ItemConfig | GroupConfig) (',' items+=(AllConfig | ItemConfig | GroupConfig))* ('->' alias=STRING)? 

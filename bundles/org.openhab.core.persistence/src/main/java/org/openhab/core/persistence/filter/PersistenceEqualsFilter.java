@@ -54,6 +54,6 @@ public class PersistenceEqualsFilter extends PersistenceFilter {
 
     @Override
     public String toString() {
-        return String.format("%s [name=%s, value=%s]", getClass().getSimpleName(), getName(), values);
+        return String.format("%s [name=%s, value=%s, inverted=]", getClass().getSimpleName(), getName(), values);
     }
 }

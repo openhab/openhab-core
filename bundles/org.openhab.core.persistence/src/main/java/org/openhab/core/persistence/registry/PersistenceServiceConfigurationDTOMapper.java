@@ -34,6 +34,7 @@ import org.openhab.core.persistence.dto.PersistenceItemConfigurationDTO;
 import org.openhab.core.persistence.dto.PersistenceServiceConfigurationDTO;
 import org.openhab.core.persistence.filter.PersistenceEqualsFilter;
 import org.openhab.core.persistence.filter.PersistenceFilter;
+import org.openhab.core.persistence.filter.PersistenceIncludeFilter;
 import org.openhab.core.persistence.filter.PersistenceThresholdFilter;
 import org.openhab.core.persistence.filter.PersistenceTimeFilter;
 import org.openhab.core.persistence.strategy.PersistenceCronStrategy;
@@ -68,6 +69,8 @@ public class PersistenceServiceConfigurationDTOMapper {
                 PersistenceServiceConfigurationDTOMapper::mapPersistenceTimeFilter);
         dto.equalsFilters = filterList(persistenceServiceConfiguration.getFilters(), PersistenceEqualsFilter.class,
                 PersistenceServiceConfigurationDTOMapper::mapPersistenceEqualsFilter);
+        dto.includeFilters = filterList(persistenceServiceConfiguration.getFilters(), PersistenceIncludeFilter.class,
+                PersistenceServiceConfigurationDTOMapper::mapPersistenceIncludeFilter);
 
         return dto;
     }
@@ -80,7 +83,9 @@ public class PersistenceServiceConfigurationDTOMapper {
                 dto.thresholdFilters.stream()
                         .map(f -> new PersistenceThresholdFilter(f.name, f.value, f.unit, f.relative)),
                 dto.timeFilters.stream().map(f -> new PersistenceTimeFilter(f.name, f.value.intValue(), f.unit)),
-                dto.equalsFilters.stream().map(f -> new PersistenceEqualsFilter(f.name, f.values, f.inverted)))
+                dto.equalsFilters.stream().map(f -> new PersistenceEqualsFilter(f.name, f.values, f.inverted)),
+                dto.includeFilters.stream()
+                        .map(f -> new PersistenceIncludeFilter(f.name, f.lower, f.upper, f.unit, f.inverted)))
                 .flatMap(Function.identity()).collect(Collectors.toMap(PersistenceFilter::getName, e -> e));
 
         List<PersistenceStrategy> defaults = dto.defaults.stream()
@@ -93,7 +98,7 @@ public class PersistenceServiceConfigurationDTOMapper {
                     .map(str -> stringToPersistenceStrategy(str, strategyMap, dto.serviceId)).toList();
             List<PersistenceFilter> filters = config.filters.stream()
                     .map(str -> stringToPersistenceFilter(str, filterMap, dto.serviceId)).toList();
-            return new PersistenceItemConfiguration(items, config.alias, strategies, List.of());
+            return new PersistenceItemConfiguration(items, config.alias, strategies, filters);
         }).toList();
 
         return new PersistenceServiceConfiguration(dto.serviceId, configs, defaults, strategyMap.values(),
@@ -187,6 +192,16 @@ public class PersistenceServiceConfigurationDTOMapper {
         filterDTO.name = persistenceEqualsFilter.getName();
         filterDTO.values = persistenceEqualsFilter.getValues().stream().toList();
         filterDTO.inverted = persistenceEqualsFilter.getInverted();
+        return filterDTO;
+    }
+
+    private static PersistenceFilterDTO mapPersistenceIncludeFilter(PersistenceIncludeFilter persistenceIncludeFilter) {
+        PersistenceFilterDTO filterDTO = new PersistenceFilterDTO();
+        filterDTO.name = persistenceIncludeFilter.getName();
+        filterDTO.lower = persistenceIncludeFilter.getLower();
+        filterDTO.upper = persistenceIncludeFilter.getUpper();
+        filterDTO.unit = persistenceIncludeFilter.getUnit();
+        filterDTO.inverted = persistenceIncludeFilter.getInverted();
         return filterDTO;
     }
 }

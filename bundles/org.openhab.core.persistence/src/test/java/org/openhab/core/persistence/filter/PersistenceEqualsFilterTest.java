@@ -39,7 +39,7 @@ import org.openhab.core.library.unit.SIUnits;
 import org.openhab.core.types.State;
 
 /**
- * The {@link PersistenceEqualsFilterTest} contains tests for {@link PersistenceThresholdFilter}
+ * The {@link PersistenceEqualsFilterTest} contains tests for {@link PersistenceEqualsFilter}
  *
  * @author Jan N. Klug - Initial contribution
  */

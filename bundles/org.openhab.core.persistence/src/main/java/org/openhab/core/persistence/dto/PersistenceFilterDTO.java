@@ -26,10 +26,20 @@ public class PersistenceFilterDTO {
 
     // threshold and time
     public BigDecimal value;
-    public String unit;
+
+    // threshold
     public Boolean relative;
+
+    // threshold, include/exclude
+    public String unit;
+
+    // include/exclude
+    public BigDecimal lower;
+    public BigDecimal upper;
 
     // equals/not equals
     public List<String> values;
+
+    // equals/not equals, include/exclude
     public Boolean inverted;
 }

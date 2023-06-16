@@ -31,6 +31,7 @@ public class PersistenceServiceConfigurationDTO {
     public Collection<PersistenceFilterDTO> thresholdFilters = List.of();
     public Collection<PersistenceFilterDTO> timeFilters = List.of();
     public Collection<PersistenceFilterDTO> equalsFilters = List.of();
+    public Collection<PersistenceFilterDTO> includeFilters = List.of();
 
     public boolean editable = false;
 }

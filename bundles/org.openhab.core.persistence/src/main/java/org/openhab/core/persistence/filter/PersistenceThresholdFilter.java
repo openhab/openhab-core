@@ -123,6 +123,7 @@ public class PersistenceThresholdFilter extends PersistenceFilter {
 
     @Override
     public String toString() {
-        return String.format("%s [name=%s, value=%s, unit=%s]", getClass().getSimpleName(), getName(), value, unit);
+        return String.format("%s [name=%s, value=%s, unit=%s, relative=%b]", getClass().getSimpleName(), getName(),
+                value, unit, relative);
     }
 }
