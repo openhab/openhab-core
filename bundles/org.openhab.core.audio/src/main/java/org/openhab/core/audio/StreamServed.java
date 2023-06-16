@@ -12,21 +12,19 @@
  */
 package org.openhab.core.audio;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
- * This is a {@link ClonableAudioStream}, which can also provide information about its absolute length.
+ * Streams served by the AudioHTTPServer.
  *
- * @author Kai Kreuzer - Initial contribution
- * @author Gwendal Roulleau - Separate getClonedStream into its own class
+ * @author Gwendal Roulleau - Initial contribution
  */
 @NonNullByDefault
-public abstract class FixedLengthAudioStream extends ClonableAudioStream {
-
-    /**
-     * Provides the length of the stream in bytes.
-     *
-     * @return absolute length in bytes
-     */
-    public abstract long length();
+public record StreamServed(String url, AudioStream audioStream, AtomicInteger currentlyServedStream, AtomicLong timeout,
+        boolean multiTimeStream, CompletableFuture<@Nullable Void> playEnd) {
 }

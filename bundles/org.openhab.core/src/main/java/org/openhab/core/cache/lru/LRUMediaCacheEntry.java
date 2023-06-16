@@ -25,6 +25,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.common.Disposable;
 import org.openhab.core.storage.Storage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -232,6 +233,9 @@ public class LRUMediaCacheEntry<V> {
                     InputStream inputStreamLocal = inputStream;
                     if (inputStreamLocal != null) {
                         inputStreamLocal.close();
+                    }
+                    if (inputStreamLocal instanceof Disposable disposableStream) {
+                        disposableStream.dispose();
                     }
                 }
             }

@@ -32,10 +32,12 @@ public class AudioStreamFromCache extends FixedLengthAudioStream {
 
     private InputStreamCacheWrapper inputStream;
     private AudioFormat audioFormat;
+    private String key;
 
-    public AudioStreamFromCache(InputStreamCacheWrapper inputStream, AudioFormatInfo audioFormat) {
+    public AudioStreamFromCache(InputStreamCacheWrapper inputStream, AudioFormatInfo audioFormat, String key) {
         this.inputStream = inputStream;
         this.audioFormat = audioFormat.toAudioFormat();
+        this.key = key;
     }
 
     @Override
@@ -100,5 +102,10 @@ public class AudioStreamFromCache extends FixedLengthAudioStream {
     @Override
     public boolean markSupported() {
         return inputStream.markSupported();
+    }
+
+    @Override
+    public @Nullable String getId() {
+        return key;
     }
 }

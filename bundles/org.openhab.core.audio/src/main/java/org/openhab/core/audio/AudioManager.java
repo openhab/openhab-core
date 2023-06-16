@@ -252,4 +252,15 @@ public interface AudioManager {
      * @return ids of matching sinks
      */
     Set<String> getSinkIds(String pattern);
+
+    /**
+     * Handles a volume command change and returns a Runnable to restore it.
+     * Returning a Runnable allows us to have a no-op Runnable if changing volume back is not needed, and conveniently
+     * keeping it as one liner usable in a chain for the caller.
+     *
+     * @param volume The volume to set
+     * @param sink The sink to set the volume to
+     * @return A runnable to restore the volume to its previous value, or no-operation if no change is required.
+     */
+    Runnable handleVolumeCommand(@Nullable PercentType volume, AudioSink sink);
 }

@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
  * @author Christoph Weitkamp - Refactored use of filename extension
  */
 @NonNullByDefault
-public class URLAudioStream extends AudioStream {
+public class URLAudioStream extends ClonableAudioStream {
 
     private static final Pattern PLS_STREAM_PATTERN = Pattern.compile("^File[0-9]=(.+)$");
 
@@ -153,5 +153,10 @@ public class URLAudioStream extends AudioStream {
     @Override
     public String toString() {
         return url;
+    }
+
+    @Override
+    public InputStream getClonedStream() throws AudioException {
+        return new URLAudioStream(url);
     }
 }
