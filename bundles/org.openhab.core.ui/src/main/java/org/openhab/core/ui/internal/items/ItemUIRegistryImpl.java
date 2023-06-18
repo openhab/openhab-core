@@ -517,7 +517,6 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
                 }
                 pattern = pattern.substring(0, matcherEnd) + (!unit.isBlank() ? " " + unit : "");
             }
-
         } catch (ItemNotFoundException e) {
             logger.warn("Cannot retrieve item '{}' for widget {}", itemName, w.eClass().getInstanceTypeName());
         }
