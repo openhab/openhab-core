@@ -53,6 +53,7 @@ import org.slf4j.LoggerFactory;
 public class JarFileAddonService extends BundleTracker<Bundle> implements AddonService {
     public static final String SERVICE_ID = "jar";
     public static final String SERVICE_NAME = "JAR-File add-on service";
+    private static final String ADDONS_CONTENT_TYPE = "application/vnd.openhab.bundle";
 
     private static final Map<String, AddonType> ADDON_TYPE_MAP = Map.of( //
             "automation", new AddonType("automation", "Automation"), //
@@ -155,7 +156,7 @@ public class JarFileAddonService extends BundleTracker<Bundle> implements AddonS
                 .withVersion(bundle.getVersion().toString()).withLabel(addonInfo.getName())
                 .withConfigDescriptionURI(addonInfo.getConfigDescriptionURI())
                 .withDescription(Objects.requireNonNullElse(addonInfo.getDescription(), bundle.getSymbolicName()))
-                .build();
+                .withContentType(ADDONS_CONTENT_TYPE).build();
     }
 
     @Override
@@ -168,7 +169,8 @@ public class JarFileAddonService extends BundleTracker<Bundle> implements AddonS
 
     @Override
     public @Nullable Addon getAddon(String id, @Nullable Locale locale) {
-        return addons.get(id);
+        String queryId = id.startsWith(ADDON_ID_PREFIX) ? id : ADDON_ID_PREFIX + id;
+        return addons.get(queryId);
     }
 
     @Override
