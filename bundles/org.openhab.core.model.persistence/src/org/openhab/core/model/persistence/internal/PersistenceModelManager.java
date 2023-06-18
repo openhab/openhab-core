@@ -26,9 +26,13 @@ import org.openhab.core.model.core.ModelRepository;
 import org.openhab.core.model.core.ModelRepositoryChangeListener;
 import org.openhab.core.model.persistence.persistence.AllConfig;
 import org.openhab.core.model.persistence.persistence.CronStrategy;
+import org.openhab.core.model.persistence.persistence.EqualsFilter;
 import org.openhab.core.model.persistence.persistence.Filter;
 import org.openhab.core.model.persistence.persistence.GroupConfig;
+import org.openhab.core.model.persistence.persistence.IncludeFilter;
 import org.openhab.core.model.persistence.persistence.ItemConfig;
+import org.openhab.core.model.persistence.persistence.NotEqualsFilter;
+import org.openhab.core.model.persistence.persistence.NotIncludeFilter;
 import org.openhab.core.model.persistence.persistence.PersistenceConfiguration;
 import org.openhab.core.model.persistence.persistence.PersistenceModel;
 import org.openhab.core.model.persistence.persistence.Strategy;
@@ -40,7 +44,9 @@ import org.openhab.core.persistence.config.PersistenceAllConfig;
 import org.openhab.core.persistence.config.PersistenceConfig;
 import org.openhab.core.persistence.config.PersistenceGroupConfig;
 import org.openhab.core.persistence.config.PersistenceItemConfig;
+import org.openhab.core.persistence.filter.PersistenceEqualsFilter;
 import org.openhab.core.persistence.filter.PersistenceFilter;
+import org.openhab.core.persistence.filter.PersistenceIncludeFilter;
 import org.openhab.core.persistence.filter.PersistenceThresholdFilter;
 import org.openhab.core.persistence.filter.PersistenceTimeFilter;
 import org.openhab.core.persistence.registry.PersistenceServiceConfiguration;
@@ -175,13 +181,21 @@ public class PersistenceModelManager extends AbstractProvider<PersistenceService
     }
 
     private PersistenceFilter mapFilter(Filter filter) {
-        if (filter.getDefinition() instanceof TimeFilter) {
-            TimeFilter timeFilter = (TimeFilter) filter.getDefinition();
+        if (filter.getDefinition() instanceof TimeFilter timeFilter) {
             return new PersistenceTimeFilter(filter.getName(), timeFilter.getValue(), timeFilter.getUnit());
-        } else if (filter.getDefinition() instanceof ThresholdFilter) {
-            ThresholdFilter thresholdFilter = (ThresholdFilter) filter.getDefinition();
+        } else if (filter.getDefinition() instanceof ThresholdFilter thresholdFilter) {
             return new PersistenceThresholdFilter(filter.getName(), thresholdFilter.getValue(),
-                    thresholdFilter.getUnit());
+                    thresholdFilter.getUnit(), thresholdFilter.isRelative());
+        } else if (filter.getDefinition() instanceof EqualsFilter equalsFilter) {
+            return new PersistenceEqualsFilter(filter.getName(), equalsFilter.getValues(), false);
+        } else if (filter.getDefinition() instanceof NotEqualsFilter notEqualsFilter) {
+            return new PersistenceEqualsFilter(filter.getName(), notEqualsFilter.getValues(), true);
+        } else if (filter.getDefinition() instanceof IncludeFilter includeFilter) {
+            return new PersistenceIncludeFilter(filter.getName(), includeFilter.getLower(), includeFilter.getUpper(),
+                    includeFilter.getUnit(), false);
+        } else if (filter.getDefinition() instanceof NotIncludeFilter notIncludeFilter) {
+            return new PersistenceIncludeFilter(filter.getName(), notIncludeFilter.getLower(),
+                    notIncludeFilter.getUpper(), notIncludeFilter.getUnit(), true);
         }
         throw new IllegalArgumentException("Unknown filter type " + filter.getClass());
     }
