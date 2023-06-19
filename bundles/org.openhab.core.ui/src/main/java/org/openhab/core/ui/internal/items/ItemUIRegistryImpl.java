@@ -500,7 +500,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
             if (item instanceof NumberItem numberItem && numberItem.getDimension() != null) {
                 Matcher m = FORMAT_PATTERN.matcher(pattern);
                 int matcherEnd = 0;
-                while (m.find() && m.group(1) == null) {
+                if (m.find() && m.group(1) == null) {
                     matcherEnd = m.end();
                 }
                 String unit = pattern.substring(matcherEnd).trim();
