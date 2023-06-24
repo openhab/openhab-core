@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.thing.binding.generic.converter;
+package org.openhab.core.thing.binding.internal.generic.converter;
 
 import java.util.Optional;
 import java.util.function.Consumer;

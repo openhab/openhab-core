@@ -23,6 +23,7 @@ import org.openhab.core.library.types.StopMoveType;
 import org.openhab.core.library.types.UpDownType;
 import org.openhab.core.thing.binding.generic.ChannelTransformation;
 import org.openhab.core.thing.binding.generic.ChannelValueConverterConfig;
+import org.openhab.core.thing.binding.internal.generic.converter.AbstractTransformingChannelHandler;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
 import org.openhab.core.types.UnDefType;

@@ -21,6 +21,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.library.types.PercentType;
 import org.openhab.core.thing.binding.generic.ChannelTransformation;
 import org.openhab.core.thing.binding.generic.ChannelValueConverterConfig;
+import org.openhab.core.thing.binding.internal.generic.converter.AbstractTransformingChannelHandler;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
 import org.openhab.core.types.UnDefType;
