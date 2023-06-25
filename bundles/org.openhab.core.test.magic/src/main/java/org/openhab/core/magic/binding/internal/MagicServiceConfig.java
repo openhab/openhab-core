@@ -46,7 +46,7 @@ public class MagicServiceConfig {
 
     @Override
     public String toString() {
-        StringBuffer b = new StringBuffer();
+        StringBuilder b = new StringBuilder();
         for (Field field : this.getClass().getDeclaredFields()) {
             Object value;
             try {

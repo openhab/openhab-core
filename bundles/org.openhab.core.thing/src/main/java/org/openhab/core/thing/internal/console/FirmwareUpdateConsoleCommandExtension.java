@@ -132,7 +132,7 @@ public final class FirmwareUpdateConsoleCommandExtension extends AbstractConsole
         FirmwareStatusInfo firmwareStatusInfo = firmwareUpdateService.getFirmwareStatusInfo(thingUID);
 
         if (firmwareStatusInfo != null) {
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
             sb.append(String.format("Firmware status for thing with UID %s is %s.", thingUID,
                     firmwareStatusInfo.getFirmwareStatus()));
 

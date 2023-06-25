@@ -500,7 +500,7 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
             if (isOptionalConfig(configDescriptions)) {
                 return;
             } else {
-                StringBuffer statusDescription = new StringBuffer();
+                StringBuilder statusDescription = new StringBuilder();
                 String msg = " '%s';";
                 for (ConfigDescriptionParameter configParameter : configDescriptions) {
                     if (configParameter.isRequired()) {
@@ -517,7 +517,7 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
                 processValue(configurations.remove(configParameterName), configParameter);
             }
             if (!configurations.isEmpty()) {
-                StringBuffer statusDescription = new StringBuffer();
+                StringBuilder statusDescription = new StringBuilder();
                 String msg = " '%s';";
                 for (String name : configurations.keySet()) {
                     statusDescription.append(String.format(msg, name));
@@ -610,7 +610,7 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
      */
     private void resolveModuleConfigReferences(List<? extends Module> modules, Map<String, ?> ruleConfiguration) {
         if (modules != null) {
-            StringBuffer statusDescription = new StringBuffer();
+            StringBuilder statusDescription = new StringBuilder();
             for (Module module : modules) {
                 try {
                     ReferenceResolver.updateConfiguration(module.getConfiguration(), ruleConfiguration, logger);
