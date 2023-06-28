@@ -67,6 +67,7 @@ Fragment-Host: org.openhab.core.io.rest.core
 	org.openhab.core.test;version='[4.0.0,4.0.1)',\
 	org.openhab.core.thing;version='[4.0.0,4.0.1)',\
 	org.openhab.core.transform;version='[4.0.0,4.0.1)',\
+	com.fasterxml.jackson.dataformat;version='[2.14.1,2.14.2)',\
 	io.methvin.directory-watcher;version='[0.17.1,0.17.2)',\
 	com.sun.jna;version='[5.12.1,5.12.2)',\
 	com.fasterxml.woodstox.woodstox-core;version='[6.4.0,6.4.1)',\
