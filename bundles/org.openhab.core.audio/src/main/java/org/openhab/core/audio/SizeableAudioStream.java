@@ -12,24 +12,20 @@
  */
 package org.openhab.core.audio;
 
-import java.io.InputStream;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * This is for an {@link AudioStream}, that can be cloned
+ * This is for an {@link AudioStream}, which size is known
  *
  * @author Gwendal Roulleau - Initial contribution, separation from {@link FixedLengthAudioStream}
  */
 @NonNullByDefault
-public interface ClonableAudioStream {
+public interface SizeableAudioStream {
 
     /**
-     * Returns a new, fully independent stream instance, which can be read and closed without impacting the original
-     * instance.
+     * Provides the length of the stream in bytes.
      *
-     * @return a new input stream that can be consumed by the caller
-     * @throws AudioException if stream cannot be created
+     * @return absolute length in bytes
      */
-    public InputStream getClonedStream() throws AudioException;
+    public long length();
 }

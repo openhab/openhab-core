@@ -15,18 +15,15 @@ package org.openhab.core.audio;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * This is a {@link ClonableAudioStream}, which can also provide information about its absolute length.
+ * This is a {@link AudioStream}, which can also provide information about its absolute length and get cloned.
  *
  * @author Kai Kreuzer - Initial contribution
- * @author Gwendal Roulleau - Separate getClonedStream into its own class
+ * @author Gwendal Roulleau - Separate getClonedStream and length into their own interface.
+ * @deprecated You should consider using {@link ClonableAudioStream} and/or {@link SizeableAudioStream} to detect audio
+ *             stream capabilities
  */
 @NonNullByDefault
-public abstract class FixedLengthAudioStream extends ClonableAudioStream {
+@Deprecated
+public abstract class FixedLengthAudioStream extends AudioStream implements SizeableAudioStream, ClonableAudioStream {
 
-    /**
-     * Provides the length of the stream in bytes.
-     *
-     * @return absolute length in bytes
-     */
-    public abstract long length();
 }
