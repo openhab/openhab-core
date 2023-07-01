@@ -113,9 +113,9 @@ public class ThingStateMetric implements OpenhabCoreMeterBinder, EventSubscriber
 
     @Override
     public void receive(Event event) {
-        if (event instanceof ThingStatusInfoEvent) {
+        if (event instanceof ThingStatusInfoEvent thingEvent) {
             logger.trace("Received ThingStatusInfo(Changed)Event...");
-            String thingUid = ((ThingStatusInfoEvent) event).getThingUID().getAsString();
+            String thingUid = thingEvent.getThingUID().getAsString();
             ThingStatus status = gson.fromJson(event.getPayload(), ThingStatusInfo.class).getStatus();
             createOrUpdateMetricForBundleState(thingUid, status.ordinal());
         } else {
