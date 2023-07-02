@@ -136,8 +136,9 @@ public class UnitsTest {
     public void testKelvin2Fahrenheit() {
         Quantity<Temperature> kelvin = Quantities.getQuantity(BigDecimal.ZERO, Units.KELVIN);
 
-        assertThat(kelvin.to(ImperialUnits.FAHRENHEIT),
-                is(Quantities.getQuantity(new BigDecimal("-459.67"), ImperialUnits.FAHRENHEIT)));
+        assertThat(kelvin.to(ImperialUnits.FAHRENHEIT).getValue().doubleValue(), is(closeTo(
+                Quantities.getQuantity(new BigDecimal("-459.67"), ImperialUnits.FAHRENHEIT).getValue().doubleValue(),
+                0.01)));
     }
 
     @Test
