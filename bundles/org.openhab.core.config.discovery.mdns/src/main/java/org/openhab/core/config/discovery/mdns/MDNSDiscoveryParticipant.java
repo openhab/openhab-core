@@ -12,6 +12,7 @@
  */
 package org.openhab.core.config.discovery.mdns;
 
+import java.util.ArrayList;
 import java.util.Set;
 
 import javax.jmdns.ServiceInfo;
@@ -29,6 +30,7 @@ import org.openhab.core.thing.ThingUID;
  * mDNS scans.
  *
  * @author Tobias Bräutigam - Initial contribution
+ * @author Richard Schleich - Implemented support for getThingUIDs(...) and createResults(...)
  */
 @NonNullByDefault
 public interface MDNSDiscoveryParticipant {
@@ -58,6 +60,17 @@ public interface MDNSDiscoveryParticipant {
     DiscoveryResult createResult(ServiceInfo service);
 
     /**
+     * Creates a discovery result list for a mDNS service
+     *
+     * @param service the mDNS service found on the network
+     * @return the according discovery result list, if the device is not
+     *         supported by this participant the list is empty
+     */
+    default ArrayList<DiscoveryResult> createResults(ServiceInfo serviceInfo) {
+        return new ArrayList<DiscoveryResult>();
+    }
+
+    /**
      * Returns the thing UID for a mDNS service
      *
      * @param service the mDNS service on the network
@@ -66,6 +79,17 @@ public interface MDNSDiscoveryParticipant {
      */
     @Nullable
     ThingUID getThingUID(ServiceInfo service);
+
+    /**
+     * Returns a list of thing UIDs for a mDNS service
+     *
+     * @param service the mDNS service on the network
+     * @return a list of thing UIDs, if the device is not supported
+     *         by this participant the list is empty
+     */
+    default ArrayList<ThingUID> getThingUIDs(ServiceInfo serviceInfo) {
+        return new ArrayList<ThingUID>();
+    }
 
     /**
      * Some openHAB bindings handle devices that can sometimes be a bit late in updating their mDNS announcements, which

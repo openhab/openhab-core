@@ -18,6 +18,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Random;
 import java.util.Set;
@@ -43,6 +44,7 @@ import org.osgi.service.cm.ConfigurationAdmin;
  * Integration tests for the {@link MDNSDiscoveryService}.
  *
  * @author Henning Sudbrock - Initial contribution
+ * @author Richard Schleich - Implemented support for getThingUIDs(...) and createResults(...)
  */
 @NonNullByDefault
 public class MDNSDiscoveryServiceOSGiTest extends JavaOSGiTest {
@@ -60,12 +62,20 @@ public class MDNSDiscoveryServiceOSGiTest extends JavaOSGiTest {
         String serviceType = "_http._tcp.local.";
         ThingTypeUID thingTypeUID = new ThingTypeUID("myBinding", "myThingType");
         ThingUID thingUID = new ThingUID(thingTypeUID, "test" + new Random().nextInt(999999999));
+        ThingUID thingUID2 = new ThingUID(thingTypeUID, "test2" + new Random().nextInt(999999999));
+        ArrayList<ThingUID> thingUIDs = new ArrayList<ThingUID>();
+        thingUIDs.add(thingUID2);
         Set<ThingTypeUID> thingTypeUIDs = Set.of(thingTypeUID);
         DiscoveryResult discoveryResult = DiscoveryResultBuilder.create(thingUID).build();
+        DiscoveryResult discoveryResult2 = DiscoveryResultBuilder.create(thingUID2).build();
+        ArrayList<DiscoveryResult> discoveryResults = new ArrayList<DiscoveryResult>();
+        discoveryResults.add(discoveryResult2);
 
         MDNSDiscoveryParticipant mockMDNSDiscoveryParticipant = mock(MDNSDiscoveryParticipant.class);
         when(mockMDNSDiscoveryParticipant.getSupportedThingTypeUIDs()).thenReturn(thingTypeUIDs);
         when(mockMDNSDiscoveryParticipant.getServiceType()).thenReturn(serviceType);
+        when(mockMDNSDiscoveryParticipant.createResults(any())).thenReturn(discoveryResults);
+        when(mockMDNSDiscoveryParticipant.getThingUIDs(any())).thenReturn(thingUIDs);
         when(mockMDNSDiscoveryParticipant.createResult(any())).thenReturn(discoveryResult);
         when(mockMDNSDiscoveryParticipant.getThingUID(any())).thenReturn(thingUID);
 
@@ -82,14 +92,17 @@ public class MDNSDiscoveryServiceOSGiTest extends JavaOSGiTest {
 
         mdnsDiscoveryService.serviceAdded(mockServiceEvent);
         verify(mockDiscoveryListener, times(1)).thingDiscovered(mdnsDiscoveryService, discoveryResult);
+        verify(mockDiscoveryListener, times(1)).thingDiscovered(mdnsDiscoveryService, discoveryResult2);
         verifyNoMoreInteractions(mockDiscoveryListener);
 
         mdnsDiscoveryService.serviceResolved(mockServiceEvent);
-        verify(mockDiscoveryListener, times(2)).thingDiscovered(mdnsDiscoveryService, discoveryResult);
+        verify(mockDiscoveryListener, times(3)).thingDiscovered(mdnsDiscoveryService, discoveryResult);
+        verify(mockDiscoveryListener, times(2)).thingDiscovered(mdnsDiscoveryService, discoveryResult2);
         verifyNoMoreInteractions(mockDiscoveryListener);
 
         mdnsDiscoveryService.serviceRemoved(mockServiceEvent);
         verify(mockDiscoveryListener, times(1)).thingRemoved(mdnsDiscoveryService, thingUID);
+        verify(mockDiscoveryListener, times(1)).thingRemoved(mdnsDiscoveryService, thingUID2);
         verifyNoMoreInteractions(mockDiscoveryListener);
     }
 

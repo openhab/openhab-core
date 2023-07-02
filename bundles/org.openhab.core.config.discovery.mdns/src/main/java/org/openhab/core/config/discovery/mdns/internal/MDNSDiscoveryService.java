@@ -13,6 +13,7 @@
 package org.openhab.core.config.discovery.mdns.internal;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -53,7 +54,8 @@ import org.slf4j.LoggerFactory;
  *
  * @author Tobias Bräutigam - Initial contribution
  * @author Kai Kreuzer - Improved startup behavior and background discovery
- * @author Andre Fuechsel - make {@link #startScan()} asynchronous
+ * @author Andre Fuechsel - make {@link #startScan()} asynchronous
+ * @author Richard Schleich - Implemented support for getThingUIDs(...) and createResults(...)
  */
 @NonNullByDefault
 @Component(immediate = true, service = DiscoveryService.class, configurationPid = "discovery.mdns")
@@ -220,9 +222,13 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
     private void createDiscoveryResult(MDNSDiscoveryParticipant participant, ServiceInfo serviceInfo) {
         try {
             DiscoveryResult result = participant.createResult(serviceInfo);
+            ArrayList<DiscoveryResult> results = participant.createResults(serviceInfo);
             if (result != null) {
+                results.add(result);
+            }
+            for (DiscoveryResult thing : results) {
                 cancelRemovalTask(serviceInfo);
-                final DiscoveryResult resultNew = getLocalizedDiscoveryResult(result,
+                final DiscoveryResult resultNew = getLocalizedDiscoveryResult(thing,
                         FrameworkUtil.getBundle(participant.getClass()));
                 thingDiscovered(resultNew);
             }
@@ -234,13 +240,17 @@ public class MDNSDiscoveryService extends AbstractDiscoveryService implements Se
     private void removeDiscoveryResult(MDNSDiscoveryParticipant participant, ServiceInfo serviceInfo) {
         try {
             ThingUID thingUID = participant.getThingUID(serviceInfo);
+            ArrayList<ThingUID> thingUIDs = participant.getThingUIDs(serviceInfo);
             if (thingUID != null) {
+                thingUIDs.add(thingUID);
+            }
+            for (ThingUID thing : thingUIDs) {
                 long gracePeriod = participant.getRemovalGracePeriodSeconds(serviceInfo);
                 if (gracePeriod <= 0) {
-                    thingRemoved(thingUID);
+                    thingRemoved(thing);
                 } else {
                     cancelRemovalTask(serviceInfo);
-                    scheduleRemovalTask(thingUID, serviceInfo, gracePeriod);
+                    scheduleRemovalTask(thing, serviceInfo, gracePeriod);
                 }
             }
         } catch (Exception e) {
