@@ -31,7 +31,7 @@ public interface AudioHTTPServer {
     /**
      * Creates a relative url for a given {@link AudioStream} where it can be requested a single time.
      * Note that the HTTP header only contains "Content-length", if the passed stream is an instance of
-     * {@link FixedLengthAudioStream}.
+     * {@link SizeableAudioStream}.
      * If the client that requests the url expects this header field to be present, make sure to pass such an instance.
      * Streams are closed after having been served.
      *

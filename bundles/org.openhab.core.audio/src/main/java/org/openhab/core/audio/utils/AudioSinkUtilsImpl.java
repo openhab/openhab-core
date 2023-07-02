@@ -66,11 +66,20 @@ public class AudioSinkUtilsImpl implements AudioSinkUtils {
                             .longValue();
                     return startTime + computedDuration;
                 } catch (IOException | UnsupportedAudioFileException e) {
-                    logger.debug("Cannot compute the duration of input stream", e);
+                    logger.debug("Cannot compute the duration of input stream with method java stream sound analysis",
+                            e);
+                    Integer bitRate = audioFormat.getBitRate();
+                    if (bitRate != null && bitRate != 0) {
+                        long computedDuration = Float.valueOf((1f * dataTransferedLength / bitRate) * 1000000000)
+                                .longValue();
+                        return startTime + computedDuration;
+                    } else {
+                        logger.debug("Cannot compute the duration of input stream by using audio format information");
+                    }
                     return null;
                 }
             } else if (AudioFormat.CODEC_MP3.equals(audioFormat.getCodec())) {
-                // not precise, no VBR, but better than nothing
+                // not accurate, no VBR support, but better than nothing
                 Bitstream bitstream = new Bitstream(new ByteArrayInputStream(dataBytes));
                 try {
                     Header h = bitstream.readFrame();

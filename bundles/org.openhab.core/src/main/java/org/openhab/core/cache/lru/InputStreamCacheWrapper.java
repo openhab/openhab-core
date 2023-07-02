@@ -37,6 +37,7 @@ public class InputStreamCacheWrapper extends InputStream {
 
     private LRUMediaCacheEntry<?> cacheEntry;
     private int offset = 0;
+    private int markedOffset = 0;
 
     /***
      * Construct a transparent InputStream wrapper around data from the cache.
@@ -112,5 +113,20 @@ public class InputStreamCacheWrapper extends InputStream {
 
     public InputStream getClonedStream() throws IOException {
         return cacheEntry.getInputStream();
+    }
+
+    @Override
+    public synchronized void mark(int readlimit) {
+        markedOffset = offset;
+    }
+
+    @Override
+    public synchronized void reset() throws IOException {
+        offset = markedOffset;
+    }
+
+    @Override
+    public boolean markSupported() {
+        return true;
     }
 }

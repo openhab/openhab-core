@@ -29,7 +29,6 @@ import org.openhab.core.audio.AudioFormat;
 import org.openhab.core.audio.AudioStream;
 import org.openhab.core.audio.ByteArrayAudioStream;
 import org.openhab.core.audio.FileAudioStream;
-import org.openhab.core.audio.FixedLengthAudioStream;
 import org.openhab.core.audio.StreamServed;
 import org.openhab.core.audio.internal.utils.BundledSoundFileHandler;
 
@@ -214,7 +213,7 @@ public class AudioServletTest extends AbstractAudioServletTest {
     @Test
     public void multiTimeStreamIsClosedAfterExpired() throws Exception {
         AtomicInteger cloneCounter = new AtomicInteger();
-        FixedLengthAudioStream audioStream = mock(FixedLengthAudioStream.class);
+        ByteArrayAudioStream audioStream = mock(ByteArrayAudioStream.class);
         AudioStream clonedStream = mock(AudioStream.class);
         AudioFormat audioFormat = mock(AudioFormat.class);
         when(audioStream.getFormat()).thenReturn(audioFormat);
@@ -250,7 +249,7 @@ public class AudioServletTest extends AbstractAudioServletTest {
     @Test
     public void streamsAreClosedOnDeactivate() throws Exception {
         AudioStream oneTimeStream = mock(AudioStream.class);
-        FixedLengthAudioStream multiTimeStream = mock(FixedLengthAudioStream.class);
+        ByteArrayAudioStream multiTimeStream = mock(ByteArrayAudioStream.class);
 
         serveStream(oneTimeStream);
         serveStream(multiTimeStream, 10);

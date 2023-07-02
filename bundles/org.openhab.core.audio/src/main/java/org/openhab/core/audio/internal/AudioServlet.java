@@ -48,7 +48,7 @@ import org.openhab.core.audio.AudioStream;
 import org.openhab.core.audio.ByteArrayAudioStream;
 import org.openhab.core.audio.ClonableAudioStream;
 import org.openhab.core.audio.FileAudioStream;
-import org.openhab.core.audio.FixedLengthAudioStream;
+import org.openhab.core.audio.SizeableAudioStream;
 import org.openhab.core.audio.StreamServed;
 import org.openhab.core.audio.utils.AudioSinkUtils;
 import org.openhab.core.common.ThreadPoolManager;
@@ -135,8 +135,8 @@ public class AudioServlet extends HttpServlet implements AudioHTTPServer {
         }
 
         // try to set the content-length, if possible
-        if (streamServed.audioStream() instanceof FixedLengthAudioStream fixedLengthServedStream) {
-            final long size = fixedLengthServedStream.length();
+        if (streamServed.audioStream() instanceof SizeableAudioStream sizeableServedStream) {
+            final long size = sizeableServedStream.length();
             resp.setContentLength((int) size);
         }
 
@@ -285,9 +285,9 @@ public class AudioServlet extends HttpServlet implements AudioHTTPServer {
         return streamToServe;
     }
 
-    private ClonableAudioStream createClonableInputStream(AudioStream stream, String streamId) throws IOException {
+    private AudioStream createClonableInputStream(AudioStream stream, String streamId) throws IOException {
         byte[] dataBytes = stream.readNBytes(ONETIME_STREAM_BUFFER_MAX_SIZE + 1);
-        ClonableAudioStream clonableAudioStreamResult;
+        AudioStream clonableAudioStreamResult;
         if (dataBytes.length <= ONETIME_STREAM_BUFFER_MAX_SIZE) {
             // we will use an in memory buffer to avoid disk operation
             clonableAudioStreamResult = new ByteArrayAudioStream(dataBytes, stream.getFormat());

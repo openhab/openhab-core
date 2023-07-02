@@ -42,9 +42,11 @@ public class FileAudioStream extends FixedLengthAudioStream implements Disposabl
 
     private final File file;
     private final AudioFormat audioFormat;
-    private InputStream inputStream;
+    private FileInputStream inputStream;
     private final long length;
     private final boolean isTemporaryFile;
+    private int markedOffset = 0;
+    private int alreadyRead = 0;
 
     public FileAudioStream(File file) throws AudioException {
         this(file, getAudioFormat(file));
@@ -87,7 +89,7 @@ public class FileAudioStream extends FixedLengthAudioStream implements Disposabl
         }
     }
 
-    private static InputStream getInputStream(File file) throws AudioException {
+    private static FileInputStream getInputStream(File file) throws AudioException {
         try {
             return new FileInputStream(file);
         } catch (FileNotFoundException e) {
@@ -102,7 +104,9 @@ public class FileAudioStream extends FixedLengthAudioStream implements Disposabl
 
     @Override
     public int read() throws IOException {
-        return inputStream.read();
+        int read = inputStream.read();
+        alreadyRead++;
+        return read;
     }
 
     @Override
@@ -124,9 +128,21 @@ public class FileAudioStream extends FixedLengthAudioStream implements Disposabl
         }
         try {
             inputStream = getInputStream(file);
+            inputStream.skipNBytes(markedOffset);
+            alreadyRead = markedOffset;
         } catch (AudioException e) {
             throw new IOException("Cannot reset file input stream: " + e.getMessage(), e);
         }
+    }
+
+    @Override
+    public synchronized void mark(int readlimit) {
+        markedOffset = alreadyRead;
+    }
+
+    @Override
+    public boolean markSupported() {
+        return true;
     }
 
     @Override
