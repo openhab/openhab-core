@@ -65,7 +65,7 @@ public class ScriptEngineFactoryBundleTracker extends BundleTracker<Bundle> impl
         this.open();
 
         readyService.registerTracker(this, new ReadyMarkerFilter().withType(StartLevelService.STARTLEVEL_MARKER_TYPE)
-                .withIdentifier(Integer.toString(StartLevelService.STARTLEVEL_OSGI)));
+                .withIdentifier(Integer.toString(StartLevelService.STARTLEVEL_MODEL)));
     }
 
     @Deactivate
@@ -126,11 +126,15 @@ public class ScriptEngineFactoryBundleTracker extends BundleTracker<Bundle> impl
     }
 
     private void checkReady() {
-        if (!ready && startLevelService.getStartLevel() > StartLevelService.STARTLEVEL_OSGI && allBundlesActive()) {
-            logger.info("All automation bundles ready.");
+        int startLevel = startLevelService.getStartLevel();
+        boolean allBundlesActive = allBundlesActive();
+
+        if (!ready && startLevel >= StartLevelService.STARTLEVEL_MODEL && allBundlesActive) {
+            logger.debug("All automation bundles ready: {}", bundles);
             readyService.markReady(READY_MARKER);
             ready = true;
         } else if (ready && !allBundlesActive()) {
+            logger.debug("All automation bundles ready: {}", bundles);
             readyService.unmarkReady(READY_MARKER);
             ready = false;
         }
