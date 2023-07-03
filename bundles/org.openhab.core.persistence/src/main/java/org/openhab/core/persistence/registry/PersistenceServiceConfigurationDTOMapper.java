@@ -79,13 +79,26 @@ public class PersistenceServiceConfigurationDTOMapper {
         Map<String, PersistenceStrategy> strategyMap = dto.cronStrategies.stream()
                 .collect(Collectors.toMap(e -> e.name, e -> new PersistenceCronStrategy(e.name, e.cronExpression)));
 
-        Map<String, PersistenceFilter> filterMap = Stream.of(
-                dto.thresholdFilters.stream()
-                        .map(f -> new PersistenceThresholdFilter(f.name, f.value, f.unit, f.relative)),
-                dto.timeFilters.stream().map(f -> new PersistenceTimeFilter(f.name, f.value.intValue(), f.unit)),
-                dto.equalsFilters.stream().map(f -> new PersistenceEqualsFilter(f.name, f.values, f.inverted)),
-                dto.includeFilters.stream()
-                        .map(f -> new PersistenceIncludeFilter(f.name, f.lower, f.upper, f.unit, f.inverted)))
+        Map<String, PersistenceFilter> filterMap = Stream.of(dto.thresholdFilters.stream().peek(f -> {
+            if (f.unit == null)
+                f.unit = "";
+            if (f.relative == null)
+                f.relative = false;
+        }).map(f -> new PersistenceThresholdFilter(f.name, f.value, f.unit, f.relative)),
+                dto.timeFilters.stream().peek(f -> {
+                    if (f.unit == null)
+                        f.unit = "s";
+                }).map(f -> new PersistenceTimeFilter(f.name, f.value.intValue(), f.unit)),
+                dto.equalsFilters.stream().peek(f -> {
+                    if (f.inverted == null)
+                        f.inverted = false;
+                }).map(f -> new PersistenceEqualsFilter(f.name, f.values, f.inverted)),
+                dto.includeFilters.stream().peek(f -> {
+                    if (f.unit == null)
+                        f.unit = "";
+                    if (f.inverted == null)
+                        f.inverted = false;
+                }).map(f -> new PersistenceIncludeFilter(f.name, f.lower, f.upper, f.unit, f.inverted)))
                 .flatMap(Function.identity()).collect(Collectors.toMap(PersistenceFilter::getName, e -> e));
 
         List<PersistenceStrategy> defaults = dto.defaults.stream()
