@@ -82,14 +82,8 @@ public class PersistenceIncludeFilter extends PersistenceFilter {
         }
 
         if (inverted) {
-            logger.error("Compare {} {} to {} -> {}, {} -> {}", inverted, compareValue, lower,
-                    compareValue.compareTo(lower) <= 0, upper, compareValue.compareTo(upper) >= 0);
-
             return compareValue.compareTo(lower) <= 0 || compareValue.compareTo(upper) >= 0;
         } else {
-
-            logger.error("Compare {} {} to {} -> {}, {} -> {}", inverted, compareValue, lower,
-                    compareValue.compareTo(lower) >= 0, upper, compareValue.compareTo(upper) <= 0);
             return compareValue.compareTo(lower) >= 0 && compareValue.compareTo(upper) <= 0;
         }
     }
