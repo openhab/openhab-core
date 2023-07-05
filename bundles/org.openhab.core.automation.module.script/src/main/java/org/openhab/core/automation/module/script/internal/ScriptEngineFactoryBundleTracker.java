@@ -85,8 +85,8 @@ public class ScriptEngineFactoryBundleTracker extends BundleTracker<Bundle> impl
         if (isScriptingBundle(bundle)) {
             logger.debug("Added {}: {} ", bsn, stateToString(state));
             bundles.put(bsn, state);
+            checkReady();
         }
-        checkReady();
 
         return bundle;
     }
@@ -99,8 +99,8 @@ public class ScriptEngineFactoryBundleTracker extends BundleTracker<Bundle> impl
         if (isScriptingBundle(bundle)) {
             logger.debug("Modified {}: {}", bsn, stateToString(state));
             bundles.put(bsn, state);
+            checkReady();
         }
-        checkReady();
     }
 
     @Override
@@ -110,31 +110,34 @@ public class ScriptEngineFactoryBundleTracker extends BundleTracker<Bundle> impl
         if (isScriptingBundle(bundle)) {
             logger.debug("Removed {}", bsn);
             bundles.remove(bsn);
+            checkReady();
         }
-        checkReady();
     }
 
     @Override
     public void onReadyMarkerAdded(ReadyMarker readyMarker) {
+        logger.debug("Readymarker {} added", readyMarker);
         checkReady();
     }
 
     @Override
     public void onReadyMarkerRemoved(ReadyMarker readyMarker) {
+        logger.debug("Readymarker {} removed", readyMarker);
         ready = false;
         readyService.unmarkReady(READY_MARKER);
     }
 
-    private void checkReady() {
+    private synchronized void checkReady() {
         int startLevel = startLevelService.getStartLevel();
         boolean allBundlesActive = allBundlesActive();
+        logger.trace("ready: {}, startlevel: {}, allActive: {}", ready, startLevel, allBundlesActive);
 
         if (!ready && startLevel >= StartLevelService.STARTLEVEL_MODEL && allBundlesActive) {
-            logger.debug("All automation bundles ready: {}", bundles);
+            logger.debug("Adding ready marker: All automation bundles ready ({})", bundles);
             readyService.markReady(READY_MARKER);
             ready = true;
-        } else if (ready && !allBundlesActive()) {
-            logger.debug("All automation bundles ready: {}", bundles);
+        } else if (ready && !allBundlesActive) {
+            logger.debug("Removing ready marker: Not all automation bundles ready ({})", bundles);
             readyService.unmarkReady(READY_MARKER);
             ready = false;
         }
