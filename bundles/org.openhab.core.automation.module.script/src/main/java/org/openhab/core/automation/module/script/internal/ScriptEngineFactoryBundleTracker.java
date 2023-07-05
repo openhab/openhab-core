@@ -50,18 +50,15 @@ public class ScriptEngineFactoryBundleTracker extends BundleTracker<Bundle> impl
     private final Logger logger = LoggerFactory.getLogger(ScriptEngineFactoryBundleTracker.class);
 
     private final ReadyService readyService;
-    private final StartLevelService startLevelService;
 
     private final Map<String, Integer> bundles = new ConcurrentHashMap<>();
+    private boolean startLevel = false;
     private boolean ready = false;
 
     @Activate
-    public ScriptEngineFactoryBundleTracker(final @Reference ReadyService readyService,
-            final @Reference StartLevelService startLevelService, BundleContext bc) {
+    public ScriptEngineFactoryBundleTracker(final @Reference ReadyService readyService, BundleContext bc) {
         super(bc, STATE_MASK, null);
         this.readyService = readyService;
-        this.startLevelService = startLevelService;
-
         this.open();
 
         readyService.registerTracker(this, new ReadyMarkerFilter().withType(StartLevelService.STARTLEVEL_MARKER_TYPE)
@@ -117,22 +114,23 @@ public class ScriptEngineFactoryBundleTracker extends BundleTracker<Bundle> impl
     @Override
     public void onReadyMarkerAdded(ReadyMarker readyMarker) {
         logger.debug("Readymarker {} added", readyMarker);
+        startLevel = true;
         checkReady();
     }
 
     @Override
     public void onReadyMarkerRemoved(ReadyMarker readyMarker) {
         logger.debug("Readymarker {} removed", readyMarker);
+        startLevel = false;
         ready = false;
         readyService.unmarkReady(READY_MARKER);
     }
 
     private synchronized void checkReady() {
-        int startLevel = startLevelService.getStartLevel();
         boolean allBundlesActive = allBundlesActive();
         logger.trace("ready: {}, startlevel: {}, allActive: {}", ready, startLevel, allBundlesActive);
 
-        if (!ready && startLevel >= StartLevelService.STARTLEVEL_MODEL && allBundlesActive) {
+        if (!ready && startLevel && allBundlesActive) {
             logger.debug("Adding ready marker: All automation bundles ready ({})", bundles);
             readyService.markReady(READY_MARKER);
             ready = true;
