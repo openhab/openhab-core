@@ -1373,26 +1373,29 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
 
     @Override
     public @Nullable String getUnitForWidget(Widget w) {
-        try {
-            Item item = getItem(w.getItem());
+        String itemName = w.getItem();
+        if (itemName != null) {
+            try {
+                Item item = getItem(itemName);
 
-            // we require the item to define a dimension, otherwise no unit will be reported to the UIs.
-            if (item instanceof NumberItem numberItem && numberItem.getDimension() != null) {
-                String pattern = getFormatPattern(w);
-                if (pattern == null || pattern.isBlank()) {
-                    // if no Label was assigned to the Widget we fallback to the items unit
+                // we require the item to define a dimension, otherwise no unit will be reported to the UIs.
+                if (item instanceof NumberItem numberItem && numberItem.getDimension() != null) {
+                    String pattern = getFormatPattern(w);
+                    if (pattern == null || pattern.isBlank()) {
+                        // if no Label was assigned to the Widget we fallback to the items unit
+                        return numberItem.getUnitSymbol();
+                    }
+
+                    String unit = getUnitFromPattern(pattern);
+                    if (!UnitUtils.UNIT_PLACEHOLDER.equals(unit)) {
+                        return unit;
+                    }
+
                     return numberItem.getUnitSymbol();
                 }
-
-                String unit = getUnitFromPattern(pattern);
-                if (!UnitUtils.UNIT_PLACEHOLDER.equals(unit)) {
-                    return unit;
-                }
-
-                return numberItem.getUnitSymbol();
+            } catch (ItemNotFoundException e) {
+                logger.warn("Failed to retrieve item during widget rendering, item does not exist: {}", e.getMessage());
             }
-        } catch (ItemNotFoundException e) {
-            logger.warn("Failed to retrieve item during widget rendering, item does not exist: {}", e.getMessage());
         }
 
         return "";
