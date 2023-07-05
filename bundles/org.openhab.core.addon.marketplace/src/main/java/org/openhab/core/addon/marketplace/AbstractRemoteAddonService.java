@@ -20,6 +20,7 @@ import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -29,6 +30,8 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.OpenHAB;
 import org.openhab.core.addon.Addon;
 import org.openhab.core.addon.AddonEventFactory;
+import org.openhab.core.addon.AddonInfo;
+import org.openhab.core.addon.AddonInfoRegistry;
 import org.openhab.core.addon.AddonService;
 import org.openhab.core.addon.AddonType;
 import org.openhab.core.cache.ExpiringCache;
@@ -66,13 +69,15 @@ public abstract class AbstractRemoteAddonService implements AddonService {
     protected final ConfigurationAdmin configurationAdmin;
     protected final ExpiringCache<List<Addon>> cachedRemoteAddons = new ExpiringCache<>(Duration.ofMinutes(15),
             this::getRemoteAddons);
+    protected final AddonInfoRegistry addonInfoRegistry;
     protected List<Addon> cachedAddons = List.of();
     protected List<String> installedAddons = List.of();
 
     private final Logger logger = LoggerFactory.getLogger(AbstractRemoteAddonService.class);
 
     public AbstractRemoteAddonService(EventPublisher eventPublisher, ConfigurationAdmin configurationAdmin,
-            StorageService storageService, String servicePid) {
+            StorageService storageService, AddonInfoRegistry addonInfoRegistry, String servicePid) {
+        this.addonInfoRegistry = addonInfoRegistry;
         this.eventPublisher = eventPublisher;
         this.configurationAdmin = configurationAdmin;
         this.installedAddonStorage = storageService.getStorage(servicePid);
@@ -81,6 +86,16 @@ public abstract class AbstractRemoteAddonService implements AddonService {
 
     protected BundleVersion getCoreVersion() {
         return new BundleVersion(FrameworkUtil.getBundle(OpenHAB.class).getVersion().toString());
+    }
+
+    private Addon convertFromStorage(Map.Entry<String, @Nullable String> entry) {
+        Addon storedAddon = Objects.requireNonNull(gson.fromJson(entry.getValue(), Addon.class));
+        AddonInfo addonInfo = addonInfoRegistry.getAddonInfo(storedAddon.getType() + "-" + storedAddon.getId());
+        if (addonInfo != null && storedAddon.getConfigDescriptionURI().isBlank()) {
+            return Addon.create(storedAddon).withConfigDescriptionURI(addonInfo.getConfigDescriptionURI()).build();
+        } else {
+            return storedAddon;
+        }
     }
 
     @Override
@@ -92,8 +107,7 @@ public abstract class AbstractRemoteAddonService implements AddonService {
         }
         List<Addon> addons = new ArrayList<>();
         try {
-            installedAddonStorage.stream().map(e -> Objects.requireNonNull(gson.fromJson(e.getValue(), Addon.class)))
-                    .forEach(addons::add);
+            installedAddonStorage.stream().map(this::convertFromStorage).forEach(addons::add);
         } catch (JsonSyntaxException e) {
             List.copyOf(installedAddonStorage.getKeys()).forEach(installedAddonStorage::remove);
             logger.error(

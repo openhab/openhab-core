@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.addon.Addon;
+import org.openhab.core.addon.AddonInfoRegistry;
 import org.openhab.core.addon.marketplace.AbstractRemoteAddonService;
 import org.openhab.core.addon.marketplace.BundleVersion;
 import org.openhab.core.addon.marketplace.MarketplaceAddonHandler;
@@ -51,8 +52,8 @@ public class TestAddonService extends AbstractRemoteAddonService {
     private int remoteCalls = 0;
 
     public TestAddonService(EventPublisher eventPublisher, ConfigurationAdmin configurationAdmin,
-            StorageService storageService) {
-        super(eventPublisher, configurationAdmin, storageService, SERVICE_PID);
+            StorageService storageService, AddonInfoRegistry addonInfoRegistry) {
+        super(eventPublisher, configurationAdmin, storageService, addonInfoRegistry, SERVICE_PID);
     }
 
     @Override
