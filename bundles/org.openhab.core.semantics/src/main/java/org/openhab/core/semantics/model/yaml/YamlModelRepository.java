@@ -17,13 +17,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.service.WatchService;
 import org.openhab.core.service.WatchService.Kind;
 import org.osgi.service.component.annotations.Activate;
@@ -52,51 +52,47 @@ public class YamlModelRepository implements WatchService.WatchEventListener {
     private final Logger logger = LoggerFactory.getLogger(YamlModelRepository.class);
 
     private final WatchService watchService;
-    private final List<Path> watchPaths = new CopyOnWriteArrayList<>();
+    private final Path watchPath;
     private final ObjectMapper yamlReader;
-    private final List<YamlModelListener<?>> listeners = new CopyOnWriteArrayList<>();
-    private final Map<Path, List<? extends YamlElement>> objects = new ConcurrentHashMap<>();
+
+    private final Map<String, List<YamlModelListener<?>>> listeners = new ConcurrentHashMap<>();
+    private final Map<String, List<? extends YamlElement>> objects = new ConcurrentHashMap<>();
 
     @Activate
     public YamlModelRepository(@Reference(target = WatchService.CONFIG_WATCHER_FILTER) WatchService watchService) {
         this.watchService = watchService;
         this.yamlReader = new ObjectMapper(new YAMLFactory());
         yamlReader.findAndRegisterModules();
+
+        watchService.registerListener(this, Path.of(""));
+        watchPath = watchService.getWatchPath();
     }
 
     @Deactivate
     public void deactivate() {
-        objects.clear();
+        watchService.unregisterListener(this);
     }
 
     @Override
     public synchronized void processWatchEvent(Kind kind, Path path) {
-        // path parameter is currently wrong ! It is a path in userdata folder
-        // Temporary workaround: build a path in tags folder
-        Path fixecPath = watchService.getWatchPath().resolve("tags").resolve(path.getFileName());
-        logger.debug("processWatchEvent {} path={} fixecPath={}", kind, path.toFile().getAbsolutePath(),
-                fixecPath.toFile().getAbsolutePath());
-        YamlModelListener<?> listener = findModelListener(fixecPath);
-        if (listener == null) {
-            logger.warn("No YAML file consumer available for {}; file is ignored",
-                    fixecPath.toFile().getAbsolutePath());
+        Path fullPath = watchPath.resolve(path);
+        String dirName = path.subpath(0, 1).toString();
+
+        if (Files.isDirectory(fullPath) || fullPath.toFile().isHidden() || !fullPath.toString().endsWith(".yaml")) {
+            logger.debug("Ignored {}", fullPath);
             return;
         }
-        processWatchEvent(kind, fixecPath, listener);
+
+        getListeners(dirName).forEach(listener -> processWatchEvent(dirName, kind, fullPath, listener));
     }
 
-    private void processWatchEvent(Kind kind, Path path, YamlModelListener<?> listener) {
-        logger.debug("processWatchEvent {} {} {}", kind, listener.getRootName(), path.toFile().getAbsolutePath());
-        if (Files.isDirectory(path) || path.toFile().isHidden() || !path.toFile().getName().endsWith(".yaml")) {
-            logger.debug("{} is ignored", path.toFile().getAbsolutePath());
-            return;
-        }
+    private void processWatchEvent(String dirName, Kind kind, Path fullPath, YamlModelListener<?> listener) {
         Map<String, ? extends YamlElement> oldObjects;
         Map<String, ? extends YamlElement> newObjects;
         if (kind == WatchService.Kind.DELETE) {
             newObjects = Map.of();
 
-            List<? extends YamlElement> oldListObjects = objects.remove(path);
+            List<? extends YamlElement> oldListObjects = objects.remove(dirName);
             if (oldListObjects == null) {
                 oldListObjects = List.of();
             }
@@ -104,31 +100,31 @@ public class YamlModelRepository implements WatchService.WatchEventListener {
         } else {
             YamlFile yamlData;
             try {
-                yamlData = readYamlFile(path, listener.getFileClass());
+                yamlData = readYamlFile(fullPath, listener.getFileClass());
             } catch (YamlParseException e) {
-                logger.warn("Failed to parse Yaml file {} with DTO class {}: {}", path.toFile().getAbsolutePath(),
+                logger.warn("Failed to parse Yaml file {} with DTO class {}: {}", fullPath,
                         listener.getFileClass().getName(), e.getMessage());
                 return;
             }
             List<? extends YamlElement> newListObjects = yamlData.getElements();
             newObjects = newListObjects.stream().collect(Collectors.toMap(YamlElement::getId, obj -> obj));
 
-            List<? extends YamlElement> oldListObjects = objects.get(path);
+            List<? extends YamlElement> oldListObjects = objects.get(dirName);
             if (oldListObjects == null) {
                 oldListObjects = List.of();
             }
             oldObjects = oldListObjects.stream().collect(Collectors.toMap(YamlElement::getId, obj -> obj));
 
-            objects.put(path, newListObjects);
+            objects.put(dirName, newListObjects);
         }
 
-        String modelName = path.toFile().getName();
+        String modelName = fullPath.toFile().getName();
         modelName = modelName.substring(0, modelName.indexOf(".yaml"));
         List<? extends YamlElement> listElts;
         listElts = oldObjects.entrySet().stream()
                 .filter(entry -> entry.getValue().getClass().equals(listener.getElementClass())
                         && !newObjects.containsKey(entry.getKey()))
-                .map(entry -> entry.getValue()).toList();
+                .map(Map.Entry::getValue).toList();
         if (!listElts.isEmpty()) {
             listener.removedModel(modelName, listElts);
         }
@@ -136,7 +132,7 @@ public class YamlModelRepository implements WatchService.WatchEventListener {
         listElts = newObjects.entrySet().stream()
                 .filter(entry -> entry.getValue().getClass().equals(listener.getElementClass())
                         && !oldObjects.containsKey(entry.getKey()))
-                .map(entry -> entry.getValue()).toList();
+                .map(Map.Entry::getValue).toList();
         if (!listElts.isEmpty()) {
             listener.addedModel(modelName, listElts);
         }
@@ -146,19 +142,10 @@ public class YamlModelRepository implements WatchService.WatchEventListener {
                 .filter(entry -> entry.getValue().getClass().equals(listener.getElementClass())
                         && oldObjects.containsKey(entry.getKey())
                         && !entry.getValue().equals(oldObjects.get(entry.getKey())))
-                .map(entry -> entry.getValue()).toList();
+                .map(Map.Entry::getValue).toList();
         if (!listElts.isEmpty()) {
             listener.updatedModel(modelName, listElts);
         }
-    }
-
-    private @Nullable YamlModelListener<?> findModelListener(Path path) {
-        for (YamlModelListener<?> listener : listeners) {
-            if (path.startsWith(watchService.getWatchPath().resolve(listener.getRootName()))) {
-                return listener;
-            }
-        }
-        return null;
     }
 
     private YamlFile readYamlFile(Path path, Class<? extends YamlFile> dtoClass) throws YamlParseException {
@@ -174,29 +161,24 @@ public class YamlModelRepository implements WatchService.WatchEventListener {
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     protected void addYamlModelListener(YamlModelListener<?> listener) {
-        logger.debug("addYamlModelListener {}", listener.getRootName());
-        listeners.add(listener);
-
-        Path watchPath = watchService.getWatchPath().resolve(listener.getRootName());
-        watchPaths.add(watchPath);
-        watchService.unregisterListener(this);
-        watchService.registerListener(this, watchPaths);
+        String dirName = listener.getRootName();
+        logger.debug("Adding model listener for {}", dirName);
+        getListeners(dirName).add(listener);
 
         // Load all existing YAML files
-        try (Stream<Path> stream = Files.walk(watchPath)) {
-            stream.forEach(path -> processWatchEvent(Kind.CREATE, path, listener));
-        } catch (IOException e) {
+        try (Stream<Path> stream = Files.walk(watchPath.resolve(dirName))) {
+            stream.forEach(path -> processWatchEvent(dirName, Kind.CREATE, path, listener));
+        } catch (IOException ignored) {
         }
     }
 
     protected void removeYamlModelListener(YamlModelListener<?> listener) {
-        listeners.remove(listener);
+        String dirName = listener.getRootName();
+        logger.debug("Removing model listener for {}", dirName);
+        getListeners(dirName).remove(listener);
+    }
 
-        Path watchPath = watchService.getWatchPath().resolve(listener.getRootName());
-        watchPaths.remove(watchPath);
-        watchService.unregisterListener(this);
-        if (!watchPaths.isEmpty()) {
-            watchService.registerListener(this, watchPaths);
-        }
+    private List<YamlModelListener<?>> getListeners(String dirName) {
+        return Objects.requireNonNull(listeners.computeIfAbsent(dirName, k -> new CopyOnWriteArrayList<>()));
     }
 }
