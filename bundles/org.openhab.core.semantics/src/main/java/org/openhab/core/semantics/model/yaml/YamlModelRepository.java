@@ -56,7 +56,7 @@ public class YamlModelRepository implements WatchService.WatchEventListener {
     private final ObjectMapper yamlReader;
 
     private final Map<String, List<YamlModelListener<?>>> listeners = new ConcurrentHashMap<>();
-    private final Map<String, List<? extends YamlElement>> objects = new ConcurrentHashMap<>();
+    private final Map<Path, List<? extends YamlElement>> objects = new ConcurrentHashMap<>();
 
     @Activate
     public YamlModelRepository(@Reference(target = WatchService.CONFIG_WATCHER_FILTER) WatchService watchService) {
@@ -87,12 +87,14 @@ public class YamlModelRepository implements WatchService.WatchEventListener {
     }
 
     private void processWatchEvent(String dirName, Kind kind, Path fullPath, YamlModelListener<?> listener) {
+        logger.debug("processWatchEvent dirName={} kind={} fullPath={} listener={}", dirName, kind, fullPath,
+                listener.getClass().getSimpleName());
         Map<String, ? extends YamlElement> oldObjects;
         Map<String, ? extends YamlElement> newObjects;
         if (kind == WatchService.Kind.DELETE) {
             newObjects = Map.of();
 
-            List<? extends YamlElement> oldListObjects = objects.remove(dirName);
+            List<? extends YamlElement> oldListObjects = objects.remove(fullPath);
             if (oldListObjects == null) {
                 oldListObjects = List.of();
             }
@@ -109,13 +111,13 @@ public class YamlModelRepository implements WatchService.WatchEventListener {
             List<? extends YamlElement> newListObjects = yamlData.getElements();
             newObjects = newListObjects.stream().collect(Collectors.toMap(YamlElement::getId, obj -> obj));
 
-            List<? extends YamlElement> oldListObjects = objects.get(dirName);
+            List<? extends YamlElement> oldListObjects = objects.get(fullPath);
             if (oldListObjects == null) {
                 oldListObjects = List.of();
             }
             oldObjects = oldListObjects.stream().collect(Collectors.toMap(YamlElement::getId, obj -> obj));
 
-            objects.put(dirName, newListObjects);
+            objects.put(fullPath, newListObjects);
         }
 
         String modelName = fullPath.toFile().getName();
@@ -167,7 +169,11 @@ public class YamlModelRepository implements WatchService.WatchEventListener {
 
         // Load all existing YAML files
         try (Stream<Path> stream = Files.walk(watchPath.resolve(dirName))) {
-            stream.forEach(path -> processWatchEvent(dirName, Kind.CREATE, path, listener));
+            stream.forEach(path -> {
+                if (!Files.isDirectory(path) && !path.toFile().isHidden() && path.toString().endsWith(".yaml")) {
+                    processWatchEvent(dirName, Kind.CREATE, path, listener);
+                }
+            });
         } catch (IOException ignored) {
         }
     }
