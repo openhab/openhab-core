@@ -40,6 +40,9 @@
 		<requirement>openhab.tp;filter:="(feature=jna)"</requirement>
 		<feature dependency="true">openhab.tp-jna</feature>
 
+		<requirement>openhab.tp;filter:="(feature=jackson)"</requirement>
+		<feature dependency="true">openhab.tp-jackson</feature>
+
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.automation/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.core/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery/${project.version}</bundle>
@@ -53,9 +56,9 @@
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.ephemeris/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.id/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.persistence/${project.version}</bundle>
+		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.model.core/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.semantics/${project.version}</bundle>
 		<feature dependency="true">openhab.tp-asm</feature>
-		<feature dependency="true">openhab.tp-jackson</feature>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.thing/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.transform/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.audio/${project.version}</bundle>
@@ -253,6 +256,8 @@
 	<feature name="openhab.inc-model-core" version="${project.version}">
 		<feature>openhab-core-base</feature>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.model.core/${project.version}</bundle>
+		<requirement>openhab.tp;filter:="(feature=jackson)"</requirement>
+		<feature dependency="true">openhab.tp-jackson</feature>
 	</feature>
 
 	<feature name="openhab-core-model-item" version="${project.version}">
