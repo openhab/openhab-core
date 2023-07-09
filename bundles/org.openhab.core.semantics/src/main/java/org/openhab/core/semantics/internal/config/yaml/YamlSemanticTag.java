@@ -16,8 +16,8 @@ import java.util.List;
 import java.util.Objects;
 
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.semantics.model.yaml.YamlElement;
-import org.openhab.core.semantics.model.yaml.YamlParseException;
+import org.openhab.core.model.core.yaml.YamlElement;
+import org.openhab.core.model.core.yaml.YamlParseException;
 
 /**
  * The {@link YamlSemanticTag} is a data transfer object used to serialize a semantic tag

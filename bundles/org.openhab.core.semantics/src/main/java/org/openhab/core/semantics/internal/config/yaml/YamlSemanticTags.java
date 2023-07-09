@@ -15,9 +15,9 @@ package org.openhab.core.semantics.internal.config.yaml;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.core.semantics.model.yaml.YamlElement;
-import org.openhab.core.semantics.model.yaml.YamlFile;
-import org.openhab.core.semantics.model.yaml.YamlParseException;
+import org.openhab.core.model.core.yaml.YamlElement;
+import org.openhab.core.model.core.yaml.YamlFile;
+import org.openhab.core.model.core.yaml.YamlParseException;
 
 /**
  * The {@link YamlSemanticTags} is a data transfer object used to serialize a list of semantic tags

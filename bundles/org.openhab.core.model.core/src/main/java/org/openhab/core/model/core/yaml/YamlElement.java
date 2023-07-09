@@ -10,16 +10,27 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.semantics.model.yaml;
+package org.openhab.core.model.core.yaml;
 
 /**
- * The {@link YamlElement} interface offers an identifier to any element defined in a YAML configuration file.
+ * The {@link YamlElement} interface offers an identifier and a check validity method
+ * to any element defined in a YAML configuration file.
  *
  * @author Laurent Garnier - Initial contribution
  */
 public interface YamlElement {
 
+    /**
+     * Get the identifier of the YAML element
+     *
+     * @return the identifier as a string
+     */
     String getId();
 
+    /**
+     * Check that the YAML element is valid
+     *
+     * @throws YamlParseException if something is wrong
+     */
     void checkValidity() throws YamlParseException;
 }
