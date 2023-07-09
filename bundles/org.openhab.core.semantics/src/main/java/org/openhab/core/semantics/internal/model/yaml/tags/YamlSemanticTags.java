@@ -10,14 +10,14 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.semantics.internal.config.yaml;
+package org.openhab.core.semantics.internal.model.yaml.tags;
 
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.core.model.core.yaml.YamlElement;
-import org.openhab.core.model.core.yaml.YamlFile;
-import org.openhab.core.model.core.yaml.YamlParseException;
+import org.openhab.core.semantics.model.yaml.YamlElement;
+import org.openhab.core.semantics.model.yaml.YamlFile;
+import org.openhab.core.semantics.model.yaml.YamlParseException;
 
 /**
  * The {@link YamlSemanticTags} is a data transfer object used to serialize a list of semantic tags

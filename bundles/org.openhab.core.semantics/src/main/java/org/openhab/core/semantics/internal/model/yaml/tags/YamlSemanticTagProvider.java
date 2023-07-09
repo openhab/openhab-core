@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.semantics.internal.config.yaml;
+package org.openhab.core.semantics.internal.model.yaml.tags;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -19,13 +19,13 @@ import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.common.registry.AbstractProvider;
-import org.openhab.core.model.core.yaml.YamlElement;
-import org.openhab.core.model.core.yaml.YamlFile;
-import org.openhab.core.model.core.yaml.YamlModelListener;
 import org.openhab.core.semantics.SemanticTag;
 import org.openhab.core.semantics.SemanticTagImpl;
 import org.openhab.core.semantics.SemanticTagProvider;
 import org.openhab.core.semantics.SemanticTagRegistry;
+import org.openhab.core.semantics.model.yaml.YamlElement;
+import org.openhab.core.semantics.model.yaml.YamlFile;
+import org.openhab.core.semantics.model.yaml.YamlModelListener;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
