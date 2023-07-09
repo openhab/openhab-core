@@ -18,7 +18,6 @@ import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.collection.IsEmptyCollection.empty;
 import static org.mockito.Mockito.*;
 
-import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
@@ -45,7 +44,7 @@ import org.openhab.core.io.rest.LocaleService;
 import org.openhab.core.io.rest.sitemap.SitemapSubscriptionService;
 import org.openhab.core.items.GenericItem;
 import org.openhab.core.items.ItemNotFoundException;
-import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.items.events.ItemEvent;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.library.types.PercentType;
 import org.openhab.core.model.sitemap.SitemapProvider;
@@ -158,11 +157,13 @@ public class SitemapResourceTest extends JavaTest {
 
     @Test
     public void whenLongPollingShouldObserveItems() {
+        ItemEvent itemEvent = mock(ItemEvent.class);
+        when(itemEvent.getItemName()).thenReturn(item.getName());
         new Thread(() -> {
             try {
                 Thread.sleep(STATE_UPDATE_WAIT_TIME); // wait for the #getPageData call and listeners to attach to the
                                                       // item
-                item.setState(PercentType.ZERO);
+                sitemapResource.receive(itemEvent);
             } catch (InterruptedException e) {
             }
         }).start();
@@ -180,11 +181,13 @@ public class SitemapResourceTest extends JavaTest {
 
     @Test
     public void whenLongPollingShouldObserveItemsFromVisibilityRules() {
+        ItemEvent itemEvent = mock(ItemEvent.class);
+        when(itemEvent.getItemName()).thenReturn(visibilityRuleItem.getName());
         new Thread(() -> {
             try {
                 Thread.sleep(STATE_UPDATE_WAIT_TIME); // wait for the #getPageData call and listeners to attach to the
                                                       // item
-                visibilityRuleItem.setState(new DecimalType(BigDecimal.ONE));
+                sitemapResource.receive(itemEvent);
             } catch (InterruptedException e) {
             }
         }).start();
@@ -202,11 +205,13 @@ public class SitemapResourceTest extends JavaTest {
 
     @Test
     public void whenLongPollingShouldObserveItemsFromLabelColorConditions() {
+        ItemEvent itemEvent = mock(ItemEvent.class);
+        when(itemEvent.getItemName()).thenReturn(labelColorItem.getName());
         new Thread(() -> {
             try {
                 Thread.sleep(STATE_UPDATE_WAIT_TIME); // wait for the #getPageData call and listeners to attach to the
                                                       // item
-                labelColorItem.setState(new DecimalType(BigDecimal.ONE));
+                sitemapResource.receive(itemEvent);
             } catch (InterruptedException e) {
             }
         }).start();
@@ -224,11 +229,13 @@ public class SitemapResourceTest extends JavaTest {
 
     @Test
     public void whenLongPollingShouldObserveItemsFromValueColorConditions() {
+        ItemEvent itemEvent = mock(ItemEvent.class);
+        when(itemEvent.getItemName()).thenReturn(valueColorItem.getName());
         new Thread(() -> {
             try {
                 Thread.sleep(STATE_UPDATE_WAIT_TIME); // wait for the #getPageData call and listeners to attach to the
                                                       // item
-                valueColorItem.setState(new DecimalType(BigDecimal.ONE));
+                sitemapResource.receive(itemEvent);
             } catch (InterruptedException e) {
             }
         }).start();

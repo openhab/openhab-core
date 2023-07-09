@@ -27,16 +27,33 @@ Filter:
 ;
 
 FilterDetails:
-	ThresholdFilter | TimeFilter
+	ThresholdFilter | TimeFilter | EqualsFilter | NotEqualsFilter | IncludeFilter | NotIncludeFilter
 ;
 
 ThresholdFilter:
-	'>' value=DECIMAL unit=STRING
+	'>' (relative?='%')? value=DECIMAL unit=STRING?
 ;
 
 TimeFilter:
-	value=INT unit=('s' | 'm' | 'h' | 'd') 
+	'T' value=INT unit=('s' | 'm' | 'h' | 'd')
 ;
+
+EqualsFilter:
+   '=' values+=STRING (',' values+=STRING)*
+;
+
+NotEqualsFilter:
+   '!' values+=STRING (',' values+=STRING)*
+;
+
+IncludeFilter:
+  '[]' lower=DECIMAL upper=DECIMAL unit=STRING?
+;
+
+NotIncludeFilter:
+  '][' lower=DECIMAL upper=DECIMAL unit=STRING?
+;
+
 
 PersistenceConfiguration:
 	items+=(AllConfig | ItemConfig | GroupConfig) (',' items+=(AllConfig | ItemConfig | GroupConfig))* ('->' alias=STRING)? 

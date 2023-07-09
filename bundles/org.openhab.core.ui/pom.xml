@@ -18,8 +18,7 @@
     <dependency>
       <groupId>org.knowm.xchart</groupId>
       <artifactId>xchart</artifactId>
-      <!-- Newer versions have issues with customized grid lines, see: https://github.com/knowm/XChart/issues/628 -->
-      <version>3.1.0</version>
+      <version>3.8.4</version>
     </dependency>
     <dependency>
       <groupId>org.openhab.core.bundles</groupId>

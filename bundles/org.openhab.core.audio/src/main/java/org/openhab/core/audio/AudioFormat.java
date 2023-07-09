@@ -484,7 +484,7 @@ public class AudioFormat {
                 + (bigEndian != null ? "bigEndian=" + bigEndian + ", " : "")
                 + (bitDepth != null ? "bitDepth=" + bitDepth + ", " : "")
                 + (bitRate != null ? "bitRate=" + bitRate + ", " : "")
-                + (frequency != null ? "frequency=" + frequency : "") + (channels != null ? "channels=" + channels : "")
-                + "]";
+                + (frequency != null ? "frequency=" + frequency + ", " : "")
+                + (channels != null ? "channels=" + channels : "") + "]";
     }
 }

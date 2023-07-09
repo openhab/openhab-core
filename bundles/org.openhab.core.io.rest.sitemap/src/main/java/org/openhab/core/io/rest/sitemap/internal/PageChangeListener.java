@@ -20,16 +20,19 @@ import java.util.Set;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import org.eclipse.emf.common.util.EList;
 import org.openhab.core.common.ThreadPoolManager;
+import org.openhab.core.events.Event;
+import org.openhab.core.events.EventSubscriber;
 import org.openhab.core.io.rest.core.item.EnrichedItemDTOMapper;
 import org.openhab.core.io.rest.sitemap.SitemapSubscriptionService.SitemapSubscriptionCallback;
-import org.openhab.core.items.GenericItem;
-import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
-import org.openhab.core.items.StateChangeListener;
+import org.openhab.core.items.events.GroupStateUpdatedEvent;
+import org.openhab.core.items.events.ItemEvent;
+import org.openhab.core.items.events.ItemStateChangedEvent;
 import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.model.sitemap.sitemap.Chart;
 import org.openhab.core.model.sitemap.sitemap.ColorArray;
@@ -45,7 +48,7 @@ import org.openhab.core.ui.items.ItemUIRegistry;
  * @author Kai Kreuzer - Initial contribution
  * @author Laurent Garnier - Added support for icon color
  */
-public class PageChangeListener implements StateChangeListener {
+public class PageChangeListener implements EventSubscriber {
 
     private static final int REVERT_INTERVAL = 300;
     private final ScheduledExecutorService scheduler = ThreadPoolManager
@@ -55,6 +58,7 @@ public class PageChangeListener implements StateChangeListener {
     private final ItemUIRegistry itemUIRegistry;
     private EList<Widget> widgets;
     private Set<Item> items;
+    private final HashSet<String> filterItems = new HashSet<>();
     private final List<SitemapSubscriptionCallback> callbacks = Collections.synchronizedList(new ArrayList<>());
     private Set<SitemapSubscriptionCallback> distinctCallbacks = Collections.emptySet();
 
@@ -75,23 +79,10 @@ public class PageChangeListener implements StateChangeListener {
     }
 
     private void updateItemsAndWidgets(EList<Widget> widgets) {
-        if (this.widgets != null) {
-            // cleanup statechange listeners in case widgets were removed
-            items = getAllItems(this.widgets);
-            for (Item item : items) {
-                if (item instanceof GenericItem genericItem) {
-                    genericItem.removeStateChangeListener(this);
-                }
-            }
-        }
-
         this.widgets = widgets;
         items = getAllItems(widgets);
-        for (Item item : items) {
-            if (item instanceof GenericItem genericItem) {
-                genericItem.addStateChangeListener(this);
-            }
-        }
+        filterItems.clear();
+        filterItems.addAll(items.stream().map(Item::getName).collect(Collectors.toSet()));
     }
 
     public String getSitemapName() {
@@ -111,19 +102,6 @@ public class PageChangeListener implements StateChangeListener {
     public void removeCallback(SitemapSubscriptionCallback callback) {
         callbacks.remove(callback);
         distinctCallbacks = new HashSet<>(callbacks);
-    }
-
-    /**
-     * Disposes this instance and releases all resources.
-     */
-    public void dispose() {
-        for (Item item : items) {
-            if (item instanceof GenericItem genericItem) {
-                genericItem.removeStateChangeListener(this);
-            } else if (item instanceof GroupItem groupItem) {
-                groupItem.removeStateChangeListener(this);
-            }
-        }
     }
 
     /**
@@ -180,26 +158,6 @@ public class PageChangeListener implements StateChangeListener {
                 callback.onEvent(event);
             }
         }
-    }
-
-    @Override
-    public void stateChanged(Item item, State oldState, State newState) {
-        // For all items except group, send an event only when the event state is changed.
-        if (item instanceof GroupItem) {
-            return;
-        }
-        constructAndSendEvents(item, newState);
-    }
-
-    @Override
-    public void stateUpdated(Item item, State state) {
-        // For group item only, send an event each time the event state is updated.
-        // It allows updating the group label while the group state is unchanged,
-        // for example the count in label for Group:Switch:OR
-        if (!(item instanceof GroupItem)) {
-            return;
-        }
-        constructAndSendEvents(item, state);
     }
 
     public void keepCurrentState(Item item) {
@@ -337,5 +295,25 @@ public class PageChangeListener implements StateChangeListener {
             }
         }
         return events;
+    }
+
+    @Override
+    public Set<String> getSubscribedEventTypes() {
+        return Set.of(ItemStateChangedEvent.TYPE, GroupStateUpdatedEvent.TYPE);
+    }
+
+    @Override
+    public void receive(Event event) {
+        if (event instanceof ItemEvent itemEvent && filterItems.contains(itemEvent.getItemName())) {
+            Item item = itemUIRegistry.get(itemEvent.getItemName());
+            if (item == null) {
+                return;
+            }
+            if (event instanceof GroupStateUpdatedEvent groupStateUpdatedEvent) {
+                constructAndSendEvents(item, groupStateUpdatedEvent.getItemState());
+            } else if (event instanceof ItemStateChangedEvent itemStateChangedEvent) {
+                constructAndSendEvents(item, itemStateChangedEvent.getItemState());
+            }
+        }
     }
 }

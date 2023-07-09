@@ -33,7 +33,7 @@ public class ConsoleInterpreter {
     public static String getHelp(final String base, final String separator,
             Collection<ConsoleCommandExtension> extensions) {
         final List<String> usages = ConsoleInterpreter.getUsages(extensions);
-        final StringBuffer buffer = new StringBuffer();
+        final StringBuilder buffer = new StringBuilder();
 
         buffer.append("---openHAB commands---\n\t");
         for (int i = 0; i < usages.size(); i++) {

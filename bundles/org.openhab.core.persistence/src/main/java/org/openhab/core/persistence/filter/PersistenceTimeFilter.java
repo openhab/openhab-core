@@ -24,8 +24,8 @@ import org.openhab.core.items.Item;
 
 /**
  * The {@link PersistenceTimeFilter} is a filter to prevent persistence base on intervals.
- *
- * The filter returns {@link false} if the time between now and the time of the last persisted value is less than
+ * <p />
+ * The filter returns {@code false} if the time between now and the time of the last persisted value is less than
  * {@link #duration} {@link #unit}
  *
  * @author Jan N. Klug - Initial contribution

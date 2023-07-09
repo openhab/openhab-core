@@ -17,12 +17,12 @@ import java.io.InputStream;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * This is an {@link AudioStream}, that can be cloned
+ * This is for an {@link AudioStream}, that can be cloned
  *
- * @author Gwendal Roulleau - Initial contribution, separation from FixedLengthAudioStream
+ * @author Gwendal Roulleau - Initial contribution, separation from {@link FixedLengthAudioStream}
  */
 @NonNullByDefault
-public abstract class ClonableAudioStream extends AudioStream {
+public interface ClonableAudioStream {
 
     /**
      * Returns a new, fully independent stream instance, which can be read and closed without impacting the original
@@ -31,5 +31,5 @@ public abstract class ClonableAudioStream extends AudioStream {
      * @return a new input stream that can be consumed by the caller
      * @throws AudioException if stream cannot be created
      */
-    public abstract InputStream getClonedStream() throws AudioException;
+    public InputStream getClonedStream() throws AudioException;
 }

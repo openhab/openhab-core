@@ -24,6 +24,7 @@ import org.openhab.core.io.rest.core.item.EnrichedItemDTO;
  * @author Kai Kreuzer - Initial contribution
  * @author Chris Jackson - Initial contribution
  * @author Laurent Garnier - New field iconcolor
+ * @author Mark herwege - New fields pattern, unit
  */
 public class WidgetDTO {
 
@@ -37,6 +38,9 @@ public class WidgetDTO {
     public String labelcolor;
     public String valuecolor;
     public String iconcolor;
+
+    public String pattern;
+    public String unit;
 
     // widget-specific attributes
     public final List<MappingDTO> mappings = new ArrayList<>();

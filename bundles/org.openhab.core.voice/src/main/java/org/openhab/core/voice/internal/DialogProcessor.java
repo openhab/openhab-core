@@ -224,6 +224,13 @@ public class DialogProcessor implements KSListener, STTListener {
     }
 
     /**
+     * Returns the dialog context used to start this processor.
+     */
+    public DialogContext getContext() {
+        return dialogContext;
+    }
+
+    /**
      * Indicates if voice recognition is running.
      */
     public boolean isProcessing() {

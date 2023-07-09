@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * The {@link PersistenceThresholdFilter} is a filter to prevent persistence based on a threshold.
- *
+ * <p />
  * The filter returns {@code false} if the new value deviates by less than {@link #value}. If unit is "%" is
  * {@code true}, the filter returns {@code false} if the relative deviation is less than {@link #value}.
  *
@@ -43,13 +43,15 @@ public class PersistenceThresholdFilter extends PersistenceFilter {
 
     private final BigDecimal value;
     private final String unit;
+    private final boolean relative;
 
     private final transient Map<String, State> valueCache = new HashMap<>();
 
-    public PersistenceThresholdFilter(String name, BigDecimal value, String unit) {
+    public PersistenceThresholdFilter(String name, BigDecimal value, String unit, boolean relative) {
         super(name);
         this.value = value;
         this.unit = unit;
+        this.relative = relative;
     }
 
     public BigDecimal getValue() {
@@ -58,6 +60,10 @@ public class PersistenceThresholdFilter extends PersistenceFilter {
 
     public String getUnit() {
         return unit;
+    }
+
+    public boolean isRelative() {
+        return relative;
     }
 
     @Override
@@ -78,7 +84,7 @@ public class PersistenceThresholdFilter extends PersistenceFilter {
         if (state instanceof DecimalType) {
             BigDecimal oldState = ((DecimalType) cachedState).toBigDecimal();
             BigDecimal delta = oldState.subtract(((DecimalType) state).toBigDecimal());
-            if ("%".equals(unit) && !BigDecimal.ZERO.equals(oldState)) {
+            if (relative && !BigDecimal.ZERO.equals(oldState)) {
                 delta = delta.multiply(HUNDRED).divide(oldState, 2, RoundingMode.HALF_UP);
             }
             return delta.abs().compareTo(value) > 0;
@@ -86,7 +92,7 @@ public class PersistenceThresholdFilter extends PersistenceFilter {
             try {
                 QuantityType oldState = (QuantityType) cachedState;
                 QuantityType delta = oldState.subtract((QuantityType) state);
-                if ("%".equals(unit)) {
+                if (relative) {
                     if (BigDecimal.ZERO.equals(oldState.toBigDecimal())) {
                         // value is different and old value is 0 -> always above relative threshold
                         return true;
@@ -117,6 +123,7 @@ public class PersistenceThresholdFilter extends PersistenceFilter {
 
     @Override
     public String toString() {
-        return String.format("%s [name=%s, value=%s, unit=%s]", getClass().getSimpleName(), getName(), value, unit);
+        return String.format("%s [name=%s, value=%s, unit=%s, relative=%b]", getClass().getSimpleName(), getName(),
+                value, unit, relative);
     }
 }

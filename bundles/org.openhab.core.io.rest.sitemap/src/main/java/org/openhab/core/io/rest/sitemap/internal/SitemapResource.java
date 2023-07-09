@@ -21,10 +21,12 @@ import java.util.LinkedList;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import javax.annotation.security.RolesAllowed;
 import javax.servlet.http.HttpServletRequest;
@@ -56,6 +58,8 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.auth.Role;
 import org.openhab.core.common.ThreadPoolManager;
+import org.openhab.core.events.Event;
+import org.openhab.core.events.EventSubscriber;
 import org.openhab.core.io.rest.JSONResponse;
 import org.openhab.core.io.rest.LocaleService;
 import org.openhab.core.io.rest.RESTConstants;
@@ -67,7 +71,8 @@ import org.openhab.core.io.rest.sitemap.SitemapSubscriptionService.SitemapSubscr
 import org.openhab.core.items.GenericItem;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
-import org.openhab.core.items.StateChangeListener;
+import org.openhab.core.items.events.ItemEvent;
+import org.openhab.core.items.events.ItemStateChangedEvent;
 import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.library.types.HSBType;
 import org.openhab.core.model.sitemap.SitemapProvider;
@@ -125,8 +130,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * @author Markus Rathgeb - Migrated to JAX-RS Whiteboard Specification
  * @author Wouter Born - Migrated to OpenAPI annotations
  * @author Laurent Garnier - Added support for icon color
+ * @author Mark Herwege - Added pattern and unit fields
  */
-@Component(service = RESTResource.class)
+@Component(service = { RESTResource.class, EventSubscriber.class })
 @JaxrsResource
 @JaxrsName(SitemapResource.PATH_SITEMAPS)
 @JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
@@ -136,7 +142,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Tag(name = SitemapResource.PATH_SITEMAPS)
 @NonNullByDefault
 public class SitemapResource
-        implements RESTResource, SitemapSubscriptionCallback, SseBroadcaster.Listener<SseSinkInfo> {
+        implements RESTResource, SitemapSubscriptionCallback, SseBroadcaster.Listener<SseSinkInfo>, EventSubscriber {
 
     private final Logger logger = LoggerFactory.getLogger(SitemapResource.class);
 
@@ -176,6 +182,7 @@ public class SitemapResource
             .getScheduledPool(ThreadPoolManager.THREAD_POOL_NAME_COMMON);
 
     private @Nullable ScheduledFuture<?> cleanSubscriptionsJob;
+    private Set<BlockingStateChangeListener> stateChangeListeners = new CopyOnWriteArraySet<>();
 
     @Activate
     public SitemapResource( //
@@ -520,6 +527,8 @@ public class SitemapResource
         bean.valuecolor = convertItemValueColor(itemUIRegistry.getValueColor(widget), itemState);
         bean.iconcolor = convertItemValueColor(itemUIRegistry.getIconColor(widget), itemState);
         bean.label = itemUIRegistry.getLabel(widget);
+        bean.pattern = itemUIRegistry.getFormatPattern(widget);
+        bean.unit = itemUIRegistry.getUnitForWidget(widget);
         bean.type = widget.eClass().getName();
         bean.visibility = itemUIRegistry.getVisiblity(widget);
         if (widget instanceof LinkableWidget linkableWidget) {
@@ -683,13 +692,11 @@ public class SitemapResource
     private boolean waitForChanges(EList<Widget> widgets) {
         long startTime = (new Date()).getTime();
         boolean timeout = false;
-        BlockingStateChangeListener listener = new BlockingStateChangeListener();
-        // let's get all items for these widgets
-        Set<GenericItem> items = getAllItems(widgets);
-        for (GenericItem item : items) {
-            item.addStateChangeListener(listener);
-        }
-        while (!listener.hasChangeOccurred() && !timeout) {
+        Set<String> items = getAllItems(widgets).stream().map(Item::getName).collect(Collectors.toSet());
+        BlockingStateChangeListener listener = new BlockingStateChangeListener(items);
+        stateChangeListeners.add(listener);
+
+        while (!listener.hasChanged() && !timeout) {
             timeout = (new Date()).getTime() - startTime > TIMEOUT_IN_MS;
             try {
                 Thread.sleep(300);
@@ -698,9 +705,8 @@ public class SitemapResource
                 break;
             }
         }
-        for (GenericItem item : items) {
-            item.removeStateChangeListener(listener);
-        }
+
+        stateChangeListeners.remove(listener);
         return timeout;
     }
 
@@ -779,34 +785,16 @@ public class SitemapResource
         return items;
     }
 
-    /**
-     * This is a state change listener, which is merely used to determine, if a
-     * state change has occurred on one of a list of items.
-     *
-     * @author Kai Kreuzer - Initial contribution
-     *
-     */
-    private static class BlockingStateChangeListener implements StateChangeListener {
+    @Override
+    public Set<String> getSubscribedEventTypes() {
+        return Set.of(ItemStateChangedEvent.TYPE);
+    }
 
-        private boolean changed = false;
-
-        @Override
-        public void stateChanged(Item item, State oldState, State newState) {
-            changed = true;
-        }
-
-        /**
-         * determines, whether a state change has occurred since its creation
-         *
-         * @return true, if a state has changed
-         */
-        public boolean hasChangeOccurred() {
-            return changed;
-        }
-
-        @Override
-        public void stateUpdated(Item item, State state) {
-            // ignore if the state did not change
+    @Override
+    public void receive(Event event) {
+        if (event instanceof ItemEvent itemEvent) {
+            String itemName = itemEvent.getItemName();
+            stateChangeListeners.forEach(l -> l.itemChanged(itemName));
         }
     }
 
@@ -851,5 +839,24 @@ public class SitemapResource
         logger.debug("SSE connection for subscription {} has been closed.", info.subscriptionId);
         subscriptions.removeSubscription(info.subscriptionId);
         knownSubscriptions.remove(info.subscriptionId);
+    }
+
+    private static class BlockingStateChangeListener {
+        private final Set<String> items;
+        private boolean changed = false;
+
+        public BlockingStateChangeListener(Set<String> items) {
+            this.items = items;
+        }
+
+        public void itemChanged(String item) {
+            if (items.contains(item)) {
+                changed = true;
+            }
+        }
+
+        public boolean hasChanged() {
+            return changed;
+        }
     }
 }

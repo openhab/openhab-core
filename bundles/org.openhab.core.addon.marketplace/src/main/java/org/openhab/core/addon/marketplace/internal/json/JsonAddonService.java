@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.addon.Addon;
+import org.openhab.core.addon.AddonInfoRegistry;
 import org.openhab.core.addon.AddonService;
 import org.openhab.core.addon.marketplace.AbstractRemoteAddonService;
 import org.openhab.core.addon.marketplace.MarketplaceAddonHandler;
@@ -78,8 +79,9 @@ public class JsonAddonService extends AbstractRemoteAddonService {
 
     @Activate
     public JsonAddonService(@Reference EventPublisher eventPublisher, @Reference StorageService storageService,
-            @Reference ConfigurationAdmin configurationAdmin, Map<String, Object> config) {
-        super(eventPublisher, configurationAdmin, storageService, SERVICE_PID);
+            @Reference ConfigurationAdmin configurationAdmin, @Reference AddonInfoRegistry addonInfoRegistry,
+            Map<String, Object> config) {
+        super(eventPublisher, configurationAdmin, storageService, addonInfoRegistry, SERVICE_PID);
         modified(config);
     }
 
