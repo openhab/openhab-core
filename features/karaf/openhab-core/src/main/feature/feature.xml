@@ -40,9 +40,6 @@
 		<requirement>openhab.tp;filter:="(feature=jna)"</requirement>
 		<feature dependency="true">openhab.tp-jna</feature>
 
-		<requirement>openhab.tp;filter:="(feature=jackson)"</requirement>
-		<feature dependency="true">openhab.tp-jackson</feature>
-
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.automation/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.core/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery/${project.version}</bundle>
@@ -373,6 +370,13 @@
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.model.lsp/${project.version}</bundle>
 	</feature>
 
+	<feature name="openhab-core-model-yaml" version="${project.version}">
+		<feature>openhab-core-base</feature>
+		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.model.yaml/${project.version}</bundle>
+		<requirement>openhab.tp;filter:="(feature=jackson)"</requirement>
+		<feature dependency="true">openhab.tp-jackson</feature>
+	</feature>
+
 	<feature name="openhab-core-storage-json" version="${project.version}">
 		<feature>openhab-core-base</feature>
 
@@ -417,6 +421,7 @@
 		<feature>openhab-core-model-script</feature>
 		<feature>openhab-core-model-sitemap</feature>
 		<feature>openhab-core-model-thing</feature>
+		<feature>openhab-core-model-yaml</feature>
 		<feature>openhab-core-ui-icon</feature>
 		<feature>openhab-core-storage-json</feature>
 		<feature>openhab-runtime-certificate</feature>

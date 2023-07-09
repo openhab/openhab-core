@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.semantics.model.yaml;
+package org.openhab.core.model.yaml;
 
 /**
  * The {@link YamlElement} interface offers an identifier and a check validity method

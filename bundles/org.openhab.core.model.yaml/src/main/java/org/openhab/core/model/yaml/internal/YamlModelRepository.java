@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.semantics.internal.model.yaml;
+package org.openhab.core.model.yaml.internal;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -24,10 +24,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.core.semantics.model.yaml.YamlElement;
-import org.openhab.core.semantics.model.yaml.YamlFile;
-import org.openhab.core.semantics.model.yaml.YamlModelListener;
-import org.openhab.core.semantics.model.yaml.YamlParseException;
+import org.openhab.core.model.yaml.YamlElement;
+import org.openhab.core.model.yaml.YamlFile;
+import org.openhab.core.model.yaml.YamlModelListener;
+import org.openhab.core.model.yaml.YamlParseException;
 import org.openhab.core.service.WatchService;
 import org.openhab.core.service.WatchService.Kind;
 import org.osgi.service.component.annotations.Activate;
