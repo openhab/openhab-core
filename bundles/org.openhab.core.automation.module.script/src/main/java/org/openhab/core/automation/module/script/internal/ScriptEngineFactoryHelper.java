@@ -13,8 +13,10 @@
 package org.openhab.core.automation.module.script.internal;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.script.ScriptEngine;
 
@@ -57,14 +59,24 @@ public class ScriptEngineFactoryHelper {
     }
 
     public static String getPreferredMimeType(ScriptEngineFactory factory) {
-        List<String> mimeTypes = new ArrayList<>(factory.getScriptTypes());
+        List<String> scriptTypes = factory.getScriptTypes();
+        if (scriptTypes.isEmpty()) {
+            throw new IllegalStateException(
+                    factory.getClass().getName() + " does not support any scriptTypes. Please report it as a bug.");
+        }
+        List<String> mimeTypes = new ArrayList<>(scriptTypes);
         mimeTypes.removeIf(mimeType -> !mimeType.contains("application") || "application/python".equals(mimeType));
-        return mimeTypes.isEmpty() ? factory.getScriptTypes().get(0) : mimeTypes.get(0);
+        return mimeTypes.isEmpty() ? scriptTypes.get(0) : mimeTypes.get(0);
     }
 
     public static String getLanguageName(javax.script.ScriptEngineFactory factory) {
         return String.format("%s (%s)",
                 factory.getLanguageName().substring(0, 1).toUpperCase() + factory.getLanguageName().substring(1),
                 factory.getLanguageVersion());
+    }
+
+    public static Optional<String> getPreferredExtension(ScriptEngineFactory factory) {
+        return factory.getScriptTypes().stream().filter(type -> !type.contains("/"))
+                .min(Comparator.comparing(String::length));
     }
 }

@@ -50,9 +50,13 @@ public class ItemEventFactory extends AbstractEventFactory {
 
     private static final String ITEM_STATE_EVENT_TOPIC = "openhab/items/{itemName}/state";
 
+    private static final String ITEM_STATE_UPDATED_EVENT_TOPIC = "openhab/items/{itemName}/stateupdated";
+
     private static final String ITEM_STATE_PREDICTED_EVENT_TOPIC = "openhab/items/{itemName}/statepredicted";
 
     private static final String ITEM_STATE_CHANGED_EVENT_TOPIC = "openhab/items/{itemName}/statechanged";
+
+    private static final String GROUP_STATE_EVENT_TOPIC = "openhab/items/{itemName}/{memberName}/stateupdated";
 
     private static final String GROUPITEM_STATE_CHANGED_EVENT_TOPIC = "openhab/items/{itemName}/{memberName}/statechanged";
 
@@ -67,8 +71,8 @@ public class ItemEventFactory extends AbstractEventFactory {
      */
     public ItemEventFactory() {
         super(Set.of(ItemCommandEvent.TYPE, ItemStateEvent.TYPE, ItemStatePredictedEvent.TYPE,
-                ItemStateChangedEvent.TYPE, ItemAddedEvent.TYPE, ItemUpdatedEvent.TYPE, ItemRemovedEvent.TYPE,
-                GroupItemStateChangedEvent.TYPE));
+                ItemStateUpdatedEvent.TYPE, ItemStateChangedEvent.TYPE, ItemAddedEvent.TYPE, ItemUpdatedEvent.TYPE,
+                ItemRemovedEvent.TYPE, GroupStateUpdatedEvent.TYPE, GroupItemStateChangedEvent.TYPE));
     }
 
     @Override
@@ -80,6 +84,8 @@ public class ItemEventFactory extends AbstractEventFactory {
             return createStateEvent(topic, payload, source);
         } else if (ItemStatePredictedEvent.TYPE.equals(eventType)) {
             return createStatePredictedEvent(topic, payload);
+        } else if (ItemStateUpdatedEvent.TYPE.equals(eventType)) {
+            return createStateUpdatedEvent(topic, payload);
         } else if (ItemStateChangedEvent.TYPE.equals(eventType)) {
             return createStateChangedEvent(topic, payload);
         } else if (ItemAddedEvent.TYPE.equals(eventType)) {
@@ -88,10 +94,20 @@ public class ItemEventFactory extends AbstractEventFactory {
             return createUpdatedEvent(topic, payload);
         } else if (ItemRemovedEvent.TYPE.equals(eventType)) {
             return createRemovedEvent(topic, payload);
+        } else if (GroupStateUpdatedEvent.TYPE.equals(eventType)) {
+            return createGroupStateUpdatedEvent(topic, payload);
         } else if (GroupItemStateChangedEvent.TYPE.equals(eventType)) {
             return createGroupStateChangedEvent(topic, payload);
         }
         throw new IllegalArgumentException("The event type '" + eventType + "' is not supported by this factory.");
+    }
+
+    private Event createGroupStateUpdatedEvent(String topic, String payload) {
+        String itemName = getItemName(topic);
+        String memberName = getMemberName(topic);
+        ItemEventPayloadBean bean = deserializePayload(payload, ItemEventPayloadBean.class);
+        State state = getState(bean.getType(), bean.getValue());
+        return new GroupStateUpdatedEvent(topic, payload, itemName, memberName, state, null);
     }
 
     private Event createGroupStateChangedEvent(String topic, String payload) {
@@ -122,6 +138,13 @@ public class ItemEventFactory extends AbstractEventFactory {
         ItemStatePredictedEventPayloadBean bean = deserializePayload(payload, ItemStatePredictedEventPayloadBean.class);
         State state = getState(bean.getPredictedType(), bean.getPredictedValue());
         return new ItemStatePredictedEvent(topic, payload, itemName, state, bean.isConfirmation());
+    }
+
+    private Event createStateUpdatedEvent(String topic, String payload) {
+        String itemName = getItemName(topic);
+        ItemEventPayloadBean bean = deserializePayload(payload, ItemEventPayloadBean.class);
+        State state = getState(bean.getType(), bean.getValue());
+        return new ItemStateUpdatedEvent(topic, payload, itemName, state, null);
     }
 
     private Event createStateChangedEvent(String topic, String payload) {
@@ -266,6 +289,54 @@ public class ItemEventFactory extends AbstractEventFactory {
      */
     public static ItemEvent createStateEvent(String itemName, State state) {
         return createStateEvent(itemName, state, null);
+    }
+
+    /**
+     * Creates an item state updated event.
+     *
+     * @param itemName the name of the item to report the state update for
+     * @param state the new state
+     * @return the created item state update event
+     * @throws IllegalArgumentException if itemName or state is null
+     */
+    public static ItemStateUpdatedEvent createStateUpdatedEvent(String itemName, State state) {
+        return createStateUpdatedEvent(itemName, state, null);
+    }
+
+    /**
+     * Creates an item state updated event.
+     *
+     * @param itemName the name of the item to report the state update for
+     * @param state the new state
+     * @param source the name of the source identifying the sender (can be null)
+     * @return the created item state update event
+     * @throws IllegalArgumentException if itemName or state is null
+     */
+    public static ItemStateUpdatedEvent createStateUpdatedEvent(String itemName, State state, @Nullable String source) {
+        assertValidArguments(itemName, state, "state");
+        String topic = buildTopic(ITEM_STATE_UPDATED_EVENT_TOPIC, itemName);
+        ItemEventPayloadBean bean = new ItemEventPayloadBean(getStateType(state), state.toFullString());
+        String payload = serializePayload(bean);
+        return new ItemStateUpdatedEvent(topic, payload, itemName, state, source);
+    }
+
+    /**
+     * Creates a group item state updated event.
+     *
+     * @param groupName the name of the group to report the state update for
+     * @param member the name of the item that updated the group state
+     * @param state the new state
+     * @param source the name of the source identifying the sender (can be null)
+     * @return the created group item state update event
+     * @throws IllegalArgumentException if groupName or state is null
+     */
+    public static GroupStateUpdatedEvent createGroupStateUpdatedEvent(String groupName, String member, State state,
+            @Nullable String source) {
+        assertValidArguments(groupName, member, state, "state");
+        String topic = buildGroupTopic(GROUP_STATE_EVENT_TOPIC, groupName, member);
+        ItemEventPayloadBean bean = new ItemEventPayloadBean(getStateType(state), state.toFullString());
+        String payload = serializePayload(bean);
+        return new GroupStateUpdatedEvent(topic, payload, groupName, member, state, source);
     }
 
     /**

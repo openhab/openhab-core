@@ -93,9 +93,8 @@ final class RuleExecutionSimulator {
             TriggerHandler triggerHandler = (TriggerHandler) this.ruleEngine.getModuleHandler(trigger, rule.getUID());
 
             // Only triggers that are time-based will be considered within the simulation
-            if (triggerHandler instanceof TimeBasedTriggerHandler) {
-                SchedulerTemporalAdjuster temporalAdjuster = ((TimeBasedTriggerHandler) triggerHandler)
-                        .getTemporalAdjuster();
+            if (triggerHandler instanceof TimeBasedTriggerHandler handler) {
+                SchedulerTemporalAdjuster temporalAdjuster = handler.getTemporalAdjuster();
                 if (temporalAdjuster != null) {
                     executions.addAll(simulateExecutionsForCronBasedRule(rule, from, until, temporalAdjuster));
                 }
@@ -143,8 +142,7 @@ final class RuleExecutionSimulator {
                     rule.getUID());
 
             // Only conditions that are time based are checked
-            if (conditionHandler instanceof TimeBasedConditionHandler
-                    && !((TimeBasedConditionHandler) conditionHandler).isSatisfiedAt(current)) {
+            if (conditionHandler instanceof TimeBasedConditionHandler handler && !handler.isSatisfiedAt(current)) {
                 return false;
             }
         }

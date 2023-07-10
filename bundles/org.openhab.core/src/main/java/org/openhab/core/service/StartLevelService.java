@@ -58,7 +58,7 @@ import org.slf4j.LoggerFactory;
  * 10 - OSGi application start level has been reached, i.e. bundles are activated.
  * 20 - Model entities (items, things, links, persist config) have been loaded, both from db as well as files.
  * 30 - Item states have been restored from persistence service, where applicable.
- * 40 - Rules are loaded and parsed, both from db as well as dsl and script files.
+ * 40 - Rules from db, dsl and script files are loaded and parsed, script engine factories are available.
  * 50 - Rule engine has executed all "system started" rules and is active.
  * 70 - User interface is up and running.
  * 80 - All things have been initialized.
@@ -117,9 +117,7 @@ public class StartLevelService {
 
             if (openHABStartLevel >= 10) {
                 for (Integer level : new TreeSet<>(startlevels.keySet())) {
-                    if (openHABStartLevel >= level) {
-                        continue;
-                    } else {
+                    if (openHABStartLevel < level) {
                         boolean reached = isStartLevelReached(startlevels.get(level));
                         if (reached) {
                             setStartLevel(level);
@@ -171,7 +169,7 @@ public class StartLevelService {
     protected void modified(Map<String, Object> configuration) {
         // clean up
         slmarker.clear();
-        trackers.values().forEach(t -> readyService.unregisterTracker(t));
+        trackers.values().forEach(readyService::unregisterTracker);
         trackers.clear();
 
         // set up trackers and markers
@@ -180,7 +178,7 @@ public class StartLevelService {
                 .forEach(sl -> slmarker.put(sl, new ReadyMarker(STARTLEVEL_MARKER_TYPE, Integer.toString(sl))));
         slmarker.put(STARTLEVEL_COMPLETE,
                 new ReadyMarker(STARTLEVEL_MARKER_TYPE, Integer.toString(STARTLEVEL_COMPLETE)));
-        startlevels.values().stream().forEach(ms -> ms.forEach(e -> registerTracker(e)));
+        startlevels.values().stream().forEach(ms -> ms.forEach(this::registerTracker));
     }
 
     private void registerTracker(ReadyMarker e) {
@@ -204,7 +202,7 @@ public class StartLevelService {
 
     private Map<Integer, Set<ReadyMarker>> parseConfig(Map<String, Object> configuration) {
         return configuration.entrySet().stream() //
-                .filter(e -> hasIntegerKey(e)) //
+                .filter(this::hasIntegerKey) //
                 .map(e -> new AbstractMap.SimpleEntry<>(Integer.valueOf(e.getKey()), markerSet(e.getValue()))) //
                 .sorted(Map.Entry.<Integer, Set<ReadyMarker>> comparingByKey().reversed()) //
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
@@ -212,8 +210,8 @@ public class StartLevelService {
 
     private Set<ReadyMarker> markerSet(Object value) {
         Set<ReadyMarker> markerSet = new HashSet<>();
-        if (value instanceof String) {
-            String[] segments = ((String) value).split(",");
+        if (value instanceof String string) {
+            String[] segments = string.split(",");
             for (String segment : segments) {
                 if (segment.contains(":")) {
                     String[] markerParts = segment.strip().split(":");
@@ -238,7 +236,7 @@ public class StartLevelService {
     @Deactivate
     protected void deactivate() {
         slmarker.clear();
-        trackers.values().forEach(t -> readyService.unregisterTracker(t));
+        trackers.values().forEach(readyService::unregisterTracker);
         ScheduledFuture<?> job = this.job;
         if (job != null) {
             job.cancel(true);

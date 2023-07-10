@@ -266,7 +266,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
         this.ruleRegistry = ruleRegistry;
         this.readyService = readyService;
 
-        listener = new RegistryChangeListener<Rule>() {
+        listener = new RegistryChangeListener<>() {
             @Override
             public void added(Rule rule) {
                 RuleEngineImpl.this.addRule(rule);
@@ -337,8 +337,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
         synchronized (this) {
             Set<String> rulesPerModule = mapModuleTypeToRules.get(moduleTypeName);
             if (rulesPerModule != null) {
-                rules = new HashSet<>();
-                rules.addAll(rulesPerModule);
+                rules = new HashSet<>(rulesPerModule);
             }
         }
         if (rules != null) {
@@ -366,8 +365,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
         synchronized (this) {
             Set<String> rulesPerModule = mapModuleTypeToRules.get(moduleTypeName);
             if (rulesPerModule != null) {
-                rules = new HashSet<>();
-                rules.addAll(rulesPerModule);
+                rules = new HashSet<>(rulesPerModule);
             }
         }
         if (rules != null) {
@@ -402,8 +400,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
                 moduleHandlerFactories.put(moduleTypeName, moduleHandlerFactory);
                 Set<String> rulesPerModule = mapModuleTypeToRules.get(moduleTypeName);
                 if (rulesPerModule != null) {
-                    rules = new HashSet<>();
-                    rules.addAll(rulesPerModule);
+                    rules = new HashSet<>(rulesPerModule);
                 }
             }
             if (rules != null) {
@@ -505,10 +502,8 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
         final boolean activated = activateRule(rule);
         if (activated) {
             Future<?> f = scheduleTasks.remove(rUID);
-            if (f != null) {
-                if (!f.isDone()) {
-                    f.cancel(true);
-                }
+            if ((f != null) && !f.isDone()) {
+                f.cancel(true);
             }
         }
     }
@@ -555,12 +550,12 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
             try {
                 ModuleHandler moduleHandler = getModuleHandler(m, rUID);
                 if (moduleHandler != null) {
-                    if (mm instanceof WrappedAction) {
-                        ((WrappedAction) mm).setModuleHandler((ActionHandler) moduleHandler);
-                    } else if (mm instanceof WrappedCondition) {
-                        ((WrappedCondition) mm).setModuleHandler((ConditionHandler) moduleHandler);
-                    } else if (mm instanceof WrappedTrigger) {
-                        ((WrappedTrigger) mm).setModuleHandler((TriggerHandler) moduleHandler);
+                    if (mm instanceof WrappedAction action) {
+                        action.setModuleHandler((ActionHandler) moduleHandler);
+                    } else if (mm instanceof WrappedCondition condition) {
+                        condition.setModuleHandler((ConditionHandler) moduleHandler);
+                    } else if (mm instanceof WrappedTrigger trigger) {
+                        trigger.setModuleHandler((TriggerHandler) moduleHandler);
                     }
                 } else {
                     if (sb == null) {
@@ -942,7 +937,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
             for (Entry<String, List<String>> e : mapMissingHandlers.entrySet()) {
                 String rUID = e.getKey();
                 List<String> missingTypes = e.getValue();
-                StringBuffer sb = new StringBuffer();
+                StringBuilder sb = new StringBuilder();
                 sb.append("Missing handlers: ");
                 for (String typeUID : missingTypes) {
                     sb.append(typeUID).append(", ");
@@ -1097,7 +1092,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
             throw new IllegalStateException("context cannot be null at that point - please report a bug.");
         }
         if (connections != null) {
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
             for (Connection c : connections) {
                 String outputModuleId = c.getOutputModuleId();
                 if (outputModuleId != null) {
@@ -1183,10 +1178,10 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
                         updateContext(ruleUID, action.getId(), outputs);
                     }
                 } catch (Throwable t) {
-                    String errMessage = "Fail to execute action: " + action.getId();
+                    String errMessage = "Failed to execute action: " + action.getId() + "(" + t.getMessage() + ")";
                     if (stopOnFirstFail) {
-                        RuntimeException re = new RuntimeException(errMessage, t);
-                        throw re;
+                        logger.debug("Action {}-{} threw an exception: ", ruleUID, action.getId(), t);
+                        throw new RuntimeException(errMessage, t);
                     } else {
                         logger.warn(errMessage, t);
                     }
@@ -1438,7 +1433,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
     private void executeRulesWithStartLevel() {
         getScheduledExecutor().submit(() -> {
             ruleRegistry.getAll().stream() //
-                    .filter(r -> mustTrigger(r)) //
+                    .filter(this::mustTrigger) //
                     .forEach(r -> runNow(r.getUID(), true,
                             Map.of(SystemTriggerHandler.OUT_STARTLEVEL, StartLevelService.STARTLEVEL_RULES)));
             started = true;

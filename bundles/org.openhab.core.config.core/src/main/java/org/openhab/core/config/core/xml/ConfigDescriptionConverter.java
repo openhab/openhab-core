@@ -89,11 +89,11 @@ public class ConfigDescriptionConverter extends GenericUnmarshaller<ConfigDescri
         // respective arrays
         while (nodeIterator.hasNext()) {
             Object node = nodeIterator.next();
-            if (node instanceof ConfigDescriptionParameter) {
-                configDescriptionParams.add((ConfigDescriptionParameter) node);
+            if (node instanceof ConfigDescriptionParameter parameter) {
+                configDescriptionParams.add(parameter);
             }
-            if (node instanceof ConfigDescriptionParameterGroup) {
-                configDescriptionGroups.add((ConfigDescriptionParameterGroup) node);
+            if (node instanceof ConfigDescriptionParameterGroup group) {
+                configDescriptionGroups.add(group);
             }
         }
 

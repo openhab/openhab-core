@@ -30,6 +30,7 @@ import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionParameterGroup;
 import org.openhab.core.config.core.ConfigDescriptionProvider;
+import org.openhab.core.config.core.ParameterOption;
 import org.openhab.core.test.BundleCloseable;
 import org.openhab.core.test.SyntheticBundleInstaller;
 import org.openhab.core.test.java.JavaOSGiTest;
@@ -101,7 +102,7 @@ public class ConfigDescriptionI18nTest extends JavaOSGiTest {
         sb.append(String.format("refresh.description = %s\n", refresh.getDescription()));
         sb.append(String.format("question.pattern = %s\n", question.getPattern()));
         sb.append(String.format("question.options = %s\n",
-                question.getOptions().stream().map(o -> o.getLabel()).collect(Collectors.joining(", "))));
+                question.getOptions().stream().map(ParameterOption::getLabel).collect(Collectors.joining(", "))));
         sb.append(String.format("group.label = %s\n", group.getLabel()));
         sb.append(String.format("group.description = %s", group.getDescription()));
 

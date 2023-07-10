@@ -110,8 +110,8 @@ public class TestHueThingHandlerFactory extends BaseThingHandlerFactory {
 
     @Override
     protected @Nullable ThingHandler createHandler(Thing thing) {
-        if (thing instanceof Bridge) {
-            return new BaseBridgeHandler((Bridge) thing) {
+        if (thing instanceof Bridge bridge) {
+            return new BaseBridgeHandler(bridge) {
                 @Override
                 public void handleCommand(ChannelUID channelUID, Command command) {
                 }

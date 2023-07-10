@@ -22,7 +22,7 @@ import org.eclipse.xtext.xbase.interpreter.IEvaluationContext;
 @SuppressWarnings("restriction")
 public interface Script {
 
-    public static final String SCRIPT_FILEEXT = "script";
+    static final String SCRIPT_FILEEXT = "script";
 
     /**
      * Executes the script instance and returns the execution result
@@ -30,7 +30,7 @@ public interface Script {
      * @return the execution result or <code>null</code>, if the script does not have a return value
      * @throws ScriptExecutionException if an error occurs during the execution
      */
-    public Object execute() throws ScriptExecutionException;
+    Object execute() throws ScriptExecutionException;
 
     /**
      * Executes the script instance with a given evaluation context and returns the execution result
@@ -40,5 +40,5 @@ public interface Script {
      * @return the execution result or <code>null</code>, if the script does not have a return value
      * @throws ScriptExecutionException if an error occurs during the execution
      */
-    public Object execute(IEvaluationContext evaluationContext) throws ScriptExecutionException;
+    Object execute(IEvaluationContext evaluationContext) throws ScriptExecutionException;
 }

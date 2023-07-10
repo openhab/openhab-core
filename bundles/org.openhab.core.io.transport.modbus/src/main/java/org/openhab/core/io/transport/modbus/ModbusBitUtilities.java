@@ -229,8 +229,7 @@ public class ModbusBitUtilities {
      */
     public static byte extractSInt8(byte[] bytes, int registerIndex, boolean hiByte) {
         int byteIndex = 2 * registerIndex + (hiByte ? 0 : 1);
-        byte signed = extractSInt8(bytes, byteIndex);
-        return signed;
+        return extractSInt8(bytes, byteIndex);
     }
 
     /**
@@ -248,8 +247,7 @@ public class ModbusBitUtilities {
      */
     public static byte extractSInt8(byte[] bytes, int index) {
         assertIndexAndType(bytes, index, ValueType.INT8);
-        byte signed = bytes[index];
-        return signed;
+        return bytes[index];
     }
 
     /**
@@ -263,8 +261,7 @@ public class ModbusBitUtilities {
      */
     public static short extractUInt8(byte[] bytes, int registerIndex, boolean hiByte) {
         int byteIndex = 2 * registerIndex + (hiByte ? 0 : 1);
-        short unsigned = extractUInt8(bytes, byteIndex);
-        return unsigned;
+        return extractUInt8(bytes, byteIndex);
     }
 
     /**
@@ -302,8 +299,7 @@ public class ModbusBitUtilities {
         assertIndexAndType(bytes, index, ValueType.INT16);
         int hi = (bytes[index] & 0xff);
         int lo = (bytes[index + 1] & 0xff);
-        short signed = (short) ((hi << 8) | lo);
-        return signed;
+        return (short) ((hi << 8) | lo);
     }
 
     /**
@@ -340,8 +336,7 @@ public class ModbusBitUtilities {
         int lo1 = bytes[index + 1] & 0xff;
         int hi2 = bytes[index + 2] & 0xff;
         int lo2 = bytes[index + 3] & 0xff;
-        int signed = (hi1 << 24) | (lo1 << 16) | (hi2 << 8) | lo2;
-        return signed;
+        return (hi1 << 24) | (lo1 << 16) | (hi2 << 8) | lo2;
     }
 
     /**
@@ -381,8 +376,7 @@ public class ModbusBitUtilities {
         int lo1 = bytes[index + 3] & 0xff;
         int hi2 = bytes[index + 0] & 0xff;
         int lo2 = bytes[index + 1] & 0xff;
-        int signed = (hi1 << 24) | (lo1 << 16) | (hi2 << 8) | lo2;
-        return signed;
+        return (hi1 << 24) | (lo1 << 16) | (hi2 << 8) | lo2;
     }
 
     /**
@@ -633,10 +627,10 @@ public class ModbusBitUtilities {
         if (command instanceof OnOffType || command instanceof OpenClosedType) {
             numericCommand = translateCommand2Boolean(command).get() ? new DecimalType(BigDecimal.ONE)
                     : DecimalType.ZERO;
-        } else if (command instanceof DecimalType) {
-            numericCommand = (DecimalType) command;
-        } else if (command instanceof QuantityType<?>) {
-            QuantityType<?> qtCommand = ((QuantityType<?>) command).toUnit(Units.ONE);
+        } else if (command instanceof DecimalType decimalType) {
+            numericCommand = decimalType;
+        } else if (command instanceof QuantityType<?> quantityType) {
+            QuantityType<?> qtCommand = quantityType.toUnit(Units.ONE);
             if (qtCommand == null) {
                 throw new IllegalArgumentException(
                         String.format("Command '%s' of class '%s' cannot be converted to bare number.", command,

@@ -46,8 +46,8 @@ import org.openhab.core.config.core.ParameterOption;
 import org.openhab.core.ephemeris.EphemerisManager;
 import org.openhab.core.i18n.LocaleProvider;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
-import org.osgi.framework.FrameworkUtil;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Modified;
@@ -59,6 +59,7 @@ import de.jollyday.Holiday;
 import de.jollyday.HolidayManager;
 import de.jollyday.ManagerParameter;
 import de.jollyday.ManagerParameters;
+import de.jollyday.parameter.CalendarPartManagerParameter;
 import de.jollyday.util.ResourceUtil;
 
 /**
@@ -82,7 +83,9 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
     public static final String CONFIG_REGION = "region";
     public static final String CONFIG_CITY = "city";
 
-    private static final String JOLLYDAY_COUNTRY_DESCRIPTIONS = "jollyday/descriptions/country_descriptions.properties";
+    private static final String RESOURCES_ROOT = "jollyday/";
+    private static final String JOLLYDAY_COUNTRY_DESCRIPTIONS = RESOURCES_ROOT
+            + "descriptions/country_descriptions.properties";
     private static final String PROPERTY_COUNTRY_DESCRIPTION_PREFIX = "country.description.";
     private static final String PROPERTY_COUNTRY_DESCRIPTION_DELIMITER = "\\.";
 
@@ -99,15 +102,16 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
     private final ResourceUtil resourceUtil = new ResourceUtil();
 
     private final LocaleProvider localeProvider;
+    private final Bundle bundle;
 
     private @NonNullByDefault({}) String country;
     private @Nullable String region;
 
     @Activate
-    public EphemerisManagerImpl(final @Reference LocaleProvider localeProvider) {
+    public EphemerisManagerImpl(final @Reference LocaleProvider localeProvider, final BundleContext bundleContext) {
         this.localeProvider = localeProvider;
+        bundle = bundleContext.getBundle();
 
-        final Bundle bundle = FrameworkUtil.getBundle(getClass());
         try (InputStream stream = bundle.getResource(JOLLYDAY_COUNTRY_DESCRIPTIONS).openStream()) {
             final Properties properties = new Properties();
             properties.load(stream);
@@ -153,8 +157,8 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
                         } else {
                             logger.warn("Erroneous day set definition {} : {}", e.getKey(), entry);
                         }
-                    } else if (entry instanceof Iterable) {
-                        addDayset(setName, (Iterable<?>) entry);
+                    } else if (entry instanceof Iterable iterable) {
+                        addDayset(setName, iterable);
                     }
                 } else {
                     logger.warn("Erroneous day set definition {}", e.getKey());
@@ -164,23 +168,26 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
             }
         });
 
-        if (config.containsKey(CONFIG_COUNTRY)) {
-            country = config.get(CONFIG_COUNTRY).toString().toLowerCase();
+        Object configValue = config.get(CONFIG_COUNTRY);
+        if (configValue != null) {
+            country = configValue.toString().toLowerCase();
         } else {
             country = localeProvider.getLocale().getCountry().toLowerCase();
             logger.debug("Using system default country '{}' ", country);
         }
 
-        if (config.containsKey(CONFIG_REGION)) {
-            String region = config.get(CONFIG_REGION).toString().toLowerCase();
+        configValue = config.get(CONFIG_REGION);
+        if (configValue != null) {
+            String region = configValue.toString().toLowerCase();
             countryParameters.add(region);
             this.region = region;
         } else {
             this.region = null;
         }
 
-        if (config.containsKey(CONFIG_CITY)) {
-            countryParameters.add(config.get(CONFIG_CITY).toString());
+        configValue = config.get(CONFIG_CITY);
+        if (configValue != null) {
+            countryParameters.add(configValue.toString());
         }
     }
 
@@ -231,9 +238,16 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
     private HolidayManager getHolidayManager(Object managerKey) {
         HolidayManager holidayManager = holidayManagers.get(managerKey);
         if (holidayManager == null) {
-            final ManagerParameter parameters = managerKey.getClass() == String.class
-                    ? ManagerParameters.create((String) managerKey)
-                    : ManagerParameters.create((URL) managerKey);
+            final ManagerParameter parameters;
+            if (managerKey instanceof String stringKey) {
+                URL urlOverride = bundle
+                        .getResource(RESOURCES_ROOT + CalendarPartManagerParameter.getConfigurationFileName(stringKey));
+                parameters = urlOverride != null //
+                        ? ManagerParameters.create(urlOverride)
+                        : ManagerParameters.create(stringKey);
+            } else {
+                parameters = ManagerParameters.create((URL) managerKey);
+            }
             holidayManager = HolidayManager.getInstance(parameters);
             holidayManagers.put(managerKey, holidayManager);
         }
@@ -297,9 +311,10 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
 
     @Override
     public boolean isInDayset(String daysetName, ZonedDateTime date) {
-        if (daysets.containsKey(daysetName)) {
+        Set<DayOfWeek> dayset = daysets.get(daysetName);
+        if (dayset != null) {
             DayOfWeek dow = date.getDayOfWeek();
-            return daysets.get(daysetName).contains(dow);
+            return dayset.contains(dow);
         } else {
             logger.warn("This dayset is not configured : {}", daysetName);
             return false;
@@ -381,8 +396,9 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
             case 2:
                 part = getValidPart(parts[0]);
                 option = new ParameterOption(getValidPart(parts[1]), name);
-                if (regions.containsKey(part)) {
-                    regions.get(part).add(option);
+                List<ParameterOption> regionsPart = regions.get(part);
+                if (regionsPart != null) {
+                    regionsPart.add(option);
                 } else {
                     final List<ParameterOption> options = new ArrayList<>();
                     options.add(option);
@@ -392,8 +408,9 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
             case 3:
                 part = getValidPart(parts[1]);
                 option = new ParameterOption(getValidPart(parts[2]), name);
-                if (cities.containsKey(part)) {
-                    cities.get(part).add(option);
+                List<ParameterOption> citiesPart = cities.get(part);
+                if (citiesPart != null) {
+                    citiesPart.add(option);
                 } else {
                     final List<ParameterOption> options = new ArrayList<>();
                     options.add(option);

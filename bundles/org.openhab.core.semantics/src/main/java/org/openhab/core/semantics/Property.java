@@ -20,6 +20,5 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * @author Kai Kreuzer - Initial contribution
  */
 @NonNullByDefault
-@TagInfo(id = "MeasurementProperty")
 public interface Property extends Tag {
 }

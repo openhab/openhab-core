@@ -33,6 +33,8 @@ import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
 import org.openhab.core.config.core.ConfigDescriptionParameterGroup;
 import org.openhab.core.config.core.ConfigDescriptionRegistry;
+import org.openhab.core.config.core.FilterCriteria;
+import org.openhab.core.config.core.ParameterOption;
 import org.openhab.core.test.BundleCloseable;
 import org.openhab.core.test.SyntheticBundleInstaller;
 import org.openhab.core.test.java.JavaOSGiTest;
@@ -119,7 +121,7 @@ public class ConfigDescriptionsTest extends JavaOSGiTest {
             assertThat(colorItemParameter.getContext(), is("item"));
             assertThat(colorItemParameter.getFilterCriteria(), is(notNullValue()));
             assertThat(
-                    colorItemParameter.getFilterCriteria().stream().map(c -> c.toString())
+                    colorItemParameter.getFilterCriteria().stream().map(FilterCriteria::toString)
                             .collect(Collectors.joining(", ")),
                     is("FilterCriteria [name=\"tags\", value=\"alarm, light\"], FilterCriteria [name=\"type\", value=\"color\"], FilterCriteria [name=\"binding-id\", value=\"hue\"]"));
 
@@ -136,7 +138,7 @@ public class ConfigDescriptionsTest extends JavaOSGiTest {
             assertThat(listParameter1.isVerifyable(), is(false));
             assertThat(listParameter1.getLimitToOptions(), is(true));
             assertThat(listParameter1.getMultipleLimit(), is(nullValue()));
-            assertThat(listParameter1.getOptions().stream().map(o -> o.toString()).collect(joining(", ")), is(
+            assertThat(listParameter1.getOptions().stream().map(ParameterOption::toString).collect(joining(", ")), is(
                     "ParameterOption [value=\"key1\", label=\"label1\"], ParameterOption [value=\"key2\", label=\"label2\"]"));
 
             ConfigDescriptionParameter listParameter2 = findParameter(englishDescription, "list2");

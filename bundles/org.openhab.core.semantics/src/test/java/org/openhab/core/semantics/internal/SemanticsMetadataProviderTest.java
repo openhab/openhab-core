@@ -16,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
+import java.util.List;
 import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -36,6 +37,9 @@ import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.Metadata;
 import org.openhab.core.library.items.SwitchItem;
+import org.openhab.core.semantics.ManagedSemanticTagProvider;
+import org.openhab.core.semantics.SemanticTagRegistry;
+import org.openhab.core.semantics.model.DefaultSemanticTagProvider;
 
 /**
  * @author Simon Lamon - Initial contribution
@@ -49,14 +53,19 @@ public class SemanticsMetadataProviderTest {
 
     private static final String GROUP_ITEM_NAME = "groupItem";
 
-    private @NonNullByDefault({}) @Mock ItemRegistry itemRegistry;
-    private @NonNullByDefault({}) @Mock ProviderChangeListener<@NonNull Metadata> changeListener;
+    private @Mock @NonNullByDefault({}) ItemRegistry itemRegistry;
+    private @Mock @NonNullByDefault({}) ProviderChangeListener<@NonNull Metadata> changeListener;
+    private @Mock @NonNullByDefault({}) ManagedSemanticTagProvider managedSemanticTagProviderMock;
 
     private @NonNullByDefault({}) SemanticsMetadataProvider semanticsMetadataProvider;
 
     @BeforeEach
     public void beforeEach() throws Exception {
-        semanticsMetadataProvider = new SemanticsMetadataProvider(itemRegistry) {
+        when(managedSemanticTagProviderMock.getAll()).thenReturn(List.of());
+        SemanticTagRegistry semanticTagRegistry = new SemanticTagRegistryImpl(new DefaultSemanticTagProvider(),
+                managedSemanticTagProviderMock);
+
+        semanticsMetadataProvider = new SemanticsMetadataProvider(itemRegistry, semanticTagRegistry) {
             {
                 addProviderChangeListener(changeListener);
             }

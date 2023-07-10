@@ -77,7 +77,7 @@ public class SystemHysteresisStateProfileTest {
             this.commands = (List<Command>) sources;
             this.resultingCommands = new ArrayList<>(results.size());
             results.forEach(result -> {
-                resultingCommands.add(result instanceof Command ? (Command) result : null);
+                resultingCommands.add(result instanceof Command c ? c : null);
             });
             this.lower = lower;
             this.upper = upper;

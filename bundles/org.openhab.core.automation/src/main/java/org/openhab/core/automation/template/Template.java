@@ -40,7 +40,7 @@ public interface Template extends Identifiable<String> {
      * @return the identifier of the Template.
      */
     @Override
-    public String getUID();
+    String getUID();
 
     /**
      * Gets the assigned tags to a Template. The templates can have {@code tags} - non-hierarchical keywords or terms
@@ -48,7 +48,7 @@ public interface Template extends Identifiable<String> {
      *
      * @return the tags assigned to the template.
      */
-    public Set<String> getTags();
+    Set<String> getTags();
 
     /**
      * Gets the label of a Template. The label is a short, human-readable description of the Template defined by its
@@ -56,7 +56,8 @@ public interface Template extends Identifiable<String> {
      *
      * @return the label of the Template.
      */
-    public @Nullable String getLabel();
+    @Nullable
+    String getLabel();
 
     /**
      * Gets the description of a Template. The description is a detailed, human-understandable description of the
@@ -64,12 +65,13 @@ public interface Template extends Identifiable<String> {
      *
      * @return the description of the Template.
      */
-    public @Nullable String getDescription();
+    @Nullable
+    String getDescription();
 
     /**
      * Shows the visibility of a Template.
      *
      * @return the visibility of the Template.
      */
-    public Visibility getVisibility();
+    Visibility getVisibility();
 }

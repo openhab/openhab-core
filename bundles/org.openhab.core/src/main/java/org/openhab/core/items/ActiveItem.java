@@ -50,59 +50,59 @@ public interface ActiveItem extends Item {
      *
      * @param tag a tag that is to be added to item's tags.
      */
-    public void addTag(String tag);
+    void addTag(String tag);
 
     /**
      * Adds tags to the item.
      *
      * @param tags tags that are to be added to item's tags.
      */
-    public void addTags(String... tags);
+    void addTags(String... tags);
 
     /**
      * Adds tags to the item.
      *
      * @param tags tags that are to be added to item's tags.
      */
-    public void addTags(Collection<String> tags);
+    void addTags(Collection<String> tags);
 
     /**
      * Removes a tag from the item.
      *
      * @param tag a tag that is to be removed from item's tags.
      */
-    public void removeTag(String tag);
+    void removeTag(String tag);
 
     /**
      * Clears all tags of this item.
      */
-    public void removeAllTags();
+    void removeAllTags();
 
     /**
      * Removes the according item from a group.
      *
      * @param groupItemName name of the group (must not be null)
      */
-    public abstract void removeGroupName(String groupItemName);
+    void removeGroupName(String groupItemName);
 
     /**
      * Assigns the according item to a group.
      *
      * @param groupItemName name of the group (must not be null)
      */
-    public abstract void addGroupName(String groupItemName);
+    void addGroupName(String groupItemName);
 
     /**
      * Assigns the according item to the given groups.
      *
      * @param groupItemNames names of the groups (must not be null)
      */
-    public abstract void addGroupNames(String... groupItemNames);
+    void addGroupNames(String... groupItemNames);
 
     /**
      * Assigns the according item to the given groups.
      *
      * @param groupItemNames names of the groups (must not be null)
      */
-    public abstract void addGroupNames(List<String> groupItemNames);
+    void addGroupNames(List<String> groupItemNames);
 }

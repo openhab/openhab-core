@@ -25,6 +25,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.common.Disposable;
 import org.openhab.core.storage.Storage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -166,7 +167,6 @@ public class LRUMediaCacheEntry<V> {
      * @throws IOException
      */
     public InputStream getInputStream() throws IOException {
-
         File localFile = file;
         if (localFile == null) { // the cache entry is not tied to the disk. The cache is not ready or not to be used.
             InputStream inputStreamLocal = inputStream;
@@ -233,6 +233,9 @@ public class LRUMediaCacheEntry<V> {
                     InputStream inputStreamLocal = inputStream;
                     if (inputStreamLocal != null) {
                         inputStreamLocal.close();
+                    }
+                    if (inputStreamLocal instanceof Disposable disposableStream) {
+                        disposableStream.dispose();
                     }
                 }
             }

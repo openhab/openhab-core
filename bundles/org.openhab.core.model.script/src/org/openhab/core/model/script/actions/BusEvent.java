@@ -47,7 +47,7 @@ public class BusEvent {
      * @param item the item to send the command to
      * @param commandString the command to send
      */
-    static public Object sendCommand(Item item, String commandString) {
+    public static Object sendCommand(Item item, String commandString) {
         if (item != null) {
             return sendCommand(item.getName(), commandString);
         } else {
@@ -61,7 +61,7 @@ public class BusEvent {
      * @param item the item to send the command to
      * @param number the number to send as a command
      */
-    static public Object sendCommand(Item item, Number number) {
+    public static Object sendCommand(Item item, Number number) {
         if (item != null && number != null) {
             return sendCommand(item.getName(), number.toString());
         } else {
@@ -75,7 +75,7 @@ public class BusEvent {
      * @param itemName the name of the item to send the command to
      * @param commandString the command to send
      */
-    static public Object sendCommand(String itemName, String commandString) {
+    public static Object sendCommand(String itemName, String commandString) {
         ItemRegistry registry = ScriptServiceUtil.getItemRegistry();
         EventPublisher publisher = ScriptServiceUtil.getEventPublisher();
         if (publisher != null && registry != null) {
@@ -107,7 +107,7 @@ public class BusEvent {
      * @param item the item to send the command to
      * @param command the command to send
      */
-    static public Object sendCommand(Item item, Command command) {
+    public static Object sendCommand(Item item, Command command) {
         EventPublisher publisher = ScriptServiceUtil.getEventPublisher();
         if (publisher != null && item != null) {
             publisher.post(ItemEventFactory.createCommandEvent(item.getName(), command));
@@ -121,7 +121,7 @@ public class BusEvent {
      * @param item the item to send the status update for
      * @param state the new state of the item as a number
      */
-    static public Object postUpdate(Item item, Number state) {
+    public static Object postUpdate(Item item, Number state) {
         if (item != null && state != null) {
             return postUpdate(item.getName(), state.toString());
         } else {
@@ -135,7 +135,7 @@ public class BusEvent {
      * @param item the item to send the status update for
      * @param stateAsString the new state of the item
      */
-    static public Object postUpdate(Item item, String stateAsString) {
+    public static Object postUpdate(Item item, String stateAsString) {
         if (item != null) {
             return postUpdate(item.getName(), stateAsString);
         } else {
@@ -149,7 +149,7 @@ public class BusEvent {
      * @param itemName the name of the item to send the status update for
      * @param stateAsString the new state of the item
      */
-    static public Object postUpdate(String itemName, String stateString) {
+    public static Object postUpdate(String itemName, String stateString) {
         ItemRegistry registry = ScriptServiceUtil.getItemRegistry();
         EventPublisher publisher = ScriptServiceUtil.getEventPublisher();
         if (publisher != null && registry != null) {
@@ -181,7 +181,7 @@ public class BusEvent {
      * @param item the item to send the status update for
      * @param state the new state of the item
      */
-    static public Object postUpdate(Item item, State state) {
+    public static Object postUpdate(Item item, State state) {
         EventPublisher publisher = ScriptServiceUtil.getEventPublisher();
         if (publisher != null && item != null) {
             publisher.post(ItemEventFactory.createStateEvent(item.getName(), state));
@@ -196,12 +196,11 @@ public class BusEvent {
      * @param items the items for which the state should be stored
      * @return the map of items with their states
      */
-    static public Map<Item, State> storeStates(Item... items) {
+    public static Map<Item, State> storeStates(Item... items) {
         Map<Item, State> statesMap = new HashMap<>();
         if (items != null) {
             for (Item item : items) {
-                if (item instanceof GroupItem) {
-                    GroupItem groupItem = (GroupItem) item;
+                if (item instanceof GroupItem groupItem) {
                     for (Item member : groupItem.getAllMembers()) {
                         statesMap.put(member, member.getState());
                     }
@@ -222,7 +221,7 @@ public class BusEvent {
      * @param statesMap a map with ({@link Item}, {@link State}) entries
      * @return null
      */
-    static public Object restoreStates(Map<Item, State> statesMap) {
+    public static Object restoreStates(Map<Item, State> statesMap) {
         if (statesMap != null) {
             for (Entry<Item, State> entry : statesMap.entrySet()) {
                 if (entry.getValue() instanceof Command) {

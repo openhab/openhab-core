@@ -44,7 +44,7 @@ import org.openhab.core.automation.type.ActionType;
 import org.openhab.core.automation.type.Input;
 import org.openhab.core.automation.type.ModuleTypeRegistry;
 import org.openhab.core.automation.type.Output;
-import org.openhab.core.automation.util.ActionBuilder;
+import org.openhab.core.automation.util.ModuleBuilder;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.io.rest.LocaleService;
 import org.openhab.core.io.rest.RESTConstants;
@@ -64,8 +64,6 @@ import org.osgi.service.jaxrs.whiteboard.propertytypes.JSONRequired;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsName;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -91,7 +89,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 public class ThingActionsResource implements RESTResource {
     public static final String PATH_THINGS = "actions";
 
-    private final Logger logger = LoggerFactory.getLogger(ThingActionsResource.class);
     private final LocaleService localeService;
     private final ModuleTypeRegistry moduleTypeRegistry;
 
@@ -209,7 +206,7 @@ public class ThingActionsResource implements RESTResource {
 
         Configuration configuration = new Configuration();
         configuration.put("config", thingUID);
-        Action action = ActionBuilder.createAction().withConfiguration(configuration)
+        Action action = ModuleBuilder.createAction().withConfiguration(configuration)
                 .withId(UUID.randomUUID().toString()).withTypeUID(actionTypeUid).build();
 
         ModuleHandlerFactory moduleHandlerFactory = moduleHandlerFactories.stream()

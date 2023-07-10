@@ -22,7 +22,6 @@ import org.eclipse.jdt.annotation.Nullable;
  * @author Kai Kreuzer - Initial contribution
  */
 @NonNullByDefault
-@TagInfo(id = "Equipment")
 public interface Equipment extends Tag {
 
     @Nullable

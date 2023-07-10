@@ -164,7 +164,7 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
                     || THING_TYPE_UID3.equals(thing.getThingTypeUID())) {
                 return Collections.emptySet();
             } else {
-                Supplier<TreeSet<Firmware>> supplier = () -> new TreeSet<>();
+                Supplier<TreeSet<Firmware>> supplier = TreeSet::new;
                 return Stream.of(FW009_EN, FW111_EN, FW112_EN).collect(Collectors.toCollection(supplier));
             }
         };
@@ -318,7 +318,7 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
         firmwareUpdateService.updateFirmware(THING1_UID, V112, null);
 
         waitForAssert(() -> {
-            assertThat(thing1.getProperties().get(Thing.PROPERTY_FIRMWARE_VERSION), is(V112.toString()));
+            assertThat(thing1.getProperties().get(Thing.PROPERTY_FIRMWARE_VERSION), is(V112));
         });
 
         assertThat(firmwareUpdateService.getFirmwareStatusInfo(THING1_UID), is(upToDateInfo));
@@ -461,7 +461,7 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
         firmwareUpdateService.updateFirmware(THING2_UID, V111, null);
 
         waitForAssert(() -> {
-            assertThat(thing2.getProperties().get(Thing.PROPERTY_FIRMWARE_VERSION), is(V111.toString()));
+            assertThat(thing2.getProperties().get(Thing.PROPERTY_FIRMWARE_VERSION), is(V111));
         });
 
         assertThat(firmwareUpdateService.getFirmwareStatusInfo(THING2_UID), is(updateExecutableInfoFw112));
@@ -547,7 +547,7 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
                     || THING_TYPE_UID2.equals(thing.getThingTypeUID())) {
                 return Collections.emptySet();
             } else {
-                Supplier<TreeSet<Firmware>> supplier = () -> new TreeSet<>();
+                Supplier<TreeSet<Firmware>> supplier = TreeSet::new;
                 return Stream.of(FW111_FIX_EN, FW113_EN).collect(Collectors.toCollection(supplier));
             }
         });
@@ -583,7 +583,7 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
                     || THING_TYPE_UID2.equals(thing.getThingTypeUID())) {
                 return Collections.emptySet();
             } else {
-                Supplier<TreeSet<Firmware>> supplier = () -> new TreeSet<>();
+                Supplier<TreeSet<Firmware>> supplier = TreeSet::new;
                 return Stream.of(FW111_FIX_EN, FW113_EN).collect(Collectors.toCollection(supplier));
             }
         };
@@ -702,7 +702,7 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
             verify(eventPublisherMock, atLeast(SEQUENCE.length + 1)).post(eventCaptor.capture());
         });
         events.get().addAll(eventCaptor.getAllValues());
-        List<Event> list = events.get().stream().filter(event -> event instanceof FirmwareUpdateProgressInfoEvent)
+        List<Event> list = events.get().stream().filter(FirmwareUpdateProgressInfoEvent.class::isInstance)
                 .collect(Collectors.toList());
         assertTrue(list.size() >= SEQUENCE.length);
         for (int i = 0; i < SEQUENCE.length; i++) {
@@ -758,7 +758,7 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
         assertResultInfoEvent(THING1_UID, FW112_EN, "unexpected-handler-error", Locale.ENGLISH, "english", 1);
         assertResultInfoEvent(THING1_UID, FW112_EN, "unexpected-handler-error", Locale.GERMAN, "deutsch", 2);
 
-        assertThat(thing1.getProperties().get(Thing.PROPERTY_FIRMWARE_VERSION), is(V111.toString()));
+        assertThat(thing1.getProperties().get(Thing.PROPERTY_FIRMWARE_VERSION), is(V111));
         assertThat(firmwareUpdateService.getFirmwareStatusInfo(THING1_UID), is(updateExecutableInfoFw112));
     }
 
@@ -777,7 +777,7 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
         assertResultInfoEvent(THING1_UID, FW112_EN, "test-error", Locale.ENGLISH, "english", 1);
         assertResultInfoEvent(THING1_UID, FW112_EN, "test-error", Locale.GERMAN, "deutsch", 2);
 
-        assertThat(thing1.getProperties().get(Thing.PROPERTY_FIRMWARE_VERSION), is(V111.toString()));
+        assertThat(thing1.getProperties().get(Thing.PROPERTY_FIRMWARE_VERSION), is(V111));
         assertThat(firmwareUpdateService.getFirmwareStatusInfo(THING1_UID), is(updateExecutableInfoFw112));
     }
 
@@ -821,9 +821,7 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
 
         FirmwareUpdateBackgroundTransferHandler handler4 = mock(FirmwareUpdateBackgroundTransferHandler.class);
         when(handler4.getThing()).thenReturn(thing4);
-        doAnswer(invocation -> {
-            return updateExecutable.get();
-        }).when(handler4).isUpdateExecutable();
+        doAnswer(invocation -> updateExecutable.get()).when(handler4).isUpdateExecutable();
         doAnswer(invocation -> {
             Firmware firmware = (Firmware) invocation.getArguments()[0];
             thing4.setProperty(Thing.PROPERTY_FIRMWARE_VERSION, firmware.getVersion());
@@ -905,7 +903,7 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
             ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
             verify(eventPublisherMock, atLeast(expectedEventCount)).post(eventCaptor.capture());
             List<Event> allValues = eventCaptor.getAllValues().stream()
-                    .filter(e -> e instanceof FirmwareUpdateResultInfoEvent).collect(Collectors.toList());
+                    .filter(FirmwareUpdateResultInfoEvent.class::isInstance).collect(Collectors.toList());
             assertEquals(expectedEventCount, allValues.size());
             assertFailedFirmwareUpdate(THING1_UID, allValues.get(expectedEventCount - 1), text);
         });

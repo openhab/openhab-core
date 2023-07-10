@@ -69,7 +69,7 @@ public class ConfigDescriptionParameter {
         /**
          * The data type for a boolean ({@code true} or {@code false}).
          */
-        BOOLEAN;
+        BOOLEAN
 
     }
 

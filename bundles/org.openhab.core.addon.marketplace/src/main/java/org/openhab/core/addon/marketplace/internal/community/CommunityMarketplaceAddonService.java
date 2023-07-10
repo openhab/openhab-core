@@ -36,6 +36,7 @@ import java.util.stream.Stream;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.addon.Addon;
+import org.openhab.core.addon.AddonInfoRegistry;
 import org.openhab.core.addon.AddonService;
 import org.openhab.core.addon.AddonType;
 import org.openhab.core.addon.marketplace.AbstractRemoteAddonService;
@@ -90,7 +91,7 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
     private static final String COMMUNITY_BASE_URL = "https://community.openhab.org";
     private static final String COMMUNITY_MARKETPLACE_URL = COMMUNITY_BASE_URL + "/c/marketplace/69/l/latest";
     private static final String COMMUNITY_TOPIC_URL = COMMUNITY_BASE_URL + "/t/";
-    private static final Pattern BUNDLE_NAME_PATTERN = Pattern.compile(".*/(.*)-\\d+\\.\\d+\\.\\d+.*");
+    private static final Pattern BUNDLE_NAME_PATTERN = Pattern.compile(".*/(.*?)-\\d+\\.\\d+\\.\\d+.*");
 
     private static final String SERVICE_ID = "marketplace";
     private static final String ADDON_ID_PREFIX = SERVICE_ID + ":";
@@ -115,8 +116,8 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
     @Activate
     public CommunityMarketplaceAddonService(final @Reference EventPublisher eventPublisher,
             @Reference ConfigurationAdmin configurationAdmin, @Reference StorageService storageService,
-            Map<String, Object> config) {
-        super(eventPublisher, configurationAdmin, storageService, SERVICE_PID);
+            @Reference AddonInfoRegistry addonInfoRegistry, Map<String, Object> config) {
+        super(eventPublisher, configurationAdmin, storageService, addonInfoRegistry, SERVICE_PID);
         modified(config);
     }
 
@@ -200,10 +201,13 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
 
     @Override
     public @Nullable Addon getAddon(String uid, @Nullable Locale locale) {
+        String queryId = uid.startsWith(ADDON_ID_PREFIX) ? uid : ADDON_ID_PREFIX + uid;
+
         // check if it is an installed add-on (cachedAddons also contains possibly incomplete results from the remote
         // side, we need to retrieve them from Discourse)
-        if (installedAddons.contains(uid)) {
-            return cachedAddons.stream().filter(e -> uid.equals(e.getUid())).findAny().orElse(null);
+
+        if (installedAddons.contains(queryId)) {
+            return cachedAddons.stream().filter(e -> queryId.equals(e.getUid())).findAny().orElse(null);
         }
 
         if (!remoteEnabled()) {
@@ -437,11 +441,13 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
         boolean installed = addonHandlers.stream()
                 .anyMatch(handler -> handler.supports(type, contentType) && handler.isInstalled(uid));
 
-        return Addon.create(uid).withType(type).withId(id).withContentType(contentType).withLabel(topic.title)
-                .withImageLink(topic.imageUrl).withLink(COMMUNITY_TOPIC_URL + topic.id.toString())
+        Addon.Builder builder = Addon.create(uid).withType(type).withId(id).withContentType(contentType)
+                .withLabel(topic.title).withImageLink(topic.imageUrl)
+                .withLink(COMMUNITY_TOPIC_URL + topic.id.toString())
                 .withAuthor(topic.postStream.posts[0].displayUsername).withMaturity(maturity)
-                .withDetailedDescription(detailedDescription).withInstalled(installed).withProperties(properties)
-                .build();
+                .withDetailedDescription(detailedDescription).withInstalled(installed).withProperties(properties);
+
+        return builder.build();
     }
 
     private @Nullable String determineIdFromUrl(String url) {

@@ -16,6 +16,7 @@ import static java.util.stream.Collectors.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -24,6 +25,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -49,6 +51,7 @@ import org.openhab.core.automation.events.RuleRemovedEvent;
 import org.openhab.core.automation.events.RuleStatusInfoEvent;
 import org.openhab.core.automation.events.RuleUpdatedEvent;
 import org.openhab.core.automation.internal.RuleEngineImpl;
+import org.openhab.core.automation.internal.module.factory.CoreModuleHandlerFactory;
 import org.openhab.core.automation.template.RuleTemplate;
 import org.openhab.core.automation.template.RuleTemplateProvider;
 import org.openhab.core.automation.template.Template;
@@ -67,6 +70,7 @@ import org.openhab.core.config.core.Configuration;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.events.EventSubscriber;
+import org.openhab.core.i18n.TimeZoneProvider;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemProvider;
@@ -76,6 +80,7 @@ import org.openhab.core.items.events.ItemEventFactory;
 import org.openhab.core.library.items.SwitchItem;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.service.ReadyMarker;
+import org.openhab.core.service.StartLevelService;
 import org.openhab.core.storage.StorageService;
 import org.openhab.core.test.java.JavaOSGiTest;
 import org.slf4j.Logger;
@@ -106,7 +111,13 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
     public void before() {
         logger.info("@Before.begin");
 
-        getService(ItemRegistry.class);
+        eventPublisher = getService(EventPublisher.class);
+        itemRegistry = getService(ItemRegistry.class);
+        CoreModuleHandlerFactory coreModuleHandlerFactory = new CoreModuleHandlerFactory(getBundleContext(),
+                Objects.requireNonNull(eventPublisher), Objects.requireNonNull(itemRegistry),
+                mock(TimeZoneProvider.class), mock(StartLevelService.class));
+        mock(CoreModuleHandlerFactory.class);
+        registerService(coreModuleHandlerFactory);
 
         ItemProvider itemProvider = new ItemProvider() {
             @Override
@@ -148,8 +159,6 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
         registerVolatileStorageService();
 
         StorageService storageService = getService(StorageService.class);
-        eventPublisher = getService(EventPublisher.class);
-        itemRegistry = getService(ItemRegistry.class);
         ruleRegistry = getService(RuleRegistry.class);
         ruleEngine = getService(RuleManager.class);
         managedRuleProvider = getService(ManagedRuleProvider.class);

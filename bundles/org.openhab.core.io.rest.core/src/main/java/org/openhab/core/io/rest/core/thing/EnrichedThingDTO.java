@@ -31,7 +31,7 @@ public class EnrichedThingDTO extends AbstractThingDTO {
 
     public List<EnrichedChannelDTO> channels;
     public ThingStatusInfo statusInfo;
-    public final FirmwareStatusDTO firmwareStatus;
+    public FirmwareStatusDTO firmwareStatus;
     public boolean editable;
 
     /**

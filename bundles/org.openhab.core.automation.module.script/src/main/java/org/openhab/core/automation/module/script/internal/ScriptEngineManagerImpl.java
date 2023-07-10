@@ -60,8 +60,7 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
 
     private final Logger logger = LoggerFactory.getLogger(ScriptEngineManagerImpl.class);
     private final Map<String, ScriptEngineContainer> loadedScriptEngineInstances = new HashMap<>();
-    private final Map<String, ScriptEngineFactory> customSupport = new HashMap<>();
-    private final Map<String, ScriptEngineFactory> genericSupport = new HashMap<>();
+    private final Map<String, ScriptEngineFactory> factories = new HashMap<>();
     private final ScriptExtensionManager scriptExtensionManager;
     private final Set<FactoryChangeListener> listeners = new HashSet<>();
 
@@ -75,11 +74,7 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
         List<String> scriptTypes = engineFactory.getScriptTypes();
         logger.trace("{}.getScriptTypes(): {}", engineFactory.getClass().getSimpleName(), scriptTypes);
         for (String scriptType : scriptTypes) {
-            if (isCustomFactory(engineFactory)) {
-                this.customSupport.put(scriptType, engineFactory);
-            } else {
-                this.genericSupport.put(scriptType, engineFactory);
-            }
+            factories.put(scriptType, engineFactory);
             listeners.forEach(listener -> listener.factoryAdded(scriptType));
         }
         if (logger.isDebugEnabled()) {
@@ -88,10 +83,10 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
                 if (scriptEngine != null) {
                     javax.script.ScriptEngineFactory factory = scriptEngine.getFactory();
                     logger.debug(
-                            "Initialized a {} ScriptEngineFactory for {} ({}): supports {} ({}) with file extensions {}, names {}, and mimetypes {}",
-                            (isCustomFactory(engineFactory)) ? "custom" : "generic", factory.getEngineName(),
-                            factory.getEngineVersion(), factory.getLanguageName(), factory.getLanguageVersion(),
-                            factory.getExtensions(), factory.getNames(), factory.getMimeTypes());
+                            "Initialized a ScriptEngineFactory for {} ({}): supports {} ({}) with file extensions {}, names {}, and mimetypes {}",
+                            factory.getEngineName(), factory.getEngineVersion(), factory.getLanguageName(),
+                            factory.getLanguageVersion(), factory.getExtensions(), factory.getNames(),
+                            factory.getMimeTypes());
                 } else {
                     logger.trace("addScriptEngineFactory: engine was null");
                 }
@@ -105,24 +100,10 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
         List<String> scriptTypes = engineFactory.getScriptTypes();
         logger.trace("{}.getScriptTypes(): {}", engineFactory.getClass().getSimpleName(), scriptTypes);
         for (String scriptType : scriptTypes) {
-            if (isCustomFactory(engineFactory)) {
-                this.customSupport.remove(scriptType, engineFactory);
-            } else {
-                this.genericSupport.remove(scriptType, engineFactory);
-            }
+            factories.remove(scriptType, engineFactory);
             listeners.forEach(listener -> listener.factoryRemoved(scriptType));
         }
         logger.debug("Removed {}", engineFactory.getClass().getSimpleName());
-    }
-
-    /**
-     * This method is used to determine if a given {@link ScriptEngineFactory} is generic or customized.
-     *
-     * @param engineFactory {@link ScriptEngineFactory}
-     * @return true, if the {@link ScriptEngineFactory} is custom, otherwise false
-     */
-    private boolean isCustomFactory(ScriptEngineFactory engineFactory) {
-        return !(engineFactory instanceof GenericScriptEngineFactory);
     }
 
     @Override
@@ -182,8 +163,7 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
             ScriptEngine engine = container.getScriptEngine();
             try {
                 engine.eval(scriptData);
-                if (engine instanceof Invocable) {
-                    Invocable inv = (Invocable) engine;
+                if (engine instanceof Invocable inv) {
                     try {
                         inv.invokeFunction("scriptLoaded", engineIdentifier);
                     } catch (NoSuchMethodException e) {
@@ -210,8 +190,7 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
                 tracker.removeTracking(engineIdentifier);
             }
             ScriptEngine scriptEngine = container.getScriptEngine();
-            if (scriptEngine instanceof Invocable) {
-                Invocable inv = (Invocable) scriptEngine;
+            if (scriptEngine instanceof Invocable inv) {
                 try {
                     inv.invokeFunction("scriptUnloaded");
                 } catch (NoSuchMethodException e) {
@@ -223,12 +202,11 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
                 logger.trace("ScriptEngine does not support Invocable interface");
             }
 
-            if (scriptEngine instanceof AutoCloseable) {
+            if (scriptEngine instanceof AutoCloseable closeable) {
                 // we cannot not use ScheduledExecutorService.execute here as it might execute the task in the calling
                 // thread (calling ScriptEngine.close in the same thread may result in a deadlock if the ScriptEngine
                 // tries to Thread.join)
                 scheduler.schedule(() -> {
-                    AutoCloseable closeable = (AutoCloseable) scriptEngine;
                     try {
                         closeable.close();
                     } catch (Exception e) {
@@ -259,15 +237,7 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
      * @return {@link ScriptEngineFactory} or null
      */
     private @Nullable ScriptEngineFactory findEngineFactory(String scriptType) {
-        ScriptEngineFactory customFactory = customSupport.get(scriptType);
-        if (customFactory != null) {
-            return customFactory;
-        }
-        ScriptEngineFactory genericFactory = genericSupport.get(scriptType);
-        if (genericFactory != null) {
-            return genericFactory;
-        }
-        return null;
+        return factories.get(scriptType);
     }
 
     @Override

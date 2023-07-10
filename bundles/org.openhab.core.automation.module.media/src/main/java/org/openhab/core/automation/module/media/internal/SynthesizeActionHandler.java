@@ -50,7 +50,7 @@ public class SynthesizeActionHandler extends BaseActionModuleHandler {
         this.sink = sinkParam != null ? sinkParam.toString() : null;
 
         Object volumeParam = module.getConfiguration().get(PARAM_VOLUME);
-        this.volume = volumeParam instanceof BigDecimal ? new PercentType((BigDecimal) volumeParam) : null;
+        this.volume = volumeParam instanceof BigDecimal bd ? new PercentType(bd) : null;
     }
 
     @Override

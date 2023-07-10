@@ -74,12 +74,12 @@ public class ModuleTypeGSONParser extends AbstractGSONParser<ModuleType> {
     private void addAll(Set<ModuleType> result, @Nullable List<? extends ModuleTypeDTO> moduleTypes) {
         if (moduleTypes != null) {
             for (ModuleTypeDTO mt : moduleTypes) {
-                if (mt instanceof CompositeTriggerTypeDTO) {
-                    result.add(TriggerTypeDTOMapper.map((CompositeTriggerTypeDTO) mt));
-                } else if (mt instanceof CompositeConditionTypeDTO) {
-                    result.add(ConditionTypeDTOMapper.map((CompositeConditionTypeDTO) mt));
-                } else if (mt instanceof CompositeActionTypeDTO) {
-                    result.add(ActionTypeDTOMapper.map((CompositeActionTypeDTO) mt));
+                if (mt instanceof CompositeTriggerTypeDTO tO) {
+                    result.add(TriggerTypeDTOMapper.map(tO));
+                } else if (mt instanceof CompositeConditionTypeDTO tO) {
+                    result.add(ConditionTypeDTOMapper.map(tO));
+                } else if (mt instanceof CompositeActionTypeDTO tO) {
+                    result.add(ActionTypeDTOMapper.map(tO));
                 }
             }
         }
@@ -92,12 +92,12 @@ public class ModuleTypeGSONParser extends AbstractGSONParser<ModuleType> {
         List<ConditionType> conditions = new ArrayList<>();
         List<ActionType> actions = new ArrayList<>();
         for (ModuleType moduleType : dataObjects) {
-            if (moduleType instanceof TriggerType) {
-                triggers.add((TriggerType) moduleType);
-            } else if (moduleType instanceof ConditionType) {
-                conditions.add((ConditionType) moduleType);
-            } else if (moduleType instanceof ActionType) {
-                actions.add((ActionType) moduleType);
+            if (moduleType instanceof TriggerType type) {
+                triggers.add(type);
+            } else if (moduleType instanceof ConditionType type) {
+                conditions.add(type);
+            } else if (moduleType instanceof ActionType type) {
+                actions.add(type);
             }
         }
         map.put("triggers", triggers);

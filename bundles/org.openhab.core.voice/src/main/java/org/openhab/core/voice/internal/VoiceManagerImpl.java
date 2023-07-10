@@ -12,7 +12,6 @@
  */
 package org.openhab.core.voice.internal;
 
-import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,8 +40,6 @@ import org.openhab.core.audio.AudioManager;
 import org.openhab.core.audio.AudioSink;
 import org.openhab.core.audio.AudioSource;
 import org.openhab.core.audio.AudioStream;
-import org.openhab.core.audio.UnsupportedAudioFormatException;
-import org.openhab.core.audio.UnsupportedAudioStreamException;
 import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.config.core.ConfigOptionProvider;
 import org.openhab.core.config.core.ConfigurableService;
@@ -272,39 +269,12 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
                 throw new TTSException(
                         "Failed playing audio stream '" + audioStream + "' as audio sink doesn't support it");
             }
-
-            PercentType oldVolume = null;
-            // set notification sound volume
-            if (volume != null) {
-                try {
-                    // get current volume
-                    oldVolume = sink.getVolume();
-                } catch (IOException e) {
-                    logger.debug("An exception occurred while getting the volume of sink '{}' : {}", sink.getId(),
-                            e.getMessage(), e);
-                }
-
-                try {
-                    sink.setVolume(volume);
-                } catch (IOException e) {
-                    logger.debug("An exception occurred while setting the volume of sink '{}' : {}", sink.getId(),
-                            e.getMessage(), e);
-                }
-            }
-            try {
-                sink.process(audioStream);
-            } finally {
-                if (volume != null && oldVolume != null) {
-                    // restore volume only if it was set before
-                    try {
-                        sink.setVolume(oldVolume);
-                    } catch (IOException e) {
-                        logger.debug("An exception occurred while setting the volume of sink '{}' : {}", sink.getId(),
-                                e.getMessage(), e);
-                    }
-                }
-            }
-        } catch (TTSException | UnsupportedAudioFormatException | UnsupportedAudioStreamException e) {
+            Runnable restoreVolume = audioManager.handleVolumeCommand(volume, sink);
+            sink.processAndComplete(audioStream).exceptionally(exception -> {
+                logger.warn("Error playing '{}': {}", audioStream, exception.getMessage(), exception);
+                return null;
+            }).thenRun(restoreVolume);
+        } catch (TTSException e) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Error saying '{}': {}", text, e.getMessage(), e);
             } else {
@@ -526,64 +496,13 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     }
 
     @Override
+    public List<DialogContext> getDialogsContexts() {
+        return dialogProcessors.values().stream().map(DialogProcessor::getContext).collect(Collectors.toList());
+    }
+
+    @Override
     public @Nullable DialogContext getLastDialogContext() {
         return lastDialogContext;
-    }
-
-    @Override
-    @Deprecated
-    public void startDialog() throws IllegalStateException {
-        startDialog(null, null, null, null, List.of(), null, null, null, this.keyword, this.listeningItem);
-    }
-
-    @Override
-    @Deprecated
-    public void startDialog(@Nullable KSService ks, @Nullable STTService stt, @Nullable TTSService tts,
-            @Nullable HumanLanguageInterpreter hli, @Nullable AudioSource source, @Nullable AudioSink sink,
-            @Nullable Locale locale, @Nullable String keyword, @Nullable String listeningItem)
-            throws IllegalStateException {
-        startDialog(ks, stt, tts, null, hli == null ? List.of() : List.of(hli), source, sink, locale, keyword,
-                listeningItem);
-    }
-
-    @Override
-    @Deprecated
-    public void startDialog(@Nullable KSService ks, @Nullable STTService stt, @Nullable TTSService tts,
-            @Nullable Voice voice, List<HumanLanguageInterpreter> hlis, @Nullable AudioSource source,
-            @Nullable AudioSink sink, @Nullable Locale locale, @Nullable String keyword, @Nullable String listeningItem)
-            throws IllegalStateException {
-        var builder = getDialogContextBuilder();
-        if (ks != null) {
-            builder.withKS(ks);
-        }
-        if (keyword != null) {
-            builder.withKeyword(keyword);
-        }
-        if (stt != null) {
-            builder.withSTT(stt);
-        }
-        if (tts != null) {
-            builder.withTTS(tts);
-        }
-        if (voice != null) {
-            builder.withVoice(voice);
-        }
-        if (!hlis.isEmpty()) {
-            builder.withHLIs(hlis);
-        }
-        if (source != null) {
-            builder.withSource(source);
-        }
-        if (sink != null) {
-            builder.withSink(sink);
-        }
-        if (locale != null) {
-            builder.withLocale(locale);
-        }
-        if (listeningItem != null) {
-            builder.withListeningItem(listeningItem);
-        }
-        startDialog(builder.build());
     }
 
     @Override
@@ -643,42 +562,6 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     @Override
     public void stopDialog(DialogContext context) throws IllegalStateException {
         stopDialog(context.source());
-    }
-
-    @Override
-    @Deprecated
-    public void listenAndAnswer() throws IllegalStateException {
-        listenAndAnswer(null, null, null, List.of(), null, null, null, null);
-    }
-
-    @Override
-    @Deprecated
-    public void listenAndAnswer(@Nullable STTService stt, @Nullable TTSService tts, @Nullable Voice voice,
-            List<HumanLanguageInterpreter> hlis, @Nullable AudioSource source, @Nullable AudioSink sink,
-            @Nullable Locale locale, @Nullable String listeningItem) throws IllegalStateException {
-        var builder = getDialogContextBuilder();
-        if (stt != null) {
-            builder.withSTT(stt);
-        }
-        if (tts != null) {
-            builder.withTTS(tts);
-        }
-        if (!hlis.isEmpty()) {
-            builder.withHLIs(hlis);
-        }
-        if (source != null) {
-            builder.withSource(source);
-        }
-        if (sink != null) {
-            builder.withSink(sink);
-        }
-        if (locale != null) {
-            builder.withLocale(locale);
-        }
-        if (listeningItem != null) {
-            builder.withListeningItem(listeningItem);
-        }
-        listenAndAnswer(builder.build());
     }
 
     @Override

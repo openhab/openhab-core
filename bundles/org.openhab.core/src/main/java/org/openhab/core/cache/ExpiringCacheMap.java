@@ -231,7 +231,7 @@ public class ExpiringCacheMap<K, V> {
      * Invalidates all values in the cache.
      */
     public synchronized void invalidateAll() {
-        items.values().forEach(item -> item.invalidateValue());
+        items.values().forEach(ExpiringCache::invalidateValue);
     }
 
     /**

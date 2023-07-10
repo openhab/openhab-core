@@ -12,12 +12,13 @@
  */
 package org.openhab.core.i18n;
 
+import java.util.Collection;
+
 import javax.measure.Quantity;
 import javax.measure.Unit;
 import javax.measure.spi.SystemOfUnits;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * Provides {@link Unit}s and the current {@link SystemOfUnits}.
@@ -34,9 +35,10 @@ public interface UnitProvider {
      * @param dimension The {@link Quantity}, called dimension here, defines the base unit for the retrieved unit. E.g.
      *            call {@code getUnit(javax.measure.quantity.Temperature.class)} to retrieve the temperature unit
      *            according to the current {@link SystemOfUnits}.
-     * @return The {@link Unit} matching the given {@link Quantity}, {@code null} otherwise.
+     * @return The {@link Unit} matching the given {@link Quantity}
+     * @throws IllegalArgumentException when the dimension is unknown
      */
-    <T extends Quantity<T>> @Nullable Unit<T> getUnit(@Nullable Class<T> dimension);
+    <T extends Quantity<T>> Unit<T> getUnit(Class<T> dimension) throws IllegalArgumentException;
 
     /**
      * Returns the {@link SystemOfUnits} which is currently set, must not be null.
@@ -44,4 +46,6 @@ public interface UnitProvider {
      * @return the {@link SystemOfUnits} which is currently set, must not be null.
      */
     SystemOfUnits getMeasurementSystem();
+
+    Collection<Class<? extends Quantity<?>>> getAllDimensions();
 }

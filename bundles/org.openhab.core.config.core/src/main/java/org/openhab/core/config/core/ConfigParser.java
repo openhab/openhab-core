@@ -102,7 +102,7 @@ public final class ConfigParser {
             }
 
             // Allows to have List<int>, List<Double>, List<String> etc (and the corresponding Set<?>)
-            if (value instanceof Collection) {
+            if (value instanceof Collection collection1) {
                 Class<?> innerClass = (Class<?>) ((ParameterizedType) field.getGenericType())
                         .getActualTypeArguments()[0];
                 Collection collection;
@@ -114,7 +114,7 @@ public final class ConfigParser {
                     LOGGER.warn("Skipping field '{}', only List and Set is supported as target Collection", fieldName);
                     continue;
                 }
-                for (final Object it : (Collection<?>) value) {
+                for (final Object it : collection1) {
                     final Object normalized = valueAs(it, innerClass);
                     if (normalized == null) {
                         continue;
@@ -185,8 +185,7 @@ public final class ConfigParser {
 
         Object result = value;
         // Handle the conversion case of Number to Float,Double,Long,Integer,Short,Byte,BigDecimal
-        if (value instanceof Number) {
-            Number number = (Number) value;
+        if (value instanceof Number number) {
             if (Float.class.equals(typeClass)) {
                 result = number.floatValue();
             } else if (Double.class.equals(typeClass)) {
@@ -202,9 +201,8 @@ public final class ConfigParser {
             } else if (BigDecimal.class.equals(typeClass)) {
                 result = new BigDecimal(number.toString());
             }
-        } else if (value instanceof String && !String.class.equals(typeClass)) {
+        } else if (value instanceof String strValue && !String.class.equals(typeClass)) {
             // Handle the conversion case of String to Float,Double,Long,Integer,BigDecimal,Boolean
-            String strValue = (String) value;
             if (Float.class.equals(typeClass)) {
                 result = Float.valueOf(strValue);
             } else if (Double.class.equals(typeClass)) {

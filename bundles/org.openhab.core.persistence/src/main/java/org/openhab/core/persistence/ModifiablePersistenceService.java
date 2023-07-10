@@ -49,11 +49,11 @@ public interface ModifiablePersistenceService extends QueryablePersistenceServic
     /**
      * Removes data associated with an item from a persistence service.
      * If all data is removed for the specified item, the persistence service should free any resources associated with
-     * the item (eg. remove any tables or delete files from the storage).
+     * the item (e.g. remove any tables or delete files from the storage).
      *
      * @param filter the filter to apply to the data removal. ItemName can not be null.
      * @return true if the query executed successfully
-     * @throws {@link IllegalArgumentException} if item name is null.
+     * @throws IllegalArgumentException if item name is null.
      */
     boolean remove(FilterCriteria filter) throws IllegalArgumentException;
 }

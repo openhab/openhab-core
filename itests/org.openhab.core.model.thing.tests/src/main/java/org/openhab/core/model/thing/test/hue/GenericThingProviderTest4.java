@@ -120,8 +120,8 @@ public class GenericThingProviderTest4 extends JavaOSGiTest {
         hueThingHandlerFactory = new TestHueThingHandlerFactoryX(componentContextMock) {
             @Override
             protected @Nullable ThingHandler createHandler(final Thing thing) {
-                if (thing instanceof Bridge) {
-                    return new TestBridgeHandler((Bridge) thing);
+                if (thing instanceof Bridge bridge) {
+                    return new TestBridgeHandler(bridge);
                 } else {
                     return new BaseThingHandler(thing) {
                         @Override

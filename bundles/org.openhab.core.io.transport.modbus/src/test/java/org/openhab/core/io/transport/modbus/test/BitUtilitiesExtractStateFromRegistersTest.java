@@ -359,16 +359,14 @@ public class BitUtilitiesExtractStateFromRegistersTest {
     @MethodSource("data")
     public void testextractStateFromRegisters(Object expectedResult, ValueType type, ModbusRegisterArray registers,
             int index) {
-        if (expectedResult instanceof Class && Exception.class.isAssignableFrom((Class) expectedResult)) {
-            assertThrows((Class) expectedResult,
-                    () -> ModbusBitUtilities.extractStateFromRegisters(registers, index, type));
+        if (expectedResult instanceof Class class1 && Exception.class.isAssignableFrom(class1)) {
+            assertThrows(class1, () -> ModbusBitUtilities.extractStateFromRegisters(registers, index, type));
             return;
         }
 
         Optional<DecimalType> actualState = ModbusBitUtilities.extractStateFromRegisters(registers, index, type);
         // Wrap given expectedResult to Optional, if necessary
-        Optional<DecimalType> expectedStateWrapped = expectedResult instanceof DecimalType
-                ? Optional.of((DecimalType) expectedResult)
+        Optional<DecimalType> expectedStateWrapped = expectedResult instanceof DecimalType dt ? Optional.of(dt)
                 : (Optional<DecimalType>) expectedResult;
         assertThat(String.format("registers=%s, index=%d, type=%s", registers, index, type), actualState,
                 is(equalTo(expectedStateWrapped)));

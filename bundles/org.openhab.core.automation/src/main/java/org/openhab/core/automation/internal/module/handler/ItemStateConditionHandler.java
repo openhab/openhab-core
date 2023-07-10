@@ -106,14 +106,14 @@ public class ItemStateConditionHandler extends BaseConditionModuleHandler implem
 
     @Override
     public void receive(Event event) {
-        if (event instanceof ItemAddedEvent) {
-            if (itemName.equals(((ItemAddedEvent) event).getItem().name)) {
+        if (event instanceof ItemAddedEvent addedEvent) {
+            if (itemName.equals(addedEvent.getItem().name)) {
                 logger.info("Item '{}' needed for rule '{}' added. Condition '{}' will now work.", itemName, ruleUID,
                         module.getId());
                 return;
             }
-        } else if (event instanceof ItemRemovedEvent) {
-            if (itemName.equals(((ItemRemovedEvent) event).getItem().name)) {
+        } else if (event instanceof ItemRemovedEvent removedEvent) {
+            if (itemName.equals(removedEvent.getItem().name)) {
                 logger.warn("Item '{}' needed for rule '{}' removed. Condition '{}' will no longer work.", itemName,
                         ruleUID, module.getId());
                 return;
@@ -126,12 +126,13 @@ public class ItemStateConditionHandler extends BaseConditionModuleHandler implem
         String state = (String) module.getConfiguration().get(STATE);
         String operator = (String) module.getConfiguration().get(OPERATOR);
         if (operator == null || state == null || itemName == null) {
-            logger.error("Module is not well configured: itemName={}  operator={}  state = {}", itemName, operator,
-                    state);
+            logger.error("Module is not well configured: itemName={}  operator={}  state = {} for rule {}", itemName,
+                    operator, state, ruleUID);
             return false;
         }
         try {
-            logger.debug("ItemStateCondition '{}' checking if {} {} {}", module.getId(), itemName, operator, state);
+            logger.debug("ItemStateCondition '{}' checking if {} {} {} for rule {}", module.getId(), itemName, operator,
+                    state, ruleUID);
             switch (operator) {
                 case "=":
                     return equalsToItemState(itemName, state);
@@ -149,7 +150,7 @@ public class ItemStateConditionHandler extends BaseConditionModuleHandler implem
                     return greaterThanOrEqualsToItemState(itemName, state);
             }
         } catch (ItemNotFoundException e) {
-            logger.error("Item with name {} not found in ItemRegistry.", itemName);
+            logger.error("Item with name {} not found in ItemRegistry for condition of rule {}.", itemName, ruleUID);
         }
         return false;
     }
@@ -159,35 +160,33 @@ public class ItemStateConditionHandler extends BaseConditionModuleHandler implem
         Item item = itemRegistry.getItem(itemName);
         State compareState = TypeParser.parseState(item.getAcceptedDataTypes(), state);
         State itemState = item.getState();
-        if (itemState instanceof DateTimeType) {
-            ZonedDateTime itemTime = ((DateTimeType) itemState).getZonedDateTime();
+        if (itemState instanceof DateTimeType type) {
+            ZonedDateTime itemTime = type.getZonedDateTime();
             ZonedDateTime compareTime = getCompareTime(state);
             return itemTime.compareTo(compareTime) <= 0;
-        } else if (itemState instanceof QuantityType) {
-            QuantityType qtState = (QuantityType) itemState;
-            if (compareState instanceof DecimalType) {
+        } else if (itemState instanceof QuantityType qtState) {
+            if (compareState instanceof DecimalType type) {
                 // allow compareState without unit -> implicitly assume its the same as the one from the
                 // state, but warn the user
                 if (!Units.ONE.equals(qtState.getUnit())) {
                     logger.warn(
-                            "Received a QuantityType state '{}' with unit for item {}, but the condition is defined as a plain number without unit ({}), please consider adding a unit to the condition.",
-                            qtState, itemName, state);
+                            "Received a QuantityType state '{}' with unit for item {}, but the condition is defined as a plain number without unit ({}), please consider adding a unit to the condition for rule {}.",
+                            qtState, itemName, state, ruleUID);
                 }
-                return qtState.compareTo(
-                        new QuantityType<>(((DecimalType) compareState).toBigDecimal(), qtState.getUnit())) <= 0;
-            } else if (compareState instanceof QuantityType) {
-                return qtState.compareTo((QuantityType) compareState) <= 0;
+                return qtState.compareTo(new QuantityType<>(type.toBigDecimal(), qtState.getUnit())) <= 0;
+            } else if (compareState instanceof QuantityType type) {
+                return qtState.compareTo(type) <= 0;
             }
-        } else if (itemState instanceof PercentType && null != compareState) {
+        } else if (itemState instanceof PercentType type && null != compareState) {
             // we need to handle PercentType first, otherwise the comparison will fail
             PercentType percentState = compareState.as(PercentType.class);
             if (null != percentState) {
-                return ((PercentType) itemState).compareTo(percentState) <= 0;
+                return type.compareTo(percentState) <= 0;
             }
-        } else if (itemState instanceof DecimalType && null != compareState) {
+        } else if (itemState instanceof DecimalType type && null != compareState) {
             DecimalType decimalState = compareState.as(DecimalType.class);
             if (null != decimalState) {
-                return ((DecimalType) itemState).compareTo(decimalState) <= 0;
+                return type.compareTo(decimalState) <= 0;
             }
         }
         return false;
@@ -198,35 +197,33 @@ public class ItemStateConditionHandler extends BaseConditionModuleHandler implem
         Item item = itemRegistry.getItem(itemName);
         State compareState = TypeParser.parseState(item.getAcceptedDataTypes(), state);
         State itemState = item.getState();
-        if (itemState instanceof DateTimeType) {
-            ZonedDateTime itemTime = ((DateTimeType) itemState).getZonedDateTime();
+        if (itemState instanceof DateTimeType type) {
+            ZonedDateTime itemTime = type.getZonedDateTime();
             ZonedDateTime compareTime = getCompareTime(state);
             return itemTime.compareTo(compareTime) >= 0;
-        } else if (itemState instanceof QuantityType) {
-            QuantityType qtState = (QuantityType) itemState;
-            if (compareState instanceof DecimalType) {
+        } else if (itemState instanceof QuantityType qtState) {
+            if (compareState instanceof DecimalType type) {
                 // allow compareState without unit -> implicitly assume its the same as the one from the
                 // state, but warn the user
                 if (!Units.ONE.equals(qtState.getUnit())) {
                     logger.warn(
-                            "Received a QuantityType state '{}' with unit for item {}, but the condition is defined as a plain number without unit ({}), please consider adding a unit to the condition.",
-                            qtState, itemName, state);
+                            "Received a QuantityType state '{}' with unit for item {}, but the condition is defined as a plain number without unit ({}), please consider adding a unit to the condition for rule {}.",
+                            qtState, itemName, state, ruleUID);
                 }
-                return qtState.compareTo(
-                        new QuantityType<>(((DecimalType) compareState).toBigDecimal(), qtState.getUnit())) >= 0;
-            } else if (compareState instanceof QuantityType) {
-                return qtState.compareTo((QuantityType) compareState) >= 0;
+                return qtState.compareTo(new QuantityType<>(type.toBigDecimal(), qtState.getUnit())) >= 0;
+            } else if (compareState instanceof QuantityType type) {
+                return qtState.compareTo(type) >= 0;
             }
-        } else if (itemState instanceof PercentType && null != compareState) {
+        } else if (itemState instanceof PercentType type && null != compareState) {
             // we need to handle PercentType first, otherwise the comparison will fail
             PercentType percentState = compareState.as(PercentType.class);
             if (null != percentState) {
-                return ((PercentType) itemState).compareTo(percentState) >= 0;
+                return type.compareTo(percentState) >= 0;
             }
-        } else if (itemState instanceof DecimalType && null != compareState) {
+        } else if (itemState instanceof DecimalType type && null != compareState) {
             DecimalType decimalState = compareState.as(DecimalType.class);
             if (null != decimalState) {
-                return ((DecimalType) itemState).compareTo(decimalState) >= 0;
+                return type.compareTo(decimalState) >= 0;
             }
         }
         return false;
@@ -236,17 +233,15 @@ public class ItemStateConditionHandler extends BaseConditionModuleHandler implem
         Item item = itemRegistry.getItem(itemName);
         State compareState = TypeParser.parseState(item.getAcceptedDataTypes(), state);
         State itemState = item.getState();
-        if (itemState instanceof QuantityType && compareState instanceof DecimalType) {
-            QuantityType<?> qtState = (QuantityType<?>) itemState;
+        if (itemState instanceof QuantityType qtState && compareState instanceof DecimalType type) {
             if (Units.ONE.equals(qtState.getUnit())) {
                 // allow compareStates without unit if the unit of the state equals to ONE
-                return itemState
-                        .equals(new QuantityType<>(((DecimalType) compareState).toBigDecimal(), qtState.getUnit()));
+                return itemState.equals(new QuantityType<>(type.toBigDecimal(), qtState.getUnit()));
             } else {
                 // log a warning if the unit of the state differs from ONE
                 logger.warn(
-                        "Received a QuantityType state '{}' with unit for item {}, but the condition is defined as a plain number without unit ({}), comparison will fail unless a unit is added to the condition.",
-                        itemState, itemName, state);
+                        "Received a QuantityType state '{}' with unit for item {}, but the condition is defined as a plain number without unit ({}), comparison will fail unless a unit is added to the condition for rule {}.",
+                        itemState, itemName, state, ruleUID);
                 return false;
             }
         }

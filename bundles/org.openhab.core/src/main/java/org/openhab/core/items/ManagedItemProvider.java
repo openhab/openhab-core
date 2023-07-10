@@ -86,8 +86,8 @@ public class ManagedItemProvider extends AbstractManagedProvider<Item, String, P
     @Override
     public @Nullable Item remove(String key) {
         Item item = get(key);
-        if (item instanceof GroupItem) {
-            removeGroupNameFromMembers((GroupItem) item);
+        if (item instanceof GroupItem groupItem) {
+            removeGroupNameFromMembers(groupItem);
         }
 
         return super.remove(key);
@@ -102,8 +102,8 @@ public class ManagedItemProvider extends AbstractManagedProvider<Item, String, P
      */
     public @Nullable Item remove(String itemName, boolean recursive) {
         Item item = get(itemName);
-        if (recursive && item instanceof GroupItem) {
-            for (String member : getMemberNamesRecursively((GroupItem) item, getAll())) {
+        if (recursive && item instanceof GroupItem groupItem) {
+            for (String member : getMemberNamesRecursively(groupItem, getAll())) {
                 remove(member);
             }
         }
@@ -128,8 +128,8 @@ public class ManagedItemProvider extends AbstractManagedProvider<Item, String, P
         for (Item item : allItems) {
             if (item.getGroupNames().contains(groupItem.getName())) {
                 memberNames.add(item.getName());
-                if (item instanceof GroupItem) {
-                    memberNames.addAll(getMemberNamesRecursively((GroupItem) item, allItems));
+                if (item instanceof GroupItem groupItem1) {
+                    memberNames.addAll(getMemberNamesRecursively(groupItem1, allItems));
                 }
             }
         }
@@ -148,8 +148,7 @@ public class ManagedItemProvider extends AbstractManagedProvider<Item, String, P
 
     private @Nullable Item createItem(String itemType, String itemName) {
         try {
-            Item item = itemBuilderFactory.newItemBuilder(itemType, itemName).build();
-            return item;
+            return itemBuilderFactory.newItemBuilder(itemType, itemName).build();
         } catch (IllegalStateException e) {
             logger.debug("Couldn't create item '{}' of type '{}'", itemName, itemType);
             return null;
@@ -159,8 +158,8 @@ public class ManagedItemProvider extends AbstractManagedProvider<Item, String, P
     private void removeGroupNameFromMembers(GroupItem groupItem) {
         Set<Item> members = getMembers(groupItem, getAll());
         for (Item member : members) {
-            if (member instanceof GenericItem) {
-                ((GenericItem) member).removeGroupName(groupItem.getUID());
+            if (member instanceof GenericItem item) {
+                item.removeGroupName(groupItem.getUID());
                 update(member);
             }
         }
@@ -187,9 +186,9 @@ public class ManagedItemProvider extends AbstractManagedProvider<Item, String, P
                 String itemName = entry.getKey();
                 PersistedItem persistedItem = entry.getValue();
                 Item item = itemFactory.createItem(persistedItem.itemType, itemName);
-                if (item != null && item instanceof GenericItem) {
+                if (item != null && item instanceof GenericItem genericItem) {
                     iterator.remove();
-                    configureItem(persistedItem, (GenericItem) item);
+                    configureItem(persistedItem, genericItem);
                     notifyListenersAboutAddedElement(item);
                 } else {
                     logger.debug("The added item factory '{}' still could not instantiate item '{}'.", itemFactory,
@@ -237,8 +236,8 @@ public class ManagedItemProvider extends AbstractManagedProvider<Item, String, P
             item = createItem(persistedItem.itemType, itemName);
         }
 
-        if (item != null && item instanceof GenericItem) {
-            configureItem(persistedItem, (GenericItem) item);
+        if (item != null && item instanceof GenericItem genericItem) {
+            configureItem(persistedItem, genericItem);
         }
 
         if (item == null) {
@@ -283,8 +282,7 @@ public class ManagedItemProvider extends AbstractManagedProvider<Item, String, P
         PersistedItem persistedItem = new PersistedItem(
                 item instanceof GroupItem ? GroupItem.TYPE : toItemFactoryName(item));
 
-        if (item instanceof GroupItem) {
-            GroupItem groupItem = (GroupItem) item;
+        if (item instanceof GroupItem groupItem) {
             String baseItemType = null;
             Item baseItem = groupItem.getBaseItem();
             if (baseItem != null) {

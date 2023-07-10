@@ -17,11 +17,13 @@ import static org.openhab.core.library.unit.MetricPrefix.HECTO;
 import java.text.MessageFormat;
 import java.time.DateTimeException;
 import java.time.ZoneId;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 import javax.measure.Quantity;
 import javax.measure.Unit;
@@ -73,6 +75,7 @@ import org.openhab.core.library.dimension.DataTransferRate;
 import org.openhab.core.library.dimension.Density;
 import org.openhab.core.library.dimension.ElectricConductivity;
 import org.openhab.core.library.dimension.Intensity;
+import org.openhab.core.library.dimension.RadiationSpecificActivity;
 import org.openhab.core.library.dimension.VolumetricFlowRate;
 import org.openhab.core.library.types.PointType;
 import org.openhab.core.library.unit.ImperialUnits;
@@ -142,12 +145,12 @@ public class I18nProviderImpl
     // UnitProvider
     static final String MEASUREMENT_SYSTEM = "measurementSystem";
     private @Nullable SystemOfUnits measurementSystem;
-    private final Map<Class<? extends Quantity<?>>, Map<SystemOfUnits, Unit<? extends Quantity<?>>>> dimensionMap = new HashMap<>();
+    private static final Map<Class<? extends Quantity<?>>, Map<SystemOfUnits, Unit<? extends Quantity<?>>>> DIMENSION_MAP = getDimensionMap();
 
     @Activate
     @SuppressWarnings("unchecked")
     public I18nProviderImpl(ComponentContext componentContext) {
-        initDimensionMap();
+        getDimensionMap();
         modified((Map<String, Object>) componentContext.getProperties());
 
         this.resourceBundleTracker = new ResourceBundleTracker(componentContext.getBundleContext(), this);
@@ -187,16 +190,12 @@ public class I18nProviderImpl
 
         final SystemOfUnits newMeasurementSystem;
         switch (ms) {
-            case SIUnits.MEASUREMENT_SYSTEM_NAME:
-                newMeasurementSystem = SIUnits.getInstance();
-                break;
-            case ImperialUnits.MEASUREMENT_SYSTEM_NAME:
-                newMeasurementSystem = ImperialUnits.getInstance();
-                break;
-            default:
+            case SIUnits.MEASUREMENT_SYSTEM_NAME -> newMeasurementSystem = SIUnits.getInstance();
+            case ImperialUnits.MEASUREMENT_SYSTEM_NAME -> newMeasurementSystem = ImperialUnits.getInstance();
+            default -> {
                 logger.debug("Error setting measurement system for value '{}'.", measurementSystem);
                 newMeasurementSystem = null;
-                break;
+            }
         }
         this.measurementSystem = newMeasurementSystem;
 
@@ -358,12 +357,14 @@ public class I18nProviderImpl
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T extends Quantity<T>> @Nullable Unit<T> getUnit(@Nullable Class<T> dimension) {
-        Map<SystemOfUnits, Unit<? extends Quantity<?>>> map = dimensionMap.get(dimension);
+    public <T extends Quantity<T>> Unit<T> getUnit(Class<T> dimension) {
+        Map<SystemOfUnits, Unit<? extends Quantity<?>>> map = DIMENSION_MAP.get(dimension);
         if (map == null) {
-            return null;
+            throw new IllegalArgumentException("Dimension " + dimension.getName() + " is unknown. This is a bug.");
         }
-        return (Unit<T>) map.get(getMeasurementSystem());
+        Unit<T> unit = (Unit<T>) map.get(getMeasurementSystem());
+        assert unit != null;
+        return unit;
     }
 
     @Override
@@ -380,54 +381,68 @@ public class I18nProviderImpl
         return SIUnits.getInstance();
     }
 
-    private void initDimensionMap() {
-        addDefaultUnit(Acceleration.class, Units.METRE_PER_SQUARE_SECOND);
-        addDefaultUnit(AmountOfSubstance.class, Units.MOLE);
-        addDefaultUnit(Angle.class, Units.DEGREE_ANGLE, Units.DEGREE_ANGLE);
-        addDefaultUnit(Area.class, SIUnits.SQUARE_METRE, ImperialUnits.SQUARE_FOOT);
-        addDefaultUnit(ArealDensity.class, Units.DOBSON_UNIT);
-        addDefaultUnit(CatalyticActivity.class, Units.KATAL);
-        addDefaultUnit(DataAmount.class, Units.BYTE);
-        addDefaultUnit(DataTransferRate.class, Units.MEGABIT_PER_SECOND);
-        addDefaultUnit(Density.class, Units.KILOGRAM_PER_CUBICMETRE);
-        addDefaultUnit(Dimensionless.class, Units.ONE);
-        addDefaultUnit(ElectricCapacitance.class, Units.FARAD);
-        addDefaultUnit(ElectricCharge.class, Units.COULOMB);
-        addDefaultUnit(ElectricConductance.class, Units.SIEMENS);
-        addDefaultUnit(ElectricConductivity.class, Units.SIEMENS_PER_METRE);
-        addDefaultUnit(ElectricCurrent.class, Units.AMPERE);
-        addDefaultUnit(ElectricInductance.class, Units.HENRY);
-        addDefaultUnit(ElectricPotential.class, Units.VOLT);
-        addDefaultUnit(ElectricResistance.class, Units.OHM);
-        addDefaultUnit(Energy.class, Units.KILOWATT_HOUR);
-        addDefaultUnit(Force.class, Units.NEWTON);
-        addDefaultUnit(Frequency.class, Units.HERTZ);
-        addDefaultUnit(Illuminance.class, Units.LUX);
-        addDefaultUnit(Intensity.class, Units.IRRADIANCE);
-        addDefaultUnit(Length.class, SIUnits.METRE, ImperialUnits.FOOT);
-        addDefaultUnit(LuminousFlux.class, Units.LUMEN);
-        addDefaultUnit(LuminousIntensity.class, Units.CANDELA);
-        addDefaultUnit(MagneticFlux.class, Units.WEBER);
-        addDefaultUnit(MagneticFluxDensity.class, Units.TESLA);
-        addDefaultUnit(Mass.class, SIUnits.KILOGRAM, ImperialUnits.POUND);
-        addDefaultUnit(Power.class, Units.WATT);
-        addDefaultUnit(Pressure.class, HECTO(SIUnits.PASCAL), ImperialUnits.INCH_OF_MERCURY);
-        addDefaultUnit(RadiationDoseAbsorbed.class, Units.GRAY);
-        addDefaultUnit(RadiationDoseEffective.class, Units.SIEVERT);
-        addDefaultUnit(Radioactivity.class, Units.BECQUEREL);
-        addDefaultUnit(SolidAngle.class, Units.STERADIAN);
-        addDefaultUnit(Speed.class, SIUnits.KILOMETRE_PER_HOUR, ImperialUnits.MILES_PER_HOUR);
-        addDefaultUnit(Temperature.class, SIUnits.CELSIUS, ImperialUnits.FAHRENHEIT);
-        addDefaultUnit(Time.class, Units.SECOND);
-        addDefaultUnit(Volume.class, SIUnits.CUBIC_METRE, ImperialUnits.GALLON_LIQUID_US);
-        addDefaultUnit(VolumetricFlowRate.class, Units.LITRE_PER_MINUTE, ImperialUnits.GALLON_PER_MINUTE);
+    @Override
+    public Collection<Class<? extends Quantity<?>>> getAllDimensions() {
+        return Set.copyOf(getDimensionMap().keySet());
     }
 
-    private <T extends Quantity<T>> void addDefaultUnit(Class<T> dimension, Unit<T> siUnit, Unit<T> imperialUnit) {
+    public static Map<Class<? extends Quantity<?>>, Map<SystemOfUnits, Unit<? extends Quantity<?>>>> getDimensionMap() {
+        Map<Class<? extends Quantity<?>>, Map<SystemOfUnits, Unit<? extends Quantity<?>>>> dimensionMap = new HashMap<>();
+
+        addDefaultUnit(dimensionMap, Acceleration.class, Units.METRE_PER_SQUARE_SECOND);
+        addDefaultUnit(dimensionMap, AmountOfSubstance.class, Units.MOLE);
+        addDefaultUnit(dimensionMap, Angle.class, Units.DEGREE_ANGLE, Units.DEGREE_ANGLE);
+        addDefaultUnit(dimensionMap, Area.class, SIUnits.SQUARE_METRE, ImperialUnits.SQUARE_FOOT);
+        addDefaultUnit(dimensionMap, ArealDensity.class, Units.DOBSON_UNIT);
+        addDefaultUnit(dimensionMap, CatalyticActivity.class, Units.KATAL);
+        addDefaultUnit(dimensionMap, DataAmount.class, Units.BYTE);
+        addDefaultUnit(dimensionMap, DataTransferRate.class, Units.MEGABIT_PER_SECOND);
+        addDefaultUnit(dimensionMap, Density.class, Units.KILOGRAM_PER_CUBICMETRE);
+        addDefaultUnit(dimensionMap, Dimensionless.class, Units.ONE);
+        addDefaultUnit(dimensionMap, ElectricCapacitance.class, Units.FARAD);
+        addDefaultUnit(dimensionMap, ElectricCharge.class, Units.COULOMB);
+        addDefaultUnit(dimensionMap, ElectricConductance.class, Units.SIEMENS);
+        addDefaultUnit(dimensionMap, ElectricConductivity.class, Units.SIEMENS_PER_METRE);
+        addDefaultUnit(dimensionMap, ElectricCurrent.class, Units.AMPERE);
+        addDefaultUnit(dimensionMap, ElectricInductance.class, Units.HENRY);
+        addDefaultUnit(dimensionMap, ElectricPotential.class, Units.VOLT);
+        addDefaultUnit(dimensionMap, ElectricResistance.class, Units.OHM);
+        addDefaultUnit(dimensionMap, Energy.class, Units.KILOWATT_HOUR);
+        addDefaultUnit(dimensionMap, Force.class, Units.NEWTON);
+        addDefaultUnit(dimensionMap, Frequency.class, Units.HERTZ);
+        addDefaultUnit(dimensionMap, Illuminance.class, Units.LUX);
+        addDefaultUnit(dimensionMap, Intensity.class, Units.IRRADIANCE);
+        addDefaultUnit(dimensionMap, Length.class, SIUnits.METRE, ImperialUnits.INCH);
+        addDefaultUnit(dimensionMap, LuminousFlux.class, Units.LUMEN);
+        addDefaultUnit(dimensionMap, LuminousIntensity.class, Units.CANDELA);
+        addDefaultUnit(dimensionMap, MagneticFlux.class, Units.WEBER);
+        addDefaultUnit(dimensionMap, MagneticFluxDensity.class, Units.TESLA);
+        addDefaultUnit(dimensionMap, Mass.class, SIUnits.KILOGRAM, ImperialUnits.POUND);
+        addDefaultUnit(dimensionMap, Power.class, Units.WATT);
+        addDefaultUnit(dimensionMap, Pressure.class, HECTO(SIUnits.PASCAL), ImperialUnits.INCH_OF_MERCURY);
+        addDefaultUnit(dimensionMap, RadiationDoseAbsorbed.class, Units.GRAY);
+        addDefaultUnit(dimensionMap, RadiationDoseEffective.class, Units.SIEVERT);
+        addDefaultUnit(dimensionMap, Radioactivity.class, Units.BECQUEREL);
+        addDefaultUnit(dimensionMap, SolidAngle.class, Units.STERADIAN);
+        addDefaultUnit(dimensionMap, RadiationSpecificActivity.class, Units.BECQUEREL_PER_CUBIC_METRE);
+        addDefaultUnit(dimensionMap, Speed.class, SIUnits.KILOMETRE_PER_HOUR, ImperialUnits.MILES_PER_HOUR);
+        addDefaultUnit(dimensionMap, Temperature.class, SIUnits.CELSIUS, ImperialUnits.FAHRENHEIT);
+        addDefaultUnit(dimensionMap, Time.class, Units.SECOND);
+        addDefaultUnit(dimensionMap, Volume.class, SIUnits.CUBIC_METRE, ImperialUnits.GALLON_LIQUID_US);
+        addDefaultUnit(dimensionMap, VolumetricFlowRate.class, Units.LITRE_PER_MINUTE, ImperialUnits.GALLON_PER_MINUTE);
+
+        return dimensionMap;
+    }
+
+    private static <T extends Quantity<T>> void addDefaultUnit(
+            Map<Class<? extends Quantity<?>>, Map<SystemOfUnits, Unit<? extends Quantity<?>>>> dimensionMap,
+            Class<T> dimension, Unit<T> siUnit, Unit<T> imperialUnit) {
         dimensionMap.put(dimension, Map.of(SIUnits.getInstance(), siUnit, ImperialUnits.getInstance(), imperialUnit));
     }
 
-    private <T extends Quantity<T>> void addDefaultUnit(Class<T> dimension, Unit<T> unit) {
+    private static <T extends Quantity<T>> void addDefaultUnit(
+            Map<Class<? extends Quantity<?>>, Map<SystemOfUnits, Unit<? extends Quantity<?>>>> dimensionMap,
+            Class<T> dimension, Unit<T> unit) {
         dimensionMap.put(dimension, Map.of(SIUnits.getInstance(), unit, ImperialUnits.getInstance(), unit));
     }
 }

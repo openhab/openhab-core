@@ -12,25 +12,14 @@
  */
 package org.openhab.core.semantics;
 
-import java.util.List;
-import java.util.Locale;
+import java.util.Collections;
 import java.util.Map;
-import java.util.MissingResourceException;
-import java.util.Optional;
-import java.util.ResourceBundle;
-import java.util.ResourceBundle.Control;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.items.Item;
-import org.openhab.core.semantics.model.equipment.Equipments;
-import org.openhab.core.semantics.model.location.Locations;
-import org.openhab.core.semantics.model.point.Measurement;
-import org.openhab.core.semantics.model.point.Points;
-import org.openhab.core.semantics.model.property.Properties;
 import org.openhab.core.types.StateDescription;
 
 /**
@@ -38,19 +27,19 @@ import org.openhab.core.types.StateDescription;
  * For everything that is not static, the {@link SemanticsService} should be used instead.
  *
  * @author Kai Kreuzer - Initial contribution
+ * @author Jimmy Tanagra - Add the ability to add new tags at runtime
+ * @author Laurent Garnier - Several methods moved into class SemanticsService or SemanticTagRegistry
  */
 @NonNullByDefault
 public class SemanticTags {
 
-    private static final String TAGS_BUNDLE_NAME = "tags";
-
-    private static final Map<String, Class<? extends Tag>> TAGS = new TreeMap<>();
+    private static final Map<String, Class<? extends Tag>> TAGS = Collections.synchronizedMap(new TreeMap<>());
 
     static {
-        Locations.stream().forEach(location -> addTagSet(location));
-        Equipments.stream().forEach(equipment -> addTagSet(equipment));
-        Points.stream().forEach(point -> addTagSet(point));
-        Properties.stream().forEach(property -> addTagSet(property));
+        addTagSet("Location", Location.class);
+        addTagSet("Equipment", Equipment.class);
+        addTagSet("Point", Point.class);
+        addTagSet("Property", Property.class);
     }
 
     /**
@@ -63,44 +52,6 @@ public class SemanticTags {
      */
     public static @Nullable Class<? extends Tag> getById(String tagId) {
         return TAGS.get(tagId);
-    }
-
-    public static @Nullable Class<? extends Tag> getByLabel(String tagLabel, Locale locale) {
-        Optional<Class<? extends Tag>> tag = TAGS.values().stream().distinct()
-                .filter(t -> getLabel(t, locale).equalsIgnoreCase(tagLabel)).findFirst();
-        return tag.isPresent() ? tag.get() : null;
-    }
-
-    public static List<Class<? extends Tag>> getByLabelOrSynonym(String tagLabelOrSynonym, Locale locale) {
-        return TAGS.values().stream().distinct()
-                .filter(t -> getLabelAndSynonyms(t, locale).contains(tagLabelOrSynonym.toLowerCase(locale)))
-                .collect(Collectors.toList());
-    }
-
-    public static List<String> getLabelAndSynonyms(Class<? extends Tag> tag, Locale locale) {
-        ResourceBundle rb = ResourceBundle.getBundle(TAGS_BUNDLE_NAME, locale,
-                Control.getNoFallbackControl(Control.FORMAT_PROPERTIES));
-        try {
-            String entry = rb.getString(tag.getAnnotation(TagInfo.class).id());
-            return List.of(entry.toLowerCase(locale).split(","));
-        } catch (MissingResourceException e) {
-            return List.of(tag.getAnnotation(TagInfo.class).label());
-        }
-    }
-
-    public static String getLabel(Class<? extends Tag> tag, Locale locale) {
-        ResourceBundle rb = ResourceBundle.getBundle(TAGS_BUNDLE_NAME, locale,
-                Control.getNoFallbackControl(Control.FORMAT_PROPERTIES));
-        try {
-            String entry = rb.getString(tag.getAnnotation(TagInfo.class).id());
-            if (entry.contains(",")) {
-                return entry.substring(0, entry.indexOf(","));
-            } else {
-                return entry;
-            }
-        } catch (MissingResourceException e) {
-            return tag.getAnnotation(TagInfo.class).label();
-        }
     }
 
     /**
@@ -121,9 +72,9 @@ public class SemanticTags {
         if (getProperty(item) != null) {
             StateDescription stateDescription = item.getStateDescription();
             if (stateDescription != null && stateDescription.isReadOnly()) {
-                return Measurement.class;
+                return getById("Point_Measurement");
             } else {
-                return org.openhab.core.semantics.model.point.Control.class;
+                return getById("Point_Control");
             }
         } else {
             return null;
@@ -199,12 +150,11 @@ public class SemanticTags {
         return null;
     }
 
-    private static void addTagSet(Class<? extends Tag> tagSet) {
-        String id = tagSet.getAnnotation(TagInfo.class).id();
-        while (id.indexOf("_") != -1) {
-            TAGS.put(id, tagSet);
-            id = id.substring(id.indexOf("_") + 1);
-        }
+    public static void addTagSet(String id, Class<? extends Tag> tagSet) {
         TAGS.put(id, tagSet);
+    }
+
+    public static void removeTagSet(String id, Class<? extends Tag> tagSet) {
+        TAGS.remove(id, tagSet);
     }
 }

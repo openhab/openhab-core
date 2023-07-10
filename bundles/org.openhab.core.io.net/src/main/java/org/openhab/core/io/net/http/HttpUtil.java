@@ -154,7 +154,7 @@ public class HttpUtil {
             String proxyPassword, String nonProxyHosts) throws IOException {
         ContentResponse response = executeUrlAndGetReponse(httpMethod, url, httpHeaders, content, contentType, timeout,
                 proxyHost, proxyPort, proxyUser, proxyPassword, nonProxyHosts);
-        String encoding = response.getEncoding() != null ? response.getEncoding().replaceAll("\"", "").trim()
+        String encoding = response.getEncoding() != null ? response.getEncoding().replace("\"", "").trim()
                 : StandardCharsets.UTF_8.name();
         String responseBody;
         try {
@@ -319,7 +319,7 @@ public class HttpUtil {
                 if (host.contains("*")) {
                     // the nonProxyHots-pattern allows wildcards '*' which must
                     // be masked to be used with regular expressions
-                    String hostRegexp = host.replaceAll("\\.", "\\\\.");
+                    String hostRegexp = host.replace(".", "\\.");
                     hostRegexp = hostRegexp.replaceAll("\\*", ".*");
                     if (givenHost.matches(hostRegexp)) {
                         return false;

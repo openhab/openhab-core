@@ -12,10 +12,8 @@
  */
 package org.openhab.core.thing.util;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -79,24 +77,10 @@ public class ThingHelper {
             return false;
         }
         // channels
-        List<Channel> channelsOfA = a.getChannels();
-        List<Channel> channelsOfB = b.getChannels();
-        if (channelsOfA.size() != channelsOfB.size()) {
-            return false;
-        }
-        if (!toString(channelsOfA).equals(toString(channelsOfB))) {
-            return false;
-        }
-        return true;
-    }
+        Set<Channel> channelsOfA = new HashSet<>(a.getChannels());
+        Set<Channel> channelsOfB = new HashSet<>(b.getChannels());
 
-    private static String toString(List<Channel> channels) {
-        List<String> strings = new ArrayList<>(channels.size());
-        for (Channel channel : channels) {
-            strings.add(channel.getUID().toString() + '#' + channel.getAcceptedItemType() + '#' + channel.getKind());
-        }
-        Collections.sort(strings);
-        return String.join(",", strings);
+        return channelsOfA.equals(channelsOfB);
     }
 
     public static void addChannelsToThing(Thing thing, Collection<Channel> channels) {
@@ -227,9 +211,7 @@ public class ThingHelper {
         Thing mergedThing = builder.build();
 
         // keep all child things in place on a merged bridge
-        if (mergedThing instanceof BridgeImpl && thing instanceof Bridge) {
-            Bridge bridge = (Bridge) thing;
-            BridgeImpl mergedBridge = (BridgeImpl) mergedThing;
+        if (mergedThing instanceof BridgeImpl mergedBridge && thing instanceof Bridge bridge) {
             for (Thing child : bridge.getThings()) {
                 mergedBridge.addThing(child);
             }

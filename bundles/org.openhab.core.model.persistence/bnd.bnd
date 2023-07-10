@@ -21,6 +21,8 @@ Import-Package: \
  org.openhab.core.persistence,\
  org.openhab.core.persistence.config,\
  org.openhab.core.persistence.strategy,\
+ org.openhab.core.persistence.filter,\
+ org.openhab.core.persistence.registry,\
  org.openhab.core.types,\
  org.openhab.core.model.core,\
  com.google.common.*;version="14",\

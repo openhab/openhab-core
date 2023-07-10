@@ -76,8 +76,8 @@ public class UnitUtils {
      * @return the {@link Class} instance of the interface or {@code null} if the given dimension is blank.
      * @throws IllegalArgumentException in case no class instance could be parsed from the given dimension.
      */
-    public static @Nullable Class<? extends Quantity<?>> parseDimension(String dimension) {
-        if (dimension.isBlank()) {
+    public static @Nullable Class<? extends Quantity<?>> parseDimension(@Nullable String dimension) {
+        if (dimension == null || dimension.isBlank()) {
             return null;
         }
 
@@ -116,8 +116,8 @@ public class UnitUtils {
             for (Field field : system.getDeclaredFields()) {
                 if (field.getType().isAssignableFrom(Unit.class) && Modifier.isStatic(field.getModifiers())) {
                     Type genericType = field.getGenericType();
-                    if (genericType instanceof ParameterizedType) {
-                        Type typeParam = ((ParameterizedType) genericType).getActualTypeArguments()[0];
+                    if (genericType instanceof ParameterizedType type) {
+                        Type typeParam = type.getActualTypeArguments()[0];
                         if (typeParam instanceof WildcardType) {
                             continue;
                         }
@@ -149,7 +149,7 @@ public class UnitUtils {
      * label). In the latter case, the unit is expected to be the last part of the pattern separated by " " (e.g. "%.2f
      * °C" for °C).
      *
-     * @param stringWithUnit the string to extract the unit symbol from
+     * @param pattern the string to extract the unit symbol from
      * @return the unit symbol extracted from the string or {@code null} if no unit could be parsed
      *
      */
@@ -188,14 +188,12 @@ public class UnitUtils {
                 || (siUnits.contains(thatUnit) && usUnits.contains(thisUnit));
 
         if (!differentSystems) {
-            if (thisUnit instanceof TransformedUnit
-                    && isMetricConversion(((TransformedUnit<?>) thisUnit).getConverter())) {
-                return isDifferentMeasurementSystem(((TransformedUnit<?>) thisUnit).getParentUnit(), thatUnit);
+            if (thisUnit instanceof TransformedUnit unit && isMetricConversion(unit.getConverter())) {
+                return isDifferentMeasurementSystem(unit.getParentUnit(), thatUnit);
             }
 
-            if (thatUnit instanceof TransformedUnit
-                    && isMetricConversion(((TransformedUnit<?>) thatUnit).getConverter())) {
-                return isDifferentMeasurementSystem(thisUnit, ((TransformedUnit<?>) thatUnit).getParentUnit());
+            if (thatUnit instanceof TransformedUnit unit && isMetricConversion(unit.getConverter())) {
+                return isDifferentMeasurementSystem(thisUnit, unit.getParentUnit());
             }
         }
 

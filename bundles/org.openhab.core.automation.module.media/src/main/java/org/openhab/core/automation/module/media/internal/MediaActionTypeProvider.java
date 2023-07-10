@@ -120,19 +120,15 @@ public class MediaActionTypeProvider implements ModuleTypeProvider {
     }
 
     private ConfigDescriptionParameter getAudioSinkConfigDescParam(@Nullable Locale locale) {
-        ConfigDescriptionParameter param2 = ConfigDescriptionParameterBuilder
-                .create(SayActionHandler.PARAM_SINK, Type.TEXT).withRequired(false).withLabel("Sink")
-                .withDescription("the audio sink id").withOptions(getSinkOptions(locale)).withLimitToOptions(true)
-                .build();
-        return param2;
+        return ConfigDescriptionParameterBuilder.create(SayActionHandler.PARAM_SINK, Type.TEXT).withRequired(false)
+                .withLabel("Sink").withDescription("the audio sink id").withOptions(getSinkOptions(locale))
+                .withLimitToOptions(true).build();
     }
 
     private ConfigDescriptionParameter getVolumeConfigDescParam(@Nullable Locale locale) {
-        ConfigDescriptionParameter param3 = ConfigDescriptionParameterBuilder
-                .create(SayActionHandler.PARAM_VOLUME, Type.INTEGER).withLabel("Volume")
+        return ConfigDescriptionParameterBuilder.create(SayActionHandler.PARAM_VOLUME, Type.INTEGER).withLabel("Volume")
                 .withDescription("the volume to use").withMinimum(BigDecimal.ZERO).withMaximum(BigDecimal.valueOf(100))
                 .withStepSize(BigDecimal.ONE).build();
-        return param3;
     }
 
     /**

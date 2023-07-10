@@ -32,7 +32,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.knowm.xchart.XYChart;
 import org.knowm.xchart.XYChartBuilder;
 import org.knowm.xchart.XYSeries;
-import org.knowm.xchart.style.Styler;
+import org.knowm.xchart.style.AxesChartStyler;
 import org.knowm.xchart.style.Styler.LegendPosition;
 import org.knowm.xchart.style.XYStyler;
 import org.knowm.xchart.style.markers.None;
@@ -150,8 +150,7 @@ public class DefaultChartProvider implements ChartProvider {
                 : persistenceServiceRegistry.get(serviceId);
 
         // Did we find a service?
-        QueryablePersistenceService persistenceService = (service instanceof QueryablePersistenceService)
-                ? (QueryablePersistenceService) service
+        QueryablePersistenceService persistenceService = (service instanceof QueryablePersistenceService qps) ? qps
                 : (QueryablePersistenceService) persistenceServiceRegistry.getAll() //
                         .stream() //
                         .filter(it -> it instanceof QueryablePersistenceService) //
@@ -196,7 +195,7 @@ public class DefaultChartProvider implements ChartProvider {
             styler.setYAxisDecimalPattern(yAxisDecimalPattern);
         }
         styler.setYAxisTickMarkSpacingHint(yAxisSpacing);
-        styler.setYAxisLabelAlignment(Styler.TextAlignment.Right);
+        styler.setYAxisLabelAlignment(AxesChartStyler.TextAlignment.Right);
         // chart
         styler.setChartBackgroundColor(chartTheme.getChartBackgroundColor());
         styler.setChartFontColor(chartTheme.getChartFontColor());
@@ -231,8 +230,7 @@ public class DefaultChartProvider implements ChartProvider {
             String[] groupNames = groups.split(",");
             for (String groupName : groupNames) {
                 Item item = itemUIRegistry.getItem(groupName);
-                if (item instanceof GroupItem) {
-                    GroupItem groupItem = (GroupItem) item;
+                if (item instanceof GroupItem groupItem) {
                     for (Item member : groupItem.getMembers()) {
                         if (addItem(chart, persistenceService, startTime, endTime, member, seriesCounter, chartTheme,
                                 dpi, legendPositionDecider)) {
@@ -293,10 +291,10 @@ public class DefaultChartProvider implements ChartProvider {
     }
 
     private double convertData(State state) {
-        if (state instanceof DecimalType) {
-            return ((DecimalType) state).doubleValue();
-        } else if (state instanceof QuantityType) {
-            return ((QuantityType<?>) state).doubleValue();
+        if (state instanceof DecimalType type) {
+            return type.doubleValue();
+        } else if (state instanceof QuantityType type) {
+            return type.doubleValue();
         } else if (state instanceof OnOffType) {
             return state == OnOffType.OFF ? 0 : 1;
         } else if (state instanceof OpenClosedType) {

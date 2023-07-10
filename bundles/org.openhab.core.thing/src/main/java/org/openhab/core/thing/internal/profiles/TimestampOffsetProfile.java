@@ -58,11 +58,9 @@ public class TimestampOffsetProfile implements StateProfile {
 
         Object offsetParam = context.getConfiguration().get(OFFSET_PARAM);
         logger.debug("Configuring profile with {} parameter '{}'", OFFSET_PARAM, offsetParam);
-        if (offsetParam instanceof Number) {
-            Number bd = (Number) offsetParam;
+        if (offsetParam instanceof Number bd) {
             offset = Duration.ofSeconds(bd.longValue());
-        } else if (offsetParam instanceof String) {
-            String s = (String) offsetParam;
+        } else if (offsetParam instanceof String s) {
             offset = Duration.ofSeconds(Long.valueOf(s));
         } else {
             logger.error(
@@ -121,8 +119,8 @@ public class TimestampOffsetProfile implements StateProfile {
 
         Duration finalOffset = towardsItem ? offset : offset.negated();
         Type result = UnDefType.UNDEF;
-        if (type instanceof DateTimeType) {
-            ZonedDateTime zdt = ((DateTimeType) type).getZonedDateTime();
+        if (type instanceof DateTimeType timeType) {
+            ZonedDateTime zdt = timeType.getZonedDateTime();
 
             // apply offset
             if (!Duration.ZERO.equals(offset)) {

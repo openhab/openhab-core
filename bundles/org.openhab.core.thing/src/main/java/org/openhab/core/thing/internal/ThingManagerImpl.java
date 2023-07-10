@@ -186,8 +186,10 @@ public class ThingManagerImpl implements ReadyTracker, ThingManager, ThingTracke
             final @Reference StorageService storageService, //
             final @Reference ThingRegistry thingRegistry,
             final @Reference ThingStatusInfoI18nLocalizationService thingStatusInfoI18nLocalizationService,
-            final @Reference ThingTypeRegistry thingTypeRegistry, final @Reference BundleResolver bundleResolver,
-            final @Reference TranslationProvider translationProvider, final BundleContext bundleContext) {
+            final @Reference ThingTypeRegistry thingTypeRegistry,
+            final @Reference ThingUpdateInstructionReader thingUpdateInstructionReader,
+            final @Reference BundleResolver bundleResolver, final @Reference TranslationProvider translationProvider,
+            final BundleContext bundleContext) {
         this.channelGroupTypeRegistry = channelGroupTypeRegistry;
         this.channelTypeRegistry = channelTypeRegistry;
         this.communicationManager = communicationManager;
@@ -198,7 +200,7 @@ public class ThingManagerImpl implements ReadyTracker, ThingManager, ThingTracke
         this.readyService = readyService;
         this.safeCaller = safeCaller;
         this.thingRegistry = (ThingRegistryImpl) thingRegistry;
-        this.thingUpdateInstructionReader = new ThingUpdateInstructionReader(bundleResolver);
+        this.thingUpdateInstructionReader = thingUpdateInstructionReader;
         this.thingStatusInfoI18nLocalizationService = thingStatusInfoI18nLocalizationService;
         this.thingTypeRegistry = thingTypeRegistry;
         this.translationProvider = translationProvider;
@@ -404,13 +406,13 @@ public class ThingManagerImpl implements ReadyTracker, ThingManager, ThingTracke
         try {
             normalizeThingConfiguration(oldThing);
         } catch (ConfigValidationException e) {
-            logger.warn("Failed to normalize configuration for thing '{}': {}", oldThing.getUID(),
+            logger.debug("Failed to normalize configuration for old thing during update '{}': {}", oldThing.getUID(),
                     e.getValidationMessages(null));
         }
         try {
             normalizeThingConfiguration(newThing);
         } catch (ConfigValidationException e) {
-            logger.warn("Failed to normalize configuration´for thing '{}': {}", newThing.getUID(),
+            logger.warn("Failed to normalize configuration for new thing during update '{}': {}", newThing.getUID(),
                     e.getValidationMessages(null));
         }
         if (thingUpdatedLock.contains(thingUID)) {
@@ -661,23 +663,23 @@ public class ThingManagerImpl implements ReadyTracker, ThingManager, ThingTracke
                     thing.getUID());
             return;
         }
-        normalizeConfiguration(thingType, thing.getUID(), thing.getConfiguration());
+        normalizeConfiguration(thingType, thing.getThingTypeUID(), thing.getUID(), thing.getConfiguration());
 
         for (Channel channel : thing.getChannels()) {
             ChannelTypeUID channelTypeUID = channel.getChannelTypeUID();
             if (channelTypeUID != null) {
                 ChannelType channelType = channelTypeRegistry.getChannelType(channelTypeUID);
-                normalizeConfiguration(channelType, channel.getUID(), channel.getConfiguration());
+                normalizeConfiguration(channelType, channelTypeUID, channel.getUID(), channel.getConfiguration());
             }
         }
     }
 
-    private void normalizeConfiguration(@Nullable AbstractDescriptionType prototype, UID targetUID,
+    private void normalizeConfiguration(@Nullable AbstractDescriptionType prototype, UID prototypeUID, UID targetUID,
             Configuration configuration) throws ConfigValidationException {
         if (prototype == null) {
             ConfigValidationMessage message = new ConfigValidationMessage("thing/channel",
-                    "Type description for '{0}' not found although we checked the presence before.",
-                    "type_description_missing", targetUID);
+                    "Type description {0} for {1} not found, although we checked the presence before.",
+                    "type_description_missing", prototypeUID.toString(), targetUID.toString());
             throw new ConfigValidationException(bundleContext.getBundle(), translationProvider, List.of(message));
         }
 
@@ -691,8 +693,8 @@ public class ThingManagerImpl implements ReadyTracker, ThingManager, ThingTracke
         ConfigDescription configDescription = configDescriptionRegistry.getConfigDescription(configDescriptionURI);
         if (configDescription == null) {
             ConfigValidationMessage message = new ConfigValidationMessage("thing/channel",
-                    "Config description for '{0}' not found also we checked the presence before.",
-                    "config_description_missing", targetUID);
+                    "Config description {0} for {1} not found, although we checked the presence before.",
+                    "config_description_missing", configDescriptionURI.toString(), targetUID.toString());
             throw new ConfigValidationException(bundleContext.getBundle(), translationProvider, List.of(message));
         }
 
@@ -725,7 +727,7 @@ public class ThingManagerImpl implements ReadyTracker, ThingManager, ThingTracke
             return null;
         }
         Thing bridge = thingRegistry.get(bridgeUID);
-        return bridge instanceof Bridge ? (Bridge) bridge : null;
+        return bridge instanceof Bridge b ? b : null;
     }
 
     private void unregisterHandler(Thing thing, ThingHandlerFactory thingHandlerFactory) {
@@ -1262,7 +1264,7 @@ public class ThingManagerImpl implements ReadyTracker, ThingManager, ThingTracke
                 timesChecked++;
                 if (timesChecked > MAX_CHECK_PREREQUISITE_TIME / CHECK_INTERVAL) {
                     logger.warn(
-                            "Channel types or config descriptions for thing '{}' are missing in the respective registry for more than {}s. This should be fixed in the binding.",
+                            "Channel types or config descriptions for thing '{}' are missing in the respective registry for more than {}s. In case it does not happen immediately after an upgrade, it should be fixed in the binding.",
                             thingUID, MAX_CHECK_PREREQUISITE_TIME);
                     channelTypeUIDs.clear();
                     configDescriptionUris.clear();

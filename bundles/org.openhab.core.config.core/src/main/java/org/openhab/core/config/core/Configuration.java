@@ -135,7 +135,7 @@ public class Configuration {
 
     @Override
     public boolean equals(@Nullable Object obj) {
-        return (obj instanceof Configuration) && this.properties.equals(((Configuration) obj).properties);
+        return (obj instanceof Configuration c) && this.properties.equals(c.properties);
     }
 
     @Override

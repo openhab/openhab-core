@@ -12,9 +12,7 @@
  */
 package org.openhab.core.automation.internal.module.handler;
 
-import java.util.Dictionary;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
 
@@ -74,7 +72,6 @@ public class ItemCommandTriggerHandler extends BaseTriggerModuleHandler implemen
         this.bundleContext = bundleContext;
         this.ruleUID = ruleUID;
         this.types = Set.of(ItemCommandEvent.TYPE, ItemAddedEvent.TYPE, ItemRemovedEvent.TYPE);
-        Dictionary<String, Object> properties = new Hashtable<>();
         eventSubscriberRegistration = this.bundleContext.registerService(EventSubscriber.class.getName(), this, null);
         if (itemRegistry.get(itemName) == null) {
             logger.warn("Item '{}' needed for rule '{}' is missing. Trigger '{}' will not work.", itemName, ruleUID,
@@ -94,14 +91,14 @@ public class ItemCommandTriggerHandler extends BaseTriggerModuleHandler implemen
 
     @Override
     public void receive(Event event) {
-        if (event instanceof ItemAddedEvent) {
-            if (itemName.equals(((ItemAddedEvent) event).getItem().name)) {
+        if (event instanceof ItemAddedEvent addedEvent) {
+            if (itemName.equals(addedEvent.getItem().name)) {
                 logger.info("Item '{}' needed for rule '{}' added. Trigger '{}' will now work.", itemName, ruleUID,
                         module.getId());
                 return;
             }
-        } else if (event instanceof ItemRemovedEvent) {
-            if (itemName.equals(((ItemRemovedEvent) event).getItem().name)) {
+        } else if (event instanceof ItemRemovedEvent removedEvent) {
+            if (itemName.equals(removedEvent.getItem().name)) {
                 logger.warn("Item '{}' needed for rule '{}' removed. Trigger '{}' will no longer work.", itemName,
                         ruleUID, module.getId());
                 return;
@@ -113,9 +110,9 @@ public class ItemCommandTriggerHandler extends BaseTriggerModuleHandler implemen
             logger.trace("Received Event: Source: {} Topic: {} Type: {}  Payload: {}", event.getSource(),
                     event.getTopic(), event.getType(), event.getPayload());
             Map<String, Object> values = new HashMap<>();
-            if (event instanceof ItemCommandEvent) {
+            if (event instanceof ItemCommandEvent commandEvent) {
                 String command = this.command;
-                Command itemCommand = ((ItemCommandEvent) event).getItemCommand();
+                Command itemCommand = commandEvent.getItemCommand();
                 if (command == null || command.equals(itemCommand.toFullString())) {
                     values.put("command", itemCommand);
                     values.put("event", event);

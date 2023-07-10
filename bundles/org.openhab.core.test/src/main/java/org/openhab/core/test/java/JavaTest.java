@@ -98,7 +98,7 @@ public class JavaTest {
         if (appender == null) {
             Assertions.fail("Logger for class '" + clazz + "' not found.");
         }
-        if (appender.list.size() != 0) {
+        if (!appender.list.isEmpty()) {
             Assertions.fail("Expected no log message for class '" + clazz + "', but found '" + appender.list + "'.");
         }
     }

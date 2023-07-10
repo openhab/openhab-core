@@ -75,11 +75,11 @@ public class BitUtilitiesCommandToRegistersTest {
         private Object expected;
 
         public Args(Object command, ValueType valueType, Object expected) {
-            this.command = command instanceof String ? new DecimalType((String) command) : (Command) command;
+            this.command = command instanceof String s ? new DecimalType(s) : (Command) command;
             this.valueType = valueType;
             // validating type with cast
-            if (expected instanceof Integer) {
-                this.expected = shorts((int) expected);
+            if (expected instanceof Integer integer) {
+                this.expected = shorts(integer);
             } else if (expected instanceof Class<?>) {
                 this.expected = expected;
             } else {
@@ -118,8 +118,8 @@ public class BitUtilitiesCommandToRegistersTest {
         for (Object obj : objects) {
             if (obj instanceof Args) {
                 builder.add(obj);
-            } else if (obj instanceof Stream) {
-                ((Stream<?>) obj).forEach(builder::add);
+            } else if (obj instanceof Stream stream) {
+                stream.forEach(builder::add);
             } else {
                 throw new IllegalArgumentException("Illegal parameter " + obj.toString());
             }
@@ -326,8 +326,8 @@ public class BitUtilitiesCommandToRegistersTest {
     @ParameterizedTest
     @MethodSource("data")
     public void testCommandToRegisters(Command command, ValueType type, Object expectedResult) {
-        if (expectedResult instanceof Class && Exception.class.isAssignableFrom((Class) expectedResult)) {
-            assertThrows((Class) expectedResult, () -> ModbusBitUtilities.commandToRegisters(command, type));
+        if (expectedResult instanceof Class class1 && Exception.class.isAssignableFrom(class1)) {
+            assertThrows(class1, () -> ModbusBitUtilities.commandToRegisters(command, type));
             return;
         }
 

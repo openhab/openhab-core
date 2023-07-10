@@ -33,7 +33,8 @@ import org.mockito.quality.Strictness;
 import org.openhab.core.audio.AudioFormat;
 import org.openhab.core.audio.AudioStream;
 import org.openhab.core.audio.ByteArrayAudioStream;
-import org.openhab.core.audio.FixedLengthAudioStream;
+import org.openhab.core.audio.utils.AudioSinkUtils;
+import org.openhab.core.audio.utils.AudioSinkUtilsImpl;
 import org.openhab.core.test.TestPortUtil;
 import org.openhab.core.test.TestServer;
 import org.openhab.core.test.java.JavaTest;
@@ -60,12 +61,13 @@ public abstract class AbstractAudioServletTest extends JavaTest {
     private @NonNullByDefault({}) HttpClient httpClient;
     private @NonNullByDefault({}) CompletableFuture<Boolean> serverStarted;
 
-    private @Mock @NonNullByDefault({}) HttpService httpServiceMock;
-    private @Mock @NonNullByDefault({}) HttpContext httpContextMock;
+    public @Mock @NonNullByDefault({}) HttpService httpServiceMock;
+    public @Mock @NonNullByDefault({}) HttpContext httpContextMock;
+    public AudioSinkUtils audioSinkUtils = new AudioSinkUtilsImpl();
 
     @BeforeEach
     public void setupServerAndClient() {
-        audioServlet = new AudioServlet();
+        audioServlet = new AudioServlet(audioSinkUtils);
 
         ServletHolder servletHolder = new ServletHolder(audioServlet);
 
@@ -126,7 +128,7 @@ public abstract class AbstractAudioServletTest extends JavaTest {
 
         String path;
         if (timeInterval != null) {
-            path = audioServlet.serve((FixedLengthAudioStream) stream, timeInterval);
+            path = audioServlet.serve(stream, timeInterval);
         } else {
             path = audioServlet.serve(stream);
         }

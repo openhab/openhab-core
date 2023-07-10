@@ -45,9 +45,9 @@ public class ItemHistoryDTO {
     public void addData(Long time, State state) {
         HistoryDataBean newVal = new HistoryDataBean();
         newVal.time = time;
-        if (state instanceof QuantityType) {
+        if (state instanceof QuantityType quantityState) {
             // we strip the unit from the state, since historic item states are expected to be all in the default unit
-            newVal.state = ((QuantityType) state).toBigDecimal().toString();
+            newVal.state = quantityState.toBigDecimal().toString();
         } else {
             newVal.state = state.toString();
         }

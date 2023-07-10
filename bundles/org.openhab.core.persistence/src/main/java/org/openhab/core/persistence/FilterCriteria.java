@@ -14,6 +14,8 @@ package org.openhab.core.persistence;
 
 import java.time.ZonedDateTime;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.types.State;
 
 /**
@@ -36,6 +38,7 @@ import org.openhab.core.types.State;
  * @author Lyubomir Papazov - Deprecate methods using java.util and add methods
  *         that use Java8's ZonedDateTime
  */
+@NonNullByDefault
 public class FilterCriteria {
 
     /** Enumeration with all possible compare options */
@@ -65,13 +68,13 @@ public class FilterCriteria {
     }
 
     /** filter result to only contain entries for the given item */
-    private String itemName;
+    private @Nullable String itemName;
 
     /** filter result to only contain entries that are equal to or after the given datetime */
-    private ZonedDateTime beginDate;
+    private @Nullable ZonedDateTime beginDate;
 
     /** filter result to only contain entries that are equal to or before the given datetime */
-    private ZonedDateTime endDate;
+    private @Nullable ZonedDateTime endDate;
 
     /** return the result list from starting index pageNumber*pageSize only */
     private int pageNumber = 0;
@@ -86,17 +89,17 @@ public class FilterCriteria {
     private Ordering ordering = Ordering.DESCENDING;
 
     /** Filter result to only contain entries that evaluate to true with the given operator and state */
-    private State state;
+    private @Nullable State state;
 
-    public String getItemName() {
+    public @Nullable String getItemName() {
         return itemName;
     }
 
-    public ZonedDateTime getBeginDate() {
+    public @Nullable ZonedDateTime getBeginDate() {
         return beginDate;
     }
 
-    public ZonedDateTime getEndDate() {
+    public @Nullable ZonedDateTime getEndDate() {
         return endDate;
     }
 
@@ -116,7 +119,7 @@ public class FilterCriteria {
         return ordering;
     }
 
-    public State getState() {
+    public @Nullable State getState() {
         return state;
     }
 

@@ -55,17 +55,16 @@ public class TestModuleTypeProvider implements ModuleTypeProvider {
         outputs.add(createOutput("out1", Set.of("tagA")));
         outputs.add(createOutput("out2", Set.of("tagB", "tagC")));
         outputs.add(createOutput("out3", Set.of("tagA", "tagB", "tagC")));
-        TriggerType t = new TriggerType(TRIGGER_TYPE, null, outputs);
-        return t;
+        return new TriggerType(TRIGGER_TYPE, null, outputs);
     }
 
     private ConditionType createConditionType() {
         List<Input> inputs = new ArrayList<>(3);
         inputs.add(createInput("in0", Set.of("tagE"))); // no connection, missing condition tag
         inputs.add(createInput("in1", Set.of("tagA"))); // conflict in2 -> out1 or in2 -> out3
-        inputs.add(createInput("in2", Set.of("tagA", "tagB"))); // in2 -> out3
-        ConditionType t = new ConditionType(CONDITION_TYPE, null, inputs);
-        return t;
+        inputs.add(createInput("in2", Set.of("tagA", "tagB")));
+        // in2 -> out3
+        return new ConditionType(CONDITION_TYPE, null, inputs);
     }
 
     private ActionType createActionType() {
@@ -78,8 +77,7 @@ public class TestModuleTypeProvider implements ModuleTypeProvider {
         List<Output> outputs = new ArrayList<>(3);
         outputs.add(createOutput("out4", Set.of("tagD")));
         outputs.add(createOutput("out5", Set.of("tagD", "tagE")));
-        ActionType t = new ActionType(ACTION_TYPE, null, inputs, outputs);
-        return t;
+        return new ActionType(ACTION_TYPE, null, inputs, outputs);
     }
 
     private Output createOutput(String name, Set<String> tags) {

@@ -22,10 +22,9 @@ import org.eclipse.jdt.annotation.Nullable;
  * @author Kai Kreuzer - Initial contribution
  */
 @NonNullByDefault
-@TagInfo(id = "Location")
 public interface Location extends Tag {
 
-    public static String name() {
+    static String name() {
         return "Location";
     }
 

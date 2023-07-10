@@ -66,7 +66,7 @@ public class ASTNode {
      * @return the value of this node as {@code String[]}
      */
     public String[] getValueAsStringArray() {
-        Object[] objs = value instanceof Object[] ? (Object[]) value : new Object[] { value };
+        Object[] objs = value instanceof Object[] os ? os : new Object[] { value };
         String[] result = new String[objs.length];
         for (int i = 0; i < objs.length; i++) {
             result[i] = objs[i] == null ? "" : ("" + objs[i]);

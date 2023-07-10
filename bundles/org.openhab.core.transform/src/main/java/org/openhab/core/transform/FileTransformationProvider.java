@@ -67,7 +67,8 @@ public class FileTransformationProvider implements WatchService.WatchEventListen
         watchService.registerListener(this, transformationPath);
         // read initial contents
         try (Stream<Path> files = Files.walk(transformationPath)) {
-            files.filter(Files::isRegularFile).map(transformationPath::relativize).forEach(f -> processPath(CREATE, f));
+            files.filter(Files::isRegularFile).map(transformationPath::relativize)
+                    .forEach(f -> processWatchEvent(CREATE, f));
         } catch (IOException e) {
             logger.warn("Could not list files in '{}', transformation configurations might be missing: {}",
                     transformationPath, e.getMessage());
@@ -94,16 +95,18 @@ public class FileTransformationProvider implements WatchService.WatchEventListen
         return transformationConfigurations.values();
     }
 
-    private void processPath(WatchService.Kind kind, Path path) {
+    @Override
+    public void processWatchEvent(WatchService.Kind kind, Path path) {
         Path finalPath = transformationPath.resolve(path);
-        if (kind == DELETE) {
-            Transformation oldElement = transformationConfigurations.remove(path);
-            if (oldElement != null) {
-                logger.trace("Removed configuration from file '{}", path);
-                listeners.forEach(listener -> listener.removed(this, oldElement));
-            }
-        } else if (Files.isRegularFile(finalPath) && ((kind == CREATE) || (kind == MODIFY))) {
-            try {
+        try {
+            if (kind == DELETE) {
+                Transformation oldElement = transformationConfigurations.remove(path);
+                if (oldElement != null) {
+                    logger.trace("Removed configuration from file '{}", path);
+                    listeners.forEach(listener -> listener.removed(this, oldElement));
+                }
+            } else if (Files.isRegularFile(finalPath) && !Files.isHidden(finalPath)
+                    && ((kind == CREATE) || (kind == MODIFY))) {
                 String fileName = path.getFileName().toString();
                 Matcher m = FILENAME_PATTERN.matcher(fileName);
                 if (!m.matches()) {
@@ -131,16 +134,11 @@ public class FileTransformationProvider implements WatchService.WatchEventListen
                     logger.trace("Updated new configuration from file '{}'", path);
                     listeners.forEach(listener -> listener.updated(this, oldElement, newElement));
                 }
-            } catch (IOException e) {
-                logger.warn("Skipping {} event for '{}' - failed to read content: {}", kind, path, e.getMessage());
+            } else {
+                logger.trace("Skipping {} event for '{}' - not a regular file", kind, path);
             }
-        } else {
-            logger.trace("Skipping {} event for '{}' - not a regular file", kind, path);
+        } catch (IOException e) {
+            logger.warn("Skipping {} event for '{}' - failed to process it: {}", kind, path, e.getMessage());
         }
-    }
-
-    @Override
-    public void processWatchEvent(WatchService.Kind kind, Path path) {
-        processPath(kind, path);
     }
 }

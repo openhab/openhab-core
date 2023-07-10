@@ -60,7 +60,7 @@ public abstract class BaseModuleHandlerFactory implements ModuleHandlerFactory {
     @Override
     @SuppressWarnings("null")
     public @Nullable ModuleHandler getHandler(Module module, String ruleUID) {
-        String id = ruleUID + module.getId();
+        String id = getModuleIdentifier(ruleUID, module.getId());
         ModuleHandler handler = handlers.get(id);
         handler = handler == null ? internalCreate(module, ruleUID) : handler;
         if (handler != null) {
@@ -80,8 +80,12 @@ public abstract class BaseModuleHandlerFactory implements ModuleHandlerFactory {
 
     @Override
     public void ungetHandler(Module module, String ruleUID, ModuleHandler handler) {
-        if (handlers.remove(ruleUID + module.getId(), handler)) {
+        if (handlers.remove(getModuleIdentifier(ruleUID, module.getId()), handler)) {
             handler.dispose();
         }
+    }
+
+    protected String getModuleIdentifier(String ruleUid, String moduleId) {
+        return ruleUid + "$" + moduleId;
     }
 }

@@ -435,8 +435,7 @@ public class AudioFormat {
 
     @Override
     public boolean equals(@Nullable Object obj) {
-        if (obj instanceof AudioFormat) {
-            AudioFormat format = (AudioFormat) obj;
+        if (obj instanceof AudioFormat format) {
             if (!(null == getCodec() ? null == format.getCodec() : getCodec().equals(format.getCodec()))) {
                 return false;
             }
@@ -485,7 +484,7 @@ public class AudioFormat {
                 + (bigEndian != null ? "bigEndian=" + bigEndian + ", " : "")
                 + (bitDepth != null ? "bitDepth=" + bitDepth + ", " : "")
                 + (bitRate != null ? "bitRate=" + bitRate + ", " : "")
-                + (frequency != null ? "frequency=" + frequency : "") + (channels != null ? "channels=" + channels : "")
-                + "]";
+                + (frequency != null ? "frequency=" + frequency + ", " : "")
+                + (channels != null ? "channels=" + channels : "") + "]";
     }
 }

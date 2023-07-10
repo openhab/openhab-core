@@ -24,5 +24,5 @@ import org.openhab.core.io.console.extensions.ConsoleCommandExtension;
 @NonNullByDefault
 public interface ConsoleCommandsContainer {
 
-    public Collection<ConsoleCommandExtension> getConsoleCommandExtensions();
+    Collection<ConsoleCommandExtension> getConsoleCommandExtensions();
 }

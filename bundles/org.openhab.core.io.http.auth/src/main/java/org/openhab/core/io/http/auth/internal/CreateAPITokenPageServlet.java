@@ -99,9 +99,8 @@ public class CreateAPITokenPageServlet extends AbstractAuthPageServlet {
             User user = login(username, password);
             String newApiToken;
 
-            if (user instanceof ManagedUser) {
-                if (((ManagedUser) user).getApiTokens().stream()
-                        .anyMatch(apiToken -> apiToken.getName().equals(tokenName))) {
+            if (user instanceof ManagedUser managedUser) {
+                if (managedUser.getApiTokens().stream().anyMatch(apiToken -> apiToken.getName().equals(tokenName))) {
                     resp.setContentType("text/html;charset=UTF-8");
                     resp.getWriter().append(
                             getPageBody(params, getLocalizedMessage("auth.createapitoken.name.unique.fail"), false));

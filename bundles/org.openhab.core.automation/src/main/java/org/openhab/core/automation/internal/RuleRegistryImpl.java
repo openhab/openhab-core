@@ -201,8 +201,8 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
      */
     @Reference(cardinality = ReferenceCardinality.MANDATORY, policy = ReferencePolicy.STATIC)
     protected void setTemplateRegistry(TemplateRegistry<RuleTemplate> templateRegistry) {
-        if (templateRegistry instanceof RuleTemplateRegistry) {
-            this.templateRegistry = (RuleTemplateRegistry) templateRegistry;
+        if (templateRegistry instanceof RuleTemplateRegistry registry) {
+            this.templateRegistry = registry;
             templateRegistry.addRegistryChangeListener(this);
         }
     }
@@ -500,7 +500,7 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
             if (isOptionalConfig(configDescriptions)) {
                 return;
             } else {
-                StringBuffer statusDescription = new StringBuffer();
+                StringBuilder statusDescription = new StringBuilder();
                 String msg = " '%s';";
                 for (ConfigDescriptionParameter configParameter : configDescriptions) {
                     if (configParameter.isRequired()) {
@@ -517,7 +517,7 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
                 processValue(configurations.remove(configParameterName), configParameter);
             }
             if (!configurations.isEmpty()) {
-                StringBuffer statusDescription = new StringBuffer();
+                StringBuilder statusDescription = new StringBuilder();
                 String msg = " '%s';";
                 for (String name : configurations.keySet()) {
                     statusDescription.append(String.format(msg, name));
@@ -557,9 +557,7 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
         if (configValue != null) {
             Type type = configParameter.getType();
             if (configParameter.isMultiple()) {
-                if (configValue instanceof List) {
-                    @SuppressWarnings("rawtypes")
-                    List lConfigValues = (List) configValue;
+                if (configValue instanceof List lConfigValues) {
                     for (Object value : lConfigValues) {
                         if (!checkType(type, value)) {
                             throw new IllegalArgumentException("Unexpected value for configuration property \""
@@ -612,7 +610,7 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
      */
     private void resolveModuleConfigReferences(List<? extends Module> modules, Map<String, ?> ruleConfiguration) {
         if (modules != null) {
-            StringBuffer statusDescription = new StringBuffer();
+            StringBuilder statusDescription = new StringBuilder();
             for (Module module : modules) {
                 try {
                     ReferenceResolver.updateConfiguration(module.getConfiguration(), ruleConfiguration, logger);

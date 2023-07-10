@@ -61,4 +61,10 @@ Fragment-Host: org.openhab.core.automation
 	junit-jupiter-engine;version='[5.9.2,5.9.3)',\
 	junit-platform-commons;version='[1.9.2,1.9.3)',\
 	junit-platform-engine;version='[1.9.2,1.9.3)',\
-	junit-platform-launcher;version='[1.9.2,1.9.3)'
+	junit-platform-launcher;version='[1.9.2,1.9.3)',\
+	net.bytebuddy.byte-buddy;version='[1.12.19,1.12.20)',\
+	net.bytebuddy.byte-buddy-agent;version='[1.12.19,1.12.20)',\
+	org.mockito.mockito-core;version='[4.11.0,4.11.1)',\
+	org.objenesis;version='[3.3.0,3.3.1)',\
+	org.osgi.service.cm;version='[1.6.0,1.6.1)',\
+	org.openhab.core.transform;version='[4.0.0,4.0.1)'

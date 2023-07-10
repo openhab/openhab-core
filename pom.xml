@@ -74,7 +74,7 @@
     <eea.version>2.3.0</eea.version>
     <karaf.compile.version>4.4.0</karaf.compile.version>
     <karaf.tooling.version>4.4.3</karaf.tooling.version>
-    <sat.version>0.13.0</sat.version>
+    <sat.version>0.15.0</sat.version>
     <slf4j.version>1.7.32</slf4j.version>
     <xtext.version>2.29.0</xtext.version>
     <spotless.version>2.35.0</spotless.version>
@@ -389,7 +389,7 @@ Import-Package: \\
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
-          <version>3.0.0-M7</version>
+          <version>3.0.0</version>
           <configuration>
             <argLine>
               --add-opens java.base/java.net=ALL-UNNAMED

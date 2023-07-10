@@ -14,6 +14,7 @@ package org.openhab.core.library;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.i18n.UnitProvider;
 import org.openhab.core.items.GenericItem;
 import org.openhab.core.items.ItemFactory;
 import org.openhab.core.items.ItemUtil;
@@ -29,7 +30,9 @@ import org.openhab.core.library.items.PlayerItem;
 import org.openhab.core.library.items.RollershutterItem;
 import org.openhab.core.library.items.StringItem;
 import org.openhab.core.library.items.SwitchItem;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 /**
  * {@link CoreItemFactory}-Implementation for the core ItemTypes
@@ -54,6 +57,12 @@ public class CoreItemFactory implements ItemFactory {
     public static final String ROLLERSHUTTER = "Rollershutter";
     public static final String STRING = "String";
     public static final String SWITCH = "Switch";
+    private final UnitProvider unitProvider;
+
+    @Activate
+    public CoreItemFactory(final @Reference UnitProvider unitProvider) {
+        this.unitProvider = unitProvider;
+    }
 
     @Override
     public @Nullable GenericItem createItem(@Nullable String itemTypeName, String itemName) {
@@ -62,34 +71,21 @@ public class CoreItemFactory implements ItemFactory {
         }
 
         String itemType = ItemUtil.getMainItemType(itemTypeName);
-        switch (itemType) {
-            case CALL:
-                return new CallItem(itemName);
-            case COLOR:
-                return new ColorItem(itemName);
-            case CONTACT:
-                return new ContactItem(itemName);
-            case DATETIME:
-                return new DateTimeItem(itemName);
-            case DIMMER:
-                return new DimmerItem(itemName);
-            case IMAGE:
-                return new ImageItem(itemName);
-            case LOCATION:
-                return new LocationItem(itemName);
-            case NUMBER:
-                return new NumberItem(itemTypeName, itemName);
-            case PLAYER:
-                return new PlayerItem(itemName);
-            case ROLLERSHUTTER:
-                return new RollershutterItem(itemName);
-            case STRING:
-                return new StringItem(itemName);
-            case SWITCH:
-                return new SwitchItem(itemName);
-            default:
-                return null;
-        }
+        return switch (itemType) {
+            case CALL -> new CallItem(itemName);
+            case COLOR -> new ColorItem(itemName);
+            case CONTACT -> new ContactItem(itemName);
+            case DATETIME -> new DateTimeItem(itemName);
+            case DIMMER -> new DimmerItem(itemName);
+            case IMAGE -> new ImageItem(itemName);
+            case LOCATION -> new LocationItem(itemName);
+            case NUMBER -> new NumberItem(itemTypeName, itemName, unitProvider);
+            case PLAYER -> new PlayerItem(itemName);
+            case ROLLERSHUTTER -> new RollershutterItem(itemName);
+            case STRING -> new StringItem(itemName);
+            case SWITCH -> new SwitchItem(itemName);
+            default -> null;
+        };
     }
 
     @Override

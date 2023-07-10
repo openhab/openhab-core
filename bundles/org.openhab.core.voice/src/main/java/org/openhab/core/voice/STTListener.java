@@ -32,5 +32,5 @@ public interface STTListener {
      *
      * @param sttEvent The {@link STTEvent} fired by the {@link STTService}
      */
-    public void sttEventReceived(STTEvent sttEvent);
+    void sttEventReceived(STTEvent sttEvent);
 }

@@ -146,12 +146,10 @@ public class ConfigDescriptionParameterConverter extends GenericUnmarshaller<Con
     }
 
     private @Nullable List<ParameterOption> readParameterOptions(@Nullable Object rawNodeValueList) {
-        if (rawNodeValueList instanceof List<?>) {
-            List<?> list = (List<?>) rawNodeValueList;
+        if (rawNodeValueList instanceof List<?> list) {
             List<ParameterOption> result = new ArrayList<>();
             for (Object object : list) {
-                if (object instanceof NodeValue) {
-                    NodeValue nodeValue = (NodeValue) object;
+                if (object instanceof NodeValue nodeValue) {
                     String value = nodeValue.getAttributes().get("value");
                     String label = nodeValue.getValue().toString();
                     result.add(new ParameterOption(value, label));

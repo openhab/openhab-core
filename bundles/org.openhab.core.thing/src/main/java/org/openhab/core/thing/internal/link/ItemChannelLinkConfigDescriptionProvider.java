@@ -111,8 +111,8 @@ public class ItemChannelLinkConfigDescriptionProvider implements ConfigDescripti
                 case STATE:
                     return profileType instanceof StateProfileType && isSupportedItemType(profileType, item);
                 case TRIGGER:
-                    return profileType instanceof TriggerProfileType && isSupportedItemType(profileType, item)
-                            && isSupportedChannelType((TriggerProfileType) profileType, channel);
+                    return profileType instanceof TriggerProfileType tpt && isSupportedItemType(profileType, item)
+                            && isSupportedChannelType(tpt, channel);
                 default:
                     throw new IllegalArgumentException("Unknown channel kind: " + channel.getKind());
             }

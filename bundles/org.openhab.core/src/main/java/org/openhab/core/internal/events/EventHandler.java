@@ -13,14 +13,18 @@
 package org.openhab.core.internal.events;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -47,9 +51,7 @@ public class EventHandler implements AutoCloseable {
     private final Map<String, Set<EventSubscriber>> typedEventSubscribers;
     private final Map<String, EventFactory> typedEventFactories;
 
-    private final ScheduledExecutorService watcher = Executors
-            .newSingleThreadScheduledExecutor(new NamedThreadFactory("eventwatcher"));
-    private final ExecutorService executor = Executors.newSingleThreadExecutor(new NamedThreadFactory("eventexecutor"));
+    private final Map<Class<? extends EventSubscriber>, ExecutorRecord> executors = new HashMap<>();
 
     /**
      * Create a new event handler.
@@ -63,10 +65,19 @@ public class EventHandler implements AutoCloseable {
         this.typedEventFactories = typedEventFactories;
     }
 
+    private synchronized ExecutorRecord createExecutorRecord(Class<? extends EventSubscriber> subscriber) {
+        return new ExecutorRecord(
+                Executors.newSingleThreadExecutor(new NamedThreadFactory("eventexecutor-" + executors.size())),
+                Executors.newSingleThreadScheduledExecutor(new NamedThreadFactory("eventwatcher-" + executors.size())),
+                new AtomicInteger());
+    }
+
     @Override
     public void close() {
-        watcher.shutdownNow();
-        executor.shutdownNow();
+        executors.values().forEach(r -> {
+            r.executor.shutdownNow();
+            r.watcher.shutdownNow();
+        });
     }
 
     public void handleEvent(org.osgi.service.event.Event osgiEvent) {
@@ -75,11 +86,9 @@ public class EventHandler implements AutoCloseable {
         Object topicObj = osgiEvent.getProperty("topic");
         Object sourceObj = osgiEvent.getProperty("source");
 
-        if (typeObj instanceof String && payloadObj instanceof String && topicObj instanceof String) {
-            String typeStr = (String) typeObj;
-            String payloadStr = (String) payloadObj;
-            String topicStr = (String) topicObj;
-            String sourceStr = (sourceObj instanceof String) ? (String) sourceObj : null;
+        if (typeObj instanceof String typeStr && payloadObj instanceof String payloadStr
+                && topicObj instanceof String topicStr) {
+            String sourceStr = (sourceObj instanceof String s) ? s : null;
             if (!typeStr.isEmpty() && !payloadStr.isEmpty() && !topicStr.isEmpty()) {
                 handleEvent(typeStr, payloadStr, topicStr, sourceStr);
             }
@@ -142,8 +151,16 @@ public class EventHandler implements AutoCloseable {
             EventFilter filter = eventSubscriber.getEventFilter();
             if (filter == null || filter.apply(event)) {
                 logger.trace("Delegate event to subscriber ({}).", eventSubscriber.getClass());
-                executor.submit(() -> {
-                    ScheduledFuture<?> logTimeout = watcher.schedule(
+                ExecutorRecord executorRecord = Objects.requireNonNull(
+                        executors.computeIfAbsent(eventSubscriber.getClass(), this::createExecutorRecord));
+                int queueSize = executorRecord.count().incrementAndGet();
+                if (queueSize > 1000) {
+                    logger.warn(
+                            "The queue for a subscriber of type '{}' exceeds 1000 elements. System may be unstable.",
+                            eventSubscriber.getClass());
+                }
+                CompletableFuture.runAsync(() -> {
+                    ScheduledFuture<?> logTimeout = executorRecord.watcher().schedule(
                             () -> logger.warn("Dispatching event to subscriber '{}' takes more than {}ms.",
                                     eventSubscriber, EVENTSUBSCRIBER_EVENTHANDLING_MAX_MS),
                             EVENTSUBSCRIBER_EVENTHANDLING_MAX_MS, TimeUnit.MILLISECONDS);
@@ -154,10 +171,13 @@ public class EventHandler implements AutoCloseable {
                                 EventSubscriber.class.getName(), ex.getMessage(), ex);
                     }
                     logTimeout.cancel(false);
-                });
+                }, executorRecord.executor()).thenRun(executorRecord.count::decrementAndGet);
             } else {
                 logger.trace("Skip event subscriber ({}) because of its filter.", eventSubscriber.getClass());
             }
         }
+    }
+
+    private record ExecutorRecord(ExecutorService executor, ScheduledExecutorService watcher, AtomicInteger count) {
     }
 }

@@ -101,9 +101,6 @@ public class RawType implements PrimitiveType, State {
         if (!mimeType.equals(other.mimeType)) {
             return false;
         }
-        if (!Arrays.equals(bytes, other.bytes)) {
-            return false;
-        }
-        return true;
+        return Arrays.equals(bytes, other.bytes);
     }
 }

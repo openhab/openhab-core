@@ -137,12 +137,12 @@ public class CacheScriptExtension implements ScriptExtensionProvider {
      */
     private void asyncCancelJob(@Nullable Object o) {
         Runnable cancelJob = null;
-        if (o instanceof ScheduledFuture) {
-            cancelJob = () -> ((ScheduledFuture<?>) o).cancel(true);
-        } else if (o instanceof java.util.Timer) {
-            cancelJob = () -> ((java.util.Timer) o).cancel();
-        } else if (o instanceof org.openhab.core.automation.module.script.action.Timer) {
-            cancelJob = () -> ((org.openhab.core.automation.module.script.action.Timer) o).cancel();
+        if (o instanceof ScheduledFuture future) {
+            cancelJob = () -> future.cancel(true);
+        } else if (o instanceof java.util.Timer timer) {
+            cancelJob = () -> timer.cancel();
+        } else if (o instanceof org.openhab.core.automation.module.script.action.Timer timer) {
+            cancelJob = () -> timer.cancel();
         }
         if (cancelJob != null) {
             // not using execute so ensure this operates in another thread and we don't block here

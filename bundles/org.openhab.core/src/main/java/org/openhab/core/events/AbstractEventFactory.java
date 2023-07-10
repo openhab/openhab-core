@@ -22,8 +22,7 @@ import com.google.gson.Gson;
 /**
  * The {@link AbstractEventFactory} defines an abstract implementation of the {@link EventFactory} interface. Subclasses
  * must implement the abstract method {@link #createEventByType(String, String, String, String)} in order to create
- * event
- * instances based on the event type.
+ * event instances based on the event type.
  *
  * @author Stefan Bußweiler - Initial contribution
  */

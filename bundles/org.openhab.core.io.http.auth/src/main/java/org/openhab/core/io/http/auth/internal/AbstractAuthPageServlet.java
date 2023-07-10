@@ -51,7 +51,7 @@ import org.slf4j.LoggerFactory;
 @NonNullByDefault
 public abstract class AbstractAuthPageServlet extends HttpServlet {
 
-    protected static final long serialVersionUID = 5340598701104679840L;
+    private static final long serialVersionUID = 5340598701104679840L;
 
     private static final String MESSAGES_BUNDLE_NAME = "messages";
 

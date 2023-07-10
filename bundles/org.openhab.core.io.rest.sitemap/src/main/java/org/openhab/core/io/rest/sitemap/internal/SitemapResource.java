@@ -21,10 +21,12 @@ import java.util.LinkedList;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import javax.annotation.security.RolesAllowed;
 import javax.servlet.http.HttpServletRequest;
@@ -56,6 +58,8 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.auth.Role;
 import org.openhab.core.common.ThreadPoolManager;
+import org.openhab.core.events.Event;
+import org.openhab.core.events.EventSubscriber;
 import org.openhab.core.io.rest.JSONResponse;
 import org.openhab.core.io.rest.LocaleService;
 import org.openhab.core.io.rest.RESTConstants;
@@ -67,7 +71,8 @@ import org.openhab.core.io.rest.sitemap.SitemapSubscriptionService.SitemapSubscr
 import org.openhab.core.items.GenericItem;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
-import org.openhab.core.items.StateChangeListener;
+import org.openhab.core.items.events.ItemEvent;
+import org.openhab.core.items.events.ItemStateChangedEvent;
 import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.library.types.HSBType;
 import org.openhab.core.model.sitemap.SitemapProvider;
@@ -75,6 +80,7 @@ import org.openhab.core.model.sitemap.sitemap.Chart;
 import org.openhab.core.model.sitemap.sitemap.ColorArray;
 import org.openhab.core.model.sitemap.sitemap.Frame;
 import org.openhab.core.model.sitemap.sitemap.Image;
+import org.openhab.core.model.sitemap.sitemap.Input;
 import org.openhab.core.model.sitemap.sitemap.LinkableWidget;
 import org.openhab.core.model.sitemap.sitemap.Mapping;
 import org.openhab.core.model.sitemap.sitemap.Mapview;
@@ -124,8 +130,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * @author Markus Rathgeb - Migrated to JAX-RS Whiteboard Specification
  * @author Wouter Born - Migrated to OpenAPI annotations
  * @author Laurent Garnier - Added support for icon color
+ * @author Mark Herwege - Added pattern and unit fields
  */
-@Component(service = RESTResource.class)
+@Component(service = { RESTResource.class, EventSubscriber.class })
 @JaxrsResource
 @JaxrsName(SitemapResource.PATH_SITEMAPS)
 @JaxrsApplicationSelect("(" + JaxrsWhiteboardConstants.JAX_RS_NAME + "=" + RESTConstants.JAX_RS_NAME + ")")
@@ -135,7 +142,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Tag(name = SitemapResource.PATH_SITEMAPS)
 @NonNullByDefault
 public class SitemapResource
-        implements RESTResource, SitemapSubscriptionCallback, SseBroadcaster.Listener<SseSinkInfo> {
+        implements RESTResource, SitemapSubscriptionCallback, SseBroadcaster.Listener<SseSinkInfo>, EventSubscriber {
 
     private final Logger logger = LoggerFactory.getLogger(SitemapResource.class);
 
@@ -175,6 +182,7 @@ public class SitemapResource
             .getScheduledPool(ThreadPoolManager.THREAD_POOL_NAME_COMMON);
 
     private @Nullable ScheduledFuture<?> cleanSubscriptionsJob;
+    private Set<BlockingStateChangeListener> stateChangeListeners = new CopyOnWriteArraySet<>();
 
     @Activate
     public SitemapResource( //
@@ -367,8 +375,8 @@ public class SitemapResource
                         false, isLeaf(children), uri, locale, timeout, includeHidden);
             } else {
                 Widget pageWidget = itemUIRegistry.getWidget(sitemap, pageId);
-                if (pageWidget instanceof LinkableWidget) {
-                    EList<Widget> children = itemUIRegistry.getChildren((LinkableWidget) pageWidget);
+                if (pageWidget instanceof LinkableWidget widget) {
+                    EList<Widget> children = itemUIRegistry.getChildren(widget);
                     PageDTO pageBean = createPageBean(sitemapName, itemUIRegistry.getLabel(pageWidget),
                             itemUIRegistry.getCategory(pageWidget), pageId, children, false, isLeaf(children), uri,
                             locale, timeout, includeHidden);
@@ -376,8 +384,8 @@ public class SitemapResource
                     while (parentPage instanceof Frame) {
                         parentPage = parentPage.eContainer();
                     }
-                    if (parentPage instanceof Widget) {
-                        String parentId = itemUIRegistry.getWidgetId((Widget) parentPage);
+                    if (parentPage instanceof Widget parentPageWidget) {
+                        String parentId = itemUIRegistry.getWidgetId(parentPageWidget);
                         pageBean.parent = getPageBean(sitemapName, parentId, uri, locale, timeout, includeHidden);
                         pageBean.parent.widgets = null;
                         pageBean.parent.parent = null;
@@ -519,10 +527,11 @@ public class SitemapResource
         bean.valuecolor = convertItemValueColor(itemUIRegistry.getValueColor(widget), itemState);
         bean.iconcolor = convertItemValueColor(itemUIRegistry.getIconColor(widget), itemState);
         bean.label = itemUIRegistry.getLabel(widget);
+        bean.pattern = itemUIRegistry.getFormatPattern(widget);
+        bean.unit = itemUIRegistry.getUnitForWidget(widget);
         bean.type = widget.eClass().getName();
         bean.visibility = itemUIRegistry.getVisiblity(widget);
-        if (widget instanceof LinkableWidget) {
-            LinkableWidget linkableWidget = (LinkableWidget) widget;
+        if (widget instanceof LinkableWidget linkableWidget) {
             EList<Widget> children = itemUIRegistry.getChildren(linkableWidget);
             if (widget instanceof Frame) {
                 for (Widget child : children) {
@@ -540,8 +549,7 @@ public class SitemapResource
                         isLeaf(children), uri, locale, false, evenIfHidden);
             }
         }
-        if (widget instanceof Switch) {
-            Switch switchWidget = (Switch) widget;
+        if (widget instanceof Switch switchWidget) {
             for (Mapping mapping : switchWidget.getMappings()) {
                 MappingDTO mappingBean = new MappingDTO();
                 mappingBean.command = mapping.getCmd();
@@ -549,8 +557,7 @@ public class SitemapResource
                 bean.mappings.add(mappingBean);
             }
         }
-        if (widget instanceof Selection) {
-            Selection selectionWidget = (Selection) widget;
+        if (widget instanceof Selection selectionWidget) {
             for (Mapping mapping : selectionWidget.getMappings()) {
                 MappingDTO mappingBean = new MappingDTO();
                 mappingBean.command = mapping.getCmd();
@@ -558,23 +565,23 @@ public class SitemapResource
                 bean.mappings.add(mappingBean);
             }
         }
-        if (widget instanceof Slider) {
-            Slider sliderWidget = (Slider) widget;
+        if (widget instanceof Input inputWidget) {
+            bean.inputHint = inputWidget.getInputHint();
+        }
+        if (widget instanceof Slider sliderWidget) {
             bean.sendFrequency = sliderWidget.getFrequency();
             bean.switchSupport = sliderWidget.isSwitchEnabled();
             bean.minValue = sliderWidget.getMinValue();
             bean.maxValue = sliderWidget.getMaxValue();
             bean.step = sliderWidget.getStep();
         }
-        if (widget instanceof Image) {
+        if (widget instanceof Image imageWidget) {
             bean.url = buildProxyUrl(sitemapName, widget, uri);
-            Image imageWidget = (Image) widget;
             if (imageWidget.getRefresh() > 0) {
                 bean.refresh = imageWidget.getRefresh();
             }
         }
-        if (widget instanceof Video) {
-            Video videoWidget = (Video) widget;
+        if (widget instanceof Video videoWidget) {
             if (videoWidget.getEncoding() != null) {
                 bean.encoding = videoWidget.getEncoding();
             }
@@ -584,17 +591,14 @@ public class SitemapResource
                 bean.url = buildProxyUrl(sitemapName, videoWidget, uri);
             }
         }
-        if (widget instanceof Webview) {
-            Webview webViewWidget = (Webview) widget;
+        if (widget instanceof Webview webViewWidget) {
             bean.url = webViewWidget.getUrl();
             bean.height = webViewWidget.getHeight();
         }
-        if (widget instanceof Mapview) {
-            Mapview mapViewWidget = (Mapview) widget;
+        if (widget instanceof Mapview mapViewWidget) {
             bean.height = mapViewWidget.getHeight();
         }
-        if (widget instanceof Chart) {
-            Chart chartWidget = (Chart) widget;
+        if (widget instanceof Chart chartWidget) {
             bean.service = chartWidget.getService();
             bean.period = chartWidget.getPeriod();
             bean.legend = chartWidget.getLegend();
@@ -604,8 +608,7 @@ public class SitemapResource
                 bean.refresh = chartWidget.getRefresh();
             }
         }
-        if (widget instanceof Setpoint) {
-            Setpoint setpointWidget = (Setpoint) widget;
+        if (widget instanceof Setpoint setpointWidget) {
             bean.minValue = setpointWidget.getMinValue();
             bean.maxValue = setpointWidget.getMaxValue();
             bean.step = setpointWidget.getStep();
@@ -636,12 +639,11 @@ public class SitemapResource
 
     private boolean isLeaf(EList<Widget> children) {
         for (Widget w : children) {
-            if (w instanceof Frame) {
-                if (isLeaf(((Frame) w).getChildren())) {
+            if (w instanceof Frame frame) {
+                if (isLeaf(frame.getChildren())) {
                     return false;
                 }
-            } else if (w instanceof LinkableWidget) {
-                LinkableWidget linkableWidget = (LinkableWidget) w;
+            } else if (w instanceof LinkableWidget linkableWidget) {
                 if (!itemUIRegistry.getChildren(linkableWidget).isEmpty()) {
                     return false;
                 }
@@ -670,8 +672,8 @@ public class SitemapResource
                 timeout = waitForChanges(children);
             } else {
                 Widget pageWidget = itemUIRegistry.getWidget(sitemap, pageId);
-                if (pageWidget instanceof LinkableWidget) {
-                    EList<Widget> children = itemUIRegistry.getChildren((LinkableWidget) pageWidget);
+                if (pageWidget instanceof LinkableWidget widget) {
+                    EList<Widget> children = itemUIRegistry.getChildren(widget);
                     timeout = waitForChanges(children);
                 }
             }
@@ -690,13 +692,11 @@ public class SitemapResource
     private boolean waitForChanges(EList<Widget> widgets) {
         long startTime = (new Date()).getTime();
         boolean timeout = false;
-        BlockingStateChangeListener listener = new BlockingStateChangeListener();
-        // let's get all items for these widgets
-        Set<GenericItem> items = getAllItems(widgets);
-        for (GenericItem item : items) {
-            item.addStateChangeListener(listener);
-        }
-        while (!listener.hasChangeOccurred() && !timeout) {
+        Set<String> items = getAllItems(widgets).stream().map(Item::getName).collect(Collectors.toSet());
+        BlockingStateChangeListener listener = new BlockingStateChangeListener(items);
+        stateChangeListeners.add(listener);
+
+        while (!listener.hasChanged() && !timeout) {
             timeout = (new Date()).getTime() - startTime > TIMEOUT_IN_MS;
             try {
                 Thread.sleep(300);
@@ -705,9 +705,8 @@ public class SitemapResource
                 break;
             }
         }
-        for (GenericItem item : items) {
-            item.removeStateChangeListener(listener);
-        }
+
+        stateChangeListeners.remove(listener);
         return timeout;
     }
 
@@ -723,24 +722,23 @@ public class SitemapResource
         for (Widget widget : widgets) {
             // We skip the chart widgets having a refresh argument
             boolean skipWidget = false;
-            if (widget instanceof Chart) {
-                Chart chartWidget = (Chart) widget;
+            if (widget instanceof Chart chartWidget) {
                 skipWidget = chartWidget.getRefresh() > 0;
             }
             String itemName = widget.getItem();
             if (!skipWidget && itemName != null) {
                 try {
                     Item item = itemUIRegistry.getItem(itemName);
-                    if (item instanceof GenericItem) {
-                        items.add((GenericItem) item);
+                    if (item instanceof GenericItem genericItem) {
+                        items.add(genericItem);
                     }
                 } catch (ItemNotFoundException e) {
                     // ignore
                 }
             }
             // Consider all items inside the frame
-            if (widget instanceof Frame) {
-                items.addAll(getAllItems(((Frame) widget).getChildren()));
+            if (widget instanceof Frame frame) {
+                items.addAll(getAllItems(frame.getChildren()));
             }
             // Consider items involved in any visibility, labelcolor, valuecolor and iconcolor condition
             items.addAll(getItemsInVisibilityCond(widget.getVisibility()));
@@ -758,8 +756,8 @@ public class SitemapResource
             if (itemName != null) {
                 try {
                     Item item = itemUIRegistry.getItem(itemName);
-                    if (item instanceof GenericItem) {
-                        items.add((GenericItem) item);
+                    if (item instanceof GenericItem genericItem) {
+                        items.add(genericItem);
                     }
                 } catch (ItemNotFoundException e) {
                     // ignore
@@ -776,8 +774,8 @@ public class SitemapResource
             if (itemName != null) {
                 try {
                     Item item = itemUIRegistry.getItem(itemName);
-                    if (item instanceof GenericItem) {
-                        items.add((GenericItem) item);
+                    if (item instanceof GenericItem genericItem) {
+                        items.add(genericItem);
                     }
                 } catch (ItemNotFoundException e) {
                     // ignore
@@ -787,34 +785,16 @@ public class SitemapResource
         return items;
     }
 
-    /**
-     * This is a state change listener, which is merely used to determine, if a
-     * state change has occurred on one of a list of items.
-     *
-     * @author Kai Kreuzer - Initial contribution
-     *
-     */
-    private static class BlockingStateChangeListener implements StateChangeListener {
+    @Override
+    public Set<String> getSubscribedEventTypes() {
+        return Set.of(ItemStateChangedEvent.TYPE);
+    }
 
-        private boolean changed = false;
-
-        @Override
-        public void stateChanged(Item item, State oldState, State newState) {
-            changed = true;
-        }
-
-        /**
-         * determines, whether a state change has occurred since its creation
-         *
-         * @return true, if a state has changed
-         */
-        public boolean hasChangeOccurred() {
-            return changed;
-        }
-
-        @Override
-        public void stateUpdated(Item item, State state) {
-            // ignore if the state did not change
+    @Override
+    public void receive(Event event) {
+        if (event instanceof ItemEvent itemEvent) {
+            String itemName = itemEvent.getItemName();
+            stateChangeListeners.forEach(l -> l.itemChanged(itemName));
         }
     }
 
@@ -834,9 +814,9 @@ public class SitemapResource
             if (sitemapName != null && sitemapName.equals(subscriptions.getSitemapName(info.subscriptionId))
                     && pageId != null && pageId.equals(subscriptions.getPageId(info.subscriptionId))) {
                 if (logger.isDebugEnabled()) {
-                    if (event instanceof SitemapWidgetEvent) {
-                        logger.debug("Sent sitemap event for widget {} to subscription {}.",
-                                ((SitemapWidgetEvent) event).widgetId, info.subscriptionId);
+                    if (event instanceof SitemapWidgetEvent widgetEvent) {
+                        logger.debug("Sent sitemap event for widget {} to subscription {}.", widgetEvent.widgetId,
+                                info.subscriptionId);
                     } else if (event instanceof ServerAliveEvent) {
                         logger.debug("Sent alive event to subscription {}.", info.subscriptionId);
                     }
@@ -859,5 +839,24 @@ public class SitemapResource
         logger.debug("SSE connection for subscription {} has been closed.", info.subscriptionId);
         subscriptions.removeSubscription(info.subscriptionId);
         knownSubscriptions.remove(info.subscriptionId);
+    }
+
+    private static class BlockingStateChangeListener {
+        private final Set<String> items;
+        private boolean changed = false;
+
+        public BlockingStateChangeListener(Set<String> items) {
+            this.items = items;
+        }
+
+        public void itemChanged(String item) {
+            if (items.contains(item)) {
+                changed = true;
+            }
+        }
+
+        public boolean hasChanged() {
+            return changed;
+        }
     }
 }

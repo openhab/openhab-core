@@ -109,8 +109,8 @@ public class NodeIterator implements Iterator<@Nullable Object> {
         if (hasNext()) {
             Object nextNode = next();
 
-            if (nextNode instanceof NodeName) {
-                if (nodeName.equals(((NodeName) nextNode).getNodeName())) {
+            if (nextNode instanceof NodeName name) {
+                if (nodeName.equals(name.getNodeName())) {
                     return nextNode;
                 }
             }
@@ -147,9 +147,9 @@ public class NodeIterator implements Iterator<@Nullable Object> {
         if (hasNext()) {
             Object nextNode = next();
 
-            if (nextNode instanceof NodeAttributes) {
-                if (nodeName.equals(((NodeName) nextNode).getNodeName())) {
-                    return ((NodeAttributes) nextNode).getAttribute(attributeName);
+            if (nextNode instanceof NodeAttributes attributes) {
+                if (nodeName.equals(attributes.getNodeName())) {
+                    return attributes.getAttribute(attributeName);
                 }
             }
 
@@ -180,8 +180,8 @@ public class NodeIterator implements Iterator<@Nullable Object> {
     public @Nullable Object nextValue(String nodeName, boolean required) throws ConversionException {
         Object value = next(nodeName, required);
 
-        if (value instanceof NodeValue) {
-            return ((NodeValue) value).getValue();
+        if (value instanceof NodeValue nodeValue) {
+            return nodeValue.getValue();
         }
 
         return null;
@@ -203,8 +203,8 @@ public class NodeIterator implements Iterator<@Nullable Object> {
     public @Nullable List<@NonNull ?> nextList(String nodeName, boolean required) throws ConversionException {
         Object list = next(nodeName, required);
 
-        if (list instanceof NodeList) {
-            return ((NodeList) list).getList();
+        if (list instanceof NodeList nodeList) {
+            return nodeList.getList();
         }
 
         return null;
