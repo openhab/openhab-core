@@ -12,3 +12,12 @@ https://www.eclipse.org/legal/epl-2.0/.
 
 https://github.com/openhab/openhab-core
 
+## Third-party Content
+
+bcpkix-jdk18on
+bcprov-jdk18on
+bcutil-jdk18on
+* License: Bouncy Castle License
+* Project: https://www.bouncycastle.org
+* Source:  https://github.com/bcgit/bc-java
+

@@ -52,6 +52,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,21 +62,20 @@ import org.slf4j.LoggerFactory;
  *
  * @author Ben Rosenblum - Initial contribution
  */
-// @NonNullByDefault
+@NonNullByDefault
 public class CryptoStore {
 
     private final Logger logger = LoggerFactory.getLogger(CryptoStore.class);
 
-    private final int KEY_SIZE = 128;
-    private final int DATA_LENGTH = 128;
-    private final String CIPHER = "AES/GCM/NoPadding";
-
+    private int keySize = 128;
     private String privKey = "";
     private String cert = "";
+    private String caCert = "";
     private String keystoreFileName = "";
     private String keystoreAlgorithm = "RSA";
     private int keyLength = 2048;
     private String alias = "openhab";
+    private String caAlias = "trustedCa";
     private String distName = "CN=openHAB, O=openHAB, L=None, ST=None, C=None";
     private String cipher = "AES/GCM/NoPadding";
     private String keyAlgorithm = "";
@@ -84,7 +84,7 @@ public class CryptoStore {
 
     public CryptoStore() {
         try {
-            encryptionCipher = Cipher.getInstance(CIPHER);
+            encryptionCipher = Cipher.getInstance(cipher);
         } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
             logger.debug("Could not get cipher instance", e);
         }
@@ -94,7 +94,7 @@ public class CryptoStore {
         Key key;
         try {
             KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
-            keyGenerator.init(KEY_SIZE);
+            keyGenerator.init(keySize);
             key = keyGenerator.generateKey();
             byte[] newKey = key.getEncoded();
             this.keyAlgorithm = key.getAlgorithm();
@@ -106,7 +106,6 @@ public class CryptoStore {
     }
 
     private Key convertByteToKey(byte[] keyString) {
-        // byte[] encodedKey = Base64.getDecoder().decode(keyString);
         Key key = new SecretKeySpec(keyString, keyAlgorithm);
         return key;
     }
@@ -117,9 +116,14 @@ public class CryptoStore {
 
     public String encrypt(String data, Key key, String cipher) throws Exception {
         byte[] dataInBytes = data.getBytes();
-        encryptionCipher.init(Cipher.ENCRYPT_MODE, key);
-        byte[] encryptedBytes = encryptionCipher.doFinal(dataInBytes);
-        return Base64.getEncoder().encodeToString(encryptedBytes);
+        Cipher encryptionCipher = this.encryptionCipher;
+        if (encryptionCipher != null) {
+            encryptionCipher.init(Cipher.ENCRYPT_MODE, key);
+            byte[] encryptedBytes = encryptionCipher.doFinal(dataInBytes);
+            return Base64.getEncoder().encodeToString(encryptedBytes);
+        } else {
+            return "";
+        }
     }
 
     public String decrypt(String encryptedData, Key key) throws Exception {
@@ -129,10 +133,15 @@ public class CryptoStore {
     public String decrypt(String encryptedData, Key key, String cipher) throws Exception {
         byte[] dataInBytes = Base64.getDecoder().decode(encryptedData);
         Cipher decryptionCipher = Cipher.getInstance(cipher);
-        GCMParameterSpec spec = new GCMParameterSpec(DATA_LENGTH, encryptionCipher.getIV());
-        decryptionCipher.init(Cipher.DECRYPT_MODE, key, spec);
-        byte[] decryptedBytes = decryptionCipher.doFinal(dataInBytes);
-        return new String(decryptedBytes);
+        Cipher encryptionCipher = this.encryptionCipher;
+        if (encryptionCipher != null) {
+            GCMParameterSpec spec = new GCMParameterSpec(keySize, encryptionCipher.getIV());
+            decryptionCipher.init(Cipher.DECRYPT_MODE, key, spec);
+            byte[] decryptedBytes = decryptionCipher.doFinal(dataInBytes);
+            return new String(decryptedBytes);
+        } else {
+            return "";
+        }
     }
 
     public void setPrivKey(String privKey, byte[] keyString) throws Exception {
@@ -159,6 +168,20 @@ public class CryptoStore {
         return cert;
     }
 
+    public void setCaCert(String caCert) {
+        this.caCert = caCert;
+    }
+
+    public void setCaCert(Certificate caCert) throws CertificateEncodingException {
+        this.caCert = new String(Base64.getEncoder().encode(caCert.getEncoded()));
+    }
+
+    public Certificate getCaCert() throws CertificateException {
+        Certificate caCert = CertificateFactory.getInstance("X.509")
+                .generateCertificate(new ByteArrayInputStream(Base64.getDecoder().decode(this.caCert.getBytes())));
+        return caCert;
+    }
+
     public void setAlias(String alias) {
         this.alias = alias;
     }
@@ -167,12 +190,28 @@ public class CryptoStore {
         return this.alias;
     }
 
+    public void setCAAlias(String caAlias) {
+        this.caAlias = caAlias;
+    }
+
+    public String getCAAlias() {
+        return this.caAlias;
+    }
+
     public void setAlgorithm(String keystoreAlgorithm) {
         this.keystoreAlgorithm = keystoreAlgorithm;
     }
 
     public String getAlgorithm() {
         return this.keystoreAlgorithm;
+    }
+
+    public void setKeySize(int keySize) {
+        this.keySize = keySize;
+    }
+
+    public int getKeySize() {
+        return this.keySize;
     }
 
     public void setKeyLength(int keyLength) {
@@ -223,6 +262,10 @@ public class CryptoStore {
         byte[] byteKey = keystore.getKey(this.alias, keystorePassword.toCharArray()).getEncoded();
         this.privKey = encrypt(new String(Base64.getEncoder().encode(byteKey)), key);
         setCert(keystore.getCertificate(this.alias));
+        Certificate caCert = keystore.getCertificate("trustedCa");
+        if (caCert != null) {
+            setCaCert(caCert);
+        }
     }
 
     public KeyStore getKeyStore(String keystorePassword, byte[] keyString)
@@ -234,6 +277,9 @@ public class CryptoStore {
         KeyFactory kf = KeyFactory.getInstance(this.keystoreAlgorithm);
         keystore.setKeyEntry(this.alias, kf.generatePrivate(keySpec), keystorePassword.toCharArray(),
                 new java.security.cert.Certificate[] { getCert() });
+        if (!caCert.isEmpty()) {
+            keystore.setCertificateEntry("trustedCa", getCaCert());
+        }
         return keystore;
     }
 
