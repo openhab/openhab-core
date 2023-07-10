@@ -262,7 +262,8 @@ public class CryptoStore {
         byte[] byteKey = keystore.getKey(this.alias, keystorePassword.toCharArray()).getEncoded();
         this.privKey = encrypt(new String(Base64.getEncoder().encode(byteKey)), key);
         setCert(keystore.getCertificate(this.alias));
-        Certificate caCert = keystore.getCertificate("trustedCa");
+        String caAlias = this.caAlias;
+        Certificate caCert = keystore.getCertificate(caAlias);
         if (caCert != null) {
             setCaCert(caCert);
         }
@@ -278,7 +279,8 @@ public class CryptoStore {
         keystore.setKeyEntry(this.alias, kf.generatePrivate(keySpec), keystorePassword.toCharArray(),
                 new java.security.cert.Certificate[] { getCert() });
         if (!caCert.isEmpty()) {
-            keystore.setCertificateEntry("trustedCa", getCaCert());
+            String caAlias = this.caAlias;
+            keystore.setCertificateEntry(caAlias, getCaCert());
         }
         return keystore;
     }
