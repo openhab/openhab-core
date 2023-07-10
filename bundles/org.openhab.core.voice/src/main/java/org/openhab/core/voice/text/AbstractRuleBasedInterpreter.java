@@ -12,16 +12,8 @@
  */
 package org.openhab.core.voice.text;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.ResourceBundle;
-import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -567,8 +559,8 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
      */
     protected List<Item> getMatchingItems(ResourceBundle language, String[] labelFragments,
             @Nullable Class<?> commandType) {
-        List<Item> items = new ArrayList<>();
-        List<Item> exactMatchItems = new ArrayList<>();
+        Set<Item> items = new HashSet<>();
+        Set<Item> exactMatchItems = new HashSet<>();
         Map<Item, List<Set<String>>> map = getItemTokens(language.getLocale());
         for (Entry<Item, List<Set<String>>> entry : map.entrySet()) {
             Item item = entry.getKey();
@@ -601,16 +593,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
                             }
                         }
                         if (insert) {
-                            for (int i = 0; i < items.size(); i++) {
-                                String itemName = items.get(i).getName();
-                                if (itemName.startsWith(name)) {
-                                    logger.debug(
-                                            "Discarding partial matched item '{}' because its name starts with '{}'",
-                                            itemName, name);
-                                    items.remove(i);
-                                    i--;
-                                }
-                            }
+                            items.removeIf((matchedItem) -> matchedItem.getName().startsWith(name));
                             items.add(item);
                             if (exactMatch) {
                                 exactMatchItems.add(item);
@@ -627,7 +610,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
             logger.debug("Exact matched items against {}{}: {}", labelFragments, typeDetails,
                     exactMatchItems.stream().map(Item::getName).toArray(String[]::new));
         }
-        return items.size() != 1 && exactMatchItems.size() == 1 ? exactMatchItems : items;
+        return new ArrayList<>(items.size() != 1 && exactMatchItems.size() == 1 ? exactMatchItems : items);
     }
 
     /**
