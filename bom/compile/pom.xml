@@ -18,6 +18,7 @@
 
   <properties>
     <californium.version>2.7.4</californium.version>
+    <bouncycastle.version>1.75</bouncycastle.version>
     <jetty.version>9.4.50.v20221201</jetty.version>
     <pax.web.version>8.0.15</pax.web.version>
     <swagger.version>2.1.9</swagger.version>
@@ -85,6 +86,26 @@
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
       <version>3.9</version>
+      <scope>compile</scope>
+    </dependency>
+
+    <!-- BouncyCastle -->
+    <dependency>
+      <groupId>org.bouncycastle</groupId>
+      <artifactId>bcpkix-jdk18on</artifactId>
+      <version>${bouncycastle.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.bouncycastle</groupId>
+      <artifactId>bcprov-jdk18on</artifactId>
+      <version>${bouncycastle.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.bouncycastle</groupId>
+      <artifactId>bcutil-jdk18on</artifactId>
+      <version>${bouncycastle.version}</version>
       <scope>compile</scope>
     </dependency>
 
