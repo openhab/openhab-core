@@ -621,7 +621,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
             }
         }
         if (logger.isDebugEnabled()) {
-            String typeDetails = commandType != null ? " that accept " + commandType : "";
+            String typeDetails = commandType != null ? " that accept " + commandType.getSimpleName() : "";
             logger.debug("Partial matched items against {}{}: {}", labelFragments, typeDetails,
                     items.stream().map(Item::getName).toArray(String[]::new));
             logger.debug("Exact matched items against {}{}: {}", labelFragments, typeDetails,

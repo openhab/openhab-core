@@ -66,7 +66,7 @@ public class StandardInterpreterTest {
     }
 
     @Test
-    public void thereAreNoNameCollisions() throws InterpretationException {
+    public void noNameCollisionOnSingleExactMatch() throws InterpretationException {
         assertEquals("Ok.", standardInterpreter.interpret(Locale.ENGLISH, "turn off computer"));
     }
 
