@@ -622,19 +622,9 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
                 logger.debug("Exact match: {}", exactMatch);
                 if (allMatch) {
                     if (commandType == null || item.getAcceptedCommandTypes().contains(commandType)) {
-                        String name = item.getName();
-                        boolean insert = true;
-                        for (Item si : items) {
-                            if (name.startsWith(si.getName())) {
-                                insert = false;
-                            }
-                        }
-                        if (insert) {
-                            items.removeIf((matchedItem) -> matchedItem.getName().startsWith(name));
-                            items.add(item);
-                            if (exactMatch) {
-                                exactMatchItems.add(item);
-                            }
+                        insertAndDiscardParents(items, item);
+                        if (exactMatch) {
+                            insertAndDiscardParents(exactMatchItems, item);
                         }
                     }
                 }
@@ -648,6 +638,20 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
                     exactMatchItems.stream().map(Item::getName).collect(Collectors.joining(", ")));
         }
         return new ArrayList<>(items.size() != 1 && exactMatchItems.size() == 1 ? exactMatchItems : items);
+    }
+
+    private static void insertAndDiscardParents(Set<Item> items, Item item) {
+        String name = item.getName();
+        boolean insert = true;
+        for (Item si : items) {
+            if (name.startsWith(si.getName())) {
+                insert = false;
+            }
+        }
+        if (insert) {
+            items.removeIf((matchedItem) -> matchedItem.getName().startsWith(name));
+            items.add(item);
+        }
     }
 
     /**
