@@ -603,7 +603,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
             Item item = entry.getKey();
             for (List<List<String>> parts : entry.getValue()) {
                 boolean exactMatch = false;
-                logger.debug("Checking tokens {} against the item tokens {}", labelFragments, parts);
+                logger.trace("Checking tokens {} against the item tokens {}", labelFragments, parts);
                 List<String> lowercaseLabelFragments = Arrays.stream(labelFragments)
                         .map(lf -> lf.toLowerCase(language.getLocale())).toList();
                 List<String> unmatchedFragments = new ArrayList<>(lowercaseLabelFragments);
@@ -618,13 +618,13 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
                     }
                 }
                 boolean allMatch = unmatchedFragments.isEmpty();
-                logger.debug("Partial match: {}", allMatch);
-                logger.debug("Exact match: {}", exactMatch);
+                logger.trace("Partial match: {}", allMatch);
+                logger.trace("Exact match: {}", exactMatch);
                 if (allMatch) {
                     if (commandType == null || item.getAcceptedCommandTypes().contains(commandType)) {
-                        insertAndDiscardParents(items, item);
+                        insertDiscardingMembers(items, item);
                         if (exactMatch) {
-                            insertAndDiscardParents(exactMatchItems, item);
+                            insertDiscardingMembers(exactMatchItems, item);
                         }
                     }
                 }
@@ -640,7 +640,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
         return new ArrayList<>(items.size() != 1 && exactMatchItems.size() == 1 ? exactMatchItems : items);
     }
 
-    private static void insertAndDiscardParents(Set<Item> items, Item item) {
+    private static void insertDiscardingMembers(Set<Item> items, Item item) {
         String name = item.getName();
         boolean insert = true;
         for (Item si : items) {
