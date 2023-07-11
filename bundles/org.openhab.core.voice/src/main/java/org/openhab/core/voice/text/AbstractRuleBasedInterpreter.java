@@ -12,8 +12,18 @@
  */
 package org.openhab.core.voice.text;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.ResourceBundle;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -60,13 +70,16 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
     private static final String NAME = "name";
 
     private static final String LANGUAGE_SUPPORT = "LanguageSupport";
+
+    private static final String SYNONYMS_NAMESPACE = "synonyms";
+
     private final MetadataRegistry metadataRegistry;
 
     private Logger logger = LoggerFactory.getLogger(AbstractRuleBasedInterpreter.class);
 
     private final Map<Locale, List<Rule>> languageRules = new HashMap<>();
     private final Map<Locale, Set<String>> allItemTokens = new HashMap<>();
-    private final Map<Locale, Map<Item, List<Set<String>>>> itemTokens = new HashMap<>();
+    private final Map<Locale, Map<Item, List<List<List<String>>>>> itemTokens = new HashMap<>();
 
     private final ItemRegistry itemRegistry;
     private final EventPublisher eventPublisher;
@@ -87,6 +100,28 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
             invalidate();
         }
     };
+    private RegistryChangeListener<Metadata> synonymsChangeListener = new RegistryChangeListener<Metadata>() {
+        @Override
+        public void added(Metadata element) {
+            invalidateIfSynonymsMetadata(element);
+        }
+
+        @Override
+        public void removed(Metadata element) {
+            invalidateIfSynonymsMetadata(element);
+        }
+
+        @Override
+        public void updated(Metadata oldElement, Metadata element) {
+            invalidateIfSynonymsMetadata(element);
+        }
+
+        private void invalidateIfSynonymsMetadata(Metadata metadata) {
+            if (metadata.getUID().getNamespace().equals(SYNONYMS_NAMESPACE)) {
+                invalidate();
+            }
+        }
+    };
 
     public AbstractRuleBasedInterpreter(final EventPublisher eventPublisher, final ItemRegistry itemRegistry,
             final MetadataRegistry metadataRegistry) {
@@ -94,6 +129,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
         this.itemRegistry = itemRegistry;
         this.metadataRegistry = metadataRegistry;
         itemRegistry.addRegistryChangeListener(registryChangeListener);
+        metadataRegistry.addRegistryChangeListener(synonymsChangeListener);
     }
 
     protected void deactivate() {
@@ -171,13 +207,13 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
      * @param locale The locale that is to be used for preparing the tokens.
      * @return the list of identifier token sets per item
      */
-    Map<Item, List<Set<String>>> getItemTokens(Locale locale) {
-        Map<Item, List<Set<String>>> localeTokens = itemTokens.get(locale);
+    Map<Item, List<List<List<String>>>> getItemTokens(Locale locale) {
+        Map<Item, List<List<List<String>>>> localeTokens = itemTokens.get(locale);
         if (localeTokens == null) {
             itemTokens.put(locale, localeTokens = new HashMap<>());
             for (Item item : itemRegistry.getItems()) {
                 if (item.getGroupNames().isEmpty()) {
-                    addItem(locale, localeTokens, new HashSet<>(), item);
+                    addItem(locale, localeTokens, new ArrayList<>(), item);
                 }
             }
         }
@@ -190,18 +226,19 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
         return (synonymsMetadata != null) ? synonymsMetadata.getValue().split(",") : new String[] {};
     }
 
-    private void addItem(Locale locale, Map<Item, List<Set<String>>> target, Set<String> tokens, Item item) {
+    private void addItem(Locale locale, Map<Item, List<List<List<String>>>> target, List<List<String>> tokens,
+            Item item) {
         addItem(locale, target, tokens, item, item.getLabel());
         for (String synonym : getItemSynonyms(item)) {
             addItem(locale, target, tokens, item, synonym);
         }
     }
 
-    private void addItem(Locale locale, Map<Item, List<Set<String>>> target, Set<String> tokens, Item item,
-            @Nullable String itemLabel) {
-        Set<String> nt = new HashSet<>(tokens);
-        nt.addAll(tokenize(locale, itemLabel));
-        List<Set<String>> list = target.computeIfAbsent(item, k -> new ArrayList<>());
+    private void addItem(Locale locale, Map<Item, List<List<List<String>>>> target, List<List<String>> tokens,
+            Item item, @Nullable String itemLabel) {
+        List<List<String>> nt = new ArrayList<>(tokens);
+        nt.add(tokenize(locale, itemLabel));
+        List<List<List<String>>> list = target.computeIfAbsent(item, k -> new ArrayList<>());
         list.add(nt);
         if (item instanceof GroupItem groupItem) {
             for (Item member : groupItem.getMembers()) {
@@ -561,28 +598,28 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
             @Nullable Class<?> commandType) {
         Set<Item> items = new HashSet<>();
         Set<Item> exactMatchItems = new HashSet<>();
-        Map<Item, List<Set<String>>> map = getItemTokens(language.getLocale());
-        for (Entry<Item, List<Set<String>>> entry : map.entrySet()) {
+        Map<Item, List<List<List<String>>>> map = getItemTokens(language.getLocale());
+        for (Entry<Item, List<List<List<String>>>> entry : map.entrySet()) {
             Item item = entry.getKey();
-            for (Set<String> parts : entry.getValue()) {
-                boolean allMatch = true;
-                boolean exactMatch = parts.size() == labelFragments.length;
-                String[] partsArray = parts.toArray(new String[0]);
-                logger.trace("Checking tokens {} against the item tokens {}", labelFragments, parts);
-                for (int i = 0; i < labelFragments.length; i++) {
-                    String lowerCaseFragment = labelFragments[i].toLowerCase(language.getLocale());
-                    if (!parts.contains(lowerCaseFragment)) {
-                        allMatch = false;
-                        exactMatch = false;
+            for (List<List<String>> parts : entry.getValue()) {
+                boolean exactMatch = false;
+                logger.debug("Checking tokens {} against the item tokens {}", labelFragments, parts);
+                List<String> lowercaseLabelFragments = Arrays.stream(labelFragments)
+                        .map(lf -> lf.toLowerCase(language.getLocale())).toList();
+                List<String> unmatchedFragments = new ArrayList<>(lowercaseLabelFragments);
+                for (List<String> segment : parts) {
+                    if (segment.equals(lowercaseLabelFragments)) {
+                        exactMatch = true;
+                        unmatchedFragments.clear();
                         break;
                     }
-                    if (exactMatch && !partsArray[i].equals(lowerCaseFragment)) {
-                        exactMatch = false;
+                    if (!unmatchedFragments.isEmpty()) {
+                        segment.stream().filter(unmatchedFragments::contains).forEach(unmatchedFragments::remove);
                     }
-
                 }
-                logger.trace("Partial match: {}", allMatch);
-                logger.trace("Exact match: {}", exactMatch);
+                boolean allMatch = unmatchedFragments.isEmpty();
+                logger.debug("Partial match: {}", allMatch);
+                logger.debug("Exact match: {}", exactMatch);
                 if (allMatch) {
                     if (commandType == null || item.getAcceptedCommandTypes().contains(commandType)) {
                         String name = item.getName();
@@ -606,9 +643,9 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
         if (logger.isDebugEnabled()) {
             String typeDetails = commandType != null ? " that accept " + commandType.getSimpleName() : "";
             logger.debug("Partial matched items against {}{}: {}", labelFragments, typeDetails,
-                    items.stream().map(Item::getName).toArray(String[]::new));
+                    items.stream().map(Item::getName).collect(Collectors.joining(", ")));
             logger.debug("Exact matched items against {}{}: {}", labelFragments, typeDetails,
-                    exactMatchItems.stream().map(Item::getName).toArray(String[]::new));
+                    exactMatchItems.stream().map(Item::getName).collect(Collectors.joining(", ")));
         }
         return new ArrayList<>(items.size() != 1 && exactMatchItems.size() == 1 ? exactMatchItems : items);
     }
