@@ -56,6 +56,7 @@ public class TTSLRUCacheImpl implements TTSCache {
 
     static final String CONFIG_CACHE_SIZE_TTS = "cacheSizeTTS";
     static final String CONFIG_ENABLE_CACHE_TTS = "enableCacheTTS";
+    static final String CONFIG_MAX_TEXTLENGTH_CACHE_TTS = "maxTextLengthCacheTTS";
 
     static final String VOICE_TTS_CACHE_PID = "org.openhab.voice.tts";
 
@@ -66,6 +67,11 @@ public class TTSLRUCacheImpl implements TTSCache {
      * current request is not known and may or may not exceed the limit.
      */
     protected long cacheSizeTTS = DEFAULT_CACHE_SIZE_TTS * 1024;
+    /**
+     * Length text limit. If exceeded, the cache will passthrough the request without storing it.
+     * (One can safely assume that long TTS are generated for report, probably not meant to be repeated)
+     */
+    private long maxTextLengthCacheTTS = 150;
     protected boolean enableCacheTTS = true;
 
     private StorageService storageService;
@@ -89,6 +95,8 @@ public class TTSLRUCacheImpl implements TTSCache {
         this.enableCacheTTS = ConfigParser.valueAsOrElse(config.get(CONFIG_ENABLE_CACHE_TTS), Boolean.class, true);
         this.cacheSizeTTS = ConfigParser.valueAsOrElse(config.get(CONFIG_CACHE_SIZE_TTS), Long.class,
                 DEFAULT_CACHE_SIZE_TTS) * 1024;
+        this.maxTextLengthCacheTTS = ConfigParser.valueAsOrElse(config.get(CONFIG_MAX_TEXTLENGTH_CACHE_TTS),
+                Integer.class, 150);
 
         if (enableCacheTTS) {
             this.lruMediaCache = new LRUMediaCache<>(storageService, cacheSizeTTS, VOICE_TTS_CACHE_PID,
@@ -100,7 +108,8 @@ public class TTSLRUCacheImpl implements TTSCache {
     public AudioStream get(CachedTTSService tts, String text, Voice voice, AudioFormat requestedFormat)
             throws TTSException {
         LRUMediaCache<AudioFormatInfo> lruMediaCacheLocal = lruMediaCache;
-        if (!enableCacheTTS || lruMediaCacheLocal == null) {
+        if (!enableCacheTTS || lruMediaCacheLocal == null
+                || (maxTextLengthCacheTTS > 0 && text.length() > maxTextLengthCacheTTS)) {
             return tts.synthesizeForCache(text, voice, requestedFormat);
         }
 
