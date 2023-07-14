@@ -76,7 +76,7 @@ public class TransformationRegistryImplTest {
     public void setup() {
         Mockito.when(localeProviderMock.getLocale()).thenReturn(Locale.US);
 
-        registry = new TransformationRegistryImpl(localeProviderMock);
+        registry = new TransformationRegistryImpl(localeProviderMock, providerMock);
         registry.addProvider(providerMock);
         registry.added(providerMock, MANAGED_WITHOUT_LANGUAGE);
         registry.added(providerMock, MANAGED_WITH_EN_LANGUAGE);

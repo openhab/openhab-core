@@ -57,7 +57,6 @@ import org.openhab.core.library.items.SwitchItem;
 import org.openhab.core.service.ReadyMarker;
 import org.openhab.core.service.StartLevelService;
 import org.openhab.core.test.java.JavaOSGiTest;
-import org.openhab.core.test.storage.VolatileStorageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,12 +71,12 @@ import org.slf4j.LoggerFactory;
 public class RuntimeRuleTest extends JavaOSGiTest {
 
     private final Logger logger = LoggerFactory.getLogger(RuntimeRuleTest.class);
-    private VolatileStorageService volatileStorageService = new VolatileStorageService();
     private @NonNullByDefault({}) RuleRegistry ruleRegistry;
     private @NonNullByDefault({}) RuleManager ruleEngine;
 
     @BeforeEach
     public void before() {
+        registerVolatileStorageService();
         EventPublisher eventPublisher = getService(EventPublisher.class);
         ItemRegistry itemRegistry = getService(ItemRegistry.class);
         CoreModuleHandlerFactory coreModuleHandlerFactory = new CoreModuleHandlerFactory(getBundleContext(),
@@ -87,7 +86,6 @@ public class RuntimeRuleTest extends JavaOSGiTest {
 
         ItemProvider itemProvider = new TestItemProvider(Set.of(new SwitchItem("myLampItem")));
         registerService(itemProvider);
-        registerService(volatileStorageService);
         waitForAssert(() -> {
             ruleRegistry = getService(RuleRegistry.class);
             assertThat("RuleRegistry service not found", ruleRegistry, is(notNullValue()));

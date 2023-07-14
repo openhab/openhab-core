@@ -94,6 +94,8 @@ public class AutomationIntegrationJsonTest extends JavaOSGiTest {
     public void before() {
         logger.info("@Before.begin");
 
+        registerVolatileStorageService();
+
         eventPublisher = getService(EventPublisher.class);
         itemRegistry = getService(ItemRegistry.class);
         CoreModuleHandlerFactory coreModuleHandlerFactory = new CoreModuleHandlerFactory(getBundleContext(),
@@ -123,7 +125,6 @@ public class AutomationIntegrationJsonTest extends JavaOSGiTest {
         };
 
         registerService(itemProvider);
-        registerVolatileStorageService();
 
         EventSubscriber ruleEventHandler = new EventSubscriber() {
 

@@ -34,6 +34,10 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventSubscriber;
 import org.openhab.core.items.GenericItem;
@@ -73,6 +77,8 @@ import org.slf4j.LoggerFactory;
  * @author Wouter Born - Migrate tests from Groovy to Java
  */
 @NonNullByDefault
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class GenericItemProviderTest extends JavaOSGiTest {
 
     private static final String ITEMS_MODEL_TYPE = "items";
@@ -89,6 +95,8 @@ public class GenericItemProviderTest extends JavaOSGiTest {
 
     @BeforeEach
     public void setUp() {
+        registerVolatileStorageService();
+
         itemRegistry = getService(ItemRegistry.class);
         assertThat(itemRegistry, is(notNullValue()));
         assertThat(itemRegistry.getAll(), hasSize(0));

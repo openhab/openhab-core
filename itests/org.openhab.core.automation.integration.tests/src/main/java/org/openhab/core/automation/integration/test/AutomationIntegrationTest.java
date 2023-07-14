@@ -110,7 +110,7 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
     @BeforeEach
     public void before() {
         logger.info("@Before.begin");
-
+        registerVolatileStorageService();
         eventPublisher = getService(EventPublisher.class);
         itemRegistry = getService(ItemRegistry.class);
         CoreModuleHandlerFactory coreModuleHandlerFactory = new CoreModuleHandlerFactory(getBundleContext(),

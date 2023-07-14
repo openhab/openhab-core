@@ -31,8 +31,6 @@ import org.openhab.core.transform.TransformationRegistry;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
 
 /**
  * The {@link TransformationRegistryImpl} implements the {@link TransformationRegistry}
@@ -49,8 +47,9 @@ public class TransformationRegistryImpl extends AbstractRegistry<Transformation,
     private final LocaleProvider localeProvider;
 
     @Activate
-    public TransformationRegistryImpl(@Reference LocaleProvider localeProvider) {
-        super(TransformationProvider.class);
+    public TransformationRegistryImpl(final @Reference LocaleProvider localeProvider,
+            final @Reference ManagedTransformationProvider managedTransformationProvider) {
+        super(TransformationProvider.class, managedTransformationProvider);
 
         this.localeProvider = localeProvider;
     }
@@ -83,15 +82,6 @@ public class TransformationRegistryImpl extends AbstractRegistry<Transformation,
     @Override
     public Collection<Transformation> getTransformations(Collection<String> types) {
         return getAll().stream().filter(e -> types.contains(e.getType())).collect(Collectors.toList());
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setManagedProvider(ManagedTransformationProvider provider) {
-        super.setManagedProvider(provider);
-    }
-
-    protected void unsetManagedProvider(ManagedTransformationProvider provider) {
-        super.unsetManagedProvider(provider);
     }
 
     @Override

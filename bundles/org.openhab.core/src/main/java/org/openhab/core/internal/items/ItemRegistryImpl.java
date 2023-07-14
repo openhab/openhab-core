@@ -77,8 +77,9 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
     private @Nullable ItemStateConverter itemStateConverter;
 
     @Activate
-    public ItemRegistryImpl(final @Reference MetadataRegistry metadataRegistry) {
-        super(ItemProvider.class);
+    public ItemRegistryImpl(final @Reference MetadataRegistry metadataRegistry,
+            final @Reference ManagedItemProvider managedItemProvider) {
+        super(ItemProvider.class, managedItemProvider);
         this.metadataRegistry = metadataRegistry;
     }
 
@@ -363,9 +364,7 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
 
     @Override
     public @Nullable Item remove(String itemName, boolean recursive) {
-        return ((ManagedItemProvider) getManagedProvider()
-                .orElseThrow(() -> new IllegalStateException("ManagedProvider is not available")))
-                .remove(itemName, recursive);
+        return ((ManagedItemProvider) managedProvider).remove(itemName, recursive);
     }
 
     @Override
@@ -469,15 +468,6 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
         for (Item item : getItems()) {
             ((GenericItem) item).setCommandDescriptionService(null);
         }
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setManagedProvider(ManagedItemProvider provider) {
-        super.setManagedProvider(provider);
-    }
-
-    protected void unsetManagedProvider(ManagedItemProvider provider) {
-        super.unsetManagedProvider(provider);
     }
 
     @Override

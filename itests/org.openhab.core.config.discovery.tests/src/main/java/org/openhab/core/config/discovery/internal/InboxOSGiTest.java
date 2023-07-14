@@ -943,12 +943,14 @@ public class InboxOSGiTest extends JavaOSGiTest {
     @SuppressWarnings("null")
     public void assertThatApproveSetsTheExplicitlyGivenThingId() {
         inbox.add(testDiscoveryResult);
-        Thing approvedThing = inbox.approve(testThing.getUID(), null, testId2);
-        Thing addedThing = registry.get(test2Thing.getUID());
+        waitForAssert(() -> {
+            Thing approvedThing = inbox.approve(testThing.getUID(), null, testId2);
+            Thing addedThing = registry.get(test2Thing.getUID());
 
-        assertFalse(addedThing == null);
-        assertFalse(approvedThing == null);
-        assertTrue(approvedThing.equals(addedThing));
+            assertFalse(addedThing == null);
+            assertFalse(approvedThing == null);
+            assertTrue(approvedThing.equals(addedThing));
+        });
     }
 
     @Test

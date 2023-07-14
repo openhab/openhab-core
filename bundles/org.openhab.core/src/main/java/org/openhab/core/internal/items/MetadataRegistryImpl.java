@@ -44,9 +44,9 @@ public class MetadataRegistryImpl extends AbstractRegistry<Metadata, MetadataKey
         implements MetadataRegistry {
 
     @Activate
-    public MetadataRegistryImpl(final @Reference ReadyService readyService) {
-        super(MetadataProvider.class);
-        super.setReadyService(readyService);
+    public MetadataRegistryImpl(final @Reference ManagedMetadataProvider managedMetadataProvider,
+            final @Reference ReadyService readyService) {
+        super(MetadataProvider.class, managedMetadataProvider, readyService);
     }
 
     @Override
@@ -89,29 +89,7 @@ public class MetadataRegistryImpl extends AbstractRegistry<Metadata, MetadataKey
     }
 
     @Override
-    @Reference
-    protected void setReadyService(ReadyService readyService) {
-        super.setReadyService(readyService);
-    }
-
-    @Override
-    protected void unsetReadyService(ReadyService readyService) {
-        super.unsetReadyService(readyService);
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    protected void setManagedProvider(ManagedMetadataProvider provider) {
-        super.setManagedProvider(provider);
-    }
-
-    protected void unsetManagedProvider(ManagedMetadataProvider managedProvider) {
-        super.unsetManagedProvider(managedProvider);
-    }
-
-    @Override
     public void removeItemMetadata(String itemName) {
-        // remove our metadata for that item
-        getManagedProvider()
-                .ifPresent(managedProvider -> ((ManagedMetadataProvider) managedProvider).removeItemMetadata(itemName));
+        ((ManagedMetadataProvider) managedProvider).removeItemMetadata(itemName);
     }
 }

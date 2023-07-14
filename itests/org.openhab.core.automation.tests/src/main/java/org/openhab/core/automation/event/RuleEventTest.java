@@ -84,6 +84,7 @@ public class RuleEventTest extends JavaOSGiTest {
 
     @BeforeEach
     public void before() {
+        registerVolatileStorageService();
         EventPublisher eventPublisher = getService(EventPublisher.class);
         ItemRegistry itemRegistry = getService(ItemRegistry.class);
         CoreModuleHandlerFactory coreModuleHandlerFactory = new CoreModuleHandlerFactory(getBundleContext(),

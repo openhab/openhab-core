@@ -55,8 +55,7 @@ public class MetadataRegistryImplTest {
     public void setup() throws Exception {
         when(bundleContextMock.getService(same(managedProviderRefMock))).thenReturn(managedProviderMock);
 
-        registry = new MetadataRegistryImpl(readyServiceMock);
-        registry.setManagedProvider(managedProviderMock);
+        registry = new MetadataRegistryImpl(managedProviderMock, readyServiceMock);
         registry.activate(bundleContextMock);
         registry.waitForCompletedAsyncActivationTasks();
 
