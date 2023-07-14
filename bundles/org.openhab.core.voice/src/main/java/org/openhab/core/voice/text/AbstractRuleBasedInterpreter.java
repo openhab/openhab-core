@@ -200,9 +200,10 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
 
     /**
      * Retrieves the list of identifier token sets per item currently contained in the {@link ItemRegistry}.
-     * Each item entry in the resulting hash map will feature a list of different token sets. Each token set
-     * represents one possible way "through" a chain of parent groups, where each groups tokenized name is
-     * part of the set.
+     * Each item entry in the resulting hash map will feature a list of different token lists. Each list
+     * represents one possible way "through" a chain of parent groups, where each groups name is tokenized
+     * into a list of strings and included as a member of the chain. Item synonym metadata options are
+     * used as alternative labels creating new alternative chains for the item.
      *
      * @param locale The locale that is to be used for preparing the tokens.
      * @return the list of identifier token sets per item
@@ -646,6 +647,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
         for (Item si : items) {
             if (name.startsWith(si.getName())) {
                 insert = false;
+                break;
             }
         }
         if (insert) {
