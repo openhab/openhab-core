@@ -44,6 +44,7 @@ import org.slf4j.LoggerFactory;
 @NonNullByDefault
 public class EventHandler implements AutoCloseable {
 
+    private static final int EVENT_QUEUE_WARN_LIMIT = 5000;
     private static final long EVENTSUBSCRIBER_EVENTHANDLING_MAX_MS = TimeUnit.SECONDS.toMillis(5);
 
     private final Logger logger = LoggerFactory.getLogger(EventHandler.class);
@@ -154,10 +155,9 @@ public class EventHandler implements AutoCloseable {
                 ExecutorRecord executorRecord = Objects.requireNonNull(
                         executors.computeIfAbsent(eventSubscriber.getClass(), this::createExecutorRecord));
                 int queueSize = executorRecord.count().incrementAndGet();
-                if (queueSize > 1000) {
-                    logger.warn(
-                            "The queue for a subscriber of type '{}' exceeds 1000 elements. System may be unstable.",
-                            eventSubscriber.getClass());
+                if (queueSize > EVENT_QUEUE_WARN_LIMIT) {
+                    logger.warn("The queue for a subscriber of type '{}' exceeds {} elements. System may be unstable.",
+                            eventSubscriber.getClass(), EVENT_QUEUE_WARN_LIMIT);
                 }
                 CompletableFuture.runAsync(() -> {
                     ScheduledFuture<?> logTimeout = executorRecord.watcher().schedule(
