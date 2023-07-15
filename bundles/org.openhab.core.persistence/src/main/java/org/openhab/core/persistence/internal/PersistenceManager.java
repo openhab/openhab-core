@@ -259,14 +259,21 @@ public class PersistenceManager implements ItemRegistryChangeListener, StateChan
                 QueryablePersistenceService queryService = (QueryablePersistenceService) container
                         .getPersistenceService();
                 FilterCriteria filter = new FilterCriteria().setItemName(item.getName()).setPageSize(1);
-                Iterator<HistoricItem> result = safeCaller.create(queryService, QueryablePersistenceService.class)
-                        .onTimeout(() -> logger.warn("Querying persistence service '{}' takes more than {}ms.",
-                                queryService.getId(), SafeCaller.DEFAULT_TIMEOUT))
-                        .onException(e -> logger.error("Exception occurred while querying persistence service '{}': {}",
-                                queryService.getId(), e.getMessage(), e))
-                        .build().query(filter).iterator();
-                if (result.hasNext()) {
-                    HistoricItem historicItem = result.next();
+                Iterable<HistoricItem> result = safeCaller.create(queryService, QueryablePersistenceService.class)
+                        .onTimeout(() -> {
+                            logger.warn("Querying persistence service '{}' to restore '{}' takes more than {}ms.",
+                                    queryService.getId(), item.getName(),SafeCaller.DEFAULT_TIMEOUT);
+                        })
+                        .onException(e -> logger.error("Exception occurred while querying persistence service '{}' to restore '{}': {}",
+                                queryService.getId(),item.getName(), e.getMessage(), e))
+                        .build().query(filter);
+                if (result == null) {
+                    // in case of an exception of timeout, the safe caller returns null
+                    continue;
+                }
+                Iterator<HistoricItem> it = result.iterator();
+                if (it.hasNext()) {
+                    HistoricItem historicItem = it.next();
                     GenericItem genericItem = (GenericItem) item;
                     genericItem.removeStateChangeListener(this);
                     genericItem.setState(historicItem.getState());
