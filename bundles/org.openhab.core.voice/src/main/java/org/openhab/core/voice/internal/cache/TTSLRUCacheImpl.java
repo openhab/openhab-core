@@ -53,6 +53,7 @@ public class TTSLRUCacheImpl implements TTSCache {
 
     // a small default cache size for all the TTS services (in kB)
     private static final long DEFAULT_CACHE_SIZE_TTS = 10240;
+    private static final int DEFAULT_MAX_TEXT_LENGTH_CACHE_TTS = 150;
 
     static final String CONFIG_CACHE_SIZE_TTS = "cacheSizeTTS";
     static final String CONFIG_ENABLE_CACHE_TTS = "enableCacheTTS";
@@ -68,10 +69,11 @@ public class TTSLRUCacheImpl implements TTSCache {
      */
     protected long cacheSizeTTS = DEFAULT_CACHE_SIZE_TTS * 1024;
     /**
-     * Length text limit. If exceeded, the cache will passthrough the request without storing it.
-     * (One can safely assume that long TTS are generated for report, probably not meant to be repeated)
+     * The maximum length of texts handled by the TTS cache (in character). If exceeded, will pass the text to
+     * the TTS without storing it. (One can safely assume that long TTS are generated for report, probably not meant to
+     * be repeated)
      */
-    private long maxTextLengthCacheTTS = 150;
+    private long maxTextLengthCacheTTS = DEFAULT_MAX_TEXT_LENGTH_CACHE_TTS;
     protected boolean enableCacheTTS = true;
 
     private StorageService storageService;
@@ -96,7 +98,7 @@ public class TTSLRUCacheImpl implements TTSCache {
         this.cacheSizeTTS = ConfigParser.valueAsOrElse(config.get(CONFIG_CACHE_SIZE_TTS), Long.class,
                 DEFAULT_CACHE_SIZE_TTS) * 1024;
         this.maxTextLengthCacheTTS = ConfigParser.valueAsOrElse(config.get(CONFIG_MAX_TEXTLENGTH_CACHE_TTS),
-                Integer.class, 150);
+                Integer.class, DEFAULT_MAX_TEXT_LENGTH_CACHE_TTS);
 
         if (enableCacheTTS) {
             this.lruMediaCache = new LRUMediaCache<>(storageService, cacheSizeTTS, VOICE_TTS_CACHE_PID,
