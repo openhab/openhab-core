@@ -262,10 +262,11 @@ public class PersistenceManager implements ItemRegistryChangeListener, StateChan
                 Iterable<HistoricItem> result = safeCaller.create(queryService, QueryablePersistenceService.class)
                         .onTimeout(() -> {
                             logger.warn("Querying persistence service '{}' to restore '{}' takes more than {}ms.",
-                                    queryService.getId(), item.getName(),SafeCaller.DEFAULT_TIMEOUT);
+                                    queryService.getId(), item.getName(), SafeCaller.DEFAULT_TIMEOUT);
                         })
-                        .onException(e -> logger.error("Exception occurred while querying persistence service '{}' to restore '{}': {}",
-                                queryService.getId(),item.getName(), e.getMessage(), e))
+                        .onException(e -> logger.error(
+                                "Exception occurred while querying persistence service '{}' to restore '{}': {}",
+                                queryService.getId(), item.getName(), e.getMessage(), e))
                         .build().query(filter);
                 if (result == null) {
                     // in case of an exception of timeout, the safe caller returns null
