@@ -269,7 +269,7 @@ public class PersistenceManager implements ItemRegistryChangeListener, StateChan
                                 queryService.getId(), item.getName(), e.getMessage(), e))
                         .build().query(filter);
                 if (result == null) {
-                    // in case of an exception of timeout, the safe caller returns null
+                    // in case of an exception or timeout, the safe caller returns null
                     continue;
                 }
                 Iterator<HistoricItem> it = result.iterator();
