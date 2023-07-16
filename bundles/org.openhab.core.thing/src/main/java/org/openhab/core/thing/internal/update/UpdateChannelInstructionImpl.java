@@ -123,6 +123,7 @@ public class UpdateChannelInstructionImpl implements ThingUpdateInstruction {
             if (oldChannel != null) {
                 channelBuilder.withConfiguration(oldChannel.getConfiguration());
                 channelBuilder.withDefaultTags(oldChannel.getDefaultTags());
+                channelBuilder.withProperties(oldChannel.getProperties());
             }
         }
 
