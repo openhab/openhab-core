@@ -515,7 +515,8 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
                             "Item '{}' with unit, nothing allowed after unit in label pattern '{}', dropping postfix",
                             itemName, pattern);
                 }
-                pattern = pattern.substring(0, matcherEnd) + (!unit.isBlank() ? " " + unit : "");
+                pattern = unit.isBlank() ? pattern.substring(0, matcherEnd)
+                        : pattern.substring(0, pattern.indexOf(unit, matcherEnd) + unit.length());
             }
         } catch (ItemNotFoundException e) {
             logger.warn("Cannot retrieve item '{}' for widget {}", itemName, w.eClass().getInstanceTypeName());
