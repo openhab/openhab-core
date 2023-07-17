@@ -97,10 +97,10 @@ public class PersistentInboxTest {
         when(thingHandlerFactoryMock.createThing(eq(THING_TYPE_UID), any(Configuration.class), eq(THING_UID), any()))
                 .then(invocation -> ThingBuilder.create(THING_TYPE_UID, "test")
                         .withConfiguration((Configuration) invocation.getArguments()[1]).build());
-        when(thingHandlerFactoryMock
-                .createThing(eq(THING_TYPE_UID), any(Configuration.class), eq(THING_OTHER_UID), any()))
-                        .then(invocation -> ThingBuilder.create(THING_TYPE_UID, THING_OTHER_ID)
-                                .withConfiguration((Configuration) invocation.getArguments()[1]).build());
+        when(thingHandlerFactoryMock.createThing(eq(THING_TYPE_UID), any(Configuration.class), eq(THING_OTHER_UID),
+                any()))
+                .then(invocation -> ThingBuilder.create(THING_TYPE_UID, THING_OTHER_ID)
+                        .withConfiguration((Configuration) invocation.getArguments()[1]).build());
         inbox = new PersistentInbox(storageServiceMock, mock(DiscoveryServiceRegistry.class), thingRegistryMock,
                 thingProviderMock, thingTypeRegistryMock, configDescriptionRegistryMock);
         inbox.addThingHandlerFactory(thingHandlerFactoryMock);

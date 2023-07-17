@@ -137,10 +137,9 @@ public class AutomaticInboxProcessorTest {
         when(thingHandlerFactoryMock.supportsThingType(eq(THING_TYPE_UID3))).thenReturn(true);
         when(thingHandlerFactoryMock.createThing(any(ThingTypeUID.class), any(Configuration.class), any(ThingUID.class),
                 nullable(ThingUID.class)))
-                        .then(invocation -> ThingBuilder
-                                .create((ThingTypeUID) invocation.getArguments()[0],
-                                        (ThingUID) invocation.getArguments()[2])
-                                .withConfiguration((Configuration) invocation.getArguments()[1]).build());
+                .then(invocation -> ThingBuilder
+                        .create((ThingTypeUID) invocation.getArguments()[0], (ThingUID) invocation.getArguments()[2])
+                        .withConfiguration((Configuration) invocation.getArguments()[1]).build());
 
         inbox = new PersistentInbox(new VolatileStorageService(), mock(DiscoveryServiceRegistry.class),
                 thingRegistryMock, thingProviderMock, thingTypeRegistryMock, configDescriptionRegistryMock);
