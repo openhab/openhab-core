@@ -391,8 +391,8 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
      * Electrical-energy: system wide {@link ChannelType} which shows the electrical energy
      */
     public static final ChannelType SYSTEM_ELECTRICAL_ENERGY = ChannelTypeBuilder
-            .state(SYSTEM_CHANNEL_TYPE_UID_ELECTRIC_ENERGY, "Electrical Energy", "Number:Energy")
-            .withDescription("Current electrical energy").withCategory("Energy")
+            .state(SYSTEM_CHANNEL_TYPE_UID_ELECTRIC_ENERGY, "Electric Energy", "Number:Energy")
+            .withDescription("Current electric energy").withCategory("Energy")
             .withStateDescriptionFragment(
                     StateDescriptionFragmentBuilder.create().withReadOnly(true).withPattern("%.1f %unit%").build())
             .withTags(List.of("Measurement", "Energy")).build();
