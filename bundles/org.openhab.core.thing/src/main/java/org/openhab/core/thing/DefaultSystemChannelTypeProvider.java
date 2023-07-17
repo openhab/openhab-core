@@ -103,8 +103,8 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
             "electric-current");
     public static final ChannelTypeUID SYSTEM_CHANNEL_TYPE_UID_ELECTRIC_VOLTAGE = new ChannelTypeUID(BINDING_ID,
             "electric-voltage");
-    public static final ChannelTypeUID SYSTEM_CHANNEL_TYPE_UID_ELECTRICAL_ENERGY = new ChannelTypeUID(BINDING_ID,
-            "electrical-energy");
+    public static final ChannelTypeUID SYSTEM_CHANNEL_TYPE_UID_ELECTRIC_ENERGY = new ChannelTypeUID(BINDING_ID,
+            "electric-energy");
 
     /**
      * Signal strength default system wide {@link ChannelType}. Represents signal strength of a device as a number
@@ -391,7 +391,7 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
      * Electrical-energy: system wide {@link ChannelType} which shows the electrical energy
      */
     public static final ChannelType SYSTEM_ELECTRICAL_ENERGY = ChannelTypeBuilder
-            .state(SYSTEM_CHANNEL_TYPE_UID_ELECTRICAL_ENERGY, "Electrical Energy", "Number:Energy")
+            .state(SYSTEM_CHANNEL_TYPE_UID_ELECTRIC_ENERGY, "Electrical Energy", "Number:Energy")
             .withDescription("Current electrical energy").withCategory("Energy")
             .withStateDescriptionFragment(
                     StateDescriptionFragmentBuilder.create().withReadOnly(true).withPattern("%.1f %unit%").build())
