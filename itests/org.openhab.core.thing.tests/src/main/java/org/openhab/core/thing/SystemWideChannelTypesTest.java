@@ -80,7 +80,7 @@ public class SystemWideChannelTypesTest extends JavaOSGiTest {
         assertNotNull(systemChannelTypeProvider.getChannelType(SYSTEM_CHANNEL_TYPE_UID_ELECTRIC_POWER, null));
         assertNotNull(systemChannelTypeProvider.getChannelType(SYSTEM_CHANNEL_TYPE_UID_ELECTRIC_CURRENT, null));
         assertNotNull(systemChannelTypeProvider.getChannelType(SYSTEM_CHANNEL_TYPE_UID_ELECTRIC_VOLTAGE, null));
-        assertNotNull(systemChannelTypeProvider.getChannelType(SYSTEM_CHANNEL_TYPE_UID_ELECTRICAL_ENERGY, null));
+        assertNotNull(systemChannelTypeProvider.getChannelType(SYSTEM_CHANNEL_TYPE_UID_ELECTRIC_ENERGY, null));
     }
 
     @Test
