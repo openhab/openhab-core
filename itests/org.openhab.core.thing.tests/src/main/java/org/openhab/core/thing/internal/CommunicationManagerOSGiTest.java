@@ -27,7 +27,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
@@ -82,7 +81,6 @@ import org.openhab.core.thing.type.ChannelType;
 import org.openhab.core.thing.type.ChannelTypeRegistry;
 import org.openhab.core.thing.type.ChannelTypeUID;
 import org.openhab.core.types.Command;
-import org.openhab.core.types.State;
 
 /**
  *
@@ -558,44 +556,15 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testItemCommandEventTypeDowncast() {
+    public void testItemCommandTypeDowncast() {
         Thing thing = ThingBuilder
                 .create(THING_TYPE_UID, THING_UID).withChannels(ChannelBuilder
                         .create(STATE_CHANNEL_UID_2, CoreItemFactory.DIMMER).withKind(ChannelKind.STATE).build())
                 .build();
         thing.setHandler(thingHandlerMock);
         when(thingRegistryMock.get(eq(THING_UID))).thenReturn(thing);
-
-        manager.receive(ItemEventFactory.createCommandEvent(ITEM_NAME_2, HSBType.fromRGB(128, 128, 128)));
-        waitForAssert(() -> {
-            ArgumentCaptor<Command> commandCaptor = ArgumentCaptor.forClass(Command.class);
-            verify(stateProfileMock).onCommandFromItem(commandCaptor.capture());
-            Command command = commandCaptor.getValue();
-            assertNotNull(command);
-            assertEquals(PercentType.class, command.getClass());
-        });
-        verifyNoMoreInteractions(stateProfileMock);
-        verifyNoMoreInteractions(triggerProfileMock);
-    }
-
-    @Test
-    public void testItemStateEventTypeDowncast() {
-        Thing thing = ThingBuilder
-                .create(THING_TYPE_UID, THING_UID).withChannels(ChannelBuilder
-                        .create(STATE_CHANNEL_UID_2, CoreItemFactory.DIMMER).withKind(ChannelKind.STATE).build())
-                .build();
-        thing.setHandler(thingHandlerMock);
-        when(thingRegistryMock.get(eq(THING_UID))).thenReturn(thing);
-
-        manager.receive(ItemEventFactory.createStateUpdatedEvent(ITEM_NAME_2, HSBType.fromRGB(128, 128, 128)));
-        waitForAssert(() -> {
-            ArgumentCaptor<State> stateCaptor = ArgumentCaptor.forClass(State.class);
-            verify(stateProfileMock).onStateUpdateFromItem(stateCaptor.capture());
-            State state = stateCaptor.getValue();
-            assertNotNull(state);
-            assertEquals(PercentType.class, state.getClass());
-        });
-        verifyNoMoreInteractions(stateProfileMock);
-        verifyNoMoreInteractions(triggerProfileMock);
+        Command command = manager.toAcceptedCommand(HSBType.fromRGB(128, 128, 128),
+                thing.getChannel(STATE_CHANNEL_UID_2), ITEM_2);
+        assertEquals(PercentType.class, command.getClass());
     }
 }
