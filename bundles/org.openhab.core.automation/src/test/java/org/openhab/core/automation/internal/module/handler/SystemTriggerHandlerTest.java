@@ -67,34 +67,17 @@ public class SystemTriggerHandlerTest {
     public void testDoesNotTriggerIfStartLevelTooLow() {
         when(startLevelServiceMock.getStartLevel()).thenReturn(0);
 
-        SystemTriggerHandler triggerHandler = new SystemTriggerHandler(triggerMock, bundleContextMock,
-                startLevelServiceMock);
+        SystemTriggerHandler triggerHandler = new SystemTriggerHandler(triggerMock, bundleContextMock);
         triggerHandler.setCallback(callbackMock);
 
         verifyNoInteractions(callbackMock);
     }
 
     @Test
-    public void testDoesTriggerImmediatelyIfStartLevelHigherOnInit() {
-        when(startLevelServiceMock.getStartLevel()).thenReturn(100);
-
-        SystemTriggerHandler triggerHandler = new SystemTriggerHandler(triggerMock, bundleContextMock,
-                startLevelServiceMock);
-        triggerHandler.setCallback(callbackMock);
-
-        ArgumentCaptor<Map> captor = ArgumentCaptor.forClass(Map.class);
-        verify(callbackMock).triggered(eq(triggerMock), captor.capture());
-
-        Map<String, Object> configuration = (Map<String, Object>) captor.getValue();
-        assertThat(configuration.get(SystemTriggerHandler.OUT_STARTLEVEL), is(CFG_STARTLEVEL));
-    }
-
-    @Test
     public void testDoesNotTriggerIfStartLevelEventLower() {
         when(startLevelServiceMock.getStartLevel()).thenReturn(0);
 
-        SystemTriggerHandler triggerHandler = new SystemTriggerHandler(triggerMock, bundleContextMock,
-                startLevelServiceMock);
+        SystemTriggerHandler triggerHandler = new SystemTriggerHandler(triggerMock, bundleContextMock);
         triggerHandler.setCallback(callbackMock);
 
         Event event = SystemEventFactory.createStartlevelEvent(70);
@@ -107,8 +90,7 @@ public class SystemTriggerHandlerTest {
     public void testDoesTriggerIfStartLevelEventHigher() {
         when(startLevelServiceMock.getStartLevel()).thenReturn(0);
 
-        SystemTriggerHandler triggerHandler = new SystemTriggerHandler(triggerMock, bundleContextMock,
-                startLevelServiceMock);
+        SystemTriggerHandler triggerHandler = new SystemTriggerHandler(triggerMock, bundleContextMock);
         triggerHandler.setCallback(callbackMock);
 
         Event event = SystemEventFactory.createStartlevelEvent(100);
@@ -119,34 +101,13 @@ public class SystemTriggerHandlerTest {
 
         Map<String, Object> configuration = (Map<String, Object>) captor.getValue();
         assertThat(configuration.get(SystemTriggerHandler.OUT_STARTLEVEL), is(CFG_STARTLEVEL));
-    }
-
-    @Test
-    public void testDoesNotTriggerAfterInitialTrigger() {
-        when(startLevelServiceMock.getStartLevel()).thenReturn(100);
-
-        SystemTriggerHandler triggerHandler = new SystemTriggerHandler(triggerMock, bundleContextMock,
-                startLevelServiceMock);
-        triggerHandler.setCallback(callbackMock);
-
-        ArgumentCaptor<Map> captor = ArgumentCaptor.forClass(Map.class);
-        verify(callbackMock).triggered(eq(triggerMock), captor.capture());
-
-        Map<String, Object> configuration = (Map<String, Object>) captor.getValue();
-        assertThat(configuration.get(SystemTriggerHandler.OUT_STARTLEVEL), is(CFG_STARTLEVEL));
-
-        Event event = SystemEventFactory.createStartlevelEvent(100);
-        triggerHandler.receive(event);
-
-        verifyNoMoreInteractions(callbackMock);
     }
 
     @Test
     public void testDoesNotTriggerAfterEventTrigger() {
         when(startLevelServiceMock.getStartLevel()).thenReturn(0);
 
-        SystemTriggerHandler triggerHandler = new SystemTriggerHandler(triggerMock, bundleContextMock,
-                startLevelServiceMock);
+        SystemTriggerHandler triggerHandler = new SystemTriggerHandler(triggerMock, bundleContextMock);
         triggerHandler.setCallback(callbackMock);
 
         Event event = SystemEventFactory.createStartlevelEvent(100);
