@@ -38,10 +38,10 @@ public class PersistenceTimeFilter extends PersistenceFilter {
     private transient @Nullable Duration duration;
     private final transient Map<String, ZonedDateTime> nextPersistenceTimes = new HashMap<>();
 
-    public PersistenceTimeFilter(String name, int value, String unit) {
+    public PersistenceTimeFilter(String name, int value, @Nullable String unit) {
         super(name);
         this.value = value;
-        this.unit = unit;
+        this.unit = (unit == null) ? "s" : unit;
     }
 
     public int getValue() {
