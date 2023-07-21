@@ -155,6 +155,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
      * The storage for the disable information
      */
     private final Storage<Boolean> disabledRulesStorage;
+    private final StartLevelService startLevelService;
 
     /**
      * Locker which does not permit rule initialization when the rule engine is stopping.
@@ -254,7 +255,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
     @Activate
     public RuleEngineImpl(final @Reference ModuleTypeRegistry moduleTypeRegistry,
             final @Reference RuleRegistry ruleRegistry, final @Reference StorageService storageService,
-            final @Reference ReadyService readyService) {
+            final @Reference ReadyService readyService, final @Reference StartLevelService startLevelService) {
         this.disabledRulesStorage = storageService.<Boolean> getStorage(DISABLED_RULE_STORAGE,
                 this.getClass().getClassLoader());
 
@@ -265,6 +266,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
 
         this.ruleRegistry = ruleRegistry;
         this.readyService = readyService;
+        this.startLevelService = startLevelService;
 
         listener = new RegistryChangeListener<>() {
             @Override
@@ -846,6 +848,17 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
         // Register the rule and set idle status.
         register(rule);
         setStatus(ruleUID, new RuleStatusInfo(RuleStatus.IDLE));
+
+        // check if we have to trigger because of the startlevel
+        List<Trigger> slTriggers = rule.getTriggers().stream().map(WrappedTrigger::unwrap)
+                .filter(t -> SystemTriggerHandler.STARTLEVEL_MODULE_TYPE_ID.equals(t.getTypeUID())).toList();
+        if (slTriggers.stream()
+                .anyMatch(t -> ((BigDecimal) t.getConfiguration().get(SystemTriggerHandler.CFG_STARTLEVEL))
+                        .intValue() <= startLevelService.getStartLevel())) {
+            runNow(rule.getUID(), true,
+                    Map.of(SystemTriggerHandler.OUT_STARTLEVEL, StartLevelService.STARTLEVEL_RULES));
+        }
+
         return true;
     }
 

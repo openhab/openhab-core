@@ -116,7 +116,7 @@ public class CoreModuleHandlerFactory extends BaseModuleHandlerFactory implement
             } else if (ItemCommandTriggerHandler.MODULE_TYPE_ID.equals(moduleTypeUID)) {
                 return new ItemCommandTriggerHandler(trigger, ruleUID, bundleContext, itemRegistry);
             } else if (SystemTriggerHandler.STARTLEVEL_MODULE_TYPE_ID.equals(moduleTypeUID)) {
-                return new SystemTriggerHandler(trigger, bundleContext, startLevelService);
+                return new SystemTriggerHandler(trigger, bundleContext);
             } else if (ThingStatusTriggerHandler.CHANGE_MODULE_TYPE_ID.equals(moduleTypeUID)
                     || ThingStatusTriggerHandler.UPDATE_MODULE_TYPE_ID.equals(moduleTypeUID)) {
                 return new ThingStatusTriggerHandler(trigger, bundleContext);

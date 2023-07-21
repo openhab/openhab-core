@@ -16,6 +16,7 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -80,6 +81,7 @@ public class AutomationIntegrationJsonTest extends JavaOSGiTest {
     private final Logger logger = LoggerFactory.getLogger(AutomationIntegrationJsonTest.class);
     private @NonNullByDefault({}) EventPublisher eventPublisher;
     private @NonNullByDefault({}) ItemRegistry itemRegistry;
+    private @NonNullByDefault({}) StartLevelService startLevelService;
     private @NonNullByDefault({}) RuleRegistry ruleRegistry;
     private @NonNullByDefault({}) RuleManager ruleManager;
     private @NonNullByDefault({}) ManagedRuleProvider managedRuleProvider;
@@ -96,8 +98,12 @@ public class AutomationIntegrationJsonTest extends JavaOSGiTest {
 
         eventPublisher = getService(EventPublisher.class);
         itemRegistry = getService(ItemRegistry.class);
+        startLevelService = mock(StartLevelService.class);
+        when(startLevelService.getStartLevel()).thenReturn(100);
+        registerService(startLevelService, StartLevelService.class.getName());
+
         CoreModuleHandlerFactory coreModuleHandlerFactory = new CoreModuleHandlerFactory(getBundleContext(),
-                eventPublisher, itemRegistry, mock(TimeZoneProvider.class), mock(StartLevelService.class));
+                eventPublisher, itemRegistry, mock(TimeZoneProvider.class), startLevelService);
         mock(CoreModuleHandlerFactory.class);
         registerService(coreModuleHandlerFactory);
 

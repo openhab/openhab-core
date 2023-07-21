@@ -16,6 +16,7 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -78,6 +79,7 @@ public abstract class BasicConditionHandlerTest extends JavaOSGiTest {
     private @NonNullByDefault({}) RuleRegistry ruleRegistry;
     private @NonNullByDefault({}) RuleManager ruleEngine;
     private @Nullable Event itemEvent;
+    private @NonNullByDefault({}) StartLevelService startLevelService;
 
     /**
      * This executes before every test and before the
@@ -86,6 +88,9 @@ public abstract class BasicConditionHandlerTest extends JavaOSGiTest {
      */
     @BeforeEach
     public void beforeBase() {
+        startLevelService = mock(StartLevelService.class);
+        when(startLevelService.getStartLevel()).thenReturn(100);
+        registerService(startLevelService, StartLevelService.class.getName());
         EventPublisher eventPublisher = getService(EventPublisher.class);
         ItemRegistry itemRegistry = getService(ItemRegistry.class);
         CoreModuleHandlerFactory coreModuleHandlerFactory = new CoreModuleHandlerFactory(getBundleContext(),

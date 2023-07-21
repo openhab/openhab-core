@@ -15,6 +15,8 @@ package org.openhab.core.automation.integration.test;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -54,6 +56,7 @@ import org.openhab.core.automation.util.RuleBuilder;
 import org.openhab.core.common.registry.ProviderChangeListener;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.service.ReadyMarker;
+import org.openhab.core.service.StartLevelService;
 import org.openhab.core.storage.StorageService;
 import org.openhab.core.test.java.JavaOSGiTest;
 import org.slf4j.Logger;
@@ -71,10 +74,15 @@ public class RuleSimulationTest extends JavaOSGiTest {
 
     private @Nullable RuleRegistry ruleRegistry;
     private @Nullable RuleManager ruleEngine;
+    private @NonNullByDefault({}) StartLevelService startLevelService;
 
     @BeforeEach
     public void before() {
         registerVolatileStorageService();
+
+        startLevelService = mock(StartLevelService.class);
+        when(startLevelService.getStartLevel()).thenReturn(100);
+        registerService(startLevelService, StartLevelService.class.getName());
 
         StorageService storageService = getService(StorageService.class);
 
