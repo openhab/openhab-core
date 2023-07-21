@@ -32,7 +32,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.knowm.xchart.XYChart;
 import org.knowm.xchart.XYChartBuilder;
 import org.knowm.xchart.XYSeries;
-import org.knowm.xchart.style.AxesChartStyler;
+import org.knowm.xchart.style.Styler;
 import org.knowm.xchart.style.Styler.LegendPosition;
 import org.knowm.xchart.style.XYStyler;
 import org.knowm.xchart.style.markers.None;
@@ -195,7 +195,7 @@ public class DefaultChartProvider implements ChartProvider {
             styler.setYAxisDecimalPattern(yAxisDecimalPattern);
         }
         styler.setYAxisTickMarkSpacingHint(yAxisSpacing);
-        styler.setYAxisLabelAlignment(AxesChartStyler.TextAlignment.Right);
+        styler.setYAxisLabelAlignment(Styler.TextAlignment.Right);
         // chart
         styler.setChartBackgroundColor(chartTheme.getChartBackgroundColor());
         styler.setChartFontColor(chartTheme.getChartFontColor());
