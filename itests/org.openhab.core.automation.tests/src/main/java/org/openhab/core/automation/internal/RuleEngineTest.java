@@ -13,6 +13,8 @@
 package org.openhab.core.automation.internal;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -41,6 +43,7 @@ import org.openhab.core.config.core.ConfigDescriptionParameterBuilder;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.config.core.FilterCriteria;
 import org.openhab.core.config.core.ParameterOption;
+import org.openhab.core.service.StartLevelService;
 import org.openhab.core.test.java.JavaOSGiTest;
 
 /**
@@ -54,10 +57,14 @@ public class RuleEngineTest extends JavaOSGiTest {
 
     private @NonNullByDefault({}) RuleEngineImpl ruleEngine;
     private @NonNullByDefault({}) RuleRegistry ruleRegistry;
+    private @NonNullByDefault({}) StartLevelService startLevelService;
 
     @BeforeEach
     public void setup() {
         registerVolatileStorageService();
+        startLevelService = mock(StartLevelService.class);
+        when(startLevelService.getStartLevel()).thenReturn(100);
+        registerService(startLevelService, StartLevelService.class.getName());
         ruleEngine = (RuleEngineImpl) getService(RuleManager.class);
         ruleRegistry = getService(RuleRegistry.class);
         registerService(new TestModuleTypeProvider(), ModuleTypeProvider.class.getName());
