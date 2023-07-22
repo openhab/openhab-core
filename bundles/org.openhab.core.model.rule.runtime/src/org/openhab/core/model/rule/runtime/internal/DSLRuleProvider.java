@@ -173,7 +173,7 @@ public class DSLRuleProvider
                 default:
                     logger.debug("Unknown event type.");
             }
-
+            notifyProviderChangeListeners(modelRules);
         } else if ("script".equals(ruleModelType)) {
             List<ModelRulePair> modelRules = new ArrayList<>();
             switch (type) {
