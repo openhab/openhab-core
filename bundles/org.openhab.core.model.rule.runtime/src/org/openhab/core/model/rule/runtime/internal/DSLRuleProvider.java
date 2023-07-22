@@ -158,7 +158,8 @@ public class DSLRuleProvider
                         int index = 1;
                         for (org.openhab.core.model.rule.rules.Rule rule : ruleModel.getRules()) {
                             Rule newRule = toRule(ruleModelName, rule, index);
-                            Rule oldRule = rules.get(ruleModelName);
+                            Rule oldRule = rules.remove(ruleModelName);
+                            rules.put(newRule.getUID(), newRule);
                             xExpressions.put(ruleModelName + "-" + index, rule.getScript());
                             modelRules.add(new ModelRulePair(newRule, oldRule));
                             index++;
