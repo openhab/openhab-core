@@ -172,44 +172,30 @@ public class DSLRuleProvider
                 default:
                     logger.debug("Unknown event type.");
             }
-            modelRules.forEach(rulePair -> {
-                if (rulePair.oldRule() != null) {
-                    rules.remove(rulePair.oldRule().getUID());
-                    rules.put(rulePair.newRule().getUID(), rulePair.newRule());
-                    listeners.forEach(listener -> listener.updated(this, rulePair.oldRule(), rulePair.newRule()));
-                } else {
-                    rules.put(rulePair.newRule().getUID(), rulePair.newRule());
-                    listeners.forEach(listener -> listener.added(this, rulePair.newRule()));
-                }
-            });
 
         } else if ("script".equals(ruleModelType)) {
+            List<ModelRulePair> modelRules = new ArrayList<>();
             switch (type) {
                 case MODIFIED:
-                    Rule oldRule = rules.remove(modelFileName);
-                    if (oldRule != null) {
-                        listeners.forEach(listener -> listener.removed(this, oldRule));
-
-                    }
                 case ADDED:
                     EObject model = modelRepository.getModel(modelFileName);
                     if (model instanceof Script script) {
-                        Rule rule = toRule(modelFileName, script);
-                        rules.put(rule.getUID(), rule);
-
-                        listeners.forEach(listener -> listener.added(this, rule));
+                        Rule oldRule = rules.remove(modelFileName);
+                        Rule newRule = toRule(modelFileName, script);
+                        rules.put(newRule.getUID(), newRule);
+                        modelRules.add(new ModelRulePair(newRule, oldRule));
                     }
                     break;
                 case REMOVED:
-                    oldRule = rules.remove(modelFileName);
+                    Rule oldRule = rules.remove(modelFileName);
                     if (oldRule != null) {
                         listeners.forEach(listener -> listener.removed(this, oldRule));
-
                     }
                     break;
                 default:
                     logger.debug("Unknown event type.");
             }
+            notifyProviderChangeListeners(modelRules);
         }
     }
 
@@ -441,19 +427,33 @@ public class DSLRuleProvider
             String ruleModelName = ruleFileName.substring(0, ruleFileName.indexOf("."));
             if (model instanceof RuleModel ruleModel) {
                 int index = 1;
+                List<ModelRulePair> modelRules = new ArrayList<>();
                 for (org.openhab.core.model.rule.rules.Rule rule : ruleModel.getRules()) {
-                    Rule rule1 = toRule(ruleModelName, rule, index);
-                    rules.put(rule1.getUID(), rule1);
-
-                    listeners.forEach(listener -> listener.added(this, rule1));
+                    Rule newRule = toRule(ruleModelName, rule, index);
                     xExpressions.put(ruleModelName + "-" + index, rule.getScript());
+                    modelRules.add(new ModelRulePair(newRule, null));
                     index++;
                 }
                 handleVarDeclarations(ruleModelName, ruleModel);
+
+                notifyProviderChangeListeners(modelRules);
             }
         }
         modelRepository.addModelRepositoryChangeListener(this);
         readyService.markReady(marker);
+    }
+
+    private void notifyProviderChangeListeners(List<ModelRulePair> modelRules) {
+        modelRules.forEach(rulePair -> {
+            if (rulePair.oldRule() != null) {
+                rules.remove(rulePair.oldRule().getUID());
+                rules.put(rulePair.newRule().getUID(), rulePair.newRule());
+                listeners.forEach(listener -> listener.updated(this, rulePair.oldRule(), rulePair.newRule()));
+            } else {
+                rules.put(rulePair.newRule().getUID(), rulePair.newRule());
+                listeners.forEach(listener -> listener.added(this, rulePair.newRule()));
+            }
+        });
     }
 
     @Override
