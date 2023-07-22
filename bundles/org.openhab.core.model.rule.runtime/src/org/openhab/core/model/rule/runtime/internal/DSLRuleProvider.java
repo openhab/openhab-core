@@ -296,7 +296,8 @@ public class DSLRuleProvider
             s += "\n\n";
         }
         String firstLine = s.lines().findFirst().orElse("");
-        String indentation = firstLine.substring(0, firstLine.length() - firstLine.stripLeading().length());
+        String indentation = firstLine == null ? ""
+                : firstLine.substring(0, firstLine.length() - firstLine.stripLeading().length());
         return s.lines().map(line -> (line.startsWith(indentation) ? line.substring(indentation.length()) : line))
                 .collect(Collectors.joining("\n"));
     }
@@ -304,7 +305,7 @@ public class DSLRuleProvider
     private @Nullable Trigger mapTrigger(EventTrigger t) {
         if (t instanceof SystemOnStartupTrigger) {
             Configuration cfg = new Configuration();
-            cfg.put("startlevel", 20);
+            cfg.put("startlevel", 40);
             return TriggerBuilder.create().withId(Integer.toString(triggerId++))
                     .withTypeUID("core.SystemStartlevelTrigger").withConfiguration(cfg).build();
         } else if (t instanceof SystemStartlevelTrigger slTrigger) {
@@ -446,10 +447,11 @@ public class DSLRuleProvider
 
     private void notifyProviderChangeListeners(List<ModelRulePair> modelRules) {
         modelRules.forEach(rulePair -> {
-            if (rulePair.oldRule() != null) {
-                rules.remove(rulePair.oldRule().getUID());
+            Rule oldRule = rulePair.oldRule();
+            if (oldRule != null) {
+                rules.remove(oldRule.getUID());
                 rules.put(rulePair.newRule().getUID(), rulePair.newRule());
-                listeners.forEach(listener -> listener.updated(this, rulePair.oldRule(), rulePair.newRule()));
+                listeners.forEach(listener -> listener.updated(this, oldRule, rulePair.newRule()));
             } else {
                 rules.put(rulePair.newRule().getUID(), rulePair.newRule());
                 listeners.forEach(listener -> listener.added(this, rulePair.newRule()));
