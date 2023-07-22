@@ -296,7 +296,7 @@ public class AuthFilter implements ContainerRequestFilter {
                         return authenticateBasicAuth(authValue);
                 }
             }
-        } else if (isImplicitUserRole(servletRequest)) {
+        } else if (isImplicitUserRole(request)) {
             return new AnonymousUserSecurityContext();
         }
         return null;
@@ -332,7 +332,7 @@ public class AuthFilter implements ContainerRequestFilter {
     private String getClientIp(HttpServletRequest request) throws UnknownHostException {
         String ipForwarded = Objects.requireNonNullElse(request.getHeader("x-forwarded-for"), "");
         String clientIp = ipForwarded.split(",")[0];
-        return clientIp.isBlank() ? servletRequest.getRemoteAddr() : clientIp;
+        return clientIp.isBlank() ? request.getRemoteAddr() : clientIp;
     }
 
     private static class CIDR {
