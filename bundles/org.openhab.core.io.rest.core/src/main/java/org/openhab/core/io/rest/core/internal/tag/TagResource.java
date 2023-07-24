@@ -41,7 +41,7 @@ import javax.ws.rs.core.UriInfo;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.auth.Role;
-import org.openhab.core.common.registry.RegistryChangeListener;
+import org.openhab.core.common.registry.RegistryChangedRunnableListener;
 import org.openhab.core.io.rest.JSONResponse;
 import org.openhab.core.io.rest.LocaleService;
 import org.openhab.core.io.rest.RESTConstants;
@@ -91,7 +91,13 @@ public class TagResource implements RESTResource {
     private final LocaleService localeService;
     private final SemanticTagRegistry semanticTagRegistry;
     private final ManagedSemanticTagProvider managedSemanticTagProvider;
-    private final ResetLastModifiedChangeListener resetLastModifiedChangeListener = new ResetLastModifiedChangeListener();
+
+    private void resetLastModified() {
+        lastModified = null;
+    }
+
+    private final RegistryChangedRunnableListener<SemanticTag> resetLastModifiedChangeListener = new RegistryChangedRunnableListener<>(
+            this::resetLastModified);
 
     private @Nullable Date lastModified = null;
 
@@ -287,27 +293,5 @@ public class TagResource implements RESTResource {
 
         return JSONResponse.createResponse(Status.OK,
                 new EnrichedSemanticTagDTO(tag.localized(locale), semanticTagRegistry.isEditable(tag)), null);
-    }
-
-    private void resetLastModified() {
-        lastModified = null;
-    }
-
-    private class ResetLastModifiedChangeListener implements RegistryChangeListener<SemanticTag> {
-
-        @Override
-        public void added(SemanticTag element) {
-            resetLastModified();
-        }
-
-        @Override
-        public void removed(SemanticTag element) {
-            resetLastModified();
-        }
-
-        @Override
-        public void updated(SemanticTag oldElement, SemanticTag element) {
-            resetLastModified();
-        }
     }
 }
