@@ -20,6 +20,7 @@ import java.util.Map;
 import javax.measure.UnconvertibleException;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.items.Item;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.QuantityType;
@@ -47,10 +48,10 @@ public class PersistenceThresholdFilter extends PersistenceFilter {
 
     private final transient Map<String, State> valueCache = new HashMap<>();
 
-    public PersistenceThresholdFilter(String name, BigDecimal value, String unit, boolean relative) {
+    public PersistenceThresholdFilter(String name, BigDecimal value, @Nullable String unit, boolean relative) {
         super(name);
         this.value = value;
-        this.unit = unit;
+        this.unit = (unit == null) ? "" : unit;
         this.relative = relative;
     }
 

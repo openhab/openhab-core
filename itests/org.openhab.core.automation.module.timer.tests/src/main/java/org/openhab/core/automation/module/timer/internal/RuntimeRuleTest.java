@@ -16,6 +16,7 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -75,9 +76,13 @@ public class RuntimeRuleTest extends JavaOSGiTest {
     private VolatileStorageService volatileStorageService = new VolatileStorageService();
     private @NonNullByDefault({}) RuleRegistry ruleRegistry;
     private @NonNullByDefault({}) RuleManager ruleEngine;
+    private @NonNullByDefault({}) StartLevelService startLevelService;
 
     @BeforeEach
     public void before() {
+        startLevelService = mock(StartLevelService.class);
+        when(startLevelService.getStartLevel()).thenReturn(100);
+        registerService(startLevelService, StartLevelService.class.getName());
         EventPublisher eventPublisher = getService(EventPublisher.class);
         ItemRegistry itemRegistry = getService(ItemRegistry.class);
         CoreModuleHandlerFactory coreModuleHandlerFactory = new CoreModuleHandlerFactory(getBundleContext(),

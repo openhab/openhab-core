@@ -263,7 +263,7 @@ public class ItemResource implements RESTResource {
                     .peek(dto -> addMetadata(dto, namespaces, null)) //
                     .peek(dto -> dto.editable = isEditable(dto.name));
             itemStream = dtoMapper.limitToFields(itemStream,
-                    "name,label,type,groupType,function,category,editable,groupNames,link,tags,metadata");
+                    "name,label,type,groupType,function,category,editable,groupNames,link,tags,metadata,commandDescription,stateDescription");
 
             CacheControl cc = new CacheControl();
             cc.setMustRevalidate(true);

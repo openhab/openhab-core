@@ -401,6 +401,20 @@ public class UnitsTest {
         assertThat(converted.doubleValue(), is(closeTo(1.00, DEFAULT_ERROR)));
     }
 
+    @Test
+    public void testCalorie() {
+        QuantityType<?> oneCalorie = QuantityType.valueOf("1 cal");
+        QuantityType<?> converted = oneCalorie.toUnit("J");
+        assertThat(converted.doubleValue(), is(closeTo(4.184, DEFAULT_ERROR)));
+    }
+
+    @Test
+    public void testKiloCalorie() {
+        QuantityType<?> oneKiloCalorie = QuantityType.valueOf("1 kcal");
+        QuantityType<?> converted = oneKiloCalorie.toUnit("J");
+        assertThat(converted.doubleValue(), is(closeTo(4184.0, DEFAULT_ERROR)));
+    }
+
     private static class QuantityEquals extends IsEqual<Quantity<?>> {
         private Quantity<?> quantity;
 

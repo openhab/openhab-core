@@ -174,7 +174,7 @@ public class DSLRuleProviderTest extends JavaOSGiTest {
 
         assertThat(rule.getTriggers().get(0).getTypeUID(), is(SystemTriggerHandler.STARTLEVEL_MODULE_TYPE_ID));
         assertThat(rule.getTriggers().get(0).getConfiguration().get(SystemTriggerHandler.CFG_STARTLEVEL),
-                is(new BigDecimal(20)));
+                is(new BigDecimal(40)));
         assertThat(rule.getTriggers().get(1).getTypeUID(), is(GenericCronTriggerHandler.MODULE_TYPE_ID));
         assertThat(rule.getTriggers().get(1).getConfiguration().get(GenericCronTriggerHandler.CFG_CRON_EXPRESSION),
                 is("0 0 12 * * ?"));

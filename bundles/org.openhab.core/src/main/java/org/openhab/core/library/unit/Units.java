@@ -12,6 +12,7 @@
  */
 package org.openhab.core.library.unit;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 
 import javax.measure.Quantity;
@@ -122,6 +123,8 @@ public final class Units extends CustomUnits {
     public static final Unit<ElectricPotential> VOLT = addUnit(tech.units.indriya.unit.Units.VOLT);
     public static final Unit<ElectricResistance> OHM = addUnit(tech.units.indriya.unit.Units.OHM);
     public static final Unit<Energy> JOULE = addUnit(tech.units.indriya.unit.Units.JOULE);
+    public static final Unit<Energy> CALORIE = addUnit(JOULE.multiply(new BigDecimal("4.184")));
+    public static final Unit<Energy> KILO_CALORIE = addUnit(MetricPrefix.KILO(CALORIE));
     public static final Unit<Energy> WATT_SECOND = addUnit(
             new ProductUnit<>(tech.units.indriya.unit.Units.WATT.multiply(tech.units.indriya.unit.Units.SECOND)));
     public static final Unit<Energy> WATT_HOUR = addUnit(
@@ -241,6 +244,8 @@ public final class Units extends CustomUnits {
         SimpleUnitFormat.getInstance().label(BIT_PER_SECOND, "bit/s");
         SimpleUnitFormat.getInstance().label(BYTE, "B");
         SimpleUnitFormat.getInstance().alias(BYTE, "o");
+        SimpleUnitFormat.getInstance().label(CALORIE, "cal");
+        SimpleUnitFormat.getInstance().label(KILO_CALORIE, "kcal");
         SimpleUnitFormat.getInstance().label(CURIE, "Ci");
         SimpleUnitFormat.getInstance().label(MILLI_CURIE, "mCi");
         SimpleUnitFormat.getInstance().label(MICRO_CURIE, "µCi");

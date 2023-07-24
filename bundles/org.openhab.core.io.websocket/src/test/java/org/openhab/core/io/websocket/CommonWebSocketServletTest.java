@@ -92,7 +92,7 @@ public class CommonWebSocketServletTest {
 
     @Test
     public void createWebsocketUsingAdapterPath() throws URISyntaxException {
-        when(request.getRequestURI()).thenReturn(new URI("http://127.0.0.1:8080/ws/"+ testAdapterId));
+        when(request.getRequestURI()).thenReturn(new URI("http://127.0.0.1:8080/ws/" + testAdapterId));
         webSocketCreatorAC.getValue().createWebSocket(request, response);
         verify(testWsAdapter, times(1)).createWebSocket(request, response);
     }

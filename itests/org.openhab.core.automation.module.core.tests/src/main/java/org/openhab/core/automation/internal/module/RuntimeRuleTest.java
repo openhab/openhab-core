@@ -15,6 +15,7 @@ package org.openhab.core.automation.internal.module;
 import static java.util.Map.entry;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -79,9 +80,13 @@ public class RuntimeRuleTest extends JavaOSGiTest {
 
     private final Logger logger = LoggerFactory.getLogger(RuntimeRuleTest.class);
     private final VolatileStorageService volatileStorageService = new VolatileStorageService();
+    private @NonNullByDefault({}) StartLevelService startLevelService;
 
     @BeforeEach
     public void before() {
+        startLevelService = mock(StartLevelService.class);
+        when(startLevelService.getStartLevel()).thenReturn(100);
+        registerService(startLevelService, StartLevelService.class.getName());
         EventPublisher eventPublisher = getService(EventPublisher.class);
         ItemRegistry itemRegistry = getService(ItemRegistry.class);
         CoreModuleHandlerFactory coreModuleHandlerFactory = new CoreModuleHandlerFactory(getBundleContext(),

@@ -11,7 +11,7 @@
 
   <groupId>org.openhab.core</groupId>
   <artifactId>org.openhab.core.reactor</artifactId>
-  <version>4.0.0-SNAPSHOT</version>
+  <version>4.1.0-SNAPSHOT</version>
 
   <packaging>pom</packaging>
 
@@ -77,8 +77,9 @@
     <sat.version>0.15.0</sat.version>
     <slf4j.version>1.7.32</slf4j.version>
     <xtext.version>2.29.0</xtext.version>
-    <spotless.version>2.35.0</spotless.version>
-    <spotless.eclipse.version>4.26</spotless.eclipse.version>
+    <spotless.version>2.37.0</spotless.version>
+    <!-- Eclipse Java formatter version 4.26+ does not check test files -->
+    <spotless.eclipse.version>4.25</spotless.eclipse.version>
     <spotless.eclipse.wtp.version>4.21.0</spotless.eclipse.wtp.version>
   </properties>
 

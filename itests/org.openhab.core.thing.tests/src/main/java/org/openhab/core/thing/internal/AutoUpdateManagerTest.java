@@ -97,7 +97,8 @@ public class AutoUpdateManagerTest extends JavaTest {
     @Test
     public void testAutoUpdateVetoFromChannelType() {
         when(channelTypeRegistry.getChannelType(any(ChannelTypeUID.class)))
-                .thenReturn(ChannelTypeBuilder.state(CHANNEL_TYPE_UID, "label", CoreItemFactory.SWITCH).withAutoUpdatePolicy(AutoUpdatePolicy.VETO).build());
+                .thenReturn(ChannelTypeBuilder.state(CHANNEL_TYPE_UID, "label", CoreItemFactory.SWITCH)
+                        .withAutoUpdatePolicy(AutoUpdatePolicy.VETO).build());
 
         autoUpdateManager.receiveCommand(ItemEventFactory.createCommandEvent(ITEM_NAME, OnOffType.ON), item);
 
