@@ -74,7 +74,7 @@ import org.openhab.core.automation.rest.internal.dto.EnrichedRuleDTO;
 import org.openhab.core.automation.rest.internal.dto.EnrichedRuleDTOMapper;
 import org.openhab.core.automation.util.ModuleBuilder;
 import org.openhab.core.automation.util.RuleBuilder;
-import org.openhab.core.common.registry.RegistryChangeListener;
+import org.openhab.core.common.registry.RegistryChangedRunnableListener;
 import org.openhab.core.config.core.ConfigUtil;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.events.Event;
@@ -135,7 +135,13 @@ public class RuleResource implements RESTResource {
     private final RuleManager ruleManager;
     private final RuleRegistry ruleRegistry;
     private final ManagedRuleProvider managedRuleProvider;
-    private final ResetLastModifiedChangeListener resetLastModifiedChangeListener = new ResetLastModifiedChangeListener();
+
+    private void resetStaticListLastModified() {
+        cacheableListLastModified = null;
+    }
+
+    private final RegistryChangedRunnableListener<Rule> resetLastModifiedChangeListener = new RegistryChangedRunnableListener<>(
+            this::resetStaticListLastModified);
 
     private @Context @NonNullByDefault({}) UriInfo uriInfo;
     private @Nullable Date cacheableListLastModified = null;
@@ -606,28 +612,6 @@ public class RuleResource implements RESTResource {
             return action == null ? null : ActionDTOMapper.map(action);
         } else {
             return null;
-        }
-    }
-
-    private void resetStaticListLastModified() {
-        cacheableListLastModified = null;
-    }
-
-    private class ResetLastModifiedChangeListener implements RegistryChangeListener<Rule> {
-
-        @Override
-        public void added(Rule element) {
-            resetStaticListLastModified();
-        }
-
-        @Override
-        public void removed(Rule element) {
-            resetStaticListLastModified();
-        }
-
-        @Override
-        public void updated(Rule oldElement, Rule element) {
-            resetStaticListLastModified();
         }
     }
 }
