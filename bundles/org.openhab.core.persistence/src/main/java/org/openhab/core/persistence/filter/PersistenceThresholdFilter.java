@@ -48,11 +48,12 @@ public class PersistenceThresholdFilter extends PersistenceFilter {
 
     private final transient Map<String, State> valueCache = new HashMap<>();
 
-    public PersistenceThresholdFilter(String name, BigDecimal value, @Nullable String unit, boolean relative) {
+    public PersistenceThresholdFilter(String name, BigDecimal value, @Nullable String unit,
+            @Nullable Boolean relative) {
         super(name);
         this.value = value;
         this.unit = (unit == null) ? "" : unit;
-        this.relative = relative;
+        this.relative = (relative == null) ? false : relative;
     }
 
     public BigDecimal getValue() {
