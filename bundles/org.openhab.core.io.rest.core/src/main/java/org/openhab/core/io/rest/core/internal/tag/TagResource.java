@@ -91,13 +91,8 @@ public class TagResource implements RESTResource {
     private final LocaleService localeService;
     private final SemanticTagRegistry semanticTagRegistry;
     private final ManagedSemanticTagProvider managedSemanticTagProvider;
-
-    private void resetLastModified() {
-        lastModified = null;
-    }
-
     private final RegistryChangedRunnableListener<SemanticTag> resetLastModifiedChangeListener = new RegistryChangedRunnableListener<>(
-            this::resetLastModified);
+            () -> lastModified = null);
 
     private @Nullable Date lastModified = null;
 

@@ -171,13 +171,8 @@ public class ThingResource implements RESTResource {
     private final ThingRegistry thingRegistry;
     private final ThingStatusInfoI18nLocalizationService thingStatusInfoI18nLocalizationService;
     private final ThingTypeRegistry thingTypeRegistry;
-
-    private void resetCacheableListLastModified() {
-        cacheableListLastModified = null;
-    }
-
     private final RegistryChangedRunnableListener<Thing> resetLastModifiedChangeListener = new RegistryChangedRunnableListener<>(
-            this::resetCacheableListLastModified);
+            () -> cacheableListLastModified = null);
 
     private @Context @NonNullByDefault({}) UriInfo uriInfo;
     private @Nullable Date cacheableListLastModified = null;

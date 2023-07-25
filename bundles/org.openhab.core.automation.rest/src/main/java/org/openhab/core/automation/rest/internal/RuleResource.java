@@ -135,13 +135,8 @@ public class RuleResource implements RESTResource {
     private final RuleManager ruleManager;
     private final RuleRegistry ruleRegistry;
     private final ManagedRuleProvider managedRuleProvider;
-
-    private void resetStaticListLastModified() {
-        cacheableListLastModified = null;
-    }
-
     private final RegistryChangedRunnableListener<Rule> resetLastModifiedChangeListener = new RegistryChangedRunnableListener<>(
-            this::resetStaticListLastModified);
+            () -> cacheableListLastModified = null);
 
     private @Context @NonNullByDefault({}) UriInfo uriInfo;
     private @Nullable Date cacheableListLastModified = null;
