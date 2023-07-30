@@ -2,14 +2,14 @@
 	"actions": [
 		{
 			"uid": "core.RuleEnablementAction",
-			"label": "enables or disables rules",
-			"description": "Enables or disables a rule or a group of rules specified by their UIDs.",
+			"label": "enable or disable scenes, scripts & rules",
+			"description": "Enables or disables a single one or a group of those specified by their UIDs.",
 			"configDescriptions": [
 				{
 					"name": "enable",
 					"type": "BOOLEAN",
-					"label": "Enable rules",
-					"description": "'true' enables all specified rules, 'false' disables them.",
+					"label": "Enable/Disable",
+					"description": "'true' enables all specified ones, 'false' disables them.",
 					"required": true,
 					"options": [
 						{
@@ -25,8 +25,8 @@
 				{
 					"name": "ruleUIDs",
 					"type": "TEXT",
-					"label": "Rules",
-					"description": "Specifies the rules that should be enabled or disabled.",
+					"label": "Scenes, scripts & rules",
+					"description": "Specifies those that should be enabled or disabled.",
 					"required": true,
 					"multiple": true,
 					"context":"rule"
