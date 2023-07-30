@@ -35,6 +35,7 @@ public class WidgetDTO {
 
     public String label;
     public String icon;
+    public Boolean staticIcon;
     public String labelcolor;
     public String valuecolor;
     public String iconcolor;
