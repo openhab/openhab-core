@@ -57,7 +57,7 @@ import javax.ws.rs.core.UriInfo;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.auth.Role;
-import org.openhab.core.common.registry.RegistryChangeListener;
+import org.openhab.core.common.registry.RegistryChangedRunnableListener;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.io.rest.DTOMapper;
 import org.openhab.core.io.rest.JSONResponse;
@@ -74,7 +74,6 @@ import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemBuilderFactory;
 import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemRegistry;
-import org.openhab.core.items.ItemRegistryChangeListener;
 import org.openhab.core.items.ManagedItemProvider;
 import org.openhab.core.items.Metadata;
 import org.openhab.core.items.MetadataKey;
@@ -183,8 +182,15 @@ public class ItemResource implements RESTResource {
     private final MetadataRegistry metadataRegistry;
     private final MetadataSelectorMatcher metadataSelectorMatcher;
     private final SemanticTagRegistry semanticTagRegistry;
-    private final ItemRegistryChangeListener resetLastModifiedItemChangeListener = new ResetLastModifiedItemChangeListener();
-    private final RegistryChangeListener<Metadata> resetLastModifiedMetadataChangeListener = new ResetLastModifiedMetadataChangeListener();
+
+    private void resetCacheableListsLastModified() {
+        this.cacheableListsLastModified.clear();
+    }
+
+    private final RegistryChangedRunnableListener<Item> resetLastModifiedItemChangeListener = new RegistryChangedRunnableListener<>(
+            this::resetCacheableListsLastModified);
+    private final RegistryChangedRunnableListener<Metadata> resetLastModifiedMetadataChangeListener = new RegistryChangedRunnableListener<>(
+            this::resetCacheableListsLastModified);
 
     private Map<@Nullable String, Date> cacheableListsLastModified = new HashMap<>();
 
@@ -989,49 +995,5 @@ public class ItemResource implements RESTResource {
 
     private boolean isEditable(String itemName) {
         return managedItemProvider.get(itemName) != null;
-    }
-
-    private void resetCacheableListsLastModified() {
-        this.cacheableListsLastModified.clear();
-    }
-
-    private class ResetLastModifiedItemChangeListener implements ItemRegistryChangeListener {
-        @Override
-        public void added(Item element) {
-            resetCacheableListsLastModified();
-        }
-
-        @Override
-        public void allItemsChanged(Collection<String> oldItemNames) {
-            resetCacheableListsLastModified();
-        }
-
-        @Override
-        public void removed(Item element) {
-            resetCacheableListsLastModified();
-        }
-
-        @Override
-        public void updated(Item oldElement, Item element) {
-            resetCacheableListsLastModified();
-        }
-    }
-
-    private class ResetLastModifiedMetadataChangeListener implements RegistryChangeListener<Metadata> {
-
-        @Override
-        public void added(Metadata element) {
-            resetCacheableListsLastModified();
-        }
-
-        @Override
-        public void removed(Metadata element) {
-            resetCacheableListsLastModified();
-        }
-
-        @Override
-        public void updated(Metadata oldElement, Metadata element) {
-            resetCacheableListsLastModified();
-        }
     }
 }

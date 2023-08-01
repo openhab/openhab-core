@@ -40,12 +40,12 @@ public class PersistenceIncludeFilter extends PersistenceFilter {
     private final boolean inverted;
 
     public PersistenceIncludeFilter(String name, BigDecimal lower, BigDecimal upper, @Nullable String unit,
-            boolean inverted) {
+            @Nullable Boolean inverted) {
         super(name);
         this.lower = lower;
         this.upper = upper;
         this.unit = (unit == null) ? "" : unit;
-        this.inverted = inverted;
+        this.inverted = (inverted == null) ? false : inverted;
     }
 
     public BigDecimal getLower() {

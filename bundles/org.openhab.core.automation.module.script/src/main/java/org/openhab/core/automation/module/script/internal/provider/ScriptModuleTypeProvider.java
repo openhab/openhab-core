@@ -84,13 +84,13 @@ public class ScriptModuleTypeProvider extends AbstractProvider<ModuleType> imple
         List<Output> outputs = new ArrayList<>();
         Output result = new Output("result", "java.lang.Object", "result", "the script result", null, null, null);
         outputs.add(result);
-        return new ActionType(ScriptActionHandler.TYPE_ID, getConfigDescriptions(locale), "execute a given script",
+        return new ActionType(ScriptActionHandler.TYPE_ID, getConfigDescriptions(locale), "execute an inline script",
                 "Allows the execution of a user-defined script.", null, Visibility.VISIBLE, null, outputs);
     }
 
     private ModuleType getScriptConditionType(@Nullable Locale locale) {
         return new ConditionType(ScriptConditionHandler.TYPE_ID, getConfigDescriptions(locale),
-                "a given script evaluates to true", "Allows the definition of a condition through a script.", null,
+                "an inline script evaluates to true", "Allows the definition of a condition through a script.", null,
                 Visibility.VISIBLE, null);
     }
 

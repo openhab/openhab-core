@@ -15,6 +15,7 @@ package org.openhab.core.persistence.filter;
 import java.util.Collection;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.items.Item;
 
 /**
@@ -29,10 +30,10 @@ public class PersistenceEqualsFilter extends PersistenceFilter {
     private final Collection<String> values;
     private final boolean inverted;
 
-    public PersistenceEqualsFilter(String name, Collection<String> values, boolean inverted) {
+    public PersistenceEqualsFilter(String name, Collection<String> values, @Nullable Boolean inverted) {
         super(name);
         this.values = values;
-        this.inverted = inverted;
+        this.inverted = (inverted == null) ? false : inverted;
     }
 
     public Collection<String> getValues() {
