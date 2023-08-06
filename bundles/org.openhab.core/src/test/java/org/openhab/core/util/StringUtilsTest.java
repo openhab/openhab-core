@@ -75,6 +75,13 @@ public class StringUtilsTest {
     }
 
     @Test
+    public void getRandomString() {
+        String randomstring = StringUtils.randomString(10000, "123");
+        assertEquals(6666, randomstring.replace("1", "").length(), 333,
+                "randomString does not equaly (<5% delta) use all characters in set");
+    }
+
+    @Test
     public void padLeft() {
         assertEquals("000000", StringUtils.padLeft("", 6, "0"));
         assertEquals("000000", StringUtils.padLeft(null, 6, "0"));

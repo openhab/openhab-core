@@ -76,11 +76,11 @@ public class StringUtils {
      * @return the escaped xml as String
      */
     public static String escapeXml(String xml) {
-        xml = xml.replaceAll("&", "&amp;");
-        xml = xml.replaceAll("<", "&lt;");
-        xml = xml.replaceAll(">", "&gt;");
-        xml = xml.replaceAll("\"", "&quot;");
-        xml = xml.replaceAll("'", "&apos;");
+        xml = xml.replace("&", "&amp;");
+        xml = xml.replace("<", "&lt;");
+        xml = xml.replace(">", "&gt;");
+        xml = xml.replace("\"", "&quot;");
+        xml = xml.replace("'", "&apos;");
         return xml;
     }
 
@@ -99,10 +99,12 @@ public class StringUtils {
      * @return the capitalized String
      */
     public static String capitalize(String val) {
-        if (val.length() == 0) {
+        if (val.isEmpty()) {
             return val;
         }
-        return val.substring(0, 1).toUpperCase() + val.substring(1);
+        StringBuilder sb = new StringBuilder(val);
+        sb.setCharAt(0, Character.toUpperCase(val.charAt(0)));
+        return sb.toString();
     }
 
     /**
@@ -119,19 +121,17 @@ public class StringUtils {
      */
     public static String capitalizeFully(String input) {
         final String delimiter = "_";
-        String capitalizedFully = "";
+        StringBuilder capitalizedFully = new StringBuilder();
         for (String str : input.split(delimiter)) {
-            String properlyCapitalized = "";
             if (str.length() > 0) {
-                properlyCapitalized = str.substring(0, 1).toUpperCase();
+                capitalizedFully.append(str.substring(0, 1).toUpperCase());
             }
             if (str.length() > 1) {
-                properlyCapitalized += str.substring(1).toLowerCase();
+                capitalizedFully.append(str.substring(1).toLowerCase());
             }
-            capitalizedFully = capitalizedFully + properlyCapitalized;
         }
 
-        return capitalizedFully;
+        return capitalizedFully.toString();
     }
 
     /**
@@ -147,21 +147,22 @@ public class StringUtils {
      * @return the capitalized String
      */
     public static String capitalizeWords(@Nullable String input) {
-        String output = "";
-        if (input != null) {
-            String[] splitted = input.split("\\s+");
-            String[] processed = new String[splitted.length];
-            for (int wordIndex = 0; wordIndex < splitted.length; wordIndex++) {
-                if (splitted[wordIndex].length() > 1) {
-                    processed[wordIndex] = splitted[wordIndex].substring(0, 1).toUpperCase()
-                            + splitted[wordIndex].substring(1);
-                } else {
-                    processed[wordIndex] = splitted[wordIndex].toUpperCase();
-                }
-            }
-            output = String.join(" ", processed);
+        if (input == null) {
+            return "";
         }
-        return output;
+
+        StringBuilder processed = new StringBuilder();
+        for (String splitted : input.split("\\s+")) {
+            if (splitted.length() > 1) {
+                processed.append(splitted.substring(0, 1).toUpperCase());
+                processed.append(splitted.substring(1));
+            } else {
+                processed.append(splitted.toUpperCase());
+            }
+            processed.append(" ");
+        }
+        processed.setLength(Math.max(processed.length() - 1, 0));
+        return processed.toString();
     }
 
     /**
@@ -295,11 +296,11 @@ public class StringUtils {
      * @return the unescaped xml as String
      */
     public static String unEscapeXml(String xml) {
-        xml = xml.replaceAll("&amp;", "&");
-        xml = xml.replaceAll("&lt;", "<");
-        xml = xml.replaceAll("&gt;", ">");
-        xml = xml.replaceAll("&quot;", "\"");
-        xml = xml.replaceAll("&apos;", "'");
+        xml = xml.replace("&amp;", "&");
+        xml = xml.replace("&lt;", "<");
+        xml = xml.replace("&gt;", ">");
+        xml = xml.replace("&quot;", "\"");
+        xml = xml.replace("&apos;", "'");
         return xml;
     }
 }
