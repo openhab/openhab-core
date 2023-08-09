@@ -110,7 +110,6 @@ Fragment-Host: org.openhab.core.model.thing
 	org.openhab.core.model.item.runtime;version='[4.1.0,4.1.1)',\
 	org.openhab.core.model.persistence;version='[4.1.0,4.1.1)',\
 	org.openhab.core.model.rule;version='[4.1.0,4.1.1)',\
-	org.openhab.core.model.rule.runtime;version='[4.1.0,4.1.1)',\
 	org.openhab.core.model.script;version='[4.1.0,4.1.1)',\
 	org.openhab.core.model.script.runtime;version='[4.1.0,4.1.1)',\
 	org.openhab.core.model.sitemap;version='[4.1.0,4.1.1)',\
@@ -123,4 +122,6 @@ Fragment-Host: org.openhab.core.model.thing
 	org.openhab.core.test;version='[4.1.0,4.1.1)',\
 	org.openhab.core.thing;version='[4.1.0,4.1.1)',\
 	org.openhab.core.transform;version='[4.1.0,4.1.1)',\
-	org.openhab.core.voice;version='[4.1.0,4.1.1)'
+	org.openhab.core.voice;version='[4.1.0,4.1.1)',\
+	org.openhab.base-fixes;version='[1.0.0,1.0.1)',\
+	org.osgi.service.cm;version='[1.6.0,1.6.1)'
