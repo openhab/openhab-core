@@ -12,8 +12,8 @@
  */
 package org.openhab.core.semantics.internal;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,12 +65,7 @@ public class SemanticsMetadataProvider extends AbstractProvider<Metadata>
     private final Map<List<Class<? extends Tag>>, String> propertyRelations = new HashMap<>();
 
     // local cache of the created metadata as a map from itemName->Metadata
-    private final Map<String, Metadata> semantics = new TreeMap<>(new Comparator<String>() {
-        @Override
-        public int compare(String s1, String s2) {
-            return s1.compareTo(s2);
-        }
-    });
+    private final Map<String, Metadata> semantics = new TreeMap<>(String::compareTo);
 
     private final ItemRegistry itemRegistry;
 
@@ -106,6 +101,10 @@ public class SemanticsMetadataProvider extends AbstractProvider<Metadata>
      * @param item the item to update the metadata for
      */
     private void processItem(Item item) {
+        processItem(item, new ArrayList<>());
+    }
+
+    private void processItem(Item item, List<String> parentItems) {
         MetadataKey key = new MetadataKey(NAMESPACE, item.getName());
         Map<String, Object> configuration = new HashMap<>();
         Class<? extends Tag> type = SemanticTags.getSemanticType(item);
@@ -127,8 +126,15 @@ public class SemanticsMetadataProvider extends AbstractProvider<Metadata>
         }
 
         if (item instanceof GroupItem groupItem) {
+            parentItems.add(item.getName());
             for (Item memberItem : groupItem.getMembers()) {
-                processItem(memberItem);
+                if (parentItems.contains(memberItem.getName())) {
+                    logger.error(
+                            "Recursive group membership found: {} is both, a direct or indirect parent and a child of {}.",
+                            memberItem.getName(), groupItem.getName());
+                } else {
+                    processItem(memberItem, parentItems);
+                }
             }
         }
     }
