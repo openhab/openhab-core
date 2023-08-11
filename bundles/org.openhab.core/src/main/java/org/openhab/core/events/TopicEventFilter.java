@@ -31,7 +31,8 @@ public class TopicEventFilter implements EventFilter {
      * Constructs a new topic event filter.
      *
      * @param topicRegex the regular expression of a topic
-     * @see <a href="http://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html">Java Regex</a>
+     * @see <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/regex/Pattern.html">Java
+     *      Regex</a>
      */
     public TopicEventFilter(String topicRegex) {
         this.topicRegex = Pattern.compile(topicRegex);

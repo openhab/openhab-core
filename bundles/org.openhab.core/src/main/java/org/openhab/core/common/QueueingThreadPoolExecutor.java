@@ -30,8 +30,9 @@ import org.slf4j.LoggerFactory;
 /**
  * This is a thread pool executor service, which works as a developer would expect it to work.
  * The default {@link ThreadPoolExecutor} does the following (see
- * <a href="http://docs.oracle.com/javase/7/docs/api/java/util/concurrent/ThreadPoolExecutor.html">the official
- * JavaDoc)</a>:
+ * <a href=
+ * "https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/concurrent/ThreadPoolExecutor.html">the
+ * official JavaDoc)</a>:
  * <ul>
  * <li>If fewer than corePoolSize threads are running, the Executor always prefers adding a new thread rather than
  * queuing.</li>
