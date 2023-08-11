@@ -105,11 +105,4 @@ public abstract class AbstractTransformingChannelHandler implements ChannelHandl
      * @return the string representation of the command
      */
     protected abstract String toString(Command command);
-
-    @FunctionalInterface
-    public interface Factory {
-        ChannelHandler create(Consumer<State> updateState, Consumer<Command> postCommand,
-                @Nullable Consumer<String> sendHttpValue, ChannelTransformation stateTransformations,
-                ChannelTransformation commandTransformations, ChannelValueConverterConfig channelConfig);
-    }
 }
