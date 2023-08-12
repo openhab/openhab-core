@@ -40,6 +40,8 @@ import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This {@link MetadataProvider} collects semantic information about items and provides them as metadata under the
@@ -55,6 +57,8 @@ import org.osgi.service.component.annotations.Reference;
 @NonNullByDefault
 public class SemanticsMetadataProvider extends AbstractProvider<Metadata>
         implements ItemRegistryChangeListener, MetadataProvider {
+
+    private final Logger logger = LoggerFactory.getLogger(SemanticsMetadataProvider.class);
 
     // the namespace to use for the metadata
     public static final String NAMESPACE = "semantics";
