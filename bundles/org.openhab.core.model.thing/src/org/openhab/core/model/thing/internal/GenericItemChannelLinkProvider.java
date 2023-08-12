@@ -31,6 +31,8 @@ import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.link.ItemChannelLink;
 import org.openhab.core.thing.link.ItemChannelLinkProvider;
 import org.osgi.service.component.annotations.Component;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * {@link GenericItemChannelLinkProvider} link items to channel by reading bindings with type "channel".
@@ -43,6 +45,7 @@ import org.osgi.service.component.annotations.Component;
 public class GenericItemChannelLinkProvider extends AbstractProvider<ItemChannelLink>
         implements BindingConfigReader, ItemChannelLinkProvider {
 
+    private final Logger logger = LoggerFactory.getLogger(GenericItemChannelLinkProvider.class);
     /** caches binding configurations. maps itemNames to {@link BindingConfig}s */
     protected Map<String, Set<ItemChannelLink>> itemChannelLinkMap = new ConcurrentHashMap<>();
 
