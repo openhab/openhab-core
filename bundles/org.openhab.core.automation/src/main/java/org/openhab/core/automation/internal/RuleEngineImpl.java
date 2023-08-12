@@ -178,7 +178,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
      * The context map of a {@link Rule} is cleaned when the execution is completed. The relation is
      * {@link Rule}'s UID to Rule context map.
      */
-    private final Map<String, Map<String, Object>> contextMap = new HashMap<>();
+    private final Map<String, Map<String, Object>> contextMap = new ConcurrentHashMap<>();
 
     /**
      * This field holds reference to {@link ModuleTypeRegistry}. The {@link RuleEngineImpl} needs it to auto-map
