@@ -267,6 +267,7 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
         if (widget != null) {
             setWidgetPropertyFromComponentConfig(widget, component, "label", SitemapPackage.WIDGET__LABEL);
             setWidgetPropertyFromComponentConfig(widget, component, "icon", SitemapPackage.WIDGET__ICON);
+            setWidgetPropertyFromComponentConfig(widget, component, "staticIcon", SitemapPackage.WIDGET__STATIC_ICON);
             setWidgetPropertyFromComponentConfig(widget, component, "item", SitemapPackage.WIDGET__ITEM);
 
             if (widget instanceof LinkableWidget linkableWidget) {
