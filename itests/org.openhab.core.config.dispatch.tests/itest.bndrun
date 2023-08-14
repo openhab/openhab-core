@@ -51,7 +51,8 @@ Fragment-Host: org.openhab.core.config.dispatch
 	junit-platform-commons;version='[1.9.2,1.9.3)',\
 	junit-platform-engine;version='[1.9.2,1.9.3)',\
 	junit-platform-launcher;version='[1.9.2,1.9.3)',\
-	org.openhab.core;version='[4.1.0,4.1.1)',\
-	org.openhab.core.config.dispatch;version='[4.1.0,4.1.1)',\
-	org.openhab.core.config.dispatch.tests;version='[4.1.0,4.1.1)',\
-	org.openhab.core.test;version='[4.1.0,4.1.1)'
+	org.openhab.base-fixes;version='[1.0.0,1.0.1)',\
+	org.openhab.core;version='[4.0.2,4.0.3)',\
+	org.openhab.core.config.dispatch;version='[4.0.2,4.0.3)',\
+	org.openhab.core.config.dispatch.tests;version='[4.0.2,4.0.3)',\
+	org.openhab.core.test;version='[4.0.2,4.0.3)'

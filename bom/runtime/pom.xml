@@ -467,7 +467,8 @@
     <dependency>
       <groupId>org.jupnp</groupId>
       <artifactId>org.jupnp</artifactId>
-      <version>2.7.0</version>
+      <!-- Uses the Java 11 LinkedTransferQueue as workaround for JDK-8301341 -->
+      <version>2.7.1.OH1</version>
       <scope>compile</scope>
     </dependency>
 
@@ -1086,6 +1087,14 @@
       <groupId>net.java.dev.jna</groupId>
       <artifactId>jna-platform</artifactId>
       <version>5.12.1</version>
+      <scope>compile</scope>
+    </dependency>
+
+    <!-- Provides the Java 11 LinkedTransferQueue used in workarounds for JDK-8301341 -->
+    <dependency>
+      <groupId>org.openhab</groupId>
+      <artifactId>base-fixes</artifactId>
+      <version>1.0.0</version>
       <scope>compile</scope>
     </dependency>
   </dependencies>

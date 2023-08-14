@@ -69,7 +69,8 @@ Fragment-Host: org.openhab.core.io.net
 	org.objectweb.asm.tree;version='[9.4.0,9.4.1)',\
 	org.objectweb.asm.tree.analysis;version='[9.4.0,9.4.1)',\
 	org.objectweb.asm.util;version='[9.4.0,9.4.1)',\
-	org.openhab.core;version='[4.1.0,4.1.1)',\
-	org.openhab.core.io.net;version='[4.1.0,4.1.1)',\
-	org.openhab.core.io.net.tests;version='[4.1.0,4.1.1)',\
-	org.openhab.core.test;version='[4.1.0,4.1.1)'
+	org.openhab.base-fixes;version='[1.0.0,1.0.1)',\
+	org.openhab.core;version='[4.0.2,4.0.3)',\
+	org.openhab.core.io.net;version='[4.0.2,4.0.3)',\
+	org.openhab.core.io.net.tests;version='[4.0.2,4.0.3)',\
+	org.openhab.core.test;version='[4.0.2,4.0.3)'
