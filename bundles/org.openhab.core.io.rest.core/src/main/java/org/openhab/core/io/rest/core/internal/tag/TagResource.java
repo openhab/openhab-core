@@ -189,15 +189,18 @@ public class TagResource implements RESTResource {
     @Operation(operationId = "createSemanticTag", summary = "Creates a new semantic tag and adds it to the registry.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "201", description = "Created", content = @Content(schema = @Schema(implementation = EnrichedSemanticTagDTO.class))),
-                    @ApiResponse(responseCode = "400", description = "The tag identifier is invalid."),
+                    @ApiResponse(responseCode = "400", description = "The tag identifier is invalid or the tag label is missing."),
                     @ApiResponse(responseCode = "409", description = "A tag with the same identifier already exists.") })
     public Response create(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @Parameter(description = "tag data", required = true) EnrichedSemanticTagDTO data) {
         final Locale locale = localeService.getLocale(language);
 
-        if (data.uid == null) {
+        if (data.uid == null || data.uid.isBlank()) {
             return JSONResponse.createErrorResponse(Status.BAD_REQUEST, "Tag identifier is required!");
+        }
+        if (data.label == null || data.label.isBlank()) {
+            return JSONResponse.createErrorResponse(Status.BAD_REQUEST, "Tag label is required!");
         }
 
         String uid = data.uid.trim();
