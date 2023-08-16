@@ -342,7 +342,7 @@ public class AutomationIntegrationJsonTest extends JavaOSGiTest {
     }
 
     @Test
-    public void assertThatARuleFromJsonFileIsExecutedCorrectly() throws ItemNotFoundException {
+    public void assertThatARuleFromJsonFileIsExecutedCorrectly() throws ItemNotFoundException, InterruptedException {
         logger.info("assert that rule added by json is executed correctly");
         waitForAssert(() -> {
             assertThat(ruleRegistry.getAll().isEmpty(), is(false));
@@ -378,6 +378,7 @@ public class AutomationIntegrationJsonTest extends JavaOSGiTest {
         };
 
         registerService(eventHandler);
+        Thread.sleep(1000);
         eventPublisher.post(ItemEventFactory.createStateEvent("myMotionItem", OnOffType.ON));
         waitForAssert(() -> {
             assertThat(itemEvent, is(notNullValue()));
