@@ -331,7 +331,8 @@ public class ThingResource implements RESTResource {
             CacheControl cc = new CacheControl();
             cc.setMustRevalidate(true);
             cc.setPrivate(true);
-            thingStream = dtoMapper.limitToFields(thingStream, "UID,label,bridgeUID,thingTypeUID,location,editable");
+            thingStream = dtoMapper.limitToFields(thingStream,
+                    "UID,label,bridgeUID,thingTypeUID,channels,location,editable");
             return Response.ok(new Stream2JSONInputStream(thingStream)).lastModified(cacheableListLastModified)
                     .cacheControl(cc).build();
         }
