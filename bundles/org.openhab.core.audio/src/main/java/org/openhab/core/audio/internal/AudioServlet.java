@@ -17,6 +17,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -297,7 +298,7 @@ public class AudioServlet extends HttpServlet implements AudioHTTPServer {
             clonableAudioStreamResult = new ByteArrayAudioStream(dataBytes, stream.getFormat());
         } else {
             // in memory max size exceeded, sound is too long, we will use a file
-            File tempFile = File.createTempFile(streamId, ".snd");
+            File tempFile = Files.createTempFile(streamId, ".snd").toFile();
             tempFile.deleteOnExit();
             try (OutputStream outputStream = new FileOutputStream(tempFile)) {
                 // copy already read data to file :
