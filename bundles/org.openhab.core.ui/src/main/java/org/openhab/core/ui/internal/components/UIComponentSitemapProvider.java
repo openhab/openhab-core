@@ -87,9 +87,9 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
     private static final String SITEMAP_SUFFIX = ".sitemap";
 
     private static final Pattern VISIBILITY_PATTERN = Pattern
-            .compile("(?<item>[A-Za-z]\\w*)\\s*(?<condition>==|!=|<=|>=|<|>)\\s*(?<sign>\\+|-)?(?<state>\\S+)");
+            .compile("(?<item>[A-Za-z]\\w*)\\s*(?<condition>==|!=|<=|>=|<|>)\\s*(?<sign>\\+|-)?(?<state>.+)");
     private static final Pattern COLOR_PATTERN = Pattern.compile(
-            "((?<item>[A-Za-z]\\w*)?\\s*((?<condition>==|!=|<=|>=|<|>)\\s*(?<sign>\\+|-)?(?<state>\\S+))?\\s*=)?\\s*(?<arg>\\S+)");
+            "((?<item>[A-Za-z]\\w*)?\\s*((?<condition>==|!=|<=|>=|<|>)\\s*(?<sign>\\+|-)?(?<state>[^=]+))?\\s*=)?\\s*(?<arg>\\S+)");
 
     private Map<String, Sitemap> sitemaps = new HashMap<>();
     private @Nullable UIComponentRegistryFactory componentRegistryFactory;
