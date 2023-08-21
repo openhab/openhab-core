@@ -120,6 +120,5 @@ Fragment-Host: org.openhab.core.model.script
 	org.openhab.base-fixes;version='[1.0.0,1.0.1)',\
 	javax.measure.unit-api;version='[2.2.0,2.2.1)',\
 	org.apiguardian.api;version='[1.1.2,1.1.3)',\
-	org.openhab.core.model.item.runtime;version='[4.1.0,4.1.1)',\
 	tech.units.indriya;version='[2.2.0,2.2.1)',\
 	uom-lib-common;version='[2.2.0,2.2.1)'
