@@ -32,6 +32,7 @@ import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.library.types.DateTimeType;
 import org.openhab.core.library.types.QuantityType;
+import org.openhab.core.service.StartLevelService;
 import org.openhab.core.transform.TransformationException;
 import org.openhab.core.transform.TransformationHelper;
 import org.openhab.core.types.State;
@@ -62,13 +63,15 @@ public class SseItemStatesEventBuilder {
     private final BundleContext bundleContext;
     private final ItemRegistry itemRegistry;
     private final LocaleService localeService;
+    private final StartLevelService startLevelService;
 
     @Activate
     public SseItemStatesEventBuilder(final BundleContext bundleContext, final @Reference ItemRegistry itemRegistry,
-            final @Reference LocaleService localeService) {
+            final @Reference LocaleService localeService, final @Reference StartLevelService startLevelService) {
         this.bundleContext = bundleContext;
         this.itemRegistry = itemRegistry;
         this.localeService = localeService;
+        this.startLevelService = startLevelService;
     }
 
     public @Nullable OutboundSseEvent buildEvent(Builder eventBuilder, Set<String> itemNames) {
@@ -86,7 +89,9 @@ public class SseItemStatesEventBuilder {
                 }
                 payload.put(itemName, stateDto);
             } catch (ItemNotFoundException e) {
-                logger.warn("Attempting to send a state update of an item which doesn't exist: {}", itemName);
+                if (startLevelService.getStartLevel() >= StartLevelService.STARTLEVEL_MODEL) {
+                    logger.warn("Attempting to send a state update of an item which doesn't exist: {}", itemName);
+                }
             }
         }
 
