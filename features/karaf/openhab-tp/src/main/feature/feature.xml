@@ -89,18 +89,18 @@
 	</feature>
 
 	<feature name="openhab.tp-jackson" description="FasterXML Jackson bundles" version="${project.version}">
-		<capability>openhab.tp;feature=jackson;version=2.14.1</capability>
-		<bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-annotations/2.14.1</bundle>
-		<bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-core/2.14.1</bundle>
-		<bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-databind/2.14.1</bundle>
-		<bundle dependency="true">mvn:com.fasterxml.jackson.dataformat/jackson-dataformat-cbor/2.14.1</bundle>
-		<bundle dependency="true">mvn:com.fasterxml.jackson.dataformat/jackson-dataformat-xml/2.14.1</bundle>
-		<bundle dependency="true">mvn:com.fasterxml.jackson.dataformat/jackson-dataformat-yaml/2.14.1</bundle>
-		<bundle dependency="true">mvn:com.fasterxml.jackson.datatype/jackson-datatype-jsr310/2.14.1</bundle>
-		<bundle dependency="true">mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-base/2.14.1</bundle>
-		<bundle dependency="true">mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-json-provider/2.14.1</bundle>
-		<bundle dependency="true">mvn:com.fasterxml.jackson.module/jackson-module-jaxb-annotations/2.14.1</bundle>
-		<bundle dependency="true">mvn:org.yaml/snakeyaml/1.33</bundle>
+		<capability>openhab.tp;feature=jackson;version=2.15.2</capability>
+		<bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-annotations/2.15.2</bundle>
+		<bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-core/2.15.2</bundle>
+		<bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-databind/2.15.2</bundle>
+		<bundle dependency="true">mvn:com.fasterxml.jackson.dataformat/jackson-dataformat-cbor/2.15.2</bundle>
+		<bundle dependency="true">mvn:com.fasterxml.jackson.dataformat/jackson-dataformat-xml/2.15.2</bundle>
+		<bundle dependency="true">mvn:com.fasterxml.jackson.dataformat/jackson-dataformat-yaml/2.15.2</bundle>
+		<bundle dependency="true">mvn:com.fasterxml.jackson.datatype/jackson-datatype-jsr310/2.15.2</bundle>
+		<bundle dependency="true">mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-base/2.15.2</bundle>
+		<bundle dependency="true">mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-json-provider/2.15.2</bundle>
+		<bundle dependency="true">mvn:com.fasterxml.jackson.module/jackson-module-jaxb-annotations/2.15.2</bundle>
+		<bundle dependency="true">mvn:org.yaml/snakeyaml/2.1</bundle>
 	</feature>
 
 	<feature name="openhab.tp-asm" description="ASM bundles" version="${project.version}">
