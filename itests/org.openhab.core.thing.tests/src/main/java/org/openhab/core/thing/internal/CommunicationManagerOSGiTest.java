@@ -104,7 +104,7 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
         }
     }
 
-    private static final UnitProvider unitProviderMock = mock(UnitProvider.class);
+    private static final UnitProvider UNIT_PROVIDER_MOCK = mock(UnitProvider.class);
 
     private static final String EVENT = "event";
     private static final String ITEM_NAME_1 = "testItem1";
@@ -116,7 +116,7 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
     private static final SwitchItem ITEM_2 = new SwitchItem(ITEM_NAME_2);
     private static final NumberItem ITEM_3 = new NumberItem(ITEM_NAME_3);
     private static final NumberItem ITEM_4 = new NumberItem(ITEM_NAME_4);
-    private static NumberItem ITEM_5 = new NumberItem(ITEM_NAME_5); // will be replaced later by dimension item
+    private NumberItem item5 = new NumberItem(ITEM_NAME_5); // will be replaced later by dimension item
 
     private static final ThingTypeUID THING_TYPE_UID = new ThingTypeUID("test", "type");
     private static final ThingUID THING_UID = new ThingUID("test", "thing");
@@ -167,8 +167,8 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
 
     @BeforeEach
     public void beforeEach() {
-        when(unitProviderMock.getUnit(Temperature.class)).thenReturn(SIUnits.CELSIUS);
-        ITEM_5 = new NumberItem("Number:Temperature", ITEM_NAME_5, unitProviderMock);
+        when(UNIT_PROVIDER_MOCK.getUnit(Temperature.class)).thenReturn(SIUnits.CELSIUS);
+        item5 = new NumberItem("Number:Temperature", ITEM_NAME_5, UNIT_PROVIDER_MOCK);
 
         safeCaller = getService(SafeCaller.class);
         assertNotNull(safeCaller);
@@ -179,7 +179,7 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
 
         manager = new CommunicationManager(autoUpdateManagerMock, channelTypeRegistryMock, profileFactory, iclRegistry,
                 itemRegistryMock, itemStateConverterMock, eventPublisherMock, safeCaller, thingRegistryMock,
-                unitProviderMock);
+                UNIT_PROVIDER_MOCK);
 
         doAnswer(invocation -> {
             switch (((Channel) invocation.getArguments()[0]).getKind()) {
@@ -227,7 +227,7 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
         when(itemRegistryMock.get(eq(ITEM_NAME_2))).thenReturn(ITEM_2);
         when(itemRegistryMock.get(eq(ITEM_NAME_3))).thenReturn(ITEM_3);
         when(itemRegistryMock.get(eq(ITEM_NAME_4))).thenReturn(ITEM_4);
-        when(itemRegistryMock.get(eq(ITEM_NAME_5))).thenReturn(ITEM_5);
+        when(itemRegistryMock.get(eq(ITEM_NAME_5))).thenReturn(item5);
 
         ChannelType channelType4 = mock(ChannelType.class);
         when(channelType4.getItemType()).thenReturn("Number:Temperature");
@@ -238,7 +238,7 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
 
         when(thingRegistryMock.get(eq(THING_UID))).thenReturn(THING);
 
-        manager.addItemFactory(new CoreItemFactory(unitProviderMock));
+        manager.addItemFactory(new CoreItemFactory(UNIT_PROVIDER_MOCK));
     }
 
     @Test
@@ -307,7 +307,7 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
     public void testItemCommandEventDecimal2Quantity2() {
         MetadataKey key = new MetadataKey(NumberItem.UNIT_METADATA_NAMESPACE, ITEM_NAME_5);
         Metadata metadata = new Metadata(key, ImperialUnits.FAHRENHEIT.toString(), null);
-        ITEM_5.addedMetadata(metadata);
+        item5.addedMetadata(metadata);
 
         manager.receive(ItemEventFactory.createCommandEvent(ITEM_NAME_5, DecimalType.valueOf("20")));
         waitForAssert(() -> {

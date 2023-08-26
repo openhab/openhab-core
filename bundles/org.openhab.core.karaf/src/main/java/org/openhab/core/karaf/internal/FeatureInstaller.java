@@ -470,26 +470,6 @@ public class FeatureInstaller implements ConfigurationListener {
         }
     }
 
-    private boolean installFeature(String name) {
-        try {
-            Feature[] features = featuresService.listInstalledFeatures();
-            if (!anyMatchingFeature(features, withName(name))) {
-                featuresService.installFeature(name,
-                        EnumSet.of(FeaturesService.Option.Upgrade, FeaturesService.Option.NoAutoRefreshBundles));
-                features = featuresService.listInstalledFeatures();
-                if (anyMatchingFeature(features, withName(name))) {
-                    logger.debug("Installed '{}'", name);
-                    postInstalledEvent(name);
-                    return true;
-                }
-            }
-        } catch (Exception e) {
-            logger.error("Failed installing '{}': {}", name, e.getMessage(), debugException(e));
-            configMapCache = null; // make sure we retry the installation
-        }
-        return false;
-    }
-
     private void uninstallFeature(String name) {
         try {
             Feature[] features = featuresService.listInstalledFeatures();

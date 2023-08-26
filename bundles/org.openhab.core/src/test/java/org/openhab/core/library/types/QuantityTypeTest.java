@@ -463,11 +463,11 @@ public class QuantityTypeTest {
         assertEquals(8, bits.byteValue());
         bytes = new QuantityType<>("1 MB");
         assertEquals("1 MB", bytes.toString());
-        bytes = new QuantityType<DataAmount>(1, MetricPrefix.MEGA(Units.BYTE));
+        bytes = new QuantityType<>(1, MetricPrefix.MEGA(Units.BYTE));
         assertEquals("1 MB", bytes.toString());
         bytes = new QuantityType<>("1 GiB");
         assertEquals("1 GiB", bytes.toString());
-        bytes = new QuantityType<DataAmount>(1, BinaryPrefix.GIBI(Units.BYTE));
+        bytes = new QuantityType<>(1, BinaryPrefix.GIBI(Units.BYTE));
         assertEquals("1 GiB", bytes.toString());
         QuantityType<DataAmount> bigAmount = new QuantityType<>("1 kio");
         QuantityType<DataAmount> octets = bigAmount.toUnit(Units.OCTET);
