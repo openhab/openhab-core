@@ -229,7 +229,7 @@ public class StringUtils {
      * @param length the length of the String to return
      * @return the random String
      */
-    public static String randomAlphanummeric(int length) {
+    public static String randomAlphanumeric(int length) {
         return StringUtils.randomString(length, "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvxyz");
     }
 
