@@ -41,7 +41,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openhab.core.library.types.PointType;
-import org.openhab.core.library.unit.CurrencyUnit;
 import org.openhab.core.library.unit.CurrencyUnits;
 import org.openhab.core.library.unit.ImperialUnits;
 import org.openhab.core.library.unit.SIUnits;
@@ -110,7 +109,6 @@ public class I18nProviderImplTest {
         assertThat(setLocale.getCountry(), is(initialConfig.get(REGION)));
         assertThat(setLocale.getVariant(), is(initialConfig.get(VARIANT)));
         assertThat(i18nProviderImpl.getTimeZone(), is(ZoneId.of(TIMEZONE_GMT9)));
-        assertThat(i18nProviderImpl.getBaseCurrency(), is(new CurrencyUnit("EUR", "€")));
     }
 
     @Test
@@ -173,7 +171,6 @@ public class I18nProviderImplTest {
         assertThat(setLocale.getScript(), is(SCRIPT_RU));
         assertThat(setLocale.getCountry(), is(REGION_RU));
         assertThat(setLocale.getVariant(), is(VARIANT_RU));
-        assertThat(i18nProviderImpl.getBaseCurrency(), is(new CurrencyUnit("RUB", "RUB")));
     }
 
     @ParameterizedTest

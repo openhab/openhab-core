@@ -14,7 +14,6 @@ package org.openhab.core.internal.i18n;
 
 import static org.openhab.core.library.unit.MetricPrefix.HECTO;
 
-import java.math.BigDecimal;
 import java.text.MessageFormat;
 import java.time.DateTimeException;
 import java.time.ZoneId;
@@ -25,7 +24,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.Set;
-import java.util.function.Function;
 
 import javax.measure.Quantity;
 import javax.measure.Unit;
@@ -82,8 +80,6 @@ import org.openhab.core.library.dimension.Intensity;
 import org.openhab.core.library.dimension.RadiationSpecificActivity;
 import org.openhab.core.library.dimension.VolumetricFlowRate;
 import org.openhab.core.library.types.PointType;
-import org.openhab.core.library.unit.CurrencyProvider;
-import org.openhab.core.library.unit.CurrencyUnit;
 import org.openhab.core.library.unit.CurrencyUnits;
 import org.openhab.core.library.unit.ImperialUnits;
 import org.openhab.core.library.unit.SIUnits;
@@ -124,8 +120,8 @@ import org.slf4j.LoggerFactory;
         "service.config.category=system", //
         "service.config.description.uri=system:i18n" })
 @NonNullByDefault
-public class I18nProviderImpl implements TranslationProvider, LocaleProvider, LocationProvider, TimeZoneProvider,
-        UnitProvider, CurrencyProvider {
+public class I18nProviderImpl
+        implements TranslationProvider, LocaleProvider, LocationProvider, TimeZoneProvider, UnitProvider {
 
     private final Logger logger = LoggerFactory.getLogger(I18nProviderImpl.class);
 
@@ -133,7 +129,6 @@ public class I18nProviderImpl implements TranslationProvider, LocaleProvider, Lo
 
     // LocaleProvider
     public static final String LANGUAGE = "language";
-    public static final String BASE_CURRENCY = "baseCurrency";
     public static final String SCRIPT = "script";
     public static final String REGION = "region";
     public static final String VARIANT = "variant";
@@ -174,7 +169,6 @@ public class I18nProviderImpl implements TranslationProvider, LocaleProvider, Lo
     @Modified
     protected synchronized void modified(Map<String, Object> config) {
         final String language = toStringOrNull(config.get(LANGUAGE));
-        this.currencyCode = toStringOrNull(config.get(BASE_CURRENCY));
         final String script = toStringOrNull(config.get(SCRIPT));
         final String region = toStringOrNull(config.get(REGION));
         final String variant = toStringOrNull(config.get(VARIANT));
@@ -456,30 +450,5 @@ public class I18nProviderImpl implements TranslationProvider, LocaleProvider, Lo
             Map<Class<? extends Quantity<?>>, Map<SystemOfUnits, Unit<? extends Quantity<?>>>> dimensionMap,
             Class<T> dimension, Unit<T> unit) {
         dimensionMap.put(dimension, Map.of(SIUnits.getInstance(), unit, ImperialUnits.getInstance(), unit));
-    }
-
-    @Override
-    public Unit<Currency> getBaseCurrency() {
-        String currencyCode = this.currencyCode;
-        if (currencyCode == null && locale != null) {
-            currencyCode = java.util.Currency.getInstance(locale).getCurrencyCode();
-        }
-        if (currencyCode != null) {
-            // either the currency was set or determined from the locale
-            String symbol = java.util.Currency.getInstance(currencyCode).getSymbol();
-            return new CurrencyUnit(currencyCode, symbol);
-        } else {
-            return new CurrencyUnit("DEF", null);
-        }
-    }
-
-    @Override
-    public Collection<Unit<Currency>> getCurrencies() {
-        return Set.of();
-    }
-
-    @Override
-    public Function<Unit<Currency>, @Nullable BigDecimal> getExchangeRateFunction() {
-        return unit -> null;
     }
 }

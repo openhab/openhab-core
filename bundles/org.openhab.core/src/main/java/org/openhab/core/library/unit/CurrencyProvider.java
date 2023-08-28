@@ -49,11 +49,13 @@ public interface CurrencyProvider {
     Unit<Currency> getBaseCurrency();
 
     /**
-     * Get all units that are supported by this provider
+     * Get all additional currency that are supported by this provider
+     * <p />
+     * The collection does NOT include the base currency.
      *
      * @return a {@link Collection} of {@link Unit<Currency>}s
      */
-    Collection<Unit<Currency>> getCurrencies();
+    Collection<Unit<Currency>> getAdditionalCurrencies();
 
     /**
      * Get a {@link Function} that supplies exchanges rates for currencies supported by this provider

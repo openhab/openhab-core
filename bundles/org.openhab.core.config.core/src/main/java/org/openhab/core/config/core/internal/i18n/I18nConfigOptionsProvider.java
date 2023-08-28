@@ -29,7 +29,7 @@ import org.openhab.core.config.core.ParameterOption;
 import org.osgi.service.component.annotations.Component;
 
 /**
- * {@link ConfigOptionProvider} that provides a list of
+ * A {@link ConfigOptionProvider} that provides a list of config options for the i18n service
  *
  * @author Simon Kaufmann - Initial contribution
  * @author Erdoan Hadzhiyusein - Added time zone

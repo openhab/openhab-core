@@ -12,12 +12,15 @@
  */
 package org.openhab.core.library.unit;
 
+import java.math.BigDecimal;
 import java.util.Objects;
 
 import javax.measure.Unit;
 import javax.measure.spi.SystemOfUnits;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.internal.library.unit.CurrencyService;
 import org.openhab.core.library.dimension.Currency;
 import org.openhab.core.library.dimension.EnergyPrice;
 
@@ -36,7 +39,8 @@ public final class CurrencyUnits extends AbstractSystemOfUnits {
     private static final CurrencyUnits INSTANCE = new CurrencyUnits();
 
     public static final Unit<Currency> BASE_CURRENCY = new CurrencyUnit("DEF", null);
-    public static Unit<EnergyPrice> BASE_ENERGY_PRICE = new ProductUnit<>(BASE_CURRENCY.divide(Units.KILOWATT_HOUR));
+    public static final Unit<EnergyPrice> BASE_ENERGY_PRICE = new ProductUnit<>(
+            BASE_CURRENCY.divide(Units.KILOWATT_HOUR));
 
     static {
         addUnit(BASE_CURRENCY);
@@ -60,9 +64,10 @@ public final class CurrencyUnits extends AbstractSystemOfUnits {
         }
     }
 
-    public void removeUnit(Unit<Currency> unit) {
+    public static void removeUnit(Unit<Currency> unit) {
+        SimpleUnitFormat.getInstance().removeLabel(unit);
+        SimpleUnitFormat.getInstance().removeAliases(unit);
         INSTANCE.units.remove(unit);
-        // TODO: remove labels/aliases, depends on unreleased indriya feature
     }
 
     public static SystemOfUnits getInstance() {
@@ -71,5 +76,15 @@ public final class CurrencyUnits extends AbstractSystemOfUnits {
 
     public static Unit<Currency> createCurrency(String symbol, String name) {
         return new CurrencyUnit(symbol, name);
+    }
+
+    /**
+     * Get the exchange rate for a given currency to the system's base unit
+     *
+     * @param currency the currency
+     * @return the exchange rate
+     */
+    public static @Nullable BigDecimal getExchangeRate(Unit<Currency> currency) {
+        return CurrencyService.FACTOR_FCN.apply(currency);
     }
 }

@@ -26,6 +26,8 @@ import javax.measure.quantity.Energy;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.internal.library.unit.CurrencyService;
 import org.openhab.core.library.dimension.Currency;
@@ -41,7 +43,18 @@ import org.openhab.core.library.types.QuantityType;
 public class CurrencyUnitTest {
 
     @SuppressWarnings("unused")
-    private final CurrencyService currencyService = new CurrencyService(new TestCurrencyProvider());
+    private final CurrencyService currencyService = new CurrencyService(
+            Map.of("currencyProvider", "org.openhab.core.library.unit.CurrencyUnitTest$TestCurrencyProvider"));
+
+    @BeforeEach
+    public void setup() {
+        currencyService.addCurrencyProvider(new TestCurrencyProvider());
+    }
+
+    @AfterEach
+    public void tearDown() {
+        currencyService.removeCurrencyProvider(new TestCurrencyProvider());
+    }
 
     @Test
     public void testSimpleConversion() {
@@ -99,7 +112,7 @@ public class CurrencyUnitTest {
         }
 
         @Override
-        public Collection<Unit<Currency>> getCurrencies() {
+        public Collection<Unit<Currency>> getAdditionalCurrencies() {
             return List.of(DKK, USD);
         }
 

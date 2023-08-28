@@ -39,7 +39,6 @@ import org.openhab.core.internal.library.unit.CurrencyConverter;
 import org.openhab.core.internal.library.unit.CurrencyService;
 import org.openhab.core.library.dimension.Currency;
 
-import tech.units.indriya.format.SimpleUnitFormat;
 import tech.units.indriya.function.AbstractConverter;
 import tech.units.indriya.function.AddConverter;
 import tech.units.indriya.function.Calculus;
@@ -88,16 +87,16 @@ public final class CurrencyUnit implements Unit<Currency>, Comparable<Unit<Curre
 
     @Override
     public String toString() {
-        return SimpleUnitFormat.getInstance().format(this);
+        return getName();
     }
 
     @Override
-    public final Unit<Currency> getSystemUnit() {
+    public Unit<Currency> getSystemUnit() {
         return this;
     }
 
     @Override
-    public final boolean isCompatible(@NonNullByDefault({}) Unit<?> that) {
+    public boolean isCompatible(@NonNullByDefault({}) Unit<?> that) {
         return DIMENSION.equals(that.getDimension());
     }
 
