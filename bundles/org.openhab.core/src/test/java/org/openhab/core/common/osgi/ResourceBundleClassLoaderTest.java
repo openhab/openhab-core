@@ -36,7 +36,7 @@ public class ResourceBundleClassLoaderTest {
 
     private @TempDir @NonNullByDefault({}) Path tempDir;
 
-    static URL createTmpTestPropetiesFile(Path root, String relativeFile) throws Exception {
+    static URL createTmpTestPropertiesFile(Path root, String relativeFile) throws Exception {
         Path filePath = Paths.get(relativeFile);
         Path dirPath = filePath.getParent();
 
@@ -49,8 +49,8 @@ public class ResourceBundleClassLoaderTest {
 
     @Test
     public void testName() throws Exception {
-        URL hostPropertiesURL = createTmpTestPropetiesFile(tempDir, "host/OH-INF/i18n/test.properties");
-        URL fragmentPropertiesURL = createTmpTestPropetiesFile(tempDir, "fragment/OH-INF/i18n/test.properties");
+        URL hostPropertiesURL = createTmpTestPropertiesFile(tempDir, "host/OH-INF/i18n/test.properties");
+        URL fragmentPropertiesURL = createTmpTestPropertiesFile(tempDir, "fragment/OH-INF/i18n/test.properties");
 
         Bundle bundleMock = mock(Bundle.class);
         when(bundleMock.findEntries(any(), any(), anyBoolean()))
