@@ -79,7 +79,6 @@ import org.openhab.core.thing.profiles.StateProfile;
 import org.openhab.core.thing.profiles.TriggerProfile;
 import org.openhab.core.thing.type.ChannelKind;
 import org.openhab.core.thing.type.ChannelType;
-import org.openhab.core.thing.type.ChannelTypeRegistry;
 import org.openhab.core.thing.type.ChannelTypeUID;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
@@ -148,7 +147,6 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
             ChannelBuilder.create(TRIGGER_CHANNEL_UID_2).withKind(ChannelKind.TRIGGER).build()).build();
 
     private @Mock @NonNullByDefault({}) AutoUpdateManager autoUpdateManagerMock;
-    private @Mock @NonNullByDefault({}) ChannelTypeRegistry channelTypeRegistryMock;
     private @Mock @NonNullByDefault({}) EventPublisher eventPublisherMock;
     private @Mock @NonNullByDefault({}) ItemRegistry itemRegistryMock;
     private @Mock @NonNullByDefault({}) ItemStateConverter itemStateConverterMock;
@@ -177,9 +175,8 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
 
         assertNotNull(profileFactory);
 
-        manager = new CommunicationManager(autoUpdateManagerMock, channelTypeRegistryMock, profileFactory, iclRegistry,
-                itemRegistryMock, itemStateConverterMock, eventPublisherMock, safeCaller, thingRegistryMock,
-                UNIT_PROVIDER_MOCK);
+        manager = new CommunicationManager(autoUpdateManagerMock, profileFactory, iclRegistry, itemRegistryMock,
+                itemStateConverterMock, eventPublisherMock, safeCaller, thingRegistryMock);
 
         doAnswer(invocation -> {
             switch (((Channel) invocation.getArguments()[0]).getKind()) {
@@ -231,8 +228,6 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
 
         ChannelType channelType4 = mock(ChannelType.class);
         when(channelType4.getItemType()).thenReturn("Number:Temperature");
-
-        when(channelTypeRegistryMock.getChannelType(CHANNEL_TYPE_UID_4)).thenReturn(channelType4);
 
         THING.setHandler(thingHandlerMock);
 

@@ -112,12 +112,10 @@ public class ItemStateConditionHandler extends BaseConditionModuleHandler implem
                         module.getId());
                 return;
             }
-        } else if (event instanceof ItemRemovedEvent removedEvent) {
-            if (itemName.equals(removedEvent.getItem().name)) {
-                logger.warn("Item '{}' needed for rule '{}' removed. Condition '{}' will no longer work.", itemName,
-                        ruleUID, module.getId());
-                return;
-            }
+        } else if ((event instanceof ItemRemovedEvent removedEvent) && itemName.equals(removedEvent.getItem().name)) {
+            logger.warn("Item '{}' needed for rule '{}' removed. Condition '{}' will no longer work.", itemName,
+                    ruleUID, module.getId());
+            return;
         }
     }
 
@@ -155,7 +153,7 @@ public class ItemStateConditionHandler extends BaseConditionModuleHandler implem
         return false;
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked", "null" })
+    @SuppressWarnings("unchecked")
     private boolean lessThanOrEqualsToItemState(String itemName, String state) throws ItemNotFoundException {
         Item item = itemRegistry.getItem(itemName);
         State compareState = TypeParser.parseState(item.getAcceptedDataTypes(), state);
@@ -192,7 +190,7 @@ public class ItemStateConditionHandler extends BaseConditionModuleHandler implem
         return false;
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked", "null" })
+    @SuppressWarnings("unchecked")
     private boolean greaterThanOrEqualsToItemState(String itemName, String state) throws ItemNotFoundException {
         Item item = itemRegistry.getItem(itemName);
         State compareState = TypeParser.parseState(item.getAcceptedDataTypes(), state);

@@ -35,7 +35,6 @@ import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.events.EventSubscriber;
-import org.openhab.core.i18n.UnitProvider;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemFactory;
 import org.openhab.core.items.ItemRegistry;
@@ -73,7 +72,6 @@ import org.openhab.core.thing.profiles.ProfileFactory;
 import org.openhab.core.thing.profiles.ProfileTypeUID;
 import org.openhab.core.thing.profiles.StateProfile;
 import org.openhab.core.thing.profiles.TriggerProfile;
-import org.openhab.core.thing.type.ChannelTypeRegistry;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
 import org.openhab.core.types.Type;
@@ -123,7 +121,6 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
     private final Logger logger = LoggerFactory.getLogger(CommunicationManager.class);
 
     private final AutoUpdateManager autoUpdateManager;
-    private final ChannelTypeRegistry channelTypeRegistry;
     private final SystemProfileFactory defaultProfileFactory;
     private final ItemChannelLinkRegistry itemChannelLinkRegistry;
     private final ItemRegistry itemRegistry;
@@ -131,22 +128,19 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
     private final EventPublisher eventPublisher;
     private final SafeCaller safeCaller;
     private final ThingRegistry thingRegistry;
-    private final UnitProvider unitProvider;
 
     private final ExpiringCacheMap<Integer, Profile> profileSafeCallCache = new ExpiringCacheMap<>(CACHE_EXPIRATION);
 
     @Activate
     public CommunicationManager(final @Reference AutoUpdateManager autoUpdateManager,
-            final @Reference ChannelTypeRegistry channelTypeRegistry,
             final @Reference SystemProfileFactory defaultProfileFactory,
             final @Reference ItemChannelLinkRegistry itemChannelLinkRegistry,
             final @Reference ItemRegistry itemRegistry, //
             final @Reference ItemStateConverter itemStateConverter, //
             final @Reference EventPublisher eventPublisher, //
             final @Reference SafeCaller safeCaller, //
-            final @Reference ThingRegistry thingRegistry, final @Reference UnitProvider unitProvider) {
+            final @Reference ThingRegistry thingRegistry) {
         this.autoUpdateManager = autoUpdateManager;
-        this.channelTypeRegistry = channelTypeRegistry;
         this.defaultProfileFactory = defaultProfileFactory;
         this.itemChannelLinkRegistry = itemChannelLinkRegistry;
         this.itemRegistry = itemRegistry;
@@ -154,7 +148,6 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
         this.eventPublisher = eventPublisher;
         this.safeCaller = safeCaller;
         this.thingRegistry = thingRegistry;
-        this.unitProvider = unitProvider;
 
         itemChannelLinkRegistry.addRegistryChangeListener(this);
     }
