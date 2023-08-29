@@ -23,7 +23,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.library.dimension.Currency;
 
 /**
- * The {@link CurrencyProvider} can be implemented by services that supply currencies and their
+ * The {@link CurrencyProvider} can be implemented by services that supply currencies and their exchange rates
  *
  * @author Jan N. Klug - Initial contribution
  */
