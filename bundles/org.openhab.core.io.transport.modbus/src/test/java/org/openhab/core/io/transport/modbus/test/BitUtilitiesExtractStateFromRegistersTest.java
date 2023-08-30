@@ -354,7 +354,7 @@ public class BitUtilitiesExtractStateFromRegistersTest {
                 .collect(Collectors.toList()));
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings("unchecked")
     @ParameterizedTest
     @MethodSource("data")
     public void testextractStateFromRegisters(Object expectedResult, ValueType type, ModbusRegisterArray registers,

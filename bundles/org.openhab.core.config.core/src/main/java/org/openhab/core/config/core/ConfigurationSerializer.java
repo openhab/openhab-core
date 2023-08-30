@@ -32,7 +32,6 @@ import com.google.gson.JsonSerializer;
  */
 public class ConfigurationSerializer implements JsonSerializer<Configuration> {
 
-    @SuppressWarnings("unchecked")
     @Override
     public JsonElement serialize(Configuration src, Type typeOfSrc, JsonSerializationContext context) {
         JsonObject result = new JsonObject();

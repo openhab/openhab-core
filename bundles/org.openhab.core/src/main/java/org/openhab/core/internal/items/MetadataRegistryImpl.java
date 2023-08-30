@@ -72,7 +72,7 @@ public class MetadataRegistryImpl extends AbstractRegistry<Metadata, MetadataKey
      * @param itemname the name of the item for which the namespaces should be searched.
      */
     @Override
-    public Collection getAllNamespaces(String itemname) {
+    public Collection<String> getAllNamespaces(String itemname) {
         return stream().map(Metadata::getUID).filter(key -> key.getItemName().equals(itemname))
                 .map(MetadataKey::getNamespace).collect(Collectors.toSet());
     }

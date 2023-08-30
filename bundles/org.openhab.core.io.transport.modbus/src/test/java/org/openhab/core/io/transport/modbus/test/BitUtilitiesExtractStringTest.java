@@ -103,7 +103,7 @@ public class BitUtilitiesExtractStringTest {
         });
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings("unchecked")
     @ParameterizedTest
     @MethodSource("data")
     public void testExtractStringFromRegisters(Object expectedResult, ModbusRegisterArray registers, int index,
@@ -119,7 +119,7 @@ public class BitUtilitiesExtractStringTest {
         }
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings("unchecked")
     @ParameterizedTest
     @MethodSource("dataWithByteVariations")
     public void testExtractStringFromBytes(Object expectedResult, int byteOffset, byte[] bytes, int byteIndex,

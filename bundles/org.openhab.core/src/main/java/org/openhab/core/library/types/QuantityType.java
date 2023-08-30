@@ -184,7 +184,7 @@ public class QuantityType<T extends Quantity<T>> extends Number
      * @return a new {@link QuantityType}
      */
     public static <T extends Quantity<T>> QuantityType<T> valueOf(double value, Unit<T> unit) {
-        return new QuantityType<T>(value, unit);
+        return new QuantityType<>(value, unit);
     }
 
     @Override
@@ -204,7 +204,6 @@ public class QuantityType<T extends Quantity<T>> extends Number
         return new QuantityType<>(value);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public boolean equals(@Nullable Object obj) {
         if (this == obj) {
@@ -229,7 +228,7 @@ public class QuantityType<T extends Quantity<T>> extends Number
 
     @Override
     public int compareTo(QuantityType<T> o) {
-        return internalCompareTo((QuantityType<?>) o);
+        return internalCompareTo(o);
     }
 
     private int internalCompareTo(QuantityType<?> o) {
@@ -269,7 +268,7 @@ public class QuantityType<T extends Quantity<T>> extends Number
                 UnitConverter uc = getUnit().getConverterToAny(targetUnit);
                 Quantity<?> result = Quantities.getQuantity(uc.convert(quantity.getValue()), targetUnit);
 
-                return new QuantityType<T>(result.getValue(), (Unit<T>) targetUnit);
+                return new QuantityType<>(result.getValue(), (Unit<T>) targetUnit);
             } catch (UnconvertibleException | IncommensurableException e) {
                 logger.debug("Unable to convert unit from {} to {}", getUnit(), targetUnit);
                 return null;
@@ -306,7 +305,6 @@ public class QuantityType<T extends Quantity<T>> extends Number
         return toUnit(targetUnit);
     }
 
-    @SuppressWarnings("unchecked")
     public @Nullable QuantityType<?> toInvertibleUnit(String targetUnit) {
         Unit<?> unit = AbstractUnit.parse(targetUnit);
         if (unit != null) {
@@ -328,7 +326,6 @@ public class QuantityType<T extends Quantity<T>> extends Number
      * @param targetUnit the unit to which this {@link QuantityType} will be converted to.
      * @return the new {@link QuantityType} in the given {@link Unit} or {@code null} in case of an error.
      */
-    @SuppressWarnings("unchecked")
     public @Nullable QuantityType<T> toUnitRelative(Unit<T> targetUnit) {
         if (targetUnit.equals(getUnit())) {
             return this;
@@ -338,7 +335,7 @@ public class QuantityType<T extends Quantity<T>> extends Number
         }
         Quantity<?> result = quantity.to(targetUnit);
 
-        return new QuantityType<T>(result.getValue(), targetUnit);
+        return new QuantityType<>(result.getValue(), targetUnit);
     }
 
     public BigDecimal toBigDecimal() {
@@ -478,7 +475,7 @@ public class QuantityType<T extends Quantity<T>> extends Number
      * @return the sum of the given {@link QuantityType} with this QuantityType.
      */
     public QuantityType<T> add(QuantityType<T> state) {
-        return new QuantityType<T>(this.quantity.add(state.quantity));
+        return new QuantityType<>(this.quantity.add(state.quantity));
     }
 
     /**
@@ -497,7 +494,7 @@ public class QuantityType<T extends Quantity<T>> extends Number
      * @return the difference by subtracting the given {@link QuantityType} from this QuantityType.
      */
     public QuantityType<T> subtract(QuantityType<T> state) {
-        return new QuantityType<T>(this.quantity.subtract(state.quantity));
+        return new QuantityType<>(this.quantity.subtract(state.quantity));
     }
 
     /**
@@ -549,12 +546,12 @@ public class QuantityType<T extends Quantity<T>> extends Number
     public QuantityType<T> offset(QuantityType<T> offset, Unit<T> unit) {
         final Quantity<T> sum = Arrays.asList(quantity, offset.quantity).stream().reduce(QuantityFunctions.sum(unit))
                 .get();
-        return new QuantityType<T>(sum);
+        return new QuantityType<>(sum);
     }
 
     /**
      * Return the reciprocal of this QuantityType.
-     * 
+     *
      * @return a QuantityType with both the value and unit reciprocated
      */
     public QuantityType<?> inverse() {
