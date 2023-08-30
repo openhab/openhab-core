@@ -22,7 +22,7 @@
     <jetty.version>9.4.50.v20221201</jetty.version>
     <pax.logging.version>2.2.0</pax.logging.version>
     <pax.web.version>8.0.15</pax.web.version>
-    <swagger.version>2.1.9</swagger.version>
+    <swagger.version>2.2.15</swagger.version>
   </properties>
 
   <dependencyManagement>
@@ -1068,7 +1068,7 @@
     <dependency>
       <groupId>org.javassist</groupId>
       <artifactId>javassist</artifactId>
-      <version>3.27.0-GA</version>
+      <version>3.29.2-GA</version>
       <scope>compile</scope>
     </dependency>
 
