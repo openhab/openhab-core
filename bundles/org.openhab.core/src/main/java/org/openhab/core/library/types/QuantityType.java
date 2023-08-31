@@ -475,7 +475,9 @@ public class QuantityType<T extends Quantity<T>> extends Number
      * @return the sum of the given {@link QuantityType} with this QuantityType.
      */
     public QuantityType<T> add(QuantityType<T> state) {
-        return new QuantityType<>(this.quantity.add(state.quantity));
+        Quantity<T> quantity = Quantities.getQuantity(this.quantity.getValue(), this.quantity.getUnit(),
+                Scale.ABSOLUTE);
+        return new QuantityType<>(quantity.add(state.quantity));
     }
 
     /**
@@ -494,7 +496,9 @@ public class QuantityType<T extends Quantity<T>> extends Number
      * @return the difference by subtracting the given {@link QuantityType} from this QuantityType.
      */
     public QuantityType<T> subtract(QuantityType<T> state) {
-        return new QuantityType<>(this.quantity.subtract(state.quantity));
+        Quantity<T> quantity = Quantities.getQuantity(this.quantity.getValue(), this.quantity.getUnit(),
+                Scale.ABSOLUTE);
+        return new QuantityType<>(quantity.subtract(state.quantity));
     }
 
     /**
@@ -504,7 +508,9 @@ public class QuantityType<T extends Quantity<T>> extends Number
      * @return the product of the given value with this {@link QuantityType}.
      */
     public QuantityType<?> multiply(BigDecimal value) {
-        return new QuantityType<>(this.quantity.multiply(value));
+        Quantity<T> quantity = Quantities.getQuantity(this.quantity.getValue(), this.quantity.getUnit(),
+                Scale.ABSOLUTE);
+        return new QuantityType<>(quantity.multiply(value));
     }
 
     /**
@@ -514,7 +520,11 @@ public class QuantityType<T extends Quantity<T>> extends Number
      * @return the product of the given {@link QuantityType} and this QuantityType.
      */
     public QuantityType<?> multiply(QuantityType<?> state) {
-        return new QuantityType<>(this.quantity.multiply(state.quantity));
+        Quantity<T> quantity = Quantities.getQuantity(this.quantity.getValue(), this.quantity.getUnit(),
+                Scale.ABSOLUTE);
+        Quantity<?> stateQuantity = Quantities.getQuantity(state.quantity.getValue(), state.quantity.getUnit(),
+                Scale.ABSOLUTE);
+        return new QuantityType<>(quantity.multiply(stateQuantity));
     }
 
     /**
@@ -524,7 +534,9 @@ public class QuantityType<T extends Quantity<T>> extends Number
      * @return the quotient from this QuantityType and the given value.
      */
     public QuantityType<?> divide(BigDecimal value) {
-        return new QuantityType<>(this.quantity.divide(value));
+        Quantity<T> quantity = Quantities.getQuantity(this.quantity.getValue(), this.quantity.getUnit(),
+                Scale.ABSOLUTE);
+        return new QuantityType<>(quantity.divide(value));
     }
 
     /**
@@ -534,7 +546,11 @@ public class QuantityType<T extends Quantity<T>> extends Number
      * @return the quotient from this QuantityType and the given {@link QuantityType}.
      */
     public QuantityType<?> divide(QuantityType<?> state) {
-        return new QuantityType<>(this.quantity.divide(state.quantity));
+        Quantity<T> quantity = Quantities.getQuantity(this.quantity.getValue(), this.quantity.getUnit(),
+                Scale.ABSOLUTE);
+        Quantity<?> stateQuantity = Quantities.getQuantity(state.quantity.getValue(), state.quantity.getUnit(),
+                Scale.ABSOLUTE);
+        return new QuantityType<>(quantity.divide(stateQuantity));
     }
 
     /**
@@ -544,6 +560,8 @@ public class QuantityType<T extends Quantity<T>> extends Number
      * @return changed QuantityType by offset
      */
     public QuantityType<T> offset(QuantityType<T> offset, Unit<T> unit) {
+        Quantity<T> quantity = Quantities.getQuantity(this.quantity.getValue(), this.quantity.getUnit(),
+                Scale.ABSOLUTE);
         final Quantity<T> sum = Arrays.asList(quantity, offset.quantity).stream().reduce(QuantityFunctions.sum(unit))
                 .get();
         return new QuantityType<>(sum);
@@ -555,6 +573,8 @@ public class QuantityType<T extends Quantity<T>> extends Number
      * @return a QuantityType with both the value and unit reciprocated
      */
     public QuantityType<?> inverse() {
-        return new QuantityType<>(this.quantity.inverse());
+        Quantity<T> quantity = Quantities.getQuantity(this.quantity.getValue(), this.quantity.getUnit(),
+                Scale.ABSOLUTE);
+        return new QuantityType<>(quantity.inverse());
     }
 }
