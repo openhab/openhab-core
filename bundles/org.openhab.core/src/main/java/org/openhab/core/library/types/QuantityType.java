@@ -173,7 +173,7 @@ public class QuantityType<T extends Quantity<T>> extends Number
      * @param quantity the {@link Quantity} for the new {@link QuantityType}.
      */
     private QuantityType(Quantity<T> quantity) {
-        this.quantity = quantity;
+        this.quantity = (Quantity<T>) Quantities.getQuantity(quantity.getValue(), quantity.getUnit(), Scale.RELATIVE);
     }
 
     /**
