@@ -347,6 +347,13 @@ public class QuantityTypeTest {
         assertThat(new QuantityType<>("1 °F").add(new QuantityType<>("65 °F")), is(new QuantityType<>("66 °F")));
         assertThat(new QuantityType<>("2 °F").add(new QuantityType<>("65 °F")), is(new QuantityType<>("67 °F")));
 
+        // test associativity of add
+        QuantityType<Temperature> tempResult = new QuantityType<Temperature>("1 °F")
+                .add(new QuantityType<Temperature>("2 °F")).add(new QuantityType<Temperature>("3 °F"));
+        assertThat(tempResult, is(new QuantityType<Temperature>("1 °F")
+                .add(new QuantityType<Temperature>("2 °F").add(new QuantityType<Temperature>("3 °F")))));
+        assertThat(tempResult, is(new QuantityType<Temperature>("6 °F")));
+
         assertThat(new QuantityType<>("65 kWh").add(new QuantityType<>("1 kWh")), is(new QuantityType<>("66 kWh")));
         assertThat(new QuantityType<>("65 kJ").add(new QuantityType<>("1 kJ")), is(new QuantityType<>("66 kJ")));
         assertThat(new QuantityType<>("65 kWh").add(new QuantityType<>("1 kJ")), is(new QuantityType<>("234001 kJ")));
@@ -393,14 +400,20 @@ public class QuantityTypeTest {
 
         assertThat(new QuantityType<>("2 m").multiply(new QuantityType<>("4 cm")), is(new QuantityType<>("8 m·cm")));
 
-        assertThat(new QuantityType<>("65 °F").multiply(QuantityType.valueOf(1, Units.ONE)).toUnit("°F").doubleValue(),
-                is(closeTo(65d, 0.0000000000000001d)));
-        assertThat(new QuantityType<>("65 °F").multiply(QuantityType.valueOf(2, Units.ONE)).toUnit("°F").doubleValue(),
-                is(closeTo(589.67d, 0.0000000000000001d)));
-        assertThat(QuantityType.valueOf(1, Units.ONE).multiply(new QuantityType<>("65 °F")).toUnit("°F").doubleValue(),
-                is(closeTo(65d, 0.0000000000000001d)));
-        assertThat(QuantityType.valueOf(2, Units.ONE).multiply(new QuantityType<>("65 °F")).toUnit("°F").doubleValue(),
-                is(closeTo(589.67d, 0.0000000000000001d)));
+        // Make sure the original unit is preserved when multiplying with dimensionless, so add associativity is
+        // guaranteed
+        result = new QuantityType<>("65 °F").multiply(QuantityType.valueOf(1, Units.ONE));
+        assertThat(result.doubleValue(), is(closeTo(65d, 0.0000000000000001d)));
+        assertEquals(ImperialUnits.FAHRENHEIT, result.getUnit());
+        result = new QuantityType<>("65 °F").multiply(QuantityType.valueOf(2, Units.ONE));
+        assertThat(result.doubleValue(), is(closeTo(589.67d, 0.0000000000000001d)));
+        assertEquals(ImperialUnits.FAHRENHEIT, result.getUnit());
+        result = QuantityType.valueOf(1, Units.ONE).multiply(new QuantityType<>("65 °F"));
+        assertThat(result.doubleValue(), is(closeTo(65d, 0.0000000000000001d)));
+        assertEquals(ImperialUnits.FAHRENHEIT, result.getUnit());
+        result = QuantityType.valueOf(2, Units.ONE).multiply(new QuantityType<>("65 °F"));
+        assertThat(result.doubleValue(), is(closeTo(589.67d, 0.0000000000000001d)));
+        assertEquals(ImperialUnits.FAHRENHEIT, result.getUnit());
 
         result = new QuantityType<>("65 °F").multiply(new QuantityType<>("1 °F"));
         assertThat(result.doubleValue(), is(closeTo(74598.68175925925925925925925925927d, 0.0000000000000001d)));
@@ -449,10 +462,13 @@ public class QuantityTypeTest {
 
         assertThat(new QuantityType<>("4 m").divide(new QuantityType<>("2 cm")), is(new QuantityType<>("2 m/cm")));
 
-        assertThat(new QuantityType<>("65 °F").divide(QuantityType.valueOf(1, Units.ONE)).toUnit("°F").doubleValue(),
-                is(closeTo(65d, 0.0000000000000001d)));
-        assertThat(new QuantityType<>("65 °F").divide(QuantityType.valueOf(2, Units.ONE)).toUnit("°F").doubleValue(),
-                is(closeTo(-197.335d, 0.0000000000000001d)));
+        // Make sure the original unit is preserved when dividing with dimensionless, so add associativity is guaranteed
+        result = new QuantityType<>("65 °F").divide(QuantityType.valueOf(1, Units.ONE));
+        assertThat(result.doubleValue(), is(closeTo(65d, 0.0000000000000001d)));
+        assertEquals(ImperialUnits.FAHRENHEIT, result.getUnit());
+        result = new QuantityType<>("65 °F").divide(QuantityType.valueOf(2, Units.ONE));
+        assertThat(result.doubleValue(), is(closeTo(-197.335d, 0.0000000000000001d)));
+        assertEquals(ImperialUnits.FAHRENHEIT, result.getUnit());
         result = QuantityType.valueOf(1, Units.ONE).divide(new QuantityType<>("65 °F"));
         assertThat(result.doubleValue(), is(closeTo(0.003430727886099834181485505174681228d, 0.0000000000000001d)));
         assertEquals(Units.KELVIN.inverse(), result.getUnit());
@@ -611,7 +627,7 @@ public class QuantityTypeTest {
 
     @Test
     public void testRelativeConversion() {
-        QuantityType<Temperature> c = new QuantityType("1 °C");
+        QuantityType<Temperature> c = new QuantityType<>("1 °C");
         QuantityType<Temperature> f = c.toUnitRelative(ImperialUnits.FAHRENHEIT);
         assertEquals(1.8, f.doubleValue());
     }

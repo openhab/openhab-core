@@ -524,7 +524,13 @@ public class QuantityType<T extends Quantity<T>> extends Number
                 Scale.ABSOLUTE);
         Quantity<?> stateQuantity = Quantities.getQuantity(state.quantity.getValue(), state.quantity.getUnit(),
                 Scale.ABSOLUTE);
-        return new QuantityType<>(quantity.multiply(stateQuantity));
+        QuantityType<?> result = new QuantityType<>(quantity.multiply(stateQuantity));
+        // If dimension did not change from dimension of one of the arguments, reapply the unit so add associativity is
+        // guaranteed
+        Unit<?> unit = result.getUnit();
+        QuantityType<?> convertedResult = getUnit().isCompatible(unit) ? result.toUnit(getUnit())
+                : state.getUnit().isCompatible(unit) ? result.toUnit(state.getUnit()) : result;
+        return convertedResult == null ? result : convertedResult;
     }
 
     /**
@@ -550,7 +556,13 @@ public class QuantityType<T extends Quantity<T>> extends Number
                 Scale.ABSOLUTE);
         Quantity<?> stateQuantity = Quantities.getQuantity(state.quantity.getValue(), state.quantity.getUnit(),
                 Scale.ABSOLUTE);
-        return new QuantityType<>(quantity.divide(stateQuantity));
+        QuantityType<?> result = new QuantityType<>(quantity.divide(stateQuantity));
+        // If dimension did not change from dimension of one of the arguments, reapply the unit so add associativity is
+        // guaranteed
+        Unit<?> unit = result.getUnit();
+        QuantityType<?> convertedResult = getUnit().isCompatible(unit) ? result.toUnit(getUnit())
+                : state.getUnit().isCompatible(unit) ? result.toUnit(state.getUnit()) : result;
+        return convertedResult == null ? result : convertedResult;
     }
 
     /**
