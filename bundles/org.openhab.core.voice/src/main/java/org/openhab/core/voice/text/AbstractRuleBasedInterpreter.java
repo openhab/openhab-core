@@ -602,26 +602,24 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
         Map<Item, List<List<List<String>>>> map = getItemTokens(language.getLocale());
         for (Entry<Item, List<List<List<String>>>> entry : map.entrySet()) {
             Item item = entry.getKey();
-            for (List<List<String>> parts : entry.getValue()) {
+            for (List<List<String>> itemLabelFragmentsPath : entry.getValue()) {
                 boolean exactMatch = false;
-                logger.trace("Checking tokens {} against the item tokens {}", labelFragments, parts);
+                logger.trace("Checking tokens {} against the item tokens {}", labelFragments, itemLabelFragmentsPath);
                 List<String> lowercaseLabelFragments = Arrays.stream(labelFragments)
                         .map(lf -> lf.toLowerCase(language.getLocale())).toList();
                 List<String> unmatchedFragments = new ArrayList<>(lowercaseLabelFragments);
-                for (List<String> segment : parts) {
-                    if (segment.equals(lowercaseLabelFragments)) {
+                for (List<String> itemLabelFragments : itemLabelFragmentsPath) {
+                    if (itemLabelFragments.equals(lowercaseLabelFragments)) {
                         exactMatch = true;
                         unmatchedFragments.clear();
                         break;
                     }
-                    if (!unmatchedFragments.isEmpty()) {
-                        segment.stream().filter(unmatchedFragments::contains).forEach(unmatchedFragments::remove);
-                    }
+                    unmatchedFragments.removeAll(itemLabelFragments);
                 }
-                boolean allMatch = unmatchedFragments.isEmpty();
-                logger.trace("Partial match: {}", allMatch);
+                boolean allMatched = unmatchedFragments.isEmpty();
+                logger.trace("All labels matched: {}", allMatched);
                 logger.trace("Exact match: {}", exactMatch);
-                if (allMatch) {
+                if (allMatched) {
                     if (commandType == null || item.getAcceptedCommandTypes().contains(commandType)) {
                         insertDiscardingMembers(items, item);
                         if (exactMatch) {
@@ -643,13 +641,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
 
     private static void insertDiscardingMembers(Set<Item> items, Item item) {
         String name = item.getName();
-        boolean insert = true;
-        for (Item si : items) {
-            if (name.startsWith(si.getName())) {
-                insert = false;
-                break;
-            }
-        }
+        boolean insert = items.stream().noneMatch(i -> name.startsWith(i.getName()));
         if (insert) {
             items.removeIf((matchedItem) -> matchedItem.getName().startsWith(name));
             items.add(item);

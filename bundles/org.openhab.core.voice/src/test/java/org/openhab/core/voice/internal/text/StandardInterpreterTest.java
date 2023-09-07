@@ -16,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Locale;
@@ -24,9 +25,10 @@ import java.util.Set;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
@@ -45,6 +47,7 @@ import org.openhab.core.voice.text.InterpretationException;
  * @author Miguel Álvarez - Initial contribution
  */
 @NonNullByDefault
+@ExtendWith(MockitoExtension.class)
 public class StandardInterpreterTest {
 
     private @Mock @NonNullByDefault({}) EventPublisher eventPublisherMock;
@@ -56,7 +59,6 @@ public class StandardInterpreterTest {
 
     @BeforeEach
     public void setUp() {
-        MockitoAnnotations.openMocks(this);
         this.standardInterpreter = new StandardInterpreter(eventPublisherMock, itemRegistryMock, metadataRegistryMock);
     }
 
@@ -67,8 +69,7 @@ public class StandardInterpreterTest {
         var computerScreenItem = new SwitchItem("screen");
         computerScreenItem.setLabel("Computer Screen");
         List<Item> items = List.of(computerItem, computerScreenItem);
-        Mockito.when(itemRegistryMock.getAll()).thenReturn(items);
-        Mockito.when(itemRegistryMock.getItems()).thenReturn(items);
+        when(itemRegistryMock.getItems()).thenReturn(items);
         assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, "turn off computer"));
         verify(eventPublisherMock, times(1))
                 .post(ItemEventFactory.createCommandEvent(computerItem.getName(), OnOffType.OFF));
@@ -84,11 +85,10 @@ public class StandardInterpreterTest {
         screenItem.setLabel("Computer Screen");
         var screenSwitchItem = new SwitchItem("screen_power");
         screenSwitchItem.setLabel("Power");
-        Mockito.when(computerItem.getMembers()).thenReturn(Set.of(computerSwitchItem));
-        Mockito.when(screenItem.getMembers()).thenReturn(Set.of(screenSwitchItem));
+        when(computerItem.getMembers()).thenReturn(Set.of(computerSwitchItem));
+        when(screenItem.getMembers()).thenReturn(Set.of(screenSwitchItem));
         List<Item> items = List.of(computerItem, computerSwitchItem, screenItem, screenSwitchItem);
-        Mockito.when(itemRegistryMock.getAll()).thenReturn(items);
-        Mockito.when(itemRegistryMock.getItems()).thenReturn(items);
+        when(itemRegistryMock.getItems()).thenReturn(items);
         assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, "turn off computer"));
         verify(eventPublisherMock, times(1))
                 .post(ItemEventFactory.createCommandEvent(computerSwitchItem.getName(), OnOffType.OFF));
@@ -99,11 +99,10 @@ public class StandardInterpreterTest {
         var computerItem = new SwitchItem("computer");
         computerItem.setLabel("Computer");
         MetadataKey computerMetadataKey = new MetadataKey("synonyms", computerItem.getName());
-        Mockito.when(metadataRegistryMock.get(computerMetadataKey))
+        when(metadataRegistryMock.get(computerMetadataKey))
                 .thenReturn(new Metadata(computerMetadataKey, "PC,Bedroom PC", null));
         List<Item> items = List.of(computerItem);
-        Mockito.when(itemRegistryMock.getAll()).thenReturn(items);
-        Mockito.when(itemRegistryMock.getItems()).thenReturn(items);
+        when(itemRegistryMock.getItems()).thenReturn(items);
         assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, "turn off computer"));
         verify(eventPublisherMock, times(1))
                 .post(ItemEventFactory.createCommandEvent(computerItem.getName(), OnOffType.OFF));
