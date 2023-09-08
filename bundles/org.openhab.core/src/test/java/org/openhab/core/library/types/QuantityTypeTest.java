@@ -347,6 +347,10 @@ public class QuantityTypeTest {
         assertThat(new QuantityType<>("1 °F").add(new QuantityType<>("65 °F")), is(new QuantityType<>("66 °F")));
         assertThat(new QuantityType<>("2 °F").add(new QuantityType<>("65 °F")), is(new QuantityType<>("67 °F")));
 
+        result = new QuantityType<>("65 °F").add(new QuantityType<>("5 °C")).toUnit("°F");
+        assertThat(result.doubleValue(), is(closeTo(74d, 0.0000000000000001d)));
+        assertEquals(ImperialUnits.FAHRENHEIT, result.getUnit());
+
         // test associativity of add
         QuantityType<Temperature> tempResult = new QuantityType<Temperature>("1 °F")
                 .add(new QuantityType<Temperature>("2 °F")).add(new QuantityType<Temperature>("3 °F"));
