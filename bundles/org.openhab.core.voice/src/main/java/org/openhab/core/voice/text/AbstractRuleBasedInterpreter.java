@@ -13,6 +13,7 @@
 package org.openhab.core.voice.text;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -22,6 +23,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -30,6 +32,9 @@ import org.openhab.core.events.EventPublisher;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.items.Metadata;
+import org.openhab.core.items.MetadataKey;
+import org.openhab.core.items.MetadataRegistry;
 import org.openhab.core.items.events.ItemEventFactory;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.StringType;
@@ -43,6 +48,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Tilman Kamp - Initial contribution
  * @author Kai Kreuzer - Improved error handling
+ * @author Miguel Álvarez - Reduce collisions on exact match and use item synonyms
  */
 @NonNullByDefault
 public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInterpreter {
@@ -65,11 +71,15 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
 
     private static final String LANGUAGE_SUPPORT = "LanguageSupport";
 
+    private static final String SYNONYMS_NAMESPACE = "synonyms";
+
+    private final MetadataRegistry metadataRegistry;
+
     private Logger logger = LoggerFactory.getLogger(AbstractRuleBasedInterpreter.class);
 
     private final Map<Locale, List<Rule>> languageRules = new HashMap<>();
     private final Map<Locale, Set<String>> allItemTokens = new HashMap<>();
-    private final Map<Locale, Map<Item, List<Set<String>>>> itemTokens = new HashMap<>();
+    private final Map<Locale, Map<Item, List<List<List<String>>>>> itemTokens = new HashMap<>();
 
     private final ItemRegistry itemRegistry;
     private final EventPublisher eventPublisher;
@@ -90,11 +100,36 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
             invalidate();
         }
     };
+    private RegistryChangeListener<Metadata> synonymsChangeListener = new RegistryChangeListener<Metadata>() {
+        @Override
+        public void added(Metadata element) {
+            invalidateIfSynonymsMetadata(element);
+        }
 
-    public AbstractRuleBasedInterpreter(final EventPublisher eventPublisher, final ItemRegistry itemRegistry) {
+        @Override
+        public void removed(Metadata element) {
+            invalidateIfSynonymsMetadata(element);
+        }
+
+        @Override
+        public void updated(Metadata oldElement, Metadata element) {
+            invalidateIfSynonymsMetadata(element);
+        }
+
+        private void invalidateIfSynonymsMetadata(Metadata metadata) {
+            if (metadata.getUID().getNamespace().equals(SYNONYMS_NAMESPACE)) {
+                invalidate();
+            }
+        }
+    };
+
+    public AbstractRuleBasedInterpreter(final EventPublisher eventPublisher, final ItemRegistry itemRegistry,
+            final MetadataRegistry metadataRegistry) {
         this.eventPublisher = eventPublisher;
         this.itemRegistry = itemRegistry;
+        this.metadataRegistry = metadataRegistry;
         itemRegistry.addRegistryChangeListener(registryChangeListener);
+        metadataRegistry.addRegistryChangeListener(synonymsChangeListener);
     }
 
     protected void deactivate() {
@@ -155,6 +190,9 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
             allItemTokens.put(locale, localeTokens = new HashSet<>());
             for (Item item : itemRegistry.getAll()) {
                 localeTokens.addAll(tokenize(locale, item.getLabel()));
+                for (String synonym : getItemSynonyms(item)) {
+                    localeTokens.addAll(tokenize(locale, synonym));
+                }
             }
         }
         return localeTokens;
@@ -162,33 +200,46 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
 
     /**
      * Retrieves the list of identifier token sets per item currently contained in the {@link ItemRegistry}.
-     * Each item entry in the resulting hash map will feature a list of different token sets. Each token set
-     * represents one possible way "through" a chain of parent groups, where each groups tokenized name is
-     * part of the set.
+     * Each item entry in the resulting hash map will feature a list of different token lists. Each list
+     * represents one possible way "through" a chain of parent groups, where each groups name is tokenized
+     * into a list of strings and included as a member of the chain. Item synonym metadata options are
+     * used as alternative labels creating new alternative chains for the item.
      *
      * @param locale The locale that is to be used for preparing the tokens.
      * @return the list of identifier token sets per item
      */
-    Map<Item, List<Set<String>>> getItemTokens(Locale locale) {
-        Map<Item, List<Set<String>>> localeTokens = itemTokens.get(locale);
+    Map<Item, List<List<List<String>>>> getItemTokens(Locale locale) {
+        Map<Item, List<List<List<String>>>> localeTokens = itemTokens.get(locale);
         if (localeTokens == null) {
             itemTokens.put(locale, localeTokens = new HashMap<>());
             for (Item item : itemRegistry.getItems()) {
                 if (item.getGroupNames().isEmpty()) {
-                    addItem(locale, localeTokens, new HashSet<>(), item);
+                    addItem(locale, localeTokens, new ArrayList<>(), item);
                 }
             }
         }
         return localeTokens;
     }
 
-    private void addItem(Locale locale, Map<Item, List<Set<String>>> target, Set<String> tokens, Item item) {
-        Set<String> nt = new HashSet<>(tokens);
-        nt.addAll(tokenize(locale, item.getLabel()));
-        List<Set<String>> list = target.get(item);
-        if (list == null) {
-            target.put(item, list = new ArrayList<>());
+    private String[] getItemSynonyms(Item item) {
+        MetadataKey key = new MetadataKey("synonyms", item.getName());
+        Metadata synonymsMetadata = metadataRegistry.get(key);
+        return (synonymsMetadata != null) ? synonymsMetadata.getValue().split(",") : new String[] {};
+    }
+
+    private void addItem(Locale locale, Map<Item, List<List<List<String>>>> target, List<List<String>> tokens,
+            Item item) {
+        addItem(locale, target, tokens, item, item.getLabel());
+        for (String synonym : getItemSynonyms(item)) {
+            addItem(locale, target, tokens, item, synonym);
         }
+    }
+
+    private void addItem(Locale locale, Map<Item, List<List<List<String>>>> target, List<List<String>> tokens,
+            Item item, @Nullable String itemLabel) {
+        List<List<String>> nt = new ArrayList<>(tokens);
+        nt.add(tokenize(locale, itemLabel));
+        List<List<List<String>>> list = target.computeIfAbsent(item, k -> new ArrayList<>());
         list.add(nt);
         if (item instanceof GroupItem groupItem) {
             for (Item member : groupItem.getMembers()) {
@@ -347,7 +398,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
      * touched.
      * All others are converted to {@link match} expressions.
      *
-     * @param obj the objects that are to be converted
+     * @param objects the objects that are to be converted
      * @return resulting expression array
      */
     protected Expression[] exps(Object... objects) {
@@ -527,7 +578,8 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
 
     /**
      * Filters the item registry by matching each item's name with the provided name fragments.
-     * The item's label and its parent group's labels are tokenized {@link tokenize} and then altogether looked up
+     * The item's label and its parent group's labels are {@link #tokenize(Locale, String) tokenized} and then
+     * altogether looked up
      * by each and every provided fragment.
      * For the item to get included into the result list, every provided fragment has to be found among the label
      * tokens.
@@ -538,52 +590,66 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
      * @param language Language information that is used for matching
      * @param labelFragments label fragments that are used to match an item's label.
      *            For a positive match, the item's label has to contain every fragment - independently of their order.
-     *            They are treated case insensitive.
+     *            They are treated case-insensitive.
      * @param commandType optional command type that all items have to support.
      *            Provide {null} if there is no need for a certain command to be supported.
      * @return All matching items from the item registry.
      */
     protected List<Item> getMatchingItems(ResourceBundle language, String[] labelFragments,
             @Nullable Class<?> commandType) {
-        List<Item> items = new ArrayList<>();
-        Map<Item, List<Set<String>>> map = getItemTokens(language.getLocale());
-        for (Item item : map.keySet()) {
-            for (Set<String> parts : map.get(item)) {
-                boolean allMatch = true;
-                for (String fragment : labelFragments) {
-                    if (!parts.contains(fragment.toLowerCase(language.getLocale()))) {
-                        allMatch = false;
+        Set<Item> items = new HashSet<>();
+        Set<Item> exactMatchItems = new HashSet<>();
+        Map<Item, List<List<List<String>>>> map = getItemTokens(language.getLocale());
+        for (Entry<Item, List<List<List<String>>>> entry : map.entrySet()) {
+            Item item = entry.getKey();
+            for (List<List<String>> itemLabelFragmentsPath : entry.getValue()) {
+                boolean exactMatch = false;
+                logger.trace("Checking tokens {} against the item tokens {}", labelFragments, itemLabelFragmentsPath);
+                List<String> lowercaseLabelFragments = Arrays.stream(labelFragments)
+                        .map(lf -> lf.toLowerCase(language.getLocale())).toList();
+                List<String> unmatchedFragments = new ArrayList<>(lowercaseLabelFragments);
+                for (List<String> itemLabelFragments : itemLabelFragmentsPath) {
+                    if (itemLabelFragments.equals(lowercaseLabelFragments)) {
+                        exactMatch = true;
+                        unmatchedFragments.clear();
                         break;
                     }
+                    unmatchedFragments.removeAll(itemLabelFragments);
                 }
-                if (allMatch) {
+                boolean allMatched = unmatchedFragments.isEmpty();
+                logger.trace("All labels matched: {}", allMatched);
+                logger.trace("Exact match: {}", exactMatch);
+                if (allMatched) {
                     if (commandType == null || item.getAcceptedCommandTypes().contains(commandType)) {
-                        String name = item.getName();
-                        boolean insert = true;
-                        for (Item si : items) {
-                            if (name.startsWith(si.getName())) {
-                                insert = false;
-                            }
-                        }
-                        if (insert) {
-                            for (int i = 0; i < items.size(); i++) {
-                                Item si = items.get(i);
-                                if (si.getName().startsWith(name)) {
-                                    items.remove(i);
-                                    i--;
-                                }
-                            }
-                            items.add(item);
+                        insertDiscardingMembers(items, item);
+                        if (exactMatch) {
+                            insertDiscardingMembers(exactMatchItems, item);
                         }
                     }
                 }
             }
         }
-        return items;
+        if (logger.isDebugEnabled()) {
+            String typeDetails = commandType != null ? " that accept " + commandType.getSimpleName() : "";
+            logger.debug("Partial matched items against {}{}: {}", labelFragments, typeDetails,
+                    items.stream().map(Item::getName).collect(Collectors.joining(", ")));
+            logger.debug("Exact matched items against {}{}: {}", labelFragments, typeDetails,
+                    exactMatchItems.stream().map(Item::getName).collect(Collectors.joining(", ")));
+        }
+        return new ArrayList<>(items.size() != 1 && exactMatchItems.size() == 1 ? exactMatchItems : items);
+    }
+
+    private static void insertDiscardingMembers(Set<Item> items, Item item) {
+        String name = item.getName();
+        boolean insert = items.stream().noneMatch(i -> name.startsWith(i.getName()));
+        if (insert) {
+            items.removeIf((matchedItem) -> matchedItem.getName().startsWith(name));
+            items.add(item);
+        }
     }
 
     /**
-     * Tokenizes text. Filters out all unsupported punctuation. Tokens will be lower case.
+     * Tokenizes text. Filters out all unsupported punctuation. Tokens will be lowercase.
      *
      * @param locale the locale that should be used for lower casing
      * @param text the text that should be tokenized
