@@ -36,10 +36,12 @@ import org.openhab.core.items.Metadata;
 import org.openhab.core.items.MetadataKey;
 import org.openhab.core.items.MetadataRegistry;
 import org.openhab.core.items.events.ItemEventFactory;
+import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.StringType;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
+import org.openhab.core.voice.DialogContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,6 +51,7 @@ import org.slf4j.LoggerFactory;
  * @author Tilman Kamp - Initial contribution
  * @author Kai Kreuzer - Improved error handling
  * @author Miguel Álvarez - Reduce collisions on exact match and use item synonyms
+ * @author Miguel Álvarez - Reduce collisions using dialog location
  */
 @NonNullByDefault
 public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInterpreter {
@@ -79,7 +82,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
 
     private final Map<Locale, List<Rule>> languageRules = new HashMap<>();
     private final Map<Locale, Set<String>> allItemTokens = new HashMap<>();
-    private final Map<Locale, Map<Item, List<List<List<String>>>>> itemTokens = new HashMap<>();
+    private final Map<Locale, Map<Item, ItemInterpretationMetadata>> itemTokens = new HashMap<>();
 
     private final ItemRegistry itemRegistry;
     private final EventPublisher eventPublisher;
@@ -143,6 +146,12 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
 
     @Override
     public String interpret(Locale locale, String text) throws InterpretationException {
+        return interpret(locale, text, null);
+    }
+
+    @Override
+    public String interpret(Locale locale, String text, @Nullable DialogContext dialogContext)
+            throws InterpretationException {
         ResourceBundle language = ResourceBundle.getBundle(LANGUAGE_SUPPORT, locale);
         Rule[] rules = getRules(locale);
         if (rules.length == 0) {
@@ -157,7 +166,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
 
         InterpretationResult lastResult = null;
         for (Rule rule : rules) {
-            if ((result = rule.execute(language, tokens)).isSuccess()) {
+            if ((result = rule.execute(language, tokens, dialogContext)).isSuccess()) {
                 return result.getResponse();
             } else {
                 if (!InterpretationResult.SYNTAX_ERROR.equals(result)) {
@@ -208,13 +217,13 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
      * @param locale The locale that is to be used for preparing the tokens.
      * @return the list of identifier token sets per item
      */
-    Map<Item, List<List<List<String>>>> getItemTokens(Locale locale) {
-        Map<Item, List<List<List<String>>>> localeTokens = itemTokens.get(locale);
+    Map<Item, ItemInterpretationMetadata> getItemTokens(Locale locale) {
+        Map<Item, ItemInterpretationMetadata> localeTokens = itemTokens.get(locale);
         if (localeTokens == null) {
             itemTokens.put(locale, localeTokens = new HashMap<>());
             for (Item item : itemRegistry.getItems()) {
                 if (item.getGroupNames().isEmpty()) {
-                    addItem(locale, localeTokens, new ArrayList<>(), item);
+                    addItem(locale, localeTokens, new ArrayList<>(), item, new ArrayList<>());
                 }
             }
         }
@@ -227,23 +236,27 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
         return (synonymsMetadata != null) ? synonymsMetadata.getValue().split(",") : new String[] {};
     }
 
-    private void addItem(Locale locale, Map<Item, List<List<List<String>>>> target, List<List<String>> tokens,
-            Item item) {
-        addItem(locale, target, tokens, item, item.getLabel());
+    private void addItem(Locale locale, Map<Item, ItemInterpretationMetadata> target, List<List<String>> tokens,
+            Item item, ArrayList<String> locationParentNames) {
+        addItem(locale, target, tokens, item, item.getLabel(), locationParentNames);
         for (String synonym : getItemSynonyms(item)) {
-            addItem(locale, target, tokens, item, synonym);
+            addItem(locale, target, tokens, item, synonym, locationParentNames);
         }
     }
 
-    private void addItem(Locale locale, Map<Item, List<List<List<String>>>> target, List<List<String>> tokens,
-            Item item, @Nullable String itemLabel) {
+    private void addItem(Locale locale, Map<Item, ItemInterpretationMetadata> target, List<List<String>> tokens,
+            Item item, @Nullable String itemLabel, ArrayList<String> locationParentNames) {
         List<List<String>> nt = new ArrayList<>(tokens);
         nt.add(tokenize(locale, itemLabel));
-        List<List<List<String>>> list = target.computeIfAbsent(item, k -> new ArrayList<>());
-        list.add(nt);
+        ItemInterpretationMetadata metadata = target.computeIfAbsent(item, k -> new ItemInterpretationMetadata());
+        metadata.pathToItem.add(nt);
+        metadata.locationParentNames.addAll(locationParentNames);
         if (item instanceof GroupItem groupItem) {
+            if (item.hasTag(CoreItemFactory.LOCATION)) {
+                locationParentNames.add(item.getName());
+            }
             for (Item member : groupItem.getMembers()) {
-                addItem(locale, target, nt, member);
+                addItem(locale, target, nt, member, locationParentNames);
             }
         }
     }
@@ -353,7 +366,8 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
         Expression expression = tail == null ? seq(headExpression, name()) : seq(headExpression, name(tail), tail);
         return new Rule(expression) {
             @Override
-            public InterpretationResult interpretAST(ResourceBundle language, ASTNode node) {
+            public InterpretationResult interpretAST(ResourceBundle language, ASTNode node,
+                    @Nullable DialogContext dialogContext) {
                 String[] name = node.findValueAsStringArray(NAME);
                 ASTNode cmdNode = node.findNode(CMD);
                 Object tag = cmdNode.getTag();
@@ -368,7 +382,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
                 }
                 if (name != null) {
                     try {
-                        return new InterpretationResult(true, executeSingle(language, name, command));
+                        return new InterpretationResult(true, executeSingle(language, name, command, dialogContext));
                     } catch (InterpretationException ex) {
                         return new InterpretationResult(ex);
                     }
@@ -538,11 +552,11 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
      * @return response text
      * @throws InterpretationException in case that there is no or more than on item matching the fragments
      */
-    protected String executeSingle(ResourceBundle language, String[] labelFragments, Command command)
-            throws InterpretationException {
-        List<Item> items = getMatchingItems(language, labelFragments, command.getClass());
+    protected String executeSingle(ResourceBundle language, String[] labelFragments, Command command,
+            @Nullable DialogContext dialogContext) throws InterpretationException {
+        List<Item> items = getMatchingItems(language, labelFragments, command.getClass(), dialogContext);
         if (items.isEmpty()) {
-            if (!getMatchingItems(language, labelFragments, null).isEmpty()) {
+            if (!getMatchingItems(language, labelFragments, null, dialogContext).isEmpty()) {
                 throw new InterpretationException(
                         language.getString(COMMAND_NOT_ACCEPTED).replace("<cmd>", command.toString()));
             } else {
@@ -596,13 +610,14 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
      * @return All matching items from the item registry.
      */
     protected List<Item> getMatchingItems(ResourceBundle language, String[] labelFragments,
-            @Nullable Class<?> commandType) {
-        Set<Item> items = new HashSet<>();
-        Set<Item> exactMatchItems = new HashSet<>();
-        Map<Item, List<List<List<String>>>> map = getItemTokens(language.getLocale());
-        for (Entry<Item, List<List<List<String>>>> entry : map.entrySet()) {
+            @Nullable Class<?> commandType, @Nullable DialogContext dialogContext) {
+        Map<Item, ItemInterpretationMetadata> itemsData = new HashMap<>();
+        Map<Item, ItemInterpretationMetadata> exactMatchItemsData = new HashMap<>();
+        Map<Item, ItemInterpretationMetadata> map = getItemTokens(language.getLocale());
+        for (Entry<Item, ItemInterpretationMetadata> entry : map.entrySet()) {
             Item item = entry.getKey();
-            for (List<List<String>> itemLabelFragmentsPath : entry.getValue()) {
+            ItemInterpretationMetadata interpretationMetadata = entry.getValue();
+            for (List<List<String>> itemLabelFragmentsPath : interpretationMetadata.pathToItem) {
                 boolean exactMatch = false;
                 logger.trace("Checking tokens {} against the item tokens {}", labelFragments, itemLabelFragmentsPath);
                 List<String> lowercaseLabelFragments = Arrays.stream(labelFragments)
@@ -617,13 +632,13 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
                     unmatchedFragments.removeAll(itemLabelFragments);
                 }
                 boolean allMatched = unmatchedFragments.isEmpty();
-                logger.trace("All labels matched: {}", allMatched);
+                logger.trace("Matched: {}", allMatched);
                 logger.trace("Exact match: {}", exactMatch);
                 if (allMatched) {
                     if (commandType == null || item.getAcceptedCommandTypes().contains(commandType)) {
-                        insertDiscardingMembers(items, item);
+                        insertDiscardingMembers(itemsData, item, interpretationMetadata);
                         if (exactMatch) {
-                            insertDiscardingMembers(exactMatchItems, item);
+                            insertDiscardingMembers(exactMatchItemsData, item, interpretationMetadata);
                         }
                     }
                 }
@@ -632,19 +647,49 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
         if (logger.isDebugEnabled()) {
             String typeDetails = commandType != null ? " that accept " + commandType.getSimpleName() : "";
             logger.debug("Partial matched items against {}{}: {}", labelFragments, typeDetails,
-                    items.stream().map(Item::getName).collect(Collectors.joining(", ")));
+                    itemsData.keySet().stream().map(Item::getName).collect(Collectors.joining(", ")));
             logger.debug("Exact matched items against {}{}: {}", labelFragments, typeDetails,
-                    exactMatchItems.stream().map(Item::getName).collect(Collectors.joining(", ")));
+                    exactMatchItemsData.keySet().stream().map(Item::getName).collect(Collectors.joining(", ")));
         }
-        return new ArrayList<>(items.size() != 1 && exactMatchItems.size() == 1 ? exactMatchItems : items);
+        @Nullable
+        String locationContext = dialogContext != null ? dialogContext.locationItem() : null;
+        if (locationContext != null && itemsData.size() > 1) {
+            logger.debug("Filtering {} matched items based on location '{}'", itemsData.size(), locationContext);
+            Item matchByLocation = filterMatchedItemsByLocation(itemsData, locationContext);
+            if (matchByLocation != null) {
+                return List.of(matchByLocation);
+            }
+        }
+        if (locationContext != null && exactMatchItemsData.size() > 1) {
+            logger.debug("Filtering {} exact matched items based on location '{}'", exactMatchItemsData.size(),
+                    locationContext);
+            Item matchByLocation = filterMatchedItemsByLocation(exactMatchItemsData, locationContext);
+            if (matchByLocation != null) {
+                return List.of(matchByLocation);
+            }
+        }
+        return new ArrayList<>(itemsData.size() != 1 && exactMatchItemsData.size() == 1 ? exactMatchItemsData.keySet()
+                : itemsData.keySet());
     }
 
-    private static void insertDiscardingMembers(Set<Item> items, Item item) {
+    @Nullable
+    private Item filterMatchedItemsByLocation(Map<Item, ItemInterpretationMetadata> itemsData, String locationContext) {
+        var itemsFilteredByLocation = itemsData.entrySet().stream()
+                .filter((entry) -> entry.getValue().locationParentNames.contains(locationContext)).toList();
+        if (itemsFilteredByLocation.size() != 1) {
+            return null;
+        }
+        logger.debug("Unique match by location found in '{}', taking prevalence", locationContext);
+        return itemsFilteredByLocation.get(0).getKey();
+    }
+
+    private static void insertDiscardingMembers(Map<Item, ItemInterpretationMetadata> items, Item item,
+            ItemInterpretationMetadata interpretationMetadata) {
         String name = item.getName();
-        boolean insert = items.stream().noneMatch(i -> name.startsWith(i.getName()));
+        boolean insert = items.keySet().stream().noneMatch(i -> name.startsWith(i.getName()));
         if (insert) {
-            items.removeIf((matchedItem) -> matchedItem.getName().startsWith(name));
-            items.add(item);
+            items.keySet().removeIf((matchedItem) -> matchedItem.getName().startsWith(name));
+            items.put(item, interpretationMetadata);
         }
     }
 
@@ -918,5 +963,13 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
         }
         JSGFGenerator generator = new JSGFGenerator(ResourceBundle.getBundle(LANGUAGE_SUPPORT, locale));
         return generator.getGrammar();
+    }
+
+    private static class ItemInterpretationMetadata {
+        final List<List<List<String>>> pathToItem = new ArrayList<>();
+        final List<String> locationParentNames = new ArrayList<>();
+
+        ItemInterpretationMetadata() {
+        }
     }
 }

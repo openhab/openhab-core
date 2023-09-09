@@ -29,6 +29,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.openhab.core.audio.AudioSink;
+import org.openhab.core.audio.AudioSource;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
@@ -39,6 +41,9 @@ import org.openhab.core.items.MetadataRegistry;
 import org.openhab.core.items.events.ItemEventFactory;
 import org.openhab.core.library.items.SwitchItem;
 import org.openhab.core.library.types.OnOffType;
+import org.openhab.core.voice.DialogContext;
+import org.openhab.core.voice.STTService;
+import org.openhab.core.voice.TTSService;
 import org.openhab.core.voice.text.InterpretationException;
 
 /**
@@ -55,6 +60,11 @@ public class StandardInterpreterTest {
     private @Mock @NonNullByDefault({}) ItemRegistry itemRegistryMock;
     private @Mock @NonNullByDefault({}) MetadataRegistry metadataRegistryMock;
     private @NonNullByDefault({}) StandardInterpreter standardInterpreter;
+    private @NonNullByDefault({}) STTService sttService;
+    private @NonNullByDefault({}) TTSService ttsService;
+    private @NonNullByDefault({}) AudioSource audioSource;
+    private @NonNullByDefault({}) AudioSink audioSink;
+
     private static final String OK_RESPONSE = "Ok.";
 
     @BeforeEach
@@ -92,6 +102,24 @@ public class StandardInterpreterTest {
         assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, "turn off computer"));
         verify(eventPublisherMock, times(1))
                 .post(ItemEventFactory.createCommandEvent(computerSwitchItem.getName(), OnOffType.OFF));
+    }
+
+    @Test
+    public void noNameCollisionWhenDialogContext() throws InterpretationException {
+        var locationItem = Mockito.spy(new GroupItem("livingroom"));
+        locationItem.setLabel("Living room");
+        var computerItem = new SwitchItem("computer");
+        computerItem.setLabel("Computer");
+        var computerItem2 = new SwitchItem("computer2");
+        computerItem2.setLabel("Computer");
+        when(locationItem.getMembers()).thenReturn(Set.of(computerItem));
+        var dialogContext = new DialogContext(null, null, sttService, ttsService, null, List.of(), audioSource,
+                audioSink, Locale.ENGLISH, "", locationItem.getName(), null, null);
+        List<Item> items = List.of(computerItem2, locationItem, computerItem);
+        when(itemRegistryMock.getItems()).thenReturn(items);
+        assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, "turn off computer", dialogContext));
+        verify(eventPublisherMock, times(1))
+                .post(ItemEventFactory.createCommandEvent(computerItem.getName(), OnOffType.OFF));
     }
 
     @Test
