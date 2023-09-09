@@ -135,6 +135,10 @@ public class AddonInfo implements Identifiable<String> {
         return sourceBundle;
     }
 
+    public @Nullable String getConnection() {
+        return connection;
+    }
+
     public List<String> getCountries() {
         return countries;
     }
@@ -192,7 +196,7 @@ public class AddonInfo implements Identifiable<String> {
         }
 
         public Builder withCountries(@Nullable String countries) {
-            this.countries = Arrays.asList(Objects.requireNonNullElse(countries, "").split(","));
+            this.countries = countries == null || countries.isBlank() ? List.of() : Arrays.asList(countries.split(","));
             return this;
         }
 

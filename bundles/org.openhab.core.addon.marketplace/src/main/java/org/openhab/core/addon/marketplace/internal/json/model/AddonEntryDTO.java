@@ -41,4 +41,6 @@ public class AddonEntryDTO {
     public String url = "";
     @SerializedName("logger_packages")
     public List<String> loggerPackages = List.of();
+    public String connection = "";
+    public List<String> countries = List.of();
 }
