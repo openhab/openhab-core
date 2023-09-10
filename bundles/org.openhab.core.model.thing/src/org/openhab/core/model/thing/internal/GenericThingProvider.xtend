@@ -235,6 +235,8 @@ class GenericThingProvider extends AbstractProviderLazyNullness<Thing> implement
         val label = if(modelThing.label !== null) modelThing.label else thingType?.label
 
         val location = modelThing.location
+        
+        val category = modelThing.icon
 
         val ThingUID bridgeUID = if(modelThing.bridgeUID !== null) new ThingUID(modelThing.bridgeUID)
         val thingFromHandler = getThingFromThingHandlerFactories(thingTypeUID, label, configuration, thingUID,
@@ -250,6 +252,7 @@ class GenericThingProvider extends AbstractProviderLazyNullness<Thing> implement
         thingBuilder.withBridge(bridgeUID)
         thingBuilder.withLabel(label)
         thingBuilder.withLocation(location)
+        thingBuilder.withCategory(category)
 
         val channels = createChannels(thingTypeUID, thingUID, modelThing.channels,
             thingType?.channelDefinitions ?: newArrayList)
@@ -321,6 +324,7 @@ class GenericThingProvider extends AbstractProviderLazyNullness<Thing> implement
         targetThing.configuration.merge(sourceThing.configuration)
         targetThing.merge(sourceThing.channels)
         targetThing.location = sourceThing.location
+        targetThing.category = sourceThing.category
         targetThing.label = sourceThing.label
     }
 

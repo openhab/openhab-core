@@ -225,6 +225,20 @@ public interface Thing extends Identifiable<ThingUID> {
     void setLocation(@Nullable String location);
 
     /**
+     * Returns the category of the {@link Thing} or null if no category is set.
+     *
+     * @return category or null
+     */
+    public @Nullable String getCategory();
+
+    /**
+     * Set the category of the {@link Thing}.
+     *
+     * @param category or null
+     */
+    void setCategory(@Nullable String category);
+
+    /**
      * Returns information whether the {@link Thing} is enabled or not.
      *
      * @return Returns {@code true} if the thing is enabled. Return {@code false} otherwise.
