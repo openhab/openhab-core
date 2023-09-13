@@ -220,7 +220,7 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
 
     private ProfileCallback createCallback(ItemChannelLink link) {
         return new ProfileCallbackImpl(eventPublisher, safeCaller, itemStateConverter, link, thingRegistry::get,
-                this::getItem);
+                this::getItem, this::toAcceptedCommand);
     }
 
     private @Nullable ProfileTypeUID determineProfileTypeUID(ItemChannelLink link, Item item, @Nullable Thing thing) {
@@ -281,9 +281,13 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
         if (item != null && thing != null) {
             Channel channel = thing.getChannel(link.getLinkedUID());
             if (channel != null) {
+                String acceptedItemType = Objects.requireNonNullElse(channel.getAcceptedItemType(), "");
+                if (acceptedItemType.startsWith("Number")) {
+                    acceptedItemType = "Number";
+                }
                 context = new ProfileContextImpl(link.getConfiguration(), item.getAcceptedDataTypes(),
-                        item.getAcceptedCommandTypes(), acceptedCommandTypeMap.getOrDefault(
-                                Objects.requireNonNullElse(channel.getAcceptedItemType(), ""), List.of()));
+                        item.getAcceptedCommandTypes(),
+                        acceptedCommandTypeMap.getOrDefault(acceptedItemType, List.of()));
             }
         }
 
@@ -394,17 +398,12 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
             if (thing != null) {
                 Channel channel = thing.getChannel(channelUID.getId());
                 if (channel != null) {
-                    @Nullable
-                    T convertedType = toAcceptedType(type, channel, acceptedTypesFunction, item);
-                    if (convertedType != null) {
-                        if (thing.getHandler() != null) {
-                            Profile profile = getProfile(link, item, thing);
-                            action.applyProfile(profile, thing, convertedType);
-                        }
-                    } else {
-                        logger.debug(
-                                "Received event '{}' ({}) could not be converted to any type accepted by item '{}' ({})",
-                                type, type.getClass().getSimpleName(), itemName, item.getType());
+                    if (thing.getHandler() != null) {
+                        // fix QuantityType/DecimalType, leave others as-is
+                        @Nullable
+                        T uomType = fixUoM(type, channel, item);
+                        Profile profile = getProfile(link, item, thing);
+                        action.applyProfile(profile, thing, uomType != null ? uomType : type);
                     }
                 } else {
                     logger.debug("Received  event '{}' for non-existing channel '{}', not forwarding it to the handler",
@@ -418,8 +417,7 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
     }
 
     @SuppressWarnings("unchecked")
-    private <T extends Type> @Nullable T toAcceptedType(T originalType, Channel channel,
-            Function<@Nullable String, @Nullable List<Class<? extends T>>> acceptedTypesFunction, Item item) {
+    private <T extends Type> @Nullable T fixUoM(@Nullable T originalType, Channel channel, Item item) {
         String channelAcceptedItemType = channel.getAcceptedItemType();
 
         if (channelAcceptedItemType == null) {
@@ -442,22 +440,40 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
             Unit<?> unit = Objects.requireNonNull(((NumberItem) item).getUnit());
             return (T) new QuantityType<>(decimalType.toBigDecimal(), unit);
         }
+        return null;
+    }
+
+    public @Nullable Command toAcceptedCommand(Command originalType, @Nullable Channel channel, @Nullable Item item) {
+        if (item == null || channel == null) {
+            logger.warn("Trying to convert types for non-existing channel or item, discarding command.");
+            return null;
+        }
+        String channelAcceptedItemType = channel.getAcceptedItemType();
+
+        if (channelAcceptedItemType == null) {
+            return originalType;
+        }
+
+        Command uomCommand = fixUoM(originalType, channel, item);
+        if (uomCommand != null) {
+            return uomCommand;
+        }
 
         // handle HSBType/PercentType
         if (CoreItemFactory.DIMMER.equals(channelAcceptedItemType) && originalType instanceof HSBType hsb) {
-            return (T) (hsb.as(PercentType.class));
+            return hsb.as(PercentType.class);
         }
 
         // check for other cases if the type is acceptable
-        List<Class<? extends T>> acceptedTypes = acceptedTypesFunction.apply(channelAcceptedItemType);
+        List<Class<? extends Command>> acceptedTypes = acceptedCommandTypeMap.get(channelAcceptedItemType);
         if (acceptedTypes == null || acceptedTypes.contains(originalType.getClass())) {
             return originalType;
         } else if (acceptedTypes.contains(PercentType.class) && originalType instanceof State state
                 && PercentType.class.isAssignableFrom(originalType.getClass())) {
-            return (@Nullable T) state.as(PercentType.class);
+            return state.as(PercentType.class);
         } else if (acceptedTypes.contains(OnOffType.class) && originalType instanceof State state
                 && PercentType.class.isAssignableFrom(originalType.getClass())) {
-            return (@Nullable T) state.as(OnOffType.class);
+            return state.as(OnOffType.class);
         } else {
             logger.debug("Received not accepted type '{}' for channel '{}'", originalType.getClass().getSimpleName(),
                     channel.getUID());
