@@ -15,6 +15,8 @@ package org.openhab.core.voice.text;
 import java.util.ResourceBundle;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.voice.DialogContext;
 
 /**
  * Represents an expression plus action code that will be executed after successful parsing. This class is immutable and
@@ -43,12 +45,13 @@ public abstract class Rule {
      * @param node the resulting AST node of the parse run. To be used as input.
      * @return
      */
-    public abstract InterpretationResult interpretAST(ResourceBundle language, ASTNode node);
+    public abstract InterpretationResult interpretAST(ResourceBundle language, ASTNode node,
+            @Nullable DialogContext dialogContext);
 
-    InterpretationResult execute(ResourceBundle language, TokenList list) {
+    InterpretationResult execute(ResourceBundle language, TokenList list, @Nullable DialogContext dialogContext) {
         ASTNode node = expression.parse(language, list);
         if (node.isSuccess() && node.getRemainingTokens().eof()) {
-            return interpretAST(language, node);
+            return interpretAST(language, node, dialogContext);
         }
         return InterpretationResult.SYNTAX_ERROR;
     }

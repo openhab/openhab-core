@@ -26,6 +26,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -115,6 +116,8 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     private final Map<String, STTService> sttServices = new HashMap<>();
     private final Map<String, TTSService> ttsServices = new HashMap<>();
     private final Map<String, HumanLanguageInterpreter> humanLanguageInterpreters = new HashMap<>();
+
+    private final WeakHashMap<String, DialogContext> activeDialogGroups = new WeakHashMap<>();
 
     private final LocaleProvider localeProvider;
     private final AudioManager audioManager;
@@ -526,7 +529,8 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
             if (processor == null) {
                 logger.debug("Starting a new dialog for source {} ({})", context.source().getLabel(null),
                         context.source().getId());
-                processor = new DialogProcessor(context, this, this.eventPublisher, this.i18nProvider, b);
+                processor = new DialogProcessor(context, this, this.eventPublisher, this.activeDialogGroups,
+                        this.i18nProvider, b);
                 dialogProcessors.put(context.source().getId(), processor);
                 processor.start();
             } else {
@@ -582,7 +586,8 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
                 isSingleDialog = true;
                 activeProcessor = singleDialogProcessors.get(audioSource.getId());
             }
-            var processor = new DialogProcessor(context, this, this.eventPublisher, this.i18nProvider, b);
+            var processor = new DialogProcessor(context, this, this.eventPublisher, this.activeDialogGroups,
+                    this.i18nProvider, b);
             if (activeProcessor == null) {
                 logger.debug("Executing a simple dialog for source {} ({})", audioSource.getLabel(null),
                         audioSource.getId());
@@ -970,6 +975,8 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
                                 .withVoice(getVoice(dr.voiceId)) //
                                 .withHLIs(getHLIsByIds(dr.hliIds)) //
                                 .withLocale(dr.locale) //
+                                .withDialogGroup(dr.dialogGroup) //
+                                .withLocationItem(dr.locationItem) //
                                 .withListeningItem(dr.listeningItem) //
                                 .withMelody(dr.listeningMelody) //
                                 .build());
