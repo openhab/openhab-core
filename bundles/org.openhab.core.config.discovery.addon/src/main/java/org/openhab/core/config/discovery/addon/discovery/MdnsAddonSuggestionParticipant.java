@@ -56,11 +56,10 @@ public class MdnsAddonSuggestionParticipant extends AddonSuggestionParticipant i
 
 	@Override
 	public @Nullable DiscoveryResult createResult(ServiceInfo serviceInfo) {
-		boolean ok = isPropertyValid("APPLICATION", serviceInfo.getApplication()) //
-				&& isPropertyValid("NAME", serviceInfo.getName());
-		ok &= Collections.list(serviceInfo.getPropertyNames()).stream()
-				.allMatch(propertyName -> isPropertyValid(propertyName, serviceInfo.getPropertyString(propertyName)));
-		if (ok) {
+		if (isPropertyValid("application", serviceInfo.getApplication())
+				&& isPropertyValid("name", serviceInfo.getName())
+				&& Collections.list(serviceInfo.getPropertyNames()).stream().allMatch(
+						propertyName -> isPropertyValid(propertyName, serviceInfo.getPropertyString(propertyName)))) {
 			listener.onAddonSuggestionFound(bindingId);
 		}
 		return null;
