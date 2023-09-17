@@ -35,25 +35,25 @@ import org.slf4j.LoggerFactory;
 @Component
 public class AddonSuggestionFinder implements AddonSuggestionListener {
 
-	private final Logger logger = LoggerFactory.getLogger(AddonSuggestionFinder.class);
+    private final Logger logger = LoggerFactory.getLogger(AddonSuggestionFinder.class);
 
-	private final Set<String> bindingIds = new HashSet<>();
-	private final List<AddonSuggestionParticipant> addonSuggestionParticipants = new ArrayList<>();
-	
-	protected void initialize() {
-		AddonSuggestionParticipant mdnsParticipant = new MdnsAddonSuggestionParticipant(this, "aaa", Map.of(), "bbb");
-		AddonSuggestionParticipant upnpParticipant = new UpnpAddonSuggestionParticipant(this, "ccc", Map.of());
-		addonSuggestionParticipants.add(mdnsParticipant);
-		addonSuggestionParticipants.add(upnpParticipant);
-	}
+    private final Set<String> bindingIds = new HashSet<>();
+    private final List<AddonSuggestionParticipant> addonSuggestionParticipants = new ArrayList<>();
 
-	protected void dispose() {
-		addonSuggestionParticipants.clear();
-	}
+    protected void initialize() {
+        AddonSuggestionParticipant mdnsParticipant = new MdnsAddonSuggestionParticipant(this, "aaa", Map.of(), "bbb");
+        AddonSuggestionParticipant upnpParticipant = new UpnpAddonSuggestionParticipant(this, "ccc", Map.of());
+        addonSuggestionParticipants.add(mdnsParticipant);
+        addonSuggestionParticipants.add(upnpParticipant);
+    }
 
-	@Override
-	public void onAddonSuggestionFound(String bindingId) {
-		logger.debug("found binding id:{}", bindingId);
-		bindingIds.add(bindingId);
-	}
+    protected void dispose() {
+        addonSuggestionParticipants.clear();
+    }
+
+    @Override
+    public void onAddonSuggestionFound(String bindingId) {
+        logger.debug("found binding id:{}", bindingId);
+        bindingIds.add(bindingId);
+    }
 }

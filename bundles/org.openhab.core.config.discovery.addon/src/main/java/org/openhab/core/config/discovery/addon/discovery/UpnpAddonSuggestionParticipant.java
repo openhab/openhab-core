@@ -35,30 +35,30 @@ import org.osgi.service.component.annotations.Component;
 @Component(service = UpnpDiscoveryParticipant.class, configurationPid = "discovery.upnp.suggestion.finder")
 public class UpnpAddonSuggestionParticipant extends AddonSuggestionParticipant implements UpnpDiscoveryParticipant {
 
-	public UpnpAddonSuggestionParticipant(AddonSuggestionListener listener, String bindingId,
-			Map<String, String> propertyMatchRegexMap) {
-		super(listener, bindingId, propertyMatchRegexMap);
-	}
+    public UpnpAddonSuggestionParticipant(AddonSuggestionListener listener, String bindingId,
+            Map<String, String> propertyMatchRegexMap) {
+        super(listener, bindingId, propertyMatchRegexMap);
+    }
 
-	@Override
-	public Set<ThingTypeUID> getSupportedThingTypeUIDs() {
-		return Set.of();
-	}
+    @Override
+    public Set<ThingTypeUID> getSupportedThingTypeUIDs() {
+        return Set.of();
+    }
 
-	@Override
-	public @Nullable DiscoveryResult createResult(RemoteDevice device) {
-		if (isPropertyValid("deviceType", device.getType().getType())
-				&& isPropertyValid("manufacturer", device.getDetails().getManufacturerDetails().getManufacturer())
-				&& isPropertyValid("model", device.getDetails().getModelDetails().getModelName())
-				&& isPropertyValid("serialNumber", device.getDetails().getSerialNumber())
-				&& isPropertyValid("udn", device.getIdentity().getUdn().getIdentifierString())) {
-			listener.onAddonSuggestionFound(bindingId);
-		}
-		return null;
-	}
+    @Override
+    public @Nullable DiscoveryResult createResult(RemoteDevice device) {
+        if (isPropertyValid("deviceType", device.getType().getType())
+                && isPropertyValid("manufacturer", device.getDetails().getManufacturerDetails().getManufacturer())
+                && isPropertyValid("model", device.getDetails().getModelDetails().getModelName())
+                && isPropertyValid("serialNumber", device.getDetails().getSerialNumber())
+                && isPropertyValid("udn", device.getIdentity().getUdn().getIdentifierString())) {
+            listener.onAddonSuggestionFound(bindingId);
+        }
+        return null;
+    }
 
-	@Override
-	public @Nullable ThingUID getThingUID(RemoteDevice device) {
-		return null;
-	}
+    @Override
+    public @Nullable ThingUID getThingUID(RemoteDevice device) {
+        return null;
+    }
 }

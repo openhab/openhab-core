@@ -26,28 +26,28 @@ import org.openhab.core.config.discovery.addon.finder.AddonSuggestionListener;
  */
 @NonNullByDefault
 public class AddonSuggestionParticipant {
-	protected AddonSuggestionListener listener;
-	protected final String bindingId;
-	protected final Map<String, String> propertyMatchRegexMap = new HashMap<>();
+    protected AddonSuggestionListener listener;
+    protected final String bindingId;
+    protected final Map<String, String> propertyMatchRegexMap = new HashMap<>();
 
-	public AddonSuggestionParticipant(AddonSuggestionListener listener, String bindingId,
-			Map<String, String> propertyMatchRegexMap) {
-		this.listener = listener;
-		this.bindingId = bindingId;
-		this.propertyMatchRegexMap.putAll(propertyMatchRegexMap);
-	}
+    public AddonSuggestionParticipant(AddonSuggestionListener listener, String bindingId,
+            Map<String, String> propertyMatchRegexMap) {
+        this.listener = listener;
+        this.bindingId = bindingId;
+        this.propertyMatchRegexMap.putAll(propertyMatchRegexMap);
+    }
 
-	/**
-	 * Check if the given property name is in the propertyMatchRegexMap and the
-	 * given property value matches the respective regular expression.
-	 * 
-	 * @param propertyName
-	 * @param propertyValue
-	 * @return true a) if the property name exists and the property value matches
-	 *         the regular expression, or b) the property name does not exist.
-	 */
-	protected boolean isPropertyValid(String propertyName, String propertyValue) {
-		String matchRegex = propertyMatchRegexMap.get(propertyName);
-		return matchRegex != null ? propertyValue.matches(matchRegex) : true;
-	}
+    /**
+     * Check if the given property name is in the propertyMatchRegexMap and the
+     * given property value matches the respective regular expression.
+     * 
+     * @param propertyName
+     * @param propertyValue
+     * @return true a) if the property name exists and the property value matches
+     *         the regular expression, or b) the property name does not exist.
+     */
+    protected boolean isPropertyValid(String propertyName, String propertyValue) {
+        String matchRegex = propertyMatchRegexMap.get(propertyName);
+        return matchRegex != null ? propertyValue.matches(matchRegex) : true;
+    }
 }

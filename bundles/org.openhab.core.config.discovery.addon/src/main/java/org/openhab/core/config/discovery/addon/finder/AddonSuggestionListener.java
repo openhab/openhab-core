@@ -12,13 +12,15 @@
  */
 package org.openhab.core.config.discovery.addon.finder;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * This is a {@link AddonSuggestionListener} which is a callback for discovery of suggested addons.
  *
  * @author Andrew Fiddian-Green - Initial contribution
  */
+@NonNullByDefault
 public interface AddonSuggestionListener {
-	
-	public void onAddonSuggestionFound(String bindingId);
 
+    public void onAddonSuggestionFound(String bindingId);
 }

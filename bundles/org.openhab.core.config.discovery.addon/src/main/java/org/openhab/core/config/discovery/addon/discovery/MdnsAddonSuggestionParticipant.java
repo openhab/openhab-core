@@ -36,37 +36,37 @@ import org.osgi.service.component.annotations.Component;
 @NonNullByDefault
 @Component(service = MDNSDiscoveryParticipant.class, configurationPid = "discovery.mdns.suggestion.finder")
 public class MdnsAddonSuggestionParticipant extends AddonSuggestionParticipant implements MDNSDiscoveryParticipant {
-	private final String serviceType;
+    private final String serviceType;
 
-	public MdnsAddonSuggestionParticipant(AddonSuggestionListener listener, String bindingId,
-			Map<String, String> propertyMatchRegex, String serviceType) {
-		super(listener, bindingId, propertyMatchRegex);
-		this.serviceType = serviceType;
-	}
+    public MdnsAddonSuggestionParticipant(AddonSuggestionListener listener, String bindingId,
+            Map<String, String> propertyMatchRegex, String serviceType) {
+        super(listener, bindingId, propertyMatchRegex);
+        this.serviceType = serviceType;
+    }
 
-	@Override
-	public Set<ThingTypeUID> getSupportedThingTypeUIDs() {
-		return Set.of();
-	}
+    @Override
+    public Set<ThingTypeUID> getSupportedThingTypeUIDs() {
+        return Set.of();
+    }
 
-	@Override
-	public String getServiceType() {
-		return serviceType;
-	}
+    @Override
+    public String getServiceType() {
+        return serviceType;
+    }
 
-	@Override
-	public @Nullable DiscoveryResult createResult(ServiceInfo serviceInfo) {
-		if (isPropertyValid("application", serviceInfo.getApplication())
-				&& isPropertyValid("name", serviceInfo.getName())
-				&& Collections.list(serviceInfo.getPropertyNames()).stream().allMatch(
-						propertyName -> isPropertyValid(propertyName, serviceInfo.getPropertyString(propertyName)))) {
-			listener.onAddonSuggestionFound(bindingId);
-		}
-		return null;
-	}
+    @Override
+    public @Nullable DiscoveryResult createResult(ServiceInfo serviceInfo) {
+        if (isPropertyValid("application", serviceInfo.getApplication())
+                && isPropertyValid("name", serviceInfo.getName())
+                && Collections.list(serviceInfo.getPropertyNames()).stream().allMatch(
+                        propertyName -> isPropertyValid(propertyName, serviceInfo.getPropertyString(propertyName)))) {
+            listener.onAddonSuggestionFound(bindingId);
+        }
+        return null;
+    }
 
-	@Override
-	public @Nullable ThingUID getThingUID(ServiceInfo service) {
-		return null;
-	}
+    @Override
+    public @Nullable ThingUID getThingUID(ServiceInfo service) {
+        return null;
+    }
 }
