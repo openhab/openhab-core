@@ -30,6 +30,7 @@
     <module>org.openhab.core.automation.rest</module>
     <module>org.openhab.core.config.core</module>
     <module>org.openhab.core.config.discovery</module>
+    <module>org.openhab.core.config.discovery.addon</module>
     <module>org.openhab.core.config.discovery.mdns</module>
     <module>org.openhab.core.config.discovery.usbserial</module>
     <module>org.openhab.core.config.discovery.usbserial.linuxsysfs</module>
