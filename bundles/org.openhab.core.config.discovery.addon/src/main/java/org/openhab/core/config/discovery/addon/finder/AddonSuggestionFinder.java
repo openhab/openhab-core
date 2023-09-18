@@ -99,8 +99,8 @@ public class AddonSuggestionFinder implements AutoCloseable {
     }
 
     /**
-     * Initialize the AddonSuggestionFinder with XML data containing the list of potential addon candidates to be
-     * suggested.
+     * Initialize the AddonSuggestionFinder with XML data containing the list of
+     * potential addon candidates to be suggested.
      * 
      * @param xml
      */
@@ -111,20 +111,20 @@ public class AddonSuggestionFinder implements AutoCloseable {
             // exception should not occur
         }
         Candidates candidates = candidatesSerializer.fromXML(xml);
-        candidates.getCandidates().forEach(c -> {
-            switch (c.getDiscoveryType()) {
+        candidates.getCandidates().forEach(candidate -> {
+            switch (candidate.getDiscoveryType()) {
                 case MDNS:
-                    mdnsCandidates
-                            .add(new MdnsCandidate(c.getAddonId(), c.getPropertyRegexMap(), c.getMdnsServiceType()));
+                    mdnsCandidates.add(new MdnsCandidate(candidate.getAddonId(), candidate.getPropertyRegexMap(),
+                            candidate.getMdnsServiceType()));
                     break;
                 case UPNP:
-                    upnpCandidates.add(new UpnpCandidate(c.getAddonId(), c.getPropertyRegexMap()));
+                    upnpCandidates.add(new UpnpCandidate(candidate.getAddonId(), candidate.getPropertyRegexMap()));
                     break;
                 default:
                     break;
             }
         });
-        mdnsCandidates.forEach(c -> mdnsClient.addServiceListener(c.getMdnsServiceType(), noop));
+        mdnsCandidates.forEach(candidate -> mdnsClient.addServiceListener(candidate.getMdnsServiceType(), noop));
     }
 
     /**
@@ -135,8 +135,7 @@ public class AddonSuggestionFinder implements AutoCloseable {
     private void startMdnsScan() {
         scheduler.submit(() -> {
             mdnsCandidates.forEach(candidate -> {
-                ServiceInfo[] services = mdnsClient.list(candidate.getMdnsServiceType());
-                for (ServiceInfo service : services) {
+                for (ServiceInfo service : mdnsClient.list(candidate.getMdnsServiceType())) {
                     if (candidate.equals(service)) {
                         suggestionFound(candidate.getAddonId());
                     }
