@@ -133,6 +133,7 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
         final Map<String, Object> contextNew = new HashMap<>(context);
         contextNew.put("ruleUID", this.ruleUID);
         executionContext.setAttribute("ctx", contextNew, ScriptContext.ENGINE_SCOPE);
+        executionContext.setAttribute("SCRIPT_CONTEXT", contextNew, ScriptContext.ENGINE_SCOPE);
 
         // Add the rule's UID to the global namespace.
         executionContext.setAttribute("ruleUID", this.ruleUID, ScriptContext.ENGINE_SCOPE);
