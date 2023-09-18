@@ -10,17 +10,27 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.config.discovery.addon.finder;
+package org.openhab.core.config.discovery.addon.dto;
+
+import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * This is a {@link AddonSuggestionListener} which is a callback for discovery of suggested addons.
+ * DTO for serialization of addon suggestion candidates.
  *
  * @author Andrew Fiddian-Green - Initial contribution
  */
 @NonNullByDefault
-public interface AddonSuggestionListener {
+public class Candidates {
+    private @NonNullByDefault({}) List<Candidate> candidates;
 
-    public void onAddonSuggestionFound(String bindingId);
+    public List<Candidate> getCandidates() {
+        return candidates;
+    }
+
+    public Candidates setCandidates(List<Candidate> candidates) {
+        this.candidates = candidates;
+        return this;
+    }
 }
