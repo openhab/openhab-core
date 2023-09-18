@@ -32,7 +32,7 @@ public class CandidatesSerializer {
 
     public CandidatesSerializer() {
         xStream = new XStream(new StaxDriver());
-        xStream.alias("addon-suggestion", Candidates.class);
+        xStream.alias("addon-suggestions", Candidates.class);
         xStream.alias("candidate", Candidate.class);
         xStream.alias("property", PropertyRegex.class);
         xStream.addImplicitCollection(Candidates.class, "candidates");
