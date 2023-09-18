@@ -18,6 +18,7 @@ import org.openhab.core.config.discovery.addon.dto.Candidates;
 import org.openhab.core.config.discovery.addon.dto.PropertyRegex;
 
 import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.XStreamException;
 import com.thoughtworks.xstream.io.xml.StaxDriver;
 
 /**
@@ -40,11 +41,25 @@ public class CandidatesSerializer {
         xStream.allowTypesByWildcard(new String[] { "org.openhab.**" });
     }
 
-    public Candidates fromXML(String xml) {
+    /**
+     * Deserialize the XML into a Candidates DTO.
+     * 
+     * @param xml an XML serial image.
+     * @return a deserialized Candidates DTO.
+     * @throws XStreamException if unable to deserialize the XML.
+     */
+    public Candidates fromXML(String xml) throws XStreamException {
         return (Candidates) xStream.fromXML(xml);
     }
 
-    public String toXML(Candidates candidates) {
+    /**
+     * Serialize a Candidates DTO to XML.
+     * 
+     * @param candidates the DTO to be serialized.
+     * @return an XML serial image of the DTO.
+     * @throws XStreamException if unable to serialize the DTO.
+     */
+    public String toXML(Candidates candidates) throws XStreamException {
         return xStream.toXML(candidates);
     }
 }

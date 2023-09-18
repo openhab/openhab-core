@@ -12,6 +12,8 @@
  */
 package org.openhab.core.config.discovery.addon.finder;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -21,6 +23,12 @@ import java.util.concurrent.ScheduledExecutorService;
 import javax.jmdns.ServiceEvent;
 import javax.jmdns.ServiceInfo;
 import javax.jmdns.ServiceListener;
+import javax.servlet.Servlet;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.core.MediaType;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -34,8 +42,11 @@ import org.openhab.core.io.transport.mdns.MDNSClient;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.http.whiteboard.propertytypes.HttpWhiteboardServletName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.thoughtworks.xstream.XStreamException;
 
 /**
  * This is a {@link AddonSuggestionFinder} which discovers suggested addons for
@@ -44,8 +55,9 @@ import org.slf4j.LoggerFactory;
  * @author Andrew Fiddian-Green - Initial contribution
  */
 @NonNullByDefault
-@Component
-public class AddonSuggestionFinder implements AutoCloseable {
+@Component(immediate = true, service = Servlet.class)
+@HttpWhiteboardServletName(AddonSuggestionFinder.SERVLET_PATH)
+public class AddonSuggestionFinder extends HttpServlet implements AutoCloseable {
 
     /**
      * Inner ServiceListener implementation that ignores call-backs.
@@ -65,7 +77,10 @@ public class AddonSuggestionFinder implements AutoCloseable {
         }
     }
 
+    public static final String SERVLET_PATH = "/suggestions";
+    private static final long serialVersionUID = -358506179462414301L;
     private static final String FINDER_THREADPOOL_NAME = "addon-suggestion-finder";
+
     private final Logger logger = LoggerFactory.getLogger(AddonSuggestionFinder.class);
     private final ScheduledExecutorService scheduler = ThreadPoolManager.getScheduledPool(FINDER_THREADPOOL_NAME);
     private final NoOp noop = new NoOp();
@@ -92,6 +107,42 @@ public class AddonSuggestionFinder implements AutoCloseable {
     }
 
     /**
+     * Process GET request by returning a comma separated list of suggested addon
+     * ids.
+     */
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        resp.setStatus(HttpServletResponse.SC_OK);
+        resp.setContentType(MediaType.TEXT_PLAIN);
+        resp.getWriter().write(String.join(",", getSuggestions()));
+    }
+
+    /**
+     * Process POST requests containing an XML payload which should contain the
+     * suggestion candidates, load the XML payload, and finally start scanning for
+     * respective suggestions.
+     */
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        if (req.getContentLength() <= 0) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "no content");
+            return;
+        }
+        if (!MediaType.TEXT_XML.equals(req.getContentType())) {
+            resp.sendError(HttpServletResponse.SC_UNSUPPORTED_MEDIA_TYPE, "content not xml");
+            return;
+        }
+        try {
+            loadXML(new String(req.getInputStream().readAllBytes(), StandardCharsets.UTF_8));
+            resp.setStatus(HttpServletResponse.SC_OK);
+            startScan();
+        } catch (XStreamException e) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "content invalid");
+            throw new ServletException(e);
+        }
+    }
+
+    /**
      * Get the list of suggested addon ids.
      */
     public List<String> getSuggestions() {
@@ -102,9 +153,10 @@ public class AddonSuggestionFinder implements AutoCloseable {
      * Initialize the AddonSuggestionFinder with XML data containing the list of
      * potential addon candidates to be suggested.
      * 
-     * @param xml
+     * @param xml an XML serial image.
+     * @throws XStreamException if the object cannot be deserialized.
      */
-    public void loadXML(String xml) {
+    public void loadXML(String xml) throws XStreamException {
         try {
             close();
         } catch (Exception e) {
@@ -148,8 +200,12 @@ public class AddonSuggestionFinder implements AutoCloseable {
      * Start the search process to find addons to suggest to be installed.
      */
     public void startScan() {
-        startMdnsScan();
-        startUpnpScan();
+        if (!mdnsCandidates.isEmpty()) {
+            startMdnsScan();
+        }
+        if (!upnpCandidates.isEmpty()) {
+            startUpnpScan();
+        }
     }
 
     /**
