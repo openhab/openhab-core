@@ -40,7 +40,7 @@ public class UpnpCandidate extends BaseCandidate {
         if (object instanceof RemoteDevice device) {
             return propertyMatches("deviceType", device.getType().getType())
                     && propertyMatches("manufacturer", device.getDetails().getManufacturerDetails().getManufacturer())
-                    && propertyMatches("model", device.getDetails().getModelDetails().getModelName())
+                    && propertyMatches("modelName", device.getDetails().getModelDetails().getModelName())
                     && propertyMatches("serialNumber", device.getDetails().getSerialNumber())
                     && propertyMatches("udn", device.getIdentity().getUdn().getIdentifierString());
         }
