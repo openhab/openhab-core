@@ -41,6 +41,7 @@ import org.openhab.core.config.discovery.addon.xml.AddonCandidatesSerializer;
 import org.openhab.core.io.transport.mdns.MDNSClient;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
@@ -105,7 +106,7 @@ public class AddonSuggestionFinderService implements AddonService, AutoCloseable
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     protected void addAddonService(AddonService addonService) {
-        // exclude ourself from addonServices in order to prevent recursion
+        // exclude ourself from addonServices set in order to prevent recursion
         if (!SERVICE_ID.equals(addonService.getId())) {
             addonServices.add(addonService);
         }
@@ -115,6 +116,7 @@ public class AddonSuggestionFinderService implements AddonService, AutoCloseable
         addonServices.remove(addonService);
     }
 
+    @Deactivate
     @Override
     public void close() throws Exception {
         mdnsCandidates.forEach(c -> mdnsClient.removeServiceListener(c.getMdnsServiceType(), noop));
@@ -125,7 +127,9 @@ public class AddonSuggestionFinderService implements AddonService, AutoCloseable
 
     @Override
     public @Nullable Addon getAddon(String id, @Nullable Locale locale) {
-        return null;
+        return addonServices.stream().filter(s -> !SERVICE_ID.equals(s.getId())).map(s -> s.getAddons(locale))
+                .flatMap(Collection::stream).filter(a -> suggestedAddonUids.contains(a.getUid()))
+                .filter(a -> id.equals(a.getId())).findAny().orElse(null);
     }
 
     @Override
@@ -135,7 +139,7 @@ public class AddonSuggestionFinderService implements AddonService, AutoCloseable
 
     @Override
     public List<Addon> getAddons(@Nullable Locale locale) {
-        return addonServices.stream().filter(s -> !this.getId().equals(s.getId())).map(s -> s.getAddons(locale))
+        return addonServices.stream().filter(s -> !SERVICE_ID.equals(s.getId())).map(s -> s.getAddons(locale))
                 .flatMap(Collection::stream).filter(a -> suggestedAddonUids.contains(a.getUid())).toList();
     }
 
