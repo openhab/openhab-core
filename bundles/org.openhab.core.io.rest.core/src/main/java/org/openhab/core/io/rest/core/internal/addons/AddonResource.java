@@ -56,7 +56,7 @@ import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionRegistry;
 import org.openhab.core.config.core.ConfigUtil;
 import org.openhab.core.config.core.Configuration;
-import org.openhab.core.config.discovery.addon.finder.AddonSuggestionFinder;
+import org.openhab.core.config.discovery.addon.finder.AddonSuggestionFinderService;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.io.rest.JSONResponse;
@@ -121,7 +121,7 @@ public class AddonResource implements RESTResource {
     private final ConfigurationService configurationService;
     private final AddonInfoRegistry addonInfoRegistry;
     private final ConfigDescriptionRegistry configDescriptionRegistry;
-    private final AddonSuggestionFinder addonSuggestionFinder;
+    private final AddonSuggestionFinderService addonSuggestionFinderService;
 
     private @Context @NonNullByDefault({}) UriInfo uriInfo;
 
@@ -130,13 +130,13 @@ public class AddonResource implements RESTResource {
             final @Reference ConfigurationService configurationService,
             final @Reference AddonInfoRegistry addonInfoRegistry,
             final @Reference ConfigDescriptionRegistry configDescriptionRegistry,
-            final @Reference AddonSuggestionFinder addonSuggestionFinder) {
+            final @Reference AddonSuggestionFinderService addonSuggestionFinderService) {
         this.eventPublisher = eventPublisher;
         this.localeService = localeService;
         this.configurationService = configurationService;
         this.addonInfoRegistry = addonInfoRegistry;
         this.configDescriptionRegistry = configDescriptionRegistry;
-        this.addonSuggestionFinder = addonSuggestionFinder;
+        this.addonSuggestionFinderService = addonSuggestionFinderService;
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
@@ -191,9 +191,7 @@ public class AddonResource implements RESTResource {
             @HeaderParam("Accept-Language") @Parameter(description = "language") @Nullable String language) {
         logger.debug("Received HTTP GET request at '{}'", uriInfo.getPath());
         Locale locale = localeService.getLocale(language);
-        List<String> suggestedAddonUids = addonSuggestionFinder.getSuggestedAddonUids();
-        return Response.ok(new Stream2JSONInputStream(
-                getAllAddons(locale).filter(addon -> suggestedAddonUids.contains(addon.getUid())))).build();
+        return Response.ok(new Stream2JSONInputStream(addonSuggestionFinderService.getAddons(locale).stream())).build();
     }
 
     @GET
