@@ -192,9 +192,8 @@ public class AddonResource implements RESTResource {
         logger.debug("Received HTTP GET request at '{}'", uriInfo.getPath());
         Locale locale = localeService.getLocale(language);
         List<String> suggestedAddonUids = addonSuggestionFinder.getSuggestedAddonUids();
-        return Response.ok(
-                new Stream2JSONInputStream(getAllAddons(locale).filter(addon -> suggestedAddonUids.contains(addon.getUid()))))
-                .build();
+        return Response.ok(new Stream2JSONInputStream(
+                getAllAddons(locale).filter(addon -> suggestedAddonUids.contains(addon.getUid())))).build();
     }
 
     @GET
