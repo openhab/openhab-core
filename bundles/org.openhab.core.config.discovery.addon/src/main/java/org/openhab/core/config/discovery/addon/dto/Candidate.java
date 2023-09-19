@@ -26,13 +26,13 @@ import org.eclipse.jdt.annotation.Nullable;
  */
 @NonNullByDefault
 public class Candidate {
-    private @NonNullByDefault({}) String addonId;
+    private @NonNullByDefault({}) String addonUid;
     private @NonNullByDefault({}) String discoveryType;
     private @NonNullByDefault({}) List<PropertyRegex> properties;
     private @Nullable String mdnsServiceType;
 
-    public String getAddonId() {
-        return addonId;
+    public String getAddonUid() {
+        return addonUid;
     }
 
     public DiscoveryType getDiscoveryType() {
@@ -48,8 +48,8 @@ public class Candidate {
         return properties.stream().collect(Collectors.toMap(x -> x.getName(), x -> x.getRegex()));
     }
 
-    public Candidate setAddonId(String addonId) {
-        this.addonId = addonId;
+    public Candidate setAddonUid(String addonUid) {
+        this.addonUid = addonUid;
         return this;
     }
 

@@ -72,7 +72,7 @@ public class AddonSuggestionFinder implements AutoCloseable {
     private final Logger logger = LoggerFactory.getLogger(AddonSuggestionFinder.class);
     private final ScheduledExecutorService scheduler = ThreadPoolManager.getScheduledPool(FINDER_THREADPOOL_NAME);
     private final NoOp noop = new NoOp();
-    private final Set<String> addonIds = ConcurrentHashMap.newKeySet();
+    private final Set<String> suggestedAddonUids = ConcurrentHashMap.newKeySet();
     private final List<MdnsCandidate> mdnsCandidates = new ArrayList<>();
     private final List<UpnpCandidate> upnpCandidates = new ArrayList<>();
     private final CandidatesSerializer candidatesSerializer = new CandidatesSerializer();
@@ -91,14 +91,14 @@ public class AddonSuggestionFinder implements AutoCloseable {
         mdnsCandidates.forEach(candidate -> mdnsClient.removeServiceListener(candidate.getMdnsServiceType(), noop));
         mdnsCandidates.clear();
         upnpCandidates.clear();
-        addonIds.clear();
+        suggestedAddonUids.clear();
     }
 
     /**
-     * Get the list of suggested addon ids.
+     * Get the list of suggested addon Uids.
      */
-    public List<String> getSuggestions() {
-        return addonIds.stream().toList();
+    public List<String> getSuggestedAddonUids() {
+        return suggestedAddonUids.stream().toList();
     }
 
     /**
@@ -118,11 +118,11 @@ public class AddonSuggestionFinder implements AutoCloseable {
         candidates.getCandidates().forEach(candidate -> {
             switch (candidate.getDiscoveryType()) {
                 case MDNS:
-                    mdnsCandidates.add(new MdnsCandidate(candidate.getAddonId(), candidate.getPropertyRegexMap(),
+                    mdnsCandidates.add(new MdnsCandidate(candidate.getAddonUid(), candidate.getPropertyRegexMap(),
                             candidate.getMdnsServiceType()));
                     break;
                 case UPNP:
-                    upnpCandidates.add(new UpnpCandidate(candidate.getAddonId(), candidate.getPropertyRegexMap()));
+                    upnpCandidates.add(new UpnpCandidate(candidate.getAddonUid(), candidate.getPropertyRegexMap()));
                     break;
                 default:
                     break;
@@ -168,12 +168,12 @@ public class AddonSuggestionFinder implements AutoCloseable {
     /**
      * Called back when a new addon suggestion is found.
      * 
-     * @param addonId
+     * @param addonUid the Uid of the found addon.
      */
-    private synchronized void suggestionFound(String addonId) {
-        if (!addonIds.contains(addonId)) {
-            logger.debug("found suggested addon id:{}", addonId);
-            addonIds.add(addonId);
+    private synchronized void suggestionFound(String addonUid) {
+        if (!suggestedAddonUids.contains(addonUid)) {
+            logger.debug("found suggested addon id:{}", addonUid);
+            suggestedAddonUids.add(addonUid);
         }
     }
 }
