@@ -12,25 +12,15 @@
  */
 package org.openhab.core.config.discovery.addon.dto;
 
-import java.util.List;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * DTO for serialization of addon suggestion candidates.
+ * Enum of different supported discovery types.
  *
  * @author Andrew Fiddian-Green - Initial contribution
  */
 @NonNullByDefault
-public class Candidates {
-    private @NonNullByDefault({}) List<Candidate> candidates;
-
-    public List<Candidate> getCandidates() {
-        return candidates;
-    }
-
-    public Candidates setCandidates(List<Candidate> candidates) {
-        this.candidates = candidates;
-        return this;
-    }
+public enum ServiceType {
+    MDNS,
+    UPNP
 }

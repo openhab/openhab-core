@@ -13,14 +13,30 @@
 package org.openhab.core.config.discovery.addon.dto;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
- * Enum of different supported discovery types.
+ * DTO for serialization of a property match regular expression.
  *
  * @author Andrew Fiddian-Green - Initial contribution
  */
 @NonNullByDefault
-public enum DiscoveryType {
-    MDNS,
-    UPNP
+public class MatchProperty {
+    private @Nullable String name;
+    private @Nullable String regex;
+
+    public MatchProperty(String name, String regex) {
+        this.name = name;
+        this.regex = regex;
+    }
+
+    public String getName() {
+        String name = this.name;
+        return name != null ? name : "";
+    }
+
+    public String getRegex() {
+        String regex = this.regex;
+        return regex != null ? regex : "";
+    }
 }

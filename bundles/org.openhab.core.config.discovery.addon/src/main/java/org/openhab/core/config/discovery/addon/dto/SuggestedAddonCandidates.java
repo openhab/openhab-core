@@ -12,28 +12,27 @@
  */
 package org.openhab.core.config.discovery.addon.dto;
 
+import java.util.List;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
- * DTO for serialization of a property match regular expression.
+ * DTO for serialization of a collection of potential suggested addon candidates.
  *
  * @author Andrew Fiddian-Green - Initial contribution
  */
 @NonNullByDefault
-public class PropertyRegex {
-    private @NonNullByDefault({}) String name;
-    private @NonNullByDefault({}) String regex;
+public class SuggestedAddonCandidates {
+    private @Nullable List<Candidate> candidates;
 
-    public PropertyRegex(String name, String regex) {
-        this.name = name;
-        this.regex = regex;
+    public List<Candidate> getCandidates() {
+        List<Candidate> candidates = this.candidates;
+        return candidates != null ? candidates : List.of();
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public String getRegex() {
-        return regex;
+    public SuggestedAddonCandidates setCandidates(List<Candidate> candidates) {
+        this.candidates = candidates;
+        return this;
     }
 }

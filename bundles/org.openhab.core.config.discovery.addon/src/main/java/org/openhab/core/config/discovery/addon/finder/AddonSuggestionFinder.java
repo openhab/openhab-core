@@ -28,8 +28,8 @@ import org.jupnp.UpnpService;
 import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.config.discovery.addon.candidate.MdnsCandidate;
 import org.openhab.core.config.discovery.addon.candidate.UpnpCandidate;
-import org.openhab.core.config.discovery.addon.dto.Candidates;
-import org.openhab.core.config.discovery.addon.xml.CandidatesSerializer;
+import org.openhab.core.config.discovery.addon.dto.SuggestedAddonCandidates;
+import org.openhab.core.config.discovery.addon.xml.AddonCandidatesSerializer;
 import org.openhab.core.io.transport.mdns.MDNSClient;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -75,7 +75,7 @@ public class AddonSuggestionFinder implements AutoCloseable {
     private final Set<String> suggestedAddonUids = ConcurrentHashMap.newKeySet();
     private final List<MdnsCandidate> mdnsCandidates = new ArrayList<>();
     private final List<UpnpCandidate> upnpCandidates = new ArrayList<>();
-    private final CandidatesSerializer candidatesSerializer = new CandidatesSerializer();
+    private final AddonCandidatesSerializer addonCandidatesSerializer = new AddonCandidatesSerializer();
 
     private final MDNSClient mdnsClient;
     private final UpnpService upnpService;
@@ -114,20 +114,22 @@ public class AddonSuggestionFinder implements AutoCloseable {
         } catch (Exception e) {
             // exception should not occur
         }
-        Candidates candidates = candidatesSerializer.fromXML(xml);
-        candidates.getCandidates().forEach(candidate -> {
-            switch (candidate.getDiscoveryType()) {
-                case MDNS:
-                    mdnsCandidates.add(new MdnsCandidate(candidate.getAddonUid(), candidate.getPropertyRegexMap(),
-                            candidate.getMdnsServiceType()));
-                    break;
-                case UPNP:
-                    upnpCandidates.add(new UpnpCandidate(candidate.getAddonUid(), candidate.getPropertyRegexMap()));
-                    break;
-                default:
-                    break;
-            }
-        });
+        SuggestedAddonCandidates candidates = addonCandidatesSerializer.fromXML(xml);
+        candidates.getCandidates().stream()
+                .forEach(candidate -> candidate.getDiscoveryMethods().stream().forEach(discoveryMethod -> {
+                    switch (discoveryMethod.getServiceType()) {
+                        case MDNS:
+                            mdnsCandidates.add(new MdnsCandidate(candidate.getAddonUid(),
+                                    discoveryMethod.getMatchProperties(), discoveryMethod.getMdnsServiceType()));
+                            break;
+                        case UPNP:
+                            upnpCandidates.add(
+                                    new UpnpCandidate(candidate.getAddonUid(), discoveryMethod.getMatchProperties()));
+                            break;
+                        default:
+                            break;
+                    }
+                }));
         mdnsCandidates.forEach(candidate -> mdnsClient.addServiceListener(candidate.getMdnsServiceType(), noop));
     }
 
