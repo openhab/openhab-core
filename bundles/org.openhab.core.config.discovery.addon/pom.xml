@@ -12,7 +12,7 @@
 
   <artifactId>org.openhab.core.config.discovery.addon</artifactId>
 
-  <name>openHAB Core :: Bundles :: Addon Suggestion Finder</name>
+  <name>openHAB Core :: Bundles :: Suggested Addon Finder</name>
 
   <dependencies>
     <dependency>
@@ -31,5 +31,13 @@
       <version>${project.version}</version>
     </dependency>
   </dependencies>
+
+  <build>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+      </resource>
+    </resources>
+  </build>
 
 </project>

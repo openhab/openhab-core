@@ -12,7 +12,10 @@
  */
 package org.openhab.core.config.discovery.addon.finder;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -79,40 +82,43 @@ public class AddonSuggestionFinderService implements AddonService, AutoCloseable
     }
 
     public static final String SERVICE_ID = "suggestions";
-    public static final String SERVICE_NAME = "Suggested addon finder service";
+    public static final String SERVICE_NAME = "suggested-addon-finder";
 
-    private static final String FINDER_THREADPOOL_NAME = "addon-suggestion-finder";
+    private static final String XML_RESOURCE_NAME = "suggested-addon-candidates.xml";
 
-    private final Logger logger = LoggerFactory.getLogger(AddonSuggestionFinderService.class);
-    private final ScheduledExecutorService scheduler = ThreadPoolManager.getScheduledPool(FINDER_THREADPOOL_NAME);
-    private final NoOp noop = new NoOp();
-    private final Set<String> suggestedAddonUids = ConcurrentHashMap.newKeySet();
-    private final List<MdnsCandidate> mdnsCandidates = new ArrayList<>();
-    private final List<UpnpCandidate> upnpCandidates = new ArrayList<>();
     private final AddonCandidatesSerializer addonCandidatesSerializer = new AddonCandidatesSerializer();
     private final Set<AddonService> addonServices = new CopyOnWriteArraySet<>();
+    private final Logger logger = LoggerFactory.getLogger(AddonSuggestionFinderService.class);
+    private final List<MdnsCandidate> mdnsCandidates = new ArrayList<>();
+    private final NoOp noop = new NoOp();
+    private final ScheduledExecutorService scheduler = ThreadPoolManager.getScheduledPool(SERVICE_NAME);
+    private final Set<String> suggestedAddonUids = ConcurrentHashMap.newKeySet();
+    private final List<UpnpCandidate> upnpCandidates = new ArrayList<>();
 
     private final MDNSClient mdnsClient;
     private final UpnpService upnpService;
 
-    private @Nullable Future<?> mdnsScanTask;
     private @Nullable Future<?> upnpScanTask;
+    private @Nullable Future<?> mdnsScanTask;
 
     @Activate
-    public AddonSuggestionFinderService(@Reference MDNSClient mdnsClient, @Reference UpnpService upnpService) {
+    public AddonSuggestionFinderService(@Reference MDNSClient mdnsClient, @Reference UpnpService upnpService)
+            throws XStreamException, IOException, IllegalStateException {
         this.mdnsClient = mdnsClient;
         this.upnpService = upnpService;
+        initialize();
+        startScan();
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
-    protected void addAddonService(AddonService addonService) {
-        // exclude ourself from addonServices set in order to prevent recursion
+    public void addAddonService(AddonService addonService) {
+        // exclude ourself from addonServices set in order to prevent infinite recursion
         if (!SERVICE_ID.equals(addonService.getId())) {
             addonServices.add(addonService);
         }
     }
 
-    protected void removeAddonService(AddonService addonService) {
+    public void removeAddonService(AddonService addonService) {
         addonServices.remove(addonService);
     }
 
@@ -127,9 +133,7 @@ public class AddonSuggestionFinderService implements AddonService, AutoCloseable
 
     @Override
     public @Nullable Addon getAddon(String id, @Nullable Locale locale) {
-        return addonServices.stream().filter(s -> !SERVICE_ID.equals(s.getId())).map(s -> s.getAddons(locale))
-                .flatMap(Collection::stream).filter(a -> suggestedAddonUids.contains(a.getUid()))
-                .filter(a -> id.equals(a.getId())).findAny().orElse(null);
+        return getAddons(locale).stream().filter(a -> id.equals(a.getId())).findAny().orElse(null);
     }
 
     @Override
@@ -158,36 +162,23 @@ public class AddonSuggestionFinderService implements AddonService, AutoCloseable
         return List.of(AddonType.BINDING);
     }
 
-    @Override
-    public void install(String id) {
-        startScan();
-    }
-
-    @Override
-    public void uninstall(String id) {
-        Future<?> task = upnpScanTask;
-        if (task != null) {
-            task.cancel(true);
-        }
-        task = mdnsScanTask;
-        if (task != null) {
-            task.cancel(true);
-        }
-    }
-
     /**
-     * Initialize the AddonSuggestionFinder with XML data containing the list of
+     * Initialize the class by loading an XML file that contains the list of
      * potential addon candidates to be suggested.
      * 
-     * @param xml an XML serial image.
-     * @throws XStreamException if the object cannot be deserialized.
+     * @throws IOException if there was an error reading the xml file.
+     * @throws XStreamException if the xml cannot be deserialized.
      */
-    public void loadXML(String xml) throws XStreamException {
-        try {
-            close();
-        } catch (Exception e) {
-            // exception should not occur
+    private void initialize() throws XStreamException, IOException, IllegalStateException {
+        ClassLoader loader = getClass().getClassLoader();
+        if (loader == null) {
+            throw new IllegalStateException("Class loader is null");
         }
+        InputStream stream = loader.getResourceAsStream(XML_RESOURCE_NAME);
+        if (stream == null) {
+            throw new IllegalStateException("Resource stream is null");
+        }
+        String xml = new String(stream.readAllBytes(), StandardCharsets.UTF_8);
         SuggestedAddonCandidates candidates = addonCandidatesSerializer.fromXML(xml);
         candidates.getCandidates().stream().forEach(c -> c.getDiscoveryMethods().stream().forEach(m -> {
             switch (m.getServiceType()) {
@@ -206,8 +197,31 @@ public class AddonSuggestionFinderService implements AddonService, AutoCloseable
     }
 
     @Override
+    public void install(String id) {
+        // note: startScan() is called from the constructor
+    }
+
+    @Override
     public void refreshSource() {
         startScan();
+    }
+
+    public boolean scanDone() {
+        Future<?> mdnsScanTask = this.mdnsScanTask;
+        Future<?> upnpScanTask = this.upnpScanTask;
+        return mdnsScanTask != null && mdnsScanTask.isDone() && upnpScanTask != null && upnpScanTask.isDone();
+    }
+
+    /**
+     * Start the search process to find addons to suggest to be installed.
+     */
+    private void startScan() {
+        if (!mdnsCandidates.isEmpty()) {
+            startScanMdns();
+        }
+        if (!upnpCandidates.isEmpty()) {
+            startScanUpnp();
+        }
     }
 
     /**
@@ -215,26 +229,18 @@ public class AddonSuggestionFinderService implements AddonService, AutoCloseable
      * the MDNS service.
      */
     @SuppressWarnings("unlikely-arg-type")
-    private void startMdnsScan() {
+    private void startScanMdns() {
         Future<?> task = mdnsScanTask;
         if (task != null) {
             task.cancel(false);
         }
-        mdnsScanTask = scheduler
-                .submit(() -> mdnsCandidates.forEach(c -> Arrays.stream(mdnsClient.list(c.getMdnsServiceType()))
-                        .filter(s -> c.equals(s)).forEach(s -> suggestionFound(c.getAddonId()))));
-    }
-
-    /**
-     * Start the search process to find addons to suggest to be installed.
-     */
-    public void startScan() {
-        if (!mdnsCandidates.isEmpty()) {
-            startMdnsScan();
-        }
-        if (!upnpCandidates.isEmpty()) {
-            startUpnpScan();
-        }
+        mdnsScanTask = scheduler.submit(() -> {
+            mdnsCandidates.forEach(c -> {
+                Arrays.stream(mdnsClient.list(c.getMdnsServiceType())).filter(s -> c.equals(s)).forEach(s -> {
+                    suggestionFound(c.getAddonId());
+                });
+            });
+        });
     }
 
     /**
@@ -242,13 +248,18 @@ public class AddonSuggestionFinderService implements AddonService, AutoCloseable
      * the UPnP service.
      */
     @SuppressWarnings("unlikely-arg-type")
-    private void startUpnpScan() {
+    private void startScanUpnp() {
         Future<?> task = upnpScanTask;
         if (task != null) {
             task.cancel(false);
         }
-        upnpScanTask = scheduler.submit(() -> upnpService.getRegistry().getRemoteDevices().forEach(
-                d -> upnpCandidates.stream().filter(c -> c.equals(d)).forEach(c -> suggestionFound(c.getAddonId()))));
+        upnpScanTask = scheduler.submit(() -> {
+            upnpService.getRegistry().getRemoteDevices().forEach(d -> {
+                upnpCandidates.stream().filter(c -> c.equals(d)).forEach(c -> {
+                    suggestionFound(c.getAddonId());
+                });
+            });
+        });
     }
 
     /**
@@ -260,6 +271,18 @@ public class AddonSuggestionFinderService implements AddonService, AutoCloseable
         if (!suggestedAddonUids.contains(addonUid)) {
             logger.debug("found suggested addon id:{}", addonUid);
             suggestedAddonUids.add(addonUid);
+        }
+    }
+
+    @Override
+    public void uninstall(String id) {
+        Future<?> task = upnpScanTask;
+        if (task != null) {
+            task.cancel(true);
+        }
+        task = mdnsScanTask;
+        if (task != null) {
+            task.cancel(true);
         }
     }
 }

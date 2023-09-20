@@ -20,7 +20,8 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 /**
- * DTO for serialization of a single addon suggestion candidate discovery method.
+ * DTO for serialization of a single addon suggestion candidate discovery
+ * method.
  *
  * @author Andrew Fiddian-Green - Initial contribution
  */
@@ -41,8 +42,9 @@ public class DiscoveryMethod {
     }
 
     public Map<String, String> getMatchProperties() {
+        List<MatchProperty> matchProperties = this.matchProperties;
         return matchProperties != null
-                ? matchProperties.stream().collect(Collectors.toMap(x -> x.getName(), x -> x.getRegex()))
+                ? matchProperties.stream().collect(Collectors.toMap(m -> m.getName(), m -> m.getRegex()))
                 : Map.of();
     }
 
