@@ -39,6 +39,7 @@ import org.openhab.core.addon.AddonType;
 import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.config.discovery.addon.candidate.MdnsCandidate;
 import org.openhab.core.config.discovery.addon.candidate.UpnpCandidate;
+import org.openhab.core.config.discovery.addon.dto.ServiceType;
 import org.openhab.core.config.discovery.addon.dto.SuggestedAddonCandidates;
 import org.openhab.core.config.discovery.addon.xml.AddonCandidatesSerializer;
 import org.openhab.core.io.transport.mdns.MDNSClient;
@@ -237,7 +238,7 @@ public class AddonSuggestionFinderService implements AddonService, AutoCloseable
         mdnsScanTask = scheduler.submit(() -> {
             mdnsCandidates.forEach(c -> {
                 Arrays.stream(mdnsClient.list(c.getMdnsServiceType())).filter(s -> c.equals(s)).forEach(s -> {
-                    suggestionFound(c.getAddonId());
+                    suggestionFound(ServiceType.MDNS, c.getAddonId());
                 });
             });
         });
@@ -256,7 +257,7 @@ public class AddonSuggestionFinderService implements AddonService, AutoCloseable
         upnpScanTask = scheduler.submit(() -> {
             upnpService.getRegistry().getRemoteDevices().forEach(d -> {
                 upnpCandidates.stream().filter(c -> c.equals(d)).forEach(c -> {
-                    suggestionFound(c.getAddonId());
+                    suggestionFound(ServiceType.UPNP, c.getAddonId());
                 });
             });
         });
@@ -265,11 +266,12 @@ public class AddonSuggestionFinderService implements AddonService, AutoCloseable
     /**
      * Called back when a new addon suggestion is found.
      * 
+     * @param origin the service type that found the addon.
      * @param addonUid the Uid of the found addon.
      */
-    private synchronized void suggestionFound(String addonUid) {
+    private synchronized void suggestionFound(ServiceType origin, String addonUid) {
+        logger.debug("Service {} found suggested addon id:{}", origin, addonUid);
         if (!suggestedAddonUids.contains(addonUid)) {
-            logger.debug("found suggested addon id:{}", addonUid);
             suggestedAddonUids.add(addonUid);
         }
     }
