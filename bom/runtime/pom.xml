@@ -475,8 +475,7 @@
     <dependency>
       <groupId>org.jupnp</groupId>
       <artifactId>org.jupnp</artifactId>
-      <!-- Uses the Java 11 LinkedTransferQueue as workaround for JDK-8301341 -->
-      <version>2.7.1.OH1</version>
+      <version>3.0.0</version>
       <scope>compile</scope>
     </dependency>
 
