@@ -536,6 +536,7 @@ public class SitemapResource
         bean.valuecolor = convertItemValueColor(itemUIRegistry.getValueColor(widget), itemState);
         bean.iconcolor = convertItemValueColor(itemUIRegistry.getIconColor(widget), itemState);
         bean.label = itemUIRegistry.getLabel(widget);
+        bean.labelSource = itemUIRegistry.getLabelSource(widget).toString();
         bean.pattern = itemUIRegistry.getFormatPattern(widget);
         bean.unit = itemUIRegistry.getUnitForWidget(widget);
         bean.type = widget.eClass().getName();
