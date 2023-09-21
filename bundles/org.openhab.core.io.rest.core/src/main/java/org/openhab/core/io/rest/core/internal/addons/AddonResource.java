@@ -56,7 +56,7 @@ import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionRegistry;
 import org.openhab.core.config.core.ConfigUtil;
 import org.openhab.core.config.core.Configuration;
-import org.openhab.core.config.discovery.addon.finder.AddonSuggestionFinderService;
+import org.openhab.core.config.discovery.addon.AddonSuggestionFinderService;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.io.rest.JSONResponse;

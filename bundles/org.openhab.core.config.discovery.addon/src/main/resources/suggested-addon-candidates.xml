@@ -9,11 +9,11 @@
 			<service-type>mdns</service-type>
 			<match-property>
 				<name>rp</name>
-				<regex>/.*\S.*/</regex>
+				<regex>.*</regex>
 			</match-property>
 			<match-property>
 				<name>ty</name>
-				<regex>^hp</regex>
+				<regex>hp (.*)</regex>
 			</match-property>
 			<mdns-service-type>_printer._tcp.local.</mdns-service-type>
 		</discovery-method>

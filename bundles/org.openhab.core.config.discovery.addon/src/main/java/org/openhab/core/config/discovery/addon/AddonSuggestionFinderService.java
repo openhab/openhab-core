@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.config.discovery.addon.finder;
+package org.openhab.core.config.discovery.addon;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -49,8 +49,6 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.thoughtworks.xstream.XStreamException;
 
@@ -89,7 +87,6 @@ public class AddonSuggestionFinderService implements AddonService, AutoCloseable
 
     private final AddonCandidatesSerializer addonCandidatesSerializer = new AddonCandidatesSerializer();
     private final Set<AddonService> addonServices = new CopyOnWriteArraySet<>();
-    private final Logger logger = LoggerFactory.getLogger(AddonSuggestionFinderService.class);
     private final List<MdnsCandidate> mdnsCandidates = new ArrayList<>();
     private final NoOp noop = new NoOp();
     private final ScheduledExecutorService scheduler = ThreadPoolManager.getScheduledPool(SERVICE_NAME);
@@ -235,13 +232,9 @@ public class AddonSuggestionFinderService implements AddonService, AutoCloseable
         if (task != null) {
             task.cancel(false);
         }
-        mdnsScanTask = scheduler.submit(() -> {
-            mdnsCandidates.forEach(c -> {
-                Arrays.stream(mdnsClient.list(c.getMdnsServiceType())).filter(s -> c.equals(s)).forEach(s -> {
-                    suggestionFound(ServiceType.MDNS, c.getAddonId());
-                });
-            });
-        });
+        mdnsScanTask = scheduler
+                .submit(() -> mdnsCandidates.forEach(c -> Arrays.stream(mdnsClient.list(c.getMdnsServiceType()))
+                        .filter(s -> c.equals(s)).forEach(s -> suggestionFound(ServiceType.MDNS, c.getAddonId()))));
     }
 
     /**
@@ -254,13 +247,8 @@ public class AddonSuggestionFinderService implements AddonService, AutoCloseable
         if (task != null) {
             task.cancel(false);
         }
-        upnpScanTask = scheduler.submit(() -> {
-            upnpService.getRegistry().getRemoteDevices().forEach(d -> {
-                upnpCandidates.stream().filter(c -> c.equals(d)).forEach(c -> {
-                    suggestionFound(ServiceType.UPNP, c.getAddonId());
-                });
-            });
-        });
+        upnpScanTask = scheduler.submit(() -> upnpService.getRegistry().getRemoteDevices().forEach(d -> upnpCandidates
+                .stream().filter(c -> c.equals(d)).forEach(c -> suggestionFound(ServiceType.UPNP, c.getAddonId()))));
     }
 
     /**
@@ -270,7 +258,6 @@ public class AddonSuggestionFinderService implements AddonService, AutoCloseable
      * @param addonUid the Uid of the found addon.
      */
     private synchronized void suggestionFound(ServiceType origin, String addonUid) {
-        logger.debug("Service {} found suggested addon id:{}", origin, addonUid);
         if (!suggestedAddonUids.contains(addonUid)) {
             suggestedAddonUids.add(addonUid);
         }

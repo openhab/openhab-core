@@ -9,7 +9,7 @@
     <version>4.1.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>org.openhab.core.config.discovery.addons.tests</artifactId>
+  <artifactId>org.openhab.core.config.discovery.addon.tests</artifactId>
 
   <name>openHAB Core :: Integration Tests :: Suggested Addon Finder Tests</name>
 

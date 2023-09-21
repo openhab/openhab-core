@@ -10,12 +10,16 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.config.discovery.addon.tests.internal;
+package org.openhab.core.config.discovery.addon.tests;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -51,7 +55,7 @@ import org.jupnp.model.types.UDN;
 import org.mockito.Mockito;
 import org.openhab.core.addon.Addon;
 import org.openhab.core.addon.AddonService;
-import org.openhab.core.config.discovery.addon.finder.AddonSuggestionFinderService;
+import org.openhab.core.config.discovery.addon.AddonSuggestionFinderService;
 import org.openhab.core.io.transport.mdns.MDNSClient;
 import org.openhab.core.test.java.JavaOSGiTest;
 
@@ -73,50 +77,13 @@ public class SuggestedAddonFinderServiceOSGiTest extends JavaOSGiTest {
 
     @BeforeAll
     public void setup() {
-        setupAddonServiceMock();
-        setupMdnsClientMock();
-        setupUpnpServiceMock();
-        setupService();
+        setupMockAddonService();
+        setupMockMdnsClient();
+        setupMockUpnpService();
+        createAddonSuggestionFinderService();
     }
 
-    private void setupAddonServiceMock() {
-        // create the mock
-        addonService = mock(AddonService.class);
-        List<Addon> addons = new ArrayList<>();
-        addons.add(Addon.create("binding.hue").withType("binding").withId("hue").build());
-        addons.add(Addon.create("binding.hpprinter").withType("binding").withId("hpprinter").build());
-        when(addonService.getAddons(Locale.US)).thenReturn(addons);
-
-        // check that it works
-        assertNotNull(addonService);
-        assertEquals(2, addonService.getAddons(Locale.US).size());
-        assertEquals("binding.hue", addonService.getAddons(Locale.US).get(0).getUid());
-        assertEquals("binding.hpprinter", addonService.getAddons(Locale.US).get(1).getUid());
-    }
-
-    private void setupMdnsClientMock() {
-        // create the mock
-        mdnsClient = mock(MDNSClient.class);
-        ServiceInfo hueService = ServiceInfo.create("test", "hue", 0, 0, 0, false, "hue service");
-        when(mdnsClient.list("_hue._tcp.local.")).thenReturn(new ServiceInfo[] { hueService });
-        ServiceInfo hpService = ServiceInfo.create("test", "hpprinter", 0, 0, 0, false, "hp printer service");
-        hpService.setText(Map.of("ty", "hp printer", "rp", "anything"));
-        when(mdnsClient.list("_printer._tcp.local.")).thenReturn(new ServiceInfo[] { hpService });
-
-        // check that it works
-        assertNotNull(mdnsClient);
-        ServiceInfo[] result;
-        result = mdnsClient.list("_printer._tcp.local.");
-        assertEquals(1, result.length);
-        assertEquals("hpprinter", result[0].getName());
-        assertEquals(2, Collections.list(result[0].getPropertyNames()).size());
-        assertEquals("hp printer", result[0].getPropertyString("ty"));
-        result = mdnsClient.list("_hue._tcp.local.");
-        assertEquals(1, result.length);
-        assertEquals("hue", result[0].getName());
-    }
-
-    private void setupService() {
+    private void createAddonSuggestionFinderService() {
         // create the service
         try {
             addonSuggestionFinderService = new AddonSuggestionFinderService(mdnsClient, upnpService);
@@ -131,7 +98,48 @@ public class SuggestedAddonFinderServiceOSGiTest extends JavaOSGiTest {
         assertNotNull(addonSuggestionFinderService);
     }
 
-    private void setupUpnpServiceMock() {
+    private void setupMockAddonService() {
+        // create the mock
+        addonService = mock(AddonService.class);
+        List<Addon> addons = new ArrayList<>();
+        addons.add(Addon.create("binding.hue").withType("binding").withId("hue").build());
+        addons.add(Addon.create("binding.hpprinter").withType("binding").withId("hpprinter").build());
+        when(addonService.getAddons(any(Locale.class))).thenReturn(addons);
+
+        // check that it works
+        assertNotNull(addonService);
+        assertEquals(2, addonService.getAddons(Locale.US).size());
+        assertTrue(addonService.getAddons(Locale.US).stream().anyMatch(a -> "binding.hue".equals(a.getUid())));
+        assertTrue(addonService.getAddons(Locale.US).stream().anyMatch(a -> "binding.hpprinter".equals(a.getUid())));
+        assertFalse(addonService.getAddons(Locale.US).stream().anyMatch(a -> "aardvark".equals(a.getUid())));
+    }
+
+    private void setupMockMdnsClient() {
+        // create the mock
+        mdnsClient = mock(MDNSClient.class);
+        when(mdnsClient.list(anyString())).thenReturn(new ServiceInfo[] {});
+        ServiceInfo hueService = ServiceInfo.create("mdnsTest", "hue", 0, 0, 0, false, "hue service");
+        when(mdnsClient.list(eq("_hue._tcp.local."))).thenReturn(new ServiceInfo[] { hueService });
+        ServiceInfo hpService = ServiceInfo.create("mdnsTest", "hpprinter", 0, 0, 0, false, "hp printer service");
+        hpService.setText(Map.of("ty", "hp printer", "rp", "anything"));
+        when(mdnsClient.list(eq("_printer._tcp.local."))).thenReturn(new ServiceInfo[] { hpService });
+
+        // check that it works
+        assertNotNull(mdnsClient);
+        ServiceInfo[] result;
+        result = mdnsClient.list("_printer._tcp.local.");
+        assertEquals(1, result.length);
+        assertEquals("hpprinter", result[0].getName());
+        assertEquals(2, Collections.list(result[0].getPropertyNames()).size());
+        assertEquals("hp printer", result[0].getPropertyString("ty"));
+        result = mdnsClient.list("_hue._tcp.local.");
+        assertEquals(1, result.length);
+        assertEquals("hue", result[0].getName());
+        result = mdnsClient.list("aardvark");
+        assertEquals(0, result.length);
+    }
+
+    private void setupMockUpnpService() {
         // create the mock
         upnpService = mock(UpnpService.class, Mockito.RETURNS_DEEP_STUBS);
         URL url = null;
@@ -150,7 +158,7 @@ public class SuggestedAddonFinderServiceOSGiTest extends JavaOSGiTest {
         RemoteDeviceIdentity identity = new RemoteDeviceIdentity(udn, 0, url, new byte[] {}, address);
         DeviceType type = new DeviceType("nameSpace", "type");
         ManufacturerDetails manDetails = new ManufacturerDetails("manufacturer", "manufacturerURI");
-        ModelDetails modDetails = new ModelDetails("modelName", "modelDescription", "modelNumber", "modelURI");
+        ModelDetails modDetails = new ModelDetails("Philips hue bridge", "modelDescription", "modelNumber", "modelURI");
         DeviceDetails devDetails = new DeviceDetails("friendlyName", manDetails, modDetails, "serialNumber",
                 "000123456789");
         List<@Nullable RemoteDevice> remoteDevice = new ArrayList<>();
@@ -180,5 +188,7 @@ public class SuggestedAddonFinderServiceOSGiTest extends JavaOSGiTest {
         assertTrue(addonSuggestionFinderService.scanDone());
         List<Addon> addons = addonSuggestionFinderService.getAddons(Locale.US);
         assertEquals(2, addons.size());
+        assertTrue(addons.stream().anyMatch(a -> "binding.hue".equals(a.getUid())));
+        assertTrue(addons.stream().anyMatch(a -> "binding.hpprinter".equals(a.getUid())));
     }
 }
