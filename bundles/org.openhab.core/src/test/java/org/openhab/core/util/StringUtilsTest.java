@@ -43,6 +43,7 @@ public class StringUtilsTest {
 
     @Test
     public void escapeXmlTest() {
+        assertEquals(null, StringUtils.escapeXml(null));
         assertEquals(" ", StringUtils.escapeXml(" "));
         assertEquals("invalidxml", StringUtils.escapeXml("invalidxml"));
         assertEquals("&lt;xmlExample&gt;&amp;&lt;/xmlExample&gt;", StringUtils.escapeXml("<xmlExample>&</xmlExample>"));
@@ -54,6 +55,7 @@ public class StringUtilsTest {
 
     @Test
     public void capitalizeTest() {
+        assertEquals(null, StringUtils.capitalize(null));
         assertEquals(" ", StringUtils.capitalize(" "));
         assertEquals("Cat", StringUtils.capitalize("cat"));
         assertEquals("CAt", StringUtils.capitalize("cAt"));
@@ -62,6 +64,7 @@ public class StringUtilsTest {
 
     @Test
     public void capitalizeFullyTest() {
+        assertEquals(null, StringUtils.capitalizeFully(null));
         assertEquals("OpenhabIsCool", StringUtils.capitalizeFully("openHAB_is_cool"));
         assertEquals("FoobarExample", StringUtils.capitalizeFully("foobar_Example"));
         assertEquals("'anotherTest'", StringUtils.capitalizeFully("'another_test'"));

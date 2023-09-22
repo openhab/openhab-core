@@ -51,6 +51,7 @@ public class StringUtils {
         if (str == null || str.isEmpty()) {
             return str;
         }
+
         if (str.endsWith("\r\n")) {
             return str.substring(0, str.length() - 2);
         } else if (str.endsWith("\r") || str.endsWith("\n")) {
@@ -72,16 +73,20 @@ public class StringUtils {
      * ' - &apos;
      * </pre>
      *
-     * @param xml the input xml as String to escape, may not be null
-     * @return the escaped xml as String
+     * @param str the input xml as String to escape, may be null
+     * @return the escaped xml as String, may be null
      */
-    public static String escapeXml(String xml) {
-        xml = xml.replace("&", "&amp;");
-        xml = xml.replace("<", "&lt;");
-        xml = xml.replace(">", "&gt;");
-        xml = xml.replace("\"", "&quot;");
-        xml = xml.replace("'", "&apos;");
-        return xml;
+    public static @Nullable String escapeXml(@Nullable String str) {
+        if (str == null || str.isEmpty()) {
+            return str;
+        }
+
+        str = str.replace("&", "&amp;");
+        str = str.replace("<", "&lt;");
+        str = str.replace(">", "&gt;");
+        str = str.replace("\"", "&quot;");
+        str = str.replace("'", "&apos;");
+        return str;
     }
 
     /**
@@ -95,15 +100,16 @@ public class StringUtils {
      * "'cat'"  => "'cat'"
      * </pre>
      *
-     * @param val the String to capitalize, may not be null
-     * @return the capitalized String
+     * @param val the String to capitalize, may be null
+     * @return the capitalized String, may be null
      */
-    public static String capitalize(String val) {
-        if (val.isEmpty()) {
-            return val;
+    public static @Nullable String capitalize(@Nullable String str) {
+        if (str == null || str.isEmpty()) {
+            return str;
         }
-        StringBuilder sb = new StringBuilder(val);
-        sb.setCharAt(0, Character.toUpperCase(val.charAt(0)));
+
+        StringBuilder sb = new StringBuilder(str);
+        sb.setCharAt(0, Character.toUpperCase(str.charAt(0)));
         return sb.toString();
     }
 
@@ -116,18 +122,22 @@ public class StringUtils {
       * "foobar_Example" => "Foobar Example"
      * </pre>
      * 
-     * @param input the String to capitalize, may not be null
-     * @return the capitalized String
+     * @param str the String to capitalize, may be null
+     * @return the capitalized String, may be null
      */
-    public static String capitalizeFully(String input) {
+    public static @Nullable String capitalizeFully(@Nullable String str) {
+        if (str == null || str.isEmpty()) {
+            return str;
+        }
+
         final String delimiter = "_";
         StringBuilder capitalizedFully = new StringBuilder();
-        for (String str : input.split(delimiter)) {
-            if (str.length() > 0) {
-                capitalizedFully.append(str.substring(0, 1).toUpperCase());
+        for (String splitStr : str.split(delimiter)) {
+            if (splitStr.length() > 0) {
+                capitalizedFully.append(splitStr.substring(0, 1).toUpperCase());
             }
-            if (str.length() > 1) {
-                capitalizedFully.append(str.substring(1).toLowerCase());
+            if (splitStr.length() > 1) {
+                capitalizedFully.append(splitStr.substring(1).toLowerCase());
             }
         }
 
@@ -143,16 +153,16 @@ public class StringUtils {
       * "foobar Example" => "Foobar Example"
      * </pre>
      * 
-     * @param input the String to capitalize, may be null
-     * @return the capitalized String
+     * @param str the String to capitalize, may be null
+     * @return the capitalized String, may be null
      */
-    public static String capitalizeWords(@Nullable String input) {
-        if (input == null) {
-            return "";
+    public static @Nullable String capitalizeWords(@Nullable String str) {
+        if (str == null || str.isEmpty()) {
+            return str;
         }
 
         StringBuilder processed = new StringBuilder();
-        for (String splitted : input.split("\\s+")) {
+        for (String splitted : str.split("\\s+")) {
             if (splitted.length() > 1) {
                 processed.append(splitted.substring(0, 1).toUpperCase());
                 processed.append(splitted.substring(1));
@@ -174,16 +184,17 @@ public class StringUtils {
       * padLeft("openHAB", 4, "*")  => "openHAB"
      * </pre>
      * 
-     * @param input the String to pad, may be null
+     * @param str the String to pad, may be null
      * @param minSize the minimum String size to return
      * @param padString the String to add when padding
      * @return the padded String
      */
-    public static String padLeft(@Nullable String input, int minSize, String padString) {
-        if (input == null) {
-            input = "";
+    public static String padLeft(@Nullable String str, int minSize, String padString) {
+        if (str == null) {
+            str = "";
         }
-        return String.format("%" + minSize + "s", input).replace(" ", padString);
+
+        return String.format("%" + minSize + "s", str).replace(" ", padString);
     }
 
     /**
@@ -245,18 +256,16 @@ public class StringUtils {
      * "OHRules"    =>  "OH", "Rules"
      * </pre>
      * 
-     * @param input the input String to split, may be null
+     * @param str the input String to split, may be null
      * @return the splitted String
      */
-    public static String[] splitByCharacterType(@Nullable String input) {
-        if (input == null) {
+    public static String[] splitByCharacterType(@Nullable String str) {
+        if (str == null || str.isBlank()) {
             return new String[0];
         }
-        if (input.isBlank()) {
-            return new String[0];
-        }
+
         List<String> cache = new ArrayList<>();
-        char[] inputAsCharArray = input.toCharArray();
+        char[] inputAsCharArray = str.toCharArray();
         int prevType = Character.getType(inputAsCharArray[0]);
         int prevTypeStart = 0;
         for (int i = prevTypeStart + 1; i < inputAsCharArray.length; i++) {
@@ -292,15 +301,18 @@ public class StringUtils {
      * ' => &apos;
      * </pre>
      * 
-     * @param input the input xml as String to unescape, may not be null
-     * @return the unescaped xml as String
+     * @param input the input xml as String to unescape, may be null
+     * @return the unescaped xml as String, may be null
      */
-    public static String unEscapeXml(String xml) {
-        xml = xml.replace("&amp;", "&");
-        xml = xml.replace("&lt;", "<");
-        xml = xml.replace("&gt;", ">");
-        xml = xml.replace("&quot;", "\"");
-        xml = xml.replace("&apos;", "'");
-        return xml;
+    public static @Nullable String unEscapeXml(@Nullable String str) {
+        if (str == null || str.isEmpty()) {
+            return str;
+        }
+        str = str.replace("&amp;", "&");
+        str = str.replace("&lt;", "<");
+        str = str.replace("&gt;", ">");
+        str = str.replace("&quot;", "\"");
+        str = str.replace("&apos;", "'");
+        return str;
     }
 }
