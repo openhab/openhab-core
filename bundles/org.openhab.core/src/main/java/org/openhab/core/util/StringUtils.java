@@ -12,6 +12,7 @@
  */
 package org.openhab.core.util;
 
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -208,8 +209,9 @@ public class StringUtils {
      */
     public static String getRandomString(int length, String charset) {
         StringBuilder sb = new StringBuilder(length);
+        SecureRandom secureRandom = new SecureRandom();
         for (int i = 0; i < length; i++) {
-            int index = (int) (charset.length() * Math.random());
+            final int index = secureRandom.nextInt(charset.length());
             sb.append(charset.charAt(index));
         }
 
