@@ -30,6 +30,7 @@ import org.openhab.core.config.core.ConfigUtil;
 import org.openhab.core.model.core.EventType;
 import org.openhab.core.model.core.ModelRepositoryChangeListener;
 import org.openhab.core.model.sitemap.SitemapProvider;
+import org.openhab.core.model.sitemap.sitemap.Button;
 import org.openhab.core.model.sitemap.sitemap.ColorArray;
 import org.openhab.core.model.sitemap.sitemap.LinkableWidget;
 import org.openhab.core.model.sitemap.sitemap.Mapping;
@@ -38,6 +39,8 @@ import org.openhab.core.model.sitemap.sitemap.SitemapFactory;
 import org.openhab.core.model.sitemap.sitemap.SitemapPackage;
 import org.openhab.core.model.sitemap.sitemap.VisibilityRule;
 import org.openhab.core.model.sitemap.sitemap.Widget;
+import org.openhab.core.model.sitemap.sitemap.impl.ButtonImpl;
+import org.openhab.core.model.sitemap.sitemap.impl.ButtongridImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.ChartImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.ColorArrayImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.ColorpickerImpl;
@@ -75,6 +78,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Yannick Schaus - Initial contribution
  * @author Laurent Garnier - icon color support for all widgets
+ * @author Laurent Garnier - Added support for new element Buttongrid
  */
 @NonNullByDefault
 @Component(service = SitemapProvider.class)
@@ -254,6 +258,12 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
                 setWidgetPropertyFromComponentConfig(widget, component, "frequency",
                         SitemapPackage.COLORPICKER__FREQUENCY);
                 break;
+            case "Buttongrid":
+                ButtongridImpl buttongridWidget = (ButtongridImpl) SitemapFactory.eINSTANCE.createButtongrid();
+                addWidgetButtons(buttongridWidget.getButtons(), component);
+                widget = buttongridWidget;
+                setWidgetPropertyFromComponentConfig(widget, component, "columns", SitemapPackage.BUTTONGRID__COLUMNS);
+                break;
             case "Default":
                 DefaultImpl defaultWidget = (DefaultImpl) SitemapFactory.eINSTANCE.createDefault();
                 widget = defaultWidget;
@@ -327,6 +337,29 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
                         mapping.setCmd(cmd);
                         mapping.setLabel(label);
                         mappings.add(mapping);
+                    }
+                }
+            }
+        }
+    }
+
+    private void addWidgetButtons(EList<Button> buttons, UIComponent component) {
+        if (component.getConfig() != null && component.getConfig().containsKey("buttons")) {
+            if (component.getConfig().get("buttons") instanceof Collection<?>) {
+                for (Object sourceButton : (Collection<?>) component.getConfig().get("buttons")) {
+                    if (sourceButton instanceof String) {
+                        String[] splitted1 = sourceButton.toString().split(":");
+                        int idx = Integer.parseInt(splitted1[0].trim());
+                        String[] splitted2 = splitted1[1].trim().split("=");
+                        String cmd = splitted2[0].trim();
+                        String label = splitted2[1].trim();
+                        String icon = splitted2.length < 3 ? null : splitted2[2].trim();
+                        ButtonImpl button = (ButtonImpl) SitemapFactory.eINSTANCE.createButton();
+                        button.setPosition(idx);
+                        button.setCmd(cmd);
+                        button.setLabel(label);
+                        button.setIcon(icon);
+                        buttons.add(button);
                     }
                 }
             }

@@ -14,13 +14,16 @@ package org.openhab.core.io.rest.sitemap.internal;
 
 /**
  * This is a data transfer object that is used to serialize command mappings.
- * 
+ *
  * @author Kai Kreuzer - Initial contribution
+ * @author Laurent Garnier - New fields position and icon
  */
 public class MappingDTO {
 
+    public Integer position;
     public String command;
     public String label;
+    public String icon;
 
     public MappingDTO() {
     }
