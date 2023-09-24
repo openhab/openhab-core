@@ -17,12 +17,12 @@
 
   <properties>
     <californium.version>2.7.4</californium.version>
-    <cxf.version>3.4.5</cxf.version>
-    <jackson.version>2.14.1</jackson.version>
+    <cxf.version>3.6.1</cxf.version>
+    <jackson.version>2.15.2</jackson.version>
     <jetty.version>9.4.50.v20221201</jetty.version>
     <pax.logging.version>2.2.0</pax.logging.version>
     <pax.web.version>8.0.15</pax.web.version>
-    <swagger.version>2.1.9</swagger.version>
+    <swagger.version>2.2.15</swagger.version>
   </properties>
 
   <dependencyManagement>
@@ -469,7 +469,8 @@
     <dependency>
       <groupId>org.jupnp</groupId>
       <artifactId>org.jupnp</artifactId>
-      <version>2.7.1</version>
+      <!-- Uses the Java 11 LinkedTransferQueue as workaround for JDK-8301341 -->
+      <version>2.7.1.OH1</version>
       <scope>compile</scope>
     </dependency>
 
@@ -489,7 +490,7 @@
     <dependency>
       <groupId>javax.measure</groupId>
       <artifactId>unit-api</artifactId>
-      <version>2.1.2</version>
+      <version>2.2</version>
       <scope>compile</scope>
     </dependency>
     <!-- The si.uom:si-units manifest has no Export-Package entry. As workaround this OSGi-ify bundle is used. -->
@@ -508,7 +509,7 @@
     <dependency>
       <groupId>tech.units</groupId>
       <artifactId>indriya</artifactId>
-      <version>2.1.2</version>
+      <version>2.2</version>
       <scope>compile</scope>
     </dependency>
 
@@ -1067,7 +1068,7 @@
     <dependency>
       <groupId>org.javassist</groupId>
       <artifactId>javassist</artifactId>
-      <version>3.27.0-GA</version>
+      <version>3.29.2-GA</version>
       <scope>compile</scope>
     </dependency>
 
@@ -1075,7 +1076,7 @@
     <dependency>
       <groupId>org.openhab.osgiify</groupId>
       <artifactId>io.methvin.directory-watcher</artifactId>
-      <version>0.17.1</version>
+      <version>0.18.0</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
@@ -1088,6 +1089,14 @@
       <groupId>net.java.dev.jna</groupId>
       <artifactId>jna-platform</artifactId>
       <version>5.12.1</version>
+      <scope>compile</scope>
+    </dependency>
+
+    <!-- Provides the Java 11 LinkedTransferQueue used in workarounds for JDK-8301341 -->
+    <dependency>
+      <groupId>org.openhab</groupId>
+      <artifactId>base-fixes</artifactId>
+      <version>1.0.0</version>
       <scope>compile</scope>
     </dependency>
   </dependencies>

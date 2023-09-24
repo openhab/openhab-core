@@ -39,6 +39,7 @@ Import-Package: \
  org.openhab.core.transform,\
  org.openhab.core.transform.actions,\
  org.openhab.core.types,\
+ org.openhab.core.util,\
  org.openhab.core.voice,\
  org.openhab.core.voice.text,\
  org.openhab.core.io.console,\

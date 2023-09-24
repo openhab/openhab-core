@@ -31,6 +31,7 @@ import org.openhab.core.library.unit.MetricPrefix;
 import org.openhab.core.library.unit.SIUnits;
 import org.openhab.core.library.unit.Units;
 import org.openhab.core.model.script.actions.BusEvent;
+import org.openhab.core.model.script.actions.CoreUtil;
 import org.openhab.core.model.script.actions.Exec;
 import org.openhab.core.model.script.actions.HTTP;
 import org.openhab.core.model.script.actions.Log;
@@ -100,6 +101,7 @@ public class ScriptImplicitlyImportedTypes extends ImplicitlyImportedFeatures {
         result.add(Transformation.class);
         result.add(ScriptExecution.class);
         result.add(URLEncoder.class);
+        result.add(CoreUtil.class);
 
         result.add(ImperialUnits.class);
         result.add(MetricPrefix.class);

@@ -169,7 +169,6 @@ public class RuleResource implements RESTResource {
             @QueryParam("prefix") final @Nullable String prefix, @QueryParam("tags") final @Nullable List<String> tags,
             @QueryParam("summary") @Parameter(description = "summary fields only") @Nullable Boolean summary,
             @DefaultValue("false") @QueryParam("staticDataOnly") @Parameter(description = "provides a cacheable list of values not expected to change regularly and honors the If-Modified-Since header, all other parameters are ignored") boolean staticDataOnly) {
-
         if ((summary == null || !summary) && !securityContext.isUserInRole(Role.ADMIN)) {
             // users may only access the summary
             return JSONResponse.createErrorResponse(Status.UNAUTHORIZED, "Authentication required");

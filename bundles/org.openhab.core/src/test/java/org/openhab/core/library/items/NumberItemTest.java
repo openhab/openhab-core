@@ -12,8 +12,9 @@
  */
 package org.openhab.core.library.items;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import java.util.Objects;
@@ -68,7 +69,6 @@ public class NumberItemTest {
     private final UnitProvider unitProvider = new TestUnitProvider();
 
     @BeforeEach
-    @SuppressWarnings("unchecked")
     public void setup() {
         when(stateDescriptionServiceMock.getStateDescription(ITEM_NAME, null))
                 .thenReturn(StateDescriptionFragmentBuilder.create().withPattern("%.1f " + UnitUtils.UNIT_PLACEHOLDER)

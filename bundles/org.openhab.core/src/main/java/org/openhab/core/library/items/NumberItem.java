@@ -73,7 +73,8 @@ public class NumberItem extends GenericItem implements MetadataAwareItem {
 
         String itemTypeExtension = ItemUtil.getItemTypeExtension(getType());
         if (itemTypeExtension != null) {
-            dimension = UnitUtils.parseDimension(itemTypeExtension);
+            Class<? extends Quantity<?>> dimension = UnitUtils.parseDimension(itemTypeExtension);
+            this.dimension = dimension;
             if (dimension == null) {
                 throw new IllegalArgumentException("The given dimension " + itemTypeExtension + " is unknown.");
             } else if (unitProvider == null) {
@@ -104,13 +105,11 @@ public class NumberItem extends GenericItem implements MetadataAwareItem {
         if (dimension == null) {
             DecimalType strippedCommand = new DecimalType(command.toBigDecimal());
             internalSend(strippedCommand);
+        } else if (command.getUnit().isCompatible(unit) || command.getUnit().inverse().isCompatible(unit)) {
+            internalSend(command);
         } else {
-            if (command.getUnit().isCompatible(unit) || command.getUnit().inverse().isCompatible(unit)) {
-                internalSend(command);
-            } else {
-                logger.warn("Command '{}' to item '{}' was rejected because it is incompatible with the item unit '{}'",
-                        command, name, unit);
-            }
+            logger.warn("Command '{}' to item '{}' was rejected because it is incompatible with the item unit '{}'",
+                    command, name, unit);
         }
     }
 
@@ -199,12 +198,7 @@ public class NumberItem extends GenericItem implements MetadataAwareItem {
     public void addedMetadata(Metadata metadata) {
         if (dimension != null && UNIT_METADATA_NAMESPACE.equals(metadata.getUID().getNamespace())) {
             Unit<?> unit = UnitUtils.parseUnit(metadata.getValue());
-            if (unit == null) {
-                logger.warn("Unit '{}' could not be parsed to a known unit. Keeping old unit '{}' for item '{}'.",
-                        metadata.getValue(), this.unit, name);
-                return;
-            }
-            if (!unit.isCompatible(this.unit) && !unit.inverse().isCompatible(this.unit)) {
+            if ((unit == null) || (!unit.isCompatible(this.unit) && !unit.inverse().isCompatible(this.unit))) {
                 logger.warn("Unit '{}' could not be parsed to a known unit. Keeping old unit '{}' for item '{}'.",
                         metadata.getValue(), this.unit, name);
                 return;
@@ -222,6 +216,7 @@ public class NumberItem extends GenericItem implements MetadataAwareItem {
     @Override
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public void removedMetadata(Metadata metadata) {
+        Class<? extends Quantity<?>> dimension = this.dimension;
         if (dimension != null && UNIT_METADATA_NAMESPACE.equals(metadata.getUID().getNamespace())) {
             assert unitProvider != null;
             unit = unitProvider.getUnit((Class<? extends Quantity>) dimension);

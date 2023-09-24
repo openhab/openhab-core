@@ -13,7 +13,6 @@
 package org.openhab.core.common;
 
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedTransferQueue;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadFactory;
@@ -24,14 +23,16 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Consumer;
 
+import org.openhab.basefixes.util.concurrent.LinkedTransferQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * This is a thread pool executor service, which works as a developer would expect it to work.
  * The default {@link ThreadPoolExecutor} does the following (see
- * <a href="http://docs.oracle.com/javase/7/docs/api/java/util/concurrent/ThreadPoolExecutor.html">the official
- * JavaDoc)</a>:
+ * <a href=
+ * "https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/concurrent/ThreadPoolExecutor.html">the
+ * official JavaDoc)</a>:
  * <ul>
  * <li>If fewer than corePoolSize threads are running, the Executor always prefers adding a new thread rather than
  * queuing.</li>

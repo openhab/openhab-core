@@ -641,6 +641,8 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         // if an icon is defined for the widget, use it
         if (w.getIcon() != null) {
             category = w.getIcon();
+        } else if (w.getStaticIcon() != null) {
+            category = w.getStaticIcon();
         } else {
             // otherwise check if any item ui provider provides an icon for this item
             String itemName = w.getItem();
@@ -792,6 +794,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
     private void copyProperties(Widget source, Widget target) {
         target.setItem(source.getItem());
         target.setIcon(source.getIcon());
+        target.setStaticIcon(source.getStaticIcon());
         target.setLabel(source.getLabel());
         target.getVisibility().addAll(EcoreUtil.copyAll(source.getVisibility()));
         target.getLabelColor().addAll(EcoreUtil.copyAll(source.getLabelColor()));
