@@ -118,7 +118,7 @@ public class StringUtils {
      * Words are recognized by an underscore delimiter.
      *
      * <pre>
-      * "openHAB_is_cool"   => "Openhab_Is_Cool"
+      * "openHAB_is_cool"   => "Openhab Is_Cool"
       * "foobar_Example" => "Foobar_Example"
      * </pre>
      * 
@@ -139,7 +139,7 @@ public class StringUtils {
             if (splitStr.length() > 1) {
                 capitalizedFully.append(splitStr.substring(1).toLowerCase());
             }
-            capitalizedFully.append(" ");
+            capitalizedFully.append(delimiter);
         }
 
         capitalizedFully.setLength(Math.max(capitalizedFully.length() - 1, 0));
