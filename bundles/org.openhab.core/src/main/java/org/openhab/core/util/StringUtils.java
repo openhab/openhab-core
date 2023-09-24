@@ -63,7 +63,7 @@ public class StringUtils {
 
     /**
      * Simple method to escape XML special characters in String.
-     * There are five XML Special characters which needs to be escaped:
+     * There are five XML special characters which needs to be escaped:
      * 
      * <pre>
      * & - &amp;
@@ -114,7 +114,7 @@ public class StringUtils {
     }
 
     /**
-     * Capitalizes words in the string. Only the first char of every word is capitalized, other are set to lowercasing.
+     * Capitalizes words in the string. Only the first char of every word is capitalized, other are set to lowercase.
      * Words are recognized by an underscore delimiter
      *
      * <pre>
@@ -125,7 +125,7 @@ public class StringUtils {
      * @param str the String to capitalize, may be null
      * @return the capitalized String, may be null
      */
-    public static @Nullable String capitalizeFully(@Nullable String str) {
+    public static @Nullable String capitalizeAllWords(@Nullable String str) {
         if (str == null || str.isEmpty()) {
             return str;
         }
@@ -139,8 +139,10 @@ public class StringUtils {
             if (splitStr.length() > 1) {
                 capitalizedFully.append(splitStr.substring(1).toLowerCase());
             }
+            capitalizedFully.append(delimiter);
         }
 
+        capitalizedFully.setLength(Math.max(capitalizedFully.length() - 1, 0));
         return capitalizedFully.toString();
     }
 
@@ -204,7 +206,7 @@ public class StringUtils {
      * @param charset the characters to use to create the String
      * @return the random String
      */
-    public static String randomString(int length, String charset) {
+    public static String getRandomString(int length, String charset) {
         StringBuilder sb = new StringBuilder(length);
         for (int i = 0; i < length; i++) {
             int index = (int) (charset.length() * Math.random());
@@ -220,8 +222,8 @@ public class StringUtils {
      * @param length the length of the String to return
      * @return the random String
      */
-    public static String randomAlphabetic(int length) {
-        return StringUtils.randomString(length, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvxyz");
+    public static String getRandomAlphabetic(int length) {
+        return StringUtils.getRandomString(length, "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvxyz");
     }
 
     /**
@@ -230,8 +232,8 @@ public class StringUtils {
      * @param length the length of the String to return
      * @return the random String
      */
-    public static String randomHex(int length) {
-        return StringUtils.randomString(length, "0123456789ABCDEF");
+    public static String getRandomHex(int length) {
+        return StringUtils.getRandomString(length, "0123456789ABCDEF");
     }
 
     /**
@@ -240,8 +242,8 @@ public class StringUtils {
      * @param length the length of the String to return
      * @return the random String
      */
-    public static String randomAlphanumeric(int length) {
-        return StringUtils.randomString(length, "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvxyz");
+    public static String getRandomAlphanumeric(int length) {
+        return StringUtils.getRandomString(length, "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvxyz");
     }
 
     /**
@@ -249,7 +251,7 @@ public class StringUtils {
      * 
      * <pre>
      * "ab de fg"   => "ab", " ", "de", " ", "fg";
-     * "ab   de fg" => "ab", " ", "de", " ", "fg";
+     * "ab   de fg" => "ab", "   ", "de", " ", "fg";
      * "ab:cd:ef"   => "ab", ":", "cd", ":", "ef";
      * "number5"    =>  "number", "5"
      * "fooBar"     =>  "foo", "Bar"

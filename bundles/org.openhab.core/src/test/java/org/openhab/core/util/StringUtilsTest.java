@@ -63,11 +63,11 @@ public class StringUtilsTest {
     }
 
     @Test
-    public void capitalizeFullyTest() {
-        assertEquals(null, StringUtils.capitalizeFully(null));
-        assertEquals("OpenhabIsCool", StringUtils.capitalizeFully("openHAB_is_cool"));
-        assertEquals("FoobarExample", StringUtils.capitalizeFully("foobar_Example"));
-        assertEquals("'anotherTest'", StringUtils.capitalizeFully("'another_test'"));
+    public void capitalizeAllWordsTest() {
+        assertEquals(null, StringUtils.capitalizeAllWords(null));
+        assertEquals("Openhab_Is_Cool", StringUtils.capitalizeAllWords("openHAB_is_cool"));
+        assertEquals("Foobar_Example", StringUtils.capitalizeAllWords("foobar_Example"));
+        assertEquals("'another_Test'", StringUtils.capitalizeAllWords("'another_test'"));
     }
 
     @Test
@@ -79,7 +79,7 @@ public class StringUtilsTest {
 
     @Test
     public void getRandomString() {
-        String randomstring = StringUtils.randomString(10000, "123");
+        String randomstring = StringUtils.getRandomString(10000, "123");
         assertEquals(6666, randomstring.replace("1", "").length(), 333,
                 "randomString does not equaly (<5% delta) use all characters in set");
     }
