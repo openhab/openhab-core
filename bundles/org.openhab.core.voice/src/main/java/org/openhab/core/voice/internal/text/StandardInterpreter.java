@@ -18,6 +18,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.items.MetadataRegistry;
 import org.openhab.core.library.types.HSBType;
 import org.openhab.core.library.types.IncreaseDecreaseType;
 import org.openhab.core.library.types.NextPreviousType;
@@ -48,8 +49,8 @@ public class StandardInterpreter extends AbstractRuleBasedInterpreter {
 
     @Activate
     public StandardInterpreter(final @Reference EventPublisher eventPublisher,
-            final @Reference ItemRegistry itemRegistry) {
-        super(eventPublisher, itemRegistry);
+            final @Reference ItemRegistry itemRegistry, @Reference MetadataRegistry metadataRegistry) {
+        super(eventPublisher, itemRegistry, metadataRegistry);
     }
 
     @Override

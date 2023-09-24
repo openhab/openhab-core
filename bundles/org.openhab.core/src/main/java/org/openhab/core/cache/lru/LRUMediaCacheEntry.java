@@ -296,7 +296,7 @@ public class LRUMediaCacheEntry<V> {
             }
         }
         // the cache file is now filled, get bytes from it.
-        long maxToRead = Math.min(currentSize, sizeToRead);
+        long maxToRead = Math.min(fileChannelLocal.size(), sizeToRead);
         ByteBuffer byteBufferFromChannelFile = ByteBuffer.allocate((int) maxToRead);
         int byteReadNumber = fileChannelLocal.read(byteBufferFromChannelFile, Integer.valueOf(start).longValue());
         logger.trace("Read {} bytes from the filechannel", byteReadNumber);

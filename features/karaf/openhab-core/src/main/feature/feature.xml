@@ -40,12 +40,13 @@
 		<requirement>openhab.tp;filter:="(feature=jna)"</requirement>
 		<feature dependency="true">openhab.tp-jna</feature>
 
+		<bundle>mvn:org.openhab/base-fixes/1.0.0</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.automation/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.core/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.dispatch/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core/${project.version}</bundle>
-		<bundle>mvn:org.openhab.osgiify/io.methvin.directory-watcher/0.17.1</bundle>
+		<bundle>mvn:org.openhab.osgiify/io.methvin.directory-watcher/0.18.0</bundle>
 		<bundle>mvn:net.java.dev.jna/jna/5.12.1</bundle>
 		<bundle>mvn:net.java.dev.jna/jna-platform/5.12.1</bundle>
 		<feature dependency="true">openhab-core-storage-json</feature>

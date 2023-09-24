@@ -16,8 +16,7 @@ import static java.util.Map.entry;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -89,8 +88,8 @@ public class RuleEventTest extends JavaOSGiTest {
         startLevelService = mock(StartLevelService.class);
         when(startLevelService.getStartLevel()).thenReturn(100);
         registerService(startLevelService, StartLevelService.class.getName());
-        EventPublisher eventPublisher = getService(EventPublisher.class);
-        ItemRegistry itemRegistry = getService(ItemRegistry.class);
+        EventPublisher eventPublisher = Objects.requireNonNull(getService(EventPublisher.class));
+        ItemRegistry itemRegistry = Objects.requireNonNull(getService(ItemRegistry.class));
         CoreModuleHandlerFactory coreModuleHandlerFactory = new CoreModuleHandlerFactory(getBundleContext(),
                 eventPublisher, itemRegistry, mock(TimeZoneProvider.class), mock(StartLevelService.class));
         mock(CoreModuleHandlerFactory.class);

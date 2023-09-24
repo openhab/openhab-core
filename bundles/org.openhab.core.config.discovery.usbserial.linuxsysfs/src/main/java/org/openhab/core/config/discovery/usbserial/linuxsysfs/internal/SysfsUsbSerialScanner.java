@@ -67,10 +67,11 @@ public class SysfsUsbSerialScanner implements UsbSerialScanner {
 
     private static final String SYSFS_TTY_DEVICES_DIRECTORY_DEFAULT = "/sys/class/tty";
     private static final String DEV_DIRECTORY_DEFAULT = "/dev";
-    private static final String DEV_SERIAL_BY_ID_DIRECTORY = DEV_DIRECTORY_DEFAULT + "/serial/by-id";
+    private static final String SERIAL_BY_ID_DIRECTORY = "/serial/by-id";
 
     private String sysfsTtyDevicesDirectory = SYSFS_TTY_DEVICES_DIRECTORY_DEFAULT;
     private String devDirectory = DEV_DIRECTORY_DEFAULT;
+    private String devSerialByIdDirectory = DEV_DIRECTORY_DEFAULT + SERIAL_BY_ID_DIRECTORY;
 
     private static final String SYSFS_FILENAME_USB_VENDOR_ID = "idVendor";
     private static final String SYSFS_FILENAME_USB_PRODUCT_ID = "idProduct";
@@ -151,7 +152,7 @@ public class SysfsUsbSerialScanner implements UsbSerialScanner {
         }
 
         // optionally compute links and their corresponding SerialInfo :
-        Path devSerialDir = Path.of(DEV_SERIAL_BY_ID_DIRECTORY);
+        Path devSerialDir = Path.of(devSerialByIdDirectory);
         if (exists(devSerialDir) && isDirectory(devSerialDir) && isReadable(devSerialDir)) {
             // browse serial/by-id directory :
             try (DirectoryStream<Path> directoryStream = newDirectoryStream(devSerialDir)) {
@@ -284,6 +285,7 @@ public class SysfsUsbSerialScanner implements UsbSerialScanner {
         if (configurationIsChanged) {
             sysfsTtyDevicesDirectory = newSysfsTtyDevicesDirectory;
             devDirectory = newDevDirectory;
+            devSerialByIdDirectory = devDirectory + SERIAL_BY_ID_DIRECTORY;
         }
 
         if (!canPerformScans()) {

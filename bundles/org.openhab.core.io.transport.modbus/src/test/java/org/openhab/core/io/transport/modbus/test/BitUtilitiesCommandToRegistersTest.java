@@ -322,7 +322,7 @@ public class BitUtilitiesCommandToRegistersTest {
         );
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings("unchecked")
     @ParameterizedTest
     @MethodSource("data")
     public void testCommandToRegisters(Command command, ValueType type, Object expectedResult) {

@@ -39,7 +39,7 @@ public abstract class AbstractProvider<@NonNull E> implements Provider<E> {
         UPDATED
     }
 
-    protected final Logger logger = LoggerFactory.getLogger(AbstractProvider.class);
+    private Logger logger = LoggerFactory.getLogger(AbstractProvider.class);
     protected List<ProviderChangeListener<E>> listeners = new CopyOnWriteArrayList<>();
 
     @Override

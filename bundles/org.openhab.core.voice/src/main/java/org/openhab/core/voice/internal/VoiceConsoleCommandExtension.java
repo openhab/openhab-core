@@ -97,17 +97,17 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
                 buildCommandUsage(SUBCMD_DIALOG_REGS,
                         "lists the existing dialog registrations and their selected audio/voice services"),
                 buildCommandUsage(SUBCMD_REGISTER_DIALOG
-                        + " [--source <source>] [--sink <sink>] [--hlis <comma,separated,interpreters>] [--tts <tts> [--voice <voice>]] [--stt <stt>] [--ks ks [--keyword <ks>]] [--listening-item <listeningItem>]",
+                        + " [--source <source>] [--sink <sink>] [--hlis <comma,separated,interpreters>] [--tts <tts> [--voice <voice>]] [--stt <stt>] [--ks ks [--keyword <ks>]] [--listening-item <listeningItem>] [--location-item <locationItem>] [--dialog-group <dialogGroup>]",
                         "register a new dialog processing using the default services or the services identified with provided arguments, it will be persisted and keep running whenever is possible."),
                 buildCommandUsage(SUBCMD_UNREGISTER_DIALOG + " [source]",
                         "unregister the dialog processing for the default audio source or the audio source identified with provided argument, stopping it if started"),
                 buildCommandUsage(SUBCMD_START_DIALOG
-                        + " [--source <source>] [--sink <sink>] [--hlis <comma,separated,interpreters>] [--tts <tts> [--voice <voice>]] [--stt <stt>] [--ks ks [--keyword <ks>]] [--listening-item <listeningItem>]",
+                        + " [--source <source>] [--sink <sink>] [--hlis <comma,separated,interpreters>] [--tts <tts> [--voice <voice>]] [--stt <stt>] [--ks ks [--keyword <ks>]] [--listening-item <listeningItem>] [--location-item <locationItem>] [--dialog-group <dialogGroup>]",
                         "start a new dialog processing using the default services or the services identified with provided arguments"),
                 buildCommandUsage(SUBCMD_STOP_DIALOG + " [<source>]",
                         "stop the dialog processing for the default audio source or the audio source identified with provided argument"),
                 buildCommandUsage(SUBCMD_LISTEN_ANSWER
-                        + " [--source <source>] [--sink <sink>] [--hlis <comma,separated,interpreters>] [--tts <tts> [--voice <voice>]] [--stt <stt>] [--listening-item <listeningItem>]",
+                        + " [--source <source>] [--sink <sink>] [--hlis <comma,separated,interpreters>] [--tts <tts> [--voice <voice>]] [--stt <stt>] [--listening-item <listeningItem>] [--location-item <locationItem>] [--dialog-group <dialogGroup>]",
                         "Execute a simple dialog sequence without keyword spotting using the default services or the services identified with provided arguments"),
                 buildCommandUsage(SUBCMD_INTERPRETERS, "lists the interpreters"),
                 buildCommandUsage(SUBCMD_KEYWORD_SPOTTERS, "lists the keyword spotters"),
@@ -309,11 +309,12 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
         Collection<DialogRegistration> registrations = voiceManager.getDialogRegistrations();
         if (!registrations.isEmpty()) {
             registrations.stream().sorted(comparing(dr -> dr.sourceId)).forEach(dr -> {
-                console.println(
-                        String.format(" Source: %s - Sink: %s (STT: %s, TTS: %s, HLIs: %s, KS: %s, Keyword: %s)",
-                                dr.sourceId, dr.sinkId, getOrDefault(dr.sttId), getOrDefault(dr.ttsId),
-                                dr.hliIds.isEmpty() ? getOrDefault(null) : String.join("->", dr.hliIds),
-                                getOrDefault(dr.ksId), getOrDefault(dr.keyword)));
+                String locationText = dr.locationItem != null ? String.format(" Location: %s", dr.locationItem) : "";
+                console.println(String.format(
+                        " Source: %s - Sink: %s (STT: %s, TTS: %s, HLIs: %s, KS: %s, Keyword: %s, Dialog Group: %s)%s",
+                        dr.sourceId, dr.sinkId, getOrDefault(dr.sttId), getOrDefault(dr.ttsId),
+                        dr.hliIds.isEmpty() ? getOrDefault(null) : String.join("->", dr.hliIds), getOrDefault(dr.ksId),
+                        getOrDefault(dr.keyword), getOrDefault(dr.dialogGroup), locationText));
             });
         } else {
             console.println("No dialog registrations.");
@@ -330,11 +331,12 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
             dialogContexts.stream().sorted(comparing(s -> s.source().getId())).forEach(c -> {
                 var ks = c.ks();
                 String ksText = ks != null ? String.format(", KS: %s, Keyword: %s", ks.getId(), c.keyword()) : "";
-                console.println(
-                        String.format(" Source: %s - Sink: %s (STT: %s, TTS: %s, HLIs: %s%s)", c.source().getId(),
-                                c.sink().getId(), c.stt().getId(), c.tts().getId(), c.hlis().stream()
-                                        .map(HumanLanguageInterpreter::getId).collect(Collectors.joining("->")),
-                                ksText));
+                String locationText = c.locationItem() != null ? String.format(" Location: %s", c.locationItem()) : "";
+                console.println(String.format(
+                        " Source: %s - Sink: %s (STT: %s, TTS: %s, HLIs: %s%s, Dialog Group: %s)%s", c.source().getId(),
+                        c.sink().getId(), c.stt().getId(), c.tts().getId(),
+                        c.hlis().stream().map(HumanLanguageInterpreter::getId).collect(Collectors.joining("->")),
+                        ksText, c.dialogGroup(), locationText));
             });
         } else {
             console.println("No running dialogs.");
@@ -450,6 +452,8 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
                 .withHLIs(voiceManager.getHLIsByIds(parameters.remove("hlis"))) //
                 .withKS(voiceManager.getKS(parameters.remove("ks"))) //
                 .withListeningItem(parameters.remove("listening-item")) //
+                .withLocationItem(parameters.remove("location-item")) //
+                .withDialogGroup(parameters.remove("dialog-group")) //
                 .withKeyword(parameters.remove("keyword"));
         if (!parameters.isEmpty()) {
             throw new IllegalStateException(
@@ -483,6 +487,9 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
         dr.ttsId = parameters.remove("tts");
         dr.voiceId = parameters.remove("voice");
         dr.listeningItem = parameters.remove("listening-item");
+        dr.locationItem = parameters.remove("location-item");
+        dr.dialogGroup = parameters.remove("dialog-group");
+
         String hliIds = parameters.remove("hlis");
         if (hliIds != null) {
             dr.hliIds = Arrays.stream(hliIds.split(",")).map(String::trim).collect(Collectors.toList());

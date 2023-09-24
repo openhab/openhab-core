@@ -35,7 +35,6 @@ import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.events.EventSubscriber;
-import org.openhab.core.i18n.UnitProvider;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemFactory;
 import org.openhab.core.items.ItemRegistry;
@@ -73,7 +72,6 @@ import org.openhab.core.thing.profiles.ProfileFactory;
 import org.openhab.core.thing.profiles.ProfileTypeUID;
 import org.openhab.core.thing.profiles.StateProfile;
 import org.openhab.core.thing.profiles.TriggerProfile;
-import org.openhab.core.thing.type.ChannelTypeRegistry;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
 import org.openhab.core.types.Type;
@@ -123,7 +121,6 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
     private final Logger logger = LoggerFactory.getLogger(CommunicationManager.class);
 
     private final AutoUpdateManager autoUpdateManager;
-    private final ChannelTypeRegistry channelTypeRegistry;
     private final SystemProfileFactory defaultProfileFactory;
     private final ItemChannelLinkRegistry itemChannelLinkRegistry;
     private final ItemRegistry itemRegistry;
@@ -131,22 +128,19 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
     private final EventPublisher eventPublisher;
     private final SafeCaller safeCaller;
     private final ThingRegistry thingRegistry;
-    private final UnitProvider unitProvider;
 
     private final ExpiringCacheMap<Integer, Profile> profileSafeCallCache = new ExpiringCacheMap<>(CACHE_EXPIRATION);
 
     @Activate
     public CommunicationManager(final @Reference AutoUpdateManager autoUpdateManager,
-            final @Reference ChannelTypeRegistry channelTypeRegistry,
             final @Reference SystemProfileFactory defaultProfileFactory,
             final @Reference ItemChannelLinkRegistry itemChannelLinkRegistry,
             final @Reference ItemRegistry itemRegistry, //
             final @Reference ItemStateConverter itemStateConverter, //
             final @Reference EventPublisher eventPublisher, //
             final @Reference SafeCaller safeCaller, //
-            final @Reference ThingRegistry thingRegistry, final @Reference UnitProvider unitProvider) {
+            final @Reference ThingRegistry thingRegistry) {
         this.autoUpdateManager = autoUpdateManager;
-        this.channelTypeRegistry = channelTypeRegistry;
         this.defaultProfileFactory = defaultProfileFactory;
         this.itemChannelLinkRegistry = itemChannelLinkRegistry;
         this.itemRegistry = itemRegistry;
@@ -154,7 +148,6 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
         this.eventPublisher = eventPublisher;
         this.safeCaller = safeCaller;
         this.thingRegistry = thingRegistry;
-        this.unitProvider = unitProvider;
 
         itemChannelLinkRegistry.addRegistryChangeListener(this);
     }
@@ -227,7 +220,7 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
 
     private ProfileCallback createCallback(ItemChannelLink link) {
         return new ProfileCallbackImpl(eventPublisher, safeCaller, itemStateConverter, link, thingRegistry::get,
-                this::getItem);
+                this::getItem, this::toAcceptedCommand);
     }
 
     private @Nullable ProfileTypeUID determineProfileTypeUID(ItemChannelLink link, Item item, @Nullable Thing thing) {
@@ -288,9 +281,13 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
         if (item != null && thing != null) {
             Channel channel = thing.getChannel(link.getLinkedUID());
             if (channel != null) {
+                String acceptedItemType = Objects.requireNonNullElse(channel.getAcceptedItemType(), "");
+                if (acceptedItemType.startsWith("Number")) {
+                    acceptedItemType = "Number";
+                }
                 context = new ProfileContextImpl(link.getConfiguration(), item.getAcceptedDataTypes(),
-                        item.getAcceptedCommandTypes(), acceptedCommandTypeMap.getOrDefault(
-                                Objects.requireNonNullElse(channel.getAcceptedItemType(), ""), List.of()));
+                        item.getAcceptedCommandTypes(),
+                        acceptedCommandTypeMap.getOrDefault(acceptedItemType, List.of()));
             }
         }
 
@@ -401,17 +398,12 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
             if (thing != null) {
                 Channel channel = thing.getChannel(channelUID.getId());
                 if (channel != null) {
-                    @Nullable
-                    T convertedType = toAcceptedType(type, channel, acceptedTypesFunction, item);
-                    if (convertedType != null) {
-                        if (thing.getHandler() != null) {
-                            Profile profile = getProfile(link, item, thing);
-                            action.applyProfile(profile, thing, convertedType);
-                        }
-                    } else {
-                        logger.debug(
-                                "Received event '{}' ({}) could not be converted to any type accepted by item '{}' ({})",
-                                type, type.getClass().getSimpleName(), itemName, item.getType());
+                    if (thing.getHandler() != null) {
+                        // fix QuantityType/DecimalType, leave others as-is
+                        @Nullable
+                        T uomType = fixUoM(type, channel, item);
+                        Profile profile = getProfile(link, item, thing);
+                        action.applyProfile(profile, thing, uomType != null ? uomType : type);
                     }
                 } else {
                     logger.debug("Received  event '{}' for non-existing channel '{}', not forwarding it to the handler",
@@ -425,8 +417,7 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
     }
 
     @SuppressWarnings("unchecked")
-    private <T extends Type> @Nullable T toAcceptedType(T originalType, Channel channel,
-            Function<@Nullable String, @Nullable List<Class<? extends T>>> acceptedTypesFunction, Item item) {
+    private <T extends Type> @Nullable T fixUoM(@Nullable T originalType, Channel channel, Item item) {
         String channelAcceptedItemType = channel.getAcceptedItemType();
 
         if (channelAcceptedItemType == null) {
@@ -449,22 +440,40 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
             Unit<?> unit = Objects.requireNonNull(((NumberItem) item).getUnit());
             return (T) new QuantityType<>(decimalType.toBigDecimal(), unit);
         }
+        return null;
+    }
+
+    public @Nullable Command toAcceptedCommand(Command originalType, @Nullable Channel channel, @Nullable Item item) {
+        if (item == null || channel == null) {
+            logger.warn("Trying to convert types for non-existing channel or item, discarding command.");
+            return null;
+        }
+        String channelAcceptedItemType = channel.getAcceptedItemType();
+
+        if (channelAcceptedItemType == null) {
+            return originalType;
+        }
+
+        Command uomCommand = fixUoM(originalType, channel, item);
+        if (uomCommand != null) {
+            return uomCommand;
+        }
 
         // handle HSBType/PercentType
         if (CoreItemFactory.DIMMER.equals(channelAcceptedItemType) && originalType instanceof HSBType hsb) {
-            return (T) (hsb.as(PercentType.class));
+            return hsb.as(PercentType.class);
         }
 
         // check for other cases if the type is acceptable
-        List<Class<? extends T>> acceptedTypes = acceptedTypesFunction.apply(channelAcceptedItemType);
+        List<Class<? extends Command>> acceptedTypes = acceptedCommandTypeMap.get(channelAcceptedItemType);
         if (acceptedTypes == null || acceptedTypes.contains(originalType.getClass())) {
             return originalType;
         } else if (acceptedTypes.contains(PercentType.class) && originalType instanceof State state
                 && PercentType.class.isAssignableFrom(originalType.getClass())) {
-            return (@Nullable T) state.as(PercentType.class);
+            return state.as(PercentType.class);
         } else if (acceptedTypes.contains(OnOffType.class) && originalType instanceof State state
                 && PercentType.class.isAssignableFrom(originalType.getClass())) {
-            return (@Nullable T) state.as(OnOffType.class);
+            return state.as(OnOffType.class);
         } else {
             logger.debug("Received not accepted type '{}' for channel '{}'", originalType.getClass().getSimpleName(),
                     channel.getUID());

@@ -275,7 +275,8 @@ public class AutomationIntegrationJsonTest extends JavaOSGiTest {
     }
 
     @Test
-    public void assertThatARuleFromJsonFileIsAddedAutomaticallyAndTheRuntimeRuleHasResolvedModuleReferences() {
+    public void assertThatARuleFromJsonFileIsAddedAutomaticallyAndTheRuntimeRuleHasResolvedModuleReferences()
+            throws InterruptedException {
         logger.info(
                 "assert that a rule from json file is added automatically and the runtime rule has resolved module references");
 
@@ -333,6 +334,7 @@ public class AutomationIntegrationJsonTest extends JavaOSGiTest {
         };
 
         registerService(itemEventHandler);
+        Thread.sleep(1000);
         eventPublisher.post(ItemEventFactory.createStateEvent("myMotionItem", OnOffType.ON));
         waitForAssert(() -> {
             assertThat(itemEvent, is(notNullValue()));
@@ -342,7 +344,7 @@ public class AutomationIntegrationJsonTest extends JavaOSGiTest {
     }
 
     @Test
-    public void assertThatARuleFromJsonFileIsExecutedCorrectly() throws ItemNotFoundException {
+    public void assertThatARuleFromJsonFileIsExecutedCorrectly() throws ItemNotFoundException, InterruptedException {
         logger.info("assert that rule added by json is executed correctly");
         waitForAssert(() -> {
             assertThat(ruleRegistry.getAll().isEmpty(), is(false));
@@ -378,6 +380,7 @@ public class AutomationIntegrationJsonTest extends JavaOSGiTest {
         };
 
         registerService(eventHandler);
+        Thread.sleep(1000);
         eventPublisher.post(ItemEventFactory.createStateEvent("myMotionItem", OnOffType.ON));
         waitForAssert(() -> {
             assertThat(itemEvent, is(notNullValue()));

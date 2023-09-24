@@ -62,11 +62,11 @@ import org.openhab.core.types.UnDefType;
 public class CommunicationManagerConversionTest {
     // TODO: remove test - only to show CommunicationManager is too complex
 
-    private static final List<Class<? extends Item>> itemTypes = List.of(CallItem.class, ColorItem.class,
+    private static final List<Class<? extends Item>> ITEM_TYPES = List.of(CallItem.class, ColorItem.class,
             ContactItem.class, DateTimeItem.class, DimmerItem.class, ImageItem.class, LocationItem.class,
             PlayerItem.class, RollershutterItem.class, StringItem.class);
 
-    private static final List<Class<? extends Type>> types = List.of(DateTimeType.class, DecimalType.class,
+    private static final List<Class<? extends Type>> TYPES = List.of(DateTimeType.class, DecimalType.class,
             HSBType.class, IncreaseDecreaseType.class, NextPreviousType.class, OnOffType.class, OpenClosedType.class,
             PercentType.class, PlayPauseType.class, PointType.class, QuantityType.class, RawType.class,
             RewindFastforwardType.class, StringType.class, UpDownType.class, UnDefType.class);
@@ -74,9 +74,9 @@ public class CommunicationManagerConversionTest {
     private static Stream<Arguments> arguments()
             throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
         List<Arguments> arguments = new ArrayList<>();
-        for (Class<? extends Item> itemType : itemTypes) {
+        for (Class<? extends Item> itemType : ITEM_TYPES) {
             Item item = itemType.getDeclaredConstructor(String.class).newInstance("testItem");
-            for (Class<? extends Type> type : types) {
+            for (Class<? extends Type> type : TYPES) {
                 if (type.isEnum()) {
                     arguments.add(Arguments.of(item, type.getEnumConstants()[0]));
                 } else if (type == RawType.class) {

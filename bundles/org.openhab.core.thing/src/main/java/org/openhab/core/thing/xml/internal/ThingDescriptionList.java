@@ -23,7 +23,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  *
  * @author Michael Grammling - Initial contribution
  */
-@SuppressWarnings({ "serial", "rawtypes" })
+@SuppressWarnings("rawtypes")
 @NonNullByDefault
 public class ThingDescriptionList extends ArrayList {
 

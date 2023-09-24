@@ -614,9 +614,9 @@ class GenericThingProvider extends AbstractProviderLazyNullness<Thing> implement
                 createThing(newThings, factory)
             ]
         }
-        thingsMap.put(modelName, newThings)
 
         newThings.forEach [ newThing |
+            thingsMap.get(modelName).add(newThing)
             val oldThing = oldThings.findFirst[it.UID == newThing.UID]
             if (oldThing !== null) {
                 if (!ThingHelper.equals(oldThing, newThing)) {
