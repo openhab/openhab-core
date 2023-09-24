@@ -115,11 +115,11 @@ public class StringUtils {
 
     /**
      * Capitalizes words in the string. Only the first char of every word is capitalized, other are set to lowercase.
-     * Words are recognized by an underscore delimiter
+     * Words are recognized by an underscore delimiter.
      *
      * <pre>
-      * "openHAB_is_cool"   => "Openhab Is Cool"
-      * "foobar_Example" => "Foobar Example"
+      * "openHAB_is_cool"   => "Openhab_Is_Cool"
+      * "foobar_Example" => "Foobar_Example"
      * </pre>
      * 
      * @param str the String to capitalize, may be null
@@ -139,7 +139,7 @@ public class StringUtils {
             if (splitStr.length() > 1) {
                 capitalizedFully.append(splitStr.substring(1).toLowerCase());
             }
-            capitalizedFully.append(delimiter);
+            capitalizedFully.append(" ");
         }
 
         capitalizedFully.setLength(Math.max(capitalizedFully.length() - 1, 0));
