@@ -12,6 +12,7 @@
  */
 package org.openhab.core.auth.jaas.internal;
 
+import java.security.Principal;
 import java.util.Map;
 
 import javax.security.auth.Subject;
@@ -19,8 +20,10 @@ import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.login.LoginException;
 import javax.security.auth.spi.LoginModule;
 
+import org.openhab.core.auth.Authentication;
 import org.openhab.core.auth.AuthenticationException;
 import org.openhab.core.auth.Credentials;
+import org.openhab.core.auth.GenericUser;
 import org.openhab.core.auth.UserRegistry;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.FrameworkUtil;
@@ -62,7 +65,11 @@ public class ManagedUserLoginModule implements LoginModule {
 
         try {
             Credentials credentials = (Credentials) this.subject.getPrivateCredentials().iterator().next();
-            userRegistry.authenticate(credentials);
+            Authentication auth = userRegistry.authenticate(credentials);
+            Principal userPrincipal = new GenericUser(auth.getUsername(), auth.getRoles());
+            if (!this.subject.getPrincipals().contains(userPrincipal)) {
+                this.subject.getPrincipals().add(userPrincipal);
+            }
             return true;
         } catch (AuthenticationException e) {
             throw new LoginException(e.getMessage());

@@ -12,18 +12,13 @@
  */
 package org.openhab.core.auth.jaas.internal;
 
-import java.io.IOException;
 import java.security.Principal;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
 import javax.security.auth.Subject;
-import javax.security.auth.callback.Callback;
-import javax.security.auth.callback.CallbackHandler;
-import javax.security.auth.callback.NameCallback;
-import javax.security.auth.callback.PasswordCallback;
-import javax.security.auth.callback.UnsupportedCallbackException;
+import javax.security.auth.login.CredentialException;
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 
@@ -34,6 +29,7 @@ import org.openhab.core.auth.AuthenticationException;
 import org.openhab.core.auth.AuthenticationProvider;
 import org.openhab.core.auth.Credentials;
 import org.openhab.core.auth.GenericUser;
+import org.openhab.core.auth.UserApiTokenCredentials;
 import org.openhab.core.auth.UsernamePasswordCredentials;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -53,6 +49,7 @@ import org.osgi.service.component.annotations.Modified;
 @Component(configurationPid = "org.openhab.jaas")
 public class JaasAuthenticationProvider implements AuthenticationProvider {
     private static final String DEFAULT_REALM = "openhab";
+    static final String API_TOKEN_PREFIX = "oh.";
 
     private @Nullable String realmName;
 
@@ -62,55 +59,77 @@ public class JaasAuthenticationProvider implements AuthenticationProvider {
             realmName = DEFAULT_REALM;
         }
 
-        if (!(credentials instanceof UsernamePasswordCredentials)) {
+        if (!((credentials instanceof UsernamePasswordCredentials)
+                || (credentials instanceof UserApiTokenCredentials))) {
             throw new AuthenticationException("Unsupported credentials passed to provider.");
         }
 
-        UsernamePasswordCredentials userCredentials = (UsernamePasswordCredentials) credentials;
-        final String name = userCredentials.getUsername();
-        final char[] password = userCredentials.getPassword().toCharArray();
+        Subject subject;
 
         final ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
-        try {
-            Principal userPrincipal = new GenericUser(name);
-            Subject subject = new Subject(true, Set.of(userPrincipal), Collections.emptySet(), Set.of(userCredentials));
 
-            Thread.currentThread().setContextClassLoader(ManagedUserLoginModule.class.getClassLoader());
-            LoginContext loginContext = new LoginContext(realmName, subject, new CallbackHandler() {
-                @Override
-                public void handle(@NonNullByDefault({}) Callback[] callbacks)
-                        throws IOException, UnsupportedCallbackException {
-                    for (Callback callback : callbacks) {
-                        if (callback instanceof PasswordCallback passwordCallback) {
-                            passwordCallback.setPassword(password);
-                        } else if (callback instanceof NameCallback nameCallback) {
-                            nameCallback.setName(name);
-                        } else {
-                            throw new UnsupportedCallbackException(callback);
-                        }
-                    }
-                }
-            }, new ManagedUserLoginConfiguration());
-            loginContext.login();
+        if (credentials instanceof UserApiTokenCredentials) {
+            UserApiTokenCredentials userCredentials = (UserApiTokenCredentials) credentials;
+            final String token = userCredentials.getApiToken();
 
-            return getAuthentication(name, loginContext.getSubject());
-        } catch (LoginException e) {
-            String message = e.getMessage();
-            throw new AuthenticationException(message != null ? message : "An unexpected LoginException occurred");
-        } finally {
-            Thread.currentThread().setContextClassLoader(contextClassLoader);
+            subject = new Subject(false, Collections.emptySet(), Collections.emptySet(), Set.of(userCredentials));
+            try {
+
+                Thread.currentThread().setContextClassLoader(ApiTokenLoginModule.class.getClassLoader());
+                LoginContext loginContext = new LoginContext(realmName, subject, null,
+                        new ApiTokenLoginConfiguration());
+                loginContext.login();
+
+                return getAuthentication("", loginContext.getSubject());
+            } catch (LoginException e) {
+                String message = e.getMessage();
+                throw new AuthenticationException(message != null ? message : "An unexpected LoginException occurred");
+            } finally {
+                Thread.currentThread().setContextClassLoader(contextClassLoader);
+            }
+
+        } else {
+            UsernamePasswordCredentials userCredentials = (UsernamePasswordCredentials) credentials;
+            final String name = userCredentials.getUsername();
+            final char[] password = userCredentials.getPassword().toCharArray();
+
+            subject = new Subject(false, Collections.emptySet(), Collections.emptySet(), Set.of(userCredentials));
+            try {
+
+                Thread.currentThread().setContextClassLoader(ManagedUserLoginModule.class.getClassLoader());
+                LoginContext loginContext = new LoginContext(realmName, subject, null,
+                        new ManagedUserLoginConfiguration());
+                loginContext.login();
+                return getAuthentication(name, loginContext.getSubject());
+            } catch (LoginException e) {
+                String message = e.getMessage();
+                throw new AuthenticationException(message != null ? message : "An unexpected LoginException occurred");
+            } finally {
+                Thread.currentThread().setContextClassLoader(contextClassLoader);
+            }
         }
     }
 
-    private Authentication getAuthentication(String name, Subject subject) {
-        return new Authentication(name, getRoles(subject.getPrincipals()));
+    private Authentication getAuthentication(String name, Subject subject) throws CredentialException {
+        String username = name;
+
+        if (subject.getPrincipals().isEmpty()) {
+            throw new CredentialException("Missing logged in user information");
+        }
+
+        if (username.isBlank()) {
+            username = ((GenericUser) subject.getPrincipals().iterator().next()).getName();
+        }
+        return new Authentication(username, getRoles(subject.getPrincipals()));
     }
 
-    private String[] getRoles(Set<Principal> principals) {
-        String[] roles = new String[principals.size()];
+    private String[] getRoles(Set<Principal> principals) throws CredentialException {
+        GenericUser user = (GenericUser) principals.iterator().next();
+        String[] roles = new String[user.getRoles().size()];
+
         int i = 0;
-        for (Principal principal : principals) {
-            roles[i++] = principal.getName();
+        for (String role : user.getRoles()) {
+            roles[i++] = role;
         }
         return roles;
     }
