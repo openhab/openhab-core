@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
 
 public class ApiTokenLoginModule implements LoginModule {
 
-    private final Logger logger = LoggerFactory.getLogger(ManagedUserLoginModule.class);
+    private final Logger logger = LoggerFactory.getLogger(ApiTokenLoginModule.class);
 
     private UserRegistry userRegistry;
 
