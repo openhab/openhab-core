@@ -35,6 +35,7 @@ import org.openhab.core.types.State;
  * @author Chris Jackson - Initial contribution
  * @author Laurent Garnier - new method getIconColor
  * @author Mark Herwege - new method getFormatPattern
+ * @author Laurent Garnier - new method getDynamicIcon
  */
 @NonNullByDefault
 public interface ItemUIRegistry extends ItemRegistry, ItemUIProvider {
@@ -169,6 +170,16 @@ public interface ItemUIRegistry extends ItemRegistry, ItemUIProvider {
      */
     @Nullable
     String getIconColor(Widget w);
+
+    /**
+     * Gets the dynamic icon for the widget. Checks conditional statements to
+     * find the icon based on the item value
+     *
+     * @param w Widget
+     * @return String with the icon reference
+     */
+    @Nullable
+    String getDynamicIcon(Widget w);
 
     /**
      * Gets the widget visibility based on the item state

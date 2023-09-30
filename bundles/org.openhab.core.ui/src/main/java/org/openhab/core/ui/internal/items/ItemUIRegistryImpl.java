@@ -68,6 +68,7 @@ import org.openhab.core.library.types.StringType;
 import org.openhab.core.model.sitemap.sitemap.ColorArray;
 import org.openhab.core.model.sitemap.sitemap.Default;
 import org.openhab.core.model.sitemap.sitemap.Group;
+import org.openhab.core.model.sitemap.sitemap.IconRule;
 import org.openhab.core.model.sitemap.sitemap.LinkableWidget;
 import org.openhab.core.model.sitemap.sitemap.Mapping;
 import org.openhab.core.model.sitemap.sitemap.Sitemap;
@@ -109,6 +110,7 @@ import org.slf4j.LoggerFactory;
  * @author Erdoan Hadzhiyusein - Adapted the class to work with the new DateTimeType
  * @author Laurent Garnier - new method getIconColor
  * @author Mark Herwege - new method getFormatPattern(widget), clean pattern
+ * @author Laurent Garnier - new icon parameter based on conditional rules + multiple AND conditions
  */
 @NonNullByDefault
 @Component(immediate = true, configurationPid = "org.openhab.sitemap", //
@@ -638,11 +640,14 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         // the default is the widget type name, e.g. "switch"
         String category = widgetTypeName.toLowerCase();
 
+        String dynamicIcon = getDynamicIcon(w);
         // if an icon is defined for the widget, use it
         if (w.getIcon() != null) {
             category = w.getIcon();
         } else if (w.getStaticIcon() != null) {
             category = w.getStaticIcon();
+        } else if (dynamicIcon != null) {
+            category = dynamicIcon;
         } else {
             // otherwise check if any item ui provider provides an icon for this item
             String itemName = w.getItem();
@@ -800,6 +805,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         target.getLabelColor().addAll(EcoreUtil.copyAll(source.getLabelColor()));
         target.getValueColor().addAll(EcoreUtil.copyAll(source.getValueColor()));
         target.getIconColor().addAll(EcoreUtil.copyAll(source.getIconColor()));
+        target.getDynamicIcon().addAll(EcoreUtil.copyAll(source.getDynamicIcon()));
     }
 
     /**
@@ -1149,150 +1155,154 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         return matched;
     }
 
-    private @Nullable String processColorDefinition(@Nullable State state, @Nullable List<ColorArray> colorList) {
+    private @Nullable String processColorDefinition(Widget w, @Nullable List<ColorArray> colorList, String colorType) {
         // Sanity check
-        if (colorList == null) {
+        if (colorList == null || colorList.isEmpty()) {
             return null;
         }
-        if (colorList.isEmpty()) {
-            return null;
-        }
+
+        logger.debug("Checking {} color for widget '{}'.", colorType, w.getLabel());
 
         String colorString = null;
 
-        // Check for the "arg". If it doesn't exist, assume there's just an
-        // static colour
-        if (colorList.size() == 1 && colorList.get(0).getState() == null) {
-            colorString = colorList.get(0).getArg();
-        } else {
-            // Loop through all elements looking for the definition associated
-            // with the supplied value
-            for (ColorArray color : colorList) {
-                // Use a local state variable in case it gets overridden below
-                State cmpState = state;
-
-                if (color.getState() == null) {
-                    // If no state associated to the condition, we consider the condition as fulfilled.
-                    // It allows defining a default color as last condition in particular.
-                    colorString = color.getArg();
-                    break;
-                }
-
-                // If there's an item defined here, get its state
-                String itemName = color.getItem();
-                if (itemName != null) {
-                    // Try and find the item to test.
-                    // If it's not found, return visible
-                    Item item;
-                    try {
-                        item = itemRegistry.getItem(itemName);
-
-                        // Get the item state
-                        cmpState = item.getState();
-                    } catch (ItemNotFoundException e) {
-                        logger.warn("Cannot retrieve color item {} for widget", color.getItem());
-                    }
-                }
-
-                // Handle the sign
-                String value;
-                if (color.getSign() != null) {
-                    value = color.getSign() + color.getState();
-                } else {
-                    value = color.getState();
-                }
-
-                if (cmpState != null && matchStateToValue(cmpState, value, color.getCondition())) {
-                    // We have the color for this value - break!
-                    colorString = color.getArg();
-                    break;
-                }
+        // Loop through all elements looking for the definition associated
+        // with the supplied value
+        for (ColorArray rule : colorList) {
+            if (allConditionsOk(rule.getConditions(), w)) {
+                // We have the color for this value - break!
+                colorString = rule.getArg();
+                break;
             }
         }
 
-        // Remove quotes off the colour - if they exist
         if (colorString == null) {
+            logger.debug("No {} color found for widget '{}'.", colorType, w.getLabel());
             return null;
         }
 
+        // Remove quotes off the colour - if they exist
         if (colorString.startsWith("\"") && colorString.endsWith("\"")) {
             colorString = colorString.substring(1, colorString.length() - 1);
         }
+        logger.debug("{} color for widget '{}' is '{}'.", colorType, w.getLabel(), colorString);
 
         return colorString;
     }
 
     @Override
     public @Nullable String getLabelColor(Widget w) {
-        return processColorDefinition(getState(w), w.getLabelColor());
+        return processColorDefinition(w, w.getLabelColor(), "label");
     }
 
     @Override
     public @Nullable String getValueColor(Widget w) {
-        return processColorDefinition(getState(w), w.getValueColor());
+        return processColorDefinition(w, w.getValueColor(), "value");
     }
 
     @Override
     public @Nullable String getIconColor(Widget w) {
-        return processColorDefinition(getState(w), w.getIconColor());
+        return processColorDefinition(w, w.getIconColor(), "icon");
+    }
+
+    @Override
+    public @Nullable String getDynamicIcon(Widget w) {
+        List<IconRule> ruleList = w.getDynamicIcon();
+        // Sanity check
+        if (ruleList == null || ruleList.isEmpty()) {
+            return null;
+        }
+
+        logger.debug("Checking icon for widget '{}'.", w.getLabel());
+
+        String icon = null;
+
+        // Loop through all elements looking for the definition associated
+        // with the supplied value
+        for (IconRule rule : ruleList) {
+            if (allConditionsOk(rule.getConditions(), w)) {
+                // We have the icon for this value - break!
+                icon = rule.getArg();
+                break;
+            }
+        }
+
+        if (icon == null) {
+            logger.debug("No icon found for widget '{}'.", w.getLabel());
+            return null;
+        }
+
+        // Remove quotes off the icon - if they exist
+        if (icon.startsWith("\"") && icon.endsWith("\"")) {
+            icon = icon.substring(1, icon.length() - 1);
+        }
+        logger.debug("icon for widget '{}' is '{}'.", w.getLabel(), icon);
+
+        return icon;
     }
 
     @Override
     public boolean getVisiblity(Widget w) {
         // Default to visible if parameters not set
         List<VisibilityRule> ruleList = w.getVisibility();
-        if (ruleList == null) {
-            return true;
-        }
-        if (ruleList.isEmpty()) {
+        if (ruleList == null || ruleList.isEmpty()) {
             return true;
         }
 
         logger.debug("Checking visiblity for widget '{}'.", w.getLabel());
 
-        for (VisibilityRule rule : w.getVisibility()) {
-            String itemName = rule.getItem();
-            if (itemName == null) {
-                continue;
-            }
-            if (rule.getState() == null) {
-                continue;
-            }
-
-            // Try and find the item to test.
-            // If it's not found, return visible
-            Item item;
-            try {
-                item = itemRegistry.getItem(itemName);
-            } catch (ItemNotFoundException e) {
-                logger.warn("Cannot retrieve visibility item {} for widget {}", rule.getItem(),
-                        w.eClass().getInstanceTypeName());
-
-                // Default to visible!
-                return true;
-            }
-
-            // Get the item state
-            State state = item.getState();
-
-            // Handle the sign
-            String value;
-            if (rule.getSign() != null) {
-                value = rule.getSign() + rule.getState();
-            } else {
-                value = rule.getState();
-            }
-
-            if (matchStateToValue(state, value, rule.getCondition())) {
-                // We have the name for this value!
+        for (VisibilityRule rule : ruleList) {
+            if (allConditionsOk(rule.getConditions(), w)) {
                 return true;
             }
         }
 
         logger.debug("Widget {} is not visible.", w.getLabel());
 
-        // The state wasn't in the list, so we don't display it
         return false;
+    }
+
+    private boolean allConditionsOk(@Nullable List<org.openhab.core.model.sitemap.sitemap.Condition> conditions,
+            Widget w) {
+        boolean allConditionsOk = true;
+        if (conditions != null) {
+            State defaultState = getState(w);
+
+            // Go through all AND conditions
+            for (org.openhab.core.model.sitemap.sitemap.Condition condition : conditions) {
+                // Use a local state variable in case it gets overridden below
+                State state = defaultState;
+
+                // If there's an item defined here, get its state
+                String itemName = condition.getItem();
+                if (itemName != null) {
+                    // Try and find the item to test.
+                    Item item;
+                    try {
+                        item = itemRegistry.getItem(itemName);
+
+                        // Get the item state
+                        state = item.getState();
+                    } catch (ItemNotFoundException e) {
+                        logger.warn("Cannot retrieve item {} for widget {}", itemName,
+                                w.eClass().getInstanceTypeName());
+                    }
+                }
+
+                // Handle the sign
+                String value;
+                if (condition.getSign() != null) {
+                    value = condition.getSign() + condition.getState();
+                } else {
+                    value = condition.getState();
+                }
+
+                if (state == null || !matchStateToValue(state, value, condition.getCondition())) {
+                    allConditionsOk = false;
+                    break;
+                }
+            }
+        }
+        return allConditionsOk;
     }
 
     enum Condition {
