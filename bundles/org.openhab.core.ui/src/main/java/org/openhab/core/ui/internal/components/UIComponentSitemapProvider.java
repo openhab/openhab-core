@@ -218,7 +218,7 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
             case "Mapview":
                 MapviewImpl mapviewWidget = (MapviewImpl) SitemapFactory.eINSTANCE.createMapview();
                 widget = mapviewWidget;
-                setWidgetPropertyFromComponentConfig(widget, component, "height", SitemapPackage.WEBVIEW__HEIGHT);
+                setWidgetPropertyFromComponentConfig(widget, component, "height", SitemapPackage.MAPVIEW__HEIGHT);
                 break;
             case "Slider":
                 SliderImpl sliderWidget = (SliderImpl) SitemapFactory.eINSTANCE.createSlider();
