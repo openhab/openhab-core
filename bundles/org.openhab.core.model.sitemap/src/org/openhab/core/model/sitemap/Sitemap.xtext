@@ -15,7 +15,7 @@ Widget:
     (LinkableWidget | NonLinkableWidget);
 
 NonLinkableWidget:
-    Switch | Selection | Slider | Setpoint | Video | Chart | Webview | Colorpicker | Mapview | Input | Default;
+    Switch | Selection | Slider | Setpoint | Video | Chart | Webview | Colorpicker | Mapview | Input | Buttongrid | Default;
 
 LinkableWidget:
     (Text | Group | Image | Frame)
@@ -149,6 +149,16 @@ Input:
     ('iconcolor=[' (IconColor+=ColorArray (',' IconColor+=ColorArray)* ']'))? &
     ('visibility=[' (Visibility+=VisibilityRule (',' Visibility+=VisibilityRule)* ']'))?);
 
+Buttongrid:
+    'Buttongrid' (('item=' item=ItemRef) & ('label=' label=(ID | STRING))? &
+    (('icon=' icon=Icon) | ('staticIcon=' staticIcon=Icon))? &
+    ('columns=' columns=INT) &
+    ('buttons=[' buttons+=Button (',' buttons+=Button)* ']') &
+    ('labelcolor=[' (LabelColor+=ColorArray (',' LabelColor+=ColorArray)* ']'))? &
+    ('valuecolor=[' (ValueColor+=ColorArray (',' ValueColor+=ColorArray)* ']'))? &
+    ('iconcolor=[' (IconColor+=ColorArray (',' IconColor+=ColorArray)* ']'))? &
+    ('visibility=[' (Visibility+=VisibilityRule (',' Visibility+=VisibilityRule)* ']'))?);
+
 Default:
     'Default' (('item=' item=ItemRef) & ('label=' label=(ID | STRING))? &
     (('icon=' icon=Icon) | ('staticIcon=' staticIcon=Icon))? &
@@ -157,6 +167,9 @@ Default:
     ('valuecolor=[' (ValueColor+=ColorArray (',' ValueColor+=ColorArray)* ']'))? &
     ('iconcolor=[' (IconColor+=ColorArray (',' IconColor+=ColorArray)* ']'))? &
     ('visibility=[' (Visibility+=VisibilityRule (',' Visibility+=VisibilityRule)* ']'))?);
+
+Button:
+    position=INT ':' cmd=Command '=' label=(ID | STRING) ('=' icon=Icon)?;
 
 Mapping:
     cmd=Command '=' label=(ID | STRING) ('=' icon=Icon)?;

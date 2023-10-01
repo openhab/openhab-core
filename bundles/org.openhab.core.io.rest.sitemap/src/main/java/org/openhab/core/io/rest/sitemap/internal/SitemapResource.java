@@ -76,6 +76,8 @@ import org.openhab.core.items.events.ItemStateChangedEvent;
 import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.library.types.HSBType;
 import org.openhab.core.model.sitemap.SitemapProvider;
+import org.openhab.core.model.sitemap.sitemap.Button;
+import org.openhab.core.model.sitemap.sitemap.Buttongrid;
 import org.openhab.core.model.sitemap.sitemap.Chart;
 import org.openhab.core.model.sitemap.sitemap.ColorArray;
 import org.openhab.core.model.sitemap.sitemap.Frame;
@@ -131,6 +133,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * @author Wouter Born - Migrated to OpenAPI annotations
  * @author Laurent Garnier - Added support for icon color
  * @author Mark Herwege - Added pattern and unit fields
+ * @author Laurent Garnier - Added support for new sitemap element Buttongrid
  * @author Laurent Garnier - Added icon field for mappings used for switch element
  */
 @Component(service = { RESTResource.class, EventSubscriber.class })
@@ -615,6 +618,17 @@ public class SitemapResource
             bean.minValue = setpointWidget.getMinValue();
             bean.maxValue = setpointWidget.getMaxValue();
             bean.step = setpointWidget.getStep();
+        }
+        if (widget instanceof Buttongrid buttonGridWidget) {
+            bean.columns = buttonGridWidget.getColumns();
+            for (Button button : buttonGridWidget.getButtons()) {
+                MappingDTO mappingBean = new MappingDTO();
+                mappingBean.position = button.getPosition();
+                mappingBean.command = button.getCmd();
+                mappingBean.label = button.getLabel();
+                mappingBean.icon = button.getIcon();
+                bean.mappings.add(mappingBean);
+            }
         }
         return bean;
     }

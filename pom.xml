@@ -72,11 +72,11 @@
     <bnd.version>6.4.0</bnd.version>
     <commons.net.version>3.7.2</commons.net.version>
     <eea.version>2.3.0</eea.version>
-    <karaf.compile.version>4.4.3</karaf.compile.version>
-    <karaf.tooling.version>4.4.3</karaf.tooling.version>
+    <karaf.compile.version>4.4.4</karaf.compile.version>
+    <karaf.tooling.version>4.4.4</karaf.tooling.version>
     <sat.version>0.15.0</sat.version>
-    <slf4j.version>1.7.32</slf4j.version>
-    <xtext.version>2.29.0</xtext.version>
+    <slf4j.version>2.0.6</slf4j.version>
+    <xtext.version>2.32.0</xtext.version>
     <spotless.version>2.38.0</spotless.version>
     <!-- Eclipse Java formatter version 4.26+ does not check test files -->
     <spotless.eclipse.version>4.25</spotless.eclipse.version>

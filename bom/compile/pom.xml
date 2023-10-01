@@ -18,8 +18,8 @@
 
   <properties>
     <californium.version>2.7.4</californium.version>
-    <jetty.version>9.4.50.v20221201</jetty.version>
-    <pax.web.version>8.0.15</pax.web.version>
+    <jetty.version>9.4.52.v20230823</jetty.version>
+    <pax.web.version>8.0.22</pax.web.version>
     <swagger.version>2.2.15</swagger.version>
   </properties>
 
@@ -84,7 +84,7 @@
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
-      <version>3.9</version>
+      <version>3.12.0</version>
       <scope>compile</scope>
     </dependency>
 
@@ -117,10 +117,11 @@
     </dependency>
 
     <!-- Gson -->
+    <!-- The Orbit bundle is used because LSP4J imports com.google.gson.internal -->
     <dependency>
-      <groupId>com.google.code.gson</groupId>
-      <artifactId>gson</artifactId>
-      <version>2.9.1</version>
+      <groupId>org.eclipse.orbit.bundles</groupId>
+      <artifactId>com.google.gson</artifactId>
+      <version>2.10.1.v20230109-0753</version>
       <scope>compile</scope>
     </dependency>
 
@@ -428,13 +429,13 @@
     <dependency>
       <groupId>net.java.dev.jna</groupId>
       <artifactId>jna</artifactId>
-      <version>5.12.1</version>
+      <version>5.13.0</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>net.java.dev.jna</groupId>
       <artifactId>jna-platform</artifactId>
-      <version>5.12.1</version>
+      <version>5.13.0</version>
       <scope>compile</scope>
     </dependency>
 
