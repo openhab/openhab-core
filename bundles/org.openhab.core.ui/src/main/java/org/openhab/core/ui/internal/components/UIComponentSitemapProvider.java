@@ -93,7 +93,7 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
     private static final Pattern VISIBILITY_PATTERN = Pattern
             .compile("(?<item>[A-Za-z]\\w*)\\s*(?<condition>==|!=|<=|>=|<|>)\\s*(?<sign>\\+|-)?(?<state>.+)");
     private static final Pattern COLOR_PATTERN = Pattern.compile(
-            "((?<item>[A-Za-z]\\w*)?\\s*((?<condition>==|!=|<=|>=|<|>)\\s*(?<sign>\\+|-)?(?<state>[^=]+))?\\s*=)?\\s*(?<arg>\\S+)");
+            "((?<item>[A-Za-z]\\w*)?\\s*((?<condition>==|!=|<=|>=|<|>)\\s*(?<sign>\\+|-)?(?<state>[^=]*[^= ]+))?\\s*=)?\\s*(?<arg>\\S+)");
 
     private Map<String, Sitemap> sitemaps = new HashMap<>();
     private @Nullable UIComponentRegistryFactory componentRegistryFactory;
