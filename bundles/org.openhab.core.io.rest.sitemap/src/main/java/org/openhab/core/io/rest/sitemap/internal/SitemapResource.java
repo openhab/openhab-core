@@ -134,6 +134,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * @author Laurent Garnier - Added support for icon color
  * @author Mark Herwege - Added pattern and unit fields
  * @author Laurent Garnier - Added support for new sitemap element Buttongrid
+ * @author Laurent Garnier - Added icon field for mappings used for switch element
  */
 @Component(service = { RESTResource.class, EventSubscriber.class })
 @JaxrsResource
@@ -558,6 +559,7 @@ public class SitemapResource
                 MappingDTO mappingBean = new MappingDTO();
                 mappingBean.command = mapping.getCmd();
                 mappingBean.label = mapping.getLabel();
+                mappingBean.icon = mapping.getIcon();
                 bean.mappings.add(mappingBean);
             }
         }

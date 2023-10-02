@@ -79,6 +79,7 @@ import org.slf4j.LoggerFactory;
  * @author Yannick Schaus - Initial contribution
  * @author Laurent Garnier - icon color support for all widgets
  * @author Laurent Garnier - Added support for new element Buttongrid
+ * @author Laurent Garnier - Added icon field for mappings
  */
 @NonNullByDefault
 @Component(service = SitemapProvider.class)
@@ -331,11 +332,14 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
             if (component.getConfig().get("mappings") instanceof Collection<?>) {
                 for (Object sourceMapping : (Collection<?>) component.getConfig().get("mappings")) {
                     if (sourceMapping instanceof String) {
-                        String cmd = sourceMapping.toString().split("=")[0].trim();
-                        String label = sourceMapping.toString().split("=")[1].trim();
+                        String[] splitMapping = sourceMapping.toString().split("=");
+                        String cmd = splitMapping[0].trim();
+                        String label = splitMapping[1].trim();
+                        String icon = splitMapping.length < 3 ? null : splitMapping[2].trim();
                         MappingImpl mapping = (MappingImpl) SitemapFactory.eINSTANCE.createMapping();
                         mapping.setCmd(cmd);
                         mapping.setLabel(label);
+                        mapping.setIcon(icon);
                         mappings.add(mapping);
                     }
                 }

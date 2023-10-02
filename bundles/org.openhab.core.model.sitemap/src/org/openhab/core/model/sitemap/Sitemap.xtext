@@ -172,7 +172,7 @@ Button:
     position=INT ':' cmd=Command '=' label=(ID | STRING) ('=' icon=Icon)?;
 
 Mapping:
-    cmd=Command '=' label=(ID | STRING);
+    cmd=Command '=' label=(ID | STRING) ('=' icon=Icon)?;
 
 VisibilityRule:
     (item=ID) (condition=('==' | '>' | '<' | '>=' | '<=' | '!=')) (sign=('-' | '+'))? (state=XState);
