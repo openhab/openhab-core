@@ -60,6 +60,7 @@ import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.library.types.StringType;
 import org.openhab.core.model.sitemap.sitemap.ColorArray;
 import org.openhab.core.model.sitemap.sitemap.Colorpicker;
+import org.openhab.core.model.sitemap.sitemap.Condition;
 import org.openhab.core.model.sitemap.sitemap.Group;
 import org.openhab.core.model.sitemap.sitemap.Image;
 import org.openhab.core.model.sitemap.sitemap.Mapping;
@@ -70,6 +71,7 @@ import org.openhab.core.model.sitemap.sitemap.SitemapFactory;
 import org.openhab.core.model.sitemap.sitemap.Slider;
 import org.openhab.core.model.sitemap.sitemap.Switch;
 import org.openhab.core.model.sitemap.sitemap.Text;
+import org.openhab.core.model.sitemap.sitemap.VisibilityRule;
 import org.openhab.core.model.sitemap.sitemap.Widget;
 import org.openhab.core.types.CommandDescriptionBuilder;
 import org.openhab.core.types.CommandOption;
@@ -83,6 +85,7 @@ import org.openhab.core.ui.items.ItemUIProvider;
 
 /**
  * @author Kai Kreuzer - Initial contribution
+ * @author Laurent Garnier - Tests updated to consider multiple AND conditions + tests added for getVisiblity
  */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -736,18 +739,27 @@ public class ItemUIRegistryImplTest {
 
         when(widgetMock.getLabel()).thenReturn(testLabel);
 
-        ColorArray colorArray = mock(ColorArray.class);
-        when(colorArray.getState()).thenReturn("21");
-        when(colorArray.getCondition()).thenReturn("<");
-        when(colorArray.getArg()).thenReturn("yellow");
-        BasicEList<ColorArray> colorArrays = new BasicEList<>();
-        colorArrays.add(colorArray);
-        when(widgetMock.getLabelColor()).thenReturn(colorArrays);
+        Condition conditon = mock(Condition.class);
+        when(conditon.getState()).thenReturn("21");
+        when(conditon.getCondition()).thenReturn("<");
+        BasicEList<Condition> conditions = new BasicEList<>();
+        conditions.add(conditon);
+        ColorArray rule = mock(ColorArray.class);
+        when(rule.getConditions()).thenReturn(conditions);
+        when(rule.getArg()).thenReturn("yellow");
+        BasicEList<ColorArray> rules = new BasicEList<>();
+        rules.add(rule);
+        when(widgetMock.getLabelColor()).thenReturn(rules);
 
         when(itemMock.getState()).thenReturn(new DecimalType(10f / 3f));
 
         String color = uiRegistry.getLabelColor(widgetMock);
         assertEquals("yellow", color);
+
+        when(itemMock.getState()).thenReturn(new DecimalType(21f));
+
+        color = uiRegistry.getLabelColor(widgetMock);
+        assertNull(color);
     }
 
     @Test
@@ -756,18 +768,27 @@ public class ItemUIRegistryImplTest {
 
         when(widgetMock.getLabel()).thenReturn(testLabel);
 
-        ColorArray colorArray = mock(ColorArray.class);
-        when(colorArray.getState()).thenReturn("20");
-        when(colorArray.getCondition()).thenReturn("==");
-        when(colorArray.getArg()).thenReturn("yellow");
-        BasicEList<ColorArray> colorArrays = new BasicEList<>();
-        colorArrays.add(colorArray);
-        when(widgetMock.getLabelColor()).thenReturn(colorArrays);
+        Condition conditon = mock(Condition.class);
+        when(conditon.getState()).thenReturn("20");
+        when(conditon.getCondition()).thenReturn("==");
+        BasicEList<Condition> conditions = new BasicEList<>();
+        conditions.add(conditon);
+        ColorArray rule = mock(ColorArray.class);
+        when(rule.getConditions()).thenReturn(conditions);
+        when(rule.getArg()).thenReturn("yellow");
+        BasicEList<ColorArray> rules = new BasicEList<>();
+        rules.add(rule);
+        when(widgetMock.getLabelColor()).thenReturn(rules);
 
         when(itemMock.getState()).thenReturn(new QuantityType<>("20 °C"));
 
         String color = uiRegistry.getLabelColor(widgetMock);
         assertEquals("yellow", color);
+
+        when(itemMock.getState()).thenReturn(new QuantityType<>("20.1 °C"));
+
+        color = uiRegistry.getLabelColor(widgetMock);
+        assertNull(color);
     }
 
     @Test
@@ -925,44 +946,108 @@ public class ItemUIRegistryImplTest {
 
         when(widgetMock.getLabel()).thenReturn(testLabel);
 
-        ColorArray colorArray = mock(ColorArray.class);
-        when(colorArray.getState()).thenReturn("21");
-        when(colorArray.getCondition()).thenReturn("<");
-        when(colorArray.getArg()).thenReturn("yellow");
-        BasicEList<ColorArray> colorArrays = new BasicEList<>();
-        colorArrays.add(colorArray);
-        ColorArray colorArray2 = mock(ColorArray.class);
-        when(colorArray2.getState()).thenReturn(null);
-        when(colorArray2.getCondition()).thenReturn(null);
-        when(colorArray2.getArg()).thenReturn("blue");
-        colorArrays.add(colorArray2);
-        when(widgetMock.getLabelColor()).thenReturn(colorArrays);
+        Condition conditon = mock(Condition.class);
+        when(conditon.getState()).thenReturn("18");
+        when(conditon.getCondition()).thenReturn(">=");
+        Condition conditon2 = mock(Condition.class);
+        when(conditon2.getState()).thenReturn("21");
+        when(conditon2.getCondition()).thenReturn("<");
+        BasicEList<Condition> conditions = new BasicEList<>();
+        conditions.add(conditon);
+        conditions.add(conditon2);
+        ColorArray rule = mock(ColorArray.class);
+        when(rule.getConditions()).thenReturn(conditions);
+        when(rule.getArg()).thenReturn("yellow");
+        BasicEList<ColorArray> rules = new BasicEList<>();
+        rules.add(rule);
+        Condition conditon3 = mock(Condition.class);
+        when(conditon3.getState()).thenReturn("21");
+        when(conditon3.getCondition()).thenReturn(">=");
+        Condition conditon4 = mock(Condition.class);
+        when(conditon4.getState()).thenReturn("24");
+        when(conditon4.getCondition()).thenReturn("<");
+        BasicEList<Condition> conditions2 = new BasicEList<>();
+        conditions2.add(conditon3);
+        conditions2.add(conditon4);
+        ColorArray rule2 = mock(ColorArray.class);
+        when(rule2.getConditions()).thenReturn(conditions2);
+        when(rule2.getArg()).thenReturn("red");
+        rules.add(rule2);
+        BasicEList<Condition> conditions5 = new BasicEList<>();
+        ColorArray rule3 = mock(ColorArray.class);
+        when(rule3.getConditions()).thenReturn(conditions5);
+        when(rule3.getArg()).thenReturn("blue");
+        rules.add(rule3);
+        when(widgetMock.getLabelColor()).thenReturn(rules);
 
-        when(itemMock.getState()).thenReturn(new DecimalType(21.0));
+        when(itemMock.getState()).thenReturn(new DecimalType(20.9));
 
         String color = uiRegistry.getLabelColor(widgetMock);
+        assertEquals("yellow", color);
+
+        when(itemMock.getState()).thenReturn(new DecimalType(23.5));
+
+        color = uiRegistry.getLabelColor(widgetMock);
+        assertEquals("red", color);
+
+        when(itemMock.getState()).thenReturn(new DecimalType(24.0));
+
+        color = uiRegistry.getLabelColor(widgetMock);
+        assertEquals("blue", color);
+
+        when(itemMock.getState()).thenReturn(new DecimalType(17.5));
+
+        color = uiRegistry.getLabelColor(widgetMock);
+        assertEquals("blue", color);
+
+        conditions5 = null;
+
+        when(itemMock.getState()).thenReturn(new DecimalType(24.0));
+
+        color = uiRegistry.getLabelColor(widgetMock);
+        assertEquals("blue", color);
+
+        when(itemMock.getState()).thenReturn(new DecimalType(17.5));
+
+        color = uiRegistry.getLabelColor(widgetMock);
         assertEquals("blue", color);
     }
 
     @Test
     public void getValueColor() {
-        ColorArray colorArray = mock(ColorArray.class);
-        when(colorArray.getState()).thenReturn("21");
-        when(colorArray.getCondition()).thenReturn("<");
-        when(colorArray.getArg()).thenReturn("yellow");
-        BasicEList<ColorArray> colorArrays = new BasicEList<>();
-        colorArrays.add(colorArray);
-        ColorArray colorArray2 = mock(ColorArray.class);
-        when(colorArray2.getState()).thenReturn("24");
-        when(colorArray2.getCondition()).thenReturn("<");
-        when(colorArray2.getArg()).thenReturn("red");
-        colorArrays.add(colorArray2);
-        ColorArray colorArray3 = mock(ColorArray.class);
-        when(colorArray3.getState()).thenReturn(null);
-        when(colorArray3.getCondition()).thenReturn(null);
-        when(colorArray3.getArg()).thenReturn("blue");
-        colorArrays.add(colorArray3);
-        when(widgetMock.getValueColor()).thenReturn(colorArrays);
+        Condition conditon = mock(Condition.class);
+        when(conditon.getState()).thenReturn("18");
+        when(conditon.getCondition()).thenReturn(">=");
+        Condition conditon2 = mock(Condition.class);
+        when(conditon2.getState()).thenReturn("21");
+        when(conditon2.getCondition()).thenReturn("<");
+        BasicEList<Condition> conditions = new BasicEList<>();
+        conditions.add(conditon);
+        conditions.add(conditon2);
+        ColorArray rule = mock(ColorArray.class);
+        when(rule.getConditions()).thenReturn(conditions);
+        when(rule.getArg()).thenReturn("yellow");
+        BasicEList<ColorArray> rules = new BasicEList<>();
+        rules.add(rule);
+        Condition conditon3 = mock(Condition.class);
+        when(conditon3.getState()).thenReturn("21");
+        when(conditon3.getCondition()).thenReturn(">=");
+        Condition conditon4 = mock(Condition.class);
+        when(conditon4.getState()).thenReturn("24");
+        when(conditon4.getCondition()).thenReturn("<");
+        BasicEList<Condition> conditions2 = new BasicEList<>();
+        conditions2.add(conditon3);
+        conditions2.add(conditon4);
+        ColorArray rule2 = mock(ColorArray.class);
+        when(rule2.getConditions()).thenReturn(conditions2);
+        when(rule2.getArg()).thenReturn("red");
+        rules.add(rule2);
+        BasicEList<Condition> conditions5 = new BasicEList<>();
+        ColorArray rule3 = mock(ColorArray.class);
+        when(rule3.getConditions()).thenReturn(conditions5);
+        when(rule3.getArg()).thenReturn("blue");
+        rules.add(rule3);
+        when(widgetMock.getValueColor()).thenReturn(rules);
 
         when(itemMock.getState()).thenReturn(new DecimalType(20.9));
 
@@ -974,7 +1059,24 @@ public class ItemUIRegistryImplTest {
         color = uiRegistry.getValueColor(widgetMock);
         assertEquals("red", color);
 
-        when(itemMock.getState()).thenReturn(new DecimalType(30.0));
+        when(itemMock.getState()).thenReturn(new DecimalType(24.0));
+
+        color = uiRegistry.getValueColor(widgetMock);
+        assertEquals("blue", color);
+
+        when(itemMock.getState()).thenReturn(new DecimalType(17.5));
+
+        color = uiRegistry.getValueColor(widgetMock);
+        assertEquals("blue", color);
+
+        conditions5 = null;
+
+        when(itemMock.getState()).thenReturn(new DecimalType(24.0));
+
+        color = uiRegistry.getValueColor(widgetMock);
+        assertEquals("blue", color);
+
+        when(itemMock.getState()).thenReturn(new DecimalType(17.5));
 
         color = uiRegistry.getValueColor(widgetMock);
         assertEquals("blue", color);
@@ -982,23 +1084,39 @@ public class ItemUIRegistryImplTest {
 
     @Test
     public void getIconColor() {
-        ColorArray colorArray = mock(ColorArray.class);
-        when(colorArray.getState()).thenReturn("21");
-        when(colorArray.getCondition()).thenReturn("<");
-        when(colorArray.getArg()).thenReturn("yellow");
-        BasicEList<ColorArray> colorArrays = new BasicEList<>();
-        colorArrays.add(colorArray);
-        ColorArray colorArray2 = mock(ColorArray.class);
-        when(colorArray2.getState()).thenReturn("24");
-        when(colorArray2.getCondition()).thenReturn("<");
-        when(colorArray2.getArg()).thenReturn("red");
-        colorArrays.add(colorArray2);
-        ColorArray colorArray3 = mock(ColorArray.class);
-        when(colorArray3.getState()).thenReturn(null);
-        when(colorArray3.getCondition()).thenReturn(null);
-        when(colorArray3.getArg()).thenReturn("blue");
-        colorArrays.add(colorArray3);
-        when(widgetMock.getIconColor()).thenReturn(colorArrays);
+        Condition conditon = mock(Condition.class);
+        when(conditon.getState()).thenReturn("18");
+        when(conditon.getCondition()).thenReturn(">=");
+        Condition conditon2 = mock(Condition.class);
+        when(conditon2.getState()).thenReturn("21");
+        when(conditon2.getCondition()).thenReturn("<");
+        BasicEList<Condition> conditions = new BasicEList<>();
+        conditions.add(conditon);
+        conditions.add(conditon2);
+        ColorArray rule = mock(ColorArray.class);
+        when(rule.getConditions()).thenReturn(conditions);
+        when(rule.getArg()).thenReturn("yellow");
+        BasicEList<ColorArray> rules = new BasicEList<>();
+        rules.add(rule);
+        Condition conditon3 = mock(Condition.class);
+        when(conditon3.getState()).thenReturn("21");
+        when(conditon3.getCondition()).thenReturn(">=");
+        Condition conditon4 = mock(Condition.class);
+        when(conditon4.getState()).thenReturn("24");
+        when(conditon4.getCondition()).thenReturn("<");
+        BasicEList<Condition> conditions2 = new BasicEList<>();
+        conditions2.add(conditon3);
+        conditions2.add(conditon4);
+        ColorArray rule2 = mock(ColorArray.class);
+        when(rule2.getConditions()).thenReturn(conditions2);
+        when(rule2.getArg()).thenReturn("red");
+        rules.add(rule2);
+        BasicEList<Condition> conditions5 = new BasicEList<>();
+        ColorArray rule3 = mock(ColorArray.class);
+        when(rule3.getConditions()).thenReturn(conditions5);
+        when(rule3.getArg()).thenReturn("blue");
+        rules.add(rule3);
+        when(widgetMock.getIconColor()).thenReturn(rules);
 
         when(itemMock.getState()).thenReturn(new DecimalType(20.9));
 
@@ -1010,9 +1128,60 @@ public class ItemUIRegistryImplTest {
         color = uiRegistry.getIconColor(widgetMock);
         assertEquals("red", color);
 
-        when(itemMock.getState()).thenReturn(new DecimalType(30.0));
+        when(itemMock.getState()).thenReturn(new DecimalType(24.0));
 
         color = uiRegistry.getIconColor(widgetMock);
         assertEquals("blue", color);
+
+        when(itemMock.getState()).thenReturn(new DecimalType(17.5));
+
+        color = uiRegistry.getIconColor(widgetMock);
+        assertEquals("blue", color);
+
+        conditions5 = null;
+
+        when(itemMock.getState()).thenReturn(new DecimalType(24.0));
+
+        color = uiRegistry.getIconColor(widgetMock);
+        assertEquals("blue", color);
+
+        when(itemMock.getState()).thenReturn(new DecimalType(17.5));
+
+        color = uiRegistry.getIconColor(widgetMock);
+        assertEquals("blue", color);
+    }
+
+    @Test
+    public void getVisibility() {
+        Condition conditon = mock(Condition.class);
+        when(conditon.getState()).thenReturn("21");
+        when(conditon.getCondition()).thenReturn(">=");
+        Condition conditon2 = mock(Condition.class);
+        when(conditon2.getState()).thenReturn("24");
+        when(conditon2.getCondition()).thenReturn("<");
+        BasicEList<Condition> conditions = new BasicEList<>();
+        conditions.add(conditon);
+        conditions.add(conditon2);
+        VisibilityRule rule = mock(VisibilityRule.class);
+        when(rule.getConditions()).thenReturn(conditions);
+        BasicEList<VisibilityRule> rules = new BasicEList<>();
+        rules.add(rule);
+        when(widgetMock.getVisibility()).thenReturn(rules);
+
+        when(itemMock.getState()).thenReturn(new DecimalType(20.9));
+
+        assertFalse(uiRegistry.getVisiblity(widgetMock));
+
+        when(itemMock.getState()).thenReturn(new DecimalType(21.0));
+
+        assertTrue(uiRegistry.getVisiblity(widgetMock));
+
+        when(itemMock.getState()).thenReturn(new DecimalType(23.5));
+
+        assertTrue(uiRegistry.getVisiblity(widgetMock));
+
+        when(itemMock.getState()).thenReturn(new DecimalType(24.0));
+
+        assertFalse(uiRegistry.getVisiblity(widgetMock));
     }
 }
