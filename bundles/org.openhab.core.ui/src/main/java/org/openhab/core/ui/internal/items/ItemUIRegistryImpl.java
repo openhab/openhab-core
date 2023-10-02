@@ -68,6 +68,7 @@ import org.openhab.core.library.types.StringType;
 import org.openhab.core.model.sitemap.sitemap.ColorArray;
 import org.openhab.core.model.sitemap.sitemap.Default;
 import org.openhab.core.model.sitemap.sitemap.Group;
+import org.openhab.core.model.sitemap.sitemap.IconRule;
 import org.openhab.core.model.sitemap.sitemap.LinkableWidget;
 import org.openhab.core.model.sitemap.sitemap.Mapping;
 import org.openhab.core.model.sitemap.sitemap.Sitemap;
@@ -109,6 +110,7 @@ import org.slf4j.LoggerFactory;
  * @author Erdoan Hadzhiyusein - Adapted the class to work with the new DateTimeType
  * @author Laurent Garnier - new method getIconColor
  * @author Mark Herwege - new method getFormatPattern(widget), clean pattern
+ * @author Laurent Garnier - new icon parameter based on conditional rules
  */
 @NonNullByDefault
 @Component(immediate = true, configurationPid = "org.openhab.sitemap", //
@@ -638,11 +640,14 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         // the default is the widget type name, e.g. "switch"
         String category = widgetTypeName.toLowerCase();
 
+        String conditionalIcon = getConditionalIcon(w);
         // if an icon is defined for the widget, use it
         if (w.getIcon() != null) {
             category = w.getIcon();
         } else if (w.getStaticIcon() != null) {
             category = w.getStaticIcon();
+        } else if (conditionalIcon != null) {
+            category = conditionalIcon;
         } else {
             // otherwise check if any item ui provider provides an icon for this item
             String itemName = w.getItem();
@@ -800,6 +805,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         target.getLabelColor().addAll(EcoreUtil.copyAll(source.getLabelColor()));
         target.getValueColor().addAll(EcoreUtil.copyAll(source.getValueColor()));
         target.getIconColor().addAll(EcoreUtil.copyAll(source.getIconColor()));
+        target.getIconRules().addAll(EcoreUtil.copyAll(source.getIconRules()));
     }
 
     /**
@@ -1293,6 +1299,86 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
 
         // The state wasn't in the list, so we don't display it
         return false;
+    }
+
+    @Override
+    public @Nullable String getConditionalIcon(Widget w) {
+        List<IconRule> ruleList = w.getIconRules();
+        // Sanity check
+        if (ruleList == null || ruleList.isEmpty()) {
+            return null;
+        }
+
+        logger.debug("Checking icon for widget '{}'.", w.getLabel());
+
+        String icon = null;
+
+        // Loop through all elements looking for the definition associated
+        // with the supplied value
+        for (IconRule rule : ruleList) {
+            if (allConditionsOk(rule.getConditions(), w)) {
+                // We have the icon for this value - break!
+                icon = rule.getArg();
+                break;
+            }
+        }
+
+        if (icon == null) {
+            logger.debug("No icon found for widget '{}'.", w.getLabel());
+            return null;
+        }
+
+        // Remove quotes off the icon - if they exist
+        if (icon.startsWith("\"") && icon.endsWith("\"")) {
+            icon = icon.substring(1, icon.length() - 1);
+        }
+        logger.debug("icon for widget '{}' is '{}'.", w.getLabel(), icon);
+
+        return icon;
+    }
+
+    private boolean allConditionsOk(@Nullable List<org.openhab.core.model.sitemap.sitemap.Condition> conditions,
+            Widget w) {
+        boolean allConditionsOk = true;
+        if (conditions != null) {
+            State defaultState = getState(w);
+
+            // Go through all AND conditions
+            for (org.openhab.core.model.sitemap.sitemap.Condition condition : conditions) {
+                // Use a local state variable in case it gets overridden below
+                State state = defaultState;
+
+                // If there's an item defined here, get its state
+                String itemName = condition.getItem();
+                if (itemName != null) {
+                    // Try and find the item to test.
+                    Item item;
+                    try {
+                        item = itemRegistry.getItem(itemName);
+
+                        // Get the item state
+                        state = item.getState();
+                    } catch (ItemNotFoundException e) {
+                        logger.warn("Cannot retrieve item {} for widget {}", itemName,
+                                w.eClass().getInstanceTypeName());
+                    }
+                }
+
+                // Handle the sign
+                String value;
+                if (condition.getSign() != null) {
+                    value = condition.getSign() + condition.getState();
+                } else {
+                    value = condition.getState();
+                }
+
+                if (state == null || !matchStateToValue(state, value, condition.getCondition())) {
+                    allConditionsOk = false;
+                    break;
+                }
+            }
+        }
+        return allConditionsOk;
     }
 
     enum Condition {

@@ -80,7 +80,9 @@ import org.openhab.core.model.sitemap.sitemap.Button;
 import org.openhab.core.model.sitemap.sitemap.Buttongrid;
 import org.openhab.core.model.sitemap.sitemap.Chart;
 import org.openhab.core.model.sitemap.sitemap.ColorArray;
+import org.openhab.core.model.sitemap.sitemap.Condition;
 import org.openhab.core.model.sitemap.sitemap.Frame;
+import org.openhab.core.model.sitemap.sitemap.IconRule;
 import org.openhab.core.model.sitemap.sitemap.Image;
 import org.openhab.core.model.sitemap.sitemap.Input;
 import org.openhab.core.model.sitemap.sitemap.LinkableWidget;
@@ -135,6 +137,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * @author Mark Herwege - Added pattern and unit fields
  * @author Laurent Garnier - Added support for new sitemap element Buttongrid
  * @author Laurent Garnier - Added icon field for mappings used for switch element
+ * @author Laurent Garnier - New widget icon parameter based on conditional rules
  */
 @Component(service = { RESTResource.class, EventSubscriber.class })
 @JaxrsResource
@@ -527,7 +530,7 @@ public class SitemapResource
         }
         bean.widgetId = widgetId;
         bean.icon = itemUIRegistry.getCategory(widget);
-        bean.staticIcon = widget.getStaticIcon() != null;
+        bean.staticIcon = widget.getStaticIcon() != null || !widget.getIconRules().isEmpty();
         bean.labelcolor = convertItemValueColor(itemUIRegistry.getLabelColor(widget), itemState);
         bean.valuecolor = convertItemValueColor(itemUIRegistry.getValueColor(widget), itemState);
         bean.iconcolor = convertItemValueColor(itemUIRegistry.getIconColor(widget), itemState);
@@ -757,6 +760,8 @@ public class SitemapResource
             if (widget instanceof Frame frame) {
                 items.addAll(getAllItems(frame.getChildren()));
             }
+            // Consider items involved in any icon condition
+            items.addAll(getItemsInIconCond(widget.getIconRules()));
             // Consider items involved in any visibility, labelcolor, valuecolor and iconcolor condition
             items.addAll(getItemsInVisibilityCond(widget.getVisibility()));
             items.addAll(getItemsInColorCond(widget.getLabelColor()));
@@ -800,6 +805,32 @@ public class SitemapResource
             }
         }
         return items;
+    }
+
+    private Set<GenericItem> getItemsInIconCond(EList<IconRule> ruleList) {
+        Set<GenericItem> items = new HashSet<>();
+        for (IconRule rule : ruleList) {
+            getItemsInConditions(rule.getConditions(), items);
+        }
+        return items;
+    }
+
+    private void getItemsInConditions(@Nullable EList<Condition> conditions, Set<GenericItem> items) {
+        if (conditions != null) {
+            for (Condition condition : conditions) {
+                String itemName = condition.getItem();
+                if (itemName != null) {
+                    try {
+                        Item item = itemUIRegistry.getItem(itemName);
+                        if (item instanceof GenericItem genericItem) {
+                            items.add(genericItem);
+                        }
+                    } catch (ItemNotFoundException e) {
+                        // ignore
+                    }
+                }
+            }
+        }
     }
 
     @Override
