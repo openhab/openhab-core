@@ -16,7 +16,7 @@
   <name>openHAB Core :: BOM :: Test</name>
 
   <properties>
-    <cxf.version>3.6.1</cxf.version>
+    <cxf.version>3.6.2</cxf.version>
     <junit.version>5.9.2</junit.version>
     <mockito.version>4.11.0</mockito.version>
   </properties>
