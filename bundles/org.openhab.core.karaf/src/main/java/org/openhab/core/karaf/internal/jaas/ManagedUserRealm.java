@@ -15,7 +15,6 @@ package org.openhab.core.karaf.internal.jaas;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.inject.Singleton;
 import javax.security.auth.login.AppConfigurationEntry;
 import javax.security.auth.login.AppConfigurationEntry.LoginModuleControlFlag;
 
@@ -30,7 +29,6 @@ import org.osgi.service.component.annotations.Component;
  *
  * @author Yannick Schaus - initial contribution
  */
-@Singleton
 @Component(service = JaasRealm.class)
 @Service
 public class ManagedUserRealm implements JaasRealm {
