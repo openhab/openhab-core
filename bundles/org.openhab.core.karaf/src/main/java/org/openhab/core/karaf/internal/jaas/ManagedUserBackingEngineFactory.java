@@ -14,8 +14,6 @@ package org.openhab.core.karaf.internal.jaas;
 
 import java.util.Map;
 
-import javax.inject.Singleton;
-
 import org.apache.karaf.jaas.modules.BackingEngine;
 import org.apache.karaf.jaas.modules.BackingEngineFactory;
 import org.openhab.core.auth.UserRegistry;
@@ -28,11 +26,10 @@ import org.osgi.service.component.annotations.Reference;
  *
  * @author Yannick Schaus - initial contribution
  */
-@Singleton
 @Component(service = BackingEngineFactory.class)
 public class ManagedUserBackingEngineFactory implements BackingEngineFactory {
 
-    UserRegistry userRegistry;
+    private final UserRegistry userRegistry;
 
     @Activate
     public ManagedUserBackingEngineFactory(@Reference UserRegistry userRegistry) {
