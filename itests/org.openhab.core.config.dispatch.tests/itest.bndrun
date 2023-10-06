@@ -61,5 +61,4 @@ Fragment-Host: org.openhab.core.config.dispatch
 	org.openhab.core;version='[4.2.0,4.2.1)',\
 	org.openhab.core.config.dispatch;version='[4.2.0,4.2.1)',\
 	org.openhab.core.config.dispatch.tests;version='[4.2.0,4.2.1)',\
-	org.openhab.core.test;version='[4.2.0,4.2.1)',\
-	org.osgi.service.cm;version='[1.6.0,1.6.1)'
+	org.openhab.core.test;version='[4.2.0,4.2.1)'
