@@ -338,6 +338,15 @@ public class QuantityType<T extends Quantity<T>> extends Number
         return new QuantityType<>(result.getValue(), targetUnit);
     }
 
+    public @Nullable QuantityType<T> toUnitRelative(String targetUnit) {
+        Unit<T> unit = (Unit<T>) AbstractUnit.parse(targetUnit);
+        if (unit != null) {
+            return toUnitRelative(unit);
+        }
+
+        return null;
+    }
+
     public BigDecimal toBigDecimal() {
         return new BigDecimal(quantity.getValue().toString());
     }
