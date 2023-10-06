@@ -28,7 +28,6 @@ Fragment-Host: org.openhab.core.io.rest.core
 	si.uom.si-quantity;version='[2.1.0,2.1.1)',\
 	org.apache.aries.jax.rs.whiteboard;version='[2.0.0,2.0.1)',\
 	org.osgi.util.function;version='[1.2.0,1.2.1)',\
-	biz.aQute.tester.junit-platform;version='[6.4.0,6.4.1)',\
 	org.apache.felix.configadmin;version='[1.9.26,1.9.27)',\
 	org.apache.felix.http.servlet-api;version='[1.2.0,1.2.1)',\
 	org.osgi.service.component;version='[1.5.0,1.5.1)',\
@@ -104,4 +103,5 @@ Fragment-Host: org.openhab.core.io.rest.core
 	org.apache.cxf.cxf-rt-rs-sse;version='[3.6.2,3.6.3)',\
 	org.apache.cxf.cxf-rt-security;version='[3.6.2,3.6.3)',\
 	org.apache.cxf.cxf-rt-transports-http;version='[3.6.2,3.6.3)',\
-	org.apache.ws.xmlschema.core;version='[2.3.1,2.3.2)'
+	org.apache.ws.xmlschema.core;version='[2.3.1,2.3.2)',\
+	biz.aQute.tester.junit-platform;version='[7.0.0,7.0.1)'
