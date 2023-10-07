@@ -20,7 +20,6 @@ import static org.mockito.Mockito.when;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
@@ -219,8 +218,7 @@ public class RuleSimulationTest extends JavaOSGiTest {
     private static Rule createRuleWithTimeOfDayTrigger() {
         int rand = new Random().nextInt();
 
-        Map<String, Object> configs = new HashMap<>();
-        configs.put(TimeOfDayTriggerHandler.CFG_TIME, "16:00");
+        Map<String, Object> configs = Map.of(TimeOfDayTriggerHandler.CFG_TIME, "16:00");
         final Configuration triggerConfig = new Configuration(configs);
         final String triggerUID = "TimeOfDayTrigger_" + rand;
         List<Trigger> triggers = List.of(ModuleBuilder.createTrigger().withId(triggerUID)
@@ -230,8 +228,7 @@ public class RuleSimulationTest extends JavaOSGiTest {
         List<Action> actions = List.of(ModuleBuilder.createAction().withId("ItemPostCommandAction_" + rand)
                 .withTypeUID("core.ItemCommandAction").withConfiguration(actionConfig).build());
 
-        configs = new HashMap<>();
-        configs.put(DayOfWeekConditionHandler.CFG_DAYS, Arrays.asList("MON", "WED"));
+        configs = Map.of(DayOfWeekConditionHandler.CFG_DAYS, List.of("MON", "WED"));
         final Configuration conditionConfig = new Configuration(configs);
         List<Condition> conditions = List.of(ModuleBuilder.createCondition().withId("DayCondition" + rand)
                 .withTypeUID(DayOfWeekConditionHandler.MODULE_TYPE_ID).withConfiguration(conditionConfig).build());
@@ -247,8 +244,7 @@ public class RuleSimulationTest extends JavaOSGiTest {
     private static Rule createRuleWithEphemerisCondition() {
         int rand = new Random().nextInt();
 
-        Map<String, Object> configs = new HashMap<>();
-        configs.put(TimeOfDayTriggerHandler.CFG_TIME, "10:00");
+        Map<String, Object> configs = Map.of(TimeOfDayTriggerHandler.CFG_TIME, "10:00");
         final Configuration triggerConfig = new Configuration(configs);
         final String triggerUID = "TimeOfDayTrigger_" + rand;
         List<Trigger> triggers = List.of(ModuleBuilder.createTrigger().withId(triggerUID)

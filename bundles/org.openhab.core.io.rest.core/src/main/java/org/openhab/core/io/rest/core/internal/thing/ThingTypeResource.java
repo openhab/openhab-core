@@ -14,7 +14,6 @@ package org.openhab.core.io.rest.core.internal.thing;
 
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Stream;
@@ -203,7 +202,7 @@ public class ThingTypeResource implements RESTResource {
             // Default to the channelGroupDefinition label/description to override the channelGroupType
             String label = channelGroupDefinition.getLabel();
             String description = channelGroupDefinition.getDescription();
-            List<ChannelDefinition> channelDefinitions = Collections.emptyList();
+            List<ChannelDefinition> channelDefinitions = List.of();
 
             if (channelGroupType == null) {
                 logger.warn("Cannot find channel group type: {}", channelGroupDefinition.getTypeUID());

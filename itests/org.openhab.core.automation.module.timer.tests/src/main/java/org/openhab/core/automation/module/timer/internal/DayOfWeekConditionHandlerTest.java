@@ -18,7 +18,6 @@ import static org.mockito.Mockito.mock;
 
 import java.text.SimpleDateFormat;
 import java.time.ZonedDateTime;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -77,17 +76,17 @@ public class DayOfWeekConditionHandlerTest extends BasicConditionHandlerTest {
                 .build();
         DayOfWeekConditionHandler handler = new DayOfWeekConditionHandler(condition);
 
-        assertThat(handler.isSatisfied(Collections.emptyMap()), is(true));
+        assertThat(handler.isSatisfied(Map.of()), is(true));
 
         condition = ModuleBuilder.createCondition(condition)
                 .withConfiguration(new Configuration(Map.of("days", List.of()))).build();
         handler = new DayOfWeekConditionHandler(condition);
-        assertThat(handler.isSatisfied(Collections.emptyMap()), is(false));
+        assertThat(handler.isSatisfied(Map.of()), is(false));
 
         condition = ModuleBuilder.createCondition(condition)
                 .withConfiguration(new Configuration(Map.of("days", List.of(dayOfWeek)))).build();
         handler = new DayOfWeekConditionHandler(condition);
-        assertThat(handler.isSatisfied(Collections.emptyMap()), is(true));
+        assertThat(handler.isSatisfied(Map.of()), is(true));
     }
 
     @Test

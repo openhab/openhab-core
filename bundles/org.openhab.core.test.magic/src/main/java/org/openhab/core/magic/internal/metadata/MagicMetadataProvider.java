@@ -16,7 +16,6 @@ import static org.openhab.core.config.core.ConfigDescriptionParameterBuilder.cre
 
 import java.util.List;
 import java.util.Locale;
-import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -47,32 +46,32 @@ public class MagicMetadataProvider implements MetadataConfigDescriptionProvider 
 
     @Override
     public @Nullable List<ParameterOption> getParameterOptions(@Nullable Locale locale) {
-        return Stream.of( //
+        return List.of( //
                 new ParameterOption("just", "Just Magic"), //
                 new ParameterOption("pure", "Pure Magic") //
-        ).toList();
+        );
     }
 
     @Override
     public @Nullable List<ConfigDescriptionParameter> getParameters(String value, @Nullable Locale locale) {
         switch (value) {
             case "just":
-                return Stream.of( //
+                return List.of( //
                         create("electric", Type.BOOLEAN).withLabel("Use Electricity").build() //
-                ).toList();
+                );
             case "pure":
-                return Stream.of( //
+                return List.of( //
                         create("spell", Type.TEXT).withLabel("Spell").withDescription("The exact spell to use").build(), //
                         create("price", Type.DECIMAL).withLabel("Price")
                                 .withDescription("...because magic always comes with a price").build(), //
                         create("power", Type.INTEGER).withLabel("Power").withLimitToOptions(true).withOptions( //
-                                Stream.of( //
+                                List.of( //
                                         new ParameterOption("0", "Very High"), //
                                         new ParameterOption("1", "Incredible"), //
                                         new ParameterOption("2", "Insane"), //
                                         new ParameterOption("3", "Ludicrous") //
-                                ).toList()).build() //
-                ).toList();
+                                )).build() //
+                );
         }
         return null;
     }

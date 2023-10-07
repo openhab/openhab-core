@@ -14,7 +14,6 @@ package org.openhab.core.automation.template;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -117,13 +116,13 @@ public class RuleTemplate implements Template {
         this.uid = UID == null ? UUID.randomUUID().toString() : UID;
         this.label = label;
         this.description = description;
-        this.triggers = triggers == null ? Collections.emptyList() : Collections.unmodifiableList(triggers);
-        this.conditions = conditions == null ? Collections.emptyList() : Collections.unmodifiableList(conditions);
-        this.actions = actions == null ? Collections.emptyList() : Collections.unmodifiableList(actions);
-        this.configDescriptions = configDescriptions == null ? Collections.emptyList()
+        this.triggers = triggers == null ? List.of() : Collections.unmodifiableList(triggers);
+        this.conditions = conditions == null ? List.of() : Collections.unmodifiableList(conditions);
+        this.actions = actions == null ? List.of() : Collections.unmodifiableList(actions);
+        this.configDescriptions = configDescriptions == null ? List.of()
                 : Collections.unmodifiableList(configDescriptions);
         this.visibility = visibility == null ? Visibility.VISIBLE : visibility;
-        this.tags = tags == null ? new HashSet<>() : new HashSet<>(tags);
+        this.tags = tags == null ? Set.of() : Collections.unmodifiableSet(tags);
     }
 
     /**
@@ -226,7 +225,7 @@ public class RuleTemplate implements Template {
         } else if (Action.class == moduleClazz) {
             result = (List<T>) actions;
         } else {
-            result = Collections.emptyList();
+            result = List.of();
         }
         return result;
     }

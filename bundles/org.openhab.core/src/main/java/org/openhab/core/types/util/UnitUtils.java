@@ -17,8 +17,8 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.WildcardType;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -59,7 +59,7 @@ public class UnitUtils {
     private static final String SI_DIMENSION_PREFIX = "si.uom.quantity.";
     private static final String FRAMEWORK_DIMENSION_PREFIX = "org.openhab.core.library.dimension.";
 
-    private static final Collection<Class<? extends SystemOfUnits>> ALL_SYSTEM_OF_UNITS = Arrays.asList(SIUnits.class,
+    private static final Collection<Class<? extends SystemOfUnits>> ALL_SYSTEM_OF_UNITS = List.of(SIUnits.class,
             ImperialUnits.class, Units.class, tech.units.indriya.unit.Units.class);
 
     static {

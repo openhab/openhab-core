@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-import java.util.Collections;
+import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
@@ -77,11 +77,9 @@ public class MetadataRegistryImplTest {
     @Test
     public void testGet() throws Exception {
         MetadataKey key = new MetadataKey("namespace", "itemName");
-        registry.added(managedProviderMock, new Metadata(key, "value", Collections.emptyMap()));
-        registry.added(managedProviderMock,
-                new Metadata(new MetadataKey("other", "itemName"), "other", Collections.emptyMap()));
-        registry.added(managedProviderMock,
-                new Metadata(new MetadataKey("namespace", "other"), "other", Collections.emptyMap()));
+        registry.added(managedProviderMock, new Metadata(key, "value", Map.of()));
+        registry.added(managedProviderMock, new Metadata(new MetadataKey("other", "itemName"), "other", Map.of()));
+        registry.added(managedProviderMock, new Metadata(new MetadataKey("namespace", "other"), "other", Map.of()));
 
         Metadata res = registry.get(key);
         assertNotNull(res);

@@ -74,8 +74,8 @@ public class ConfigDescription implements Identifiable<URI> {
         }
 
         this.uri = uri;
-        this.parameters = parameters == null ? Collections.emptyList() : Collections.unmodifiableList(parameters);
-        this.parameterGroups = groups == null ? Collections.emptyList() : Collections.unmodifiableList(groups);
+        this.parameters = parameters == null ? List.of() : Collections.unmodifiableList(parameters);
+        this.parameterGroups = groups == null ? List.of() : Collections.unmodifiableList(groups);
     }
 
     /**

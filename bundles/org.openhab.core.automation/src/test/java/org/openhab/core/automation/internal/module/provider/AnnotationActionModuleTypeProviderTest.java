@@ -88,16 +88,14 @@ public class AnnotationActionModuleTypeProviderTest extends JavaTest {
     public void testMultiServiceAnnotationActions() {
         AnnotatedActionModuleTypeProvider prov = new AnnotatedActionModuleTypeProvider(moduleTypeI18nServiceMock);
 
-        Map<String, Object> properties1 = new HashMap<>();
-        properties1.put(OpenHAB.SERVICE_CONTEXT, "conf1");
+        Map<String, Object> properties1 = Map.of(OpenHAB.SERVICE_CONTEXT, "conf1");
         prov.addActionProvider(actionProviderConf1, properties1);
 
         Collection<String> types = prov.getTypes();
         assertEquals(1, types.size());
         assertTrue(types.contains(TEST_ACTION_TYPE_ID));
 
-        Map<String, Object> properties2 = new HashMap<>();
-        properties2.put(OpenHAB.SERVICE_CONTEXT, "conf2");
+        Map<String, Object> properties2 = Map.of(OpenHAB.SERVICE_CONTEXT, "conf2");
         prov.addActionProvider(actionProviderConf2, properties2);
 
         // we only have ONE type but TWO configurations for it

@@ -14,7 +14,6 @@ package org.openhab.core.automation.module.script;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -71,7 +70,7 @@ public class LifecycleScriptExtensionProvider implements ScriptExtensionProvider
             }
         }
 
-        return Collections.emptyMap();
+        return Map.of();
     }
 
     @Override

@@ -220,7 +220,7 @@ public class DefaultScriptScopeProvider implements ScriptExtensionProvider {
         if (PRESET_DEFAULT.equals(preset)) {
             return Collections.unmodifiableMap(elements);
         }
-        return Collections.emptyMap();
+        return Map.of();
     }
 
     @Override

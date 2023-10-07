@@ -18,7 +18,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.List;
@@ -114,7 +113,7 @@ public class JavaOSGiTest extends JavaTest {
 
         if (serviceReferences == null) {
             new MissingServiceAnalyzer(System.out, bundleContext).printMissingServiceDetails(clazz);
-            return Collections.emptyList();
+            return List.of();
         }
 
         return (List<T>) Arrays //
@@ -195,7 +194,7 @@ public class JavaOSGiTest extends JavaTest {
 
         if (serviceReferences == null) {
             new MissingServiceAnalyzer(System.out, bundleContext).printMissingServiceDetails(clazz);
-            return Collections.emptyList();
+            return List.of();
         }
 
         return Arrays //

@@ -12,9 +12,7 @@
  */
 package org.openhab.core.library.types;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Formatter;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -41,11 +39,11 @@ public class StringListType implements Command, State {
     public static final String REGEX_SPLITTER = "(?<!\\\\)" + DELIMITER;
 
     public StringListType() {
-        typeDetails = Collections.emptyList();
+        typeDetails = List.of();
     }
 
     public StringListType(List<String> rows) {
-        typeDetails = new ArrayList<>(rows);
+        typeDetails = List.copyOf(rows);
     }
 
     public StringListType(StringType... rows) {
@@ -53,7 +51,7 @@ public class StringListType implements Command, State {
     }
 
     public StringListType(String... rows) {
-        typeDetails = Arrays.asList(rows);
+        typeDetails = List.of(rows);
     }
 
     /**

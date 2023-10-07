@@ -16,7 +16,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -73,7 +72,7 @@ public class MetadataCommandDescriptionProviderTest {
         providerTracker = captor.getValue();
         providerTracker.serviceChanged(new ServiceEvent(ServiceEvent.REGISTERED, managedProviderRefMock));
 
-        commandDescriptionProvider = new MetadataCommandDescriptionProvider(metadataRegistryMock, new HashMap<>());
+        commandDescriptionProvider = new MetadataCommandDescriptionProvider(metadataRegistryMock, Map.of());
     }
 
     @Test
@@ -85,7 +84,6 @@ public class MetadataCommandDescriptionProviderTest {
     @Test
     public void testEmptyConfig() throws Exception {
         MetadataKey metadataKey = new MetadataKey("commandDescription", ITEM_NAME);
-        // Map<String, Object> metadataConfig = new HashMap<>();
         Metadata metadata = new Metadata(metadataKey, "N/A", null);
 
         metadataRegistryMock.added(managedProviderMock, metadata);
@@ -96,8 +94,8 @@ public class MetadataCommandDescriptionProviderTest {
     @Test
     public void testOptions() throws Exception {
         MetadataKey metadataKey = new MetadataKey("commandDescription", ITEM_NAME);
-        Map<String, Object> metadataConfig = new HashMap<>();
-        metadataConfig.put("options", "OPTION1,OPTION2 , 3 =Option 3  , \" 4=4 \"=\"Option 4 \"");
+        Map<String, Object> metadataConfig = Map.of("options",
+                "OPTION1,OPTION2 , 3 =Option 3  , \" 4=4 \"=\"Option 4 \"");
         Metadata metadata = new Metadata(metadataKey, "N/A", metadataConfig);
 
         metadataRegistryMock.added(managedProviderMock, metadata);

@@ -14,9 +14,9 @@ package org.openhab.core.automation.module.script.rulesupport.internal;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -134,7 +134,7 @@ public class RuleSupportScriptExtension implements ScriptExtensionProvider {
 
     @Override
     public Collection<String> getDefaultPresets() {
-        return Collections.emptyList();
+        return List.of();
     }
 
     @Override

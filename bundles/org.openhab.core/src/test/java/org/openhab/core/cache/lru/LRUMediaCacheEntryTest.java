@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.function.Supplier;
@@ -193,7 +192,7 @@ public class LRUMediaCacheEntryTest {
 
         // read bytes from the two stream concurrently
         Mutable<@Nullable IOException> exceptionCatched = new MutableObject<>();
-        List<InputStream> parallelAudioStreamList = Arrays.asList(actualAudioStream1, actualAudioStream2);
+        List<InputStream> parallelAudioStreamList = List.of(actualAudioStream1, actualAudioStream2);
         List<byte[]> bytesResultList = parallelAudioStreamList.parallelStream().map(stream -> {
             try {
                 return stream.readAllBytes();

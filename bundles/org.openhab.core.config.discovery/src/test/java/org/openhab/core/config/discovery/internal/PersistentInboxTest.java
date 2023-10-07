@@ -20,7 +20,6 @@ import static org.mockito.Mockito.*;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -108,8 +107,7 @@ public class PersistentInboxTest {
 
     @Test
     public void testConfigUpdateNormalizationWithConfigDescription() throws URISyntaxException {
-        Map<String, Object> props = new HashMap<>();
-        props.put("foo", "1");
+        Map<String, Object> props = Map.of("foo", "1");
         Configuration config = new Configuration(props);
         Thing thing = ThingBuilder.create(THING_TYPE_UID, THING_UID).withConfiguration(config).build();
         configureConfigDescriptionRegistryMock("foo", Type.TEXT);

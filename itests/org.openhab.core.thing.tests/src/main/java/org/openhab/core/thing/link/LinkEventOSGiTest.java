@@ -16,8 +16,6 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -48,8 +46,7 @@ public class LinkEventOSGiTest extends JavaOSGiTest {
 
         @Override
         public Set<String> getSubscribedEventTypes() {
-            return Stream.of(ItemChannelLinkAddedEvent.TYPE, ItemChannelLinkRemovedEvent.TYPE)
-                    .collect(Collectors.toSet());
+            return Set.of(ItemChannelLinkAddedEvent.TYPE, ItemChannelLinkRemovedEvent.TYPE);
         }
 
         @Override

@@ -18,7 +18,6 @@ import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -257,7 +256,7 @@ public class ScriptTransformationService implements TransformationService, Confi
             return List.of(configDescription);
         }
 
-        return Collections.emptyList();
+        return List.of();
     }
 
     @Override

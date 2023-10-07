@@ -21,8 +21,7 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.HashMap;
-import java.util.List;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 
@@ -74,8 +73,7 @@ public class CommonWebSocketServletTest {
         when(factory.getPolicy()).thenReturn(wsPolicy);
         servlet.configure(factory);
         verify(factory).setCreator(webSocketCreatorAC.capture());
-        var params = new HashMap<String, List<String>>();
-        when(request.getParameterMap()).thenReturn(params);
+        when(request.getParameterMap()).thenReturn(Map.of());
         when(authFilter.getSecurityContext(any(), anyBoolean())).thenReturn(new AnonymousUserSecurityContext());
         when(testDefaultWsAdapter.getId()).thenReturn(CommonWebSocketServlet.DEFAULT_ADAPTER_ID);
         when(testWsAdapter.getId()).thenReturn(testAdapterId);

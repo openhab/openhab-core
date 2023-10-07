@@ -12,7 +12,6 @@
  */
 package org.openhab.core.items;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -38,11 +37,11 @@ public class TestItem extends GenericItem {
 
     @Override
     public List<Class<? extends State>> getAcceptedDataTypes() {
-        return Collections.emptyList();
+        return List.of();
     }
 
     @Override
     public List<Class<? extends Command>> getAcceptedCommandTypes() {
-        return Collections.emptyList();
+        return List.of();
     }
 }

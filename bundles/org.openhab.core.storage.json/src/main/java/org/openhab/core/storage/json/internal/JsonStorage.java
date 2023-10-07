@@ -293,7 +293,7 @@ public class JsonStorage<T> implements Storage<T> {
     private List<Long> calculateFileTimes() {
         File folder = new File(file.getParent() + File.separator + BACKUP_EXTENSION);
         if (!folder.isDirectory()) {
-            return Collections.emptyList();
+            return List.of();
         }
         List<Long> fileTimes = new ArrayList<>();
         File[] files = folder.listFiles();

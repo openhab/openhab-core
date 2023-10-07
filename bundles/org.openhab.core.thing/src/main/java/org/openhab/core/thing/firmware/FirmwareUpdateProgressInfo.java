@@ -13,7 +13,7 @@
 package org.openhab.core.thing.firmware;
 
 import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -53,7 +53,7 @@ public final class FirmwareUpdateProgressInfo {
         thingUID = new ThingUID("internal:reflective:constructor");
         firmwareVersion = "";
         progressStep = ProgressStep.WAITING;
-        sequence = Collections.emptyList();
+        sequence = List.of();
         pending = false;
         progress = null;
     }

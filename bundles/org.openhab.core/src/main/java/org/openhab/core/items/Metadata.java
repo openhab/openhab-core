@@ -42,14 +42,14 @@ public final class Metadata implements Identifiable<MetadataKey> {
     Metadata() {
         key = new MetadataKey();
         value = "";
-        configuration = Collections.emptyMap();
+        configuration = Map.of();
     }
 
     public Metadata(MetadataKey key, String value, @Nullable Map<String, Object> configuration) {
         this.key = key;
         this.value = value;
         this.configuration = configuration != null ? Collections.unmodifiableMap(new HashMap<>(configuration))
-                : Collections.emptyMap();
+                : Map.of();
     }
 
     @Override

@@ -41,22 +41,22 @@ public class ConditionType extends ModuleType {
      * Creates an instance of {@link ConditionType} with base properties - UID, a {@link List} of configuration
      * descriptions and a {@link List} of {@link Input} descriptions.
      *
-     * @param UID the {@link ConditionType}'s identifier, or {@code null} if a random identifier should
+     * @param uid the {@link ConditionType}'s identifier, or {@code null} if a random identifier should
      *            be generated.
      * @param configDescriptions describing meta-data for the configuration of the future {@link Condition} instances.
      * @param inputs a {@link List} with {@link Input} meta-information descriptions of the future
      *            {@link Condition} instances.
      */
-    public ConditionType(@Nullable String UID, @Nullable List<ConfigDescriptionParameter> configDescriptions,
+    public ConditionType(@Nullable String uid, @Nullable List<ConfigDescriptionParameter> configDescriptions,
             @Nullable List<Input> inputs) {
-        this(UID, configDescriptions, null, null, null, null, inputs);
+        this(uid, configDescriptions, null, null, null, null, inputs);
     }
 
     /**
-     * Creates an instance of {@link ConditionType} with UID, label, description, a {@link Set} of tags, visibility,
+     * Creates an instance of {@link ConditionType} with uid, label, description, a {@link Set} of tags, visibility,
      * a {@link List} of configuration descriptions and a {@link List} of {@link Input} descriptions.
      *
-     * @param UID the {@link ConditionType}'s identifier, or {@code null} if a random identifier should
+     * @param uid the {@link ConditionType}'s identifier, or {@code null} if a random identifier should
      *            be generated.
      * @param configDescriptions describing meta-data for the configuration of the future {@link Condition} instances.
      * @param label a short and accurate, human-readable label of the {@link ConditionType}.
@@ -69,10 +69,10 @@ public class ConditionType extends ModuleType {
      * @param inputs a {@link List} with {@link Input} meta-information descriptions of the future
      *            {@link Condition} instances.
      */
-    public ConditionType(@Nullable String UID, @Nullable List<ConfigDescriptionParameter> configDescriptions,
+    public ConditionType(@Nullable String uid, @Nullable List<ConfigDescriptionParameter> configDescriptions,
             @Nullable String label, @Nullable String description, @Nullable Set<String> tags,
             @Nullable Visibility visibility, @Nullable List<Input> inputs) {
-        super(UID, configDescriptions, label, description, tags, visibility);
+        super(uid, configDescriptions, label, description, tags, visibility);
         this.inputs = inputs != null ? Collections.unmodifiableList(inputs) : List.of();
     }
 

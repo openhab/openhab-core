@@ -17,7 +17,6 @@ import static org.openhab.core.config.discovery.inbox.InboxPredicates.forThingUI
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -632,7 +631,7 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
                 }
             }
         }
-        return Collections.emptyList();
+        return List.of();
     }
 
     private void addThingSafely(Thing thing) {

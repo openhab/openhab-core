@@ -33,8 +33,8 @@ import org.openhab.core.automation.type.Output;
 @NonNullByDefault
 public class WrappedAction extends WrappedModule<Action, ActionHandler> {
 
-    private Set<Connection> connections = Collections.emptySet();
-    private Map<String, String> inputs = Collections.emptyMap();
+    private Set<Connection> connections = Set.of();
+    private Map<String, String> inputs = Map.of();
 
     public WrappedAction(final Action action) {
         super(action);
@@ -47,7 +47,7 @@ public class WrappedAction extends WrappedModule<Action, ActionHandler> {
      * @param connections the set of connections for this action
      */
     public void setConnections(@Nullable Set<Connection> connections) {
-        this.connections = connections == null ? Collections.emptySet() : connections;
+        this.connections = connections == null ? Set.of() : connections;
     }
 
     public Set<Connection> getConnections() {
@@ -71,6 +71,6 @@ public class WrappedAction extends WrappedModule<Action, ActionHandler> {
      * @param inputs map that contains the inputs for this action.
      */
     public void setInputs(@Nullable Map<String, String> inputs) {
-        this.inputs = inputs == null ? Collections.emptyMap() : Collections.unmodifiableMap(inputs);
+        this.inputs = inputs == null ? Map.of() : Collections.unmodifiableMap(inputs);
     }
 }

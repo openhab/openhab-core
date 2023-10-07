@@ -17,7 +17,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -80,12 +79,12 @@ public class ManagedItemProviderOSGiTest extends JavaOSGiTest {
 
         @Override
         public List<Class<? extends State>> getAcceptedDataTypes() {
-            return Collections.emptyList();
+            return List.of();
         }
 
         @Override
         public List<Class<? extends Command>> getAcceptedCommandTypes() {
-            return Collections.emptyList();
+            return List.of();
         }
     }
 

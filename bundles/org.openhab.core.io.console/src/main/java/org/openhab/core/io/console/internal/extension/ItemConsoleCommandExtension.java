@@ -12,7 +12,6 @@
  */
 package org.openhab.core.io.console.internal.extension;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -101,13 +100,13 @@ public class ItemConsoleCommandExtension extends AbstractConsoleCommandExtension
 
     @Override
     public List<String> getUsages() {
-        return Arrays.asList(new String[] {
+        return List.of(
                 buildCommandUsage(SUBCMD_LIST + " [<pattern>]",
                         "lists names and types of all items (matching the pattern, if given)"),
                 buildCommandUsage(SUBCMD_CLEAR, "removes all items"),
                 buildCommandUsage(SUBCMD_REMOVE + " <itemName>", "removes the given item"),
                 buildCommandUsage(SUBCMD_ADDTAG + " <itemName> <tag>", "adds a tag to the given item"),
-                buildCommandUsage(SUBCMD_RMTAG + " <itemName> <tag>", "removes a tag from the given item") });
+                buildCommandUsage(SUBCMD_RMTAG + " <itemName> <tag>", "removes a tag from the given item"));
     }
 
     @Override

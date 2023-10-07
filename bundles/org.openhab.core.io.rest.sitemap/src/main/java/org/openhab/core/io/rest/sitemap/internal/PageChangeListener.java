@@ -63,7 +63,7 @@ public class PageChangeListener implements EventSubscriber {
     private Set<Item> items;
     private final HashSet<String> filterItems = new HashSet<>();
     private final List<SitemapSubscriptionCallback> callbacks = Collections.synchronizedList(new ArrayList<>());
-    private Set<SitemapSubscriptionCallback> distinctCallbacks = Collections.emptySet();
+    private Set<SitemapSubscriptionCallback> distinctCallbacks = Set.of();
 
     /**
      * Creates a new instance.

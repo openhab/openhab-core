@@ -15,7 +15,6 @@ package org.openhab.core.internal.i18n;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
@@ -65,9 +64,7 @@ public class TranslationProviderOSGiTest extends JavaOSGiTest {
         translationProvider = getService(TranslationProvider.class);
 
         LocaleProvider localeProvider = getService(LocaleProvider.class);
-        Map<String, Object> localeCfg = new HashMap<>();
-        localeCfg.put("language", "de");
-        localeCfg.put("region", "DE");
+        Map<String, Object> localeCfg = Map.of("language", "de", "region", "DE");
         ((I18nProviderImpl) localeProvider).modified(localeCfg);
     }
 

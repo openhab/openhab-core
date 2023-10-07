@@ -14,7 +14,6 @@ package org.openhab.core.ui.internal.components;
 
 import java.math.BigDecimal;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -113,7 +112,7 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
     public Set<String> getSitemapNames() {
         UIComponentRegistry registry = sitemapComponentRegistry;
         if (registry == null) {
-            return Collections.emptySet();
+            return Set.of();
         }
 
         sitemaps.clear();

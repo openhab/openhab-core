@@ -101,7 +101,7 @@ public final class FirmwareImpl implements Firmware {
         this.onlineChangelog = onlineChangelog;
         this.inputStream = inputStream;
         this.md5Hash = md5Hash;
-        this.properties = Collections.unmodifiableMap(properties != null ? properties : Collections.emptyMap());
+        this.properties = properties != null ? Collections.unmodifiableMap(properties) : Map.of();
     }
 
     @Override

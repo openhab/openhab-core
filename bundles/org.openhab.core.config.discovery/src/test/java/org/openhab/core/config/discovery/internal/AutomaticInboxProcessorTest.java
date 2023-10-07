@@ -19,8 +19,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.openhab.core.config.discovery.inbox.InboxPredicates.withFlag;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -243,7 +241,7 @@ public class AutomaticInboxProcessorTest {
         assertThat(results.size(), is(1));
         assertThat(results.get(0).getThingUID(), is(equalTo(THING_UID)));
 
-        when(thingMock.getProperties()).thenReturn(Collections.emptyMap());
+        when(thingMock.getProperties()).thenReturn(Map.of());
         when(thingStatusInfoChangedEventMock.getStatusInfo())
                 .thenReturn(new ThingStatusInfo(ThingStatus.ONLINE, ThingStatusDetail.NONE, null));
         when(thingStatusInfoChangedEventMock.getThingUID()).thenReturn(THING_UID);
@@ -410,8 +408,8 @@ public class AutomaticInboxProcessorTest {
         verify(thingRegistryMock, never()).add(argThat(thing -> THING_UID.equals(thing.getUID())));
 
         // After setting the always auto approve property, all existing inbox results are approved.
-        Map<String, Object> configProperties = new HashMap<>();
-        configProperties.put(AutomaticInboxProcessor.ALWAYS_AUTO_APPROVE_CONFIG_PROPERTY, true);
+        Map<String, Object> configProperties = Map.of(AutomaticInboxProcessor.ALWAYS_AUTO_APPROVE_CONFIG_PROPERTY,
+                true);
         automaticInboxProcessor.activate(configProperties);
 
         verify(thingRegistryMock, times(1)).add(argThat(thing -> THING_UID.equals(thing.getUID())));

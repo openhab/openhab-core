@@ -15,7 +15,6 @@ package org.openhab.core.automation.internal.provider;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Set;
@@ -118,11 +117,11 @@ public class RuleResourceBundleImporter extends AbstractResourceBundleProvider<R
                 if (parser != null) {
                     Set<Rule> parsedObjects = parseData(parser, url, bundle);
                     if (!parsedObjects.isEmpty()) {
-                        addNewProvidedObjects(Collections.emptyList(), Collections.emptyList(), parsedObjects);
+                        addNewProvidedObjects(List.of(), List.of(), parsedObjects);
                     }
                 }
             }
-            putNewPortfolio(vendor, Collections.emptyList());
+            putNewPortfolio(vendor, List.of());
         }
     }
 

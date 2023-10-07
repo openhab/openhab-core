@@ -20,8 +20,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.jose4j.jwa.AlgorithmConstraints.ConstraintType;
@@ -116,8 +116,7 @@ public class JwtHelper {
             jwtClaims.setSubject(user.getName());
             jwtClaims.setClaim("client_id", clientId);
             jwtClaims.setClaim("scope", scope);
-            jwtClaims.setStringListClaim("role",
-                    new ArrayList<>(user.getRoles() != null ? user.getRoles() : Collections.emptySet()));
+            jwtClaims.setStringListClaim("role", new ArrayList<>(user.getRoles() != null ? user.getRoles() : Set.of()));
 
             JsonWebSignature jws = new JsonWebSignature();
             jws.setPayload(jwtClaims.toJson());

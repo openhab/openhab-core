@@ -346,7 +346,7 @@ public abstract class GenericItem implements ActiveItem {
 
     @Override
     public Set<String> getTags() {
-        return Collections.unmodifiableSet(new HashSet<>(tags));
+        return Set.copyOf(tags);
     }
 
     @Override

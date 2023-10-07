@@ -13,7 +13,6 @@
 package org.openhab.core.common;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -36,7 +35,7 @@ public abstract class AbstractUID {
      * Constructor must be public, otherwise it can not be called by subclasses from another package.
      */
     public AbstractUID() {
-        segments = Collections.emptyList();
+        segments = List.of();
     }
 
     /**

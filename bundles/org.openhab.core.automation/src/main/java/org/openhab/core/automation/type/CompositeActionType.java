@@ -40,7 +40,7 @@ public class CompositeActionType extends ActionType {
      * Creates an instance of {@code CompositeActionType} with list of {@link Action}s. It initializes only base
      * properties of the {@code CompositeActionType}.
      *
-     * @param UID the {@link ActionType}'s identifier, or {@code null} if a random identifier should be
+     * @param uid the {@link ActionType}'s identifier, or {@code null} if a random identifier should be
      *            generated.
      * @param configDescriptions describing meta-data for the configuration of the future {@link Action} instances.
      * @param children is a {@link List} of {@link Action}s.
@@ -50,17 +50,17 @@ public class CompositeActionType extends ActionType {
      *            {@link Action} instances.
      * @param children is a {@link List} of {@link Action}s.
      */
-    public CompositeActionType(@Nullable String UID, @Nullable List<ConfigDescriptionParameter> configDescriptions,
+    public CompositeActionType(@Nullable String uid, @Nullable List<ConfigDescriptionParameter> configDescriptions,
             @Nullable List<Input> inputs, @Nullable List<Output> outputs, @Nullable List<Action> children) {
-        super(UID, configDescriptions, inputs, outputs);
-        this.children = children != null ? Collections.unmodifiableList(children) : Collections.emptyList();
+        super(uid, configDescriptions, inputs, outputs);
+        this.children = children != null ? Collections.unmodifiableList(children) : List.of();
     }
 
     /**
      * Creates an instance of {@code CompositeActionType} with list of {@link Action}s. It initializes all properties of
      * the {@code CompositeActionType}.
      *
-     * @param UID the {@link ActionType}'s identifier, or {@code null} if a random identifier should be
+     * @param uid the {@link ActionType}'s identifier, or {@code null} if a random identifier should be
      *            generated.
      * @param configDescriptions describing meta-data for the configuration of the future {@link Action} instances.
      * @param label a short and accurate, human-readable label of the {@link ActionType}.
@@ -75,12 +75,12 @@ public class CompositeActionType extends ActionType {
      *            {@link Action} instances.
      * @param children is a {@link List} of {@link Action}s.
      */
-    public CompositeActionType(@Nullable String UID, @Nullable List<ConfigDescriptionParameter> configDescriptions,
+    public CompositeActionType(@Nullable String uid, @Nullable List<ConfigDescriptionParameter> configDescriptions,
             @Nullable String label, @Nullable String description, @Nullable Set<String> tags,
             @Nullable Visibility visibility, @Nullable List<Input> inputs, @Nullable List<Output> outputs,
             @Nullable List<Action> children) {
-        super(UID, configDescriptions, label, description, tags, visibility, inputs, outputs);
-        this.children = children != null ? Collections.unmodifiableList(children) : Collections.emptyList();
+        super(uid, configDescriptions, label, description, tags, visibility, inputs, outputs);
+        this.children = children != null ? Collections.unmodifiableList(children) : List.of();
     }
 
     /**

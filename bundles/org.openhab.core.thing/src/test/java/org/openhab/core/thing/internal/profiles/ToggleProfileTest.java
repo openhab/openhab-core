@@ -17,7 +17,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.openhab.core.thing.profiles.SystemProfiles.*;
 
-import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -152,8 +151,7 @@ public class ToggleProfileTest extends JavaTest {
     }
 
     private void initializeContextMock(@Nullable String triggerEvent) {
-        Map<String, Object> params = triggerEvent == null ? Collections.emptyMap()
-                : Map.of(ToggleProfile.EVENT_PARAM, triggerEvent);
+        Map<String, Object> params = triggerEvent == null ? Map.of() : Map.of(ToggleProfile.EVENT_PARAM, triggerEvent);
         when(contextMock.getConfiguration()).thenReturn(new Configuration(params));
     }
 
