@@ -70,10 +70,10 @@ public class QuantityType<T extends Quantity<T>> extends Number
     public static final QuantityType<Dimensionless> ZERO = new QuantityType<>(0, AbstractUnit.ONE);
     public static final QuantityType<Dimensionless> ONE = new QuantityType<>(1, AbstractUnit.ONE);
 
-    // Regular expression to split unit from value
-    // split on any blank character, even none (\\s*) which occurs after a digit (?<=\\d) and before
-    // a "unit" character ?=[a-zA-Z°µ%'] which itself must not be preceded by plus/minus digit (?![\\+\\-]?\\d).
-    // The later would be an exponent from the scalar value.
+    // Regular expression to split unit from value. Split on any blank character, even none (\\s*)
+    // which occurs after a digit (?<=\\d) and before a "unit" character ?=[a-zA-Z°µ\u03BC\u00B5%']
+    // which itself must not be preceded by plus/minus digit (?![\\+\\-]?\\d).
+    // The latter would be an exponent from the scalar value.
     private static final String UNIT_PATTERN = "(?<=\\d)\\s*(?=[a-zA-Z°µ\u03BC\u00B5%'](?![\\+\\-]?\\d))";
 
     static {
@@ -297,7 +297,7 @@ public class QuantityType<T extends Quantity<T>> extends Number
      * change the dimension.
      *
      * @param targetUnit the unit to which this {@link QuantityType} will be converted to.
-     * @return the new {@link QuantityType} in the given {@link Unit} or {@code null} in case of an erro.
+     * @return the new {@link QuantityType} in the given {@link Unit} or {@code null} in case of an error.
      */
     public @Nullable QuantityType<?> toInvertibleUnit(Unit<?> targetUnit) {
         // only invert if unit is not equal and inverse is compatible and targetUnit is not ONE
