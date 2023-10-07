@@ -82,7 +82,7 @@ public class DecimalType extends Number implements PrimitiveType, State, Command
         DecimalFormat df = (DecimalFormat) NumberFormat.getInstance(locale);
         df.setParseBigDecimal(true);
         ParsePosition position = new ParsePosition(0);
-        BigDecimal parsedValue = (BigDecimal) df.parseObject(value, position);
+        BigDecimal parsedValue = (BigDecimal) df.parseObject(value.toUpperCase(locale), position);
         if (parsedValue == null || position.getErrorIndex() != -1 || position.getIndex() < value.length()) {
             throw new NumberFormatException("Invalid BigDecimal value: " + value);
         }

@@ -74,7 +74,7 @@ public class QuantityType<T extends Quantity<T>> extends Number
     // split on any blank character, even none (\\s*) which occurs after a digit (?<=\\d) and before
     // a "unit" character ?=[a-zA-Z°µ%'] which itself must not be preceded by plus/minus digit (?![\\+\\-]?\\d).
     // The later would be an exponent from the scalar value.
-    private static final String UNIT_PATTERN = "(?<=\\d)\\s*(?=[a-zA-Z°µ%'](?![\\+\\-]?\\d))";
+    private static final String UNIT_PATTERN = "(?<=\\d)\\s*(?=[a-zA-Z°µ\u03BC\u00B5%'](?![\\+\\-]?\\d))";
 
     static {
         UnitInitializer.init();
@@ -119,13 +119,16 @@ public class QuantityType<T extends Quantity<T>> extends Number
     public QuantityType(String value, Locale locale) {
         String[] constituents = value.split(UNIT_PATTERN);
 
+        if (constituents.length > 0) {
+            constituents[0] = constituents[0].toUpperCase(locale);
+        }
         // getQuantity needs a space between numeric value and unit
         String formatted = String.join(" ", constituents);
         if (!formatted.contains(" ")) {
             DecimalFormat df = (DecimalFormat) NumberFormat.getInstance(locale);
             df.setParseBigDecimal(true);
             ParsePosition position = new ParsePosition(0);
-            BigDecimal parsedValue = (BigDecimal) df.parseObject(value, position);
+            BigDecimal parsedValue = (BigDecimal) df.parseObject(formatted, position);
             if (parsedValue == null || position.getErrorIndex() != -1 || position.getIndex() < value.length()) {
                 throw new NumberFormatException("Invalid BigDecimal value: " + value);
             }
