@@ -20,7 +20,6 @@ import static org.openhab.core.config.serial.internal.SerialConfigOptionProvider
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -83,7 +82,7 @@ public class SerialConfigOptionProviderTest {
         Collection<ParameterOption> actual = provider.getParameterOptions(URI.create("uri"), "serialPort", SERIAL_PORT,
                 null);
         Collection<ParameterOption> expected = Arrays.stream(serialPortIdentifiers)
-                .map(id -> new ParameterOption(id, id)).collect(Collectors.toList());
+                .map(id -> new ParameterOption(id, id)).toList();
         assertThat(actual, is(expected));
     }
 

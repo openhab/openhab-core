@@ -30,7 +30,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -388,7 +387,7 @@ public abstract class AbstractResourceBundleProvider<@NonNull E> {
                 URI uri = new URI(prefix + ":" + uid + ".name");
                 return config.stream()
                         .map(p -> localConfigI18nService.getLocalizedConfigDescriptionParameter(bundle, uri, p, locale))
-                        .collect(Collectors.toList());
+                        .toList();
             } catch (URISyntaxException e) {
                 logger.error("Constructed invalid uri '{}:{}.name'", prefix, uid, e);
                 return config;

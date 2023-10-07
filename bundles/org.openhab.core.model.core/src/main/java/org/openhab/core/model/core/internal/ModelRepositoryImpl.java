@@ -173,7 +173,7 @@ public class ModelRepositoryImpl implements ModelRepository {
             return resourceListCopy.stream()
                     .filter(input -> input.getURI().lastSegment().contains(".") && input.isLoaded()
                             && modelType.equalsIgnoreCase(input.getURI().fileExtension()))
-                    .map(from -> from.getURI().path()).collect(Collectors.toList());
+                    .map(from -> from.getURI().path()).toList();
         }
     }
 

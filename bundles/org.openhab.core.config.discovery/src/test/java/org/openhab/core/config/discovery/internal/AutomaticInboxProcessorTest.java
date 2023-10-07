@@ -23,7 +23,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -169,8 +168,7 @@ public class AutomaticInboxProcessorTest {
                 .withRepresentationProperty(DEVICE_ID_KEY).build());
 
         // Then there is a discovery result which is NEW
-        List<DiscoveryResult> results = inbox.stream().filter(withFlag(DiscoveryResultFlag.NEW))
-                .collect(Collectors.toList());
+        List<DiscoveryResult> results = inbox.stream().filter(withFlag(DiscoveryResultFlag.NEW)).toList();
         assertThat(results.size(), is(1));
         assertThat(results.get(0).getThingUID(), is(equalTo(THING_UID)));
 
@@ -183,10 +181,10 @@ public class AutomaticInboxProcessorTest {
         automaticInboxProcessor.receive(thingStatusInfoChangedEventMock);
 
         // Then there should still be the NEW discovery result, but no IGNORED discovery result
-        results = inbox.stream().filter(withFlag(DiscoveryResultFlag.NEW)).collect(Collectors.toList());
+        results = inbox.stream().filter(withFlag(DiscoveryResultFlag.NEW)).toList();
         assertThat(results.size(), is(1));
         assertThat(results.get(0).getThingUID(), is(equalTo(THING_UID)));
-        results = inbox.stream().filter(withFlag(DiscoveryResultFlag.IGNORED)).collect(Collectors.toList());
+        results = inbox.stream().filter(withFlag(DiscoveryResultFlag.IGNORED)).toList();
         assertThat(results.size(), is(0));
     }
 
@@ -201,12 +199,11 @@ public class AutomaticInboxProcessorTest {
                 .withRepresentationProperty(DEVICE_ID_KEY).build());
 
         // Do NOT ignore this discovery result because it has a different binding ID
-        List<DiscoveryResult> results = inbox.stream().filter(withFlag(DiscoveryResultFlag.IGNORED))
-                .collect(Collectors.toList());
+        List<DiscoveryResult> results = inbox.stream().filter(withFlag(DiscoveryResultFlag.IGNORED)).toList();
         assertThat(results.size(), is(0));
 
         // Then there is a discovery result which is NEW
-        results = inbox.stream().filter(withFlag(DiscoveryResultFlag.NEW)).collect(Collectors.toList());
+        results = inbox.stream().filter(withFlag(DiscoveryResultFlag.NEW)).toList();
         assertThat(results.size(), is(1));
         assertThat(results.get(0).getThingUID(), is(equalTo(THING_UID3)));
     }
@@ -216,8 +213,7 @@ public class AutomaticInboxProcessorTest {
         inbox.add(DiscoveryResultBuilder.create(THING_UID).withProperty(DEVICE_ID_KEY, DEVICE_ID)
                 .withRepresentationProperty(DEVICE_ID_KEY).build());
 
-        List<DiscoveryResult> results = inbox.stream().filter(withFlag(DiscoveryResultFlag.NEW))
-                .collect(Collectors.toList());
+        List<DiscoveryResult> results = inbox.stream().filter(withFlag(DiscoveryResultFlag.NEW)).toList();
         assertThat(results.size(), is(1));
         assertThat(results.get(0).getThingUID(), is(equalTo(THING_UID)));
 
@@ -227,25 +223,23 @@ public class AutomaticInboxProcessorTest {
         when(thingStatusInfoChangedEventMock.getThingUID()).thenReturn(THING_UID);
         automaticInboxProcessor.receive(thingStatusInfoChangedEventMock);
 
-        results = inbox.stream().filter(withFlag(DiscoveryResultFlag.NEW)).collect(Collectors.toList());
+        results = inbox.stream().filter(withFlag(DiscoveryResultFlag.NEW)).toList();
         assertThat(results.size(), is(0));
-        results = inbox.stream().filter(withFlag(DiscoveryResultFlag.IGNORED)).collect(Collectors.toList());
+        results = inbox.stream().filter(withFlag(DiscoveryResultFlag.IGNORED)).toList();
         assertThat(results.size(), is(1));
         assertThat(results.get(0).getThingUID(), is(equalTo(THING_UID)));
     }
 
     @Test
     public void testNoDiscoveryResultIfNoRepresentationPropertySet() {
-        List<DiscoveryResult> results = inbox.stream().filter(withFlag(DiscoveryResultFlag.NEW))
-                .collect(Collectors.toList());
+        List<DiscoveryResult> results = inbox.stream().filter(withFlag(DiscoveryResultFlag.NEW)).toList();
         assertThat(results.size(), is(0));
     }
 
     @Test
     public void testThingWhenNoRepresentationPropertySet() {
         inbox.add(DiscoveryResultBuilder.create(THING_UID).withProperty(DEVICE_ID_KEY, DEVICE_ID).build());
-        List<DiscoveryResult> results = inbox.stream().filter(withFlag(DiscoveryResultFlag.NEW))
-                .collect(Collectors.toList());
+        List<DiscoveryResult> results = inbox.stream().filter(withFlag(DiscoveryResultFlag.NEW)).toList();
         assertThat(results.size(), is(1));
         assertThat(results.get(0).getThingUID(), is(equalTo(THING_UID)));
 
@@ -255,7 +249,7 @@ public class AutomaticInboxProcessorTest {
         when(thingStatusInfoChangedEventMock.getThingUID()).thenReturn(THING_UID);
         automaticInboxProcessor.receive(thingStatusInfoChangedEventMock);
 
-        results = inbox.stream().filter(withFlag(DiscoveryResultFlag.IGNORED)).collect(Collectors.toList());
+        results = inbox.stream().filter(withFlag(DiscoveryResultFlag.IGNORED)).toList();
         assertThat(results.size(), is(0));
     }
 
@@ -270,10 +264,9 @@ public class AutomaticInboxProcessorTest {
         inbox.add(DiscoveryResultBuilder.create(THING_UID2).withProperty(DEVICE_ID_KEY, DEVICE_ID)
                 .withRepresentationProperty(DEVICE_ID_KEY).build());
 
-        List<DiscoveryResult> results = inbox.stream().filter(withFlag(DiscoveryResultFlag.NEW))
-                .collect(Collectors.toList());
+        List<DiscoveryResult> results = inbox.stream().filter(withFlag(DiscoveryResultFlag.NEW)).toList();
         assertThat(results.size(), is(0));
-        results = inbox.stream().filter(withFlag(DiscoveryResultFlag.IGNORED)).collect(Collectors.toList());
+        results = inbox.stream().filter(withFlag(DiscoveryResultFlag.IGNORED)).toList();
         assertThat(results.size(), is(1));
         assertThat(results.get(0).getThingUID(), is(equalTo(THING_UID2)));
     }
@@ -284,8 +277,7 @@ public class AutomaticInboxProcessorTest {
                 .withRepresentationProperty(DEVICE_ID_KEY).build());
 
         inbox.setFlag(THING_UID, DiscoveryResultFlag.IGNORED);
-        List<DiscoveryResult> results = inbox.stream().filter(withFlag(DiscoveryResultFlag.IGNORED))
-                .collect(Collectors.toList());
+        List<DiscoveryResult> results = inbox.stream().filter(withFlag(DiscoveryResultFlag.IGNORED)).toList();
         assertThat(results.size(), is(1));
         assertThat(results.get(0).getThingUID(), is(equalTo(THING_UID)));
 
@@ -305,8 +297,7 @@ public class AutomaticInboxProcessorTest {
                 .withRepresentationProperty(DEVICE_ID_KEY).build());
         inbox.setFlag(THING_UID3, DiscoveryResultFlag.IGNORED);
 
-        List<DiscoveryResult> results = inbox.stream().filter(withFlag(DiscoveryResultFlag.IGNORED))
-                .collect(Collectors.toList());
+        List<DiscoveryResult> results = inbox.stream().filter(withFlag(DiscoveryResultFlag.IGNORED)).toList();
         assertThat(results.size(), is(2));
 
         automaticInboxProcessor.removed(thingMock);
@@ -321,8 +312,7 @@ public class AutomaticInboxProcessorTest {
         inbox.add(DiscoveryResultBuilder.create(THING_UID2).withProperty(OTHER_KEY, OTHER_VALUE)
                 .withRepresentationProperty(OTHER_KEY).build());
 
-        List<DiscoveryResult> results = inbox.stream().filter(withFlag(DiscoveryResultFlag.NEW))
-                .collect(Collectors.toList());
+        List<DiscoveryResult> results = inbox.stream().filter(withFlag(DiscoveryResultFlag.NEW)).toList();
         assertThat(results.size(), is(1));
         assertThat(results.get(0).getThingUID(), is(equalTo(THING_UID2)));
 
@@ -332,9 +322,9 @@ public class AutomaticInboxProcessorTest {
         when(thingStatusInfoChangedEventMock.getThingUID()).thenReturn(THING_UID2);
         automaticInboxProcessor.receive(thingStatusInfoChangedEventMock);
 
-        results = inbox.stream().filter(withFlag(DiscoveryResultFlag.NEW)).collect(Collectors.toList());
+        results = inbox.stream().filter(withFlag(DiscoveryResultFlag.NEW)).toList();
         assertThat(results.size(), is(0));
-        results = inbox.stream().filter(withFlag(DiscoveryResultFlag.IGNORED)).collect(Collectors.toList());
+        results = inbox.stream().filter(withFlag(DiscoveryResultFlag.IGNORED)).toList();
         assertThat(results.size(), is(1));
         assertThat(results.get(0).getThingUID(), is(equalTo(THING_UID2)));
     }
@@ -350,10 +340,9 @@ public class AutomaticInboxProcessorTest {
         inbox.add(DiscoveryResultBuilder.create(THING_UID).withProperty(OTHER_KEY, OTHER_VALUE)
                 .withRepresentationProperty(OTHER_KEY).build());
 
-        List<DiscoveryResult> results = inbox.stream().filter(withFlag(DiscoveryResultFlag.NEW))
-                .collect(Collectors.toList());
+        List<DiscoveryResult> results = inbox.stream().filter(withFlag(DiscoveryResultFlag.NEW)).toList();
         assertThat(results.size(), is(0));
-        results = inbox.stream().filter(withFlag(DiscoveryResultFlag.IGNORED)).collect(Collectors.toList());
+        results = inbox.stream().filter(withFlag(DiscoveryResultFlag.IGNORED)).toList();
         assertThat(results.size(), is(1));
         assertThat(results.get(0).getThingUID(), is(equalTo(THING_UID)));
     }
@@ -364,8 +353,7 @@ public class AutomaticInboxProcessorTest {
                 .withRepresentationProperty(OTHER_KEY).build());
 
         inbox.setFlag(THING_UID2, DiscoveryResultFlag.IGNORED);
-        List<DiscoveryResult> results = inbox.stream().filter(withFlag(DiscoveryResultFlag.IGNORED))
-                .collect(Collectors.toList());
+        List<DiscoveryResult> results = inbox.stream().filter(withFlag(DiscoveryResultFlag.IGNORED)).toList();
         assertThat(results.size(), is(1));
         assertThat(results.get(0).getThingUID(), is(equalTo(THING_UID2)));
 

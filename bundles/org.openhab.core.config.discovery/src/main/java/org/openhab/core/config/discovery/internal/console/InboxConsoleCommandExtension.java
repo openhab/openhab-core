@@ -18,7 +18,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.config.discovery.DiscoveryResult;
@@ -73,8 +72,7 @@ public class InboxConsoleCommandExtension extends AbstractConsoleCommandExtensio
                         }
                         try {
                             ThingUID thingUID = new ThingUID(args[1]);
-                            List<DiscoveryResult> results = inbox.stream().filter(forThingUID(thingUID))
-                                    .collect(Collectors.toList());
+                            List<DiscoveryResult> results = inbox.stream().filter(forThingUID(thingUID)).toList();
                             if (results.isEmpty()) {
                                 console.println("No matching inbox entry could be found.");
                                 return;
@@ -102,12 +100,10 @@ public class InboxConsoleCommandExtension extends AbstractConsoleCommandExtensio
                     }
                     break;
                 case SUBCMD_LIST:
-                    printInboxEntries(console,
-                            inbox.stream().filter(withFlag((DiscoveryResultFlag.NEW))).collect(Collectors.toList()));
+                    printInboxEntries(console, inbox.stream().filter(withFlag((DiscoveryResultFlag.NEW))).toList());
                     break;
                 case SUBCMD_LIST_IGNORED:
-                    printInboxEntries(console, inbox.stream().filter(withFlag((DiscoveryResultFlag.IGNORED)))
-                            .collect(Collectors.toList()));
+                    printInboxEntries(console, inbox.stream().filter(withFlag((DiscoveryResultFlag.IGNORED))).toList());
                     break;
                 case SUBCMD_CLEAR:
                     clearInboxEntries(console, inbox.getAll());
@@ -117,8 +113,7 @@ public class InboxConsoleCommandExtension extends AbstractConsoleCommandExtensio
                         boolean validParam = true;
                         try {
                             ThingUID thingUID = new ThingUID(args[1]);
-                            List<DiscoveryResult> results = inbox.stream().filter(forThingUID(thingUID))
-                                    .collect(Collectors.toList());
+                            List<DiscoveryResult> results = inbox.stream().filter(forThingUID(thingUID)).toList();
                             if (results.isEmpty()) {
                                 console.println("No matching inbox entry could be found.");
                             } else {
@@ -131,7 +126,7 @@ public class InboxConsoleCommandExtension extends AbstractConsoleCommandExtensio
                             try {
                                 ThingTypeUID thingTypeUID = new ThingTypeUID(args[1]);
                                 List<DiscoveryResult> results = inbox.stream().filter(forThingTypeUID(thingTypeUID))
-                                        .collect(Collectors.toList());
+                                        .toList();
                                 if (results.isEmpty()) {
                                     console.println("No matching inbox entry could be found.");
                                 } else {

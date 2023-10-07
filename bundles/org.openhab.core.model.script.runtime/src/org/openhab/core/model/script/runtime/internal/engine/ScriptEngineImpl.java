@@ -16,7 +16,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
@@ -179,7 +178,7 @@ public class ScriptEngineImpl implements ScriptEngine, ModelParser {
 
     protected Iterable<Issue> getValidationErrors(final EObject model) {
         final List<Issue> validate = validate(model);
-        return validate.stream().filter(input -> Severity.ERROR == input.getSeverity()).collect(Collectors.toList());
+        return validate.stream().filter(input -> Severity.ERROR == input.getSeverity()).toList();
     }
 
     @Override

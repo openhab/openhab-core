@@ -808,7 +808,7 @@ public class InboxOSGiTest extends JavaOSGiTest {
                 .anyMatch(forThingUID(THING1_WITH_BRIDGE.getThingUID()).and(withFlag(DiscoveryResultFlag.NEW))));
         assertFalse(inbox.stream()
                 .anyMatch(forThingUID(THING2_WITH_BRIDGE.getThingUID()).and(withFlag(DiscoveryResultFlag.NEW))));
-        assertThat(inbox.stream().filter(withFlag(DiscoveryResultFlag.NEW)).collect(Collectors.toList()),
+        assertThat(inbox.stream().filter(withFlag(DiscoveryResultFlag.NEW)).toList(),
                 hasItems(THING_WITHOUT_BRIDGE, THING_WITH_OTHER_BRIDGE));
         waitForAssert(() -> {
             assertThat(receivedEvents.size(), is(3));
@@ -845,7 +845,7 @@ public class InboxOSGiTest extends JavaOSGiTest {
 
         registry.add(BridgeBuilder.create(BRIDGE_THING_TYPE_UID, BRIDGE_THING_UID).build());
         assertFalse(inbox.stream().anyMatch(forThingUID(BRIDGE.getThingUID()).and(withFlag(DiscoveryResultFlag.NEW))));
-        assertThat(inbox.stream().filter(withFlag(DiscoveryResultFlag.NEW)).collect(Collectors.toList()),
+        assertThat(inbox.stream().filter(withFlag(DiscoveryResultFlag.NEW)).toList(),
                 hasItems(THING1_WITH_BRIDGE, THING2_WITH_BRIDGE, THING_WITHOUT_BRIDGE));
         waitForAssert(() -> {
             assertThat(receivedEvents.size(), is(1));
@@ -879,7 +879,7 @@ public class InboxOSGiTest extends JavaOSGiTest {
         inbox.add(THING2_WITH_BRIDGE);
         inbox.add(THING_WITHOUT_BRIDGE);
         inbox.add(THING_WITH_OTHER_BRIDGE);
-        assertThat(inbox.stream().filter(withFlag(DiscoveryResultFlag.NEW)).collect(Collectors.toList()),
+        assertThat(inbox.stream().filter(withFlag(DiscoveryResultFlag.NEW)).toList(),
                 hasItems(THING1_WITH_BRIDGE, THING2_WITH_BRIDGE, THING_WITHOUT_BRIDGE, THING_WITH_OTHER_BRIDGE));
 
         registry.forceRemove(BRIDGE.getThingUID());
@@ -889,7 +889,7 @@ public class InboxOSGiTest extends JavaOSGiTest {
                     .anyMatch(forThingUID(THING1_WITH_BRIDGE.getThingUID()).and(withFlag(DiscoveryResultFlag.NEW))));
             assertFalse(inbox.stream()
                     .anyMatch(forThingUID(THING2_WITH_BRIDGE.getThingUID()).and(withFlag(DiscoveryResultFlag.NEW))));
-            assertThat(inbox.stream().filter(withFlag(DiscoveryResultFlag.NEW)).collect(Collectors.toList()),
+            assertThat(inbox.stream().filter(withFlag(DiscoveryResultFlag.NEW)).toList(),
                     hasItems(THING_WITHOUT_BRIDGE, THING_WITH_OTHER_BRIDGE));
         });
     }

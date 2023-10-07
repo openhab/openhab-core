@@ -17,7 +17,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -116,8 +115,7 @@ public class ItemChannelLinkConfigDescriptionProvider implements ConfigDescripti
                 default:
                     throw new IllegalArgumentException("Unknown channel kind: " + channel.getKind());
             }
-        }).map(profileType -> new ParameterOption(profileType.getUID().toString(), profileType.getLabel()))
-                .collect(Collectors.toList());
+        }).map(profileType -> new ParameterOption(profileType.getUID().toString(), profileType.getLabel())).toList();
     }
 
     private boolean isSupportedItemType(ProfileType profileType, Item item) {

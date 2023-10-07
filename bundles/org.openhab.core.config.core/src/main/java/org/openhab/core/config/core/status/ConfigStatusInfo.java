@@ -18,7 +18,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -137,7 +136,7 @@ public final class ConfigStatusInfo {
 
     private static Collection<ConfigStatusMessage> filterConfigStatusMessages(
             Collection<ConfigStatusMessage> configStatusMessages, Predicate<? super ConfigStatusMessage> predicate) {
-        return configStatusMessages.stream().filter(predicate).collect(Collectors.toList());
+        return configStatusMessages.stream().filter(predicate).toList();
     }
 
     @Override

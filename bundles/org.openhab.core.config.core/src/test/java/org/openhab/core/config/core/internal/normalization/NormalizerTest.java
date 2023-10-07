@@ -12,7 +12,6 @@
  */
 package org.openhab.core.config.core.internal.normalization;
 
-import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -153,14 +152,13 @@ public class NormalizerTest {
 
         assertThat(normalizer.normalize(null), is(nullValue()));
 
-        List<Boolean> expectedList = Stream.of(true, false, true).collect(toList());
+        List<Boolean> expectedList = Stream.of(true, false, true).toList();
 
-        assertThat(normalizer.normalize(Stream.of(true, false, true).collect(toList())), is(equalTo(expectedList)));
-        assertThat(normalizer.normalize(Stream.of(true, false, true).collect(toList()).toArray()),
-                is(equalTo(expectedList)));
-        assertThat(normalizer.normalize(new TreeSet<>(Stream.of(false, true).collect(toList()))),
-                is(equalTo(Stream.of(false, true).collect(toList()))));
-        assertThat(normalizer.normalize(Stream.of(true, "false", true).collect(toList())), is(equalTo(expectedList)));
-        assertThat(normalizer.normalize(Stream.of(true, 0, "true").collect(toList())), is(equalTo(expectedList)));
+        assertThat(normalizer.normalize(Stream.of(true, false, true).toList()), is(equalTo(expectedList)));
+        assertThat(normalizer.normalize(Stream.of(true, false, true).toArray()), is(equalTo(expectedList)));
+        assertThat(normalizer.normalize(new TreeSet<>(Stream.of(false, true).toList())),
+                is(equalTo(Stream.of(false, true).toList())));
+        assertThat(normalizer.normalize(Stream.of(true, "false", true).toList()), is(equalTo(expectedList)));
+        assertThat(normalizer.normalize(Stream.of(true, 0, "true").toList()), is(equalTo(expectedList)));
     }
 }

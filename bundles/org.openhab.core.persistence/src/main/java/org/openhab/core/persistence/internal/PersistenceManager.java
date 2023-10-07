@@ -24,7 +24,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -446,8 +445,7 @@ public class PersistenceManager implements ItemRegistryChangeListener, StateChan
                     .forEach(strategy -> {
                         PersistenceCronStrategy cronStrategy = (PersistenceCronStrategy) strategy;
                         String cronExpression = cronStrategy.getCronExpression();
-                        List<PersistenceItemConfiguration> itemConfigs = getMatchingConfigurations(strategy)
-                                .collect(Collectors.toList());
+                        List<PersistenceItemConfiguration> itemConfigs = getMatchingConfigurations(strategy).toList();
                         jobs.add(scheduler.schedule(() -> persistJob(itemConfigs), cronExpression));
 
                         logger.debug("Scheduled strategy {} with cron expression {} for service {}",

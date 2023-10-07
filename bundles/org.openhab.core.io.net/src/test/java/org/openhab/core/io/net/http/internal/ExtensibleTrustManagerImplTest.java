@@ -22,7 +22,6 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.net.ssl.SSLEngine;
@@ -174,7 +173,7 @@ public class ExtensibleTrustManagerImplTest {
     private Collection<List<?>> constructAlternativeNames(String... alternatives) {
         Collection<List<?>> alternativeNames = new ArrayList<>();
         for (String alternative : alternatives) {
-            alternativeNames.add(Stream.of(0, alternative).collect(Collectors.toList()));
+            alternativeNames.add(Stream.of(0, alternative).toList());
         }
 
         return alternativeNames;

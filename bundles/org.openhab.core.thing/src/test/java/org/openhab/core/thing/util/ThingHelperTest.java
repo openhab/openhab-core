@@ -12,7 +12,6 @@
  */
 package org.openhab.core.thing.util;
 
-import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
@@ -138,10 +137,11 @@ public class ThingHelperTest {
                 .build();
 
         assertThrows(IllegalArgumentException.class,
-                () -> ThingHelper.addChannelsToThing(thing,
-                        Stream.of(ChannelBuilder.create(new ChannelUID(thingUID, "channel2"), "").build(),
-                                ChannelBuilder.create(new ChannelUID(thingUID, "channel3"), "").build())
-                                .collect(toList())));
+                () -> ThingHelper
+                        .addChannelsToThing(thing,
+                                Stream.of(ChannelBuilder.create(new ChannelUID(thingUID, "channel2"), "").build(),
+                                        ChannelBuilder.create(new ChannelUID(thingUID, "channel3"), "").build())
+                                        .toList()));
     }
 
     @Test

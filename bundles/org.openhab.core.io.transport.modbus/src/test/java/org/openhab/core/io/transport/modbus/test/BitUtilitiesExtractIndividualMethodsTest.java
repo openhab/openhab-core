@@ -19,7 +19,6 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.Stream.Builder;
 
@@ -51,7 +50,7 @@ public class BitUtilitiesExtractIndividualMethodsTest {
             ModbusRegisterArray registers = (ModbusRegisterArray) values[2];
             int index = (int) values[3];
             return registerVariations(expectedResult, type, registers, index);
-        }).collect(Collectors.toList());
+        }).toList();
     }
 
     public static Stream<Object[]> filteredTestData(ValueType type) {

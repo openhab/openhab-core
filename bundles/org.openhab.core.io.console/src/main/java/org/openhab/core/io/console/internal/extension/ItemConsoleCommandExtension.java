@@ -17,7 +17,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -74,8 +73,8 @@ public class ItemConsoleCommandExtension extends AbstractConsoleCommandExtension
                     default:
                         return false;
                 }
-                return new StringsCompleter(items.stream().map(i -> i.getName()).collect(Collectors.toList()), true)
-                        .complete(args, cursorArgumentIndex, cursorPosition, candidates);
+                return new StringsCompleter(items.stream().map(i -> i.getName()).toList(), true).complete(args,
+                        cursorArgumentIndex, cursorPosition, candidates);
             }
             if (cursorArgumentIndex == 2 && args[0].equals(SUBCMD_RMTAG)) {
                 Item item = managedItemProvider.get(args[1]);

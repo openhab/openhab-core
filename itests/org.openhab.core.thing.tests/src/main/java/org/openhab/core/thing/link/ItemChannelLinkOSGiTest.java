@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.AfterEach;
@@ -154,7 +153,7 @@ public class ItemChannelLinkOSGiTest extends JavaOSGiTest {
         int removed = itemChannelLinkRegistry.removeLinksForItem(itemToRemove);
         assertThat(removed, is(1));
 
-        assertThat(itemChannelLinkRegistry.stream().map(ItemChannelLink::getItemName).collect(Collectors.toList()),
+        assertThat(itemChannelLinkRegistry.stream().map(ItemChannelLink::getItemName).toList(),
                 not(hasItem(itemToRemove)));
         assertThat(itemChannelLinkRegistry.getAll(),
                 hasSize(BULK_ITEM_COUNT * BULK_THING_COUNT * BULK_CHANNEL_COUNT - 1));
@@ -169,7 +168,7 @@ public class ItemChannelLinkOSGiTest extends JavaOSGiTest {
         assertThat(removed, is(BULK_CHANNEL_COUNT));
 
         assertThat(itemChannelLinkRegistry.stream().map(ItemChannelLink::getLinkedUID).map(ChannelUID::getThingUID)
-                .collect(Collectors.toList()), not(hasItem(thingToRemove)));
+                .toList(), not(hasItem(thingToRemove)));
         assertThat(itemChannelLinkRegistry.getAll(),
                 hasSize((BULK_ITEM_COUNT * BULK_THING_COUNT - 1) * BULK_CHANNEL_COUNT));
     }

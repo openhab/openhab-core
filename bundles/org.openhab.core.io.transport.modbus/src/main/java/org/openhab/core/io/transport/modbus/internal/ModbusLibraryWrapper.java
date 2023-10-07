@@ -14,7 +14,6 @@ package org.openhab.core.io.transport.modbus.internal;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -269,8 +268,8 @@ public class ModbusLibraryWrapper {
      * @return
      */
     public static Register[] convertRegisters(ModbusRegisterArray arr) {
-        return IntStream.range(0, arr.size()).mapToObj(i -> new SimpleInputRegister(arr.getRegister(i)))
-                .collect(Collectors.toList()).toArray(new Register[0]);
+        return IntStream.range(0, arr.size()).mapToObj(i -> new SimpleInputRegister(arr.getRegister(i))).toList()
+                .toArray(new Register[0]);
     }
 
     /**

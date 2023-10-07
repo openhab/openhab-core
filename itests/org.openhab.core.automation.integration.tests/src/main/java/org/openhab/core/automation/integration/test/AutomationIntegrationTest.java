@@ -919,7 +919,7 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
                 ModuleBuilder.createCondition().withId("ItemStateCondition" + (random + 1))
                         .withTypeUID("core.GenericCompareCondition").withConfiguration(condition2Config)
                         .withInputs(Map.of("input", triggerId + ".event")).build())
-                .collect(toList());
+                .toList();
 
         List<Action> actions = List.of(ModuleBuilder.createAction().withId("ItemPostCommandAction" + random)
                 .withTypeUID("core.ItemCommandAction").withConfiguration(actionConfig).build());

@@ -18,7 +18,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.WeakHashMap;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -426,12 +425,12 @@ public class DialogProcessor implements KSListener, STTListener {
 
     private void playStartSound() {
         playNotes(Stream.of(ToneSynthesizer.Note.G, ToneSynthesizer.Note.A, ToneSynthesizer.Note.B)
-                .map(note -> ToneSynthesizer.noteTone(note, 100L)).collect(Collectors.toList()));
+                .map(note -> ToneSynthesizer.noteTone(note, 100L)).toList());
     }
 
     private void playStopSound() {
         playNotes(Stream.of(ToneSynthesizer.Note.B, ToneSynthesizer.Note.A, ToneSynthesizer.Note.G)
-                .map(note -> ToneSynthesizer.noteTone(note, 100L)).collect(Collectors.toList()));
+                .map(note -> ToneSynthesizer.noteTone(note, 100L)).toList());
     }
 
     private void playOnListeningSound() {

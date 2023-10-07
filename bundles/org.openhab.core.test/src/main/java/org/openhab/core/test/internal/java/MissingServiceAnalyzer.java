@@ -91,19 +91,19 @@ public class MissingServiceAnalyzer {
                 .collect(toSet());
         return Stream.of(description.references) //
                 .filter(ref -> unsatisfiedRefNames.contains(ref.name)) //
-                .collect(toList());
+                .toList();
     }
 
     private List<ComponentDescriptionDTO> getComponentDescriptions(ServiceComponentRuntime scr, String interfaceName,
             Bundle[] allBundlesArrays) {
         return scr.getComponentDescriptionDTOs(allBundlesArrays).stream()
                 .filter(description -> Stream.of(description.serviceInterfaces).anyMatch(s -> s.equals(interfaceName)))
-                .collect(toList());
+                .toList();
     }
 
     private Bundle[] getAllBundles() {
         List<Bundle> allBundles = Arrays.stream(bundleContext.getBundles())
-                .filter(b -> b.getHeaders().get(Constants.FRAGMENT_HOST) == null).collect(toList());
+                .filter(b -> b.getHeaders().get(Constants.FRAGMENT_HOST) == null).toList();
         return allBundles.toArray(new Bundle[allBundles.size()]);
     }
 

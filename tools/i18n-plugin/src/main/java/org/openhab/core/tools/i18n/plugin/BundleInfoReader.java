@@ -19,7 +19,6 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -144,7 +143,7 @@ public class BundleInfoReader {
         if (Files.exists(modulePath)) {
             try (Stream<Path> files = Files.walk(modulePath)) {
                 List<JsonObject> moduleTypes = files.filter(isJsonFile).flatMap(this::readJsonElementsFromFile)
-                        .map(JsonElement::getAsJsonObject).collect(Collectors.toList());
+                        .map(JsonElement::getAsJsonObject).toList();
                 if (!moduleTypes.isEmpty()) {
                     bundleInfo.setModuleTypesJson(moduleTypes);
                 }
@@ -157,7 +156,7 @@ public class BundleInfoReader {
         if (Files.exists(template)) {
             try (Stream<Path> files = Files.walk(template)) {
                 List<JsonObject> ruleTemplates = files.filter(isJsonFile).flatMap(this::readJsonElementsFromFile)
-                        .map(JsonElement::getAsJsonObject).collect(Collectors.toList());
+                        .map(JsonElement::getAsJsonObject).toList();
                 if (!ruleTemplates.isEmpty()) {
                     bundleInfo.setRuleTemplateJson(ruleTemplates);
                 }
