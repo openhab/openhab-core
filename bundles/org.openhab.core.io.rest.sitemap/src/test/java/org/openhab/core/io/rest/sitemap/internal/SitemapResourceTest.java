@@ -49,6 +49,7 @@ import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.library.types.PercentType;
 import org.openhab.core.model.sitemap.SitemapProvider;
 import org.openhab.core.model.sitemap.sitemap.ColorArray;
+import org.openhab.core.model.sitemap.sitemap.Condition;
 import org.openhab.core.model.sitemap.sitemap.Sitemap;
 import org.openhab.core.model.sitemap.sitemap.VisibilityRule;
 import org.openhab.core.model.sitemap.sitemap.Widget;
@@ -252,6 +253,30 @@ public class SitemapResourceTest extends JavaTest {
     }
 
     @Test
+    public void whenLongPollingShouldObserveItemsFromIconColorConditions() {
+        ItemEvent itemEvent = mock(ItemEvent.class);
+        when(itemEvent.getItemName()).thenReturn(iconColorItem.getName());
+        new Thread(() -> {
+            try {
+                Thread.sleep(STATE_UPDATE_WAIT_TIME); // wait for the #getPageData call and listeners to attach to the
+                                                      // item
+                sitemapResource.receive(itemEvent);
+            } catch (InterruptedException e) {
+            }
+        }).start();
+
+        // non-null is sufficient here.
+        when(headersMock.getRequestHeader(HTTP_HEADER_X_ATMOSPHERE_TRANSPORT)).thenReturn(List.of());
+
+        Response response = sitemapResource.getPageData(headersMock, null, SITEMAP_MODEL_NAME, SITEMAP_NAME, null,
+                false);
+
+        PageDTO pageDTO = (PageDTO) response.getEntity();
+        assertThat(pageDTO.timeout, is(false)); // assert that the item state change did trigger the blocking method to
+                                                // return
+    }
+
+    @Test
     public void whenGetPageDataShouldReturnPageBean() throws ItemNotFoundException {
         item.setState(new PercentType(50));
         configureItemUIRegistry(item.getState(), OnOffType.ON);
@@ -333,28 +358,44 @@ public class SitemapResourceTest extends JavaTest {
 
         // add visibility rules to the mock widget:
         VisibilityRule visibilityRule = mock(VisibilityRule.class);
-        when(visibilityRule.getItem()).thenReturn(VISIBILITY_RULE_ITEM_NAME);
-        BasicEList<VisibilityRule> visibilityRules = new BasicEList<>(1);
+        Condition conditon = mock(Condition.class);
+        when(conditon.getItem()).thenReturn(VISIBILITY_RULE_ITEM_NAME);
+        EList<Condition> conditions = new BasicEList<>();
+        conditions.add(conditon);
+        when(visibilityRule.getConditions()).thenReturn(conditions);
+        EList<VisibilityRule> visibilityRules = new BasicEList<>(1);
         visibilityRules.add(visibilityRule);
         when(w1.getVisibility()).thenReturn(visibilityRules);
 
         // add label color conditions to the item:
         ColorArray labelColor = mock(ColorArray.class);
-        when(labelColor.getItem()).thenReturn(LABEL_COLOR_ITEM_NAME);
+        Condition conditon1 = mock(Condition.class);
+        when(conditon1.getItem()).thenReturn(LABEL_COLOR_ITEM_NAME);
+        EList<Condition> conditions1 = new BasicEList<>();
+        conditions1.add(conditon1);
+        when(labelColor.getConditions()).thenReturn(conditions1);
         EList<ColorArray> labelColors = new BasicEList<>();
         labelColors.add(labelColor);
         when(w1.getLabelColor()).thenReturn(labelColors);
 
         // add value color conditions to the item:
         ColorArray valueColor = mock(ColorArray.class);
-        when(valueColor.getItem()).thenReturn(VALUE_COLOR_ITEM_NAME);
+        Condition conditon2 = mock(Condition.class);
+        when(conditon2.getItem()).thenReturn(VALUE_COLOR_ITEM_NAME);
+        EList<Condition> conditions2 = new BasicEList<>();
+        conditions2.add(conditon2);
+        when(valueColor.getConditions()).thenReturn(conditions2);
         EList<ColorArray> valueColors = new BasicEList<>();
         valueColors.add(valueColor);
         when(w1.getValueColor()).thenReturn(valueColors);
 
         // add icon color conditions to the item:
         ColorArray iconColor = mock(ColorArray.class);
-        when(iconColor.getItem()).thenReturn(ICON_COLOR_ITEM_NAME);
+        Condition conditon3 = mock(Condition.class);
+        when(conditon3.getItem()).thenReturn(ICON_COLOR_ITEM_NAME);
+        EList<Condition> conditions3 = new BasicEList<>();
+        conditions3.add(conditon3);
+        when(iconColor.getConditions()).thenReturn(conditions3);
         EList<ColorArray> iconColors = new BasicEList<>();
         iconColors.add(iconColor);
         when(w1.getIconColor()).thenReturn(iconColors);
@@ -376,7 +417,7 @@ public class SitemapResourceTest extends JavaTest {
         when(w2.getValueColor()).thenReturn(valueColors);
         when(w2.getIconColor()).thenReturn(iconColors);
 
-        BasicEList<Widget> widgets = new BasicEList<>(2);
+        EList<Widget> widgets = new BasicEList<>(2);
         widgets.add(w1);
         widgets.add(w2);
         return widgets;
