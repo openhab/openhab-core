@@ -383,10 +383,12 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
                     if (matcher.matches()) {
                         VisibilityRuleImpl visibilityRule = (VisibilityRuleImpl) SitemapFactory.eINSTANCE
                                 .createVisibilityRule();
-                        visibilityRule.setItem(matcher.group("item"));
-                        visibilityRule.setCondition(matcher.group("condition"));
-                        visibilityRule.setSign(matcher.group("sign"));
-                        visibilityRule.setState(matcher.group("state"));
+                        ConditionImpl condition = (ConditionImpl) SitemapFactory.eINSTANCE.createCondition();
+                        condition.setItem(matcher.group("item"));
+                        condition.setCondition(matcher.group("condition"));
+                        condition.setSign(matcher.group("sign"));
+                        condition.setState(matcher.group("state"));
+                        visibilityRule.eSet(SitemapPackage.VISIBILITY_RULE__CONDITIONS, condition);
                         visibility.add(visibilityRule);
                     } else {
                         logger.warn("Syntax error in visibility rule '{}' for widget {}", sourceVisibility,
@@ -416,11 +418,12 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
                     Matcher matcher = COLOR_PATTERN.matcher(sourceColor.toString());
                     if (matcher.matches()) {
                         ColorArrayImpl colorArray = (ColorArrayImpl) SitemapFactory.eINSTANCE.createColorArray();
-                        colorArray.setItem(matcher.group("item"));
-                        colorArray.setCondition(matcher.group("condition"));
-                        colorArray.setSign(matcher.group("sign"));
-                        colorArray.setState(matcher.group("state"));
-                        colorArray.setArg(matcher.group("arg"));
+                        ConditionImpl condition = (ConditionImpl) SitemapFactory.eINSTANCE.createCondition();
+                        condition.setItem(matcher.group("item"));
+                        condition.setCondition(matcher.group("condition"));
+                        condition.setSign(matcher.group("sign"));
+                        condition.setState(matcher.group("state"));
+                        colorArray.eSet(SitemapPackage.COLOR_ARRAY__CONDITIONS, condition);
                         color.add(colorArray);
                     } else {
                         logger.warn("Syntax error in {} rule '{}' for widget {}", key, sourceColor,

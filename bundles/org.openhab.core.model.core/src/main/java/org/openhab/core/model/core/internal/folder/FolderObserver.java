@@ -14,18 +14,15 @@ package org.openhab.core.model.core.internal.folder;
 
 import static org.openhab.core.service.WatchService.Kind.*;
 
-import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -73,14 +70,14 @@ public class FolderObserver implements WatchService.WatchEventListener {
     private boolean activated;
 
     /* map that stores a list of valid file extensions for each folder */
-    private final Map<String, List<String>> folderFileExtMap = new ConcurrentHashMap<>();
+    private final Map<String, Set<String>> folderFileExtMap = new ConcurrentHashMap<>();
 
     /* set of file extensions for which we have parsers already registered */
     private final Set<String> parsers = new HashSet<>();
 
     /* set of files that have been ignored due to a missing parser */
-    private final Set<File> ignoredFiles = new HashSet<>();
-    private final Map<String, File> nameFileMap = new HashMap<>();
+    private final Set<Path> ignoredPaths = new HashSet<>();
+    private final Map<String, Path> namePathMap = new HashMap<>();
 
     @Activate
     public FolderObserver(final @Reference ModelRepository modelRepo, final @Reference ReadyService readyService,
@@ -92,19 +89,26 @@ public class FolderObserver implements WatchService.WatchEventListener {
 
     @Reference(cardinality = ReferenceCardinality.AT_LEAST_ONE, policy = ReferencePolicy.DYNAMIC)
     protected void addModelParser(ModelParser modelParser) {
-        parsers.add(modelParser.getExtension());
+        String extension = modelParser.getExtension();
+        logger.debug("Adding parser for '{}' extension", extension);
+        parsers.add(extension);
 
         if (activated) {
-            processIgnoredFiles(modelParser.getExtension());
-            readyService.markReady(new ReadyMarker(READYMARKER_TYPE, modelParser.getExtension()));
+            processIgnoredPaths(extension);
+            readyService.markReady(new ReadyMarker(READYMARKER_TYPE, extension));
+            logger.debug("Marked extension '{}' as ready", extension);
+        } else {
+            logger.debug("{} is not yet activated", FolderObserver.class.getSimpleName());
         }
     }
 
     protected void removeModelParser(ModelParser modelParser) {
-        parsers.remove(modelParser.getExtension());
+        String extension = modelParser.getExtension();
+        logger.debug("Removing parser for '{}' extension", extension);
+        parsers.remove(extension);
 
-        Set<String> removed = modelRepository.removeAllModelsOfType(modelParser.getExtension());
-        ignoredFiles.addAll(removed.stream().map(nameFileMap::get).collect(Collectors.toSet()));
+        Set<String> removed = modelRepository.removeAllModelsOfType(extension);
+        ignoredPaths.addAll(removed.stream().map(namePathMap::get).collect(Collectors.toSet()));
     }
 
     @Activate
@@ -113,77 +117,88 @@ public class FolderObserver implements WatchService.WatchEventListener {
 
         Enumeration<String> keys = config.keys();
         while (keys.hasMoreElements()) {
-            String foldername = keys.nextElement();
-            if (!foldername.matches("[A-Za-z0-9_]*")) {
+            String folderName = keys.nextElement();
+            if (!folderName.matches("[A-Za-z0-9_]*")) {
                 // we allow only simple alphanumeric names for model folders - everything else might be other service
                 // properties
                 continue;
             }
 
-            String[] fileExts = ((String) config.get(foldername)).split(",");
-
-            File folder = watchService.getWatchPath().resolve(foldername).toFile();
-            if (folder.exists() && folder.isDirectory()) {
-                folderFileExtMap.put(foldername, Arrays.asList(fileExts));
+            Path folderPath = watchService.getWatchPath().resolve(folderName);
+            if (Files.exists(folderPath) && Files.isDirectory(folderPath)) {
+                String[] validExtensions = ((String) config.get(folderName)).split(",");
+                folderFileExtMap.put(folderName, Set.of(validExtensions));
             } else {
                 logger.warn("Directory '{}' does not exist in '{}'. Please check your configuration settings!",
-                        foldername, OpenHAB.getConfigFolder());
+                        folderName, OpenHAB.getConfigFolder());
             }
         }
 
         watchService.registerListener(this, Path.of(""));
         addModelsToRepo();
         this.activated = true;
+        logger.debug("{} has been activated", FolderObserver.class.getSimpleName());
     }
 
     @Deactivate
     public void deactivate() {
         watchService.unregisterListener(this);
-        this.activated = false;
+        activated = false;
         deleteModelsFromRepo();
-        this.ignoredFiles.clear();
-        this.folderFileExtMap.clear();
-        this.parsers.clear();
-        this.nameFileMap.clear();
+        ignoredPaths.clear();
+        folderFileExtMap.clear();
+        parsers.clear();
+        namePathMap.clear();
+        logger.debug("{} has been deactivated", FolderObserver.class.getSimpleName());
     }
 
-    private void processIgnoredFiles(String extension) {
-        Set<File> clonedSet = new HashSet<>(this.ignoredFiles);
-        for (File file : clonedSet) {
-            if (extension.equals(getExtension(file.getPath()))) {
-                checkFile(modelRepository, file, CREATE);
-                this.ignoredFiles.remove(file);
+    private void processIgnoredPaths(String extension) {
+        logger.debug("Processing {} ignored paths for '{}' extension", ignoredPaths.size(), extension);
+
+        Set<Path> clonedSet = new HashSet<>(ignoredPaths);
+        for (Path path : clonedSet) {
+            if (extension.equals(getExtension(path))) {
+                checkPath(path, CREATE);
+                ignoredPaths.remove(path);
             }
         }
+
+        logger.debug("Finished processing ignored paths for '{}' extension. {} ignored paths remain", extension,
+                ignoredPaths.size());
     }
 
     private void addModelsToRepo() {
-        if (!folderFileExtMap.isEmpty()) {
-            for (String folderName : folderFileExtMap.keySet()) {
-                final List<String> validExtension = folderFileExtMap.get(folderName);
-                if (validExtension != null && !validExtension.isEmpty()) {
-                    File folder = watchService.getWatchPath().resolve(folderName).toFile();
+        for (Map.Entry<String, Set<String>> entry : folderFileExtMap.entrySet()) {
+            String folderName = entry.getKey();
+            Set<String> validExtensions = entry.getValue();
 
-                    File[] files = folder.listFiles(new FileExtensionsFilter(validExtension));
-                    if (files != null) {
-                        for (File file : files) {
-                            // we omit parsing of hidden files possibly created by editors or operating systems
-                            if (!file.isHidden()) {
-                                checkFile(modelRepository, file, CREATE);
-                            }
-                        }
-                    }
-                    for (String ext : validExtension) {
-                        readyService.markReady(new ReadyMarker(READYMARKER_TYPE, ext));
-                    }
+            if (validExtensions.isEmpty()) {
+                logger.debug("Folder '{}' has no valid extensions", folderName);
+                continue;
+            }
+
+            Path folderPath = watchService.getWatchPath().resolve(folderName);
+            logger.debug("Adding files in '{}' to the model", folderPath);
+            try (DirectoryStream<Path> stream = Files.newDirectoryStream(folderPath,
+                    new FileExtensionsFilter(validExtensions))) {
+                stream.forEach(path -> checkPath(path, CREATE));
+            } catch (IOException e) {
+                logger.warn("Failed to list entries in directory: {}", folderPath.toAbsolutePath(), e);
+            }
+
+            for (String extension : validExtensions) {
+                if (parsers.contains(extension)) {
+                    readyService.markReady(new ReadyMarker(READYMARKER_TYPE, extension));
+                    logger.debug("Marked extension '{}' as ready", extension);
                 }
             }
         }
+
+        logger.debug("Added {} model files and {} ignored paths remain", namePathMap.size(), ignoredPaths.size());
     }
 
     private void deleteModelsFromRepo() {
-        Set<String> folders = folderFileExtMap.keySet();
-        for (String folder : folders) {
+        for (String folder : folderFileExtMap.keySet()) {
             Iterable<String> models = modelRepository.getAllModelNamesOfType(folder);
             for (String model : models) {
                 logger.debug("Removing file {} from the model repo.", model);
@@ -192,78 +207,93 @@ public class FolderObserver implements WatchService.WatchEventListener {
         }
     }
 
-    protected static class FileExtensionsFilter implements FilenameFilter {
+    protected static class FileExtensionsFilter implements DirectoryStream.Filter<Path> {
+        private final Set<String> validExtensions;
 
-        private final List<String> validExtensions;
-
-        public FileExtensionsFilter(List<String> validExtensions) {
+        public FileExtensionsFilter(Set<String> validExtensions) {
             this.validExtensions = validExtensions;
         }
 
         @Override
-        public boolean accept(@NonNullByDefault({}) File dir, @NonNullByDefault({}) String name) {
-            for (String extension : validExtensions) {
-                if (name.toLowerCase().endsWith("." + extension)) {
-                    return true;
-                }
-            }
-            return false;
+        public boolean accept(Path entry) throws IOException {
+            String extension = getExtension(entry);
+            return extension != null && validExtensions.contains(extension);
         }
     }
 
-    private void checkFile(final ModelRepository modelRepository, final File file, final WatchService.Kind kind) {
+    private void checkPath(final Path path, final WatchService.Kind kind) {
         try {
+            if (Files.isHidden(path)) {
+                // we omit parsing of hidden files possibly created by editors or operating systems
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Omitting update of hidden file '{}'", path.toAbsolutePath());
+                }
+                return;
+            }
+
             synchronized (FolderObserver.class) {
-                if ((kind == CREATE || kind == MODIFY)) {
-                    if (parsers.contains(getExtension(file.getName()))) {
-                        try (InputStream inputStream = Files.newInputStream(file.toPath())) {
-                            nameFileMap.put(file.getName(), file);
-                            modelRepository.addOrRefreshModel(file.getName(), inputStream);
+                String fileName = path.getFileName().toString();
+                if (kind == CREATE || kind == MODIFY) {
+                    String extension = getExtension(fileName);
+                    if (parsers.contains(extension)) {
+                        try (InputStream inputStream = Files.newInputStream(path)) {
+                            namePathMap.put(fileName, path);
+                            modelRepository.addOrRefreshModel(fileName, inputStream);
+                            logger.debug("Added/refreshed '{}' model", fileName);
                         } catch (IOException e) {
-                            logger.warn("Error while opening file during update: {}", file.getAbsolutePath());
+                            logger.warn("Error while opening file during update: {}", path.toAbsolutePath());
                         }
                     } else {
-                        ignoredFiles.add(file);
+                        ignoredPaths.add(path);
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("Missing parser for '{}' extension, added ignored path: {}", extension,
+                                    path.toAbsolutePath());
+                        }
                     }
                 } else if (kind == WatchService.Kind.DELETE) {
-                    modelRepository.removeModel(file.getName());
-                    nameFileMap.remove(file.getName());
+                    modelRepository.removeModel(fileName);
+                    namePathMap.remove(fileName);
+                    logger.debug("Removed '{}' model ", fileName);
                 }
             }
         } catch (Exception e) {
-            logger.error("Error handling update of file '{}': {}.", file.getAbsolutePath(), e.getMessage(), e);
+            logger.error("Error handling update of file '{}': {}.", path.toAbsolutePath(), e.getMessage(), e);
         }
     }
 
-    /**
-     * Returns the extension of the given file
-     *
-     * @param filename
-     *            the file name to get the extension
-     * @return the file's extension
-     */
-    public @Nullable String getExtension(String filename) {
-        if (filename.contains(".")) {
-            return filename.substring(filename.lastIndexOf(".") + 1);
-        } else {
-            return null;
-        }
+    private static @Nullable String getExtension(String fileName) {
+        return fileName.contains(".") ? fileName.substring(fileName.lastIndexOf(".") + 1) : null;
+    }
+
+    private static @Nullable String getExtension(Path path) {
+        return getExtension(path.getFileName().toString());
     }
 
     @Override
     public void processWatchEvent(WatchService.Kind kind, Path path) {
         if (path.getNameCount() != 2) {
-            logger.trace("{} event for {} ignored, only depth 1 is allowed.", kind, path);
+            logger.trace("{} event for {} ignored (only depth 1 allowed)", kind, path);
             return;
         }
 
-        String fileExtension = getExtension(path.getFileName().toString());
-        List<String> validExtensions = folderFileExtMap.get(path.getName(0).toString());
-        if (fileExtension != null && validExtensions != null && validExtensions.contains(fileExtension)) {
-            File toCheck = watchService.getWatchPath().resolve(path).toFile();
-            if (!toCheck.isHidden()) {
-                checkFile(modelRepository, toCheck, kind);
-            }
+        String extension = getExtension(path);
+        if (extension == null) {
+            logger.trace("{} event for {} ignored (extension null)", kind, path);
+            return;
         }
+
+        String folderName = path.getName(0).toString();
+        Set<String> validExtensions = folderFileExtMap.get(folderName);
+        if (validExtensions == null) {
+            logger.trace("{} event for {} ignored (folder '{}' extensions null)", kind, path, folderName);
+            return;
+        }
+        if (!validExtensions.contains(extension)) {
+            logger.trace("{} event for {} ignored ('{}' extension is invalid)", kind, path, extension);
+            return;
+        }
+
+        Path resolvedPath = watchService.getWatchPath().resolve(path);
+        checkPath(resolvedPath, kind);
     }
 }

@@ -50,6 +50,7 @@ import org.openhab.core.ui.items.ItemUIRegistry;
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Laurent Garnier - Added support for icon color
+ * @author Laurent Garnier - Support added for multiple AND conditions in labelcolor/valuecolor/visibility
  * @author Laurent Garnier - New widget icon parameter based on conditional rules
  */
 public class PageChangeListener implements EventSubscriber {
@@ -129,19 +130,19 @@ public class PageChangeListener implements EventSubscriber {
                 }
                 // now scan visibility rules
                 for (VisibilityRule rule : widget.getVisibility()) {
-                    addItemWithName(items, rule.getItem());
+                    addItemsFromConditions(items, rule.getConditions());
                 }
                 // now scan label color rules
                 for (ColorArray rule : widget.getLabelColor()) {
-                    addItemWithName(items, rule.getItem());
+                    addItemsFromConditions(items, rule.getConditions());
                 }
                 // now scan value color rules
                 for (ColorArray rule : widget.getValueColor()) {
-                    addItemWithName(items, rule.getItem());
+                    addItemsFromConditions(items, rule.getConditions());
                 }
-                // now scan value icon rules
+                // now scan icon color rules
                 for (ColorArray rule : widget.getIconColor()) {
-                    addItemWithName(items, rule.getItem());
+                    addItemsFromConditions(items, rule.getConditions());
                 }
             }
         }
@@ -256,10 +257,10 @@ public class PageChangeListener implements EventSubscriber {
     }
 
     private boolean definesVisibilityOrColorOrIcon(Widget w, String name) {
-        return w.getVisibility().stream().anyMatch(r -> name.equals(r.getItem()))
-                || w.getLabelColor().stream().anyMatch(r -> name.equals(r.getItem()))
-                || w.getValueColor().stream().anyMatch(r -> name.equals(r.getItem()))
-                || w.getIconColor().stream().anyMatch(r -> name.equals(r.getItem()))
+        return w.getVisibility().stream().anyMatch(r -> conditionsDependsOnItem(r.getConditions(), name))
+                || w.getLabelColor().stream().anyMatch(r -> conditionsDependsOnItem(r.getConditions(), name))
+                || w.getValueColor().stream().anyMatch(r -> conditionsDependsOnItem(r.getConditions(), name))
+                || w.getIconColor().stream().anyMatch(r -> conditionsDependsOnItem(r.getConditions(), name))
                 || w.getIconRules().stream().anyMatch(r -> conditionsDependsOnItem(r.getConditions(), name));
     }
 

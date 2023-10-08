@@ -137,6 +137,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * @author Mark Herwege - Added pattern and unit fields
  * @author Laurent Garnier - Added support for new sitemap element Buttongrid
  * @author Laurent Garnier - Added icon field for mappings used for switch element
+ * @author Laurent Garnier - Support added for multiple AND conditions in labelcolor/valuecolor/visibility
  * @author Laurent Garnier - New widget icon parameter based on conditional rules
  */
 @Component(service = { RESTResource.class, EventSubscriber.class })
@@ -774,35 +775,15 @@ public class SitemapResource
     private Set<GenericItem> getItemsInVisibilityCond(EList<VisibilityRule> ruleList) {
         Set<GenericItem> items = new HashSet<>();
         for (VisibilityRule rule : ruleList) {
-            String itemName = rule.getItem();
-            if (itemName != null) {
-                try {
-                    Item item = itemUIRegistry.getItem(itemName);
-                    if (item instanceof GenericItem genericItem) {
-                        items.add(genericItem);
-                    }
-                } catch (ItemNotFoundException e) {
-                    // ignore
-                }
-            }
+            getItemsInConditions(rule.getConditions(), items);
         }
         return items;
     }
 
     private Set<GenericItem> getItemsInColorCond(EList<ColorArray> colorList) {
         Set<GenericItem> items = new HashSet<>();
-        for (ColorArray color : colorList) {
-            String itemName = color.getItem();
-            if (itemName != null) {
-                try {
-                    Item item = itemUIRegistry.getItem(itemName);
-                    if (item instanceof GenericItem genericItem) {
-                        items.add(genericItem);
-                    }
-                } catch (ItemNotFoundException e) {
-                    // ignore
-                }
-            }
+        for (ColorArray rule : colorList) {
+            getItemsInConditions(rule.getConditions(), items);
         }
         return items;
     }

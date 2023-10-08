@@ -25,7 +25,6 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.security.RolesAllowed;
-import javax.inject.Singleton;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -92,7 +91,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Path(SseResource.PATH_EVENTS)
 @RolesAllowed({ Role.USER, Role.ADMIN })
 @Tag(name = SseResource.PATH_EVENTS)
-@Singleton
 @NonNullByDefault
 public class SseResource implements RESTResource, SsePublisher {
 

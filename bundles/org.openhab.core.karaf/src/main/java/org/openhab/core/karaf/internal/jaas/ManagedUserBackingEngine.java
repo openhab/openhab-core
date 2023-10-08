@@ -36,7 +36,7 @@ import org.openhab.core.auth.UserRegistry;
  */
 public class ManagedUserBackingEngine implements BackingEngine {
 
-    UserRegistry userRegistry;
+    private final UserRegistry userRegistry;
 
     public ManagedUserBackingEngine(UserRegistry userRegistry) {
         this.userRegistry = userRegistry;
