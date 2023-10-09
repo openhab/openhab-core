@@ -74,6 +74,7 @@
 		<feature dependency="true">pax-web-jetty-extras</feature>
 		<feature dependency="true">pax-web-jetty-http2</feature>
 		<feature dependency="true">pax-web-jetty-http2-extras</feature>
+		<feature dependency="true">pax-web-jetty-http2-jdk9</feature>
 		<feature dependency="true">pax-web-jetty-websockets</feature>
 	</feature>
 
