@@ -68,12 +68,12 @@ public class ScriptModuleTypeProvider extends AbstractProvider<ModuleType> imple
 
     @SuppressWarnings("unchecked")
     @Override
-    public @Nullable ModuleType getModuleType(String UID, @Nullable Locale locale) {
+    public @Nullable ModuleType getModuleType(String uid, @Nullable Locale locale) {
         if (parameterOptions.isEmpty()) {
             return null;
-        } else if (ScriptActionHandler.TYPE_ID.equals(UID)) {
+        } else if (ScriptActionHandler.TYPE_ID.equals(uid)) {
             return getScriptActionType(locale);
-        } else if (ScriptConditionHandler.TYPE_ID.equals(UID)) {
+        } else if (ScriptConditionHandler.TYPE_ID.equals(uid)) {
             return getScriptConditionType(locale);
         } else {
             return null;

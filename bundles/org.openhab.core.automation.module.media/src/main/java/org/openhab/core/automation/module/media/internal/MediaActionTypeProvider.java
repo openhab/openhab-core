@@ -60,8 +60,8 @@ public class MediaActionTypeProvider implements ModuleTypeProvider {
 
     @SuppressWarnings("unchecked")
     @Override
-    public @Nullable ModuleType getModuleType(String UID, @Nullable Locale locale) {
-        switch (UID) {
+    public @Nullable ModuleType getModuleType(String uid, @Nullable Locale locale) {
+        switch (uid) {
             case PlayActionHandler.TYPE_ID:
                 return getPlayActionType(locale);
             case SayActionHandler.TYPE_ID:

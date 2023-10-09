@@ -131,8 +131,8 @@ public class TemplateResourceBundleProvider extends AbstractResourceBundleProvid
      * @see TemplateProvider#getTemplate(java.lang.String, java.util.Locale)
      */
     @Override
-    public @Nullable RuleTemplate getTemplate(String UID, @Nullable Locale locale) {
-        return getPerLocale(providedObjectsHolder.get(UID), locale);
+    public @Nullable RuleTemplate getTemplate(String uid, @Nullable Locale locale) {
+        return getPerLocale(providedObjectsHolder.get(uid), locale);
     }
 
     /**

@@ -136,9 +136,9 @@ public class CommandlineModuleTypeProvider extends AbstractCommandProvider<Modul
 
     @SuppressWarnings("unchecked")
     @Override
-    public @Nullable ModuleType getModuleType(String UID, @Nullable Locale locale) {
+    public @Nullable ModuleType getModuleType(String uid, @Nullable Locale locale) {
         synchronized (providedObjectsHolder) {
-            return providedObjectsHolder.get(UID);
+            return providedObjectsHolder.get(uid);
         }
     }
 

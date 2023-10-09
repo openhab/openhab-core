@@ -130,9 +130,9 @@ public class CommandlineTemplateProvider extends AbstractCommandProvider<RuleTem
     }
 
     @Override
-    public @Nullable RuleTemplate getTemplate(String UID, @Nullable Locale locale) {
+    public @Nullable RuleTemplate getTemplate(String uid, @Nullable Locale locale) {
         synchronized (providerPortfolio) {
-            return providedObjectsHolder.get(UID);
+            return providedObjectsHolder.get(uid);
         }
     }
 

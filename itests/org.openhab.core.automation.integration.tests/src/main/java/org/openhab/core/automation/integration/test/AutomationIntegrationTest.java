@@ -785,8 +785,8 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
 
         RuleTemplateProvider templateProvider = new RuleTemplateProvider() {
             @Override
-            public @Nullable RuleTemplate getTemplate(String UID, @Nullable Locale locale) {
-                if (UID.equals(templateUID)) {
+            public @Nullable RuleTemplate getTemplate(String uid, @Nullable Locale locale) {
+                if (uid.equals(templateUID)) {
                     return template;
                 } else {
                     return null;
@@ -827,10 +827,10 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
             }
 
             @Override
-            public <T extends ModuleType> @Nullable T getModuleType(String UID, @Nullable Locale locale) {
-                if (UID.equals(triggerTypeUID)) {
+            public <T extends ModuleType> @Nullable T getModuleType(String uid, @Nullable Locale locale) {
+                if (uid.equals(triggerTypeUID)) {
                     return (T) triggerType;
-                } else if (UID.equals(actionTypeUID)) {
+                } else if (uid.equals(actionTypeUID)) {
                     return (T) actionType;
                 } else {
                     return null;

@@ -57,8 +57,8 @@ public class ScriptedCustomModuleTypeProvider implements ModuleTypeProvider {
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T extends ModuleType> T getModuleType(String UID, @Nullable Locale locale) {
-        return (T) modulesTypes.get(UID);
+    public <T extends ModuleType> T getModuleType(String uid, @Nullable Locale locale) {
+        return (T) modulesTypes.get(uid);
     }
 
     @SuppressWarnings("unchecked")

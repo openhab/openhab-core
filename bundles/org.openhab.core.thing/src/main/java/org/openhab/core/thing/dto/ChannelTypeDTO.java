@@ -44,11 +44,11 @@ public class ChannelTypeDTO {
     public ChannelTypeDTO() {
     }
 
-    public ChannelTypeDTO(String UID, String label, String description, String category, String itemType,
+    public ChannelTypeDTO(String uid, String label, String description, String category, String itemType,
             ChannelKind kind, List<ConfigDescriptionParameterDTO> parameters,
             List<ConfigDescriptionParameterGroupDTO> parameterGroups, StateDescription stateDescription,
             Set<String> tags, boolean advanced, CommandDescription commandDescription) {
-        this.UID = UID;
+        this.UID = uid;
         this.label = label;
         this.description = description;
         this.category = category;

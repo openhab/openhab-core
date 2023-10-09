@@ -114,8 +114,8 @@ public class ModuleTypeResourceBundleProvider extends AbstractResourceBundleProv
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T extends ModuleType> T getModuleType(String UID, @Nullable Locale locale) {
-        return (T) getPerLocale(providedObjectsHolder.get(UID), locale);
+    public <T extends ModuleType> T getModuleType(String uid, @Nullable Locale locale) {
+        return (T) getPerLocale(providedObjectsHolder.get(uid), locale);
     }
 
     @Override

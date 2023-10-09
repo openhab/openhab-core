@@ -52,22 +52,22 @@ public class ActionType extends ModuleType {
      * Creates an instance of {@link ActionType} with base properties - UID, a {@link List} of configuration
      * descriptions and a {@link List} of {@link Input} definitions.
      *
-     * @param UID the {@link ActionType}'s identifier, or {@code null} if a random identifier should be
+     * @param uid the {@link ActionType}'s identifier, or {@code null} if a random identifier should be
      *            generated.
      * @param configDescriptions describing meta-data for the configuration of the future {@link Action} instances.
      * @param inputs a {@link List} with {@link Input} meta-information descriptions of the future
      *            {@link Action} instances.
      */
-    public ActionType(@Nullable String UID, @Nullable List<ConfigDescriptionParameter> configDescriptions,
+    public ActionType(@Nullable String uid, @Nullable List<ConfigDescriptionParameter> configDescriptions,
             @Nullable List<Input> inputs) {
-        this(UID, configDescriptions, inputs, null);
+        this(uid, configDescriptions, inputs, null);
     }
 
     /**
      * Creates an instance of the {@link ActionType} with UID, a {@link List} of configuration descriptions,
      * a {@link List} of {@link Input} definitions and a {@link List} of {@link Output} descriptions.
      *
-     * @param UID the {@link ActionType}'s identifier, or {@code null} if a random identifier should be
+     * @param uid the {@link ActionType}'s identifier, or {@code null} if a random identifier should be
      *            generated.
      * @param configDescriptions describing meta-data for the configuration of the future {@link Action} instances.
      * @param inputs a {@link List} with {@link Input} meta-information descriptions of the future
@@ -75,9 +75,9 @@ public class ActionType extends ModuleType {
      * @param outputs a {@link List} with {@link Output} meta-information descriptions of the future
      *            {@link Action} instances.
      */
-    public ActionType(@Nullable String UID, @Nullable List<ConfigDescriptionParameter> configDescriptions,
+    public ActionType(@Nullable String uid, @Nullable List<ConfigDescriptionParameter> configDescriptions,
             @Nullable List<Input> inputs, @Nullable List<Output> outputs) {
-        this(UID, configDescriptions, null, null, null, null, inputs, outputs);
+        this(uid, configDescriptions, null, null, null, null, inputs, outputs);
     }
 
     /**

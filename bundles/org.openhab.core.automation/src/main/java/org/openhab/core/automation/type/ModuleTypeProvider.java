@@ -34,12 +34,12 @@ public interface ModuleTypeProvider extends Provider<ModuleType> {
      * Gets the localized {@link ModuleType} defined by this provider. When the localization is not specified
      * or it is not supported a {@link ModuleType} with default locale is returned.
      *
-     * @param UID unique identifier of the {@link ModuleType}.
+     * @param uid unique identifier of the {@link ModuleType}.
      * @param locale defines localization of label and description of the {@link ModuleType} or null.
      * @param <T> the type of the required object.
      * @return localized module type.
      */
-    <T extends ModuleType> @Nullable T getModuleType(String UID, @Nullable Locale locale);
+    <T extends ModuleType> @Nullable T getModuleType(String uid, @Nullable Locale locale);
 
     /**
      * Gets the localized {@link ModuleType}s defined by this provider. When localization is not specified or

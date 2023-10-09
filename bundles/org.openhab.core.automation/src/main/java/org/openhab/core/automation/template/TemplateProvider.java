@@ -34,14 +34,14 @@ public interface TemplateProvider<E extends Template> extends Provider<E> {
      * Gets the localized Templates defined by this provider. When the localization is not specified or it is not
      * supported a Template localized with default locale is returned.
      *
-     * @param UID unique identifier of the desired Template.
+     * @param uid unique identifier of the desired Template.
      * @param locale specifies the desired {@link Locale} to be used for localization of the returned element. If
      *            localization resources for this locale are not available or the passed locale is {@code null} the
      *            element is returned with the default localization.
      * @return the desired localized Template.
      */
     @Nullable
-    E getTemplate(String UID, @Nullable Locale locale);
+    E getTemplate(String uid, @Nullable Locale locale);
 
     /**
      * Gets the localized Templates defined by this provider. When localization is not specified or it is not supported

@@ -47,8 +47,8 @@ public abstract class TemplateFileProvider extends AbstractFileProvider<RuleTemp
     }
 
     @Override
-    public @Nullable RuleTemplate getTemplate(String UID, @Nullable Locale locale) {
-        return providedObjectsHolder.get(UID);
+    public @Nullable RuleTemplate getTemplate(String uid, @Nullable Locale locale) {
+        return providedObjectsHolder.get(uid);
     }
 
     @Override

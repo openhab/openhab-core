@@ -37,16 +37,16 @@ public class ActionImpl extends ModuleImpl implements Action {
     /**
      * Constructor of Action object.
      *
-     * @param UID action unique id.
+     * @param uid action unique id.
      * @param typeUID module type unique id.
      * @param configuration map of configuration values.
      * @param label the label
      * @param description description
      * @param inputs set of connections to other modules (triggers and other actions).
      */
-    public ActionImpl(String UID, String typeUID, @Nullable Configuration configuration, @Nullable String label,
+    public ActionImpl(String uid, String typeUID, @Nullable Configuration configuration, @Nullable String label,
             @Nullable String description, @Nullable Map<String, String> inputs) {
-        super(UID, typeUID, configuration, label, description);
+        super(uid, typeUID, configuration, label, description);
         this.inputs = inputs == null ? Map.of() : Map.copyOf(inputs);
     }
 
