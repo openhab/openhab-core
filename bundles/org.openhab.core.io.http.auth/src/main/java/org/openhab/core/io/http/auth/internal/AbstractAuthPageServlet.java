@@ -34,6 +34,7 @@ import org.openhab.core.auth.Authentication;
 import org.openhab.core.auth.AuthenticationException;
 import org.openhab.core.auth.AuthenticationProvider;
 import org.openhab.core.auth.User;
+import org.openhab.core.auth.UserApiTokenCredentials;
 import org.openhab.core.auth.UserRegistry;
 import org.openhab.core.auth.UsernamePasswordCredentials;
 import org.openhab.core.i18n.LocaleProvider;
@@ -124,10 +125,16 @@ public abstract class AbstractAuthPageServlet extends HttpServlet {
                 .isAfter(Instant.now().minus(Duration.ofSeconds(authenticationFailureCount)))) {
             throw new AuthenticationException("Too many consecutive login attempts");
         }
-
-        // Authenticate the user with the supplied credentials
-        UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(username, password);
-        Authentication auth = authProvider.authenticate(credentials);
+        Authentication auth;
+        if (!password.isEmpty()) {
+            // Authenticate the user with the supplied credentials
+            UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(username, password);
+            auth = authProvider.authenticate(credentials);
+        } else {
+            // try APItoken to login
+            UserApiTokenCredentials credentials = new UserApiTokenCredentials(username);
+            auth = authProvider.authenticate(credentials);
+        }
         logger.debug("Login successful: {}", auth.getUsername());
         lastAuthenticationFailure = null;
         authenticationFailureCount = 0;

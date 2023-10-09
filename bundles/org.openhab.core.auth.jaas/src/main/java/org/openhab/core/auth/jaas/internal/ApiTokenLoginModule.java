@@ -10,6 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
+
 package org.openhab.core.auth.jaas.internal;
 
 import java.security.Principal;
@@ -34,20 +35,24 @@ import org.slf4j.LoggerFactory;
 /**
  * This {@link LoginModule} delegates the authentication to a {@link UserRegistry}
  *
- * @author Yannick Schaus - initial contribution
- */
-public class ManagedUserLoginModule implements LoginModule {
+ * @author Felix Lo - initial contribution
+ *
+ **/
 
-    private final Logger logger = LoggerFactory.getLogger(ManagedUserLoginModule.class);
+public class ApiTokenLoginModule implements LoginModule {
+
+    private final Logger logger = LoggerFactory.getLogger(ApiTokenLoginModule.class);
 
     private UserRegistry userRegistry;
 
     private Subject subject;
+    private CallbackHandler callbackHandler;
 
     @Override
     public void initialize(Subject subject, CallbackHandler callbackHandler, Map<String, ?> sharedState,
             Map<String, ?> options) {
         this.subject = subject;
+        this.callbackHandler = callbackHandler;
     }
 
     @Override
@@ -59,7 +64,7 @@ public class ManagedUserLoginModule implements LoginModule {
 
             userRegistry = bundleContext.getService(serviceReference);
         } catch (Exception e) {
-            logger.error("Cannot initialize the ManagedLoginModule", e);
+            logger.error("Cannot initialize the ApiTokenLoginModule", e);
             throw new LoginException("Authorization failed");
         }
 
@@ -77,13 +82,14 @@ public class ManagedUserLoginModule implements LoginModule {
     }
 
     @Override
-    public boolean commit() throws LoginException {
-        return true;
+    public boolean abort() throws LoginException {
+        return false;
     }
 
     @Override
-    public boolean abort() throws LoginException {
-        return false;
+    public boolean commit() throws LoginException {
+
+        return true;
     }
 
     @Override
