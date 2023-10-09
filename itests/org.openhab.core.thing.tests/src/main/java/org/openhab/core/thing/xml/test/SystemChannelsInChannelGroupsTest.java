@@ -16,7 +16,6 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
@@ -68,7 +67,7 @@ public class SystemChannelsInChannelGroupsTest extends JavaOSGiTest {
     public void thingTypesWithSystemChannelsInChannelsGoupsShouldHavePorperChannelDefinitions() throws Exception {
         try (final AutoCloseable unused = loadedTestBundle()) {
             List<ThingType> thingTypes = thingTypeProvider.getThingTypes(null).stream()
-                    .filter(it -> "wireless-router".equals(it.getUID().getId())).collect(Collectors.toList());
+                    .filter(it -> "wireless-router".equals(it.getUID().getId())).toList();
             assertThat(thingTypes.size(), is(1));
 
             List<ChannelGroupType> channelGroupTypes = channelGroupTypeRegistry.getChannelGroupTypes();
@@ -82,17 +81,13 @@ public class SystemChannelsInChannelGroupsTest extends JavaOSGiTest {
 
             List<ChannelDefinition> myChannel = channelDefs.stream().filter(
                     it -> "test".equals(it.getId()) && "system:my-channel".equals(it.getChannelTypeUID().getAsString()))
-                    .collect(Collectors.toList());
+                    .toList();
 
-            List<ChannelDefinition> sigStr = channelDefs.stream()
-                    .filter(it -> "sigstr".equals(it.getId())
-                            && "system:signal-strength".equals(it.getChannelTypeUID().getAsString()))
-                    .collect(Collectors.toList());
+            List<ChannelDefinition> sigStr = channelDefs.stream().filter(it -> "sigstr".equals(it.getId())
+                    && "system:signal-strength".equals(it.getChannelTypeUID().getAsString())).toList();
 
-            List<ChannelDefinition> lowBat = channelDefs.stream()
-                    .filter(it -> "lowbat".equals(it.getId())
-                            && "system:low-battery".equals(it.getChannelTypeUID().getAsString()))
-                    .collect(Collectors.toList());
+            List<ChannelDefinition> lowBat = channelDefs.stream().filter(it -> "lowbat".equals(it.getId())
+                    && "system:low-battery".equals(it.getChannelTypeUID().getAsString())).toList();
 
             assertThat(myChannel.size(), is(1));
             assertThat(sigStr.size(), is(1));

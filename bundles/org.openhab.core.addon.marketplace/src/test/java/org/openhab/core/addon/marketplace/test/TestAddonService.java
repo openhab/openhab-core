@@ -16,7 +16,6 @@ import java.net.URI;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -76,7 +75,7 @@ public class TestAddonService extends AbstractRemoteAddonService {
         remoteCalls++;
         return REMOTE_ADDONS.stream().map(id -> Addon.create(SERVICE_PID + ":" + id).withType("binding")
                 .withId(id.substring("binding-".length())).withContentType(TestAddonHandler.TEST_ADDON_CONTENT_TYPE)
-                .withCompatible(!id.equals(INCOMPATIBLE_VERSION)).build()).collect(Collectors.toList());
+                .withCompatible(!id.equals(INCOMPATIBLE_VERSION)).build()).toList();
     }
 
     @Override

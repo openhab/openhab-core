@@ -386,7 +386,7 @@ public class ItemResource implements RESTResource {
     public Response getBinaryItemState(@HeaderParam("Accept") @Nullable String mediaType,
             @PathParam("itemname") @Parameter(description = "item name") String itemname) {
         List<String> acceptedMediaTypes = Arrays.stream(Objects.requireNonNullElse(mediaType, "").split(","))
-                .map(String::trim).collect(Collectors.toList());
+                .map(String::trim).toList();
 
         Item item = getItem(itemname);
 

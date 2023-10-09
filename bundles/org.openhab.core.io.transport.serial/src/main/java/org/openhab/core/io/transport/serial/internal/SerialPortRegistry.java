@@ -17,7 +17,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.io.transport.serial.ProtocolType.PathType;
@@ -79,7 +78,7 @@ public class SerialPortRegistry {
                     .count() > 0;
         }
 
-        return portCreators.stream().filter(filter).collect(Collectors.toList());
+        return portCreators.stream().filter(filter).toList();
     }
 
     public Collection<SerialPortProvider> getPortCreators() {

@@ -14,7 +14,6 @@ package org.openhab.core.common.registry;
 
 import java.util.Collection;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -70,8 +69,7 @@ public abstract class AbstractManagedProvider<@NonNull E extends Identifiable<K>
 
     @Override
     public Collection<E> getAll() {
-        return (Collection<E>) storage.getKeys().stream().map(this::getElement).filter(Objects::nonNull)
-                .collect(Collectors.toList());
+        return (Collection<E>) storage.getKeys().stream().map(this::getElement).filter(Objects::nonNull).toList();
     }
 
     @Override

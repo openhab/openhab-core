@@ -15,7 +15,6 @@ package org.openhab.core.io.rest.voice.internal;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.Consumes;
@@ -114,7 +113,7 @@ public class VoiceResource implements RESTResource {
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language) {
         final Locale locale = localeService.getLocale(language);
         List<HumanLanguageInterpreterDTO> dtos = voiceManager.getHLIs().stream().map(hli -> HLIMapper.map(hli, locale))
-                .collect(Collectors.toList());
+                .toList();
         return Response.ok(dtos).build();
     }
 
@@ -203,7 +202,7 @@ public class VoiceResource implements RESTResource {
     @Operation(operationId = "getVoices", summary = "Get the list of all voices.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = VoiceDTO.class)))) })
     public Response getVoices() {
-        List<VoiceDTO> dtos = voiceManager.getAllVoices().stream().map(VoiceMapper::map).collect(Collectors.toList());
+        List<VoiceDTO> dtos = voiceManager.getAllVoices().stream().map(VoiceMapper::map).toList();
         return Response.ok(dtos).build();
     }
 

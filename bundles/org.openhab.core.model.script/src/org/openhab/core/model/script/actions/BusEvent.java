@@ -16,7 +16,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.stream.Collectors;
 
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.items.GroupItem;
@@ -98,7 +97,7 @@ public class BusEvent {
     }
 
     private static <T extends State> List<String> getAcceptedCommandNames(Item item) {
-        return item.getAcceptedCommandTypes().stream().map(t -> t.getSimpleName()).collect(Collectors.toList());
+        return item.getAcceptedCommandTypes().stream().map(Class::getSimpleName).toList();
     }
 
     /**
@@ -171,7 +170,7 @@ public class BusEvent {
     }
 
     private static <T extends State> List<String> getAcceptedDataTypeNames(Item item) {
-        return item.getAcceptedDataTypes().stream().map(t -> t.getSimpleName()).collect(Collectors.toList());
+        return item.getAcceptedDataTypes().stream().map(Class::getSimpleName).toList();
     }
 
     /**

@@ -15,12 +15,10 @@ package org.openhab.core.thing.internal.profiles;
 import static org.openhab.core.thing.profiles.SystemProfiles.*;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -219,8 +217,7 @@ public class SystemProfileFactory implements ProfileFactory, ProfileAdvisor, Pro
 
     @Override
     public Collection<ProfileType> getProfileTypes(@Nullable Locale locale) {
-        return Collections.unmodifiableList(SUPPORTED_PROFILE_TYPES.stream()
-                .map(p -> createLocalizedProfileType(p, locale)).collect(Collectors.toList()));
+        return SUPPORTED_PROFILE_TYPES.stream().map(p -> createLocalizedProfileType(p, locale)).toList();
     }
 
     @Override

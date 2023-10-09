@@ -15,7 +15,6 @@ package org.openhab.core.io.console.internal.extension;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -51,8 +50,7 @@ public class ItemConsoleCommandCompleter implements ConsoleCommandCompleter {
     @SuppressWarnings("unchecked")
     public boolean complete(String[] args, int cursorArgumentIndex, int cursorPosition, List<String> candidates) {
         if (cursorArgumentIndex <= 0) {
-            return new StringsCompleter(
-                    itemRegistry.getAll().stream().map(i -> i.getName()).collect(Collectors.toList()), true)
+            return new StringsCompleter(itemRegistry.getAll().stream().map(i -> i.getName()).toList(), true)
                     .complete(args, cursorArgumentIndex, cursorPosition, candidates);
         }
         var localDataTypeGetter = dataTypeGetter;
@@ -62,8 +60,8 @@ public class ItemConsoleCommandCompleter implements ConsoleCommandCompleter {
                 Stream<Class<?>> enums = Stream.of(localDataTypeGetter.apply(item)).filter(Class::isEnum);
                 Stream<? super Enum<?>> enumConstants = enums.flatMap(
                         t -> Stream.of(Objects.requireNonNull(((Class<? extends Enum<?>>) t).getEnumConstants())));
-                return new StringsCompleter(enumConstants.map(Object::toString).collect(Collectors.toList()), false)
-                        .complete(args, cursorArgumentIndex, cursorPosition, candidates);
+                return new StringsCompleter(enumConstants.map(Object::toString).toList(), false).complete(args,
+                        cursorArgumentIndex, cursorPosition, candidates);
             } catch (ItemNotFoundException | ItemNotUniqueException e) {
                 return false;
             }

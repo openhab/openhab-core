@@ -702,8 +702,7 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
             verify(eventPublisherMock, atLeast(SEQUENCE.length + 1)).post(eventCaptor.capture());
         });
         events.get().addAll(eventCaptor.getAllValues());
-        List<Event> list = events.get().stream().filter(FirmwareUpdateProgressInfoEvent.class::isInstance)
-                .collect(Collectors.toList());
+        List<Event> list = events.get().stream().filter(FirmwareUpdateProgressInfoEvent.class::isInstance).toList();
         assertTrue(list.size() >= SEQUENCE.length);
         for (int i = 0; i < SEQUENCE.length; i++) {
             FirmwareUpdateProgressInfoEvent event = (FirmwareUpdateProgressInfoEvent) list.get(i);
@@ -903,7 +902,7 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
             ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
             verify(eventPublisherMock, atLeast(expectedEventCount)).post(eventCaptor.capture());
             List<Event> allValues = eventCaptor.getAllValues().stream()
-                    .filter(FirmwareUpdateResultInfoEvent.class::isInstance).collect(Collectors.toList());
+                    .filter(FirmwareUpdateResultInfoEvent.class::isInstance).toList();
             assertEquals(expectedEventCount, allValues.size());
             assertFailedFirmwareUpdate(THING1_UID, allValues.get(expectedEventCount - 1), text);
         });

@@ -18,7 +18,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -86,7 +85,7 @@ public class HSBType extends PercentType implements ComplexType, State, Command 
      * @param value a stringified HSBType value in the format "hue,saturation,brightness"
      */
     public HSBType(String value) {
-        List<String> constituents = Arrays.stream(value.split(",")).map(String::trim).collect(Collectors.toList());
+        List<String> constituents = Arrays.stream(value.split(",")).map(String::trim).toList();
         if (constituents.size() == 3) {
             this.hue = new BigDecimal(constituents.get(0));
             this.saturation = new BigDecimal(constituents.get(1));

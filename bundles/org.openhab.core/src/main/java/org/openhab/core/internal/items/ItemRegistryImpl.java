@@ -12,8 +12,6 @@
  */
 package org.openhab.core.internal.items;
 
-import static java.util.stream.Collectors.toList;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -262,11 +260,11 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
         // don't use #initialize and retain order of items in groups:
         List<String> oldNames = oldItem.getGroupNames();
         List<String> newNames = item.getGroupNames();
-        List<String> commonNames = oldNames.stream().filter(newNames::contains).collect(toList());
+        List<String> commonNames = oldNames.stream().filter(newNames::contains).toList();
 
-        removeFromGroupItems(oldItem, oldNames.stream().filter(name -> !commonNames.contains(name)).collect(toList()));
+        removeFromGroupItems(oldItem, oldNames.stream().filter(name -> !commonNames.contains(name)).toList());
         replaceInGroupItems(oldItem, item, commonNames);
-        addToGroupItems(item, newNames.stream().filter(name -> !commonNames.contains(name)).collect(toList()));
+        addToGroupItems(item, newNames.stream().filter(name -> !commonNames.contains(name)).toList());
         if (item instanceof GroupItem groupItem) {
             addMembersToGroupItem(groupItem);
         }

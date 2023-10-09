@@ -12,8 +12,6 @@
  */
 package org.openhab.core.thing.internal;
 
-import static java.util.stream.Collectors.toList;
-
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Stream;
@@ -49,7 +47,7 @@ public class AutoUpdateConfigDescriptionProvider implements MetadataConfigDescri
         return Stream.of( //
                 new ParameterOption("true", "Enforce an auto update"), //
                 new ParameterOption("false", "Veto an auto update") //
-        ).collect(toList());
+        ).toList();
     }
 
     @Override

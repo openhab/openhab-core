@@ -31,7 +31,6 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.servlet.Servlet;
@@ -172,7 +171,7 @@ public class AudioServlet extends HttpServlet implements AudioHTTPServer {
         final String streamId = substringBefore(substringAfterLast(requestURI, "/"), ".");
 
         List<String> acceptedMimeTypes = Stream.of(Objects.requireNonNullElse(req.getHeader("Accept"), "").split(","))
-                .map(String::trim).collect(Collectors.toList());
+                .map(String::trim).toList();
 
         StreamServed servedStream = servedStreams.get(streamId);
         if (servedStream == null) {
@@ -219,7 +218,7 @@ public class AudioServlet extends HttpServlet implements AudioHTTPServer {
         long now = System.nanoTime();
         final List<String> toRemove = servedStreams.entrySet().stream()
                 .filter(e -> e.getValue().timeout().get() < now && e.getValue().currentlyServedStream().get() <= 0)
-                .map(Entry::getKey).collect(Collectors.toList());
+                .map(Entry::getKey).toList();
 
         toRemove.forEach(streamId -> {
             // the stream has expired and no one is using it, we need to remove it!

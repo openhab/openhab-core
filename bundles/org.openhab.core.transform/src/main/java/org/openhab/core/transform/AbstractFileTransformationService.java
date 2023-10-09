@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -296,8 +295,7 @@ public abstract class AbstractFileTransformationService<T> implements Transforma
      */
     protected List<String> getFilenames(String[] validExtensions) {
         File path = new File(getSourcePath());
-        return Arrays.asList(path.listFiles(new FileExtensionsFilter(validExtensions))).stream().map(f -> f.getName())
-                .collect(Collectors.toList());
+        return Arrays.stream(path.listFiles(new FileExtensionsFilter(validExtensions))).map(File::getName).toList();
     }
 
     protected class FileExtensionsFilter implements FilenameFilter {

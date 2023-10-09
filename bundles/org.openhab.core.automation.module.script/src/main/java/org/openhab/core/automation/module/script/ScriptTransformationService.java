@@ -29,7 +29,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import javax.script.Compilable;
 import javax.script.CompiledScript;
@@ -246,7 +245,7 @@ public class ScriptTransformationService implements TransformationService, Confi
 
         if (ScriptProfile.CONFIG_TO_HANDLER_SCRIPT.equals(param) || ScriptProfile.CONFIG_TO_ITEM_SCRIPT.equals(param)) {
             return transformationRegistry.getTransformations(List.of(scriptType.toLowerCase())).stream()
-                    .map(c -> new ParameterOption(c.getUID(), c.getLabel())).collect(Collectors.toList());
+                    .map(c -> new ParameterOption(c.getUID(), c.getLabel())).toList();
         }
         return null;
     }

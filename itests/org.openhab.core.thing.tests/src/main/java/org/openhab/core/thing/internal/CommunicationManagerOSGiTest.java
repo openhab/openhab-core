@@ -18,7 +18,6 @@ import static org.mockito.Mockito.*;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.measure.quantity.Temperature;
@@ -196,8 +195,8 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
         }).when(profileFactoryMock).createProfile(isA(ProfileTypeUID.class), isA(ProfileCallback.class),
                 isA(ProfileContext.class));
 
-        when(profileFactoryMock.getSupportedProfileTypeUIDs()).thenReturn(Stream
-                .of(new ProfileTypeUID("test:state"), new ProfileTypeUID("test:trigger")).collect(Collectors.toList()));
+        when(profileFactoryMock.getSupportedProfileTypeUIDs())
+                .thenReturn(Stream.of(new ProfileTypeUID("test:state"), new ProfileTypeUID("test:trigger")).toList());
 
         manager.addProfileFactory(profileFactoryMock);
         manager.addProfileAdvisor(profileAdvisorMock);

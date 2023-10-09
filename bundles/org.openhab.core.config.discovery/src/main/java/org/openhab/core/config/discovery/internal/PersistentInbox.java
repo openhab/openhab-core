@@ -33,7 +33,6 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -189,7 +188,7 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
         if (thingUID == null) {
             throw new IllegalArgumentException("Thing UID must not be null");
         }
-        List<DiscoveryResult> results = stream().filter(forThingUID(thingUID)).collect(Collectors.toList());
+        List<DiscoveryResult> results = stream().filter(forThingUID(thingUID)).toList();
         if (results.isEmpty()) {
             throw new IllegalArgumentException("No Thing with UID " + thingUID.getAsString() + " in inbox");
         }
@@ -268,7 +267,7 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
         }
 
         List<String> configurationParameters = getConfigDescParams(thingType).stream()
-                .map(ConfigDescriptionParameter::getName).collect(Collectors.toList());
+                .map(ConfigDescriptionParameter::getName).toList();
 
         discoveryResult.normalizePropertiesOnConfigDescription(configurationParameters);
 
@@ -369,7 +368,7 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
 
     @Override
     public List<DiscoveryResult> getAll() {
-        return stream().collect(Collectors.toList());
+        return stream().toList();
     }
 
     @Override

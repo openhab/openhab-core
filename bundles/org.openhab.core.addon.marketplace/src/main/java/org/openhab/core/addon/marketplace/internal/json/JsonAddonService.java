@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -133,8 +132,7 @@ public class JsonAddonService extends AbstractRemoteAddonService {
                 return List.of();
             }
         }).flatMap(List::stream).filter(Objects::nonNull).map(e -> (AddonEntryDTO) e)
-                .filter(e -> showUnstable || "stable".equals(e.maturity)).map(this::fromAddonEntry)
-                .collect(Collectors.toList());
+                .filter(e -> showUnstable || "stable".equals(e.maturity)).map(this::fromAddonEntry).toList();
     }
 
     @Override

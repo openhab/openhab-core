@@ -49,7 +49,7 @@ public class StringListType implements Command, State {
     }
 
     public StringListType(StringType... rows) {
-        typeDetails = Arrays.stream(rows).map(StringType::toString).collect(Collectors.toList());
+        typeDetails = Arrays.stream(rows).map(StringType::toString).toList();
     }
 
     public StringListType(String... rows) {
@@ -61,7 +61,7 @@ public class StringListType implements Command, State {
      */
     public StringListType(String serialized) {
         typeDetails = Arrays.stream(serialized.split(REGEX_SPLITTER, -1))
-                .map(s -> s.replace(ESCAPED_DELIMITER, DELIMITER)).collect(Collectors.toList());
+                .map(s -> s.replace(ESCAPED_DELIMITER, DELIMITER)).toList();
     }
 
     public String getValue(final int index) {
