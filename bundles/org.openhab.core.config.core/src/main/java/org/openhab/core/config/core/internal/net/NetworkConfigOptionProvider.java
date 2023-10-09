@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -52,13 +51,11 @@ public class NetworkConfigOptionProvider implements ConfigOptionProvider {
             case PARAM_PRIMARY_ADDRESS:
                 Stream<CidrAddress> ipv4Addresses = NetUtil.getAllInterfaceAddresses().stream()
                         .filter(a -> a.getAddress() instanceof Inet4Address);
-                return ipv4Addresses.map(a -> new ParameterOption(a.toString(), a.toString()))
-                        .collect(Collectors.toList());
+                return ipv4Addresses.map(a -> new ParameterOption(a.toString(), a.toString())).toList();
             case PARAM_BROADCAST_ADDRESS:
                 List<String> broadcastAddrList = new ArrayList<>(NetUtil.getAllBroadcastAddresses());
                 broadcastAddrList.add("255.255.255.255");
-                return broadcastAddrList.stream().distinct().map(a -> new ParameterOption(a, a))
-                        .collect(Collectors.toList());
+                return broadcastAddrList.stream().distinct().map(a -> new ParameterOption(a, a)).toList();
             default:
                 return null;
         }

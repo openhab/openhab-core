@@ -19,7 +19,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -142,6 +141,6 @@ public class GenericItemChannelLinkProvider extends AbstractProvider<ItemChannel
 
     @Override
     public Collection<ItemChannelLink> getAll() {
-        return itemChannelLinkMap.values().stream().flatMap(Collection::stream).collect(Collectors.toList());
+        return itemChannelLinkMap.values().stream().flatMap(Collection::stream).toList();
     }
 }

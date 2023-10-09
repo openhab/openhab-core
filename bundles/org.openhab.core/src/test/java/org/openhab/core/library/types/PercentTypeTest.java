@@ -77,6 +77,12 @@ public class PercentTypeTest {
         PercentType.valueOf(value);
     }
 
+    @Test
+    public void testLowerCaseExponents() {
+        assertEquals(PercentType.valueOf("1e2"), PercentType.valueOf("1E2"));
+        assertEquals(PercentType.valueOf("1.1e1"), PercentType.valueOf("1.1E1"));
+    }
+
     @ParameterizedTest
     @MethodSource("locales")
     public void testLocalizedStringConstruction(Locale defaultLocale) {

@@ -22,7 +22,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.Consumes;
@@ -369,7 +368,7 @@ public class ConfigurableServiceResource implements RESTResource {
         } else if (pid instanceof String[] pids) {
             serviceId = getServicePID(cn, Arrays.asList(pids));
         } else if (pid instanceof Collection<?> pids) {
-            serviceId = getServicePID(cn, pids.stream().map(entry -> entry.toString()).collect(Collectors.toList()));
+            serviceId = getServicePID(cn, pids.stream().map(Object::toString).toList());
         } else {
             logger.warn("The component \"{}\" is using an unhandled service PID type ({}). Use component name.", cn,
                     pid.getClass());

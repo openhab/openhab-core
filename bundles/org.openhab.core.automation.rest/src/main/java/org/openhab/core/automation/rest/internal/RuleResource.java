@@ -25,7 +25,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.annotation.security.RolesAllowed;
@@ -433,7 +432,7 @@ public class RuleResource implements RESTResource {
         }
 
         final Stream<RuleExecution> ruleExecutions = ruleManager.simulateRuleExecutions(fromDate, untilDate);
-        return Response.ok(ruleExecutions.collect(Collectors.toList())).build();
+        return Response.ok(ruleExecutions.toList()).build();
     }
 
     private static ZonedDateTime parseTime(String sTime) {

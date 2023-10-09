@@ -21,7 +21,6 @@ import java.util.Locale;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -82,7 +81,7 @@ public class I18nConfigOptionsProvider implements ConfigOptionProvider {
         Comparator<TimeZone> byOffset = (t1, t2) -> t1.getRawOffset() - t2.getRawOffset();
         Comparator<TimeZone> byID = (t1, t2) -> t1.getID().compareTo(t2.getID());
         return ZoneId.getAvailableZoneIds().stream().map(TimeZone::getTimeZone).sorted(byOffset.thenComparing(byID))
-                .map(tz -> new ParameterOption(tz.getID(), getTimeZoneRepresentation(tz))).collect(Collectors.toList());
+                .map(tz -> new ParameterOption(tz.getID(), getTimeZoneRepresentation(tz))).toList();
     }
 
     private static String getTimeZoneRepresentation(TimeZone tz) {
@@ -107,6 +106,6 @@ public class I18nConfigOptionsProvider implements ConfigOptionProvider {
                 .distinct() //
                 .filter(po -> !po.getValue().isEmpty()) //
                 .sorted(Comparator.comparing(a -> a.getLabel())) //
-                .collect(Collectors.toList());
+                .toList();
     }
 }

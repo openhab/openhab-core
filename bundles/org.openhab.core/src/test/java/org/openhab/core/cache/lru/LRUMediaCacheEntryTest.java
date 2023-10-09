@@ -24,7 +24,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.mutable.Mutable;
 import org.apache.commons.lang3.mutable.MutableObject;
@@ -202,7 +201,7 @@ public class LRUMediaCacheEntryTest {
                 exceptionCatched.setValue(e);
                 return new byte[0];
             }
-        }).collect(Collectors.toList());
+        }).toList();
 
         IOException possibleException = exceptionCatched.getValue();
         if (possibleException != null) {

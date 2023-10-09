@@ -83,12 +83,6 @@
     <dependency>
       <groupId>org.eclipse.emf</groupId>
       <artifactId>org.eclipse.emf.mwe2.launch</artifactId>
-      <exclusions>
-        <exclusion>
-          <groupId>com.google.inject</groupId>
-          <artifactId>guice</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
 
     <dependency>
@@ -144,14 +138,6 @@
       <scope>compile</scope>
     </dependency>
 
-    <!-- Guice -->
-    <dependency>
-      <groupId>org.eclipse.orbit.bundles</groupId>
-      <artifactId>com.google.inject</artifactId>
-      <version>5.0.1.v20210324-2015</version>
-      <scope>compile</scope>
-    </dependency>
-
     <!-- TEST -->
     <dependency>
       <groupId>org.eclipse.xtext</groupId>
@@ -162,10 +148,6 @@
         <exclusion>
           <groupId>org.eclipse.platform</groupId>
           <artifactId>org.eclipse.osgi</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.google.inject</groupId>
-          <artifactId>guice</artifactId>
         </exclusion>
       </exclusions>
     </dependency>

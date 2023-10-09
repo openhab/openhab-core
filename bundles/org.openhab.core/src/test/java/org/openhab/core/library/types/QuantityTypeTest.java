@@ -146,6 +146,20 @@ public class QuantityTypeTest {
         QuantityType.valueOf("2m");
     }
 
+    @Test
+    public void testLowerCaseExponents() {
+        assertEquals(QuantityType.valueOf("10e3"), QuantityType.valueOf("10E3"));
+        assertEquals(QuantityType.valueOf("1.1e3 W"), QuantityType.valueOf("1.1E3 W"));
+        assertEquals(QuantityType.valueOf("1.1e3 m"), QuantityType.valueOf("1.1E3 m"));
+        assertEquals(QuantityType.valueOf("1.1e3m"), QuantityType.valueOf("1.1E3 m"));
+        assertEquals(QuantityType.valueOf("1.1e3m³"), QuantityType.valueOf("1.1E3 m³"));
+        assertEquals(QuantityType.valueOf("1.1e3m·cm"), QuantityType.valueOf("1.1E3 m·cm"));
+        assertEquals(QuantityType.valueOf("1.1e3 \u03BCm"), QuantityType.valueOf("1.1E3 µm"));
+        assertEquals(QuantityType.valueOf("1.1e3\u03BCm"), QuantityType.valueOf("1.1E3 µm"));
+        assertEquals(QuantityType.valueOf("1.1e3 \u00B5m"), QuantityType.valueOf("1.1E3 µm"));
+        assertEquals(QuantityType.valueOf("1.1e3\u00B5m"), QuantityType.valueOf("1.1E3 µm"));
+    }
+
     @ParameterizedTest
     @MethodSource("locales")
     public void testLocalizedStringConstruction(Locale defaultLocale) {

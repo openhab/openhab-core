@@ -18,7 +18,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.apache.karaf.jaas.boot.principal.GroupPrincipal;
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
@@ -36,7 +35,7 @@ import org.openhab.core.auth.UserRegistry;
  */
 public class ManagedUserBackingEngine implements BackingEngine {
 
-    UserRegistry userRegistry;
+    private final UserRegistry userRegistry;
 
     public ManagedUserBackingEngine(UserRegistry userRegistry) {
         this.userRegistry = userRegistry;
@@ -54,7 +53,7 @@ public class ManagedUserBackingEngine implements BackingEngine {
 
     @Override
     public List<UserPrincipal> listUsers() {
-        return userRegistry.getAll().stream().map(u -> new UserPrincipal(u.getName())).collect(Collectors.toList());
+        return userRegistry.getAll().stream().map(u -> new UserPrincipal(u.getName())).toList();
     }
 
     @Override
@@ -95,7 +94,7 @@ public class ManagedUserBackingEngine implements BackingEngine {
     public List<RolePrincipal> listRoles(Principal principal) {
         User user = userRegistry.get(principal.getName());
         if (user != null) {
-            return user.getRoles().stream().map(r -> new RolePrincipal(r)).collect(Collectors.toList());
+            return user.getRoles().stream().map(r -> new RolePrincipal(r)).toList();
         }
         return Collections.emptyList();
     }

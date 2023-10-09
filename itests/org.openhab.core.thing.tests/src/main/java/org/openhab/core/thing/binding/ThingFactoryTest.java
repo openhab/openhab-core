@@ -126,7 +126,7 @@ public class ThingFactoryTest extends JavaOSGiTest {
         ChannelDefinition cd1 = new ChannelDefinitionBuilder("channel1", channelType1.getUID()).build();
         ChannelDefinition cd2 = new ChannelDefinitionBuilder("channel2", channelType2.getUID()).build();
 
-        return Stream.of(cd1, cd2).collect(toList());
+        return Stream.of(cd1, cd2).toList();
     }
 
     @Test
@@ -204,7 +204,7 @@ public class ThingFactoryTest extends JavaOSGiTest {
                                 .withMultiple(true).withLimitToOptions(true).build();
 
                         return ConfigDescriptionBuilder.create(uri)
-                                .withParameters(Stream.of(p1, p2, p3, p4, p5, p6).collect(toList())).build();
+                                .withParameters(Stream.of(p1, p2, p3, p4, p5, p6).toList()).build();
                     }
                 });
 

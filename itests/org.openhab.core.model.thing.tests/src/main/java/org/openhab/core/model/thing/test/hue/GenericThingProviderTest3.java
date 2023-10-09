@@ -12,7 +12,6 @@
  */
 package org.openhab.core.model.thing.test.hue;
 
-import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -97,7 +96,7 @@ public class GenericThingProviderTest3 extends JavaOSGiTest {
                                 .withRequired(false).withDefault("hello world").build(),
                         ConfigDescriptionParameterBuilder.create("testConf", ConfigDescriptionParameter.Type.TEXT)
                                 .withRequired(false).withDefault("bar").build())
-                        .collect(toList()))
+                        .toList())
                 .build();
 
         ConfigDescriptionProvider configDescriptionProvider = mock(ConfigDescriptionProvider.class);

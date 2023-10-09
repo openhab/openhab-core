@@ -492,7 +492,7 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
 
         String hliIds = parameters.remove("hlis");
         if (hliIds != null) {
-            dr.hliIds = Arrays.stream(hliIds.split(",")).map(String::trim).collect(Collectors.toList());
+            dr.hliIds = Arrays.stream(hliIds.split(",")).map(String::trim).toList();
         }
         if (!parameters.isEmpty()) {
             throw new IllegalStateException(

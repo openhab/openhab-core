@@ -13,7 +13,6 @@
 package org.openhab.core.audio.internal;
 
 import static java.util.Comparator.comparing;
-import static java.util.stream.Collectors.toList;
 
 import java.io.File;
 import java.io.IOException;
@@ -312,10 +311,10 @@ public class AudioManagerImpl implements AudioManager, ConfigOptionProvider {
             final Locale safeLocale = locale != null ? locale : Locale.getDefault();
             if (CONFIG_DEFAULT_SOURCE.equals(param)) {
                 return audioSources.values().stream().sorted(comparing(s -> s.getLabel(safeLocale)))
-                        .map(s -> new ParameterOption(s.getId(), s.getLabel(safeLocale))).collect(toList());
+                        .map(s -> new ParameterOption(s.getId(), s.getLabel(safeLocale))).toList();
             } else if (CONFIG_DEFAULT_SINK.equals(param)) {
                 return audioSinks.values().stream().sorted(comparing(s -> s.getLabel(safeLocale)))
-                        .map(s -> new ParameterOption(s.getId(), s.getLabel(safeLocale))).collect(toList());
+                        .map(s -> new ParameterOption(s.getId(), s.getLabel(safeLocale))).toList();
             }
         }
         return null;

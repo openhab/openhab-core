@@ -12,8 +12,6 @@
  */
 package org.openhab.core.thing.xml.internal;
 
-import static java.util.stream.Collectors.toList;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -116,7 +114,7 @@ public class ThingTypeConverter extends AbstractDescriptionTypeConverter<ThingTy
             return Collections.emptyList();
         }
 
-        return Arrays.stream(extensible.split(",")).map(String::trim).collect(toList());
+        return Arrays.stream(extensible.split(",")).map(String::trim).toList();
     }
 
     protected @Nullable String readCategory(NodeIterator nodeIterator) {

@@ -12,7 +12,6 @@
  */
 package org.openhab.core.magic.internal.metadata;
 
-import static java.util.stream.Collectors.toList;
 import static org.openhab.core.config.core.ConfigDescriptionParameterBuilder.create;
 
 import java.util.List;
@@ -51,7 +50,7 @@ public class MagicMetadataProvider implements MetadataConfigDescriptionProvider 
         return Stream.of( //
                 new ParameterOption("just", "Just Magic"), //
                 new ParameterOption("pure", "Pure Magic") //
-        ).collect(toList());
+        ).toList();
     }
 
     @Override
@@ -60,7 +59,7 @@ public class MagicMetadataProvider implements MetadataConfigDescriptionProvider 
             case "just":
                 return Stream.of( //
                         create("electric", Type.BOOLEAN).withLabel("Use Electricity").build() //
-                ).collect(toList());
+                ).toList();
             case "pure":
                 return Stream.of( //
                         create("spell", Type.TEXT).withLabel("Spell").withDescription("The exact spell to use").build(), //
@@ -72,8 +71,8 @@ public class MagicMetadataProvider implements MetadataConfigDescriptionProvider 
                                         new ParameterOption("1", "Incredible"), //
                                         new ParameterOption("2", "Insane"), //
                                         new ParameterOption("3", "Ludicrous") //
-                                ).collect(toList())).build() //
-                ).collect(toList());
+                                ).toList()).build() //
+                ).toList();
         }
         return null;
     }

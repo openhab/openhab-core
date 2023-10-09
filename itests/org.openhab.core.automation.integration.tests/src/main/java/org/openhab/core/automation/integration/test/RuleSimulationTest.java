@@ -31,7 +31,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -147,7 +146,7 @@ public class RuleSimulationTest extends JavaOSGiTest {
         final ZonedDateTime from = ZonedDateTime.of(2021, 1, 4, 0, 0, 0, 0, ZoneId.systemDefault());
         final ZonedDateTime until = ZonedDateTime.of(2021, 1, 17, 23, 59, 59, 0, ZoneId.systemDefault());
 
-        List<RuleExecution> executions = ruleEngine.simulateRuleExecutions(from, until).collect(Collectors.toList());
+        List<RuleExecution> executions = ruleEngine.simulateRuleExecutions(from, until).toList();
 
         // Every rule fires twice a week. We simulate for two weeks so we expect 12 executions
         // TODO: must be 12, but Ephemeris Condition is not yet evaluated in test, because dayset is not configured.
