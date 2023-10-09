@@ -109,11 +109,11 @@ public class RuleTemplate implements Template {
      * @param configDescriptions describing meta-data for the configuration of the future {@link Rule} instances.
      * @param visibility the {@link RuleTemplate}'s visibility.
      */
-    public RuleTemplate(@Nullable String UID, @Nullable String label, @Nullable String description,
+    public RuleTemplate(@Nullable String uid, @Nullable String label, @Nullable String description,
             @Nullable Set<String> tags, @Nullable List<Trigger> triggers, @Nullable List<Condition> conditions,
             @Nullable List<Action> actions, @Nullable List<ConfigDescriptionParameter> configDescriptions,
             @Nullable Visibility visibility) {
-        this.uid = UID == null ? UUID.randomUUID().toString() : UID;
+        this.uid = uid == null ? UUID.randomUUID().toString() : uid;
         this.label = label;
         this.description = description;
         this.triggers = triggers == null ? List.of() : Collections.unmodifiableList(triggers);

@@ -98,7 +98,7 @@ public class TestModuleTypeProvider implements ModuleTypeProvider {
     }
 
     @Override
-    public <T extends ModuleType> @Nullable T getModuleType(String UID, @Nullable Locale locale) {
+    public <T extends ModuleType> @Nullable T getModuleType(String uid, @Nullable Locale locale) {
         return null;
     }
 

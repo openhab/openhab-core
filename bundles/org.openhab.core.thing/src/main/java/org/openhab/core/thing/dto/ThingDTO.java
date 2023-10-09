@@ -31,9 +31,9 @@ public class ThingDTO extends AbstractThingDTO {
     public ThingDTO() {
     }
 
-    protected ThingDTO(String thingTypeUID, String UID, String label, String bridgeUID, List<ChannelDTO> channels,
+    protected ThingDTO(String thingTypeUID, String uid, String label, String bridgeUID, List<ChannelDTO> channels,
             Map<String, Object> configuration, Map<String, String> properties, String location) {
-        super(thingTypeUID, UID, label, bridgeUID, configuration, properties, location);
+        super(thingTypeUID, uid, label, bridgeUID, configuration, properties, location);
         this.channels = channels;
     }
 }

@@ -47,8 +47,8 @@ public abstract class ModuleTypeFileProvider extends AbstractFileProvider<Module
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T extends ModuleType> @Nullable T getModuleType(String UID, @Nullable Locale locale) {
-        return (T) providedObjectsHolder.get(UID);
+    public <T extends ModuleType> @Nullable T getModuleType(String uid, @Nullable Locale locale) {
+        return (T) providedObjectsHolder.get(uid);
     }
 
     @SuppressWarnings("unchecked")

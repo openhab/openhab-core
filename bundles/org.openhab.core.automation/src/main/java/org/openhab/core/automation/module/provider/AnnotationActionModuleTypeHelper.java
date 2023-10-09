@@ -147,8 +147,8 @@ public class AnnotationActionModuleTypeHelper {
         return outputs;
     }
 
-    public @Nullable ActionType buildModuleType(String UID, Map<String, Set<ModuleInformation>> moduleInformation) {
-        Set<ModuleInformation> mis = moduleInformation.get(UID);
+    public @Nullable ActionType buildModuleType(String uid, Map<String, Set<ModuleInformation>> moduleInformation) {
+        Set<ModuleInformation> mis = moduleInformation.get(uid);
         List<ConfigDescriptionParameter> configDescriptions = new ArrayList<>();
 
         if (mis != null && !mis.isEmpty()) {
@@ -158,7 +158,7 @@ public class AnnotationActionModuleTypeHelper {
             if (mi.getConfigName() != null && mi.getThingUID() != null) {
                 logger.error(
                         "ModuleType with UID {} has thingUID ({}) and multi-service ({}) property set, ignoring it.",
-                        UID, mi.getConfigName(), mi.getThingUID());
+                        uid, mi.getConfigName(), mi.getThingUID());
                 return null;
             } else if (mi.getConfigName() != null) {
                 kind = ActionModuleKind.SERVICE;
@@ -170,7 +170,7 @@ public class AnnotationActionModuleTypeHelper {
             if (configParam != null) {
                 configDescriptions.add(configParam);
             }
-            return new ActionType(UID, configDescriptions, mi.getLabel(), mi.getDescription(), mi.getTags(),
+            return new ActionType(uid, configDescriptions, mi.getLabel(), mi.getDescription(), mi.getTags(),
                     mi.getVisibility(), mi.getInputs(), mi.getOutputs());
         }
         return null;
