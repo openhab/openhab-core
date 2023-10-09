@@ -13,9 +13,9 @@
 package org.openhab.core.config.core.status;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
 
@@ -66,7 +66,7 @@ public final class ConfigStatusInfo {
      * @return an unmodifiable collection of the corresponding configuration status messages
      */
     public Collection<ConfigStatusMessage> getConfigStatusMessages(Type... types) {
-        final Collection<Type> typesCollection = Arrays.asList(types);
+        final Collection<Type> typesCollection = List.of(types);
         return filter(typesCollection, configStatusMessage -> typesCollection.contains(configStatusMessage.type));
     }
 
@@ -77,7 +77,7 @@ public final class ConfigStatusInfo {
      * @return an unmodifiable collection of the corresponding configuration status messages
      */
     public Collection<ConfigStatusMessage> getConfigStatusMessages(String... parameterNames) {
-        final Collection<String> parameterNamesCollection = Arrays.asList(parameterNames);
+        final Collection<String> parameterNamesCollection = List.of(parameterNames);
         return filter(parameterNamesCollection,
                 configStatusMessage -> parameterNamesCollection.contains(configStatusMessage.parameterName));
     }

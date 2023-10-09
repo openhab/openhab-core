@@ -17,7 +17,6 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import java.time.Duration;
-import java.util.HashMap;
 import java.util.Map;
 
 import javax.measure.quantity.Temperature;
@@ -69,7 +68,7 @@ class ExpireManagerTest {
 
     @BeforeEach
     public void setup() {
-        expireManager = new ExpireManager(new HashMap<>(), eventPublisherMock, metadataRegistryMock, itemRegistryMock);
+        expireManager = new ExpireManager(Map.of(), eventPublisherMock, metadataRegistryMock, itemRegistryMock);
     }
 
     @Test

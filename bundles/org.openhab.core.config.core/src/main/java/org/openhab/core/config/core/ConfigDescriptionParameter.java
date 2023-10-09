@@ -15,7 +15,6 @@ package org.openhab.core.config.core;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -224,12 +223,12 @@ public class ConfigDescriptionParameter {
         if (options != null) {
             this.options = Collections.unmodifiableList(options);
         } else {
-            this.options = Collections.unmodifiableList(new LinkedList<>());
+            this.options = List.of();
         }
         if (filterCriteria != null) {
             this.filterCriteria = Collections.unmodifiableList(filterCriteria);
         } else {
-            this.filterCriteria = Collections.unmodifiableList(new LinkedList<>());
+            this.filterCriteria = List.of();
         }
     }
 

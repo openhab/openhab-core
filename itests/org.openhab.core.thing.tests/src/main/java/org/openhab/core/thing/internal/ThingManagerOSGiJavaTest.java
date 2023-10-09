@@ -20,7 +20,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 import java.net.URI;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -403,13 +402,13 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
         // verify a missing mandatory thing config prevents it from getting initialized
         when(mockConfigDescriptionProvider.getConfigDescription(eq(configDescriptionThing), any()))
                 .thenReturn(ConfigDescriptionBuilder.create(configDescriptionThing).withParameter(parameter).build());
-        assertThingStatus(Collections.emptyMap(), Collections.emptyMap(), ThingStatus.UNINITIALIZED,
+        assertThingStatus(Map.of(), Map.of(), ThingStatus.UNINITIALIZED,
                 ThingStatusDetail.HANDLER_CONFIGURATION_PENDING);
 
         // verify a missing mandatory channel config prevents it from getting initialized
         when(mockConfigDescriptionProvider.getConfigDescription(eq(configDescriptionChannel), any()))
                 .thenReturn(ConfigDescriptionBuilder.create(configDescriptionChannel).withParameter(parameter).build());
-        assertThingStatus(Map.of(CONFIG_PARAM_NAME, "value"), Collections.emptyMap(), ThingStatus.UNINITIALIZED,
+        assertThingStatus(Map.of(CONFIG_PARAM_NAME, "value"), Map.of(), ThingStatus.UNINITIALIZED,
                 ThingStatusDetail.HANDLER_CONFIGURATION_PENDING);
 
         // verify a satisfied config does not prevent it from getting initialized anymore

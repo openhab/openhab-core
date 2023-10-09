@@ -13,7 +13,6 @@
 package org.openhab.core.config.discovery.internal.console;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
@@ -134,12 +133,12 @@ public class DiscoveryConsoleCommandExtension extends AbstractConsoleCommandExte
 
     @Override
     public List<String> getUsages() {
-        return Arrays.asList(new String[] {
+        return List.of(
                 buildCommandUsage(SUBCMD_START + " <thingTypeUID|bindingID>",
                         "runs a discovery on a given thing type or binding"),
                 buildCommandUsage(SUBCMD_BACKGROUND_DISCOVERY_ENABLE + " <PID>",
                         "enables background discovery for the discovery service with the given PID"),
                 buildCommandUsage(SUBCMD_BACKGROUND_DISCOVERY_DISABLE + " <PID>",
-                        "disables background discovery for the discovery service with the given PID") });
+                        "disables background discovery for the discovery service with the given PID"));
     }
 }

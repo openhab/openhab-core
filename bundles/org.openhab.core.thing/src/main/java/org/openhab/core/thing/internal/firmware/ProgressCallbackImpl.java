@@ -12,10 +12,9 @@
  */
 package org.openhab.core.thing.internal.firmware;
 
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 
 import org.openhab.core.events.Event;
@@ -90,7 +89,7 @@ final class ProgressCallbackImpl implements ProgressCallback {
         if (sequence == null || sequence.length == 0) {
             throw new IllegalArgumentException("Sequence must not be null or empty.");
         }
-        this.sequence = Collections.unmodifiableCollection(Arrays.asList(sequence));
+        this.sequence = List.of(sequence);
         progressIterator = this.sequence.iterator();
         this.state = InternalState.INITIALIZED;
     }

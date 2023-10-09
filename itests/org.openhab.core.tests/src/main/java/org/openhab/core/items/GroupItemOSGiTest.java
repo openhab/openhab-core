@@ -19,7 +19,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 import static org.openhab.core.library.unit.Units.ONE;
 
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -108,9 +107,7 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
 
             @Override
             public Set<String> getSubscribedEventTypes() {
-                Set<String> hs = new HashSet<>();
-                hs.add(ItemUpdatedEvent.TYPE);
-                return hs;
+                return Set.of(ItemUpdatedEvent.TYPE);
             }
         });
 

@@ -27,7 +27,6 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
 import java.time.Instant;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -202,7 +201,7 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
         /*
          * Assert that the configuration is updated with an empty list for a file in the services directory.
          */
-        verifyValuesOfConfigurationProperty("local.service.fourth.pid", "service.property", 0, Collections.emptyList());
+        verifyValuesOfConfigurationProperty("local.service.fourth.pid", "service.property", 0, List.of());
 
         /*
          * Assert some edge cases containing special chars

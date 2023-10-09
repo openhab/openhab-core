@@ -59,16 +59,11 @@ public class ChannelDefinition {
             throw new IllegalArgumentException("The ID must neither be null nor empty!");
         }
 
-        if (properties != null) {
-            this.properties = Collections.unmodifiableMap(properties);
-        } else {
-            this.properties = Collections.emptyMap();
-        }
-
         this.id = id;
         this.channelTypeUID = channelTypeUID;
         this.label = label;
         this.description = description;
+        this.properties = properties != null ? Collections.unmodifiableMap(properties) : Map.of();
         this.autoUpdatePolicy = autoUpdatePolicy;
     }
 
@@ -114,7 +109,7 @@ public class ChannelDefinition {
     /**
      * Returns the properties for this {@link ChannelDefinition}
      *
-     * @return the unmodfiable properties for this {@link ChannelDefinition} (not null)
+     * @return the unmodifiable properties for this {@link ChannelDefinition} (not null)
      */
     public Map<String, String> getProperties() {
         return properties;

@@ -90,11 +90,11 @@ public class SerialCommandExtension extends AbstractConsoleCommandExtension {
 
     @Override
     public List<String> getUsages() {
-        return Arrays.asList(new String[] { //
+        return List.of( //
                 buildCommandUsage(SUBCMD_IDENTIFIER_ALL, "lists all identifiers"), //
                 buildCommandUsage(SUBCMD_IDENTIFIER_NAME, "lists a specific identifier"), //
                 buildCommandUsage(SUBCMD_PORT_CREATORS, "gets details about the port creators") //
-        });
+        );
     }
 
     private static String str(final @Nullable SerialPortIdentifier id) {

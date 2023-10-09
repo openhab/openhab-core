@@ -12,7 +12,6 @@
  */
 package org.openhab.core.ui.internal.components;
 
-import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -118,7 +117,7 @@ public class UIComponentRegistryFactoryImpl implements UIComponentRegistryFactor
         Set<UIComponentProvider> existing = providers.get(provider.getNamespace());
 
         if (existing == null) {
-            existing = Collections.emptySet();
+            existing = Set.of();
         }
 
         Set<UIComponentProvider> updated = new HashSet<>(existing);

@@ -22,7 +22,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
@@ -236,7 +235,7 @@ public class AudioManagerTest {
             audioManager.modified(Map.of(AudioManagerImpl.CONFIG_DEFAULT_SOURCE, audioSource.getId()));
         } else {
             // just to make sure there is no default source
-            audioManager.modified(Collections.emptyMap());
+            audioManager.modified(Map.of());
         }
 
         assertThat(String.format("The source %s was not registered", audioSource.getId()), audioManager.getSource(),

@@ -15,8 +15,8 @@ package org.openhab.core.types;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -46,7 +46,7 @@ class TypeParserTest {
     }
 
     public static Collection<Object[]> stringItemParameters() {
-        return Arrays.asList(new Object[][] { //
+        return List.of(new Object[][] { //
                 { new ParameterSet("UNDEF", UnDefType.class) }, //
                 { new ParameterSet("ABC", StringType.class) }, //
                 { new ParameterSet("123", StringType.class) }, //

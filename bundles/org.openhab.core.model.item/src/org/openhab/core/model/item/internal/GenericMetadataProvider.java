@@ -15,7 +15,6 @@ package org.openhab.core.model.item.internal;
 import static java.util.stream.Collectors.toSet;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -107,7 +106,7 @@ public class GenericMetadataProvider extends AbstractProvider<Metadata> implemen
     public Collection<Metadata> getAll() {
         try {
             lock.readLock().lock();
-            return Collections.unmodifiableSet(new HashSet<>(metadata));
+            return Set.copyOf(metadata);
         } finally {
             lock.readLock().unlock();
         }

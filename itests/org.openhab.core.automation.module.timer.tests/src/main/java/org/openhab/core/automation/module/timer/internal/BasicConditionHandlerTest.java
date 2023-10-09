@@ -17,7 +17,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -104,10 +103,7 @@ public abstract class BasicConditionHandlerTest extends JavaOSGiTest {
 
             @Override
             public Collection<Item> getAll() {
-                List<Item> items = new ArrayList<>();
-                items.add(new SwitchItem("TriggeredItem"));
-                items.add(new SwitchItem("SwitchedItem"));
-                return items;
+                return List.of(new SwitchItem("TriggeredItem"), new SwitchItem("SwitchedItem"));
             }
 
             @Override

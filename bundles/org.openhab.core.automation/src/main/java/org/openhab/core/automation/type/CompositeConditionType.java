@@ -39,7 +39,7 @@ public class CompositeConditionType extends ConditionType {
      * Creates an instance of {@code CompositeConditionType} with ordered set of {@link Condition}s. It initializes
      * only base properties of the {@code CompositeConditionType}.
      *
-     * @param UID is the {@link ConditionType}'s identifier, or {@code null} if a random identifier
+     * @param uid is the {@link ConditionType}'s identifier, or {@code null} if a random identifier
      *            should be generated.
      * @param configDescriptions is a {@link List} of configuration descriptions describing meta-data for the
      *            configuration of the future {@link Condition} instances.
@@ -47,17 +47,17 @@ public class CompositeConditionType extends ConditionType {
      *            {@link Condition} instances.
      * @param children is a {@link List} of {@link Condition}s.
      */
-    public CompositeConditionType(@Nullable String UID, @Nullable List<ConfigDescriptionParameter> configDescriptions,
+    public CompositeConditionType(@Nullable String uid, @Nullable List<ConfigDescriptionParameter> configDescriptions,
             @Nullable List<Input> inputs, @Nullable List<Condition> children) {
-        super(UID, configDescriptions, inputs);
-        this.children = children != null ? Collections.unmodifiableList(children) : Collections.emptyList();
+        super(uid, configDescriptions, inputs);
+        this.children = children != null ? Collections.unmodifiableList(children) : List.of();
     }
 
     /**
      * Creates an instance of {@code CompositeConditionType} with ordered set of {@link Condition}s. It initializes
      * all properties of the {@code CompositeConditionType}.
      *
-     * @param UID is the {@link ConditionType}'s identifier, or {@code null} if a random identifier
+     * @param uid is the {@link ConditionType}'s identifier, or {@code null} if a random identifier
      *            should be generated.
      * @param configDescriptions is a {@link List} of configuration descriptions describing meta-data for the
      *            configuration of the future {@link Condition} instances.
@@ -74,11 +74,11 @@ public class CompositeConditionType extends ConditionType {
      *            {@link Condition} instances.
      * @param children is a {@link List} of {@link Condition}s.
      */
-    public CompositeConditionType(@Nullable String UID, @Nullable List<ConfigDescriptionParameter> configDescriptions,
+    public CompositeConditionType(@Nullable String uid, @Nullable List<ConfigDescriptionParameter> configDescriptions,
             @Nullable String label, @Nullable String description, @Nullable Set<String> tags,
             @Nullable Visibility visibility, @Nullable List<Input> inputs, @Nullable List<Condition> children) {
-        super(UID, configDescriptions, label, description, tags, visibility, inputs);
-        this.children = children != null ? Collections.unmodifiableList(children) : Collections.emptyList();
+        super(uid, configDescriptions, label, description, tags, visibility, inputs);
+        this.children = children != null ? Collections.unmodifiableList(children) : List.of();
     }
 
     /**

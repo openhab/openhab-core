@@ -14,8 +14,8 @@ package org.openhab.core.io.transport.serial.internal;
 
 import java.net.URI;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
+import java.util.Set;
 import java.util.function.Predicate;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -83,7 +83,7 @@ public class SerialPortRegistry {
 
     public Collection<SerialPortProvider> getPortCreators() {
         synchronized (portCreators) {
-            return Collections.unmodifiableCollection(new HashSet<>(portCreators));
+            return Set.copyOf(portCreators);
         }
     }
 }

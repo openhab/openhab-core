@@ -22,8 +22,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.hamcrest.CoreMatchers;
@@ -75,8 +73,7 @@ public class EnrichedThingDTOMapperTest {
 
     @Test
     public void shouldMapEnrichedThingDTO() {
-        when(linkedItemsMapMock.get("1"))
-                .thenReturn(Stream.of("linkedItem1", "linkedItem2").collect(Collectors.toSet()));
+        when(linkedItemsMapMock.get("1")).thenReturn(Set.of("linkedItem1", "linkedItem2"));
 
         EnrichedThingDTO enrichedThingDTO = EnrichedThingDTOMapper.map(thingMock, thingStatusInfoMock,
                 firmwareStatusMock, linkedItemsMapMock, true);

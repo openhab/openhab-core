@@ -13,7 +13,6 @@
 package org.openhab.core.karaf.internal.jaas;
 
 import java.security.Principal;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -67,12 +66,12 @@ public class ManagedUserBackingEngine implements BackingEngine {
 
     @Override
     public List<GroupPrincipal> listGroups(UserPrincipal user) {
-        return Collections.emptyList();
+        return List.of();
     }
 
     @Override
     public Map<GroupPrincipal, String> listGroups() {
-        return Collections.emptyMap();
+        return Map.of();
     }
 
     @Override
@@ -96,7 +95,7 @@ public class ManagedUserBackingEngine implements BackingEngine {
         if (user != null) {
             return user.getRoles().stream().map(r -> new RolePrincipal(r)).toList();
         }
-        return Collections.emptyList();
+        return List.of();
     }
 
     @Override

@@ -18,7 +18,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -252,7 +251,7 @@ public class ConfigUtil {
     private static Collection<Object> normalizeCollection(Collection<@NonNull ?> collection)
             throws IllegalArgumentException {
         if (collection.isEmpty()) {
-            return Collections.emptyList();
+            return List.of();
         } else {
             final List<Object> lst = new ArrayList<>(collection.size());
             for (final Object it : collection) {

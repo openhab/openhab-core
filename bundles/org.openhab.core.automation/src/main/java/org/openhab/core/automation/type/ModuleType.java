@@ -78,19 +78,19 @@ public abstract class ModuleType implements Identifiable<String> {
      * Creates a {@link ModuleType} instance. This constructor is responsible to initialize common base properties of
      * the {@link ModuleType}s.
      *
-     * @param UID the {@link ModuleType}'s identifier, or {@code null} if a random identifier should be
+     * @param uid the {@link ModuleType}'s identifier, or {@code null} if a random identifier should be
      *            generated.
      * @param configDescriptions describing meta-data for the configuration of the future {@link Module} instances
      */
-    public ModuleType(@Nullable String UID, @Nullable List<ConfigDescriptionParameter> configDescriptions) {
-        this(UID, configDescriptions, null, null, null, null);
+    public ModuleType(@Nullable String uid, @Nullable List<ConfigDescriptionParameter> configDescriptions) {
+        this(uid, configDescriptions, null, null, null, null);
     }
 
     /**
      * Creates a {@link ModuleType} instance. This constructor is responsible to initialize all common properties of
      * the {@link ModuleType}s.
      *
-     * @param UID the {@link ModuleType}'s identifier, or {@code null} if a random identifier should be
+     * @param uid the {@link ModuleType}'s identifier, or {@code null} if a random identifier should be
      *            generated.
      * @param configDescriptions describing meta-data for the configuration of the future {@link Module} instances.
      * @param label a short and accurate, human-readable label of the {@link ModuleType}.
@@ -102,15 +102,15 @@ public abstract class ModuleType implements Identifiable<String> {
      *            If {@code null} is provided the default visibility {@link Visibility#VISIBLE} will be
      *            used.
      */
-    public ModuleType(@Nullable String UID, @Nullable List<ConfigDescriptionParameter> configDescriptions,
+    public ModuleType(@Nullable String uid, @Nullable List<ConfigDescriptionParameter> configDescriptions,
             @Nullable String label, @Nullable String description, @Nullable Set<String> tags,
             @Nullable Visibility visibility) {
-        this.uid = UID == null ? UUID.randomUUID().toString() : UID;
+        this.uid = uid == null ? UUID.randomUUID().toString() : uid;
         this.label = label;
         this.description = description;
-        this.configDescriptions = configDescriptions == null ? Collections.emptyList()
+        this.configDescriptions = configDescriptions == null ? List.of()
                 : Collections.unmodifiableList(configDescriptions);
-        this.tags = tags == null ? Collections.emptySet() : Collections.unmodifiableSet(tags);
+        this.tags = tags == null ? Set.of() : Collections.unmodifiableSet(tags);
         this.visibility = visibility == null ? Visibility.VISIBLE : visibility;
     }
 

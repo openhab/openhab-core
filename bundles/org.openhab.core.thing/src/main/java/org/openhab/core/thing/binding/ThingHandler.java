@@ -13,7 +13,7 @@
 package org.openhab.core.thing.binding;
 
 import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -178,6 +178,6 @@ public interface ThingHandler {
      * @return - list of classes that will be registered as OSGi services
      */
     default Collection<Class<? extends ThingHandlerService>> getServices() {
-        return Collections.emptyList();
+        return List.of();
     }
 }

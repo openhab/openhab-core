@@ -13,7 +13,6 @@
 package org.openhab.core.model.thing.internal;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
@@ -117,7 +116,7 @@ public class GenericItemChannelLinkProvider extends AbstractProvider<ItemChannel
             logger.warn("There already is an update transaction for generic item channel links. Continuing anyway.");
         }
         Set<String> previous = contextMap.get(context);
-        previousItemNames = previous != null ? new HashSet<>(previous) : Collections.emptySet();
+        previousItemNames = previous != null ? new HashSet<>(previous) : new HashSet<>();
     }
 
     @Override

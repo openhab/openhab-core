@@ -189,7 +189,7 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
 
             List<DiscourseUser> users = pages.stream().flatMap(p -> Stream.of(p.users)).toList();
             pages.stream().flatMap(p -> Stream.of(p.topicList.topics))
-                    .filter(t -> showUnpublished || Arrays.asList(t.tags).contains(PUBLISHED_TAG))
+                    .filter(t -> showUnpublished || List.of(t.tags).contains(PUBLISHED_TAG))
                     .map(t -> Optional.ofNullable(convertTopicItemToAddon(t, users)))
                     .forEach(a -> a.ifPresent(addons::add));
         } catch (Exception e) {

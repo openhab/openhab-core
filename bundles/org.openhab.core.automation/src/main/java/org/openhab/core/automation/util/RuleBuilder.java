@@ -14,7 +14,6 @@ package org.openhab.core.automation.util;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -146,12 +145,12 @@ public class RuleBuilder {
     }
 
     public RuleBuilder withTags(String... tags) {
-        withTags(new HashSet<>(Arrays.asList(tags)));
+        withTags(Set.of(tags));
         return this;
     }
 
     public RuleBuilder withTags(@Nullable Set<String> tags) {
-        this.tags = tags != null ? new HashSet<>(tags) : Collections.emptySet();
+        this.tags = tags != null ? Set.copyOf(tags) : Set.of();
         return this;
     }
 
@@ -161,7 +160,7 @@ public class RuleBuilder {
     }
 
     public RuleBuilder withConfigurationDescriptions(@Nullable List<ConfigDescriptionParameter> configDescs) {
-        this.configDescriptions = configDescs != null ? new LinkedList<>(configDescs) : Collections.emptyList();
+        this.configDescriptions = configDescs != null ? List.copyOf(configDescs) : List.of();
         return this;
     }
 

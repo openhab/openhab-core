@@ -51,7 +51,7 @@ public class StateDescription {
         this.step = step;
         this.pattern = pattern;
         this.readOnly = readOnly;
-        this.options = options == null ? Collections.emptyList() : Collections.unmodifiableList(options);
+        this.options = options == null ? List.of() : Collections.unmodifiableList(options);
     }
 
     /**

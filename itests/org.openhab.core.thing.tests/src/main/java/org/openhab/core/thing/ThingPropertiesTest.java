@@ -14,7 +14,6 @@ package org.openhab.core.thing;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -34,19 +33,14 @@ import org.openhab.core.thing.type.ThingTypeBuilder;
 @NonNullByDefault
 public class ThingPropertiesTest extends JavaOSGiTest {
 
-    private final Map<String, String> properties = new HashMap<String, String>() {
-        private static final long serialVersionUID = 1L;
-        {
-            put("key1", "value1");
-            put("key2", "value2");
-        }
-    };
+    private static final Map<String, String> PROPERTIES = Map.of("key1", "value1", "key2", "value2");
+
     private @NonNullByDefault({}) Thing thing;
 
     @BeforeEach
     public void setup() {
         ThingType thingType = ThingTypeBuilder.instance(new ThingTypeUID("bindingId", "thingTypeId"), "label")
-                .withProperties(properties).build();
+                .withProperties(PROPERTIES).build();
         thing = ThingFactory.createThing(thingType, new ThingUID(thingType.getUID(), "thingId"), new Configuration());
     }
 

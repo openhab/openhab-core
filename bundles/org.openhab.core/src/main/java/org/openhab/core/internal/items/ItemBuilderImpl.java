@@ -13,8 +13,6 @@
 package org.openhab.core.internal.items;
 
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -41,11 +39,11 @@ public class ItemBuilderImpl implements ItemBuilder {
     private final String name;
 
     private @Nullable String category;
-    private List<String> groups = Collections.emptyList();
+    private List<String> groups = List.of();
     private @Nullable String label;
     private @Nullable Item baseItem;
     private @Nullable GroupFunction groupFunction;
-    private Set<String> tags = Collections.emptySet();
+    private Set<String> tags = Set.of();
 
     public ItemBuilderImpl(Set<ItemFactory> itemFactories, Item item) {
         this.itemFactories = itemFactories;
@@ -78,7 +76,7 @@ public class ItemBuilderImpl implements ItemBuilder {
         if (groups != null) {
             this.groups = new LinkedList<>(groups);
         } else {
-            this.groups = Collections.emptyList();
+            this.groups = List.of();
         }
         return this;
     }
@@ -109,7 +107,7 @@ public class ItemBuilderImpl implements ItemBuilder {
 
     @Override
     public ItemBuilder withTags(@Nullable Set<String> tags) {
-        this.tags = tags != null ? new HashSet<>(tags) : Collections.emptySet();
+        this.tags = tags != null ? Set.copyOf(tags) : Set.of();
         return this;
     }
 

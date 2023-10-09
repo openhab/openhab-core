@@ -18,7 +18,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import java.time.Duration;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -51,26 +50,26 @@ public class TimeOfDayConditionHandlerTest extends BasicConditionHandlerTest {
         // Time is between start and end time -> should return true.
         TimeOfDayConditionHandler handler = getTimeOfDayConditionHandler(beforeCurrentTime.toString(),
                 afterCurrentTime.toString());
-        assertThat(handler.isSatisfied(Collections.emptyMap()), is(true));
+        assertThat(handler.isSatisfied(Map.of()), is(true));
 
         // Time is equal to start time -> should return true
         handler = getTimeOfDayConditionHandler(currentTime.toString(), afterCurrentTime.toString());
-        assertThat(handler.isSatisfied(Collections.emptyMap()), is(true));
+        assertThat(handler.isSatisfied(Map.of()), is(true));
 
         // Time is equal to end time -> should return false
         handler = getTimeOfDayConditionHandler(beforeCurrentTime.toString(), currentTime.toString());
-        assertThat(handler.isSatisfied(Collections.emptyMap()), is(false));
+        assertThat(handler.isSatisfied(Map.of()), is(false));
 
         // Start value is in the future & end value is in the past
         // -> should return false
         handler = getTimeOfDayConditionHandler(afterCurrentTime.toString(), beforeCurrentTime.toString());
-        assertThat(handler.isSatisfied(Collections.emptyMap()), is(false));
+        assertThat(handler.isSatisfied(Map.of()), is(false));
 
         // Start & end time are in the future & start time is after the end time
         // -> should return true
         handler = getTimeOfDayConditionHandler(afterCurrentTime.plus(Duration.ofMinutes(2)).toString(),
                 afterCurrentTime.toString());
-        assertThat(handler.isSatisfied(Collections.emptyMap()), is(true));
+        assertThat(handler.isSatisfied(Map.of()), is(true));
     }
 
     private TimeOfDayConditionHandler getTimeOfDayConditionHandler(String startTime, String endTime) {

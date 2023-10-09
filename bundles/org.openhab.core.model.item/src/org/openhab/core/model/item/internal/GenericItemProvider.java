@@ -15,7 +15,6 @@ package org.openhab.core.model.item.internal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -477,7 +476,7 @@ public class GenericItemProvider extends AbstractProvider<Item>
 
     private Map<String, Item> toItemMap(@Nullable Collection<Item> items) {
         if (items == null || items.isEmpty()) {
-            return Collections.emptyMap();
+            return Map.of();
         }
 
         Map<String, Item> ret = new LinkedHashMap<>();

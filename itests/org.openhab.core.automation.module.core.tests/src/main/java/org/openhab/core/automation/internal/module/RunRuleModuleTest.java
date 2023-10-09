@@ -16,7 +16,6 @@ import static java.util.Map.entry;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -128,8 +127,7 @@ public class RunRuleModuleTest extends JavaOSGiTest {
         final Configuration outerRuleTriggerConfig = new Configuration(
                 Map.ofEntries(entry("topic", "openhab/items/ruleTrigger/*"), entry("types", "ItemStateEvent")));
 
-        final List<String> ruleUIDs = new ArrayList<>();
-        ruleUIDs.add("exampleSceneRule");
+        final List<String> ruleUIDs = List.of("exampleSceneRule");
 
         final Configuration outerRuleActionConfig = new Configuration(Map.of("ruleUIDs", ruleUIDs));
 

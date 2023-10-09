@@ -18,7 +18,6 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -206,7 +205,7 @@ public class ConfigurableServiceResource implements RESTResource {
         try {
             Configuration configuration = configurationService.get(serviceId);
             return configuration != null ? Response.ok(configuration.getProperties()).build()
-                    : Response.ok(Collections.emptyMap()).build();
+                    : Response.ok(Map.of()).build();
         } catch (IOException ex) {
             logger.error("Cannot get configuration for service {}: ", serviceId, ex);
             return Response.status(Status.INTERNAL_SERVER_ERROR).build();

@@ -12,8 +12,7 @@
  */
 package org.openhab.core.events.system;
 
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -35,7 +34,7 @@ public class SystemEventFactory extends AbstractEventFactory {
     static final String SYSTEM_STARTLEVEL_TOPIC = "openhab/system/startlevel";
 
     public SystemEventFactory() {
-        super(Stream.of(StartlevelEvent.TYPE).collect(Collectors.toSet()));
+        super(Set.of(StartlevelEvent.TYPE));
     }
 
     /**

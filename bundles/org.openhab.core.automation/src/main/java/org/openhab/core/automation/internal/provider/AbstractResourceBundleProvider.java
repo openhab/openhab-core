@@ -21,7 +21,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
@@ -393,7 +392,7 @@ public abstract class AbstractResourceBundleProvider<@NonNull E> {
                 return config;
             }
         }
-        return Collections.emptyList();
+        return List.of();
     }
 
     /**
@@ -433,7 +432,7 @@ public abstract class AbstractResourceBundleProvider<@NonNull E> {
                 }
             }
         }
-        return Collections.emptySet();
+        return Set.of();
     }
 
     @SuppressWarnings("unchecked")

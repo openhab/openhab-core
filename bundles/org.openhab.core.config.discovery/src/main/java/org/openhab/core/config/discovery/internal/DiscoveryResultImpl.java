@@ -39,7 +39,7 @@ public class DiscoveryResultImpl implements DiscoveryResult {
     private @NonNullByDefault({}) ThingUID thingUID;
     private @Nullable ThingTypeUID thingTypeUID;
 
-    private Map<String, Object> properties = Collections.emptyMap();
+    private Map<String, Object> properties = Map.of();
     private @Nullable String representationProperty;
     private @NonNullByDefault({}) DiscoveryResultFlag flag;
     private @NonNullByDefault({}) String label;
@@ -82,7 +82,7 @@ public class DiscoveryResultImpl implements DiscoveryResult {
         this.thingUID = thingUID;
         this.thingTypeUID = thingTypeUID;
         this.bridgeUID = bridgeUID;
-        this.properties = properties == null ? Collections.emptyMap() : Collections.unmodifiableMap(properties);
+        this.properties = properties == null ? Map.of() : Collections.unmodifiableMap(properties);
         this.representationProperty = representationProperty;
         this.label = label == null ? "" : label;
 

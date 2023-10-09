@@ -12,7 +12,6 @@
  */
 package org.openhab.core.addon;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -196,7 +195,7 @@ public class AddonInfo implements Identifiable<String> {
         }
 
         public Builder withCountries(@Nullable String countries) {
-            this.countries = countries == null || countries.isBlank() ? List.of() : Arrays.asList(countries.split(","));
+            this.countries = countries == null || countries.isBlank() ? List.of() : List.of(countries.split(","));
             return this;
         }
 

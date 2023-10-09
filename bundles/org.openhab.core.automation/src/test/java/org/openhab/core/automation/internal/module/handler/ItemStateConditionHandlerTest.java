@@ -17,8 +17,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.time.ZoneId;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import javax.measure.quantity.Temperature;
@@ -104,7 +104,7 @@ public class ItemStateConditionHandlerTest extends JavaTest {
     }
 
     public static Collection<Object[]> equalsParameters() {
-        return Arrays.asList(new Object[][] { //
+        return List.of(new Object[][] { //
                 { new ParameterSet("Number", "5", new DecimalType(23), false) }, //
                 { new ParameterSet("Number", "5", new DecimalType(5), true) }, //
                 { new ParameterSet("Number:Temperature", "5 °C", new DecimalType(23), false) }, //
@@ -120,7 +120,7 @@ public class ItemStateConditionHandlerTest extends JavaTest {
     }
 
     public static Collection<Object[]> greaterThanParameters() {
-        return Arrays.asList(new Object[][] { //
+        return List.of(new Object[][] { //
                 { new ParameterSet("Number", "5", new DecimalType(23), true) }, //
                 { new ParameterSet("Number", "5", new DecimalType(5), false) }, //
                 { new ParameterSet("Number", "5 °C", new DecimalType(23), true) }, //
@@ -137,7 +137,7 @@ public class ItemStateConditionHandlerTest extends JavaTest {
     }
 
     public static Collection<Object[]> greaterThanOrEqualsParameters() {
-        return Arrays.asList(new Object[][] { //
+        return List.of(new Object[][] { //
                 { new ParameterSet("Number", "5", new DecimalType(23), true) }, //
                 { new ParameterSet("Number", "5", new DecimalType(5), true) }, //
                 { new ParameterSet("Number", "5", new DecimalType(4), false) }, //
@@ -160,7 +160,7 @@ public class ItemStateConditionHandlerTest extends JavaTest {
     }
 
     public static Collection<Object[]> lessThanParameters() {
-        return Arrays.asList(new Object[][] { //
+        return List.of(new Object[][] { //
                 { new ParameterSet("Number", "5", new DecimalType(23), false) }, //
                 { new ParameterSet("Number", "5", new DecimalType(4), true) }, //
                 { new ParameterSet("Number", "5 °C", new DecimalType(23), false) }, //
@@ -178,7 +178,7 @@ public class ItemStateConditionHandlerTest extends JavaTest {
     }
 
     public static Collection<Object[]> lessThanOrEqualsParameters() {
-        return Arrays.asList(new Object[][] { //
+        return List.of(new Object[][] { //
                 { new ParameterSet("Number", "5", new DecimalType(23), false) }, //
                 { new ParameterSet("Number", "5", new DecimalType(5), true) }, //
                 { new ParameterSet("Number", "5", new DecimalType(4), true) }, //

@@ -49,7 +49,7 @@ public class ChannelGroupType extends AbstractDescriptionType {
         super(uid, label, description, null);
 
         this.category = category;
-        this.channelDefinitions = channelDefinitions == null ? Collections.emptyList()
+        this.channelDefinitions = channelDefinitions == null ? List.of()
                 : Collections.unmodifiableList(channelDefinitions);
     }
 

@@ -18,7 +18,6 @@ import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -68,7 +67,7 @@ public class AnnotationActionModuleTypeHelper {
             ActionScope scope = clazz.getAnnotation(ActionScope.class);
             return parseAnnotations(scope.name(), actionProvider);
         }
-        return Collections.emptyList();
+        return List.of();
     }
 
     public Collection<ModuleInformation> parseAnnotations(String name, Object actionProvider) {
@@ -112,8 +111,7 @@ public class AnnotationActionModuleTypeHelper {
             Annotation[] paramAnnotations = annotations[i];
             if (paramAnnotations.length == 0) {
                 // we do not have an annotation with a name for this parameter
-                inputs.add(new Input("p" + i, param.getType().getCanonicalName(), "", "", Collections.emptySet(), false,
-                        "", ""));
+                inputs.add(new Input("p" + i, param.getType().getCanonicalName(), "", "", Set.of(), false, "", ""));
             } else if (paramAnnotations.length == 1) {
                 Annotation a = paramAnnotations[0];
                 if (a instanceof ActionInput inp) {

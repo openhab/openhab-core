@@ -17,8 +17,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsMapContaining.hasEntry;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -40,23 +38,20 @@ public class DiscoveryResultBuilderTest {
     private static final ThingUID BRIDGE_UID = new ThingUID(new ThingTypeUID(BINDING_ID, "bridgeTypeId"), "bridgeId");
     private static final ThingTypeUID THING_TYPE_UID = new ThingTypeUID(BINDING_ID, "thingTypeId");
     private static final ThingUID THING_UID = new ThingUID(THING_TYPE_UID, BRIDGE_UID, "thingId");
+
     private static final String KEY1 = "key1";
     private static final String KEY2 = "key2";
     private static final String VALUE1 = "value1";
     private static final String VALUE2 = "value2";
-    private final Map<String, Object> properties = new HashMap<String, Object>() {
-        private static final long serialVersionUID = 1L;
-        {
-            put(KEY1, VALUE1);
-            put(KEY2, VALUE2);
-        }
-    };
+
+    private static final Map<String, Object> PROPERTIES = Map.of(KEY1, VALUE1, KEY2, VALUE2);
+
     private @NonNullByDefault({}) DiscoveryResultBuilder builder;
     private @NonNullByDefault({}) DiscoveryResult discoveryResult;
 
     @BeforeEach
     public void setup() {
-        builder = DiscoveryResultBuilder.create(THING_UID).withThingType(THING_TYPE_UID).withProperties(properties)
+        builder = DiscoveryResultBuilder.create(THING_UID).withThingType(THING_TYPE_UID).withProperties(PROPERTIES)
                 .withRepresentationProperty(KEY1).withLabel("Test");
         discoveryResult = builder.build();
     }
@@ -118,8 +113,7 @@ public class DiscoveryResultBuilderTest {
     @Test
     @Disabled
     public void subsequentBuildsCreateIndependentDiscoveryResults() {
-        DiscoveryResult otherDiscoveryResult = builder.withLabel("Second Test").withProperties(Collections.emptyMap())
-                .build();
+        DiscoveryResult otherDiscoveryResult = builder.withLabel("Second Test").withProperties(Map.of()).build();
 
         assertThat(otherDiscoveryResult.getLabel(), is(not(discoveryResult.getLabel())));
         assertThat(otherDiscoveryResult.getProperties().size(), is(not(discoveryResult.getProperties().size())));

@@ -12,7 +12,6 @@
  */
 package org.openhab.core.automation.integration.test;
 
-import static java.util.stream.Collectors.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -20,7 +19,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -30,7 +28,6 @@ import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -208,7 +205,7 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
         EventSubscriber ruleEventHandler = new EventSubscriber() {
             @Override
             public Set<String> getSubscribedEventTypes() {
-                return Stream.of(RuleAddedEvent.TYPE, RuleRemovedEvent.TYPE, RuleUpdatedEvent.TYPE).collect(toSet());
+                return Set.of(RuleAddedEvent.TYPE, RuleRemovedEvent.TYPE, RuleUpdatedEvent.TYPE);
             }
 
             @Override
@@ -771,10 +768,10 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
         TemplateRegistry<RuleTemplate> templateRegistry = getService(TemplateRegistry.class);
         ModuleTypeRegistry moduleTypeRegistry = getService(ModuleTypeRegistry.class);
         String templateUID = "testTemplate1";
-        Set<String> tags = Stream.of("test", "testTag").collect(toSet());
-        List<Trigger> templateTriggers = Collections.emptyList();
-        List<Condition> templateConditions = Collections.emptyList();
-        List<Action> templateActions = Collections.emptyList();
+        Set<String> tags = Set.of("test", "testTag");
+        List<Trigger> templateTriggers = List.of();
+        List<Condition> templateConditions = List.of();
+        List<Action> templateActions = List.of();
         List<ConfigDescriptionParameter> templateConfigDescriptionParameters = List
                 .of(ConfigDescriptionParameterBuilder.create("param", ConfigDescriptionParameter.Type.TEXT).build());
         RuleTemplate template = new RuleTemplate(templateUID, "Test template Label", "Test template description", tags,
@@ -822,7 +819,7 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
 
             @Override
             public Collection<ModuleType> getAll() {
-                return Stream.of(triggerType, actionType).collect(toSet());
+                return Set.of(triggerType, actionType);
             }
 
             @Override
@@ -842,7 +839,7 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
 
             @Override
             public <T extends ModuleType> Collection<T> getModuleTypes(@Nullable Locale locale) {
-                return (Collection<T>) Stream.of(triggerType, actionType).collect(toSet());
+                return (Collection<T>) Set.of(triggerType, actionType);
             }
         };
 
@@ -912,14 +909,13 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
         String triggerId = "ItemStateChangeTrigger" + random;
         List<Trigger> triggers = List.of(ModuleBuilder.createTrigger().withId(triggerId)
                 .withTypeUID("core.GenericEventTrigger").withConfiguration(triggerConfig).build());
-        List<Condition> conditions = Stream.of(
+        List<Condition> conditions = List.of(
                 ModuleBuilder.createCondition().withId("ItemStateCondition" + random)
                         .withTypeUID("core.GenericCompareCondition").withConfiguration(condition1Config)
                         .withInputs(Map.of("input", triggerId + ".event")).build(),
                 ModuleBuilder.createCondition().withId("ItemStateCondition" + (random + 1))
                         .withTypeUID("core.GenericCompareCondition").withConfiguration(condition2Config)
-                        .withInputs(Map.of("input", triggerId + ".event")).build())
-                .toList();
+                        .withInputs(Map.of("input", triggerId + ".event")).build());
 
         List<Action> actions = List.of(ModuleBuilder.createAction().withId("ItemPostCommandAction" + random)
                 .withTypeUID("core.ItemCommandAction").withConfiguration(actionConfig).build());

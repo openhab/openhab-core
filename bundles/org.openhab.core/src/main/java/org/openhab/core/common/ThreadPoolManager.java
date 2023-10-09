@@ -13,7 +13,6 @@
 package org.openhab.core.common;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -215,7 +214,7 @@ public class ThreadPoolManager {
         public List<Runnable> shutdownNow() {
             logger.warn("shutdownNow() invoked on a shared thread pool '{}'. This is a bug, please submit a bug report",
                     threadPoolName, new IllegalStateException());
-            return Collections.emptyList();
+            return List.of();
         }
 
         @Override

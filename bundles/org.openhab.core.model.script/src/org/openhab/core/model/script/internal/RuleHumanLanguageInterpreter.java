@@ -12,7 +12,6 @@
  */
 package org.openhab.core.model.script.internal;
 
-import java.util.Collections;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -110,6 +109,6 @@ public class RuleHumanLanguageInterpreter implements HumanLanguageInterpreter {
 
     @Override
     public Set<String> getSupportedGrammarFormats() {
-        return Collections.emptySet();
+        return Set.of();
     }
 }

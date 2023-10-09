@@ -85,7 +85,7 @@ public class NetUtil implements NetworkAddressService {
     // must be initialized before activate due to OSGi reference
     private Set<NetworkAddressChangeListener> networkAddressChangeListeners = ConcurrentHashMap.newKeySet();
 
-    private Collection<CidrAddress> lastKnownInterfaceAddresses = Collections.emptyList();
+    private Collection<CidrAddress> lastKnownInterfaceAddresses = List.of();
     private final ScheduledExecutorService scheduledExecutorService = ThreadPoolManager
             .getScheduledPool(ThreadPoolManager.THREAD_POOL_NAME_COMMON);
     private @Nullable ScheduledFuture<?> networkInterfacePollFuture = null;
@@ -99,13 +99,13 @@ public class NetUtil implements NetworkAddressService {
 
     @Activate
     protected void activate(Map<String, Object> props) {
-        lastKnownInterfaceAddresses = Collections.emptyList();
+        lastKnownInterfaceAddresses = List.of();
         modified(props);
     }
 
     @Deactivate
     protected void deactivate() {
-        lastKnownInterfaceAddresses = Collections.emptyList();
+        lastKnownInterfaceAddresses = List.of();
         networkAddressChangeListeners = ConcurrentHashMap.newKeySet();
 
         if (networkInterfacePollFuture != null) {

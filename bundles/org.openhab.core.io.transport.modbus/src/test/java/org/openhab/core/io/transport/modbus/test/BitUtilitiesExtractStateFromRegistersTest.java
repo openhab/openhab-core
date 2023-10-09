@@ -17,8 +17,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -39,7 +39,7 @@ public class BitUtilitiesExtractStateFromRegistersTest {
     }
 
     public static Collection<Object[]> data() {
-        return Stream.of(
+        return List.of(
                 //
                 // BIT
                 //
@@ -348,8 +348,7 @@ public class BitUtilitiesExtractStateFromRegistersTest {
                 new Object[] {
                         // out of bounds of unsigned 64bit
                         new DecimalType("16124500437522872585"), ValueType.UINT64_SWAP,
-                        shortArrayToRegisterArray(0x7909, 0x772E, 0xBBB7, 0xDFC5), 0 })
-                .toList();
+                        shortArrayToRegisterArray(0x7909, 0x772E, 0xBBB7, 0xDFC5), 0 });
     }
 
     @SuppressWarnings("unchecked")

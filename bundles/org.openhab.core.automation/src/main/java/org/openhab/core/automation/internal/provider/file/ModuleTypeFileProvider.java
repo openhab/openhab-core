@@ -13,8 +13,8 @@
 package org.openhab.core.automation.internal.provider.file;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Locale;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -56,7 +56,7 @@ public abstract class ModuleTypeFileProvider extends AbstractFileProvider<Module
     public <T extends ModuleType> Collection<T> getModuleTypes(@Nullable Locale locale) {
         Collection<ModuleType> values = providedObjectsHolder.values();
         if (values.isEmpty()) {
-            return Collections.emptyList();
+            return List.of();
         }
         return (Collection<T>) new LinkedList<>(values);
     }

@@ -12,7 +12,6 @@
  */
 package org.openhab.core.thing.internal.console;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -142,11 +141,11 @@ public class LinkConsoleCommandExtension extends AbstractConsoleCommandExtension
 
     @Override
     public List<String> getUsages() {
-        return Arrays.asList(new String[] { buildCommandUsage(SUBCMD_LIST, "lists all links"),
+        return List.of(buildCommandUsage(SUBCMD_LIST, "lists all links"),
                 buildCommandUsage(SUBCMD_LINK + " <itemName> <channelUID>", "links an item with a channel"),
                 buildCommandUsage(SUBCMD_UNLINK + " <itemName> <thingUID>", "unlinks an item with a channel"),
                 buildCommandUsage(SUBCMD_CLEAR, "removes all managed links"),
-                buildCommandUsage(SUBCMD_ORPHAN, "<list|purge> lists/purges all links with one missing element") });
+                buildCommandUsage(SUBCMD_ORPHAN, "<list|purge> lists/purges all links with one missing element"));
     }
 
     private void clear(Console console) {

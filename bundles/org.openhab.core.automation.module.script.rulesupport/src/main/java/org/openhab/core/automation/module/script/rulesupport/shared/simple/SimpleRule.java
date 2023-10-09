@@ -166,7 +166,7 @@ public abstract class SimpleRule implements Rule, SimpleRuleActionHandler {
 
     @Override
     public List<Condition> getConditions() {
-        return conditions == null ? Collections.emptyList() : conditions;
+        return conditions == null ? List.of() : conditions;
     }
 
     /**
@@ -180,12 +180,12 @@ public abstract class SimpleRule implements Rule, SimpleRuleActionHandler {
 
     @Override
     public List<Action> getActions() {
-        return actions == null ? Collections.emptyList() : actions;
+        return actions == null ? List.of() : actions;
     }
 
     @Override
     public List<Trigger> getTriggers() {
-        return triggers == null ? Collections.emptyList() : triggers;
+        return triggers == null ? List.of() : triggers;
     }
 
     /**
@@ -227,7 +227,7 @@ public abstract class SimpleRule implements Rule, SimpleRuleActionHandler {
         } else if (Action.class == moduleClazz) {
             result = (List<T>) actions;
         } else {
-            result = Collections.emptyList();
+            result = List.of();
         }
         return result;
     }

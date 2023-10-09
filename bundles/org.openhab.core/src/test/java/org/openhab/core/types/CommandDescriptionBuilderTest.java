@@ -15,7 +15,6 @@ package org.openhab.core.types;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -56,7 +55,7 @@ public class CommandDescriptionBuilderTest {
         CommandDescriptionBuilder builder = CommandDescriptionBuilder.create();
         CommandDescription commandDescription1 = builder
                 .withCommandOptions(List.of(new CommandOption("command", "label"))).build();
-        CommandDescription commandDescription2 = builder.withCommandOptions(Collections.emptyList()).build();
+        CommandDescription commandDescription2 = builder.withCommandOptions(List.of()).build();
 
         assertThat(commandDescription1.getCommandOptions(), is(not(commandDescription2.getCommandOptions())));
     }

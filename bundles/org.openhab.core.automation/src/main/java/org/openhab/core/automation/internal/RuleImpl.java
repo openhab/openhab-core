@@ -149,7 +149,7 @@ public class RuleImpl implements Rule {
      * @param ruleTags the {@link RuleImpl}'s assigned tags.
      */
     public void setTags(@Nullable Set<String> ruleTags) {
-        tags = ruleTags == null ? Collections.emptySet() : Collections.unmodifiableSet(ruleTags);
+        tags = ruleTags == null ? Set.of() : Collections.unmodifiableSet(ruleTags);
     }
 
     @Override
@@ -205,7 +205,7 @@ public class RuleImpl implements Rule {
      * properties of the {@link RuleImpl}.
      */
     public void setConfigurationDescriptions(@Nullable List<ConfigDescriptionParameter> configDescriptions) {
-        this.configDescriptions = configDescriptions == null ? Collections.emptyList()
+        this.configDescriptions = configDescriptions == null ? List.of()
                 : Collections.unmodifiableList(configDescriptions);
     }
 
@@ -220,7 +220,7 @@ public class RuleImpl implements Rule {
      * @param conditions a list with the conditions that should belong to this {@link RuleImpl}.
      */
     public void setConditions(@Nullable List<Condition> conditions) {
-        this.conditions = conditions == null ? Collections.emptyList() : Collections.unmodifiableList(conditions);
+        this.conditions = conditions == null ? List.of() : Collections.unmodifiableList(conditions);
     }
 
     @Override
@@ -239,7 +239,7 @@ public class RuleImpl implements Rule {
      * @param actions a list with the actions that should belong to this {@link RuleImpl}.
      */
     public void setActions(@Nullable List<Action> actions) {
-        this.actions = actions == null ? Collections.emptyList() : Collections.unmodifiableList(actions);
+        this.actions = actions == null ? List.of() : Collections.unmodifiableList(actions);
     }
 
     /**
@@ -248,7 +248,7 @@ public class RuleImpl implements Rule {
      * @param triggers a list with the triggers that should belong to this {@link RuleImpl}.
      */
     public void setTriggers(@Nullable List<Trigger> triggers) {
-        this.triggers = triggers == null ? Collections.emptyList() : Collections.unmodifiableList(triggers);
+        this.triggers = triggers == null ? List.of() : Collections.unmodifiableList(triggers);
     }
 
     @Override

@@ -14,8 +14,8 @@ package org.openhab.core.model.script.runtime.internal.engine;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
@@ -188,7 +188,7 @@ public class ScriptEngineImpl implements ScriptEngine, ModelParser {
 
     private void deleteResource(Resource resource) {
         try {
-            resource.delete(Collections.emptyMap());
+            resource.delete(Map.of());
         } catch (IOException e) {
             // Do nothing
         }
