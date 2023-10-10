@@ -21,9 +21,10 @@ import java.text.ParsePosition;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.util.Arrays;
 import java.util.IllegalFormatConversionException;
 import java.util.Locale;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import javax.measure.Dimension;
 import javax.measure.IncommensurableException;
@@ -74,7 +75,7 @@ public class QuantityType<T extends Quantity<T>> extends Number
     // between a digit (?<=\\d) and a non-digit character (?=\\D)
     // which must not be preceded by plus/minus digit (?![\\+\\-]?\\d).
     // The latter would be an exponent from the scalar value.
-    private static final String UNIT_PATTERN = "\\s+|(?<=\\d)(?=\\D(?![\\+\\-]?\\d))";
+    private static final Pattern UNIT_PATTERN = Pattern.compile("\\s+|(?<=\\d)(?=\\D(?![+\\-]?\\d))");
 
     static {
         UnitInitializer.init();
@@ -117,7 +118,7 @@ public class QuantityType<T extends Quantity<T>> extends Number
      */
     @SuppressWarnings("unchecked")
     public QuantityType(String value, Locale locale) {
-        String[] constituents = value.split(UNIT_PATTERN);
+        String[] constituents = UNIT_PATTERN.split(value);
 
         if (constituents.length > 0) {
             constituents[0] = constituents[0].toUpperCase(locale);
@@ -180,10 +181,10 @@ public class QuantityType<T extends Quantity<T>> extends Number
     }
 
     /**
-     * Static access to {@link QuantityType#QuantityType(double, Unit)}.
+     * Static access to {@link QuantityType(double, Unit)}.
      *
-     * @param value the non null measurement value.
-     * @param unit the non null measurement unit.
+     * @param value the non-null measurement value.
+     * @param unit the non-null measurement unit.
      * @return a new {@link QuantityType}
      */
     public static <T extends Quantity<T>> QuantityType<T> valueOf(double value, Unit<T> unit) {
@@ -215,10 +216,9 @@ public class QuantityType<T extends Quantity<T>> extends Number
         if (obj == null) {
             return false;
         }
-        if (!(obj instanceof QuantityType)) {
+        if (!(obj instanceof QuantityType<?> other)) {
             return false;
         }
-        QuantityType<?> other = (QuantityType<?>) obj;
         if (!quantity.getUnit().isCompatible(other.quantity.getUnit())
                 && !quantity.getUnit().inverse().isCompatible(other.quantity.getUnit())) {
             return false;
@@ -320,7 +320,7 @@ public class QuantityType<T extends Quantity<T>> extends Number
     /**
      * Convert this QuantityType to a new {@link QuantityType} using the given target unit.
      *
-     * Similar to {@link toUnit}, except that it treats the values as relative instead of absolute.
+     * Similar to {@link #toUnit}, except that it treats the values as relative instead of absolute.
      * This means that any offsets in the conversion of absolute values are ignored.
      * This is useful when your quantity represents a delta, and not necessarily a measured
      * value itself. For example, 32 °F, when converted with toUnit to Celsius, it will become 0 °C.
@@ -586,8 +586,7 @@ public class QuantityType<T extends Quantity<T>> extends Number
     public QuantityType<T> offset(QuantityType<T> offset, Unit<T> unit) {
         Quantity<T> quantity = Quantities.getQuantity(this.quantity.getValue(), this.quantity.getUnit(),
                 Scale.ABSOLUTE);
-        final Quantity<T> sum = Arrays.asList(quantity, offset.quantity).stream().reduce(QuantityFunctions.sum(unit))
-                .get();
+        final Quantity<T> sum = Stream.of(quantity, offset.quantity).reduce(QuantityFunctions.sum(unit)).get();
         return new QuantityType<>(sum);
     }
 
