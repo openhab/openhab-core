@@ -23,16 +23,17 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.io.IOException;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import javax.jmdns.ServiceInfo;
 
@@ -54,69 +55,105 @@ import org.jupnp.model.types.DeviceType;
 import org.jupnp.model.types.UDN;
 import org.mockito.Mockito;
 import org.openhab.core.addon.Addon;
+import org.openhab.core.addon.AddonDiscoveryMethod;
+import org.openhab.core.addon.AddonDiscoveryServiceType;
+import org.openhab.core.addon.AddonInfo;
+import org.openhab.core.addon.AddonInfoProvider;
 import org.openhab.core.addon.AddonService;
 import org.openhab.core.config.discovery.addon.AddonSuggestionFinderService;
+import org.openhab.core.i18n.LocaleProvider;
 import org.openhab.core.io.transport.mdns.MDNSClient;
 import org.openhab.core.test.java.JavaOSGiTest;
 
-import com.thoughtworks.xstream.XStreamException;
-
 /**
- * Integration tests for the {@link SuggestedAddonFinderService}.
+ * Integration tests for the {@link AddonSuggestionFinderService}.
  *
  * @author Andrew Fiddian-Green - Initial contribution
  */
 @NonNullByDefault
 @TestInstance(Lifecycle.PER_CLASS)
-public class SuggestedAddonFinderServiceOSGiTest extends JavaOSGiTest {
+public class AddonSuggestionFinderServiceOSGiTest extends JavaOSGiTest {
 
+    private @NonNullByDefault({}) LocaleProvider localeProvider;
     private @NonNullByDefault({}) MDNSClient mdnsClient;
     private @NonNullByDefault({}) UpnpService upnpService;
     private @NonNullByDefault({}) AddonService addonService;
+    private @NonNullByDefault({}) AddonInfoProvider addonInfoProvider;
     private @NonNullByDefault({}) AddonSuggestionFinderService addonSuggestionFinderService;
 
     @BeforeAll
     public void setup() {
+        setupMockLocaleProvider();
         setupMockAddonService();
+        setupMockAddonInfoProvider();
         setupMockMdnsClient();
         setupMockUpnpService();
         createAddonSuggestionFinderService();
     }
 
     private void createAddonSuggestionFinderService() {
-        // create the service
-        try {
-            addonSuggestionFinderService = new AddonSuggestionFinderService(mdnsClient, upnpService);
-        } catch (IOException e) {
-            fail("Error loading XML");
-        } catch (XStreamException e) {
-            fail("Error parsing XML");
-        }
-        addonSuggestionFinderService.addAddonService(addonService);
-
-        // check that it exists
+        addonSuggestionFinderService = new AddonSuggestionFinderService(localeProvider, mdnsClient, upnpService);
         assertNotNull(addonSuggestionFinderService);
+
+        addonSuggestionFinderService.addAddonService(addonService);
     }
 
     private void setupMockAddonService() {
         // create the mock
         addonService = mock(AddonService.class);
         List<Addon> addons = new ArrayList<>();
-        addons.add(Addon.create("binding.hue").withType("binding").withId("hue").build());
-        addons.add(Addon.create("binding.hpprinter").withType("binding").withId("hpprinter").build());
+        addons.add(Addon.create("binding-hue").withType("binding").withId("hue").build());
+        addons.add(Addon.create("binding-hpprinter").withType("binding").withId("hpprinter").build());
         when(addonService.getAddons(any(Locale.class))).thenReturn(addons);
 
         // check that it works
         assertNotNull(addonService);
         assertEquals(2, addonService.getAddons(Locale.US).size());
-        assertTrue(addonService.getAddons(Locale.US).stream().anyMatch(a -> "binding.hue".equals(a.getUid())));
-        assertTrue(addonService.getAddons(Locale.US).stream().anyMatch(a -> "binding.hpprinter".equals(a.getUid())));
+        assertTrue(addonService.getAddons(Locale.US).stream().anyMatch(a -> "binding-hue".equals(a.getUid())));
+        assertTrue(addonService.getAddons(Locale.US).stream().anyMatch(a -> "binding-hpprinter".equals(a.getUid())));
         assertFalse(addonService.getAddons(Locale.US).stream().anyMatch(a -> "aardvark".equals(a.getUid())));
+    }
+
+    private void setupMockAddonInfoProvider() {
+        AddonDiscoveryMethod hp = new AddonDiscoveryMethod().setServiceType(AddonDiscoveryServiceType.MDNS)
+                .setMatchProperties(Map.of("rp", ".*", "ty", "hp (.*)")).setMdnsServiceType("_printer._tcp.local.");
+
+        AddonDiscoveryMethod hue1 = new AddonDiscoveryMethod().setServiceType(AddonDiscoveryServiceType.UPNP)
+                .setMatchProperties(Map.of("modelName", "Philips hue bridge"));
+
+        AddonDiscoveryMethod hue2 = new AddonDiscoveryMethod().setServiceType(AddonDiscoveryServiceType.MDNS)
+                .setMdnsServiceType("_hue._tcp.local.");
+
+        // create the mock
+        addonInfoProvider = mock(AddonInfoProvider.class);
+        Set<AddonInfo> addonInfos = new HashSet<>();
+        addonInfos.add(AddonInfo.builder("hue", "binding").withName("Hue").withDescription("Hue Bridge")
+                .withDiscoveryMethods(List.of(hue1, hue2)).build());
+        addonInfos.add(AddonInfo.builder("hpprinter", "binding").withName("HP").withDescription("HP Printer")
+                .withDiscoveryMethods(List.of(hp)).build());
+        when(addonInfoProvider.getAddonInfos(any(Locale.class))).thenReturn(addonInfos);
+
+        // check that it works
+        assertNotNull(addonInfoProvider);
+        Set<AddonInfo> addonInfos2 = addonInfoProvider.getAddonInfos(Locale.US);
+        assertEquals(2, addonInfos2.size());
+        assertTrue(addonInfos2.stream().anyMatch(a -> "binding-hue".equals(a.getUID())));
+        assertTrue(addonInfos2.stream().anyMatch(a -> "binding-hpprinter".equals(a.getUID())));
+    }
+
+    private void setupMockLocaleProvider() {
+        // create the mock
+        localeProvider = mock(LocaleProvider.class);
+        when(localeProvider.getLocale()).thenReturn(Locale.US);
+
+        // check that it works
+        assertNotNull(localeProvider);
+        assertEquals(Locale.US, localeProvider.getLocale());
     }
 
     private void setupMockMdnsClient() {
         // create the mock
-        mdnsClient = mock(MDNSClient.class);
+        mdnsClient = mock(MDNSClient.class, Mockito.RETURNS_DEEP_STUBS);
         when(mdnsClient.list(anyString())).thenReturn(new ServiceInfo[] {});
         ServiceInfo hueService = ServiceInfo.create("mdnsTest", "hue", 0, 0, 0, false, "hue service");
         when(mdnsClient.list(eq("_hue._tcp.local."))).thenReturn(new ServiceInfo[] { hueService });
@@ -180,15 +217,17 @@ public class SuggestedAddonFinderServiceOSGiTest extends JavaOSGiTest {
 
     @Test
     public void testGetAddons() {
+        addonSuggestionFinderService.addAddonInfoProvider(addonInfoProvider);
         // give the scan tasks some time to complete
         try {
             Thread.sleep(100);
         } catch (InterruptedException e) {
         }
         assertTrue(addonSuggestionFinderService.scanDone());
-        List<Addon> addons = addonSuggestionFinderService.getAddons(Locale.US);
+        List<Addon> addons = addonSuggestionFinderService.getSuggestedAddons(Locale.US);
         assertEquals(2, addons.size());
-        assertTrue(addons.stream().anyMatch(a -> "binding.hue".equals(a.getUid())));
-        assertTrue(addons.stream().anyMatch(a -> "binding.hpprinter".equals(a.getUid())));
+        assertFalse(addons.stream().anyMatch(a -> "aardvark".equals(a.getUid())));
+        assertTrue(addons.stream().anyMatch(a -> "binding-hue".equals(a.getUid())));
+        assertTrue(addons.stream().anyMatch(a -> "binding-hpprinter".equals(a.getUid())));
     }
 }

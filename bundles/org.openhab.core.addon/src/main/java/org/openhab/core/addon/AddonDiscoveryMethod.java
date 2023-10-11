@@ -13,7 +13,8 @@
 package org.openhab.core.addon;
 
 import java.util.List;
-import java.util.Objects;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -25,12 +26,13 @@ import org.eclipse.jdt.annotation.Nullable;
  */
 @NonNullByDefault
 public class AddonDiscoveryMethod {
-    private @NonNullByDefault({}) String serviceType;
-    private @Nullable String mdnsServiceType;
+    private @Nullable String serviceType;
     private @Nullable List<AddonMatchProperty> matchProperties;
+    private @Nullable String mdnsServiceType;
 
-    public String getServiceType() {
-        return serviceType.toLowerCase();
+    public AddonDiscoveryServiceType getServiceType() {
+        String serviceType = this.serviceType;
+        return AddonDiscoveryServiceType.valueOf(serviceType != null ? serviceType.toUpperCase() : "");
     }
 
     public String getMdnsServiceType() {
@@ -38,44 +40,26 @@ public class AddonDiscoveryMethod {
         return mdnsServiceType != null ? mdnsServiceType : "";
     }
 
-    public List<AddonMatchProperty> getMatchProperties() {
+    public Map<String, String> getPropertyRegexMap() {
         List<AddonMatchProperty> matchProperties = this.matchProperties;
-        return matchProperties != null ? matchProperties : List.of();
+        return matchProperties != null
+                ? matchProperties.stream().collect(Collectors.toMap(m -> m.getName(), m -> m.getRegex()))
+                : Map.of();
     }
 
-    public AddonDiscoveryMethod setServiceType(String serviceType) {
-        this.serviceType = serviceType.toLowerCase();
+    public AddonDiscoveryMethod setServiceType(AddonDiscoveryServiceType serviceType) {
+        this.serviceType = serviceType.name().toLowerCase();
         return this;
     }
 
-    public AddonDiscoveryMethod setMdnsServiceType(@Nullable String mdnsServiceType) {
+    public AddonDiscoveryMethod setMdnsServiceType(String mdnsServiceType) {
         this.mdnsServiceType = mdnsServiceType;
         return this;
     }
 
-    public AddonDiscoveryMethod setMatchProperties(@Nullable List<AddonMatchProperty> matchProperties) {
-        this.matchProperties = matchProperties;
+    public AddonDiscoveryMethod setMatchProperties(Map<String, String> matchProperties) {
+        this.matchProperties = matchProperties.entrySet().stream()
+                .map(e -> new AddonMatchProperty(e.getKey(), e.getValue())).toList();
         return this;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(serviceType, mdnsServiceType, matchProperties);
-    }
-
-    @Override
-    public boolean equals(@Nullable Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        AddonDiscoveryMethod other = (AddonDiscoveryMethod) obj;
-        return Objects.equals(serviceType, other.serviceType) && Objects.equals(mdnsServiceType, other.mdnsServiceType)
-                && Objects.equals(matchProperties, other.matchProperties);
     }
 }

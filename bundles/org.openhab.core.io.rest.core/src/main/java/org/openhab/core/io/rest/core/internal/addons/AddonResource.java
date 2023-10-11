@@ -191,7 +191,8 @@ public class AddonResource implements RESTResource {
             @HeaderParam("Accept-Language") @Parameter(description = "language") @Nullable String language) {
         logger.debug("Received HTTP GET request at '{}'", uriInfo.getPath());
         Locale locale = localeService.getLocale(language);
-        return Response.ok(new Stream2JSONInputStream(addonSuggestionFinderService.getAddons(locale).stream())).build();
+        return Response.ok(new Stream2JSONInputStream(addonSuggestionFinderService.getSuggestedAddons(locale).stream()))
+                .build();
     }
 
     @GET

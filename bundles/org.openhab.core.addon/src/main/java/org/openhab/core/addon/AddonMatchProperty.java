@@ -12,9 +12,6 @@
  */
 package org.openhab.core.addon;
 
-import java.util.Objects;
-import java.util.regex.Pattern;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
@@ -25,49 +22,21 @@ import org.eclipse.jdt.annotation.Nullable;
  */
 @NonNullByDefault
 public class AddonMatchProperty {
-    private @NonNullByDefault({}) String name;
-    private @NonNullByDefault({}) String regex;
-    private transient @NonNullByDefault({}) Pattern pattern;
+    private @Nullable String name;
+    private @Nullable String regex;
 
     public AddonMatchProperty(String name, String regex) {
         this.name = name;
         this.regex = regex;
-        this.pattern = null;
     }
 
     public String getName() {
-        return name;
-    }
-
-    public Pattern getPattern() {
-        Pattern pattern = this.pattern;
-        if (pattern == null) {
-            this.pattern = Pattern.compile(regex);
-        }
-        return this.pattern;
+        String name = this.name;
+        return name != null ? name : "";
     }
 
     public String getRegex() {
-        return regex;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(name, regex);
-    }
-
-    @Override
-    public boolean equals(@Nullable Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        AddonMatchProperty other = (AddonMatchProperty) obj;
-        return Objects.equals(name, other.name) && Objects.equals(regex, other.regex);
+        String regex = this.regex;
+        return regex != null ? regex : "";
     }
 }
