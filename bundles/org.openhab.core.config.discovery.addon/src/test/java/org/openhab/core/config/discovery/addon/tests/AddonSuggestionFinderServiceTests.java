@@ -63,7 +63,6 @@ import org.openhab.core.addon.AddonService;
 import org.openhab.core.config.discovery.addon.AddonSuggestionFinderService;
 import org.openhab.core.i18n.LocaleProvider;
 import org.openhab.core.io.transport.mdns.MDNSClient;
-import org.openhab.core.test.java.JavaOSGiTest;
 
 /**
  * Integration tests for the {@link AddonSuggestionFinderService}.
@@ -72,7 +71,7 @@ import org.openhab.core.test.java.JavaOSGiTest;
  */
 @NonNullByDefault
 @TestInstance(Lifecycle.PER_CLASS)
-public class AddonSuggestionFinderServiceOSGiTest extends JavaOSGiTest {
+public class AddonSuggestionFinderServiceTests {
 
     private @NonNullByDefault({}) LocaleProvider localeProvider;
     private @NonNullByDefault({}) MDNSClient mdnsClient;
