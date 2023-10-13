@@ -64,17 +64,17 @@ public class StringUtilsTest {
 
     @Test
     public void capitalizeAllWordsTest() {
-        assertEquals(null, StringUtils.capitalizeAllWords(null));
-        assertEquals("Openhab_Is_Cool", StringUtils.capitalizeAllWords("openHAB_is_cool"));
-        assertEquals("Foobar_Example", StringUtils.capitalizeAllWords("foobar_Example"));
-        assertEquals("'another_Test'", StringUtils.capitalizeAllWords("'another_test'"));
+        assertEquals(null, StringUtils.capitalizeByUnderscore(null));
+        assertEquals("Openhab_Is_Cool", StringUtils.capitalizeByUnderscore("openHAB_is_cool"));
+        assertEquals("Foobar_Example", StringUtils.capitalizeByUnderscore("foobar_Example"));
+        assertEquals("'another_Test'", StringUtils.capitalizeByUnderscore("'another_test'"));
     }
 
     @Test
     public void capitalizeWordsTest() {
-        assertEquals("OpenHAB Is Cool", StringUtils.capitalizeWords("openHAB is cool"));
-        assertEquals("Foobar Example", StringUtils.capitalizeWords("foobar Example"));
-        assertEquals("'another Test'", StringUtils.capitalizeWords("'another test'"));
+        assertEquals("OpenHAB Is Cool", StringUtils.capitalizeByWhitespace("openHAB is cool"));
+        assertEquals("Foobar Example", StringUtils.capitalizeByWhitespace("foobar Example"));
+        assertEquals("'another Test'", StringUtils.capitalizeByWhitespace("'another test'"));
     }
 
     @Test

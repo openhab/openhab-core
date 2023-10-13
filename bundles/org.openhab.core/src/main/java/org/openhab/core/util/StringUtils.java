@@ -119,14 +119,14 @@ public class StringUtils {
      * Words are recognized by an underscore delimiter.
      *
      * <pre>
-      * "openHAB_is_cool"   => "Openhab Is_Cool"
+      * "openHAB_is_cool"   => "Openhab_Is_Cool"
       * "foobar_Example" => "Foobar_Example"
      * </pre>
      * 
      * @param str the String to capitalize, may be null
      * @return the capitalized String, may be null
      */
-    public static @Nullable String capitalizeAllWords(@Nullable String str) {
+    public static @Nullable String capitalizeByUnderscore(@Nullable String str) {
         if (str == null || str.isEmpty()) {
             return str;
         }
@@ -159,7 +159,7 @@ public class StringUtils {
      * @param str the String to capitalize, may be null
      * @return the capitalized String, may be null
      */
-    public static @Nullable String capitalizeWords(@Nullable String str) {
+    public static @Nullable String capitalizeByWhitespace(@Nullable String str) {
         if (str == null || str.isEmpty()) {
             return str;
         }
