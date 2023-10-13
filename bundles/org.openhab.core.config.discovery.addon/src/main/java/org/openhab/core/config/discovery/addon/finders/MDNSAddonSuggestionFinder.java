@@ -37,7 +37,7 @@ import org.osgi.service.component.annotations.Reference;
  */
 @NonNullByDefault
 @Component(service = AddonSuggestionFinder.class, name = MDNSAddonSuggestionFinder.SERVICE_NAME)
-public class MDNSAddonSuggestionFinder extends AddonSuggestionFinder {
+public class MDNSAddonSuggestionFinder extends BaseAddonSuggestionFinder {
 
     public static final String SERVICE_NAME = "mdns-addon-suggestion-finder";
 

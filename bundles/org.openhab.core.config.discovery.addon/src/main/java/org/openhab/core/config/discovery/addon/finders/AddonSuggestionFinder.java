@@ -12,62 +12,28 @@
  */
 package org.openhab.core.config.discovery.addon.finders;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.addon.AddonInfo;
 
 /**
- * This is a {@link AddonSuggestionFinder} abstract class for finding suggested addons.
+ * This is a {@link AddonSuggestionFinder} interface for finding suggested
+ * addons.
  *
  * @author Andrew Fiddian-Green - Initial contribution
  */
 @NonNullByDefault
-public abstract class AddonSuggestionFinder {
+public interface AddonSuggestionFinder {
 
-    protected final List<AddonInfo> addonCandidates = Collections.synchronizedList(new ArrayList<>());
-    protected final Set<String> addonSuggestionUIDs = ConcurrentHashMap.newKeySet();
-    protected boolean scanDone;
+    public Set<String> getAddonSuggestionUIDs();
 
-    public Set<String> getAddonSuggestionUIDs() {
-        return addonSuggestionUIDs;
-    }
+    public void reset();
 
-    /**
-     * Helper method to check if the given property name is in the propertyRegexMap
-     * and the given property value matches the respective regular expression.
-     * 
-     * @param propertyRegexMap map of property names and regexes for value matching
-     * @param propertyName
-     * @param propertyValue
-     * @return true a) if the property name exists and the property value matches
-     *         the regular expression, or b) the property name does not exist.
-     */
-    protected static boolean propertyMatches(Map<String, String> propertyRegexMap, String propertyName,
-            String propertyValue) {
-        String matchRegex = propertyRegexMap.get(propertyName);
-        return matchRegex == null ? true : propertyValue.matches(matchRegex);
-    }
+    public boolean scanDone();
 
-    public void reset() {
-        addonCandidates.clear();
-        addonSuggestionUIDs.clear();
-        scanDone = false;
-    }
+    public void scanTask();
 
-    public boolean scanDone() {
-        return scanDone;
-    }
-
-    public abstract void scanTask();
-
-    public void setAddonCandidates(List<AddonInfo> candidates) {
-        reset();
-        addonCandidates.addAll(candidates);
-    }
+    public void setAddonCandidates(List<AddonInfo> candidates);
 }

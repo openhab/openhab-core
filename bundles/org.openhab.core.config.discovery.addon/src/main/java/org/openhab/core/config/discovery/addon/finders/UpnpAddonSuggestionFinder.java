@@ -29,7 +29,7 @@ import org.osgi.service.component.annotations.Reference;
  */
 @NonNullByDefault
 @Component(service = AddonSuggestionFinder.class, name = UpnpAddonSuggestionFinder.SERVICE_NAME)
-public class UpnpAddonSuggestionFinder extends AddonSuggestionFinder {
+public class UpnpAddonSuggestionFinder extends BaseAddonSuggestionFinder {
 
     public static final String SERVICE_NAME = "upnp-addon-suggestion-finder";
 
