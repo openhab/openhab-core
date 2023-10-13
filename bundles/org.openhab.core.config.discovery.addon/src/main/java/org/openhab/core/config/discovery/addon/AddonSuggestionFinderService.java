@@ -25,17 +25,13 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.jupnp.UpnpService;
 import org.openhab.core.addon.Addon;
 import org.openhab.core.addon.AddonInfo;
 import org.openhab.core.addon.AddonInfoProvider;
 import org.openhab.core.addon.AddonService;
 import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.config.discovery.addon.finders.AddonSuggestionFinder;
-import org.openhab.core.config.discovery.addon.finders.MDNSAddonSuggestionFinder;
-import org.openhab.core.config.discovery.addon.finders.UpnpAddonSuggestionFinder;
 import org.openhab.core.i18n.LocaleProvider;
-import org.openhab.core.io.transport.mdns.MDNSClient;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -53,21 +49,18 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 @Component(immediate = true, service = AddonSuggestionFinderService.class, name = AddonSuggestionFinderService.SERVICE_NAME)
 public class AddonSuggestionFinderService implements AutoCloseable {
 
-    public static final String SERVICE_NAME = "suggested-addon-finder";
+    public static final String SERVICE_NAME = "addon-suggestion-finder-service";
 
-    private final Set<AddonService> addonServices = ConcurrentHashMap.newKeySet();
-    private final Set<AddonInfoProvider> addonInfoProviders = ConcurrentHashMap.newKeySet();
     private final ScheduledExecutorService scheduler = ThreadPoolManager.getScheduledPool(SERVICE_NAME);
-    private final List<AddonSuggestionFinder> finders = Collections.synchronizedList(new ArrayList<>());
-    private final List<Future<?>> finderTasks = Collections.synchronizedList(new ArrayList<>());
+    private final Set<AddonInfoProvider> addonInfoProviders = ConcurrentHashMap.newKeySet();
+    private final Set<AddonService> addonServices = ConcurrentHashMap.newKeySet();
+    private final List<AddonSuggestionFinder> addonSuggestionFinders = Collections.synchronizedList(new ArrayList<>());
+    private final List<Future<?>> addonSuggestionFinderTasks = Collections.synchronizedList(new ArrayList<>());
     private final LocaleProvider localeProvider;
 
     @Activate
-    public AddonSuggestionFinderService(@Reference LocaleProvider localeProvider, @Reference MDNSClient mdnsClient,
-            @Reference UpnpService upnpService) {
+    public AddonSuggestionFinderService(@Reference LocaleProvider localeProvider) {
         this.localeProvider = localeProvider;
-        finders.add(new MDNSAddonSuggestionFinder(mdnsClient));
-        finders.add(new UpnpAddonSuggestionFinder(upnpService));
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
@@ -79,7 +72,25 @@ public class AddonSuggestionFinderService implements AutoCloseable {
     }
 
     public void removeAddonInfoProvider(AddonInfoProvider addonInfoProvider) {
-        addonInfoProviders.remove(addonInfoProvider);
+        if (addonInfoProviders.contains(addonInfoProvider)) {
+            addonInfoProviders.remove(addonInfoProvider);
+            scanStart();
+        }
+    }
+
+    @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
+    public void addAddonSuggestionFinder(AddonSuggestionFinder addonSuggestionFinder) {
+        if (!addonSuggestionFinders.contains(addonSuggestionFinder)) {
+            addonSuggestionFinders.add(addonSuggestionFinder);
+            scanStart();
+        }
+    }
+
+    public void removeAddonSuggestionFinder(AddonSuggestionFinder addonSuggestionFinder) {
+        if (addonSuggestionFinders.contains(addonSuggestionFinder)) {
+            addonSuggestionFinders.remove(addonSuggestionFinder);
+            scanStart();
+        }
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
@@ -94,34 +105,36 @@ public class AddonSuggestionFinderService implements AutoCloseable {
     @Deactivate
     @Override
     public void close() throws Exception {
-        finderTasks.forEach(t -> t.cancel(true));
-        finderTasks.clear();
-        finders.forEach(f -> f.reset());
-        finders.clear();
+        addonSuggestionFinderTasks.forEach(t -> t.cancel(true));
+        addonSuggestionFinderTasks.clear();
+        addonSuggestionFinders.forEach(f -> f.reset());
+        addonSuggestionFinders.clear();
+        addonInfoProviders.clear();
+        addonServices.clear();
     }
 
     public List<Addon> getSuggestedAddons(@Nullable Locale locale) {
-        Set<String> uids = finders.stream().map(f -> f.getAddonSuggestionUIDs()).flatMap(Collection::stream)
-                .collect(Collectors.toSet());
+        Set<String> uids = addonSuggestionFinders.stream().map(f -> f.getAddonSuggestionUIDs())
+                .flatMap(Collection::stream).collect(Collectors.toSet());
 
         return addonServices.stream().map(s -> s.getAddons(locale)).flatMap(Collection::stream)
                 .filter(a -> uids.contains(a.getUid())).toList();
     }
 
     public boolean scanDone() {
-        return finders.stream().allMatch(f -> f.scanDone());
+        return addonSuggestionFinders.stream().allMatch(f -> f.scanDone());
     }
 
     private void scanStart() {
-        finderTasks.forEach(t -> t.cancel(false));
-        finderTasks.clear();
+        addonSuggestionFinderTasks.forEach(t -> t.cancel(false));
+        addonSuggestionFinderTasks.clear();
 
         List<AddonInfo> candidates = addonInfoProviders.stream().map(p -> p.getAddonInfos(localeProvider.getLocale()))
                 .flatMap(Collection::stream).toList();
 
-        finders.forEach(f -> {
+        addonSuggestionFinders.forEach(f -> {
             f.setAddonCandidates(candidates);
-            finderTasks.add(scheduler.submit(() -> f.scanTask()));
+            addonSuggestionFinderTasks.add(scheduler.submit(() -> f.scanTask()));
         });
     }
 }

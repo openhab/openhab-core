@@ -17,18 +17,26 @@ import java.util.Map;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.jupnp.UpnpService;
 import org.openhab.core.addon.AddonDiscoveryServiceType;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 /**
- * This is a {@link UpnpAddonSuggestionFinder} for finding suggested addons via UPnP.
+ * This is a {@link UpnpAddonSuggestionFinder} for finding suggested addons via
+ * UPnP.
  *
  * @author Andrew Fiddian-Green - Initial contribution
  */
 @NonNullByDefault
+@Component(service = AddonSuggestionFinder.class, name = UpnpAddonSuggestionFinder.SERVICE_NAME)
 public class UpnpAddonSuggestionFinder extends AddonSuggestionFinder {
+
+    public static final String SERVICE_NAME = "upnp-addon-suggestion-finder";
 
     private final UpnpService upnpService;
 
-    public UpnpAddonSuggestionFinder(UpnpService upnpService) {
+    @Activate
+    public UpnpAddonSuggestionFinder(@Reference UpnpService upnpService) {
         this.upnpService = upnpService;
     }
 

@@ -39,6 +39,7 @@ import javax.jmdns.ServiceInfo;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -61,6 +62,8 @@ import org.openhab.core.addon.AddonInfo;
 import org.openhab.core.addon.AddonInfoProvider;
 import org.openhab.core.addon.AddonService;
 import org.openhab.core.config.discovery.addon.AddonSuggestionFinderService;
+import org.openhab.core.config.discovery.addon.finders.MDNSAddonSuggestionFinder;
+import org.openhab.core.config.discovery.addon.finders.UpnpAddonSuggestionFinder;
 import org.openhab.core.i18n.LocaleProvider;
 import org.openhab.core.io.transport.mdns.MDNSClient;
 
@@ -80,6 +83,16 @@ public class AddonSuggestionFinderServiceTests {
     private @NonNullByDefault({}) AddonInfoProvider addonInfoProvider;
     private @NonNullByDefault({}) AddonSuggestionFinderService addonSuggestionFinderService;
 
+    @AfterAll
+    public void cleanUp() {
+        assertNotNull(addonSuggestionFinderService);
+        try {
+            addonSuggestionFinderService.close();
+        } catch (Exception e) {
+            fail(e);
+        }
+    }
+
     @BeforeAll
     public void setup() {
         setupMockLocaleProvider();
@@ -91,9 +104,11 @@ public class AddonSuggestionFinderServiceTests {
     }
 
     private void createAddonSuggestionFinderService() {
-        addonSuggestionFinderService = new AddonSuggestionFinderService(localeProvider, mdnsClient, upnpService);
+        addonSuggestionFinderService = new AddonSuggestionFinderService(localeProvider);
         assertNotNull(addonSuggestionFinderService);
 
+        addonSuggestionFinderService.addAddonSuggestionFinder(new UpnpAddonSuggestionFinder(upnpService));
+        addonSuggestionFinderService.addAddonSuggestionFinder(new MDNSAddonSuggestionFinder(mdnsClient));
         addonSuggestionFinderService.addAddonService(addonService);
     }
 

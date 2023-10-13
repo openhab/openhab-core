@@ -25,14 +25,21 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.addon.AddonDiscoveryServiceType;
 import org.openhab.core.addon.AddonInfo;
 import org.openhab.core.io.transport.mdns.MDNSClient;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 /**
- * This is a {@link MDNSAddonSuggestionFinder} for finding suggested addons via MDNS.
+ * This is a {@link MDNSAddonSuggestionFinder} for finding suggested addons via
+ * MDNS.
  *
  * @author Andrew Fiddian-Green - Initial contribution
  */
 @NonNullByDefault
+@Component(service = AddonSuggestionFinder.class, name = MDNSAddonSuggestionFinder.SERVICE_NAME)
 public class MDNSAddonSuggestionFinder extends AddonSuggestionFinder {
+
+    public static final String SERVICE_NAME = "mdns-addon-suggestion-finder";
 
     /**
      * Anonymous ServiceListener implementation that ignores call-backs.
@@ -54,7 +61,8 @@ public class MDNSAddonSuggestionFinder extends AddonSuggestionFinder {
 
     private final MDNSClient mdnsClient;
 
-    public MDNSAddonSuggestionFinder(MDNSClient mdnsClient) {
+    @Activate
+    public MDNSAddonSuggestionFinder(@Reference MDNSClient mdnsClient) {
         this.mdnsClient = mdnsClient;
     }
 
