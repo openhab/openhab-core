@@ -25,8 +25,7 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 /**
- * This is a {@link UpnpAddonSuggestionFinder} for finding suggested addons via
- * UPnP.
+ * This is a {@link UpnpAddonSuggestionFinder} for finding suggested Addons via UPnP.
  *
  * @author Andrew Fiddian-Green - Initial contribution
  */

@@ -40,8 +40,7 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 
 /**
- * This is a {@link AddonSuggestionFinderService} which discovers suggested
- * addons for the user to install.
+ * This is a {@link AddonSuggestionFinderService} which discovers suggested Addons for the user to install.
  *
  * @author Andrew Fiddian-Green - Initial contribution
  */

@@ -31,8 +31,7 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 /**
- * This is a {@link MDNSAddonSuggestionFinder} for finding suggested addons via
- * MDNS.
+ * This is a {@link MDNSAddonSuggestionFinder} for finding suggested Addons via MDNS.
  *
  * @author Andrew Fiddian-Green - Initial contribution
  */

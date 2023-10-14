@@ -68,7 +68,7 @@ import org.openhab.core.i18n.LocaleProvider;
 import org.openhab.core.io.transport.mdns.MDNSClient;
 
 /**
- * Integration tests for the {@link AddonSuggestionFinderService}.
+ * JUnit tests for the {@link AddonSuggestionFinderService}.
  *
  * @author Andrew Fiddian-Green - Initial contribution
  */

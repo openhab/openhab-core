@@ -23,7 +23,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.addon.AddonInfo;
 
 /**
- * This is a {@link BaseAddonSuggestionFinder} abstract class for finding suggested addons.
+ * This is a {@link BaseAddonSuggestionFinder} abstract class for finding suggested Addons.
  *
  * @author Andrew Fiddian-Green - Initial contribution
  */
