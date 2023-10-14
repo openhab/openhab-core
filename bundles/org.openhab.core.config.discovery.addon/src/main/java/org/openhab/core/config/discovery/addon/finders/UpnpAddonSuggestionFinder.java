@@ -16,7 +16,10 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.jupnp.UpnpService;
+import org.jupnp.model.meta.RemoteDevice;
+import org.openhab.core.addon.AddonDiscoveryMethod;
 import org.openhab.core.addon.AddonDiscoveryServiceType;
+import org.openhab.core.addon.AddonInfo;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -42,23 +45,28 @@ public class UpnpAddonSuggestionFinder extends BaseAddonSuggestionFinder {
 
     @Override
     public void scanTask() {
-        upnpService.getRegistry().getRemoteDevices().forEach(d -> {
-            addonCandidates.forEach(c -> {
-                c.getDiscoveryMethods().stream().filter(m -> AddonDiscoveryServiceType.UPNP == m.getServiceType())
-                        .forEach(m -> {
-                            Map<String, String> map = m.getPropertyRegexMap();
-                            if (propertyMatches(map, "deviceType", d.getType().getType())
-                                    && propertyMatches(map, "manufacturer",
-                                            d.getDetails().getManufacturerDetails().getManufacturer())
-                                    && propertyMatches(map, "modelName",
-                                            d.getDetails().getModelDetails().getModelName())
-                                    && propertyMatches(map, "serialNumber", d.getDetails().getSerialNumber())
-                                    && propertyMatches(map, "udn", d.getIdentity().getUdn().getIdentifierString())) {
-                                addonSuggestionUIDs.add(c.getUID());
-                            }
-                        });
-            });
-        });
+        for (RemoteDevice device : upnpService.getRegistry().getRemoteDevices()) {
+            for (AddonInfo candidate : addonCandidates) {
+                for (AddonDiscoveryMethod method : candidate.getDiscoveryMethods()) {
+                    if (Thread.interrupted()) {
+                        // using nested for loops instead of forEach to allow external interruption
+                        return;
+                    }
+                    if (AddonDiscoveryServiceType.UPNP != method.getServiceType()) {
+                        continue;
+                    }
+                    Map<String, String> map = method.getPropertyRegexMap();
+                    if (propertyMatches(map, "deviceType", device.getType().getType())
+                            && propertyMatches(map, "manufacturer",
+                                    device.getDetails().getManufacturerDetails().getManufacturer())
+                            && propertyMatches(map, "modelName", device.getDetails().getModelDetails().getModelName())
+                            && propertyMatches(map, "serialNumber", device.getDetails().getSerialNumber())
+                            && propertyMatches(map, "udn", device.getIdentity().getUdn().getIdentifierString())) {
+                        addonSuggestionUIDs.add(candidate.getUID());
+                    }
+                }
+            }
+        }
         scanDone = true;
     }
 }

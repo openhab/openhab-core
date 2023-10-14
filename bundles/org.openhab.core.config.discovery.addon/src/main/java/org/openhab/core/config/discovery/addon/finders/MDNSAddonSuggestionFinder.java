@@ -12,16 +12,17 @@
  */
 package org.openhab.core.config.discovery.addon.finders;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 import javax.jmdns.ServiceEvent;
+import javax.jmdns.ServiceInfo;
 import javax.jmdns.ServiceListener;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.addon.AddonDiscoveryMethod;
 import org.openhab.core.addon.AddonDiscoveryServiceType;
 import org.openhab.core.addon.AddonInfo;
 import org.openhab.core.io.transport.mdns.MDNSClient;
@@ -68,20 +69,26 @@ public class MDNSAddonSuggestionFinder extends BaseAddonSuggestionFinder {
 
     @Override
     public void scanTask() {
-        addonCandidates.forEach(c -> {
-            c.getDiscoveryMethods().stream().filter(m -> AddonDiscoveryServiceType.MDNS == m.getServiceType())
-                    .forEach(m -> {
-                        Map<String, String> map = m.getPropertyRegexMap();
-                        Arrays.stream(mdnsClient.list(m.getMdnsServiceType())).forEach(s -> {
-                            if (propertyMatches(map, "application", s.getApplication())
-                                    && propertyMatches(map, "name", s.getName())
-                                    && Collections.list(s.getPropertyNames()).stream()
-                                            .allMatch(n -> propertyMatches(map, n, s.getPropertyString(n)))) {
-                                addonSuggestionUIDs.add(c.getUID());
-                            }
-                        });
-                    });
-        });
+        for (AddonInfo candidate : addonCandidates) {
+            for (AddonDiscoveryMethod method : candidate.getDiscoveryMethods()) {
+                if (AddonDiscoveryServiceType.MDNS != method.getServiceType()) {
+                    continue;
+                }
+                Map<String, String> map = method.getPropertyRegexMap();
+                for (ServiceInfo service : mdnsClient.list(method.getMdnsServiceType())) {
+                    if (Thread.interrupted()) {
+                        // using nested for loops instead of forEach to allow external interruption
+                        return;
+                    }
+                    if (propertyMatches(map, "application", service.getApplication())
+                            && propertyMatches(map, "name", service.getName())
+                            && Collections.list(service.getPropertyNames()).stream()
+                                    .allMatch(n -> propertyMatches(map, n, service.getPropertyString(n)))) {
+                        addonSuggestionUIDs.add(candidate.getUID());
+                    }
+                }
+            }
+        }
         scanDone = true;
     }
 
