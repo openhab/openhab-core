@@ -24,7 +24,6 @@ import org.eclipse.jdt.annotation.Nullable;
  *
  * @author Leo Siepel - Initial contribution
  */
-
 @NonNullByDefault
 public class StringUtils {
 
@@ -65,7 +64,7 @@ public class StringUtils {
     /**
      * Simple method to escape XML special characters in String.
      * There are five XML special characters which needs to be escaped:
-     * 
+     *
      * <pre>
      * & - &amp;
      * < - &lt;
@@ -80,14 +79,10 @@ public class StringUtils {
     public static @Nullable String escapeXml(@Nullable String str) {
         if (str == null || str.isEmpty()) {
             return str;
+        } else {
+            return str.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;")
+                    .replace("'", "&apos;");
         }
-
-        str = str.replace("&", "&amp;");
-        str = str.replace("<", "&lt;");
-        str = str.replace(">", "&gt;");
-        str = str.replace("\"", "&quot;");
-        str = str.replace("'", "&apos;");
-        return str;
     }
 
     /**
@@ -122,7 +117,7 @@ public class StringUtils {
       * "openHAB_is_cool"   => "Openhab_Is_Cool"
       * "foobar_Example" => "Foobar_Example"
      * </pre>
-     * 
+     *
      * @param str the String to capitalize, may be null
      * @return the capitalized String, may be null
      */
@@ -155,7 +150,7 @@ public class StringUtils {
       * "openHAB is cool"   => "OpenHAB Is Cool"
       * "foobar Example" => "Foobar Example"
      * </pre>
-     * 
+     *
      * @param str the String to capitalize, may be null
      * @return the capitalized String, may be null
      */
@@ -180,29 +175,26 @@ public class StringUtils {
 
     /**
      * Pads the string from the left
-     * 
+     *
      * <pre>
       * padLeft("9", 4, "0")        => "0009"
       * padLeft("3112", 12, "*")    => "********3112"
       * padLeft("openHAB", 4, "*")  => "openHAB"
      * </pre>
-     * 
+     *
      * @param str the String to pad, may be null
      * @param minSize the minimum String size to return
      * @param padString the String to add when padding
      * @return the padded String
      */
     public static String padLeft(@Nullable String str, int minSize, String padString) {
-        if (str == null) {
-            str = "";
-        }
-
-        return String.format("%" + minSize + "s", str).replace(" ", padString);
+        String paddedString = str == null ? "" : str;
+        return String.format("%" + minSize + "s", paddedString).replace(" ", padString);
     }
 
     /**
      * Creates a random string
-     * 
+     *
      * @param length the length of the String to return
      * @param charset the characters to use to create the String
      * @return the random String
@@ -220,7 +212,7 @@ public class StringUtils {
 
     /**
      * Creates a random string with [A-Zaz] characters
-     * 
+     *
      * @param length the length of the String to return
      * @return the random String
      */
@@ -230,7 +222,7 @@ public class StringUtils {
 
     /**
      * Creates a random string with only hex characters
-     * 
+     *
      * @param length the length of the String to return
      * @return the random String
      */
@@ -240,7 +232,7 @@ public class StringUtils {
 
     /**
      * Creates a random string with [A-Za-z0-9] characters
-     * 
+     *
      * @param length the length of the String to return
      * @return the random String
      */
@@ -250,7 +242,7 @@ public class StringUtils {
 
     /**
      * Splits the string by character type into an array
-     * 
+     *
      * <pre>
      * "ab de fg"   => "ab", " ", "de", " ", "fg";
      * "ab   de fg" => "ab", "   ", "de", " ", "fg";
@@ -259,7 +251,7 @@ public class StringUtils {
      * "fooBar"     =>  "foo", "Bar"
      * "OHRules"    =>  "OH", "Rules"
      * </pre>
-     * 
+     *
      * @param str the input String to split, may be null
      * @return the splitted String
      */
@@ -296,7 +288,7 @@ public class StringUtils {
     /**
      * Simple method to un escape XML special characters in String.
      * There are five XML Special characters which needs to be escaped:
-     * 
+     *
      * <pre>
      * & => &amp;
      * < => &lt;
@@ -304,19 +296,16 @@ public class StringUtils {
      * " => &quot;
      * ' => &apos;
      * </pre>
-     * 
+     *
      * @param input the input xml as String to unescape, may be null
      * @return the unescaped xml as String, may be null
      */
     public static @Nullable String unEscapeXml(@Nullable String str) {
         if (str == null || str.isEmpty()) {
             return str;
+        } else {
+            return str.replace("&amp;", "&").replace("&lt;", "<").replace("&gt;", ">").replace("&quot;", "\"")
+                    .replace("&apos;", "'");
         }
-        str = str.replace("&amp;", "&");
-        str = str.replace("&lt;", "<");
-        str = str.replace("&gt;", ">");
-        str = str.replace("&quot;", "\"");
-        str = str.replace("&apos;", "'");
-        return str;
     }
 }
