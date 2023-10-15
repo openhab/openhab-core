@@ -25,7 +25,9 @@ LinkableWidget:
 
 Frame:
     {Frame} 'Frame' (('item=' item=ItemRef)? & ('label=' label=(ID | STRING))? &
-    (('icon=' icon=Icon) | ('staticIcon=' staticIcon=Icon))? &
+    (('icon=' icon=Icon) |
+        ('icon=[' (IconRules+=IconRule (',' IconRules+=IconRule)*) ']') |
+        ('staticIcon=' staticIcon=Icon))? &
     ('labelcolor=[' (LabelColor+=ColorArray (',' LabelColor+=ColorArray)*) ']')? &
     ('valuecolor=[' (ValueColor+=ColorArray (',' ValueColor+=ColorArray)*) ']')? &
     ('iconcolor=[' (IconColor+=ColorArray (',' IconColor+=ColorArray)*) ']')? &
@@ -33,7 +35,9 @@ Frame:
 
 Text:
     {Text} 'Text' (('item=' item=ItemRef)? & ('label=' label=(ID | STRING))? &
-    (('icon=' icon=Icon) | ('staticIcon=' staticIcon=Icon))? &
+    (('icon=' icon=Icon) |
+        ('icon=[' (IconRules+=IconRule (',' IconRules+=IconRule)*) ']') |
+        ('staticIcon=' staticIcon=Icon))? &
     ('labelcolor=[' (LabelColor+=ColorArray (',' LabelColor+=ColorArray)*) ']')? &
     ('valuecolor=[' (ValueColor+=ColorArray (',' ValueColor+=ColorArray)*) ']')? &
     ('iconcolor=[' (IconColor+=ColorArray (',' IconColor+=ColorArray)*) ']')? &
@@ -41,7 +45,9 @@ Text:
 
 Group:
     'Group' (('item=' item=GroupItemRef) & ('label=' label=(ID | STRING))? &
-    (('icon=' icon=Icon) | ('staticIcon=' staticIcon=Icon))? &
+    (('icon=' icon=Icon) |
+        ('icon=[' (IconRules+=IconRule (',' IconRules+=IconRule)*) ']') |
+        ('staticIcon=' staticIcon=Icon))? &
     ('labelcolor=[' (LabelColor+=ColorArray (',' LabelColor+=ColorArray)*) ']')? &
     ('valuecolor=[' (ValueColor+=ColorArray (',' ValueColor+=ColorArray)*) ']')? &
     ('iconcolor=[' (IconColor+=ColorArray (',' IconColor+=ColorArray)*) ']')? &
@@ -49,7 +55,9 @@ Group:
 
 Image:
     'Image' (('item=' item=ItemRef)? & ('label=' label=(ID | STRING))? &
-    (('icon=' icon=Icon) | ('staticIcon=' staticIcon=Icon))? &
+    (('icon=' icon=Icon) |
+        ('icon=[' (IconRules+=IconRule (',' IconRules+=IconRule)*) ']') |
+        ('staticIcon=' staticIcon=Icon))? &
     ('url=' url=STRING)? & ('refresh=' refresh=INT)? &
     ('labelcolor=[' (LabelColor+=ColorArray (',' LabelColor+=ColorArray)*) ']')? &
     ('valuecolor=[' (ValueColor+=ColorArray (',' ValueColor+=ColorArray)*) ']')? &
@@ -58,7 +66,9 @@ Image:
 
 Video:
     'Video' (('item=' item=ItemRef)? & ('label=' label=(ID | STRING))? &
-    (('icon=' icon=Icon) | ('staticIcon=' staticIcon=Icon))? &
+    (('icon=' icon=Icon) |
+        ('icon=[' (IconRules+=IconRule (',' IconRules+=IconRule)*) ']') |
+        ('staticIcon=' staticIcon=Icon))? &
     ('url=' url=STRING) & ('encoding=' encoding=STRING)? &
     ('labelcolor=[' (LabelColor+=ColorArray (',' LabelColor+=ColorArray)*) ']')? &
     ('valuecolor=[' (ValueColor+=ColorArray (',' ValueColor+=ColorArray)*) ']')? &
@@ -67,7 +77,9 @@ Video:
 
 Chart:
     'Chart' (('item=' item=ItemRef) & ('label=' label=(ID | STRING))? &
-    (('icon=' icon=Icon) | ('staticIcon=' staticIcon=Icon))? &
+    (('icon=' icon=Icon) |
+        ('icon=[' (IconRules+=IconRule (',' IconRules+=IconRule)*) ']') |
+        ('staticIcon=' staticIcon=Icon))? &
     ('service=' service=STRING)? & ('refresh=' refresh=INT)? & ('period=' period=ID) &
     ('legend=' legend=BOOLEAN_OBJECT)? & ('forceasitem=' forceAsItem=BOOLEAN_OBJECT)? &
     ('labelcolor=[' (LabelColor+=ColorArray (',' LabelColor+=ColorArray)*) ']')? &
@@ -78,7 +90,9 @@ Chart:
 
 Webview:
     'Webview' (('item=' item=ItemRef)? & ('label=' label=(ID | STRING))? &
-    (('icon=' icon=Icon) | ('staticIcon=' staticIcon=Icon))? &
+    (('icon=' icon=Icon) |
+        ('icon=[' (IconRules+=IconRule (',' IconRules+=IconRule)*) ']') |
+        ('staticIcon=' staticIcon=Icon))? &
     ('height=' height=INT)? & ('url=' url=STRING) &
     ('labelcolor=[' (LabelColor+=ColorArray (',' LabelColor+=ColorArray)*) ']')? &
     ('valuecolor=[' (ValueColor+=ColorArray (',' ValueColor+=ColorArray)*) ']')? &
@@ -87,7 +101,9 @@ Webview:
 
 Switch:
     'Switch' (('item=' item=ItemRef) & ('label=' label=(ID | STRING))? &
-    (('icon=' icon=Icon) | ('staticIcon=' staticIcon=Icon))? &
+    (('icon=' icon=Icon) |
+        ('icon=[' (IconRules+=IconRule (',' IconRules+=IconRule)*) ']') |
+        ('staticIcon=' staticIcon=Icon))? &
     ('mappings=[' mappings+=Mapping (',' mappings+=Mapping)* ']')? &
     ('labelcolor=[' (LabelColor+=ColorArray (',' LabelColor+=ColorArray)*) ']')? &
     ('valuecolor=[' (ValueColor+=ColorArray (',' ValueColor+=ColorArray)*) ']')? &
@@ -96,7 +112,9 @@ Switch:
 
 Mapview:
     'Mapview' (('item=' item=ItemRef) & ('label=' label=(ID | STRING))? &
-    (('icon=' icon=Icon) | ('staticIcon=' staticIcon=Icon))? &
+    (('icon=' icon=Icon) |
+        ('icon=[' (IconRules+=IconRule (',' IconRules+=IconRule)*) ']') |
+        ('staticIcon=' staticIcon=Icon))? &
     ('height=' height=INT)? &
     ('labelcolor=[' (LabelColor+=ColorArray (',' LabelColor+=ColorArray)*) ']')? &
     ('valuecolor=[' (ValueColor+=ColorArray (',' ValueColor+=ColorArray)*) ']')? &
@@ -105,7 +123,9 @@ Mapview:
 
 Slider:
     'Slider' (('item=' item=ItemRef) & ('label=' label=(ID | STRING))? &
-    (('icon=' icon=Icon) | ('staticIcon=' staticIcon=Icon))? &
+    (('icon=' icon=Icon) |
+        ('icon=[' (IconRules+=IconRule (',' IconRules+=IconRule)*) ']') |
+        ('staticIcon=' staticIcon=Icon))? &
     ('sendFrequency=' frequency=INT)? & (switchEnabled?='switchSupport')? &
     ('minValue=' minValue=Number)? & ('maxValue=' maxValue=Number)? & ('step=' step=Number)? &
     ('labelcolor=[' (LabelColor+=ColorArray (',' LabelColor+=ColorArray)*) ']')? &
@@ -115,7 +135,9 @@ Slider:
 
 Selection:
     'Selection' (('item=' item=ItemRef) & ('label=' label=(ID | STRING))? &
-    (('icon=' icon=Icon) | ('staticIcon=' staticIcon=Icon))? &
+    (('icon=' icon=Icon) |
+        ('icon=[' (IconRules+=IconRule (',' IconRules+=IconRule)*) ']') |
+        ('staticIcon=' staticIcon=Icon))? &
     ('mappings=[' mappings+=Mapping (',' mappings+=Mapping)* ']')? &
     ('labelcolor=[' (LabelColor+=ColorArray (',' LabelColor+=ColorArray)*) ']')? &
     ('valuecolor=[' (ValueColor+=ColorArray (',' ValueColor+=ColorArray)*) ']')? &
@@ -124,7 +146,9 @@ Selection:
 
 Setpoint:
     'Setpoint' (('item=' item=ItemRef) & ('label=' label=(ID | STRING))? &
-    (('icon=' icon=Icon) | ('staticIcon=' staticIcon=Icon))? &
+    (('icon=' icon=Icon) |
+        ('icon=[' (IconRules+=IconRule (',' IconRules+=IconRule)*) ']') |
+        ('staticIcon=' staticIcon=Icon))? &
     ('minValue=' minValue=Number)? & ('maxValue=' maxValue=Number)? & ('step=' step=Number)? &
     ('labelcolor=[' (LabelColor+=ColorArray (',' LabelColor+=ColorArray)*) ']')? &
     ('valuecolor=[' (ValueColor+=ColorArray (',' ValueColor+=ColorArray)*) ']')? &
@@ -133,7 +157,9 @@ Setpoint:
 
 Colorpicker:
     'Colorpicker' (('item=' item=ItemRef) & ('label=' label=(ID | STRING))? &
-    (('icon=' icon=Icon) | ('staticIcon=' staticIcon=Icon))? &
+    (('icon=' icon=Icon) |
+        ('icon=[' (IconRules+=IconRule (',' IconRules+=IconRule)*) ']') |
+        ('staticIcon=' staticIcon=Icon))? &
     ('sendFrequency=' frequency=INT)? &
     ('labelcolor=[' (LabelColor+=ColorArray (',' LabelColor+=ColorArray)*) ']')? &
     ('valuecolor=[' (ValueColor+=ColorArray (',' ValueColor+=ColorArray)*) ']')? &
@@ -142,7 +168,9 @@ Colorpicker:
 
 Input:
     'Input' (('item=' item=ItemRef) & ('label=' label=(ID | STRING))? &
-    (('icon=' icon=Icon) | ('staticIcon=' staticIcon=Icon))? &
+    (('icon=' icon=Icon) |
+        ('icon=[' (IconRules+=IconRule (',' IconRules+=IconRule)*) ']') |
+        ('staticIcon=' staticIcon=Icon))? &
     ('inputHint=' inputHint=STRING)? &
     ('labelcolor=[' (LabelColor+=ColorArray (',' LabelColor+=ColorArray)*) ']')? &
     ('valuecolor=[' (ValueColor+=ColorArray (',' ValueColor+=ColorArray)*) ']')? &
@@ -151,7 +179,9 @@ Input:
 
 Buttongrid:
     'Buttongrid' (('item=' item=ItemRef) & ('label=' label=(ID | STRING))? &
-    (('icon=' icon=Icon) | ('staticIcon=' staticIcon=Icon))? &
+    (('icon=' icon=Icon) |
+        ('icon=[' (IconRules+=IconRule (',' IconRules+=IconRule)*) ']') |
+        ('staticIcon=' staticIcon=Icon))? &
     ('columns=' columns=INT) &
     ('buttons=[' buttons+=Button (',' buttons+=Button)* ']') &
     ('labelcolor=[' (LabelColor+=ColorArray (',' LabelColor+=ColorArray)*) ']')? &
@@ -161,7 +191,9 @@ Buttongrid:
 
 Default:
     'Default' (('item=' item=ItemRef) & ('label=' label=(ID | STRING))? &
-    (('icon=' icon=Icon) | ('staticIcon=' staticIcon=Icon))? &
+    (('icon=' icon=Icon) |
+        ('icon=[' (IconRules+=IconRule (',' IconRules+=IconRule)*) ']') |
+        ('staticIcon=' staticIcon=Icon))? &
     ('height=' height=INT)? &
     ('labelcolor=[' (LabelColor+=ColorArray (',' LabelColor+=ColorArray)*) ']')? &
     ('valuecolor=[' (ValueColor+=ColorArray (',' ValueColor+=ColorArray)*) ']')? &
@@ -192,6 +224,9 @@ IconName:
 
 ColorArray:
     ((conditions+=Condition ('AND' conditions+=Condition)*) '=')? (arg=STRING);
+
+IconRule:
+    ((conditions+=Condition ('AND' conditions+=Condition)*) '=')? (arg=Icon);
 
 Condition:
     (item=ID)? (condition=('==' | '>' | '<' | '>=' | '<=' | '!='))? (sign=('-' | '+'))? (state=XState);

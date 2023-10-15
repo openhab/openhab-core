@@ -36,6 +36,11 @@ public class WidgetDTO {
 
     public String label;
     public String icon;
+    /**
+     * staticIcon is a boolean indicating if the widget state must be ignored when requesting the icon.
+     * It is set to true when the widget has either the staticIcon property set or the icon property set
+     * with conditional rules.
+     */
     public Boolean staticIcon;
     public String labelcolor;
     public String valuecolor;

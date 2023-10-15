@@ -27,6 +27,7 @@ import java.util.TimeZone;
 import javax.measure.quantity.Temperature;
 
 import org.eclipse.emf.common.util.BasicEList;
+import org.eclipse.emf.ecore.EClass;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -62,6 +63,7 @@ import org.openhab.core.model.sitemap.sitemap.ColorArray;
 import org.openhab.core.model.sitemap.sitemap.Colorpicker;
 import org.openhab.core.model.sitemap.sitemap.Condition;
 import org.openhab.core.model.sitemap.sitemap.Group;
+import org.openhab.core.model.sitemap.sitemap.IconRule;
 import org.openhab.core.model.sitemap.sitemap.Image;
 import org.openhab.core.model.sitemap.sitemap.Mapping;
 import org.openhab.core.model.sitemap.sitemap.Mapview;
@@ -86,6 +88,7 @@ import org.openhab.core.ui.items.ItemUIProvider;
 /**
  * @author Kai Kreuzer - Initial contribution
  * @author Laurent Garnier - Tests updated to consider multiple AND conditions + tests added for getVisiblity
+ * @author Laurent Garnier - Tests added for getCategory
  */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -1183,5 +1186,115 @@ public class ItemUIRegistryImplTest {
         when(itemMock.getState()).thenReturn(new DecimalType(24.0));
 
         assertFalse(uiRegistry.getVisiblity(widgetMock));
+    }
+
+    @Test
+    public void getCategoryWhenIconSetWithoutRules() {
+        EClass textEClass = mock(EClass.class);
+        when(textEClass.getName()).thenReturn("text");
+        when(textEClass.getInstanceTypeName()).thenReturn("org.openhab.core.model.sitemap.Text");
+        when(widgetMock.eClass()).thenReturn(textEClass);
+        when(widgetMock.getIcon()).thenReturn("temperature");
+        when(widgetMock.getStaticIcon()).thenReturn(null);
+        when(widgetMock.getIconRules()).thenReturn(null);
+
+        String icon = uiRegistry.getCategory(widgetMock);
+        assertEquals("temperature", icon);
+    }
+
+    @Test
+    public void getCategoryWhenIconSetWithRules() {
+        EClass textEClass = mock(EClass.class);
+        when(textEClass.getName()).thenReturn("text");
+        when(textEClass.getInstanceTypeName()).thenReturn("org.openhab.core.model.sitemap.Text");
+        when(widgetMock.eClass()).thenReturn(textEClass);
+        when(widgetMock.getIcon()).thenReturn(null);
+        when(widgetMock.getStaticIcon()).thenReturn(null);
+        Condition conditon = mock(Condition.class);
+        when(conditon.getState()).thenReturn("21");
+        when(conditon.getCondition()).thenReturn(">=");
+        Condition conditon2 = mock(Condition.class);
+        when(conditon2.getState()).thenReturn("24");
+        when(conditon2.getCondition()).thenReturn("<");
+        BasicEList<Condition> conditions = new BasicEList<>();
+        conditions.add(conditon);
+        conditions.add(conditon2);
+        IconRule rule = mock(IconRule.class);
+        when(rule.getConditions()).thenReturn(conditions);
+        when(rule.getArg()).thenReturn("temperature");
+        BasicEList<IconRule> rules = new BasicEList<>();
+        rules.add(rule);
+        BasicEList<Condition> conditions2 = new BasicEList<>();
+        IconRule rule2 = mock(IconRule.class);
+        when(rule2.getConditions()).thenReturn(conditions2);
+        when(rule2.getArg()).thenReturn("humidity");
+        rules.add(rule2);
+        when(widgetMock.getIconRules()).thenReturn(rules);
+
+        when(itemMock.getState()).thenReturn(new DecimalType(20.9));
+
+        String icon = uiRegistry.getCategory(widgetMock);
+        assertEquals("humidity", icon);
+
+        when(itemMock.getState()).thenReturn(new DecimalType(21.0));
+
+        icon = uiRegistry.getCategory(widgetMock);
+        assertEquals("temperature", icon);
+
+        when(itemMock.getState()).thenReturn(new DecimalType(23.5));
+
+        icon = uiRegistry.getCategory(widgetMock);
+        assertEquals("temperature", icon);
+
+        when(itemMock.getState()).thenReturn(new DecimalType(24.0));
+
+        icon = uiRegistry.getCategory(widgetMock);
+        assertEquals("humidity", icon);
+    }
+
+    @Test
+    public void getCategoryWhenStaticIconSet() {
+        EClass textEClass = mock(EClass.class);
+        when(textEClass.getName()).thenReturn("text");
+        when(textEClass.getInstanceTypeName()).thenReturn("org.openhab.core.model.sitemap.Text");
+        when(widgetMock.eClass()).thenReturn(textEClass);
+        when(widgetMock.getIcon()).thenReturn(null);
+        when(widgetMock.getStaticIcon()).thenReturn("temperature");
+        when(widgetMock.getIconRules()).thenReturn(null);
+
+        String icon = uiRegistry.getCategory(widgetMock);
+        assertEquals("temperature", icon);
+    }
+
+    @Test
+    public void getCategoryWhenIconSetOnItem() {
+        EClass textEClass = mock(EClass.class);
+        when(textEClass.getName()).thenReturn("text");
+        when(textEClass.getInstanceTypeName()).thenReturn("org.openhab.core.model.sitemap.Text");
+        when(widgetMock.eClass()).thenReturn(textEClass);
+        when(widgetMock.getIcon()).thenReturn(null);
+        when(widgetMock.getStaticIcon()).thenReturn(null);
+        when(widgetMock.getIconRules()).thenReturn(null);
+
+        when(itemMock.getCategory()).thenReturn("temperature");
+
+        String icon = uiRegistry.getCategory(widgetMock);
+        assertEquals("temperature", icon);
+    }
+
+    @Test
+    public void getCategoryDefaultIcon() {
+        EClass textEClass = mock(EClass.class);
+        when(textEClass.getName()).thenReturn("text");
+        when(textEClass.getInstanceTypeName()).thenReturn("org.openhab.core.model.sitemap.Text");
+        when(widgetMock.eClass()).thenReturn(textEClass);
+        when(widgetMock.getIcon()).thenReturn(null);
+        when(widgetMock.getStaticIcon()).thenReturn(null);
+        when(widgetMock.getIconRules()).thenReturn(null);
+
+        when(itemMock.getCategory()).thenReturn(null);
+
+        String icon = uiRegistry.getCategory(widgetMock);
+        assertEquals("text", icon);
     }
 }

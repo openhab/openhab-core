@@ -39,6 +39,7 @@ import org.openhab.core.model.sitemap.sitemap.Chart;
 import org.openhab.core.model.sitemap.sitemap.ColorArray;
 import org.openhab.core.model.sitemap.sitemap.Condition;
 import org.openhab.core.model.sitemap.sitemap.Frame;
+import org.openhab.core.model.sitemap.sitemap.IconRule;
 import org.openhab.core.model.sitemap.sitemap.VisibilityRule;
 import org.openhab.core.model.sitemap.sitemap.Widget;
 import org.openhab.core.types.State;
@@ -50,6 +51,7 @@ import org.openhab.core.ui.items.ItemUIRegistry;
  * @author Kai Kreuzer - Initial contribution
  * @author Laurent Garnier - Added support for icon color
  * @author Laurent Garnier - Support added for multiple AND conditions in labelcolor/valuecolor/visibility
+ * @author Laurent Garnier - New widget icon parameter based on conditional rules
  */
 public class PageChangeListener implements EventSubscriber {
 
@@ -121,6 +123,10 @@ public class PageChangeListener implements EventSubscriber {
                 addItemWithName(items, widget.getItem());
                 if (widget instanceof Frame frame) {
                     items.addAll(getAllItems(frame.getChildren()));
+                }
+                // now scan icon rules
+                for (IconRule rule : widget.getIconRules()) {
+                    addItemsFromConditions(items, rule.getConditions());
                 }
                 // now scan visibility rules
                 for (VisibilityRule rule : widget.getVisibility()) {
@@ -194,7 +200,7 @@ public class PageChangeListener implements EventSubscriber {
             if (!skipWidget && w instanceof Chart chartWidget) {
                 skipWidget = chartWidget.getRefresh() > 0;
             }
-            if (!skipWidget || definesVisibilityOrColor(w, item.getName())) {
+            if (!skipWidget || definesVisibilityOrColorOrIcon(w, item.getName())) {
                 SitemapWidgetEvent event = constructSitemapEventForWidget(item, state, w);
                 events.add(event);
             }
@@ -208,6 +214,8 @@ public class PageChangeListener implements EventSubscriber {
         event.pageId = pageId;
         event.label = itemUIRegistry.getLabel(widget);
         event.widgetId = itemUIRegistry.getWidgetId(widget);
+        event.icon = itemUIRegistry.getCategory(widget);
+        event.reloadIcon = widget.getStaticIcon() == null;
         event.visibility = itemUIRegistry.getVisiblity(widget);
         event.descriptionChanged = false;
         // event.item contains the (potentially changed) data of the item belonging to
@@ -248,11 +256,12 @@ public class PageChangeListener implements EventSubscriber {
         return null;
     }
 
-    private boolean definesVisibilityOrColor(Widget w, String name) {
+    private boolean definesVisibilityOrColorOrIcon(Widget w, String name) {
         return w.getVisibility().stream().anyMatch(r -> conditionsDependsOnItem(r.getConditions(), name))
                 || w.getLabelColor().stream().anyMatch(r -> conditionsDependsOnItem(r.getConditions(), name))
                 || w.getValueColor().stream().anyMatch(r -> conditionsDependsOnItem(r.getConditions(), name))
-                || w.getIconColor().stream().anyMatch(r -> conditionsDependsOnItem(r.getConditions(), name));
+                || w.getIconColor().stream().anyMatch(r -> conditionsDependsOnItem(r.getConditions(), name))
+                || w.getIconRules().stream().anyMatch(r -> conditionsDependsOnItem(r.getConditions(), name));
     }
 
     private boolean conditionsDependsOnItem(@Nullable EList<Condition> conditions, String name) {

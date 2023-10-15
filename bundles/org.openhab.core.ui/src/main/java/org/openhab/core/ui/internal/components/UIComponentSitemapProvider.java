@@ -31,6 +31,7 @@ import org.openhab.core.model.core.ModelRepositoryChangeListener;
 import org.openhab.core.model.sitemap.SitemapProvider;
 import org.openhab.core.model.sitemap.sitemap.Button;
 import org.openhab.core.model.sitemap.sitemap.ColorArray;
+import org.openhab.core.model.sitemap.sitemap.IconRule;
 import org.openhab.core.model.sitemap.sitemap.LinkableWidget;
 import org.openhab.core.model.sitemap.sitemap.Mapping;
 import org.openhab.core.model.sitemap.sitemap.Sitemap;
@@ -47,6 +48,7 @@ import org.openhab.core.model.sitemap.sitemap.impl.ConditionImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.DefaultImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.FrameImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.GroupImpl;
+import org.openhab.core.model.sitemap.sitemap.impl.IconRuleImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.ImageImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.InputImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.MappingImpl;
@@ -95,6 +97,7 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
             .compile("(?<item>[A-Za-z]\\w*)\\s*(?<condition>==|!=|<=|>=|<|>)\\s*(?<sign>\\+|-)?(?<state>.+)");
     private static final Pattern COLOR_PATTERN = Pattern.compile(
             "((?<item>[A-Za-z]\\w*)?\\s*((?<condition>==|!=|<=|>=|<|>)\\s*(?<sign>\\+|-)?(?<state>[^=]*[^= ]+))?\\s*=)?\\s*(?<arg>\\S+)");
+    private static final Pattern ICON_PATTERN = COLOR_PATTERN;
 
     private Map<String, Sitemap> sitemaps = new HashMap<>();
     private @Nullable UIComponentRegistryFactory componentRegistryFactory;
@@ -296,6 +299,7 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
             addLabelColor(widget.getLabelColor(), component);
             addValueColor(widget.getValueColor(), component);
             addIconColor(widget.getIconColor(), component);
+            addIconRules(widget.getIconRules(), component);
         }
 
         return widget;
@@ -423,6 +427,29 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
                     } else {
                         logger.warn("Syntax error in {} rule '{}' for widget {}", key, sourceColor,
                                 component.getType());
+                    }
+                }
+            }
+        }
+    }
+
+    private void addIconRules(EList<IconRule> iconDef, UIComponent component) {
+        if (component.getConfig() != null && component.getConfig().containsKey("icon")) {
+            for (Object sourceIcon : (Collection<?>) component.getConfig().get("icon")) {
+                if (sourceIcon instanceof String) {
+                    Matcher matcher = ICON_PATTERN.matcher(sourceIcon.toString());
+                    if (matcher.matches()) {
+                        IconRuleImpl iconRule = (IconRuleImpl) SitemapFactory.eINSTANCE.createIconRule();
+                        ConditionImpl condition = (ConditionImpl) SitemapFactory.eINSTANCE.createCondition();
+                        condition.setItem(matcher.group("item"));
+                        condition.setCondition(matcher.group("condition"));
+                        condition.setSign(matcher.group("sign"));
+                        condition.setState(matcher.group("state"));
+                        iconRule.eSet(SitemapPackage.ICON_RULE__CONDITIONS, condition);
+                        iconRule.setArg(matcher.group("arg"));
+                        iconDef.add(iconRule);
+                    } else {
+                        logger.warn("Syntax error in icon rule '{}' for widget {}", sourceIcon, component.getType());
                     }
                 }
             }
