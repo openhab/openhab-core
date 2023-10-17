@@ -46,7 +46,10 @@ public class ColorUtil {
     private static final BigDecimal BIG_DECIMAL_60 = BigDecimal.valueOf(60);
     private static final BigDecimal BIG_DECIMAL_5 = BigDecimal.valueOf(5);
     private static final BigDecimal BIG_DECIMAL_3 = BigDecimal.valueOf(3);
+    private static final BigDecimal BIG_DECIMAL_2 = BigDecimal.valueOf(2);
     private static final BigDecimal BIG_DECIMAL_2_POINT_55 = new BigDecimal("2.55");
+    private static final BigDecimal BIG_DECIMAL_0 = BigDecimal.valueOf(0);
+    private static final BigDecimal BIG_DECIMAL_127_POINT_5 = BigDecimal.valueOf(127.5);
 
     public static final Gamut DEFAULT_GAMUT = new Gamut(new double[] { 0.9961, 0.0001 }, new double[] { 0, 0.9961 },
             new double[] { 0, 0.0001 });
@@ -79,7 +82,7 @@ public class ColorUtil {
      * This function does not round the components. For conversion to integer values in the range 0 to 255 use
      * {@link #hsbToRgb(HSBType)}.
      *
-     * See also: {@link #hsbToRgb(HSBType)}, {@link #hsbTosRgb(HSBType)}
+     * See also: {@link #hsbToRgb(HSBType)}, {@link #hsbTosRgb(HSBType)}, {@link #hsbToRgbwPercent(HSBType)}
      *
      * @param hsb an {@link HSBType} value.
      * @return array of three {@link PercentType} with the RGB values in the range 0 to 100 percent.
@@ -138,6 +141,102 @@ public class ColorUtil {
                 throw new IllegalArgumentException("Could not convert to RGB.");
         }
         return new PercentType[] { red, green, blue };
+    }
+
+    /**
+     * Transform <a href="https://en.wikipedia.org/wiki/HSL_and_HSV">HSV</a> based {@link HSBType} to RGBW.
+     *
+     * See <a href=
+     * "https://stackoverflow.com/questions/40312216/converting-rgb-to-rgbw">Converting RGB to RGBW</a>.
+     *
+     * This function does not round the components. For conversion to integer values in the range 0 to 255 use
+     * {@link #hsbToRgb(HSBType)}.
+     *
+     * See also: {@link #hsbToRgb(HSBType)}, {@link #hsbTosRgb(HSBType)}, {@link #hsbToRgbPercent(HSBType)}
+     *
+     * @param hsb an {@link HSBType} value.
+     * @return array of four {@link PercentType} with the RGBW values in the range 0 to 100 percent.
+     */
+    public static PercentType[] hsbToRgbwPercent(HSBType hsb) {
+        int[] rgb = hsbToRgb(hsb);
+        final BigDecimal Ri = new BigDecimal(rgb[0]);
+        final BigDecimal Gi = new BigDecimal(rgb[1]);
+        final BigDecimal Bi = new BigDecimal(rgb[2]);
+        // Get the maximum between R, G, and B
+        final BigDecimal tM = Ri.max(Gi.max(Bi));
+
+        // If the maximum value is 0, immediately return pure black.
+        if (tM.floatValue() == 0) {
+            return new PercentType[] { PercentType.ZERO, PercentType.ZERO, PercentType.ZERO, PercentType.ZERO };
+        }
+
+        // This section serves to figure out what the color with 100% hue is
+        final BigDecimal multiplier = BIG_DECIMAL_255.divide(tM, 0, RoundingMode.DOWN);
+        final BigDecimal hR = Ri.multiply(multiplier);
+        final BigDecimal hG = Gi.multiply(multiplier);
+        final BigDecimal hB = Bi.multiply(multiplier);
+
+        // This calculates the Whiteness (not strictly speaking Luminance) of the color
+        final BigDecimal M = hR.max(hG.max(hB));
+        final BigDecimal m = hR.min(hG.min(hB));
+        final BigDecimal Luminance = ((M.add(m).divide(BIG_DECIMAL_2).subtract(BIG_DECIMAL_127_POINT_5))
+                .multiply(BIG_DECIMAL_255.divide(BIG_DECIMAL_127_POINT_5))).divide(multiplier);
+
+        // Calculate the output values
+        BigDecimal Ro = (Ri.subtract(Luminance).multiply(BIG_DECIMAL_100).divide(BIG_DECIMAL_255, 0,
+                RoundingMode.DOWN));
+        BigDecimal Go = (Gi.subtract(Luminance).multiply(BIG_DECIMAL_100).divide(BIG_DECIMAL_255, 0,
+                RoundingMode.DOWN));
+        BigDecimal Bo = (Bi.subtract(Luminance).multiply(BIG_DECIMAL_100).divide(BIG_DECIMAL_255, 0,
+                RoundingMode.DOWN));
+        BigDecimal Wo = Luminance.multiply(BIG_DECIMAL_100).divide(BIG_DECIMAL_255, 0, RoundingMode.DOWN);
+
+        // check range
+        Ro = BIG_DECIMAL_100.min(Ro.max(BIG_DECIMAL_0));
+        Go = BIG_DECIMAL_100.min(Go.max(BIG_DECIMAL_0));
+        Bo = BIG_DECIMAL_100.min(Bo.max(BIG_DECIMAL_0));
+        Wo = BIG_DECIMAL_100.min(Wo.max(BIG_DECIMAL_0));
+
+        return new PercentType[] { new PercentType(Ro), new PercentType(Go), new PercentType(Bo), new PercentType(Wo) };
+    }
+
+    /**
+     * Transform <a href="https://en.wikipedia.org/wiki/HSL_and_HSV">HSV</a> based {@link HSBType} to RGBW.
+     *
+     * See <a href=
+     * "https://stackoverflow.com/questions/40312216/converting-rgb-to-rgbw">Converting RGB to RGBW</a>.
+     *
+     * This function does not round the components. For conversion to integer values in the range 0 to 255 use
+     * {@link #hsbToRgb(HSBType)}.
+     *
+     * See also: {@link #hsbToRgb(HSBType)}, {@link #hsbTosRgb(HSBType)}, {@link #hsbToRgbPercent(HSBType)}
+     *
+     * @param rgb array of three int with the RGB values in the range 0 to 255.
+     * @return hsb an {@link HSBType} value.
+     *
+     */
+    public static HSBType rgbwTohsb(double r, double g, double b, double w) {
+
+        BigDecimal Luminance = BigDecimal.valueOf(w);
+        BigDecimal Ri = BigDecimal.valueOf(r).add(Luminance);
+        BigDecimal Gi = BigDecimal.valueOf(g).add(Luminance);
+        BigDecimal Bi = BigDecimal.valueOf(b).add(Luminance);
+
+        // Get the maximum between R, G, and B
+        final BigDecimal tM = BIG_DECIMAL_255.min(Ri.max(Gi.max(Bi)).max(BIG_DECIMAL_0));
+
+        // If the maximum value is 0, immediately return pure black.
+        if (tM.floatValue() == 0) {
+            return HSBType.BLACK;
+        }
+
+        final BigDecimal multiplier = BIG_DECIMAL_255.divide(tM, 0, RoundingMode.DOWN);
+
+        BigDecimal Ro = Ri.divide(multiplier).min(BIG_DECIMAL_255).max(BIG_DECIMAL_0);
+        BigDecimal Go = Gi.divide(multiplier).min(BIG_DECIMAL_255).max(BIG_DECIMAL_0);
+        BigDecimal Bo = Bi.divide(multiplier).min(BIG_DECIMAL_255).max(BIG_DECIMAL_0);
+
+        return HSBType.fromRGB(Ro.intValue(), Go.intValue(), Bo.intValue());
     }
 
     /**

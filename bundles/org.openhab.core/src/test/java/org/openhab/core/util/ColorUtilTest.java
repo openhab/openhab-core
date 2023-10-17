@@ -59,6 +59,71 @@ public class ColorUtilTest {
         assertThat(deltaBri, is(lessThanOrEqualTo(1.0)));
     }
 
+    @Test
+    public void hsbtorgbwTest() {
+        HSBType hsb = HSBType.WHITE;
+        PercentType[] rgbw = ColorUtil.hsbToRgbwPercent(hsb);
+        assertEquals(0.0, rgbw[0].doubleValue(), 0.01);
+        assertEquals(0.0, rgbw[1].doubleValue(), 0.01);
+        assertEquals(0.0, rgbw[2].doubleValue(), 0.01);
+        assertEquals(100.0, rgbw[3].doubleValue(), 0.01);
+
+        hsb = HSBType.BLACK;
+        rgbw = ColorUtil.hsbToRgbwPercent(hsb);
+        assertEquals(0.0, rgbw[0].doubleValue(), 0.01);
+        assertEquals(0.0, rgbw[1].doubleValue(), 0.01);
+        assertEquals(0.0, rgbw[2].doubleValue(), 0.01);
+        assertEquals(0.0, rgbw[3].doubleValue(), 0.01);
+
+        hsb = HSBType.RED;
+        rgbw = ColorUtil.hsbToRgbwPercent(hsb);
+        assertEquals(100.0, rgbw[0].doubleValue(), 0.01);
+        assertEquals(0.0, rgbw[1].doubleValue(), 0.01);
+        assertEquals(0.0, rgbw[2].doubleValue(), 0.01);
+        assertEquals(0.0, rgbw[3].doubleValue(), 0.01);
+
+        hsb = HSBType.GREEN;
+        rgbw = ColorUtil.hsbToRgbwPercent(hsb);
+        assertEquals(0.0, rgbw[0].doubleValue(), 0.01);
+        assertEquals(100.0, rgbw[1].doubleValue(), 0.01);
+        assertEquals(0.0, rgbw[2].doubleValue(), 0.01);
+        assertEquals(0.0, rgbw[3].doubleValue(), 0.01);
+
+        hsb = HSBType.BLUE;
+        rgbw = ColorUtil.hsbToRgbwPercent(hsb);
+        assertEquals(0.0, rgbw[0].doubleValue(), 0.01);
+        assertEquals(0.0, rgbw[1].doubleValue(), 0.01);
+        assertEquals(100.0, rgbw[2].doubleValue(), 0.01);
+        assertEquals(0.0, rgbw[3].doubleValue(), 0.01);
+    }
+
+    public void rgbwtohsbTest() {
+        // Test Red
+        HSBType hsb = ColorUtil.rgbwTohsb(255, 0, 0, 0);
+        int[] convertedRgb = ColorUtil.hsbToRgb(hsb);
+        assertRgbEquals(new int[] { 255, 0, 0 }, convertedRgb);
+
+        // Test Green
+        hsb = ColorUtil.rgbwTohsb(0, 255, 0, 0);
+        convertedRgb = ColorUtil.hsbToRgb(hsb);
+        assertRgbEquals(new int[] { 0, 255, 0 }, convertedRgb);
+
+        // Test Blue
+        hsb = ColorUtil.rgbwTohsb(0, 0, 255, 0);
+        convertedRgb = ColorUtil.hsbToRgb(hsb);
+        assertRgbEquals(new int[] { 0, 0, 255 }, convertedRgb);
+
+        // Test White
+        hsb = ColorUtil.rgbwTohsb(0, 0, 0, 255);
+        convertedRgb = ColorUtil.hsbToRgb(hsb);
+        assertRgbEquals(new int[] { 255, 255, 255 }, convertedRgb);
+
+        // Test Black
+        hsb = ColorUtil.rgbwTohsb(0, 0, 0, 0);
+        convertedRgb = ColorUtil.hsbToRgb(hsb);
+        assertRgbEquals(new int[] { 0, 0, 0 }, convertedRgb);
+    }
+
     @ParameterizedTest
     @MethodSource("invalids")
     public void invalidXyValues(double[] xy) {
