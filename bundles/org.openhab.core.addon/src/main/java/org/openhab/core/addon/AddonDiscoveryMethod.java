@@ -27,8 +27,8 @@ import org.eclipse.jdt.annotation.Nullable;
 @NonNullByDefault
 public class AddonDiscoveryMethod {
     private @Nullable String serviceType;
-    private @Nullable List<AddonMatchProperty> matchProperties;
     private @Nullable String mdnsServiceType;
+    private @Nullable List<AddonMatchProperty> matchProperties;
 
     public AddonDiscoveryServiceType getServiceType() {
         String serviceType = this.serviceType;
