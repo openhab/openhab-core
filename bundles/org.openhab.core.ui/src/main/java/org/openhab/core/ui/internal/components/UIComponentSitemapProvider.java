@@ -15,6 +15,7 @@ package org.openhab.core.ui.internal.components;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -31,7 +32,6 @@ import org.openhab.core.model.core.ModelRepositoryChangeListener;
 import org.openhab.core.model.sitemap.SitemapProvider;
 import org.openhab.core.model.sitemap.sitemap.Button;
 import org.openhab.core.model.sitemap.sitemap.ColorArray;
-import org.openhab.core.model.sitemap.sitemap.IconRule;
 import org.openhab.core.model.sitemap.sitemap.LinkableWidget;
 import org.openhab.core.model.sitemap.sitemap.Mapping;
 import org.openhab.core.model.sitemap.sitemap.Sitemap;
@@ -48,7 +48,6 @@ import org.openhab.core.model.sitemap.sitemap.impl.ConditionImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.DefaultImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.FrameImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.GroupImpl;
-import org.openhab.core.model.sitemap.sitemap.impl.IconRuleImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.ImageImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.InputImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.MappingImpl;
@@ -82,6 +81,8 @@ import org.slf4j.LoggerFactory;
  * @author Laurent Garnier - icon color support for all widgets
  * @author Laurent Garnier - Added support for new element Buttongrid
  * @author Laurent Garnier - Added icon field for mappings
+ * @author Mark Herwege - Make UI provided sitemaps compatible with enhanced syntax, no full UI support for enhanced
+ *         syntax
  */
 @NonNullByDefault
 @Component(service = SitemapProvider.class)
@@ -97,7 +98,6 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
             .compile("(?<item>[A-Za-z]\\w*)\\s*(?<condition>==|!=|<=|>=|<|>)\\s*(?<sign>\\+|-)?(?<state>.+)");
     private static final Pattern COLOR_PATTERN = Pattern.compile(
             "((?<item>[A-Za-z]\\w*)?\\s*((?<condition>==|!=|<=|>=|<|>)\\s*(?<sign>\\+|-)?(?<state>[^=]*[^= ]+))?\\s*=)?\\s*(?<arg>\\S+)");
-    private static final Pattern ICON_PATTERN = COLOR_PATTERN;
 
     private Map<String, Sitemap> sitemaps = new HashMap<>();
     private @Nullable UIComponentRegistryFactory componentRegistryFactory;
@@ -280,8 +280,7 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
 
         if (widget != null) {
             setWidgetPropertyFromComponentConfig(widget, component, "label", SitemapPackage.WIDGET__LABEL);
-            setWidgetPropertyFromComponentConfig(widget, component, "icon", SitemapPackage.WIDGET__ICON);
-            setWidgetPropertyFromComponentConfig(widget, component, "staticIcon", SitemapPackage.WIDGET__STATIC_ICON);
+            setWidgetIconPropertyFromComponentConfig(widget, component);
             setWidgetPropertyFromComponentConfig(widget, component, "item", SitemapPackage.WIDGET__ITEM);
 
             if (widget instanceof LinkableWidget linkableWidget) {
@@ -299,10 +298,22 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
             addLabelColor(widget.getLabelColor(), component);
             addValueColor(widget.getValueColor(), component);
             addIconColor(widget.getIconColor(), component);
-            addIconRules(widget.getIconRules(), component);
         }
 
         return widget;
+    }
+
+    private void setWidgetIconPropertyFromComponentConfig(Widget widget, @Nullable UIComponent component) {
+        if (component == null || component.getConfig() == null) {
+            return;
+        }
+        Object value = component.getConfig().get("staticIcon");
+        if (value == null) {
+            return;
+        }
+        boolean staticIcon = Boolean.valueOf(ConfigUtil.normalizeType(value).toString());
+        setWidgetPropertyFromComponentConfig(widget, component, "icon",
+                staticIcon ? SitemapPackage.WIDGET__STATIC_ICON : SitemapPackage.WIDGET__ICON);
     }
 
     private void setWidgetPropertyFromComponentConfig(Widget widget, @Nullable UIComponent component,
@@ -387,7 +398,7 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
                         condition.setCondition(matcher.group("condition"));
                         condition.setSign(matcher.group("sign"));
                         condition.setState(matcher.group("state"));
-                        visibilityRule.eSet(SitemapPackage.VISIBILITY_RULE__CONDITIONS, condition);
+                        visibilityRule.eSet(SitemapPackage.VISIBILITY_RULE__CONDITIONS, List.of(condition));
                         visibility.add(visibilityRule);
                     } else {
                         logger.warn("Syntax error in visibility rule '{}' for widget {}", sourceVisibility,
@@ -422,34 +433,11 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
                         condition.setCondition(matcher.group("condition"));
                         condition.setSign(matcher.group("sign"));
                         condition.setState(matcher.group("state"));
-                        colorArray.eSet(SitemapPackage.COLOR_ARRAY__CONDITIONS, condition);
+                        colorArray.eSet(SitemapPackage.COLOR_ARRAY__CONDITIONS, List.of(condition));
                         color.add(colorArray);
                     } else {
                         logger.warn("Syntax error in {} rule '{}' for widget {}", key, sourceColor,
                                 component.getType());
-                    }
-                }
-            }
-        }
-    }
-
-    private void addIconRules(EList<IconRule> iconDef, UIComponent component) {
-        if (component.getConfig() != null && component.getConfig().containsKey("icon")) {
-            for (Object sourceIcon : (Collection<?>) component.getConfig().get("icon")) {
-                if (sourceIcon instanceof String) {
-                    Matcher matcher = ICON_PATTERN.matcher(sourceIcon.toString());
-                    if (matcher.matches()) {
-                        IconRuleImpl iconRule = (IconRuleImpl) SitemapFactory.eINSTANCE.createIconRule();
-                        ConditionImpl condition = (ConditionImpl) SitemapFactory.eINSTANCE.createCondition();
-                        condition.setItem(matcher.group("item"));
-                        condition.setCondition(matcher.group("condition"));
-                        condition.setSign(matcher.group("sign"));
-                        condition.setState(matcher.group("state"));
-                        iconRule.eSet(SitemapPackage.ICON_RULE__CONDITIONS, condition);
-                        iconRule.setArg(matcher.group("arg"));
-                        iconDef.add(iconRule);
-                    } else {
-                        logger.warn("Syntax error in icon rule '{}' for widget {}", sourceIcon, component.getType());
                     }
                 }
             }
