@@ -14,7 +14,6 @@ package org.openhab.core.voice.text;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -25,6 +24,7 @@ import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.registry.RegistryChangeListener;
@@ -140,9 +140,9 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
     }
 
     /**
-     * Called whenever the rules are to be (re)generated and added by {@link addRules}
+     * Called whenever the rules are to be (re)generated and added by {@link #addRules}
      */
-    protected abstract void createRules();
+    protected abstract void createRules(@Nullable Locale locale);
 
     @Override
     public String interpret(Locale locale, String text) throws InterpretationException {
@@ -165,8 +165,9 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
         InterpretationResult result;
 
         InterpretationResult lastResult = null;
+        String locationItem = dialogContext != null ? dialogContext.locationItem() : null;
         for (Rule rule : rules) {
-            if ((result = rule.execute(language, tokens, dialogContext)).isSuccess()) {
+            if ((result = rule.execute(language, tokens, locationItem)).isSuccess()) {
                 return result.getResponse();
             } else {
                 if (!InterpretationResult.SYNTAX_ERROR.equals(result)) {
@@ -264,7 +265,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
     /**
      * Creates an item name placeholder expression. This expression is greedy: Only use it, if there are no other
      * expressions following this one.
-     * It's safer to use {@link thingRule} instead.
+     * It's safer to use {@link #itemRule} instead.
      *
      * @return Expression that represents a name of an item.
      */
@@ -275,7 +276,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
     /**
      * Creates an item name placeholder expression. This expression is greedy: Only use it, if you are able to pass in
      * all possible stop tokens as excludes.
-     * It's safer to use {@link thingRule} instead.
+     * It's safer to use {@link #itemRule} instead.
      *
      * @param stopper Stop expression that, if matching, will stop this expression from consuming further tokens.
      * @return Expression that represents a name of an item.
@@ -284,11 +285,11 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
         return tag(NAME, star(new ExpressionIdentifier(this, stopper)));
     }
 
-    private Map<Locale, List<Rule>> getLanguageRules() {
-        if (languageRules.isEmpty()) {
-            createRules();
+    private @Nullable List<@NonNull Rule> getLanguageRules(@Nullable Locale locale) {
+        if (!languageRules.containsKey(locale)) {
+            createRules(locale);
         }
-        return languageRules;
+        return languageRules.get(locale);
     }
 
     /**
@@ -299,15 +300,13 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
      * @return Rules in descending match priority order.
      */
     public Rule[] getRules(Locale locale) {
-        Map<Locale, List<Rule>> languageRules = getLanguageRules();
         List<Rule> rules = new ArrayList<>();
         Set<List<Rule>> ruleSets = new HashSet<>();
-        List<Rule> ruleSet = languageRules.get(locale);
+        List<Rule> ruleSet = getLanguageRules(locale);
         if (ruleSet != null) {
             ruleSets.add(ruleSet);
             rules.addAll(ruleSet);
         }
-
         String language = locale.getLanguage();
         for (Entry<Locale, List<Rule>> entry : languageRules.entrySet()) {
             Locale ruleLocale = entry.getKey();
@@ -323,7 +322,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
     }
 
     /**
-     * Adds {@link Locale} specific rules to this interpreter. To be called from within {@link createRules}.
+     * Adds {@link Locale} specific rules to this interpreter. To be called from within {@link #createRules}.
      *
      * @param locale Locale of the rules.
      * @param rules Rules to add.
@@ -343,7 +342,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
      * item
      * name expression.
      *
-     * @param headExpression The head expression that should contain at least one {@link cmd} generated expression. The
+     * @param headExpression The head expression that should contain at least one {@link #cmd} generated expression. The
      *            corresponding {@link Command} will in case of a match be sent to the matching {@link Item}.
      * @return The created rule.
      */
@@ -354,7 +353,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
     /**
      * Creates an item rule on base of a head and a tail expression, where the middle part of the new rule's expression
      * will consist of an item
-     * name expression. Either the head expression or the tail expression should contain at least one {@link cmd}
+     * name expression. Either the head expression or the tail expression should contain at least one {@link #cmd}
      * generated expression.
      *
      * @param headExpression The head expression.
@@ -362,27 +361,44 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
      * @return The created rule.
      */
     protected Rule itemRule(Object headExpression, @Nullable Object tailExpression) {
+        return restrictedItemRule(List.of(), headExpression, tailExpression);
+    }
+
+    /**
+     * Creates an item rule on base of a head and a tail expression, where the middle part of the new rule's ex ression
+     * will consist of an item
+     * name expression. Either the head expression or the tail expression should contain at least one {@link #cmd}
+     * generated expression.
+     * Rule will be restricted to the provided item names if any.
+     *
+     * @param allowedItemNames List of allowed item names, empty for disabled.
+     * @param headExpression The head expression.
+     * @param tailExpression The tail expression.
+     * @return The created rule.
+     */
+    protected Rule restrictedItemRule(List<String> allowedItemNames, Object headExpression,
+            @Nullable Object tailExpression) {
         Expression tail = exp(tailExpression);
         Expression expression = tail == null ? seq(headExpression, name()) : seq(headExpression, name(tail), tail);
-        return new Rule(expression) {
+        return new Rule(expression, allowedItemNames) {
             @Override
             public InterpretationResult interpretAST(ResourceBundle language, ASTNode node,
-                    @Nullable DialogContext dialogContext) {
+                    InterpretationContext context) {
                 String[] name = node.findValueAsStringArray(NAME);
                 ASTNode cmdNode = node.findNode(CMD);
                 Object tag = cmdNode.getTag();
                 Object value = cmdNode.getValue();
-                Command command;
-                if (tag instanceof Command command1) {
-                    command = command1;
+                ItemCommandSupplier commandSupplier;
+                if (tag instanceof ItemCommandSupplier supplier) {
+                    commandSupplier = supplier;
                 } else if (value instanceof Number number) {
-                    command = new DecimalType(number.longValue());
+                    commandSupplier = new SingleCommandSupplier(new DecimalType(number.longValue()));
                 } else {
-                    command = new StringType(cmdNode.getValueAsString());
+                    commandSupplier = new SingleCommandSupplier(new StringType(cmdNode.getValueAsString()));
                 }
                 if (name != null) {
                     try {
-                        return new InterpretationResult(true, executeSingle(language, name, command, dialogContext));
+                        return new InterpretationResult(true, executeSingle(language, name, commandSupplier, context));
                     } catch (InterpretationException ex) {
                         return new InterpretationResult(ex);
                     }
@@ -393,8 +409,9 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
     }
 
     /**
-     * Converts an object to an expression. Objects that are already instances of {@link Expression} are just returned.
-     * All others are converted to {@link match} expressions.
+     * Converts an object to an expression.
+     * Objects that are already instances of {@link Expression} are just returned.
+     * All others are converted to {@link Expression}.
      *
      * @param obj the object that's to be converted
      * @return resulting expression
@@ -408,9 +425,9 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
     }
 
     /**
-     * Converts all parameters to an expression array. Objects that are already instances of {@link Expression} are not
-     * touched.
-     * All others are converted to {@link match} expressions.
+     * Converts all parameters to an expression array.
+     * Objects that are already instances of {@link Expression} are not touched.
+     * All others are converted to {@link Expression}.
      *
      * @param objects the objects that are to be converted
      * @return resulting expression array
@@ -468,7 +485,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
      * @return resulting expression
      */
     protected Expression cmd(Object expression) {
-        return cmd(expression, null);
+        return cmd(expression, (Command) null);
     }
 
     /**
@@ -479,6 +496,17 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
      * @return resulting expression
      */
     protected Expression cmd(Object expression, @Nullable Command command) {
+        return tag(CMD, expression, command != null ? new SingleCommandSupplier(command) : null);
+    }
+
+    /**
+     * Adds command resolver to the resulting AST tree, if the expression matches.
+     *
+     * @param expression the expression that has to match
+     * @param command the command that should be added
+     * @return resulting expression
+     */
+    protected Expression cmd(Object expression, AbstractRuleBasedInterpreter.@Nullable ItemCommandSupplier command) {
         return tag(CMD, expression, command);
     }
 
@@ -548,17 +576,17 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
      * @param labelFragments label fragments that are used to match an item's label.
      *            For a positive match, the item's label has to contain every fragment - independently of their order.
      *            They are treated case insensitive.
-     * @param command command that should be executed
+     * @param commandSupplier supplies the command to be executed.
      * @return response text
      * @throws InterpretationException in case that there is no or more than on item matching the fragments
      */
-    protected String executeSingle(ResourceBundle language, String[] labelFragments, Command command,
-            @Nullable DialogContext dialogContext) throws InterpretationException {
-        List<Item> items = getMatchingItems(language, labelFragments, command.getClass(), dialogContext);
+    protected String executeSingle(ResourceBundle language, String[] labelFragments,
+            ItemCommandSupplier commandSupplier, Rule.InterpretationContext context) throws InterpretationException {
+        List<Item> items = getMatchingItems(language, labelFragments, commandSupplier, context);
         if (items.isEmpty()) {
-            if (!getMatchingItems(language, labelFragments, null, dialogContext).isEmpty()) {
+            if (!getMatchingItems(language, labelFragments, null, context).isEmpty()) {
                 throw new InterpretationException(
-                        language.getString(COMMAND_NOT_ACCEPTED).replace("<cmd>", command.toString()));
+                        language.getString(COMMAND_NOT_ACCEPTED).replace("<cmd>", commandSupplier.getCommandLabel()));
             } else {
                 throw new InterpretationException(language.getString(NO_OBJECTS));
             }
@@ -566,6 +594,12 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
             throw new InterpretationException(language.getString(MULTIPLE_OBJECTS));
         } else {
             Item item = items.get(0);
+            Command command = commandSupplier.getItemCommand(item);
+            if (command == null) {
+                // should never happen
+                logger.warn("Failed resolving item command");
+                return language.getString(ERROR);
+            }
             if (command instanceof State newState) {
                 try {
                     State oldState = item.getStateAs(newState.getClass());
@@ -605,18 +639,22 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
      * @param labelFragments label fragments that are used to match an item's label.
      *            For a positive match, the item's label has to contain every fragment - independently of their order.
      *            They are treated case-insensitive.
-     * @param commandType optional command type that all items have to support.
-     *            Provide {null} if there is no need for a certain command to be supported.
+     * @param commandSupplier optional command supplier to access the command types an item have to support.
+     *            Provide {null} if there is no need for a certain command type to be supported.
      * @return All matching items from the item registry.
      */
     protected List<Item> getMatchingItems(ResourceBundle language, String[] labelFragments,
-            @Nullable Class<?> commandType, @Nullable DialogContext dialogContext) {
+            @Nullable ItemCommandSupplier commandSupplier, Rule.InterpretationContext context) {
         Map<Item, ItemInterpretationMetadata> itemsData = new HashMap<>();
         Map<Item, ItemInterpretationMetadata> exactMatchItemsData = new HashMap<>();
         Map<Item, ItemInterpretationMetadata> map = getItemTokens(language.getLocale());
         for (Entry<Item, ItemInterpretationMetadata> entry : map.entrySet()) {
             Item item = entry.getKey();
             ItemInterpretationMetadata interpretationMetadata = entry.getValue();
+            if (!context.allowedItems().isEmpty() && !context.allowedItems().contains(item.getName())) {
+                logger.trace("Item {} discarded, not allowed for this rule", item.getName());
+                continue;
+            }
             for (List<List<String>> itemLabelFragmentsPath : interpretationMetadata.pathToItem) {
                 boolean exactMatch = false;
                 logger.trace("Checking tokens {} against the item tokens {}", labelFragments, itemLabelFragmentsPath);
@@ -635,7 +673,11 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
                 logger.trace("Matched: {}", allMatched);
                 logger.trace("Exact match: {}", exactMatch);
                 if (allMatched) {
-                    if (commandType == null || item.getAcceptedCommandTypes().contains(commandType)) {
+                    List<Class<? extends Command>> commandTypes = commandSupplier != null
+                            ? commandSupplier.getCommandClasses(null)
+                            : List.of();
+                    if (commandSupplier == null
+                            || commandTypes.stream().anyMatch(item.getAcceptedCommandTypes()::contains)) {
                         insertDiscardingMembers(itemsData, item, interpretationMetadata);
                         if (exactMatch) {
                             insertDiscardingMembers(exactMatchItemsData, item, interpretationMetadata);
@@ -645,14 +687,20 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
             }
         }
         if (logger.isDebugEnabled()) {
-            String typeDetails = commandType != null ? " that accept " + commandType.getSimpleName() : "";
+            List<Class<? extends Command>> commandTypes = commandSupplier != null
+                    ? commandSupplier.getCommandClasses(null)
+                    : List.of();
+            String typeDetails = !commandTypes.isEmpty()
+                    ? " that accept " + commandTypes.stream().map(Class::getSimpleName).distinct()
+                            .collect(Collectors.joining(" or "))
+                    : "";
             logger.debug("Partial matched items against {}{}: {}", labelFragments, typeDetails,
                     itemsData.keySet().stream().map(Item::getName).collect(Collectors.joining(", ")));
             logger.debug("Exact matched items against {}{}: {}", labelFragments, typeDetails,
                     exactMatchItemsData.keySet().stream().map(Item::getName).collect(Collectors.joining(", ")));
         }
         @Nullable
-        String locationContext = dialogContext != null ? dialogContext.locationItem() : null;
+        String locationContext = context.locationItem();
         if (locationContext != null && itemsData.size() > 1) {
             logger.debug("Filtering {} matched items based on location '{}'", itemsData.size(), locationContext);
             Item matchByLocation = filterMatchedItemsByLocation(itemsData, locationContext);
@@ -722,11 +770,6 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
             }
         }
         return parts;
-    }
-
-    @Override
-    public Set<Locale> getSupportedLocales() {
-        return Collections.unmodifiableSet(getLanguageRules().keySet());
     }
 
     @Override
@@ -970,6 +1013,32 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
         final List<String> locationParentNames = new ArrayList<>();
 
         ItemInterpretationMetadata() {
+        }
+    }
+
+    protected interface ItemCommandSupplier {
+        @Nullable
+        Command getItemCommand(Item item);
+
+        String getCommandLabel();
+
+        List<Class<? extends Command>> getCommandClasses(@Nullable Item item);
+    }
+
+    private record SingleCommandSupplier(Command command) implements ItemCommandSupplier {
+        @Override
+        public @Nullable Command getItemCommand(Item ignored) {
+            return command;
+        }
+
+        @Override
+        public String getCommandLabel() {
+            return command.toFullString();
+        }
+
+        @Override
+        public List<Class<? extends Command>> getCommandClasses(@Nullable Item ignored) {
+            return List.of(command.getClass());
         }
     }
 }
