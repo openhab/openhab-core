@@ -49,6 +49,8 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 public class AddonSuggestionFinderService implements AutoCloseable {
 
     public static final String SERVICE_NAME = "addon-suggestion-finder-service";
+    public static final String DEFAULT_ADDON_SERVICE = "karaf";
+    public static final String SUPPORTING_ADDON_ID = "addonsuggestionfinder";
 
     private final ScheduledExecutorService scheduler = ThreadPoolManager.getScheduledPool(SERVICE_NAME);
     private final Set<AddonInfoProvider> addonInfoProviders = ConcurrentHashMap.newKeySet();
@@ -60,6 +62,7 @@ public class AddonSuggestionFinderService implements AutoCloseable {
     @Activate
     public AddonSuggestionFinderService(@Reference LocaleProvider localeProvider) {
         this.localeProvider = localeProvider;
+        loadSupportingAddon();
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
@@ -118,6 +121,17 @@ public class AddonSuggestionFinderService implements AutoCloseable {
 
         return addonServices.stream().map(s -> s.getAddons(locale)).flatMap(Collection::stream)
                 .filter(a -> uids.contains(a.getUid())).toList();
+    }
+
+    /**
+     * Loads our special supporting addon 'org.openhab.misc.addonsuggestionfinder' that implements an AddonInfoProvider
+     * service that provides information about potential available addons that could be suggested to the user to be
+     * installed during setup.
+     */
+    private void loadSupportingAddon() {
+        addonServices.stream().filter(s -> DEFAULT_ADDON_SERVICE.equals(s.getId())).findAny().ifPresent(s -> {
+            scheduler.submit(() -> s.install(SUPPORTING_ADDON_ID));
+        });
     }
 
     public boolean scanDone() {

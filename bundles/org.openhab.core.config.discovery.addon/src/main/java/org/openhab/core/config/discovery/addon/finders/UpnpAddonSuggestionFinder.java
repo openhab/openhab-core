@@ -13,6 +13,7 @@
 package org.openhab.core.config.discovery.addon.finders;
 
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.jupnp.UpnpService;
@@ -54,7 +55,8 @@ public class UpnpAddonSuggestionFinder extends BaseAddonSuggestionFinder {
                     if (AddonDiscoveryServiceType.UPNP != method.getServiceType()) {
                         continue;
                     }
-                    Map<String, String> map = method.getPropertyRegexMap();
+                    Map<String, String> map = method.getMatchProperties().stream()
+                            .collect(Collectors.toMap(e -> e.getName(), e -> e.getRegex()));
                     if (propertyMatches(map, "deviceType", device.getType().getType())
                             && propertyMatches(map, "manufacturer",
                                     device.getDetails().getManufacturerDetails().getManufacturer())

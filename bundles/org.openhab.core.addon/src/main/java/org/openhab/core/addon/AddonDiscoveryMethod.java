@@ -13,8 +13,6 @@
 package org.openhab.core.addon;
 
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -40,11 +38,9 @@ public class AddonDiscoveryMethod {
         return mdnsServiceType != null ? mdnsServiceType : "";
     }
 
-    public Map<String, String> getPropertyRegexMap() {
+    public List<AddonMatchProperty> getMatchProperties() {
         List<AddonMatchProperty> matchProperties = this.matchProperties;
-        return matchProperties != null
-                ? matchProperties.stream().collect(Collectors.toMap(m -> m.getName(), m -> m.getRegex()))
-                : Map.of();
+        return matchProperties != null ? matchProperties : List.of();
     }
 
     public AddonDiscoveryMethod setServiceType(AddonDiscoveryServiceType serviceType) {
@@ -57,9 +53,8 @@ public class AddonDiscoveryMethod {
         return this;
     }
 
-    public AddonDiscoveryMethod setMatchProperties(Map<String, String> matchProperties) {
-        this.matchProperties = matchProperties.entrySet().stream()
-                .map(e -> new AddonMatchProperty(e.getKey(), e.getValue())).toList();
+    public AddonDiscoveryMethod setMatchProperties(List<AddonMatchProperty> matchProperties) {
+        this.matchProperties = matchProperties;
         return this;
     }
 }

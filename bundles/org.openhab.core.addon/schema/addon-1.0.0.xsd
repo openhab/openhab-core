@@ -24,12 +24,12 @@
                         <xs:documentation>The ID (service.pid or component.name) of the main add-on service, which can be configured through OSGi configuration admin service. Should only be used in combination with a config description definition. The default value is &lt;type&gt;.&lt;name&gt;</xs:documentation>
                     </xs:annotation>
                 </xs:element>
-                <xs:element name="discoveryMethods" type="addon:discoveryMethodsType" minOccurs="0"/>
                 <xs:choice minOccurs="0">
                     <xs:element name="config-description" type="config-description:configDescription"/>
                     <xs:element name="config-description-ref" type="config-description:configDescriptionRef"/>
                 </xs:choice>
-                </xs:sequence>
+                <xs:element name="discovery-method" type="addon:discoveryMethodType" minOccurs="0"/>
+            </xs:sequence>
             <xs:attribute name="id" type="config-description:idRestrictionPattern" use="required">
                 <xs:annotation>
                     <xs:documentation>Comma-separated list of two-letter ISO country codes.</xs:documentation>
@@ -96,23 +96,11 @@
         </xs:restriction>
     </xs:simpleType>
 
-  <xs:complexType name="discoveryMethodsType">
-    <xs:sequence>
-      <xs:element type="addon:discoveryMethodType" name="discoveryMethod" maxOccurs="unbounded"/>
-    </xs:sequence>
-  </xs:complexType>
-
   <xs:complexType name="discoveryMethodType">
     <xs:sequence>
-      <xs:element type="xs:string" name="serviceType"/>
-      <xs:element type="xs:string" name="mdnsServiceType" minOccurs="0"/>
-      <xs:element type="addon:matchPropertiesType" name="matchProperties"/>
-    </xs:sequence>
-  </xs:complexType>
-
-  <xs:complexType name="matchPropertiesType">
-    <xs:sequence>
-      <xs:element type="addon:matchPropertyType" name="matchProperty" maxOccurs="unbounded"/>
+      <xs:element type="xs:string" name="service-type"/>
+      <xs:element type="xs:string" name="mdns-service-type" minOccurs="0"/>
+      <xs:element type="addon:matchPropertyType" name="match-property" minOccurs="0"/>
     </xs:sequence>
   </xs:complexType>
 

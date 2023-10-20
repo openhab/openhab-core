@@ -15,6 +15,7 @@ package org.openhab.core.config.discovery.addon.finders;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.jmdns.ServiceEvent;
 import javax.jmdns.ServiceInfo;
@@ -73,7 +74,8 @@ public class MDNSAddonSuggestionFinder extends BaseAddonSuggestionFinder {
                 if (AddonDiscoveryServiceType.MDNS != method.getServiceType()) {
                     continue;
                 }
-                Map<String, String> map = method.getPropertyRegexMap();
+                Map<String, String> map = method.getMatchProperties().stream()
+                        .collect(Collectors.toMap(e -> e.getName(), e -> e.getRegex()));
                 for (ServiceInfo service : mdnsClient.list(method.getMdnsServiceType())) {
                     if (Thread.interrupted()) {
                         // using nested for loops instead of forEach to allow external interruption

@@ -60,6 +60,7 @@ import org.openhab.core.addon.AddonDiscoveryMethod;
 import org.openhab.core.addon.AddonDiscoveryServiceType;
 import org.openhab.core.addon.AddonInfo;
 import org.openhab.core.addon.AddonInfoProvider;
+import org.openhab.core.addon.AddonMatchProperty;
 import org.openhab.core.addon.AddonService;
 import org.openhab.core.config.discovery.addon.AddonSuggestionFinderService;
 import org.openhab.core.config.discovery.addon.finders.MDNSAddonSuggestionFinder;
@@ -130,10 +131,12 @@ public class AddonSuggestionFinderServiceTests {
 
     private void setupMockAddonInfoProvider() {
         AddonDiscoveryMethod hp = new AddonDiscoveryMethod().setServiceType(AddonDiscoveryServiceType.MDNS)
-                .setMatchProperties(Map.of("rp", ".*", "ty", "hp (.*)")).setMdnsServiceType("_printer._tcp.local.");
+                .setMatchProperties(
+                        List.of(new AddonMatchProperty("rp", ".*"), new AddonMatchProperty("ty", "hp (.*)")))
+                .setMdnsServiceType("_printer._tcp.local.");
 
         AddonDiscoveryMethod hue1 = new AddonDiscoveryMethod().setServiceType(AddonDiscoveryServiceType.UPNP)
-                .setMatchProperties(Map.of("modelName", "Philips hue bridge"));
+                .setMatchProperties(List.of(new AddonMatchProperty("modelName", "Philips hue bridge")));
 
         AddonDiscoveryMethod hue2 = new AddonDiscoveryMethod().setServiceType(AddonDiscoveryServiceType.MDNS)
                 .setMdnsServiceType("_hue._tcp.local.");
@@ -143,6 +146,7 @@ public class AddonSuggestionFinderServiceTests {
         Set<AddonInfo> addonInfos = new HashSet<>();
         addonInfos.add(AddonInfo.builder("hue", "binding").withName("Hue").withDescription("Hue Bridge")
                 .withDiscoveryMethods(List.of(hue1, hue2)).build());
+
         addonInfos.add(AddonInfo.builder("hpprinter", "binding").withName("HP").withDescription("HP Printer")
                 .withDiscoveryMethods(List.of(hp)).build());
         when(addonInfoProvider.getAddonInfos(any(Locale.class))).thenReturn(addonInfos);
