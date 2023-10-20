@@ -12,6 +12,7 @@
  */
 package org.openhab.core.voice.text;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -41,6 +42,7 @@ import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.StringType;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
+import org.openhab.core.types.TypeParser;
 import org.openhab.core.voice.DialogContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,6 +73,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
 
     private static final String CMD = "cmd";
     private static final String NAME = "name";
+    private static final String VALUE = "name";
 
     private static final String LANGUAGE_SUPPORT = "LanguageSupport";
 
@@ -285,6 +288,18 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
         return tag(NAME, star(new ExpressionIdentifier(this, stopper)));
     }
 
+    /**
+     * Creates an item value placeholder expression. This expression is greedy: Only use it, if you are able to pass in
+     * all possible stop tokens as excludes.
+     * It's safer to use {@link #itemRule} instead.
+     *
+     * @param stopper Stop expression that, if matching, will stop this expression from consuming further tokens.
+     * @return Expression that represents a name of an item.
+     */
+    private Expression value(@Nullable Expression stopper) {
+        return tag(VALUE, star(new ExpressionIdentifier(this, stopper)));
+    }
+
     private @Nullable List<@NonNull Rule> getLanguageRules(@Nullable Locale locale) {
         if (!languageRules.containsKey(locale)) {
             createRules(locale);
@@ -399,6 +414,61 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
                 if (name != null) {
                     try {
                         return new InterpretationResult(true, executeSingle(language, name, commandSupplier, context));
+                    } catch (InterpretationException ex) {
+                        return new InterpretationResult(ex);
+                    }
+                }
+                return InterpretationResult.SEMANTIC_ERROR;
+            }
+        };
+    }
+
+    /**
+     * Creates a custom rule on base of a head and a tail expression, where the middle part of the new rule's
+     * expression
+     * will consist of a free command to be captured. Either the head expression or the tail expression should contain
+     * at least one {@link #cmd}
+     * generated expression.
+     * Rule will be restricted to the provided item name.
+     *
+     * @param item Item target
+     * @param headExpression The head expression.
+     * @param tailExpression The tail expression.
+     * @return The created rule.
+     */
+    protected Rule customItemRule(Item item, Object headExpression, @Nullable Object tailExpression) {
+        Expression tail = exp(tailExpression);
+        Expression expression = tail == null ? seq(headExpression, value(null))
+                : seq(headExpression, value(tail), tail);
+
+        HashMap<String, String> valuesByLabel = new HashMap<>();
+        var stateDescription = item.getStateDescription();
+        if (stateDescription != null) {
+            stateDescription.getOptions().forEach(op -> {
+                String label = op.getLabel();
+                if (label != null) {
+                    valuesByLabel.put(label, op.getValue());
+                }
+            });
+        }
+        var commandDesc = item.getCommandDescription();
+        if (commandDesc != null) {
+            commandDesc.getCommandOptions().forEach(op -> {
+                String label = op.getLabel();
+                if (label != null) {
+                    valuesByLabel.put(label, op.getCommand());
+                }
+            });
+        }
+        return new Rule(expression, List.of(item.getName())) {
+            @Override
+            public InterpretationResult interpretAST(ResourceBundle language, ASTNode node,
+                    InterpretationContext context) {
+                String[] commandParts = node.findValueAsStringArray(VALUE);
+                if (commandParts != null && commandParts.length > 0) {
+                    try {
+                        return new InterpretationResult(true,
+                                executeCustom(language, item, String.join(" ", commandParts).trim(), valuesByLabel));
                     } catch (InterpretationException ex) {
                         return new InterpretationResult(ex);
                     }
@@ -596,32 +666,60 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
             Item item = items.get(0);
             Command command = commandSupplier.getItemCommand(item);
             if (command == null) {
-                // should never happen
                 logger.warn("Failed resolving item command");
                 return language.getString(ERROR);
             }
-            if (command instanceof State newState) {
-                try {
-                    State oldState = item.getStateAs(newState.getClass());
-                    if (newState.equals(oldState)) {
-                        String template = language.getString(STATE_ALREADY_SINGULAR);
-                        String cmdName = "state_" + command.toString().toLowerCase();
-                        String stateText = null;
-                        try {
-                            stateText = language.getString(cmdName);
-                        } catch (Exception e) {
-                            stateText = language.getString(STATE_CURRENT);
-                        }
-                        return template.replace("<state>", stateText);
-                    }
-                } catch (Exception ex) {
-                    logger.debug("Failed constructing response: {}", ex.getMessage());
-                    return language.getString(ERROR);
-                }
-            }
-            eventPublisher.post(ItemEventFactory.createCommandEvent(item.getName(), command));
-            return language.getString(OK);
+            return trySendCommand(language, item, command);
         }
+    }
+
+    /**
+     * Executes a custom rule command.
+     *
+     * @param item the rule target.
+     * @param options replacement values from item description.
+     * @param language resource bundle used for producing localized response texts
+     * @param commandText label fragments that are used to match an item's label.
+     *            For a positive match, the item's label has to contain every fragment - independently of their order.
+     *            They are treated case-insensitive.
+     * @return response text
+     * @throws InterpretationException in case that there is no or more than on item matching the fragments
+     */
+    protected String executeCustom(ResourceBundle language, Item item, String commandText,
+            HashMap<String, String> options) throws InterpretationException {
+        @Nullable
+        String commandReplacement = options.get(commandText);
+        Command command = TypeParser.parseCommand(item.getAcceptedCommandTypes(),
+                commandReplacement != null ? commandReplacement : commandText);
+        if (command == null) {
+            logger.warn("Failed creating command for {} from {}", item, commandText);
+            return language.getString(ERROR);
+        }
+        return trySendCommand(language, item, command);
+    }
+
+    private String trySendCommand(ResourceBundle language, Item item, Command command) {
+        if (command instanceof State newState) {
+            try {
+                State oldState = item.getStateAs(newState.getClass());
+                if (newState.equals(oldState)) {
+                    String template = language.getString(STATE_ALREADY_SINGULAR);
+                    String cmdName = "state_" + command.toString().toLowerCase();
+                    String stateText = null;
+                    try {
+                        stateText = language.getString(cmdName);
+                    } catch (Exception e) {
+                        stateText = language.getString(STATE_CURRENT);
+                    }
+                    return template.replace("<state>", stateText);
+                }
+            } catch (Exception ex) {
+                logger.debug("Failed constructing response: {}", ex.getMessage());
+                return language.getString(ERROR);
+            }
+        }
+        eventPublisher.post(ItemEventFactory.createCommandEvent(item.getName(), command));
+        return language.getString(OK);
     }
 
     /**
@@ -770,6 +868,91 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
             }
         }
         return parts;
+    }
+
+    /**
+     * Parses a rule as text into a {@link Rule} instance.
+     *
+     * The rule text should be a list of space separated expressions,
+     * one of them but not the first should be the character '*' (which indicates dynamic part to capture),
+     * the other expressions can be conformed by a single word, alternative words separated by '|',
+     * and can be marked as optional by adding '?' at the end.
+     * There must be at least one non-optional expression at the beginning of the rule.
+     *
+     * An example of a valid text will be 'watch * on|at? the tv'.
+     *
+     * @param item will be the target of the rule.
+     * @param ruleText the text to parse into a {@link Rule}
+     *
+     * @return The created rule.
+     */
+    protected @Nullable Rule parseItemCustomRule(Item item, String ruleText) {
+        String[] ruleParts = ruleText.split("\\*");
+        Expression headExpression;
+        @Nullable
+        Expression tailExpression = null;
+        try {
+            if (ruleText.startsWith("*") || !ruleText.contains(" *") || ruleParts.length > 2) {
+                throw new ParseException("Incorrect usage of character '*'", 0);
+            }
+            List<Expression> headExpressions = new ArrayList<>();
+            boolean headHasNonOptional = true;
+            for (String s : ruleParts[0].split("\\s")) {
+                if (!s.isBlank()) {
+                    String trim = s.trim();
+                    Expression expression = parseItemRuleTokenText(trim);
+                    if (expression instanceof ExpressionCardinality expressionCardinality) {
+                        if (!expressionCardinality.isAtLeastOne()) {
+                            headHasNonOptional = false;
+                        }
+                    } else {
+                        headHasNonOptional = false;
+                    }
+                    headExpressions.add(expression);
+                }
+            }
+            if (headHasNonOptional) {
+                throw new ParseException("Rule head only contains optional expressions", 0);
+            }
+            headExpression = seq(headExpressions.toArray());
+            if (ruleParts.length == 2) {
+                List<Expression> tailExpressions = new ArrayList<>();
+                for (String s : ruleParts[1].split("\\s")) {
+                    if (!s.isBlank()) {
+                        String trim = s.trim();
+                        Expression expression = parseItemRuleTokenText(trim);
+                        tailExpressions.add(expression);
+                    }
+                }
+                if (!tailExpressions.isEmpty()) {
+                    tailExpression = seq(tailExpressions.toArray());
+                }
+            }
+        } catch (ParseException e) {
+            logger.warn("Unable to parse item {} rule '{}': {}", item.getName(), ruleText, e.getMessage());
+            return null;
+        }
+        return customItemRule(item, headExpression, tailExpression);
+    }
+
+    private Expression parseItemRuleTokenText(String tokenText) throws ParseException {
+        boolean optional = false;
+        if (tokenText.endsWith("?")) {
+            tokenText = tokenText.substring(0, tokenText.length() - 1);
+            optional = true;
+        }
+        if (tokenText.contains("?")) {
+            throw new ParseException("The character '?' can only be used at the end of the expression", 0);
+        }
+        if (tokenText.equals("|")) {
+            throw new ParseException("The character '|' can not be used alone", 0);
+        }
+        Expression expression = seq(tokenText.contains("|") ? alt(Arrays.stream(tokenText.split("\\|"))//
+                .filter((s) -> !s.isBlank()).toArray()) : tokenText);
+        if (optional) {
+            return opt(expression);
+        }
+        return expression;
     }
 
     @Override

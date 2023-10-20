@@ -41,9 +41,11 @@ import org.openhab.core.items.MetadataKey;
 import org.openhab.core.items.MetadataRegistry;
 import org.openhab.core.items.events.ItemEventFactory;
 import org.openhab.core.library.items.DimmerItem;
+import org.openhab.core.library.items.StringItem;
 import org.openhab.core.library.items.SwitchItem;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.library.types.PercentType;
+import org.openhab.core.library.types.StringType;
 import org.openhab.core.types.CommandDescription;
 import org.openhab.core.types.CommandOption;
 import org.openhab.core.voice.DialogContext;
@@ -134,6 +136,7 @@ public class StandardInterpreterTest {
         MetadataKey computerMetadataKey = new MetadataKey("synonyms", computerItem.getName());
         when(metadataRegistryMock.get(computerMetadataKey))
                 .thenReturn(new Metadata(computerMetadataKey, "PC,Bedroom PC", null));
+        when(metadataRegistryMock.get(new MetadataKey("voice-system", computerItem.getName()))).thenReturn(null);
         List<Item> items = List.of(computerItem);
         when(itemRegistryMock.getItems()).thenReturn(items);
         assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, "turn off computer"));
@@ -187,5 +190,49 @@ public class StandardInterpreterTest {
         assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, "set brightness high two"));
         verify(eventPublisherMock, times(1))
                 .post(ItemEventFactory.createCommandEvent(brightness.getName(), new PercentType(100)));
+    }
+
+    @Test
+    public void allowUseCustomCommands() throws InterpretationException {
+        var virtualItem = new StringItem("virtual");
+        MetadataKey voiceMetadataKey = new MetadataKey("voice-system", virtualItem.getName());
+        when(metadataRegistryMock.get(voiceMetadataKey))
+                .thenReturn(new Metadata(voiceMetadataKey, "watch|play * on|at? the? tv", null));
+        List<Item> items = List.of(virtualItem);
+        when(itemRegistryMock.getItems()).thenReturn(items);
+        assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, "watch channel 4 on the tv"));
+        verify(eventPublisherMock, times(1))
+                .post(ItemEventFactory.createCommandEvent(virtualItem.getName(), new StringType("channel 4")));
+        reset(eventPublisherMock);
+    }
+
+    @Test
+    public void allowUseItemDescriptionOnCustomCommands() throws InterpretationException {
+        var cmdDescription = new CommandDescription() {
+            @Override
+            public List<CommandOption> getCommandOptions() {
+                return List.of(new CommandOption("KEY_4", "channel 4"));
+            }
+        };
+        var virtualItem = new StringItem("virtual") {
+            @Override
+            public @Nullable CommandDescription getCommandDescription() {
+                return cmdDescription;
+            }
+
+            @Override
+            public @Nullable CommandDescription getCommandDescription(@Nullable Locale locale) {
+                return getCommandDescription();
+            }
+        };
+        MetadataKey voiceMetadataKey = new MetadataKey("voice-system", virtualItem.getName());
+        when(metadataRegistryMock.get(voiceMetadataKey))
+                .thenReturn(new Metadata(voiceMetadataKey, "watch|play * on|at? the? tv", null));
+        List<Item> items = List.of(virtualItem);
+        when(itemRegistryMock.getItems()).thenReturn(items);
+        assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, "watch channel 4 on the tv"));
+        verify(eventPublisherMock, times(1))
+                .post(ItemEventFactory.createCommandEvent(virtualItem.getName(), new StringType("KEY_4")));
+        reset(eventPublisherMock);
     }
 }

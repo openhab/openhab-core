@@ -12,6 +12,7 @@
  */
 package org.openhab.core.voice.internal.text;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -20,12 +21,14 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.items.MetadataKey;
 import org.openhab.core.items.MetadataRegistry;
 import org.openhab.core.library.types.HSBType;
 import org.openhab.core.library.types.IncreaseDecreaseType;
@@ -46,6 +49,8 @@ import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A human language command interpretation service.
@@ -53,17 +58,23 @@ import org.osgi.service.component.annotations.Reference;
  * @author Tilman Kamp - Initial contribution
  * @author Kai Kreuzer - Added further German interpretation rules
  * @author Laurent Garnier - Added French interpretation rules
+ * @author Miguel Álvarez - Added Spanish interpretation rules
+ * @author Miguel Álvarez - Added item's dynamic rules
  */
 @NonNullByDefault
 @Component(service = HumanLanguageInterpreter.class)
 public class StandardInterpreter extends AbstractRuleBasedInterpreter {
+    private Logger logger = LoggerFactory.getLogger(StandardInterpreter.class);
     private final ItemRegistry itemRegistry;
+    private final String metadataNamespace = "voice-system";
+    private final MetadataRegistry metadataRegistry;
 
     @Activate
     public StandardInterpreter(final @Reference EventPublisher eventPublisher,
             final @Reference ItemRegistry itemRegistry, @Reference MetadataRegistry metadataRegistry) {
         super(eventPublisher, itemRegistry, metadataRegistry);
         this.itemRegistry = itemRegistry;
+        this.metadataRegistry = metadataRegistry;
     }
 
     @Override
@@ -401,7 +412,9 @@ public class StandardInterpreter extends AbstractRuleBasedInterpreter {
     private List<Rule> createItemDescriptionRules(CreateItemDescriptionRule creator, @Nullable Locale locale) {
         // Map different item state/command labels with theirs values by item
         HashMap<String, HashMap<Item, String>> options = new HashMap<>();
+        List<Rule> customRules = new ArrayList<>();
         for (var item : itemRegistry.getItems()) {
+            customRules.addAll(createItemCustomRules(item));
             var stateDesc = item.getStateDescription(locale);
             if (stateDesc != null) {
                 stateDesc.getOptions().forEach(op -> {
@@ -428,7 +441,7 @@ public class StandardInterpreter extends AbstractRuleBasedInterpreter {
             }
         }
         // create rules
-        return options.entrySet().stream() //
+        return Stream.concat(customRules.stream(), options.entrySet().stream() //
                 .map(entry -> {
                     String label = entry.getKey();
                     Map<Item, String> commandByItem = entry.getValue();
@@ -438,8 +451,24 @@ public class StandardInterpreter extends AbstractRuleBasedInterpreter {
                     Expression labeledCmd = cmd(seq((Object[]) labelParts),
                             new ItemStateCommandSupplier(label, commandByItem));
                     return creator.itemDescriptionRule(itemNames, labeledCmd);
-                }) //
+                })) //
                 .collect(Collectors.toList());
+    }
+
+    private List<Rule> createItemCustomRules(Item item) {
+        var interpreterMetadata = metadataRegistry.get(new MetadataKey(metadataNamespace, item.getName()));
+        if (interpreterMetadata == null) {
+            return List.of();
+        }
+        List<Rule> list = new ArrayList<>();
+        for (String s : interpreterMetadata.getValue().split("\n")) {
+            String line = s.trim();
+            Rule rule = this.parseItemCustomRule(item, line);
+            if (rule != null) {
+                list.add(rule);
+            }
+        }
+        return list;
     }
 
     private interface CreateItemDescriptionRule {
