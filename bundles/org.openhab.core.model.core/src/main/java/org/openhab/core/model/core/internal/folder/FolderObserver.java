@@ -75,6 +75,9 @@ public class FolderObserver implements WatchService.WatchEventListener {
     /* set of file extensions for which we have parsers already registered */
     private final Set<String> parsers = new HashSet<>();
 
+    /* set of file extensions for missing parsers during activation */
+    private final Set<String> missingParsers = new HashSet<>();
+
     /* set of files that have been ignored due to a missing parser */
     private final Set<Path> ignoredPaths = new HashSet<>();
     private final Map<String, Path> namePathMap = new HashMap<>();
@@ -135,9 +138,20 @@ public class FolderObserver implements WatchService.WatchEventListener {
         }
 
         watchService.registerListener(this, Path.of(""));
+
         addModelsToRepo();
         this.activated = true;
         logger.debug("{} has been activated", FolderObserver.class.getSimpleName());
+
+        // process ignored paths for missing parsers which were added during activation
+        for (String extension : missingParsers) {
+            if (parsers.contains(extension)) {
+                processIgnoredPaths(extension);
+                readyService.markReady(new ReadyMarker(READYMARKER_TYPE, extension));
+                logger.debug("Marked extension '{}' as ready", extension);
+            }
+        }
+        missingParsers.clear();
     }
 
     @Deactivate
@@ -187,7 +201,7 @@ public class FolderObserver implements WatchService.WatchEventListener {
             }
 
             for (String extension : validExtensions) {
-                if (parsers.contains(extension)) {
+                if (parsers.contains(extension) && !missingParsers.contains(extension)) {
                     readyService.markReady(new ReadyMarker(READYMARKER_TYPE, extension));
                     logger.debug("Marked extension '{}' as ready", extension);
                 }
@@ -243,8 +257,11 @@ public class FolderObserver implements WatchService.WatchEventListener {
                         } catch (IOException e) {
                             logger.warn("Error while opening file during update: {}", path.toAbsolutePath());
                         }
-                    } else {
+                    } else if (extension != null) {
                         ignoredPaths.add(path);
+                        if (!activated) {
+                            missingParsers.add(extension);
+                        }
                         if (logger.isDebugEnabled()) {
                             logger.debug("Missing parser for '{}' extension, added ignored path: {}", extension,
                                     path.toAbsolutePath());
