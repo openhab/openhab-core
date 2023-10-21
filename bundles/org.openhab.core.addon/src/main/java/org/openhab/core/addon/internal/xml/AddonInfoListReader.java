@@ -37,7 +37,7 @@ import org.openhab.core.config.core.xml.util.XmlDocumentReader;
 import com.thoughtworks.xstream.XStream;
 
 /**
- * The {@link AddonInfoListReader} reads XML documents, which contain the {@code addon} XML tag, and converts them to
+ * The {@link AddonInfoListReader} reads XML documents, which contain the {@code binding} XML tag, and converts them to
  * a List of {@link AddonInfoXmlResult} objects.
  * <p>
  * This reader uses {@code XStream} and {@code StAX} to parse and convert the XML document.
@@ -74,7 +74,6 @@ public class AddonInfoListReader extends XmlDocumentReader<AddonInfoList> {
 
     @Override
     protected void registerAliases(XStream xstream) {
-        xstream.alias("addon-info-list", AddonInfoList.class);
         xstream.alias("addons", NodeList.class);
         xstream.alias("addon", AddonInfoXmlResult.class);
         xstream.alias("name", NodeValue.class);

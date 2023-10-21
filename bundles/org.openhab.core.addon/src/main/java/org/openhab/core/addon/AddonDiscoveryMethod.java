@@ -24,13 +24,12 @@ import org.eclipse.jdt.annotation.Nullable;
  */
 @NonNullByDefault
 public class AddonDiscoveryMethod {
-    private @Nullable String serviceType;
+    private @NonNullByDefault({}) String serviceType;
     private @Nullable String mdnsServiceType;
     private @Nullable List<AddonMatchProperty> matchProperties;
 
-    public AddonDiscoveryServiceType getServiceType() {
-        String serviceType = this.serviceType;
-        return AddonDiscoveryServiceType.valueOf(serviceType != null ? serviceType.toUpperCase() : "");
+    public String getServiceType() {
+        return serviceType.toLowerCase();
     }
 
     public String getMdnsServiceType() {
@@ -43,17 +42,17 @@ public class AddonDiscoveryMethod {
         return matchProperties != null ? matchProperties : List.of();
     }
 
-    public AddonDiscoveryMethod setServiceType(AddonDiscoveryServiceType serviceType) {
-        this.serviceType = serviceType.name().toLowerCase();
+    public AddonDiscoveryMethod setServiceType(String serviceType) {
+        this.serviceType = serviceType.toLowerCase();
         return this;
     }
 
-    public AddonDiscoveryMethod setMdnsServiceType(String mdnsServiceType) {
+    public AddonDiscoveryMethod setMdnsServiceType(@Nullable String mdnsServiceType) {
         this.mdnsServiceType = mdnsServiceType;
         return this;
     }
 
-    public AddonDiscoveryMethod setMatchProperties(List<AddonMatchProperty> matchProperties) {
+    public AddonDiscoveryMethod setMatchProperties(@Nullable List<AddonMatchProperty> matchProperties) {
         this.matchProperties = matchProperties;
         return this;
     }

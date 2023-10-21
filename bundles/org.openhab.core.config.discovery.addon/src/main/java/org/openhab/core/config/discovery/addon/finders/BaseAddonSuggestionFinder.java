@@ -30,8 +30,11 @@ import org.openhab.core.addon.AddonInfo;
 @NonNullByDefault
 public abstract class BaseAddonSuggestionFinder implements AddonSuggestionFinder {
 
+    protected static final String ADDON_SUGGESTION_FINDER = "-addon-suggestion-finder";
+
     protected final List<AddonInfo> addonCandidates = Collections.synchronizedList(new ArrayList<>());
     protected final Set<String> addonSuggestionUIDs = ConcurrentHashMap.newKeySet();
+
     protected boolean scanDone;
 
     public Set<String> getAddonSuggestionUIDs() {

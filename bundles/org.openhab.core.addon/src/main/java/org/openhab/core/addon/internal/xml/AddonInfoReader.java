@@ -90,9 +90,12 @@ public class AddonInfoReader extends XmlDocumentReader<AddonInfoXmlResult> {
         xstream.alias("filter", List.class);
         xstream.alias("criteria", FilterCriteria.class);
         xstream.alias("service-id", NodeValue.class);
+        xstream.alias("discovery-methods", NodeList.class);
+        xstream.alias("discovery-method", AddonDiscoveryMethod.class);
         xstream.alias("service-type", NodeValue.class);
         xstream.alias("mdns-service-type", NodeValue.class);
-        xstream.alias("discovery-method", AddonDiscoveryMethod.class);
+        xstream.alias("match-properties", NodeList.class);
         xstream.alias("match-property", AddonMatchProperty.class);
+        xstream.alias("regex", NodeValue.class);
     }
 }

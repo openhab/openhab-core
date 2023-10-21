@@ -24,7 +24,6 @@ import javax.jmdns.ServiceListener;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.addon.AddonDiscoveryMethod;
-import org.openhab.core.addon.AddonDiscoveryServiceType;
 import org.openhab.core.addon.AddonInfo;
 import org.openhab.core.io.transport.mdns.MDNSClient;
 import org.osgi.service.component.annotations.Activate;
@@ -40,7 +39,8 @@ import org.osgi.service.component.annotations.Reference;
 @Component(service = AddonSuggestionFinder.class, name = MDNSAddonSuggestionFinder.SERVICE_NAME)
 public class MDNSAddonSuggestionFinder extends BaseAddonSuggestionFinder {
 
-    public static final String SERVICE_NAME = "mdns-addon-suggestion-finder";
+    public static final String SERVICE_TYPE = "mdns";
+    public static final String SERVICE_NAME = SERVICE_TYPE + ADDON_SUGGESTION_FINDER;
 
     /**
      * Anonymous ServiceListener implementation that ignores call-backs.
@@ -71,7 +71,7 @@ public class MDNSAddonSuggestionFinder extends BaseAddonSuggestionFinder {
     public void scanTask() {
         for (AddonInfo candidate : addonCandidates) {
             for (AddonDiscoveryMethod method : candidate.getDiscoveryMethods()) {
-                if (AddonDiscoveryServiceType.MDNS != method.getServiceType()) {
+                if (!SERVICE_TYPE.equals(method.getServiceType())) {
                     continue;
                 }
                 Map<String, String> map = method.getMatchProperties().stream()
@@ -96,8 +96,8 @@ public class MDNSAddonSuggestionFinder extends BaseAddonSuggestionFinder {
     @Override
     public void setAddonCandidates(List<AddonInfo> candidates) {
         super.setAddonCandidates(candidates);
-        addonCandidates.forEach(
-                c -> c.getDiscoveryMethods().stream().filter(m -> AddonDiscoveryServiceType.MDNS == m.getServiceType())
+        addonCandidates
+                .forEach(c -> c.getDiscoveryMethods().stream().filter(m -> SERVICE_TYPE.equals(m.getServiceType()))
                         .forEach(m -> mdnsClient.addServiceListener(m.getMdnsServiceType(), noOp)));
     }
 }

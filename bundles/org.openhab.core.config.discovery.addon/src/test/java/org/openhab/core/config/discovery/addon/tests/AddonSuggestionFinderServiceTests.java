@@ -57,7 +57,6 @@ import org.jupnp.model.types.UDN;
 import org.mockito.Mockito;
 import org.openhab.core.addon.Addon;
 import org.openhab.core.addon.AddonDiscoveryMethod;
-import org.openhab.core.addon.AddonDiscoveryServiceType;
 import org.openhab.core.addon.AddonInfo;
 import org.openhab.core.addon.AddonInfoProvider;
 import org.openhab.core.addon.AddonMatchProperty;
@@ -130,15 +129,15 @@ public class AddonSuggestionFinderServiceTests {
     }
 
     private void setupMockAddonInfoProvider() {
-        AddonDiscoveryMethod hp = new AddonDiscoveryMethod().setServiceType(AddonDiscoveryServiceType.MDNS)
+        AddonDiscoveryMethod hp = new AddonDiscoveryMethod().setServiceType(MDNSAddonSuggestionFinder.SERVICE_TYPE)
                 .setMatchProperties(
                         List.of(new AddonMatchProperty("rp", ".*"), new AddonMatchProperty("ty", "hp (.*)")))
                 .setMdnsServiceType("_printer._tcp.local.");
 
-        AddonDiscoveryMethod hue1 = new AddonDiscoveryMethod().setServiceType(AddonDiscoveryServiceType.UPNP)
+        AddonDiscoveryMethod hue1 = new AddonDiscoveryMethod().setServiceType(UpnpAddonSuggestionFinder.SERVICE_TYPE)
                 .setMatchProperties(List.of(new AddonMatchProperty("modelName", "Philips hue bridge")));
 
-        AddonDiscoveryMethod hue2 = new AddonDiscoveryMethod().setServiceType(AddonDiscoveryServiceType.MDNS)
+        AddonDiscoveryMethod hue2 = new AddonDiscoveryMethod().setServiceType(MDNSAddonSuggestionFinder.SERVICE_TYPE)
                 .setMdnsServiceType("_hue._tcp.local.");
 
         // create the mock

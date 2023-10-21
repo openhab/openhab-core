@@ -13,7 +13,6 @@
 package org.openhab.core.addon;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * DTO for serialization of a property match regular expression.
@@ -22,8 +21,8 @@ import org.eclipse.jdt.annotation.Nullable;
  */
 @NonNullByDefault
 public class AddonMatchProperty {
-    private @Nullable String name;
-    private @Nullable String regex;
+    private @NonNullByDefault({}) String name;
+    private @NonNullByDefault({}) String regex;
 
     public AddonMatchProperty(String name, String regex) {
         this.name = name;
@@ -31,12 +30,10 @@ public class AddonMatchProperty {
     }
 
     public String getName() {
-        String name = this.name;
-        return name != null ? name : "";
+        return name;
     }
 
     public String getRegex() {
-        String regex = this.regex;
-        return regex != null ? regex : "";
+        return regex;
     }
 }

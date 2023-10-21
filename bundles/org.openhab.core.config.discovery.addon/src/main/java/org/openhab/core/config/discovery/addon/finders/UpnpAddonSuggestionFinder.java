@@ -19,7 +19,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.jupnp.UpnpService;
 import org.jupnp.model.meta.RemoteDevice;
 import org.openhab.core.addon.AddonDiscoveryMethod;
-import org.openhab.core.addon.AddonDiscoveryServiceType;
 import org.openhab.core.addon.AddonInfo;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -34,7 +33,8 @@ import org.osgi.service.component.annotations.Reference;
 @Component(service = AddonSuggestionFinder.class, name = UpnpAddonSuggestionFinder.SERVICE_NAME)
 public class UpnpAddonSuggestionFinder extends BaseAddonSuggestionFinder {
 
-    public static final String SERVICE_NAME = "upnp-addon-suggestion-finder";
+    public static final String SERVICE_TYPE = "upnp";
+    public static final String SERVICE_NAME = SERVICE_TYPE + ADDON_SUGGESTION_FINDER;
 
     private final UpnpService upnpService;
 
@@ -52,7 +52,7 @@ public class UpnpAddonSuggestionFinder extends BaseAddonSuggestionFinder {
                         // using nested for loops instead of forEach to allow external interruption
                         return;
                     }
-                    if (AddonDiscoveryServiceType.UPNP != method.getServiceType()) {
+                    if (!SERVICE_TYPE.equals(method.getServiceType())) {
                         continue;
                     }
                     Map<String, String> map = method.getMatchProperties().stream()
