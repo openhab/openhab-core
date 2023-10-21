@@ -434,7 +434,7 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
                         String argument = getRuleArgument(sourceColor.toString());
                         List<String> conditionsString = getRuleConditions(sourceColor.toString(), argument);
                         ColorArrayImpl colorArray = (ColorArrayImpl) SitemapFactory.eINSTANCE.createColorArray();
-                        colorArray.eSet(SitemapPackage.COLOR_ARRAY__ARG, argument);
+                        colorArray.setArg(argument);
                         List<ConditionImpl> conditions = getConditions(conditionsString, component, key);
                         colorArray.eSet(SitemapPackage.COLOR_ARRAY__CONDITIONS, conditions);
                         color.add(colorArray);
@@ -453,7 +453,7 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
                         String argument = getRuleArgument(sourceIcon.toString());
                         List<String> conditionsString = getRuleConditions(sourceIcon.toString(), argument);
                         IconRuleImpl iconRule = (IconRuleImpl) SitemapFactory.eINSTANCE.createIconRule();
-                        iconRule.eSet(SitemapPackage.ICON_RULE__ARG, argument);
+                        iconRule.setArg(argument);
                         List<ConditionImpl> conditions = getConditions(conditionsString, component, "iconrules");
                         iconRule.eSet(SitemapPackage.ICON_RULE__CONDITIONS, conditions);
                         icon.add(iconRule);
