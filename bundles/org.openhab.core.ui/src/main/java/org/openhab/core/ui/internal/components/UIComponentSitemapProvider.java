@@ -84,8 +84,7 @@ import org.slf4j.LoggerFactory;
  * @author Laurent Garnier - icon color support for all widgets
  * @author Laurent Garnier - Added support for new element Buttongrid
  * @author Laurent Garnier - Added icon field for mappings
- * @author Mark Herwege - Make UI provided sitemaps compatible with enhanced syntax, no full UI support for enhanced
- *         syntax
+ * @author Mark Herwege - Make UI provided sitemaps compatible with enhanced syntax in conditions
  */
 @NonNullByDefault
 @Component(service = SitemapProvider.class)
@@ -162,10 +161,9 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
         SitemapImpl sitemap = (SitemapImpl) SitemapFactory.eINSTANCE.createSitemap();
         sitemap.setName(SITEMAP_PREFIX + rootComponent.getUID());
         Object label = rootComponent.getConfig().get("label");
-        if (label == null) {
-            return sitemap;
+        if (label != null) {
+            sitemap.setLabel(label.toString());
         }
-        sitemap.setLabel(label.toString());
 
         if (rootComponent.getSlots() != null && rootComponent.getSlots().containsKey("widgets")) {
             for (UIComponent component : rootComponent.getSlot("widgets")) {
