@@ -46,8 +46,8 @@ public class AddonInfoListConverter extends GenericUnmarshaller<AddonInfoList> {
 
         Object object = nodeIterator.nextList("addons", false);
         List<AddonInfo> addons = (object instanceof List<?> list)
-                ? list.stream().filter(e -> (e instanceof AddonInfoXmlResult)).map(e -> (AddonInfoXmlResult) e)
-                        .map(r -> r.addonInfo()).toList()
+                ? list.stream().filter(e -> e != null).filter(e -> (e instanceof AddonInfoXmlResult))
+                        .map(e -> (AddonInfoXmlResult) e).map(r -> r.addonInfo()).toList()
                 : null;
 
         nodeIterator.assertEndOfType();

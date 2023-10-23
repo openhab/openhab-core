@@ -10,14 +10,16 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.addon.internal.xml;
+package org.openhab.core.addon;
 
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.core.addon.AddonDiscoveryMethod;
-import org.openhab.core.addon.AddonInfoList;
-import org.openhab.core.addon.AddonMatchProperty;
+import org.openhab.core.addon.internal.xml.AddonDiscoveryMethodConverter;
+import org.openhab.core.addon.internal.xml.AddonInfoConverter;
+import org.openhab.core.addon.internal.xml.AddonInfoListConverter;
+import org.openhab.core.addon.internal.xml.AddonInfoXmlResult;
+import org.openhab.core.addon.internal.xml.AddonMatchPropertyConverter;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionParameterGroup;
@@ -74,6 +76,7 @@ public class AddonInfoListReader extends XmlDocumentReader<AddonInfoList> {
 
     @Override
     protected void registerAliases(XStream xstream) {
+        xstream.alias("addon-info-list", AddonInfoList.class);
         xstream.alias("addons", NodeList.class);
         xstream.alias("addon", AddonInfoXmlResult.class);
         xstream.alias("name", NodeValue.class);
