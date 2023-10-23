@@ -41,9 +41,13 @@ import org.openhab.core.types.State;
 @NonNullByDefault
 public interface ItemUIRegistry extends ItemRegistry, ItemUIProvider {
     public enum WidgetLabelSource {
+        /** Label is taken from widget definition in sitemap */
         SITEMAP_WIDGET,
+        /** Label is taken from the widget's backing item definition */
         ITEM_LABEL,
+        /** Label equals the widget's backing item name */
         ITEM_NAME,
+        /** No suitable label source could be determined */
         NONE
     };
 
