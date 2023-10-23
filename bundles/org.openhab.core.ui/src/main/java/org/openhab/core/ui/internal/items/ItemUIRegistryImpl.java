@@ -582,8 +582,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
             }
         }
         // use an empty string, if no label could be found
-        String finalLabel = label != null ? label : "";
-        return new WidgetLabelWithSource(finalLabel, finalLabel.isEmpty() ? WidgetLabelSource.NONE : source);
+        return new WidgetLabelWithSource(label != null ? label : "", source);
     }
 
     /**
