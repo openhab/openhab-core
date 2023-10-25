@@ -12,6 +12,8 @@
  */
 package org.openhab.core.addon;
 
+import java.util.regex.Pattern;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
@@ -22,18 +24,18 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 @NonNullByDefault
 public class AddonMatchProperty {
     private @NonNullByDefault({}) String name;
-    private @NonNullByDefault({}) String regex;
+    private @NonNullByDefault({}) Pattern pattern;
 
     public AddonMatchProperty(String name, String regex) {
         this.name = name;
-        this.regex = regex;
+        this.pattern = Pattern.compile(regex);
     }
 
     public String getName() {
         return name;
     }
 
-    public String getRegex() {
-        return regex;
+    public Pattern getPattern() {
+        return this.pattern;
     }
 }

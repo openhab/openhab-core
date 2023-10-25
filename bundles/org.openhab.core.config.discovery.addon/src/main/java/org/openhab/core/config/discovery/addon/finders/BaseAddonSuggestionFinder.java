@@ -17,7 +17,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.addon.AddonInfo;
@@ -32,45 +32,31 @@ public abstract class BaseAddonSuggestionFinder implements AddonSuggestionFinder
 
     protected static final String ADDON_SUGGESTION_FINDER = "-addon-suggestion-finder";
 
-    protected final List<AddonInfo> addonCandidates = Collections.synchronizedList(new ArrayList<>());
-    protected final Set<String> addonSuggestionUIDs = ConcurrentHashMap.newKeySet();
-
-    protected boolean scanDone;
-
-    public Set<String> getAddonSuggestionUIDs() {
-        return addonSuggestionUIDs;
-    }
-
     /**
-     * Helper method to check if the given property name is in the propertyRegexMap
-     * and the given property value matches the respective regular expression.
+     * Helper method to check if the given {@code propertyName} is in the {@code propertyPatternMap} and if so, the
+     * given {@code propertyValue} matches the respective regular expression {@code Pattern}.
      * 
-     * @param propertyRegexMap map of property names and regexes for value matching
+     * @param propertyPatternMap map of property names and regex patterns for value matching
      * @param propertyName
      * @param propertyValue
      * @return true a) if the property name exists and the property value matches
      *         the regular expression, or b) the property name does not exist.
      */
-    protected static boolean propertyMatches(Map<String, String> propertyRegexMap, String propertyName,
+    protected static boolean propertyMatches(Map<String, Pattern> propertyPatternMap, String propertyName,
             String propertyValue) {
-        String matchRegex = propertyRegexMap.get(propertyName);
-        return matchRegex == null ? true : propertyValue.matches(matchRegex);
+        Pattern pattern = propertyPatternMap.get(propertyName);
+        return pattern == null ? true : pattern.matcher(propertyValue).matches();
     }
 
-    public void reset() {
+    protected final List<AddonInfo> addonCandidates = Collections.synchronizedList(new ArrayList<>());
+
+    public void close() {
         addonCandidates.clear();
-        addonSuggestionUIDs.clear();
-        scanDone = false;
     }
 
-    public boolean scanDone() {
-        return scanDone;
-    }
-
-    public abstract void scanTask();
+    public abstract Set<AddonInfo> getSuggestedAddons();
 
     public void setAddonCandidates(List<AddonInfo> candidates) {
-        reset();
         addonCandidates.addAll(candidates);
     }
 }

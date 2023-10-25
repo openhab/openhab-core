@@ -54,13 +54,12 @@ import org.jupnp.model.meta.RemoteDeviceIdentity;
 import org.jupnp.model.meta.RemoteService;
 import org.jupnp.model.types.DeviceType;
 import org.jupnp.model.types.UDN;
+import org.jupnp.registry.Registry;
 import org.mockito.Mockito;
-import org.openhab.core.addon.Addon;
 import org.openhab.core.addon.AddonDiscoveryMethod;
 import org.openhab.core.addon.AddonInfo;
 import org.openhab.core.addon.AddonInfoProvider;
 import org.openhab.core.addon.AddonMatchProperty;
-import org.openhab.core.addon.AddonService;
 import org.openhab.core.config.discovery.addon.AddonSuggestionFinderService;
 import org.openhab.core.config.discovery.addon.finders.MDNSAddonSuggestionFinder;
 import org.openhab.core.config.discovery.addon.finders.UpnpAddonSuggestionFinder;
@@ -79,7 +78,6 @@ public class AddonSuggestionFinderServiceTests {
     private @NonNullByDefault({}) LocaleProvider localeProvider;
     private @NonNullByDefault({}) MDNSClient mdnsClient;
     private @NonNullByDefault({}) UpnpService upnpService;
-    private @NonNullByDefault({}) AddonService addonService;
     private @NonNullByDefault({}) AddonInfoProvider addonInfoProvider;
     private @NonNullByDefault({}) AddonSuggestionFinderService addonSuggestionFinderService;
 
@@ -96,7 +94,6 @@ public class AddonSuggestionFinderServiceTests {
     @BeforeAll
     public void setup() {
         setupMockLocaleProvider();
-        setupMockAddonService();
         setupMockAddonInfoProvider();
         setupMockMdnsClient();
         setupMockUpnpService();
@@ -104,28 +101,22 @@ public class AddonSuggestionFinderServiceTests {
     }
 
     private void createAddonSuggestionFinderService() {
-        addonSuggestionFinderService = new AddonSuggestionFinderService(localeProvider);
+        addonSuggestionFinderService = new AddonSuggestionFinderService();
         assertNotNull(addonSuggestionFinderService);
 
-        addonSuggestionFinderService.addAddonSuggestionFinder(new UpnpAddonSuggestionFinder(upnpService));
-        addonSuggestionFinderService.addAddonSuggestionFinder(new MDNSAddonSuggestionFinder(mdnsClient));
-        addonSuggestionFinderService.addAddonService(addonService);
-    }
+        UpnpAddonSuggestionFinder upnp = new UpnpAddonSuggestionFinder(upnpService);
+        Registry registry = upnpService.getRegistry();
+        registry.getRemoteDevices().forEach(device -> upnp.remoteDeviceAdded(registry, device));
+        addonSuggestionFinderService.addAddonSuggestionFinder(upnp);
 
-    private void setupMockAddonService() {
-        // create the mock
-        addonService = mock(AddonService.class);
-        List<Addon> addons = new ArrayList<>();
-        addons.add(Addon.create("binding-hue").withType("binding").withId("hue").build());
-        addons.add(Addon.create("binding-hpprinter").withType("binding").withId("hpprinter").build());
-        when(addonService.getAddons(any(Locale.class))).thenReturn(addons);
-
-        // check that it works
-        assertNotNull(addonService);
-        assertEquals(2, addonService.getAddons(Locale.US).size());
-        assertTrue(addonService.getAddons(Locale.US).stream().anyMatch(a -> "binding-hue".equals(a.getUid())));
-        assertTrue(addonService.getAddons(Locale.US).stream().anyMatch(a -> "binding-hpprinter".equals(a.getUid())));
-        assertFalse(addonService.getAddons(Locale.US).stream().anyMatch(a -> "aardvark".equals(a.getUid())));
+        MDNSAddonSuggestionFinder mdns = new MDNSAddonSuggestionFinder(mdnsClient);
+        for (ServiceInfo service : mdnsClient.list("_hue._tcp.local.")) {
+            mdns.addService(service);
+        }
+        for (ServiceInfo service : mdnsClient.list("_printer._tcp.local.")) {
+            mdns.addService(service);
+        }
+        addonSuggestionFinderService.addAddonSuggestionFinder(mdns);
     }
 
     private void setupMockAddonInfoProvider() {
@@ -172,9 +163,9 @@ public class AddonSuggestionFinderServiceTests {
         // create the mock
         mdnsClient = mock(MDNSClient.class, Mockito.RETURNS_DEEP_STUBS);
         when(mdnsClient.list(anyString())).thenReturn(new ServiceInfo[] {});
-        ServiceInfo hueService = ServiceInfo.create("mdnsTest", "hue", 0, 0, 0, false, "hue service");
+        ServiceInfo hueService = ServiceInfo.create("hue", "hue", 0, 0, 0, false, "hue service");
         when(mdnsClient.list(eq("_hue._tcp.local."))).thenReturn(new ServiceInfo[] { hueService });
-        ServiceInfo hpService = ServiceInfo.create("mdnsTest", "hpprinter", 0, 0, 0, false, "hp printer service");
+        ServiceInfo hpService = ServiceInfo.create("printer", "hpprinter", 0, 0, 0, false, "hp printer service");
         hpService.setText(Map.of("ty", "hp printer", "rp", "anything"));
         when(mdnsClient.list(eq("_printer._tcp.local."))).thenReturn(new ServiceInfo[] { hpService });
 
@@ -215,13 +206,13 @@ public class AddonSuggestionFinderServiceTests {
         ModelDetails modDetails = new ModelDetails("Philips hue bridge", "modelDescription", "modelNumber", "modelURI");
         DeviceDetails devDetails = new DeviceDetails("friendlyName", manDetails, modDetails, "serialNumber",
                 "000123456789");
-        List<@Nullable RemoteDevice> remoteDevice = new ArrayList<>();
+        List<@Nullable RemoteDevice> remoteDevices = new ArrayList<>();
         try {
-            remoteDevice.add(new RemoteDevice(identity, type, devDetails, (RemoteService) null));
+            remoteDevices.add(new RemoteDevice(identity, type, devDetails, (RemoteService) null));
         } catch (ValidationException e1) {
             fail("ValidationException");
         }
-        when(upnpService.getRegistry().getRemoteDevices()).thenReturn(remoteDevice);
+        when(upnpService.getRegistry().getRemoteDevices()).thenReturn(remoteDevices);
 
         // check that it works
         assertNotNull(upnpService);
@@ -233,18 +224,12 @@ public class AddonSuggestionFinderServiceTests {
     }
 
     @Test
-    public void testGetAddons() {
+    public void testGetSuggestedAddons() {
         addonSuggestionFinderService.addAddonInfoProvider(addonInfoProvider);
-        // give the scan tasks some time to complete
-        try {
-            Thread.sleep(100);
-        } catch (InterruptedException e) {
-        }
-        assertTrue(addonSuggestionFinderService.scanDone());
-        List<Addon> addons = addonSuggestionFinderService.getSuggestedAddons(Locale.US);
+        Set<AddonInfo> addons = addonSuggestionFinderService.getSuggestedAddons(localeProvider.getLocale());
         assertEquals(2, addons.size());
-        assertFalse(addons.stream().anyMatch(a -> "aardvark".equals(a.getUid())));
-        assertTrue(addons.stream().anyMatch(a -> "binding-hue".equals(a.getUid())));
-        assertTrue(addons.stream().anyMatch(a -> "binding-hpprinter".equals(a.getUid())));
+        assertFalse(addons.stream().anyMatch(a -> "aardvark".equals(a.getUID())));
+        assertTrue(addons.stream().anyMatch(a -> "binding-hue".equals(a.getUID())));
+        assertTrue(addons.stream().anyMatch(a -> "binding-hpprinter".equals(a.getUID())));
     }
 }

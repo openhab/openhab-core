@@ -13,8 +13,12 @@
 package org.openhab.core.config.discovery.addon.finders;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.jmdns.ServiceEvent;
@@ -23,12 +27,14 @@ import javax.jmdns.ServiceListener;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.addon.AddonDiscoveryMethod;
 import org.openhab.core.addon.AddonInfo;
 import org.openhab.core.io.transport.mdns.MDNSClient;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This is a {@link MDNSAddonSuggestionFinder} for finding suggested Addons via MDNS.
@@ -37,29 +43,16 @@ import org.osgi.service.component.annotations.Reference;
  */
 @NonNullByDefault
 @Component(service = AddonSuggestionFinder.class, name = MDNSAddonSuggestionFinder.SERVICE_NAME)
-public class MDNSAddonSuggestionFinder extends BaseAddonSuggestionFinder {
+public class MDNSAddonSuggestionFinder extends BaseAddonSuggestionFinder implements ServiceListener {
 
     public static final String SERVICE_TYPE = "mdns";
     public static final String SERVICE_NAME = SERVICE_TYPE + ADDON_SUGGESTION_FINDER;
 
-    /**
-     * Anonymous ServiceListener implementation that ignores call-backs.
-     */
-    private final ServiceListener noOp = new ServiceListener() {
+    private static final String APPLICATION = "application";
+    private static final String NAME = "name";
 
-        @Override
-        public void serviceAdded(@Nullable ServiceEvent event) {
-        }
-
-        @Override
-        public void serviceRemoved(@Nullable ServiceEvent event) {
-        }
-
-        @Override
-        public void serviceResolved(@Nullable ServiceEvent event) {
-        }
-    };
-
+    private final Logger logger = LoggerFactory.getLogger(MDNSAddonSuggestionFinder.class);
+    private final Set<ServiceInfo> services = ConcurrentHashMap.newKeySet();
     private final MDNSClient mdnsClient;
 
     @Activate
@@ -67,37 +60,64 @@ public class MDNSAddonSuggestionFinder extends BaseAddonSuggestionFinder {
         this.mdnsClient = mdnsClient;
     }
 
-    @Override
-    public void scanTask() {
-        for (AddonInfo candidate : addonCandidates) {
-            for (AddonDiscoveryMethod method : candidate.getDiscoveryMethods()) {
-                if (!SERVICE_TYPE.equals(method.getServiceType())) {
-                    continue;
-                }
-                Map<String, String> map = method.getMatchProperties().stream()
-                        .collect(Collectors.toMap(e -> e.getName(), e -> e.getRegex()));
-                for (ServiceInfo service : mdnsClient.list(method.getMdnsServiceType())) {
-                    if (Thread.interrupted()) {
-                        // using nested for loops instead of forEach to allow external interruption
-                        return;
-                    }
-                    if (propertyMatches(map, "application", service.getApplication())
-                            && propertyMatches(map, "name", service.getName())
-                            && Collections.list(service.getPropertyNames()).stream()
-                                    .allMatch(n -> propertyMatches(map, n, service.getPropertyString(n)))) {
-                        addonSuggestionUIDs.add(candidate.getUID());
-                    }
-                }
-            }
+    public void addService(@Nullable ServiceInfo service) {
+        if (service != null) {
+            services.add(service);
         }
-        scanDone = true;
+    }
+
+    @Deactivate
+    public void close() {
+        services.clear();
+        super.close();
+    }
+
+    @Override
+    public Set<AddonInfo> getSuggestedAddons() {
+        Set<AddonInfo> result = new HashSet<>();
+        addonCandidates.forEach(candidate -> {
+            candidate.getDiscoveryMethods().stream().filter(method -> SERVICE_TYPE.equals(method.getServiceType()))
+                    .forEach(method -> {
+                        Map<String, Pattern> map = method.getMatchProperties().stream().collect(
+                                Collectors.toMap(property -> property.getName(), property -> property.getPattern()));
+
+                        services.stream().forEach(service -> {
+                            if (method.getMdnsServiceType().equals(service.getType())
+                                    && propertyMatches(map, APPLICATION, service.getApplication())
+                                    && propertyMatches(map, NAME, service.getName())
+                                    && Collections.list(service.getPropertyNames()).stream().allMatch(
+                                            name -> propertyMatches(map, name, service.getPropertyString(name)))) {
+                                result.add(candidate);
+                                logger.debug("Addon '{}' will be suggested", candidate.getUID());
+                            }
+                        });
+                    });
+        });
+        return result;
+    }
+
+    @Override
+    public void serviceAdded(@Nullable ServiceEvent event) {
+        if (event != null) {
+            addService(event.getInfo());
+        }
+    }
+
+    @Override
+    public void serviceRemoved(@Nullable ServiceEvent event) {
+    }
+
+    @Override
+    public void serviceResolved(@Nullable ServiceEvent event) {
+        if (event != null) {
+            addService(event.getInfo());
+        }
     }
 
     @Override
     public void setAddonCandidates(List<AddonInfo> candidates) {
         super.setAddonCandidates(candidates);
-        addonCandidates
-                .forEach(c -> c.getDiscoveryMethods().stream().filter(m -> SERVICE_TYPE.equals(m.getServiceType()))
-                        .forEach(m -> mdnsClient.addServiceListener(m.getMdnsServiceType(), noOp)));
+        candidates.forEach(c -> c.getDiscoveryMethods().stream().filter(m -> SERVICE_TYPE.equals(m.getServiceType()))
+                .forEach(m -> mdnsClient.addServiceListener(m.getMdnsServiceType(), this)));
     }
 }
