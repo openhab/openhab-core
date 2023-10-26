@@ -22,7 +22,6 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -77,13 +76,18 @@ public class AddonInfoRegistry {
      */
     public @Nullable AddonInfo getAddonInfo(String targetId, @Nullable Locale locale) {
         // note: using funky code to prevent a maven compiler error
-        Stream<AddonInfo> addonInfos = addonInfoProviders.stream()
+        List<AddonInfo> addonInfos = addonInfoProviders.stream()
                 .map(p -> Optional.ofNullable(p.getAddonInfo(targetId, locale))).filter(o -> o.isPresent())
-                .map(o -> o.get());
+                .map(o -> o.get()).toList();
 
         // one or zero entries
-        if (addonInfos.count() <= 1) {
-            return addonInfos.findAny().orElse(null);
+        switch (addonInfos.size()) {
+            case 0:
+                return null;
+            case 1:
+                return addonInfos.get(0);
+            default:
+                // fall through
         }
 
         // multiple entries
@@ -99,7 +103,7 @@ public class AddonInfoRegistry {
         List<AddonDiscoveryMethod> discoveryMethods = List.of();
         Set<String> countries = new HashSet<>();
 
-        for (AddonInfo addonInfo : addonInfos.toList()) {
+        for (AddonInfo addonInfo : addonInfos) {
             // unique fields: take first non null value
             id = id != null ? id : addonInfo.getId();
             type = type != null ? type : addonInfo.getType();
