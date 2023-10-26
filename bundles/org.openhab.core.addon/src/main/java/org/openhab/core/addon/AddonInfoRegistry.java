@@ -14,6 +14,7 @@ package org.openhab.core.addon;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
@@ -21,6 +22,7 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -66,18 +68,59 @@ public class AddonInfoRegistry {
      * Returns the add-on information for the specified add-on UID and locale (language),
      * or {@code null} if no add-on information could be found.
      * <p>
-     * If more than one provider provides information for the specified add-on UID and locale,
-     * it returns a new {@link AddonInfo} containing merged information from all such providers.
+     * If more than one provider provides information for the specified add-on ID and locale,
+     * it returns merged information from all such providers.
      *
-     * @param uid the UID to be looked for
+     * @param targetId the ID to be looked for
      * @param locale the locale to be used for the add-on information (could be null)
      * @return a localized add-on information object (could be null)
      */
-    public @Nullable AddonInfo getAddonInfo(String uid, @Nullable Locale locale) {
-        return addonInfoProviders.stream().map(p -> p.getAddonInfo(uid, locale)).filter(Objects::nonNull)
-                .collect(Collectors.groupingBy(a -> a == null ? "" : a.getUID(),
-                        Collectors.collectingAndThen(Collectors.reducing(mergeAddonInfos), Optional::get)))
-                .get(uid);
+    public @Nullable AddonInfo getAddonInfo(String targetId, @Nullable Locale locale) {
+        // note: using funky code to prevent a maven compiler error
+        Stream<AddonInfo> addonInfos = addonInfoProviders.stream()
+                .map(p -> Optional.ofNullable(p.getAddonInfo(targetId, locale))).filter(o -> o.isPresent())
+                .map(o -> o.get());
+
+        // one or zero entries
+        if (addonInfos.count() <= 1) {
+            return addonInfos.findAny().orElse(null);
+        }
+
+        // multiple entries
+        String id = null;
+        String type = null;
+        String uid = null;
+        String name = null;
+        String description = null;
+        String connection = null;
+        String configDescriptionURI = null;
+        String serviceId = null;
+        String sourceBundle = null;
+        List<AddonDiscoveryMethod> discoveryMethods = List.of();
+        Set<String> countries = new HashSet<>();
+
+        for (AddonInfo addonInfo : addonInfos.toList()) {
+            // unique fields: take first non null value
+            id = id != null ? id : addonInfo.getId();
+            type = type != null ? type : addonInfo.getType();
+            uid = uid != null ? uid : addonInfo.getUID();
+            name = name != null ? name : addonInfo.getName();
+            description = description != null ? description : addonInfo.getDescription();
+            connection = connection != null ? connection : addonInfo.getConnection();
+            configDescriptionURI = configDescriptionURI != null ? configDescriptionURI
+                    : addonInfo.getConfigDescriptionURI();
+            serviceId = serviceId != null ? serviceId : addonInfo.getServiceId();
+            sourceBundle = sourceBundle != null ? sourceBundle : addonInfo.getSourceBundle();
+            discoveryMethods = !discoveryMethods.isEmpty() ? discoveryMethods : addonInfo.getDiscoveryMethods();
+            // list field: uniquely combine via a set
+            countries.addAll(addonInfo.getCountries());
+        }
+
+        return AddonInfo.builder(Objects.requireNonNull(id), Objects.requireNonNull(type))
+                .withUID(Objects.requireNonNull(uid)).withName(Objects.requireNonNull(name))
+                .withDescription(Objects.requireNonNull(description)).withConnection(connection)
+                .withCountries(countries.stream().toList()).withConfigDescriptionURI(configDescriptionURI)
+                .withServiceId(serviceId).withSourceBundle(sourceBundle).withDiscoveryMethods(discoveryMethods).build();
     }
 
     /**
