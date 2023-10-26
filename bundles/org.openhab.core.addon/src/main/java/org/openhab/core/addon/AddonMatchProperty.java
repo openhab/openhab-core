@@ -24,10 +24,12 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 @NonNullByDefault
 public class AddonMatchProperty {
     private @NonNullByDefault({}) String name;
-    private @NonNullByDefault({}) Pattern pattern;
+    private @NonNullByDefault({}) String regex;
+    private transient @NonNullByDefault({}) Pattern pattern;
 
     public AddonMatchProperty(String name, String regex) {
         this.name = name;
+        this.regex = regex;
         this.pattern = Pattern.compile(regex);
     }
 
@@ -36,6 +38,10 @@ public class AddonMatchProperty {
     }
 
     public Pattern getPattern() {
-        return this.pattern;
+        return pattern;
+    }
+
+    public String getRegex() {
+        return regex;
     }
 }

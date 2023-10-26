@@ -17,6 +17,7 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.net.URI;
 import java.util.List;
@@ -95,6 +96,7 @@ public class AddonInfoTest extends JavaOSGiTest {
             assertNotNull(property);
             assertEquals("modelName", property.getName());
             assertEquals("Philips hue bridge", property.getRegex());
+            assertTrue(property.getPattern().matcher("Philips hue bridge").matches());
         });
     }
 
