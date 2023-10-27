@@ -12,9 +12,11 @@
  */
 package org.openhab.core.addon;
 
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * DTO for serialization of a property match regular expression.
@@ -43,5 +45,25 @@ public class AddonMatchProperty {
 
     public String getRegex() {
         return regex;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, regex);
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        AddonMatchProperty other = (AddonMatchProperty) obj;
+        return Objects.equals(name, other.name) && Objects.equals(regex, other.regex);
     }
 }

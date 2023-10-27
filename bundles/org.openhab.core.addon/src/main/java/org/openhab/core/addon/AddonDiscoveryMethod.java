@@ -13,6 +13,7 @@
 package org.openhab.core.addon;
 
 import java.util.List;
+import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -55,5 +56,26 @@ public class AddonDiscoveryMethod {
     public AddonDiscoveryMethod setMatchProperties(@Nullable List<AddonMatchProperty> matchProperties) {
         this.matchProperties = matchProperties;
         return this;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(serviceType, mdnsServiceType, matchProperties);
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        AddonDiscoveryMethod other = (AddonDiscoveryMethod) obj;
+        return Objects.equals(serviceType, other.serviceType) && Objects.equals(mdnsServiceType, other.mdnsServiceType)
+                && Objects.equals(matchProperties, other.matchProperties);
     }
 }
