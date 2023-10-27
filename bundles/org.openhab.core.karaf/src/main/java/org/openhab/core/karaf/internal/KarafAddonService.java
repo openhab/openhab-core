@@ -13,7 +13,13 @@
 package org.openhab.core.karaf.internal;
 
 import static java.util.Map.entry;
-import static org.openhab.core.addon.AddonType.*;
+import static org.openhab.core.addon.AddonType.AUTOMATION;
+import static org.openhab.core.addon.AddonType.BINDING;
+import static org.openhab.core.addon.AddonType.MISC;
+import static org.openhab.core.addon.AddonType.PERSISTENCE;
+import static org.openhab.core.addon.AddonType.TRANSFORMATION;
+import static org.openhab.core.addon.AddonType.UI;
+import static org.openhab.core.addon.AddonType.VOICE;
 
 import java.net.URI;
 import java.util.Arrays;
@@ -133,8 +139,7 @@ public class KarafAddonService implements AddonService {
 
         AddonInfo addonInfo = addonInfoRegistry.getAddonInfo(uid, locale);
 
-        if (isInstalled && addonInfo != null) {
-            // only enrich if this add-on is installed, otherwise wrong data might be added
+        if (addonInfo != null) {
             addon = addon.withLabel(addonInfo.getName()).withDescription(addonInfo.getDescription())
                     .withConnection(addonInfo.getConnection()).withCountries(addonInfo.getCountries())
                     .withLink(getDefaultDocumentationLink(type, name))
