@@ -15,6 +15,7 @@ package org.openhab.core.addon;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -73,7 +74,7 @@ public class AddonInfoRegistry {
      * @return a localized add-on information object (could be null)
      */
     public @Nullable AddonInfo getAddonInfo(String uid, @Nullable Locale locale) {
-        return addonInfoProviders.stream().map(p -> p.getAddonInfo(uid, locale))
+        return addonInfoProviders.stream().map(p -> p.getAddonInfo(uid, locale)).filter(Objects::nonNull)
                 .collect(Collectors.groupingBy(a -> a == null ? "" : a.getUID(),
                         Collectors.collectingAndThen(Collectors.reducing(mergeAddonInfos), Optional::get)))
                 .get(uid);
