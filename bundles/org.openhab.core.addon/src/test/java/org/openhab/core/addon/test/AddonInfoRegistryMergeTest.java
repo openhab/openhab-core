@@ -46,7 +46,7 @@ import org.openhab.core.addon.AddonMatchProperty;
  */
 @NonNullByDefault
 @TestInstance(Lifecycle.PER_CLASS)
-class AddonInfoMergeTest {
+class AddonInfoRegistryMergeTest {
 
     private @Nullable AddonInfoProvider addonInfoProvider0;
     private @Nullable AddonInfoProvider addonInfoProvider1;
@@ -89,7 +89,7 @@ class AddonInfoMergeTest {
                 .setMatchProperties(List.of(new AddonMatchProperty("modelName", "Philips hue bridge")));
         AddonInfo addonInfo = AddonInfo.builder("hue", "binding").withName("name-two")
                 .withDescription("description-two").withCountries("DE,FR").withSourceBundle("source-bundle")
-                .withConfigDescriptionURI("http://www.disney.com").withDiscoveryMethods(List.of(discoveryMethod))
+                .withConfigDescriptionURI("http://www.openhab.org").withDiscoveryMethods(List.of(discoveryMethod))
                 .build();
         AddonInfoProvider provider = mock(AddonInfoProvider.class);
         when(provider.getAddonInfo(anyString(), any(Locale.class))).thenReturn(null);
@@ -125,7 +125,7 @@ class AddonInfoMergeTest {
         assertTrue(addonInfo.getDescription().startsWith("description-"));
         assertNotEquals("local", addonInfo.getConnection());
         assertEquals(0, addonInfo.getCountries().size());
-        assertNotEquals("http://www.disney.com", addonInfo.getConfigDescriptionURI());
+        assertNotEquals("http://www.openhab.org", addonInfo.getConfigDescriptionURI());
         assertEquals(0, addonInfo.getDiscoveryMethods().size());
     }
 
@@ -158,7 +158,7 @@ class AddonInfoMergeTest {
         assertNotEquals("source-bundle", addonInfo.getSourceBundle());
         assertEquals("local", addonInfo.getConnection());
         assertEquals(2, addonInfo.getCountries().size());
-        assertNotEquals("http://www.disney.com", addonInfo.getConfigDescriptionURI());
+        assertNotEquals("http://www.openhab.org", addonInfo.getConfigDescriptionURI());
         assertEquals(1, addonInfo.getDiscoveryMethods().size());
     }
 
@@ -193,7 +193,7 @@ class AddonInfoMergeTest {
         assertEquals("source-bundle", addonInfo.getSourceBundle());
         assertEquals("local", addonInfo.getConnection());
         assertEquals(4, addonInfo.getCountries().size());
-        assertEquals("http://www.disney.com", addonInfo.getConfigDescriptionURI());
+        assertEquals("http://www.openhab.org", addonInfo.getConfigDescriptionURI());
         assertEquals(2, addonInfo.getDiscoveryMethods().size());
     }
 }
