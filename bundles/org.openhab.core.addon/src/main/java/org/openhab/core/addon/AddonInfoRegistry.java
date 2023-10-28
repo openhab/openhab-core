@@ -115,6 +115,10 @@ public class AddonInfoRegistry {
         if (a.getSourceBundle() == null && b.getSourceBundle() != null) {
             builder.withSourceBundle(b.getSourceBundle());
         }
+        String defaultServiceId = a.getType() + "." + a.getId();
+        if (defaultServiceId.equals(a.getServiceId()) && !defaultServiceId.equals(b.getServiceId())) {
+            builder.withServiceId(b.getServiceId());
+        }
         Set<AddonDiscoveryMethod> discoveryMethods = new HashSet<>(a.getDiscoveryMethods());
         discoveryMethods.addAll(b.getDiscoveryMethods());
         if (!discoveryMethods.isEmpty()) {

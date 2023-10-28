@@ -89,8 +89,8 @@ class AddonInfoRegistryMergeTest {
                 .setMatchProperties(List.of(new AddonMatchProperty("modelName", "Philips hue bridge")));
         AddonInfo addonInfo = AddonInfo.builder("hue", "binding").withName("name-two")
                 .withDescription("description-two").withCountries("DE,FR").withSourceBundle("source-bundle")
-                .withConfigDescriptionURI("http://www.openhab.org").withDiscoveryMethods(List.of(discoveryMethod))
-                .build();
+                .withServiceId("service-id").withConfigDescriptionURI("http://www.openhab.org")
+                .withDiscoveryMethods(List.of(discoveryMethod)).build();
         AddonInfoProvider provider = mock(AddonInfoProvider.class);
         when(provider.getAddonInfo(anyString(), any(Locale.class))).thenReturn(null);
         when(provider.getAddonInfo(anyString(), eq(null))).thenReturn(null);
@@ -123,9 +123,11 @@ class AddonInfoRegistryMergeTest {
         assertEquals("binding-hue", addonInfo.getUID());
         assertTrue(addonInfo.getName().startsWith("name-"));
         assertTrue(addonInfo.getDescription().startsWith("description-"));
+        assertNull(addonInfo.getSourceBundle());
         assertNotEquals("local", addonInfo.getConnection());
         assertEquals(0, addonInfo.getCountries().size());
         assertNotEquals("http://www.openhab.org", addonInfo.getConfigDescriptionURI());
+        assertEquals("binding.hue", addonInfo.getServiceId());
         assertEquals(0, addonInfo.getDiscoveryMethods().size());
     }
 
@@ -155,10 +157,11 @@ class AddonInfoRegistryMergeTest {
         assertEquals("binding-hue", addonInfo.getUID());
         assertTrue(addonInfo.getName().startsWith("name-"));
         assertTrue(addonInfo.getDescription().startsWith("description-"));
-        assertNotEquals("source-bundle", addonInfo.getSourceBundle());
+        assertNull(addonInfo.getSourceBundle());
         assertEquals("local", addonInfo.getConnection());
         assertEquals(2, addonInfo.getCountries().size());
         assertNotEquals("http://www.openhab.org", addonInfo.getConfigDescriptionURI());
+        assertEquals("binding.hue", addonInfo.getServiceId());
         assertEquals(1, addonInfo.getDiscoveryMethods().size());
     }
 
@@ -194,6 +197,7 @@ class AddonInfoRegistryMergeTest {
         assertEquals("local", addonInfo.getConnection());
         assertEquals(4, addonInfo.getCountries().size());
         assertEquals("http://www.openhab.org", addonInfo.getConfigDescriptionURI());
+        assertEquals("service-id", addonInfo.getServiceId());
         assertEquals(2, addonInfo.getDiscoveryMethods().size());
     }
 }
