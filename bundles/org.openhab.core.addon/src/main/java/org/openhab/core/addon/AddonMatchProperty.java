@@ -32,7 +32,7 @@ public class AddonMatchProperty {
     public AddonMatchProperty(String name, String regex) {
         this.name = name;
         this.regex = regex;
-        this.pattern = Pattern.compile(regex);
+        this.pattern = null;
     }
 
     public String getName() {
@@ -40,7 +40,11 @@ public class AddonMatchProperty {
     }
 
     public Pattern getPattern() {
-        return pattern;
+        Pattern pattern = this.pattern;
+        if (pattern == null) {
+            this.pattern = Pattern.compile(regex);
+        }
+        return this.pattern;
     }
 
     public String getRegex() {
