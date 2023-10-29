@@ -18,11 +18,7 @@ import java.util.Map;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.Configuration;
-import org.openhab.core.thing.Bridge;
-import org.openhab.core.thing.Channel;
-import org.openhab.core.thing.ChannelUID;
-import org.openhab.core.thing.ThingTypeUID;
-import org.openhab.core.thing.ThingUID;
+import org.openhab.core.thing.*;
 import org.openhab.core.thing.internal.BridgeImpl;
 
 /**
@@ -46,6 +42,19 @@ public class BridgeBuilder extends ThingBuilder {
 
     public static BridgeBuilder create(ThingTypeUID thingTypeUID, ThingUID thingUID) {
         return new BridgeBuilder(thingTypeUID, thingUID);
+    }
+
+    /**
+     * Create a new bridge {@link BridgeBuilder} for a copy of the given bridge
+     *
+     * @param bridge the {@link Bridge} to create this builder from
+     * @return the created {@link BridgeBuilder}
+     *
+     */
+    public static BridgeBuilder create(Bridge bridge) {
+        return BridgeBuilder.create(bridge.getThingTypeUID(), bridge.getUID()).withBridge(bridge.getBridgeUID())
+                .withChannels(bridge.getChannels()).withConfiguration(bridge.getConfiguration())
+                .withLabel(bridge.getLabel()).withLocation(bridge.getLocation()).withProperties(bridge.getProperties());
     }
 
     @Override
