@@ -48,6 +48,19 @@ public class BridgeBuilder extends ThingBuilder {
         return new BridgeBuilder(thingTypeUID, thingUID);
     }
 
+    /**
+     * Create a new bridge {@link BridgeBuilder} for a copy of the given bridge
+     *
+     * @param bridge the {@link Bridge} to create this builder from
+     * @return the created {@link BridgeBuilder}
+     *
+     */
+    public static BridgeBuilder create(Bridge bridge) {
+        return BridgeBuilder.create(bridge.getThingTypeUID(), bridge.getUID()).withBridge(bridge.getBridgeUID())
+                .withChannels(bridge.getChannels()).withConfiguration(bridge.getConfiguration())
+                .withLabel(bridge.getLabel()).withLocation(bridge.getLocation()).withProperties(bridge.getProperties());
+    }
+
     @Override
     public Bridge build() {
         final BridgeImpl bridge = new BridgeImpl(thingTypeUID, thingUID);
