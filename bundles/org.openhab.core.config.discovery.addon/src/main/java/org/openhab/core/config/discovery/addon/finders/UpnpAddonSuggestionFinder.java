@@ -62,7 +62,7 @@ public class UpnpAddonSuggestionFinder extends BaseAddonSuggestionFinder impleme
             MODEL_NAME, MODEL_NUMBER, SERIAL_NUMBER, FRIENDLY_NAME, UDN);
 
     private final Logger logger = LoggerFactory.getLogger(UpnpAddonSuggestionFinder.class);
-    private final Set<RemoteDevice> devices = ConcurrentHashMap.newKeySet();
+    private final Map<String, RemoteDevice> devices = new ConcurrentHashMap<>();
     private final UpnpService upnpService;
 
     @Activate
@@ -73,7 +73,19 @@ public class UpnpAddonSuggestionFinder extends BaseAddonSuggestionFinder impleme
 
     public void addDevice(@Nullable RemoteDevice device) {
         if (device != null) {
-            devices.add(device);
+            String udnString = device.getIdentity().getUdn().getIdentifierString();
+            devices.put(udnString, device);
+            if (logger.isTraceEnabled()) {
+                DeviceDetails deviceDetails = device.getDetails();
+                ManufacturerDetails manufacturerDetails = deviceDetails.getManufacturerDetails();
+                ModelDetails modelDetails = deviceDetails.getModelDetails();
+                logger.trace(
+                        "UPnP device type:{}, manufacturer:{}, manufacturerURI:{}, modelName:{}, modelNumber:{}, serialNumber:{}, friendlyName:{}, UDN:{}",
+                        device.getType(), manufacturerDetails.getManufacturer(),
+                        manufacturerDetails.getManufacturerURI().toString(), modelDetails.getModelName(),
+                        modelDetails.getModelNumber(), deviceDetails.getSerialNumber(), deviceDetails.getFriendlyName(),
+                        udnString);
+            }
         }
     }
 
@@ -98,7 +110,7 @@ public class UpnpAddonSuggestionFinder extends BaseAddonSuggestionFinder impleme
                             logger.warn("Addon '{}' addon.xml file contains unsupported 'match-property' [{}]",
                                     candidate.getUID(), String.join(",", propNames));
                         } else {
-                            devices.stream().forEach(device -> {
+                            devices.values().stream().forEach(device -> {
                                 DeviceDetails deviceDetails = device.getDetails();
                                 ManufacturerDetails manufacturerDetails = deviceDetails.getManufacturerDetails();
                                 ModelDetails modelDetails = deviceDetails.getModelDetails();

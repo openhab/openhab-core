@@ -13,6 +13,7 @@
 package org.openhab.core.config.discovery.addon.finders;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -48,11 +49,10 @@ public class MDNSAddonSuggestionFinder extends BaseAddonSuggestionFinder impleme
     public static final String SERVICE_TYPE = "mdns";
     public static final String SERVICE_NAME = SERVICE_TYPE + ADDON_SUGGESTION_FINDER;
 
-    private static final String APPLICATION = "application";
     private static final String NAME = "name";
 
     private final Logger logger = LoggerFactory.getLogger(MDNSAddonSuggestionFinder.class);
-    private final Set<ServiceInfo> services = ConcurrentHashMap.newKeySet();
+    private final Map<String, ServiceInfo> services = new ConcurrentHashMap<>();
     private final MDNSClient mdnsClient;
 
     @Activate
@@ -62,7 +62,16 @@ public class MDNSAddonSuggestionFinder extends BaseAddonSuggestionFinder impleme
 
     public void addService(@Nullable ServiceInfo service) {
         if (service != null) {
-            services.add(service);
+            String qualifiedName = service.getQualifiedName();
+            services.put(qualifiedName, service);
+            if (logger.isTraceEnabled()) {
+                Map<String, String> properties = new HashMap<>();
+                while (service.getPropertyNames().hasMoreElements()) {
+                    String name = service.getPropertyNames().nextElement();
+                    properties.put(name, service.getPropertyString(name));
+                }
+                logger.trace("mDNS service name:{}, properties:{}", qualifiedName, properties.toString());
+            }
         }
     }
 
@@ -80,10 +89,8 @@ public class MDNSAddonSuggestionFinder extends BaseAddonSuggestionFinder impleme
                     .forEach(method -> {
                         Map<String, Pattern> map = method.getMatchProperties().stream().collect(
                                 Collectors.toMap(property -> property.getName(), property -> property.getPattern()));
-
-                        services.stream().forEach(service -> {
+                        services.values().stream().forEach(service -> {
                             if (method.getMdnsServiceType().equals(service.getType())
-                                    && propertyMatches(map, APPLICATION, service.getApplication())
                                     && propertyMatches(map, NAME, service.getName())
                                     && Collections.list(service.getPropertyNames()).stream().allMatch(
                                             name -> propertyMatches(map, name, service.getPropertyString(name)))) {
