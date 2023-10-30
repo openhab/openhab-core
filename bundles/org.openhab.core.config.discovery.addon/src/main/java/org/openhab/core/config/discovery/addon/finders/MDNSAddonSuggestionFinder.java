@@ -13,7 +13,6 @@
 package org.openhab.core.config.discovery.addon.finders;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -63,14 +62,10 @@ public class MDNSAddonSuggestionFinder extends BaseAddonSuggestionFinder impleme
     public void addService(@Nullable ServiceInfo service) {
         if (service != null) {
             String qualifiedName = service.getQualifiedName();
-            services.put(qualifiedName, service);
-            if (logger.isTraceEnabled()) {
-                Map<String, String> properties = new HashMap<>();
-                while (service.getPropertyNames().hasMoreElements()) {
-                    String name = service.getPropertyNames().nextElement();
-                    properties.put(name, service.getPropertyString(name));
-                }
-                logger.trace("mDNS service name:{}, properties:{}", qualifiedName, properties.toString());
+            if (services.put(qualifiedName, service) == null && logger.isTraceEnabled()) {
+                logger.trace("mDNS service name={}, properties={}", qualifiedName,
+                        Collections.list(service.getPropertyNames()).stream()
+                                .map(n -> n + "=" + service.getPropertyString(n)).toList());
             }
         }
     }
@@ -95,7 +90,7 @@ public class MDNSAddonSuggestionFinder extends BaseAddonSuggestionFinder impleme
                                     && Collections.list(service.getPropertyNames()).stream().allMatch(
                                             name -> propertyMatches(map, name, service.getPropertyString(name)))) {
                                 result.add(candidate);
-                                logger.debug("Addon '{}' will be suggested", candidate.getUID());
+                                logger.debug("Addon '{}' will be suggested (via mDNS)", candidate.getUID());
                             }
                         });
                     });

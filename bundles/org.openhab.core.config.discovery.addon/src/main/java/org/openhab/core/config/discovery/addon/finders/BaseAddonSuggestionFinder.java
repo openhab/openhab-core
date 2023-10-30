@@ -20,6 +20,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.addon.AddonInfo;
 
 /**
@@ -39,13 +40,13 @@ public abstract class BaseAddonSuggestionFinder implements AddonSuggestionFinder
      * @param propertyPatternMap map of property names and regex patterns for value matching
      * @param propertyName
      * @param propertyValue
-     * @return true a) if the property name exists and the property value matches
-     *         the regular expression, or b) the property name does not exist.
+     * @return true a) if the property name exists and the property value is not null and matches the regular
+     *         expression, or b) the property name does not exist.
      */
     protected static boolean propertyMatches(Map<String, Pattern> propertyPatternMap, String propertyName,
-            String propertyValue) {
+            @Nullable String propertyValue) {
         Pattern pattern = propertyPatternMap.get(propertyName);
-        return pattern == null ? true : pattern.matcher(propertyValue).matches();
+        return pattern == null ? true : propertyValue != null ? pattern.matcher(propertyValue).matches() : false;
     }
 
     protected final List<AddonInfo> addonCandidates = Collections.synchronizedList(new ArrayList<>());
