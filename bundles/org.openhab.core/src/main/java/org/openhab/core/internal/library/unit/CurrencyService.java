@@ -83,7 +83,6 @@ public class CurrencyService {
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     public void addCurrencyProvider(CurrencyProvider currencyProvider) {
-        logger.error("Added {}", currencyProvider.getName());
         currencyProviders.put(currencyProvider.getName(), currencyProvider);
         if (configuredCurrencyProvider.equals(currencyProvider.getName())) {
             enableProvider(currencyProvider);
