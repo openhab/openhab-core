@@ -58,6 +58,7 @@ public abstract class BaseAddonSuggestionFinder implements AddonSuggestionFinder
     public abstract Set<AddonInfo> getSuggestedAddons();
 
     public void setAddonCandidates(List<AddonInfo> candidates) {
+        addonCandidates.clear();
         addonCandidates.addAll(candidates);
     }
 }

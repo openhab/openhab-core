@@ -82,15 +82,18 @@ public class MDNSAddonSuggestionFinder extends BaseAddonSuggestionFinder impleme
         addonCandidates.forEach(candidate -> {
             candidate.getDiscoveryMethods().stream().filter(method -> SERVICE_TYPE.equals(method.getServiceType()))
                     .forEach(method -> {
-                        Map<String, Pattern> map = method.getMatchProperties().stream().collect(
+                        Map<String, Pattern> matchProperties = method.getMatchProperties().stream().collect(
                                 Collectors.toMap(property -> property.getName(), property -> property.getPattern()));
                         services.values().stream().forEach(service -> {
                             if (method.getMdnsServiceType().equals(service.getType())
-                                    && propertyMatches(map, NAME, service.getName())
-                                    && Collections.list(service.getPropertyNames()).stream().allMatch(
-                                            name -> propertyMatches(map, name, service.getPropertyString(name)))) {
-                                result.add(candidate);
-                                logger.debug("Addon '{}' will be suggested (via mDNS)", candidate.getUID());
+                                    && propertyMatches(matchProperties, NAME, service.getName())) {
+                                List<String> serviceProperties = Collections.list(service.getPropertyNames());
+                                if (serviceProperties.containsAll(matchProperties.keySet())
+                                        && serviceProperties.stream().allMatch(name -> propertyMatches(matchProperties,
+                                                name, service.getPropertyString(name)))) {
+                                    result.add(candidate);
+                                    logger.debug("Addon '{}' will be suggested (via mDNS)", candidate.getUID());
+                                }
                             }
                         });
                     });

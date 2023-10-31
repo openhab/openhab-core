@@ -137,10 +137,10 @@ public class UpnpAddonSuggestionFinder extends BaseAddonSuggestionFinder impleme
         addonCandidates.forEach(candidate -> {
             candidate.getDiscoveryMethods().stream().filter(method -> SERVICE_TYPE.equals(method.getServiceType()))
                     .forEach(method -> {
-                        Map<String, Pattern> map = method.getMatchProperties().stream().collect(
+                        Map<String, Pattern> matchProperties = method.getMatchProperties().stream().collect(
                                 Collectors.toMap(property -> property.getName(), property -> property.getPattern()));
 
-                        Set<String> propNames = new HashSet<>(map.keySet());
+                        Set<String> propNames = new HashSet<>(matchProperties.keySet());
                         propNames.removeAll(SUPPORTED_PROPERTIES);
                         if (!propNames.isEmpty()) {
                             logger.warn("Addon '{}' addon.xml file contains unsupported 'match-property' [{}]",
@@ -184,15 +184,15 @@ public class UpnpAddonSuggestionFinder extends BaseAddonSuggestionFinder impleme
                                     }
                                 }
 
-                                if (propertyMatches(map, DEVICE_TYPE, deviceType)
-                                        && propertyMatches(map, MANUFACTURER, manufacturer)
-                                        && propertyMatches(map, MANUFACTURER_URL, manufacturerURL)
-                                        && propertyMatches(map, MODEL_NAME, modelName)
-                                        && propertyMatches(map, MODEL_NUMBER, modelNumber)
-                                        && propertyMatches(map, MODEL_DESCRIPTION, modelDescription)
-                                        && propertyMatches(map, MODEL_URL, modelURL)
-                                        && propertyMatches(map, SERIAL_NUMBER, serialNumber)
-                                        && propertyMatches(map, FRIENDLY_NAME, friendlyName)) {
+                                if (propertyMatches(matchProperties, DEVICE_TYPE, deviceType)
+                                        && propertyMatches(matchProperties, MANUFACTURER, manufacturer)
+                                        && propertyMatches(matchProperties, MANUFACTURER_URL, manufacturerURL)
+                                        && propertyMatches(matchProperties, MODEL_NAME, modelName)
+                                        && propertyMatches(matchProperties, MODEL_NUMBER, modelNumber)
+                                        && propertyMatches(matchProperties, MODEL_DESCRIPTION, modelDescription)
+                                        && propertyMatches(matchProperties, MODEL_URL, modelURL)
+                                        && propertyMatches(matchProperties, SERIAL_NUMBER, serialNumber)
+                                        && propertyMatches(matchProperties, FRIENDLY_NAME, friendlyName)) {
                                     result.add(candidate);
                                     logger.debug("Addon '{}' will be suggested (via UPnP)", candidate.getUID());
                                 }
