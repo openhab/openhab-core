@@ -26,6 +26,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.addon.AddonInfo;
 import org.openhab.core.addon.AddonInfoProvider;
 import org.openhab.core.config.discovery.addon.finders.AddonSuggestionFinder;
+import org.openhab.core.i18n.LocaleProvider;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -46,18 +47,28 @@ public class AddonSuggestionFinderService implements AutoCloseable {
 
     private final Set<AddonInfoProvider> addonInfoProviders = ConcurrentHashMap.newKeySet();
     private final List<AddonSuggestionFinder> addonSuggestionFinders = Collections.synchronizedList(new ArrayList<>());
+    private final LocaleProvider localeProvider;
 
     @Activate
-    public AddonSuggestionFinderService() {
+    public AddonSuggestionFinderService(@Reference LocaleProvider localeProvider) {
+        this.localeProvider = localeProvider;
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     public void addAddonInfoProvider(AddonInfoProvider addonInfoProvider) {
         addonInfoProviders.add(addonInfoProvider);
+        addonInfoProvidersChanged();
     }
 
     public void removeAddonInfoProvider(AddonInfoProvider addonInfoProvider) {
         addonInfoProviders.remove(addonInfoProvider);
+        addonInfoProvidersChanged();
+    }
+
+    private void addonInfoProvidersChanged() {
+        List<AddonInfo> candidates = addonInfoProviders.stream().map(p -> p.getAddonInfos(localeProvider.getLocale()))
+                .flatMap(Collection::stream).toList();
+        addonSuggestionFinders.forEach(f -> f.setAddonCandidates(candidates));
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
@@ -77,9 +88,6 @@ public class AddonSuggestionFinderService implements AutoCloseable {
     }
 
     public Set<AddonInfo> getSuggestedAddons(@Nullable Locale locale) {
-        List<AddonInfo> candidates = addonInfoProviders.stream().map(p -> p.getAddonInfos(locale))
-                .flatMap(Collection::stream).toList();
-        addonSuggestionFinders.forEach(f -> f.setAddonCandidates(candidates));
         return addonSuggestionFinders.stream().map(f -> f.getSuggestedAddons()).flatMap(Collection::stream)
                 .collect(Collectors.toSet());
     }
