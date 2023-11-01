@@ -37,6 +37,7 @@ public class AddonInfo implements Identifiable<String> {
 
     private final String id;
     private final String type;
+    private final String uid;
     private final String name;
     private final String description;
     private final @Nullable String connection;
@@ -46,10 +47,10 @@ public class AddonInfo implements Identifiable<String> {
     private @Nullable String sourceBundle;
     private @Nullable List<AddonDiscoveryMethod> discoveryMethods;
 
-    private AddonInfo(String id, String type, String name, String description, @Nullable String connection,
-            List<String> countries, @Nullable String configDescriptionURI, @Nullable String serviceId,
-            @Nullable String sourceBundle, @Nullable List<AddonDiscoveryMethod> discoveryMethods)
-            throws IllegalArgumentException {
+    private AddonInfo(String id, String type, @Nullable String uid, String name, String description,
+            @Nullable String connection, List<String> countries, @Nullable String configDescriptionURI,
+            @Nullable String serviceId, @Nullable String sourceBundle,
+            @Nullable List<AddonDiscoveryMethod> discoveryMethods) throws IllegalArgumentException {
         // mandatory fields
         if (id.isBlank()) {
             throw new IllegalArgumentException("The ID must neither be null nor empty!");
@@ -66,6 +67,7 @@ public class AddonInfo implements Identifiable<String> {
         }
         this.id = id;
         this.type = type;
+        this.uid = uid != null ? uid : type + Addon.ADDON_SEPARATOR + id;
         this.name = name;
         this.description = description;
 
@@ -85,7 +87,7 @@ public class AddonInfo implements Identifiable<String> {
      */
     @Override
     public String getUID() {
-        return type + Addon.ADDON_SEPARATOR + id;
+        return uid;
     }
 
     /**
@@ -162,6 +164,7 @@ public class AddonInfo implements Identifiable<String> {
 
         private final String id;
         private final String type;
+        private @Nullable String uid;
         private String name = "";
         private String description = "";
         private @Nullable String connection;
@@ -179,6 +182,7 @@ public class AddonInfo implements Identifiable<String> {
         private Builder(AddonInfo addonInfo) {
             this.id = addonInfo.id;
             this.type = addonInfo.type;
+            this.uid = addonInfo.uid;
             this.name = addonInfo.name;
             this.description = addonInfo.description;
             this.connection = addonInfo.connection;
@@ -187,6 +191,11 @@ public class AddonInfo implements Identifiable<String> {
             this.serviceId = addonInfo.serviceId;
             this.sourceBundle = addonInfo.sourceBundle;
             this.discoveryMethods = addonInfo.discoveryMethods;
+        }
+
+        public Builder withUID(@Nullable String uid) {
+            this.uid = uid;
+            return this;
         }
 
         public Builder withName(String name) {
@@ -241,8 +250,8 @@ public class AddonInfo implements Identifiable<String> {
          * @throws IllegalArgumentException if any of the information in this builder is invalid
          */
         public AddonInfo build() throws IllegalArgumentException {
-            return new AddonInfo(id, type, name, description, connection, countries, configDescriptionURI, serviceId,
-                    sourceBundle, discoveryMethods);
+            return new AddonInfo(id, type, uid, name, description, connection, countries, configDescriptionURI,
+                    serviceId, sourceBundle, discoveryMethods);
         }
     }
 }

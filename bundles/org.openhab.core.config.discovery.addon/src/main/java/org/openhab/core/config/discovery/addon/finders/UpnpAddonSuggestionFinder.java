@@ -30,6 +30,7 @@ import org.jupnp.model.meta.LocalDevice;
 import org.jupnp.model.meta.ManufacturerDetails;
 import org.jupnp.model.meta.ModelDetails;
 import org.jupnp.model.meta.RemoteDevice;
+import org.jupnp.model.meta.RemoteDeviceIdentity;
 import org.jupnp.model.types.DeviceType;
 import org.jupnp.registry.Registry;
 import org.jupnp.registry.RegistryListener;
@@ -55,17 +56,17 @@ public class UpnpAddonSuggestionFinder extends BaseAddonSuggestionFinder impleme
 
     private static final String DEVICE_TYPE = "deviceType";
     private static final String MANUFACTURER = "manufacturer";
-    private static final String MANUFACTURER_URL = "manufacturerURL";
+    private static final String MANUFACTURER_URI = "manufacturerURI";
     private static final String MODEL_NAME = "modelName";
     private static final String MODEL_NUMBER = "modelNumber";
     private static final String MODEL_DESCRIPTION = "modelDescription";
-    private static final String MODEL_URL = "modelURL";
+    private static final String MODEL_URI = "modelURI";
     private static final String SERIAL_NUMBER = "serialNumber";
     private static final String FRIENDLY_NAME = "friendlyName";
     private static final String UDN = "udn";
 
-    private static final Set<String> SUPPORTED_PROPERTIES = Set.of(DEVICE_TYPE, MANUFACTURER, MANUFACTURER_URL,
-            MODEL_NAME, MODEL_NUMBER, MODEL_DESCRIPTION, MODEL_URL, SERIAL_NUMBER, FRIENDLY_NAME);
+    private static final Set<String> SUPPORTED_PROPERTIES = Set.of(DEVICE_TYPE, MANUFACTURER, MANUFACTURER_URI,
+            MODEL_NAME, MODEL_NUMBER, MODEL_DESCRIPTION, MODEL_URI, SERIAL_NUMBER, FRIENDLY_NAME);
 
     private final Logger logger = LoggerFactory.getLogger(UpnpAddonSuggestionFinder.class);
     private final Map<String, RemoteDevice> devices = new ConcurrentHashMap<>();
@@ -83,45 +84,44 @@ public class UpnpAddonSuggestionFinder extends BaseAddonSuggestionFinder impleme
         this.upnpService.getRegistry().addListener(this);
     }
 
-    public void addDevice(@Nullable RemoteDevice device) {
-        if (device != null && device.getIdentity() != null && device.getIdentity().getUdn() != null) {
-            String udn = device.getIdentity().getUdn().getIdentifierString();
-            if (devices.put(udn, device) == null && logger.isTraceEnabled()) {
-                List<String> properties = new ArrayList<>();
-                logProperty(properties, UDN, udn);
+    public void addDevice(RemoteDevice device) {
+        RemoteDeviceIdentity identity = device.getIdentity();
+        String udn = identity != null ? udn = identity.getUdn().getIdentifierString() : "NULL";
+        if (devices.put(udn, device) == null && logger.isTraceEnabled()) {
+            List<String> properties = new ArrayList<>();
+            logProperty(properties, UDN, udn);
 
-                DeviceType devType = device.getType();
-                if (devType != null) {
-                    logProperty(properties, DEVICE_TYPE, devType.getType());
-                }
-
-                DeviceDetails devDetails = device.getDetails();
-                if (devDetails != null) {
-                    logProperty(properties, SERIAL_NUMBER, devDetails.getSerialNumber());
-                    logProperty(properties, FRIENDLY_NAME, devDetails.getFriendlyName());
-
-                    ManufacturerDetails mfrDetails = devDetails.getManufacturerDetails();
-                    if (mfrDetails != null) {
-                        URI mfrUri = mfrDetails.getManufacturerURI();
-                        logProperty(properties, MANUFACTURER, mfrDetails.getManufacturer());
-                        if (mfrUri != null) {
-                            logProperty(properties, MANUFACTURER_URL, mfrUri.toString());
-                        }
-                    }
-
-                    ModelDetails modDetails = devDetails.getModelDetails();
-                    if (modDetails != null) {
-                        URI modUri = modDetails.getModelURI();
-                        logProperty(properties, MODEL_NAME, modDetails.getModelName());
-                        logProperty(properties, MODEL_NUMBER, modDetails.getModelNumber());
-                        logProperty(properties, MODEL_DESCRIPTION, modDetails.getModelDescription());
-                        if (modUri != null) {
-                            logProperty(properties, MODEL_URL, modUri.toString());
-                        }
-                    }
-                }
-                logger.trace("UPnP device properties={}", properties);
+            DeviceType devType = device.getType();
+            if (devType != null) {
+                logProperty(properties, DEVICE_TYPE, devType.getType());
             }
+
+            DeviceDetails devDetails = device.getDetails();
+            if (devDetails != null) {
+                logProperty(properties, SERIAL_NUMBER, devDetails.getSerialNumber());
+                logProperty(properties, FRIENDLY_NAME, devDetails.getFriendlyName());
+
+                ManufacturerDetails mfrDetails = devDetails.getManufacturerDetails();
+                if (mfrDetails != null) {
+                    URI mfrUri = mfrDetails.getManufacturerURI();
+                    logProperty(properties, MANUFACTURER, mfrDetails.getManufacturer());
+                    if (mfrUri != null) {
+                        logProperty(properties, MANUFACTURER_URI, mfrUri.toString());
+                    }
+                }
+
+                ModelDetails modDetails = devDetails.getModelDetails();
+                if (modDetails != null) {
+                    URI modUri = modDetails.getModelURI();
+                    logProperty(properties, MODEL_NAME, modDetails.getModelName());
+                    logProperty(properties, MODEL_NUMBER, modDetails.getModelNumber());
+                    logProperty(properties, MODEL_DESCRIPTION, modDetails.getModelDescription());
+                    if (modUri != null) {
+                        logProperty(properties, MODEL_URI, modUri.toString());
+                    }
+                }
+            }
+            logger.trace("UPnP device {}", properties);
         }
     }
 
@@ -151,11 +151,11 @@ public class UpnpAddonSuggestionFinder extends BaseAddonSuggestionFinder impleme
                                 String serialNumber = null;
                                 String friendlyName = null;
                                 String manufacturer = null;
-                                String manufacturerURL = null;
+                                String manufacturerURI = null;
                                 String modelName = null;
                                 String modelNumber = null;
                                 String modelDescription = null;
-                                String modelURL = null;
+                                String modelURI = null;
 
                                 DeviceType devType = device.getType();
                                 if (devType != null) {
@@ -171,7 +171,7 @@ public class UpnpAddonSuggestionFinder extends BaseAddonSuggestionFinder impleme
                                     if (mfrDetails != null) {
                                         URI mfrUri = mfrDetails.getManufacturerURI();
                                         manufacturer = mfrDetails.getManufacturer();
-                                        manufacturerURL = mfrUri != null ? mfrUri.toString() : null;
+                                        manufacturerURI = mfrUri != null ? mfrUri.toString() : null;
                                     }
 
                                     ModelDetails modDetails = devDetails.getModelDetails();
@@ -180,17 +180,17 @@ public class UpnpAddonSuggestionFinder extends BaseAddonSuggestionFinder impleme
                                         modelName = modDetails.getModelName();
                                         modelDescription = modDetails.getModelDescription();
                                         modelNumber = modDetails.getModelNumber();
-                                        modelURL = modUri != null ? modUri.toString() : null;
+                                        modelURI = modUri != null ? modUri.toString() : null;
                                     }
                                 }
 
                                 if (propertyMatches(map, DEVICE_TYPE, deviceType)
                                         && propertyMatches(map, MANUFACTURER, manufacturer)
-                                        && propertyMatches(map, MANUFACTURER_URL, manufacturerURL)
+                                        && propertyMatches(map, MANUFACTURER_URI, manufacturerURI)
                                         && propertyMatches(map, MODEL_NAME, modelName)
                                         && propertyMatches(map, MODEL_NUMBER, modelNumber)
                                         && propertyMatches(map, MODEL_DESCRIPTION, modelDescription)
-                                        && propertyMatches(map, MODEL_URL, modelURL)
+                                        && propertyMatches(map, MODEL_URI, modelURI)
                                         && propertyMatches(map, SERIAL_NUMBER, serialNumber)
                                         && propertyMatches(map, FRIENDLY_NAME, friendlyName)) {
                                     result.add(candidate);
@@ -221,7 +221,9 @@ public class UpnpAddonSuggestionFinder extends BaseAddonSuggestionFinder impleme
 
     @Override
     public void remoteDeviceAdded(@Nullable Registry registry, @Nullable RemoteDevice remoteDevice) {
-        addDevice(remoteDevice);
+        if (remoteDevice != null) {
+            addDevice(remoteDevice);
+        }
     }
 
     @Override
@@ -239,6 +241,8 @@ public class UpnpAddonSuggestionFinder extends BaseAddonSuggestionFinder impleme
 
     @Override
     public void remoteDeviceUpdated(@Nullable Registry registry, @Nullable RemoteDevice remoteDevice) {
-        addDevice(remoteDevice);
+        if (remoteDevice != null) {
+            addDevice(remoteDevice);
+        }
     }
 }

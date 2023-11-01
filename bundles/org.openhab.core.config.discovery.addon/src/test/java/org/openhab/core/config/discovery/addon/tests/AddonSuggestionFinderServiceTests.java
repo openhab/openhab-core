@@ -101,7 +101,7 @@ public class AddonSuggestionFinderServiceTests {
     }
 
     private void createAddonSuggestionFinderService() {
-        addonSuggestionFinderService = new AddonSuggestionFinderService();
+        addonSuggestionFinderService = new AddonSuggestionFinderService(localeProvider);
         assertNotNull(addonSuggestionFinderService);
 
         UpnpAddonSuggestionFinder upnp = new UpnpAddonSuggestionFinder(upnpService);

@@ -119,6 +119,10 @@ public class AddonInfoRegistry {
         if (defaultServiceId.equals(a.getServiceId()) && !defaultServiceId.equals(b.getServiceId())) {
             builder.withServiceId(b.getServiceId());
         }
+        String defaultUID = a.getType() + Addon.ADDON_SEPARATOR + a.getId();
+        if (defaultUID.equals(a.getUID()) && !defaultUID.equals(b.getUID())) {
+            builder.withUID(b.getUID());
+        }
         Set<AddonDiscoveryMethod> discoveryMethods = new HashSet<>(a.getDiscoveryMethods());
         discoveryMethods.addAll(b.getDiscoveryMethods());
         if (!discoveryMethods.isEmpty()) {

@@ -13,6 +13,7 @@
 package org.openhab.core.config.discovery.addon.finders;
 
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -59,14 +60,16 @@ public class MDNSAddonSuggestionFinder extends BaseAddonSuggestionFinder impleme
         this.mdnsClient = mdnsClient;
     }
 
-    public void addService(@Nullable ServiceInfo service) {
-        if (service != null) {
-            String qualifiedName = service.getQualifiedName();
-            if (services.put(qualifiedName, service) == null && logger.isTraceEnabled()) {
-                logger.trace("mDNS service name={}, properties={}", qualifiedName,
-                        Collections.list(service.getPropertyNames()).stream()
-                                .map(n -> n + "=" + service.getPropertyString(n)).toList());
+    public void addService(ServiceInfo service) {
+        String qualifiedName = service.getQualifiedName();
+        if (services.put(qualifiedName, service) == null && logger.isTraceEnabled()) {
+            List<String> properties = List.of("name=" + qualifiedName);
+            Enumeration<String> enumeration = service.getPropertyNames();
+            if (enumeration != null) {
+                properties.addAll(Collections.list(enumeration).stream()
+                        .map(n -> n + "=" + service.getPropertyString(n)).toList());
             }
+            logger.trace("mDNS service {}", properties);
         }
     }
 
@@ -101,9 +104,6 @@ public class MDNSAddonSuggestionFinder extends BaseAddonSuggestionFinder impleme
 
     @Override
     public void serviceAdded(@Nullable ServiceEvent event) {
-        if (event != null) {
-            addService(event.getInfo());
-        }
     }
 
     @Override
@@ -112,7 +112,7 @@ public class MDNSAddonSuggestionFinder extends BaseAddonSuggestionFinder impleme
 
     @Override
     public void serviceResolved(@Nullable ServiceEvent event) {
-        if (event != null) {
+        if (event != null && event.getInfo() != null) {
             addService(event.getInfo());
         }
     }
