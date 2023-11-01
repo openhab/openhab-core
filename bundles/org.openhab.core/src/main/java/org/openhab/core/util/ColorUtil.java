@@ -49,7 +49,6 @@ public class ColorUtil {
     private static final BigDecimal BIG_DECIMAL_3 = BigDecimal.valueOf(3);
     private static final BigDecimal BIG_DECIMAL_2 = BigDecimal.valueOf(2);
     private static final BigDecimal BIG_DECIMAL_2_POINT_55 = new BigDecimal("2.55");
-    private static final BigDecimal BIG_DECIMAL_127_POINT_5 = BigDecimal.valueOf(127.5);
 
     public static final Gamut DEFAULT_GAMUT = new Gamut(new double[] { 0.9961, 0.0001 }, new double[] { 0, 0.9961 },
             new double[] { 0, 0.0001 });
