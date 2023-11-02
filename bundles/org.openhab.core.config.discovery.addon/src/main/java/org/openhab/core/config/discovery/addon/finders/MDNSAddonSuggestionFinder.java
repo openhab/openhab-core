@@ -12,8 +12,6 @@
  */
 package org.openhab.core.config.discovery.addon.finders;
 
-import java.util.Collections;
-import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -61,16 +59,7 @@ public class MDNSAddonSuggestionFinder extends BaseAddonSuggestionFinder impleme
     }
 
     public void addService(ServiceInfo service) {
-        String qualifiedName = service.getQualifiedName();
-        if (services.put(qualifiedName, service) == null && logger.isTraceEnabled()) {
-            List<String> properties = List.of("name=" + qualifiedName);
-            Enumeration<String> enumeration = service.getPropertyNames();
-            if (enumeration != null) {
-                properties.addAll(Collections.list(enumeration).stream()
-                        .map(n -> n + "=" + service.getPropertyString(n)).toList());
-            }
-            logger.trace("mDNS service {}", properties);
-        }
+        services.put(service.getQualifiedName(), service);
     }
 
     @Deactivate
@@ -85,16 +74,18 @@ public class MDNSAddonSuggestionFinder extends BaseAddonSuggestionFinder impleme
         addonCandidates.forEach(candidate -> {
             candidate.getDiscoveryMethods().stream().filter(method -> SERVICE_TYPE.equals(method.getServiceType()))
                     .forEach(method -> {
-                        Map<String, Pattern> map = method.getMatchProperties().stream().collect(
+                        Map<String, Pattern> matchProperties = method.getMatchProperties().stream().collect(
                                 Collectors.toMap(property -> property.getName(), property -> property.getPattern()));
+                        Set<String> matchPropertyKeys = matchProperties.keySet().stream()
+                                .filter(property -> !NAME.equals(property)).collect(Collectors.toSet());
 
                         services.values().stream().forEach(service -> {
                             if (method.getMdnsServiceType().equals(service.getType())
-                                    && propertyMatches(map, NAME, service.getName())
-                                    && map.keySet().stream().filter(name -> !NAME.equals(name)).allMatch(
-                                            name -> propertyMatches(map, name, service.getPropertyString(name)))) {
+                                    && propertyMatches(matchProperties, NAME, service.getName())
+                                    && matchPropertyKeys.stream().allMatch(name -> propertyMatches(matchProperties,
+                                            name, service.getPropertyString(name)))) {
                                 result.add(candidate);
-                                logger.debug("Addon '{}' will be suggested (via mDNS)", candidate.getUID());
+                                logger.debug("Suggested addon found via mDNS: {}", candidate.getUID());
                             }
                         });
                     });
@@ -112,8 +103,11 @@ public class MDNSAddonSuggestionFinder extends BaseAddonSuggestionFinder impleme
 
     @Override
     public void serviceResolved(@Nullable ServiceEvent event) {
-        if (event != null && event.getInfo() != null) {
-            addService(event.getInfo());
+        if (event != null) {
+            ServiceInfo service = event.getInfo();
+            if (service != null) {
+                addService(service);
+            }
         }
     }
 

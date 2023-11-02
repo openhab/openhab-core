@@ -13,9 +13,7 @@
 package org.openhab.core.config.discovery.addon.finders;
 
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -32,6 +30,7 @@ import org.jupnp.model.meta.ModelDetails;
 import org.jupnp.model.meta.RemoteDevice;
 import org.jupnp.model.meta.RemoteDeviceIdentity;
 import org.jupnp.model.types.DeviceType;
+import org.jupnp.model.types.UDN;
 import org.jupnp.registry.Registry;
 import org.jupnp.registry.RegistryListener;
 import org.openhab.core.addon.AddonInfo;
@@ -63,7 +62,6 @@ public class UpnpAddonSuggestionFinder extends BaseAddonSuggestionFinder impleme
     private static final String MODEL_URI = "modelURI";
     private static final String SERIAL_NUMBER = "serialNumber";
     private static final String FRIENDLY_NAME = "friendlyName";
-    private static final String UDN = "udn";
 
     private static final Set<String> SUPPORTED_PROPERTIES = Set.of(DEVICE_TYPE, MANUFACTURER, MANUFACTURER_URI,
             MODEL_NAME, MODEL_NUMBER, MODEL_DESCRIPTION, MODEL_URI, SERIAL_NUMBER, FRIENDLY_NAME);
@@ -72,56 +70,19 @@ public class UpnpAddonSuggestionFinder extends BaseAddonSuggestionFinder impleme
     private final Map<String, RemoteDevice> devices = new ConcurrentHashMap<>();
     private final UpnpService upnpService;
 
-    private static void logProperty(List<String> propertyList, String name, @Nullable String value) {
-        if (value != null) {
-            propertyList.add(name + "=" + value);
-        }
-    }
-
     @Activate
     public UpnpAddonSuggestionFinder(@Reference UpnpService upnpService) {
         this.upnpService = upnpService;
         this.upnpService.getRegistry().addListener(this);
     }
 
-    public void addDevice(RemoteDevice device) {
-        RemoteDeviceIdentity identity = device.getIdentity();
-        String udn = identity != null ? udn = identity.getUdn().getIdentifierString() : "NULL";
-        if (devices.put(udn, device) == null && logger.isTraceEnabled()) {
-            List<String> properties = new ArrayList<>();
-            logProperty(properties, UDN, udn);
-
-            DeviceType devType = device.getType();
-            if (devType != null) {
-                logProperty(properties, DEVICE_TYPE, devType.getType());
+    public void addDevice(RemoteDevice remoteDevice) {
+        RemoteDeviceIdentity identity = remoteDevice.getIdentity();
+        if (identity != null) {
+            UDN udn = identity.getUdn();
+            if (udn != null) {
+                devices.put(udn.getIdentifierString(), remoteDevice);
             }
-
-            DeviceDetails devDetails = device.getDetails();
-            if (devDetails != null) {
-                logProperty(properties, SERIAL_NUMBER, devDetails.getSerialNumber());
-                logProperty(properties, FRIENDLY_NAME, devDetails.getFriendlyName());
-
-                ManufacturerDetails mfrDetails = devDetails.getManufacturerDetails();
-                if (mfrDetails != null) {
-                    URI mfrUri = mfrDetails.getManufacturerURI();
-                    logProperty(properties, MANUFACTURER, mfrDetails.getManufacturer());
-                    if (mfrUri != null) {
-                        logProperty(properties, MANUFACTURER_URI, mfrUri.toString());
-                    }
-                }
-
-                ModelDetails modDetails = devDetails.getModelDetails();
-                if (modDetails != null) {
-                    URI modUri = modDetails.getModelURI();
-                    logProperty(properties, MODEL_NAME, modDetails.getModelName());
-                    logProperty(properties, MODEL_NUMBER, modDetails.getModelNumber());
-                    logProperty(properties, MODEL_DESCRIPTION, modDetails.getModelDescription());
-                    if (modUri != null) {
-                        logProperty(properties, MODEL_URI, modUri.toString());
-                    }
-                }
-            }
-            logger.trace("UPnP device {}", properties);
         }
     }
 
@@ -194,7 +155,7 @@ public class UpnpAddonSuggestionFinder extends BaseAddonSuggestionFinder impleme
                                         && propertyMatches(map, SERIAL_NUMBER, serialNumber)
                                         && propertyMatches(map, FRIENDLY_NAME, friendlyName)) {
                                     result.add(candidate);
-                                    logger.debug("Addon '{}' will be suggested (via UPnP)", candidate.getUID());
+                                    logger.debug("Suggested addon found via UPnP: {}", candidate.getUID());
                                 }
                             });
                         }
