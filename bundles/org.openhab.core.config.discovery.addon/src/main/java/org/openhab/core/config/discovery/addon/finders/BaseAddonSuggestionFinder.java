@@ -46,19 +46,23 @@ public abstract class BaseAddonSuggestionFinder implements AddonSuggestionFinder
     protected static boolean propertyMatches(Map<String, Pattern> propertyPatternMap, String propertyName,
             @Nullable String propertyValue) {
         Pattern pattern = propertyPatternMap.get(propertyName);
-        return pattern == null ? true : propertyValue != null ? pattern.matcher(propertyValue).matches() : false;
+        return pattern == null ? true : propertyValue == null ? false : pattern.matcher(propertyValue).matches();
     }
 
     protected final List<AddonInfo> addonCandidates = Collections.synchronizedList(new ArrayList<>());
 
-    public void close() {
-        addonCandidates.clear();
+    protected void deactivate() {
+        resetAddonCandidates();
     }
 
     public abstract Set<AddonInfo> getSuggestedAddons();
 
-    public void setAddonCandidates(List<AddonInfo> candidates) {
+    protected void resetAddonCandidates() {
         addonCandidates.clear();
+    }
+
+    public void setAddonCandidates(List<AddonInfo> candidates) {
+        resetAddonCandidates();
         addonCandidates.addAll(candidates);
     }
 }

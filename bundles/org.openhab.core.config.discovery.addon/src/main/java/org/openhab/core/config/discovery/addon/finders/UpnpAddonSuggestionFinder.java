@@ -33,6 +33,7 @@ import org.jupnp.model.types.DeviceType;
 import org.jupnp.model.types.UDN;
 import org.jupnp.registry.Registry;
 import org.jupnp.registry.RegistryListener;
+import org.openhab.core.addon.AddonDiscoveryMethod;
 import org.openhab.core.addon.AddonInfo;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -73,94 +74,108 @@ public class UpnpAddonSuggestionFinder extends BaseAddonSuggestionFinder impleme
     @Activate
     public UpnpAddonSuggestionFinder(@Reference UpnpService upnpService) {
         this.upnpService = upnpService;
-        this.upnpService.getRegistry().addListener(this);
+        Registry registry = upnpService.getRegistry();
+        for (RemoteDevice device : registry.getRemoteDevices()) {
+            remoteDeviceAdded(registry, device);
+        }
+        registry.addListener(this);
     }
 
-    public void addDevice(RemoteDevice remoteDevice) {
-        RemoteDeviceIdentity identity = remoteDevice.getIdentity();
+    public void addDevice(RemoteDevice device) {
+        RemoteDeviceIdentity identity = device.getIdentity();
         if (identity != null) {
             UDN udn = identity.getUdn();
             if (udn != null) {
-                devices.put(udn.getIdentifierString(), remoteDevice);
+                String udnString = udn.getIdentifierString();
+                devices.put(udnString, device);
+                logger.trace("Added device: {}", device.getDisplayString());
             }
         }
     }
 
     @Deactivate
-    public void close() {
+    @Override
+    protected void deactivate() {
         devices.clear();
-        super.close();
+        upnpService.getRegistry().removeListener(this);
+        super.deactivate();
     }
 
     @Override
     public Set<AddonInfo> getSuggestedAddons() {
         Set<AddonInfo> result = new HashSet<>();
-        addonCandidates.forEach(candidate -> {
-            candidate.getDiscoveryMethods().stream().filter(method -> SERVICE_TYPE.equals(method.getServiceType()))
-                    .forEach(method -> {
-                        Map<String, Pattern> map = method.getMatchProperties().stream().collect(
-                                Collectors.toMap(property -> property.getName(), property -> property.getPattern()));
+        for (AddonInfo candidate : addonCandidates) {
+            for (AddonDiscoveryMethod method : candidate.getDiscoveryMethods().stream()
+                    .filter(method -> SERVICE_TYPE.equals(method.getServiceType())).toList()) {
+                Map<String, Pattern> matchProperties = method.getMatchProperties().stream()
+                        .collect(Collectors.toMap(property -> property.getName(), property -> property.getPattern()));
 
-                        Set<String> propNames = new HashSet<>(map.keySet());
-                        propNames.removeAll(SUPPORTED_PROPERTIES);
-                        if (!propNames.isEmpty()) {
-                            logger.warn("Addon '{}' addon.xml file contains unsupported 'match-property' [{}]",
-                                    candidate.getUID(), String.join(",", propNames));
-                        } else {
-                            devices.values().stream().forEach(device -> {
-                                String deviceType = null;
-                                String serialNumber = null;
-                                String friendlyName = null;
-                                String manufacturer = null;
-                                String manufacturerURI = null;
-                                String modelName = null;
-                                String modelNumber = null;
-                                String modelDescription = null;
-                                String modelURI = null;
+                Set<String> propertyNames = new HashSet<>(matchProperties.keySet());
+                propertyNames.removeAll(SUPPORTED_PROPERTIES);
 
-                                DeviceType devType = device.getType();
-                                if (devType != null) {
-                                    deviceType = devType.getType();
-                                }
+                if (!propertyNames.isEmpty()) {
+                    logger.warn("Addon '{}' addon.xml file contains unsupported 'match-property' [{}]",
+                            candidate.getUID(), String.join(",", propertyNames));
+                    break;
+                }
 
-                                DeviceDetails devDetails = device.getDetails();
-                                if (devDetails != null) {
-                                    friendlyName = devDetails.getFriendlyName();
-                                    serialNumber = devDetails.getSerialNumber();
+                logger.trace("Checking candidate: {}", candidate.getUID());
+                for (RemoteDevice device : devices.values()) {
 
-                                    ManufacturerDetails mfrDetails = devDetails.getManufacturerDetails();
-                                    if (mfrDetails != null) {
-                                        URI mfrUri = mfrDetails.getManufacturerURI();
-                                        manufacturer = mfrDetails.getManufacturer();
-                                        manufacturerURI = mfrUri != null ? mfrUri.toString() : null;
-                                    }
+                    String deviceType = null;
+                    String serialNumber = null;
+                    String friendlyName = null;
+                    String manufacturer = null;
+                    String manufacturerURI = null;
+                    String modelName = null;
+                    String modelNumber = null;
+                    String modelDescription = null;
+                    String modelURI = null;
 
-                                    ModelDetails modDetails = devDetails.getModelDetails();
-                                    if (modDetails != null) {
-                                        URI modUri = modDetails.getModelURI();
-                                        modelName = modDetails.getModelName();
-                                        modelDescription = modDetails.getModelDescription();
-                                        modelNumber = modDetails.getModelNumber();
-                                        modelURI = modUri != null ? modUri.toString() : null;
-                                    }
-                                }
+                    DeviceType devType = device.getType();
+                    if (devType != null) {
+                        deviceType = devType.getType();
+                    }
 
-                                if (propertyMatches(map, DEVICE_TYPE, deviceType)
-                                        && propertyMatches(map, MANUFACTURER, manufacturer)
-                                        && propertyMatches(map, MANUFACTURER_URI, manufacturerURI)
-                                        && propertyMatches(map, MODEL_NAME, modelName)
-                                        && propertyMatches(map, MODEL_NUMBER, modelNumber)
-                                        && propertyMatches(map, MODEL_DESCRIPTION, modelDescription)
-                                        && propertyMatches(map, MODEL_URI, modelURI)
-                                        && propertyMatches(map, SERIAL_NUMBER, serialNumber)
-                                        && propertyMatches(map, FRIENDLY_NAME, friendlyName)) {
-                                    result.add(candidate);
-                                    logger.debug("Suggested addon found via UPnP: {}", candidate.getUID());
-                                }
-                            });
+                    DeviceDetails devDetails = device.getDetails();
+                    if (devDetails != null) {
+                        friendlyName = devDetails.getFriendlyName();
+                        serialNumber = devDetails.getSerialNumber();
+
+                        ManufacturerDetails mfrDetails = devDetails.getManufacturerDetails();
+                        if (mfrDetails != null) {
+                            URI mfrUri = mfrDetails.getManufacturerURI();
+                            manufacturer = mfrDetails.getManufacturer();
+                            manufacturerURI = mfrUri != null ? mfrUri.toString() : null;
                         }
-                    });
-        });
+
+                        ModelDetails modDetails = devDetails.getModelDetails();
+                        if (modDetails != null) {
+                            URI modUri = modDetails.getModelURI();
+                            modelName = modDetails.getModelName();
+                            modelDescription = modDetails.getModelDescription();
+                            modelNumber = modDetails.getModelNumber();
+                            modelURI = modUri != null ? modUri.toString() : null;
+                        }
+                    }
+
+                    logger.trace("Checking device: {}", device.getDisplayString());
+                    if (propertyMatches(matchProperties, DEVICE_TYPE, deviceType)
+                            && propertyMatches(matchProperties, MANUFACTURER, manufacturer)
+                            && propertyMatches(matchProperties, MANUFACTURER_URI, manufacturerURI)
+                            && propertyMatches(matchProperties, MODEL_NAME, modelName)
+                            && propertyMatches(matchProperties, MODEL_NUMBER, modelNumber)
+                            && propertyMatches(matchProperties, MODEL_DESCRIPTION, modelDescription)
+                            && propertyMatches(matchProperties, MODEL_URI, modelURI)
+                            && propertyMatches(matchProperties, SERIAL_NUMBER, serialNumber)
+                            && propertyMatches(matchProperties, FRIENDLY_NAME, friendlyName)) {
+                        result.add(candidate);
+                        logger.debug("Suggested addon found: {}", candidate.getUID());
+                        break;
+                    }
+                }
+            }
+        }
         return result;
     }
 
