@@ -111,10 +111,10 @@ public class AddonSuggestionFinderServiceTests {
 
         MDNSAddonSuggestionFinder mdns = new MDNSAddonSuggestionFinder(mdnsClient);
         for (ServiceInfo service : mdnsClient.list("_hue._tcp.local.")) {
-            mdns.addService(service);
+            mdns.addService(service, true);
         }
         for (ServiceInfo service : mdnsClient.list("_printer._tcp.local.")) {
-            mdns.addService(service);
+            mdns.addService(service, true);
         }
         addonSuggestionFinderService.addAddonSuggestionFinder(mdns);
     }
