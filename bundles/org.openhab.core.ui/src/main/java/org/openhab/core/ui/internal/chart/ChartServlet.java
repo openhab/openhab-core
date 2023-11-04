@@ -12,12 +12,11 @@
  */
 package org.openhab.core.ui.internal.chart;
 
-import static java.util.Map.entry;
-
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.Period;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -69,6 +68,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Chris Jackson - Initial contribution
  * @author Holger Reichert - Support for themes, DPI, legend hiding
+ * @author Laurent Garnier - Extend support to ISO8601 format for chart period parameter
  */
 @Component(immediate = true, service = { ChartServlet.class, Servlet.class }, configurationPid = "org.openhab.chart", //
         property = Constants.SERVICE_PID + "=org.openhab.chart")
@@ -99,17 +99,7 @@ public class ChartServlet extends HttpServlet {
     // The URI of this servlet
     public static final String SERVLET_PATH = "/chart";
 
-    private static final Duration DEFAULT_PERIOD = Duration.ofDays(1);
-
-    private static final Map<String, Duration> PERIODS = Map.ofEntries( //
-            entry("h", Duration.ofHours(1)), entry("4h", Duration.ofHours(4)), //
-            entry("8h", Duration.ofHours(8)), entry("12h", Duration.ofHours(12)), //
-            entry("D", Duration.ofDays(1)), entry("2D", Duration.ofDays(2)), //
-            entry("3D", Duration.ofDays(3)), entry("W", Duration.ofDays(7)), //
-            entry("2W", Duration.ofDays(14)), entry("M", Duration.ofDays(30)), //
-            entry("2M", Duration.ofDays(60)), entry("4M", Duration.ofDays(120)), //
-            entry("Y", Duration.ofDays(365))//
-    );
+    private static final Duration DEFAULT_DURATION = Duration.ofDays(1);
 
     protected static final Map<String, ChartProvider> CHART_PROVIDERS = new ConcurrentHashMap<>();
 
@@ -233,7 +223,8 @@ public class ChartServlet extends HttpServlet {
         }
 
         // Read out the parameter period, begin and end and save them.
-        Duration period = periodParam == null ? DEFAULT_PERIOD : PERIODS.getOrDefault(periodParam, DEFAULT_PERIOD);
+        Period period = convertToPeriod(periodParam, Period.ZERO);
+        Duration duration = convertToDuration(periodParam, DEFAULT_DURATION);
         ZonedDateTime timeBegin = null;
         ZonedDateTime timeEnd = null;
 
@@ -260,13 +251,13 @@ public class ChartServlet extends HttpServlet {
         // Set begin and end time and check legality.
         if (timeBegin == null && timeEnd == null) {
             timeEnd = ZonedDateTime.now(timeZoneProvider.getTimeZone());
-            timeBegin = timeEnd.minus(period);
+            timeBegin = timeEnd.minus(!period.isZero() ? period : duration);
             logger.debug("No begin or end is specified, use now as end and now-period as begin.");
         } else if (timeEnd == null) {
-            timeEnd = timeBegin.plus(period);
+            timeEnd = timeBegin.plus(!period.isZero() ? period : duration);
             logger.debug("No end is specified, use begin + period as end.");
         } else if (timeBegin == null) {
-            timeBegin = timeEnd.minus(period);
+            timeBegin = timeEnd.minus(!period.isZero() ? period : duration);
             logger.debug("No begin is specified, use end-period as begin");
         } else if (timeEnd.isBefore(timeBegin)) {
             res.sendError(HttpServletResponse.SC_BAD_REQUEST, "The end is before the begin.");
@@ -358,5 +349,43 @@ public class ChartServlet extends HttpServlet {
 
     @Override
     public void destroy() {
+    }
+
+    public static Period convertToPeriod(@Nullable String periodParam, Period defaultPeriod) {
+        Period period = defaultPeriod;
+        String convertedPeriod = convertPeriodToISO8601(periodParam);
+        if (convertedPeriod != null) {
+            try {
+                period = Period.parse(convertedPeriod);
+            } catch (DateTimeParseException e) {
+                // Ignored
+            }
+        }
+        return period;
+    }
+
+    public static Duration convertToDuration(@Nullable String periodParam, Duration defaultDuration) {
+        Duration duration = defaultDuration;
+        String convertedPeriod = convertPeriodToISO8601(periodParam);
+        if (convertedPeriod != null) {
+            try {
+                duration = Duration.parse(convertedPeriod);
+            } catch (DateTimeParseException e) {
+                // Ignored
+            }
+        }
+        return duration;
+    }
+
+    private static @Nullable String convertPeriodToISO8601(@Nullable String period) {
+        if (period == null || period.startsWith("P") || !(period.endsWith("h") || period.endsWith("D")
+                || period.endsWith("W") || period.endsWith("M") || period.endsWith("Y"))) {
+            return period;
+        }
+        String newPeriod = period.length() == 1 ? "1" + period : period;
+        if (newPeriod.endsWith("h")) {
+            newPeriod = "T" + newPeriod.replace("h", "H");
+        }
+        return "P" + newPeriod;
     }
 }
