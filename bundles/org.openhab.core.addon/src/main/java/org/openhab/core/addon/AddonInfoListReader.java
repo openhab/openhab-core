@@ -10,13 +10,16 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.addon.internal.xml;
+package org.openhab.core.addon;
 
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.core.addon.AddonDiscoveryMethod;
-import org.openhab.core.addon.AddonMatchProperty;
+import org.openhab.core.addon.internal.xml.AddonDiscoveryMethodConverter;
+import org.openhab.core.addon.internal.xml.AddonInfoConverter;
+import org.openhab.core.addon.internal.xml.AddonInfoListConverter;
+import org.openhab.core.addon.internal.xml.AddonInfoXmlResult;
+import org.openhab.core.addon.internal.xml.AddonMatchPropertyConverter;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionParameterGroup;
@@ -36,24 +39,21 @@ import org.openhab.core.config.core.xml.util.XmlDocumentReader;
 import com.thoughtworks.xstream.XStream;
 
 /**
- * The {@link AddonInfoReader} reads XML documents, which contain the {@code binding} XML tag,
- * and converts them to {@link AddonInfoXmlResult} objects.
+ * The {@link AddonInfoListReader} reads XML documents, which contain the {@code binding} XML tag, and converts them to
+ * a List of {@link AddonInfoXmlResult} objects.
  * <p>
  * This reader uses {@code XStream} and {@code StAX} to parse and convert the XML document.
  *
- * @author Michael Grammling - Initial contribution
- * @author Alex Tugarev - Extended by options and filter criteria
- * @author Chris Jackson - Add parameter groups
- * @author Jan N. Klug - Refactored to cover all add-ons
+ * @author Andrew Fiddian-Green - Initial contribution
  */
 @NonNullByDefault
-public class AddonInfoReader extends XmlDocumentReader<AddonInfoXmlResult> {
+public class AddonInfoListReader extends XmlDocumentReader<AddonInfoList> {
 
     /**
      * The default constructor of this class.
      */
-    public AddonInfoReader() {
-        ClassLoader classLoader = AddonInfoReader.class.getClassLoader();
+    public AddonInfoListReader() {
+        ClassLoader classLoader = AddonInfoListReader.class.getClassLoader();
         if (classLoader != null) {
             super.setClassLoader(classLoader);
         }
@@ -64,6 +64,7 @@ public class AddonInfoReader extends XmlDocumentReader<AddonInfoXmlResult> {
         xstream.registerConverter(new NodeAttributesConverter());
         xstream.registerConverter(new NodeListConverter());
         xstream.registerConverter(new NodeValueConverter());
+        xstream.registerConverter(new AddonInfoListConverter());
         xstream.registerConverter(new AddonInfoConverter());
         xstream.registerConverter(new ConfigDescriptionConverter());
         xstream.registerConverter(new ConfigDescriptionParameterConverter());
@@ -75,6 +76,8 @@ public class AddonInfoReader extends XmlDocumentReader<AddonInfoXmlResult> {
 
     @Override
     protected void registerAliases(XStream xstream) {
+        xstream.alias("addon-info-list", AddonInfoList.class);
+        xstream.alias("addons", NodeList.class);
         xstream.alias("addon", AddonInfoXmlResult.class);
         xstream.alias("name", NodeValue.class);
         xstream.alias("description", NodeValue.class);

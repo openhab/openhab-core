@@ -19,6 +19,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.XStreamException;
 import com.thoughtworks.xstream.converters.ConversionException;
 import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.io.xml.StaxDriver;
@@ -103,5 +104,21 @@ public abstract class XmlDocumentReader<@NonNull T> {
     @SuppressWarnings("unchecked")
     public @Nullable T readFromXML(URL xmlURL) throws ConversionException {
         return (@Nullable T) xstream.fromXML(xmlURL);
+    }
+
+    /**
+     * Reads the XML document containing a specific XML tag from the specified xml string and converts it to the
+     * according object.
+     * <p>
+     * This method returns {@code null} if the given URL is {@code null}.
+     *
+     * @param xml a string containing the XML document to be read.
+     * @return the conversion result object (could be null).
+     * @throws XStreamException if the object cannot be deserialized.
+     * @throws ConversionException if the specified document contains invalid content
+     */
+    @SuppressWarnings("unchecked")
+    public @Nullable T readFromXML(String xml) throws ConversionException {
+        return (@Nullable T) xstream.fromXML(xml);
     }
 }

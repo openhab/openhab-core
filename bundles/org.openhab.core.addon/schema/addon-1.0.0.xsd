@@ -28,7 +28,8 @@
                     <xs:element name="config-description" type="config-description:configDescription"/>
                     <xs:element name="config-description-ref" type="config-description:configDescriptionRef"/>
                 </xs:choice>
-                </xs:sequence>
+                <xs:element name="discovery-methods" type="addon:discoveryMethodsType" minOccurs="0"/>
+            </xs:sequence>
             <xs:attribute name="id" type="config-description:idRestrictionPattern" use="required">
                 <xs:annotation>
                     <xs:documentation>The id is used to construct the UID of this add-on to &lt;type&gt;-&lt;name&gt;</xs:documentation>
@@ -79,5 +80,32 @@
             <xs:pattern value="[a-z]{2}(,[a-z]{2})*"/>
         </xs:restriction>
     </xs:simpleType>
+
+ <xs:complexType name="discoveryMethodsType">
+    <xs:sequence>
+      <xs:element type="addon:discoveryMethodType" name="discovery-method" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="discoveryMethodType">
+    <xs:sequence>
+      <xs:element type="xs:string" name="service-type"/>
+      <xs:element type="xs:string" name="mdns-service-type" minOccurs="0"/>
+      <xs:element type="addon:matchPropertiesType" name="match-properties" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="matchPropertiesType">
+    <xs:sequence>
+      <xs:element type="addon:matchPropertyType" name="match-property" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="matchPropertyType">
+    <xs:sequence>
+      <xs:element type="xs:string" name="name"/>
+      <xs:element type="xs:string" name="regex"/>
+    </xs:sequence>
+  </xs:complexType>
 
 </xs:schema>
