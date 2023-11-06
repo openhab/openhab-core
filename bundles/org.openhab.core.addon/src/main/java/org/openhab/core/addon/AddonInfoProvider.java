@@ -31,15 +31,15 @@ import org.eclipse.jdt.annotation.Nullable;
 public interface AddonInfoProvider {
 
     /**
-     * Returns the binding information for the specified binding UID and locale (language),
+     * Returns the binding information for the specified binding ID and locale (language),
      * or {@code null} if no binding information could be found.
      *
-     * @param uid the UID to be looked for (could be null or empty)
+     * @param id the ID to be looked for (could be null or empty)
      * @param locale the locale to be used for the binding information (could be null)
      * @return a localized binding information object (could be null)
      */
     @Nullable
-    AddonInfo getAddonInfo(@Nullable String uid, @Nullable Locale locale);
+    AddonInfo getAddonInfo(@Nullable String id, @Nullable Locale locale);
 
     /**
      * Returns all binding information in the specified locale (language) this provider contains.

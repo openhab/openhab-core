@@ -15,8 +15,6 @@ package org.openhab.core.addon.internal.xml;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.core.addon.AddonDiscoveryMethod;
-import org.openhab.core.addon.AddonMatchProperty;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionParameterGroup;
@@ -28,7 +26,6 @@ import org.openhab.core.config.core.xml.FilterCriteriaConverter;
 import org.openhab.core.config.core.xml.util.NodeAttributes;
 import org.openhab.core.config.core.xml.util.NodeAttributesConverter;
 import org.openhab.core.config.core.xml.util.NodeList;
-import org.openhab.core.config.core.xml.util.NodeListConverter;
 import org.openhab.core.config.core.xml.util.NodeValue;
 import org.openhab.core.config.core.xml.util.NodeValueConverter;
 import org.openhab.core.config.core.xml.util.XmlDocumentReader;
@@ -62,15 +59,12 @@ public class AddonInfoReader extends XmlDocumentReader<AddonInfoXmlResult> {
     @Override
     protected void registerConverters(XStream xstream) {
         xstream.registerConverter(new NodeAttributesConverter());
-        xstream.registerConverter(new NodeListConverter());
         xstream.registerConverter(new NodeValueConverter());
         xstream.registerConverter(new AddonInfoConverter());
         xstream.registerConverter(new ConfigDescriptionConverter());
         xstream.registerConverter(new ConfigDescriptionParameterConverter());
         xstream.registerConverter(new ConfigDescriptionParameterGroupConverter());
         xstream.registerConverter(new FilterCriteriaConverter());
-        xstream.registerConverter(new AddonDiscoveryMethodConverter());
-        xstream.registerConverter(new AddonMatchPropertyConverter());
     }
 
     @Override
@@ -90,12 +84,5 @@ public class AddonInfoReader extends XmlDocumentReader<AddonInfoXmlResult> {
         xstream.alias("filter", List.class);
         xstream.alias("criteria", FilterCriteria.class);
         xstream.alias("service-id", NodeValue.class);
-        xstream.alias("discovery-methods", NodeList.class);
-        xstream.alias("discovery-method", AddonDiscoveryMethod.class);
-        xstream.alias("service-type", NodeValue.class);
-        xstream.alias("mdns-service-type", NodeValue.class);
-        xstream.alias("match-properties", NodeList.class);
-        xstream.alias("match-property", AddonMatchProperty.class);
-        xstream.alias("regex", NodeValue.class);
     }
 }

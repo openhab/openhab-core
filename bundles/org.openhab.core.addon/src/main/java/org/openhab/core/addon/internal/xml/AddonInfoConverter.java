@@ -18,7 +18,6 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.addon.AddonDiscoveryMethod;
 import org.openhab.core.addon.AddonInfo;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionBuilder;
@@ -38,7 +37,6 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader;
  * @author Michael Grammling - Initial contribution
  * @author Andre Fuechsel - Made author tag optional
  * @author Jan N. Klug - Refactored to cover all add-ons
- * @author Andrew Fiddian-Green - Added discovery methods
  */
 @NonNullByDefault
 public class AddonInfoConverter extends GenericUnmarshaller<AddonInfoXmlResult> {
@@ -108,11 +106,6 @@ public class AddonInfoConverter extends GenericUnmarshaller<AddonInfoXmlResult> 
         }
 
         addonInfo.withConfigDescriptionURI(configDescriptionURI);
-
-        Object object = nodeIterator.nextList("discovery-methods", false);
-        addonInfo.withDiscoveryMethods(!(object instanceof List<?> list) ? null
-                : list.stream().filter(e -> (e instanceof AddonDiscoveryMethod)).map(e -> ((AddonDiscoveryMethod) e))
-                        .toList());
 
         nodeIterator.assertEndOfType();
 
