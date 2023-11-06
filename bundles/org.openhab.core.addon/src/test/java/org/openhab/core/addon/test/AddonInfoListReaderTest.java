@@ -1,0 +1,121 @@
+/**
+ * Copyright (c) 2010-2023 Contributors to the openHAB project
+ *
+ * See the NOTICE file(s) distributed with this work for additional
+ * information.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ */
+package org.openhab.core.addon.test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
+import java.util.List;
+
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.junit.jupiter.api.Test;
+import org.openhab.core.addon.AddonDiscoveryMethod;
+import org.openhab.core.addon.AddonInfo;
+import org.openhab.core.addon.AddonInfoList;
+import org.openhab.core.addon.AddonInfoListReader;
+import org.openhab.core.addon.AddonMatchProperty;
+
+/**
+ * JUnit tests for {@link AddonInfoListReader}.
+ *
+ * @author Andrew Fiddian-Green - Initial contribution
+ */
+@NonNullByDefault
+class AddonInfoListReaderTest {
+
+    // @formatter:off
+    private final String testXml =
+            "<addon-info-list><addons>"
+            + "  <addon:addon id=\"groovyscripting\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\""
+            + "    xmlns:addon=\"https://openhab.org/schemas/addon/v1.0.0\""
+            + "    xsi:schemaLocation=\"https://openhab.org/schemas/addon/v1.0.0 https://openhab.org/schemas/addon-1.0.0.xsd\">"
+            + "    <type>automation</type>"
+            + "    <name>Groovy Scripting</name>"
+            + "    <description>This adds a Groovy script engine.</description>"
+            + "    <connection>none</connection>"
+            + "    <discovery-methods>"
+            + "      <discovery-method>"
+            + "        <service-type>mdns</service-type>"
+            + "        <mdns-service-type>_printer._tcp.local.</mdns-service-type>"
+            + "        <match-properties>"
+            + "          <match-property>"
+            + "            <name>rp</name>"
+            + "            <regex>.*</regex>"
+            + "          </match-property>"
+            + "          <match-property>"
+            + "            <name>ty</name>"
+            + "            <regex>hp (.*)</regex>"
+            + "          </match-property>"
+            + "        </match-properties>"
+            + "      </discovery-method>"
+            + "      <discovery-method>"
+            + "        <service-type>upnp</service-type>"
+            + "        <match-properties>"
+            + "          <match-property>"
+            + "            <name>modelName</name>"
+            + "            <regex>Philips hue bridge</regex>"
+            + "          </match-property>"
+            + "        </match-properties>"
+            + "      </discovery-method>"
+            + "    </discovery-methods>"
+            + "  </addon:addon>"
+            + "</addons></addon-info-list>";
+    // @formatter:on
+
+    @Test
+    void testAddonInfoListReader() {
+        AddonInfoList addons = null;
+        try {
+            AddonInfoListReader reader = new AddonInfoListReader();
+            addons = reader.readFromXML(testXml);
+        } catch (Exception e) {
+            fail(e);
+        }
+        assertNotNull(addons);
+        List<AddonInfo> addonsInfos = addons.getAddons();
+        assertEquals(1, addonsInfos.size());
+        AddonInfo addon = addonsInfos.get(0);
+        assertNotNull(addon);
+        List<AddonDiscoveryMethod> discoveryMethods = addon.getDiscoveryMethods();
+        assertNotNull(discoveryMethods);
+        assertEquals(2, discoveryMethods.size());
+
+        AddonDiscoveryMethod method = discoveryMethods.get(0);
+        assertNotNull(method);
+        assertEquals("mdns", method.getServiceType());
+        assertEquals("_printer._tcp.local.", method.getMdnsServiceType());
+        List<AddonMatchProperty> matchProperties = method.getMatchProperties();
+        assertNotNull(matchProperties);
+        assertEquals(2, matchProperties.size());
+        AddonMatchProperty property = matchProperties.get(0);
+        assertNotNull(property);
+        assertEquals("rp", property.getName());
+        assertEquals(".*", property.getRegex());
+        assertTrue(property.getPattern().matcher("the cat sat on the mat").matches());
+
+        method = discoveryMethods.get(1);
+        assertNotNull(method);
+        assertEquals("upnp", method.getServiceType());
+        assertEquals("", method.getMdnsServiceType());
+        matchProperties = method.getMatchProperties();
+        assertNotNull(matchProperties);
+        assertEquals(1, matchProperties.size());
+        property = matchProperties.get(0);
+        assertNotNull(property);
+        assertEquals("modelName", property.getName());
+        assertEquals("Philips hue bridge", property.getRegex());
+        assertTrue(property.getPattern().matcher("Philips hue bridge").matches());
+    }
+}
