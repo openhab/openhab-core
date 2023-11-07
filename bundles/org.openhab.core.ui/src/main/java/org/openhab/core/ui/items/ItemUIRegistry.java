@@ -36,9 +36,20 @@ import org.openhab.core.types.State;
  * @author Laurent Garnier - new method getIconColor
  * @author Mark Herwege - new method getFormatPattern
  * @author Laurent Garnier - new method getConditionalIcon
+ * @author Danny Baumann - widget label source support
  */
 @NonNullByDefault
 public interface ItemUIRegistry extends ItemRegistry, ItemUIProvider {
+    public enum WidgetLabelSource {
+        /** Label is taken from widget definition in sitemap */
+        SITEMAP_WIDGET,
+        /** Label is taken from the widget's backing item definition */
+        ITEM_LABEL,
+        /** Label equals the widget's backing item name */
+        ITEM_NAME,
+        /** No suitable label source could be determined */
+        NONE
+    };
 
     /**
      * Retrieves the label for a widget.
@@ -56,6 +67,14 @@ public interface ItemUIRegistry extends ItemRegistry, ItemUIProvider {
      */
     @Nullable
     String getLabel(Widget w);
+
+    /**
+     * Retrieves the label source for a widget.
+     *
+     * @param w the widget to retrieve the label source for
+     * @return the source the widget label is taken from
+     */
+    WidgetLabelSource getLabelSource(Widget w);
 
     /**
      * Retrieves the category for a widget.
