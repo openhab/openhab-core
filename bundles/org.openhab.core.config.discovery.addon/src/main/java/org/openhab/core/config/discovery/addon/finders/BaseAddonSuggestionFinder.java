@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -51,18 +50,13 @@ public abstract class BaseAddonSuggestionFinder implements AddonSuggestionFinder
 
     protected final List<AddonInfo> addonCandidates = Collections.synchronizedList(new ArrayList<>());
 
-    protected void deactivate() {
-        resetAddonCandidates();
-    }
-
-    public abstract Set<AddonInfo> getSuggestedAddons();
-
-    protected void resetAddonCandidates() {
+    @Override
+    public void deactivate() {
         addonCandidates.clear();
     }
 
-    public void setAddonCandidates(List<AddonInfo> candidates) {
-        resetAddonCandidates();
+    public synchronized void setAddonCandidates(List<AddonInfo> candidates) {
+        addonCandidates.clear();
         addonCandidates.addAll(candidates);
     }
 }

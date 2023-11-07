@@ -74,11 +74,7 @@ public class UpnpAddonSuggestionFinder extends BaseAddonSuggestionFinder impleme
     @Activate
     public UpnpAddonSuggestionFinder(@Reference UpnpService upnpService) {
         this.upnpService = upnpService;
-        Registry registry = upnpService.getRegistry();
-        for (RemoteDevice device : registry.getRemoteDevices()) {
-            remoteDeviceAdded(registry, device);
-        }
-        registry.addListener(this);
+        connect();
     }
 
     public void addDevice(RemoteDevice device) {
@@ -93,12 +89,37 @@ public class UpnpAddonSuggestionFinder extends BaseAddonSuggestionFinder impleme
         }
     }
 
+    private void connect() {
+        Registry registry = upnpService.getRegistry();
+        for (RemoteDevice device : registry.getRemoteDevices()) {
+            remoteDeviceAdded(registry, device);
+        }
+        registry.addListener(this);
+    }
+
     @Deactivate
     @Override
-    protected void deactivate() {
+    public void deactivate() {
         devices.clear();
-        upnpService.getRegistry().removeListener(this);
+        disconnect();
         super.deactivate();
+    }
+
+    private void disconnect() {
+        upnpService.getRegistry().removeListener(this);
+    }
+
+    @Override
+    public void enable(boolean enable) {
+        disconnect();
+        if (enable) {
+            connect();
+        }
+    }
+
+    @Override
+    public String getServiceType() {
+        return SERVICE_TYPE;
     }
 
     @Override
@@ -178,6 +199,10 @@ public class UpnpAddonSuggestionFinder extends BaseAddonSuggestionFinder impleme
         }
         return result;
     }
+
+    /*
+     * ************ UpnpService call-back methods ************
+     */
 
     @Override
     public void afterShutdown() {

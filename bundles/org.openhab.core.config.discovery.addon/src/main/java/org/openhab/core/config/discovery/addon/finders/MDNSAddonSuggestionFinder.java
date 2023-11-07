@@ -71,11 +71,41 @@ public class MDNSAddonSuggestionFinder extends BaseAddonSuggestionFinder impleme
         }
     }
 
+    private void connect() {
+        addonCandidates
+                .forEach(c -> c.getDiscoveryMethods().stream().filter(m -> SERVICE_TYPE.equals(m.getServiceType()))
+                        .filter(m -> !m.getMdnsServiceType().isEmpty()).forEach(m -> {
+                            String serviceType = m.getMdnsServiceType();
+                            mdnsClient.addServiceListener(serviceType, this);
+                            scheduler.submit(() -> mdnsClient.list(serviceType));
+                        }));
+    }
+
     @Deactivate
     @Override
-    protected void deactivate() {
+    public void deactivate() {
         services.clear();
+        disconnect();
         super.deactivate();
+    }
+
+    private void disconnect() {
+        addonCandidates.forEach(c -> c.getDiscoveryMethods().stream()
+                .filter(m -> SERVICE_TYPE.equals(m.getServiceType())).filter(m -> !m.getMdnsServiceType().isEmpty())
+                .forEach(m -> mdnsClient.removeServiceListener(m.getMdnsServiceType(), this)));
+    }
+
+    @Override
+    public void enable(boolean enable) {
+        disconnect();
+        if (enable) {
+            connect();
+        }
+    }
+
+    @Override
+    public String getServiceType() {
+        return SERVICE_TYPE;
     }
 
     @Override
@@ -110,6 +140,10 @@ public class MDNSAddonSuggestionFinder extends BaseAddonSuggestionFinder impleme
         return result;
     }
 
+    /*
+     * ************ MDNSClient call-back methods ************
+     */
+
     @Override
     public void serviceAdded(@Nullable ServiceEvent event) {
         if (event != null) {
@@ -135,21 +169,9 @@ public class MDNSAddonSuggestionFinder extends BaseAddonSuggestionFinder impleme
     }
 
     @Override
-    protected void resetAddonCandidates() {
-        addonCandidates.forEach(c -> c.getDiscoveryMethods().stream()
-                .filter(m -> SERVICE_TYPE.equals(m.getServiceType())).filter(m -> !m.getMdnsServiceType().isEmpty())
-                .forEach(m -> mdnsClient.removeServiceListener(m.getMdnsServiceType(), this)));
-        super.resetAddonCandidates();
-    }
-
-    @Override
     public void setAddonCandidates(List<AddonInfo> candidates) {
+        disconnect();
         super.setAddonCandidates(candidates);
-        candidates.forEach(c -> c.getDiscoveryMethods().stream().filter(m -> SERVICE_TYPE.equals(m.getServiceType()))
-                .filter(m -> !m.getMdnsServiceType().isEmpty()).forEach(m -> {
-                    String serviceType = m.getMdnsServiceType();
-                    mdnsClient.addServiceListener(serviceType, this);
-                    scheduler.submit(() -> mdnsClient.list(serviceType));
-                }));
+        connect();
     }
 }

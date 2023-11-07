@@ -87,6 +87,17 @@ public class AddonSuggestionFinderService implements AutoCloseable {
         addonInfoProviders.clear();
     }
 
+    /**
+     * The OH framework calls this method to enable/disable the finder with the given service id (if any).
+     * 
+     * @param finderServiceId the service id of the finder to be enabled/disabled.
+     * @param enable true to enable, false to disable
+     */
+    public void enable(String finderServiceId, boolean enable) {
+        addonSuggestionFinders.stream().filter(f -> finderServiceId.equals(f.getServiceType())).findFirst()
+                .ifPresent(f -> f.enable(enable));
+    }
+
     public Set<AddonInfo> getSuggestedAddons(@Nullable Locale locale) {
         return addonSuggestionFinders.stream().map(f -> f.getSuggestedAddons()).flatMap(Collection::stream)
                 .collect(Collectors.toSet());
