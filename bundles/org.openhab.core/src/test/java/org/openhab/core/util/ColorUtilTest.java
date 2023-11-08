@@ -60,7 +60,7 @@ public class ColorUtilTest {
     }
 
     @Test
-    public void hsbtorgbwTest() {
+    public void hsbToRgbwTest() {
         HSBType hsb = HSBType.WHITE;
         PercentType[] rgbw = ColorUtil.hsbToRgbwPercent(hsb);
         assertEquals(0.0, rgbw[0].doubleValue(), 0.01);
@@ -97,7 +97,8 @@ public class ColorUtilTest {
         assertEquals(0.0, rgbw[3].doubleValue(), 0.01);
     }
 
-    public void rgbwtohsbTest() {
+    @Test
+    public void rgbwToHsbTest() {
         // Test Red
         HSBType hsb = ColorUtil.rgbToHsb(new int[] { 255, 0, 0, 0 });
         int[] convertedRgb = ColorUtil.hsbToRgb(hsb);
