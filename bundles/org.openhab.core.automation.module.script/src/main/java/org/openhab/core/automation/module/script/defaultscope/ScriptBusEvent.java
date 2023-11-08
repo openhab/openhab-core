@@ -12,6 +12,7 @@
  */
 package org.openhab.core.automation.module.script.defaultscope;
 
+import java.time.ZonedDateTime;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -19,6 +20,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.items.Item;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
+import org.openhab.core.types.TimeSeries;
 
 /**
  * The static methods of this class are made available as functions in the scripts.
@@ -98,13 +100,32 @@ public interface ScriptBusEvent {
 
     /**
      * Posts a status update for a specified item to the event bus.
-     * t
      *
      * @param item the item to send the status update for
      * @param state the new state of the item
      */
     @Nullable
     Object postUpdate(@Nullable Item item, @Nullable State state);
+
+    /**
+     * Sends a time series to the event bus
+     *
+     * @param item the item to send the time series for
+     * @param timeSeries a {@link TimeSeries} containing policy and values
+     */
+    @Nullable
+    Object sendTimeSeries(@Nullable Item item, @Nullable TimeSeries timeSeries);
+
+    /**
+     * Sends a time series to the event bus
+     *
+     * @param itemName the name of the item to send the status update for
+     * @param values a {@link Map} containing the timeseries, composed of pairs of {@link ZonedDateTime} and
+     *            {@link State}
+     * @param policy either <code>ADD</code> or <code>REPLACE</code>
+     */
+    @Nullable
+    Object sendTimeSeries(@Nullable String itemName, @Nullable Map<ZonedDateTime, State> values, String policy);
 
     /**
      * Stores the current states for a list of items in a map.

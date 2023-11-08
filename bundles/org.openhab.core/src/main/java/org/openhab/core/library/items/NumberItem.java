@@ -14,6 +14,7 @@ package org.openhab.core.library.items;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 import javax.measure.Dimension;
 import javax.measure.Quantity;
@@ -35,6 +36,7 @@ import org.openhab.core.types.RefreshType;
 import org.openhab.core.types.State;
 import org.openhab.core.types.StateDescription;
 import org.openhab.core.types.StateDescriptionFragmentBuilder;
+import org.openhab.core.types.TimeSeries;
 import org.openhab.core.types.UnDefType;
 import org.openhab.core.types.util.UnitUtils;
 import org.slf4j.Logger;
@@ -136,13 +138,12 @@ public class NumberItem extends GenericItem implements MetadataAwareItem {
         return dimension;
     }
 
-    @Override
-    public void setState(State state) {
+    private @Nullable State getInternalState(State state) {
         if (state instanceof QuantityType<?> quantityType) {
             if (dimension == null) {
                 // QuantityType update to a NumberItem without unit, strip unit
                 DecimalType plainState = new DecimalType(quantityType.toBigDecimal());
-                super.applyState(plainState);
+                return plainState;
             } else {
                 // QuantityType update to a NumberItem with unit, convert to item unit (if possible)
                 Unit<?> stateUnit = quantityType.getUnit();
@@ -150,7 +151,7 @@ public class NumberItem extends GenericItem implements MetadataAwareItem {
                         ? quantityType.toInvertibleUnit(unit)
                         : null;
                 if (convertedState != null) {
-                    super.applyState(convertedState);
+                    return convertedState;
                 } else {
                     logger.warn("Failed to update item '{}' because '{}' could not be converted to the item unit '{}'",
                             name, state, unit);
@@ -159,15 +160,41 @@ public class NumberItem extends GenericItem implements MetadataAwareItem {
         } else if (state instanceof DecimalType decimalType) {
             if (dimension == null) {
                 // DecimalType update to NumberItem with unit
-                super.applyState(decimalType);
+                return decimalType;
             } else {
                 // DecimalType update for a NumberItem with dimension, convert to QuantityType
-                super.applyState(new QuantityType<>(decimalType.doubleValue(), unit));
+                return new QuantityType<>(decimalType.doubleValue(), unit);
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public void setState(State state) {
+        if (state instanceof DecimalType || state instanceof QuantityType<?>) {
+            State internalState = getInternalState(state);
+            if (internalState != null) {
+                applyState(internalState);
             }
         } else if (state instanceof UnDefType) {
-            super.applyState(state);
+            applyState(state);
         } else {
             logSetTypeError(state);
+        }
+    }
+
+    @Override
+    public void setTimeSeries(TimeSeries timeSeries) {
+        TimeSeries internalSeries = new TimeSeries(timeSeries.getPolicy());
+        timeSeries.getStates().forEach(s -> internalSeries.add(s.timestamp(),
+                Objects.requireNonNullElse(getInternalState(s.state()), UnDefType.NULL)));
+
+        if (dimension != null && internalSeries.getStates().allMatch(s -> s.state() instanceof QuantityType<?>)) {
+            applyTimeSeries(internalSeries);
+        } else if (internalSeries.getStates().allMatch(s -> s.state() instanceof DecimalType)) {
+            applyTimeSeries(internalSeries);
+        } else {
+            logSetTypeError(timeSeries);
         }
     }
 

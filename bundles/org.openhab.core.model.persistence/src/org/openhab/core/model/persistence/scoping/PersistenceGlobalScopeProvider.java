@@ -38,6 +38,7 @@ public class PersistenceGlobalScopeProvider extends AbstractGlobalScopeProvider 
         res.getContents().add(GlobalStrategies.UPDATE);
         res.getContents().add(GlobalStrategies.CHANGE);
         res.getContents().add(GlobalStrategies.RESTORE);
+        res.getContents().add(GlobalStrategies.FORECAST);
     }
 
     @Override

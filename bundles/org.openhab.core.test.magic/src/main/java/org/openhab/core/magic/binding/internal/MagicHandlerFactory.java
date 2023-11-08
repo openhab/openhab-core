@@ -38,6 +38,7 @@ import org.openhab.core.magic.binding.handler.MagicOnlineOfflineHandler;
 import org.openhab.core.magic.binding.handler.MagicPlayerHandler;
 import org.openhab.core.magic.binding.handler.MagicRollershutterHandler;
 import org.openhab.core.magic.binding.handler.MagicThermostatThingHandler;
+import org.openhab.core.magic.binding.handler.MagicTimeSeriesHandler;
 import org.openhab.core.thing.Bridge;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingTypeUID;
@@ -62,8 +63,8 @@ public class MagicHandlerFactory extends BaseThingHandlerFactory {
             THING_TYPE_CONTACT_SENSOR, THING_TYPE_CONFIG_THING, THING_TYPE_DELAYED_THING, THING_TYPE_LOCATION,
             THING_TYPE_THERMOSTAT, THING_TYPE_FIRMWARE_UPDATE, THING_TYPE_BRIDGE_1, THING_TYPE_BRIDGE_2,
             THING_TYPE_BRIDGED_THING, THING_TYPE_CHATTY_THING, THING_TYPE_ROLLERSHUTTER, THING_TYPE_PLAYER,
-            THING_TYPE_IMAGE, THING_TYPE_ACTION_MODULE, THING_TYPE_DYNAMIC_STATE_DESCRIPTION,
-            THING_TYPE_ONLINE_OFFLINE);
+            THING_TYPE_IMAGE, THING_TYPE_ACTION_MODULE, THING_TYPE_DYNAMIC_STATE_DESCRIPTION, THING_TYPE_ONLINE_OFFLINE,
+            THING_TYPE_TIMESERIES);
 
     private final MagicDynamicCommandDescriptionProvider commandDescriptionProvider;
     private final MagicDynamicStateDescriptionProvider stateDescriptionProvider;
@@ -125,6 +126,8 @@ public class MagicHandlerFactory extends BaseThingHandlerFactory {
             return new MagicOnlineOfflineHandler(thing);
         } else if (THING_TYPE_BRIDGE_1.equals(thingTypeUID) || THING_TYPE_BRIDGE_2.equals(thingTypeUID)) {
             return new MagicBridgeHandler((Bridge) thing);
+        } else if (THING_TYPE_TIMESERIES.equals(thingTypeUID)) {
+            return new MagicTimeSeriesHandler(thing);
         }
 
         return null;
