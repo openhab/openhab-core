@@ -58,8 +58,9 @@ public class KarafAddonsInfoProvider implements AddonInfoProvider {
     private static final boolean TEST_ADDON_DEVELOPER_REGEX_SYNTAX = true;
 
     private final Logger logger = LoggerFactory.getLogger(KarafAddonsInfoProvider.class);
-    private final String addonsXmlPathName = OpenHAB.getUserDataFolder() + File.separator + "addons.xml";
     private final Set<AddonInfo> addonInfos = new HashSet<>();
+    private final String addonsXmlPathName = OpenHAB.getUserDataFolder() + File.separator + "etc" + File.separator
+            + "addons.xml";
 
     @Activate
     public KarafAddonsInfoProvider() {
