@@ -279,7 +279,7 @@ public class ColorUtil {
      * Transform <a href="https://en.wikipedia.org/wiki/SRGB">sRGB</a> color format to
      * <a href="https://en.wikipedia.org/wiki/HSL_and_HSV">HSV</a> based {@link HSBType}.
      *
-     * @param rgbw array of four int with the RGBW values in the range 0 to 255.
+     * @param rgbw array of three or four int with the RGB(W) values in the range 0 to 255.
      * @return the corresponding {@link HSBType}.
      * @throws IllegalArgumentException when input array has wrong size or exceeds allowed value range.
      */
