@@ -13,10 +13,8 @@
 package org.openhab.core.addon.infoproviders;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -24,13 +22,13 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.OpenHAB;
 import org.openhab.core.addon.AddonDiscoveryMethod;
 import org.openhab.core.addon.AddonInfo;
-import org.openhab.core.addon.AddonInfoList;
 import org.openhab.core.addon.AddonInfoListReader;
 import org.openhab.core.addon.AddonInfoProvider;
 import org.openhab.core.addon.AddonMatchProperty;
@@ -44,26 +42,26 @@ import com.thoughtworks.xstream.XStreamException;
 import com.thoughtworks.xstream.converters.ConversionException;
 
 /**
- * The {@link KarafAddonsInfoProvider} provides information from the addon.xml file of
- * the addons that will are packaged in the openhab-addons .kar file.
+ * The {@link AddonsInfoProvider} reads all {@code userdata/addons/*.xml} files, each of which
+ * should contain a list of addon.xml elements, and convert their combined contents into a list
+ * of {@link AddonInfo} objects can be accessed via the {@link AddonInfoProvider} interface.
  *
  * @author Andrew Fiddian-Green - Initial contribution
  */
 @NonNullByDefault
-@Component(service = AddonInfoProvider.class, name = KarafAddonsInfoProvider.SERVICE_NAME)
-public class KarafAddonsInfoProvider implements AddonInfoProvider {
+@Component(service = AddonInfoProvider.class, name = AddonsInfoProvider.SERVICE_NAME)
+public class AddonsInfoProvider implements AddonInfoProvider {
 
-    public static final String SERVICE_NAME = "karaf-addons-info-provider";
+    public static final String SERVICE_NAME = "addons-info-provider";
 
     private static final boolean TEST_ADDON_DEVELOPER_REGEX_SYNTAX = true;
 
-    private final Logger logger = LoggerFactory.getLogger(KarafAddonsInfoProvider.class);
+    private final Logger logger = LoggerFactory.getLogger(AddonsInfoProvider.class);
+    private final String folder = OpenHAB.getUserDataFolder() + File.separator + "addons";
     private final Set<AddonInfo> addonInfos = new HashSet<>();
-    private final String addonsXmlPathName = OpenHAB.getUserDataFolder() + File.separator + "etc" + File.separator
-            + "addons.xml";
 
     @Activate
-    public KarafAddonsInfoProvider() {
+    public AddonsInfoProvider() {
         initialize();
         if (TEST_ADDON_DEVELOPER_REGEX_SYNTAX) {
             testAddonDeveloperRegexSyntax();
@@ -86,27 +84,23 @@ public class KarafAddonsInfoProvider implements AddonInfoProvider {
     }
 
     private void initialize() {
-        String addonsXml;
-        try (InputStream stream = new FileInputStream(addonsXmlPathName)) {
-            addonsXml = new String(stream.readAllBytes(), StandardCharsets.UTF_8);
-        } catch (IOException e) {
-            logger.warn("The 'addons.xml' file is missing");
-            return;
-        }
-        if (addonsXml.isBlank()) {
-            logger.warn("The 'addons.xml' file is empty");
-            return;
-        }
-        try {
-            AddonInfoList addonInfoList = new AddonInfoListReader().readFromXML(addonsXml);
-            addonInfos.addAll(addonInfoList.getAddons().stream().collect(Collectors.toSet()));
-        } catch (ConversionException e) {
-            logger.warn("The 'addons.xml' file has invalid content");
-            return;
-        } catch (XStreamException e) {
-            logger.warn("The 'addons.xml' file cannot be deserialized");
-            return;
-        }
+        AddonInfoListReader reader = new AddonInfoListReader();
+        Stream.of(new File(folder).listFiles()).filter(f -> f.isFile() && f.getName().endsWith(".xml")).forEach(f -> {
+            try {
+                String xml = Files.readString(f.toPath());
+                if (!xml.isBlank()) {
+                    addonInfos.addAll(reader.readFromXML(xml).getAddons().stream().collect(Collectors.toSet()));
+                } else {
+                    logger.warn("File '{}' is empty", f.getName());
+                }
+            } catch (IOException e) {
+                logger.warn("File '{}' could not be read", f.getName());
+            } catch (ConversionException e) {
+                logger.warn("File '{}' has invalid content", f.getName());
+            } catch (XStreamException e) {
+                logger.warn("File '{}' could not deserialized", f.getName());
+            }
+        });
     }
 
     /*
@@ -133,7 +127,7 @@ public class KarafAddonsInfoProvider implements AddonInfoProvider {
             }
         }
         if (!patternErrors.isEmpty()) {
-            logger.warn("The 'addons.xml' file has errors\n\t{}", String.join("\n\t", patternErrors));
+            logger.warn("The following errors were found\n\t{}", String.join("\n\t", patternErrors));
         }
     }
 }
