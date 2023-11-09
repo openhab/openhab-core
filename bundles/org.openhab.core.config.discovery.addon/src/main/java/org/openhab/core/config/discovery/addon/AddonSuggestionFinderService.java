@@ -57,27 +57,31 @@ public class AddonSuggestionFinderService implements AutoCloseable {
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     public void addAddonInfoProvider(AddonInfoProvider addonInfoProvider) {
         addonInfoProviders.add(addonInfoProvider);
-        addonInfoProvidersChanged();
+        changed();
     }
 
     public void removeAddonInfoProvider(AddonInfoProvider addonInfoProvider) {
-        addonInfoProviders.remove(addonInfoProvider);
-        addonInfoProvidersChanged();
-    }
-
-    private void addonInfoProvidersChanged() {
-        List<AddonInfo> candidates = addonInfoProviders.stream().map(p -> p.getAddonInfos(localeProvider.getLocale()))
-                .flatMap(Collection::stream).toList();
-        addonSuggestionFinders.forEach(f -> f.setAddonCandidates(candidates));
+        if (addonInfoProviders.remove(addonInfoProvider)) {
+            changed();
+        }
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     public void addAddonSuggestionFinder(AddonSuggestionFinder addonSuggestionFinder) {
         addonSuggestionFinders.add(addonSuggestionFinder);
+        changed();
     }
 
     public void removeAddonSuggestionFinder(AddonSuggestionFinder addonSuggestionFinder) {
-        addonSuggestionFinders.remove(addonSuggestionFinder);
+        if (addonSuggestionFinders.remove(addonSuggestionFinder)) {
+            changed();
+        }
+    }
+
+    private void changed() {
+        List<AddonInfo> candidates = addonInfoProviders.stream().map(p -> p.getAddonInfos(localeProvider.getLocale()))
+                .flatMap(Collection::stream).toList();
+        addonSuggestionFinders.forEach(f -> f.setAddonCandidates(candidates));
     }
 
     @Deactivate
