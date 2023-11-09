@@ -65,7 +65,7 @@ public class HSBType extends PercentType implements ComplexType, State, Command 
     /**
      * Constructs a HSBType instance with the given values
      *
-     * @param h the hue value in the range from 0 <= h < 360
+     * @param h the hue value in the range from {@code 0 <= h < 360}
      * @param s the saturation as a percent value
      * @param b the brightness as a percent value
      */
@@ -80,7 +80,7 @@ public class HSBType extends PercentType implements ComplexType, State, Command 
      * Constructs a HSBType instance from a given string.
      * The string has to be in comma-separated format with exactly three segments, which correspond to the hue,
      * saturation and brightness values.
-     * where the hue value in the range from 0 <= h < 360 and the saturation and brightness are percent values.
+     * where the hue value in the range from {@code 0 <= h < 360} and the saturation and brightness are percent values.
      *
      * @param value a stringified HSBType value in the format "hue,saturation,brightness"
      */

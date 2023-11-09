@@ -43,7 +43,7 @@ public class ExpiringCache<V> {
      *
      * @param expiry the duration for how long the value stays valid
      * @param action the action to retrieve/calculate the value
-     * @throws IllegalArgumentException For an expire value <=0.
+     * @throws IllegalArgumentException For an expire {@code value <=0}.
      */
     public ExpiringCache(Duration expiry, Supplier<@Nullable V> action) {
         if (expiry.isNegative() || expiry.isZero()) {

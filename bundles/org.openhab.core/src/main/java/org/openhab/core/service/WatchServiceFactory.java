@@ -35,7 +35,6 @@ public interface WatchServiceFactory {
      *
      * @param name the name of the service to create/get (must follow the conventions of an OSGi service name)
      * @param basePath the base path of the watch service (path is created if it does not exist)
-     * @return a {@link WatchService} with the given configuration
      * @throws IOException if the {@link WatchService} could not be instantiated
      */
     void createWatchService(String name, Path basePath) throws IOException;

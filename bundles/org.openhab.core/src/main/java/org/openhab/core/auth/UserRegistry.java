@@ -43,7 +43,7 @@ public interface UserRegistry extends Registry<User, String>, AuthenticationProv
      * Change the password for a {@link User} in this registry. The implementation receives the new password and is
      * responsible for their secure storage (for instance by hashing the password).
      *
-     * @param username the username of the existing user
+     * @param user the username of the existing user
      * @param newPassword the new password
      */
     void changePassword(User user, String newPassword);
