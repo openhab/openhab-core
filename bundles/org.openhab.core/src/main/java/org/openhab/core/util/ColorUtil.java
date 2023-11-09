@@ -63,7 +63,7 @@ public class ColorUtil {
      *
      * This function does rounding to integer valued components. It is the preferred way of doing HSB to RGB conversion.
      *
-     * See also: {@link #hsbToRgbPercent(HSBType)}, {@link #hsbTosRgb(HSBType)}
+     * See also: {@link #hsbToRgbPercent(HSBType)}, {@link #hsbToRgbw(HSBType)}, {@link #hsbTosRgb(HSBType)}
      *
      * @param hsb an {@link HSBType} value.
      * @return array of three int with the RGB values in the range 0 to 255.
@@ -72,6 +72,24 @@ public class ColorUtil {
         final PercentType[] rgbPercent = hsbToRgbPercent(hsb);
         return new int[] { convertColorPercentToByte(rgbPercent[0]), convertColorPercentToByte(rgbPercent[1]),
                 convertColorPercentToByte(rgbPercent[2]) };
+    }
+
+    /**
+     * Transform <a href="https://en.wikipedia.org/wiki/HSL_and_HSV">HSV</a> based {@link HSBType} to
+     * <a href="https://en.wikipedia.org/wiki/SRGB">sRGB</a>.
+     *
+     * This function does rounding to integer valued components. It is the preferred way of doing HSB to RGBW
+     * conversion.
+     *
+     * See also: {@link #hsbToRgbPercent(HSBType)}, {@link #hsbToRgbwPercent(HSBType)}, {@link #hsbTosRgb(HSBType)}
+     *
+     * @param hsb an {@link HSBType} value.
+     * @return array of four int with the RGBW values in the range 0 to 255.
+     */
+    public static int[] hsbToRgbw(HSBType hsb) {
+        final PercentType[] rgbPercent = hsbToRgbwPercent(hsb);
+        return new int[] { convertColorPercentToByte(rgbPercent[0]), convertColorPercentToByte(rgbPercent[1]),
+                convertColorPercentToByte(rgbPercent[2]), convertColorPercentToByte(rgbPercent[3]) };
     }
 
     /**
@@ -261,19 +279,19 @@ public class ColorUtil {
      * Transform <a href="https://en.wikipedia.org/wiki/SRGB">sRGB</a> color format to
      * <a href="https://en.wikipedia.org/wiki/HSL_and_HSV">HSV</a> based {@link HSBType}.
      *
-     * @param rgb array of three int with the RGB values in the range 0 to 255.
+     * @param rgbw array of four int with the RGBW values in the range 0 to 255.
      * @return the corresponding {@link HSBType}.
      * @throws IllegalArgumentException when input array has wrong size or exceeds allowed value range.
      */
-    public static HSBType rgbToHsb(int[] rgb) throws IllegalArgumentException {
-        if (rgb.length == 4) {
-            return rgbwToHsb(rgb);
+    public static HSBType rgbToHsb(int[] rgbw) throws IllegalArgumentException {
+        if (rgbw.length == 4) {
+            return rgbwToHsb(rgbw);
         }
-        if (rgb.length != 3 || !inByteRange(rgb[0]) || !inByteRange(rgb[1]) || !inByteRange(rgb[2])) {
+        if (rgbw.length != 3 || !inByteRange(rgbw[0]) || !inByteRange(rgbw[1]) || !inByteRange(rgbw[2])) {
             throw new IllegalArgumentException("RGB array only allows values between 0 and 255");
         }
-        return rgbToHsb(new PercentType[] { convertByteToColorPercent(rgb[0]), convertByteToColorPercent(rgb[1]),
-                convertByteToColorPercent(rgb[2]) });
+        return rgbToHsb(new PercentType[] { convertByteToColorPercent(rgbw[0]), convertByteToColorPercent(rgbw[1]),
+                convertByteToColorPercent(rgbw[2]) });
     }
 
     /**
@@ -323,7 +341,7 @@ public class ColorUtil {
      * Transform <a href="https://en.wikipedia.org/wiki/SRGB">sRGB</a> color format to
      * <a href="https://en.wikipedia.org/wiki/HSL_and_HSV">HSV</a> based {@link HSBType}.
      *
-     * @param rgb array of three {@link PercentType] with the RGB values in the range 0 to 100 percent.
+     * @param rgb array of three {@link PercentType} with the RGB values in the range 0 to 100 percent.
      * @return the corresponding {@link HSBType}.
      * @throws IllegalArgumentException when input array has wrong size or exceeds allowed value range.
      */
