@@ -79,7 +79,7 @@ public interface ModuleHandlerCallback {
      * This should always be possible unless an action has a mandatory input that is linked to a trigger.
      * In that case the action is skipped and the rule engine continues execution of rest actions.
      *
-     * @param ruleUID id of the rule whose actions have to be executed.
+     * @param uid id of the rule whose actions have to be executed.
      */
     void runNow(String uid);
 
@@ -87,7 +87,7 @@ public interface ModuleHandlerCallback {
      * Same as {@link #runNow(String)} with the additional option to enable/disable evaluation of
      * conditions defined in the target rule. The context can be set here, too, but also might be {@code null}.
      *
-     * @param ruleUID id of the rule whose actions have to be executed.
+     * @param uid id of the rule whose actions have to be executed.
      * @param considerConditions if {@code true} the conditions of the rule will be checked.
      * @param context the context that is passed to the conditions and the actions of the rule.
      */

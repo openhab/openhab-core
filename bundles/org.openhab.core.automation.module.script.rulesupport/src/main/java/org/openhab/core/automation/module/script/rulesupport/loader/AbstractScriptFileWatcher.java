@@ -62,7 +62,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Simon Merschjohann - Initial contribution
  * @author Kai Kreuzer - improved logging and removed thread pool
- * @author Jonathan Gilbert - added dependency tracking & per-script start levels; made reusable
+ * @author Jonathan Gilbert - added dependency tracking and per-script start levels; made reusable
  * @author Jan N. Klug - Refactored dependency tracking to script engine factories
  */
 @NonNullByDefault

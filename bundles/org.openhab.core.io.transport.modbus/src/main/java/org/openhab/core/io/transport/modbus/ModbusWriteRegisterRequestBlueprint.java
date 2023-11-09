@@ -35,8 +35,8 @@ public class ModbusWriteRegisterRequestBlueprint extends ModbusWriteRequestBluep
      * @param slaveId slave id to write to
      * @param reference reference address
      * @param registers register(s) to write
-     * @param writeMultiple whether to use {@link ModbusWriteFunctionCode.WRITE_MULTIPLE_COILS} over
-     *            {@link ModbusWriteFunctionCode.WRITE_COIL}. Useful with single register of data.
+     * @param writeMultiple whether to use {@link ModbusWriteFunctionCode#WRITE_MULTIPLE_COILS} over
+     *            {@link ModbusWriteFunctionCode#WRITE_COIL}. Useful with single register of data.
      * @param maxTries maximum number of tries in case of errors, should be at least 1
      * @throws IllegalArgumentException in case <code>data</code> is empty, <code>writeMultiple</code> is
      *             <code>false</code> but there are many registers to write.

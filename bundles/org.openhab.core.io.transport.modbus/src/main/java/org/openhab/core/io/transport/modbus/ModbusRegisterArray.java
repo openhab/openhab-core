@@ -39,7 +39,6 @@ public class ModbusRegisterArray {
      * Construct plain <code>ModbusRegisterArray</code> array from register values
      *
      * @param registerValues register values, each <code>int</code> corresponding to one register
-     * @return
      */
     public ModbusRegisterArray(int... registerValues) {
         bytes = new byte[registerValues.length * 2];

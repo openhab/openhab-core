@@ -68,7 +68,7 @@ public class SemanticsPredicates {
     /**
      * Creates a {@link Predicate} which can be used to filter {@link Item}s that relates to a given property.
      *
-     * @param type the semantic property to filter for
+     * @param property the semantic property to filter for
      * @return created {@link Predicate}
      */
     public static Predicate<Item> relatesTo(Class<? extends Property> property) {

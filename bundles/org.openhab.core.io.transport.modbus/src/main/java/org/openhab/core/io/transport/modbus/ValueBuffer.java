@@ -165,7 +165,7 @@ public class ValueBuffer {
      * Extract signed 8-bit integer at current position, and advance position.
      *
      * @return signed 8-bit integer (byte)
-     * @see ModbusBitUtilities.extractSInt8
+     * @see ModbusBitUtilities#extractSInt8
      * @throws IllegalArgumentException when there are not enough bytes in this ValueBuffer
      */
     public byte getSInt8() {
@@ -176,7 +176,7 @@ public class ValueBuffer {
      * Extract unsigned 8-bit integer at current position, and advance position.
      *
      * @return unsigned 8-bit integer
-     * @see ModbusBitUtilities.extractUInt8
+     * @see ModbusBitUtilities#extractUInt8
      * @throws IllegalArgumentException when there are not enough bytes in this ValueBuffer
      */
     public short getUInt8() {
@@ -187,7 +187,7 @@ public class ValueBuffer {
      * Extract signed 16-bit integer at current position, and advance position.
      *
      * @return signed 16-bit integer (short)
-     * @see ModbusBitUtilities.extractSInt16
+     * @see ModbusBitUtilities#extractSInt16
      * @throws IllegalArgumentException when there are not enough bytes in this ValueBuffer
      */
     public short getSInt16() {
@@ -198,7 +198,7 @@ public class ValueBuffer {
      * Extract unsigned 16-bit integer at current position, and advance position.
      *
      * @return unsigned 16-bit integer
-     * @see ModbusBitUtilities.extractUInt16
+     * @see ModbusBitUtilities#extractUInt16
      * @throws IllegalArgumentException when there are not enough bytes in this ValueBuffer
      */
     public int getUInt16() {
@@ -209,7 +209,7 @@ public class ValueBuffer {
      * Extract signed 32-bit integer at current position, and advance position.
      *
      * @return signed 32-bit integer
-     * @see ModbusBitUtilities.extractSInt32
+     * @see ModbusBitUtilities#extractSInt32
      * @throws IllegalArgumentException when there are not enough bytes in this ValueBuffer
      */
     public int getSInt32() {
@@ -220,7 +220,7 @@ public class ValueBuffer {
      * Extract unsigned 32-bit integer at current position, and advance position.
      *
      * @return unsigned 32-bit integer
-     * @see ModbusBitUtilities.extractUInt32
+     * @see ModbusBitUtilities#extractUInt32
      * @throws IllegalArgumentException when there are not enough bytes in this ValueBuffer
      */
     public long getUInt32() {
@@ -233,7 +233,7 @@ public class ValueBuffer {
      * This is identical with getSInt32, but with registers swapped.
      *
      * @return signed 32-bit integer
-     * @see ModbusBitUtilities.extractSInt32Swap
+     * @see ModbusBitUtilities#extractSInt32Swap
      * @throws IllegalArgumentException when there are not enough bytes in this ValueBuffer
      */
     public int getSInt32Swap() {
@@ -246,7 +246,7 @@ public class ValueBuffer {
      * This is identical with getUInt32, but with registers swapped.
      *
      * @return unsigned 32-bit integer
-     * @see ModbusBitUtilities.extractUInt32Swap
+     * @see ModbusBitUtilities#extractUInt32Swap
      * @throws IllegalArgumentException when there are not enough bytes in this ValueBuffer
      */
     public long getUInt32Swap() {
@@ -257,7 +257,7 @@ public class ValueBuffer {
      * Extract signed 64-bit integer at current position, and advance position.
      *
      * @return signed 64-bit integer
-     * @see ModbusBitUtilities.extractInt64
+     * @see ModbusBitUtilities#extractSInt64
      * @throws IllegalArgumentException when there are not enough bytes in this ValueBuffer
      */
     public long getSInt64() {
@@ -268,7 +268,7 @@ public class ValueBuffer {
      * Extract unsigned 64-bit integer at current position, and advance position.
      *
      * @return unsigned 64-bit integer
-     * @see ModbusBitUtilities.extractUInt64
+     * @see ModbusBitUtilities#extractUInt64
      * @throws IllegalArgumentException when there are not enough bytes in this ValueBuffer
      */
     public BigInteger getUInt64() {
@@ -281,7 +281,7 @@ public class ValueBuffer {
      * This is identical with getSInt64, but with registers swapped.
      *
      * @return signed 64-bit integer
-     * @see ModbusBitUtilities.extractInt64Swap
+     * @see ModbusBitUtilities#extractSInt64Swap
      * @throws IllegalArgumentException when there are not enough bytes in this ValueBuffer
      */
     public long getSInt64Swap() {
@@ -294,7 +294,7 @@ public class ValueBuffer {
      * This is identical with getUInt64, but with registers swapped.
      *
      * @return unsigned 64-bit integer
-     * @see ModbusBitUtilities.extractUInt64Swap
+     * @see ModbusBitUtilities#extractUInt64Swap
      * @throws IllegalArgumentException when there are not enough bytes in this ValueBuffer
      */
     public BigInteger getUInt64Swap() {
@@ -307,7 +307,7 @@ public class ValueBuffer {
      * Note that this method can return floating point NaN and floating point infinity.
      *
      * @return single-precision 32-bit IEEE 754 floating point
-     * @see ModbusBitUtilities.extractFloat32
+     * @see ModbusBitUtilities#extractFloat32
      * @throws IllegalArgumentException when there are not enough bytes in this ValueBuffer
      */
     public float getFloat32() {
@@ -322,7 +322,7 @@ public class ValueBuffer {
      * Note that this method can return floating point NaN and floating point infinity.
      *
      * @return single-precision 32-bit IEEE 754 floating point
-     * @see ModbusBitUtilities.extractFloat32
+     * @see ModbusBitUtilities#extractFloat32
      * @throws IllegalArgumentException when there are not enough bytes in this ValueBuffer
      */
     public float getFloat32Swap() {

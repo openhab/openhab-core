@@ -197,8 +197,6 @@ public class SseResource implements RESTResource, SsePublisher {
     /**
      * Subscribes the connecting client for state updates. It will initially only send a "ready" event with a unique
      * connectionId that the client can use to dynamically alter the list of tracked items.
-     *
-     * @return {@link EventOutput} object associated with the incoming connection.
      */
     @GET
     @Path("/states")

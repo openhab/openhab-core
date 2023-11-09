@@ -26,7 +26,7 @@ import java.util.Set;
 import org.eclipse.jdt.annotation.Nullable;
 
 /**
- * This class is a wrapper for configuration settings of {@link Thing}s.
+ * This class is a wrapper for configuration settings of {@link org.openhab.core.thing.Thing}s.
  *
  * @author Dennis Nobel - Initial contribution
  * @author Kai Kreuzer - added constructors and normalization

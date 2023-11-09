@@ -98,7 +98,6 @@ public class RulePredicates {
     /**
      * Creates a {@link Predicate} which can be used to match {@link Rule}s with one or more tags.
      *
-     * @param tags to search for.
      * @return created {@link Predicate}.
      */
     public static Predicate<Rule> hasTags() {
@@ -110,7 +109,6 @@ public class RulePredicates {
     /**
      * Creates a {@link Predicate} which can be used to match {@link Rule}s without tags.
      *
-     * @param tags to search for.
      * @return created {@link Predicate}.
      */
     public static Predicate<Rule> hasNoTags() {
