@@ -91,8 +91,9 @@ public class UpnpAddonSuggestionFinder extends BaseAddonSuggestionFinder impleme
             UDN udn = identity.getUdn();
             if (udn != null) {
                 String udnString = udn.getIdentifierString();
-                devices.put(udnString, device);
-                logger.trace("Added device: {}", device.getDisplayString());
+                if (devices.put(udnString, device) == null) {
+                    logger.trace("Added device: {}", device.getDisplayString());
+                }
             }
         }
     }
