@@ -32,7 +32,7 @@ public abstract class BaseAddonSuggestionFinder implements AddonSuggestionFinder
 
     public static final String ADDON_SUGGESTION_FINDER_ENABLED_PROPERTY = "enabled";
     protected static final String ADDON_SUGGESTION_FINDER = "-addon-suggestion-finder";
-    protected static final String ADDON_SUGGESTION_FINDER_CONFIG_PID = "discovery.addon.";
+    protected static final String ADDON_SUGGESTION_FINDER_CONFIG_PID = "org.openhab.discovery.addon.finder.";
 
     /**
      * Helper method to check if the given {@code propertyName} is in the {@code propertyPatternMap} and if so, the
