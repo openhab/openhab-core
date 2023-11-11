@@ -34,6 +34,7 @@ import org.openhab.core.io.transport.mdns.MDNSClient;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,11 +45,12 @@ import org.slf4j.LoggerFactory;
  * @author Andrew Fiddian-Green - Initial contribution
  */
 @NonNullByDefault
-@Component(service = AddonSuggestionFinder.class, name = MDNSAddonSuggestionFinder.SERVICE_NAME)
+@Component(service = AddonSuggestionFinder.class, name = MDNSAddonSuggestionFinder.SERVICE_NAME, configurationPid = MDNSAddonSuggestionFinder.CONFIG_PID)
 public class MDNSAddonSuggestionFinder extends BaseAddonSuggestionFinder implements ServiceListener {
 
     public static final String SERVICE_TYPE = "mdns";
     public static final String SERVICE_NAME = SERVICE_TYPE + ADDON_SUGGESTION_FINDER;
+    public static final String CONFIG_PID = ADDON_SUGGESTION_FINDER_CONFIG_PID + SERVICE_TYPE;
 
     private static final String NAME = "name";
     private static final String APPLICATION = "application";
@@ -59,10 +61,16 @@ public class MDNSAddonSuggestionFinder extends BaseAddonSuggestionFinder impleme
     private final MDNSClient mdnsClient;
 
     @Activate
-    public MDNSAddonSuggestionFinder(@Reference MDNSClient mdnsClient) {
+    public MDNSAddonSuggestionFinder(@Nullable Map<String, Object> configProperties, @Reference MDNSClient mdnsClient) {
         this.mdnsClient = mdnsClient;
+        activate(configProperties);
     }
 
+    /**
+     * Adds the given mDNS service to the set of discovered services.
+     * 
+     * @param device the mDNS service to be added.
+     */
     public void addService(ServiceInfo service, boolean isResolved) {
         String qualifiedName = service.getQualifiedName();
         if (isResolved || !services.containsKey(qualifiedName)) {
@@ -71,7 +79,8 @@ public class MDNSAddonSuggestionFinder extends BaseAddonSuggestionFinder impleme
         }
     }
 
-    private void connect() {
+    @Override
+    protected void connect() {
         addonCandidates
                 .forEach(c -> c.getDiscoveryMethods().stream().filter(m -> SERVICE_TYPE.equals(m.getServiceType()))
                         .filter(m -> !m.getMdnsServiceType().isEmpty()).forEach(m -> {
@@ -79,33 +88,22 @@ public class MDNSAddonSuggestionFinder extends BaseAddonSuggestionFinder impleme
                             mdnsClient.addServiceListener(serviceType, this);
                             scheduler.submit(() -> mdnsClient.list(serviceType));
                         }));
+        super.connect();
     }
 
     @Deactivate
     @Override
     public void deactivate() {
-        services.clear();
-        disconnect();
         super.deactivate();
+        services.clear();
     }
 
-    private void disconnect() {
+    @Override
+    protected void disconnect() {
         addonCandidates.forEach(c -> c.getDiscoveryMethods().stream()
                 .filter(m -> SERVICE_TYPE.equals(m.getServiceType())).filter(m -> !m.getMdnsServiceType().isEmpty())
                 .forEach(m -> mdnsClient.removeServiceListener(m.getMdnsServiceType(), this)));
-    }
-
-    @Override
-    public void enable(boolean enable) {
-        disconnect();
-        if (enable) {
-            connect();
-        }
-    }
-
-    @Override
-    public String getServiceType() {
-        return SERVICE_TYPE;
+        super.disconnect();
     }
 
     @Override
@@ -138,6 +136,12 @@ public class MDNSAddonSuggestionFinder extends BaseAddonSuggestionFinder impleme
             }
         }
         return result;
+    }
+
+    @Modified
+    @Override
+    public void modified(@Nullable Map<String, Object> configProperties) {
+        super.modified(configProperties);
     }
 
     /*

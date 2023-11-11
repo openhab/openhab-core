@@ -104,12 +104,12 @@ public class AddonSuggestionFinderServiceTests {
         addonSuggestionFinderService = new AddonSuggestionFinderService(localeProvider);
         assertNotNull(addonSuggestionFinderService);
 
-        UpnpAddonSuggestionFinder upnp = new UpnpAddonSuggestionFinder(upnpService);
+        UpnpAddonSuggestionFinder upnp = new UpnpAddonSuggestionFinder(null, upnpService);
         Registry registry = upnpService.getRegistry();
         registry.getRemoteDevices().forEach(device -> upnp.remoteDeviceAdded(registry, device));
         addonSuggestionFinderService.addAddonSuggestionFinder(upnp);
 
-        MDNSAddonSuggestionFinder mdns = new MDNSAddonSuggestionFinder(mdnsClient);
+        MDNSAddonSuggestionFinder mdns = new MDNSAddonSuggestionFinder(null, mdnsClient);
         for (ServiceInfo service : mdnsClient.list("_hue._tcp.local.")) {
             mdns.addService(service, true);
         }

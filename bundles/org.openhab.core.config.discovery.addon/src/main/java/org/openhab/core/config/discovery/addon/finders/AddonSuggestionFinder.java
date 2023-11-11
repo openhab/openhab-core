@@ -27,27 +27,6 @@ import org.openhab.core.addon.AddonInfo;
 public interface AddonSuggestionFinder {
 
     /**
-     * This method should be overridden and referenced so that the OSGI framework will call it when the component is
-     * deactivated. It should clear the finder's internal state.
-     */
-    public void deactivate();
-
-    /**
-     * The OH framework calls this method to enable or disable the finder. Typically e.g. for upnp and mdns, it connects
-     * to resp. disconnects from, the underlying discovery transport.
-     * 
-     * @param enable true to enable, false to disable
-     */
-    public void enable(boolean enable);
-
-    /**
-     * The OH framework calls this method to read the finder service type.
-     * 
-     * @return the finder service type
-     */
-    public String getServiceType();
-
-    /**
      * The OH framework calls this method to scan through the candidate list of {@link AddonInfo} and return a subset of
      * those that it suggests to be installed.
      */

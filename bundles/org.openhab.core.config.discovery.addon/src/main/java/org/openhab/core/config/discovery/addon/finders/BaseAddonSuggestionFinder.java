@@ -30,7 +30,9 @@ import org.openhab.core.addon.AddonInfo;
 @NonNullByDefault
 public abstract class BaseAddonSuggestionFinder implements AddonSuggestionFinder {
 
+    public static final String ADDON_SUGGESTION_FINDER_ENABLED_PROPERTY = "enabled";
     protected static final String ADDON_SUGGESTION_FINDER = "-addon-suggestion-finder";
+    protected static final String ADDON_SUGGESTION_FINDER_CONFIG_PID = "discovery.addon.";
 
     /**
      * Helper method to check if the given {@code propertyName} is in the {@code propertyPatternMap} and if so, the
@@ -49,10 +51,79 @@ public abstract class BaseAddonSuggestionFinder implements AddonSuggestionFinder
     }
 
     protected final List<AddonInfo> addonCandidates = Collections.synchronizedList(new ArrayList<>());
+    private boolean connected = false;
 
-    @Override
+    /**
+     * Implementation classes must implement their specific constructor and OSGI annotate it so that the OSGI framework
+     * will call it when the component is activated. Such methods must call this {@code activate()} method. Depending on
+     * the given configuration properties, it either connects (enables) or disconnects (disables) the service.
+     * 
+     * @param configProperties the configuration properties.
+     */
+    protected void activate(@Nullable Map<String, Object> configProperties) {
+        if (connected ^ getTargetConnected(configProperties)) {
+            if (connected) {
+                disconnect();
+            } else
+                connect();
+        }
+    }
+
+    /**
+     * Implementation classes must override this method in order to connect (enable) the service. Implementations must
+     * call {@code super.connect()}.
+     */
+    protected void connect() {
+        connected = true;
+    }
+
+    /**
+     * Implementation classes must override this method and OSGI annotate it so that the OSGI framework will call it
+     * when the component is deactivated. Overridden methods must call {@code super.deactivate()}. Generally it should
+     * clear the finder state and disable the service.
+     */
     public void deactivate() {
+        if (connected) {
+            disconnect();
+        }
         addonCandidates.clear();
+    }
+
+    /**
+     * Implementation classes must override this method in order to disconnect (disable) the service. Implementations
+     * must call {@code super.disconnect()}.
+     */
+    protected void disconnect() {
+        connected = false;
+    }
+
+    /**
+     * Helper method that reads a configuration property and determines the target connected state.
+     * 
+     * @param configProperties the configuration properties.
+     * @return true if the target is for the service to be connected, false otherwise.
+     */
+    private boolean getTargetConnected(@Nullable Map<String, Object> configProperties) {
+        if (configProperties != null) {
+            Object property = configProperties.get(ADDON_SUGGESTION_FINDER_ENABLED_PROPERTY);
+            if (property instanceof String string) {
+                return Boolean.valueOf(string);
+            } else {
+                return !Boolean.FALSE.equals(property);
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Implementation classes must override this method and OSGI annotate it so that the OSGI framework will call it
+     * when the component configuration is modified. Overridden methods must call {@code super.modified()}. Generally
+     * it should have the same effect as the {@code activate()} method.
+     * 
+     * @param configProperties the modified configuration properties.
+     */
+    public void modified(@Nullable Map<String, Object> configProperties) {
+        activate(configProperties);
     }
 
     public synchronized void setAddonCandidates(List<AddonInfo> candidates) {

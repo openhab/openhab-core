@@ -38,6 +38,7 @@ import org.openhab.core.addon.AddonInfo;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,11 +49,12 @@ import org.slf4j.LoggerFactory;
  * @author Andrew Fiddian-Green - Initial contribution
  */
 @NonNullByDefault
-@Component(service = AddonSuggestionFinder.class, name = UpnpAddonSuggestionFinder.SERVICE_NAME)
+@Component(service = AddonSuggestionFinder.class, name = UpnpAddonSuggestionFinder.SERVICE_NAME, configurationPid = UpnpAddonSuggestionFinder.CONFIG_PID)
 public class UpnpAddonSuggestionFinder extends BaseAddonSuggestionFinder implements RegistryListener {
 
     public static final String SERVICE_TYPE = "upnp";
     public static final String SERVICE_NAME = SERVICE_TYPE + ADDON_SUGGESTION_FINDER;
+    public static final String CONFIG_PID = ADDON_SUGGESTION_FINDER_CONFIG_PID + SERVICE_TYPE;
 
     private static final String DEVICE_TYPE = "deviceType";
     private static final String MANUFACTURER = "manufacturer";
@@ -72,11 +74,17 @@ public class UpnpAddonSuggestionFinder extends BaseAddonSuggestionFinder impleme
     private final UpnpService upnpService;
 
     @Activate
-    public UpnpAddonSuggestionFinder(@Reference UpnpService upnpService) {
+    public UpnpAddonSuggestionFinder(@Nullable Map<String, Object> configProperties,
+            @Reference UpnpService upnpService) {
         this.upnpService = upnpService;
-        connect();
+        activate(configProperties);
     }
 
+    /**
+     * Adds the given UPnP remote device to the set of discovered devices.
+     * 
+     * @param device the UPnP remote device to be added.
+     */
     public void addDevice(RemoteDevice device) {
         RemoteDeviceIdentity identity = device.getIdentity();
         if (identity != null) {
@@ -89,37 +97,27 @@ public class UpnpAddonSuggestionFinder extends BaseAddonSuggestionFinder impleme
         }
     }
 
-    private void connect() {
+    @Override
+    protected void connect() {
         Registry registry = upnpService.getRegistry();
         for (RemoteDevice device : registry.getRemoteDevices()) {
             remoteDeviceAdded(registry, device);
         }
         registry.addListener(this);
+        super.connect();
     }
 
     @Deactivate
     @Override
     public void deactivate() {
-        devices.clear();
-        disconnect();
         super.deactivate();
+        devices.clear();
     }
 
-    private void disconnect() {
+    @Override
+    protected void disconnect() {
         upnpService.getRegistry().removeListener(this);
-    }
-
-    @Override
-    public void enable(boolean enable) {
-        disconnect();
-        if (enable) {
-            connect();
-        }
-    }
-
-    @Override
-    public String getServiceType() {
-        return SERVICE_TYPE;
+        super.disconnect();
     }
 
     @Override
@@ -198,6 +196,12 @@ public class UpnpAddonSuggestionFinder extends BaseAddonSuggestionFinder impleme
             }
         }
         return result;
+    }
+
+    @Modified
+    @Override
+    public void modified(@Nullable Map<String, Object> configProperties) {
+        super.modified(configProperties);
     }
 
     /*
