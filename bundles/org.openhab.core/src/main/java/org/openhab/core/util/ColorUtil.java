@@ -176,36 +176,37 @@ public class ColorUtil {
      */
     public static PercentType[] hsbToRgbwPercent(HSBType hsb) {
         PercentType[] rgb = hsbToRgbPercent(hsb);
-        final BigDecimal Ri = rgb[0].toBigDecimal();
-        final BigDecimal Gi = rgb[1].toBigDecimal();
-        final BigDecimal Bi = rgb[2].toBigDecimal();
+        final BigDecimal inRed = rgb[0].toBigDecimal();
+        final BigDecimal inGreen = rgb[1].toBigDecimal();
+        final BigDecimal inBlue = rgb[2].toBigDecimal();
         // Get the maximum between R, G, and B
-        final BigDecimal tM = Ri.max(Gi.max(Bi));
+        final BigDecimal maxColor = inRed.max(inGreen.max(inBlue));
 
         // If the maximum value is 0, immediately return pure black.
-        if (tM.floatValue() == 0) {
+        if (BigDecimal.ZERO.equals(maxColor)) {
             return new PercentType[] { PercentType.ZERO, PercentType.ZERO, PercentType.ZERO, PercentType.ZERO };
         }
 
         // This section serves to figure out what the color with 100% hue is
-        final BigDecimal multiplier = BIG_DECIMAL_100.divide(tM, 0, RoundingMode.DOWN);
-        final BigDecimal hR = Ri.multiply(multiplier);
-        final BigDecimal hG = Gi.multiply(multiplier);
-        final BigDecimal hB = Bi.multiply(multiplier);
+        final BigDecimal multiplier = BIG_DECIMAL_100.divide(maxColor, 0, RoundingMode.DOWN);
+        final BigDecimal hR = inRed.multiply(multiplier);
+        final BigDecimal hG = inGreen.multiply(multiplier);
+        final BigDecimal hB = inBlue.multiply(multiplier);
 
         // This calculates the Whiteness (not strictly speaking Luminance) of the color
-        final BigDecimal M = hR.max(hG.max(hB));
-        final BigDecimal m = hR.min(hG.min(hB));
-        final BigDecimal Luminance = ((M.add(m).divide(BIG_DECIMAL_2).subtract(BIG_DECIMAL_50))
+        final BigDecimal whitenessMax = hR.max(hG.max(hB));
+        final BigDecimal whitenessMin = hR.min(hG.min(hB));
+        final BigDecimal luminance = ((whitenessMax.add(whitenessMin).divide(BIG_DECIMAL_2).subtract(BIG_DECIMAL_50))
                 .multiply(BIG_DECIMAL_100.divide(BIG_DECIMAL_50))).divide(multiplier);
 
         // check range
-        final BigDecimal Ro = Ri.subtract(Luminance).max(BigDecimal.ZERO);
-        final BigDecimal Go = Gi.subtract(Luminance).max(BigDecimal.ZERO);
-        final BigDecimal Bo = Bi.subtract(Luminance).max(BigDecimal.ZERO);
-        final BigDecimal Wo = Luminance.max(BigDecimal.ZERO);
+        BigDecimal outRed = inRed.subtract(luminance).max(BigDecimal.ZERO);
+        BigDecimal outGreen = inGreen.subtract(luminance).max(BigDecimal.ZERO);
+        BigDecimal outBlue = inBlue.subtract(luminance).max(BigDecimal.ZERO);
+        BigDecimal outWhite = luminance.max(BigDecimal.ZERO);
 
-        return new PercentType[] { new PercentType(Ro), new PercentType(Go), new PercentType(Bo), new PercentType(Wo) };
+        return new PercentType[] { new PercentType(outRed), new PercentType(outGreen), new PercentType(outBlue),
+                new PercentType(outWhite) };
     }
 
     /**
