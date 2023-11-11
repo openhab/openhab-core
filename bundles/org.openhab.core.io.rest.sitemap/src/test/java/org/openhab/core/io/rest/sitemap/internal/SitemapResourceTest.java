@@ -58,6 +58,7 @@ import org.openhab.core.test.java.JavaTest;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
 import org.openhab.core.ui.items.ItemUIRegistry;
+import org.openhab.core.ui.items.ItemUIRegistry.WidgetLabelSource;
 
 /**
  * Test aspects of the {@link SitemapResource}.
@@ -74,6 +75,7 @@ public class SitemapResourceTest extends JavaTest {
 
     private static final String HTTP_HEADER_X_ATMOSPHERE_TRANSPORT = "X-Atmosphere-Transport";
     private static final String ITEM_NAME = "itemName";
+    private static final String ITEM_LABEL = "item label";
     private static final String SITEMAP_PATH = "/sitemaps";
     private static final String SITEMAP_MODEL_NAME = "sitemapModel";
     private static final String SITEMAP_NAME = "defaultSitemap";
@@ -84,7 +86,6 @@ public class SitemapResourceTest extends JavaTest {
     private static final String ICON_COLOR_ITEM_NAME = "iconColorItemName";
     private static final String ICON_ITEM_NAME = "iconItemName";
     private static final String WIDGET1_LABEL = "widget 1";
-    private static final String WIDGET2_LABEL = "widget 2";
     private static final String WIDGET3_LABEL = "widget 3";
     private static final String WIDGET1_ID = "00";
     private static final String WIDGET2_ID = "01";
@@ -332,6 +333,7 @@ public class SitemapResourceTest extends JavaTest {
 
         assertThat(pageDTO.widgets.get(0).widgetId, is(WIDGET1_ID));
         assertThat(pageDTO.widgets.get(0).label, is(WIDGET1_LABEL));
+        assertThat(pageDTO.widgets.get(0).labelSource, is("SITEMAP_WIDGET"));
         assertThat(pageDTO.widgets.get(0).labelcolor, is("GREEN"));
         assertThat(pageDTO.widgets.get(0).valuecolor, is("BLUE"));
         assertThat(pageDTO.widgets.get(0).iconcolor, is("ORANGE"));
@@ -343,7 +345,8 @@ public class SitemapResourceTest extends JavaTest {
         assertThat(pageDTO.widgets.get(0).item.state, is("50"));
 
         assertThat(pageDTO.widgets.get(1).widgetId, is(WIDGET2_ID));
-        assertThat(pageDTO.widgets.get(1).label, is(WIDGET2_LABEL));
+        assertThat(pageDTO.widgets.get(1).label, is(ITEM_LABEL));
+        assertThat(pageDTO.widgets.get(1).labelSource, is("ITEM_LABEL"));
         assertThat(pageDTO.widgets.get(1).labelcolor, nullValue());
         assertThat(pageDTO.widgets.get(1).valuecolor, nullValue());
         assertThat(pageDTO.widgets.get(1).iconcolor, nullValue());
@@ -379,6 +382,7 @@ public class SitemapResourceTest extends JavaTest {
         when(itemUIRegistryMock.getWidgetId(widgets.get(0))).thenReturn(WIDGET1_ID);
         when(itemUIRegistryMock.getCategory(widgets.get(0))).thenReturn(WIDGET1_ICON);
         when(itemUIRegistryMock.getLabel(widgets.get(0))).thenReturn(WIDGET1_LABEL);
+        when(itemUIRegistryMock.getLabelSource(widgets.get(0))).thenReturn(WidgetLabelSource.SITEMAP_WIDGET);
         when(itemUIRegistryMock.getVisiblity(widgets.get(0))).thenReturn(true);
         when(itemUIRegistryMock.getLabelColor(widgets.get(0))).thenReturn("GREEN");
         when(itemUIRegistryMock.getValueColor(widgets.get(0))).thenReturn("BLUE");
@@ -387,7 +391,8 @@ public class SitemapResourceTest extends JavaTest {
 
         when(itemUIRegistryMock.getWidgetId(widgets.get(1))).thenReturn(WIDGET2_ID);
         when(itemUIRegistryMock.getCategory(widgets.get(1))).thenReturn(WIDGET2_ICON);
-        when(itemUIRegistryMock.getLabel(widgets.get(1))).thenReturn(WIDGET2_LABEL);
+        when(itemUIRegistryMock.getLabel(widgets.get(1))).thenReturn(ITEM_LABEL);
+        when(itemUIRegistryMock.getLabelSource(widgets.get(1))).thenReturn(WidgetLabelSource.ITEM_LABEL);
         when(itemUIRegistryMock.getVisiblity(widgets.get(1))).thenReturn(true);
         when(itemUIRegistryMock.getLabelColor(widgets.get(1))).thenReturn(null);
         when(itemUIRegistryMock.getValueColor(widgets.get(1))).thenReturn(null);
@@ -397,6 +402,7 @@ public class SitemapResourceTest extends JavaTest {
         when(itemUIRegistryMock.getWidgetId(widgets.get(2))).thenReturn(WIDGET3_ID);
         when(itemUIRegistryMock.getCategory(widgets.get(2))).thenReturn(WIDGET3_ICON);
         when(itemUIRegistryMock.getLabel(widgets.get(2))).thenReturn(WIDGET3_LABEL);
+        when(itemUIRegistryMock.getLabelSource(widgets.get(2))).thenReturn(WidgetLabelSource.SITEMAP_WIDGET);
         when(itemUIRegistryMock.getVisiblity(widgets.get(2))).thenReturn(true);
         when(itemUIRegistryMock.getLabelColor(widgets.get(2))).thenReturn(null);
         when(itemUIRegistryMock.getValueColor(widgets.get(2))).thenReturn(null);
@@ -484,7 +490,7 @@ public class SitemapResourceTest extends JavaTest {
         when(switchEClass.getName()).thenReturn("switch");
         when(switchEClass.getInstanceTypeName()).thenReturn("org.openhab.core.model.sitemap.Switch");
         when(w2.eClass()).thenReturn(switchEClass);
-        when(w2.getLabel()).thenReturn(WIDGET2_LABEL);
+        when(w2.getLabel()).thenReturn(null);
         when(w2.getItem()).thenReturn(ITEM_NAME);
         when(w2.getIcon()).thenReturn(WIDGET2_ICON);
         when(w2.getStaticIcon()).thenReturn(null);
@@ -528,6 +534,7 @@ public class SitemapResourceTest extends JavaTest {
 
         public TestItem(String name) {
             super("Number", name);
+            label = ITEM_LABEL;
         }
 
         @Override

@@ -43,4 +43,10 @@ public class GlobalStrategies {
             return "restoreOnStartup";
         };
     };
+    public static final Strategy FORECAST = new StrategyImpl() {
+        @Override
+        public String getName() {
+            return "forecast";
+        };
+    };
 }

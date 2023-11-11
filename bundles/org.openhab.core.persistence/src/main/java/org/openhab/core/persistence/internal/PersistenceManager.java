@@ -12,6 +12,14 @@
  */
 package org.openhab.core.persistence.internal;
 
+import static org.openhab.core.persistence.FilterCriteria.Ordering.ASCENDING;
+import static org.openhab.core.persistence.strategy.PersistenceStrategy.Globals.FORECAST;
+import static org.openhab.core.persistence.strategy.PersistenceStrategy.Globals.RESTORE;
+import static org.openhab.core.persistence.strategy.PersistenceStrategy.Globals.UPDATE;
+
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.HashSet;
@@ -23,6 +31,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
@@ -37,8 +46,10 @@ import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.ItemRegistryChangeListener;
 import org.openhab.core.items.StateChangeListener;
+import org.openhab.core.items.TimeSeriesListener;
 import org.openhab.core.persistence.FilterCriteria;
 import org.openhab.core.persistence.HistoricItem;
+import org.openhab.core.persistence.ModifiablePersistenceService;
 import org.openhab.core.persistence.PersistenceItemConfiguration;
 import org.openhab.core.persistence.PersistenceService;
 import org.openhab.core.persistence.QueryablePersistenceService;
@@ -53,12 +64,14 @@ import org.openhab.core.persistence.strategy.PersistenceCronStrategy;
 import org.openhab.core.persistence.strategy.PersistenceStrategy;
 import org.openhab.core.scheduler.CronScheduler;
 import org.openhab.core.scheduler.ScheduledCompletableFuture;
+import org.openhab.core.scheduler.Scheduler;
 import org.openhab.core.service.ReadyMarker;
 import org.openhab.core.service.ReadyMarkerFilter;
 import org.openhab.core.service.ReadyService;
 import org.openhab.core.service.ReadyService.ReadyTracker;
 import org.openhab.core.service.StartLevelService;
 import org.openhab.core.types.State;
+import org.openhab.core.types.TimeSeries;
 import org.openhab.core.types.UnDefType;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -75,18 +88,19 @@ import org.slf4j.LoggerFactory;
  * @author Kai Kreuzer - Initial contribution
  * @author Markus Rathgeb - Separation of persistence core and model, drop Quartz usage.
  * @author Jan N. Klug - Refactored to use service configuration registry
+ * @author Jan N. Klug - Added time series support
  */
 @Component(immediate = true)
 @NonNullByDefault
 public class PersistenceManager implements ItemRegistryChangeListener, StateChangeListener, ReadyTracker,
-        PersistenceServiceConfigurationRegistryChangeListener {
-
+        PersistenceServiceConfigurationRegistryChangeListener, TimeSeriesListener {
     private final Logger logger = LoggerFactory.getLogger(PersistenceManager.class);
 
     private final ReadyMarker marker = new ReadyMarker("persistence", "restore");
 
     // the scheduler used for timer events
-    private final CronScheduler scheduler;
+    private final CronScheduler cronScheduler;
+    private final Scheduler scheduler;
     private final ItemRegistry itemRegistry;
     private final SafeCaller safeCaller;
     private final ReadyService readyService;
@@ -97,9 +111,11 @@ public class PersistenceManager implements ItemRegistryChangeListener, StateChan
     private final Map<String, PersistenceServiceContainer> persistenceServiceContainers = new ConcurrentHashMap<>();
 
     @Activate
-    public PersistenceManager(final @Reference CronScheduler scheduler, final @Reference ItemRegistry itemRegistry,
-            final @Reference SafeCaller safeCaller, final @Reference ReadyService readyService,
+    public PersistenceManager(final @Reference CronScheduler cronScheduler, final @Reference Scheduler scheduler,
+            final @Reference ItemRegistry itemRegistry, final @Reference SafeCaller safeCaller,
+            final @Reference ReadyService readyService,
             final @Reference PersistenceServiceConfigurationRegistry persistenceServiceConfigurationRegistry) {
+        this.cronScheduler = cronScheduler;
         this.scheduler = scheduler;
         this.itemRegistry = itemRegistry;
         this.safeCaller = safeCaller;
@@ -118,6 +134,7 @@ public class PersistenceManager implements ItemRegistryChangeListener, StateChan
         started = false;
 
         persistenceServiceContainers.values().forEach(PersistenceServiceContainer::cancelPersistJobs);
+        persistenceServiceContainers.values().forEach(PersistenceServiceContainer::cancelForecastJobs);
 
         // remove item state change listeners
         itemRegistry.stream().filter(GenericItem.class::isInstance)
@@ -136,6 +153,7 @@ public class PersistenceManager implements ItemRegistryChangeListener, StateChan
         if (oldContainer != null) { // cancel all jobs if the persistence service is set and an old configuration is
                                     // already present
             oldContainer.cancelPersistJobs();
+            oldContainer.cancelForecastJobs();
         }
 
         if (started) {
@@ -147,6 +165,7 @@ public class PersistenceManager implements ItemRegistryChangeListener, StateChan
         PersistenceServiceContainer container = persistenceServiceContainers.remove(persistenceService.getId());
         if (container != null) {
             container.cancelPersistJobs();
+            container.cancelForecastJobs();
         }
     }
 
@@ -237,61 +256,8 @@ public class PersistenceManager implements ItemRegistryChangeListener, StateChan
         return items;
     }
 
-    /**
-     * Handles the "restoreOnStartup" strategy for the item.
-     * If the item state is still undefined when entering this method, all persistence configurations are checked,
-     * if they have the "restoreOnStartup" strategy configured for the item. If so, the item state will be set
-     * to its last persisted value.
-     *
-     * @param item the item to restore the state for
-     */
-    private void restoreItemStateIfNeeded(Item item) {
-        // get the last persisted state from the persistence service if no state is yet set
-        if (UnDefType.NULL.equals(item.getState()) && item instanceof GenericItem) {
-            List<PersistenceServiceContainer> matchingContainers = persistenceServiceContainers.values().stream() //
-                    .filter(container -> container.getPersistenceService() instanceof QueryablePersistenceService) //
-                    .filter(container -> container.getMatchingConfigurations(PersistenceStrategy.Globals.RESTORE)
-                            .anyMatch(itemConfig -> appliesToItem(itemConfig, item)))
-                    .toList();
-
-            for (PersistenceServiceContainer container : matchingContainers) {
-                QueryablePersistenceService queryService = (QueryablePersistenceService) container
-                        .getPersistenceService();
-                FilterCriteria filter = new FilterCriteria().setItemName(item.getName()).setPageSize(1);
-                Iterable<HistoricItem> result = safeCaller.create(queryService, QueryablePersistenceService.class)
-                        .onTimeout(() -> {
-                            logger.warn("Querying persistence service '{}' to restore '{}' takes more than {}ms.",
-                                    queryService.getId(), item.getName(), SafeCaller.DEFAULT_TIMEOUT);
-                        })
-                        .onException(e -> logger.error(
-                                "Exception occurred while querying persistence service '{}' to restore '{}': {}",
-                                queryService.getId(), item.getName(), e.getMessage(), e))
-                        .build().query(filter);
-                if (result == null) {
-                    // in case of an exception or timeout, the safe caller returns null
-                    continue;
-                }
-                Iterator<HistoricItem> it = result.iterator();
-                if (it.hasNext()) {
-                    HistoricItem historicItem = it.next();
-                    GenericItem genericItem = (GenericItem) item;
-                    genericItem.removeStateChangeListener(this);
-                    genericItem.setState(historicItem.getState());
-                    genericItem.addStateChangeListener(this);
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Restored item state from '{}' for item '{}' -> '{}'",
-                                DateTimeFormatter.ISO_ZONED_DATE_TIME.format(historicItem.getTimestamp()),
-                                item.getName(), historicItem.getState());
-                    }
-                    return;
-                }
-            }
-        }
-    }
-
     private void startEventHandling(PersistenceServiceContainer serviceContainer) {
-        serviceContainer.getMatchingConfigurations(PersistenceStrategy.Globals.RESTORE)
-                .forEach(itemConfig -> getAllItems(itemConfig).forEach(this::restoreItemStateIfNeeded));
+        serviceContainer.restoreStatesAndScheduleForecastJobs();
         serviceContainer.schedulePersistJobs();
     }
 
@@ -304,16 +270,19 @@ public class PersistenceManager implements ItemRegistryChangeListener, StateChan
 
     @Override
     public void added(Item item) {
-        restoreItemStateIfNeeded(item);
+        persistenceServiceContainers.values().forEach(container -> container.addItem(item));
         if (item instanceof GenericItem genericItem) {
             genericItem.addStateChangeListener(this);
+            genericItem.addTimeSeriesListener(this);
         }
     }
 
     @Override
     public void removed(Item item) {
+        persistenceServiceContainers.values().forEach(container -> container.removeItem(item.getName()));
         if (item instanceof GenericItem genericItem) {
             genericItem.removeStateChangeListener(this);
+            genericItem.removeTimeSeriesListener(this);
         }
     }
 
@@ -331,6 +300,50 @@ public class PersistenceManager implements ItemRegistryChangeListener, StateChan
     @Override
     public void stateUpdated(Item item, State state) {
         handleStateEvent(item, false);
+    }
+
+    @Override
+    public void timeSeriesUpdated(Item item, TimeSeries timeSeries) {
+        if (timeSeries.size() == 0) {
+            // discard empty time series
+            return;
+        }
+        persistenceServiceContainers.values().stream()
+                .filter(psc -> psc.persistenceService instanceof ModifiablePersistenceService)
+                .forEach(container -> Stream
+                        .concat(container.getMatchingConfigurations(UPDATE),
+                                container.getMatchingConfigurations(FORECAST))
+                        .distinct().filter(itemConfig -> appliesToItem(itemConfig, item)).forEach(itemConfig -> {
+                            ModifiablePersistenceService service = (ModifiablePersistenceService) container
+                                    .getPersistenceService();
+                            // remove old values if replace selected
+                            if (timeSeries.getPolicy() == TimeSeries.Policy.REPLACE) {
+                                ZonedDateTime begin = timeSeries.getBegin().atZone(ZoneId.systemDefault());
+                                ZonedDateTime end = timeSeries.getEnd().atZone(ZoneId.systemDefault());
+                                FilterCriteria removeFilter = new FilterCriteria().setItemName(item.getName())
+                                        .setBeginDate(begin).setEndDate(end);
+                                service.remove(removeFilter);
+                                ScheduledCompletableFuture<?> forecastJob = container.forecastJobs.get(item.getName());
+                                if (forecastJob != null && forecastJob.getScheduledTime().isAfter(begin)
+                                        && forecastJob.getScheduledTime().isBefore(end)) {
+                                    forecastJob.cancel(true);
+                                    container.forecastJobs.remove(item.getName());
+                                }
+                            }
+                            // update states
+                            timeSeries.getStates().forEach(
+                                    e -> service.store(item, e.timestamp().atZone(ZoneId.systemDefault()), e.state()));
+                            timeSeries.getStates().filter(s -> s.timestamp().isAfter(Instant.now())).findFirst()
+                                    .ifPresent(s -> {
+                                        ScheduledCompletableFuture<?> forecastJob = container.forecastJobs
+                                                .get(item.getName());
+                                        if (forecastJob == null || forecastJob.getScheduledTime()
+                                                .isAfter(s.timestamp().atZone(ZoneId.systemDefault()))) {
+                                            container.scheduleNextForecastForItem(item.getName(), s.timestamp(),
+                                                    s.state());
+                                        }
+                                    });
+                        }));
     }
 
     @Override
@@ -381,7 +394,9 @@ public class PersistenceManager implements ItemRegistryChangeListener, StateChan
 
     private class PersistenceServiceContainer {
         private final PersistenceService persistenceService;
-        private final Set<ScheduledCompletableFuture<?>> jobs = new HashSet<>();
+        private final Set<ScheduledCompletableFuture<?>> persistJobs = new HashSet<>();
+        private final Map<String, ScheduledCompletableFuture<?>> forecastJobs = new ConcurrentHashMap<>();
+        private final Map<PersistenceStrategy, Collection<PersistenceItemConfiguration>> strategyCache = new ConcurrentHashMap<>();
 
         private PersistenceServiceConfiguration configuration;
 
@@ -403,19 +418,25 @@ public class PersistenceManager implements ItemRegistryChangeListener, StateChan
          */
         public void setConfiguration(@Nullable PersistenceServiceConfiguration configuration) {
             cancelPersistJobs();
+            cancelForecastJobs();
             this.configuration = Objects.requireNonNullElseGet(configuration, this::getDefaultConfig);
+            strategyCache.clear();
         }
 
         /**
          * Get all item configurations from this service that match a certain strategy
          *
          * @param strategy the {@link PersistenceStrategy} to look for
-         * @return a @link Stream<PersistenceItemConfiguration>} of the result
+         * @return a {@link Stream<PersistenceItemConfiguration>} of the result
          */
         public Stream<PersistenceItemConfiguration> getMatchingConfigurations(PersistenceStrategy strategy) {
-            boolean matchesDefaultStrategies = configuration.getDefaults().contains(strategy);
-            return configuration.getConfigs().stream().filter(itemConfig -> itemConfig.strategies().contains(strategy)
-                    || (itemConfig.strategies().isEmpty() && matchesDefaultStrategies));
+            return Objects.requireNonNull(strategyCache.computeIfAbsent(strategy, s -> {
+                boolean matchesDefaultStrategies = configuration.getDefaults().contains(strategy);
+                return configuration.getConfigs().stream()
+                        .filter(itemConfig -> itemConfig.strategies().contains(strategy)
+                                || (itemConfig.strategies().isEmpty() && matchesDefaultStrategies))
+                        .toList();
+            }).stream());
         }
 
         private PersistenceServiceConfiguration getDefaultConfig() {
@@ -430,11 +451,19 @@ public class PersistenceManager implements ItemRegistryChangeListener, StateChan
          * Cancel all scheduled cron jobs / strategies for this service
          */
         public void cancelPersistJobs() {
-            synchronized (jobs) {
-                jobs.forEach(job -> job.cancel(true));
-                jobs.clear();
+            synchronized (persistJobs) {
+                persistJobs.forEach(job -> job.cancel(true));
+                persistJobs.clear();
             }
-            logger.debug("Removed scheduled cron job for persistence service '{}'", configuration.getUID());
+            logger.debug("Removed scheduled cron jobs for persistence service '{}'", configuration.getUID());
+        }
+
+        public void cancelForecastJobs() {
+            synchronized (forecastJobs) {
+                forecastJobs.values().forEach(job -> job.cancel(true));
+                forecastJobs.clear();
+            }
+            logger.debug("Removed scheduled forecast jobs for persistence service '{}'", configuration.getUID());
         }
 
         /**
@@ -446,12 +475,114 @@ public class PersistenceManager implements ItemRegistryChangeListener, StateChan
                         PersistenceCronStrategy cronStrategy = (PersistenceCronStrategy) strategy;
                         String cronExpression = cronStrategy.getCronExpression();
                         List<PersistenceItemConfiguration> itemConfigs = getMatchingConfigurations(strategy).toList();
-                        jobs.add(scheduler.schedule(() -> persistJob(itemConfigs), cronExpression));
+                        persistJobs.add(cronScheduler.schedule(() -> persistJob(itemConfigs), cronExpression));
 
                         logger.debug("Scheduled strategy {} with cron expression {} for service {}",
                                 cronStrategy.getName(), cronExpression, configuration.getUID());
 
                     });
+        }
+
+        public void restoreStatesAndScheduleForecastJobs() {
+            itemRegistry.getItems().forEach(this::addItem);
+        }
+
+        public void addItem(Item item) {
+            if (persistenceService instanceof QueryablePersistenceService) {
+                if (UnDefType.NULL.equals(item.getState())
+                        && (getMatchingConfigurations(RESTORE)
+                                .anyMatch(configuration -> appliesToItem(configuration, item)))
+                        || getMatchingConfigurations(FORECAST)
+                                .anyMatch(configuration -> appliesToItem(configuration, item))) {
+                    restoreItemStateIfPossible(item);
+                }
+                if (getMatchingConfigurations(FORECAST).anyMatch(configuration -> appliesToItem(configuration, item))) {
+                    scheduleNextPersistedForecastForItem(item.getName());
+
+                }
+            }
+        }
+
+        public void removeItem(String itemName) {
+            ScheduledCompletableFuture<?> job = forecastJobs.remove(itemName);
+            if (job != null) {
+                job.cancel(true);
+            }
+        }
+
+        private void restoreItemStateIfPossible(Item item) {
+            QueryablePersistenceService queryService = (QueryablePersistenceService) persistenceService;
+
+            FilterCriteria filter = new FilterCriteria().setItemName(item.getName()).setEndDate(ZonedDateTime.now())
+                    .setPageSize(1);
+            Iterable<HistoricItem> result = safeCaller.create(queryService, QueryablePersistenceService.class)
+                    .onTimeout(
+                            () -> logger.warn("Querying persistence service '{}' to restore '{}' takes more than {}ms.",
+                                    queryService.getId(), item.getName(), SafeCaller.DEFAULT_TIMEOUT))
+                    .onException(e -> logger.error(
+                            "Exception occurred while querying persistence service '{}' to restore '{}': {}",
+                            queryService.getId(), item.getName(), e.getMessage(), e))
+                    .build().query(filter);
+            if (result == null) {
+                // in case of an exception or timeout, the safe caller returns null
+                return;
+            }
+            Iterator<HistoricItem> it = result.iterator();
+            if (it.hasNext()) {
+                HistoricItem historicItem = it.next();
+                GenericItem genericItem = (GenericItem) item;
+                if (!UnDefType.NULL.equals(item.getState())) {
+                    // someone else already restored the state or a new state was set
+                    return;
+                }
+                genericItem.removeStateChangeListener(PersistenceManager.this);
+                genericItem.setState(historicItem.getState());
+                genericItem.addStateChangeListener(PersistenceManager.this);
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Restored item state from '{}' for item '{}' -> '{}'",
+                            DateTimeFormatter.ISO_ZONED_DATE_TIME.format(historicItem.getTimestamp()), item.getName(),
+                            historicItem.getState());
+                }
+            }
+        }
+
+        public void scheduleNextForecastForItem(String itemName, Instant time, State state) {
+            ScheduledFuture<?> oldJob = forecastJobs.remove(itemName);
+            if (oldJob != null) {
+                oldJob.cancel(true);
+            }
+            forecastJobs.put(itemName, scheduler.at(() -> restoreItemState(itemName, state), time));
+            logger.trace("Scheduled forecasted value for {} at {}", itemName, time);
+        }
+
+        public void scheduleNextPersistedForecastForItem(String itemName) {
+            Item item = itemRegistry.get(itemName);
+            if (item instanceof GenericItem) {
+                QueryablePersistenceService queryService = (QueryablePersistenceService) persistenceService;
+                FilterCriteria filter = new FilterCriteria().setItemName(itemName).setBeginDate(ZonedDateTime.now())
+                        .setOrdering(ASCENDING);
+                Iterator<HistoricItem> result = safeCaller.create(queryService, QueryablePersistenceService.class)
+                        .onTimeout(() -> logger.warn("Querying persistence service '{}' takes more than {}ms.",
+                                queryService.getId(), SafeCaller.DEFAULT_TIMEOUT))
+                        .onException(e -> logger.error("Exception occurred while querying persistence service '{}': {}",
+                                queryService.getId(), e.getMessage(), e))
+                        .build().query(filter).iterator();
+                while (result.hasNext()) {
+                    HistoricItem next = result.next();
+                    if (next.getTimestamp().isAfter(ZonedDateTime.now())) {
+                        scheduleNextForecastForItem(itemName, next.getTimestamp().toInstant(), next.getState());
+                        break;
+                    }
+                }
+            }
+        }
+
+        private void restoreItemState(String itemName, State state) {
+            Item item = itemRegistry.get(itemName);
+            if (item != null) {
+                ((GenericItem) item).setState(state);
+            }
+            scheduleNextPersistedForecastForItem(itemName);
         }
 
         private void persistJob(List<PersistenceItemConfiguration> itemConfigs) {

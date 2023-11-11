@@ -71,9 +71,11 @@ import org.openhab.core.thing.profiles.ProfileContext;
 import org.openhab.core.thing.profiles.ProfileFactory;
 import org.openhab.core.thing.profiles.ProfileTypeUID;
 import org.openhab.core.thing.profiles.StateProfile;
+import org.openhab.core.thing.profiles.TimeSeriesProfile;
 import org.openhab.core.thing.profiles.TriggerProfile;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
+import org.openhab.core.types.TimeSeries;
 import org.openhab.core.types.Type;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -90,6 +92,7 @@ import org.slf4j.LoggerFactory;
  * It mainly mediates commands, state updates and triggers from ThingHandlers to the framework and vice versa.
  *
  * @author Simon Kaufmann - Initial contribution factored out of ThingManger
+ * @author Jan N. Klug - Added time series support
  */
 @NonNullByDefault
 @Component(service = { EventSubscriber.class, CommunicationManager.class }, immediate = true)
@@ -516,6 +519,20 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
         handleCallFromHandler(channelUID, thing, profile -> {
             if (profile instanceof StateProfile stateProfile) {
                 stateProfile.onCommandFromHandler(command);
+            }
+        });
+    }
+
+    public void sendTimeSeries(ChannelUID channelUID, TimeSeries timeSeries) {
+        ThingUID thingUID = channelUID.getThingUID();
+        Thing thing = thingRegistry.get(thingUID);
+        handleCallFromHandler(channelUID, thing, profile -> {
+            // TODO: check which profiles need enhancements
+            if (profile instanceof TimeSeriesProfile timeSeriesProfile) {
+                timeSeriesProfile.onTimeSeriesFromHandler(timeSeries);
+            } else {
+                logger.warn("Profile '{}' on channel {} does not support time series.", profile.getProfileTypeUID(),
+                        channelUID);
             }
         });
     }

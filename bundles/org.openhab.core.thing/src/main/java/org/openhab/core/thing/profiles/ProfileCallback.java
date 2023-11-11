@@ -16,6 +16,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.thing.link.ItemChannelLink;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
+import org.openhab.core.types.TimeSeries;
 
 /**
  * Gives access to the framework features for continuing the communication flow.
@@ -52,4 +53,11 @@ public interface ProfileCallback {
      * @param state
      */
     void sendUpdate(State state);
+
+    /**
+     * Send a {@link TimeSeries} update to the framework.
+     *
+     * @param timeSeries
+     */
+    void sendTimeSeries(TimeSeries timeSeries);
 }

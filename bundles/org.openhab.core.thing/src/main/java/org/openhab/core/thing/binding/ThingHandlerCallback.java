@@ -35,6 +35,7 @@ import org.openhab.core.thing.type.ChannelType;
 import org.openhab.core.thing.type.ChannelTypeUID;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
+import org.openhab.core.types.TimeSeries;
 
 /**
  * {@link ThingHandlerCallback} is callback interface for {@link ThingHandler}s. The implementation of a
@@ -64,6 +65,14 @@ public interface ThingHandlerCallback {
      * @param command command
      */
     void postCommand(ChannelUID channelUID, Command command);
+
+    /**
+     * Informs about a time series, whcihs is send from the channel.
+     *
+     * @param channelUID channel UID
+     * @param timeSeries time series
+     */
+    void sendTimeSeries(ChannelUID channelUID, TimeSeries timeSeries);
 
     /**
      * Informs about an updated status of a thing.
