@@ -28,7 +28,7 @@ import org.openhab.core.types.TimeSeries;
  * Items should not be updated directly (setting the state property), but updates should
  * be sent to the bus, so that all interested bundles are notified.
  *
- * Note: This class is a copy from the {@link org.openhab.core.model.script.actions.BusEvent} class
+ * Note: This class is a copy from the {@code org.openhab.core.model.script.actions.BusEvent} class
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Jan N. Klug - Refactored to interface

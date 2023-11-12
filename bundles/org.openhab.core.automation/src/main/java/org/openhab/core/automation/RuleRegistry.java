@@ -47,7 +47,7 @@ import org.openhab.core.common.registry.Registry;
  * <li>If one of the Rule's Triggers is triggered, the Rule becomes {@link RuleStatus#RUNNING}.
  * When the execution is complete, it will become {@link RuleStatus#IDLE} again.</li>
  * <li>If a Rule is disabled with {@link RuleManager#setEnabled(String, boolean)}, it's status is set to
- * {@link RuleStatus#DISABLED}.</li>
+ * {@link RuleStatusDetail#DISABLED}.</li>
  * </ul>
  *
  * @author Yordan Mihaylov - Initial contribution
