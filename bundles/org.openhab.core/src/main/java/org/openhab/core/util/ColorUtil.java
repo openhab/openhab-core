@@ -316,26 +316,26 @@ public class ColorUtil {
             throw new IllegalArgumentException("RGBW array only allows values between 0 and 255 with 4 values");
         }
 
-        BigDecimal Luminance = BigDecimal.valueOf(rgbw[3]);
-        BigDecimal Ri = BigDecimal.valueOf(rgbw[0]).add(Luminance);
-        BigDecimal Gi = BigDecimal.valueOf(rgbw[1]).add(Luminance);
-        BigDecimal Bi = BigDecimal.valueOf(rgbw[2]).add(Luminance);
+        BigDecimal luminance = BigDecimal.valueOf(rgbw[3]);
+        BigDecimal inRed = BigDecimal.valueOf(rgbw[0]).add(luminance);
+        BigDecimal inGreen = BigDecimal.valueOf(rgbw[1]).add(luminance);
+        BigDecimal inBlue = BigDecimal.valueOf(rgbw[2]).add(luminance);
 
         // Get the maximum between R, G, and B
-        final BigDecimal tM = BIG_DECIMAL_255.min(Ri.max(Gi.max(Bi)).max(BigDecimal.ZERO));
+        final BigDecimal maxColor = BIG_DECIMAL_255.min(inRed.max(inGreen.max(inBlue)).max(BigDecimal.ZERO));
 
         // If the maximum value is 0, immediately return pure black.
-        if (BigDecimal.ZERO.compareTo(tM) == 0) {
+        if (BigDecimal.ZERO.compareTo(maxColor) == 0) {
             return HSBType.BLACK;
         }
 
-        final BigDecimal multiplier = BIG_DECIMAL_255.divide(tM, 0, RoundingMode.DOWN);
+        final BigDecimal multiplier = BIG_DECIMAL_255.divide(maxColor, 0, RoundingMode.DOWN);
 
-        BigDecimal Ro = Ri.divide(multiplier).min(BIG_DECIMAL_255).max(BigDecimal.ZERO);
-        BigDecimal Go = Gi.divide(multiplier).min(BIG_DECIMAL_255).max(BigDecimal.ZERO);
-        BigDecimal Bo = Bi.divide(multiplier).min(BIG_DECIMAL_255).max(BigDecimal.ZERO);
+        BigDecimal outRed = inRed.divide(multiplier).min(BIG_DECIMAL_255).max(BigDecimal.ZERO);
+        BigDecimal outGreen = inGreen.divide(multiplier).min(BIG_DECIMAL_255).max(BigDecimal.ZERO);
+        BigDecimal outBlue = inBlue.divide(multiplier).min(BIG_DECIMAL_255).max(BigDecimal.ZERO);
 
-        return HSBType.fromRGB(Ro.intValue(), Go.intValue(), Bo.intValue());
+        return HSBType.fromRGB(outRed.intValue(), outGreen.intValue(), outBlue.intValue());
     }
 
     /**
