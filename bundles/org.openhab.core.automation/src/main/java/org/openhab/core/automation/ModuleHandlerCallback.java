@@ -33,12 +33,12 @@ public interface ModuleHandlerCallback {
      * This method gets <b>enabled</b> {@link RuleStatus} for a {@link Rule}.
      * The <b>enabled</b> rule statuses are {@link RuleStatus#UNINITIALIZED}, {@link RuleStatus#IDLE} and
      * {@link RuleStatus#RUNNING}.
-     * The <b>disabled</b> rule status is {@link RuleStatus#DISABLED}.
+     * The <b>disabled</b> rule status is {@link RuleStatusDetail#DISABLED}.
      *
      * @param ruleUID UID of the {@link Rule}
      * @return {@code true} when the {@link RuleStatus} is one of the {@link RuleStatus#UNINITIALIZED},
      *         {@link RuleStatus#IDLE} and {@link RuleStatus#RUNNING}, {@code false} when it is
-     *         {@link RuleStatus#DISABLED} and {@code null} when it is not available.
+     *         {@link RuleStatusDetail#DISABLED} and {@code null} when it is not available.
      */
     @Nullable
     Boolean isEnabled(String ruleUID);
@@ -47,7 +47,7 @@ public interface ModuleHandlerCallback {
      * This method is used for changing <b>enabled</b> state of the {@link Rule}.
      * The <b>enabled</b> rule statuses are {@link RuleStatus#UNINITIALIZED}, {@link RuleStatus#IDLE} and
      * {@link RuleStatus#RUNNING}.
-     * The <b>disabled</b> rule status is {@link RuleStatus#DISABLED}.
+     * The <b>disabled</b> rule status is {@link RuleStatusDetail#DISABLED}.
      *
      * @param uid the unique identifier of the {@link Rule}.
      * @param isEnabled a new <b>enabled / disabled</b> state of the {@link Rule}.
