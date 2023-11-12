@@ -58,7 +58,7 @@ public final class ReadyMarkerFilter {
     /**
      * Returns a {@link ReadyMarkerFilter} restricted to the given identifier.
      *
-     * @param type
+     * @param identifier
      * @return
      */
     public ReadyMarkerFilter withIdentifier(@Nullable String identifier) {

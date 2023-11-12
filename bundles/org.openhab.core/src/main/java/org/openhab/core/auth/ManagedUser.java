@@ -37,7 +37,7 @@ public class ManagedUser implements User {
     private List<UserApiToken> apiTokens = new ArrayList<>();
 
     /**
-     * Constructs a user with a password hash & salt provided by the caller.
+     * Constructs a user with a password hash and salt provided by the caller.
      *
      * @param name the username (account name)
      * @param passwordSalt the salt to compute the password hash

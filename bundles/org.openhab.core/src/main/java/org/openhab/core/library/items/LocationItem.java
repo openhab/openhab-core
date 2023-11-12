@@ -62,7 +62,7 @@ public class LocationItem extends GenericItem {
      * http://stackoverflow.com/questions/837872/calculate-distance-in-meters-when-you-know-longitude-and-latitude-in-
      * java
      *
-     * @param away : the point to calculate the distance with
+     * @param awayItem the point to calculate the distance with
      * @return distance between the two points in meters
      */
     public DecimalType distanceFrom(@Nullable LocationItem awayItem) {

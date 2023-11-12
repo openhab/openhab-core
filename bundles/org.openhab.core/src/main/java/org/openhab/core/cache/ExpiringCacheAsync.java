@@ -40,7 +40,7 @@ public class ExpiringCacheAsync<V> {
      * Create a new instance.
      *
      * @param expiry the duration in milliseconds for how long the value stays valid. Must be positive.
-     * @throws IllegalArgumentException For an expire value <=0.
+     * @throws IllegalArgumentException For an expire {@code value <=0}.
      */
     public ExpiringCacheAsync(Duration expiry) {
         if (expiry.isNegative() || expiry.isZero()) {
@@ -53,7 +53,7 @@ public class ExpiringCacheAsync<V> {
      * Create a new instance.
      *
      * @param expiry the duration in milliseconds for how long the value stays valid. Must be greater than 0.
-     * @throws IllegalArgumentException For an expire value <=0.
+     * @throws IllegalArgumentException For an expire {@code value <=0}.
      */
     public ExpiringCacheAsync(long expiry) {
         this(Duration.ofMillis(expiry));
