@@ -1164,7 +1164,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
     }
 
     /**
-     * This method evaluates actions of the {@link Rule} and set their {@link Output}s when they exists.
+     * This method evaluates actions of the {@link Rule} and set their {@link Output}s when they exist.
      *
      * @param rule executed rule.
      */
@@ -1207,7 +1207,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
      * This method gets rule's status object.
      *
      * @param rUID rule's UID
-     * @return status of the rule or null when such rule does not exists.
+     * @return status of the rule or null when such rule does not exist.
      */
     protected @Nullable RuleStatus getRuleStatus(String rUID) {
         RuleStatusInfo info = getStatusInfo(rUID);
