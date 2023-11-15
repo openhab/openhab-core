@@ -273,7 +273,7 @@ public class AudioManagerTest {
 
     /**
      *
-     * @param param - either default source or default sink
+     * @param param either default source or default sink
      */
     private void assertAddedParameterOption(String param, Locale locale) {
         String id = "";
