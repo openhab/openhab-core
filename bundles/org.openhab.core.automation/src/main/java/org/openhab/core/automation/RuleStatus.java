@@ -56,7 +56,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * <td><b>N/A</b></td>
  * <td>
  * <li>Triggered</li>
- * <li><b>{@link RuleRegistry#runNow(String) runNow}</b></li></td>
+ * <li><b>{@link RuleManager#runNow(String) runNow}</b></li></td>
  * </tr>
  * <td></td>
  * <tr>

@@ -75,7 +75,6 @@ public class ReferenceResolver {
      * try to find values for {{firstName}} and {{lastName}} in the given context and replace them. References that are
      * not found in the context - are not replaced.
      *
-     * @param module module that is directly part of Rule or part of CompositeModule
      * @param context containing Rule configuration or Composite configuration values.
      */
     public static void updateConfiguration(Configuration config, Map<String, ?> context, Logger logger) {

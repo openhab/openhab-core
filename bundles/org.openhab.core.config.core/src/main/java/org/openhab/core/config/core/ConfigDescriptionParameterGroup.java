@@ -21,7 +21,7 @@ import org.eclipse.jdt.annotation.Nullable;
  * be displayed together in the UI (eg in a single tab).
  * <p>
  * A {@link ConfigDescriptionParameter} instance must also contain the groupName. It should be permissible to use the
- * groupId in the {@link ConfigDesctiptionParameter} without supplying a corresponding
+ * groupId in the {@link ConfigDescriptionParameter} without supplying a corresponding
  * {@link ConfigDescriptionParameterGroup} - in this way the UI can group the parameters together, but doesn't have the
  * group information.
  *

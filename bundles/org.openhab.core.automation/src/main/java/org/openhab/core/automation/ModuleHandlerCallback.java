@@ -33,12 +33,12 @@ public interface ModuleHandlerCallback {
      * This method gets <b>enabled</b> {@link RuleStatus} for a {@link Rule}.
      * The <b>enabled</b> rule statuses are {@link RuleStatus#UNINITIALIZED}, {@link RuleStatus#IDLE} and
      * {@link RuleStatus#RUNNING}.
-     * The <b>disabled</b> rule status is {@link RuleStatus#DISABLED}.
+     * The <b>disabled</b> rule status is {@link RuleStatusDetail#DISABLED}.
      *
      * @param ruleUID UID of the {@link Rule}
      * @return {@code true} when the {@link RuleStatus} is one of the {@link RuleStatus#UNINITIALIZED},
      *         {@link RuleStatus#IDLE} and {@link RuleStatus#RUNNING}, {@code false} when it is
-     *         {@link RuleStatus#DISABLED} and {@code null} when it is not available.
+     *         {@link RuleStatusDetail#DISABLED} and {@code null} when it is not available.
      */
     @Nullable
     Boolean isEnabled(String ruleUID);
@@ -47,7 +47,7 @@ public interface ModuleHandlerCallback {
      * This method is used for changing <b>enabled</b> state of the {@link Rule}.
      * The <b>enabled</b> rule statuses are {@link RuleStatus#UNINITIALIZED}, {@link RuleStatus#IDLE} and
      * {@link RuleStatus#RUNNING}.
-     * The <b>disabled</b> rule status is {@link RuleStatus#DISABLED}.
+     * The <b>disabled</b> rule status is {@link RuleStatusDetail#DISABLED}.
      *
      * @param uid the unique identifier of the {@link Rule}.
      * @param isEnabled a new <b>enabled / disabled</b> state of the {@link Rule}.
@@ -79,7 +79,7 @@ public interface ModuleHandlerCallback {
      * This should always be possible unless an action has a mandatory input that is linked to a trigger.
      * In that case the action is skipped and the rule engine continues execution of rest actions.
      *
-     * @param ruleUID id of the rule whose actions have to be executed.
+     * @param uid id of the rule whose actions have to be executed.
      */
     void runNow(String uid);
 
@@ -87,7 +87,7 @@ public interface ModuleHandlerCallback {
      * Same as {@link #runNow(String)} with the additional option to enable/disable evaluation of
      * conditions defined in the target rule. The context can be set here, too, but also might be {@code null}.
      *
-     * @param ruleUID id of the rule whose actions have to be executed.
+     * @param uid id of the rule whose actions have to be executed.
      * @param considerConditions if {@code true} the conditions of the rule will be checked.
      * @param context the context that is passed to the conditions and the actions of the rule.
      */

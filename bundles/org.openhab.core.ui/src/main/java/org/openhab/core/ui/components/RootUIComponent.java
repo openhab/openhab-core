@@ -26,7 +26,7 @@ import org.openhab.core.common.registry.Identifiable;
 import org.openhab.core.config.core.dto.ConfigDescriptionDTO;
 
 /**
- * A root component is a special type of {@link Component} at the root of the hierarchy.
+ * A root component is a special type of {@link UIComponent} at the root of the hierarchy.
  * It has a number of specific parameters, a set of tags, a timestamp, some configurable
  * parameters ("props") and is identifiable by its UID (generally a GUID).
  *
@@ -106,7 +106,7 @@ public class RootUIComponent extends UIComponent implements Identifiable<String>
     }
 
     /**
-     * Updates the timestamp of the component to the current date & time.
+     * Updates the timestamp of the component to the current date and time.
      */
     public void updateTimestamp() {
         this.timestamp = new Date();

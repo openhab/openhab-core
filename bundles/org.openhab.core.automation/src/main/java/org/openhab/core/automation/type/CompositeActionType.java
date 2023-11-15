@@ -43,7 +43,6 @@ public class CompositeActionType extends ActionType {
      * @param uid the {@link ActionType}'s identifier, or {@code null} if a random identifier should be
      *            generated.
      * @param configDescriptions describing meta-data for the configuration of the future {@link Action} instances.
-     * @param children is a {@link List} of {@link Action}s.
      * @param inputs a {@link List} with {@link Input} meta-information descriptions of the future
      *            {@link Action} instances.
      * @param outputs a {@link List} with {@link Output} meta-information descriptions of the future

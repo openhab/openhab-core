@@ -320,7 +320,7 @@ public class ThingEventFactory extends AbstractEventFactory {
      * Creates a {@link ChannelTriggeredEvent}
      *
      * @param event the event
-     * @param channel the {@link ChannelUID}
+     * @param channelUID the {@link ChannelUID}
      * @return Created {@link ChannelTriggeredEvent}
      */
     public static ChannelTriggeredEvent createTriggerEvent(String event, ChannelUID channelUID) {

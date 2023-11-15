@@ -29,13 +29,13 @@ import org.eclipse.jdt.annotation.Nullable;
 public interface ChannelGroupTypeProvider {
 
     /**
-     * @see ChannelTypeRegistry#getChannelGroupType(ChannelGroupTypeUID, Locale)
+     * @see ChannelGroupTypeRegistry#getChannelGroupType(ChannelGroupTypeUID, Locale)
      */
     @Nullable
     ChannelGroupType getChannelGroupType(ChannelGroupTypeUID channelGroupTypeUID, @Nullable Locale locale);
 
     /**
-     * @see ChannelTypeRegistry#getChannelGroupTypes(Locale)
+     * @see ChannelGroupTypeRegistry#getChannelGroupTypes(Locale)
      */
     Collection<ChannelGroupType> getChannelGroupTypes(@Nullable Locale locale);
 }

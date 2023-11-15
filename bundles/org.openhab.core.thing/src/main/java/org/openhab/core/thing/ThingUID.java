@@ -40,7 +40,7 @@ public class ThingUID extends UID {
     /**
      * Instantiates a new thing UID.
      *
-     * @param thingType the thing type
+     * @param thingTypeUID the thing type
      * @param id the id
      */
     public ThingUID(ThingTypeUID thingTypeUID, String id) {
@@ -50,7 +50,7 @@ public class ThingUID extends UID {
     /**
      * Instantiates a new thing UID.
      *
-     * @param thingType the thing type
+     * @param thingTypeUID the thing type
      * @param bridgeUID the bridge UID through which the thing is accessed
      * @param id the id of the thing
      */
@@ -62,7 +62,7 @@ public class ThingUID extends UID {
     /**
      * Instantiates a new thing UID.
      *
-     * @param thingType the thing type
+     * @param thingTypeUID the thing type
      * @param id the id
      */
     public ThingUID(ThingTypeUID thingTypeUID, String id, String... bridgeIds) {

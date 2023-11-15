@@ -37,7 +37,7 @@ public interface AudioHTTPServer {
      *
      * @param stream the stream to serve on HTTP
      * @return the relative URL to access the stream starting with a '/'
-     * @deprecated Use {@link AudioHTTPServer#serve(AudioStream, int, boolean, CompletableFuture)}
+     * @deprecated Use {@link AudioHTTPServer#serve(AudioStream, int, boolean)}
      */
     @Deprecated
     String serve(AudioStream stream);
@@ -54,7 +54,7 @@ public interface AudioHTTPServer {
      * @param stream the stream to serve on HTTP
      * @param seconds number of seconds for which the stream is available through HTTP
      * @return the relative URL to access the stream starting with a '/'
-     * @deprecated Use {@link AudioHTTPServer#serve(AudioStream, int, boolean, CompletableFuture)}
+     * @deprecated Use {@link AudioHTTPServer#serve(AudioStream, int, boolean)}
      */
     @Deprecated
     String serve(AudioStream stream, int seconds);

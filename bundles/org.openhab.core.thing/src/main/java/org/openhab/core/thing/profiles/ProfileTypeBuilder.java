@@ -94,7 +94,7 @@ public final class ProfileTypeBuilder<T extends ProfileType> {
     /**
      * Declare that the given item type(s) are supported by a profile of this type.
      *
-     * @param itemType
+     * @param itemTypes
      * @return the builder itself
      */
     public ProfileTypeBuilder<T> withSupportedItemTypes(Collection<String> itemTypes) {

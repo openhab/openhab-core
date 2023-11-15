@@ -15,6 +15,7 @@ package org.openhab.core.thing.binding.firmware;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
 import org.openhab.core.thing.firmware.FirmwareUpdateService;
 
 /**
@@ -53,7 +54,7 @@ public interface FirmwareUpdateHandler {
     /**
      * Returns true, if this firmware update handler is in a state in which the firmware update can be executed,
      * otherwise false (e.g. the thing is {@link ThingStatus#OFFLINE} or its status detail is already
-     * {@link ThingStatusDetail#FIRMWARE_UPDATING.)
+     * {@link ThingStatusDetail#FIRMWARE_UPDATING}.)
      *
      * @return true, if this firmware update handler is in a state in which the firmware update can be executed,
      *         otherwise false

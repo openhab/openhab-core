@@ -89,7 +89,7 @@ public interface DiscoveryService {
 
     /**
      * Stops an active scan for devices.<br>
-     * This method must not block any calls such as {@link #startScan()} and must
+     * This method must not block any calls such as {@link #startScan} and must
      * return fast.
      * <p>
      * After this method returns, no further notifications about {@link DiscoveryResult}s are allowed to be sent to any

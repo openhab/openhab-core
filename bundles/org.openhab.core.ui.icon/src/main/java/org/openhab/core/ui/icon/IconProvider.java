@@ -66,9 +66,9 @@ public interface IconProvider {
     /**
      * retrieves the {@link InputStream} of an icon
      *
-     * @param iconName the icon name
+     * @param category the icon category
      * @param iconSetId the id of the icon set for which the icon is requested
-     * @param the string representation of the state (for the case that the icon differs for different states)
+     * @param state the string representation of the state (for the case that the icon differs for different states)
      * @param format the format of the stream (usually either png or svg)
      * @return a byte stream of the icon in the given format or null, if no icon exists
      */

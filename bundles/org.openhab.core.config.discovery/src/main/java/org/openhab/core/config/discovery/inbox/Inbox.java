@@ -95,7 +95,7 @@ public interface Inbox {
      * case the result object should be regarded as known by the system so that
      * further processing should be skipped.
      * <p>
-     * If the specified flag is {@code null}, {@link DiscoveryResultFlag.NEW} is set by default.
+     * If the specified flag is {@code null}, {@link DiscoveryResultFlag#NEW} is set by default.
      *
      * @param flag the flag of the given thingUID result to be set (could be null)
      */
