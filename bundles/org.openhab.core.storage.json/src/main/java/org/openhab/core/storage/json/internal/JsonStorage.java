@@ -391,14 +391,14 @@ public class JsonStorage<T> implements Storage<T> {
 
         // Handle a maximum time for deferring the commit.
         // This stops a pathological loop preventing saving
-        if (deferredSince != 0 && deferredSince < System.nanoTime() - (maxDeferredPeriod * 1000L)) {
+        if (deferredSince != 0 && deferredSince < System.currentTimeMillis() - maxDeferredPeriod) {
             flush();
             // as we committed the database now, there is no need to schedule a new commit
             return;
         }
 
         if (deferredSince == 0) {
-            deferredSince = System.nanoTime();
+            deferredSince = System.currentTimeMillis();
         }
 
         // Schedule the commit
