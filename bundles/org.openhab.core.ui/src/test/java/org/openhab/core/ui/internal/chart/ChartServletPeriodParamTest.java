@@ -12,10 +12,11 @@
  */
 package org.openhab.core.ui.internal.chart;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.time.Duration;
-import java.time.Period;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalAmount;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
@@ -27,128 +28,80 @@ import org.junit.jupiter.api.Test;
 public class ChartServletPeriodParamTest {
 
     @Test
-    public void convertToPeriodFromNull() {
-        Period period = ChartServlet.convertToPeriod(null, Period.ZERO);
-        assertTrue(period.isZero());
+    public void convertToTemporalAmountFromNull() {
+        TemporalAmount period = ChartServlet.convertToTemporalAmount(null, Duration.ZERO);
+        assertEquals(0, period.get(ChronoUnit.SECONDS));
     }
 
     @Test
-    public void convertToPeriodFromHours() {
-        Period period = ChartServlet.convertToPeriod("2h", Period.ZERO);
-        assertTrue(period.isZero());
+    public void convertToTemporalAmountFromHours() {
+        TemporalAmount period = ChartServlet.convertToTemporalAmount("h", Duration.ZERO);
+        assertEquals(1 * 60 * 60, period.get(ChronoUnit.SECONDS));
+
+        period = ChartServlet.convertToTemporalAmount("12h", Duration.ZERO);
+        assertEquals(12 * 60 * 60, period.get(ChronoUnit.SECONDS));
     }
 
     @Test
-    public void convertToPeriodFromDays() {
-        Period period = ChartServlet.convertToPeriod("D", Period.ZERO);
-        assertEquals(1, period.getDays());
-        assertEquals(0, period.getMonths());
-        assertEquals(0, period.getYears());
+    public void convertToTemporalAmountFromDays() {
+        TemporalAmount period = ChartServlet.convertToTemporalAmount("D", Duration.ZERO);
+        assertEquals(1, period.get(ChronoUnit.DAYS));
+        assertEquals(0, period.get(ChronoUnit.MONTHS));
+        assertEquals(0, period.get(ChronoUnit.YEARS));
 
-        period = ChartServlet.convertToPeriod("4D", Period.ZERO);
-        assertEquals(4, period.getDays());
-        assertEquals(0, period.getMonths());
-        assertEquals(0, period.getYears());
+        period = ChartServlet.convertToTemporalAmount("4D", Duration.ZERO);
+        assertEquals(4, period.get(ChronoUnit.DAYS));
+        assertEquals(0, period.get(ChronoUnit.MONTHS));
+        assertEquals(0, period.get(ChronoUnit.YEARS));
     }
 
     @Test
-    public void convertToPeriodFromWeeks() {
-        Period period = ChartServlet.convertToPeriod("W", Period.ZERO);
-        assertEquals(7, period.getDays());
-        assertEquals(0, period.getMonths());
-        assertEquals(0, period.getYears());
+    public void convertToTemporalAmountFromWeeks() {
+        TemporalAmount period = ChartServlet.convertToTemporalAmount("W", Duration.ZERO);
+        assertEquals(7, period.get(ChronoUnit.DAYS));
+        assertEquals(0, period.get(ChronoUnit.MONTHS));
+        assertEquals(0, period.get(ChronoUnit.YEARS));
 
-        period = ChartServlet.convertToPeriod("2W", Period.ZERO);
-        assertEquals(14, period.getDays());
-        assertEquals(0, period.getMonths());
-        assertEquals(0, period.getYears());
+        period = ChartServlet.convertToTemporalAmount("2W", Duration.ZERO);
+        assertEquals(14, period.get(ChronoUnit.DAYS));
+        assertEquals(0, period.get(ChronoUnit.MONTHS));
+        assertEquals(0, period.get(ChronoUnit.YEARS));
     }
 
     @Test
-    public void convertToPeriodFromMonths() {
-        Period period = ChartServlet.convertToPeriod("M", Period.ZERO);
-        assertEquals(0, period.getDays());
-        assertEquals(1, period.getMonths());
-        assertEquals(0, period.getYears());
+    public void convertToTemporalAmountFromMonths() {
+        TemporalAmount period = ChartServlet.convertToTemporalAmount("M", Duration.ZERO);
+        assertEquals(0, period.get(ChronoUnit.DAYS));
+        assertEquals(1, period.get(ChronoUnit.MONTHS));
+        assertEquals(0, period.get(ChronoUnit.YEARS));
 
-        period = ChartServlet.convertToPeriod("3M", Period.ZERO);
-        assertEquals(0, period.getDays());
-        assertEquals(3, period.getMonths());
-        assertEquals(0, period.getYears());
+        period = ChartServlet.convertToTemporalAmount("3M", Duration.ZERO);
+        assertEquals(0, period.get(ChronoUnit.DAYS));
+        assertEquals(3, period.get(ChronoUnit.MONTHS));
+        assertEquals(0, period.get(ChronoUnit.YEARS));
     }
 
     @Test
-    public void convertToPeriodFromYears() {
-        Period period = ChartServlet.convertToPeriod("Y", Period.ZERO);
-        assertEquals(0, period.getDays());
-        assertEquals(0, period.getMonths());
-        assertEquals(1, period.getYears());
+    public void convertToTemporalAmountFromYears() {
+        TemporalAmount period = ChartServlet.convertToTemporalAmount("Y", Duration.ZERO);
+        assertEquals(0, period.get(ChronoUnit.DAYS));
+        assertEquals(0, period.get(ChronoUnit.MONTHS));
+        assertEquals(1, period.get(ChronoUnit.YEARS));
 
-        period = ChartServlet.convertToPeriod("2Y", Period.ZERO);
-        assertEquals(0, period.getDays());
-        assertEquals(0, period.getMonths());
-        assertEquals(2, period.getYears());
+        period = ChartServlet.convertToTemporalAmount("2Y", Duration.ZERO);
+        assertEquals(0, period.get(ChronoUnit.DAYS));
+        assertEquals(0, period.get(ChronoUnit.MONTHS));
+        assertEquals(2, period.get(ChronoUnit.YEARS));
     }
 
     @Test
-    public void convertToPeriodFromISO8601() {
-        Period period = ChartServlet.convertToPeriod("P2Y3M4D", Period.ZERO);
-        assertEquals(4, period.getDays());
-        assertEquals(3, period.getMonths());
-        assertEquals(2, period.getYears());
+    public void convertToTemporalAmountFromISO8601() {
+        TemporalAmount period = ChartServlet.convertToTemporalAmount("P2Y3M4D", Duration.ZERO);
+        assertEquals(4, period.get(ChronoUnit.DAYS));
+        assertEquals(3, period.get(ChronoUnit.MONTHS));
+        assertEquals(2, period.get(ChronoUnit.YEARS));
 
-        period = ChartServlet.convertToPeriod("P1DT12H30M15S", Period.ZERO);
-        assertTrue(period.isZero());
-    }
-
-    @Test
-    public void convertToDurationFromNull() {
-        Duration duration = ChartServlet.convertToDuration(null, Duration.ZERO);
-        assertTrue(duration.isZero());
-    }
-
-    @Test
-    public void convertToDurationFromHours() {
-        Duration duration = ChartServlet.convertToDuration("h", Duration.ZERO);
-        assertEquals(1 * 60 * 60, duration.getSeconds());
-
-        duration = ChartServlet.convertToDuration("12h", Duration.ZERO);
-        assertEquals(12 * 60 * 60, duration.getSeconds());
-    }
-
-    @Test
-    public void convertToDurationFromDays() {
-        Duration duration = ChartServlet.convertToDuration("D", Duration.ZERO);
-        assertEquals(24 * 60 * 60, duration.getSeconds());
-
-        duration = ChartServlet.convertToDuration("2D", Duration.ZERO);
-        assertEquals(48 * 60 * 60, duration.getSeconds());
-    }
-
-    @Test
-    public void convertToDurationFromWeeks() {
-        Duration duration = ChartServlet.convertToDuration("2W", Duration.ZERO);
-        assertTrue(duration.isZero());
-    }
-
-    @Test
-    public void convertToDurationFromMonths() {
-        Duration duration = ChartServlet.convertToDuration("3M", Duration.ZERO);
-        assertTrue(duration.isZero());
-    }
-
-    @Test
-    public void convertToDurationFromYears() {
-        Duration duration = ChartServlet.convertToDuration("2Y", Duration.ZERO);
-        assertTrue(duration.isZero());
-    }
-
-    @Test
-    public void convertToDurationFromISO8601() {
-        Duration duration = ChartServlet.convertToDuration("P1DT12H30M15S", Duration.ZERO);
-        assertEquals(36 * 60 * 60 + 30 * 60 + 15, duration.getSeconds());
-
-        duration = ChartServlet.convertToDuration("P2Y3M4D", Duration.ZERO);
-        assertTrue(duration.isZero());
+        period = ChartServlet.convertToTemporalAmount("P1DT12H30M15S", Duration.ZERO);
+        assertEquals(36 * 60 * 60 + 30 * 60 + 15, period.get(ChronoUnit.SECONDS));
     }
 }

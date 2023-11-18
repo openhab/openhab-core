@@ -20,6 +20,7 @@ import java.time.Period;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.time.temporal.TemporalAmount;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -99,7 +100,7 @@ public class ChartServlet extends HttpServlet {
     // The URI of this servlet
     public static final String SERVLET_PATH = "/chart";
 
-    private static final Duration DEFAULT_DURATION = Duration.ofDays(1);
+    private static final Duration DEFAULT_PERIOD = Duration.ofDays(1);
 
     protected static final Map<String, ChartProvider> CHART_PROVIDERS = new ConcurrentHashMap<>();
 
@@ -223,8 +224,7 @@ public class ChartServlet extends HttpServlet {
         }
 
         // Read out the parameter period, begin and end and save them.
-        Period period = convertToPeriod(periodParam, Period.ZERO);
-        Duration duration = convertToDuration(periodParam, DEFAULT_DURATION);
+        TemporalAmount period = convertToTemporalAmount(periodParam, DEFAULT_PERIOD);
         ZonedDateTime timeBegin = null;
         ZonedDateTime timeEnd = null;
 
@@ -251,13 +251,13 @@ public class ChartServlet extends HttpServlet {
         // Set begin and end time and check legality.
         if (timeBegin == null && timeEnd == null) {
             timeEnd = ZonedDateTime.now(timeZoneProvider.getTimeZone());
-            timeBegin = timeEnd.minus(!period.isZero() ? period : duration);
+            timeBegin = timeEnd.minus(period);
             logger.debug("No begin or end is specified, use now as end and now-period as begin.");
         } else if (timeEnd == null) {
-            timeEnd = timeBegin.plus(!period.isZero() ? period : duration);
+            timeEnd = timeBegin.plus(period);
             logger.debug("No end is specified, use begin + period as end.");
         } else if (timeBegin == null) {
-            timeBegin = timeEnd.minus(!period.isZero() ? period : duration);
+            timeBegin = timeEnd.minus(period);
             logger.debug("No begin is specified, use end-period as begin");
         } else if (timeEnd.isBefore(timeBegin)) {
             res.sendError(HttpServletResponse.SC_BAD_REQUEST, "The end is before the begin.");
@@ -351,30 +351,25 @@ public class ChartServlet extends HttpServlet {
     public void destroy() {
     }
 
-    public static Period convertToPeriod(@Nullable String periodParam, Period defaultPeriod) {
-        Period period = defaultPeriod;
+    public static TemporalAmount convertToTemporalAmount(@Nullable String periodParam, TemporalAmount defaultPeriod) {
+        TemporalAmount period = defaultPeriod;
         String convertedPeriod = convertPeriodToISO8601(periodParam);
         if (convertedPeriod != null) {
+            boolean failed = false;
             try {
                 period = Period.parse(convertedPeriod);
             } catch (DateTimeParseException e) {
-                // Ignored
+                failed = true;
+            }
+            if (failed) {
+                try {
+                    period = Duration.parse(convertedPeriod);
+                } catch (DateTimeParseException e) {
+                    // Ignored
+                }
             }
         }
         return period;
-    }
-
-    public static Duration convertToDuration(@Nullable String periodParam, Duration defaultDuration) {
-        Duration duration = defaultDuration;
-        String convertedPeriod = convertPeriodToISO8601(periodParam);
-        if (convertedPeriod != null) {
-            try {
-                duration = Duration.parse(convertedPeriod);
-            } catch (DateTimeParseException e) {
-                // Ignored
-            }
-        }
-        return duration;
     }
 
     private static @Nullable String convertPeriodToISO8601(@Nullable String period) {
