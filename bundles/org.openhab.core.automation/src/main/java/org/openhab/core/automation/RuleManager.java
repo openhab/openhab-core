@@ -63,7 +63,7 @@ public interface RuleManager {
      *
      * @param ruleUID UID of the {@link Rule}
      * @return {@link RuleStatusInfo} object containing status of the looking {@link Rule} or null when a rule with
-     *         specified UID does not exists.
+     *         specified UID does not exist.
      */
     @Nullable
     RuleStatusInfo getStatusInfo(String ruleUID);
@@ -73,7 +73,7 @@ public interface RuleManager {
      *
      * @param ruleUID UID of the {@link Rule}
      * @return {@link RuleStatus} object containing status of the looking {@link Rule} or null when a rule with
-     *         specified UID does not exists.
+     *         specified UID does not exist.
      */
     @Nullable
     RuleStatus getStatus(String ruleUID);

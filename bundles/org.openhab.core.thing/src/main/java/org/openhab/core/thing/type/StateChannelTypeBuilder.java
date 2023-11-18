@@ -44,7 +44,7 @@ public interface StateChannelTypeBuilder extends ChannelTypeBuilder<StateChannel
     /**
      * Sets the list of {@link CommandOption}s for the {@link ChannelType}
      *
-     * @param commandOptions the list of {@link CommandOption}s
+     * @param commandDescription the list of {@link CommandOption}s
      * @return this builder
      */
     StateChannelTypeBuilder withCommandDescription(@Nullable CommandDescription commandDescription);

@@ -45,7 +45,7 @@ import org.openhab.core.thing.firmware.FirmwareUpdateService;
  * <p>
  * The {@link Firmware} implements the {@link Comparable} interface in order to be able to sort firmwares based on their
  * versions. Firmwares are sorted in a descending sequence, i.e. that the latest firmware will be the first
- * element in a sorted result set. The implementation of {@link Firmware#compareTo(Firmware)} splits the firmware
+ * element in a sorted result set. The implementation of {@link Firmware#compareTo} splits the firmware
  * version by the delimiters ".", "-" and "_" and compares the different parts of the firmware version. As a result the
  * firmware version <i>2-0-1</i> is newer then firmware version <i>2.0.0</i> which again is newer than firmware version
  * <i>1-9_9.9_abc</i>. Consequently <i>2.0-0</i>, <i>2-0_0</i> and <i>2_0.0</i> represent the same firmware version.

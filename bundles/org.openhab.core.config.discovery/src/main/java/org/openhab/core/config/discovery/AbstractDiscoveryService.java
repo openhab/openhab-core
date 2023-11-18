@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
  * The {@link AbstractDiscoveryService} provides methods which handle the {@link DiscoveryListener}s.
  *
  * Subclasses do not have to care about adding and removing those listeners.
- * They can use the protected methods {@link #thingDiscovered(DiscoveryResult)} and {@link #thingRemoved(String)} in
+ * They can use the protected methods {@link #thingDiscovered(DiscoveryResult)} and {@link #thingRemoved(ThingUID)} in
  * order to notify the registered {@link DiscoveryListener}s.
  *
  * @author Oliver Libutzki - Initial contribution
@@ -83,7 +83,7 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
      *            service automatically stops its forced discovery process (>= 0).
      * @param backgroundDiscoveryEnabledByDefault defines, whether the default for this discovery service is to
      *            enable background discovery or not.
-     * @throws IllegalArgumentException if the timeout < 0
+     * @throws IllegalArgumentException if {@code timeout < 0}
      */
     public AbstractDiscoveryService(@Nullable Set<ThingTypeUID> supportedThingTypes, int timeout,
             boolean backgroundDiscoveryEnabledByDefault) throws IllegalArgumentException {
@@ -102,7 +102,7 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
      * @param timeout the discovery timeout in seconds after which the discovery service
      *            automatically stops its forced discovery process (>= 0).
      *            If set to 0, disables the automatic stop.
-     * @throws IllegalArgumentException if the timeout < 0
+     * @throws IllegalArgumentException if {@code timeout < 0}
      */
     public AbstractDiscoveryService(@Nullable Set<ThingTypeUID> supportedThingTypes, int timeout)
             throws IllegalArgumentException {
@@ -115,7 +115,7 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
      * @param timeout the discovery timeout in seconds after which the discovery service
      *            automatically stops its forced discovery process (>= 0).
      *            If set to 0, disables the automatic stop.
-     * @throws IllegalArgumentException if the timeout < 0
+     * @throws IllegalArgumentException if {@code timeout < 0}
      */
     public AbstractDiscoveryService(int timeout) throws IllegalArgumentException {
         this(null, timeout);
@@ -221,10 +221,10 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
     }
 
     /**
-     * This method is called by the {@link #startScan(ScanListener))} implementation of the
+     * This method is called by the {@link #startScan(ScanListener)} implementation of the
      * {@link AbstractDiscoveryService}.
      * The abstract class schedules a call of {@link #stopScan()} after {@link #getScanTimeout()} seconds. If this
-     * behavior is not appropriate, the {@link #startScan(ScanListener))} method should be overridden.
+     * behavior is not appropriate, the {@link #startScan(ScanListener)} method should be overridden.
      */
     protected abstract void startScan();
 
@@ -401,9 +401,8 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
 
     /**
      * Can be overridden to start background discovery logic. This method is
-     * called when {@link AbstractDiscoveryService#setBackgroundDiscoveryEnabled(boolean)} is called with true as
-     * parameter and when the component is being
-     * activated (see {@link AbstractDiscoveryService#activate()}.
+     * called if background discovery is enabled when the component is being
+     * activated (see {@link AbstractDiscoveryService#activate}.
      */
     protected void startBackgroundDiscovery() {
         // can be overridden
@@ -411,8 +410,7 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
 
     /**
      * Can be overridden to stop background discovery logic. This method is
-     * called when {@link AbstractDiscoveryService#setBackgroundDiscoveryEnabled(boolean)} is called with false as
-     * parameter and when the component is being
+     * called if background discovery is enabled when the component is being
      * deactivated (see {@link AbstractDiscoveryService#deactivate()}.
      */
     protected void stopBackgroundDiscovery() {

@@ -112,6 +112,7 @@ import org.slf4j.LoggerFactory;
  * @author Mark Herwege - new method getFormatPattern(widget), clean pattern
  * @author Laurent Garnier - Support added for multiple AND conditions in labelcolor/valuecolor/visibility
  * @author Laurent Garnier - new icon parameter based on conditional rules
+ * @author Danny Baumann - widget label source support
  */
 @NonNullByDefault
 @Component(immediate = true, configurationPid = "org.openhab.sitemap", //
@@ -141,6 +142,16 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
     private final Map<Widget, Widget> defaultWidgets = Collections.synchronizedMap(new WeakHashMap<>());
 
     private String groupMembersSorting = DEFAULT_SORTING;
+
+    private static class WidgetLabelWithSource {
+        public final String label;
+        public final WidgetLabelSource source;
+
+        public WidgetLabelWithSource(String l, WidgetLabelSource s) {
+            label = l;
+            source = s;
+        }
+    }
 
     @Activate
     public ItemUIRegistryImpl(@Reference ItemRegistry itemRegistry) {
@@ -325,7 +336,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
 
     @Override
     public @Nullable String getLabel(Widget w) {
-        String label = getLabelFromWidget(w);
+        String label = getLabelFromWidget(w).label;
 
         String itemName = w.getItem();
         if (itemName == null || itemName.isBlank()) {
@@ -468,6 +479,11 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         return transform(label, considerTransform, labelMappedOption);
     }
 
+    @Override
+    public WidgetLabelSource getLabelSource(Widget w) {
+        return getLabelFromWidget(w).source;
+    }
+
     private QuantityType<?> convertStateToWidgetUnit(QuantityType<?> quantityState, Widget w) {
         Unit<?> widgetUnit = UnitUtils.parseUnit(getFormatPattern(w));
         if (widgetUnit != null && !widgetUnit.equals(quantityState.getUnit())) {
@@ -479,7 +495,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
 
     @Override
     public @Nullable String getFormatPattern(Widget w) {
-        String label = getLabelFromWidget(w);
+        String label = getLabelFromWidget(w).label;
         String pattern = getFormatPattern(label);
         String itemName = w.getItem();
         try {
@@ -543,24 +559,30 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         }
     }
 
-    private String getLabelFromWidget(Widget w) {
+    private WidgetLabelWithSource getLabelFromWidget(Widget w) {
         String label = null;
+        WidgetLabelSource source = WidgetLabelSource.NONE;
+
         if (w.getLabel() != null) {
             // if there is a label defined for the widget, use this
             label = w.getLabel();
+            source = WidgetLabelSource.SITEMAP_WIDGET;
         } else {
             String itemName = w.getItem();
             if (itemName != null) {
                 // check if any item ui provider provides a label for this item
                 label = getLabel(itemName);
                 // if there is no item ui provider saying anything, simply use the name as a label
-                if (label == null) {
+                if (label != null) {
+                    source = WidgetLabelSource.ITEM_LABEL;
+                } else {
                     label = itemName;
+                    source = WidgetLabelSource.ITEM_NAME;
                 }
             }
         }
         // use an empty string, if no label could be found
-        return label != null ? label : "";
+        return new WidgetLabelWithSource(label != null ? label : "", source);
     }
 
     /**

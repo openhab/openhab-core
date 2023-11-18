@@ -12,11 +12,11 @@
  */
 package org.openhab.core.voice.text;
 
+import java.util.List;
 import java.util.ResourceBundle;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.voice.DialogContext;
 
 /**
  * Represents an expression plus action code that will be executed after successful parsing. This class is immutable and
@@ -27,15 +27,18 @@ import org.openhab.core.voice.DialogContext;
 @NonNullByDefault
 public abstract class Rule {
 
-    private Expression expression;
+    private final Expression expression;
+    private final List<String> allowedItemNames;
 
     /**
      * Constructs a new instance.
      *
-     * @param expression the expression that has to parse successfully, before {@link interpretAST} is called
+     * @param expression the expression that has to parse successfully, before {@link #interpretAST} is called
+     * @param allowedItemNames List of allowed items or empty for disabled.
      */
-    public Rule(Expression expression) {
+    public Rule(Expression expression, List<String> allowedItemNames) {
         this.expression = expression;
+        this.allowedItemNames = allowedItemNames;
     }
 
     /**
@@ -43,15 +46,16 @@ public abstract class Rule {
      *
      * @param language a resource bundle that can be used for looking up common localized response phrases
      * @param node the resulting AST node of the parse run. To be used as input.
+     * @param context for rule interpretation
      * @return
      */
     public abstract InterpretationResult interpretAST(ResourceBundle language, ASTNode node,
-            @Nullable DialogContext dialogContext);
+            InterpretationContext context);
 
-    InterpretationResult execute(ResourceBundle language, TokenList list, @Nullable DialogContext dialogContext) {
+    InterpretationResult execute(ResourceBundle language, TokenList list, @Nullable String locationItem) {
         ASTNode node = expression.parse(language, list);
         if (node.isSuccess() && node.getRemainingTokens().eof()) {
-            return interpretAST(language, node, dialogContext);
+            return interpretAST(language, node, new InterpretationContext(this.allowedItemNames, locationItem));
         }
         return InterpretationResult.SYNTAX_ERROR;
     }
@@ -61,5 +65,16 @@ public abstract class Rule {
      */
     public Expression getExpression() {
         return expression;
+    }
+
+    /**
+     * Context for rule execution.
+     *
+     * @author Miguel Álvarez - Initial contribution
+     *
+     * @param allowedItems List of item names to restrict rule compatibility to, empty for disabled.
+     * @param locationItem Location item to prioritize item matches or null.
+     */
+    public record InterpretationContext(List<String> allowedItems, @Nullable String locationItem) {
     }
 }

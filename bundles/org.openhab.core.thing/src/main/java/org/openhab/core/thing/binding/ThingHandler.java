@@ -154,7 +154,7 @@ public interface ThingHandler {
      * returns to {@link ThingStatus#ONLINE}, the thing status must be changed at least to {@link ThingStatus#OFFLINE}
      * with detail {@link ThingStatusDetail#NONE}.
      *
-     * @param thingStatusInfo the status info of the bridge
+     * @param bridgeStatusInfo the status info of the bridge
      */
     void bridgeStatusChanged(ThingStatusInfo bridgeStatusInfo);
 

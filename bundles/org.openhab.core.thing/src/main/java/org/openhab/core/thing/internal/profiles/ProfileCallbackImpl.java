@@ -33,6 +33,7 @@ import org.openhab.core.thing.profiles.ProfileCallback;
 import org.openhab.core.thing.util.ThingHandlerHelper;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
+import org.openhab.core.types.TimeSeries;
 import org.openhab.core.types.TypeParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -143,6 +144,19 @@ public class ProfileCallbackImpl implements ProfileCallback {
 
         eventPublisher.post(
                 ItemEventFactory.createStateEvent(link.getItemName(), acceptedState, link.getLinkedUID().toString()));
+    }
+
+    @Override
+    public void sendTimeSeries(TimeSeries timeSeries) {
+        Item item = itemProvider.apply(link.getItemName());
+        if (item == null) {
+            logger.warn("Cannot send time series event '{}' for item '{}', because no item could be found.", timeSeries,
+                    link.getItemName());
+            return;
+        }
+
+        eventPublisher.post(
+                ItemEventFactory.createTimeSeriesEvent(link.getItemName(), timeSeries, link.getLinkedUID().toString()));
     }
 
     @FunctionalInterface

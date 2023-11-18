@@ -54,7 +54,7 @@ public class ConverterValueMap {
      * Creates a new instance of this class with the specified parameters.
      *
      * @param reader the reader to be used to read-in all children (must not be null)
-     * @param numberOfValues the number of children to be read-in (< 0 = until end of section)
+     * @param numberOfValues the number of children to be read-in ({@code< 0} = until end of section)
      * @param context
      * @throws ConversionException if not all children could be read-in
      */
@@ -78,7 +78,7 @@ public class ConverterValueMap {
      * Reads-in {@code N} children in a key-value map and returns it.
      *
      * @param reader the reader to be used to read-in the children
-     * @param numberOfValues the number of children to be read in (< 0 = until end of section)
+     * @param numberOfValues the number of children to be read in ({@code < 0} = until end of section)
      * @param context
      * @return the key-value map containing the read-in children (not null, could be empty)
      * @throws ConversionException if not all children could be read-in

@@ -67,7 +67,7 @@ public interface ReadyService {
      * The provided tracker will get notified about the addition of all existing readyMarkers right away.
      *
      * @param readyTracker
-     * @param readyMarker
+     * @param filter
      */
     void registerTracker(ReadyTracker readyTracker, ReadyMarkerFilter filter);
 

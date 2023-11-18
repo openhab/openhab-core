@@ -65,13 +65,13 @@ public class StringUtils {
      * Simple method to escape XML special characters in String.
      * There are five XML special characters which needs to be escaped:
      *
-     * <pre>
+     * <pre>{@code
      * & - &amp;
      * < - &lt;
      * > - &gt;
      * " - &quot;
      * ' - &apos;
-     * </pre>
+     * }</pre>
      *
      * @param str the input xml as String to escape, may be null
      * @return the escaped xml as String, may be null
@@ -96,7 +96,7 @@ public class StringUtils {
      * "'cat'"  => "'cat'"
      * </pre>
      *
-     * @param val the String to capitalize, may be null
+     * @param str the String to capitalize, may be null
      * @return the capitalized String, may be null
      */
     public static @Nullable String capitalize(@Nullable String str) {
@@ -289,15 +289,15 @@ public class StringUtils {
      * Simple method to un escape XML special characters in String.
      * There are five XML Special characters which needs to be escaped:
      *
-     * <pre>
+     * <pre>{@code
      * & => &amp;
      * < => &lt;
      * > => &gt;
      * " => &quot;
      * ' => &apos;
-     * </pre>
+     * }</pre>
      *
-     * @param input the input xml as String to unescape, may be null
+     * @param str the input xml as String to unescape, may be null
      * @return the unescaped xml as String, may be null
      */
     public static @Nullable String unEscapeXml(@Nullable String str) {

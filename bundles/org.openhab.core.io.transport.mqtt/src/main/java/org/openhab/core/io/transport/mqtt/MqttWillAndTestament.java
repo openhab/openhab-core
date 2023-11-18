@@ -109,7 +109,7 @@ public class MqttWillAndTestament {
     }
 
     /**
-     * Create a new {@link} MqttWillAndTestament with at least a topic name.
+     * Create a new {@link MqttWillAndTestament} with at least a topic name.
      *
      * @param topic topic is a normal topic string (no placeholders are allowed)
      * @param payload The optional payload. Can be null.

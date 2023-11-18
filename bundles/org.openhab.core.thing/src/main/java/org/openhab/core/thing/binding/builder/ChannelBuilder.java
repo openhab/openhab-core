@@ -155,7 +155,7 @@ public class ChannelBuilder {
     /**
      * Sets the channel description. This allows overriding of the default description set in the {@link ChannelType}.
      *
-     * @param label the channel label to override the description set in the {@link ChannelType}
+     * @param description the channel label to override the description set in the {@link ChannelType}
      * @return channel builder
      */
     public ChannelBuilder withDescription(String description) {

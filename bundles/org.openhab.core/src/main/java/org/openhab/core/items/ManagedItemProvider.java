@@ -40,8 +40,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * {@link ManagedItemProvider} is an OSGi service, that allows to add or remove
- * items at runtime by calling {@link ManagedItemProvider#addItem(Item)} or {@link ManagedItemProvider#removeItem(Item)}
- * . An added item is automatically
+ * items at runtime by calling {@link #add} or {@link #remove}.
+ * An added item is automatically
  * exposed to the {@link ItemRegistry}. Persistence of added Items is handled by
  * a {@link StorageService}. Items are being restored using the given {@link ItemFactory}s.
  *

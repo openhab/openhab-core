@@ -33,7 +33,6 @@ public class ServiceDescription {
      * @param serviceName String service name, like "openHAB"
      * @param servicePort Int service port, like 8080
      * @param serviceProperties Hashtable service props, like url = "/rest"
-     * @param serviceDescription String service description text, like "openHAB REST interface"
      */
     public ServiceDescription(String serviceType, String serviceName, int servicePort,
             Hashtable<String, String> serviceProperties) {

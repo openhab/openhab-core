@@ -110,7 +110,7 @@ public class ASTNode {
      *
      * @param name the name of the named node to be found
      * @param cls the node's value has to be assignable to a reference of this class to match during search
-     * @return the value of the resulting node. Null, if not found or the value does not match {@link cls}.
+     * @return the value of the resulting node. Null, if not found or the value does not match {@code cls}.
      */
     public Object findValue(String name, Class<?> cls) {
         ASTNode node = findNode(name);

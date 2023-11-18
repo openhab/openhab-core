@@ -213,6 +213,7 @@ public class PageChangeListener implements EventSubscriber {
         event.sitemapName = sitemapName;
         event.pageId = pageId;
         event.label = itemUIRegistry.getLabel(widget);
+        event.labelSource = itemUIRegistry.getLabelSource(widget).toString();
         event.widgetId = itemUIRegistry.getWidgetId(widget);
         event.icon = itemUIRegistry.getCategory(widget);
         event.reloadIcon = widget.getStaticIcon() == null;

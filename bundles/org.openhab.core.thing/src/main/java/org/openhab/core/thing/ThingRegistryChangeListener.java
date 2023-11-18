@@ -17,9 +17,9 @@ import org.openhab.core.common.registry.RegistryChangeListener;
 
 /**
  * {@link ThingRegistryChangeListener} can be implemented to listen for things
- * beeing added or removed. The listener must be added and removed via
- * {@link ThingRegistry#addRegistryChangeListener(ThingRegistryChangeListener)} and
- * {@link ThingRegistry#removeRegistryChangeListener(ThingRegistryChangeListener)}.
+ * being added or removed. The listener must be added and removed via
+ * {@link ThingRegistry#addRegistryChangeListener} and
+ * {@link ThingRegistry#removeRegistryChangeListener}.
  *
  * @author Dennis Nobel - Initial contribution
  * @author Michael Grammling - Added dynamic configuration update

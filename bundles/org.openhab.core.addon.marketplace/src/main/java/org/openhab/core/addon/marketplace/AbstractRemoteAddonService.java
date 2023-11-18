@@ -136,7 +136,7 @@ public abstract class AbstractRemoteAddonService implements AddonService {
     }
 
     /**
-     * Add a {@link MarketplaceAddonHandler) to this service
+     * Add a {@link MarketplaceAddonHandler} to this service
      *
      * This needs to be implemented by the addon-services because the handlers are references to OSGi services and
      * the @Reference annotation is not inherited.
@@ -147,7 +147,7 @@ public abstract class AbstractRemoteAddonService implements AddonService {
     protected abstract void addAddonHandler(MarketplaceAddonHandler handler);
 
     /**
-     * Remove a {@link MarketplaceAddonHandler) from this service
+     * Remove a {@link MarketplaceAddonHandler} from this service
      *
      * This needs to be implemented by the addon-services because the handlers are references to OSGi services and
      * unbind methods can't be inherited.

@@ -20,12 +20,14 @@ import org.openhab.core.io.rest.core.item.EnrichedItemDTO;
  * @author Kai Kreuzer - Initial contribution
  * @author Laurent Garnier - New field iconcolor
  * @author Laurent Garnier - New field reloadIcon
+ * @author Danny Baumann - New field labelSource
  */
 public class SitemapWidgetEvent extends SitemapEvent {
 
     public String widgetId;
 
     public String label;
+    public String labelSource;
     public String icon;
     public boolean reloadIcon;
     public String labelcolor;

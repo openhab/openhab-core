@@ -83,7 +83,7 @@ public class LRUMediaCache<V> {
      * Constructs a cache system.
      *
      * @param storageService Storage service to store metadata
-     * @param cacheSize Limit size, in byte
+     * @param maxCacheSize Limit size, in byte
      * @param pid A pid identifying the cache on disk
      */
     public LRUMediaCache(@Reference StorageService storageService, long maxCacheSize, String pid,

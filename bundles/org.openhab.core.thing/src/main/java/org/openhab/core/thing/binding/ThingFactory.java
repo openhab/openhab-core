@@ -63,7 +63,7 @@ public class ThingFactory {
      * @param thingType thing type (must not be null)
      * @param thingUID thindUID (must not be null)
      * @param configuration (must not be null)
-     * @param bridge (can be null)
+     * @param bridgeUID (can be null)
      * @return thing the thing
      */
     public static Thing createThing(ThingType thingType, ThingUID thingUID, Configuration configuration,

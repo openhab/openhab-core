@@ -21,7 +21,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.thing.Channel;
-import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.binding.ThingTypeProvider;
 import org.osgi.service.component.annotations.Activate;
@@ -130,12 +129,6 @@ public class ThingTypeRegistry {
     /**
      * Returns the channel type for a given channel.
      *
-     * <p>
-     * <strong>Attention:</strong> If you iterate over multiple channels to find the according channel types, please
-     * fetch the thing type first using
-     * {@link ThingTypeRegistry#getThingType(ThingTypeUID)} and use
-     * {@link ThingType#getChannelType(ChannelUID)} afterwards.
-     *
      * @param channel channel
      * @return channel type or null if no channel type was found
      */
@@ -145,12 +138,6 @@ public class ThingTypeRegistry {
 
     /**
      * Returns the channel type for a given channel and locale.
-     *
-     * <p>
-     * <strong>Attention:</strong> If you iterate over multiple channels to find the according channel types, please
-     * fetch the thing type first using
-     * {@link ThingTypeRegistry#getThingType(ThingTypeUID)} and use
-     * {@link ThingType#getChannelType(ChannelUID)} afterwards.
      *
      * @param channel channel
      * @param locale locale (can be null)

@@ -84,6 +84,7 @@ import org.openhab.core.types.StateOption;
 import org.openhab.core.types.UnDefType;
 import org.openhab.core.types.util.UnitUtils;
 import org.openhab.core.ui.items.ItemUIProvider;
+import org.openhab.core.ui.items.ItemUIRegistry.WidgetLabelSource;
 
 /**
  * @author Kai Kreuzer - Initial contribution
@@ -121,8 +122,8 @@ public class ItemUIRegistryImplTest {
         String testLabel = "This is a plain text";
 
         when(widgetMock.getLabel()).thenReturn(testLabel);
-        String label = uiRegistry.getLabel(widgetMock);
-        assertEquals(testLabel, label);
+        assertEquals(testLabel, uiRegistry.getLabel(widgetMock));
+        assertEquals(WidgetLabelSource.SITEMAP_WIDGET, uiRegistry.getLabelSource(widgetMock));
     }
 
     @Test
@@ -455,14 +456,14 @@ public class ItemUIRegistryImplTest {
     @Test
     public void getLabelWidgetWithoutLabelAndItem() {
         Widget w = mock(Widget.class);
-        String label = uiRegistry.getLabel(w);
-        assertEquals("", label);
+        assertEquals("", uiRegistry.getLabel(w));
+        assertEquals(WidgetLabelSource.NONE, uiRegistry.getLabelSource(w));
     }
 
     @Test
     public void getLabelWidgetWithoutLabel() {
-        String label = uiRegistry.getLabel(widgetMock);
-        assertEquals(ITEM_NAME, label);
+        assertEquals(ITEM_NAME, uiRegistry.getLabel(widgetMock));
+        assertEquals(WidgetLabelSource.ITEM_NAME, uiRegistry.getLabelSource(widgetMock));
     }
 
     @Test
@@ -470,8 +471,8 @@ public class ItemUIRegistryImplTest {
         ItemUIProvider provider = mock(ItemUIProvider.class);
         uiRegistry.addItemUIProvider(provider);
         when(provider.getLabel(anyString())).thenReturn("ProviderLabel");
-        String label = uiRegistry.getLabel(widgetMock);
-        assertEquals("ProviderLabel", label);
+        assertEquals("ProviderLabel", uiRegistry.getLabel(widgetMock));
+        assertEquals(WidgetLabelSource.ITEM_LABEL, uiRegistry.getLabelSource(widgetMock));
         uiRegistry.removeItemUIProvider(provider);
     }
 

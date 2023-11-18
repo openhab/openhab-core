@@ -150,7 +150,7 @@ public interface SerialPort extends Closeable {
     String getName();
 
     /**
-     * Registers a {@link SerialPortEventListener} object to listen for {@link SerialEvents}.
+     * Registers a {@link SerialPortEventListener} object to listen for {@link SerialPortEvent}s.
      *
      * <p>
      * Interest in specific events may be expressed using the notifyOnXXX calls.
@@ -266,7 +266,7 @@ public interface SerialPort extends Closeable {
     /**
      * Sets the flow control mode value.
      *
-     * @param flowcontrol The flowcontrol (<code>int</code>) parameter.
+     * @param flowcontrolRtsctsOut The flowcontrol (<code>int</code>) parameter.
      * @throws UnsupportedCommOperationException Unsupported Comm Operation Exception.
      */
     void setFlowControlMode(int flowcontrolRtsctsOut) throws UnsupportedCommOperationException;
@@ -281,7 +281,7 @@ public interface SerialPort extends Closeable {
     /**
      * Enable receive threshold with the specified thresh parameter.
      *
-     * @param thresh The thresh (<code>int</code>) parameter.
+     * @param i The thresh (<code>int</code>) parameter.
      * @throws UnsupportedCommOperationException Unsupported Comm Operation Exception.
      */
     void enableReceiveThreshold(int i) throws UnsupportedCommOperationException;

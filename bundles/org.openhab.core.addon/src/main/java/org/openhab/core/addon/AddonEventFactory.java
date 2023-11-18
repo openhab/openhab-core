@@ -25,7 +25,7 @@ import org.osgi.service.component.annotations.Component;
  * This is an {@link EventFactory} for creating add-on events. The following event types are supported by this
  * factory:
  *
- * {@link AddonEventFactory#TYPE}
+ * {@link AddonEvent#TYPE}
  *
  * @author Kai Kreuzer - Initial contribution
  */
