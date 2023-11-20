@@ -10,7 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.config.discovery.addon.finders;
+package org.openhab.core.config.discovery.addon.upnp;
+
+import static org.openhab.core.config.discovery.addon.AddonFinderConstants.*;
 
 import java.net.URI;
 import java.util.HashSet;
@@ -35,26 +37,27 @@ import org.jupnp.registry.Registry;
 import org.jupnp.registry.RegistryListener;
 import org.openhab.core.addon.AddonDiscoveryMethod;
 import org.openhab.core.addon.AddonInfo;
+import org.openhab.core.config.discovery.addon.AddonFinder;
+import org.openhab.core.config.discovery.addon.BaseAddonFinder;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
-import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This is a {@link UpnpAddonSuggestionFinder} for finding suggested Addons via UPnP.
+ * This is a {@link UpnpAddonFinder} for finding suggested Addons via UPnP.
  *
  * @author Andrew Fiddian-Green - Initial contribution
+ * @author Mark Herwege - refactor to allow uninstall
  */
 @NonNullByDefault
-@Component(service = AddonSuggestionFinder.class, name = UpnpAddonSuggestionFinder.SERVICE_NAME, configurationPid = UpnpAddonSuggestionFinder.CONFIG_PID)
-public class UpnpAddonSuggestionFinder extends BaseAddonSuggestionFinder implements RegistryListener {
+@Component(service = AddonFinder.class, name = UpnpAddonFinder.SERVICE_NAME)
+public class UpnpAddonFinder extends BaseAddonFinder implements RegistryListener {
 
-    public static final String SERVICE_TYPE = "upnp";
-    public static final String SERVICE_NAME = SERVICE_TYPE + ADDON_SUGGESTION_FINDER;
-    public static final String CONFIG_PID = ADDON_SUGGESTION_FINDER_CONFIG_PID + SERVICE_TYPE;
+    public static final String SERVICE_TYPE = SERVICE_TYPE_UPNP;
+    public static final String SERVICE_NAME = SERVICE_NAME_UPNP;
 
     private static final String DEVICE_TYPE = "deviceType";
     private static final String MANUFACTURER = "manufacturer";
@@ -69,23 +72,37 @@ public class UpnpAddonSuggestionFinder extends BaseAddonSuggestionFinder impleme
     private static final Set<String> SUPPORTED_PROPERTIES = Set.of(DEVICE_TYPE, MANUFACTURER, MANUFACTURER_URI,
             MODEL_NAME, MODEL_NUMBER, MODEL_DESCRIPTION, MODEL_URI, SERIAL_NUMBER, FRIENDLY_NAME);
 
-    private final Logger logger = LoggerFactory.getLogger(UpnpAddonSuggestionFinder.class);
+    private final Logger logger = LoggerFactory.getLogger(UpnpAddonFinder.class);
     private final Map<String, RemoteDevice> devices = new ConcurrentHashMap<>();
-    private final UpnpService upnpService;
+    private UpnpService upnpService;
 
     @Activate
-    public UpnpAddonSuggestionFinder(@Nullable Map<String, Object> configProperties,
-            @Reference UpnpService upnpService) {
+    public UpnpAddonFinder(@Reference UpnpService upnpService) {
         this.upnpService = upnpService;
-        activate(configProperties);
+
+        Registry registry = upnpService.getRegistry();
+        for (RemoteDevice device : registry.getRemoteDevices()) {
+            remoteDeviceAdded(registry, device);
+        }
+        registry.addListener(this);
+    }
+
+    @Deactivate
+    public void deactivate() {
+        unsetAddonCandidates();
+
+        UpnpService upnpService = this.upnpService;
+        upnpService.getRegistry().removeListener(this);
+
+        devices.clear();
     }
 
     /**
      * Adds the given UPnP remote device to the set of discovered devices.
-     * 
+     *
      * @param device the UPnP remote device to be added.
      */
-    public void addDevice(RemoteDevice device) {
+    private void addDevice(RemoteDevice device) {
         RemoteDeviceIdentity identity = device.getIdentity();
         if (identity != null) {
             UDN udn = identity.getUdn();
@@ -96,29 +113,6 @@ public class UpnpAddonSuggestionFinder extends BaseAddonSuggestionFinder impleme
                 }
             }
         }
-    }
-
-    @Override
-    protected void connect() {
-        Registry registry = upnpService.getRegistry();
-        for (RemoteDevice device : registry.getRemoteDevices()) {
-            remoteDeviceAdded(registry, device);
-        }
-        registry.addListener(this);
-        super.connect();
-    }
-
-    @Deactivate
-    @Override
-    public void deactivate() {
-        super.deactivate();
-        devices.clear();
-    }
-
-    @Override
-    protected void disconnect() {
-        upnpService.getRegistry().removeListener(this);
-        super.disconnect();
     }
 
     @Override
@@ -199,10 +193,9 @@ public class UpnpAddonSuggestionFinder extends BaseAddonSuggestionFinder impleme
         return result;
     }
 
-    @Modified
     @Override
-    public void modified(@Nullable Map<String, Object> configProperties) {
-        super.modified(configProperties);
+    public String getServiceName() {
+        return SERVICE_NAME;
     }
 
     /*

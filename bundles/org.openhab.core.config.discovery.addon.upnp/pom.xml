@@ -10,14 +10,14 @@
     <version>4.1.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>org.openhab.core.addon.eclipse</artifactId>
+  <artifactId>org.openhab.core.config.discovery.addon.upnp</artifactId>
 
-  <name>openHAB Core :: Bundles :: Eclipse Add-on Service</name>
+  <name>openHAB Core :: Bundles :: uPnP Suggested Add-on Finder</name>
 
   <dependencies>
     <dependency>
       <groupId>org.openhab.core.bundles</groupId>
-      <artifactId>org.openhab.core</artifactId>
+      <artifactId>org.openhab.core.config.discovery.addon</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
@@ -25,11 +25,5 @@
       <artifactId>org.openhab.core.addon</artifactId>
       <version>${project.version}</version>
     </dependency>
-    <dependency>
-      <groupId>org.openhab.core.bundles</groupId>
-      <artifactId>org.openhab.core.config.discovery.addon</artifactId>
-      <version>${project.version}</version>
-    </dependency>
   </dependencies>
-
 </project>

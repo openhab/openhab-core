@@ -10,19 +10,14 @@
     <version>4.1.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>org.openhab.core.addon.eclipse</artifactId>
+  <artifactId>org.openhab.core.config.discovery.addon.mdns</artifactId>
 
-  <name>openHAB Core :: Bundles :: Eclipse Add-on Service</name>
+  <name>openHAB Core :: Bundles :: mDNS Suggested Add-on Finder</name>
 
   <dependencies>
     <dependency>
       <groupId>org.openhab.core.bundles</groupId>
-      <artifactId>org.openhab.core</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.openhab.core.bundles</groupId>
-      <artifactId>org.openhab.core.addon</artifactId>
+      <artifactId>org.openhab.core.config.discovery.mdns</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
@@ -30,6 +25,10 @@
       <artifactId>org.openhab.core.config.discovery.addon</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>org.openhab.core.bundles</groupId>
+      <artifactId>org.openhab.core.addon</artifactId>
+      <version>${project.version}</version>
+    </dependency>
   </dependencies>
-
 </project>

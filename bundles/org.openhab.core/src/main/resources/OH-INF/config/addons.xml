@@ -17,6 +17,16 @@
 				expected. Enabling this option will include these entries in the list of available add-ons.</description>
 			<default>false</default>
 		</parameter>
+		<parameter name="suggestionFinderUpnp" type="boolean">
+			<label>uPnP Suggestion Finder</label>
+			<description>Use uPnP network scan to suggest add-ons.</description>
+			<default>true</default>
+		</parameter>
+		<parameter name="suggestionFinderMdns" type="boolean">
+			<label>mDNS Suggestion Finder</label>
+			<description>Use mDNS network scan to suggest add-ons.</description>
+			<default>true</default>
+		</parameter>
 	</config-description>
 
 </config-description:config-descriptions>

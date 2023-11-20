@@ -66,22 +66,29 @@
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.rest/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.rest.core/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.rest.sse/${project.version}</bundle>
-		<feature dependency="true">openhab-core-config-discovery-addon</feature>
+		<feature>openhab-core-config-discovery-addon</feature>
 	</feature>
 
 	<feature name="openhab-core-config-discovery-addon" version="${project.version}">
 		<feature>openhab-core-base</feature>
+		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery.addon/${project.version}</bundle>
+	</feature>
 
+	<feature name="openhab-core-config-discovery-addon-mdns" version="${project.version}">
+		<feature>openhab-core-base</feature>
+		<feature>openhab-core-config-discovery-addon</feature>
+		<bundle dependency="true">mvn:org.openhab.core.bundles/org.openhab.core.io.transport.mdns/${project.version}</bundle>
+		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery.addon.mdns/${project.version}</bundle>
 		<requirement>openhab.tp;filter:="(feature=jmdns)"</requirement>
 		<feature dependency="true">openhab.tp-jmdns</feature>
+	</feature>
 
-		<bundle dependency="true">mvn:org.openhab.core.bundles/org.openhab.core.io.transport.mdns/${project.version}</bundle>
-
+	<feature name="openhab-core-config-discovery-addon-upnp" version="${project.version}">
+		<feature>openhab-core-base</feature>
+		<feature>openhab-core-config-discovery-addon</feature>
+		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery.addon.upnp/${project.version}</bundle>
 		<requirement>openhab.tp;filter:="(feature=jupnp)"</requirement>
 		<feature dependency="true">openhab.tp-jupnp</feature>
-
-		<bundle dependency="true">mvn:org.openhab.core.bundles/org.openhab.core.addon/${project.version}</bundle>
-		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery.addon/${project.version}</bundle>
 	</feature>
 
 	<feature name="openhab-core-addon-marketplace" version="${project.version}">

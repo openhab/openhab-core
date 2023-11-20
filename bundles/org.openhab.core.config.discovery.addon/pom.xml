@@ -12,27 +12,13 @@
 
   <artifactId>org.openhab.core.config.discovery.addon</artifactId>
 
-  <name>openHAB Core :: Bundles :: Suggested Addon Finder</name>
+  <name>openHAB Core :: Bundles :: Add-on Suggestion Service</name>
 
   <dependencies>
-    <dependency>
-      <groupId>org.openhab.core.bundles</groupId>
-      <artifactId>org.openhab.core.config.discovery.mdns</artifactId>
-      <version>${project.version}</version>
-    </dependency>
     <dependency>
       <groupId>org.openhab.core.bundles</groupId>
       <artifactId>org.openhab.core.addon</artifactId>
       <version>${project.version}</version>
     </dependency>
   </dependencies>
-
-  <build>
-    <resources>
-      <resource>
-        <directory>src/main/resources</directory>
-      </resource>
-    </resources>
-  </build>
-
 </project>

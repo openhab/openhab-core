@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.config.discovery.addon.finders;
+package org.openhab.core.config.discovery.addon;
 
 import java.util.List;
 import java.util.Set;
@@ -19,12 +19,12 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.addon.AddonInfo;
 
 /**
- * This is a {@link AddonSuggestionFinder} interface for classes that find Addons that are suggested to be installed.
+ * This is a {@link AddonFinder} interface for classes that find Addons that are suggested to be installed.
  *
  * @author Andrew Fiddian-Green - Initial contribution
  */
 @NonNullByDefault
-public interface AddonSuggestionFinder {
+public interface AddonFinder {
 
     /**
      * The OH framework calls this method to scan through the candidate list of {@link AddonInfo} and return a subset of
@@ -36,8 +36,13 @@ public interface AddonSuggestionFinder {
      * The OH framework calls this method to provide a list of {@link AddonInfo} elements which contain potential
      * candidates that this finder can iterate over in order to detect which ones to return via the
      * {@code getSuggestedAddons()} method.
-     * 
+     *
      * @param candidates a list of AddonInfo candidates.
      */
     public void setAddonCandidates(List<AddonInfo> candidates);
+
+    /**
+     * This method should be called from the framework to allow a finder to stop searching for addons and do cleanup.
+     */
+    public void unsetAddonCandidates();
 }
