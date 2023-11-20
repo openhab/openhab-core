@@ -309,7 +309,11 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
             return createPlayerButtons();
         } else if (RollershutterItem.class.equals(itemType) //
                 || SwitchItem.class.equals(itemType)) {
-            return SitemapFactory.eINSTANCE.createSwitch();
+            if (isReadOnly(itemName)) {
+                return SitemapFactory.eINSTANCE.createText();
+            } else {
+                return SitemapFactory.eINSTANCE.createSwitch();
+            }
         }
 
         return null;

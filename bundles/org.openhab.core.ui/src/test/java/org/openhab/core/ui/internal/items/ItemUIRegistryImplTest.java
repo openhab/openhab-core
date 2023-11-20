@@ -906,6 +906,19 @@ public class ItemUIRegistryImplTest {
     }
 
     @Test
+    public void getDefaultWidgetsForSwitchItem() {
+        // SwitchItem without CommandOptions or StateOptions should return Switch element
+        Widget defaultWidget = uiRegistry.getDefaultWidget(SwitchItem.class, ITEM_NAME);
+        assertThat(defaultWidget, is(instanceOf(Switch.class)));
+
+        // Read-only SwitchItem should return Text element
+        when(itemMock.getStateDescription()).thenReturn(
+                StateDescriptionFragmentBuilder.create().withReadOnly(Boolean.TRUE).build().toStateDescription());
+        defaultWidget = uiRegistry.getDefaultWidget(SwitchItem.class, ITEM_NAME);
+        assertThat(defaultWidget, is(instanceOf(Text.class)));
+    }
+
+    @Test
     public void getUnitForWidgetForNonNumberItem() throws Exception {
         String unit = uiRegistry.getUnitForWidget(widgetMock);
 
