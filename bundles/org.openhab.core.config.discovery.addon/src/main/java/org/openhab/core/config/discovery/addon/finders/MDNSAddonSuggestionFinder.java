@@ -75,7 +75,7 @@ public class MDNSAddonSuggestionFinder extends BaseAddonSuggestionFinder impleme
         String qualifiedName = service.getQualifiedName();
         if (isResolved || !services.containsKey(qualifiedName)) {
             if (services.put(qualifiedName, service) == null) {
-                logger.trace("Added service: {}/{}", qualifiedName, service.getNiceTextString());
+                logger.trace("Added service: {}", qualifiedName);
             }
         }
     }
