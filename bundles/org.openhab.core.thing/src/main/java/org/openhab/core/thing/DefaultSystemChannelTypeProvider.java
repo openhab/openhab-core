@@ -105,6 +105,7 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
             "electric-voltage");
     public static final ChannelTypeUID SYSTEM_CHANNEL_TYPE_UID_ELECTRIC_ENERGY = new ChannelTypeUID(BINDING_ID,
             "electric-energy");
+    public static final ChannelTypeUID SYSTEM_CHANNEL_TYPE_UID_UV_INDEX = new ChannelTypeUID(BINDING_ID, "uv-index");
 
     /**
      * Signal strength default system wide {@link ChannelType}. Represents signal strength of a device as a number
@@ -397,6 +398,16 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
                     StateDescriptionFragmentBuilder.create().withReadOnly(true).withPattern("%.1f %unit%").build())
             .withTags(List.of("Measurement", "Energy")).build();
 
+    /**
+     * UV Index: system wide {@link ChannelType} which shows the UV Index
+     */
+    public static final ChannelType SYSTEM_UV_INDEX = ChannelTypeBuilder
+            .state(SYSTEM_CHANNEL_TYPE_UID_UV_INDEX, "UV Index", CoreItemFactory.NUMBER)
+            .withDescription("Current UV Index")
+            .withStateDescriptionFragment(StateDescriptionFragmentBuilder.create().withReadOnly(true)
+                    .withPattern("%.0f/16").withMinimum(BigDecimal.ZERO).withMaximum(new BigDecimal(16)).build())
+            .withTags(List.of("Status", "Ultraviolet")).build();
+
     private static final Collection<ChannelType> CHANNEL_TYPES = List.of(SYSTEM_CHANNEL_SIGNAL_STRENGTH,
             SYSTEM_CHANNEL_LOW_BATTERY, SYSTEM_CHANNEL_BATTERY_LEVEL, SYSTEM_TRIGGER, SYSTEM_RAWBUTTON, SYSTEM_BUTTON,
             SYSTEM_RAWROCKER, SYSTEM_POWER, SYSTEM_LOCATION, SYSTEM_MOTION, SYSTEM_BRIGHTNESS, SYSTEM_COLOR,
@@ -404,7 +415,7 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
             SYSTEM_MEDIA_TITLE, SYSTEM_MEDIA_ARTIST, SYSTEM_WIND_DIRECTION, SYSTEM_WIND_SPEED,
             SYSTEM_OUTDOOR_TEMPERATURE, SYSTEM_INDOOR_TEMPERATURE, SYSTEM_ATMOSPHERIC_HUMIDITY,
             SYSTEM_BAROMETRIC_PRESSURE, SYSTEM_ELECTRIC_POWER, SYSTEM_ELECTRIC_CURRENT, SYSTEM_ELECTRIC_VOLTAGE,
-            SYSTEM_ELECTRICAL_ENERGY);
+            SYSTEM_ELECTRICAL_ENERGY, SYSTEM_UV_INDEX);
 
     private final Map<LocalizedKey, ChannelType> localizedChannelTypeCache = new ConcurrentHashMap<>();
 
