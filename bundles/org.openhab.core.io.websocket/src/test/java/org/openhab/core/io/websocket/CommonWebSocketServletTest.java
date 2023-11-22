@@ -43,6 +43,7 @@ import org.mockito.quality.Strictness;
 import org.openhab.core.auth.AuthenticationException;
 import org.openhab.core.io.rest.auth.AnonymousUserSecurityContext;
 import org.openhab.core.io.rest.auth.AuthFilter;
+import org.openhab.core.io.websocket.event.EventWebSocket;
 import org.osgi.service.http.NamespaceException;
 
 /**

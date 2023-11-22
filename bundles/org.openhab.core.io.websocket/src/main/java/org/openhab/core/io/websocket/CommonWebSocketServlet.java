@@ -30,6 +30,7 @@ import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
 import org.openhab.core.auth.AuthenticationException;
 import org.openhab.core.auth.Role;
 import org.openhab.core.io.rest.auth.AuthFilter;
+import org.openhab.core.io.websocket.event.EventWebSocketAdapter;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
