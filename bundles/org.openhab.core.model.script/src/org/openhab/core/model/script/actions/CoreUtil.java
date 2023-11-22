@@ -36,6 +36,14 @@ public class CoreUtil {
         return ColorUtil.hsbTosRgb(hsb);
     }
 
+    public static int[] hsbToRgbw(HSBType hsb) {
+        return ColorUtil.hsbToRgbw(hsb);
+    }
+
+    public static PercentType[] hsbToRgbwPercent(HSBType hsb) {
+        return ColorUtil.hsbToRgbwPercent(hsb);
+    }
+
     public static double[] hsbToXY(HSBType hsb) {
         return ColorUtil.hsbToXY(hsb);
     }
