@@ -286,10 +286,14 @@ public class ColorUtil {
      */
     public static HSBType rgbToHsb(int[] rgbw) throws IllegalArgumentException {
         if (rgbw.length == 4) {
-            return rgbwToHsb(rgbw);
+            if (!inByteRange(rgbw[0]) || !inByteRange(rgbw[1]) || !inByteRange(rgbw[2]) || !inByteRange(rgbw[3])) {
+                throw new IllegalArgumentException("rgbToHsb requires 3 or 4 values between 0 and 255");
+            }
+            return rgbwToHsb(new PercentType[] { convertByteToColorPercent(rgbw[0]), convertByteToColorPercent(rgbw[1]),
+                    convertByteToColorPercent(rgbw[2]), convertByteToColorPercent(rgbw[3]) });
         }
         if (rgbw.length != 3 || !inByteRange(rgbw[0]) || !inByteRange(rgbw[1]) || !inByteRange(rgbw[2])) {
-            throw new IllegalArgumentException("RGB array only allows values between 0 and 255");
+            throw new IllegalArgumentException("rgbToHsb requires 3 or 4 values between 0 and 255");
         }
         return rgbToHsb(new PercentType[] { convertByteToColorPercent(rgbw[0]), convertByteToColorPercent(rgbw[1]),
                 convertByteToColorPercent(rgbw[2]) });
@@ -310,16 +314,18 @@ public class ColorUtil {
      * @return hsb an {@link HSBType} value.
      *
      */
-    private static HSBType rgbwToHsb(int[] rgbw) {
-        if (rgbw.length != 4 || !inByteRange(rgbw[0]) || !inByteRange(rgbw[1]) || !inByteRange(rgbw[2])
-                || !inByteRange(rgbw[3])) {
-            throw new IllegalArgumentException("RGBW array only allows values between 0 and 255 with 4 values");
+    private static HSBType rgbwToHsb(PercentType[] rgbw) {
+        if (rgbw.length != 4) {
+            throw new IllegalArgumentException("RGBW requires 4 values");
         }
 
-        BigDecimal luminance = BigDecimal.valueOf(rgbw[3]);
-        BigDecimal inRed = BigDecimal.valueOf(rgbw[0]).add(luminance);
-        BigDecimal inGreen = BigDecimal.valueOf(rgbw[1]).add(luminance);
-        BigDecimal inBlue = BigDecimal.valueOf(rgbw[2]).add(luminance);
+        BigDecimal luminance = BigDecimal.valueOf(rgbw[3].doubleValue() / PercentType.HUNDRED.doubleValue() * 255.0);
+        BigDecimal inRed = BigDecimal.valueOf(rgbw[0].doubleValue() / PercentType.HUNDRED.doubleValue() * 255.0)
+                .add(luminance);
+        BigDecimal inGreen = BigDecimal.valueOf(rgbw[1].doubleValue() / PercentType.HUNDRED.doubleValue() * 255.0)
+                .add(luminance);
+        BigDecimal inBlue = BigDecimal.valueOf(rgbw[2].doubleValue() / PercentType.HUNDRED.doubleValue() * 255.0)
+                .add(luminance);
 
         // Get the maximum between R, G, and B
         final BigDecimal maxColor = BIG_DECIMAL_255.min(inRed.max(inGreen.max(inBlue)).max(BigDecimal.ZERO));
@@ -342,11 +348,14 @@ public class ColorUtil {
      * Transform <a href="https://en.wikipedia.org/wiki/SRGB">sRGB</a> color format to
      * <a href="https://en.wikipedia.org/wiki/HSL_and_HSV">HSV</a> based {@link HSBType}.
      *
-     * @param rgb array of three {@link PercentType} with the RGB values in the range 0 to 100 percent.
+     * @param rgb array of three or four {@link PercentType} with the RGB(W) values in the range 0 to 100 percent.
      * @return the corresponding {@link HSBType}.
      * @throws IllegalArgumentException when input array has wrong size or exceeds allowed value range.
      */
     public static HSBType rgbToHsb(PercentType[] rgb) throws IllegalArgumentException {
+        if (rgb.length == 4) {
+            return rgbwToHsb(rgb);
+        }
         if (rgb.length != 3) {
             throw new IllegalArgumentException("RGB array needs exactly three values!");
         }
