@@ -13,13 +13,7 @@
 package org.openhab.core.karaf.internal;
 
 import static java.util.Map.entry;
-import static org.openhab.core.addon.AddonType.AUTOMATION;
-import static org.openhab.core.addon.AddonType.BINDING;
-import static org.openhab.core.addon.AddonType.MISC;
-import static org.openhab.core.addon.AddonType.PERSISTENCE;
-import static org.openhab.core.addon.AddonType.TRANSFORMATION;
-import static org.openhab.core.addon.AddonType.UI;
-import static org.openhab.core.addon.AddonType.VOICE;
+import static org.openhab.core.addon.AddonType.*;
 
 import java.net.URI;
 import java.util.Arrays;
