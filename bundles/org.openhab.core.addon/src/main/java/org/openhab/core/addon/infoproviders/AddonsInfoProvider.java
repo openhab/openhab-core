@@ -88,10 +88,10 @@ public class AddonsInfoProvider implements AddonInfoProvider {
         Stream.of(new File(folder).listFiles()).filter(f -> f.isFile() && f.getName().endsWith(".xml")).forEach(f -> {
             try {
                 String xml = Files.readString(f.toPath());
-                if (!xml.isBlank()) {
+                if (xml != null && !xml.isBlank()) {
                     addonInfos.addAll(reader.readFromXML(xml).getAddons().stream().collect(Collectors.toSet()));
                 } else {
-                    logger.warn("File '{}' is empty", f.getName());
+                    logger.warn("File '{}' contents are null or empty", f.getName());
                 }
             } catch (IOException e) {
                 logger.warn("File '{}' could not be read", f.getName());

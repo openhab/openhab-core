@@ -109,8 +109,6 @@ public abstract class XmlDocumentReader<@NonNull T> {
     /**
      * Reads the XML document containing a specific XML tag from the specified xml string and converts it to the
      * according object.
-     * <p>
-     * This method returns {@code null} if the given URL is {@code null}.
      *
      * @param xml a string containing the XML document to be read.
      * @return the conversion result object (could be null).
