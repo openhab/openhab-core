@@ -105,6 +105,10 @@ public class ChannelBuilder {
         if (description != null) {
             channelBuilder.withDescription(description);
         }
+        AutoUpdatePolicy autoUpdatePolicy = channel.getAutoUpdatePolicy();
+        if (autoUpdatePolicy != null) {
+            channelBuilder.withAutoUpdatePolicy(autoUpdatePolicy);
+        }
         return channelBuilder;
     }
 
