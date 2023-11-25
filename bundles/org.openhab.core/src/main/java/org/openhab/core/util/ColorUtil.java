@@ -300,13 +300,10 @@ public class ColorUtil {
     }
 
     /**
-     * Transform <a href="https://en.wikipedia.org/wiki/HSL_and_HSV">HSV</a> based {@link HSBType} to RGBW.
+     * Transform RGBW to <a href="https://en.wikipedia.org/wiki/HSL_and_HSV">HSV</a> based {@link HSBType}.
      *
      * See <a href=
      * "https://stackoverflow.com/questions/40312216/converting-rgb-to-rgbw">Converting RGB to RGBW</a>.
-     *
-     * This function does not round the components. For conversion to integer values in the range 0 to 255 use
-     * {@link #hsbToRgb(HSBType)}.
      *
      * See also: {@link #hsbToRgb(HSBType)}, {@link #hsbTosRgb(HSBType)}, {@link #hsbToRgbPercent(HSBType)}
      *
