@@ -2,6 +2,7 @@
 
 [![GitHub Actions Build Status](https://github.com/openhab/openhab-core/actions/workflows/ci-build.yml/badge.svg?branch=main)](https://github.com/openhab/openhab-core/actions/workflows/ci-build.yml)
 [![Jenkins Build Status](https://ci.openhab.org/job/openHAB-Core/badge/icon)](https://ci.openhab.org/job/openHAB-Core/)
+[![JavaDoc Build Status](https://ci.openhab.org/view/Documentation/job/openHAB-JavaDoc/badge/icon?subject=javadoc)](https://ci.openhab.org/view/Documentation/job/openHAB-JavaDoc/)
 [![EPL-2.0](https://img.shields.io/badge/license-EPL%202-green.svg)](https://opensource.org/licenses/EPL-2.0)
 [![Crowdin](https://badges.crowdin.net/openhab-core/localized.svg)](https://crowdin.com/project/openhab-core)
 

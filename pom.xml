@@ -326,10 +326,12 @@ Import-Package: \\
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-javadoc-plugin</artifactId>
-          <version>3.2.0</version>
+          <version>3.6.2</version>
           <configuration>
-            <failOnError>!${quality.skip}</failOnError>
+            <failOnError>true</failOnError>
+            <failOnWarnings>true</failOnWarnings>
             <doclint>none</doclint>
+            <legacyMode>true</legacyMode>
             <excludePackageNames>*.internal,*.internal.*</excludePackageNames>
             <!-- The search function is broken without the workaround below -->
             <!-- See: https://stackoverflow.com/questions/52326318/maven-javadoc-search-redirects-to-undefined-url -->
