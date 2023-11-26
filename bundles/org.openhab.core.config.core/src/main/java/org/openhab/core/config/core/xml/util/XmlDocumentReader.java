@@ -46,9 +46,9 @@ public abstract class XmlDocumentReader<@NonNull T> {
      * The default constructor of this class initializes the {@code XStream} object by calling:
      *
      * <ol>
-     * <li>{@link #configureSecurity()}</li>
-     * <li>{@link #registerConverters()}</li>
-     * <li>{@link #registerAliases()}</li>
+     * <li>{@link #configureSecurity}</li>
+     * <li>{@link #registerConverters}</li>
+     * <li>{@link #registerAliases}</li>
      * </ol>
      */
     public XmlDocumentReader() {

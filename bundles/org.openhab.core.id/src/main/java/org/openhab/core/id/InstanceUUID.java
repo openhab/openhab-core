@@ -38,7 +38,7 @@ public class InstanceUUID {
     static String uuid;
 
     /**
-     * Retrieves a unified unique id, based on {@link java.util.UUID.randomUUID()}
+     * Retrieves a unified unique id, based on {@link java.util.UUID#randomUUID()}
      *
      * @return a UUID which identifies the instance or null, if uuid cannot be persisted
      */

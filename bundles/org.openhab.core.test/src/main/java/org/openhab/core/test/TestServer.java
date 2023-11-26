@@ -42,7 +42,7 @@ public class TestServer {
 
     /**
      * Creates a new {@link TestServer}. The server is started by {@link #startServer()} and stopped by
-     * {@link #stopServer()}, preferably in the tests setup & tearDown methods.
+     * {@link #stopServer()}, preferably in the tests setup and tearDown methods.
      *
      * @param host the host this server runs on.
      * @param port the port this server runs on. Use {@link TestPortUtil} to find a random free port.

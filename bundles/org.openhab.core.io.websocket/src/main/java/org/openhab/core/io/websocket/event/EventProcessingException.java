@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.io.websocket;
+package org.openhab.core.io.websocket.event;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 

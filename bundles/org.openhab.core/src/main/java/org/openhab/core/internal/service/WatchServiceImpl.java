@@ -115,7 +115,7 @@ public class WatchServiceImpl implements WatchService, DirectoryChangeListener {
             closeWatcherAndUnregister();
 
             if (!Files.exists(basePath)) {
-                logger.info("Watch directory '{}' does not exists. Trying to create it.", basePath);
+                logger.info("Watch directory '{}' does not exist. Trying to create it.", basePath);
                 Files.createDirectories(basePath);
             }
 

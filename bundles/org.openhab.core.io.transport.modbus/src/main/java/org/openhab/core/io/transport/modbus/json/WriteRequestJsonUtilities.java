@@ -85,10 +85,10 @@ public final class WriteRequestJsonUtilities {
      *             protocol specification
      * @throws IllegalStateException in case of parsing errors and unexpected json structure
      *
-     * @see WriteRequestJsonUtilities.JSON_FUNCTION_CODE
-     * @see WriteRequestJsonUtilities.JSON_ADDRESS
-     * @see WriteRequestJsonUtilities.JSON_VALUE
-     * @see WriteRequestJsonUtilities.JSON_MAX_TRIES
+     * @see WriteRequestJsonUtilities#JSON_FUNCTION_CODE
+     * @see WriteRequestJsonUtilities#JSON_ADDRESS
+     * @see WriteRequestJsonUtilities#JSON_VALUE
+     * @see WriteRequestJsonUtilities#JSON_MAX_TRIES
      */
     public static Collection<ModbusWriteRequestBlueprint> fromJson(int unitId, String jsonString) {
         JsonArray jsonArray = JsonParser.parseString(jsonString).getAsJsonArray();

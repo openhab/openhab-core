@@ -30,7 +30,7 @@ import org.eclipse.jdt.annotation.Nullable;
 public interface ConfigOptionProvider {
 
     /**
-     * Provides a collection of {@link ParameterOptions}s.
+     * Provides a collection of {@link ParameterOption}s.
      *
      * @param uri the uri of the config description
      * @param param the parameter name for which the requested options shall be returned

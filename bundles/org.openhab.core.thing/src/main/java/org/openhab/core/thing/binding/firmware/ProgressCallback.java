@@ -107,8 +107,9 @@ public interface ProgressCallback {
      * previous defined sequence.
      *
      * @param progress the progress between 0 and 100
-     * @throws IllegalArgumentException if given progress is < 0 or > 100
-     * @throws IllegalArgumentException if given progress is smaller than old progress
+     * @throws IllegalArgumentException if given progress is {@code < 0} or {@code > 100} or if given progress is
+     *             smaller than old
+     *             progress
      * @throws IllegalStateException if update is finished
      */
     void update(int progress);

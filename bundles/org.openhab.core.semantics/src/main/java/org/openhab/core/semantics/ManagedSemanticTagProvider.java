@@ -27,8 +27,8 @@ import org.osgi.service.component.annotations.Reference;
 
 /**
  * {@link ManagedSemanticTagProvider} is an OSGi service, that allows to add or remove
- * semantic tags at runtime by calling {@link ManagedSemanticTagProvider#add(SemanticTag)}
- * or {@link ManagedSemanticTagProvider#remove(String)}.
+ * semantic tags at runtime by calling {@link ManagedSemanticTagProvider#add}
+ * or {@link ManagedSemanticTagProvider#remove}.
  * An added semantic tag is automatically exposed to the {@link SemanticTagRegistry}.
  * Persistence of added semantic tags is handled by a {@link StorageService}.
  *

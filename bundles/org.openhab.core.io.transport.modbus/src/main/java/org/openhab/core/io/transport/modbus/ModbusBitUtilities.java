@@ -240,7 +240,6 @@ public class ModbusBitUtilities {
      * - it is assumed that each high and low byte is encoded in most significant bit first order
      *
      * @param bytes registers represented by sequence of bytes
-     * @param registerIndex index of register. First register has index of 0.
      * @param index index of the byte in registers
      * @return 0 when bit is set, 1 otherwise
      * @throws IllegalArgumentException when index is out of bounds
@@ -272,7 +271,6 @@ public class ModbusBitUtilities {
      * - it is assumed that each high and low byte is encoded in most significant bit first order
      *
      * @param bytes registers represented by sequence of bytes
-     * @param registerIndex index of register. First register has index of 0.
      * @param index index of the byte in registers
      * @return 0 when bit is set, 1 otherwise
      * @throws IllegalArgumentException when index is out of bounds
@@ -735,8 +733,8 @@ public class ModbusBitUtilities {
     /**
      * Converts command to a boolean
      *
-     * true value is represented by {@link OnOffType.ON}, {@link OpenClosedType.OPEN}.
-     * false value is represented by {@link OnOffType.OFF}, {@link OpenClosedType.CLOSED}.
+     * true value is represented by {@link OnOffType#ON}, {@link OpenClosedType#OPEN}.
+     * false value is represented by {@link OnOffType#OFF}, {@link OpenClosedType#CLOSED}.
      * Furthermore, {@link DecimalType} are converted to boolean true if they are unequal to zero.
      *
      * @param command to convert to boolean

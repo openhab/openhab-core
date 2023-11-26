@@ -25,7 +25,7 @@ import com.google.gson.annotations.SerializedName;
  * concrete configuration parameter. Such parameter descriptions are collected
  * within the {@link ConfigDescription} and can be retrieved from the {@link ConfigDescriptionRegistry}.
  *
- * This class defines available configuration parameter types in {@link ConfigDescriptionParameter#Type},
+ * This class defines available configuration parameter types in {@link ConfigDescriptionParameter.Type},
  * it defines available unit types in {@link ConfigDescriptionParameter#UNITS} and available
  * contexts (see {@link ConfigDescriptionParameter#getContext()}).
  *

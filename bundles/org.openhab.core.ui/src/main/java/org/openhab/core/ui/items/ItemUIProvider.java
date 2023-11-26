@@ -38,7 +38,7 @@ public interface ItemUIProvider {
     /**
      * Returns the label text to be used for an item in the UI.
      *
-     * @param item the name of the item to return the label text for
+     * @param itemName the name of the item to return the label text for
      * @return the label text to be used in the UI or null if undefined.
      */
     @Nullable

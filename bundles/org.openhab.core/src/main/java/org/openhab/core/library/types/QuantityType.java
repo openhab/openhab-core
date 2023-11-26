@@ -181,7 +181,7 @@ public class QuantityType<T extends Quantity<T>> extends Number
     }
 
     /**
-     * Static access to {@link QuantityType(double, Unit)}.
+     * Static access to {@link QuantityType(Number, Unit)}.
      *
      * @param value the non-null measurement value.
      * @param unit the non-null measurement unit.
@@ -293,7 +293,7 @@ public class QuantityType<T extends Quantity<T>> extends Number
     /**
      * Convert this QuantityType to a new {@link QuantityType} using the given target unit.
      *
-     * Implicit conversions using inverse units are allowed (i.e. mired <=> Kelvin). This may
+     * Implicit conversions using inverse units are allowed (i.e. {@code mired <=> Kelvin}). This may
      * change the dimension.
      *
      * @param targetUnit the unit to which this {@link QuantityType} will be converted to.

@@ -22,7 +22,7 @@ import javax.servlet.http.HttpServletResponse;
  * HTTP. Handlers are called before servlet who will receive request, thus they can not mutate servlet response, but
  * they can generate its own response depending on actual needs.
  * Pay attention to error handling - as a proper executions might report exceptions, but fault path handled in
- * {@link #handleError(HttpServletRequest, HttpServletResponse, HandlerContext) method must remain silent and take care
+ * {@link #handleError(HttpServletRequest, HttpServletResponse, HandlerContext)} method must remain silent and take care
  * of all issues which might occur while handling error.
  *
  * @author Łukasz Dywicki - Initial contribution

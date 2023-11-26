@@ -35,7 +35,7 @@ public interface WebSocketAdapter {
 
     /**
      * Creates a websocket instance.
-     * It should use the {@link org.eclipse.jetty.websocket.api.annotations} or implement
+     * It should use the {@code org.eclipse.jetty.websocket.api.annotations} or implement
      * {@link org.eclipse.jetty.websocket.api.WebSocketListener}.
      * 
      * @return a websocket instance.

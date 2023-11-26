@@ -126,7 +126,7 @@ public interface ItemUIRegistry extends ItemRegistry, ItemUIProvider {
      * this should be used instead of Sitemap.getChildren() as the default
      * widgets have to be resolved to a concrete widget type.
      *
-     * @param w the sitemap to retrieve the children for
+     * @param sitemap the sitemap to retrieve the children for
      * @return the children of the sitemap
      */
     EList<Widget> getChildren(Sitemap sitemap);

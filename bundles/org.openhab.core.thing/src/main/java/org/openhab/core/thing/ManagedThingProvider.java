@@ -25,8 +25,8 @@ import org.osgi.service.component.annotations.Reference;
 
 /**
  * {@link ManagedThingProvider} is an OSGi service, that allows to add or remove
- * things at runtime by calling {@link ManagedThingProvider#addThing(Thing)} or
- * {@link ManagedThingProvider#removeThing(Thing)}. An added thing is
+ * things at runtime by calling {@link ManagedThingProvider#add} or
+ * {@link ManagedThingProvider#remove}. An added thing is
  * automatically exposed to the {@link ThingRegistry}.
  *
  * @author Oliver Libutzki - Initial contribution

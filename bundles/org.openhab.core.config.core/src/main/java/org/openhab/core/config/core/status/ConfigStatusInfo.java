@@ -42,7 +42,7 @@ public final class ConfigStatusInfo {
     }
 
     /**
-     * Creates a new {@link ConfigStatusInfo} with the given {@link ConfigStatusMessages}.
+     * Creates a new {@link ConfigStatusInfo} with the given {@link ConfigStatusMessage}s.
      *
      * @param configStatusMessages the configuration status messages to be added
      */

@@ -42,7 +42,7 @@ public class AudioWaveUtils {
 
     /**
      *
-     * @param InputStream an inputStream of a wav file to analyze. The InputStream must have a fmt header
+     * @param inputStream an InputStream of a wav file to analyze. The InputStream must have a fmt header
      *            and support the mark/reset method
      * @return The audio format, or the default audio format if an error occured
      * @throws IOException If i/o exception occurs, or if the InputStream doesn't support the mark/reset
@@ -84,7 +84,7 @@ public class AudioWaveUtils {
      * as if it is a pure PCM stream, it could try to play it and will
      * do a "click" noise at the beginning.
      *
-     * @param audio A wav container in an InputStream
+     * @param data A wav container in an InputStream
      * @throws IOException
      */
     public static void removeFMT(InputStream data) throws IOException {

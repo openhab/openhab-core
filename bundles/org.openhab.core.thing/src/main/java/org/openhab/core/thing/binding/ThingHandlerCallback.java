@@ -165,7 +165,7 @@ public interface ThingHandlerCallback {
 
     /**
      * Creates a {@link ChannelBuilder} which is preconfigured with values from the given {@link Channel} and allows to
-     * modify it. The methods {@link BaseThingHandler#editThing(Thing)} and {@link BaseThingHandler#updateThing(Thing)}
+     * modify it. The methods {@link BaseThingHandler#editThing()} and {@link BaseThingHandler#updateThing(Thing)}
      * must be called to persist the changes.
      *
      * @param thing {@link Thing} (must not be null)

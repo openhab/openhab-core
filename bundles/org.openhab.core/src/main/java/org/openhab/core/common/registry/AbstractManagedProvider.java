@@ -118,7 +118,7 @@ public abstract class AbstractManagedProvider<@NonNull E extends Identifiable<K>
                 return oldElement;
             }
         } else {
-            logger.warn("Could not update element with key {} in {}, because it does not exists.", key,
+            logger.warn("Could not update element with key {} in {}, because it does not exist.", key,
                     this.getClass().getSimpleName());
         }
 

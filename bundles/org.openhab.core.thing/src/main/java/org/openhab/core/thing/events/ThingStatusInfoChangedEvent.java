@@ -43,8 +43,8 @@ public class ThingStatusInfoChangedEvent extends AbstractEvent {
      * @param topic the topic
      * @param payload the payload
      * @param thingUID the thing UID
-     * @param thingStatusInfo the thing status info object
-     * @param thingStatusInfo the old thing status info object
+     * @param newThingStatusInfo the thing status info object
+     * @param oldThingStatusInfo the old thing status info object
      */
     protected ThingStatusInfoChangedEvent(String topic, String payload, ThingUID thingUID,
             ThingStatusInfo newThingStatusInfo, ThingStatusInfo oldThingStatusInfo) {

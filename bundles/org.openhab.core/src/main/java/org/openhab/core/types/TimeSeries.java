@@ -93,7 +93,7 @@ public class TimeSeries {
      * <p/>
      * The entries are returned in chronological order, earlier entries before later entries.
      *
-     * @return a {@link <Stream<Entry>} with the content of this series.
+     * @return a {@link Stream<Entry>} with the content of this series.
      */
     public Stream<Entry> getStates() {
         return List.copyOf(states).stream();
