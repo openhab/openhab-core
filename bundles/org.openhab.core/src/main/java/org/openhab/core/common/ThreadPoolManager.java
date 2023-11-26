@@ -22,6 +22,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -113,6 +114,26 @@ public class ThreadPoolManager {
                 }
             }
         }
+    }
+
+    /**
+     * Returns an instance of a scheduled service, which will sequentially execute submitted tasks. If a task is
+     * currently running the task is queued until the previous one is completed, this also applies for scheduled tasks.
+     * The service might execute submitted task might in different threads, but still one after the other.
+     * If it is the first request for the given pool name and a pool is used, the instance is newly created.
+     *
+     * @param poolName a short name used to identify the pool, if a thread pool is used e.g. "discovery"
+     * @param threadName a short name used to identify the thread if no thread pool is used, e.g. "bluetooth"
+     * @return an instance to use
+     */
+    public static ScheduledExecutorService newSequentialScheduledExecutorService(String poolName, String threadName) {
+        if (Boolean.getBoolean("org.openhab.core.common.SequentialScheduledExecutorService")) {
+            ScheduledThreadPoolExecutor pool = getScheduledPoolUnwrapped(poolName);
+
+            return new SequentialScheduledExecutorService((ScheduledThreadPoolExecutor) pool);
+        }
+
+        return Executors.newSingleThreadScheduledExecutor(new NamedThreadFactory(threadName));
     }
 
     /**
