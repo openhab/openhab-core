@@ -18,6 +18,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
+import java.time.Instant;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,10 +36,13 @@ import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.events.ItemEvent;
 import org.openhab.core.items.events.ItemEventFactory;
+import org.openhab.core.items.events.ItemTimeSeriesEvent;
 import org.openhab.core.library.items.StringItem;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.HSBType;
+import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.library.types.StringType;
+import org.openhab.core.types.TimeSeries;
 
 import com.google.gson.Gson;
 
@@ -170,5 +175,18 @@ public class ItemEventUtilityTest {
         EventProcessingException e = assertThrows(EventProcessingException.class,
                 () -> itemEventUtility.createCommandEvent(eventDTO));
         assertThat(e.getMessage(), is("Failed to deserialize payload 'invalidNoJson'."));
+    }
+
+    @Test
+    public void validTimeSeriesEvent() throws EventProcessingException {
+        TimeSeries timeSeries = new TimeSeries(TimeSeries.Policy.REPLACE);
+        timeSeries.add(Instant.now(), OnOffType.ON);
+        timeSeries.add(Instant.now().plusSeconds(5), OnOffType.OFF);
+        ItemTimeSeriesEvent event = ItemEventFactory.createTimeSeriesEvent(EXISTING_ITEM_NAME, timeSeries, null);
+        EventDTO eventDTO = new EventDTO(event);
+
+        Event itemEvent = itemEventUtility.createTimeSeriesEvent(eventDTO);
+
+        assertThat(itemEvent, is(event));
     }
 }

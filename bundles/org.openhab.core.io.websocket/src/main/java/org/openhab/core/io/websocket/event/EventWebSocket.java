@@ -123,6 +123,12 @@ public class EventWebSocket {
                         responseEvent = new EventDTO(WEBSOCKET_EVENT_TYPE, WEBSOCKET_TOPIC_PREFIX + "response/success",
                                 "", null, eventDTO.eventId);
                         break;
+                    case "ItemTimeSeriesEvent":
+                        Event itemTimeseriesEvent = itemEventUtility.createTimeSeriesEvent(eventDTO);
+                        eventPublisher.post(itemTimeseriesEvent);
+                        responseEvent = new EventDTO(WEBSOCKET_EVENT_TYPE, WEBSOCKET_TOPIC_PREFIX + "response/success",
+                                "", null, eventDTO.eventId);
+                        break;
                     case WEBSOCKET_EVENT_TYPE:
                         if ((WEBSOCKET_TOPIC_PREFIX + "heartbeat").equals(eventDTO.topic)
                                 && "PING".equals(eventDTO.payload)) {
