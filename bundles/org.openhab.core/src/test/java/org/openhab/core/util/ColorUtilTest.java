@@ -103,9 +103,17 @@ public class ColorUtilTest {
         HSBType hsb = ColorUtil.rgbToHsb(new int[] { 255, 0, 0, 0 });
         int[] convertedRgb = ColorUtil.hsbToRgb(hsb);
         assertRgbEquals(new int[] { 255, 0, 0 }, convertedRgb);
+        hsb = ColorUtil.rgbToHsb(
+                new PercentType[] { new PercentType(100), new PercentType(0), new PercentType(0), new PercentType(0) });
+        convertedRgb = ColorUtil.hsbToRgb(hsb);
+        assertRgbEquals(new int[] { 255, 0, 0 }, convertedRgb);
 
         // Test Green
         hsb = ColorUtil.rgbToHsb(new int[] { 0, 255, 0, 0 });
+        convertedRgb = ColorUtil.hsbToRgb(hsb);
+        assertRgbEquals(new int[] { 0, 255, 0 }, convertedRgb);
+        hsb = ColorUtil.rgbToHsb(
+                new PercentType[] { new PercentType(0), new PercentType(100), new PercentType(0), new PercentType(0) });
         convertedRgb = ColorUtil.hsbToRgb(hsb);
         assertRgbEquals(new int[] { 0, 255, 0 }, convertedRgb);
 
@@ -113,14 +121,26 @@ public class ColorUtilTest {
         hsb = ColorUtil.rgbToHsb(new int[] { 0, 0, 255, 0 });
         convertedRgb = ColorUtil.hsbToRgb(hsb);
         assertRgbEquals(new int[] { 0, 0, 255 }, convertedRgb);
+        hsb = ColorUtil.rgbToHsb(
+                new PercentType[] { new PercentType(0), new PercentType(0), new PercentType(100), new PercentType(0) });
+        convertedRgb = ColorUtil.hsbToRgb(hsb);
+        assertRgbEquals(new int[] { 0, 0, 255 }, convertedRgb);
 
         // Test White
         hsb = ColorUtil.rgbToHsb(new int[] { 0, 0, 0, 255 });
         convertedRgb = ColorUtil.hsbToRgb(hsb);
         assertRgbEquals(new int[] { 255, 255, 255 }, convertedRgb);
+        hsb = ColorUtil.rgbToHsb(
+                new PercentType[] { new PercentType(0), new PercentType(0), new PercentType(0), new PercentType(100) });
+        convertedRgb = ColorUtil.hsbToRgb(hsb);
+        assertRgbEquals(new int[] { 255, 255, 255 }, convertedRgb);
 
         // Test Black
         hsb = ColorUtil.rgbToHsb(new int[] { 0, 0, 0, 0 });
+        convertedRgb = ColorUtil.hsbToRgb(hsb);
+        assertRgbEquals(new int[] { 0, 0, 0 }, convertedRgb);
+        hsb = ColorUtil.rgbToHsb(
+                new PercentType[] { new PercentType(0), new PercentType(0), new PercentType(0), new PercentType(0) });
         convertedRgb = ColorUtil.hsbToRgb(hsb);
         assertRgbEquals(new int[] { 0, 0, 0 }, convertedRgb);
     }
