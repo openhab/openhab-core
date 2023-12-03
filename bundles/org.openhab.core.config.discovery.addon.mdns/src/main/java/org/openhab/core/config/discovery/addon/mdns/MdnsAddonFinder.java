@@ -12,7 +12,8 @@
  */
 package org.openhab.core.config.discovery.addon.mdns;
 
-import static org.openhab.core.config.discovery.addon.AddonFinderConstants.*;
+import static org.openhab.core.config.discovery.addon.AddonFinderConstants.SERVICE_NAME_MDNS;
+import static org.openhab.core.config.discovery.addon.AddonFinderConstants.SERVICE_TYPE_MDNS;
 
 import java.util.HashSet;
 import java.util.List;
@@ -68,6 +69,20 @@ public class MdnsAddonFinder extends BaseAddonFinder implements ServiceListener 
         this.mdnsClient = mdnsClient;
     }
 
+    /**
+     * Adds the given mDNS service to the set of discovered services.
+     * 
+     * @param device the mDNS service to be added.
+     */
+    public void addService(ServiceInfo service, boolean isResolved) {
+        String qualifiedName = service.getQualifiedName();
+        if (isResolved || !services.containsKey(qualifiedName)) {
+            if (services.put(qualifiedName, service) == null) {
+                logger.trace("Added service: {}", qualifiedName);
+            }
+        }
+    }
+
     @Deactivate
     public void deactivate() {
         services.clear();
@@ -99,20 +114,6 @@ public class MdnsAddonFinder extends BaseAddonFinder implements ServiceListener 
                 .filter(m -> SERVICE_TYPE.equals(m.getServiceType())).filter(m -> !m.getMdnsServiceType().isEmpty())
                 .forEach(m -> mdnsClient.removeServiceListener(m.getMdnsServiceType(), this)));
         super.unsetAddonCandidates();
-    }
-
-    /**
-     * Adds the given mDNS service to the set of discovered services.
-     *
-     * @param device the mDNS service to be added.
-     */
-    public void addService(ServiceInfo service, boolean isResolved) {
-        String qualifiedName = service.getQualifiedName();
-        if (isResolved || !services.containsKey(qualifiedName)) {
-            if (services.put(qualifiedName, service) == null) {
-                logger.trace("Added service: {}", qualifiedName);
-            }
-        }
     }
 
     @Override
