@@ -17,7 +17,11 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.openhab.core.voice.internal.text.StandardInterpreter.VOICE_SYSTEM_NAMESPACE;
+import static org.openhab.core.voice.text.AbstractRuleBasedInterpreter.IS_SILENT_CONFIGURATION;
+import static org.openhab.core.voice.text.AbstractRuleBasedInterpreter.IS_TEMPLATE_CONFIGURATION;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -136,7 +140,8 @@ public class StandardInterpreterTest {
         MetadataKey computerMetadataKey = new MetadataKey("synonyms", computerItem.getName());
         when(metadataRegistryMock.get(computerMetadataKey))
                 .thenReturn(new Metadata(computerMetadataKey, "PC,Bedroom PC", null));
-        when(metadataRegistryMock.get(new MetadataKey("voice-system", computerItem.getName()))).thenReturn(null);
+        when(metadataRegistryMock.get(new MetadataKey(VOICE_SYSTEM_NAMESPACE, computerItem.getName())))
+                .thenReturn(null);
         List<Item> items = List.of(computerItem);
         when(itemRegistryMock.getItems()).thenReturn(items);
         assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, "turn off computer"));
@@ -154,17 +159,11 @@ public class StandardInterpreterTest {
 
     @Test
     public void allowUseItemDescription() throws InterpretationException {
-        var cmdDescription = new CommandDescription() {
-            @Override
-            public List<CommandOption> getCommandOptions() {
-                return List.of(new CommandOption("10", "low"), new CommandOption("50", "medium"),
-                        new CommandOption("90", "high"), new CommandOption("100", "high two"));
-            }
-        };
         var brightness = new DimmerItem("brightness") {
             @Override
             public @Nullable CommandDescription getCommandDescription() {
-                return cmdDescription;
+                return () -> List.of(new CommandOption("10", "low"), new CommandOption("50", "medium"),
+                        new CommandOption("90", "high"), new CommandOption("100", "high two"));
             }
 
             @Override
@@ -193,14 +192,116 @@ public class StandardInterpreterTest {
     }
 
     @Test
-    public void allowUseCustomCommands() throws InterpretationException {
-        var virtualItem = new StringItem("virtual");
-        MetadataKey voiceMetadataKey = new MetadataKey("voice-system", virtualItem.getName());
+    public void allowUseCustomItemCommands() throws InterpretationException {
+        var tvItem = new StringItem("virtual") {
+            @Override
+            public @Nullable CommandDescription getCommandDescription() {
+                return () -> List.of(new CommandOption("KEY_4", "channel 4"));
+            }
+
+            @Override
+            public @Nullable CommandDescription getCommandDescription(@Nullable Locale locale) {
+                return getCommandDescription();
+            }
+        };
+        tvItem.setLabel("tv");
+        MetadataKey voiceMetadataKey = new MetadataKey(VOICE_SYSTEM_NAMESPACE, tvItem.getName());
         when(metadataRegistryMock.get(voiceMetadataKey))
-                .thenReturn(new Metadata(voiceMetadataKey, "watch|play * on|at? the? tv", null));
-        List<Item> items = List.of(virtualItem);
+                .thenReturn(new Metadata(voiceMetadataKey, "watch|play $cmd$ on|at the? $name$", null));
+        List<Item> items = List.of(tvItem);
         when(itemRegistryMock.getItems()).thenReturn(items);
         assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, "watch channel 4 on the tv"));
+        verify(eventPublisherMock, times(1))
+                .post(ItemEventFactory.createCommandEvent(tvItem.getName(), new StringType("KEY_4")));
+        reset(eventPublisherMock);
+    }
+
+    @Test
+    public void allowUseCustomCommandCommands() throws InterpretationException {
+        var tvItem = new StringItem("tv") {
+            @Override
+            public @Nullable CommandDescription getCommandDescription() {
+                return () -> List.of(new CommandOption("KEY_4", "channel 4"));
+            }
+
+            @Override
+            public @Nullable CommandDescription getCommandDescription(@Nullable Locale locale) {
+                return getCommandDescription();
+            }
+        };
+        MetadataKey voiceMetadataKey = new MetadataKey(VOICE_SYSTEM_NAMESPACE, tvItem.getName());
+        when(metadataRegistryMock.get(voiceMetadataKey))
+                .thenReturn(new Metadata(voiceMetadataKey, "watch|play $cmd$ on|at the? tv", null));
+        List<Item> items = List.of(tvItem);
+        when(itemRegistryMock.getItems()).thenReturn(items);
+        assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, "watch channel 4 on the tv"));
+        verify(eventPublisherMock, times(1))
+                .post(ItemEventFactory.createCommandEvent(tvItem.getName(), new StringType("KEY_4")));
+        reset(eventPublisherMock);
+    }
+
+    @Test
+    public void allowUseCustomItemDynamicCommands() throws InterpretationException {
+        var tvItem = new StringItem("tv");
+        tvItem.setLabel("tv");
+        MetadataKey voiceMetadataKey = new MetadataKey(VOICE_SYSTEM_NAMESPACE, tvItem.getName());
+        when(metadataRegistryMock.get(voiceMetadataKey))
+                .thenReturn(new Metadata(voiceMetadataKey, "watch|play $*$ on|at the? $name$", null));
+        List<Item> items = List.of(tvItem);
+        when(itemRegistryMock.getItems()).thenReturn(items);
+        assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, "watch channel 4 on the tv"));
+        verify(eventPublisherMock, times(1))
+                .post(ItemEventFactory.createCommandEvent(tvItem.getName(), new StringType("channel 4")));
+        reset(eventPublisherMock);
+    }
+
+    @Test
+    public void allowUseCommandsWithoutAnswer() throws InterpretationException {
+        var tvItem = new StringItem("tv");
+        tvItem.setLabel("tv");
+        MetadataKey voiceMetadataKey = new MetadataKey(VOICE_SYSTEM_NAMESPACE, tvItem.getName());
+        HashMap<String, Object> configuration = new HashMap<>();
+        configuration.put(IS_SILENT_CONFIGURATION, true);
+        when(metadataRegistryMock.get(voiceMetadataKey))
+                .thenReturn(new Metadata(voiceMetadataKey, "watch|play $*$ on|at the? $name$", configuration));
+        List<Item> items = List.of(tvItem);
+        when(itemRegistryMock.getItems()).thenReturn(items);
+        assertEquals("", standardInterpreter.interpret(Locale.ENGLISH, "watch channel 4 on the tv"));
+        verify(eventPublisherMock, times(1))
+                .post(ItemEventFactory.createCommandEvent(tvItem.getName(), new StringType("channel 4")));
+        reset(eventPublisherMock);
+    }
+
+    @Test
+    public void allowUseCommandsFromTemplate() throws InterpretationException {
+        var virtualItem = new StringItem("virtual");
+        virtualItem.setLabel("tv rule");
+        virtualItem.addTag("tv");
+        var tvItem = new StringItem("tv");
+        tvItem.setLabel("tv");
+        virtualItem.addTag("tv");
+        MetadataKey voiceMetadataKey = new MetadataKey(VOICE_SYSTEM_NAMESPACE, virtualItem.getName());
+        HashMap<String, Object> configuration = new HashMap<>();
+        configuration.put(IS_TEMPLATE_CONFIGURATION, true);
+        when(metadataRegistryMock.get(voiceMetadataKey))
+                .thenReturn(new Metadata(voiceMetadataKey, "watch|play $*$ on|at the? $name$", configuration));
+        List<Item> items = List.of(virtualItem, tvItem);
+        when(itemRegistryMock.getItems()).thenReturn(items);
+        assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, "watch channel 4 on the tv"));
+        verify(eventPublisherMock, times(1))
+                .post(ItemEventFactory.createCommandEvent(tvItem.getName(), new StringType("channel 4")));
+        reset(eventPublisherMock);
+    }
+
+    @Test
+    public void allowUseCustomDynamicCommands() throws InterpretationException {
+        var virtualItem = new StringItem("tv");
+        MetadataKey voiceMetadataKey = new MetadataKey(VOICE_SYSTEM_NAMESPACE, virtualItem.getName());
+        when(metadataRegistryMock.get(voiceMetadataKey))
+                .thenReturn(new Metadata(voiceMetadataKey, "watch|play $*$", null));
+        List<Item> items = List.of(virtualItem);
+        when(itemRegistryMock.getItems()).thenReturn(items);
+        assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, "watch channel 4"));
         verify(eventPublisherMock, times(1))
                 .post(ItemEventFactory.createCommandEvent(virtualItem.getName(), new StringType("channel 4")));
         reset(eventPublisherMock);
@@ -225,9 +326,9 @@ public class StandardInterpreterTest {
                 return getCommandDescription();
             }
         };
-        MetadataKey voiceMetadataKey = new MetadataKey("voice-system", virtualItem.getName());
+        MetadataKey voiceMetadataKey = new MetadataKey(VOICE_SYSTEM_NAMESPACE, virtualItem.getName());
         when(metadataRegistryMock.get(voiceMetadataKey))
-                .thenReturn(new Metadata(voiceMetadataKey, "watch|play * on|at? the? tv", null));
+                .thenReturn(new Metadata(voiceMetadataKey, "watch|play $*$ on|at? the? tv", null));
         List<Item> items = List.of(virtualItem);
         when(itemRegistryMock.getItems()).thenReturn(items);
         assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, "watch channel 4 on the tv"));

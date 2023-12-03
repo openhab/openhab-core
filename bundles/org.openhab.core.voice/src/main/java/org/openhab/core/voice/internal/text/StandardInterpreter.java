@@ -64,9 +64,9 @@ import org.slf4j.LoggerFactory;
 @NonNullByDefault
 @Component(service = HumanLanguageInterpreter.class)
 public class StandardInterpreter extends AbstractRuleBasedInterpreter {
+    public static final String VOICE_SYSTEM_NAMESPACE = "voice-system";
     private Logger logger = LoggerFactory.getLogger(StandardInterpreter.class);
     private final ItemRegistry itemRegistry;
-    private final String metadataNamespace = "voice-system";
     private final MetadataRegistry metadataRegistry;
 
     @Activate
@@ -164,7 +164,7 @@ public class StandardInterpreter extends AbstractRuleBasedInterpreter {
             );
             /* Item description commands */
             addRules(Locale.ENGLISH, createItemDescriptionRules( //
-                    (allowedItemNames, labeledCmd) -> restrictedItemRule(allowedItemNames, //
+                    (allowedItems, labeledCmd) -> restrictedItemRule(allowedItems, //
                             seq(alt("set", "change"), opt(the)), /* item */ seq(to, labeledCmd)//
                     ), //
                     Locale.ENGLISH).toArray(Rule[]::new));
@@ -233,7 +233,7 @@ public class StandardInterpreter extends AbstractRuleBasedInterpreter {
             /* Item description commands */
 
             addRules(Locale.GERMAN, createItemDescriptionRules( //
-                    (allowedItemNames, labeledCmd) -> restrictedItemRule(allowedItemNames, //
+                    (allowedItems, labeledCmd) -> restrictedItemRule(allowedItems, //
                             seq(schalte, denDieDas), /* item */ seq(opt("auf"), labeledCmd)//
                     ), //
                     Locale.GERMAN).toArray(Rule[]::new));
@@ -301,7 +301,7 @@ public class StandardInterpreter extends AbstractRuleBasedInterpreter {
             /* Item description commands */
 
             addRules(Locale.FRENCH, createItemDescriptionRules( //
-                    (allowedItemNames, labeledCmd) -> restrictedItemRule(allowedItemNames, //
+                    (allowedItems, labeledCmd) -> restrictedItemRule(allowedItems, //
                             seq("mets", lela), /* item */ seq(poursurdude, lela, labeledCmd)//
                     ), //
                     Locale.FRENCH).toArray(Rule[]::new));
@@ -351,10 +351,17 @@ public class StandardInterpreter extends AbstractRuleBasedInterpreter {
 
                     /* NextPreviousType */
 
-                    itemRule(cambiar,
+                    itemRule(seq(cambiar, opt(articulo)),
                             /* item */ seq(opt("a"),
                                     alt(cmd("siguiente", NextPreviousType.NEXT),
                                             cmd("anterior", NextPreviousType.PREVIOUS)))),
+
+                    itemRule(
+                            seq(opt(poner),
+                                    alt(cmd("siguiente", NextPreviousType.NEXT),
+                                            cmd("anterior", NextPreviousType.PREVIOUS)),
+                                    "en"),
+                            opt(articulo) /* item */ ),
 
                     /* PlayPauseType */
 
@@ -392,7 +399,7 @@ public class StandardInterpreter extends AbstractRuleBasedInterpreter {
             /* Item description commands */
 
             addRules(localeES, createItemDescriptionRules( //
-                    (allowedItemNames, labeledCmd) -> restrictedItemRule(allowedItemNames, //
+                    (allowedItems, labeledCmd) -> restrictedItemRule(allowedItems, //
                             seq(alt(cambiar, poner), opt(articulo)), /* item */ seq(preposicion, labeledCmd)//
                     ), //
                     localeES).toArray(Rule[]::new));
@@ -409,12 +416,12 @@ public class StandardInterpreter extends AbstractRuleBasedInterpreter {
         return "Built-in Interpreter";
     }
 
-    private List<Rule> createItemDescriptionRules(CreateItemDescriptionRule creator, @Nullable Locale locale) {
+    private List<Rule> createItemDescriptionRules(CreateItemDescriptionRule creator, Locale locale) {
         // Map different item state/command labels with theirs values by item
         HashMap<String, HashMap<Item, String>> options = new HashMap<>();
         List<Rule> customRules = new ArrayList<>();
         for (var item : itemRegistry.getItems()) {
-            customRules.addAll(createItemCustomRules(item));
+            customRules.addAll(createItemMetadataRules(locale, item));
             var stateDesc = item.getStateDescription(locale);
             if (stateDesc != null) {
                 stateDesc.getOptions().forEach(op -> {
@@ -445,34 +452,28 @@ public class StandardInterpreter extends AbstractRuleBasedInterpreter {
                 .map(entry -> {
                     String label = entry.getKey();
                     Map<Item, String> commandByItem = entry.getValue();
-                    List<String> itemNames = commandByItem.keySet().stream().map(Item::getName).toList();
                     String[] labelParts = Arrays.stream(label.split("\\s")).filter(p -> !p.isBlank())
                             .toArray(String[]::new);
                     Expression labeledCmd = cmd(seq((Object[]) labelParts),
                             new ItemStateCommandSupplier(label, commandByItem));
-                    return creator.itemDescriptionRule(itemNames, labeledCmd);
+                    return creator.itemDescriptionRule(commandByItem.keySet(), labeledCmd);
                 })) //
                 .collect(Collectors.toList());
     }
 
-    private List<Rule> createItemCustomRules(Item item) {
-        var interpreterMetadata = metadataRegistry.get(new MetadataKey(metadataNamespace, item.getName()));
+    private List<Rule> createItemMetadataRules(Locale locale, Item item) {
+        var interpreterMetadata = metadataRegistry.get(new MetadataKey(VOICE_SYSTEM_NAMESPACE, item.getName()));
         if (interpreterMetadata == null) {
             return List.of();
         }
-        List<Rule> list = new ArrayList<>();
-        for (String s : interpreterMetadata.getValue().split("\n")) {
-            String line = s.trim();
-            Rule rule = this.parseItemCustomRule(item, line);
-            if (rule != null) {
-                list.add(rule);
-            }
-        }
-        return list;
+        return Arrays.stream(interpreterMetadata.getValue().split("\n")) //
+                .map(line -> this.parseItemCustomRules(locale, item, line.trim(), interpreterMetadata)) //
+                .flatMap(List::stream) //
+                .collect(Collectors.toList());
     }
 
     private interface CreateItemDescriptionRule {
-        Rule itemDescriptionRule(List<String> allowedItemNames, Expression labeledCmd);
+        Rule itemDescriptionRule(Set<Item> allowedItemNames, Expression labeledCmd);
     }
 
     private record ItemStateCommandSupplier(String label,
