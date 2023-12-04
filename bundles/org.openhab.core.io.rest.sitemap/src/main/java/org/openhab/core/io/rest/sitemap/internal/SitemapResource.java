@@ -625,10 +625,10 @@ public class SitemapResource
             bean.step = setpointWidget.getStep();
         }
         if (widget instanceof Buttongrid buttonGridWidget) {
-            bean.columns = buttonGridWidget.getColumns();
             for (Button button : buttonGridWidget.getButtons()) {
                 MappingDTO mappingBean = new MappingDTO();
-                mappingBean.position = button.getPosition();
+                mappingBean.row = button.getRow();
+                mappingBean.column = button.getColumn();
                 mappingBean.command = button.getCmd();
                 mappingBean.label = button.getLabel();
                 mappingBean.icon = button.getIcon();

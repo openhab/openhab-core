@@ -17,10 +17,12 @@ package org.openhab.core.io.rest.sitemap.internal;
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Laurent Garnier - New fields position and icon
+ * @author Laurent Garnier - Replace field position by fields row and column
  */
 public class MappingDTO {
 
-    public Integer position;
+    public Integer row;
+    public Integer column;
     public String command;
     public String label;
     public String icon;
