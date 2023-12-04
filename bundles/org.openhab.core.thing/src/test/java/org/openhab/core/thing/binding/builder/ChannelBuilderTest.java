@@ -84,6 +84,7 @@ public class ChannelBuilderTest {
         assertThat(otherChannel.getDescription(), is(channel.getDescription()));
         assertThat(otherChannel.getKind(), is(channel.getKind()));
         assertThat(otherChannel.getLabel(), is(channel.getLabel()));
+        assertThat(otherChannel.getAutoUpdatePolicy(), is(channel.getAutoUpdatePolicy()));
         assertThat(otherChannel.getProperties().size(), is(channel.getProperties().size()));
         assertThat(otherChannel.getProperties().get(KEY1), is(channel.getProperties().get(KEY1)));
         assertThat(otherChannel.getProperties().get(KEY2), is(channel.getProperties().get(KEY2)));

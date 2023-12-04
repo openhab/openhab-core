@@ -96,7 +96,7 @@ public class ChannelBuilder {
         ChannelBuilder channelBuilder = create(channel.getUID(), channel.getAcceptedItemType())
                 .withConfiguration(channel.getConfiguration()).withDefaultTags(channel.getDefaultTags())
                 .withKind(channel.getKind()).withProperties(channel.getProperties())
-                .withType(channel.getChannelTypeUID());
+                .withType(channel.getChannelTypeUID()).withAutoUpdatePolicy(channel.getAutoUpdatePolicy());
         String label = channel.getLabel();
         if (label != null) {
             channelBuilder.withLabel(label);
