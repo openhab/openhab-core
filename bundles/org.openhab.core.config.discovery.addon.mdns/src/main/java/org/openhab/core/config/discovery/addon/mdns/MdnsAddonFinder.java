@@ -44,7 +44,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This is a {@link MdnsAddonFinder} for finding suggested Addons via MDNS.
+ * This is a {@link MdnsAddonFinder} for finding suggested add-ons via mDNS.
  *
  * @author Andrew Fiddian-Green - Initial contribution
  * @author Mark Herwege - refactor to allow uninstall
