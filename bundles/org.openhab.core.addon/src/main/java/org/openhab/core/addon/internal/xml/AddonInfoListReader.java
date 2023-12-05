@@ -10,16 +10,14 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.addon;
+package org.openhab.core.addon.internal.xml;
 
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.core.addon.internal.xml.AddonDiscoveryMethodConverter;
-import org.openhab.core.addon.internal.xml.AddonInfoConverter;
-import org.openhab.core.addon.internal.xml.AddonInfoListConverter;
-import org.openhab.core.addon.internal.xml.AddonInfoXmlResult;
-import org.openhab.core.addon.internal.xml.AddonMatchPropertyConverter;
+import org.openhab.core.addon.AddonDiscoveryMethod;
+import org.openhab.core.addon.AddonInfoList;
+import org.openhab.core.addon.AddonMatchProperty;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionParameterGroup;
@@ -39,7 +37,7 @@ import org.openhab.core.config.core.xml.util.XmlDocumentReader;
 import com.thoughtworks.xstream.XStream;
 
 /**
- * The {@link AddonInfoListReader} reads XML documents, which contain the {@code binding} XML tag, and converts them to
+ * The {@link AddonInfoListReader} reads XML documents, which contain the {@code addon} XML tag, and converts them to
  * a List of {@link AddonInfoXmlResult} objects.
  * <p>
  * This reader uses {@code XStream} and {@code StAX} to parse and convert the XML document.

@@ -36,7 +36,7 @@ import org.openhab.core.config.core.xml.util.XmlDocumentReader;
 import com.thoughtworks.xstream.XStream;
 
 /**
- * The {@link AddonInfoReader} reads XML documents, which contain the {@code binding} XML tag,
+ * The {@link AddonInfoReader} reads XML documents, which contain the {@code addon} XML tag,
  * and converts them to {@link AddonInfoXmlResult} objects.
  * <p>
  * This reader uses {@code XStream} and {@code StAX} to parse and convert the XML document.

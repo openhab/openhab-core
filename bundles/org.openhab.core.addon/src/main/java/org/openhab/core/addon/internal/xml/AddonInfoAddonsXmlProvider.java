@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.addon.infoproviders;
+package org.openhab.core.addon.internal.xml;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,7 +29,6 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.OpenHAB;
 import org.openhab.core.addon.AddonDiscoveryMethod;
 import org.openhab.core.addon.AddonInfo;
-import org.openhab.core.addon.AddonInfoListReader;
 import org.openhab.core.addon.AddonInfoProvider;
 import org.openhab.core.addon.AddonMatchProperty;
 import org.osgi.service.component.annotations.Activate;
@@ -42,30 +41,26 @@ import com.thoughtworks.xstream.XStreamException;
 import com.thoughtworks.xstream.converters.ConversionException;
 
 /**
- * The {@link AddonsInfoProvider} reads all {@code userdata/addons/*.xml} files, each of which
- * should contain a list of addon.xml elements, and convert their combined contents into a list
+ * The {@link AddonInfoAddonsXmlProvider} reads all {@code userdata/addons/*.xml} files, each of which
+ * should contain a list of {@code addon} elements, and convert their combined contents into a list
  * of {@link AddonInfo} objects can be accessed via the {@link AddonInfoProvider} interface.
  *
  * @author Andrew Fiddian-Green - Initial contribution
  */
 @NonNullByDefault
-@Component(service = AddonInfoProvider.class, name = AddonsInfoProvider.SERVICE_NAME)
-public class AddonsInfoProvider implements AddonInfoProvider {
+@Component(service = AddonInfoProvider.class, name = AddonInfoAddonsXmlProvider.SERVICE_NAME)
+public class AddonInfoAddonsXmlProvider implements AddonInfoProvider {
 
     public static final String SERVICE_NAME = "addons-info-provider";
 
-    private static final boolean TEST_ADDON_DEVELOPER_REGEX_SYNTAX = true;
-
-    private final Logger logger = LoggerFactory.getLogger(AddonsInfoProvider.class);
+    private final Logger logger = LoggerFactory.getLogger(AddonInfoAddonsXmlProvider.class);
     private final String folder = OpenHAB.getUserDataFolder() + File.separator + "addons";
     private final Set<AddonInfo> addonInfos = new HashSet<>();
 
     @Activate
-    public AddonsInfoProvider() {
+    public AddonInfoAddonsXmlProvider() {
         initialize();
-        if (TEST_ADDON_DEVELOPER_REGEX_SYNTAX) {
-            testAddonDeveloperRegexSyntax();
-        }
+        testAddonDeveloperRegexSyntax();
     }
 
     @Deactivate
@@ -98,7 +93,7 @@ public class AddonsInfoProvider implements AddonInfoProvider {
             } catch (ConversionException e) {
                 logger.warn("File '{}' has invalid content", f.getName());
             } catch (XStreamException e) {
-                logger.warn("File '{}' could not deserialized", f.getName());
+                logger.warn("File '{}' could not be deserialized", f.getName());
             }
         });
     }
@@ -127,7 +122,7 @@ public class AddonsInfoProvider implements AddonInfoProvider {
             }
         }
         if (!patternErrors.isEmpty()) {
-            logger.warn("The following errors were found\n\t{}", String.join("\n\t", patternErrors));
+            logger.warn("The following errors were found:\n\t{}", String.join("\n\t", patternErrors));
         }
     }
 }
