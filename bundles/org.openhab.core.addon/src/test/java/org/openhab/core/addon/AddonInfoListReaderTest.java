@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.addon.test;
+package org.openhab.core.addon;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -21,10 +21,6 @@ import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
-import org.openhab.core.addon.AddonDiscoveryMethod;
-import org.openhab.core.addon.AddonInfo;
-import org.openhab.core.addon.AddonInfoList;
-import org.openhab.core.addon.AddonMatchProperty;
 import org.openhab.core.addon.internal.xml.AddonInfoListReader;
 
 /**

@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.addon.test;
+package org.openhab.core.addon;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -33,11 +33,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
-import org.openhab.core.addon.AddonDiscoveryMethod;
-import org.openhab.core.addon.AddonInfo;
-import org.openhab.core.addon.AddonInfoProvider;
-import org.openhab.core.addon.AddonInfoRegistry;
-import org.openhab.core.addon.AddonMatchProperty;
 
 /**
  * JUnit test for the {@link AddonInfoRegistry} merge function.
