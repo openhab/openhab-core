@@ -44,14 +44,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This is a {@link MDNSAddonFinder} for finding suggested add-ons via mDNS.
+ * This is a {@link MDNSAardvarkAddonFinder} for finding suggested add-ons via mDNS.
  *
  * @author Andrew Fiddian-Green - Initial contribution
  * @author Mark Herwege - refactor to allow uninstall
  */
 @NonNullByDefault
-@Component(service = AddonFinder.class, name = MDNSAddonFinder.SERVICE_NAME)
-public class MDNSAddonFinder extends BaseAddonFinder implements ServiceListener {
+@Component(service = AddonFinder.class, name = MDNSAardvarkAddonFinder.SERVICE_NAME)
+public class MDNSAardvarkAddonFinder extends BaseAddonFinder implements ServiceListener {
 
     public static final String SERVICE_TYPE = SERVICE_TYPE_MDNS;
     public static final String SERVICE_NAME = SERVICE_NAME_MDNS;
@@ -59,13 +59,13 @@ public class MDNSAddonFinder extends BaseAddonFinder implements ServiceListener 
     private static final String NAME = "name";
     private static final String APPLICATION = "application";
 
-    private final Logger logger = LoggerFactory.getLogger(MDNSAddonFinder.class);
+    private final Logger logger = LoggerFactory.getLogger(MDNSAardvarkAddonFinder.class);
     private final ScheduledExecutorService scheduler = ThreadPoolManager.getScheduledPool(SERVICE_NAME);
     private final Map<String, ServiceInfo> services = new ConcurrentHashMap<>();
     private MDNSClient mdnsClient;
 
     @Activate
-    public MDNSAddonFinder(@Reference MDNSClient mdnsClient) {
+    public MDNSAardvarkAddonFinder(@Reference MDNSClient mdnsClient) {
         this.mdnsClient = mdnsClient;
     }
 
