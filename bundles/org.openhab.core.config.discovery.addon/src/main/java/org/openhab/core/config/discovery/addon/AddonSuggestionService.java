@@ -49,7 +49,7 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.component.annotations.ReferencePolicyOption;
 
 /**
- * This is a {@link AddonSuggestionService} which discovers suggested Addons for the user to install.
+ * This is a {@link AddonSuggestionService} which discovers suggested add-ons for the user to install.
  *
  * @author Andrew Fiddian-Green - Initial contribution
  * @author Mark Herwege - Install/remove finders
