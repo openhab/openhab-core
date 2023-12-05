@@ -21,7 +21,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.addon.AddonInfo;
 
 /**
- * This is a {@link BaseAddonFinder} abstract class for finding suggested Addons.
+ * This is a {@link BaseAddonFinder} abstract class for finding suggested add-ons.
  *
  * @author Andrew Fiddian-Green - Initial contribution
  */
