@@ -25,6 +25,5 @@
 			<attribute name="annotationpath" value="target/dependency"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="src" path="/org.openhab.core.config.discovery.addon"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

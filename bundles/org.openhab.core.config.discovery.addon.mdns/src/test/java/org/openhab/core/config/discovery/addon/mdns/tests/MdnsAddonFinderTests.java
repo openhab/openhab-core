@@ -36,7 +36,7 @@ import org.openhab.core.addon.AddonMatchProperty;
 import org.openhab.core.config.discovery.addon.AddonFinder;
 import org.openhab.core.config.discovery.addon.AddonFinderConstants;
 import org.openhab.core.config.discovery.addon.AddonSuggestionService;
-import org.openhab.core.config.discovery.addon.mdns.MdnsAddonFinder;
+import org.openhab.core.config.discovery.addon.mdns.MDNSAddonFinder;
 import org.openhab.core.io.transport.mdns.MDNSClient;
 
 /**
@@ -47,7 +47,7 @@ import org.openhab.core.io.transport.mdns.MDNSClient;
  */
 @NonNullByDefault
 @TestInstance(Lifecycle.PER_CLASS)
-public class MdnsAddonFinderTests {
+public class MDNSAddonFinderTests {
 
     private @NonNullByDefault({}) MDNSClient mdnsClient;
     private @NonNullByDefault({}) AddonFinder addonFinder;
@@ -61,7 +61,7 @@ public class MdnsAddonFinderTests {
     }
 
     private void createAddonFinder() {
-        MdnsAddonFinder mdnsAddonFinder = new MdnsAddonFinder(mdnsClient);
+        MDNSAddonFinder mdnsAddonFinder = new MDNSAddonFinder(mdnsClient);
         assertNotNull(mdnsAddonFinder);
 
         for (ServiceInfo service : mdnsClient.list("_hue._tcp.local.")) {
