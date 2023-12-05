@@ -19,7 +19,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.addon.AddonInfo;
 
 /**
- * This is a {@link AddonFinder} interface for classes that find Addons that are suggested to be installed.
+ * This is a {@link AddonFinder} interface for classes that find add-ons that are suggested to be installed.
  *
  * @author Andrew Fiddian-Green - Initial contribution
  */
