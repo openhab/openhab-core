@@ -908,7 +908,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
         for (Entry<Item, ItemInterpretationMetadata> entry : map.entrySet()) {
             Item item = entry.getKey();
             ItemInterpretationMetadata interpretationMetadata = entry.getValue();
-            if (commandSupplier != null && !context.itemFilter().filterItem(item, metadataRegistry)) {
+            if (!context.itemFilter().filterItem(item, metadataRegistry)) {
                 logger.trace("Item {} discarded, not allowed for this rule", item.getName());
                 continue;
             }
@@ -1538,8 +1538,11 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
             if (!itemNames.isEmpty() && !itemNames.contains(item.getName())) {
                 return false;
             }
-            if (!itemTags.isEmpty() && item.getTags().size() == itemTags.size()
-                    && !item.getTags().stream().allMatch(itemTags::contains)) {
+            if (!excludedItemNames.isEmpty() && excludedItemNames.contains(item.getName())) {
+                return false;
+            }
+            if (!itemTags.isEmpty()
+                    && (item.getTags().size() != itemTags.size() || !item.getTags().containsAll(itemTags))) {
                 return false;
             }
             Metadata semanticsMetadata = metadataRegistry.get(new MetadataKey(SEMANTICS_NAMESPACE, item.getName()));

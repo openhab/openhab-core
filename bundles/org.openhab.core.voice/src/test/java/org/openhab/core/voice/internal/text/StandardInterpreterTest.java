@@ -279,7 +279,7 @@ public class StandardInterpreterTest {
         virtualItem.addTag("tv");
         var tvItem = new StringItem("tv");
         tvItem.setLabel("tv");
-        virtualItem.addTag("tv");
+        tvItem.addTag("tv");
         MetadataKey voiceMetadataKey = new MetadataKey(VOICE_SYSTEM_NAMESPACE, virtualItem.getName());
         HashMap<String, Object> configuration = new HashMap<>();
         configuration.put(IS_TEMPLATE_CONFIGURATION, true);
