@@ -33,7 +33,7 @@ public interface AddonFinder {
     public Set<AddonInfo> getSuggestedAddons();
 
     /**
-     * The OH framework calls this method to provide a list of {@link AddonInfo} elements which contain potential
+     * The framework calls this method to provide a list of {@link AddonInfo} elements which contain potential
      * candidates that this finder can iterate over in order to detect which ones to return via the
      * {@code getSuggestedAddons()} method.
      *
