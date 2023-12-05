@@ -24,8 +24,8 @@ import org.junit.jupiter.api.Test;
 import org.openhab.core.addon.AddonDiscoveryMethod;
 import org.openhab.core.addon.AddonInfo;
 import org.openhab.core.addon.AddonInfoList;
-import org.openhab.core.addon.AddonInfoListReader;
 import org.openhab.core.addon.AddonMatchProperty;
+import org.openhab.core.addon.internal.xml.AddonInfoListReader;
 
 /**
  * JUnit tests for {@link AddonInfoListReader}.
