@@ -476,10 +476,8 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
     }
 
     /**
-     * Creates an item rule which two dynamic capture values on base of a head, a middle and an optional tail
-     * expression,
-     * where one of the values is an item
-     * name expression and the other a free captured value.
+     * Creates an item rule which two dynamic capture values on base of a head a middle and an optional tail expression,
+     * where one of the values is an item name expression and the other a free captured value.
      * Rule will be restricted by the provided filter.
      *
      * @param item Item registering the rule.
@@ -524,11 +522,8 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
     }
 
     /**
-     * Creates a custom rule on base of a head and a tail expression, where the middle part of the new rule's
-     * expression
-     * will consist of a free command to be captured. Either the head expression or the tail expression should contain
-     * at least one {@link #cmd}
-     * generated expression.
+     * Creates a custom rule on base of a head and a tail expression,
+     * where the middle part of the new rule's expression will consist of a free command to be captured.
      * Rule will be restricted to the provided item name.
      *
      * @param item Item target
@@ -541,7 +536,6 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
         Expression tail = exp(tailExpression);
         Expression expression = tail == null ? seq(headExpression, value(null))
                 : seq(headExpression, value(tail), tail);
-
         HashMap<String, String> valuesByLabel = getItemValuesByLabel(item);
         return new Rule(expression, itemFilter, isSilent) {
             @Override
@@ -586,14 +580,10 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
     }
 
     /**
-     * Creates a custom rule on base of a head and a tail expression, where the middle part of the new rule's
-     * expression
-     * will consist of a free command to be captured. Either the head expression or the tail expression should contain
-     * at least one {@link #cmd}
-     * generated expression.
-     * Rule will be restricted to the provided item name.
+     * Creates a custom rule on base of a expression.
+     * The expression should contain at least one {@link #cmd} generated expression.
      *
-     * @param itemFilter Filters the allowed items
+     * @param itemFilter Filters the allowed items.
      * @param cmdExpression The expression.
      * @return The created rule.
      */
