@@ -182,7 +182,6 @@ Buttongrid:
     (('icon=' icon=Icon) |
         ('icon=[' (IconRules+=IconRule (',' IconRules+=IconRule)*) ']') |
         ('staticIcon=' staticIcon=Icon))? &
-    ('columns=' columns=INT) &
     ('buttons=[' buttons+=Button (',' buttons+=Button)* ']') &
     ('labelcolor=[' (LabelColor+=ColorArray (',' LabelColor+=ColorArray)*) ']')? &
     ('valuecolor=[' (ValueColor+=ColorArray (',' ValueColor+=ColorArray)*) ']')? &
@@ -201,7 +200,7 @@ Default:
     ('visibility=[' (Visibility+=VisibilityRule (',' Visibility+=VisibilityRule)*) ']')?);
 
 Button:
-    position=INT ':' cmd=Command '=' label=(ID | STRING) ('=' icon=Icon)?;
+    row=INT ':' column=INT ':' cmd=Command '=' label=(ID | STRING) ('=' icon=Icon)?;
 
 Mapping:
     cmd=Command '=' label=(ID | STRING) ('=' icon=Icon)?;

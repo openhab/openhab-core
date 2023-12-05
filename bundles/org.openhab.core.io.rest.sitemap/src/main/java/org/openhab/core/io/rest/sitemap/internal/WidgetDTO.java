@@ -27,6 +27,7 @@ import org.openhab.core.io.rest.core.item.EnrichedItemDTO;
  * @author Mark herwege - New fields pattern, unit
  * @author Laurent Garnier - New field columns
  * @author Danny Baumann - New field labelSource
+ * @author Laurent Garnier - Remove field columns
  */
 public class WidgetDTO {
 
@@ -68,7 +69,6 @@ public class WidgetDTO {
     public String yAxisDecimalPattern;
     public Boolean legend;
     public Boolean forceAsItem;
-    public Integer columns;
     public String state;
 
     public EnrichedItemDTO item;

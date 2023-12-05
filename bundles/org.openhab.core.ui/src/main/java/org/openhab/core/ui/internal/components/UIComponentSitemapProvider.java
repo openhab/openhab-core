@@ -269,7 +269,6 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
                 ButtongridImpl buttongridWidget = (ButtongridImpl) SitemapFactory.eINSTANCE.createButtongrid();
                 addWidgetButtons(buttongridWidget.getButtons(), component);
                 widget = buttongridWidget;
-                setWidgetPropertyFromComponentConfig(widget, component, "columns", SitemapPackage.BUTTONGRID__COLUMNS);
                 break;
             case "Default":
                 DefaultImpl defaultWidget = (DefaultImpl) SitemapFactory.eINSTANCE.createDefault();
@@ -378,13 +377,16 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
                 for (Object sourceButton : (Collection<?>) sourceButtons) {
                     if (sourceButton instanceof String) {
                         String[] splitted1 = sourceButton.toString().split(":");
-                        int idx = Integer.parseInt(splitted1[0].trim());
-                        String[] splitted2 = splitted1[1].trim().split("=");
-                        String cmd = splitted2[0].trim();
-                        String label = splitted2[1].trim();
-                        String icon = splitted2.length < 3 ? null : splitted2[2].trim();
+                        String[] splitted2 = splitted1[0].split(",");
+                        int row = Integer.parseInt(splitted2[0].trim());
+                        int column = Integer.parseInt(splitted2[1].trim());
+                        String[] splitted3 = splitted1[1].trim().split("=");
+                        String cmd = splitted3[0].trim();
+                        String label = splitted3[1].trim();
+                        String icon = splitted3.length < 3 ? null : splitted3[2].trim();
                         ButtonImpl button = (ButtonImpl) SitemapFactory.eINSTANCE.createButton();
-                        button.setPosition(idx);
+                        button.setRow(row);
+                        button.setColumn(column);
                         button.setCmd(cmd);
                         button.setLabel(label);
                         button.setIcon(icon);
