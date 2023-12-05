@@ -27,7 +27,7 @@ import org.openhab.core.addon.AddonInfo;
 public interface AddonFinder {
 
     /**
-     * The OH framework calls this method to scan through the candidate list of {@link AddonInfo} and return a subset of
+     * The framework calls this method to scan through the candidate list of {@link AddonInfo} and return a subset of
      * those that it suggests to be installed.
      */
     public Set<AddonInfo> getSuggestedAddons();
