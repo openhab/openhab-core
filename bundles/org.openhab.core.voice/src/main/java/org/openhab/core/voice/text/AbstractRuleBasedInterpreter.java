@@ -826,7 +826,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
             throw new InterpretationException(language.getString(NO_OBJECTS));
         }
         if (compatibleItemEntries.size() > 1 && context.locationItem() != null) {
-            var filteredCompatibleEntries = itemsMap.entrySet().stream() //
+            var filteredCompatibleEntries = compatibleItemEntries.stream() //
                     .filter(itemEntry -> itemEntry.getValue().locationParentNames.contains(context.locationItem())) //
                     .collect(Collectors.toSet());
             if (filteredCompatibleEntries.size() == 1) {
