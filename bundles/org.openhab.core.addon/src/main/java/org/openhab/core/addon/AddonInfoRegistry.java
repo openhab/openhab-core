@@ -43,7 +43,7 @@ public class AddonInfoRegistry {
     private final Collection<AddonInfoProvider> addonInfoProviders = new CopyOnWriteArrayList<>();
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
-    public void addAddonInfoProvider(AddonInfoProvider addonInfoProvider) {
+    protected void addAddonInfoProvider(AddonInfoProvider addonInfoProvider) {
         addonInfoProviders.add(addonInfoProvider);
     }
 
