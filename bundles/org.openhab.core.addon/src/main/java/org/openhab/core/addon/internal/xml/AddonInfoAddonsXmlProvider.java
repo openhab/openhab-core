@@ -79,8 +79,18 @@ public class AddonInfoAddonsXmlProvider implements AddonInfoProvider {
     }
 
     private void initialize() {
+        File fileFolder = new File(folder);
+        try {
+            if (!fileFolder.isDirectory()) {
+                logger.warn("Folder '{}' does not exist", folder);
+                return;
+            }
+        } catch (SecurityException e) {
+            logger.warn("Folder '{}' security exception", folder);
+            return;
+        }
         AddonInfoListReader reader = new AddonInfoListReader();
-        Stream.of(new File(folder).listFiles()).filter(f -> f.isFile() && f.getName().endsWith(".xml")).forEach(f -> {
+        Stream.of(fileFolder.listFiles()).filter(f -> f.isFile() && f.getName().endsWith(".xml")).forEach(f -> {
             try {
                 String xml = Files.readString(f.toPath());
                 if (xml != null && !xml.isBlank()) {
@@ -94,6 +104,8 @@ public class AddonInfoAddonsXmlProvider implements AddonInfoProvider {
                 logger.warn("File '{}' has invalid content", f.getName());
             } catch (XStreamException e) {
                 logger.warn("File '{}' could not be deserialized", f.getName());
+            } catch (SecurityException e) {
+                logger.warn("File '{}' security exception", f.getName());
             }
         });
     }
