@@ -12,7 +12,6 @@
  */
 package org.openhab.core.voice.text;
 
-import java.util.List;
 import java.util.ResourceBundle;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -28,17 +27,20 @@ import org.eclipse.jdt.annotation.Nullable;
 public abstract class Rule {
 
     private final Expression expression;
-    private final List<String> allowedItemNames;
+    private final AbstractRuleBasedInterpreter.ItemFilter itemFilter;
+    private final boolean isSilent;
 
     /**
      * Constructs a new instance.
      *
      * @param expression the expression that has to parse successfully, before {@link #interpretAST} is called
-     * @param allowedItemNames List of allowed items or empty for disabled.
+     * @param itemFilter Filters allowed items for rule.
+     * @param isSilent Rule will emit no response on success.
      */
-    public Rule(Expression expression, List<String> allowedItemNames) {
+    public Rule(Expression expression, AbstractRuleBasedInterpreter.ItemFilter itemFilter, boolean isSilent) {
         this.expression = expression;
-        this.allowedItemNames = allowedItemNames;
+        this.itemFilter = itemFilter;
+        this.isSilent = isSilent;
     }
 
     /**
@@ -55,7 +57,7 @@ public abstract class Rule {
     InterpretationResult execute(ResourceBundle language, TokenList list, @Nullable String locationItem) {
         ASTNode node = expression.parse(language, list);
         if (node.isSuccess() && node.getRemainingTokens().eof()) {
-            return interpretAST(language, node, new InterpretationContext(this.allowedItemNames, locationItem));
+            return interpretAST(language, node, new InterpretationContext(this.itemFilter, isSilent, locationItem));
         }
         return InterpretationResult.SYNTAX_ERROR;
     }
@@ -72,9 +74,10 @@ public abstract class Rule {
      *
      * @author Miguel Álvarez - Initial contribution
      *
-     * @param allowedItems List of item names to restrict rule compatibility to, empty for disabled.
+     * @param itemFilter Restricts rule compatibility to allowed items.
      * @param locationItem Location item to prioritize item matches or null.
      */
-    public record InterpretationContext(List<String> allowedItems, @Nullable String locationItem) {
+    public record InterpretationContext(AbstractRuleBasedInterpreter.ItemFilter itemFilter, boolean isSilent,
+            @Nullable String locationItem) {
     }
 }

@@ -21,14 +21,17 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.registry.RegistryChangeListener;
+import org.openhab.core.config.core.ConfigParser;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
@@ -73,15 +76,43 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
 
     private static final String CMD = "cmd";
     private static final String NAME = "name";
-    private static final String VALUE = "name";
+    private static final String VALUE = "value";
+
+    public static final String IS_TEMPLATE_CONFIGURATION = "isTemplate";
+    public static final String IS_SILENT_CONFIGURATION = "isSilent";
+
+    /**
+     * Reserved token to use in custom item rules.
+     * Represents the name place in the phrase.
+     */
+    private static final String NAME_TOKEN = "$name$";
+    /**
+     * Reserved token to use in custom item rules.
+     * Represents the command place in the phrase,
+     * which possible values are defined by the command description
+     * of the item registering these rule.
+     */
+    private static final String CMD_TOKEN = "$cmd$";
+    /**
+     * Reserved token to use in custom item rules.
+     * Represents the command place in the phrase,
+     * allows capturing multiple tokens.
+     */
+    private static final String DYN_CMD_TOKEN = "$*$";
+    /**
+     * Set of reserved tokens in custom item rules.
+     */
+    private static final Set<String> CUSTOM_RULE_TOKENS = Set.of(NAME_TOKEN, CMD_TOKEN, DYN_CMD_TOKEN);
 
     private static final String LANGUAGE_SUPPORT = "LanguageSupport";
 
     private static final String SYNONYMS_NAMESPACE = "synonyms";
 
+    private static final String SEMANTICS_NAMESPACE = "semantics";
+
     private final MetadataRegistry metadataRegistry;
 
-    private Logger logger = LoggerFactory.getLogger(AbstractRuleBasedInterpreter.class);
+    private final Logger logger = LoggerFactory.getLogger(AbstractRuleBasedInterpreter.class);
 
     private final Map<Locale, List<Rule>> languageRules = new HashMap<>();
     private final Map<Locale, Set<String>> allItemTokens = new HashMap<>();
@@ -90,7 +121,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
     private final ItemRegistry itemRegistry;
     private final EventPublisher eventPublisher;
 
-    private RegistryChangeListener<Item> registryChangeListener = new RegistryChangeListener<Item>() {
+    private final RegistryChangeListener<Item> registryChangeListener = new RegistryChangeListener<>() {
         @Override
         public void added(Item element) {
             invalidate();
@@ -106,7 +137,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
             invalidate();
         }
     };
-    private RegistryChangeListener<Metadata> synonymsChangeListener = new RegistryChangeListener<Metadata>() {
+    private final RegistryChangeListener<Metadata> synonymsChangeListener = new RegistryChangeListener<>() {
         @Override
         public void added(Metadata element) {
             invalidateIfSynonymsMetadata(element);
@@ -178,11 +209,10 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
                 }
             }
         }
-        if (lastResult == null) {
-            throw new InterpretationException(language.getString(SORRY));
-        } else {
+        if (lastResult != null && lastResult.getException() != null) {
             throw lastResult.getException();
         }
+        throw new InterpretationException(language.getString(SORRY));
     }
 
     private void invalidate() {
@@ -293,6 +323,17 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
      * all possible stop tokens as excludes.
      * It's safer to use {@link #itemRule} instead.
      *
+     * @return Expression that represents a name of an item.
+     */
+    private Expression value() {
+        return value(null);
+    }
+
+    /**
+     * Creates an item value placeholder expression. This expression is greedy: Only use it, if you are able to pass in
+     * all possible stop tokens as excludes.
+     * It's safer to use {@link #itemRule} instead.
+     *
      * @param stopper Stop expression that, if matching, will stop this expression from consuming further tokens.
      * @return Expression that represents a name of an item.
      */
@@ -343,13 +384,8 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
      * @param rules Rules to add.
      */
     protected void addRules(Locale locale, Rule... rules) {
-        List<Rule> ruleSet = languageRules.get(locale);
-        if (ruleSet == null) {
-            languageRules.put(locale, ruleSet = new ArrayList<>());
-        }
-        for (Rule rule : rules) {
-            ruleSet.add(rule);
-        }
+        List<Rule> ruleSet = languageRules.computeIfAbsent(locale, k -> new ArrayList<>());
+        ruleSet.addAll(Arrays.asList(rules));
     }
 
     /**
@@ -376,7 +412,23 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
      * @return The created rule.
      */
     protected Rule itemRule(Object headExpression, @Nullable Object tailExpression) {
-        return restrictedItemRule(List.of(), headExpression, tailExpression);
+        return restrictedItemRule(ItemFilter.all(), headExpression, tailExpression, false);
+    }
+
+    /**
+     * Creates an item rule on base of a head and a tail expression, where the middle part of the new rule's expression
+     * will consist of an item
+     * name expression. Either the head expression or the tail expression should contain at least one {@link #cmd}
+     * generated expression.
+     *
+     * 
+     * @param allowedItems Allowed item targets.
+     * @param headExpression The head expression.
+     * @param tailExpression The tail expression.
+     * @return The created rule.
+     */
+    protected Rule restrictedItemRule(Set<Item> allowedItems, Object headExpression, @Nullable Object tailExpression) {
+        return restrictedItemRule(ItemFilter.forItems(allowedItems), headExpression, tailExpression, false);
     }
 
     /**
@@ -384,18 +436,18 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
      * will consist of an item
      * name expression. Either the head expression or the tail expression should contain at least one {@link #cmd}
      * generated expression.
-     * Rule will be restricted to the provided item names if any.
+     * Rule will be restricted by the provided filter.
      *
-     * @param allowedItemNames List of allowed item names, empty for disabled.
+     * @param itemFilter Filters allowed items.
      * @param headExpression The head expression.
      * @param tailExpression The tail expression.
      * @return The created rule.
      */
-    protected Rule restrictedItemRule(List<String> allowedItemNames, Object headExpression,
-            @Nullable Object tailExpression) {
+    protected Rule restrictedItemRule(ItemFilter itemFilter, Object headExpression, @Nullable Object tailExpression,
+            boolean isSilent) {
         Expression tail = exp(tailExpression);
         Expression expression = tail == null ? seq(headExpression, name()) : seq(headExpression, name(tail), tail);
-        return new Rule(expression, allowedItemNames) {
+        return new Rule(expression, itemFilter, isSilent) {
             @Override
             public InterpretationResult interpretAST(ResourceBundle language, ASTNode node,
                     InterpretationContext context) {
@@ -424,11 +476,54 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
     }
 
     /**
-     * Creates a custom rule on base of a head and a tail expression, where the middle part of the new rule's
-     * expression
-     * will consist of a free command to be captured. Either the head expression or the tail expression should contain
-     * at least one {@link #cmd}
-     * generated expression.
+     * Creates an item rule which two dynamic capture values on base of a head a middle and an optional tail expression,
+     * where one of the values is an item name expression and the other a free captured value.
+     * Rule will be restricted by the provided filter.
+     *
+     * @param item Item registering the rule.
+     * @param itemFilter Filters allowed items.
+     * @param headExpression The head expression.
+     * @param midExpression The middle expression.
+     * @param tailExpression The optional tail expression.
+     * @param isNameFirst Indicates whether the name goes between the head and the middle expressions.
+     * @return The created rule.
+     */
+    protected Rule restrictedDynamicItemRule(Item item, ItemFilter itemFilter, Object headExpression,
+            Object midExpression, @Nullable Object tailExpression, boolean isNameFirst, boolean isSilent) {
+        Expression head = Objects.requireNonNull(exp(headExpression));
+        Expression mid = Objects.requireNonNull(exp(midExpression));
+        @Nullable
+        Expression tail = exp(tailExpression);
+        Expression firstValue = isNameFirst ? name(mid) : value(mid);
+        Expression secondValue = tail != null ? (isNameFirst ? value(tail) : name(tail))
+                : (isNameFirst ? value() : name());
+        Expression expression = tail == null ? //
+                seq(head, firstValue, mid, secondValue) : //
+                seq(head, firstValue, mid, secondValue, tail);
+        Map<String, String> itemValuesByLabel = getItemValuesByLabel(item);
+        return new Rule(expression, itemFilter, isSilent) {
+            @Override
+            public InterpretationResult interpretAST(ResourceBundle language, ASTNode node,
+                    InterpretationContext context) {
+                String[] name = node.findValueAsStringArray(NAME);
+                String[] value = node.findValueAsStringArray(VALUE);
+                if (name != null && value != null) {
+                    try {
+                        ItemCommandSupplier commandSupplier = new TextCommandSupplier(String.join(" ", value),
+                                item.getAcceptedCommandTypes(), itemValuesByLabel);
+                        return new InterpretationResult(true, executeSingle(language, name, commandSupplier, context));
+                    } catch (InterpretationException ex) {
+                        return new InterpretationResult(ex);
+                    }
+                }
+                return InterpretationResult.SEMANTIC_ERROR;
+            }
+        };
+    }
+
+    /**
+     * Creates a custom rule on base of a head and a tail expression,
+     * where the middle part of the new rule's expression will consist of a free command to be captured.
      * Rule will be restricted to the provided item name.
      *
      * @param item Item target
@@ -436,11 +531,32 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
      * @param tailExpression The tail expression.
      * @return The created rule.
      */
-    protected Rule customItemRule(Item item, Object headExpression, @Nullable Object tailExpression) {
+    protected Rule customDynamicRule(Item item, ItemFilter itemFilter, Object headExpression,
+            @Nullable Object tailExpression, boolean isSilent) {
         Expression tail = exp(tailExpression);
         Expression expression = tail == null ? seq(headExpression, value(null))
                 : seq(headExpression, value(tail), tail);
+        HashMap<String, String> valuesByLabel = getItemValuesByLabel(item);
+        return new Rule(expression, itemFilter, isSilent) {
+            @Override
+            public InterpretationResult interpretAST(ResourceBundle language, ASTNode node,
+                    InterpretationContext context) {
+                String[] commandParts = node.findValueAsStringArray(VALUE);
+                if (commandParts != null && commandParts.length > 0) {
+                    try {
+                        ItemCommandSupplier commandSupplier = new TextCommandSupplier(
+                                String.join(" ", commandParts).trim(), item.getAcceptedCommandTypes(), valuesByLabel);
+                        return new InterpretationResult(true, executeCustom(language, commandSupplier, context));
+                    } catch (InterpretationException ex) {
+                        return new InterpretationResult(ex);
+                    }
+                }
+                return InterpretationResult.SEMANTIC_ERROR;
+            }
+        };
+    }
 
+    private HashMap<String, String> getItemValuesByLabel(Item item) {
         HashMap<String, String> valuesByLabel = new HashMap<>();
         var stateDescription = item.getStateDescription();
         if (stateDescription != null) {
@@ -460,20 +576,38 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
                 }
             });
         }
-        return new Rule(expression, List.of(item.getName())) {
+        return valuesByLabel;
+    }
+
+    /**
+     * Creates a custom rule on base of a expression.
+     * The expression should contain at least one {@link #cmd} generated expression.
+     *
+     * @param itemFilter Filters the allowed items.
+     * @param cmdExpression The expression.
+     * @return The created rule.
+     */
+    protected Rule customCommandRule(ItemFilter itemFilter, Object cmdExpression, boolean isSilent) {
+        return new Rule(Objects.requireNonNull(exp(cmdExpression)), itemFilter, isSilent) {
             @Override
             public InterpretationResult interpretAST(ResourceBundle language, ASTNode node,
                     InterpretationContext context) {
-                String[] commandParts = node.findValueAsStringArray(VALUE);
-                if (commandParts != null && commandParts.length > 0) {
-                    try {
-                        return new InterpretationResult(true,
-                                executeCustom(language, item, String.join(" ", commandParts).trim(), valuesByLabel));
-                    } catch (InterpretationException ex) {
-                        return new InterpretationResult(ex);
-                    }
+                ASTNode cmdNode = node.findNode(CMD);
+                Object tag = cmdNode.getTag();
+                Object value = cmdNode.getValue();
+                ItemCommandSupplier commandSupplier;
+                if (tag instanceof ItemCommandSupplier supplier) {
+                    commandSupplier = supplier;
+                } else if (value instanceof Number number) {
+                    commandSupplier = new SingleCommandSupplier(new DecimalType(number.longValue()));
+                } else {
+                    commandSupplier = new SingleCommandSupplier(new StringType(cmdNode.getValueAsString()));
                 }
-                return InterpretationResult.SEMANTIC_ERROR;
+                try {
+                    return new InterpretationResult(true, executeCustom(language, commandSupplier, context));
+                } catch (InterpretationException ex) {
+                    return new InterpretationResult(ex);
+                }
             }
         };
     }
@@ -669,36 +803,50 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
                 logger.warn("Failed resolving item command");
                 return language.getString(ERROR);
             }
-            return trySendCommand(language, item, command);
+            return trySendCommand(language, item, command, context.isSilent());
         }
     }
 
     /**
      * Executes a custom rule command.
      *
-     * @param item the rule target.
-     * @param options replacement values from item description.
      * @param language resource bundle used for producing localized response texts
-     * @param commandText label fragments that are used to match an item's label.
-     *            For a positive match, the item's label has to contain every fragment - independently of their order.
-     *            They are treated case-insensitive.
+     * @param itemCommandSupplier the rule command supplier.
+     * @param context to propagate the interpretation context.
      * @return response text
      * @throws InterpretationException in case that there is no or more than on item matching the fragments
      */
-    protected String executeCustom(ResourceBundle language, Item item, String commandText,
-            HashMap<String, String> options) throws InterpretationException {
-        @Nullable
-        String commandReplacement = options.get(commandText);
-        Command command = TypeParser.parseCommand(item.getAcceptedCommandTypes(),
-                commandReplacement != null ? commandReplacement : commandText);
+    protected String executeCustom(ResourceBundle language, ItemCommandSupplier itemCommandSupplier,
+            Rule.InterpretationContext context) throws InterpretationException {
+        Map<Item, ItemInterpretationMetadata> itemsMap = getItemTokens(language.getLocale());
+        Set<Entry<Item, ItemInterpretationMetadata>> compatibleItemEntries = itemsMap.entrySet().stream() //
+                .filter(itemEntry -> context.itemFilter().filterItem(itemEntry.getKey(), metadataRegistry)) //
+                .collect(Collectors.toSet());
+        if (compatibleItemEntries.isEmpty()) {
+            throw new InterpretationException(language.getString(NO_OBJECTS));
+        }
+        if (compatibleItemEntries.size() > 1 && context.locationItem() != null) {
+            var filteredCompatibleEntries = compatibleItemEntries.stream() //
+                    .filter(itemEntry -> itemEntry.getValue().locationParentNames.contains(context.locationItem())) //
+                    .collect(Collectors.toSet());
+            if (filteredCompatibleEntries.size() == 1) {
+                logger.debug("Collision resolved based on location context");
+                compatibleItemEntries = filteredCompatibleEntries;
+            }
+        }
+        if (compatibleItemEntries.size() > 1) {
+            throw new InterpretationException(language.getString(MULTIPLE_OBJECTS));
+        }
+        Item item = compatibleItemEntries.stream().map(Entry::getKey).findFirst().get();
+        Command command = itemCommandSupplier.getItemCommand(item);
         if (command == null) {
-            logger.warn("Failed creating command for {} from {}", item, commandText);
+            logger.warn("Failed creating command");
             return language.getString(ERROR);
         }
-        return trySendCommand(language, item, command);
+        return trySendCommand(language, item, command, context.isSilent());
     }
 
-    private String trySendCommand(ResourceBundle language, Item item, Command command) {
+    private String trySendCommand(ResourceBundle language, Item item, Command command, boolean isSilent) {
         if (command instanceof State newState) {
             try {
                 State oldState = item.getStateAs(newState.getClass());
@@ -719,7 +867,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
             }
         }
         eventPublisher.post(ItemEventFactory.createCommandEvent(item.getName(), command));
-        return language.getString(OK);
+        return !isSilent ? language.getString(OK) : "";
     }
 
     /**
@@ -745,31 +893,40 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
             @Nullable ItemCommandSupplier commandSupplier, Rule.InterpretationContext context) {
         Map<Item, ItemInterpretationMetadata> itemsData = new HashMap<>();
         Map<Item, ItemInterpretationMetadata> exactMatchItemsData = new HashMap<>();
+        Map<Item, ItemInterpretationMetadata> exactMatchOnTargetItemsData = new HashMap<>();
         Map<Item, ItemInterpretationMetadata> map = getItemTokens(language.getLocale());
         for (Entry<Item, ItemInterpretationMetadata> entry : map.entrySet()) {
             Item item = entry.getKey();
             ItemInterpretationMetadata interpretationMetadata = entry.getValue();
-            if (!context.allowedItems().isEmpty() && !context.allowedItems().contains(item.getName())) {
+            if (!context.itemFilter().filterItem(item, metadataRegistry)) {
                 logger.trace("Item {} discarded, not allowed for this rule", item.getName());
                 continue;
             }
             for (List<List<String>> itemLabelFragmentsPath : interpretationMetadata.pathToItem) {
                 boolean exactMatch = false;
+                boolean exactMatchOnTarget = false;
                 logger.trace("Checking tokens {} against the item tokens {}", labelFragments, itemLabelFragmentsPath);
                 List<String> lowercaseLabelFragments = Arrays.stream(labelFragments)
                         .map(lf -> lf.toLowerCase(language.getLocale())).toList();
                 List<String> unmatchedFragments = new ArrayList<>(lowercaseLabelFragments);
-                for (List<String> itemLabelFragments : itemLabelFragmentsPath) {
-                    if (itemLabelFragments.equals(lowercaseLabelFragments)) {
-                        exactMatch = true;
-                        unmatchedFragments.clear();
-                        break;
+                if (itemLabelFragmentsPath.get(itemLabelFragmentsPath.size() - 1).equals(lowercaseLabelFragments)) {
+                    exactMatch = true;
+                    exactMatchOnTarget = true;
+                    unmatchedFragments.clear();
+                } else {
+                    for (List<String> itemLabelFragments : itemLabelFragmentsPath) {
+                        if (itemLabelFragments.equals(lowercaseLabelFragments)) {
+                            exactMatch = true;
+                            unmatchedFragments.clear();
+                            break;
+                        }
+                        unmatchedFragments.removeAll(itemLabelFragments);
                     }
-                    unmatchedFragments.removeAll(itemLabelFragments);
                 }
                 boolean allMatched = unmatchedFragments.isEmpty();
                 logger.trace("Matched: {}", allMatched);
                 logger.trace("Exact match: {}", exactMatch);
+                logger.trace("Exact match on target: {}", exactMatchOnTarget);
                 if (allMatched) {
                     List<Class<? extends Command>> commandTypes = commandSupplier != null
                             ? commandSupplier.getCommandClasses(null)
@@ -780,11 +937,14 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
                         if (exactMatch) {
                             insertDiscardingMembers(exactMatchItemsData, item, interpretationMetadata);
                         }
+                        if (exactMatchOnTarget) {
+                            insertDiscardingMembers(exactMatchOnTargetItemsData, item, interpretationMetadata);
+                        }
                     }
                 }
             }
         }
-        if (logger.isDebugEnabled()) {
+        if (logger.isTraceEnabled()) {
             List<Class<? extends Command>> commandTypes = commandSupplier != null
                     ? commandSupplier.getCommandClasses(null)
                     : List.of();
@@ -792,30 +952,48 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
                     ? " that accept " + commandTypes.stream().map(Class::getSimpleName).distinct()
                             .collect(Collectors.joining(" or "))
                     : "";
-            logger.debug("Partial matched items against {}{}: {}", labelFragments, typeDetails,
+            logger.trace("Partial matched items against {}{}: {}", labelFragments, typeDetails,
                     itemsData.keySet().stream().map(Item::getName).collect(Collectors.joining(", ")));
-            logger.debug("Exact matched items against {}{}: {}", labelFragments, typeDetails,
+            logger.trace("Exact matched items against {}{}: {}", labelFragments, typeDetails,
                     exactMatchItemsData.keySet().stream().map(Item::getName).collect(Collectors.joining(", ")));
+            logger.trace("Exact matched on target items against {}{}: {}", labelFragments, typeDetails,
+                    exactMatchOnTargetItemsData.keySet().stream().map(Item::getName).collect(Collectors.joining(", ")));
         }
         @Nullable
         String locationContext = context.locationItem();
         if (locationContext != null && itemsData.size() > 1) {
-            logger.debug("Filtering {} matched items based on location '{}'", itemsData.size(), locationContext);
+            logger.trace("Filtering {} matched items based on location '{}'", itemsData.size(), locationContext);
             Item matchByLocation = filterMatchedItemsByLocation(itemsData, locationContext);
             if (matchByLocation != null) {
                 return List.of(matchByLocation);
             }
         }
         if (locationContext != null && exactMatchItemsData.size() > 1) {
-            logger.debug("Filtering {} exact matched items based on location '{}'", exactMatchItemsData.size(),
+            logger.trace("Filtering {} exact matched items based on location '{}'", exactMatchItemsData.size(),
                     locationContext);
             Item matchByLocation = filterMatchedItemsByLocation(exactMatchItemsData, locationContext);
             if (matchByLocation != null) {
                 return List.of(matchByLocation);
             }
         }
-        return new ArrayList<>(itemsData.size() != 1 && exactMatchItemsData.size() == 1 ? exactMatchItemsData.keySet()
-                : itemsData.keySet());
+        if (locationContext != null && exactMatchOnTargetItemsData.size() > 1) {
+            logger.trace("Filtering {} exact matched on target items based on location '{}'",
+                    exactMatchOnTargetItemsData.size(), locationContext);
+            Item matchByLocation = filterMatchedItemsByLocation(exactMatchOnTargetItemsData, locationContext);
+            if (matchByLocation != null) {
+                return List.of(matchByLocation);
+            }
+        }
+        if (itemsData.size() == 1) {
+            return new ArrayList<>(itemsData.keySet());
+        }
+        if (exactMatchItemsData.size() == 1) {
+            return new ArrayList<>(exactMatchItemsData.keySet());
+        }
+        if (exactMatchOnTargetItemsData.size() == 1) {
+            return new ArrayList<>(exactMatchOnTargetItemsData.keySet());
+        }
+        return new ArrayList<>(itemsData.keySet());
     }
 
     @Nullable
@@ -825,7 +1003,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
         if (itemsFilteredByLocation.size() != 1) {
             return null;
         }
-        logger.debug("Unique match by location found in '{}', taking prevalence", locationContext);
+        logger.trace("Unique match by location found in '{}', taking prevalence", locationContext);
         return itemsFilteredByLocation.get(0).getKey();
     }
 
@@ -847,96 +1025,195 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
      * @return resulting tokens
      */
     protected List<String> tokenize(Locale locale, @Nullable String text) {
-        List<String> parts = new ArrayList<>();
         if (text == null) {
-            return parts;
+            return List.of();
         }
-        String[] split;
+        String specialCharactersRegex;
         if (Locale.FRENCH.getLanguage().equalsIgnoreCase(locale.getLanguage())) {
-            split = text.toLowerCase(locale).replaceAll("[\\']", " ").replaceAll("[^\\w\\sàâäçéèêëîïôùûü]", " ")
-                    .split("\\s");
+            specialCharactersRegex = "[^\\w\\sàâäçéèêëîïôùûü$|?]";
         } else if ("es".equalsIgnoreCase(locale.getLanguage())) {
-            split = text.toLowerCase(locale).replaceAll("[\\']", " ").replaceAll("[^\\w\\sáéíóúïüñç]", " ")
-                    .split("\\s");
+            specialCharactersRegex = "[^\\w\\sáéíóúïüñç$|?]";
         } else {
-            split = text.toLowerCase(locale).replaceAll("[\\']", "").replaceAll("[^\\w\\s]", " ").split("\\s");
+            specialCharactersRegex = "[^\\w\\s$|?]";
         }
-        for (String s : split) {
-            String part = s.trim();
-            if (part.length() > 0) {
-                parts.add(part);
-            }
-        }
-        return parts;
+        return Arrays.stream(text.toLowerCase(locale) //
+                .replaceAll("[\\']", "") //
+                .replaceAll(specialCharactersRegex, " ") //
+                .split("\\s")) //
+                .filter(i -> !i.isBlank()) //
+                .map(String::trim) //
+                .toList();
     }
 
     /**
      * Parses a rule as text into a {@link Rule} instance.
-     *
+     * <p>
      * The rule text should be a list of space separated expressions,
      * one of them but not the first should be the character '*' (which indicates dynamic part to capture),
      * the other expressions can be conformed by a single word, alternative words separated by '|',
      * and can be marked as optional by adding '?' at the end.
      * There must be at least one non-optional expression at the beginning of the rule.
-     *
+     * <p>
      * An example of a valid text will be 'watch * on|at? the tv'.
      *
      * @param item will be the target of the rule.
      * @param ruleText the text to parse into a {@link Rule}
-     *
+     * @param metadata voice-system metadata.
      * @return The created rule.
      */
-    protected @Nullable Rule parseItemCustomRule(Item item, String ruleText) {
-        String[] ruleParts = ruleText.split("\\*");
-        Expression headExpression;
-        @Nullable
-        Expression tailExpression = null;
+    protected List<Rule> parseItemCustomRules(Locale locale, Item item, String ruleText, Metadata metadata) {
+        boolean isTemplate = ConfigParser.valueAsOrElse(metadata.getConfiguration().get(IS_TEMPLATE_CONFIGURATION),
+                Boolean.class, false);
+        boolean isSilent = ConfigParser.valueAsOrElse(metadata.getConfiguration().get(IS_SILENT_CONFIGURATION),
+                Boolean.class, false);
+        boolean isItemRule = false;
+        boolean isCommandRule = false;
+        boolean isDynamicRule = false;
+        if (ruleText.startsWith(NAME_TOKEN) || ruleText.startsWith(DYN_CMD_TOKEN)) {
+            logger.warn("Rule can not start with {} or {}: {}", NAME_TOKEN, DYN_CMD_TOKEN, ruleText);
+            return List.of();
+        }
+        boolean containsMultiple = CUSTOM_RULE_TOKENS.stream().anyMatch(token -> {
+            int firstIndex = token.indexOf(token);
+            return firstIndex != -1 && token.indexOf(token, firstIndex + 1) != -1;
+        });
+        if (containsMultiple) {
+            logger.warn("Rule can not contains {}, {} or {} multiple times: {}", NAME_TOKEN, CMD_TOKEN, DYN_CMD_TOKEN,
+                    ruleText);
+            return List.of();
+        }
+        if (ruleText.contains(NAME_TOKEN)) {
+            isItemRule = true;
+        }
+        if (ruleText.contains(CMD_TOKEN)) {
+            isCommandRule = true;
+        }
+        if (ruleText.contains(DYN_CMD_TOKEN)) {
+            isDynamicRule = true;
+        }
+        if (isCommandRule && isDynamicRule) {
+            logger.warn("Rule can not contain {} and {}: {}", CMD_TOKEN, DYN_CMD_TOKEN, ruleText);
+            return List.of();
+        }
+        if (!isCommandRule && !isDynamicRule) {
+            logger.warn("Rule should contain {} or {}: {}", CMD_TOKEN, DYN_CMD_TOKEN, ruleText);
+            return List.of();
+        }
         try {
-            if (ruleText.startsWith("*") || !ruleText.contains(" *") || ruleParts.length > 2) {
-                throw new ParseException("Incorrect usage of character '*'", 0);
-            }
-            List<Expression> headExpressions = new ArrayList<>();
-            boolean headHasNonOptional = true;
-            for (String s : ruleParts[0].split("\\s")) {
-                if (!s.isBlank()) {
-                    String trim = s.trim();
-                    Expression expression = parseItemRuleTokenText(trim);
-                    if (expression instanceof ExpressionCardinality expressionCardinality) {
-                        if (!expressionCardinality.isAtLeastOne()) {
-                            headHasNonOptional = false;
-                        }
-                    } else {
-                        headHasNonOptional = false;
+            ItemFilter itemsFilter = isTemplate
+                    ? ItemFilter.forSimilarItem(item,
+                            metadataRegistry.get(new MetadataKey(SEMANTICS_NAMESPACE, item.getName())))
+                    : ItemFilter.forItem(item);
+            if (isItemRule && isCommandRule) {
+                String[] ruleParts = ruleText.split(Pattern.quote(NAME_TOKEN));
+                String headPart = ruleParts[0];
+                @Nullable
+                String tailPart = ruleParts.length > 1 ? ruleParts[1] : null;
+                var itemCMDs = item.getCommandDescription();
+                if (itemCMDs == null || itemCMDs.getCommandOptions().isEmpty()) {
+                    throw new ParseException("Missing item " + item.getName() + " command description.", 0);
+                }
+                ArrayList<Rule> rules = new ArrayList<>();
+                for (var cmd : itemCMDs.getCommandOptions()) {
+                    String label = cmd.getLabel();
+                    if (label == null) {
+                        label = cmd.getCommand();
                     }
-                    headExpressions.add(expression);
+                    String value = cmd.getCommand();
+                    String[] cmdInfo = new String[] { label, value };
+                    var head = Objects.requireNonNull(parseCustomRuleSegment(locale, headPart, false, item, cmdInfo));
+                    var tail = tailPart != null ? parseCustomRuleSegment(locale, tailPart, true, item, cmdInfo) : null;
+                    rules.add(restrictedItemRule(itemsFilter, head, tail, isSilent));
                 }
-            }
-            if (headHasNonOptional) {
-                throw new ParseException("Rule head only contains optional expressions", 0);
-            }
-            headExpression = seq(headExpressions.toArray());
-            if (ruleParts.length == 2) {
-                List<Expression> tailExpressions = new ArrayList<>();
-                for (String s : ruleParts[1].split("\\s")) {
-                    if (!s.isBlank()) {
-                        String trim = s.trim();
-                        Expression expression = parseItemRuleTokenText(trim);
-                        tailExpressions.add(expression);
+                return rules;
+            } else if (isItemRule && isDynamicRule) {
+                String[] ruleParts = Arrays.stream(ruleText.split(Pattern.quote(NAME_TOKEN))) //
+                        .map(s -> s.split(Pattern.quote(DYN_CMD_TOKEN))) //
+                        .flatMap(Arrays::stream).toArray(String[]::new);
+                if (ruleParts.length > 3) {
+                    throw new ParseException("Incorrectly rule segments: " + ruleText, 0);
+                }
+                Expression head = Objects
+                        .requireNonNull(parseCustomRuleSegment(locale, ruleParts[0], false, item, null));
+                Expression mid = Objects
+                        .requireNonNull(parseCustomRuleSegment(locale, ruleParts[1], false, item, null));
+                @Nullable
+                Expression tail = ruleParts.length > 2 ? parseCustomRuleSegment(locale, ruleParts[2], true, item, null)
+                        : null;
+                boolean isNameFirst = ruleText.indexOf(NAME_TOKEN) < ruleText.indexOf(DYN_CMD_TOKEN);
+                return List.of(restrictedDynamicItemRule(item, itemsFilter, head, mid, tail, isNameFirst, isSilent));
+            } else if (isDynamicRule) {
+                String[] ruleParts = ruleText.split(Pattern.quote(DYN_CMD_TOKEN));
+                if (ruleParts.length > 2) {
+                    throw new ParseException("Incorrectly rule segments: " + ruleText, 0);
+                }
+                Expression head = Objects
+                        .requireNonNull(parseCustomRuleSegment(locale, ruleParts[0], false, item, null));
+                @Nullable
+                Expression tail = ruleParts.length > 1 ? parseCustomRuleSegment(locale, ruleParts[1], true, item, null)
+                        : null;
+                return List.of(customDynamicRule(item, itemsFilter, head, tail, isSilent));
+            } else if (isCommandRule) {
+                var itemCMDs = item.getCommandDescription();
+                if (itemCMDs == null || itemCMDs.getCommandOptions().isEmpty()) {
+                    throw new ParseException("Missing item " + item.getName() + " command description.", 0);
+                }
+                ArrayList<Rule> rules = new ArrayList<>();
+                for (var cmd : itemCMDs.getCommandOptions()) {
+                    String label = cmd.getLabel();
+                    if (label == null) {
+                        label = cmd.getCommand();
                     }
+                    String value = cmd.getCommand();
+                    String[] cmdInfo = new String[] { label, value };
+                    var expression = Objects
+                            .requireNonNull(parseCustomRuleSegment(locale, ruleText, false, item, cmdInfo));
+                    rules.add(customCommandRule(itemsFilter, expression, isSilent));
                 }
-                if (!tailExpressions.isEmpty()) {
-                    tailExpression = seq(tailExpressions.toArray());
-                }
+                return rules;
+            } else {
+                throw new ParseException("Unable to parse rule: " + ruleText, 0);
             }
         } catch (ParseException e) {
             logger.warn("Unable to parse item {} rule '{}': {}", item.getName(), ruleText, e.getMessage());
-            return null;
+            return List.of();
         }
-        return customItemRule(item, headExpression, tailExpression);
     }
 
-    private Expression parseItemRuleTokenText(String tokenText) throws ParseException {
+    private @Nullable Expression parseCustomRuleSegment(Locale locale, String text, boolean allowEmpty, Item item,
+            String @Nullable [] cmdData) throws ParseException {
+        List<Expression> subExpressions = new ArrayList<>();
+        Expression sequenceExpression;
+        boolean headHasNonOptional = true;
+        for (String s : tokenize(locale, text)) {
+            String trim = s.trim();
+            Expression expression = parseItemRuleTokenText(locale, trim, item, cmdData);
+            if (expression instanceof ExpressionCardinality expressionCardinality) {
+                if (!expressionCardinality.isAtLeastOne()) {
+                    headHasNonOptional = false;
+                }
+            } else {
+                headHasNonOptional = false;
+            }
+            subExpressions.add(expression);
+        }
+        if (headHasNonOptional) {
+            if (allowEmpty) {
+                return null;
+            }
+            throw new ParseException("Rule segment contains only optional elements: " + text, 0);
+        }
+        sequenceExpression = seq(subExpressions.toArray());
+        return sequenceExpression;
+    }
+
+    private Expression parseItemRuleTokenText(Locale locale, String tokenText, Item item, String @Nullable [] cmdData)
+            throws ParseException {
         boolean optional = false;
+        if (tokenText.equals(CMD_TOKEN) && cmdData != null) {
+            Expression cmdExpression = seq(tokenize(locale, cmdData[0]).toArray());
+            return cmd(cmdExpression, TypeParser.parseCommand(item.getAcceptedCommandTypes(), cmdData[1]));
+        }
         if (tokenText.endsWith("?")) {
             tokenText = tokenText.substring(0, tokenText.length() - 1);
             optional = true;
@@ -1143,7 +1420,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
             }
         }
 
-        String getGrammar() {
+        protected String getGrammar() {
             Rule[] rules = getRules(language.getLocale());
             identifiers.addAll(getAllItemTokens(language.getLocale()));
             for (Rule rule : rules) {
@@ -1222,6 +1499,66 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
         @Override
         public List<Class<? extends Command>> getCommandClasses(@Nullable Item ignored) {
             return List.of(command.getClass());
+        }
+    }
+
+    private record TextCommandSupplier(String text, List<Class<? extends Command>> allowedCommands,
+            Map<String, String> transformations) implements ItemCommandSupplier {
+        @Override
+        public @Nullable Command getItemCommand(Item item) {
+            return TypeParser.parseCommand(item.getAcceptedCommandTypes(), transformations.getOrDefault(text, text));
+        }
+
+        @Override
+        public String getCommandLabel() {
+            return text;
+        }
+
+        @Override
+        public List<Class<? extends Command>> getCommandClasses(@Nullable Item ignored) {
+            return allowedCommands;
+        }
+    }
+
+    public record ItemFilter(Set<String> itemNames, Set<String> excludedItemNames, Set<String> itemTags,
+            Set<String> itemSemantics) {
+
+        private static final ItemFilter allInstance = new ItemFilter(Set.of(), Set.of(), Set.of(), Set.of());
+        public boolean filterItem(Item item, MetadataRegistry metadataRegistry) {
+            if (!itemNames.isEmpty() && !itemNames.contains(item.getName())) {
+                return false;
+            }
+            if (!excludedItemNames.isEmpty() && excludedItemNames.contains(item.getName())) {
+                return false;
+            }
+            if (!itemTags.isEmpty()
+                    && (item.getTags().size() != itemTags.size() || !item.getTags().containsAll(itemTags))) {
+                return false;
+            }
+            Metadata semanticsMetadata = metadataRegistry.get(new MetadataKey(SEMANTICS_NAMESPACE, item.getName()));
+            if (!itemSemantics.isEmpty()
+                    && (semanticsMetadata == null || !itemSemantics.contains(semanticsMetadata.getValue()))) {
+                return false;
+            }
+            return true;
+        }
+
+        public static ItemFilter all() {
+            return allInstance;
+        }
+
+        public static ItemFilter forItem(Item item) {
+            return new ItemFilter(Set.of(item.getName()), Set.of(), Set.of(), Set.of());
+        }
+
+        public static ItemFilter forItems(Set<Item> item) {
+            return new ItemFilter(item.stream().map(Item::getName).collect(Collectors.toSet()), Set.of(), Set.of(),
+                    Set.of());
+        }
+
+        public static ItemFilter forSimilarItem(Item item, @Nullable Metadata semantic) {
+            return new ItemFilter(Set.of(), Set.of(item.getName()), item.getTags(),
+                    semantic != null ? Set.of(semantic.getValue()) : Set.of());
         }
     }
 }
