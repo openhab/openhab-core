@@ -18,7 +18,6 @@ import java.time.temporal.ChronoUnit;
 import java.time.temporal.Temporal;
 import java.time.temporal.TemporalAdjuster;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -157,7 +156,7 @@ public class CronAdjuster implements SchedulerTemporalAdjuster {
             }
             return map;
         } else {
-            return Collections.emptyMap();
+            return Map.of();
         }
     }
 
@@ -208,7 +207,7 @@ public class CronAdjuster implements SchedulerTemporalAdjuster {
      * @param chronoField the chronoField is part belongs to
      */
     private void parseAndAdd(final String cronExpression, final String part, final ChronoField chronoField) {
-        parse(cronExpression, part, chronoField, Collections.emptyMap());
+        parse(cronExpression, part, chronoField, Map.of());
     }
 
     /**

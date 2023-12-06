@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.io.websocket;
+package org.openhab.core.io.websocket.event;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -120,6 +120,12 @@ public class EventWebSocket {
                     case "ItemStateEvent":
                         Event itemStateEvent = itemEventUtility.createStateEvent(eventDTO);
                         eventPublisher.post(itemStateEvent);
+                        responseEvent = new EventDTO(WEBSOCKET_EVENT_TYPE, WEBSOCKET_TOPIC_PREFIX + "response/success",
+                                "", null, eventDTO.eventId);
+                        break;
+                    case "ItemTimeSeriesEvent":
+                        Event itemTimeseriesEvent = itemEventUtility.createTimeSeriesEvent(eventDTO);
+                        eventPublisher.post(itemTimeseriesEvent);
                         responseEvent = new EventDTO(WEBSOCKET_EVENT_TYPE, WEBSOCKET_TOPIC_PREFIX + "response/success",
                                 "", null, eventDTO.eventId);
                         break;

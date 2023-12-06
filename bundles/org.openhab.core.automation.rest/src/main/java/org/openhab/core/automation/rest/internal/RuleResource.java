@@ -25,7 +25,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.annotation.security.RolesAllowed;
@@ -74,7 +73,7 @@ import org.openhab.core.automation.rest.internal.dto.EnrichedRuleDTO;
 import org.openhab.core.automation.rest.internal.dto.EnrichedRuleDTOMapper;
 import org.openhab.core.automation.util.ModuleBuilder;
 import org.openhab.core.automation.util.RuleBuilder;
-import org.openhab.core.common.registry.RegistryChangeListener;
+import org.openhab.core.common.registry.RegistryChangedRunnableListener;
 import org.openhab.core.config.core.ConfigUtil;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.events.Event;
@@ -135,7 +134,8 @@ public class RuleResource implements RESTResource {
     private final RuleManager ruleManager;
     private final RuleRegistry ruleRegistry;
     private final ManagedRuleProvider managedRuleProvider;
-    private final ResetLastModifiedChangeListener resetLastModifiedChangeListener = new ResetLastModifiedChangeListener();
+    private final RegistryChangedRunnableListener<Rule> resetLastModifiedChangeListener = new RegistryChangedRunnableListener<>(
+            () -> cacheableListLastModified = null);
 
     private @Context @NonNullByDefault({}) UriInfo uriInfo;
     private @Nullable Date cacheableListLastModified = null;
@@ -168,7 +168,6 @@ public class RuleResource implements RESTResource {
             @QueryParam("prefix") final @Nullable String prefix, @QueryParam("tags") final @Nullable List<String> tags,
             @QueryParam("summary") @Parameter(description = "summary fields only") @Nullable Boolean summary,
             @DefaultValue("false") @QueryParam("staticDataOnly") @Parameter(description = "provides a cacheable list of values not expected to change regularly and honors the If-Modified-Since header, all other parameters are ignored") boolean staticDataOnly) {
-
         if ((summary == null || !summary) && !securityContext.isUserInRole(Role.ADMIN)) {
             // users may only access the summary
             return JSONResponse.createErrorResponse(Status.UNAUTHORIZED, "Authentication required");
@@ -433,7 +432,7 @@ public class RuleResource implements RESTResource {
         }
 
         final Stream<RuleExecution> ruleExecutions = ruleManager.simulateRuleExecutions(fromDate, untilDate);
-        return Response.ok(ruleExecutions.collect(Collectors.toList())).build();
+        return Response.ok(ruleExecutions.toList()).build();
     }
 
     private static ZonedDateTime parseTime(String sTime) {
@@ -606,28 +605,6 @@ public class RuleResource implements RESTResource {
             return action == null ? null : ActionDTOMapper.map(action);
         } else {
             return null;
-        }
-    }
-
-    private void resetStaticListLastModified() {
-        cacheableListLastModified = null;
-    }
-
-    private class ResetLastModifiedChangeListener implements RegistryChangeListener<Rule> {
-
-        @Override
-        public void added(Rule element) {
-            resetStaticListLastModified();
-        }
-
-        @Override
-        public void removed(Rule element) {
-            resetStaticListLastModified();
-        }
-
-        @Override
-        public void updated(Rule oldElement, Rule element) {
-            resetStaticListLastModified();
         }
     }
 }

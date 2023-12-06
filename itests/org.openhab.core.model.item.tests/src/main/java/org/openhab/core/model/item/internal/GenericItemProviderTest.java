@@ -28,7 +28,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.AfterEach;
@@ -262,7 +261,7 @@ public class GenericItemProviderTest extends JavaOSGiTest {
 
             @Override
             public Set<String> getSubscribedEventTypes() {
-                return Stream.of(ItemAddedEvent.TYPE, ItemUpdatedEvent.TYPE, ItemRemovedEvent.TYPE).collect(toSet());
+                return Set.of(ItemAddedEvent.TYPE, ItemUpdatedEvent.TYPE, ItemRemovedEvent.TYPE);
             }
         };
 
@@ -324,7 +323,7 @@ public class GenericItemProviderTest extends JavaOSGiTest {
 
             @Override
             public Set<String> getSubscribedEventTypes() {
-                return Stream.of(ItemAddedEvent.TYPE, ItemUpdatedEvent.TYPE, ItemRemovedEvent.TYPE).collect(toSet());
+                return Set.of(ItemAddedEvent.TYPE, ItemUpdatedEvent.TYPE, ItemRemovedEvent.TYPE);
             }
         };
 
@@ -589,7 +588,7 @@ public class GenericItemProviderTest extends JavaOSGiTest {
 
             @Override
             public Set<String> getSubscribedEventTypes() {
-                return Stream.of(ItemRemovedEvent.TYPE).collect(toSet());
+                return Set.of(ItemRemovedEvent.TYPE);
             }
         };
 

@@ -18,7 +18,6 @@ import static org.mockito.Mockito.*;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -86,7 +85,7 @@ public class SystemRangeStateProfileTest {
     }
 
     public static Collection<Object[]> parameters() {
-        return Arrays.asList(new Object[][] { //
+        return List.of(new Object[][] { //
                 // lower bound = 10, upper bound = 40 (as BigDecimal), one state update / command (PercentType), not
                 // inverted
                 { new ParameterSet(List.of(PercentType.HUNDRED), List.of(OnOffType.OFF), BigDecimal.TEN,

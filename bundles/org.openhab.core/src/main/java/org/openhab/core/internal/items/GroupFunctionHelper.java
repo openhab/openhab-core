@@ -13,7 +13,6 @@
 package org.openhab.core.internal.items;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import javax.measure.Quantity;
@@ -63,7 +62,7 @@ public class GroupFunctionHelper {
 
     private List<State> parseStates(@Nullable Item baseItem, String @Nullable [] params) {
         if (params == null || baseItem == null) {
-            return Collections.emptyList();
+            return List.of();
         }
 
         List<State> states = new ArrayList<>();

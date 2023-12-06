@@ -12,10 +12,7 @@
  */
 package org.openhab.core.thing.xml.internal;
 
-import static java.util.stream.Collectors.toList;
-
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -113,10 +110,10 @@ public class ThingTypeConverter extends AbstractDescriptionTypeConverter<ThingTy
     protected List<String> getExtensibleChannelTypeIds(Map<String, String> attributes) {
         String extensible = attributes.get("extensible");
         if (extensible == null) {
-            return Collections.emptyList();
+            return List.of();
         }
 
-        return Arrays.stream(extensible.split(",")).map(String::trim).collect(toList());
+        return Arrays.stream(extensible.split(",")).map(String::trim).toList();
     }
 
     protected @Nullable String readCategory(NodeIterator nodeIterator) {

@@ -47,15 +47,13 @@ public class SystemTriggerHandler extends BaseTriggerModuleHandler implements Ev
 
     private final Integer startlevel;
     private final Set<String> types;
-    private final StartLevelService startLevelService;
 
     private boolean triggered = false;
 
     private final ServiceRegistration<?> eventSubscriberRegistration;
 
-    public SystemTriggerHandler(Trigger module, BundleContext bundleContext, StartLevelService startLevelService) {
+    public SystemTriggerHandler(Trigger module, BundleContext bundleContext) {
         super(module);
-        this.startLevelService = startLevelService;
         this.startlevel = ((BigDecimal) module.getConfiguration().get(CFG_STARTLEVEL)).intValue();
         if (STARTLEVEL_MODULE_TYPE_ID.equals(module.getTypeUID())) {
             this.types = Set.of(StartlevelEvent.TYPE);
@@ -69,12 +67,6 @@ public class SystemTriggerHandler extends BaseTriggerModuleHandler implements Ev
     @Override
     public void setCallback(ModuleHandlerCallback callback) {
         super.setCallback(callback);
-
-        // trigger immediately when start level is already reached
-        int currentStartLevel = startLevelService.getStartLevel();
-        if (currentStartLevel > StartLevelService.STARTLEVEL_RULEENGINE && currentStartLevel >= startlevel) {
-            trigger();
-        }
     }
 
     @Override

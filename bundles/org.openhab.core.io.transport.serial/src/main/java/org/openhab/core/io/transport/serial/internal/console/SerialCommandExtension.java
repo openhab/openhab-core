@@ -16,7 +16,6 @@ import java.util.Arrays;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.io.console.Console;
@@ -79,9 +78,8 @@ public class SerialCommandExtension extends AbstractConsoleCommandExtension {
             case SUBCMD_PORT_CREATORS:
                 serialPortRegistry.getPortCreators().forEach(provider -> {
                     console.printf("%s, accepted protocols: %s, port identifiers: %s%n", provider.getClass(),
-                            provider.getAcceptedProtocols().collect(Collectors.toList()),
-                            provider.getSerialPortIdentifiers().map(SerialCommandExtension::str)
-                                    .collect(Collectors.toList()));
+                            provider.getAcceptedProtocols().toList(),
+                            provider.getSerialPortIdentifiers().map(SerialCommandExtension::str).toList());
                 });
                 return;
             default:
@@ -92,11 +90,11 @@ public class SerialCommandExtension extends AbstractConsoleCommandExtension {
 
     @Override
     public List<String> getUsages() {
-        return Arrays.asList(new String[] { //
+        return List.of( //
                 buildCommandUsage(SUBCMD_IDENTIFIER_ALL, "lists all identifiers"), //
                 buildCommandUsage(SUBCMD_IDENTIFIER_NAME, "lists a specific identifier"), //
                 buildCommandUsage(SUBCMD_PORT_CREATORS, "gets details about the port creators") //
-        });
+        );
     }
 
     private static String str(final @Nullable SerialPortIdentifier id) {

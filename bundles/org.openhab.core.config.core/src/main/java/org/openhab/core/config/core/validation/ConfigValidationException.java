@@ -49,7 +49,7 @@ public final class ConfigValidationException extends RuntimeException {
      *
      * @param bundle the bundle from which this exception is thrown
      * @param configValidationMessages the configuration description validation messages
-     * @throws NullPointException if given bundle or configuration description validation messages are null
+     * @throws NullPointerException if given bundle or configuration description validation messages are null
      */
     public ConfigValidationException(Bundle bundle, TranslationProvider translationProvider,
             Collection<ConfigValidationMessage> configValidationMessages) {

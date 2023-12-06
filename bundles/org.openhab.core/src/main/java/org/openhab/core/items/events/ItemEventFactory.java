@@ -14,6 +14,7 @@ package org.openhab.core.items.events;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.time.Instant;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -29,6 +30,7 @@ import org.openhab.core.items.dto.ItemDTOMapper;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.RefreshType;
 import org.openhab.core.types.State;
+import org.openhab.core.types.TimeSeries;
 import org.openhab.core.types.Type;
 import org.openhab.core.types.UnDefType;
 import org.osgi.service.component.annotations.Component;
@@ -51,6 +53,8 @@ public class ItemEventFactory extends AbstractEventFactory {
     private static final String ITEM_STATE_EVENT_TOPIC = "openhab/items/{itemName}/state";
 
     private static final String ITEM_STATE_UPDATED_EVENT_TOPIC = "openhab/items/{itemName}/stateupdated";
+    private static final String ITEM_TIME_SERIES_EVENT_TOPIC = "openhab/items/{itemName}/timeseries";
+    private static final String ITEM_TIME_SERIES_UPDATED_EVENT_TOPIC = "openhab/items/{itemName}/timeseriesupdated";
 
     private static final String ITEM_STATE_PREDICTED_EVENT_TOPIC = "openhab/items/{itemName}/statepredicted";
 
@@ -72,7 +76,8 @@ public class ItemEventFactory extends AbstractEventFactory {
     public ItemEventFactory() {
         super(Set.of(ItemCommandEvent.TYPE, ItemStateEvent.TYPE, ItemStatePredictedEvent.TYPE,
                 ItemStateUpdatedEvent.TYPE, ItemStateChangedEvent.TYPE, ItemAddedEvent.TYPE, ItemUpdatedEvent.TYPE,
-                ItemRemovedEvent.TYPE, GroupStateUpdatedEvent.TYPE, GroupItemStateChangedEvent.TYPE));
+                ItemRemovedEvent.TYPE, GroupStateUpdatedEvent.TYPE, GroupItemStateChangedEvent.TYPE,
+                ItemTimeSeriesEvent.TYPE, ItemTimeSeriesUpdatedEvent.TYPE));
     }
 
     @Override
@@ -88,6 +93,10 @@ public class ItemEventFactory extends AbstractEventFactory {
             return createStateUpdatedEvent(topic, payload);
         } else if (ItemStateChangedEvent.TYPE.equals(eventType)) {
             return createStateChangedEvent(topic, payload);
+        } else if (ItemTimeSeriesEvent.TYPE.equals(eventType)) {
+            return createTimeSeriesEvent(topic, payload);
+        } else if (ItemTimeSeriesUpdatedEvent.TYPE.equals(eventType)) {
+            return createTimeSeriesUpdatedEvent(topic, payload);
         } else if (ItemAddedEvent.TYPE.equals(eventType)) {
             return createAddedEvent(topic, payload);
         } else if (ItemUpdatedEvent.TYPE.equals(eventType)) {
@@ -155,6 +164,20 @@ public class ItemEventFactory extends AbstractEventFactory {
         return new ItemStateChangedEvent(topic, payload, itemName, state, oldState);
     }
 
+    private Event createTimeSeriesEvent(String topic, String payload) {
+        String itemName = getItemName(topic);
+        ItemTimeSeriesEventPayloadBean bean = deserializePayload(payload, ItemTimeSeriesEventPayloadBean.class);
+        TimeSeries timeSeries = bean.getTimeSeries();
+        return new ItemTimeSeriesEvent(topic, payload, itemName, timeSeries, null);
+    }
+
+    private Event createTimeSeriesUpdatedEvent(String topic, String payload) {
+        String itemName = getItemName(topic);
+        ItemTimeSeriesEventPayloadBean bean = deserializePayload(payload, ItemTimeSeriesEventPayloadBean.class);
+        TimeSeries timeSeries = bean.getTimeSeries();
+        return new ItemTimeSeriesUpdatedEvent(topic, payload, itemName, timeSeries, null);
+    }
+
     private State getState(String type, String value) {
         return parseType(type, value, State.class);
     }
@@ -175,7 +198,7 @@ public class ItemEventFactory extends AbstractEventFactory {
         return topicElements[3];
     }
 
-    private <T> T parseType(String typeName, String valueToParse, Class<T> desiredClass) {
+    private static <T> T parseType(String typeName, String valueToParse, Class<T> desiredClass) {
         Object parsedObject = null;
         String simpleClassName = typeName + TYPE_POSTFIX;
         parsedObject = parseSimpleClassName(simpleClassName, valueToParse);
@@ -190,7 +213,7 @@ public class ItemEventFactory extends AbstractEventFactory {
         return desiredClass.cast(parsedObject);
     }
 
-    private @Nullable Object parseSimpleClassName(String simpleClassName, String valueToParse) {
+    private static @Nullable Object parseSimpleClassName(String simpleClassName, String valueToParse) {
         if (simpleClassName.equals(UnDefType.class.getSimpleName())) {
             return UnDefType.valueOf(valueToParse);
         }
@@ -318,6 +341,22 @@ public class ItemEventFactory extends AbstractEventFactory {
         ItemEventPayloadBean bean = new ItemEventPayloadBean(getStateType(state), state.toFullString());
         String payload = serializePayload(bean);
         return new ItemStateUpdatedEvent(topic, payload, itemName, state, source);
+    }
+
+    public static ItemTimeSeriesEvent createTimeSeriesEvent(String itemName, TimeSeries timeSeries,
+            @Nullable String source) {
+        String topic = buildTopic(ITEM_TIME_SERIES_EVENT_TOPIC, itemName);
+        ItemTimeSeriesEventPayloadBean bean = new ItemTimeSeriesEventPayloadBean(timeSeries);
+        String payload = serializePayload(bean);
+        return new ItemTimeSeriesEvent(topic, payload, itemName, timeSeries, source);
+    }
+
+    public static ItemTimeSeriesUpdatedEvent createTimeSeriesUpdatedEvent(String itemName, TimeSeries timeSeries,
+            @Nullable String source) {
+        String topic = buildTopic(ITEM_TIME_SERIES_UPDATED_EVENT_TOPIC, itemName);
+        ItemTimeSeriesEventPayloadBean bean = new ItemTimeSeriesEventPayloadBean(timeSeries);
+        String payload = serializePayload(bean);
+        return new ItemTimeSeriesUpdatedEvent(topic, payload, itemName, timeSeries, source);
     }
 
     /**
@@ -583,6 +622,60 @@ public class ItemEventFactory extends AbstractEventFactory {
 
         public String getOldValue() {
             return oldValue;
+        }
+    }
+
+    private static class ItemTimeSeriesEventPayloadBean {
+        private @NonNullByDefault({}) List<TimeSeriesPayload> timeSeries;
+        private @NonNullByDefault({}) String policy;
+
+        @SuppressWarnings("unused")
+        private ItemTimeSeriesEventPayloadBean() {
+            // do not remove, GSON needs it
+        }
+
+        public ItemTimeSeriesEventPayloadBean(TimeSeries timeSeries) {
+            this.timeSeries = timeSeries.getStates().map(TimeSeriesPayload::new).toList();
+            this.policy = timeSeries.getPolicy().name();
+        }
+
+        public TimeSeries getTimeSeries() {
+            TimeSeries timeSeries1 = new TimeSeries(TimeSeries.Policy.valueOf(policy));
+            timeSeries.forEach(e -> {
+                State state = parseType(e.getType(), e.getValue(), State.class);
+                Instant instant = Instant.parse(e.getTimestamp());
+                timeSeries1.add(instant, state);
+            });
+            return timeSeries1;
+        }
+
+        private static class TimeSeriesPayload {
+            private @NonNullByDefault({}) String type;
+            private @NonNullByDefault({}) String value;
+            private @NonNullByDefault({}) String timestamp;
+
+            @SuppressWarnings("unused")
+            private TimeSeriesPayload() {
+                // do not remove, GSON needs it
+            }
+
+            public TimeSeriesPayload(TimeSeries.Entry entry) {
+                type = getStateType(entry.state());
+                value = entry.state().toFullString();
+                timestamp = entry.timestamp().toString();
+            }
+
+            public String getType() {
+                return type;
+            }
+
+            public String getValue() {
+                return value;
+            }
+
+            public String getTimestamp() {
+                return timestamp;
+            }
         }
     }
 }

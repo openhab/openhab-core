@@ -67,10 +67,10 @@ public class ScriptedAutomationManager {
         this.scriptedPrivateModuleHandlerFactory = scriptedPrivateModuleHandlerFactory;
     }
 
-    public void removeModuleType(String UID) {
-        if (modules.remove(UID)) {
-            scriptedCustomModuleTypeProvider.removeModuleType(UID);
-            removeHandler(UID);
+    public void removeModuleType(String uid) {
+        if (modules.remove(uid)) {
+            scriptedCustomModuleTypeProvider.removeModuleType(uid);
+            removeHandler(uid);
         }
     }
 

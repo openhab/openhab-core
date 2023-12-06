@@ -96,7 +96,7 @@ public class ThingRegistryImpl extends AbstractRegistry<Thing, ThingUID, ThingPr
                 throw new IllegalStateException("Thing with UID " + thingUID + " has no handler attached.");
             }
         } else {
-            throw new IllegalArgumentException("Thing with UID " + thingUID + " does not exists.");
+            throw new IllegalArgumentException("Thing with UID " + thingUID + " does not exist.");
         }
     }
 

@@ -18,11 +18,11 @@ import static org.mockito.Mockito.mock;
 
 import java.text.SimpleDateFormat;
 import java.time.ZonedDateTime;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
@@ -59,8 +59,8 @@ public class DayOfWeekConditionHandlerTest extends BasicConditionHandlerTest {
 
     @BeforeEach
     public void before() {
-        EventPublisher eventPublisher = getService(EventPublisher.class);
-        ItemRegistry itemRegistry = getService(ItemRegistry.class);
+        EventPublisher eventPublisher = Objects.requireNonNull(getService(EventPublisher.class));
+        ItemRegistry itemRegistry = Objects.requireNonNull(getService(ItemRegistry.class));
         CoreModuleHandlerFactory coreModuleHandlerFactory = new CoreModuleHandlerFactory(getBundleContext(),
                 eventPublisher, itemRegistry, mock(TimeZoneProvider.class), mock(StartLevelService.class));
         mock(CoreModuleHandlerFactory.class);
@@ -76,17 +76,17 @@ public class DayOfWeekConditionHandlerTest extends BasicConditionHandlerTest {
                 .build();
         DayOfWeekConditionHandler handler = new DayOfWeekConditionHandler(condition);
 
-        assertThat(handler.isSatisfied(Collections.emptyMap()), is(true));
+        assertThat(handler.isSatisfied(Map.of()), is(true));
 
         condition = ModuleBuilder.createCondition(condition)
                 .withConfiguration(new Configuration(Map.of("days", List.of()))).build();
         handler = new DayOfWeekConditionHandler(condition);
-        assertThat(handler.isSatisfied(Collections.emptyMap()), is(false));
+        assertThat(handler.isSatisfied(Map.of()), is(false));
 
         condition = ModuleBuilder.createCondition(condition)
                 .withConfiguration(new Configuration(Map.of("days", List.of(dayOfWeek)))).build();
         handler = new DayOfWeekConditionHandler(condition);
-        assertThat(handler.isSatisfied(Collections.emptyMap()), is(true));
+        assertThat(handler.isSatisfied(Map.of()), is(true));
     }
 
     @Test

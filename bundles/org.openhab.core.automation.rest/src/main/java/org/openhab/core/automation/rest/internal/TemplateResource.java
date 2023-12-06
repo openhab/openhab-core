@@ -14,7 +14,6 @@ package org.openhab.core.automation.rest.internal;
 
 import java.util.Collection;
 import java.util.Locale;
-import java.util.stream.Collectors;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -92,7 +91,7 @@ public class TemplateResource implements RESTResource {
             @HeaderParam("Accept-Language") @Parameter(description = "language") @Nullable String language) {
         Locale locale = localeService.getLocale(language);
         Collection<RuleTemplateDTO> result = templateRegistry.getAll(locale).stream()
-                .map(template -> RuleTemplateDTOMapper.map(template)).collect(Collectors.toList());
+                .map(template -> RuleTemplateDTOMapper.map(template)).toList();
         return Response.ok(result).build();
     }
 

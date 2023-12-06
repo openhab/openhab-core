@@ -20,7 +20,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -199,7 +198,7 @@ public abstract class AbstractStorageBasedTypeProvider
         entity.configDescriptionUri = thingType.getConfigDescriptionURI();
         entity.category = thingType.getCategory();
         entity.channelGroupDefinitions = thingType.getChannelGroupDefinitions().stream()
-                .map(AbstractStorageBasedTypeProvider::mapToEntity).collect(Collectors.toList());
+                .map(AbstractStorageBasedTypeProvider::mapToEntity).toList();
         entity.channelDefinitions = thingType.getChannelDefinitions().stream()
                 .map(AbstractStorageBasedTypeProvider::mapToEntity).toList();
         entity.representationProperty = thingType.getRepresentationProperty();

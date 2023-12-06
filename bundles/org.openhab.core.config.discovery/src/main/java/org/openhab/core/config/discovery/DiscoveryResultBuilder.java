@@ -89,7 +89,7 @@ public class DiscoveryResultBuilder {
     /**
      * Adds a property to the desired result.
      *
-     * @param property of the desired result
+     * @param key property of the desired result
      * @return the updated builder
      */
     public DiscoveryResultBuilder withProperty(String key, Object value) {

@@ -17,15 +17,13 @@ import static java.util.function.Predicate.not;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -118,14 +116,13 @@ public class ConfigUtil {
                 if (defaultValue != null && configuration.get(parameter.getName()) == null) {
                     if (parameter.isMultiple()) {
                         if (defaultValue.contains(DEFAULT_LIST_DELIMITER)) {
-                            List<Object> values = (List<Object>) List.of(defaultValue.split(DEFAULT_LIST_DELIMITER))
-                                    .stream() //
+                            List<Object> values = (List<Object>) Stream.of(defaultValue.split(DEFAULT_LIST_DELIMITER))
                                     .map(String::trim) //
                                     .filter(not(String::isEmpty)) //
                                     .map(value -> ConfigUtil.getDefaultValueAsCorrectType(parameter.getName(),
                                             parameter.getType(), value)) //
                                     .filter(Objects::nonNull) //
-                                    .collect(Collectors.toList());
+                                    .toList();
                             Integer multipleLimit = parameter.getMultipleLimit();
                             if (multipleLimit != null && values.size() > multipleLimit.intValue()) {
                                 LoggerFactory.getLogger(ConfigUtil.class).warn(
@@ -136,7 +133,7 @@ public class ConfigUtil {
                         } else {
                             Object value = ConfigUtil.getDefaultValueAsCorrectType(parameter);
                             if (value != null) {
-                                configuration.put(parameter.getName(), Arrays.asList(value));
+                                configuration.put(parameter.getName(), List.of(value));
                             }
                         }
                     } else {
@@ -254,7 +251,7 @@ public class ConfigUtil {
     private static Collection<Object> normalizeCollection(Collection<@NonNull ?> collection)
             throws IllegalArgumentException {
         if (collection.isEmpty()) {
-            return Collections.emptyList();
+            return List.of();
         } else {
             final List<Object> lst = new ArrayList<>(collection.size());
             for (final Object it : collection) {

@@ -17,6 +17,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -30,7 +31,6 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.servlet.Servlet;
@@ -171,7 +171,7 @@ public class AudioServlet extends HttpServlet implements AudioHTTPServer {
         final String streamId = substringBefore(substringAfterLast(requestURI, "/"), ".");
 
         List<String> acceptedMimeTypes = Stream.of(Objects.requireNonNullElse(req.getHeader("Accept"), "").split(","))
-                .map(String::trim).collect(Collectors.toList());
+                .map(String::trim).toList();
 
         StreamServed servedStream = servedStreams.get(streamId);
         if (servedStream == null) {
@@ -189,6 +189,9 @@ public class AudioServlet extends HttpServlet implements AudioHTTPServer {
                 // update timeout with the sound duration :
                 if (endOfPlayTimestamp != null) {
                     servedStream.timeout().set(Math.max(servedStream.timeout().get(), endOfPlayTimestamp));
+                    logger.debug(
+                            "doGet endOfPlayTimestamp {} (delay from now {} nanoseconds) => new timeout timestamp {} nanoseconds",
+                            endOfPlayTimestamp, endOfPlayTimestamp - System.nanoTime(), servedStream.timeout().get());
                 }
                 resp.flushBuffer();
             } catch (final AudioException ex) {
@@ -215,7 +218,7 @@ public class AudioServlet extends HttpServlet implements AudioHTTPServer {
         long now = System.nanoTime();
         final List<String> toRemove = servedStreams.entrySet().stream()
                 .filter(e -> e.getValue().timeout().get() < now && e.getValue().currentlyServedStream().get() <= 0)
-                .map(Entry::getKey).collect(Collectors.toList());
+                .map(Entry::getKey).toList();
 
         toRemove.forEach(streamId -> {
             // the stream has expired and no one is using it, we need to remove it!
@@ -234,7 +237,7 @@ public class AudioServlet extends HttpServlet implements AudioHTTPServer {
         if (!servedStreams.isEmpty()) {
             if (periodicCleanerLocal == null || periodicCleanerLocal.isDone()) {
                 // reschedule a clean
-                periodicCleaner = threadPool.scheduleWithFixedDelay(this::removeTimedOutStreams, 5, 5,
+                periodicCleaner = threadPool.scheduleWithFixedDelay(this::removeTimedOutStreams, 2, 2,
                         TimeUnit.SECONDS);
             }
         } else if (periodicCleanerLocal != null) { // no more stream to serve, shut the periodic cleaning thread:
@@ -274,6 +277,7 @@ public class AudioServlet extends HttpServlet implements AudioHTTPServer {
             audioStream = createClonableInputStream(originalStream, streamId);
         }
         long timeOut = System.nanoTime() + TimeUnit.SECONDS.toNanos(seconds);
+        logger.debug("timeout {} seconds => timestamp {} nanoseconds", seconds, timeOut);
         CompletableFuture<@Nullable Void> playEnd = new CompletableFuture<@Nullable Void>();
         StreamServed streamToServe = new StreamServed(getRelativeURL(streamId), audioStream, new AtomicInteger(),
                 new AtomicLong(timeOut), multiTimeStream, playEnd);
@@ -293,7 +297,7 @@ public class AudioServlet extends HttpServlet implements AudioHTTPServer {
             clonableAudioStreamResult = new ByteArrayAudioStream(dataBytes, stream.getFormat());
         } else {
             // in memory max size exceeded, sound is too long, we will use a file
-            File tempFile = File.createTempFile(streamId, ".snd");
+            File tempFile = Files.createTempFile(streamId, ".snd").toFile();
             tempFile.deleteOnExit();
             try (OutputStream outputStream = new FileOutputStream(tempFile)) {
                 // copy already read data to file :

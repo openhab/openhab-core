@@ -12,12 +12,10 @@
  */
 package org.openhab.core.thing.util;
 
-import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
@@ -139,9 +137,8 @@ public class ThingHelperTest {
 
         assertThrows(IllegalArgumentException.class,
                 () -> ThingHelper.addChannelsToThing(thing,
-                        Stream.of(ChannelBuilder.create(new ChannelUID(thingUID, "channel2"), "").build(),
-                                ChannelBuilder.create(new ChannelUID(thingUID, "channel3"), "").build())
-                                .collect(toList())));
+                        List.of(ChannelBuilder.create(new ChannelUID(thingUID, "channel2"), "").build(),
+                                ChannelBuilder.create(new ChannelUID(thingUID, "channel3"), "").build())));
     }
 
     @Test

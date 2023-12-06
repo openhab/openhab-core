@@ -7,7 +7,7 @@
   <parent>
     <groupId>org.openhab.core.bom</groupId>
     <artifactId>org.openhab.core.reactor.bom</artifactId>
-    <version>4.0.0-SNAPSHOT</version>
+    <version>4.1.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>org.openhab.core.bom.runtime</artifactId>
@@ -17,12 +17,12 @@
 
   <properties>
     <californium.version>2.7.4</californium.version>
-    <cxf.version>3.4.5</cxf.version>
-    <jackson.version>2.14.1</jackson.version>
-    <jetty.version>9.4.50.v20221201</jetty.version>
-    <pax.logging.version>2.2.0</pax.logging.version>
-    <pax.web.version>8.0.15</pax.web.version>
-    <swagger.version>2.1.9</swagger.version>
+    <cxf.version>3.6.2</cxf.version>
+    <jackson.version>2.15.2</jackson.version>
+    <jetty.version>9.4.52.v20230823</jetty.version>
+    <pax.logging.version>2.2.3</pax.logging.version>
+    <pax.web.version>8.0.22</pax.web.version>
+    <swagger.version>2.2.15</swagger.version>
   </properties>
 
   <dependencyManagement>
@@ -50,7 +50,7 @@
     <dependency>
       <groupId>org.eclipse.platform</groupId>
       <artifactId>org.eclipse.osgi</artifactId>
-      <version>3.17.200</version>
+      <version>3.18.0</version>
       <scope>compile</scope>
     </dependency>
 
@@ -64,7 +64,7 @@
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.scr</artifactId>
-      <version>2.2.4</version>
+      <version>2.2.6</version>
       <scope>compile</scope>
       <exclusions>
         <exclusion>
@@ -100,13 +100,13 @@
     <dependency>
       <groupId>org.eclipse.platform</groupId>
       <artifactId>org.eclipse.equinox.event</artifactId>
-      <version>1.4.300</version>
+      <version>1.6.200</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.service.event</artifactId>
-      <version>1.4.0</version>
+      <version>1.4.1</version>
       <scope>compile</scope>
     </dependency>
 
@@ -114,13 +114,13 @@
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.service.log</artifactId>
-      <version>1.4.0</version>
+      <version>1.5.0</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.eclipse.platform</groupId>
       <artifactId>org.eclipse.equinox.log.stream</artifactId>
-      <version>1.0.100</version>
+      <version>1.1.100</version>
       <scope>compile</scope>
     </dependency>
 
@@ -174,7 +174,7 @@
     <dependency>
       <groupId>org.apache.aries.spec</groupId>
       <artifactId>org.apache.aries.javax.jax.rs-api</artifactId>
-      <version>1.0.1</version>
+      <version>1.0.4</version>
       <scope>compile</scope>
     </dependency>
 
@@ -188,7 +188,7 @@
     <dependency>
       <groupId>com.sun.xml.bind</groupId>
       <artifactId>jaxb-osgi</artifactId>
-      <version>2.3.3</version>
+      <version>2.3.8</version>
     </dependency>
 
     <!-- Activation 1.2 API -->
@@ -247,7 +247,7 @@
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.util.promise</artifactId>
-      <version>1.2.0</version>
+      <version>1.3.0</version>
       <scope>compile</scope>
     </dependency>
 
@@ -263,7 +263,7 @@
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.util.converter</artifactId>
-      <version>1.0.0</version>
+      <version>1.0.9</version>
       <scope>compile</scope>
     </dependency>
 
@@ -271,19 +271,19 @@
     <dependency>
       <groupId>org.apache.aries.tx-control</groupId>
       <artifactId>tx-control-service-xa</artifactId>
-      <version>1.0.0</version>
+      <version>1.0.1</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.aries.tx-control</groupId>
       <artifactId>tx-control-provider-jdbc-xa</artifactId>
-      <version>1.0.0</version>
+      <version>1.0.1</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.aries.tx-control</groupId>
       <artifactId>tx-control-provider-jpa-xa</artifactId>
-      <version>1.0.0</version>
+      <version>1.0.1</version>
       <scope>compile</scope>
     </dependency>
 
@@ -291,7 +291,7 @@
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.configurator</artifactId>
-      <version>1.0.14</version>
+      <version>1.0.16</version>
       <scope>compile</scope>
     </dependency>
 
@@ -299,7 +299,7 @@
     <dependency>
       <groupId>org.apache.aries.jpa</groupId>
       <artifactId>org.apache.aries.jpa.container</artifactId>
-      <version>2.7.0</version>
+      <version>2.7.3</version>
       <scope>compile</scope>
       <exclusions>
         <exclusion>
@@ -312,7 +312,7 @@
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.service.jdbc</artifactId>
-      <version>1.0.0</version>
+      <version>1.0.1</version>
       <scope>compile</scope>
     </dependency>
 
@@ -331,7 +331,7 @@
     <dependency>
       <groupId>org.apache.felix</groupId>
       <artifactId>org.apache.felix.webconsole</artifactId>
-      <version>4.7.2</version>
+      <version>4.8.12</version>
     </dependency>
     <dependency>
       <groupId>org.apache.felix</groupId>
@@ -398,7 +398,7 @@
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
-      <version>2.11.0</version>
+      <version>2.13.0</version>
     </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>
@@ -443,9 +443,9 @@
 
     <!-- Gson -->
     <dependency>
-      <groupId>com.google.code.gson</groupId>
-      <artifactId>gson</artifactId>
-      <version>2.9.1</version>
+      <groupId>org.eclipse.orbit.bundles</groupId>
+      <artifactId>com.google.gson</artifactId>
+      <version>2.10.1.v20230109-0753</version>
       <scope>compile</scope>
     </dependency>
 
@@ -469,7 +469,8 @@
     <dependency>
       <groupId>org.jupnp</groupId>
       <artifactId>org.jupnp</artifactId>
-      <version>2.7.0</version>
+      <!-- Uses the Java 11 LinkedTransferQueue as workaround for JDK-8301341 -->
+      <version>2.7.1.OH1</version>
       <scope>compile</scope>
     </dependency>
 
@@ -489,7 +490,7 @@
     <dependency>
       <groupId>javax.measure</groupId>
       <artifactId>unit-api</artifactId>
-      <version>2.1.2</version>
+      <version>2.2</version>
       <scope>compile</scope>
     </dependency>
     <!-- The si.uom:si-units manifest has no Export-Package entry. As workaround this OSGi-ify bundle is used. -->
@@ -508,7 +509,7 @@
     <dependency>
       <groupId>tech.units</groupId>
       <artifactId>indriya</artifactId>
-      <version>2.1.2</version>
+      <version>2.2</version>
       <scope>compile</scope>
     </dependency>
 
@@ -516,7 +517,7 @@
     <dependency>
       <groupId>com.hivemq</groupId>
       <artifactId>hivemq-mqtt-client</artifactId>
-      <version>1.2.2</version>
+      <version>1.3.3</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
@@ -774,13 +775,13 @@
     <dependency>
       <groupId>org.apache.xbean</groupId>
       <artifactId>xbean-bundleutils</artifactId>
-      <version>4.22</version>
+      <version>4.23</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.xbean</groupId>
       <artifactId>xbean-finder</artifactId>
-      <version>4.22</version>
+      <version>4.23</version>
       <scope>compile</scope>
     </dependency>
 
@@ -788,7 +789,7 @@
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <version>30.1-jre</version>
+      <version>32.1.2-jre</version>
       <scope>compile</scope>
     </dependency>
 
@@ -848,12 +849,6 @@
       <artifactId>org.eclipse.xtext</artifactId>
       <version>${xtext.version}</version>
       <scope>compile</scope>
-      <exclusions>
-        <exclusion>
-          <groupId>com.google.inject</groupId>
-          <artifactId>guice</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.eclipse.xtext</groupId>
@@ -884,12 +879,6 @@
       <artifactId>org.eclipse.xtext.util</artifactId>
       <version>${xtext.version}</version>
       <scope>compile</scope>
-      <exclusions>
-        <exclusion>
-          <groupId>com.google.inject</groupId>
-          <artifactId>guice</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.eclipse.xtext</groupId>
@@ -1067,7 +1056,7 @@
     <dependency>
       <groupId>org.javassist</groupId>
       <artifactId>javassist</artifactId>
-      <version>3.27.0-GA</version>
+      <version>3.29.2-GA</version>
       <scope>compile</scope>
     </dependency>
 
@@ -1075,19 +1064,27 @@
     <dependency>
       <groupId>org.openhab.osgiify</groupId>
       <artifactId>io.methvin.directory-watcher</artifactId>
-      <version>0.17.1</version>
+      <version>0.18.0</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>net.java.dev.jna</groupId>
       <artifactId>jna</artifactId>
-      <version>5.12.1</version>
+      <version>5.13.0</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>net.java.dev.jna</groupId>
       <artifactId>jna-platform</artifactId>
-      <version>5.12.1</version>
+      <version>5.13.0</version>
+      <scope>compile</scope>
+    </dependency>
+
+    <!-- Provides the Java 11 LinkedTransferQueue used in workarounds for JDK-8301341 -->
+    <dependency>
+      <groupId>org.openhab</groupId>
+      <artifactId>base-fixes</artifactId>
+      <version>1.0.0</version>
       <scope>compile</scope>
     </dependency>
   </dependencies>

@@ -12,9 +12,7 @@
  */
 package org.openhab.core.thing.binding;
 
-import static java.util.Collections.emptyList;
 import static java.util.Map.entry;
-import static java.util.stream.Collectors.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -28,7 +26,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -121,12 +118,12 @@ public class ThingFactoryTest extends JavaOSGiTest {
                 .state(new ChannelTypeUID("bindingId:cd2"), "channelLabel2", "itemType2")
                 .withConfigDescriptionURI(new URI("scheme", "channelType:cd2", null)).build();
 
-        registerChannelTypes(Stream.of(channelType1, channelType2).collect(toSet()), emptyList());
+        registerChannelTypes(Set.of(channelType1, channelType2), List.of());
 
         ChannelDefinition cd1 = new ChannelDefinitionBuilder("channel1", channelType1.getUID()).build();
         ChannelDefinition cd2 = new ChannelDefinitionBuilder("channel2", channelType2.getUID()).build();
 
-        return Stream.of(cd1, cd2).collect(toList());
+        return List.of(cd1, cd2);
     }
 
     @Test
@@ -203,8 +200,8 @@ public class ThingFactoryTest extends JavaOSGiTest {
                                 .withDefault("2.3,2.4,2.5").withLabel("label").withDescription("description")
                                 .withMultiple(true).withLimitToOptions(true).build();
 
-                        return ConfigDescriptionBuilder.create(uri)
-                                .withParameters(Stream.of(p1, p2, p3, p4, p5, p6).collect(toList())).build();
+                        return ConfigDescriptionBuilder.create(uri).withParameters(List.of(p1, p2, p3, p4, p5, p6))
+                                .build();
                     }
                 });
 
@@ -230,19 +227,19 @@ public class ThingFactoryTest extends JavaOSGiTest {
     public void createThingWithChannels() {
         ChannelType channelType1 = ChannelTypeBuilder
                 .state(new ChannelTypeUID("bindingId:channelTypeId1"), "channelLabel", CoreItemFactory.COLOR)
-                .withTags(Stream.of("tag1", "tag2").collect(toSet())).build();
+                .withTags(Set.of("tag1", "tag2")).build();
 
         ChannelType channelType2 = ChannelTypeBuilder
                 .state(new ChannelTypeUID("bindingId:channelTypeId2"), "channelLabel2", CoreItemFactory.DIMMER)
                 .withTag("tag3").build();
 
-        registerChannelTypes(Set.of(channelType1, channelType2), emptyList());
+        registerChannelTypes(Set.of(channelType1, channelType2), List.of());
 
         ChannelDefinition channelDef1 = new ChannelDefinitionBuilder("ch1", channelType1.getUID()).build();
         ChannelDefinition channelDef2 = new ChannelDefinitionBuilder("ch2", channelType2.getUID()).build();
 
         ThingType thingType = ThingTypeBuilder.instance(new ThingTypeUID("bindingId:thingType"), "label")
-                .withSupportedBridgeTypeUIDs(emptyList()).withChannelDefinitions(List.of(channelDef1, channelDef2))
+                .withSupportedBridgeTypeUIDs(List.of()).withChannelDefinitions(List.of(channelDef1, channelDef2))
                 .build();
         Configuration configuration = new Configuration();
 
@@ -285,7 +282,7 @@ public class ThingFactoryTest extends JavaOSGiTest {
         registerChannelTypes(Set.of(channelType1, channelType2), Set.of(channelGroupType1, channelGroupType2));
 
         ThingType thingType = ThingTypeBuilder.instance(new ThingTypeUID("bindingId:thingType"), "label")
-                .withSupportedBridgeTypeUIDs(emptyList())
+                .withSupportedBridgeTypeUIDs(List.of())
                 .withChannelGroupDefinitions(List.of(channelGroupDef1, channelGroupDef2)).build();
         Configuration configuration = new Configuration();
 

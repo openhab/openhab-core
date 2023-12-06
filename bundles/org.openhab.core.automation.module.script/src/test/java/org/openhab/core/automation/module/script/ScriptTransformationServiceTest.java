@@ -19,7 +19,6 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -75,8 +74,7 @@ public class ScriptTransformationServiceTest {
 
     @BeforeEach
     public void setUp() throws ScriptException {
-        Map<String, Object> properties = new HashMap<>();
-        properties.put(ScriptTransformationService.SCRIPT_TYPE_PROPERTY_NAME, SCRIPT_LANGUAGE);
+        Map<String, Object> properties = Map.of(ScriptTransformationService.SCRIPT_TYPE_PROPERTY_NAME, SCRIPT_LANGUAGE);
         service = new ScriptTransformationService(transformationRegistry, mock(ConfigDescriptionRegistry.class),
                 scriptEngineManager, properties);
 

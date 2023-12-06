@@ -27,5 +27,15 @@ public class RESTConstants {
 
     public static final String JAX_RS_NAME = "openhab";
 
-    public static final String API_VERSION = "5";
+    /**
+     * Version of the openHAB API
+     *
+     * Version 1: initial version
+     * Version 2: include invisible widgets into sitemap response (#499)
+     * Version 3: Addition of anyFormat icon parameter (#978)
+     * Version 4: OH3, refactored extensions to addons (#1560)
+     * Version 5: transparent charts (#2502)
+     * Version 6: extended chart period parameter format (#3863)
+     */
+    public static final String API_VERSION = "6";
 }

@@ -12,7 +12,6 @@
  */
 package org.openhab.core.config.discovery.usbserial.linuxsysfs.internal;
 
-import static java.util.Collections.emptySet;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsEmptyCollection.empty;
@@ -57,7 +56,7 @@ public class DeltaUsbSerialScannerTest {
      */
     @Test
     public void testInitialEmptyResult() throws IOException {
-        when(usbSerialScannerMock.scan()).thenReturn(emptySet());
+        when(usbSerialScannerMock.scan()).thenReturn(Set.of());
 
         Delta<UsbSerialDeviceInformation> delta = deltaUsbSerialScanner.scan();
 

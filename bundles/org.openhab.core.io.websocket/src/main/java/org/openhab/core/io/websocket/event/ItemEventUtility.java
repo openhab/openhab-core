@@ -10,8 +10,10 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.io.websocket;
+package org.openhab.core.io.websocket.event;
 
+import java.time.Instant;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -26,6 +28,7 @@ import org.openhab.core.items.events.ItemEventFactory;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.RefreshType;
 import org.openhab.core.types.State;
+import org.openhab.core.types.TimeSeries;
 import org.openhab.core.types.Type;
 import org.openhab.core.types.TypeParser;
 import org.openhab.core.types.UnDefType;
@@ -78,6 +81,13 @@ public class ItemEventUtility {
         throw new EventProcessingException("Incompatible datatype, rejected.");
     }
 
+    public Event createTimeSeriesEvent(EventDTO eventDTO) throws EventProcessingException {
+        Matcher matcher = getTopicMatcher(eventDTO.topic, "timeseries");
+        Item item = getItem(matcher.group("entity"));
+        TimeSeries timeSeries = parseTimeSeries(eventDTO.payload);
+        return ItemEventFactory.createTimeSeriesEvent(item.getName(), timeSeries, eventDTO.source);
+    }
+
     private Matcher getTopicMatcher(@Nullable String topic, String action) throws EventProcessingException {
         if (topic == null) {
             throw new EventProcessingException("Topic must not be null");
@@ -102,6 +112,36 @@ public class ItemEventUtility {
         }
     }
 
+    private TimeSeries parseTimeSeries(@Nullable String payload) throws EventProcessingException {
+        ItemTimeSeriesEventPayloadBean bean = null;
+        try {
+            bean = gson.fromJson(payload, ItemTimeSeriesEventPayloadBean.class);
+        } catch (JsonParseException ignored) {
+        }
+        if (bean == null) {
+            throw new EventProcessingException("Failed to deserialize payload '" + payload + "'.");
+        }
+
+        TimeSeries timeSeries = new TimeSeries(TimeSeries.Policy.valueOf(bean.policy));
+
+        for (ItemTimeSeriesEventPayloadBean.TimeSeriesPayload timeSeriesPayload : bean.timeSeries) {
+            Type value = parseType(timeSeriesPayload.type, timeSeriesPayload.value);
+            if (value instanceof State state) {
+                try {
+                    Instant timestamp = Instant.parse(timeSeriesPayload.timestamp);
+                    timeSeries.add(timestamp, state);
+                } catch (DateTimeParseException e) {
+                    throw new EventProcessingException(
+                            "Could not parse '" + timeSeriesPayload.timestamp + "' to an instant.");
+                }
+            } else {
+                throw new EventProcessingException("Only states are allowed in timeseries events.");
+            }
+        }
+
+        return timeSeries;
+    }
+
     private Type parseType(@Nullable String payload) throws EventProcessingException {
         ItemEventPayloadBean bean = null;
         try {
@@ -112,20 +152,24 @@ public class ItemEventUtility {
             throw new EventProcessingException("Failed to deserialize payload '" + payload + "'.");
         }
 
-        String simpleClassName = bean.type + TYPE_POSTFIX;
+        return parseType(bean.type, bean.value);
+    }
+
+    private Type parseType(String type, String value) throws EventProcessingException {
+        String simpleClassName = type + TYPE_POSTFIX;
         Type returnType;
 
         if (simpleClassName.equals(UnDefType.class.getSimpleName())) {
-            returnType = UnDefType.valueOf(bean.value);
+            returnType = UnDefType.valueOf(value);
         } else if (simpleClassName.equals(RefreshType.class.getSimpleName())) {
-            returnType = RefreshType.valueOf(bean.value);
+            returnType = RefreshType.valueOf(value);
         } else {
-            returnType = TypeParser.parseType(simpleClassName, bean.value);
+            returnType = TypeParser.parseType(simpleClassName, value);
         }
 
         if (returnType == null) {
             throw new EventProcessingException(
-                    "Error parsing simpleClassName '" + simpleClassName + "' with value '" + bean.value + "'.");
+                    "Error parsing simpleClassName '" + simpleClassName + "' with value '" + value + "'.");
         }
 
         return returnType;
@@ -134,5 +178,16 @@ public class ItemEventUtility {
     private static class ItemEventPayloadBean {
         public @NonNullByDefault({}) String type;
         public @NonNullByDefault({}) String value;
+    }
+
+    private static class ItemTimeSeriesEventPayloadBean {
+        private @NonNullByDefault({}) List<ItemTimeSeriesEventPayloadBean.TimeSeriesPayload> timeSeries;
+        private @NonNullByDefault({}) String policy;
+
+        private static class TimeSeriesPayload {
+            private @NonNullByDefault({}) String type;
+            private @NonNullByDefault({}) String value;
+            private @NonNullByDefault({}) String timestamp;
+        }
     }
 }

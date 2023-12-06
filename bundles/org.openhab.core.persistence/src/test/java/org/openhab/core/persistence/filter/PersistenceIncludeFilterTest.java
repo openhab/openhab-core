@@ -48,7 +48,7 @@ public class PersistenceIncludeFilterTest {
 
     @ParameterizedTest
     @MethodSource("argumentProvider")
-    public void includeFilterTest(State state, BigDecimal lower,  BigDecimal upper, String unit, boolean expected) {
+    public void includeFilterTest(State state, BigDecimal lower, BigDecimal upper, String unit, boolean expected) {
         when(item.getState()).thenReturn(state);
 
         PersistenceIncludeFilter filter = new PersistenceIncludeFilter("filter", lower, upper, unit, false);
@@ -57,7 +57,7 @@ public class PersistenceIncludeFilterTest {
 
     @ParameterizedTest
     @MethodSource("notArgumentProvider")
-    public void notIncludeFilterTest(State state, BigDecimal lower,  BigDecimal upper, String unit, boolean expected) {
+    public void notIncludeFilterTest(State state, BigDecimal lower, BigDecimal upper, String unit, boolean expected) {
         when(item.getState()).thenReturn(state);
 
         PersistenceIncludeFilter filter = new PersistenceIncludeFilter("filter", lower, upper, unit, true);

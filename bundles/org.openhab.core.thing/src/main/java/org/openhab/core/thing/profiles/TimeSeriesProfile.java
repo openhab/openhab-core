@@ -10,20 +10,23 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.io.websocket;
+package org.openhab.core.thing.profiles;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.core.types.TimeSeries;
 
 /**
- * The {@link EventProcessingException} is thrown when processing of incoming events fails
+ * The {@link TimeSeriesProfile} extends the {@link StateProfile} to support {@link TimeSeries} updates
  *
  * @author Jan N. Klug - Initial contribution
  */
 @NonNullByDefault
-public class EventProcessingException extends Exception {
-    private static final long serialVersionUID = 1L;
+public interface TimeSeriesProfile extends StateProfile {
 
-    public EventProcessingException(String message) {
-        super(message);
-    }
+    /**
+     * If a binding sends a time-series to a channel, this method will be called for each linked item.
+     *
+     * @param timeSeries the time-series
+     */
+    void onTimeSeriesFromHandler(TimeSeries timeSeries);
 }

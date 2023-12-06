@@ -13,9 +13,10 @@
 package org.openhab.core.ui.internal.components;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -30,7 +31,9 @@ import org.openhab.core.config.core.ConfigUtil;
 import org.openhab.core.model.core.EventType;
 import org.openhab.core.model.core.ModelRepositoryChangeListener;
 import org.openhab.core.model.sitemap.SitemapProvider;
+import org.openhab.core.model.sitemap.sitemap.Button;
 import org.openhab.core.model.sitemap.sitemap.ColorArray;
+import org.openhab.core.model.sitemap.sitemap.IconRule;
 import org.openhab.core.model.sitemap.sitemap.LinkableWidget;
 import org.openhab.core.model.sitemap.sitemap.Mapping;
 import org.openhab.core.model.sitemap.sitemap.Sitemap;
@@ -38,12 +41,16 @@ import org.openhab.core.model.sitemap.sitemap.SitemapFactory;
 import org.openhab.core.model.sitemap.sitemap.SitemapPackage;
 import org.openhab.core.model.sitemap.sitemap.VisibilityRule;
 import org.openhab.core.model.sitemap.sitemap.Widget;
+import org.openhab.core.model.sitemap.sitemap.impl.ButtonImpl;
+import org.openhab.core.model.sitemap.sitemap.impl.ButtongridImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.ChartImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.ColorArrayImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.ColorpickerImpl;
+import org.openhab.core.model.sitemap.sitemap.impl.ConditionImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.DefaultImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.FrameImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.GroupImpl;
+import org.openhab.core.model.sitemap.sitemap.impl.IconRuleImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.ImageImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.InputImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.MappingImpl;
@@ -75,6 +82,9 @@ import org.slf4j.LoggerFactory;
  *
  * @author Yannick Schaus - Initial contribution
  * @author Laurent Garnier - icon color support for all widgets
+ * @author Laurent Garnier - Added support for new element Buttongrid
+ * @author Laurent Garnier - Added icon field for mappings
+ * @author Mark Herwege - Make UI provided sitemaps compatible with enhanced syntax in conditions
  */
 @NonNullByDefault
 @Component(service = SitemapProvider.class)
@@ -86,10 +96,8 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
     private static final String SITEMAP_PREFIX = "uicomponents_";
     private static final String SITEMAP_SUFFIX = ".sitemap";
 
-    private static final Pattern VISIBILITY_PATTERN = Pattern
-            .compile("(?<item>[A-Za-z]\\w*)\\s*(?<condition>==|!=|<=|>=|<|>)\\s*(?<sign>\\+|-)?(?<state>\\S+)");
-    private static final Pattern COLOR_PATTERN = Pattern.compile(
-            "((?<item>[A-Za-z]\\w*)?\\s*((?<condition>==|!=|<=|>=|<|>)\\s*(?<sign>\\+|-)?(?<state>\\S+))?\\s*=)?\\s*(?<arg>\\S+)");
+    private static final Pattern CONDITION_PATTERN = Pattern
+            .compile("(?<item>[A-Za-z]\\w*)?\\s*(?<condition>==|!=|<=|>=|<|>)?\\s*(?<sign>\\+|-)?(?<state>.+)");
 
     private Map<String, Sitemap> sitemaps = new HashMap<>();
     private @Nullable UIComponentRegistryFactory componentRegistryFactory;
@@ -107,7 +115,7 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
     public Set<String> getSitemapNames() {
         UIComponentRegistry registry = sitemapComponentRegistry;
         if (registry == null) {
-            return Collections.emptySet();
+            return Set.of();
         }
 
         sitemaps.clear();
@@ -152,7 +160,10 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
 
         SitemapImpl sitemap = (SitemapImpl) SitemapFactory.eINSTANCE.createSitemap();
         sitemap.setName(SITEMAP_PREFIX + rootComponent.getUID());
-        sitemap.setLabel(rootComponent.getConfig().get("label").toString());
+        Object label = rootComponent.getConfig().get("label");
+        if (label != null) {
+            sitemap.setLabel(label.toString());
+        }
 
         if (rootComponent.getSlots() != null && rootComponent.getSlots().containsKey("widgets")) {
             for (UIComponent component : rootComponent.getSlot("widgets")) {
@@ -218,7 +229,7 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
             case "Mapview":
                 MapviewImpl mapviewWidget = (MapviewImpl) SitemapFactory.eINSTANCE.createMapview();
                 widget = mapviewWidget;
-                setWidgetPropertyFromComponentConfig(widget, component, "height", SitemapPackage.WEBVIEW__HEIGHT);
+                setWidgetPropertyFromComponentConfig(widget, component, "height", SitemapPackage.MAPVIEW__HEIGHT);
                 break;
             case "Slider":
                 SliderImpl sliderWidget = (SliderImpl) SitemapFactory.eINSTANCE.createSlider();
@@ -254,6 +265,11 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
                 setWidgetPropertyFromComponentConfig(widget, component, "frequency",
                         SitemapPackage.COLORPICKER__FREQUENCY);
                 break;
+            case "Buttongrid":
+                ButtongridImpl buttongridWidget = (ButtongridImpl) SitemapFactory.eINSTANCE.createButtongrid();
+                addWidgetButtons(buttongridWidget.getButtons(), component);
+                widget = buttongridWidget;
+                break;
             case "Default":
                 DefaultImpl defaultWidget = (DefaultImpl) SitemapFactory.eINSTANCE.createDefault();
                 widget = defaultWidget;
@@ -266,7 +282,7 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
 
         if (widget != null) {
             setWidgetPropertyFromComponentConfig(widget, component, "label", SitemapPackage.WIDGET__LABEL);
-            setWidgetPropertyFromComponentConfig(widget, component, "icon", SitemapPackage.WIDGET__ICON);
+            setWidgetIconPropertyFromComponentConfig(widget, component);
             setWidgetPropertyFromComponentConfig(widget, component, "item", SitemapPackage.WIDGET__ITEM);
 
             if (widget instanceof LinkableWidget linkableWidget) {
@@ -284,6 +300,7 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
             addLabelColor(widget.getLabelColor(), component);
             addValueColor(widget.getValueColor(), component);
             addIconColor(widget.getIconColor(), component);
+            addIconRules(widget.getIconRules(), component);
         }
 
         return widget;
@@ -315,17 +332,65 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
         }
     }
 
+    private void setWidgetIconPropertyFromComponentConfig(Widget widget, @Nullable UIComponent component) {
+        if (component == null || component.getConfig() == null) {
+            return;
+        }
+        Object staticIcon = component.getConfig().get("staticIcon");
+        if (staticIcon != null && Boolean.valueOf(ConfigUtil.normalizeType(staticIcon).toString())) {
+            setWidgetPropertyFromComponentConfig(widget, component, "icon", SitemapPackage.WIDGET__STATIC_ICON);
+            return;
+        }
+
+        Object icon = component.getConfig().get("icon");
+        if (icon == null) {
+            return;
+        }
+        setWidgetPropertyFromComponentConfig(widget, component, "icon", SitemapPackage.WIDGET__ICON);
+    }
+
     private void addWidgetMappings(EList<Mapping> mappings, UIComponent component) {
         if (component.getConfig() != null && component.getConfig().containsKey("mappings")) {
-            if (component.getConfig().get("mappings") instanceof Collection<?>) {
-                for (Object sourceMapping : (Collection<?>) component.getConfig().get("mappings")) {
+            Object sourceMappings = component.getConfig().get("mappings");
+            if (sourceMappings instanceof Collection<?>) {
+                for (Object sourceMapping : (Collection<?>) sourceMappings) {
                     if (sourceMapping instanceof String) {
-                        String cmd = sourceMapping.toString().split("=")[0].trim();
-                        String label = sourceMapping.toString().split("=")[1].trim();
+                        String[] splitMapping = sourceMapping.toString().split("=");
+                        String cmd = splitMapping[0].trim();
+                        String label = splitMapping[1].trim();
+                        String icon = splitMapping.length < 3 ? null : splitMapping[2].trim();
                         MappingImpl mapping = (MappingImpl) SitemapFactory.eINSTANCE.createMapping();
                         mapping.setCmd(cmd);
                         mapping.setLabel(label);
+                        mapping.setIcon(icon);
                         mappings.add(mapping);
+                    }
+                }
+            }
+        }
+    }
+
+    private void addWidgetButtons(EList<Button> buttons, UIComponent component) {
+        if (component.getConfig() != null && component.getConfig().containsKey("buttons")) {
+            Object sourceButtons = component.getConfig().get("buttons");
+            if (sourceButtons instanceof Collection<?>) {
+                for (Object sourceButton : (Collection<?>) sourceButtons) {
+                    if (sourceButton instanceof String) {
+                        String[] splitted1 = sourceButton.toString().split(":");
+                        String[] splitted2 = splitted1[0].split(",");
+                        int row = Integer.parseInt(splitted2[0].trim());
+                        int column = Integer.parseInt(splitted2[1].trim());
+                        String[] splitted3 = splitted1[1].trim().split("=");
+                        String cmd = splitted3[0].trim();
+                        String label = splitted3[1].trim();
+                        String icon = splitted3.length < 3 ? null : splitted3[2].trim();
+                        ButtonImpl button = (ButtonImpl) SitemapFactory.eINSTANCE.createButton();
+                        button.setRow(row);
+                        button.setColumn(column);
+                        button.setCmd(cmd);
+                        button.setLabel(label);
+                        button.setIcon(icon);
+                        buttons.add(button);
                     }
                 }
             }
@@ -334,20 +399,16 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
 
     private void addWidgetVisibility(EList<VisibilityRule> visibility, UIComponent component) {
         if (component.getConfig() != null && component.getConfig().containsKey("visibility")) {
-            for (Object sourceVisibility : (Collection<?>) component.getConfig().get("visibility")) {
-                if (sourceVisibility instanceof String) {
-                    Matcher matcher = VISIBILITY_PATTERN.matcher(sourceVisibility.toString());
-                    if (matcher.matches()) {
+            Object sourceVisibilities = component.getConfig().get("visibility");
+            if (sourceVisibilities instanceof Collection<?>) {
+                for (Object sourceVisibility : (Collection<?>) sourceVisibilities) {
+                    if (sourceVisibility instanceof String) {
+                        List<String> conditionsString = getRuleConditions(sourceVisibility.toString(), null);
                         VisibilityRuleImpl visibilityRule = (VisibilityRuleImpl) SitemapFactory.eINSTANCE
                                 .createVisibilityRule();
-                        visibilityRule.setItem(matcher.group("item"));
-                        visibilityRule.setCondition(matcher.group("condition"));
-                        visibilityRule.setSign(matcher.group("sign"));
-                        visibilityRule.setState(matcher.group("state"));
+                        List<ConditionImpl> conditions = getConditions(conditionsString, component, "visibility");
+                        visibilityRule.eSet(SitemapPackage.VISIBILITY_RULE__CONDITIONS, conditions);
                         visibility.add(visibilityRule);
-                    } else {
-                        logger.warn("Syntax error in visibility rule '{}' for widget {}", sourceVisibility,
-                                component.getType());
                     }
                 }
             }
@@ -368,24 +429,76 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
 
     private void addColor(EList<ColorArray> color, UIComponent component, String key) {
         if (component.getConfig() != null && component.getConfig().containsKey(key)) {
-            for (Object sourceColor : (Collection<?>) component.getConfig().get(key)) {
-                if (sourceColor instanceof String) {
-                    Matcher matcher = COLOR_PATTERN.matcher(sourceColor.toString());
-                    if (matcher.matches()) {
+            Object sourceColors = component.getConfig().get(key);
+            if (sourceColors instanceof Collection<?>) {
+                for (Object sourceColor : (Collection<?>) sourceColors) {
+                    if (sourceColor instanceof String) {
+                        String argument = getRuleArgument(sourceColor.toString());
+                        List<String> conditionsString = getRuleConditions(sourceColor.toString(), argument);
                         ColorArrayImpl colorArray = (ColorArrayImpl) SitemapFactory.eINSTANCE.createColorArray();
-                        colorArray.setItem(matcher.group("item"));
-                        colorArray.setCondition(matcher.group("condition"));
-                        colorArray.setSign(matcher.group("sign"));
-                        colorArray.setState(matcher.group("state"));
-                        colorArray.setArg(matcher.group("arg"));
+                        colorArray.setArg(argument);
+                        List<ConditionImpl> conditions = getConditions(conditionsString, component, key);
+                        colorArray.eSet(SitemapPackage.COLOR_ARRAY__CONDITIONS, conditions);
                         color.add(colorArray);
-                    } else {
-                        logger.warn("Syntax error in {} rule '{}' for widget {}", key, sourceColor,
-                                component.getType());
                     }
                 }
             }
         }
+    }
+
+    private void addIconRules(EList<IconRule> icon, UIComponent component) {
+        if (component.getConfig() != null && component.getConfig().containsKey("iconrules")) {
+            Object sourceIcons = component.getConfig().get("iconrules");
+            if (sourceIcons instanceof Collection<?>) {
+                for (Object sourceIcon : (Collection<?>) sourceIcons) {
+                    if (sourceIcon instanceof String) {
+                        String argument = getRuleArgument(sourceIcon.toString());
+                        List<String> conditionsString = getRuleConditions(sourceIcon.toString(), argument);
+                        IconRuleImpl iconRule = (IconRuleImpl) SitemapFactory.eINSTANCE.createIconRule();
+                        iconRule.setArg(argument);
+                        List<ConditionImpl> conditions = getConditions(conditionsString, component, "iconrules");
+                        iconRule.eSet(SitemapPackage.ICON_RULE__CONDITIONS, conditions);
+                        icon.add(iconRule);
+                    }
+                }
+            }
+        }
+    }
+
+    private List<ConditionImpl> getConditions(List<String> conditionsString, UIComponent component, String key) {
+        List<ConditionImpl> conditions = new ArrayList<>();
+        for (String conditionString : conditionsString) {
+            Matcher matcher = CONDITION_PATTERN.matcher(conditionString);
+            if (matcher.matches()) {
+                ConditionImpl condition = (ConditionImpl) SitemapFactory.eINSTANCE.createCondition();
+                condition.setItem(matcher.group("item"));
+                condition.setCondition(matcher.group("condition"));
+                condition.setSign(matcher.group("sign"));
+                condition.setState(matcher.group("state"));
+                conditions.add(condition);
+            } else {
+                logger.warn("Syntax error in {} rule condition '{}' for widget {}", key, conditionString,
+                        component.getType());
+            }
+        }
+        return conditions;
+    }
+
+    private String getRuleArgument(String rule) {
+        int argIndex = rule.lastIndexOf("=") + 1;
+        return rule.substring(argIndex).trim();
+    }
+
+    private List<String> getRuleConditions(String rule, @Nullable String argument) {
+        String conditions = rule;
+        if (argument != null) {
+            conditions = rule.substring(0, rule.lastIndexOf(argument)).trim();
+            if (conditions.endsWith("=")) {
+                conditions = conditions.substring(0, conditions.length() - 1);
+            }
+        }
+        List<String> conditionsList = List.of(conditions.split(" AND "));
+        return conditionsList.stream().map(String::trim).toList();
     }
 
     @Override

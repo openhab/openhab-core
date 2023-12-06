@@ -160,4 +160,8 @@
 		<category>time</category>
 	</channel-type>
 
+	<channel-type id="forecast">
+		<item-type>Number</item-type>
+		<label>Forecast</label>
+	</channel-type>
 </thing:thing-descriptions>

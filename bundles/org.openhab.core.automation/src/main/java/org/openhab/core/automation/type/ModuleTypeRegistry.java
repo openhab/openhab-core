@@ -77,7 +77,7 @@ public interface ModuleTypeRegistry extends Registry<ModuleType, String> {
      * This method is used for getting the {@link ModuleType}s filtered by tags.
      *
      * @param locale used for localization of the {@link ModuleType}.
-     * @param moduleTypeTag specifies the filter for getting the {@link ModuleType}s, if it is {@code null} then returns
+     * @param tags specifies the filter for getting the {@link ModuleType}s, if it is {@code null} then returns
      *            all {@link ModuleType}s.
      * @param <T> the type of the required object.
      * @return the {@link ModuleType}s, which correspond to the filter.

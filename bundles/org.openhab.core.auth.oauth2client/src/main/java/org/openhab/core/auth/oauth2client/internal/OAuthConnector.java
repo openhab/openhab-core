@@ -63,15 +63,26 @@ public class OAuthConnector {
 
     private final HttpClientFactory httpClientFactory;
 
+    private final @Nullable Fields extraFields;
+
     private final Logger logger = LoggerFactory.getLogger(OAuthConnector.class);
     private final Gson gson;
 
     public OAuthConnector(HttpClientFactory httpClientFactory) {
-        this(httpClientFactory, new GsonBuilder());
+        this(httpClientFactory, null, new GsonBuilder());
+    }
+
+    public OAuthConnector(HttpClientFactory httpClientFactory, @Nullable Fields extraFields) {
+        this(httpClientFactory, extraFields, new GsonBuilder());
     }
 
     public OAuthConnector(HttpClientFactory httpClientFactory, GsonBuilder gsonBuilder) {
+        this(httpClientFactory, null, gsonBuilder);
+    }
+
+    public OAuthConnector(HttpClientFactory httpClientFactory, @Nullable Fields extraFields, GsonBuilder gsonBuilder) {
         this.httpClientFactory = httpClientFactory;
+        this.extraFields = extraFields;
         gson = gsonBuilder.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
                 .registerTypeAdapter(Instant.class, (JsonDeserializer<Instant>) (json, typeOfT, context) -> {
                     try {
@@ -291,6 +302,14 @@ public class OAuthConnector {
                 fields.add(parameters[i], parameters[i + 1]);
             }
         }
+
+        if (extraFields != null) {
+            for (Fields.Field extra : extraFields) {
+                logger.debug("Oauth request (extra) parameter {}, value {}", extra.getName(), extra.getValue());
+                fields.put(extra);
+            }
+        }
+
         return fields;
     }
 
@@ -326,11 +345,12 @@ public class OAuthConnector {
             throw new IOException("Exception in oauth communication, grant type " + grantType, e);
         } catch (JsonSyntaxException e) {
             throw new OAuthException(String.format(
-                    "Unable to deserialize json into AccessTokenResponse/ OAuthResponseException. httpCode: %d json: %s",
-                    statusCode, content), e);
+                    "Unable to deserialize json into AccessTokenResponse/ OAuthResponseException. httpCode: %d json: %s: %s",
+                    statusCode, content, e.getMessage()), e);
         } catch (Exception e) {
             // Dont know what exception it is, wrap it up and throw it out
-            throw new OAuthException("Exception in oauth communication, grant type " + grantType, e);
+            throw new OAuthException(
+                    "Exception in oauth communication, grant type " + grantType + ": " + e.getMessage(), e);
         }
     }
 

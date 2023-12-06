@@ -17,7 +17,7 @@ import java.text.ParseException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
+import java.util.WeakHashMap;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -69,13 +69,13 @@ import org.slf4j.LoggerFactory;
  * @author Miguel Álvarez - Close audio streams + use RecognitionStartEvent
  * @author Miguel Álvarez - Use dialog context
  * @author Miguel Álvarez - Add sounds
+ * @author Miguel Álvarez - Add dialog groups
  *
  */
 @NonNullByDefault
 public class DialogProcessor implements KSListener, STTListener {
-
     private final Logger logger = LoggerFactory.getLogger(DialogProcessor.class);
-
+    private final WeakHashMap<String, DialogContext> activeDialogGroups;
     public final DialogContext dialogContext;
     private @Nullable List<ToneSynthesizer.Tone> listeningMelody;
     private final EventPublisher eventPublisher;
@@ -105,11 +105,12 @@ public class DialogProcessor implements KSListener, STTListener {
     private @Nullable ToneSynthesizer toneSynthesizer;
 
     public DialogProcessor(DialogContext context, DialogEventListener eventListener, EventPublisher eventPublisher,
-            TranslationProvider i18nProvider, Bundle bundle) {
+            WeakHashMap<String, DialogContext> activeDialogGroups, TranslationProvider i18nProvider, Bundle bundle) {
         this.dialogContext = context;
         this.eventListener = eventListener;
         this.eventPublisher = eventPublisher;
         this.i18nProvider = i18nProvider;
+        this.activeDialogGroups = activeDialogGroups;
         this.bundle = bundle;
         var ks = context.ks();
         this.ksFormat = ks != null
@@ -182,7 +183,15 @@ public class DialogProcessor implements KSListener, STTListener {
      * Starts a single dialog
      */
     public void startSimpleDialog() {
-        abortSTT();
+        synchronized (activeDialogGroups) {
+            if (!activeDialogGroups.containsKey(dialogContext.dialogGroup())) {
+                logger.debug("Acquiring dialog group '{}'", dialogContext.dialogGroup());
+                activeDialogGroups.put(dialogContext.dialogGroup(), dialogContext);
+            } else {
+                logger.warn("Ignoring keyword spotting event, dialog group '{}' running", dialogContext.dialogGroup());
+                return;
+            }
+        }
         closeStreamSTT();
         isSTTServerAborting = false;
         AudioFormat fmt = sttFormat;
@@ -196,6 +205,7 @@ public class DialogProcessor implements KSListener, STTListener {
             AudioStream stream = dialogContext.source().getInputStream(fmt);
             streamSTT = stream;
             sttServiceHandle = dialogContext.stt().recognize(this, stream, dialogContext.locale(), new HashSet<>());
+            return;
         } catch (AudioException e) {
             logger.warn("Error creating the audio stream: {}", e.getMessage());
         } catch (STTException e) {
@@ -207,6 +217,11 @@ public class DialogProcessor implements KSListener, STTListener {
             } else if (text != null) {
                 say(text.replace("{0}", ""));
             }
+        }
+        // In case of error release dialog group
+        synchronized (activeDialogGroups) {
+            logger.debug("Releasing dialog group '{}' due to errors", dialogContext.dialogGroup());
+            activeDialogGroups.remove(dialogContext.dialogGroup());
         }
     }
 
@@ -264,6 +279,10 @@ public class DialogProcessor implements KSListener, STTListener {
             sttServiceHandle = null;
         }
         isSTTServerAborting = true;
+        synchronized (activeDialogGroups) {
+            logger.debug("Releasing dialog group '{}'", dialogContext.dialogGroup());
+            activeDialogGroups.remove(dialogContext.dialogGroup());
+        }
     }
 
     private void closeStreamSTT() {
@@ -292,20 +311,18 @@ public class DialogProcessor implements KSListener, STTListener {
 
     @Override
     public void ksEventReceived(KSEvent ksEvent) {
-        if (!processing) {
-            isSTTServerAborting = false;
-            if (ksEvent instanceof KSpottedEvent) {
-                logger.debug("KSpottedEvent event received");
-                try {
-                    startSimpleDialog();
-                } catch (IllegalStateException e) {
-                    logger.warn("{}", e.getMessage());
-                }
-            } else if (ksEvent instanceof KSErrorEvent kse) {
-                logger.debug("KSErrorEvent event received");
-                String text = i18nProvider.getText(bundle, "error.ks-error", null, dialogContext.locale());
-                say(text == null ? kse.getMessage() : text.replace("{0}", kse.getMessage()));
+        isSTTServerAborting = false;
+        if (ksEvent instanceof KSpottedEvent) {
+            logger.debug("KSpottedEvent event received");
+            try {
+                startSimpleDialog();
+            } catch (IllegalStateException e) {
+                logger.warn("{}", e.getMessage());
             }
+        } else if (ksEvent instanceof KSErrorEvent kse) {
+            logger.debug("KSErrorEvent event received");
+            String text = i18nProvider.getText(bundle, "error.ks-error", null, dialogContext.locale());
+            say(text == null ? kse.getMessage() : text.replace("{0}", kse.getMessage()));
         }
     }
 
@@ -322,7 +339,7 @@ public class DialogProcessor implements KSListener, STTListener {
                 String error = null;
                 for (HumanLanguageInterpreter interpreter : dialogContext.hlis()) {
                     try {
-                        answer = interpreter.interpret(dialogContext.locale(), question);
+                        answer = interpreter.interpret(dialogContext.locale(), question, dialogContext);
                         logger.debug("Interpretation result: {}", answer);
                         error = null;
                         break;
@@ -408,12 +425,12 @@ public class DialogProcessor implements KSListener, STTListener {
 
     private void playStartSound() {
         playNotes(Stream.of(ToneSynthesizer.Note.G, ToneSynthesizer.Note.A, ToneSynthesizer.Note.B)
-                .map(note -> ToneSynthesizer.noteTone(note, 100L)).collect(Collectors.toList()));
+                .map(note -> ToneSynthesizer.noteTone(note, 100L)).toList());
     }
 
     private void playStopSound() {
         playNotes(Stream.of(ToneSynthesizer.Note.B, ToneSynthesizer.Note.A, ToneSynthesizer.Note.G)
-                .map(note -> ToneSynthesizer.noteTone(note, 100L)).collect(Collectors.toList()));
+                .map(note -> ToneSynthesizer.noteTone(note, 100L)).toList());
     }
 
     private void playOnListeningSound() {

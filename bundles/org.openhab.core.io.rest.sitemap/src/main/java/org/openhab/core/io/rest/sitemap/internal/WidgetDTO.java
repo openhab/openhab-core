@@ -25,6 +25,9 @@ import org.openhab.core.io.rest.core.item.EnrichedItemDTO;
  * @author Chris Jackson - Initial contribution
  * @author Laurent Garnier - New field iconcolor
  * @author Mark herwege - New fields pattern, unit
+ * @author Laurent Garnier - New field columns
+ * @author Danny Baumann - New field labelSource
+ * @author Laurent Garnier - Remove field columns
  */
 public class WidgetDTO {
 
@@ -34,7 +37,14 @@ public class WidgetDTO {
     public boolean visibility;
 
     public String label;
+    public String labelSource;
     public String icon;
+    /**
+     * staticIcon is a boolean indicating if the widget state must be ignored when requesting the icon.
+     * It is set to true when the widget has either the staticIcon property set or the icon property set
+     * with conditional rules.
+     */
+    public Boolean staticIcon;
     public String labelcolor;
     public String valuecolor;
     public String iconcolor;

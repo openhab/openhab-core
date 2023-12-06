@@ -19,7 +19,7 @@ import org.openhab.core.thing.binding.ThingActions;
 /**
  * The methods of this class are made available as functions in the scripts.
  *
- * Note: This class is a copy from the {@link org.openhab.core.model.script.internal.engine.action.ThingActionService}
+ * Note: This class is a copy from the {@code org.openhab.core.model.script.internal.engine.action.ThingActionService}
  * class
  *
  * @author Kai Kreuzer - Initial contribution

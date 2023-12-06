@@ -42,6 +42,7 @@ import org.openhab.core.thing.type.ThingType;
 import org.openhab.core.thing.util.ThingHandlerHelper;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
+import org.openhab.core.types.TimeSeries;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,6 +69,11 @@ class ThingHandlerCallbackImpl implements ThingHandlerCallback {
     @Override
     public void postCommand(ChannelUID channelUID, Command command) {
         thingManager.communicationManager.postCommand(channelUID, command);
+    }
+
+    @Override
+    public void sendTimeSeries(ChannelUID channelUID, TimeSeries timeSeries) {
+        thingManager.communicationManager.sendTimeSeries(channelUID, timeSeries);
     }
 
     @Override

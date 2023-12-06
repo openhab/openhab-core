@@ -19,7 +19,7 @@ import java.nio.file.Paths;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * The {@link TopicGlobalEventFilter} is a default openHAB {@link EventFilter} implementation that ensures filtering
+ * The {@link TopicGlobEventFilter} is a default openHAB {@link EventFilter} implementation that ensures filtering
  * of events based on an event topic.
  * 
  * The syntax for the filter is the glob syntax documented at

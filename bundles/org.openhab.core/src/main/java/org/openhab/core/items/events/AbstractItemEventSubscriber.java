@@ -31,7 +31,8 @@ import org.openhab.core.events.EventSubscriber;
 @NonNullByDefault
 public abstract class AbstractItemEventSubscriber implements EventSubscriber {
 
-    private final Set<String> subscribedEventTypes = Set.of(ItemStateEvent.TYPE, ItemCommandEvent.TYPE);
+    private final Set<String> subscribedEventTypes = Set.of(ItemStateEvent.TYPE, ItemCommandEvent.TYPE,
+            ItemTimeSeriesEvent.TYPE);
 
     @Override
     public Set<String> getSubscribedEventTypes() {
@@ -44,6 +45,8 @@ public abstract class AbstractItemEventSubscriber implements EventSubscriber {
             receiveUpdate(stateEvent);
         } else if (event instanceof ItemCommandEvent commandEvent) {
             receiveCommand(commandEvent);
+        } else if (event instanceof ItemTimeSeriesEvent timeSeriesEvent) {
+            receiveTimeSeries(timeSeriesEvent);
         }
     }
 
@@ -65,5 +68,15 @@ public abstract class AbstractItemEventSubscriber implements EventSubscriber {
     protected void receiveUpdate(ItemStateEvent updateEvent) {
         // Default implementation: do nothing.
         // Can be implemented by subclass in order to handle item updates.
+    }
+
+    /**
+     * Callback method for receiving item timeseries events from the openHAB event bus.
+     *
+     * @param timeSeriesEvent the timeseries event
+     */
+    protected void receiveTimeSeries(ItemTimeSeriesEvent timeSeriesEvent) {
+        // Default implementation: do nothing.
+        // Can be implemented by subclass in order to handle timeseries updates.
     }
 }

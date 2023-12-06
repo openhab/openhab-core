@@ -18,13 +18,11 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -115,14 +113,14 @@ public class JavaOSGiTest extends JavaTest {
 
         if (serviceReferences == null) {
             new MissingServiceAnalyzer(System.out, bundleContext).printMissingServiceDetails(clazz);
-            return Collections.emptyList();
+            return List.of();
         }
 
-        return Arrays //
+        return (List<T>) Arrays //
                 .stream(serviceReferences) //
                 .filter(filter) // apply the predicate
                 .map(this::unrefService) // get the actual services from the references
-                .collect(Collectors.toList()); // get the result as List
+                .toList(); // get the result as List
     }
 
     /**
@@ -196,7 +194,7 @@ public class JavaOSGiTest extends JavaTest {
 
         if (serviceReferences == null) {
             new MissingServiceAnalyzer(System.out, bundleContext).printMissingServiceDetails(clazz);
-            return Collections.emptyList();
+            return List.of();
         }
 
         return Arrays //
@@ -204,7 +202,7 @@ public class JavaOSGiTest extends JavaTest {
                 .map(this::unrefService) // get the actual services from the references
                 .filter(implementationClass::isInstance) // check that are of implementationClass
                 .map(implementationClass::cast) // cast instances to implementationClass
-                .collect(Collectors.toList()) // get the result as List
+                .toList() // get the result as List
         ;
     }
 
@@ -281,7 +279,7 @@ public class JavaOSGiTest extends JavaTest {
      * The given interface names are used as OSGi service interface name.
      *
      * @param service service to be registered
-     * @param interfaceName interface name of the OSGi service
+     * @param interfaceNames interface names of the OSGi service
      * @param properties OSGi service properties
      * @return service registration object
      */

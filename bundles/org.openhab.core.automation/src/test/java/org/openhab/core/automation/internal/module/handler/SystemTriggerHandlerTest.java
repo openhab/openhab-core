@@ -15,10 +15,7 @@ package org.openhab.core.automation.internal.module.handler;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.util.Map;
 
@@ -27,6 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
@@ -56,6 +54,8 @@ public class SystemTriggerHandlerTest {
 
     private @Mock @NonNullByDefault({}) Trigger triggerMock;
 
+    private @Captor @NonNullByDefault({}) ArgumentCaptor<Map<String, Object>> captor;
+
     @BeforeEach
     public void setup() {
         when(triggerMock.getConfiguration())
@@ -67,34 +67,17 @@ public class SystemTriggerHandlerTest {
     public void testDoesNotTriggerIfStartLevelTooLow() {
         when(startLevelServiceMock.getStartLevel()).thenReturn(0);
 
-        SystemTriggerHandler triggerHandler = new SystemTriggerHandler(triggerMock, bundleContextMock,
-                startLevelServiceMock);
+        SystemTriggerHandler triggerHandler = new SystemTriggerHandler(triggerMock, bundleContextMock);
         triggerHandler.setCallback(callbackMock);
 
         verifyNoInteractions(callbackMock);
     }
 
     @Test
-    public void testDoesTriggerImmediatelyIfStartLevelHigherOnInit() {
-        when(startLevelServiceMock.getStartLevel()).thenReturn(100);
-
-        SystemTriggerHandler triggerHandler = new SystemTriggerHandler(triggerMock, bundleContextMock,
-                startLevelServiceMock);
-        triggerHandler.setCallback(callbackMock);
-
-        ArgumentCaptor<Map> captor = ArgumentCaptor.forClass(Map.class);
-        verify(callbackMock).triggered(eq(triggerMock), captor.capture());
-
-        Map<String, Object> configuration = (Map<String, Object>) captor.getValue();
-        assertThat(configuration.get(SystemTriggerHandler.OUT_STARTLEVEL), is(CFG_STARTLEVEL));
-    }
-
-    @Test
     public void testDoesNotTriggerIfStartLevelEventLower() {
         when(startLevelServiceMock.getStartLevel()).thenReturn(0);
 
-        SystemTriggerHandler triggerHandler = new SystemTriggerHandler(triggerMock, bundleContextMock,
-                startLevelServiceMock);
+        SystemTriggerHandler triggerHandler = new SystemTriggerHandler(triggerMock, bundleContextMock);
         triggerHandler.setCallback(callbackMock);
 
         Event event = SystemEventFactory.createStartlevelEvent(70);
@@ -107,55 +90,31 @@ public class SystemTriggerHandlerTest {
     public void testDoesTriggerIfStartLevelEventHigher() {
         when(startLevelServiceMock.getStartLevel()).thenReturn(0);
 
-        SystemTriggerHandler triggerHandler = new SystemTriggerHandler(triggerMock, bundleContextMock,
-                startLevelServiceMock);
+        SystemTriggerHandler triggerHandler = new SystemTriggerHandler(triggerMock, bundleContextMock);
         triggerHandler.setCallback(callbackMock);
 
         Event event = SystemEventFactory.createStartlevelEvent(100);
         triggerHandler.receive(event);
 
-        ArgumentCaptor<Map> captor = ArgumentCaptor.forClass(Map.class);
         verify(callbackMock).triggered(eq(triggerMock), captor.capture());
 
-        Map<String, Object> configuration = (Map<String, Object>) captor.getValue();
+        Map<String, Object> configuration = captor.getValue();
         assertThat(configuration.get(SystemTriggerHandler.OUT_STARTLEVEL), is(CFG_STARTLEVEL));
-    }
-
-    @Test
-    public void testDoesNotTriggerAfterInitialTrigger() {
-        when(startLevelServiceMock.getStartLevel()).thenReturn(100);
-
-        SystemTriggerHandler triggerHandler = new SystemTriggerHandler(triggerMock, bundleContextMock,
-                startLevelServiceMock);
-        triggerHandler.setCallback(callbackMock);
-
-        ArgumentCaptor<Map> captor = ArgumentCaptor.forClass(Map.class);
-        verify(callbackMock).triggered(eq(triggerMock), captor.capture());
-
-        Map<String, Object> configuration = (Map<String, Object>) captor.getValue();
-        assertThat(configuration.get(SystemTriggerHandler.OUT_STARTLEVEL), is(CFG_STARTLEVEL));
-
-        Event event = SystemEventFactory.createStartlevelEvent(100);
-        triggerHandler.receive(event);
-
-        verifyNoMoreInteractions(callbackMock);
     }
 
     @Test
     public void testDoesNotTriggerAfterEventTrigger() {
         when(startLevelServiceMock.getStartLevel()).thenReturn(0);
 
-        SystemTriggerHandler triggerHandler = new SystemTriggerHandler(triggerMock, bundleContextMock,
-                startLevelServiceMock);
+        SystemTriggerHandler triggerHandler = new SystemTriggerHandler(triggerMock, bundleContextMock);
         triggerHandler.setCallback(callbackMock);
 
         Event event = SystemEventFactory.createStartlevelEvent(100);
         triggerHandler.receive(event);
 
-        ArgumentCaptor<Map> captor = ArgumentCaptor.forClass(Map.class);
         verify(callbackMock).triggered(eq(triggerMock), captor.capture());
 
-        Map<String, Object> configuration = (Map<String, Object>) captor.getValue();
+        Map<String, Object> configuration = captor.getValue();
         assertThat(configuration.get(SystemTriggerHandler.OUT_STARTLEVEL), is(CFG_STARTLEVEL));
 
         triggerHandler.receive(event);

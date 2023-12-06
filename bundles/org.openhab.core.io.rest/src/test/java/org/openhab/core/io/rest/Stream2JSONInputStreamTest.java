@@ -18,7 +18,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -40,7 +39,7 @@ public class Stream2JSONInputStreamTest {
 
     @Test
     public void shouldReturnForEmptyStream() throws Exception {
-        List<Object> emptyList = Collections.emptyList();
+        List<Object> emptyList = List.of();
         Stream2JSONInputStream collection2InputStream = new Stream2JSONInputStream(emptyList.stream());
 
         assertThat(inputStreamToString(collection2InputStream), is(GSON.toJson(emptyList)));

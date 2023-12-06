@@ -17,7 +17,6 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -82,7 +81,7 @@ public class TransformationRegistryImpl extends AbstractRegistry<Transformation,
 
     @Override
     public Collection<Transformation> getTransformations(Collection<String> types) {
-        return getAll().stream().filter(e -> types.contains(e.getType())).collect(Collectors.toList());
+        return getAll().stream().filter(e -> types.contains(e.getType())).toList();
     }
 
     @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)

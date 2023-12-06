@@ -67,6 +67,7 @@ import org.openhab.core.thing.binding.BridgeHandler;
 import org.openhab.core.thing.binding.ThingHandler;
 import org.openhab.core.thing.binding.ThingHandlerCallback;
 import org.openhab.core.thing.binding.ThingHandlerFactory;
+import org.openhab.core.thing.binding.builder.BridgeBuilder;
 import org.openhab.core.thing.binding.builder.ThingBuilder;
 import org.openhab.core.thing.binding.builder.ThingStatusInfoBuilder;
 import org.openhab.core.thing.events.ThingEventFactory;
@@ -238,7 +239,7 @@ public class ThingManagerImpl implements ReadyTracker, ThingManager, ThingTracke
             throw new IllegalArgumentException(MessageFormat.format(
                     "Cannot update thing {0} because it is not known to the registry", thing.getUID().getAsString()));
         }
-        final Provider<Thing> provider = thingRegistry.getProvider(thing);
+        final Provider<Thing> provider = thingRegistry.getProvider(oldThing);
         if (provider == null) {
             throw new IllegalArgumentException(MessageFormat.format(
                     "Provider for thing {0} cannot be determined because it is not known to the registry",
@@ -1089,7 +1090,8 @@ public class ThingManagerImpl implements ReadyTracker, ThingManager, ThingTracke
         }
 
         // create a thing builder and apply the update instructions
-        ThingBuilder thingBuilder = ThingBuilder.create(thing);
+        ThingBuilder thingBuilder = thing instanceof Bridge ? BridgeBuilder.create((Bridge) thing)
+                : ThingBuilder.create(thing);
         instructions.forEach(instruction -> instruction.perform(thing, thingBuilder));
         int newThingTypeVersion = instructions.get(instructions.size() - 1).getThingTypeVersion();
         thingBuilder.withProperty(PROPERTY_THING_TYPE_VERSION, String.valueOf(newThingTypeVersion));

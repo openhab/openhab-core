@@ -247,8 +247,7 @@ public class GroupItem extends GenericItem implements StateChangeListener, Metad
                     acceptedDataTypes.retainAll(item.getAcceptedDataTypes());
                 }
             }
-            return acceptedDataTypes == null ? Collections.unmodifiableList(Collections.EMPTY_LIST)
-                    : Collections.unmodifiableList(acceptedDataTypes);
+            return acceptedDataTypes == null ? List.of() : Collections.unmodifiableList(acceptedDataTypes);
         }
     }
 
@@ -274,8 +273,7 @@ public class GroupItem extends GenericItem implements StateChangeListener, Metad
                     acceptedCommandTypes.retainAll(item.getAcceptedCommandTypes());
                 }
             }
-            return acceptedCommandTypes == null ? Collections.unmodifiableList(Collections.EMPTY_LIST)
-                    : Collections.unmodifiableList(acceptedCommandTypes);
+            return acceptedCommandTypes == null ? List.of() : Collections.unmodifiableList(acceptedCommandTypes);
         }
     }
 

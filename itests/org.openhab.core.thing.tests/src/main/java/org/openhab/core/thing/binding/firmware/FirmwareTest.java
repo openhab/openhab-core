@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -308,9 +307,7 @@ public class FirmwareTest extends JavaOSGiTest {
         URL onlineChangelog = new URL("https://secure.com/changelog");
         String prerequisiteVersion = "0.1";
         String vendor = "vendor";
-        Map<String, String> properties = new HashMap<>();
-        properties.put("prop1", "val1");
-        properties.put("prop2", "val2");
+        Map<String, String> properties = Map.of("prop1", "val1", "prop2", "val2");
         InputStream openStream = bundleContext.getBundle().getResource(FILE_NAME).openStream();
 
         Firmware firmware1 = FirmwareBuilder.create(THING_TYPE_UID, "1").withInputStream(openStream)
@@ -336,9 +333,7 @@ public class FirmwareTest extends JavaOSGiTest {
         URL onlineChangelog = new URL("https://secure.com/changelog");
         String prerequisiteVersion = "0.1";
         String vendor = "vendor";
-        Map<String, String> properties = new HashMap<>();
-        properties.put("prop1", "val1");
-        properties.put("prop2", "val2");
+        Map<String, String> properties = Map.of("prop1", "val1", "prop2", "val2");
         InputStream openStream = bundleContext.getBundle().getResource(FILE_NAME).openStream();
 
         Firmware firmware1 = FirmwareBuilder.create(THING_TYPE_UID, "1").withInputStream(openStream)
@@ -378,8 +373,7 @@ public class FirmwareTest extends JavaOSGiTest {
     }
 
     private Thing thingWithFirmwareVersion(String version) {
-        Map<String, String> properties = new HashMap<>();
-        properties.put(Thing.PROPERTY_FIRMWARE_VERSION, version);
+        Map<String, String> properties = Map.of(Thing.PROPERTY_FIRMWARE_VERSION, version);
         return ThingBuilder.create(THING_TYPE_UID, "testThing").withProperties(properties).build();
     }
 }

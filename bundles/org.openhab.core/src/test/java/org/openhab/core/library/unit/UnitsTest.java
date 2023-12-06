@@ -136,8 +136,9 @@ public class UnitsTest {
     public void testKelvin2Fahrenheit() {
         Quantity<Temperature> kelvin = Quantities.getQuantity(BigDecimal.ZERO, Units.KELVIN);
 
-        assertThat(kelvin.to(ImperialUnits.FAHRENHEIT),
-                is(Quantities.getQuantity(new BigDecimal("-459.67"), ImperialUnits.FAHRENHEIT)));
+        assertThat(kelvin.to(ImperialUnits.FAHRENHEIT).getValue().doubleValue(), is(closeTo(
+                Quantities.getQuantity(new BigDecimal("-459.67"), ImperialUnits.FAHRENHEIT).getValue().doubleValue(),
+                0.01)));
     }
 
     @Test
@@ -399,6 +400,20 @@ public class UnitsTest {
         QuantityType<?> oneHertz = QuantityType.valueOf("60 rpm");
         QuantityType<?> converted = oneHertz.toUnit("Hz");
         assertThat(converted.doubleValue(), is(closeTo(1.00, DEFAULT_ERROR)));
+    }
+
+    @Test
+    public void testCalorie() {
+        QuantityType<?> oneCalorie = QuantityType.valueOf("1 cal");
+        QuantityType<?> converted = oneCalorie.toUnit("J");
+        assertThat(converted.doubleValue(), is(closeTo(4.184, DEFAULT_ERROR)));
+    }
+
+    @Test
+    public void testKiloCalorie() {
+        QuantityType<?> oneKiloCalorie = QuantityType.valueOf("1 kcal");
+        QuantityType<?> converted = oneKiloCalorie.toUnit("J");
+        assertThat(converted.doubleValue(), is(closeTo(4184.0, DEFAULT_ERROR)));
     }
 
     private static class QuantityEquals extends IsEqual<Quantity<?>> {

@@ -34,7 +34,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -86,7 +85,7 @@ public class NetUtil implements NetworkAddressService {
     // must be initialized before activate due to OSGi reference
     private Set<NetworkAddressChangeListener> networkAddressChangeListeners = ConcurrentHashMap.newKeySet();
 
-    private Collection<CidrAddress> lastKnownInterfaceAddresses = Collections.emptyList();
+    private Collection<CidrAddress> lastKnownInterfaceAddresses = List.of();
     private final ScheduledExecutorService scheduledExecutorService = ThreadPoolManager
             .getScheduledPool(ThreadPoolManager.THREAD_POOL_NAME_COMMON);
     private @Nullable ScheduledFuture<?> networkInterfacePollFuture = null;
@@ -100,13 +99,13 @@ public class NetUtil implements NetworkAddressService {
 
     @Activate
     protected void activate(Map<String, Object> props) {
-        lastKnownInterfaceAddresses = Collections.emptyList();
+        lastKnownInterfaceAddresses = List.of();
         modified(props);
     }
 
     @Deactivate
     protected void deactivate() {
-        lastKnownInterfaceAddresses = Collections.emptyList();
+        lastKnownInterfaceAddresses = List.of();
         networkAddressChangeListeners = ConcurrentHashMap.newKeySet();
 
         if (networkInterfacePollFuture != null) {
@@ -319,7 +318,7 @@ public class NetUtil implements NetworkAddressService {
      *
      * Example to get a list of only IPv4 addresses in string representation:
      * List<String> l = getAllInterfaceAddresses().stream().filter(a->a.getAddress() instanceof
-     * Inet4Address).map(a->a.getAddress().getHostAddress()).collect(Collectors.toList());
+     * Inet4Address).map(a->a.getAddress().getHostAddress()).toList();
      *
      * down, or loopback interfaces are skipped.
      *
@@ -531,19 +530,20 @@ public class NetUtil implements NetworkAddressService {
 
         // Look for added addresses to notify
         List<CidrAddress> added = newInterfaceAddresses.stream()
-                .filter(newInterfaceAddr -> !lastKnownInterfaceAddresses.contains(newInterfaceAddr))
-                .collect(Collectors.toList());
+                .filter(newInterfaceAddr -> !lastKnownInterfaceAddresses.contains(newInterfaceAddr)).toList();
 
         // Look for removed addresses to notify
         List<CidrAddress> removed = lastKnownInterfaceAddresses.stream()
-                .filter(lastKnownInterfaceAddr -> !newInterfaceAddresses.contains(lastKnownInterfaceAddr))
-                .collect(Collectors.toList());
+                .filter(lastKnownInterfaceAddr -> !newInterfaceAddresses.contains(lastKnownInterfaceAddr)).toList();
 
         lastKnownInterfaceAddresses = newInterfaceAddresses;
 
         if (!added.isEmpty() || !removed.isEmpty()) {
-            LOGGER.debug("added {} network interfaces: {}", added.size(), Arrays.deepToString(added.toArray()));
-            LOGGER.debug("removed {} network interfaces: {}", removed.size(), Arrays.deepToString(removed.toArray()));
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("added {} network interfaces: {}", added.size(), Arrays.deepToString(added.toArray()));
+                LOGGER.debug("removed {} network interfaces: {}", removed.size(),
+                        Arrays.deepToString(removed.toArray()));
+            }
 
             notifyListeners(added, removed);
         }

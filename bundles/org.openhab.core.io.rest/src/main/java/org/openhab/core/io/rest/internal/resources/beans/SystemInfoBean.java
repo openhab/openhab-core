@@ -12,6 +12,8 @@
  */
 package org.openhab.core.io.rest.internal.resources.beans;
 
+import java.lang.management.ManagementFactory;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.OpenHAB;
@@ -39,6 +41,7 @@ public class SystemInfoBean {
         public final int availableProcessors = Runtime.getRuntime().availableProcessors();
         public final long freeMemory = Runtime.getRuntime().freeMemory();
         public final long totalMemory = Runtime.getRuntime().totalMemory();
+        public final long uptime = ManagementFactory.getRuntimeMXBean().getUptime() / 1000;
         public final int startLevel;
 
         public SystemInfo(int startLevel) {

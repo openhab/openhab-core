@@ -80,15 +80,15 @@ public class ThingType extends AbstractDescriptionType {
         this.category = category;
         this.listed = listed;
         this.representationProperty = representationProperty;
-        this.supportedBridgeTypeUIDs = supportedBridgeTypeUIDs == null ? Collections.emptyList()
+        this.supportedBridgeTypeUIDs = supportedBridgeTypeUIDs == null ? List.of()
                 : Collections.unmodifiableList(supportedBridgeTypeUIDs);
-        this.channelDefinitions = channelDefinitions == null ? Collections.emptyList()
+        this.channelDefinitions = channelDefinitions == null ? List.of()
                 : Collections.unmodifiableList(channelDefinitions);
-        this.channelGroupDefinitions = channelGroupDefinitions == null ? Collections.emptyList()
+        this.channelGroupDefinitions = channelGroupDefinitions == null ? List.of()
                 : Collections.unmodifiableList(channelGroupDefinitions);
-        this.extensibleChannelTypeIds = extensibleChannelTypeIds == null ? Collections.emptyList()
+        this.extensibleChannelTypeIds = extensibleChannelTypeIds == null ? List.of()
                 : Collections.unmodifiableList(extensibleChannelTypeIds);
-        this.properties = properties == null ? Collections.emptyMap() : Collections.unmodifiableMap(properties);
+        this.properties = properties == null ? Map.of() : Collections.unmodifiableMap(properties);
     }
 
     /**

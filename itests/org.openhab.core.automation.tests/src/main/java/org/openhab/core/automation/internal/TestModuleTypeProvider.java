@@ -12,15 +12,11 @@
  */
 package org.openhab.core.automation.internal;
 
-import static java.util.stream.Collectors.toSet;
-
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -94,7 +90,7 @@ public class TestModuleTypeProvider implements ModuleTypeProvider {
 
     @Override
     public Collection<ModuleType> getAll() {
-        return Stream.of(createTriggerType(), createConditionType(), createActionType()).collect(toSet());
+        return Set.of(createTriggerType(), createConditionType(), createActionType());
     }
 
     @Override
@@ -102,12 +98,12 @@ public class TestModuleTypeProvider implements ModuleTypeProvider {
     }
 
     @Override
-    public <T extends ModuleType> @Nullable T getModuleType(String UID, @Nullable Locale locale) {
+    public <T extends ModuleType> @Nullable T getModuleType(String uid, @Nullable Locale locale) {
         return null;
     }
 
     @Override
     public <T extends ModuleType> Collection<T> getModuleTypes(@Nullable Locale locale) {
-        return Collections.emptyList();
+        return List.of();
     }
 }

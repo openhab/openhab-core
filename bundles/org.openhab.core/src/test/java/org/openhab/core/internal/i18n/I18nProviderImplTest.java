@@ -176,8 +176,7 @@ public class I18nProviderImplTest {
     @MethodSource("getAllDimensions")
     @SuppressWarnings("unchecked")
     public <T extends Quantity<T>> void assertThatUnitProviderIsComplete(String dimensionName) {
-        Class<? extends Quantity<?>> dimension = UnitUtils.parseDimension(dimensionName);
-        assertThat(dimension, is(notNullValue()));
+        Class<? extends Quantity<?>> dimension = Objects.requireNonNull(UnitUtils.parseDimension(dimensionName));
 
         Unit<?> defaultUnit = i18nProviderImpl.getUnit((Class<T>) dimension);
         assertThat(dimensionName + " has no default unit", defaultUnit, notNullValue());

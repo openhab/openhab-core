@@ -12,9 +12,12 @@
  */
 package org.openhab.core.thing.binding.generic;
 
+import java.util.function.Consumer;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.types.Command;
+import org.openhab.core.types.State;
 
 /**
  * The {@link ChannelHandler} defines the interface for converting received {@link ChannelHandlerContent}
@@ -40,4 +43,11 @@ public interface ChannelHandler {
      * @param command
      */
     void send(Command command);
+
+    @FunctionalInterface
+    public interface Factory {
+        ChannelHandler create(Consumer<State> updateState, Consumer<Command> postCommand,
+                @Nullable Consumer<String> sendHttpValue, ChannelTransformation stateTransformations,
+                ChannelTransformation commandTransformations, ChannelValueConverterConfig channelConfig);
+    }
 }

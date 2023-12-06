@@ -12,7 +12,6 @@
  */
 package org.openhab.core.addon;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -38,6 +37,7 @@ public class AddonInfo implements Identifiable<String> {
 
     private final String id;
     private final String type;
+    private final String uid;
     private final String name;
     private final String description;
     private final @Nullable String connection;
@@ -45,10 +45,12 @@ public class AddonInfo implements Identifiable<String> {
     private final @Nullable String configDescriptionURI;
     private final String serviceId;
     private @Nullable String sourceBundle;
+    private @Nullable List<AddonDiscoveryMethod> discoveryMethods;
 
-    private AddonInfo(String id, String type, String name, String description, @Nullable String connection,
-            List<String> countries, @Nullable String configDescriptionURI, @Nullable String serviceId,
-            @Nullable String sourceBundle) throws IllegalArgumentException {
+    private AddonInfo(String id, String type, @Nullable String uid, String name, String description,
+            @Nullable String connection, List<String> countries, @Nullable String configDescriptionURI,
+            @Nullable String serviceId, @Nullable String sourceBundle,
+            @Nullable List<AddonDiscoveryMethod> discoveryMethods) throws IllegalArgumentException {
         // mandatory fields
         if (id.isBlank()) {
             throw new IllegalArgumentException("The ID must neither be null nor empty!");
@@ -65,6 +67,7 @@ public class AddonInfo implements Identifiable<String> {
         }
         this.id = id;
         this.type = type;
+        this.uid = uid != null ? uid : type + Addon.ADDON_SEPARATOR + id;
         this.name = name;
         this.description = description;
 
@@ -74,6 +77,7 @@ public class AddonInfo implements Identifiable<String> {
         this.configDescriptionURI = configDescriptionURI;
         this.serviceId = Objects.requireNonNullElse(serviceId, type + "." + id);
         this.sourceBundle = sourceBundle;
+        this.discoveryMethods = discoveryMethods;
     }
 
     /**
@@ -83,7 +87,7 @@ public class AddonInfo implements Identifiable<String> {
      */
     @Override
     public String getUID() {
-        return type + Addon.ADDON_SEPARATOR + id;
+        return uid;
     }
 
     /**
@@ -135,8 +139,17 @@ public class AddonInfo implements Identifiable<String> {
         return sourceBundle;
     }
 
+    public @Nullable String getConnection() {
+        return connection;
+    }
+
     public List<String> getCountries() {
         return countries;
+    }
+
+    public List<AddonDiscoveryMethod> getDiscoveryMethods() {
+        List<AddonDiscoveryMethod> discoveryMethods = this.discoveryMethods;
+        return discoveryMethods != null ? discoveryMethods : List.of();
     }
 
     public static Builder builder(String id, String type) {
@@ -151,6 +164,7 @@ public class AddonInfo implements Identifiable<String> {
 
         private final String id;
         private final String type;
+        private @Nullable String uid;
         private String name = "";
         private String description = "";
         private @Nullable String connection;
@@ -158,6 +172,7 @@ public class AddonInfo implements Identifiable<String> {
         private @Nullable String configDescriptionURI = "";
         private @Nullable String serviceId;
         private @Nullable String sourceBundle;
+        private @Nullable List<AddonDiscoveryMethod> discoveryMethods;
 
         private Builder(String id, String type) {
             this.id = id;
@@ -167,6 +182,7 @@ public class AddonInfo implements Identifiable<String> {
         private Builder(AddonInfo addonInfo) {
             this.id = addonInfo.id;
             this.type = addonInfo.type;
+            this.uid = addonInfo.uid;
             this.name = addonInfo.name;
             this.description = addonInfo.description;
             this.connection = addonInfo.connection;
@@ -174,6 +190,12 @@ public class AddonInfo implements Identifiable<String> {
             this.configDescriptionURI = addonInfo.configDescriptionURI;
             this.serviceId = addonInfo.serviceId;
             this.sourceBundle = addonInfo.sourceBundle;
+            this.discoveryMethods = addonInfo.discoveryMethods;
+        }
+
+        public Builder withUID(@Nullable String uid) {
+            this.uid = uid;
+            return this;
         }
 
         public Builder withName(String name) {
@@ -192,7 +214,7 @@ public class AddonInfo implements Identifiable<String> {
         }
 
         public Builder withCountries(@Nullable String countries) {
-            this.countries = Arrays.asList(Objects.requireNonNullElse(countries, "").split(","));
+            this.countries = countries == null || countries.isBlank() ? List.of() : List.of(countries.split(","));
             return this;
         }
 
@@ -216,6 +238,11 @@ public class AddonInfo implements Identifiable<String> {
             return this;
         }
 
+        public Builder withDiscoveryMethods(@Nullable List<AddonDiscoveryMethod> discoveryMethods) {
+            this.discoveryMethods = discoveryMethods;
+            return this;
+        }
+
         /**
          * Build an {@link AddonInfo} from this builder
          *
@@ -223,8 +250,8 @@ public class AddonInfo implements Identifiable<String> {
          * @throws IllegalArgumentException if any of the information in this builder is invalid
          */
         public AddonInfo build() throws IllegalArgumentException {
-            return new AddonInfo(id, type, name, description, connection, countries, configDescriptionURI, serviceId,
-                    sourceBundle);
+            return new AddonInfo(id, type, uid, name, description, connection, countries, configDescriptionURI,
+                    serviceId, sourceBundle, discoveryMethods);
         }
     }
 }

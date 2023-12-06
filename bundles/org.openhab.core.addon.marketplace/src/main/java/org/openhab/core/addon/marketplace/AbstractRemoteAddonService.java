@@ -23,7 +23,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -117,7 +116,7 @@ public abstract class AbstractRemoteAddonService implements AddonService {
         }
 
         // create lookup list to make sure installed addons take precedence
-        List<String> installedAddons = addons.stream().map(Addon::getUid).collect(Collectors.toList());
+        List<String> installedAddons = addons.stream().map(Addon::getUid).toList();
 
         if (remoteEnabled()) {
             List<Addon> remoteAddons = Objects.requireNonNullElse(cachedRemoteAddons.getValue(), List.of());
@@ -137,7 +136,7 @@ public abstract class AbstractRemoteAddonService implements AddonService {
     }
 
     /**
-     * Add a {@link MarketplaceAddonHandler) to this service
+     * Add a {@link MarketplaceAddonHandler} to this service
      *
      * This needs to be implemented by the addon-services because the handlers are references to OSGi services and
      * the @Reference annotation is not inherited.
@@ -148,7 +147,7 @@ public abstract class AbstractRemoteAddonService implements AddonService {
     protected abstract void addAddonHandler(MarketplaceAddonHandler handler);
 
     /**
-     * Remove a {@link MarketplaceAddonHandler) from this service
+     * Remove a {@link MarketplaceAddonHandler} from this service
      *
      * This needs to be implemented by the addon-services because the handlers are references to OSGi services and
      * unbind methods can't be inherited.

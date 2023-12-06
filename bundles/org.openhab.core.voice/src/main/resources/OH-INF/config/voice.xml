@@ -59,6 +59,12 @@
 			<description>The limit size of the TTS cache (in kB).</description>
 			<default>10240</default>
 		</parameter>
+		<parameter name="maxTextLengthCacheTTS" type="integer">
+			<label>TTS Cache Maximum Text Length</label>
+			<description>The maximum length of texts handled by the TTS cache (in character). If exceeded, will pass the text to
+				the TTS without storing it. 0 for no limit.</description>
+			<default>150</default>
+		</parameter>
 	</config-description>
 
 </config-description:config-descriptions>

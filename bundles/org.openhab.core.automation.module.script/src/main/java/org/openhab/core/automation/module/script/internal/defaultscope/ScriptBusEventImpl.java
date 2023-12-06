@@ -12,6 +12,7 @@
  */
 package org.openhab.core.automation.module.script.internal.defaultscope;
 
+import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -27,6 +28,7 @@ import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.events.ItemEventFactory;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
+import org.openhab.core.types.TimeSeries;
 import org.openhab.core.types.TypeParser;
 import org.slf4j.LoggerFactory;
 
@@ -149,6 +151,31 @@ public class ScriptBusEventImpl implements ScriptBusEvent {
         EventPublisher eventPublisher = this.eventPublisher;
         if (eventPublisher != null && item != null && state != null) {
             eventPublisher.post(ItemEventFactory.createStateEvent(item.getName(), state));
+        }
+        return null;
+    }
+
+    @Override
+    public @Nullable Object sendTimeSeries(@Nullable Item item, @Nullable TimeSeries timeSeries) {
+        EventPublisher eventPublisher1 = this.eventPublisher;
+        if (eventPublisher1 != null && item != null && timeSeries != null) {
+            eventPublisher1.post(ItemEventFactory.createTimeSeriesEvent(item.getName(), timeSeries, null));
+        }
+        return null;
+    }
+
+    @Override
+    public @Nullable Object sendTimeSeries(@Nullable String itemName, @Nullable Map<ZonedDateTime, State> values,
+            @Nullable String policy) {
+        EventPublisher eventPublisher1 = this.eventPublisher;
+        if (eventPublisher1 != null && itemName != null && values != null && policy != null) {
+            try {
+                TimeSeries timeSeries = new TimeSeries(TimeSeries.Policy.valueOf(policy));
+                values.forEach((key, value) -> timeSeries.add(key.toInstant(), value));
+                eventPublisher1.post(ItemEventFactory.createTimeSeriesEvent(itemName, timeSeries, null));
+            } catch (IllegalArgumentException e) {
+                LoggerFactory.getLogger(ScriptBusEventImpl.class).warn("Policy '{}' does not exist.", policy);
+            }
         }
         return null;
     }

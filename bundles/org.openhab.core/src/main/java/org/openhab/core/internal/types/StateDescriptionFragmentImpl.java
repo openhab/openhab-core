@@ -72,8 +72,7 @@ public class StateDescriptionFragmentImpl implements StateDescriptionFragment {
         this.step = step;
         this.pattern = pattern;
         this.readOnly = readOnly;
-        this.options = options == null || options.isEmpty() ? Collections.emptyList()
-                : Collections.unmodifiableList(options);
+        this.options = options == null || options.isEmpty() ? List.of() : Collections.unmodifiableList(options);
     }
 
     /**

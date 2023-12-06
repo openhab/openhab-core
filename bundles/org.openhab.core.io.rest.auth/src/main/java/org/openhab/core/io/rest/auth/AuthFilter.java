@@ -53,7 +53,10 @@ import org.openhab.core.config.core.ConfigParser;
 import org.openhab.core.config.core.ConfigurableService;
 import org.openhab.core.io.rest.JSONResponse;
 import org.openhab.core.io.rest.RESTConstants;
-import org.openhab.core.io.rest.auth.internal.*;
+import org.openhab.core.io.rest.auth.internal.ExpiringUserSecurityContextCache;
+import org.openhab.core.io.rest.auth.internal.JwtHelper;
+import org.openhab.core.io.rest.auth.internal.JwtSecurityContext;
+import org.openhab.core.io.rest.auth.internal.UserSecurityContext;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -296,7 +299,7 @@ public class AuthFilter implements ContainerRequestFilter {
                         return authenticateBasicAuth(authValue);
                 }
             }
-        } else if (isImplicitUserRole(servletRequest)) {
+        } else if (isImplicitUserRole(request)) {
             return new AnonymousUserSecurityContext();
         }
         return null;
@@ -332,7 +335,7 @@ public class AuthFilter implements ContainerRequestFilter {
     private String getClientIp(HttpServletRequest request) throws UnknownHostException {
         String ipForwarded = Objects.requireNonNullElse(request.getHeader("x-forwarded-for"), "");
         String clientIp = ipForwarded.split(",")[0];
-        return clientIp.isBlank() ? servletRequest.getRemoteAddr() : clientIp;
+        return clientIp.isBlank() ? request.getRemoteAddr() : clientIp;
     }
 
     private static class CIDR {

@@ -102,8 +102,8 @@ public class AnnotatedThingActionModuleTypeProvider extends BaseModuleHandlerFac
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T extends ModuleType> T getModuleType(String UID, @Nullable Locale locale) {
-        return (T) localizeModuleType(UID, locale);
+    public <T extends ModuleType> T getModuleType(String uid, @Nullable Locale locale) {
+        return (T) localizeModuleType(uid, locale);
     }
 
     @SuppressWarnings("unchecked")

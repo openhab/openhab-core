@@ -18,7 +18,6 @@ import java.util.Formatter;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -85,7 +84,7 @@ public class PointType implements ComplexType, Command, State {
 
     public PointType(String value) {
         if (!value.isEmpty()) {
-            List<String> elements = Arrays.stream(value.split(",")).map(String::trim).collect(Collectors.toList());
+            List<String> elements = Arrays.stream(value.split(",")).map(String::trim).toList();
             if (elements.size() >= 2) {
                 canonicalize(new DecimalType(elements.get(0)), new DecimalType(elements.get(1)));
                 if (elements.size() == 3) {

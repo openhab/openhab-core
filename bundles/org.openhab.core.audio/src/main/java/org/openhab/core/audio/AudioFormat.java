@@ -44,7 +44,7 @@ public class AudioFormat {
             null, null);
 
     /**
-     * {@link AudioCodec} encoded data without any container header or footer,
+     * {@code AudioCodec} encoded data without any container header or footer,
      * e.g. MP3 is a non-container format
      */
     public static final String CONTAINER_NONE = "NONE";

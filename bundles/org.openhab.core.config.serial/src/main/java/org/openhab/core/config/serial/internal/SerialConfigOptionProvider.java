@@ -17,7 +17,6 @@ import java.util.Collection;
 import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -87,7 +86,7 @@ public class SerialConfigOptionProvider implements ConfigOptionProvider, UsbSeri
                             previouslyDiscovered.stream().map(UsbSerialDeviceInformation::getSerialPort))
                     .distinct() //
                     .map(serialPortName -> new ParameterOption(serialPortName, serialPortName)) //
-                    .collect(Collectors.toList());
+                    .toList();
         }
         return null;
     }

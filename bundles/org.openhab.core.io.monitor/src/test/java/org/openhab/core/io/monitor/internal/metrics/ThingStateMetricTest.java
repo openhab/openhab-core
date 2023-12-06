@@ -16,9 +16,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
@@ -36,7 +35,6 @@ import org.openhab.core.thing.internal.ThingImpl;
 import org.osgi.framework.BundleContext;
 
 import io.micrometer.core.instrument.Meter;
-import io.micrometer.core.instrument.Tag;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 
 /**
@@ -63,11 +61,10 @@ public class ThingStateMetricTest {
 
         SimpleMeterRegistry meterRegistry = new SimpleMeterRegistry();
 
-        ThingStateMetric thingStateMetric = new ThingStateMetric(mock(BundleContext.class), thingRegistry,
-                new HashSet<Tag>());
+        ThingStateMetric thingStateMetric = new ThingStateMetric(mock(BundleContext.class), thingRegistry, Set.of());
 
         // Only one meter registered at bind time
-        doReturn(Collections.singleton(thing)).when(thingRegistry).getAll();
+        doReturn(List.of(thing)).when(thingRegistry).getAll();
         thingStateMetric.bindTo(meterRegistry);
 
         List<Meter> meters = meterRegistry.getMeters();

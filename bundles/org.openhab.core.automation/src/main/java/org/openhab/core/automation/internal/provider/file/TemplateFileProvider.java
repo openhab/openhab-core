@@ -13,8 +13,8 @@
 package org.openhab.core.automation.internal.provider.file;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Locale;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -47,15 +47,15 @@ public abstract class TemplateFileProvider extends AbstractFileProvider<RuleTemp
     }
 
     @Override
-    public @Nullable RuleTemplate getTemplate(String UID, @Nullable Locale locale) {
-        return providedObjectsHolder.get(UID);
+    public @Nullable RuleTemplate getTemplate(String uid, @Nullable Locale locale) {
+        return providedObjectsHolder.get(uid);
     }
 
     @Override
     public Collection<RuleTemplate> getTemplates(@Nullable Locale locale) {
         Collection<RuleTemplate> values = providedObjectsHolder.values();
         if (values.isEmpty()) {
-            return Collections.emptyList();
+            return List.of();
         }
         return new LinkedList<>(values);
     }

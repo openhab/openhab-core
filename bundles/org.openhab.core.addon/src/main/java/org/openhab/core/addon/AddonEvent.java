@@ -17,7 +17,8 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.events.AbstractEvent;
 
 /**
- * This is an {@link Event} that is sent on add-on operations, such as installing and uninstalling.
+ * This is an {@link org.openhab.core.events.Event} that is sent on add-on operations, such as installing and
+ * uninstalling.
  *
  * @author Kai Kreuzer - Initial contribution
  */

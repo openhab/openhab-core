@@ -105,7 +105,7 @@ public interface OAuthClientService extends AutoCloseable {
      *            the state will be assigned to the requestParams in this case.
      * @return An authorization URL during the Authorization Code Grant with http request parameters filled in.
      *         e.g Produces a URL string like this:
-     *         https://oauth.provider?response_type=code&client_id=myClientId&redirect_uri=redirectURI&scope=myScope&state=mySecureRandomState
+     *         {@code https://oauth.provider?response_type=code&client_id=myClientId&redirect_uri=redirectURI&scope=myScope&state=mySecureRandomState}
      * @throws OAuthException if authorizationUrl or clientId were not previously provided (null)
      */
     String getAuthorizationUrl(@Nullable String redirectURI, @Nullable String scope, @Nullable String state)
@@ -122,8 +122,12 @@ public interface OAuthClientService extends AutoCloseable {
      *            returned by the oauth provider. It is encoded in application/x-www-form-urlencoded format
      *            as stated in RFC 6749 section 4.1.2.
      *            To quote from the RFC:
+     * 
+     *            <pre>{@code
      *            HTTP/1.1 302 Found
      *            Location: https://client.example.com/cb?code=SplxlOBeZQQYbYS6WxSbIA&state=xyz
+     *            }</pre>
+     * 
      * @return AuthorizationCode This authorizationCode can be used in the call {#getOAuthTokenByAuthCode(String)}
      * @throws OAuthException If the state from redirectURLwithParams does not exactly match the expectedState, or
      *             exceptions arise while parsing redirectURLwithParams.
@@ -289,6 +293,14 @@ public interface OAuthClientService extends AutoCloseable {
      * @param listener the listener to remove
      */
     boolean removeAccessTokenRefreshListener(AccessTokenRefreshListener listener);
+
+    /**
+     * Adds extra fields to include in the form data when doing the token request
+     *
+     * @param key The name of the key to add to the auth form
+     * @param value The value of the new auth form param
+     */
+    public void addExtraAuthField(String key, String value);
 
     /**
      * Adds a custom GsonBuilder to be used with the OAuth service instance.

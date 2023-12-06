@@ -90,6 +90,12 @@ public class DecimalTypeTest {
         DecimalType.valueOf(value);
     }
 
+    @Test
+    public void testLowerCaseExponents() {
+        assertEquals(DecimalType.valueOf("1e3"), DecimalType.valueOf("1E3"));
+        assertEquals(DecimalType.valueOf("2.5e-3"), DecimalType.valueOf("2.5E-3"));
+    }
+
     @ParameterizedTest
     @MethodSource("locales")
     public void testLocalizedStringConstruction(Locale defaultLocale) {

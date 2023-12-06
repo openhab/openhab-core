@@ -53,7 +53,7 @@ public class PersistenceEqualsFilterTest {
 
     @ParameterizedTest
     @MethodSource("argumentProvider")
-    public void equalsFilterTest(State state, Collection<String> values,  boolean expected) {
+    public void equalsFilterTest(State state, Collection<String> values, boolean expected) {
         when(item.getState()).thenReturn(state);
 
         PersistenceEqualsFilter filter = new PersistenceEqualsFilter("filter", values, false);
@@ -62,7 +62,7 @@ public class PersistenceEqualsFilterTest {
 
     @ParameterizedTest
     @MethodSource("argumentProvider")
-    public void notEqualsFilterTest(State state, Collection<String> values,  boolean expected) {
+    public void notEqualsFilterTest(State state, Collection<String> values, boolean expected) {
         when(item.getState()).thenReturn(state);
 
         PersistenceEqualsFilter filter = new PersistenceEqualsFilter("filter", values, true);

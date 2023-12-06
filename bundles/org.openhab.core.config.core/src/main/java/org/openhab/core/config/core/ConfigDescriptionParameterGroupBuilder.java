@@ -93,7 +93,6 @@ public class ConfigDescriptionParameterGroupBuilder {
      *
      * @return the desired result
      */
-    @SuppressWarnings("deprecation")
     public ConfigDescriptionParameterGroup build() throws IllegalArgumentException {
         return new ConfigDescriptionParameterGroup(name, context, advanced != null ? advanced : false, label,
                 description);

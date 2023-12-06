@@ -18,7 +18,6 @@ import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -68,7 +67,7 @@ public class AnnotationActionModuleTypeHelper {
             ActionScope scope = clazz.getAnnotation(ActionScope.class);
             return parseAnnotations(scope.name(), actionProvider);
         }
-        return Collections.emptyList();
+        return List.of();
     }
 
     public Collection<ModuleInformation> parseAnnotations(String name, Object actionProvider) {
@@ -112,8 +111,7 @@ public class AnnotationActionModuleTypeHelper {
             Annotation[] paramAnnotations = annotations[i];
             if (paramAnnotations.length == 0) {
                 // we do not have an annotation with a name for this parameter
-                inputs.add(new Input("p" + i, param.getType().getCanonicalName(), "", "", Collections.emptySet(), false,
-                        "", ""));
+                inputs.add(new Input("p" + i, param.getType().getCanonicalName(), "", "", Set.of(), false, "", ""));
             } else if (paramAnnotations.length == 1) {
                 Annotation a = paramAnnotations[0];
                 if (a instanceof ActionInput inp) {
@@ -149,8 +147,8 @@ public class AnnotationActionModuleTypeHelper {
         return outputs;
     }
 
-    public @Nullable ActionType buildModuleType(String UID, Map<String, Set<ModuleInformation>> moduleInformation) {
-        Set<ModuleInformation> mis = moduleInformation.get(UID);
+    public @Nullable ActionType buildModuleType(String uid, Map<String, Set<ModuleInformation>> moduleInformation) {
+        Set<ModuleInformation> mis = moduleInformation.get(uid);
         List<ConfigDescriptionParameter> configDescriptions = new ArrayList<>();
 
         if (mis != null && !mis.isEmpty()) {
@@ -160,7 +158,7 @@ public class AnnotationActionModuleTypeHelper {
             if (mi.getConfigName() != null && mi.getThingUID() != null) {
                 logger.error(
                         "ModuleType with UID {} has thingUID ({}) and multi-service ({}) property set, ignoring it.",
-                        UID, mi.getConfigName(), mi.getThingUID());
+                        uid, mi.getConfigName(), mi.getThingUID());
                 return null;
             } else if (mi.getConfigName() != null) {
                 kind = ActionModuleKind.SERVICE;
@@ -172,7 +170,7 @@ public class AnnotationActionModuleTypeHelper {
             if (configParam != null) {
                 configDescriptions.add(configParam);
             }
-            return new ActionType(UID, configDescriptions, mi.getLabel(), mi.getDescription(), mi.getTags(),
+            return new ActionType(uid, configDescriptions, mi.getLabel(), mi.getDescription(), mi.getTags(),
                     mi.getVisibility(), mi.getInputs(), mi.getOutputs());
         }
         return null;

@@ -20,7 +20,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -121,9 +120,7 @@ public final class FirmwareRegistryImpl implements FirmwareRegistry {
             try {
                 Collection<Firmware> result = firmwareProvider.getFirmwares(thing, loc);
                 if (result != null) {
-                    List<Firmware> suitableFirmwares = result.stream().filter(firmware -> firmware.isSuitableFor(thing))
-                            .collect(Collectors.toList());
-                    firmwares.addAll(suitableFirmwares);
+                    result.stream().filter(firmware -> firmware.isSuitableFor(thing)).forEach(firmwares::add);
                 }
             } catch (Exception e) {
                 logger.warn(

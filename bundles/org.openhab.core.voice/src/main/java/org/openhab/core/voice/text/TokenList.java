@@ -12,8 +12,6 @@
  */
 package org.openhab.core.voice.text;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -34,7 +32,7 @@ public class TokenList {
      * @param list of the initial tokens
      */
     public TokenList(List<String> list) {
-        this.list = Collections.unmodifiableList(new ArrayList<>(list));
+        this.list = List.copyOf(list);
         this.head = 0;
         this.tail = list.size() - 1;
     }

@@ -29,9 +29,12 @@ public class PersistenceStrategy {
         public static final PersistenceStrategy UPDATE = new PersistenceStrategy("everyUpdate");
         public static final PersistenceStrategy CHANGE = new PersistenceStrategy("everyChange");
         public static final PersistenceStrategy RESTORE = new PersistenceStrategy("restoreOnStartup");
-
-        public static final Map<String, PersistenceStrategy> STRATEGIES = Map.of(UPDATE.name, UPDATE, CHANGE.name,
-                CHANGE, RESTORE.name, RESTORE);
+        public static final PersistenceStrategy FORECAST = new PersistenceStrategy("forecast");
+        public static final Map<String, PersistenceStrategy> STRATEGIES = Map.of( //
+                UPDATE.name, UPDATE, //
+                CHANGE.name, CHANGE, //
+                RESTORE.name, RESTORE, //
+                FORECAST.name, FORECAST);
     }
 
     private final String name;

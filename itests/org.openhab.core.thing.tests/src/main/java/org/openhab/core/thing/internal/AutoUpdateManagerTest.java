@@ -16,8 +16,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -80,7 +80,7 @@ public class AutoUpdateManagerTest extends JavaTest {
 
         Channel channel = ChannelBuilder.create(CHANNEL_UID).withType(CHANNEL_TYPE_UID).build();
 
-        autoUpdateManager = new AutoUpdateManager(Collections.emptyMap(), channelTypeRegistry, eventPublisher,
+        autoUpdateManager = new AutoUpdateManager(Map.of(), channelTypeRegistry, eventPublisher,
                 itemChannelLinkRegistry, metadataRegistry, thingRegistry);
 
         item = mock(Item.class);
@@ -97,7 +97,8 @@ public class AutoUpdateManagerTest extends JavaTest {
     @Test
     public void testAutoUpdateVetoFromChannelType() {
         when(channelTypeRegistry.getChannelType(any(ChannelTypeUID.class)))
-                .thenReturn(ChannelTypeBuilder.state(CHANNEL_TYPE_UID, "label", CoreItemFactory.SWITCH).withAutoUpdatePolicy(AutoUpdatePolicy.VETO).build());
+                .thenReturn(ChannelTypeBuilder.state(CHANNEL_TYPE_UID, "label", CoreItemFactory.SWITCH)
+                        .withAutoUpdatePolicy(AutoUpdatePolicy.VETO).build());
 
         autoUpdateManager.receiveCommand(ItemEventFactory.createCommandEvent(ITEM_NAME, OnOffType.ON), item);
 

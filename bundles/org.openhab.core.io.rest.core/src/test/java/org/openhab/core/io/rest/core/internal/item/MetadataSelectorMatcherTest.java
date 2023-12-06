@@ -19,9 +19,9 @@ import static org.hamcrest.core.IsIterableContaining.hasItem;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
@@ -63,12 +63,12 @@ public class MetadataSelectorMatcherTest {
 
     @Test
     public void nullSelectorShouldReturnEmptySet() {
-        assertThat(matcher.filterNamespaces(null, null), is(Collections.emptySet()));
+        assertThat(matcher.filterNamespaces(null, null), is(Set.of()));
     }
 
     @Test
     public void emptySelectorShouldReturnEmptySet() {
-        assertThat(matcher.filterNamespaces("", null), is(Collections.emptySet()));
+        assertThat(matcher.filterNamespaces("", null), is(Set.of()));
     }
 
     @Test

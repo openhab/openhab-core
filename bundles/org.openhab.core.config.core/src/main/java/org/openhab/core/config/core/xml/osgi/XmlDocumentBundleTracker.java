@@ -16,7 +16,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -150,7 +149,7 @@ public class XmlDocumentBundleTracker<@NonNull T> extends BundleTracker<Bundle> 
     private Set<Bundle> getRelevantBundles() {
         BundleTracker<?> bundleTracker = relevantBundlesTracker;
         if (bundleTracker == null || bundleTracker.getBundles() == null) {
-            return Collections.emptySet();
+            return Set.of();
         }
         return (Set<Bundle>) Arrays.stream(bundleTracker.getBundles()).collect(Collectors.toSet());
     }

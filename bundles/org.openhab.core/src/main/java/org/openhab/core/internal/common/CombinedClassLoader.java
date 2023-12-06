@@ -75,7 +75,7 @@ public class CombinedClassLoader extends ClassLoader {
     public static CombinedClassLoader fromClassLoaders(final ClassLoader parent,
             final Stream<ClassLoader> delegateClassLoaders) {
         return new CombinedClassLoader(parent,
-                delegateClassLoaders.collect(Collectors.toMap(cl -> cl, cl -> Collections.emptySet())));
+                delegateClassLoaders.collect(Collectors.toMap(cl -> cl, cl -> Set.of())));
     }
 
     private CombinedClassLoader(ClassLoader parent, Map<ClassLoader, Set<Class<?>>> delegateClassLoaders) {

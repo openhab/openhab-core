@@ -17,8 +17,8 @@ import java.util.List;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * Implementing this interface allows a {@link ConsoleCommandExtension} to
- * provide completions for the user as they write commands.
+ * Implementing this interface allows a {@link org.openhab.core.io.console.extensions.ConsoleCommandExtension}
+ * to provide completions for the user as they write commands.
  *
  * @author Cody Cutrer - Initial contribution
  */

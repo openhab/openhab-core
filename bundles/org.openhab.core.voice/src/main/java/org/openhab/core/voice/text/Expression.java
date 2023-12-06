@@ -12,7 +12,6 @@
  */
 package org.openhab.core.voice.text;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.ResourceBundle;
@@ -34,7 +33,7 @@ public abstract class Expression {
     }
 
     List<Expression> getChildExpressions() {
-        return Collections.emptyList();
+        return List.of();
     }
 
     abstract boolean collectFirsts(ResourceBundle language, Set<String> firsts);

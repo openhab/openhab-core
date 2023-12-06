@@ -14,7 +14,6 @@ package org.openhab.core.internal.scheduler;
 
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -59,7 +58,7 @@ public class CronSchedulerImpl implements CronScheduler {
 
     @Override
     public ScheduledCompletableFuture<@Nullable Void> schedule(SchedulerRunnable runnable, String cronExpression) {
-        return schedule(d -> runnable.run(), Collections.emptyMap(), cronExpression);
+        return schedule(d -> runnable.run(), Map.of(), cronExpression);
     }
 
     @Override

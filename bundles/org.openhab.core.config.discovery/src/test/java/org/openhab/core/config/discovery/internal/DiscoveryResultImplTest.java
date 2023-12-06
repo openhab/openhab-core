@@ -14,7 +14,6 @@ package org.openhab.core.config.discovery.internal;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -71,8 +70,7 @@ public class DiscoveryResultImplTest {
     public void testInvalidSynchronize() {
         ThingTypeUID thingTypeUID = new ThingTypeUID("bindingId", "thingType");
 
-        Map<String, Object> discoveryResultSourceMap = new HashMap<>();
-        discoveryResultSourceMap.put("ipAddress", "127.0.0.1");
+        Map<String, Object> discoveryResultSourceMap = Map.of("ipAddress", "127.0.0.1");
 
         DiscoveryResultImpl discoveryResult = new DiscoveryResultImpl(thingTypeUID,
                 new ThingUID(thingTypeUID, "thingId"), null, discoveryResultSourceMap, "ipAddress", "TARGET",
@@ -91,8 +89,7 @@ public class DiscoveryResultImplTest {
     public void testIrrelevantSynchronize() {
         ThingTypeUID thingTypeUID = new ThingTypeUID("bindingId", "thingType");
 
-        Map<String, Object> discoveryResultSourceMap = new HashMap<>();
-        discoveryResultSourceMap.put("ipAddress", "127.0.0.1");
+        Map<String, Object> discoveryResultSourceMap = Map.of("ipAddress", "127.0.0.1");
 
         DiscoveryResultImpl discoveryResult = new DiscoveryResultImpl(thingTypeUID,
                 new ThingUID(thingTypeUID, "thingId"), null, discoveryResultSourceMap, "ipAddress", "TARGET",
@@ -114,17 +111,16 @@ public class DiscoveryResultImplTest {
     public void testSynchronize() {
         ThingTypeUID thingTypeUID = new ThingTypeUID("bindingId", "thingType");
 
-        Map<String, Object> discoveryResultSourceMap = new HashMap<>();
-        discoveryResultSourceMap.put("ipAddress", "127.0.0.1");
+        Map<String, Object> discoveryResultSourceMap = Map.of("ipAddress", "127.0.0.1");
 
         DiscoveryResultImpl discoveryResult = new DiscoveryResultImpl(thingTypeUID,
                 new ThingUID(thingTypeUID, "thingId"), null, discoveryResultSourceMap, "ipAddress", "TARGET",
                 DEFAULT_TTL);
         discoveryResult.setFlag(DiscoveryResultFlag.IGNORED);
 
-        Map<String, Object> discoveryResultMap = new HashMap<>();
-        discoveryResultMap.put("ipAddress", "192.168.178.1");
-        discoveryResultMap.put("macAddress", "AA:BB:CC:DD:EE:FF");
+        Map<String, Object> discoveryResultMap = Map.of( //
+                "ipAddress", "192.168.178.1", //
+                "macAddress", "AA:BB:CC:DD:EE:FF");
 
         DiscoveryResultImpl discoveryResultSource = new DiscoveryResultImpl(thingTypeUID,
                 new ThingUID(thingTypeUID, "thingId"), null, discoveryResultMap, "macAddress", "SOURCE", DEFAULT_TTL);

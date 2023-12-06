@@ -20,7 +20,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -214,7 +213,7 @@ public class AutomaticInboxProcessor extends AbstractTypedEventSubscriber<ThingS
 
     private void ignoreInInbox(ThingTypeUID thingtypeUID, String representationValue) {
         List<DiscoveryResult> results = inbox.stream().filter(withRepresentationPropertyValue(representationValue))
-                .filter(forThingTypeUID(thingtypeUID)).collect(Collectors.toList());
+                .filter(forThingTypeUID(thingtypeUID)).toList();
         if (results.size() == 1) {
             logger.debug("Auto-ignoring the inbox entry for the representation value '{}'.", representationValue);
 
@@ -252,8 +251,7 @@ public class AutomaticInboxProcessor extends AbstractTypedEventSubscriber<ThingS
 
     private void removeFromInbox(ThingTypeUID thingtypeUID, String representationValue) {
         List<DiscoveryResult> results = inbox.stream().filter(withRepresentationPropertyValue(representationValue))
-                .filter(forThingTypeUID(thingtypeUID)).filter(withFlag(DiscoveryResultFlag.IGNORED))
-                .collect(Collectors.toList());
+                .filter(forThingTypeUID(thingtypeUID)).filter(withFlag(DiscoveryResultFlag.IGNORED)).toList();
         if (results.size() == 1) {
             logger.debug("Removing the ignored result from the inbox for the representation value '{}'.",
                     representationValue);

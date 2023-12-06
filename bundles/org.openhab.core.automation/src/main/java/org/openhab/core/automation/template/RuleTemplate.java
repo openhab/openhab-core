@@ -14,7 +14,6 @@ package org.openhab.core.automation.template;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -110,20 +109,20 @@ public class RuleTemplate implements Template {
      * @param configDescriptions describing meta-data for the configuration of the future {@link Rule} instances.
      * @param visibility the {@link RuleTemplate}'s visibility.
      */
-    public RuleTemplate(@Nullable String UID, @Nullable String label, @Nullable String description,
+    public RuleTemplate(@Nullable String uid, @Nullable String label, @Nullable String description,
             @Nullable Set<String> tags, @Nullable List<Trigger> triggers, @Nullable List<Condition> conditions,
             @Nullable List<Action> actions, @Nullable List<ConfigDescriptionParameter> configDescriptions,
             @Nullable Visibility visibility) {
-        this.uid = UID == null ? UUID.randomUUID().toString() : UID;
+        this.uid = uid == null ? UUID.randomUUID().toString() : uid;
         this.label = label;
         this.description = description;
-        this.triggers = triggers == null ? Collections.emptyList() : Collections.unmodifiableList(triggers);
-        this.conditions = conditions == null ? Collections.emptyList() : Collections.unmodifiableList(conditions);
-        this.actions = actions == null ? Collections.emptyList() : Collections.unmodifiableList(actions);
-        this.configDescriptions = configDescriptions == null ? Collections.emptyList()
+        this.triggers = triggers == null ? List.of() : Collections.unmodifiableList(triggers);
+        this.conditions = conditions == null ? List.of() : Collections.unmodifiableList(conditions);
+        this.actions = actions == null ? List.of() : Collections.unmodifiableList(actions);
+        this.configDescriptions = configDescriptions == null ? List.of()
                 : Collections.unmodifiableList(configDescriptions);
         this.visibility = visibility == null ? Visibility.VISIBLE : visibility;
-        this.tags = tags == null ? new HashSet<>() : new HashSet<>(tags);
+        this.tags = tags == null ? Set.of() : Collections.unmodifiableSet(tags);
     }
 
     /**
@@ -226,7 +225,7 @@ public class RuleTemplate implements Template {
         } else if (Action.class == moduleClazz) {
             result = (List<T>) actions;
         } else {
-            result = Collections.emptyList();
+            result = List.of();
         }
         return result;
     }

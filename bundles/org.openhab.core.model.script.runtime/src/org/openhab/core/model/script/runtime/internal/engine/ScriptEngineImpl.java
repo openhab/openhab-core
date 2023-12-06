@@ -14,9 +14,8 @@ package org.openhab.core.model.script.runtime.internal.engine;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
 
 import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.common.util.URI;
@@ -179,7 +178,7 @@ public class ScriptEngineImpl implements ScriptEngine, ModelParser {
 
     protected Iterable<Issue> getValidationErrors(final EObject model) {
         final List<Issue> validate = validate(model);
-        return validate.stream().filter(input -> Severity.ERROR == input.getSeverity()).collect(Collectors.toList());
+        return validate.stream().filter(input -> Severity.ERROR == input.getSeverity()).toList();
     }
 
     @Override
@@ -189,7 +188,7 @@ public class ScriptEngineImpl implements ScriptEngine, ModelParser {
 
     private void deleteResource(Resource resource) {
         try {
-            resource.delete(Collections.emptyMap());
+            resource.delete(Map.of());
         } catch (IOException e) {
             // Do nothing
         }

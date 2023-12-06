@@ -13,7 +13,6 @@
 package org.openhab.core.automation.module.media.internal;
 
 import static java.util.Comparator.comparing;
-import static java.util.stream.Collectors.toList;
 
 import java.io.File;
 import java.math.BigDecimal;
@@ -61,8 +60,8 @@ public class MediaActionTypeProvider implements ModuleTypeProvider {
 
     @SuppressWarnings("unchecked")
     @Override
-    public @Nullable ModuleType getModuleType(String UID, @Nullable Locale locale) {
-        switch (UID) {
+    public @Nullable ModuleType getModuleType(String uid, @Nullable Locale locale) {
+        switch (uid) {
             case PlayActionHandler.TYPE_ID:
                 return getPlayActionType(locale);
             case SayActionHandler.TYPE_ID:
@@ -162,7 +161,7 @@ public class MediaActionTypeProvider implements ModuleTypeProvider {
     private List<ParameterOption> getSinkOptions(@Nullable Locale locale) {
         final Locale safeLocale = locale != null ? locale : Locale.getDefault();
         return audioManager.getAllSinks().stream().sorted(comparing(s -> s.getLabel(safeLocale)))
-                .map(s -> new ParameterOption(s.getId(), s.getLabel(safeLocale))).collect(toList());
+                .map(s -> new ParameterOption(s.getId(), s.getLabel(safeLocale))).toList();
     }
 
     @Override

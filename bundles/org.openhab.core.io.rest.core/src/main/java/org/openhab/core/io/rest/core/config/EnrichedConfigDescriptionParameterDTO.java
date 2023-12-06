@@ -16,7 +16,7 @@ import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -49,8 +49,8 @@ public class EnrichedConfigDescriptionParameterDTO extends ConfigDescriptionPara
 
         if (multiple && defaultValue != null) {
             if (defaultValue.contains(DEFAULT_LIST_DELIMITER)) {
-                defaultValues = List.of(defaultValue.split(DEFAULT_LIST_DELIMITER)).stream().map(v -> v.trim())
-                        .filter(v -> !v.isEmpty()).collect(Collectors.toList());
+                defaultValues = Stream.of(defaultValue.split(DEFAULT_LIST_DELIMITER)).map(String::trim)
+                        .filter(v -> !v.isEmpty()).toList();
             } else {
                 defaultValues = Set.of(defaultValue);
             }

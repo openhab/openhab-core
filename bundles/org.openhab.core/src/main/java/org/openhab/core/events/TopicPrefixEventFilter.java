@@ -28,7 +28,7 @@ public class TopicPrefixEventFilter implements EventFilter {
     /**
      * Constructs a new topic event filter.
      *
-     * @param topicRegex the prefix event topics must start with
+     * @param topicPrefix the prefix event topics must start with
      */
     public TopicPrefixEventFilter(String topicPrefix) {
         this.topicPrefix = topicPrefix;

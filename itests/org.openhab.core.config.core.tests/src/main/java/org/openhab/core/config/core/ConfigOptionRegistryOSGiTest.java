@@ -19,7 +19,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -57,11 +56,8 @@ public class ConfigOptionRegistryOSGiTest extends JavaOSGiTest {
         ConfigDescription configDescription = ConfigDescriptionBuilder.create(DUMMY_URI).withParameter(param1).build();
 
         // Create config option list
-        List<ParameterOption> oList1 = new ArrayList<>();
-        ParameterOption parameterOption = new ParameterOption("Option1", "Option1");
-        oList1.add(parameterOption);
-        parameterOption = new ParameterOption("Option2", "Option2");
-        oList1.add(parameterOption);
+        List<ParameterOption> oList1 = List.of(new ParameterOption("Option1", "Option1"),
+                new ParameterOption("Option2", "Option2"));
 
         when(configOptionsProviderMock.getParameterOptions(any(), any(), any(), any())).thenReturn(oList1);
 

@@ -66,6 +66,14 @@ public class DialogRegistration {
      */
     public @Nullable String listeningItem;
     /**
+     * Linked location item
+     */
+    public @Nullable String locationItem;
+    /**
+     * Dialog group name
+     */
+    public @Nullable String dialogGroup;
+    /**
      * Custom listening melody
      */
     public @Nullable String listeningMelody;

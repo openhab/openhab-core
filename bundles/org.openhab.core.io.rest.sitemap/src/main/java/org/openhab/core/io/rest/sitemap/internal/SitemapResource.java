@@ -76,9 +76,13 @@ import org.openhab.core.items.events.ItemStateChangedEvent;
 import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.library.types.HSBType;
 import org.openhab.core.model.sitemap.SitemapProvider;
+import org.openhab.core.model.sitemap.sitemap.Button;
+import org.openhab.core.model.sitemap.sitemap.Buttongrid;
 import org.openhab.core.model.sitemap.sitemap.Chart;
 import org.openhab.core.model.sitemap.sitemap.ColorArray;
+import org.openhab.core.model.sitemap.sitemap.Condition;
 import org.openhab.core.model.sitemap.sitemap.Frame;
+import org.openhab.core.model.sitemap.sitemap.IconRule;
 import org.openhab.core.model.sitemap.sitemap.Image;
 import org.openhab.core.model.sitemap.sitemap.Input;
 import org.openhab.core.model.sitemap.sitemap.LinkableWidget;
@@ -131,6 +135,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * @author Wouter Born - Migrated to OpenAPI annotations
  * @author Laurent Garnier - Added support for icon color
  * @author Mark Herwege - Added pattern and unit fields
+ * @author Laurent Garnier - Added support for new sitemap element Buttongrid
+ * @author Laurent Garnier - Added icon field for mappings used for switch element
+ * @author Laurent Garnier - Support added for multiple AND conditions in labelcolor/valuecolor/visibility
+ * @author Laurent Garnier - New widget icon parameter based on conditional rules
  */
 @Component(service = { RESTResource.class, EventSubscriber.class })
 @JaxrsResource
@@ -523,10 +531,12 @@ public class SitemapResource
         }
         bean.widgetId = widgetId;
         bean.icon = itemUIRegistry.getCategory(widget);
+        bean.staticIcon = widget.getStaticIcon() != null || !widget.getIconRules().isEmpty();
         bean.labelcolor = convertItemValueColor(itemUIRegistry.getLabelColor(widget), itemState);
         bean.valuecolor = convertItemValueColor(itemUIRegistry.getValueColor(widget), itemState);
         bean.iconcolor = convertItemValueColor(itemUIRegistry.getIconColor(widget), itemState);
         bean.label = itemUIRegistry.getLabel(widget);
+        bean.labelSource = itemUIRegistry.getLabelSource(widget).toString();
         bean.pattern = itemUIRegistry.getFormatPattern(widget);
         bean.unit = itemUIRegistry.getUnitForWidget(widget);
         bean.type = widget.eClass().getName();
@@ -554,6 +564,7 @@ public class SitemapResource
                 MappingDTO mappingBean = new MappingDTO();
                 mappingBean.command = mapping.getCmd();
                 mappingBean.label = mapping.getLabel();
+                mappingBean.icon = mapping.getIcon();
                 bean.mappings.add(mappingBean);
             }
         }
@@ -612,6 +623,17 @@ public class SitemapResource
             bean.minValue = setpointWidget.getMinValue();
             bean.maxValue = setpointWidget.getMaxValue();
             bean.step = setpointWidget.getStep();
+        }
+        if (widget instanceof Buttongrid buttonGridWidget) {
+            for (Button button : buttonGridWidget.getButtons()) {
+                MappingDTO mappingBean = new MappingDTO();
+                mappingBean.row = button.getRow();
+                mappingBean.column = button.getColumn();
+                mappingBean.command = button.getCmd();
+                mappingBean.label = button.getLabel();
+                mappingBean.icon = button.getIcon();
+                bean.mappings.add(mappingBean);
+            }
         }
         return bean;
     }
@@ -740,6 +762,8 @@ public class SitemapResource
             if (widget instanceof Frame frame) {
                 items.addAll(getAllItems(frame.getChildren()));
             }
+            // Consider items involved in any icon condition
+            items.addAll(getItemsInIconCond(widget.getIconRules()));
             // Consider items involved in any visibility, labelcolor, valuecolor and iconcolor condition
             items.addAll(getItemsInVisibilityCond(widget.getVisibility()));
             items.addAll(getItemsInColorCond(widget.getLabelColor()));
@@ -752,37 +776,43 @@ public class SitemapResource
     private Set<GenericItem> getItemsInVisibilityCond(EList<VisibilityRule> ruleList) {
         Set<GenericItem> items = new HashSet<>();
         for (VisibilityRule rule : ruleList) {
-            String itemName = rule.getItem();
-            if (itemName != null) {
-                try {
-                    Item item = itemUIRegistry.getItem(itemName);
-                    if (item instanceof GenericItem genericItem) {
-                        items.add(genericItem);
-                    }
-                } catch (ItemNotFoundException e) {
-                    // ignore
-                }
-            }
+            getItemsInConditions(rule.getConditions(), items);
         }
         return items;
     }
 
     private Set<GenericItem> getItemsInColorCond(EList<ColorArray> colorList) {
         Set<GenericItem> items = new HashSet<>();
-        for (ColorArray color : colorList) {
-            String itemName = color.getItem();
-            if (itemName != null) {
-                try {
-                    Item item = itemUIRegistry.getItem(itemName);
-                    if (item instanceof GenericItem genericItem) {
-                        items.add(genericItem);
+        for (ColorArray rule : colorList) {
+            getItemsInConditions(rule.getConditions(), items);
+        }
+        return items;
+    }
+
+    private Set<GenericItem> getItemsInIconCond(EList<IconRule> ruleList) {
+        Set<GenericItem> items = new HashSet<>();
+        for (IconRule rule : ruleList) {
+            getItemsInConditions(rule.getConditions(), items);
+        }
+        return items;
+    }
+
+    private void getItemsInConditions(@Nullable EList<Condition> conditions, Set<GenericItem> items) {
+        if (conditions != null) {
+            for (Condition condition : conditions) {
+                String itemName = condition.getItem();
+                if (itemName != null) {
+                    try {
+                        Item item = itemUIRegistry.getItem(itemName);
+                        if (item instanceof GenericItem genericItem) {
+                            items.add(genericItem);
+                        }
+                    } catch (ItemNotFoundException e) {
+                        // ignore
                     }
-                } catch (ItemNotFoundException e) {
-                    // ignore
                 }
             }
         }
-        return items;
     }
 
     @Override

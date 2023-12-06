@@ -24,7 +24,6 @@ import org.openhab.core.audio.AudioSink;
 import org.openhab.core.audio.AudioSinkAsync;
 import org.openhab.core.audio.AudioStream;
 import org.openhab.core.audio.StreamServed;
-import org.openhab.core.audio.URLAudioStream;
 import org.openhab.core.audio.UnsupportedAudioFormatException;
 import org.openhab.core.audio.UnsupportedAudioStreamException;
 import org.openhab.core.events.EventPublisher;
@@ -67,29 +66,19 @@ public class WebAudioAudioSink extends AudioSinkAsync {
         if (audioStream == null) {
             // in case the audioStream is null, this should be interpreted as a request to end any currently playing
             // stream.
-            logger.debug("Web Audio sink does not support stopping the currently playing stream.");
+            sendEvent("");
             return;
         }
         logger.debug("Received audio stream of format {}", audioStream.getFormat());
-        if (audioStream instanceof URLAudioStream urlAudioStream) {
-            try (AudioStream stream = urlAudioStream) {
-                // in this case only, we need to close the stream by ourself in a try with block,
-                // because nothing will consume it
-                // it is an external URL, so we can directly pass this on.
-                sendEvent(urlAudioStream.getURL());
-            } catch (IOException e) {
-                logger.debug("Error while closing the audio stream: {}", e.getMessage(), e);
-            }
-        } else {
-            // we need to serve it for a while and make it available to multiple clients
-            try {
-                StreamServed servedStream = audioHTTPServer.serve(audioStream, 10, true);
-                // we will let the HTTP servlet run the delayed task when finished with the stream
-                servedStream.playEnd().thenRun(() -> this.playbackFinished(audioStream));
-                sendEvent(servedStream.url());
-            } catch (IOException e) {
-                logger.warn("Cannot precache the audio stream to serve it", e);
-            }
+
+        // we need to serve it for a while and make it available to multiple clients
+        try {
+            StreamServed servedStream = audioHTTPServer.serve(audioStream, 10, true);
+            // we will let the HTTP servlet run the delayed task when finished with the stream
+            servedStream.playEnd().thenRun(() -> this.playbackFinished(audioStream));
+            sendEvent(servedStream.url());
+        } catch (IOException e) {
+            logger.warn("Cannot precache the audio stream to serve it", e);
         }
     }
 

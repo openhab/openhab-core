@@ -16,10 +16,11 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.thing.binding.ThingHandler;
 import org.openhab.core.thing.profiles.ProfileCallback;
 import org.openhab.core.thing.profiles.ProfileTypeUID;
-import org.openhab.core.thing.profiles.StateProfile;
 import org.openhab.core.thing.profiles.SystemProfiles;
+import org.openhab.core.thing.profiles.TimeSeriesProfile;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
+import org.openhab.core.types.TimeSeries;
 
 /**
  * This is the default profile for stateful channels.
@@ -30,7 +31,7 @@ import org.openhab.core.types.State;
  * @author Simon Kaufmann - Initial contribution
  */
 @NonNullByDefault
-public class SystemDefaultProfile implements StateProfile {
+public class SystemDefaultProfile implements TimeSeriesProfile {
 
     private final ProfileCallback callback;
 
@@ -56,6 +57,11 @@ public class SystemDefaultProfile implements StateProfile {
     @Override
     public void onCommandFromHandler(Command command) {
         callback.sendCommand(command);
+    }
+
+    @Override
+    public void onTimeSeriesFromHandler(TimeSeries timeSeries) {
+        callback.sendTimeSeries(timeSeries);
     }
 
     @Override

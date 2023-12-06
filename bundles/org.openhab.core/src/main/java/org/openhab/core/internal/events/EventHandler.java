@@ -44,6 +44,7 @@ import org.slf4j.LoggerFactory;
 @NonNullByDefault
 public class EventHandler implements AutoCloseable {
 
+    private static final int EVENT_QUEUE_WARN_LIMIT = 5000;
     private static final long EVENTSUBSCRIBER_EVENTHANDLING_MAX_MS = TimeUnit.SECONDS.toMillis(5);
 
     private final Logger logger = LoggerFactory.getLogger(EventHandler.class);
@@ -52,6 +53,7 @@ public class EventHandler implements AutoCloseable {
     private final Map<String, EventFactory> typedEventFactories;
 
     private final Map<Class<? extends EventSubscriber>, ExecutorRecord> executors = new HashMap<>();
+    private final ScheduledExecutorService watcher;
 
     /**
      * Create a new event handler.
@@ -63,12 +65,12 @@ public class EventHandler implements AutoCloseable {
             final Map<String, EventFactory> typedEventFactories) {
         this.typedEventSubscribers = typedEventSubscribers;
         this.typedEventFactories = typedEventFactories;
+        watcher = Executors.newSingleThreadScheduledExecutor(new NamedThreadFactory("eventwatcher"));
     }
 
     private synchronized ExecutorRecord createExecutorRecord(Class<? extends EventSubscriber> subscriber) {
         return new ExecutorRecord(
                 Executors.newSingleThreadExecutor(new NamedThreadFactory("eventexecutor-" + executors.size())),
-                Executors.newSingleThreadScheduledExecutor(new NamedThreadFactory("eventwatcher-" + executors.size())),
                 new AtomicInteger());
     }
 
@@ -76,8 +78,8 @@ public class EventHandler implements AutoCloseable {
     public void close() {
         executors.values().forEach(r -> {
             r.executor.shutdownNow();
-            r.watcher.shutdownNow();
         });
+        watcher.shutdownNow();
     }
 
     public void handleEvent(org.osgi.service.event.Event osgiEvent) {
@@ -153,14 +155,13 @@ public class EventHandler implements AutoCloseable {
                 logger.trace("Delegate event to subscriber ({}).", eventSubscriber.getClass());
                 ExecutorRecord executorRecord = Objects.requireNonNull(
                         executors.computeIfAbsent(eventSubscriber.getClass(), this::createExecutorRecord));
-                int queueSize = executorRecord.count().incrementAndGet();
-                if (queueSize > 1000) {
-                    logger.warn(
-                            "The queue for a subscriber of type '{}' exceeds 1000 elements. System may be unstable.",
-                            eventSubscriber.getClass());
+                int queueSize = executorRecord.count.incrementAndGet();
+                if (queueSize > EVENT_QUEUE_WARN_LIMIT) {
+                    logger.warn("The queue for a subscriber of type '{}' exceeds {} elements. System may be unstable.",
+                            eventSubscriber.getClass(), EVENT_QUEUE_WARN_LIMIT);
                 }
                 CompletableFuture.runAsync(() -> {
-                    ScheduledFuture<?> logTimeout = executorRecord.watcher().schedule(
+                    ScheduledFuture<?> logTimeout = watcher.schedule(
                             () -> logger.warn("Dispatching event to subscriber '{}' takes more than {}ms.",
                                     eventSubscriber, EVENTSUBSCRIBER_EVENTHANDLING_MAX_MS),
                             EVENTSUBSCRIBER_EVENTHANDLING_MAX_MS, TimeUnit.MILLISECONDS);
@@ -171,13 +172,13 @@ public class EventHandler implements AutoCloseable {
                                 EventSubscriber.class.getName(), ex.getMessage(), ex);
                     }
                     logTimeout.cancel(false);
-                }, executorRecord.executor()).thenRun(executorRecord.count::decrementAndGet);
+                }, executorRecord.executor).thenRun(executorRecord.count::decrementAndGet);
             } else {
                 logger.trace("Skip event subscriber ({}) because of its filter.", eventSubscriber.getClass());
             }
         }
     }
 
-    private record ExecutorRecord(ExecutorService executor, ScheduledExecutorService watcher, AtomicInteger count) {
+    private record ExecutorRecord(ExecutorService executor, AtomicInteger count) {
     }
 }

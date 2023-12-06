@@ -12,7 +12,6 @@
  */
 package org.openhab.core.automation.type;
 
-import java.util.Collections;
 import java.util.Set;
 
 import org.openhab.core.automation.Module;
@@ -205,7 +204,7 @@ public class Output {
      * @return the tags, associated with this {@link Input}.
      */
     public Set<String> getTags() {
-        return tags != null ? tags : Collections.<String> emptySet();
+        return tags != null ? tags : Set.of();
     }
 
     /**

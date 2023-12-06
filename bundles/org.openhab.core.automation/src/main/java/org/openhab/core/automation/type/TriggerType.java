@@ -39,23 +39,23 @@ public class TriggerType extends ModuleType {
      * Creates an instance of {@link TriggerType} with base properties - UID, a {@link List} of configuration
      * descriptions and a {@link List} of {@link Output} descriptions.
      *
-     * @param UID the {@link TriggerType}'s identifier, or {@code null} if a random identifier should be
+     * @param uid the {@link TriggerType}'s identifier, or {@code null} if a random identifier should be
      *            generated.
      * @param configDescriptions describing meta-data for the configuration of the future {@link Trigger} instances.
      * @param outputs a {@link List} with {@link Output} meta-information descriptions of the future
      *            {@link Trigger} instances.
      */
-    public TriggerType(@Nullable String UID, @Nullable List<ConfigDescriptionParameter> configDescriptions,
+    public TriggerType(@Nullable String uid, @Nullable List<ConfigDescriptionParameter> configDescriptions,
             @Nullable List<Output> outputs) {
-        super(UID, configDescriptions);
-        this.outputs = outputs != null ? Collections.unmodifiableList(outputs) : Collections.emptyList();
+        super(uid, configDescriptions);
+        this.outputs = outputs != null ? Collections.unmodifiableList(outputs) : List.of();
     }
 
     /**
      * Creates an instance of {@link TriggerType} with UID, label, description, a {@link Set} of tags, visibility,
      * a {@link List} of configuration descriptions and a {@link List} of {@link Output} descriptions.
      *
-     * @param UID the {@link TriggerType}'s identifier, or {@code null} if a random identifier should be
+     * @param uid the {@link TriggerType}'s identifier, or {@code null} if a random identifier should be
      *            generated.
      * @param configDescriptions describing meta-data for the configuration of the future {@link Trigger} instances.
      * @param label a short and accurate, human-readable label of the {@link TriggerType}.
@@ -70,11 +70,11 @@ public class TriggerType extends ModuleType {
      * @param outputs a {@link List} with {@link Output} meta-information descriptions of the future
      *            {@link Trigger} instances.
      */
-    public TriggerType(@Nullable String UID, @Nullable List<ConfigDescriptionParameter> configDescriptions,
+    public TriggerType(@Nullable String uid, @Nullable List<ConfigDescriptionParameter> configDescriptions,
             @Nullable String label, @Nullable String description, @Nullable Set<String> tags,
             @Nullable Visibility visibility, @Nullable List<Output> outputs) {
-        super(UID, configDescriptions, label, description, tags, visibility);
-        this.outputs = outputs != null ? Collections.unmodifiableList(outputs) : Collections.emptyList();
+        super(uid, configDescriptions, label, description, tags, visibility);
+        this.outputs = outputs != null ? Collections.unmodifiableList(outputs) : List.of();
     }
 
     /**

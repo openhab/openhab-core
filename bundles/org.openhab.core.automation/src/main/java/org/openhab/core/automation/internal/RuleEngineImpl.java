@@ -155,6 +155,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
      * The storage for the disable information
      */
     private final Storage<Boolean> disabledRulesStorage;
+    private final StartLevelService startLevelService;
 
     /**
      * Locker which does not permit rule initialization when the rule engine is stopping.
@@ -177,7 +178,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
      * The context map of a {@link Rule} is cleaned when the execution is completed. The relation is
      * {@link Rule}'s UID to Rule context map.
      */
-    private final Map<String, Map<String, Object>> contextMap = new HashMap<>();
+    private final Map<String, Map<String, Object>> contextMap = new ConcurrentHashMap<>();
 
     /**
      * This field holds reference to {@link ModuleTypeRegistry}. The {@link RuleEngineImpl} needs it to auto-map
@@ -254,7 +255,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
     @Activate
     public RuleEngineImpl(final @Reference ModuleTypeRegistry moduleTypeRegistry,
             final @Reference RuleRegistry ruleRegistry, final @Reference StorageService storageService,
-            final @Reference ReadyService readyService) {
+            final @Reference ReadyService readyService, final @Reference StartLevelService startLevelService) {
         this.disabledRulesStorage = storageService.<Boolean> getStorage(DISABLED_RULE_STORAGE,
                 this.getClass().getClassLoader());
 
@@ -265,6 +266,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
 
         this.ruleRegistry = ruleRegistry;
         this.readyService = readyService;
+        this.startLevelService = startLevelService;
 
         listener = new RegistryChangeListener<>() {
             @Override
@@ -846,6 +848,17 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
         // Register the rule and set idle status.
         register(rule);
         setStatus(ruleUID, new RuleStatusInfo(RuleStatus.IDLE));
+
+        // check if we have to trigger because of the startlevel
+        List<Trigger> slTriggers = rule.getTriggers().stream().map(WrappedTrigger::unwrap)
+                .filter(t -> SystemTriggerHandler.STARTLEVEL_MODULE_TYPE_ID.equals(t.getTypeUID())).toList();
+        if (slTriggers.stream()
+                .anyMatch(t -> ((BigDecimal) t.getConfiguration().get(SystemTriggerHandler.CFG_STARTLEVEL))
+                        .intValue() <= startLevelService.getStartLevel())) {
+            runNow(rule.getUID(), true,
+                    Map.of(SystemTriggerHandler.OUT_STARTLEVEL, StartLevelService.STARTLEVEL_RULES));
+        }
+
         return true;
     }
 
@@ -1151,7 +1164,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
     }
 
     /**
-     * This method evaluates actions of the {@link Rule} and set their {@link Output}s when they exists.
+     * This method evaluates actions of the {@link Rule} and set their {@link Output}s when they exist.
      *
      * @param rule executed rule.
      */
@@ -1194,7 +1207,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
      * This method gets rule's status object.
      *
      * @param rUID rule's UID
-     * @return status of the rule or null when such rule does not exists.
+     * @return status of the rule or null when such rule does not exist.
      */
     protected @Nullable RuleStatus getRuleStatus(String rUID) {
         RuleStatusInfo info = getStatusInfo(rUID);

@@ -14,7 +14,6 @@ package org.openhab.core.automation.internal.parser.gson;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -68,6 +67,6 @@ public class TemplateGSONParser extends AbstractGSONParser<Template> {
             } catch (IOException e) {
             }
         }
-        return Collections.emptySet();
+        return Set.of();
     }
 }

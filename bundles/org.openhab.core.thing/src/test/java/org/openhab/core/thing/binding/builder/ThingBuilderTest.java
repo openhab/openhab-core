@@ -17,7 +17,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -114,8 +113,8 @@ public class ThingBuilderTest {
     @Test
     public void subsequentBuildsCreateIndependentThings() {
         Thing thing = thingBuilder.withLabel("Test").withLocation("Some Place").withProperties(properties).build();
-        Thing otherThing = thingBuilder.withLabel("Second Test").withLocation("Other Place")
-                .withProperties(Collections.emptyMap()).build();
+        Thing otherThing = thingBuilder.withLabel("Second Test").withLocation("Other Place").withProperties(Map.of())
+                .build();
 
         assertThat(otherThing.getLabel(), is(not(thing.getLabel())));
         assertThat(otherThing.getLocation(), is(not(thing.getLocation())));

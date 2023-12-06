@@ -26,6 +26,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -115,6 +116,8 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     private final Map<String, STTService> sttServices = new HashMap<>();
     private final Map<String, TTSService> ttsServices = new HashMap<>();
     private final Map<String, HumanLanguageInterpreter> humanLanguageInterpreters = new HashMap<>();
+
+    private final WeakHashMap<String, DialogContext> activeDialogGroups = new WeakHashMap<>();
 
     private final LocaleProvider localeProvider;
     private final AudioManager audioManager;
@@ -497,7 +500,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
 
     @Override
     public List<DialogContext> getDialogsContexts() {
-        return dialogProcessors.values().stream().map(DialogProcessor::getContext).collect(Collectors.toList());
+        return dialogProcessors.values().stream().map(DialogProcessor::getContext).toList();
     }
 
     @Override
@@ -526,7 +529,8 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
             if (processor == null) {
                 logger.debug("Starting a new dialog for source {} ({})", context.source().getLabel(null),
                         context.source().getId());
-                processor = new DialogProcessor(context, this, this.eventPublisher, this.i18nProvider, b);
+                processor = new DialogProcessor(context, this, this.eventPublisher, this.activeDialogGroups,
+                        this.i18nProvider, b);
                 dialogProcessors.put(context.source().getId(), processor);
                 processor.start();
             } else {
@@ -582,7 +586,8 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
                 isSingleDialog = true;
                 activeProcessor = singleDialogProcessors.get(audioSource.getId());
             }
-            var processor = new DialogProcessor(context, this, this.eventPublisher, this.i18nProvider, b);
+            var processor = new DialogProcessor(context, this, this.eventPublisher, this.activeDialogGroups,
+                    this.i18nProvider, b);
             if (activeProcessor == null) {
                 logger.debug("Executing a simple dialog for source {} ({})", audioSource.getLabel(null),
                         audioSource.getId());
@@ -895,30 +900,27 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
                 case CONFIG_DEFAULT_HLI:
                     return humanLanguageInterpreters.values().stream()
                             .sorted((hli1, hli2) -> hli1.getLabel(locale).compareToIgnoreCase(hli2.getLabel(locale)))
-                            .map(hli -> new ParameterOption(hli.getId(), hli.getLabel(locale)))
-                            .collect(Collectors.toList());
+                            .map(hli -> new ParameterOption(hli.getId(), hli.getLabel(locale))).toList();
                 case CONFIG_DEFAULT_KS:
                     return ksServices.values().stream()
                             .sorted((ks1, ks2) -> ks1.getLabel(locale).compareToIgnoreCase(ks2.getLabel(locale)))
-                            .map(ks -> new ParameterOption(ks.getId(), ks.getLabel(locale)))
-                            .collect(Collectors.toList());
+                            .map(ks -> new ParameterOption(ks.getId(), ks.getLabel(locale))).toList();
                 case CONFIG_DEFAULT_STT:
                     return sttServices.values().stream()
                             .sorted((stt1, stt2) -> stt1.getLabel(locale).compareToIgnoreCase(stt2.getLabel(locale)))
-                            .map(stt -> new ParameterOption(stt.getId(), stt.getLabel(locale)))
-                            .collect(Collectors.toList());
+                            .map(stt -> new ParameterOption(stt.getId(), stt.getLabel(locale))).toList();
                 case CONFIG_DEFAULT_TTS:
                     return ttsServices.values().stream()
                             .sorted((tts1, tts2) -> tts1.getLabel(locale).compareToIgnoreCase(tts2.getLabel(locale)))
-                            .map(tts -> new ParameterOption(tts.getId(), tts.getLabel(locale)))
-                            .collect(Collectors.toList());
+                            .map(tts -> new ParameterOption(tts.getId(), tts.getLabel(locale))).toList();
                 case CONFIG_DEFAULT_VOICE:
                     Locale nullSafeLocale = locale != null ? locale : localeProvider.getLocale();
-                    return getAllVoicesSorted(nullSafeLocale).stream().filter(v -> getTTS(v) != null)
-                            .map(v -> new ParameterOption(v.getUID(),
-                                    String.format("%s - %s - %s", getTTS(v).getLabel(nullSafeLocale),
-                                            v.getLocale().getDisplayName(nullSafeLocale), v.getLabel())))
-                            .collect(Collectors.toList());
+                    return getAllVoicesSorted(nullSafeLocale)
+                            .stream().filter(v -> getTTS(v) != null).map(
+                                    v -> new ParameterOption(v.getUID(),
+                                            String.format("%s - %s - %s", getTTS(v).getLabel(nullSafeLocale),
+                                                    v.getLocale().getDisplayName(nullSafeLocale), v.getLabel())))
+                            .toList();
             }
         }
         return null;
@@ -970,6 +972,8 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
                                 .withVoice(getVoice(dr.voiceId)) //
                                 .withHLIs(getHLIsByIds(dr.hliIds)) //
                                 .withLocale(dr.locale) //
+                                .withDialogGroup(dr.dialogGroup) //
+                                .withLocationItem(dr.locationItem) //
                                 .withListeningItem(dr.listeningItem) //
                                 .withMelody(dr.listeningMelody) //
                                 .build());

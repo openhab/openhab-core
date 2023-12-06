@@ -39,7 +39,7 @@ public class CompositeTriggerType extends TriggerType {
      * Creates an instance of {@code CompositeTriggerType} with ordered set of {@link Trigger} modules. It initializes
      * only base properties of the {@code CompositeTriggerType}.
      *
-     * @param UID the {@link TriggerType}'s identifier, or {@code null} if a random identifier should be
+     * @param uid the {@link TriggerType}'s identifier, or {@code null} if a random identifier should be
      *            generated.
      * @param configDescriptions describing meta-data for the configuration of the future {@link Trigger} instances.
      * @param outputs a {@link List} with {@link Output} meta-information descriptions of the future
@@ -47,17 +47,17 @@ public class CompositeTriggerType extends TriggerType {
      * @param children is a {@link List} of {@link Trigger} modules.
      *
      */
-    public CompositeTriggerType(@Nullable String UID, @Nullable List<ConfigDescriptionParameter> configDescriptions,
+    public CompositeTriggerType(@Nullable String uid, @Nullable List<ConfigDescriptionParameter> configDescriptions,
             @Nullable List<Output> outputs, @Nullable List<Trigger> children) {
-        super(UID, configDescriptions, outputs);
-        this.children = children != null ? Collections.unmodifiableList(children) : Collections.emptyList();
+        super(uid, configDescriptions, outputs);
+        this.children = children != null ? Collections.unmodifiableList(children) : List.of();
     }
 
     /**
      * Creates an instance of {@code CompositeTriggerType} with ordered set of {@link Trigger} modules. It initializes
      * all properties of the {@code CompositeTriggerType}.
      *
-     * @param UID the {@link TriggerType}'s identifier, or {@code null} if a random identifier should be
+     * @param uid the {@link TriggerType}'s identifier, or {@code null} if a random identifier should be
      *            generated.
      * @param configDescriptions describing meta-data for the configuration of the future {@link Trigger} instances.
      * @param label a short and accurate, human-readable label of the {@link TriggerType}.
@@ -71,11 +71,11 @@ public class CompositeTriggerType extends TriggerType {
      *            {@link Trigger} instances.
      * @param children is a {@link List} of {@link Trigger} modules.
      */
-    public CompositeTriggerType(@Nullable String UID, @Nullable List<ConfigDescriptionParameter> configDescriptions,
+    public CompositeTriggerType(@Nullable String uid, @Nullable List<ConfigDescriptionParameter> configDescriptions,
             @Nullable String label, @Nullable String description, @Nullable Set<String> tags,
             @Nullable Visibility visibility, @Nullable List<Output> outputs, @Nullable List<Trigger> children) {
-        super(UID, configDescriptions, label, description, tags, visibility, outputs);
-        this.children = children != null ? Collections.unmodifiableList(children) : Collections.emptyList();
+        super(uid, configDescriptions, label, description, tags, visibility, outputs);
+        this.children = children != null ? Collections.unmodifiableList(children) : List.of();
     }
 
     /**

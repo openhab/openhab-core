@@ -32,7 +32,7 @@ public class ItemHistoryDTO {
     public List<HistoryDataBean> data = new ArrayList<>();
 
     public ItemHistoryDTO() {
-    };
+    }
 
     /**
      * Add a new record to the data history.
@@ -41,7 +41,6 @@ public class ItemHistoryDTO {
      * @param time the time of the record
      * @param state the state at this time
      */
-    @SuppressWarnings("rawtypes")
     public void addData(Long time, State state) {
         HistoryDataBean newVal = new HistoryDataBean();
         newVal.time = time;

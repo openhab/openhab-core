@@ -95,8 +95,6 @@ public class ItemDTOMapper {
      * Maps item into item DTO object.
      *
      * @param item the item
-     * @param drillDown the drill down
-     * @param uri the uri
      * @return item DTO object
      */
     public static ItemDTO map(Item item) {

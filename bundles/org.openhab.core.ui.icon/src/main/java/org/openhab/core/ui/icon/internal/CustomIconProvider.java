@@ -17,7 +17,6 @@ import java.io.InputStream;
 import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
 import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -78,7 +77,7 @@ public class CustomIconProvider extends AbstractResourceIconProvider {
 
     @Override
     public Set<IconSet> getIconSets(@Nullable Locale locale) {
-        return Collections.emptySet();
+        return Set.of();
     }
 
     @Override

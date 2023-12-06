@@ -28,7 +28,7 @@
 
 		<feature dependency="true">openhab.tp-gson</feature>
 
-		<requirement>openhab.tp;filter:="(&amp;(feature=xtext)(version&gt;=2.29.0)(!(version&gt;=2.30.0)))"</requirement>
+		<requirement>openhab.tp;filter:="(&amp;(feature=xtext)(version&gt;=2.32.0)(!(version&gt;=2.33.0)))"</requirement>
 		<feature dependency="true">openhab.tp-xtext</feature>
 
 		<requirement>openhab.tp;filter:="(feature=jax-rs-whiteboard)"</requirement>
@@ -40,21 +40,20 @@
 		<requirement>openhab.tp;filter:="(feature=jna)"</requirement>
 		<feature dependency="true">openhab.tp-jna</feature>
 
+		<bundle>mvn:org.openhab/base-fixes/1.0.0</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.automation/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.core/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.dispatch/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core/${project.version}</bundle>
-		<bundle>mvn:org.openhab.osgiify/io.methvin.directory-watcher/0.17.1</bundle>
-		<bundle>mvn:net.java.dev.jna/jna/5.12.1</bundle>
-		<bundle>mvn:net.java.dev.jna/jna-platform/5.12.1</bundle>
+		<bundle>mvn:org.openhab.osgiify/io.methvin.directory-watcher/0.18.0</bundle>
 		<feature dependency="true">openhab-core-storage-json</feature>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.addon/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.ephemeris/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.id/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.persistence/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.semantics/${project.version}</bundle>
-		<feature dependency="true">openhab.tp-asm</feature>
+		<feature dependency="true">asm</feature>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.thing/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.transform/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.audio/${project.version}</bundle>
@@ -182,9 +181,7 @@
 	<feature name="openhab-core-io-websocket" version="${project.version}">
 		<feature>openhab-core-base</feature>
 		<feature dependency="true">openhab-core-io-rest-auth</feature>
-
-		<bundle>mvn:org.eclipse.jetty.websocket/websocket-servlet/${jetty.version}</bundle>
-		<bundle>mvn:org.eclipse.jetty.websocket/websocket-server/${jetty.version}</bundle>
+		<feature dependency="true">pax-web-jetty-websockets</feature>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.websocket/${project.version}</bundle>
 	</feature>
 
@@ -355,10 +352,10 @@
 
 	<feature name="openhab-core-model-lsp" version="${project.version}">
 
-		<requirement>openhab.tp;filter:="(&amp;(feature=xtext-ide)(version&gt;=2.29.0)(!(version&gt;=2.30.0)))"</requirement>
+		<requirement>openhab.tp;filter:="(&amp;(feature=xtext-ide)(version&gt;=2.32.0)(!(version&gt;=2.33.0)))"</requirement>
 		<feature dependency="true">openhab.tp-xtext-ide</feature>
 
-		<requirement>openhab.tp;filter:="(&amp;(feature=lsp4j)(version&gt;=0.19.0)(!(version&gt;=0.20.0)))"</requirement>
+		<requirement>openhab.tp;filter:="(&amp;(feature=lsp4j)(version&gt;=0.21.0)(!(version&gt;=0.22.0)))"</requirement>
 		<feature dependency="true">openhab.tp-lsp4j</feature>
 
 		<feature>openhab-core-model-item-ide</feature>
@@ -452,16 +449,9 @@
 
 	<feature name="openhab-transport-http" description="HTTP Transport" version="${project.version}">
 		<capability>openhab.tp;feature=httpclient;version=${jetty.version}</capability>
-		<feature>openhab-core-auth-oauth2client</feature>
-		<bundle dependency="true">mvn:javax.servlet/javax.servlet-api/3.1.0</bundle>
-		<bundle dependency="true">mvn:org.eclipse.jetty/jetty-client/${jetty.version}</bundle>
-		<bundle dependency="true">mvn:org.eclipse.jetty/jetty-http/${jetty.version}</bundle>
-		<bundle dependency="true">mvn:org.eclipse.jetty/jetty-util/${jetty.version}</bundle>
-		<bundle dependency="true">mvn:org.eclipse.jetty/jetty-io/${jetty.version}</bundle>
-		<bundle dependency="true">mvn:org.eclipse.jetty/jetty-proxy/${jetty.version}</bundle>
-		<bundle dependency="true">mvn:org.eclipse.jetty.websocket/websocket-api/${jetty.version}</bundle>
-		<bundle dependency="true">mvn:org.eclipse.jetty.websocket/websocket-common/${jetty.version}</bundle>
-		<bundle dependency="true">mvn:org.eclipse.jetty.websocket/websocket-client/${jetty.version}</bundle>
+		<feature dependency="true">openhab-core-auth-oauth2client</feature>
+		<feature dependency="true">pax-web-jetty-extras</feature>
+		<feature dependency="true">pax-web-jetty-websockets</feature>
 	</feature>
 
 	<feature name="openhab-transport-mdns" description="mDNS Transport" version="${project.version}">

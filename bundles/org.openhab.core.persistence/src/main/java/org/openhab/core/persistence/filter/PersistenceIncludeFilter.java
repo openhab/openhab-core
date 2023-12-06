@@ -15,6 +15,7 @@ package org.openhab.core.persistence.filter;
 import java.math.BigDecimal;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.items.Item;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.QuantityType;
@@ -38,12 +39,13 @@ public class PersistenceIncludeFilter extends PersistenceFilter {
     private final String unit;
     private final boolean inverted;
 
-    public PersistenceIncludeFilter(String name, BigDecimal lower, BigDecimal upper, String unit, boolean inverted) {
+    public PersistenceIncludeFilter(String name, BigDecimal lower, BigDecimal upper, @Nullable String unit,
+            @Nullable Boolean inverted) {
         super(name);
         this.lower = lower;
         this.upper = upper;
-        this.unit = unit;
-        this.inverted = inverted;
+        this.unit = (unit == null) ? "" : unit;
+        this.inverted = (inverted == null) ? false : inverted;
     }
 
     public BigDecimal getLower() {

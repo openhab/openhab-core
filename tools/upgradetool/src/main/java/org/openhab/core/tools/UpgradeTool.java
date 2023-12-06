@@ -62,7 +62,7 @@ public class UpgradeTool {
                 System.exit(0);
             }
 
-            System.setProperty(org.slf4j.impl.SimpleLogger.DEFAULT_LOG_LEVEL_KEY, loglevel);
+            System.setProperty(org.slf4j.simple.SimpleLogger.DEFAULT_LOG_LEVEL_KEY, loglevel);
 
             String baseDir = commandLine.hasOption(OPT_DIR) ? commandLine.getOptionValue(OPT_DIR)
                     : System.getenv("OPENHAB_USERDATA");

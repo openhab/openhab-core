@@ -12,8 +12,6 @@
  */
 package org.openhab.core.automation.util;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -49,7 +47,7 @@ public class ActionBuilder extends ModuleBuilder<ActionBuilder, Action> {
     }
 
     public ActionBuilder withInputs(@Nullable Map<String, String> inputs) {
-        this.inputs = inputs != null ? Collections.unmodifiableMap(new HashMap<>(inputs)) : null;
+        this.inputs = inputs != null ? Map.copyOf(inputs) : null;
         return this;
     }
 

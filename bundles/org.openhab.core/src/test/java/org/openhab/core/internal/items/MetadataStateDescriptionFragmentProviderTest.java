@@ -75,8 +75,7 @@ public class MetadataStateDescriptionFragmentProviderTest {
         providerTracker = captor.getValue();
         providerTracker.serviceChanged(new ServiceEvent(ServiceEvent.REGISTERED, managedProviderRefMock));
 
-        stateDescriptionFragmentProvider = new MetadataStateDescriptionFragmentProvider(metadataRegistryMock,
-                new HashMap<>());
+        stateDescriptionFragmentProvider = new MetadataStateDescriptionFragmentProvider(metadataRegistryMock, Map.of());
     }
 
     @Test

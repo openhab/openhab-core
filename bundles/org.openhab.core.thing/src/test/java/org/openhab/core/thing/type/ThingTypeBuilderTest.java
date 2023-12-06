@@ -20,7 +20,6 @@ import static org.mockito.Mockito.mock;
 
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -212,11 +211,7 @@ public class ThingTypeBuilderTest {
     }
 
     private Map<String, String> mockProperties() {
-        Map<String, String> result = new HashMap<>();
-        result.put("key1", "value1");
-        result.put("key2", "value2");
-
-        return result;
+        return Map.of("key1", "value1", "key2", "value2");
     }
 
     private <T> List<T> mockList(Class<T> entityClass, int size) {

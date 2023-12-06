@@ -19,7 +19,6 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -54,7 +53,7 @@ import javax.ws.rs.core.UriInfo;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.auth.Role;
-import org.openhab.core.common.registry.RegistryChangeListener;
+import org.openhab.core.common.registry.RegistryChangedRunnableListener;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionRegistry;
 import org.openhab.core.config.core.ConfigUtil;
@@ -171,7 +170,8 @@ public class ThingResource implements RESTResource {
     private final ThingRegistry thingRegistry;
     private final ThingStatusInfoI18nLocalizationService thingStatusInfoI18nLocalizationService;
     private final ThingTypeRegistry thingTypeRegistry;
-    private final ResetLastModifiedChangeListener resetLastModifiedChangeListener = new ResetLastModifiedChangeListener();
+    private final RegistryChangedRunnableListener<Thing> resetLastModifiedChangeListener = new RegistryChangedRunnableListener<>(
+            () -> cacheableListLastModified = null);
 
     private @Context @NonNullByDefault({}) UriInfo uriInfo;
     private @Nullable Date cacheableListLastModified = null;
@@ -636,7 +636,7 @@ public class ThingResource implements RESTResource {
         if (info != null) {
             return Response.ok().entity(info.getConfigStatusMessages()).build();
         }
-        return Response.ok().entity(Collections.EMPTY_SET).build();
+        return Response.ok().entity(Set.of()).build();
     }
 
     @PUT
@@ -888,28 +888,6 @@ public class ThingResource implements RESTResource {
             return new URI(uriString);
         } catch (URISyntaxException e) {
             throw new BadRequestException("Invalid URI syntax: " + uriString);
-        }
-    }
-
-    private void resetCacheableListLastModified() {
-        cacheableListLastModified = null;
-    }
-
-    private class ResetLastModifiedChangeListener implements RegistryChangeListener<Thing> {
-
-        @Override
-        public void added(Thing element) {
-            resetCacheableListLastModified();
-        }
-
-        @Override
-        public void removed(Thing element) {
-            resetCacheableListLastModified();
-        }
-
-        @Override
-        public void updated(Thing oldElement, Thing element) {
-            resetCacheableListLastModified();
         }
     }
 }

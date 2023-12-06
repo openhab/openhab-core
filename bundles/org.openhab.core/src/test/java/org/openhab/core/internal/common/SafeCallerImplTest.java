@@ -25,9 +25,9 @@ import java.lang.management.ThreadMXBean;
 import java.text.MessageFormat;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 import java.util.Random;
 import java.util.concurrent.Callable;
@@ -544,13 +544,7 @@ public class SafeCallerImplTest extends JavaTest {
     }
 
     private void configureSingleThread() {
-        safeCaller.modified(new HashMap<>() {
-            private static final long serialVersionUID = 1L;
-
-            {
-                put("singleThread", "true");
-            }
-        });
+        safeCaller.modified(Map.of("singleThread", "true"));
     }
 
     /**
