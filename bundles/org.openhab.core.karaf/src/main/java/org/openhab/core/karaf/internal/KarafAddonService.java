@@ -133,8 +133,7 @@ public class KarafAddonService implements AddonService {
 
         AddonInfo addonInfo = addonInfoRegistry.getAddonInfo(uid, locale);
 
-        if (isInstalled && addonInfo != null) {
-            // only enrich if this add-on is installed, otherwise wrong data might be added
+        if (addonInfo != null) {
             addon = addon.withLabel(addonInfo.getName()).withDescription(addonInfo.getDescription())
                     .withConnection(addonInfo.getConnection()).withCountries(addonInfo.getCountries())
                     .withLink(getDefaultDocumentationLink(type, name))
