@@ -81,7 +81,7 @@ public class AddonSuggestionService implements AutoCloseable {
         modified(config);
         changed();
 
-        // Changes to the configuration are expected to call the {@link Modified} method. This works well when running
+        // Changes to the configuration are expected to call the {@link modified} method. This works well when running
         // in Eclipse. Running in Karaf, the method was not consistently called. Therefore regularly check for changes
         // in configuration.
         // This pattern and code was re-used from {@link org.openhab.core.karaf.internal.FeatureInstaller}
