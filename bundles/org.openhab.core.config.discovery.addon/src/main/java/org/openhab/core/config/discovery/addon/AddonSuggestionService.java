@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -67,8 +68,8 @@ public class AddonSuggestionService implements AutoCloseable {
     private @Nullable AddonFinderService addonFinderService;
     private @Nullable Map<String, Object> config;
     private final ScheduledExecutorService scheduler;
-
-    private Map<String, Boolean> baseFinderConfig = new ConcurrentHashMap<>();
+    private final Map<String, Boolean> baseFinderConfig = new ConcurrentHashMap<>();
+    private final ScheduledFuture<?> syncConfigurationTask;
 
     @Activate
     public AddonSuggestionService(final @Reference ConfigurationAdmin configurationAdmin,
@@ -85,12 +86,12 @@ public class AddonSuggestionService implements AutoCloseable {
         // in configuration.
         // This pattern and code was re-used from {@link org.openhab.core.karaf.internal.FeatureInstaller}
         scheduler = ThreadPoolManager.getScheduledPool(ThreadPoolManager.THREAD_POOL_NAME_COMMON);
-        scheduler.scheduleWithFixedDelay(this::syncConfiguration, 1, 1, TimeUnit.MINUTES);
+        syncConfigurationTask = scheduler.scheduleWithFixedDelay(this::syncConfiguration, 1, 1, TimeUnit.MINUTES);
     }
 
     @Deactivate
     protected void deactivate() {
-        scheduler.shutdown();
+        syncConfigurationTask.cancel(true);
     }
 
     @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY)

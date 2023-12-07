@@ -12,12 +12,8 @@
  */
 package org.openhab.core.karaf.internal;
 
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-
 import org.apache.karaf.features.FeaturesService;
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.core.common.NamedThreadFactory;
 import org.openhab.core.config.discovery.addon.AddonFinderService;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -36,38 +32,32 @@ import org.slf4j.LoggerFactory;
 public class KarafAddonFinderService implements AddonFinderService {
     private final Logger logger = LoggerFactory.getLogger(KarafAddonFinderService.class);
 
-    private final ScheduledExecutorService scheduler;
     private final FeaturesService featuresService;
 
     @Activate
     public KarafAddonFinderService(final @Reference FeaturesService featuresService) {
         this.featuresService = featuresService;
-        scheduler = Executors.newSingleThreadScheduledExecutor(new NamedThreadFactory("karaf-addonfinders"));
     }
 
     @Override
     public void install(String id) {
-        scheduler.execute(() -> {
-            try {
-                if (!featuresService.isInstalled(featuresService.getFeature(id))) {
-                    featuresService.installFeature(id);
-                }
-            } catch (Exception e) {
-                logger.error("Failed to install add-on suggestion finder {}", id, e);
+        try {
+            if (!featuresService.isInstalled(featuresService.getFeature(id))) {
+                featuresService.installFeature(id);
             }
-        });
+        } catch (Exception e) {
+            logger.error("Failed to install add-on suggestion finder {}", id, e);
+        }
     }
 
     @Override
     public void uninstall(String id) {
-        scheduler.execute(() -> {
-            try {
-                if (featuresService.isInstalled(featuresService.getFeature(id))) {
-                    featuresService.uninstallFeature(id);
-                }
-            } catch (Exception e) {
-                logger.error("Failed to uninstall add-on suggestion finder {}", id, e);
+        try {
+            if (featuresService.isInstalled(featuresService.getFeature(id))) {
+                featuresService.uninstallFeature(id);
             }
-        });
+        } catch (Exception e) {
+            logger.error("Failed to uninstall add-on suggestion finder {}", id, e);
+        }
     }
 }
