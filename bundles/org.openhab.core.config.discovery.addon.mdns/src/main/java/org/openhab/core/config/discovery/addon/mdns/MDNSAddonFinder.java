@@ -139,7 +139,7 @@ public class MDNSAddonFinder extends BaseAddonFinder implements ServiceListener 
                             && matchPropertyKeys.stream().allMatch(
                                     name -> propertyMatches(matchProperties, name, service.getPropertyString(name)))) {
                         result.add(candidate);
-                        logger.debug("Suggested addon found: {}", candidate.getUID());
+                        logger.debug("Suggested add-on found: {}", candidate.getUID());
                         break;
                     }
                 }
