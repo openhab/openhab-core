@@ -128,7 +128,7 @@ public class UpnpAddonFinder extends BaseAddonFinder implements RegistryListener
                 propertyNames.removeAll(SUPPORTED_PROPERTIES);
 
                 if (!propertyNames.isEmpty()) {
-                    logger.warn("Addon '{}' addon.xml file contains unsupported 'match-property' [{}]",
+                    logger.warn("Add-on '{}' addon.xml file contains unsupported 'match-property' [{}]",
                             candidate.getUID(), String.join(",", propertyNames));
                     break;
                 }
