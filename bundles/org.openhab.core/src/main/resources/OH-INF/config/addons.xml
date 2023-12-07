@@ -20,7 +20,7 @@
 		<parameter name="suggestionFinderUpnp" type="boolean">
 			<advanced>true</advanced>
 			<label>UPnP Suggestion Finder</label>
-			<description>Use uPnP network scan to suggest add-ons.</description>
+			<description>Use UPnP network scan to suggest add-ons.</description>
 			<default>true</default>
 		</parameter>
 		<parameter name="suggestionFinderMdns" type="boolean">
