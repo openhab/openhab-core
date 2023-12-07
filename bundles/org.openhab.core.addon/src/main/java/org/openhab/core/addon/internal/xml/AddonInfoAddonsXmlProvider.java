@@ -82,11 +82,11 @@ public class AddonInfoAddonsXmlProvider implements AddonInfoProvider {
         File fileFolder = new File(folder);
         try {
             if (!fileFolder.isDirectory()) {
-                logger.warn("Folder '{}' does not exist", folder);
+                logger.debug("Folder '{}' does not exist", folder);
                 return;
             }
         } catch (SecurityException e) {
-            logger.warn("Folder '{}' security exception", folder);
+            logger.warn("Folder '{}' security exception", folder, e);
             return;
         }
         AddonInfoListReader reader = new AddonInfoListReader();
@@ -105,7 +105,7 @@ public class AddonInfoAddonsXmlProvider implements AddonInfoProvider {
             } catch (XStreamException e) {
                 logger.warn("File '{}' could not be deserialized", f.getName());
             } catch (SecurityException e) {
-                logger.warn("File '{}' security exception", f.getName());
+                logger.warn("File '{}' security exception", f.getName(), e);
             }
         });
     }
