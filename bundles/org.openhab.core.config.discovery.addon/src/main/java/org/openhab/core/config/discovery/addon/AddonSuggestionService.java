@@ -26,7 +26,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -35,7 +34,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.addon.AddonInfo;
 import org.openhab.core.addon.AddonInfoProvider;
-import org.openhab.core.common.NamedThreadFactory;
+import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.config.core.ConfigParser;
 import org.openhab.core.i18n.LocaleProvider;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -85,7 +84,7 @@ public class AddonSuggestionService implements AutoCloseable {
         // in Eclipse. Running in Karaf, the method was not consistently called. Therefore regularly check for changes
         // in configuration.
         // This pattern and code was re-used from {@link org.openhab.core.karaf.internal.FeatureInstaller}
-        scheduler = Executors.newSingleThreadScheduledExecutor(new NamedThreadFactory("addon-suggestion-finder"));
+        scheduler = ThreadPoolManager.getScheduledPool(ThreadPoolManager.THREAD_POOL_NAME_COMMON);
         scheduler.scheduleWithFixedDelay(this::syncConfiguration, 1, 1, TimeUnit.MINUTES);
     }
 
@@ -120,9 +119,9 @@ public class AddonSuggestionService implements AutoCloseable {
                 AddonFinderService finderService = addonFinderService;
                 if (feature != null && finderService != null) {
                     if (enabled) {
-                        finderService.install(feature);
+                        scheduler.execute(() -> finderService.install(feature));
                     } else {
-                        finderService.uninstall(feature);
+                        scheduler.execute(() -> finderService.uninstall(feature));
                     }
                 }
             }
