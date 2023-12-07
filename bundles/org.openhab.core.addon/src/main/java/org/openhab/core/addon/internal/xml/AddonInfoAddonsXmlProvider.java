@@ -86,7 +86,7 @@ public class AddonInfoAddonsXmlProvider implements AddonInfoProvider {
                 return;
             }
         } catch (SecurityException e) {
-            logger.warn("Folder '{}' security exception", folder, e);
+            logger.warn("Folder '{}' threw a security exception: {}", folder, e.getMessage());
             return;
         }
         AddonInfoListReader reader = new AddonInfoListReader();
@@ -105,7 +105,7 @@ public class AddonInfoAddonsXmlProvider implements AddonInfoProvider {
             } catch (XStreamException e) {
                 logger.warn("File '{}' could not be deserialized", f.getName());
             } catch (SecurityException e) {
-                logger.warn("File '{}' security exception", f.getName(), e);
+                logger.warn("File '{}' threw a security exception: {}", folder, e.getMessage());
             }
         });
     }
