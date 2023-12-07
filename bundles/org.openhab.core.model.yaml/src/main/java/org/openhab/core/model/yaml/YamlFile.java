@@ -15,6 +15,8 @@ package org.openhab.core.model.yaml;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The {@link YamlFile} is the DTO base class used to map a YAML configuration file.
@@ -25,6 +27,8 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  */
 @NonNullByDefault
 public abstract class YamlFile {
+
+    private final Logger logger = LoggerFactory.getLogger(YamlFile.class);
 
     /**
      * YAML file version
@@ -39,37 +43,36 @@ public abstract class YamlFile {
     public abstract List<? extends YamlElement> getElements();
 
     /**
-     * Check that the version in the YAML file in the expected one.
+     * Get the version present in the YAML file.
      *
-     * @throws YamlParseException if the version in the file is not the expected one
+     * @return the version in the file
      */
-    protected abstract void checkVersion() throws YamlParseException;
+    public int getVersion() {
+        return version;
+    }
 
     /**
      * Check that the file content is valid.
-     * It includes the check of the version, the check of duplicated elements (same identifier)
-     * and the check of each element.
+     * It includes the check of duplicated elements (same identifier) and the check of each element.
      *
-     * @throws YamlParseException if something is invalid
+     * @return true if all the checks are OK
      */
-    public void checkValidity() throws YamlParseException {
-        // Checking version
-        checkVersion();
-
+    public boolean isValid() {
         // Checking duplicated elements
         List<? extends YamlElement> elts = getElements();
         long nbDistinctIds = elts.stream().map(YamlElement::getId).distinct().count();
         if (nbDistinctIds < elts.size()) {
-            throw new YamlParseException("Elements with same ids detected in the file");
+            logger.debug("Elements with same ids detected in the file");
+            return false;
         }
 
         // Checking each element
         for (int i = 0; i < elts.size(); i++) {
-            try {
-                elts.get(i).checkValidity();
-            } catch (YamlParseException e) {
-                throw new YamlParseException("Error in element " + (i + 1) + ": " + e.getMessage());
+            if (!elts.get(i).isValid()) {
+                logger.debug("Error in element {}", i + 1);
+                return false;
             }
         }
+        return true;
     }
 }

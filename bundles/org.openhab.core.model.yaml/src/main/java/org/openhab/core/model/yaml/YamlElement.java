@@ -30,7 +30,7 @@ public interface YamlElement {
     /**
      * Check that the YAML element is valid
      *
-     * @throws YamlParseException if something is wrong
+     * @return true if all the checks are OK
      */
-    void checkValidity() throws YamlParseException;
+    boolean isValid();
 }

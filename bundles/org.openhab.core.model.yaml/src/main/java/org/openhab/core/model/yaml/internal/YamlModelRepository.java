@@ -159,7 +159,9 @@ public class YamlModelRepository implements WatchService.WatchEventListener {
         logger.debug("readYamlFile {} with {}", path.toFile().getAbsolutePath(), dtoClass.getName());
         try {
             YamlFile dto = yamlReader.readValue(path.toFile(), dtoClass);
-            dto.checkValidity();
+            if (!dto.isValid()) {
+                throw new YamlParseException("The file is not valid, some checks failed!");
+            }
             return dto;
         } catch (IOException e) {
             throw new YamlParseException(e);

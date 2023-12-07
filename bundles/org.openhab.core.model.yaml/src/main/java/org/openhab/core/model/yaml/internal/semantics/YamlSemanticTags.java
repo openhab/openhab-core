@@ -17,7 +17,6 @@ import java.util.List;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.model.yaml.YamlElement;
 import org.openhab.core.model.yaml.YamlFile;
-import org.openhab.core.model.yaml.YamlParseException;
 
 /**
  * The {@link YamlSemanticTags} is a data transfer object used to serialize a list of semantic tags
@@ -33,12 +32,5 @@ public class YamlSemanticTags extends YamlFile {
     @Override
     public List<? extends YamlElement> getElements() {
         return tags;
-    }
-
-    @Override
-    protected void checkVersion() throws YamlParseException {
-        if (version != 1) {
-            throw new YamlParseException("Version 1 required; please convert your file");
-        }
     }
 }

@@ -17,7 +17,8 @@ import java.util.Objects;
 
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.model.yaml.YamlElement;
-import org.openhab.core.model.yaml.YamlParseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The {@link YamlSemanticTag} is a data transfer object used to serialize a semantic tag
@@ -26,6 +27,8 @@ import org.openhab.core.model.yaml.YamlParseException;
  * @author Laurent Garnier - Initial contribution
  */
 public class YamlSemanticTag implements YamlElement {
+
+    private final Logger logger = LoggerFactory.getLogger(YamlSemanticTag.class);
 
     public String uid;
     public String label;
@@ -41,10 +44,12 @@ public class YamlSemanticTag implements YamlElement {
     }
 
     @Override
-    public void checkValidity() throws YamlParseException {
+    public boolean isValid() {
         if (uid == null) {
-            throw new YamlParseException("uid missing");
+            logger.debug("uid missing");
+            return false;
         }
+        return true;
     }
 
     @Override
