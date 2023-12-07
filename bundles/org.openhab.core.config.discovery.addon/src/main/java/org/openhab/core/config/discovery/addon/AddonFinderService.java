@@ -26,8 +26,7 @@ public interface AddonFinderService {
     /**
      * Installs the given add-on suggestion finder.
      *
-     * This can be a long running process. The framework makes sure that this is called within a separate thread and
-     * add-on events will be sent upon its completion.
+     * This can be a long running process. The framework makes sure that this is called within a separate thread.
      *
      * @param id the id of the add-on suggestion finder to install
      */
@@ -36,8 +35,7 @@ public interface AddonFinderService {
     /**
      * Uninstalls the given add-on suggestion finder.
      *
-     * This can be a long running process. The framework makes sure that this is called within a separate thread and
-     * add-on events will be sent upon its completion.
+     * This can be a long running process. The framework makes sure that this is called within a separate thread.
      *
      * @param id the id of the add-on suggestion finder to uninstall
      */
