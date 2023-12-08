@@ -33,6 +33,11 @@ public class AddonFinderConstants {
     public static final String SERVICE_NAME_MDNS = SERVICE_TYPE_MDNS + ADDON_SUGGESTION_FINDER;
     public static final String FEATURE_MDNS = ADDON_SUGGESTION_FINDER_FEATURE + SERVICE_TYPE_MDNS;
 
+    public static final String SERVICE_TYPE_PROCESS = "process";
+    public static final String CFG_FINDER_PROCESS = "suggestionFinderProcess";
+    public static final String SERVICE_NAME_PROCESS = SERVICE_TYPE_PROCESS + ADDON_SUGGESTION_FINDER;
+    public static final String FEATURE_PROCESS = ADDON_SUGGESTION_FINDER_FEATURE + SERVICE_TYPE_PROCESS;
+
     public static final String SERVICE_TYPE_UPNP = "upnp";
     public static final String CFG_FINDER_UPNP = "suggestionFinderUpnp";
     public static final String SERVICE_NAME_UPNP = SERVICE_TYPE_UPNP + ADDON_SUGGESTION_FINDER;
