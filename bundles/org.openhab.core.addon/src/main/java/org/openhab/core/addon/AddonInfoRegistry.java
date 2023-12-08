@@ -97,8 +97,15 @@ public class AddonInfoRegistry {
             return a;
         }
         AddonInfo.Builder builder = AddonInfo.builder(a);
-        if (a.getDescription().isEmpty()) {
+        if (AddonInfo.NA.equals(a.getName())) {
+            builder.withName(b.getName());
+        } else if (AddonInfo.NA.equals(b.getName())) {
+            builder.withName(a.getName());
+        }
+        if (AddonInfo.NA.equals(a.getDescription())) {
             builder.withDescription(b.getDescription());
+        } else if (AddonInfo.NA.equals(b.getDescription())) {
+            builder.withDescription(a.getDescription());
         }
         if (a.getConnection() == null && b.getConnection() != null) {
             builder.withConnection(b.getConnection());
