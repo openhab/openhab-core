@@ -64,7 +64,7 @@ public interface YamlModelListener<T extends YamlElement> {
      *
      * @return the DTO file class
      */
-    Class<? extends YamlFile> getFileClass();
+    Class<? extends AbstractYamlFile> getFileClass();
 
     /**
      * Get the DTO class to be used for each object of this model type.

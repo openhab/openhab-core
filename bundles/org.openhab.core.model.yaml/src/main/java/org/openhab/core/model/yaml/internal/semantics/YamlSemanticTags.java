@@ -15,8 +15,8 @@ package org.openhab.core.model.yaml.internal.semantics;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.core.model.yaml.AbstractYamlFile;
 import org.openhab.core.model.yaml.YamlElement;
-import org.openhab.core.model.yaml.YamlFile;
 
 /**
  * The {@link YamlSemanticTags} is a data transfer object used to serialize a list of semantic tags
@@ -25,7 +25,7 @@ import org.openhab.core.model.yaml.YamlFile;
  * @author Laurent Garnier - Initial contribution
  */
 @NonNullByDefault
-public class YamlSemanticTags extends YamlFile {
+public class YamlSemanticTags extends AbstractYamlFile {
 
     public List<YamlSemanticTag> tags = List.of();
 

@@ -24,8 +24,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.core.model.yaml.AbstractYamlFile;
 import org.openhab.core.model.yaml.YamlElement;
-import org.openhab.core.model.yaml.YamlFile;
 import org.openhab.core.model.yaml.YamlModelListener;
 import org.openhab.core.model.yaml.YamlParseException;
 import org.openhab.core.service.WatchService;
@@ -105,7 +105,7 @@ public class YamlModelRepository implements WatchService.WatchEventListener {
             }
             oldObjects = oldListObjects.stream().collect(Collectors.toMap(YamlElement::getId, obj -> obj));
         } else {
-            YamlFile yamlData;
+            AbstractYamlFile yamlData;
             try {
                 yamlData = readYamlFile(fullPath, listener.getFileClass());
             } catch (YamlParseException e) {
@@ -155,10 +155,11 @@ public class YamlModelRepository implements WatchService.WatchEventListener {
         }
     }
 
-    private YamlFile readYamlFile(Path path, Class<? extends YamlFile> dtoClass) throws YamlParseException {
+    private AbstractYamlFile readYamlFile(Path path, Class<? extends AbstractYamlFile> dtoClass)
+            throws YamlParseException {
         logger.debug("readYamlFile {} with {}", path.toFile().getAbsolutePath(), dtoClass.getName());
         try {
-            YamlFile dto = yamlReader.readValue(path.toFile(), dtoClass);
+            AbstractYamlFile dto = yamlReader.readValue(path.toFile(), dtoClass);
             if (!dto.isValid()) {
                 throw new YamlParseException("The file is not valid, some checks failed!");
             }

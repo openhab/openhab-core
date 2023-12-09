@@ -19,8 +19,8 @@ import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.common.registry.AbstractProvider;
+import org.openhab.core.model.yaml.AbstractYamlFile;
 import org.openhab.core.model.yaml.YamlElement;
-import org.openhab.core.model.yaml.YamlFile;
 import org.openhab.core.model.yaml.YamlModelListener;
 import org.openhab.core.semantics.SemanticTag;
 import org.openhab.core.semantics.SemanticTagImpl;
@@ -70,7 +70,7 @@ public class YamlSemanticTagProvider extends AbstractProvider<SemanticTag>
     }
 
     @Override
-    public Class<? extends YamlFile> getFileClass() {
+    public Class<? extends AbstractYamlFile> getFileClass() {
         return YamlSemanticTags.class;
     }
 

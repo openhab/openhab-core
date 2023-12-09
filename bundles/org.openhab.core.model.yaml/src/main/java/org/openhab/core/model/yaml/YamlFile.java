@@ -15,41 +15,28 @@ package org.openhab.core.model.yaml;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
- * The {@link YamlFile} is the DTO base class used to map a YAML configuration file.
- *
- * A YAML configuration file consists of a version and a list of elements.
+ * The {@link YamlFile} is the interface to manage the generic content of a YAML configuration file.
  *
  * @author Laurent Garnier - Initial contribution
  */
 @NonNullByDefault
-public abstract class YamlFile {
-
-    private final Logger logger = LoggerFactory.getLogger(YamlFile.class);
-
-    /**
-     * YAML file version
-     */
-    public int version;
+public interface YamlFile {
 
     /**
      * Get the list of elements present in the YAML file.
      *
      * @return the list of elements
      */
-    public abstract List<? extends YamlElement> getElements();
+    List<? extends YamlElement> getElements();
 
     /**
      * Get the version present in the YAML file.
      *
      * @return the version in the file
      */
-    public int getVersion() {
-        return version;
-    }
+    int getVersion();
 
     /**
      * Check that the file content is valid.
@@ -57,22 +44,5 @@ public abstract class YamlFile {
      *
      * @return true if all the checks are OK
      */
-    public boolean isValid() {
-        // Checking duplicated elements
-        List<? extends YamlElement> elts = getElements();
-        long nbDistinctIds = elts.stream().map(YamlElement::getId).distinct().count();
-        if (nbDistinctIds < elts.size()) {
-            logger.debug("Elements with same ids detected in the file");
-            return false;
-        }
-
-        // Checking each element
-        for (int i = 0; i < elts.size(); i++) {
-            if (!elts.get(i).isValid()) {
-                logger.debug("Error in element {}", i + 1);
-                return false;
-            }
-        }
-        return true;
-    }
+    boolean isValid();
 }
