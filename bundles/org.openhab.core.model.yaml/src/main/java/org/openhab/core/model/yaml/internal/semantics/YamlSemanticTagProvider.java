@@ -80,7 +80,7 @@ public class YamlSemanticTagProvider extends AbstractProvider<SemanticTag>
     }
 
     @Override
-    public void addedModel(String modelName, List<? extends YamlElement> elements) {
+    public void addedModel(String modelName, Collection<? extends YamlElement> elements) {
         List<SemanticTag> added = elements.stream().map(e -> mapSemanticTag((YamlSemanticTag) e))
                 .sorted(Comparator.comparing(SemanticTag::getUID)).toList();
         tags.addAll(added);
@@ -91,7 +91,7 @@ public class YamlSemanticTagProvider extends AbstractProvider<SemanticTag>
     }
 
     @Override
-    public void updatedModel(String modelName, List<? extends YamlElement> elements) {
+    public void updatedModel(String modelName, Collection<? extends YamlElement> elements) {
         List<SemanticTag> updated = elements.stream().map(e -> mapSemanticTag((YamlSemanticTag) e)).toList();
         updated.forEach(t -> {
             tags.stream().filter(tag -> tag.getUID().equals(t.getUID())).findFirst().ifPresentOrElse(oldTag -> {
@@ -104,7 +104,7 @@ public class YamlSemanticTagProvider extends AbstractProvider<SemanticTag>
     }
 
     @Override
-    public void removedModel(String modelName, List<? extends YamlElement> elements) {
+    public void removedModel(String modelName, Collection<? extends YamlElement> elements) {
         List<SemanticTag> removed = elements.stream().map(e -> mapSemanticTag((YamlSemanticTag) e))
                 .sorted(Comparator.comparing(SemanticTag::getUID).reversed()).toList();
         removed.forEach(t -> {

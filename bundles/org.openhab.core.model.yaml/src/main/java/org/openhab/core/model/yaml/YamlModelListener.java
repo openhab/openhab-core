@@ -12,7 +12,7 @@
  */
 package org.openhab.core.model.yaml;
 
-import java.util.List;
+import java.util.Collection;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
@@ -29,25 +29,25 @@ public interface YamlModelListener<T extends YamlElement> {
      * Method called by the model repository when elements from a model are added.
      *
      * @param modelName the name of the model
-     * @param elements the list of added elements
+     * @param elements the collection of added elements
      */
-    void addedModel(String modelName, List<? extends YamlElement> elements);
+    void addedModel(String modelName, Collection<? extends YamlElement> elements);
 
     /**
      * Method called by the model repository when elements from a model are updated.
      *
      * @param modelName the name of the model
-     * @param elements the list of updated elements
+     * @param elements the collection of updated elements
      */
-    void updatedModel(String modelName, List<? extends YamlElement> elements);
+    void updatedModel(String modelName, Collection<? extends YamlElement> elements);
 
     /**
      * Method called by the model repository when elements from a model are removed.
      *
      * @param modelName the name of the model
-     * @param elements the list of removed elements
+     * @param elements the collection of removed elements
      */
-    void removedModel(String modelName, List<? extends YamlElement> elements);
+    void removedModel(String modelName, Collection<? extends YamlElement> elements);
 
     /**
      * Get the root name of this model type which is also the name of the root folder
