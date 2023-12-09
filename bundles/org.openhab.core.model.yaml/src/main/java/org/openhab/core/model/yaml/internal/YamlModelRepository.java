@@ -84,7 +84,7 @@ public class YamlModelRepository implements WatchService.WatchEventListener {
         String dirName = path.subpath(0, 1).toString();
 
         if (Files.isDirectory(fullPath) || fullPath.toFile().isHidden() || !fullPath.toString().endsWith(".yaml")) {
-            logger.debug("Ignored {}", fullPath);
+            logger.trace("Ignored {}", fullPath);
             return;
         }
 
@@ -127,31 +127,31 @@ public class YamlModelRepository implements WatchService.WatchEventListener {
 
         String modelName = fullPath.toFile().getName();
         modelName = modelName.substring(0, modelName.indexOf(".yaml"));
-        List<? extends YamlElement> listElts;
-        listElts = oldObjects.entrySet().stream()
+        List<? extends YamlElement> listElements;
+        listElements = oldObjects.entrySet().stream()
                 .filter(entry -> entry.getValue().getClass().equals(listener.getElementClass())
                         && !newObjects.containsKey(entry.getKey()))
                 .map(Map.Entry::getValue).toList();
-        if (!listElts.isEmpty()) {
-            listener.removedModel(modelName, listElts);
+        if (!listElements.isEmpty()) {
+            listener.removedModel(modelName, listElements);
         }
 
-        listElts = newObjects.entrySet().stream()
+        listElements = newObjects.entrySet().stream()
                 .filter(entry -> entry.getValue().getClass().equals(listener.getElementClass())
                         && !oldObjects.containsKey(entry.getKey()))
                 .map(Map.Entry::getValue).toList();
-        if (!listElts.isEmpty()) {
-            listener.addedModel(modelName, listElts);
+        if (!listElements.isEmpty()) {
+            listener.addedModel(modelName, listElements);
         }
 
         // Object is ignored if unchanged
-        listElts = newObjects.entrySet().stream()
+        listElements = newObjects.entrySet().stream()
                 .filter(entry -> entry.getValue().getClass().equals(listener.getElementClass())
                         && oldObjects.containsKey(entry.getKey())
                         && !entry.getValue().equals(oldObjects.get(entry.getKey())))
                 .map(Map.Entry::getValue).toList();
-        if (!listElts.isEmpty()) {
-            listener.updatedModel(modelName, listElts);
+        if (!listElements.isEmpty()) {
+            listener.updatedModel(modelName, listElements);
         }
     }
 
