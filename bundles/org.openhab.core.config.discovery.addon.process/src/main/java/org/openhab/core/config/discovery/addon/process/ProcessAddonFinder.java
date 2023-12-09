@@ -16,16 +16,16 @@ import static org.openhab.core.config.discovery.addon.AddonFinderConstants.SERVI
 import static org.openhab.core.config.discovery.addon.AddonFinderConstants.SERVICE_TYPE_PROCESS;
 
 import java.util.HashSet;
-import java.util.Map;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.addon.AddonDiscoveryMethod;
 import org.openhab.core.addon.AddonInfo;
+import org.openhab.core.addon.AddonMatchProperty;
 import org.openhab.core.config.discovery.addon.AddonFinder;
 import org.openhab.core.config.discovery.addon.BaseAddonFinder;
 import org.osgi.service.component.annotations.Activate;
@@ -71,41 +71,43 @@ public class ProcessAddonFinder extends BaseAddonFinder {
 
     @Override
     public Set<AddonInfo> getSuggestedAddons() {
+        logger.trace("ProcessAddonFinder::getSuggestedAddons");
         Set<String> processList = ProcessHandle.allProcesses().map(this::getProcessCommandProcess)
                 .filter(Predicate.not(String::isEmpty)).collect(Collectors.toUnmodifiableSet());
+        // logging task list is commented out by default due to privacy reasons
+        // logger.trace("Processes visible: {}", processList.toString());
+
         Set<AddonInfo> result = new HashSet<>();
         for (AddonInfo candidate : addonCandidates) {
             for (AddonDiscoveryMethod method : candidate.getDiscoveryMethods().stream()
                     .filter(method -> SERVICE_TYPE.equals(method.getServiceType())).toList()) {
-                Map<String, Pattern> matchProperties = method.getMatchProperties().stream()
-                        .collect(Collectors.toMap(property -> property.getName(), property -> property.getPattern()));
 
-                // make sure addon.xml specifies required match properties
-                Set<String> propertyNames = new HashSet<>(matchProperties.keySet());
-                if (!matchProperties.containsKey(COMMAND)) {
+                List<AddonMatchProperty> matchProperties = method.getMatchProperties();
+                List<AddonMatchProperty> commands = matchProperties.stream()
+                        .filter(amp -> COMMAND.equals(amp.getName())).collect(Collectors.toUnmodifiableList());
+
+                if (matchProperties.size() != commands.size()) {
+                    logger.warn("Add-on '{}' addon.xml file contains unsupported 'match-property'", candidate.getUID());
+                }
+
+                if (commands.isEmpty()) {
                     logger.warn("Add-on '{}' addon.xml file does not specify match property \"{}\"", candidate.getUID(),
                             COMMAND);
-                    break;
-                }
-                // make sure addon.xml does not specify unknown properties
-                propertyNames.remove(COMMAND);
-                if (!propertyNames.isEmpty()) {
-                    logger.warn("Add-on '{}' addon.xml file contains unsupported 'match-property' [{}]",
-                            candidate.getUID(), String.join(",", propertyNames));
                     break;
                 }
 
                 // now check if a process matches the pattern defined in addon.xml
                 logger.debug("Checking candidate: {}", candidate.getUID());
 
-                Pattern p = matchProperties.get(COMMAND);
+                for (AddonMatchProperty command : commands) {
+                    logger.trace("Candidate {}, pattern \"{}\"", candidate.getUID(), command.getRegex());
+                    boolean match = processList.stream().anyMatch(c -> command.getPattern().matcher(c).matches());
 
-                boolean match = processList.stream().anyMatch(c -> p.matcher(c).matches());
-
-                if (match) {
-                    result.add(candidate);
-                    logger.debug("Suggested add-on found: {}", candidate.getUID());
-                    break;
+                    if (match) {
+                        result.add(candidate);
+                        logger.debug("Suggested add-on found: {}", candidate.getUID());
+                        break;
+                    }
                 }
             }
         }

@@ -12,7 +12,7 @@
 
   <artifactId>org.openhab.core.config.discovery.addon.process</artifactId>
 
-  <name>openHAB Core :: Bundles :: Process-based Add-on Finder</name>
+  <name>openHAB Core :: Bundles :: Process-based Suggested Add-on Finder</name>
 
   <dependencies>
     <dependency>
