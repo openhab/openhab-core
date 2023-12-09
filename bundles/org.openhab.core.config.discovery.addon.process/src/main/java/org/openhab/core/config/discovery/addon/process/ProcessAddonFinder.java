@@ -15,6 +15,7 @@ package org.openhab.core.config.discovery.addon.process;
 import static org.openhab.core.config.discovery.addon.AddonFinderConstants.SERVICE_NAME_PROCESS;
 import static org.openhab.core.config.discovery.addon.AddonFinderConstants.SERVICE_TYPE_PROCESS;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -72,12 +73,18 @@ public class ProcessAddonFinder extends BaseAddonFinder {
     @Override
     public Set<AddonInfo> getSuggestedAddons() {
         logger.trace("ProcessAddonFinder::getSuggestedAddons");
-        Set<String> processList = ProcessHandle.allProcesses().map(this::getProcessCommandProcess)
-                .filter(Predicate.not(String::isEmpty)).collect(Collectors.toUnmodifiableSet());
+        Set<AddonInfo> result = new HashSet<>();
+        Set<String> processList = Collections.emptySet();
+        try {
+            processList = ProcessHandle.allProcesses().map(this::getProcessCommandProcess)
+                    .filter(Predicate.not(String::isEmpty)).collect(Collectors.toUnmodifiableSet());
+        } catch (SecurityException | UnsupportedOperationException unused) {
+            logger.info("Cannot obtain process list, suggesting add-ons not possible");
+            return result;
+        }
         // logging task list is commented out by default due to privacy reasons
         // logger.trace("Processes visible: {}", processList.toString());
 
-        Set<AddonInfo> result = new HashSet<>();
         for (AddonInfo candidate : addonCandidates) {
             for (AddonDiscoveryMethod method : candidate.getDiscoveryMethods().stream()
                     .filter(method -> SERVICE_TYPE.equals(method.getServiceType())).toList()) {
