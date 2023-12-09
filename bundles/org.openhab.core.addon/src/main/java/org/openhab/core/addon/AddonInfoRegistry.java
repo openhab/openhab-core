@@ -108,6 +108,9 @@ public class AddonInfoRegistry {
             builder.withName(b.getName());
             builder.withDescription(b.getDescription());
         }
+        if (!(a.isMasterAddonInfo() || b.isMasterAddonInfo())) {
+            builder.isMasterAddonInfo(false);
+        }
         if (a.getConnection() == null && b.getConnection() != null) {
             builder.withConnection(b.getConnection());
         }
