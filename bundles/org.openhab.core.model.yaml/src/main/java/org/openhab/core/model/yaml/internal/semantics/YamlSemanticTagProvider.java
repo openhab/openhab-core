@@ -12,10 +12,11 @@
  */
 package org.openhab.core.model.yaml.internal.semantics;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.common.registry.AbstractProvider;
@@ -48,7 +49,7 @@ public class YamlSemanticTagProvider extends AbstractProvider<SemanticTag>
 
     private final Logger logger = LoggerFactory.getLogger(YamlSemanticTagProvider.class);
 
-    private final List<SemanticTag> tags = new ArrayList<>();
+    private final Set<SemanticTag> tags = new TreeSet<>(Comparator.comparing(SemanticTag::getUID));
 
     @Activate
     public YamlSemanticTagProvider() {
@@ -61,7 +62,7 @@ public class YamlSemanticTagProvider extends AbstractProvider<SemanticTag>
 
     @Override
     public Collection<SemanticTag> getAll() {
-        return tags.stream().sorted(Comparator.comparing(SemanticTag::getUID)).toList();
+        return tags;
     }
 
     @Override
