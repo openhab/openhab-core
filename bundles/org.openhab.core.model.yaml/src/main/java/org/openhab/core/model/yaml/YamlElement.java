@@ -12,12 +12,15 @@
  */
 package org.openhab.core.model.yaml;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * The {@link YamlElement} interface offers an identifier and a check validity method
  * to any element defined in a YAML configuration file.
  *
  * @author Laurent Garnier - Initial contribution
  */
+@NonNullByDefault
 public interface YamlElement {
 
     /**
