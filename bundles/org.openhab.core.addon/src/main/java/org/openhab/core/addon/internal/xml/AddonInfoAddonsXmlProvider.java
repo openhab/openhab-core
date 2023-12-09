@@ -95,7 +95,7 @@ public class AddonInfoAddonsXmlProvider implements AddonInfoProvider {
                 String xml = Files.readString(f.toPath());
                 if (xml != null && !xml.isBlank()) {
                     addonInfos.addAll(reader.readFromXML(xml).getAddons().stream()
-                            .map(a -> AddonInfo.builder(a).withName(AddonInfo.NA).withDescription(AddonInfo.NA).build())
+                            .map(a -> AddonInfo.builder(a).isMasterAddonInfo(false).build())
                             .collect(Collectors.toSet()));
                 } else {
                     logger.warn("File '{}' contents are null or empty", f.getName());

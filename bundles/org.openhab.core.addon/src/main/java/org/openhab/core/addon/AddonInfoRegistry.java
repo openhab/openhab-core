@@ -28,6 +28,8 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The {@link AddonInfoRegistry} provides access to {@link AddonInfo} objects.
@@ -39,6 +41,8 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 @Component(immediate = true, service = AddonInfoRegistry.class)
 @NonNullByDefault
 public class AddonInfoRegistry {
+
+    private final Logger logger = LoggerFactory.getLogger(AddonInfoRegistry.class);
 
     private final Collection<AddonInfoProvider> addonInfoProviders = new CopyOnWriteArrayList<>();
 
@@ -85,7 +89,7 @@ public class AddonInfoRegistry {
      * <p>
      * If the first object has a non-null field value the result object takes the first value, or if the second object
      * has a non-null field value the result object takes the second value. Otherwise the field remains null.
-     * 
+     *
      * @param a the first {@link AddonInfo} (could be null)
      * @param b the second {@link AddonInfo} (could be null)
      * @return a new {@link AddonInfo} containing the combined field values (could be null)
@@ -97,15 +101,15 @@ public class AddonInfoRegistry {
             return a;
         }
         AddonInfo.Builder builder = AddonInfo.builder(a);
-        if (AddonInfo.NA.equals(a.getName())) {
-            builder.withName(b.getName());
-        } else if (AddonInfo.NA.equals(b.getName())) {
+        if (a.isMasterAddonInfo()) {
             builder.withName(a.getName());
-        }
-        if (AddonInfo.NA.equals(a.getDescription())) {
-            builder.withDescription(b.getDescription());
-        } else if (AddonInfo.NA.equals(b.getDescription())) {
             builder.withDescription(a.getDescription());
+        } else {
+            builder.withName(b.getName());
+            builder.withDescription(b.getDescription());
+        }
+        if (!(a.isMasterAddonInfo() || b.isMasterAddonInfo())) {
+            builder.isMasterAddonInfo(false);
         }
         if (a.getConnection() == null && b.getConnection() != null) {
             builder.withConnection(b.getConnection());
