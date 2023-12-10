@@ -22,6 +22,7 @@ import java.util.TreeMap;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.common.registry.AbstractProvider;
+import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemRegistry;
@@ -33,6 +34,7 @@ import org.openhab.core.semantics.Equipment;
 import org.openhab.core.semantics.Location;
 import org.openhab.core.semantics.Point;
 import org.openhab.core.semantics.Property;
+import org.openhab.core.semantics.SemanticTag;
 import org.openhab.core.semantics.SemanticTagRegistry;
 import org.openhab.core.semantics.SemanticTags;
 import org.openhab.core.semantics.Tag;
@@ -72,11 +74,16 @@ public class SemanticsMetadataProvider extends AbstractProvider<Metadata>
     private final Map<String, Metadata> semantics = new TreeMap<>(String::compareTo);
 
     private final ItemRegistry itemRegistry;
+    private final SemanticTagRegistry semanticTagRegistry;
+
+    private SemanticTagRegistryChangeListener listener;
 
     @Activate
     public SemanticsMetadataProvider(final @Reference ItemRegistry itemRegistry,
             final @Reference SemanticTagRegistry semanticTagRegistry) {
         this.itemRegistry = itemRegistry;
+        this.semanticTagRegistry = semanticTagRegistry;
+        this.listener = new SemanticTagRegistryChangeListener(this);
     }
 
     @Activate
@@ -86,10 +93,12 @@ public class SemanticsMetadataProvider extends AbstractProvider<Metadata>
             processItem(item);
         }
         itemRegistry.addRegistryChangeListener(this);
+        semanticTagRegistry.addRegistryChangeListener(listener);
     }
 
     @Deactivate
     protected void deactivate() {
+        semanticTagRegistry.removeRegistryChangeListener(listener);
         itemRegistry.removeRegistryChangeListener(this);
         semantics.clear();
     }
@@ -279,5 +288,29 @@ public class SemanticsMetadataProvider extends AbstractProvider<Metadata>
     @Override
     public void updated(Item oldItem, Item item) {
         processItem(item);
+    }
+
+    private class SemanticTagRegistryChangeListener implements RegistryChangeListener<SemanticTag> {
+
+        private SemanticsMetadataProvider provider;
+
+        public SemanticTagRegistryChangeListener(SemanticsMetadataProvider provider) {
+            this.provider = provider;
+        }
+
+        @Override
+        public void added(SemanticTag element) {
+            provider.allItemsChanged(List.of());
+        }
+
+        @Override
+        public void removed(SemanticTag element) {
+            provider.allItemsChanged(List.of());
+        }
+
+        @Override
+        public void updated(SemanticTag oldElement, SemanticTag element) {
+            provider.allItemsChanged(List.of());
+        }
     }
 }

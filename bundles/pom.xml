@@ -102,6 +102,7 @@
     <module>org.openhab.core.model.thing</module>
     <module>org.openhab.core.model.thing.ide</module>
     <module>org.openhab.core.model.thing.runtime</module>
+    <module>org.openhab.core.model.yaml</module>
     <module>org.openhab.core.storage.json</module>
     <module>org.openhab.core.test</module>
     <module>org.openhab.core.test.magic</module>
