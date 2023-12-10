@@ -17,6 +17,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.config.discovery.addon.AddonFinderService;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,31 +34,45 @@ public class KarafAddonFinderService implements AddonFinderService {
     private final Logger logger = LoggerFactory.getLogger(KarafAddonFinderService.class);
 
     private final FeaturesService featuresService;
+    private boolean deactivated;
 
     @Activate
     public KarafAddonFinderService(final @Reference FeaturesService featuresService) {
         this.featuresService = featuresService;
     }
 
+    @Deactivate
+    protected void deactivate() {
+        deactivated = true;
+    }
+
     @Override
     public void install(String id) {
-        try {
-            if (!featuresService.isInstalled(featuresService.getFeature(id))) {
-                featuresService.installFeature(id);
+        if (!deactivated) {
+            try {
+                if (!featuresService.isInstalled(featuresService.getFeature(id))) {
+                    featuresService.installFeature(id);
+                }
+            } catch (Exception e) {
+                if (!deactivated) {
+                    logger.error("Failed to install add-on suggestion finder {}", id, e);
+                }
             }
-        } catch (Exception e) {
-            logger.error("Failed to install add-on suggestion finder {}", id, e);
         }
     }
 
     @Override
     public void uninstall(String id) {
-        try {
-            if (featuresService.isInstalled(featuresService.getFeature(id))) {
-                featuresService.uninstallFeature(id);
+        if (!deactivated) {
+            try {
+                if (featuresService.isInstalled(featuresService.getFeature(id))) {
+                    featuresService.uninstallFeature(id);
+                }
+            } catch (Exception e) {
+                if (!deactivated) {
+                    logger.error("Failed to uninstall add-on suggestion finder {}", id, e);
+                }
             }
-        } catch (Exception e) {
-            logger.error("Failed to uninstall add-on suggestion finder {}", id, e);
         }
     }
 }
