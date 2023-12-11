@@ -669,7 +669,7 @@ public class ModbusManagerImpl implements ModbusManager {
                     lastError.set(new ModbusSlaveErrorResponseExceptionImpl(e));
                     // Slave returned explicit error response, no reason to re-establish new connection
                     if (willRetry && e.getType() == MODBUS_EXCEPTION_SLAVE_DEVICE_BUSY) {
-                        logger.info(
+                        logger.debug(
                                 "Try {} out of {} failed when executing request ({}). The slave device is busy (exception code {}). Will try again soon. [operation ID {}]",
                                 tryIndex, maxTries, request, e.getType(), operationId);
                     } else if (willRetry) {
