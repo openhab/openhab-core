@@ -157,6 +157,7 @@ public class YamlModelRepository implements WatchService.WatchEventListener {
 
     private AbstractYamlFile readYamlFile(Path path, Class<? extends AbstractYamlFile> dtoClass)
             throws YamlParseException {
+        logger.info("Loading model '{}'", path.toFile().getName());
         logger.debug("readYamlFile {} with {}", path.toFile().getAbsolutePath(), dtoClass.getName());
         try {
             AbstractYamlFile dto = yamlReader.readValue(path.toFile(), dtoClass);
