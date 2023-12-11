@@ -12,8 +12,7 @@
  */
 package org.openhab.core.config.discovery.addon.process;
 
-import static org.openhab.core.config.discovery.addon.AddonFinderConstants.SERVICE_NAME_PROCESS;
-import static org.openhab.core.config.discovery.addon.AddonFinderConstants.SERVICE_TYPE_PROCESS;
+import static org.openhab.core.config.discovery.addon.AddonFinderConstants.ADDON_SUGGESTION_FINDER;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -44,10 +43,11 @@ import org.slf4j.LoggerFactory;
 @Component(service = AddonFinder.class, name = ProcessAddonFinder.SERVICE_NAME)
 public class ProcessAddonFinder extends BaseAddonFinder {
 
-    private static final String COMMAND = "command";
+    public static final String SERVICE_TYPE = "process";
+    public static final String CFG_FINDER_PROCESS = "suggestionFinderProcess";
+    public static final String SERVICE_NAME = SERVICE_TYPE + ADDON_SUGGESTION_FINDER;
 
-    public static final String SERVICE_TYPE = SERVICE_TYPE_PROCESS;
-    public static final String SERVICE_NAME = SERVICE_NAME_PROCESS;
+    private static final String COMMAND = "command";
 
     private final Logger logger = LoggerFactory.getLogger(ProcessAddonFinder.class);
 
@@ -82,8 +82,6 @@ public class ProcessAddonFinder extends BaseAddonFinder {
             logger.info("Cannot obtain process list, suggesting add-ons not possible");
             return result;
         }
-        // logging task list is commented out by default due to privacy reasons
-        // logger.trace("Processes visible: {}", processList.toString());
 
         for (AddonInfo candidate : addonCandidates) {
             for (AddonDiscoveryMethod method : candidate.getDiscoveryMethods().stream()
