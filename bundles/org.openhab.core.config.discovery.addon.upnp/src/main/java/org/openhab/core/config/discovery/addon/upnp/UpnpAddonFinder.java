@@ -85,6 +85,7 @@ public class UpnpAddonFinder extends BaseAddonFinder implements RegistryListener
             remoteDeviceAdded(registry, device);
         }
         registry.addListener(this);
+        upnpService.getControlPoint().search();
     }
 
     @Deactivate
