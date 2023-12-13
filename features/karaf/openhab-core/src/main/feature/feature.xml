@@ -98,6 +98,12 @@
 		<feature dependency="true">openhab.tp-jupnp</feature>
 	</feature>
 
+	<feature name="openhab-core-config-discovery-addon-usb" version="${project.version}">
+		<feature>openhab-core-base</feature>
+		<feature>openhab-core-config-discovery-addon</feature>
+		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery.addon.usb/${project.version}</bundle>
+	</feature>
+
 	<feature name="openhab-core-addon-marketplace" version="${project.version}">
 		<feature>kar</feature>
 		<feature>openhab-core-base</feature>
