@@ -80,6 +80,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
 
     public static final String IS_TEMPLATE_CONFIGURATION = "isTemplate";
     public static final String IS_SILENT_CONFIGURATION = "isSilent";
+    public static final String IS_FORCED_CONFIGURATION = "isForced";
 
     /**
      * Reserved token to use in custom item rules.
@@ -412,7 +413,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
      * @return The created rule.
      */
     protected Rule itemRule(Object headExpression, @Nullable Object tailExpression) {
-        return restrictedItemRule(ItemFilter.all(), headExpression, tailExpression, false);
+        return restrictedItemRule(ItemFilter.all(), headExpression, tailExpression, false, false);
     }
 
     /**
@@ -428,7 +429,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
      * @return The created rule.
      */
     protected Rule restrictedItemRule(Set<Item> allowedItems, Object headExpression, @Nullable Object tailExpression) {
-        return restrictedItemRule(ItemFilter.forItems(allowedItems), headExpression, tailExpression, false);
+        return restrictedItemRule(ItemFilter.forItems(allowedItems), headExpression, tailExpression, false, false);
     }
 
     /**
@@ -444,10 +445,10 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
      * @return The created rule.
      */
     protected Rule restrictedItemRule(ItemFilter itemFilter, Object headExpression, @Nullable Object tailExpression,
-            boolean isSilent) {
+            boolean isForced, boolean isSilent) {
         Expression tail = exp(tailExpression);
         Expression expression = tail == null ? seq(headExpression, name()) : seq(headExpression, name(tail), tail);
-        return new Rule(expression, itemFilter, isSilent) {
+        return new Rule(expression, itemFilter, isForced, isSilent) {
             @Override
             public InterpretationResult interpretAST(ResourceBundle language, ASTNode node,
                     InterpretationContext context) {
@@ -489,7 +490,8 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
      * @return The created rule.
      */
     protected Rule restrictedDynamicItemRule(Item item, ItemFilter itemFilter, Object headExpression,
-            Object midExpression, @Nullable Object tailExpression, boolean isNameFirst, boolean isSilent) {
+            Object midExpression, @Nullable Object tailExpression, boolean isNameFirst, boolean isForced,
+            boolean isSilent) {
         Expression head = Objects.requireNonNull(exp(headExpression));
         Expression mid = Objects.requireNonNull(exp(midExpression));
         @Nullable
@@ -501,7 +503,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
                 seq(head, firstValue, mid, secondValue) : //
                 seq(head, firstValue, mid, secondValue, tail);
         Map<String, String> itemValuesByLabel = getItemValuesByLabel(item);
-        return new Rule(expression, itemFilter, isSilent) {
+        return new Rule(expression, itemFilter, isForced, isSilent) {
             @Override
             public InterpretationResult interpretAST(ResourceBundle language, ASTNode node,
                     InterpretationContext context) {
@@ -532,12 +534,12 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
      * @return The created rule.
      */
     protected Rule customDynamicRule(Item item, ItemFilter itemFilter, Object headExpression,
-            @Nullable Object tailExpression, boolean isSilent) {
+            @Nullable Object tailExpression, boolean isForced, boolean isSilent) {
         Expression tail = exp(tailExpression);
         Expression expression = tail == null ? seq(headExpression, value(null))
                 : seq(headExpression, value(tail), tail);
         HashMap<String, String> valuesByLabel = getItemValuesByLabel(item);
-        return new Rule(expression, itemFilter, isSilent) {
+        return new Rule(expression, itemFilter, isForced, isSilent) {
             @Override
             public InterpretationResult interpretAST(ResourceBundle language, ASTNode node,
                     InterpretationContext context) {
@@ -587,8 +589,8 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
      * @param cmdExpression The expression.
      * @return The created rule.
      */
-    protected Rule customCommandRule(ItemFilter itemFilter, Object cmdExpression, boolean isSilent) {
-        return new Rule(Objects.requireNonNull(exp(cmdExpression)), itemFilter, isSilent) {
+    protected Rule customCommandRule(ItemFilter itemFilter, Object cmdExpression, boolean isForced, boolean isSilent) {
+        return new Rule(Objects.requireNonNull(exp(cmdExpression)), itemFilter, isForced, isSilent) {
             @Override
             public InterpretationResult interpretAST(ResourceBundle language, ASTNode node,
                     InterpretationContext context) {
@@ -803,7 +805,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
                 logger.warn("Failed resolving item command");
                 return language.getString(ERROR);
             }
-            return trySendCommand(language, item, command, context.isSilent());
+            return trySendCommand(language, item, command, context.isForced(), context.isSilent());
         }
     }
 
@@ -843,14 +845,15 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
             logger.warn("Failed creating command");
             return language.getString(ERROR);
         }
-        return trySendCommand(language, item, command, context.isSilent());
+        return trySendCommand(language, item, command, context.isForced(), context.isSilent());
     }
 
-    private String trySendCommand(ResourceBundle language, Item item, Command command, boolean isSilent) {
+    private String trySendCommand(ResourceBundle language, Item item, Command command, boolean isForced,
+            boolean isSilent) {
         if (command instanceof State newState) {
             try {
                 State oldState = item.getStateAs(newState.getClass());
-                if (newState.equals(oldState)) {
+                if (!isForced && newState.equals(oldState)) {
                     String template = language.getString(STATE_ALREADY_SINGULAR);
                     String cmdName = "state_" + command.toString().toLowerCase();
                     String stateText = null;
@@ -1025,16 +1028,29 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
      * @return resulting tokens
      */
     protected List<String> tokenize(Locale locale, @Nullable String text) {
+        return tokenize(locale, text, false);
+    }
+
+    /**
+     * Tokenizes text. Filters out all unsupported punctuation. Tokens will be lowercase.
+     *
+     * @param locale the locale that should be used for lower casing
+     * @param text the text that should be tokenized
+     * @param customRuleCompat do not remove characters used on custom rules
+     * @return resulting tokens
+     */
+    protected List<String> tokenize(Locale locale, @Nullable String text, boolean customRuleCompat) {
         if (text == null) {
             return List.of();
         }
         String specialCharactersRegex;
+        String extraAllowedChars = customRuleCompat ? Pattern.quote("$|?") : "";
         if (Locale.FRENCH.getLanguage().equalsIgnoreCase(locale.getLanguage())) {
-            specialCharactersRegex = "[^\\w\\sàâäçéèêëîïôùûü$|?]";
+            specialCharactersRegex = "[^\\w\\sàâäçéèêëîïôùûü" + extraAllowedChars + "]";
         } else if ("es".equalsIgnoreCase(locale.getLanguage())) {
-            specialCharactersRegex = "[^\\w\\sáéíóúïüñç$|?]";
+            specialCharactersRegex = "[^\\w\\sáéíóúïüñç" + extraAllowedChars + "]";
         } else {
-            specialCharactersRegex = "[^\\w\\s$|?]";
+            specialCharactersRegex = "[^\\w\\s" + extraAllowedChars + "]";
         }
         return Arrays.stream(text.toLowerCase(locale) //
                 .replaceAll("[\\']", "") //
@@ -1065,6 +1081,8 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
         boolean isTemplate = ConfigParser.valueAsOrElse(metadata.getConfiguration().get(IS_TEMPLATE_CONFIGURATION),
                 Boolean.class, false);
         boolean isSilent = ConfigParser.valueAsOrElse(metadata.getConfiguration().get(IS_SILENT_CONFIGURATION),
+                Boolean.class, false);
+        boolean isForced = ConfigParser.valueAsOrElse(metadata.getConfiguration().get(IS_FORCED_CONFIGURATION),
                 Boolean.class, false);
         boolean isItemRule = false;
         boolean isCommandRule = false;
@@ -1123,7 +1141,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
                     String[] cmdInfo = new String[] { label, value };
                     var head = Objects.requireNonNull(parseCustomRuleSegment(locale, headPart, false, item, cmdInfo));
                     var tail = tailPart != null ? parseCustomRuleSegment(locale, tailPart, true, item, cmdInfo) : null;
-                    rules.add(restrictedItemRule(itemsFilter, head, tail, isSilent));
+                    rules.add(restrictedItemRule(itemsFilter, head, tail, isForced, isSilent));
                 }
                 return rules;
             } else if (isItemRule && isDynamicRule) {
@@ -1141,7 +1159,8 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
                 Expression tail = ruleParts.length > 2 ? parseCustomRuleSegment(locale, ruleParts[2], true, item, null)
                         : null;
                 boolean isNameFirst = ruleText.indexOf(NAME_TOKEN) < ruleText.indexOf(DYN_CMD_TOKEN);
-                return List.of(restrictedDynamicItemRule(item, itemsFilter, head, mid, tail, isNameFirst, isSilent));
+                return List.of(
+                        restrictedDynamicItemRule(item, itemsFilter, head, mid, tail, isNameFirst, isForced, isSilent));
             } else if (isDynamicRule) {
                 String[] ruleParts = ruleText.split(Pattern.quote(DYN_CMD_TOKEN));
                 if (ruleParts.length > 2) {
@@ -1152,7 +1171,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
                 @Nullable
                 Expression tail = ruleParts.length > 1 ? parseCustomRuleSegment(locale, ruleParts[1], true, item, null)
                         : null;
-                return List.of(customDynamicRule(item, itemsFilter, head, tail, isSilent));
+                return List.of(customDynamicRule(item, itemsFilter, head, tail, isForced, isSilent));
             } else if (isCommandRule) {
                 var itemCMDs = item.getCommandDescription();
                 if (itemCMDs == null || itemCMDs.getCommandOptions().isEmpty()) {
@@ -1168,7 +1187,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
                     String[] cmdInfo = new String[] { label, value };
                     var expression = Objects
                             .requireNonNull(parseCustomRuleSegment(locale, ruleText, false, item, cmdInfo));
-                    rules.add(customCommandRule(itemsFilter, expression, isSilent));
+                    rules.add(customCommandRule(itemsFilter, expression, isForced, isSilent));
                 }
                 return rules;
             } else {
@@ -1185,7 +1204,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
         List<Expression> subExpressions = new ArrayList<>();
         Expression sequenceExpression;
         boolean headHasNonOptional = true;
-        for (String s : tokenize(locale, text)) {
+        for (String s : tokenize(locale, text, true)) {
             String trim = s.trim();
             Expression expression = parseItemRuleTokenText(locale, trim, item, cmdData);
             if (expression instanceof ExpressionCardinality expressionCardinality) {
