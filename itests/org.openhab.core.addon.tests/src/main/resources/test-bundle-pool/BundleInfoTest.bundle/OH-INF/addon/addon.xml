@@ -34,7 +34,12 @@
 	<discovery-methods>
 		<discovery-method>
 			<service-type>mdns</service-type>
-			<mdns-service-type>_hue._tcp.local.</mdns-service-type>
+			<parameters>
+				<param>
+					<name>mdnsServiceType</name>
+					<value>_hue._tcp.local.</value>
+				</param>
+			</parameters>
 		</discovery-method>
 		<discovery-method>
 			<service-type>upnp</service-type>
