@@ -15,6 +15,7 @@ package org.openhab.core.config.discovery.addon.mdns.tests;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
+import static org.openhab.core.config.discovery.addon.mdns.MDNSAddonFinder.MDNS_SERVICE_TYPE;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -104,12 +105,12 @@ public class MDNSAddonFinderTests {
         AddonDiscoveryMethod hp = new AddonDiscoveryMethod().setServiceType(AddonFinderConstants.SERVICE_TYPE_MDNS)
                 .setMatchProperties(
                         List.of(new AddonMatchProperty("rp", ".*"), new AddonMatchProperty("ty", "hp (.*)")))
-                .setParameters(List.of(new AddonParameter("mdnsServiceType", "_printer._tcp.local.")));
+                .setParameters(List.of(new AddonParameter(MDNS_SERVICE_TYPE, "_printer._tcp.local.")));
         addonInfos.add(AddonInfo.builder("hpprinter", "binding").withName("HP").withDescription("HP Printer")
                 .withDiscoveryMethods(List.of(hp)).build());
 
         AddonDiscoveryMethod hue = new AddonDiscoveryMethod().setServiceType(AddonFinderConstants.SERVICE_TYPE_MDNS)
-                .setParameters(List.of(new AddonParameter("mdnsServiceType", "_hue._tcp.local.")));
+                .setParameters(List.of(new AddonParameter(MDNS_SERVICE_TYPE, "_hue._tcp.local.")));
         addonInfos.add(AddonInfo.builder("hue", "binding").withName("Hue").withDescription("Hue Bridge")
                 .withDiscoveryMethods(List.of(hue)).build());
     }

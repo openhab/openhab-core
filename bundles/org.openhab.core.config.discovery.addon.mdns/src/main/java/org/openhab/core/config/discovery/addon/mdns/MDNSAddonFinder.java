@@ -57,6 +57,8 @@ public class MDNSAddonFinder extends BaseAddonFinder implements ServiceListener 
     public static final String SERVICE_TYPE = SERVICE_TYPE_MDNS;
     public static final String SERVICE_NAME = SERVICE_NAME_MDNS;
 
+    public static final String MDNS_SERVICE_TYPE = "mdnsServiceType";
+
     private static final String NAME = "name";
     private static final String APPLICATION = "application";
 
@@ -150,7 +152,7 @@ public class MDNSAddonFinder extends BaseAddonFinder implements ServiceListener 
     }
 
     private String getMdnsServiceType(AddonDiscoveryMethod method) {
-        String param = method.getParameters().stream().filter(p -> "mdnsServiceType".equals(p.getName()))
+        String param = method.getParameters().stream().filter(p -> MDNS_SERVICE_TYPE.equals(p.getName()))
                 .map(p -> p.getValue()).findFirst().orElse("");
         return param == null ? "" : param;
     }

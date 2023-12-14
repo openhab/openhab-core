@@ -35,7 +35,7 @@
 		<discovery-method>
 			<service-type>mdns</service-type>
 			<discovery-parameters>
-				<parameter>
+				<discovery-parameter>
 					<name>mdnsServiceType</name>
 					<value>_hue._tcp.local.</value>
 				</discovery-parameter>

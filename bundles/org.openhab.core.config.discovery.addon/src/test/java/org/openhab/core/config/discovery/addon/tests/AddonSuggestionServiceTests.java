@@ -53,6 +53,8 @@ import org.osgi.service.cm.ConfigurationAdmin;
 @TestInstance(Lifecycle.PER_CLASS)
 public class AddonSuggestionServiceTests {
 
+    public static final String MDNS_SERVICE_TYPE = "mdnsServiceType";
+
     private @NonNullByDefault({}) ConfigurationAdmin configurationAdmin;
     private @NonNullByDefault({}) LocaleProvider localeProvider;
     private @NonNullByDefault({}) AddonInfoProvider addonInfoProvider;
@@ -126,13 +128,13 @@ public class AddonSuggestionServiceTests {
         AddonDiscoveryMethod hp = new AddonDiscoveryMethod().setServiceType(AddonFinderConstants.SERVICE_TYPE_MDNS)
                 .setMatchProperties(
                         List.of(new AddonMatchProperty("rp", ".*"), new AddonMatchProperty("ty", "hp (.*)")))
-                .setParameters(List.of(new AddonParameter("mdnsServiceType", "_printer._tcp.local.")));
+                .setParameters(List.of(new AddonParameter(MDNS_SERVICE_TYPE, "_printer._tcp.local.")));
 
         AddonDiscoveryMethod hue1 = new AddonDiscoveryMethod().setServiceType(AddonFinderConstants.SERVICE_TYPE_UPNP)
                 .setMatchProperties(List.of(new AddonMatchProperty("modelName", "Philips hue bridge")));
 
         AddonDiscoveryMethod hue2 = new AddonDiscoveryMethod().setServiceType(AddonFinderConstants.SERVICE_TYPE_MDNS)
-                .setParameters(List.of(new AddonParameter("mdnsServiceType", "_hue._tcp.local.")));
+                .setParameters(List.of(new AddonParameter(MDNS_SERVICE_TYPE, "_hue._tcp.local.")));
 
         // create the mock
         addonInfoProvider = mock(AddonInfoProvider.class);

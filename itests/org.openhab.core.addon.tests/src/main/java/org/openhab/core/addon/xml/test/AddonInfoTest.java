@@ -15,6 +15,7 @@ package org.openhab.core.addon.xml.test;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.openhab.core.config.discovery.addon.mdns.MDNSAddonFinder.MDNS_SERVICE_TYPE;
 
 import java.net.URI;
 import java.util.List;
@@ -83,7 +84,7 @@ public class AddonInfoTest extends JavaOSGiTest {
             assertEquals(1, parameters.size());
             AddonParameter parameter = parameters.get(0);
             assertNotNull(parameter);
-            assertEquals("mdnsServiceType", parameter.getName());
+            assertEquals(MDNS_SERVICE_TYPE, parameter.getName());
             assertEquals("_hue._tcp.local.", parameter.getValue());
             List<AddonMatchProperty> properties = discoveryMethod.getMatchProperties();
             assertNotNull(properties);
