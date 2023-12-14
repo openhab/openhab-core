@@ -90,14 +90,14 @@
     <xs:complexType name="discoveryMethodType">
         <xs:sequence>
             <xs:element type="xs:string" name="service-type"/>
-            <xs:element type="addon:ParametersType" name="parameters" minOccurs="0"/>
+            <xs:element type="addon:ParametersType" name="discovery-parameters" minOccurs="0"/>
             <xs:element type="addon:matchPropertiesType" name="match-properties" minOccurs="0"/>
         </xs:sequence>
     </xs:complexType>
 
     <xs:complexType name="ParametersType">
         <xs:sequence>
-            <xs:element type="addon:parameterType" name="parameter" maxOccurs="unbounded"/>
+            <xs:element type="addon:parameterType" name="discovery-parameter" maxOccurs="unbounded"/>
         </xs:sequence>
     </xs:complexType>
 
