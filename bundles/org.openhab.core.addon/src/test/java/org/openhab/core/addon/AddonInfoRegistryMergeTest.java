@@ -12,16 +12,9 @@
  */
 package org.openhab.core.addon;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 import java.util.List;
 import java.util.Locale;
@@ -67,7 +60,7 @@ class AddonInfoRegistryMergeTest {
 
     private AddonInfoProvider createAddonInfoProvider1() {
         AddonDiscoveryMethod discoveryMethod = new AddonDiscoveryMethod().setServiceType("mdns")
-                .setMdnsServiceType("_hue._tcp.local.");
+                .setParameters(List.of(new AddonParameter("mdnsServiceType", "_hue._tcp.local.")));
         AddonInfo addonInfo = AddonInfo.builder("hue", "binding").withName("name-one")
                 .withDescription("description-one").withCountries("GB,NL").withConnection("local")
                 .withDiscoveryMethods(List.of(discoveryMethod)).build();

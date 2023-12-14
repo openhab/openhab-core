@@ -26,16 +26,16 @@ import org.eclipse.jdt.annotation.Nullable;
 @NonNullByDefault
 public class AddonDiscoveryMethod {
     private @NonNullByDefault({}) String serviceType;
-    private @Nullable String mdnsServiceType;
+    private @Nullable List<AddonParameter> parameters;
     private @Nullable List<AddonMatchProperty> matchProperties;
 
     public String getServiceType() {
         return serviceType.toLowerCase();
     }
 
-    public String getMdnsServiceType() {
-        String mdnsServiceType = this.mdnsServiceType;
-        return mdnsServiceType != null ? mdnsServiceType : "";
+    public List<AddonParameter> getParameters() {
+        List<AddonParameter> parameters = this.parameters;
+        return parameters != null ? parameters : List.of();
     }
 
     public List<AddonMatchProperty> getMatchProperties() {
@@ -48,8 +48,8 @@ public class AddonDiscoveryMethod {
         return this;
     }
 
-    public AddonDiscoveryMethod setMdnsServiceType(@Nullable String mdnsServiceType) {
-        this.mdnsServiceType = mdnsServiceType;
+    public AddonDiscoveryMethod setParameters(@Nullable List<AddonParameter> parameters) {
+        this.parameters = parameters;
         return this;
     }
 
@@ -60,7 +60,7 @@ public class AddonDiscoveryMethod {
 
     @Override
     public int hashCode() {
-        return Objects.hash(serviceType, mdnsServiceType, matchProperties);
+        return Objects.hash(serviceType, parameters, matchProperties);
     }
 
     @Override
@@ -75,7 +75,7 @@ public class AddonDiscoveryMethod {
             return false;
         }
         AddonDiscoveryMethod other = (AddonDiscoveryMethod) obj;
-        return Objects.equals(serviceType, other.serviceType) && Objects.equals(mdnsServiceType, other.mdnsServiceType)
+        return Objects.equals(serviceType, other.serviceType) && Objects.equals(parameters, other.parameters)
                 && Objects.equals(matchProperties, other.matchProperties);
     }
 }
