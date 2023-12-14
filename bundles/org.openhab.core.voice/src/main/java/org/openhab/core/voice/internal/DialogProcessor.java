@@ -34,6 +34,7 @@ import org.openhab.core.items.ItemUtil;
 import org.openhab.core.items.events.ItemEventFactory;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.voice.DialogContext;
+import org.openhab.core.voice.KSEdgeService;
 import org.openhab.core.voice.KSErrorEvent;
 import org.openhab.core.voice.KSEvent;
 import org.openhab.core.voice.KSException;
@@ -164,9 +165,13 @@ public class DialogProcessor implements KSListener, STTListener {
                 return;
             }
             try {
-                AudioStream stream = dialogContext.source().getInputStream(fmt);
-                streamKS = stream;
-                ksServiceHandle = ksService.spot(this, stream, dialogContext.locale(), keyword);
+                if (ksService instanceof KSEdgeService) {
+                    ((KSEdgeService) ksService).spot(this);
+                } else {
+                    AudioStream stream = dialogContext.source().getInputStream(fmt);
+                    streamKS = stream;
+                    ksServiceHandle = ksService.spot(this, stream, dialogContext.locale(), keyword);
+                }
                 playStartSound();
             } catch (AudioException e) {
                 logger.warn("Encountered audio error: {}", e.getMessage());
