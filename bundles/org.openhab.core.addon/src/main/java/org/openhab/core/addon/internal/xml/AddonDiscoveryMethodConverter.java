@@ -47,7 +47,7 @@ public class AddonDiscoveryMethodConverter extends GenericUnmarshaller<AddonDisc
         String serviceType = requireNonEmpty((String) nodeIterator.nextValue("service-type", true),
                 "Service type is null or empty");
 
-        Object paramObject = nodeIterator.nextList("parameters", false);
+        Object paramObject = nodeIterator.nextList("discovery-parameters", false);
         List<AddonParameter> parameters = !(paramObject instanceof List<?> list) ? null
                 : list.stream().filter(e -> (e instanceof AddonParameter)).map(e -> ((AddonParameter) e)).toList();
 

@@ -48,6 +48,6 @@ public class AddonParameterConverter extends GenericUnmarshaller<AddonParameter>
 
         nodeIterator.assertEndOfType();
 
-        return new AddonMatchProperty(name, value);
+        return new AddonParameter(name, value);
     }
 }

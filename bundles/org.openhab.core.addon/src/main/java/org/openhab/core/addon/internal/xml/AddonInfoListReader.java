@@ -70,6 +70,7 @@ public class AddonInfoListReader extends XmlDocumentReader<AddonInfoList> {
         xstream.registerConverter(new ConfigDescriptionParameterGroupConverter());
         xstream.registerConverter(new FilterCriteriaConverter());
         xstream.registerConverter(new AddonDiscoveryMethodConverter());
+        xstream.registerConverter(new AddonParameterConverter());
         xstream.registerConverter(new AddonMatchPropertyConverter());
     }
 
@@ -99,6 +100,7 @@ public class AddonInfoListReader extends XmlDocumentReader<AddonInfoList> {
         xstream.alias("discovery-parameter", AddonParameter.class);
         xstream.alias("match-properties", NodeList.class);
         xstream.alias("match-property", AddonMatchProperty.class);
+        xstream.alias("value", NodeValue.class);
         xstream.alias("regex", NodeValue.class);
     }
 }
