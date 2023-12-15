@@ -15,31 +15,28 @@ package org.openhab.core.config.discovery.addon.usb;
 import static org.openhab.core.config.discovery.addon.AddonFinderConstants.SERVICE_NAME_USB;
 import static org.openhab.core.config.discovery.addon.AddonFinderConstants.SERVICE_TYPE_USB;
 
-import java.io.UnsupportedEncodingException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import javax.usb.UsbDevice;
-import javax.usb.UsbDeviceDescriptor;
-import javax.usb.UsbDisconnectedException;
-import javax.usb.UsbException;
-import javax.usb.UsbHostManager;
-import javax.usb.UsbHub;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.addon.AddonDiscoveryMethod;
 import org.openhab.core.addon.AddonInfo;
 import org.openhab.core.config.discovery.addon.AddonFinder;
 import org.openhab.core.config.discovery.addon.BaseAddonFinder;
+import org.openhab.core.config.discovery.usbserial.UsbSerialDeviceInformation;
+import org.openhab.core.config.discovery.usbserial.UsbSerialDiscovery;
+import org.openhab.core.config.discovery.usbserial.UsbSerialDiscoveryListener;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,52 +47,39 @@ import org.slf4j.LoggerFactory;
  */
 @NonNullByDefault
 @Component(service = AddonFinder.class, name = USBAddonFinder.SERVICE_NAME)
-public class USBAddonFinder extends BaseAddonFinder {
+public class USBAddonFinder extends BaseAddonFinder implements UsbSerialDiscoveryListener {
 
     public static final String SERVICE_TYPE = SERVICE_TYPE_USB;
     public static final String SERVICE_NAME = SERVICE_NAME_USB;
 
-    private static final String VENDOR_ID = "vendorId";
-    private static final String VENDOR_NAME = "vendorName";
-    private static final String PRODUCT_ID = "productId";
-    private static final String PRODUCT_NAME = "productName";
-
-    private static final Set<String> SUPPORTED_PROPERTIES = Set.of(VENDOR_ID, VENDOR_NAME, PRODUCT_ID, PRODUCT_NAME);
-
-    /**
-     * Private class for storing the properties of discovered USB devices.
+    /*
+     * Supported 'match-property' names
      */
-    protected static class USBDevice {
-        private final String vendorId;
-        private final String productId;
-        private @Nullable String vendorName;
-        private @Nullable String productName;
+    private static final String VENDOR_ID = "vendorId";
+    private static final String PRODUCT_ID = "productId";
+    private static final String MANUFACTURER = "manufacturer";
+    private static final String PRODUCT = "product";
+    private static final Set<String> SUPPORTED_PROPERTIES = Set.of(VENDOR_ID, MANUFACTURER, PRODUCT_ID, PRODUCT);
 
-        public USBDevice(UsbDevice usbDevice) {
-            UsbDeviceDescriptor descriptor = usbDevice.getUsbDeviceDescriptor();
-            vendorId = String.format("%04x", descriptor.idVendor());
-            productId = String.format("%04x", descriptor.idProduct());
-            try {
-                vendorName = usbDevice.getManufacturerString();
-            } catch (UnsupportedEncodingException | UsbDisconnectedException | UsbException e) {
-                vendorName = null;
-            }
-            try {
-                productName = usbDevice.getProductString();
-            } catch (UnsupportedEncodingException | UsbDisconnectedException | UsbException e) {
-                productName = null;
-            }
-        }
-
-        @Override
-        public String toString() {
-            return String.format("vendorId:%s (vendorName:%s) / productId:%s (productName:%s)", vendorId, vendorName,
-                    productId, productName);
-        }
-    }
+    /*
+     * Database map between hex 'vendorId:productId' pairs and the descriptions of known products. This is required
+     * because in some cases the USB scanners cannot read the product description strings, so this provides fallback
+     * descriptions.
+     */
+    private static final Map<String, String> PRODUCT_DATABASE = Map.of(
+    // @formatter:off
+            "0403:6001", "FTDI / UART", // won't match for Z-Wave or Zigbee
+            "0403:8A28", "FTDI / ZigBee",
+            "0451:16A8", "Texas Instruments / ZigBee", 
+            "0658:0200", "Aeotec / Z-Wave",
+            "10C4:89FB", "Silicon Laboratories / ZigBee",
+            "1CF1:0030", "dresden elektronik / ZigBee"
+    // @formatter:on
+    );
 
     private final Logger logger = LoggerFactory.getLogger(USBAddonFinder.class);
-    private final List<USBDevice> deviceData = new CopyOnWriteArrayList<>();
+    private final Set<UsbSerialDiscovery> usbSerialDiscoveries = new CopyOnWriteArraySet<>();
+    private final Set<UsbSerialDeviceInformation> usbDeviceInformations = new CopyOnWriteArraySet<>();
 
     @Activate
     public USBAddonFinder() {
@@ -105,35 +89,16 @@ public class USBAddonFinder extends BaseAddonFinder {
     public void deactivate() {
     }
 
-    /**
-     * Traverse the USB tree for devices that are children of the given hub.
-     * 
-     * @param usbHub the hub whose children are to be found.
-     */
-    private void usbGetChildren(UsbHub usbHub) {
-        @SuppressWarnings("unchecked")
-        List<UsbDevice> deviceList = usbHub.getAttachedUsbDevices();
-        deviceList.forEach(usbDevice -> {
-            if (usbDevice.isUsbHub()) {
-                usbGetChildren((UsbHub) usbDevice);
-            } else {
-                USBDevice data = new USBDevice(usbDevice);
-                deviceData.add(data);
-                logger.trace("Added device: {}", data);
-            }
-        });
+    @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
+    protected void addUsbSerialDiscovery(UsbSerialDiscovery usbSerialDiscovery) {
+        usbSerialDiscoveries.add(usbSerialDiscovery);
+        usbSerialDiscovery.registerDiscoveryListener(this);
+        usbSerialDiscovery.doSingleScan();
     }
 
-    /**
-     * Traverse the USB tree for devices that are children of the root hub.
-     */
-    private void usbGetDevices() {
-        try {
-            usbGetChildren(UsbHostManager.getUsbServices().getRootUsbHub());
-            logger.trace("USB devices found: {}", deviceData.size());
-        } catch (SecurityException | UsbException e) {
-            logger.warn("Error getting USB devices: {}", e.getMessage());
-        }
+    protected synchronized void removeUsbSerialDiscovery(UsbSerialDiscovery usbSerialDiscovery) {
+        usbSerialDiscovery.unregisterDiscoveryListener(this);
+        usbSerialDiscoveries.remove(usbSerialDiscovery);
     }
 
     @Override
@@ -165,12 +130,24 @@ public class USBAddonFinder extends BaseAddonFinder {
                 }
 
                 logger.trace("Checking candidate: {}", candidate.getUID());
-                for (USBDevice device : getDeviceData()) {
+                for (UsbSerialDeviceInformation device : usbDeviceInformations) {
                     logger.trace("Checking device: {}", device);
-                    if (propertyMatches(matchProperties, VENDOR_ID, device.vendorId)
-                            && propertyMatches(matchProperties, VENDOR_NAME, device.vendorName)
-                            && propertyMatches(matchProperties, PRODUCT_ID, device.productId)
-                            && propertyMatches(matchProperties, PRODUCT_NAME, device.productName)) {
+
+                    String vendorId = toHexString(device.getVendorId());
+                    String productId = toHexString(device.getProductId());
+
+                    String manufacturer = device.getManufacturer();
+                    String product = device.getProduct();
+
+                    // try the local product database if the product description is null
+                    if (product == null) {
+                        product = PRODUCT_DATABASE.get(vendorId + ":" + productId);
+                    }
+
+                    if (propertyMatches(matchProperties, VENDOR_ID, vendorId)
+                            && propertyMatches(matchProperties, PRODUCT_ID, productId)
+                            && propertyMatches(matchProperties, MANUFACTURER, manufacturer)
+                            && propertyMatches(matchProperties, PRODUCT, product)) {
                         result.add(candidate);
                         logger.debug("Suggested add-on found: {}", candidate.getUID());
                         break;
@@ -181,15 +158,26 @@ public class USBAddonFinder extends BaseAddonFinder {
         return result;
     }
 
+    private String toHexString(int value) {
+        return String.format("%04x", value);
+    }
+
     @Override
     public String getServiceName() {
         return SERVICE_NAME;
     }
 
-    public List<USBDevice> getDeviceData() {
-        if (deviceData.isEmpty()) {
-            usbGetDevices();
-        }
-        return deviceData;
+    @Override
+    public void usbSerialDeviceDiscovered(UsbSerialDeviceInformation usbSerialDeviceInformation) {
+        usbDeviceInformations.add(usbSerialDeviceInformation);
+    }
+
+    @Override
+    public void usbSerialDeviceRemoved(UsbSerialDeviceInformation usbSerialDeviceInformation) {
+        usbDeviceInformations.remove(usbSerialDeviceInformation);
+    }
+
+    public Set<UsbSerialDeviceInformation> getDeviceInformations() {
+        return usbDeviceInformations;
     }
 }
