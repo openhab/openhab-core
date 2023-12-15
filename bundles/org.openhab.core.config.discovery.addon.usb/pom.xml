@@ -26,45 +26,10 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>javax.usb</groupId>
-      <artifactId>usb-api</artifactId>
-      <version>1.0.2</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.usb4java</groupId>
-      <artifactId>usb4java-javax</artifactId>
-      <version>1.3.0</version>
-      <scope>compile</scope>
+      <groupId>org.openhab.core.bundles</groupId>
+      <artifactId>org.openhab.core.config.discovery.usbserial</artifactId>
+      <version>${project.version}</version>
     </dependency>
   </dependencies>
-
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-dependency-plugin</artifactId>
-        <version>3.1.1</version>
-        <executions>
-          <execution>
-            <id>embed-dependencies</id>
-            <goals>
-              <goal>unpack-dependencies</goal>
-            </goals>
-            <configuration>
-              <includeScope>runtime</includeScope>
-              <includeTypes>jar</includeTypes>
-              <excludeGroupIds>org.apache.karaf.features,org.openhab.core.bundles</excludeGroupIds>
-              <outputDirectory>${project.build.directory}/classes</outputDirectory>
-              <overWriteReleases>true</overWriteReleases>
-              <overWriteSnapshots>true</overWriteSnapshots>
-              <excludeTransitive>true</excludeTransitive>
-              <type>jar</type>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
-  </build>
 
 </project>

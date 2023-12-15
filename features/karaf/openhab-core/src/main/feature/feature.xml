@@ -101,6 +101,7 @@
 	<feature name="openhab-core-config-discovery-addon-usb" version="${project.version}">
 		<feature>openhab-core-base</feature>
 		<feature>openhab-core-config-discovery-addon</feature>
+		<bundle dependency="true">mvn:org.openhab.core.bundles/openhab.core.config.discovery.usbserial/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery.addon.usb/${project.version}</bundle>
 	</feature>
 
