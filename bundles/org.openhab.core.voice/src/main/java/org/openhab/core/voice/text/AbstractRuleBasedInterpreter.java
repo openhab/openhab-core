@@ -1074,7 +1074,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
      *
      * @param item will be the target of the rule.
      * @param ruleText the text to parse into a {@link Rule}
-     * @param metadata voice-system metadata.
+     * @param metadata voiceSystem metadata.
      * @return The created rule.
      */
     protected List<Rule> parseItemCustomRules(Locale locale, Item item, String ruleText, Metadata metadata) {
