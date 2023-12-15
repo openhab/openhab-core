@@ -12,11 +12,9 @@
  */
 package org.openhab.core.config.discovery.addon.usb;
 
-import javax.usb.UsbException;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
-import org.openhab.core.config.discovery.addon.usb.USBAddonFinder.USBDevice;
+import org.openhab.core.config.discovery.usbserial.UsbSerialDeviceInformation;
 
 /**
  * This contains Junit tests for the {@link USBAddonFinder} class.
@@ -27,11 +25,11 @@ import org.openhab.core.config.discovery.addon.usb.USBAddonFinder.USBDevice;
 class USBAddonFinderTest {
 
     @Test
-    void test() throws SecurityException, UsbException {
+    void test() {
         USBAddonFinder finder = new USBAddonFinder();
         finder.getSuggestedAddons();
-        for (USBDevice data : finder.getDeviceData()) {
-            // System.out.println(data.toString());
+        for (UsbSerialDeviceInformation deviceInfo : finder.getDeviceInformations()) {
+            // System.out.println(deviceInfo.toString());
         }
     }
 }
