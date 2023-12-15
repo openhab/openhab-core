@@ -55,20 +55,20 @@ public class USBAddonFinder extends BaseAddonFinder implements UsbSerialDiscover
     /*
      * Supported 'match-property' names
      */
-    private static final String VENDOR_ID = "vendorId";
-    private static final String PRODUCT_ID = "productId";
-    private static final String MANUFACTURER = "manufacturer";
-    private static final String PRODUCT = "product";
-    private static final Set<String> SUPPORTED_PROPERTIES = Set.of(VENDOR_ID, MANUFACTURER, PRODUCT_ID, PRODUCT);
+    public static final String VENDOR_ID = "vendorId";
+    public static final String PRODUCT_ID = "productId";
+    public static final String MANUFACTURER = "manufacturer";
+    public static final String PRODUCT = "product";
+    public static final Set<String> SUPPORTED_PROPERTIES = Set.of(VENDOR_ID, MANUFACTURER, PRODUCT_ID, PRODUCT);
 
     /*
      * Database map between hex 'vendorId:productId' pairs and the descriptions of known products. This is required
      * because in some cases the USB scanners cannot read the product description strings, so this provides fallback
      * descriptions.
      */
-    private static final Map<String, String> PRODUCT_DATABASE = Map.of(
+    public static final Map<String, String> USB_PRODUCT_DATABASE = Map.of(
     // @formatter:off
-            "0403:6001", "FTDI / UART", // won't match for Z-Wave or Zigbee
+            "0403:6001", "FTDI / UART", // this won't match for Z-Wave or Zigbee
             "0403:8A28", "FTDI / ZigBee",
             "0451:16A8", "Texas Instruments / ZigBee", 
             "0658:0200", "Aeotec / Z-Wave",
@@ -141,7 +141,7 @@ public class USBAddonFinder extends BaseAddonFinder implements UsbSerialDiscover
 
                     // try the local product database if the product description is null
                     if (product == null) {
-                        product = PRODUCT_DATABASE.get(vendorId + ":" + productId);
+                        product = USB_PRODUCT_DATABASE.get(vendorId + ":" + productId);
                     }
 
                     if (propertyMatches(matchProperties, VENDOR_ID, vendorId)
