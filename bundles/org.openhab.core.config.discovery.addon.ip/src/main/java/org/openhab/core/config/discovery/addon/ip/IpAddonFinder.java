@@ -71,6 +71,13 @@ public class IpAddonFinder extends BaseAddonFinder {
     public static final String SERVICE_TYPE = SERVICE_TYPE_IP;
     public static final String SERVICE_NAME = SERVICE_NAME_IP;
 
+    private static final String TYPE_IP_MULTICAST = "ip_multicast";
+    private static final String MATCH_PROPERTY_RESPONSE = "response";
+    private static final String PARAMETER_DEST_IP = "dest_ip";
+    private static final String PARAMETER_DEST_PORT = "dest_port";
+    private static final String PARAMETER_REQUEST = "request";
+    private static final String PARAMETER_TIMEOUT_MS = "timeout_ms";
+
     private final Logger logger = LoggerFactory.getLogger(IpAddonFinder.class);
     private final ScheduledExecutorService scheduler = ThreadPoolManager.getScheduledPool(SERVICE_NAME);
     private @Nullable Future<?> scanJob = null;
@@ -129,11 +136,11 @@ public class IpAddonFinder extends BaseAddonFinder {
 
                 // parse standard set op parameters:
                 String type = Objects.toString(parameters.get("type"), "");
-                String request = Objects.toString(parameters.get("request"), "");
-                String response = Objects.toString(matchProperties.get("response"), "");
+                String request = Objects.toString(parameters.get(PARAMETER_REQUEST), "");
+                String response = Objects.toString(matchProperties.get(MATCH_PROPERTY_RESPONSE), "");
                 int timeoutMs = 0;
                 try {
-                    timeoutMs = Integer.parseInt(Objects.toString(parameters.get("timeout_ms")));
+                    timeoutMs = Integer.parseInt(Objects.toString(parameters.get(PARAMETER_TIMEOUT_MS)));
                 } catch (NumberFormatException e) {
                     logger.info("{}: discovery-parameter timeout_ms cannot be parsed", candidate.getUID());
                     continue;
@@ -141,14 +148,14 @@ public class IpAddonFinder extends BaseAddonFinder {
                 @Nullable
                 InetAddress destIp = null;
                 try {
-                    destIp = InetAddress.getByName(parameters.get("dest_ip"));
+                    destIp = InetAddress.getByName(parameters.get(PARAMETER_DEST_IP));
                 } catch (UnknownHostException e) {
                     logger.info("{}: discovery-parameter dest_ip cannot be parsed", candidate.getUID());
                     continue;
                 }
                 int destPort = 0;
                 try {
-                    destPort = Integer.parseInt(Objects.toString(parameters.get("dest_port")));
+                    destPort = Integer.parseInt(Objects.toString(parameters.get(PARAMETER_DEST_PORT)));
                 } catch (NumberFormatException e) {
                     logger.info("{}: discovery-parameter dest_port cannot be parsed", candidate.getUID());
                     continue;
@@ -159,7 +166,7 @@ public class IpAddonFinder extends BaseAddonFinder {
                 //
                 try {
                     switch (Objects.toString(type)) {
-                        case "ip_multicast":
+                        case TYPE_IP_MULTICAST:
                             List<String> ipAddresses = NetUtil.getAllInterfaceAddresses().stream()
                                     .filter(a -> a.getAddress() instanceof Inet4Address)
                                     .map(a -> a.getAddress().getHostAddress()).toList();
