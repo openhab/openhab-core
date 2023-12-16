@@ -41,13 +41,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This is a {@link USBAddonFinder} for finding suggested add-ons related to USB devices.
+ * This is a {@link UsbAddonFinder} for finding suggested add-ons related to USB devices.
  *
  * @author Andrew Fiddian-Green - Initial contribution
  */
 @NonNullByDefault
-@Component(service = AddonFinder.class, name = USBAddonFinder.SERVICE_NAME)
-public class USBAddonFinder extends BaseAddonFinder implements UsbSerialDiscoveryListener {
+@Component(service = AddonFinder.class, name = UsbAddonFinder.SERVICE_NAME)
+public class UsbAddonFinder extends BaseAddonFinder implements UsbSerialDiscoveryListener {
 
     public static final String SERVICE_TYPE = SERVICE_TYPE_USB;
     public static final String SERVICE_NAME = SERVICE_NAME_USB;
@@ -61,28 +61,12 @@ public class USBAddonFinder extends BaseAddonFinder implements UsbSerialDiscover
     public static final String PRODUCT = "product";
     public static final Set<String> SUPPORTED_PROPERTIES = Set.of(VENDOR_ID, MANUFACTURER, PRODUCT_ID, PRODUCT);
 
-    /*
-     * Database map between hex 'vendorId:productId' pairs and the descriptions of known products. This is required
-     * because in some cases the USB scanners cannot read the product description strings, so this provides fallback
-     * descriptions.
-     */
-    public static final Map<String, String> USB_PRODUCT_DATABASE = Map.of(
-    // @formatter:off
-            "0403:6001", "FTDI / UART", // this won't match for Z-Wave or Zigbee
-            "0403:8A28", "FTDI / ZigBee",
-            "0451:16A8", "Texas Instruments / ZigBee", 
-            "0658:0200", "Aeotec / Z-Wave",
-            "10C4:89FB", "Silicon Laboratories / ZigBee",
-            "1CF1:0030", "dresden elektronik / ZigBee"
-    // @formatter:on
-    );
-
-    private final Logger logger = LoggerFactory.getLogger(USBAddonFinder.class);
+    private final Logger logger = LoggerFactory.getLogger(UsbAddonFinder.class);
     private final Set<UsbSerialDiscovery> usbSerialDiscoveries = new CopyOnWriteArraySet<>();
     private final Set<UsbSerialDeviceInformation> usbDeviceInformations = new CopyOnWriteArraySet<>();
 
     @Activate
-    public USBAddonFinder() {
+    public UsbAddonFinder() {
     }
 
     @Deactivate
@@ -138,11 +122,6 @@ public class USBAddonFinder extends BaseAddonFinder implements UsbSerialDiscover
 
                     String manufacturer = device.getManufacturer();
                     String product = device.getProduct();
-
-                    // try the local product database if the product description is null
-                    if (product == null) {
-                        product = USB_PRODUCT_DATABASE.get(vendorId + ":" + productId);
-                    }
 
                     if (propertyMatches(matchProperties, VENDOR_ID, vendorId)
                             && propertyMatches(matchProperties, PRODUCT_ID, productId)

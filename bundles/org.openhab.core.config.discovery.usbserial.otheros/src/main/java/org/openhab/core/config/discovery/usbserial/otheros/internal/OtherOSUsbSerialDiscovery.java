@@ -52,8 +52,8 @@ import org.slf4j.LoggerFactory;
  * 
  * @author Andrew Fiddian-Green - Initial contribution
  */
-@Component(service = UsbSerialDiscovery.class, name = OtherOSUsbSerialDiscovery.SERVICE_NAME)
 @NonNullByDefault
+@Component(service = UsbSerialDiscovery.class, name = OtherOSUsbSerialDiscovery.SERVICE_NAME)
 public class OtherOSUsbSerialDiscovery implements UsbSerialDiscovery {
 
     protected static final String SERVICE_NAME = "usb-serial-discovery-other-os";
@@ -165,39 +165,36 @@ public class OtherOSUsbSerialDiscovery implements UsbSerialDiscovery {
                 short vendorId = d.idVendor();
                 short productId = d.idProduct();
 
+                String manufacturer = null;
+                String product = null;
+                String serialNumber = null;
+
                 /*
                  * Note: the getString() calls below may fail depending on the Operating System:
                  * - on Windows if no libusb device driver is installed for the device.
                  * - on Linux if the user has no write permission on the USB device file.
                  */
-                String manufacturer;
                 try {
+                    product = usbDevice.getString(d.iProduct());
                     manufacturer = usbDevice.getString(d.iManufacturer());
-                } catch (UnsupportedEncodingException | UsbDisconnectedException | UsbException e) {
-                    manufacturer = null;
-                }
-                String productName;
-                try {
-                    productName = usbDevice.getString(d.iProduct());
-                } catch (UnsupportedEncodingException | UsbDisconnectedException | UsbException e) {
-                    productName = null;
-                }
-                String serialNumber;
-                try {
                     serialNumber = usbDevice.getString(d.iSerialNumber());
                 } catch (UnsupportedEncodingException | UsbDisconnectedException | UsbException e) {
-                    serialNumber = null;
+                    // ignore because this would be a 'normal' runtime failure
+                }
+
+                if (product == null || product.isBlank()) {
+                    product = UsbProductDatabase.getProduct(vendorId, productId);
                 }
 
                 /*
                  * TODO are the following three data required (??)
                  */
-                int interfaceNumber = 0; // TODO
-                String interfaceDescription = "n/a"; // TODO
-                String serialPort = "n/a"; // TODO
+                int interfaceNumber = 0;
+                String interfaceDescription = "n/a";
+                String serialPort = "n/a";
 
                 UsbSerialDeviceInformation usbDeviceInfo = new UsbSerialDeviceInformation(vendorId, productId,
-                        serialNumber, manufacturer, productName, interfaceNumber, interfaceDescription, serialPort);
+                        serialNumber, manufacturer, product, interfaceNumber, interfaceDescription, serialPort);
 
                 result.add(usbDeviceInfo);
                 logger.trace("Added device: {}", usbDeviceInfo);
