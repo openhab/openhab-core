@@ -79,7 +79,7 @@ public class ProcessAddonFinder extends BaseAddonFinder {
             processList = ProcessHandle.allProcesses().map(this::getProcessCommandProcess)
                     .filter(Predicate.not(String::isEmpty)).collect(Collectors.toUnmodifiableSet());
         } catch (SecurityException | UnsupportedOperationException unused) {
-            logger.info("Cannot obtain process list, suggesting add-ons not possible");
+            logger.info("Cannot obtain process list, suggesting add-ons based on running processes is not possible");
             return result;
         }
 
