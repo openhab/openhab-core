@@ -121,33 +121,35 @@ public class IpAddonFinder extends BaseAddonFinder {
 
                 logger.trace("Checking candidate: {}", candidate.getUID());
 
+                Map<String, String> parameters = method.getParameters().stream()
+                        .collect(Collectors.toMap(property -> property.getName(), property -> property.getValue()));
                 Map<String, String> matchProperties = method.getMatchProperties().stream()
                         .collect(Collectors.toMap(property -> property.getName(), property -> property.getRegex()));
 
                 // parse standard set op parameters:
-                String type = Objects.toString(matchProperties.get("type"), "");
-                String request = Objects.toString(matchProperties.get("request"), "");
+                String type = Objects.toString(parameters.get("type"), "");
+                String request = Objects.toString(parameters.get("request"), "");
                 String response = Objects.toString(matchProperties.get("response"), "");
                 int timeoutMs = 0;
                 try {
-                    timeoutMs = Integer.parseInt(Objects.toString(matchProperties.get("timeout_ms")));
+                    timeoutMs = Integer.parseInt(Objects.toString(parameters.get("timeout_ms")));
                 } catch (NumberFormatException e) {
-                    logger.info("{}: match-property timeout_ms cannot be parsed", candidate.getUID());
+                    logger.info("{}: discovery-parameter timeout_ms cannot be parsed", candidate.getUID());
                     continue;
                 }
                 @Nullable
                 InetAddress destIp = null;
                 try {
-                    destIp = InetAddress.getByName(matchProperties.get("dest_ip"));
+                    destIp = InetAddress.getByName(parameters.get("dest_ip"));
                 } catch (UnknownHostException e) {
-                    logger.info("{}: match-property dest_ip cannot be parsed", candidate.getUID());
+                    logger.info("{}: discovery-parameter dest_ip cannot be parsed", candidate.getUID());
                     continue;
                 }
                 int destPort = 0;
                 try {
-                    destPort = Integer.parseInt(Objects.toString(matchProperties.get("dest_port")));
+                    destPort = Integer.parseInt(Objects.toString(parameters.get("dest_port")));
                 } catch (NumberFormatException e) {
-                    logger.info("{}: match-property dest_port cannot be parsed", candidate.getUID());
+                    logger.info("{}: discovery-parameter dest_port cannot be parsed", candidate.getUID());
                     continue;
                 }
 
@@ -185,7 +187,7 @@ public class IpAddonFinder extends BaseAddonFinder {
                                     Iterator<SelectionKey> it = selector.selectedKeys().iterator();
 
                                     switch (Objects.toString(response)) {
-                                        case "any":
+                                        case ".*":
                                             if (it.hasNext()) {
                                                 final SocketAddress source = ((DatagramChannel) it.next().channel())
                                                         .receive(buffer);
