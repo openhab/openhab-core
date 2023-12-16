@@ -12,12 +12,10 @@
  */
 package org.openhab.core.addon.xml.test;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.openhab.core.config.discovery.addon.mdns.MDNSAddonFinder.MDNS_SERVICE_TYPE;
 
 import java.net.URI;
 import java.util.List;
@@ -32,6 +30,7 @@ import org.openhab.core.addon.AddonDiscoveryMethod;
 import org.openhab.core.addon.AddonInfo;
 import org.openhab.core.addon.AddonInfoRegistry;
 import org.openhab.core.addon.AddonMatchProperty;
+import org.openhab.core.addon.AddonParameter;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionRegistry;
@@ -80,7 +79,13 @@ public class AddonInfoTest extends JavaOSGiTest {
             AddonDiscoveryMethod discoveryMethod = discoveryMethods.get(0);
             assertNotNull(discoveryMethod);
             assertEquals("mdns", discoveryMethod.getServiceType());
-            assertEquals("_hue._tcp.local.", discoveryMethod.getMdnsServiceType());
+            List<AddonParameter> parameters = discoveryMethod.getParameters();
+            assertNotNull(parameters);
+            assertEquals(1, parameters.size());
+            AddonParameter parameter = parameters.get(0);
+            assertNotNull(parameter);
+            assertEquals(MDNS_SERVICE_TYPE, parameter.getName());
+            assertEquals("_hue._tcp.local.", parameter.getValue());
             List<AddonMatchProperty> properties = discoveryMethod.getMatchProperties();
             assertNotNull(properties);
             assertEquals(0, properties.size());
@@ -88,7 +93,9 @@ public class AddonInfoTest extends JavaOSGiTest {
             discoveryMethod = discoveryMethods.get(1);
             assertNotNull(discoveryMethod);
             assertEquals("upnp", discoveryMethod.getServiceType());
-            assertEquals("", discoveryMethod.getMdnsServiceType());
+            parameters = discoveryMethod.getParameters();
+            assertNotNull(parameters);
+            assertEquals(0, parameters.size());
             properties = discoveryMethod.getMatchProperties();
             assertNotNull(properties);
             assertEquals(1, properties.size());
