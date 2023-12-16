@@ -70,14 +70,17 @@ import org.openhab.core.i18n.TimeZoneProvider;
 import org.openhab.core.i18n.TranslationProvider;
 import org.openhab.core.i18n.UnitProvider;
 import org.openhab.core.library.dimension.ArealDensity;
+import org.openhab.core.library.dimension.Currency;
 import org.openhab.core.library.dimension.DataAmount;
 import org.openhab.core.library.dimension.DataTransferRate;
 import org.openhab.core.library.dimension.Density;
 import org.openhab.core.library.dimension.ElectricConductivity;
+import org.openhab.core.library.dimension.EnergyPrice;
 import org.openhab.core.library.dimension.Intensity;
 import org.openhab.core.library.dimension.RadiationSpecificActivity;
 import org.openhab.core.library.dimension.VolumetricFlowRate;
 import org.openhab.core.library.types.PointType;
+import org.openhab.core.library.unit.CurrencyUnits;
 import org.openhab.core.library.unit.ImperialUnits;
 import org.openhab.core.library.unit.SIUnits;
 import org.openhab.core.library.unit.Units;
@@ -130,6 +133,7 @@ public class I18nProviderImpl
     public static final String REGION = "region";
     public static final String VARIANT = "variant";
     private @Nullable Locale locale;
+    private @Nullable String currencyCode;
 
     // TranslationProvider
     private final ResourceBundleTracker resourceBundleTracker;
@@ -395,6 +399,7 @@ public class I18nProviderImpl
         addDefaultUnit(dimensionMap, Area.class, SIUnits.SQUARE_METRE, ImperialUnits.SQUARE_FOOT);
         addDefaultUnit(dimensionMap, ArealDensity.class, Units.DOBSON_UNIT);
         addDefaultUnit(dimensionMap, CatalyticActivity.class, Units.KATAL);
+        addDefaultUnit(dimensionMap, Currency.class, CurrencyUnits.BASE_CURRENCY);
         addDefaultUnit(dimensionMap, DataAmount.class, Units.BYTE);
         addDefaultUnit(dimensionMap, DataTransferRate.class, Units.MEGABIT_PER_SECOND);
         addDefaultUnit(dimensionMap, Density.class, Units.KILOGRAM_PER_CUBICMETRE);
@@ -420,6 +425,7 @@ public class I18nProviderImpl
         addDefaultUnit(dimensionMap, Mass.class, SIUnits.KILOGRAM, ImperialUnits.POUND);
         addDefaultUnit(dimensionMap, Power.class, Units.WATT);
         addDefaultUnit(dimensionMap, Pressure.class, HECTO(SIUnits.PASCAL), ImperialUnits.INCH_OF_MERCURY);
+        addDefaultUnit(dimensionMap, EnergyPrice.class, CurrencyUnits.BASE_ENERGY_PRICE);
         addDefaultUnit(dimensionMap, RadiationDoseAbsorbed.class, Units.GRAY);
         addDefaultUnit(dimensionMap, RadiationDoseEffective.class, Units.SIEVERT);
         addDefaultUnit(dimensionMap, Radioactivity.class, Units.BECQUEREL);

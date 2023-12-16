@@ -13,6 +13,7 @@
 package org.openhab.core.internal.library.unit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.core.library.unit.CurrencyUnits;
 import org.openhab.core.library.unit.ImperialUnits;
 import org.openhab.core.library.unit.SIUnits;
 import org.openhab.core.library.unit.Units;
@@ -29,6 +30,7 @@ public class UnitInitializer {
         Units.getInstance();
         SIUnits.getInstance();
         ImperialUnits.getInstance();
+        CurrencyUnits.getInstance();
     }
 
     public static void init() {
