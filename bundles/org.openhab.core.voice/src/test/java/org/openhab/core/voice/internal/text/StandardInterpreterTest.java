@@ -18,6 +18,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.openhab.core.voice.internal.text.StandardInterpreter.VOICE_SYSTEM_NAMESPACE;
+import static org.openhab.core.voice.text.AbstractRuleBasedInterpreter.IS_FORCED_CONFIGURATION;
 import static org.openhab.core.voice.text.AbstractRuleBasedInterpreter.IS_SILENT_CONFIGURATION;
 import static org.openhab.core.voice.text.AbstractRuleBasedInterpreter.IS_TEMPLATE_CONFIGURATION;
 
@@ -52,6 +53,7 @@ import org.openhab.core.library.types.PercentType;
 import org.openhab.core.library.types.StringType;
 import org.openhab.core.types.CommandDescription;
 import org.openhab.core.types.CommandOption;
+import org.openhab.core.types.State;
 import org.openhab.core.voice.DialogContext;
 import org.openhab.core.voice.STTService;
 import org.openhab.core.voice.TTSService;
@@ -237,6 +239,61 @@ public class StandardInterpreterTest {
         assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, "watch channel 4 on the tv"));
         verify(eventPublisherMock, times(1))
                 .post(ItemEventFactory.createCommandEvent(tvItem.getName(), new StringType("KEY_4")));
+        reset(eventPublisherMock);
+    }
+
+    @Test
+    public void allowHandleQuestionWithCustomCommand() throws InterpretationException {
+        var trigger_item = new StringItem("trigger_item") {
+            @Override
+            public @Nullable CommandDescription getCommandDescription() {
+                return () -> List.of(new CommandOption("day", "day"), new CommandOption("time", "time"));
+            }
+
+            @Override
+            public @Nullable CommandDescription getCommandDescription(@Nullable Locale locale) {
+                return getCommandDescription();
+            }
+        };
+        MetadataKey voiceMetadataKey = new MetadataKey(VOICE_SYSTEM_NAMESPACE, trigger_item.getName());
+        when(metadataRegistryMock.get(voiceMetadataKey))
+                .thenReturn(new Metadata(voiceMetadataKey, "what $cmd$ is it", null));
+        List<Item> items = List.of(trigger_item);
+        when(itemRegistryMock.getItems()).thenReturn(items);
+        assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, "what time is it?"));
+        verify(eventPublisherMock, times(1))
+                .post(ItemEventFactory.createCommandEvent(trigger_item.getName(), new StringType("time")));
+        reset(eventPublisherMock);
+    }
+
+    @Test
+    public void allowForceCustomCommand() throws InterpretationException {
+        var trigger_item = new StringItem("trigger_item") {
+            @Override
+            public @Nullable CommandDescription getCommandDescription() {
+                return () -> List.of(new CommandOption("day", "day"), new CommandOption("time", "time"));
+            }
+
+            @Override
+            public @Nullable CommandDescription getCommandDescription(@Nullable Locale locale) {
+                return getCommandDescription();
+            }
+
+            @Override
+            public <T extends State> @Nullable T getStateAs(Class<T> typeClass) {
+                return (T) new StringType("time");
+            }
+        };
+        HashMap<String, Object> configuration = new HashMap<>();
+        configuration.put(IS_FORCED_CONFIGURATION, true);
+        MetadataKey voiceMetadataKey = new MetadataKey(VOICE_SYSTEM_NAMESPACE, trigger_item.getName());
+        when(metadataRegistryMock.get(voiceMetadataKey))
+                .thenReturn(new Metadata(voiceMetadataKey, "what $cmd$ is it", configuration));
+        List<Item> items = List.of(trigger_item);
+        when(itemRegistryMock.getItems()).thenReturn(items);
+        assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, "what time is it?"));
+        verify(eventPublisherMock, times(1))
+                .post(ItemEventFactory.createCommandEvent(trigger_item.getName(), new StringType("time")));
         reset(eventPublisherMock);
     }
 
