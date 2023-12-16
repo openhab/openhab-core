@@ -41,7 +41,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This is a {@link UsbAddonFinder} for finding suggested add-ons related to USB devices.
+ * This is an implementation of the {@link AddonFinder} interface that finds suggested add-ons related to USB devices.
  *
  * @author Andrew Fiddian-Green - Initial contribution
  */
