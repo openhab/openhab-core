@@ -25,7 +25,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 @NonNullByDefault
 public class AddonFinderConstants {
 
-    private static final String ADDON_SUGGESTION_FINDER = "-addon-suggestion-finder";
+    public static final String ADDON_SUGGESTION_FINDER = "-addon-suggestion-finder";
     private static final String ADDON_SUGGESTION_FINDER_FEATURE = "openhab-core-config-discovery-addon-";
 
     public static final String SERVICE_TYPE_MDNS = "mdns";
