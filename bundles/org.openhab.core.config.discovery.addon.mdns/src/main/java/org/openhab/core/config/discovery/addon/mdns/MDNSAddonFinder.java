@@ -75,7 +75,7 @@ public class MDNSAddonFinder extends BaseAddonFinder implements ServiceListener 
     /**
      * Adds the given mDNS service to the set of discovered services.
      *
-     * @param device the mDNS service to be added.
+     * @param service the mDNS service to be added.
      */
     public void addService(ServiceInfo service, boolean isResolved) {
         String qualifiedName = service.getQualifiedName();
