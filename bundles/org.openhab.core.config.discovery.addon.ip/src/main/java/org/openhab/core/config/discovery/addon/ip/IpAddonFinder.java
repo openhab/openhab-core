@@ -77,17 +77,18 @@ public class IpAddonFinder extends BaseAddonFinder {
     Set<AddonInfo> suggestions = new HashSet<>();
 
     public IpAddonFinder() {
-        logger.warn("IpAddonFinder::IpAddonFinder");
+        logger.trace("IpAddonFinder::IpAddonFinder");
+        // start of scan will be triggered by setAddonCandidates to ensure addonCandidates are available
     }
 
     @Deactivate
     public void deactivate() {
-        logger.warn("IpAddonFinder::deactivate");
+        logger.trace("IpAddonFinder::deactivate");
         stopScan();
     }
 
     public void setAddonCandidates(List<AddonInfo> candidates) {
-        logger.warn("IpAddonFinder::setAddonCandidates({})", candidates.size());
+        logger.debug("IpAddonFinder::setAddonCandidates({})", candidates.size());
         super.setAddonCandidates(candidates);
         startScan();
     }
@@ -114,7 +115,7 @@ public class IpAddonFinder extends BaseAddonFinder {
     }
 
     void scan() {
-        logger.warn("IpAddonFinder::scan");
+        logger.trace("IpAddonFinder::scan started");
         for (AddonInfo candidate : addonCandidates) {
             for (AddonDiscoveryMethod method : candidate.getDiscoveryMethods().stream()
                     .filter(method -> SERVICE_TYPE.equals(method.getServiceType())).toList()) {
@@ -212,13 +213,14 @@ public class IpAddonFinder extends BaseAddonFinder {
                             break;
 
                         default:
-                            logger.info("{}: match-property type \"{}\" is unknown", candidate.getUID(), type);
+                            logger.info("{}: discovery-parameter type \"{}\" is unknown", candidate.getUID(), type);
                     }
                 } catch (ParseException | NumberFormatException none) {
                     continue;
                 }
             }
         }
+        logger.trace("IpAddonFinder::scan completed");
     }
 
     byte[] buildRequestArray(DatagramChannel channel, String request) throws java.io.IOException, ParseException {
@@ -254,7 +256,7 @@ public class IpAddonFinder extends BaseAddonFinder {
 
     @Override
     public Set<AddonInfo> getSuggestedAddons() {
-        logger.trace("IpAddonFinder::getSuggestedAddons {}", addonCandidates.size());
+        logger.trace("IpAddonFinder::getSuggestedAddons {}/{}", suggestions.size(), addonCandidates.size());
         return suggestions;
     }
 
