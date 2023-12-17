@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
 import ch.qos.logback.classic.Level;
 
 /**
- * This contains Junit tests for the {@link UsbAddonFinder} class.
+ * This contains Junit tests for the {@link UsbAddonFinderXXX} class.
  *
  * @author Andrew Fiddian-Green - Initial contribution
  */
@@ -56,7 +56,7 @@ class UsbAddonFinderTests {
         addons.add(AddonInfo.builder("id", "binding").withName("name").withDescription("description")
                 .withDiscoveryMethods(List.of(discoveryMethod)).build());
 
-        UsbAddonFinder finder = new UsbAddonFinder();
+        UsbAddonFinderXXX finder = new UsbAddonFinderXXX();
         finder.setAddonCandidates(addons);
 
         finder.usbSerialDeviceDiscovered(
@@ -88,7 +88,7 @@ class UsbAddonFinderTests {
         addons.add(AddonInfo.builder("id", "binding").withName("name").withDescription("description")
                 .withDiscoveryMethods(List.of(discoveryMethod)).build());
 
-        UsbAddonFinder finder = new UsbAddonFinder();
+        UsbAddonFinderXXX finder = new UsbAddonFinderXXX();
         finder.setAddonCandidates(addons);
 
         finder.usbSerialDeviceDiscovered(
