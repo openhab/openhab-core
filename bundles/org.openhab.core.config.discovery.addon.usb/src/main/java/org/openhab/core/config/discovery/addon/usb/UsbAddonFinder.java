@@ -46,8 +46,8 @@ import org.slf4j.LoggerFactory;
  * @author Andrew Fiddian-Green - Initial contribution
  */
 @NonNullByDefault
-@Component(service = AddonFinder.class, name = UsbAddonFinderXXX.SERVICE_NAME)
-public class UsbAddonFinderXXX extends BaseAddonFinder implements UsbSerialDiscoveryListener {
+@Component(service = AddonFinder.class, name = UsbAddonFinder.SERVICE_NAME)
+public class UsbAddonFinder extends BaseAddonFinder implements UsbSerialDiscoveryListener {
 
     public static final String SERVICE_TYPE = SERVICE_TYPE_USB;
     public static final String SERVICE_NAME = SERVICE_NAME_USB;
@@ -61,12 +61,12 @@ public class UsbAddonFinderXXX extends BaseAddonFinder implements UsbSerialDisco
     public static final String PRODUCT = "product";
     public static final Set<String> SUPPORTED_PROPERTIES = Set.of(VENDOR_ID, MANUFACTURER, PRODUCT_ID, PRODUCT);
 
-    private final Logger logger = LoggerFactory.getLogger(UsbAddonFinderXXX.class);
+    private final Logger logger = LoggerFactory.getLogger(UsbAddonFinder.class);
     private final Set<UsbSerialDiscovery> usbSerialDiscoveries = new CopyOnWriteArraySet<>();
     private final Set<UsbSerialDeviceInformation> usbDeviceInformations = new CopyOnWriteArraySet<>();
 
     @Activate
-    public UsbAddonFinderXXX() {
+    public UsbAddonFinder() {
     }
 
     @Deactivate
