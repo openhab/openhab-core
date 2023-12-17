@@ -161,8 +161,8 @@ public class IpAddonFinder extends BaseAddonFinder {
                 try {
                     destPort = Integer.parseInt(Objects.toString(parameters.get(PARAMETER_DEST_PORT)));
                 } catch (NumberFormatException e) {
-                    logger.info("{}: discovery-parameter " + PARAMETER_DEST_PORT + " cannot be parsed",
-                            candidate.getUID());
+                    logger.warn("{}: discovery-parameter '{}' cannot be parsed",
+                            candidate.getUID(), PARAMETER_DEST_PORT);
                     continue;
                 }
 
