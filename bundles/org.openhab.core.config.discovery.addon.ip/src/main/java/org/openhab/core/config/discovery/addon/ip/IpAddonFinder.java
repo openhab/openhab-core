@@ -255,7 +255,7 @@ public class IpAddonFinder extends BaseAddonFinder {
                         requestFrame.write((byte) (dPort & 0xff));
                         break;
                     default:
-                        logger.info("Unknown token in request frame \"{}\"", token);
+                        logger.warn("Unknown token in request frame \"{}\"", token);
                         throw new ParseException(token, 0);
                 }
             } else {
