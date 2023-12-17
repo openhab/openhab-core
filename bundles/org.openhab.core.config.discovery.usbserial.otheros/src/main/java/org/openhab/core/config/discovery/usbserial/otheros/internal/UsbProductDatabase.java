@@ -34,7 +34,9 @@ public class UsbProductDatabase {
             "0451:16A8", "Texas Instruments / ZigBee",
             "0658:0200", "Aeotec / Z-Wave",
             "10C4:89FB", "Silicon Laboratories / ZigBee",
-            "1CF1:0030", "dresden elektronik / ZigBee"
+            "10C4:EA60", "Zooz ZST10 700 / Z-Wave",
+            "1CF1:0030", "dresden elektronik / ZigBee",
+            "1A86:55D4", "Zooz 800 / Z-Wave"
     // @formatter:on
     );
 
