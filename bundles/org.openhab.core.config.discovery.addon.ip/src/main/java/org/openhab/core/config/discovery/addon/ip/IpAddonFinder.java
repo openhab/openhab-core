@@ -213,7 +213,7 @@ public class IpAddonFinder extends BaseAddonFinder {
                                             }
                                             break;
                                         default:
-                                            logger.info("{}: match-property response \"{}\" is unknown",
+                                            logger.warn("{}: match-property response \"{}\" is unknown",
                                                     candidate.getUID(), type);
                                             break; // end loop
                                     }
