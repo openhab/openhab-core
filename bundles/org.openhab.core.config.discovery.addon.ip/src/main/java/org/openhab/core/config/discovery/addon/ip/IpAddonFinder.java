@@ -144,8 +144,8 @@ public class IpAddonFinder extends BaseAddonFinder {
                 try {
                     timeoutMs = Integer.parseInt(Objects.toString(parameters.get(PARAMETER_TIMEOUT_MS)));
                 } catch (NumberFormatException e) {
-                    logger.info("{}: discovery-parameter " + PARAMETER_TIMEOUT_MS + "cannot be parsed",
-                            candidate.getUID());
+                    logger.warn("{}: discovery-parameter '{}' cannot be parsed",
+                            candidate.getUID(), PARAMETER_TIMEOUT_MS);
                     continue;
                 }
                 @Nullable
