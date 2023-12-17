@@ -71,14 +71,14 @@ public class IpAddonFinder extends BaseAddonFinder {
     public static final String SERVICE_TYPE = SERVICE_TYPE_IP;
     public static final String SERVICE_NAME = SERVICE_NAME_IP;
 
-    private static final String TYPE_IP_MULTICAST = "IpMulticast";
-    private static final String MATCH_PROPERTY_RESPONSE = "Response";
-    private static final String PARAMETER_DEST_IP = "DestIp";
-    private static final String PARAMETER_DEST_PORT = "DestPort";
-    private static final String PARAMETER_REQUEST = "Request";
-    private static final String PARAMETER_SRC_IP = "SrcIp";
-    private static final String PARAMETER_SRC_PORT = "SrcPort";
-    private static final String PARAMETER_TIMEOUT_MS = "TimeoutMs";
+    private static final String TYPE_IP_MULTICAST = "ipMulticast";
+    private static final String MATCH_PROPERTY_RESPONSE = "response";
+    private static final String PARAMETER_DEST_IP = "destIp";
+    private static final String PARAMETER_DEST_PORT = "destPort";
+    private static final String PARAMETER_REQUEST = "request";
+    private static final String PARAMETER_SRC_IP = "srcIp";
+    private static final String PARAMETER_SRC_PORT = "srcPort";
+    private static final String PARAMETER_TIMEOUT_MS = "timeoutMs";
 
     private final Logger logger = LoggerFactory.getLogger(IpAddonFinder.class);
     private final ScheduledExecutorService scheduler = ThreadPoolManager.getScheduledPool(SERVICE_NAME);
@@ -144,7 +144,8 @@ public class IpAddonFinder extends BaseAddonFinder {
                 try {
                     timeoutMs = Integer.parseInt(Objects.toString(parameters.get(PARAMETER_TIMEOUT_MS)));
                 } catch (NumberFormatException e) {
-                    logger.info("{}: discovery-parameter " + PARAMETER_TIMEOUT_MS + "cannot be parsed", candidate.getUID());
+                    logger.info("{}: discovery-parameter " + PARAMETER_TIMEOUT_MS + "cannot be parsed",
+                            candidate.getUID());
                     continue;
                 }
                 @Nullable
@@ -152,14 +153,16 @@ public class IpAddonFinder extends BaseAddonFinder {
                 try {
                     destIp = InetAddress.getByName(parameters.get(PARAMETER_DEST_IP));
                 } catch (UnknownHostException e) {
-                    logger.info("{}: discovery-parameter " + PARAMETER_DEST_IP + " cannot be parsed", candidate.getUID());
+                    logger.info("{}: discovery-parameter " + PARAMETER_DEST_IP + " cannot be parsed",
+                            candidate.getUID());
                     continue;
                 }
                 int destPort = 0;
                 try {
                     destPort = Integer.parseInt(Objects.toString(parameters.get(PARAMETER_DEST_PORT)));
                 } catch (NumberFormatException e) {
-                    logger.info("{}: discovery-parameter " + PARAMETER_DEST_PORT + " cannot be parsed", candidate.getUID());
+                    logger.info("{}: discovery-parameter " + PARAMETER_DEST_PORT + " cannot be parsed",
+                            candidate.getUID());
                     continue;
                 }
 
