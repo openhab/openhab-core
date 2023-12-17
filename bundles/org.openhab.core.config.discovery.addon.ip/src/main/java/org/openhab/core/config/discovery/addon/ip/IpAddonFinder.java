@@ -225,7 +225,7 @@ public class IpAddonFinder extends BaseAddonFinder {
                             break;
 
                         default:
-                            logger.info("{}: discovery-parameter type \"{}\" is unknown", candidate.getUID(), type);
+                            logger.warn("{}: discovery-parameter type \"{}\" is unknown", candidate.getUID(), type);
                     }
                 } catch (ParseException | NumberFormatException none) {
                     continue;
