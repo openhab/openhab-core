@@ -32,6 +32,7 @@ import javax.measure.spi.SystemOfUnits;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.internal.library.unit.UnitInitializer;
+import org.openhab.core.library.unit.CurrencyUnits;
 import org.openhab.core.library.unit.ImperialUnits;
 import org.openhab.core.library.unit.SIUnits;
 import org.openhab.core.library.unit.Units;
@@ -60,7 +61,7 @@ public class UnitUtils {
     private static final String FRAMEWORK_DIMENSION_PREFIX = "org.openhab.core.library.dimension.";
 
     private static final Collection<Class<? extends SystemOfUnits>> ALL_SYSTEM_OF_UNITS = List.of(SIUnits.class,
-            ImperialUnits.class, Units.class, tech.units.indriya.unit.Units.class);
+            ImperialUnits.class, Units.class, tech.units.indriya.unit.Units.class, CurrencyUnits.class);
 
     static {
         UnitInitializer.init();

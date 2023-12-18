@@ -64,7 +64,7 @@ import org.slf4j.LoggerFactory;
 @NonNullByDefault
 @Component(service = HumanLanguageInterpreter.class)
 public class StandardInterpreter extends AbstractRuleBasedInterpreter {
-    public static final String VOICE_SYSTEM_NAMESPACE = "voice-system";
+    public static final String VOICE_SYSTEM_NAMESPACE = "voiceSystem";
     private Logger logger = LoggerFactory.getLogger(StandardInterpreter.class);
     private final ItemRegistry itemRegistry;
     private final MetadataRegistry metadataRegistry;

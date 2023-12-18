@@ -12,8 +12,7 @@
  */
 package org.openhab.core.config.discovery.addon.mdns;
 
-import static org.openhab.core.config.discovery.addon.AddonFinderConstants.SERVICE_NAME_MDNS;
-import static org.openhab.core.config.discovery.addon.AddonFinderConstants.SERVICE_TYPE_MDNS;
+import static org.openhab.core.config.discovery.addon.AddonFinderConstants.*;
 
 import java.util.HashSet;
 import java.util.List;
@@ -44,10 +43,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This is a {@link MDNSAddonFinder} for finding suggested add-ons via mDNS.
+ * This is a {@link MDNSAddonFinder} for finding suggested add-ons via mDNS. This finder requires a
+ * {@code mdnsServiceType} parameter to be present in the add-on info discovery method.
  *
  * @author Andrew Fiddian-Green - Initial contribution
  * @author Mark Herwege - refactor to allow uninstall
+ * @author Mark Herwege - change to discovery method schema
  */
 @NonNullByDefault
 @Component(service = AddonFinder.class, name = MDNSAddonFinder.SERVICE_NAME)
@@ -55,6 +56,8 @@ public class MDNSAddonFinder extends BaseAddonFinder implements ServiceListener 
 
     public static final String SERVICE_TYPE = SERVICE_TYPE_MDNS;
     public static final String SERVICE_NAME = SERVICE_NAME_MDNS;
+
+    public static final String MDNS_SERVICE_TYPE = "mdnsServiceType";
 
     private static final String NAME = "name";
     private static final String APPLICATION = "application";
@@ -71,8 +74,9 @@ public class MDNSAddonFinder extends BaseAddonFinder implements ServiceListener 
 
     /**
      * Adds the given mDNS service to the set of discovered services.
-     * 
-     * @param device the mDNS service to be added.
+     *
+     * @param service the mDNS service to be added.
+     * @param isResolved indicates if mDNS has fully resolved the service information.
      */
     public void addService(ServiceInfo service, boolean isResolved) {
         String qualifiedName = service.getQualifiedName();
@@ -94,15 +98,15 @@ public class MDNSAddonFinder extends BaseAddonFinder implements ServiceListener 
         // Remove listeners for all service types that are no longer in candidates
         addonCandidates.stream().filter(c -> !candidates.contains(c))
                 .forEach(c -> c.getDiscoveryMethods().stream().filter(m -> SERVICE_TYPE.equals(m.getServiceType()))
-                        .filter(m -> !m.getMdnsServiceType().isEmpty())
-                        .forEach(m -> mdnsClient.removeServiceListener(m.getMdnsServiceType(), this)));
+                        .filter(m -> !getMdnsServiceType(m).isEmpty())
+                        .forEach(m -> mdnsClient.removeServiceListener(getMdnsServiceType(m), this)));
 
         // Add listeners for all service types in candidates
         super.setAddonCandidates(candidates);
         addonCandidates
                 .forEach(c -> c.getDiscoveryMethods().stream().filter(m -> SERVICE_TYPE.equals(m.getServiceType()))
-                        .filter(m -> !m.getMdnsServiceType().isEmpty()).forEach(m -> {
-                            String serviceType = m.getMdnsServiceType();
+                        .filter(m -> !getMdnsServiceType(m).isEmpty()).forEach(m -> {
+                            String serviceType = getMdnsServiceType(m);
                             mdnsClient.addServiceListener(serviceType, this);
                             scheduler.submit(() -> mdnsClient.list(serviceType));
                         }));
@@ -111,8 +115,8 @@ public class MDNSAddonFinder extends BaseAddonFinder implements ServiceListener 
     @Override
     public void unsetAddonCandidates() {
         addonCandidates.forEach(c -> c.getDiscoveryMethods().stream()
-                .filter(m -> SERVICE_TYPE.equals(m.getServiceType())).filter(m -> !m.getMdnsServiceType().isEmpty())
-                .forEach(m -> mdnsClient.removeServiceListener(m.getMdnsServiceType(), this)));
+                .filter(m -> SERVICE_TYPE.equals(m.getServiceType())).filter(m -> !getMdnsServiceType(m).isEmpty())
+                .forEach(m -> mdnsClient.removeServiceListener(getMdnsServiceType(m), this)));
         super.unsetAddonCandidates();
     }
 
@@ -133,7 +137,7 @@ public class MDNSAddonFinder extends BaseAddonFinder implements ServiceListener 
                 for (ServiceInfo service : services.values()) {
 
                     logger.trace("Checking service: {}/{}", service.getQualifiedName(), service.getNiceTextString());
-                    if (method.getMdnsServiceType().equals(service.getType())
+                    if (getMdnsServiceType(method).equals(service.getType())
                             && propertyMatches(matchProperties, NAME, service.getName())
                             && propertyMatches(matchProperties, APPLICATION, service.getApplication())
                             && matchPropertyKeys.stream().allMatch(
@@ -146,6 +150,12 @@ public class MDNSAddonFinder extends BaseAddonFinder implements ServiceListener 
             }
         }
         return result;
+    }
+
+    private String getMdnsServiceType(AddonDiscoveryMethod method) {
+        String param = method.getParameters().stream().filter(p -> MDNS_SERVICE_TYPE.equals(p.getName()))
+                .map(p -> p.getValue()).findFirst().orElse("");
+        return param == null ? "" : param;
     }
 
     @Override

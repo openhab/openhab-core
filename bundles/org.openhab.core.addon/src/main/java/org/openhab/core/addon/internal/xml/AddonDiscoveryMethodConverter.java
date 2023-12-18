@@ -18,6 +18,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.addon.AddonDiscoveryMethod;
 import org.openhab.core.addon.AddonMatchProperty;
+import org.openhab.core.addon.AddonParameter;
 import org.openhab.core.config.core.xml.util.GenericUnmarshaller;
 import org.openhab.core.config.core.xml.util.NodeIterator;
 
@@ -46,16 +47,18 @@ public class AddonDiscoveryMethodConverter extends GenericUnmarshaller<AddonDisc
         String serviceType = requireNonEmpty((String) nodeIterator.nextValue("service-type", true),
                 "Service type is null or empty");
 
-        String mdnsServiceType = (String) nodeIterator.nextValue("mdns-service-type", false);
+        Object paramObject = nodeIterator.nextList("discovery-parameters", false);
+        List<AddonParameter> parameters = !(paramObject instanceof List<?> list) ? null
+                : list.stream().filter(e -> (e instanceof AddonParameter)).map(e -> ((AddonParameter) e)).toList();
 
-        Object object = nodeIterator.nextList("match-properties", false);
-        List<AddonMatchProperty> matchProperties = !(object instanceof List<?> list) ? null
+        Object matchPropObject = nodeIterator.nextList("match-properties", false);
+        List<AddonMatchProperty> matchProperties = !(matchPropObject instanceof List<?> list) ? null
                 : list.stream().filter(e -> (e instanceof AddonMatchProperty)).map(e -> ((AddonMatchProperty) e))
                         .toList();
 
         nodeIterator.assertEndOfType();
 
-        return new AddonDiscoveryMethod().setServiceType(serviceType).setMdnsServiceType(mdnsServiceType)
+        return new AddonDiscoveryMethod().setServiceType(serviceType).setParameters(parameters)
                 .setMatchProperties(matchProperties);
     }
 }

@@ -12,10 +12,7 @@
  */
 package org.openhab.core.addon;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
 
@@ -44,7 +41,12 @@ class AddonInfoListReaderTest {
             + "    <discovery-methods>"
             + "      <discovery-method>"
             + "        <service-type>mdns</service-type>"
-            + "        <mdns-service-type>_printer._tcp.local.</mdns-service-type>"
+            + "        <discovery-parameters>"
+            + "          <discovery-parameter>"
+            + "            <name>mdnsServiceType</name>"
+            + "            <value>_printer._tcp.local.</value>"
+            + "          </discovery-parameter>"
+            + "        </discovery-parameters>"
             + "        <match-properties>"
             + "          <match-property>"
             + "            <name>rp</name>"
@@ -91,7 +93,13 @@ class AddonInfoListReaderTest {
         AddonDiscoveryMethod method = discoveryMethods.get(0);
         assertNotNull(method);
         assertEquals("mdns", method.getServiceType());
-        assertEquals("_printer._tcp.local.", method.getMdnsServiceType());
+        List<AddonParameter> parameters = method.getParameters();
+        assertNotNull(parameters);
+        assertEquals(1, parameters.size());
+        AddonParameter parameter = parameters.get(0);
+        assertNotNull(parameter);
+        assertEquals("mdnsServiceType", parameter.getName());
+        assertEquals("_printer._tcp.local.", parameter.getValue());
         List<AddonMatchProperty> matchProperties = method.getMatchProperties();
         assertNotNull(matchProperties);
         assertEquals(2, matchProperties.size());
@@ -104,7 +112,9 @@ class AddonInfoListReaderTest {
         method = discoveryMethods.get(1);
         assertNotNull(method);
         assertEquals("upnp", method.getServiceType());
-        assertEquals("", method.getMdnsServiceType());
+        parameters = method.getParameters();
+        assertNotNull(parameters);
+        assertEquals(0, parameters.size());
         matchProperties = method.getMatchProperties();
         assertNotNull(matchProperties);
         assertEquals(1, matchProperties.size());

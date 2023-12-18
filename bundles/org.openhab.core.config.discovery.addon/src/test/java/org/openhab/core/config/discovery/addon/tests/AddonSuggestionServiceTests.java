@@ -35,6 +35,7 @@ import org.openhab.core.addon.AddonDiscoveryMethod;
 import org.openhab.core.addon.AddonInfo;
 import org.openhab.core.addon.AddonInfoProvider;
 import org.openhab.core.addon.AddonMatchProperty;
+import org.openhab.core.addon.AddonParameter;
 import org.openhab.core.config.discovery.addon.AddonFinder;
 import org.openhab.core.config.discovery.addon.AddonFinderConstants;
 import org.openhab.core.config.discovery.addon.AddonSuggestionService;
@@ -51,6 +52,8 @@ import org.osgi.service.cm.ConfigurationAdmin;
 @NonNullByDefault
 @TestInstance(Lifecycle.PER_CLASS)
 public class AddonSuggestionServiceTests {
+
+    public static final String MDNS_SERVICE_TYPE = "mdnsServiceType";
 
     private @NonNullByDefault({}) ConfigurationAdmin configurationAdmin;
     private @NonNullByDefault({}) LocaleProvider localeProvider;
@@ -125,13 +128,13 @@ public class AddonSuggestionServiceTests {
         AddonDiscoveryMethod hp = new AddonDiscoveryMethod().setServiceType(AddonFinderConstants.SERVICE_TYPE_MDNS)
                 .setMatchProperties(
                         List.of(new AddonMatchProperty("rp", ".*"), new AddonMatchProperty("ty", "hp (.*)")))
-                .setMdnsServiceType("_printer._tcp.local.");
+                .setParameters(List.of(new AddonParameter(MDNS_SERVICE_TYPE, "_printer._tcp.local.")));
 
         AddonDiscoveryMethod hue1 = new AddonDiscoveryMethod().setServiceType(AddonFinderConstants.SERVICE_TYPE_UPNP)
                 .setMatchProperties(List.of(new AddonMatchProperty("modelName", "Philips hue bridge")));
 
         AddonDiscoveryMethod hue2 = new AddonDiscoveryMethod().setServiceType(AddonFinderConstants.SERVICE_TYPE_MDNS)
-                .setMdnsServiceType("_hue._tcp.local.");
+                .setParameters(List.of(new AddonParameter(MDNS_SERVICE_TYPE, "_hue._tcp.local.")));
 
         // create the mock
         addonInfoProvider = mock(AddonInfoProvider.class);

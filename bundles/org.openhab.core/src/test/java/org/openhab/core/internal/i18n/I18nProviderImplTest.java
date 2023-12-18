@@ -41,6 +41,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openhab.core.library.types.PointType;
+import org.openhab.core.library.unit.CurrencyUnits;
 import org.openhab.core.library.unit.ImperialUnits;
 import org.openhab.core.library.unit.SIUnits;
 import org.openhab.core.library.unit.Units;
@@ -183,7 +184,9 @@ public class I18nProviderImplTest {
     }
 
     private static Stream<String> getAllDimensions() {
-        return Stream.of(SIUnits.getInstance(), Units.getInstance(), ImperialUnits.getInstance())
+        return Stream
+                .of(SIUnits.getInstance(), Units.getInstance(), ImperialUnits.getInstance(),
+                        CurrencyUnits.getInstance())
                 .map(SystemOfUnits::getUnits).flatMap(Collection::stream) //
                 .map(UnitUtils::getDimensionName).filter(Objects::nonNull).map(Objects::requireNonNull).distinct();
     }

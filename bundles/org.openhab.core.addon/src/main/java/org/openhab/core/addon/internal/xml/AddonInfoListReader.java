@@ -18,6 +18,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.addon.AddonDiscoveryMethod;
 import org.openhab.core.addon.AddonInfoList;
 import org.openhab.core.addon.AddonMatchProperty;
+import org.openhab.core.addon.AddonParameter;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionParameterGroup;
@@ -69,6 +70,7 @@ public class AddonInfoListReader extends XmlDocumentReader<AddonInfoList> {
         xstream.registerConverter(new ConfigDescriptionParameterGroupConverter());
         xstream.registerConverter(new FilterCriteriaConverter());
         xstream.registerConverter(new AddonDiscoveryMethodConverter());
+        xstream.registerConverter(new AddonParameterConverter());
         xstream.registerConverter(new AddonMatchPropertyConverter());
     }
 
@@ -94,9 +96,11 @@ public class AddonInfoListReader extends XmlDocumentReader<AddonInfoList> {
         xstream.alias("discovery-methods", NodeList.class);
         xstream.alias("discovery-method", AddonDiscoveryMethod.class);
         xstream.alias("service-type", NodeValue.class);
-        xstream.alias("mdns-service-type", NodeValue.class);
+        xstream.alias("discovery-parameters", NodeList.class);
+        xstream.alias("discovery-parameter", AddonParameter.class);
         xstream.alias("match-properties", NodeList.class);
         xstream.alias("match-property", AddonMatchProperty.class);
+        xstream.alias("value", NodeValue.class);
         xstream.alias("regex", NodeValue.class);
     }
 }
