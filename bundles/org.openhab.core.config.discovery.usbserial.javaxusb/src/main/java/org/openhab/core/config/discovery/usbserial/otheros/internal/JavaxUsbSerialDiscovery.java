@@ -63,8 +63,9 @@ public class JavaxUsbSerialDiscovery implements UsbSerialDiscovery {
     private final Duration scanInterval = Duration.ofSeconds(15);
     private final @Nullable ScheduledExecutorService scheduler;
 
-    private @Nullable ScheduledFuture<?> scanTask;
     private Set<UsbSerialDeviceInformation> lastScanResult = new HashSet<>();
+    private @Nullable ScheduledFuture<?> scanTask;
+    private @Nullable JavaxUsbDeviceInformationProvider infoProvider;
 
     @Activate
     public JavaxUsbSerialDiscovery() {
@@ -176,8 +177,8 @@ public class JavaxUsbSerialDiscovery implements UsbSerialDiscovery {
                 }
 
                 if (product == null || manufacturer == null) {
-                    Optional<UsbSerialDeviceInformation> lookupInfo = JavaxUsbDeviceInformationProvider
-                            .getDeviceInformation(vendorId, productId);
+                    Optional<UsbSerialDeviceInformation> lookupInfo = getInfoProvider()
+                            .getDeviceInfo(vendorId, productId);
                     if (lookupInfo.isPresent()) {
                         if (product == null) {
                             product = lookupInfo.get().getProduct();
@@ -204,6 +205,13 @@ public class JavaxUsbSerialDiscovery implements UsbSerialDiscovery {
         });
 
         return result;
+    }
+
+    private JavaxUsbDeviceInformationProvider getInfoProvider() {
+        if (infoProvider == null) {
+            infoProvider = new JavaxUsbDeviceInformationProvider();
+        }
+        return infoProvider;
     }
 
     @Override

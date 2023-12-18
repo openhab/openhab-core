@@ -1,0 +1,16 @@
+// common generic device => ignore
+0x0403,0x6001,Future Technology Devices,GENERIC
+
+// Zigbee
+0x0403,0x8A28,Future Technology Devices,Rainforest Automation ZigBee
+0x0451,0x16A8,Texas Instruments,ZigBee
+0x10C4,0x89FB,Silicon Laboratories,ZigBee
+0x1CF1,0x0030,Dresden Elektronik,ZigBee
+
+// Z-Wave
+0x0658,0x0200,Sigma Designs,Aeotec / ZWave.me UZB Z-Wave
+0x1A86,0x55D4,Nanjing Qinheng Microelectronics,Zooz 800 Z-Wave
+
+// both Zigbee and Z-Wave
+// the following generic is very common => EXCLUDE from being discovered
+0x10C4,0xEA60,Silicon Laboratories,Aeon Labs / Zooz 700 / sonoff / GENERIC

@@ -12,8 +12,13 @@
  */
 package org.openhab.core.config.discovery.usbserial.otheros.internal;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.config.discovery.usbserial.UsbSerialDeviceInformation;
@@ -28,38 +33,26 @@ import org.openhab.core.config.discovery.usbserial.UsbSerialDeviceInformation;
 @NonNullByDefault
 public class JavaxUsbDeviceInformationProvider {
 
-    // @formatter:off
-    private static final Set<UsbSerialDeviceInformation> KNOWN_DEVICES = Set.of(
-        /*
-         * ==== EnOcean sticks ====
-         */
-        // the following generic is used in EnOcean sticks => EXCLUDE from being discovered
-        new UsbSerialDeviceInformation(0x0403, 0x6001, null, "Future Technology Devices", "GENERIC", 0, null, ""),
+    private final List<UsbSerialDeviceInformation> infos = new ArrayList<>();
 
-        /*
-         * ==== Zigbee sticks ====
-         */
-        new UsbSerialDeviceInformation(0x0403, 0x8A28, null, "Future Technology Devices", "Rainforest Automation ZigBee", 0, null, ""),
-        new UsbSerialDeviceInformation(0x0451, 0x16A8, null, "Texas Instruments", "ZigBee", 0, null, ""),
-        new UsbSerialDeviceInformation(0x10C4, 0x89FB, null, "Silicon Laboratories", "ZigBee", 0, null, ""),
-        new UsbSerialDeviceInformation(0x1CF1, 0x0030, null, "Dresden Elektronik", "ZigBee", 0, null, ""),
+    public JavaxUsbDeviceInformationProvider() {
+        InputStream stream = getClass().getClassLoader().getResourceAsStream("usb-device-infos.txt");
+        if (stream != null) {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+            try {
+                while (reader.ready()) {
+                    String[] data = reader.readLine().split(",");
+                    if (data.length > 3) {
+                        infos.add(new UsbSerialDeviceInformation(Integer.decode(data[0]), Integer.decode(data[1]), null,
+                                data[2], data[3], 0, null, ""));
+                    }
+                }
+            } catch (IOException e) {
+            }
+        }
+    }
 
-        /*
-         * ==== Z-Wave sticks ====
-         */
-        new UsbSerialDeviceInformation(0x0658, 0x0200, null, "Sigma Designs", "Aeotec / ZWave.me UZB Z-Wave", 0, null, ""),
-        new UsbSerialDeviceInformation(0x1A86, 0x55D4, null, "Nanjing Qinheng Microelectronics", "Zooz 800 Z-Wave", 0, null, ""),
-
-        /*
-         * ==== Zigbee sticks || Z-Wave sticks ====
-         */
-        // the following generic very common => EXCLUDE from being discovered
-        new UsbSerialDeviceInformation(0x10C4, 0xEA60, null, "Silicon Laboratories", "Aeon Labs / Zooz 700 / sonoff / GENERIC", 0, null, "")
-    );
-    // @formatter:on
-
-    public static Optional<UsbSerialDeviceInformation> getDeviceInformation(int vendorId, int productId) {
-        return KNOWN_DEVICES.stream().filter(p -> (vendorId == p.getVendorId()) && (productId == p.getProductId()))
-                .findFirst();
+    public Optional<UsbSerialDeviceInformation> getDeviceInfo(int vendorId, int productId) {
+        return infos.stream().filter(p -> (vendorId == p.getVendorId()) && (productId == p.getProductId())).findAny();
     }
 }
