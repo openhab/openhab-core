@@ -512,7 +512,7 @@
 
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.serial/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery.usbserial/${project.version}</bundle>
-		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery.usbserial.javaxrs/${project.version}</bundle>
+		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery.usbserial.javaxusb/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery.usbserial.linuxsysfs/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery.usbserial.ser2net/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.transport.serial/${project.version}</bundle>
