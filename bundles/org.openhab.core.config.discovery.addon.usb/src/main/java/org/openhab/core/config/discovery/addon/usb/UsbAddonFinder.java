@@ -19,6 +19,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -63,7 +64,7 @@ public class UsbAddonFinder extends BaseAddonFinder implements UsbSerialDiscover
 
     private final Logger logger = LoggerFactory.getLogger(UsbAddonFinder.class);
     private final Set<UsbSerialDiscovery> usbSerialDiscoveries = new CopyOnWriteArraySet<>();
-    private final Set<UsbSerialDeviceInformation> usbDeviceInformations = new CopyOnWriteArraySet<>();
+    private final Map<Integer, UsbSerialDeviceInformation> usbDeviceInformations = new ConcurrentHashMap<>();
 
     @Activate
     public UsbAddonFinder() {
@@ -114,7 +115,7 @@ public class UsbAddonFinder extends BaseAddonFinder implements UsbSerialDiscover
                 }
 
                 logger.trace("Checking candidate: {}", candidate.getUID());
-                for (UsbSerialDeviceInformation device : usbDeviceInformations) {
+                for (UsbSerialDeviceInformation device : usbDeviceInformations.values()) {
                     logger.trace("Checking device: {}", device);
 
                     String vendorId = toHexString(device.getVendorId());
@@ -146,17 +147,54 @@ public class UsbAddonFinder extends BaseAddonFinder implements UsbSerialDiscover
         return SERVICE_NAME;
     }
 
+    /**
+     * Create a unique 32 bit integer map hash key that comprises the vendorId in the upper 16 bits, plus the productId
+     * in the lower 16 bits.
+     */
+    private Integer keyOf(UsbSerialDeviceInformation deviceInfo) {
+        return (deviceInfo.getVendorId() * 0x10000) + deviceInfo.getProductId();
+    }
+
+    /**
+     * Add the discovered USB device information record to our internal map. If there is already an entry in the map
+     * then merge the two sets of data.
+     * 
+     * @param discoveredInfo the newly discovered USB device information.
+     */
     @Override
-    public void usbSerialDeviceDiscovered(UsbSerialDeviceInformation usbSerialDeviceInformation) {
-        usbDeviceInformations.add(usbSerialDeviceInformation);
+    public void usbSerialDeviceDiscovered(UsbSerialDeviceInformation discoveredInfo) {
+        UsbSerialDeviceInformation targetInfo = discoveredInfo;
+        UsbSerialDeviceInformation existingInfo = usbDeviceInformations.get(keyOf(targetInfo));
+
+        if (existingInfo != null) {
+            boolean isMerging = false;
+            String product = existingInfo.getProduct();
+            if (product != null) {
+                product = discoveredInfo.getProduct();
+                isMerging = true;
+            }
+            String manufacturer = existingInfo.getManufacturer();
+            if (manufacturer != null) {
+                manufacturer = discoveredInfo.getManufacturer();
+                isMerging = true;
+            }
+            String serialNumber = existingInfo.getSerialNumber();
+            if (serialNumber != null) {
+                serialNumber = discoveredInfo.getSerialNumber();
+                isMerging = true;
+            }
+            if (isMerging) {
+                targetInfo = new UsbSerialDeviceInformation(discoveredInfo.getVendorId(), discoveredInfo.getProductId(),
+                        serialNumber, manufacturer, product, discoveredInfo.getInterfaceNumber(),
+                        discoveredInfo.getInterfaceDescription(), discoveredInfo.getSerialPort());
+            }
+        }
+
+        usbDeviceInformations.put(keyOf(targetInfo), targetInfo);
     }
 
     @Override
-    public void usbSerialDeviceRemoved(UsbSerialDeviceInformation usbSerialDeviceInformation) {
-        usbDeviceInformations.remove(usbSerialDeviceInformation);
-    }
-
-    public Set<UsbSerialDeviceInformation> getDeviceInformations() {
-        return usbDeviceInformations;
+    public void usbSerialDeviceRemoved(UsbSerialDeviceInformation removedInfo) {
+        usbDeviceInformations.remove(keyOf(removedInfo));
     }
 }
