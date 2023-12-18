@@ -177,8 +177,8 @@ public class JavaxUsbSerialDiscovery implements UsbSerialDiscovery {
                 }
 
                 if (product == null || manufacturer == null) {
-                    Optional<UsbSerialDeviceInformation> lookupInfo = getInfoProvider()
-                            .getDeviceInfo(vendorId, productId);
+                    Optional<UsbSerialDeviceInformation> lookupInfo = getInfoProvider().getDeviceInfo(vendorId,
+                            productId);
                     if (lookupInfo.isPresent()) {
                         if (product == null) {
                             product = lookupInfo.get().getProduct();
