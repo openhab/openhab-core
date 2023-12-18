@@ -208,8 +208,10 @@ public class JavaxUsbSerialDiscovery implements UsbSerialDiscovery {
     }
 
     private JavaxUsbDeviceInformationProvider getInfoProvider() {
+        JavaxUsbDeviceInformationProvider infoProvider = this.infoProvider;
         if (infoProvider == null) {
             infoProvider = new JavaxUsbDeviceInformationProvider();
+            this.infoProvider = infoProvider;
         }
         return infoProvider;
     }
