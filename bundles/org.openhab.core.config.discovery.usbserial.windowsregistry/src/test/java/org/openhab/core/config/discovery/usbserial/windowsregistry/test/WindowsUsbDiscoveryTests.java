@@ -14,9 +14,10 @@ package org.openhab.core.config.discovery.usbserial.windowsregistry.test;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
+import org.openhab.core.config.discovery.usbserial.windowsregistry.internal.WindowsUsbSerialDiscovery;
 
 /**
- * JUnit tests for ..
+ * JUnit tests for {@link WindowsUsbSerialDiscovery}
  *
  * @author Andrew Fiddian-Green - Initial contribution
  */
@@ -24,6 +25,7 @@ import org.junit.jupiter.api.Test;
 class WindowsUsbDiscoveryTests {
 
     @Test
-    void testWhatever() {
+    void testDiscovery() {
+        // TODO write tests
     }
 }

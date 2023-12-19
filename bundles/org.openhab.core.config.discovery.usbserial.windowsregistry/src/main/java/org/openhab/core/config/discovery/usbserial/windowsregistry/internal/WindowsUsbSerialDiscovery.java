@@ -12,9 +12,13 @@
  */
 package org.openhab.core.config.discovery.usbserial.windowsregistry.internal;
 
+import static com.sun.jna.platform.win32.WinReg.HKEY_LOCAL_MACHINE;
+
 import java.time.Duration;
 import java.util.HashSet;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -33,12 +37,12 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sun.jna.Platform;
+import com.sun.jna.platform.win32.Advapi32Util;
+
 /**
- * This is a {@link UsbSerialDiscovery} implementation component that scans the system for USB devices by means of the
- * {@link org.usb4java} library implementation of the {@link javax.usb} interface.
- * <p>
- * It provides USB coverage on non Linux Operating Systems. Linux is already better covered by the scanners in the
- * {@link org.openhab.core.config.discovery.usbserial.linuxsysfs} module.
+ * This is a {@link UsbSerialDiscovery} implementation component for Windows.
+ * It parses the Windows registry for USB device entries.
  *
  * @author Andrew Fiddian-Green - Initial contribution
  */
@@ -47,6 +51,17 @@ import org.slf4j.LoggerFactory;
 public class WindowsUsbSerialDiscovery implements UsbSerialDiscovery {
 
     protected static final String SERVICE_NAME = "usb-serial-discovery-windows";
+
+    // registry accessor strings
+    private static final String USB_REGISTRY_ROOT = "SYSTEM\\CurrentControlSet\\Enum\\USB";
+    private static final String BACKSLASH = "\\";
+    private static final String PREFIX_PID = "PID_";
+    private static final String PREFIX_VID = "VID_";
+    private static final String PREFIX_HEX = "0x";
+    private static final String SPLIT_IDS = "&";
+    private static final String SPLIT_VALUES = ";";
+    private static final String KEY_MANUFACTURER = "Mfg";
+    private static final String KEY_PRODUCT = "DeviceDesc";
 
     private final Logger logger = LoggerFactory.getLogger(WindowsUsbSerialDiscovery.class);
     private final Set<UsbSerialDiscoveryListener> discoveryListeners = new CopyOnWriteArraySet<>();
@@ -114,12 +129,91 @@ public class WindowsUsbSerialDiscovery implements UsbSerialDiscovery {
     }
 
     /**
-     * Traverse the USB tree and return a set of USB device information.
+     * Traverse the USB tree in Windows registry and return a set of USB device information.
      *
      * @return a set of USB device information.
      */
-    private Set<UsbSerialDeviceInformation> scanAllUsbDevicesInformation() {
-        return Set.of();
+    public Set<UsbSerialDeviceInformation> scanAllUsbDevicesInformation() {
+        if (!Platform.isWindows()) {
+            return Set.of();
+        }
+
+        Set<UsbSerialDeviceInformation> result = new HashSet<>();
+        String[] usbKeys = Advapi32Util.registryGetKeys(HKEY_LOCAL_MACHINE, USB_REGISTRY_ROOT);
+
+        for (String usbKey : usbKeys) {
+            logger.trace("{}", usbKey);
+
+            if (!usbKey.startsWith(PREFIX_VID)) {
+                continue;
+            }
+
+            String[] ids = usbKey.split(SPLIT_IDS);
+            if (ids.length < 2) {
+                continue;
+            }
+
+            if (!ids[1].startsWith(PREFIX_PID)) {
+                continue;
+            }
+
+            int vendorId;
+            int productId;
+            try {
+                vendorId = Integer.decode(PREFIX_HEX + ids[0].substring(4));
+                productId = Integer.decode(PREFIX_HEX + ids[1].substring(4));
+            } catch (NumberFormatException e) {
+                continue;
+            }
+
+            String usbPath = USB_REGISTRY_ROOT + BACKSLASH + usbKey;
+            String[] usbSubKeys = Advapi32Util.registryGetKeys(HKEY_LOCAL_MACHINE, usbPath);
+
+            for (String usbSubKey : usbSubKeys) {
+                logger.trace("  {}", usbSubKey);
+
+                String usbSubPath = usbPath + BACKSLASH + usbSubKey;
+                TreeMap<String, Object> values = Advapi32Util.registryGetValues(HKEY_LOCAL_MACHINE, usbSubPath);
+
+                if (logger.isTraceEnabled()) {
+                    for (Entry<String, Object> value : values.entrySet()) {
+                        logger.trace("    {}={}", value.getKey(), value.getValue());
+                    }
+                }
+
+                String manufacturer;
+                Object manufacturerObject = values.get(KEY_MANUFACTURER);
+                if (manufacturerObject instanceof String manufacturerString) {
+                    String[] manufacturerData = manufacturerString.split(SPLIT_VALUES);
+                    if (manufacturerData.length < 2) {
+                        continue;
+                    }
+                    manufacturer = manufacturerData[1];
+                } else {
+                    continue;
+                }
+
+                String product;
+                Object productObject = values.get(KEY_PRODUCT);
+                if (productObject instanceof String productString) {
+                    String[] productData = productString.split(SPLIT_VALUES);
+                    if (productData.length < 2) {
+                        continue;
+                    }
+                    product = productData[1];
+                } else {
+                    continue;
+                }
+
+                UsbSerialDeviceInformation usbSerialDeviceInformation = new UsbSerialDeviceInformation(vendorId,
+                        productId, null, manufacturer, product, 0, null, "");
+
+                logger.debug("Add {}", usbSerialDeviceInformation);
+                result.add(usbSerialDeviceInformation);
+                break;
+            }
+        }
+        return result;
     }
 
     @Override
