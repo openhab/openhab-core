@@ -1,3 +1,6 @@
+// test entry for JUnit
+0xFFFF,0x1111,Test Manufacturer,Test Product
+
 // ZigBee
 0x0403,0x8A28,Future Technology Devices,Rainforest Automation ZigBee
 0x0451,0x16A8,Texas Instruments,ZigBee

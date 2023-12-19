@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.config.discovery.usbserial.otheros.internal;
+package org.openhab.core.config.discovery.usbserial.javaxusb.internal;
 
 import java.io.UnsupportedEncodingException;
 import java.time.Duration;
@@ -61,7 +61,7 @@ public class JavaxUsbSerialDiscovery implements UsbSerialDiscovery {
     private final Logger logger = LoggerFactory.getLogger(JavaxUsbSerialDiscovery.class);
     private final Set<UsbSerialDiscoveryListener> discoveryListeners = new CopyOnWriteArraySet<>();
     private final Duration scanInterval = Duration.ofSeconds(15);
-    private final @Nullable ScheduledExecutorService scheduler;
+    private final ScheduledExecutorService scheduler;
 
     private Set<UsbSerialDeviceInformation> lastScanResult = new HashSet<>();
     private @Nullable ScheduledFuture<?> scanTask;
