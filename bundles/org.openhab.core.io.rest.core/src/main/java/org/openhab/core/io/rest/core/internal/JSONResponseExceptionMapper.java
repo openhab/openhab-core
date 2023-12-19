@@ -56,7 +56,7 @@ public class JSONResponseExceptionMapper implements ExceptionMapper<Exception> {
             // see https://github.com/openhab/openhab-distro/issues/1616
             logger.debug("Requested resource not (yet) found", e);
             // Returning null results in a Response.Status.NO_CONTENT response.
-            return null;
+            return Response.status(Response.Status.NOT_FOUND).build();
         } else {
             logger.error("Unexpected exception occurred while processing REST request.", e);
             return delegate.toResponse(e);
