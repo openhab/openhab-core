@@ -244,7 +244,7 @@ public class StandardInterpreterTest {
 
     @Test
     public void allowHandleQuestionWithCustomCommand() throws InterpretationException {
-        var trigger_item = new StringItem("trigger_item") {
+        var triggerItem = new StringItem("trigger_item") {
             @Override
             public @Nullable CommandDescription getCommandDescription() {
                 return () -> List.of(new CommandOption("day", "day"), new CommandOption("time", "time"));
@@ -255,20 +255,20 @@ public class StandardInterpreterTest {
                 return getCommandDescription();
             }
         };
-        MetadataKey voiceMetadataKey = new MetadataKey(VOICE_SYSTEM_NAMESPACE, trigger_item.getName());
+        MetadataKey voiceMetadataKey = new MetadataKey(VOICE_SYSTEM_NAMESPACE, triggerItem.getName());
         when(metadataRegistryMock.get(voiceMetadataKey))
                 .thenReturn(new Metadata(voiceMetadataKey, "what $cmd$ is it", null));
-        List<Item> items = List.of(trigger_item);
+        List<Item> items = List.of(triggerItem);
         when(itemRegistryMock.getItems()).thenReturn(items);
         assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, "what time is it?"));
         verify(eventPublisherMock, times(1))
-                .post(ItemEventFactory.createCommandEvent(trigger_item.getName(), new StringType("time")));
+                .post(ItemEventFactory.createCommandEvent(triggerItem.getName(), new StringType("time")));
         reset(eventPublisherMock);
     }
 
     @Test
     public void allowForceCustomCommand() throws InterpretationException {
-        var trigger_item = new StringItem("trigger_item") {
+        var triggerItem = new StringItem("trigger_item") {
             @Override
             public @Nullable CommandDescription getCommandDescription() {
                 return () -> List.of(new CommandOption("day", "day"), new CommandOption("time", "time"));
@@ -286,14 +286,14 @@ public class StandardInterpreterTest {
         };
         HashMap<String, Object> configuration = new HashMap<>();
         configuration.put(IS_FORCED_CONFIGURATION, true);
-        MetadataKey voiceMetadataKey = new MetadataKey(VOICE_SYSTEM_NAMESPACE, trigger_item.getName());
+        MetadataKey voiceMetadataKey = new MetadataKey(VOICE_SYSTEM_NAMESPACE, triggerItem.getName());
         when(metadataRegistryMock.get(voiceMetadataKey))
                 .thenReturn(new Metadata(voiceMetadataKey, "what $cmd$ is it", configuration));
-        List<Item> items = List.of(trigger_item);
+        List<Item> items = List.of(triggerItem);
         when(itemRegistryMock.getItems()).thenReturn(items);
         assertEquals(OK_RESPONSE, standardInterpreter.interpret(Locale.ENGLISH, "what time is it?"));
         verify(eventPublisherMock, times(1))
-                .post(ItemEventFactory.createCommandEvent(trigger_item.getName(), new StringType("time")));
+                .post(ItemEventFactory.createCommandEvent(triggerItem.getName(), new StringType("time")));
         reset(eventPublisherMock);
     }
 

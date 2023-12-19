@@ -59,14 +59,17 @@ public class ProcessAddonFinder extends BaseAddonFinder {
     // also tries to mitigate differences on different operating systems
     String getProcessCommandProcess(ProcessHandle h) {
         Optional<String> command = h.info().command();
-        if (command.isPresent())
+        if (command.isPresent()) {
             return command.get();
+        }
         Optional<String[]> args = h.info().arguments();
-        if (!args.isPresent())
+        if (!args.isPresent()) {
             return "";
+        }
         String[] argsArray = args.get();
-        if (argsArray.length < 1)
+        if (argsArray.length < 1) {
             return "";
+        }
         return argsArray[0];
     }
 

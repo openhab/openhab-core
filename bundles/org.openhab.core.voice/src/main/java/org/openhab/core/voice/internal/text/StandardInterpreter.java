@@ -90,7 +90,6 @@ public class StandardInterpreter extends AbstractRuleBasedInterpreter {
 
     @Override
     public void createRules(@Nullable Locale locale) {
-
         /****************************** ENGLISH ******************************/
 
         if (locale == null || Objects.equals(locale.getLanguage(), Locale.ENGLISH.getLanguage())) {
@@ -173,7 +172,6 @@ public class StandardInterpreter extends AbstractRuleBasedInterpreter {
         /****************************** GERMAN ******************************/
 
         if (locale == null || Objects.equals(locale.getLanguage(), Locale.GERMAN.getLanguage())) {
-
             Expression einAnAus = alt(cmd("ein", OnOffType.ON), cmd("an", OnOffType.ON), cmd("aus", OnOffType.OFF));
             Expression denDieDas = opt(alt("den", "die", "das"));
             Expression schalte = alt("schalt", "schalte", "mach");
@@ -237,7 +235,6 @@ public class StandardInterpreter extends AbstractRuleBasedInterpreter {
                             seq(schalte, denDieDas), /* item */ seq(opt("auf"), labeledCmd)//
                     ), //
                     Locale.GERMAN).toArray(Rule[]::new));
-
         }
 
         /****************************** FRENCH ******************************/
