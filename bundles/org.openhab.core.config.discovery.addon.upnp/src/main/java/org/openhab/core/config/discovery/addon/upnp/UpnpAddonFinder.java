@@ -12,7 +12,8 @@
  */
 package org.openhab.core.config.discovery.addon.upnp;
 
-import static org.openhab.core.config.discovery.addon.AddonFinderConstants.*;
+import static org.openhab.core.config.discovery.addon.AddonFinderConstants.SERVICE_NAME_UPNP;
+import static org.openhab.core.config.discovery.addon.AddonFinderConstants.SERVICE_TYPE_UPNP;
 
 import java.net.URI;
 import java.util.HashSet;
@@ -25,6 +26,7 @@ import java.util.stream.Collectors;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.jupnp.UpnpService;
+import org.jupnp.model.message.header.RootDeviceHeader;
 import org.jupnp.model.meta.DeviceDetails;
 import org.jupnp.model.meta.LocalDevice;
 import org.jupnp.model.meta.ManufacturerDetails;
@@ -86,6 +88,7 @@ public class UpnpAddonFinder extends BaseAddonFinder implements RegistryListener
         }
         registry.addListener(this);
         upnpService.getControlPoint().search();
+        upnpService.getControlPoint().search(new RootDeviceHeader());
     }
 
     @Deactivate
