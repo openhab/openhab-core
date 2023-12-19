@@ -127,7 +127,6 @@ public class JavaxUsbSerialDiscovery implements UsbSerialDiscovery {
     /**
      * Traverse the USB tree for devices that are children of the ROOT hub, and return a set of USB device information.
      *
-     * @param usbHub the hub whose children are to be found.
      * @return a set of USB device information.
      */
     private Set<UsbSerialDeviceInformation> scanAllUsbDevicesInformation() {
