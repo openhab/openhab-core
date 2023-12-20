@@ -83,7 +83,7 @@ public class AddonInfoAddonsXmlProvider implements AddonInfoProvider {
         File file = new File(fileName);
         try {
             if (!file.isFile()) {
-                logger.warn("File '{}' does not exist.", fileName);
+                logger.debug("File '{}' does not exist.", fileName);
                 return;
             }
         } catch (SecurityException e) {
