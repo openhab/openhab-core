@@ -103,7 +103,7 @@ public class AddonInfoAddonsXmlProvider implements AddonInfoProvider {
             } catch (IOException e) {
                 logger.warn("File '{}' could not be read", f.getName());
             } catch (ConversionException e) {
-                logger.warn("File '{}' has invalid content", f.getName());
+                logger.warn("File '{}' has invalid content: {}", f.getName(), e.getMessage());
             } catch (XStreamException e) {
                 logger.warn("File '{}' could not be deserialized", f.getName());
             } catch (SecurityException e) {
