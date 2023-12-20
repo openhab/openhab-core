@@ -36,6 +36,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
@@ -150,6 +151,7 @@ public class IpAddonFinder extends BaseAddonFinder {
     private static final String PARAMETER_SRC_IP = "srcIp";
     private static final String PARAMETER_SRC_PORT = "srcPort";
     private static final String PARAMETER_TIMEOUT_MS = "timeoutMs";
+    private static final String REPLACEMENT_UUID = "uuid";
 
     private final Logger logger = LoggerFactory.getLogger(IpAddonFinder.class);
     private final ScheduledExecutorService scheduler = ThreadPoolManager
@@ -341,6 +343,10 @@ public class IpAddonFinder extends BaseAddonFinder {
                         int dPort = sock.getPort();
                         requestFrame.write((byte) ((dPort >> 8) & 0xff));
                         requestFrame.write((byte) (dPort & 0xff));
+                        break;
+                    case "$" + REPLACEMENT_UUID:
+                        String uuid = UUID.randomUUID().toString();
+                        requestFrame.write(uuid.getBytes());
                         break;
                     default:
                         logger.warn("Unknown token in request frame \"{}\"", token);
