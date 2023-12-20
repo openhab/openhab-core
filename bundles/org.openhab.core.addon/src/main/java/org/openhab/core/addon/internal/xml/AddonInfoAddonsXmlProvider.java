@@ -22,7 +22,6 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -41,20 +40,22 @@ import com.thoughtworks.xstream.XStreamException;
 import com.thoughtworks.xstream.converters.ConversionException;
 
 /**
- * The {@link AddonInfoAddonsXmlProvider} reads all {@code userdata/addons/*.xml} files, each of which
- * should contain a list of {@code addon} elements, and convert their combined contents into a list
- * of {@link AddonInfo} objects can be accessed via the {@link AddonInfoProvider} interface.
+ * The {@link AddonInfoAddonsXmlProvider} reads the {@code runtime/etc/addons.xml} file, which
+ * should contain a list of {@code addon} elements, and convert its combined contents into a list
+ * of {@link AddonInfo} objects that can be accessed via the {@link AddonInfoProvider} interface.
  *
  * @author Andrew Fiddian-Green - Initial contribution
+ * @author Kai Kreuzer - Reduce it to support a single addons.xml file
  */
 @NonNullByDefault
 @Component(service = AddonInfoProvider.class, name = AddonInfoAddonsXmlProvider.SERVICE_NAME)
 public class AddonInfoAddonsXmlProvider implements AddonInfoProvider {
 
+    private static final String ADDONS_XML_FILE = "etc" + File.separator + "addons.xml";
     public static final String SERVICE_NAME = "addons-info-provider";
 
     private final Logger logger = LoggerFactory.getLogger(AddonInfoAddonsXmlProvider.class);
-    private final String folder = OpenHAB.getUserDataFolder() + File.separator + "addons";
+    private final String fileName = OpenHAB.getRuntimeFolder() + File.separator + ADDONS_XML_FILE;
     private final Set<AddonInfo> addonInfos = new HashSet<>();
 
     @Activate
@@ -79,37 +80,34 @@ public class AddonInfoAddonsXmlProvider implements AddonInfoProvider {
     }
 
     private void initialize() {
-        File fileFolder = new File(folder);
+        File file = new File(fileName);
         try {
-            if (!fileFolder.isDirectory()) {
-                logger.debug("Folder '{}' does not exist", folder);
+            if (!file.isFile()) {
+                logger.debug("File '{}' does not exist.", fileName);
                 return;
             }
         } catch (SecurityException e) {
-            logger.warn("Folder '{}' threw a security exception: {}", folder, e.getMessage());
+            logger.warn("File '{}' threw a security exception: {}", fileName, e.getMessage());
             return;
         }
         AddonInfoListReader reader = new AddonInfoListReader();
-        Stream.of(fileFolder.listFiles()).filter(f -> f.isFile() && f.getName().endsWith(".xml")).forEach(f -> {
-            try {
-                String xml = Files.readString(f.toPath());
-                if (xml != null && !xml.isBlank()) {
-                    addonInfos.addAll(reader.readFromXML(xml).getAddons().stream()
-                            .map(a -> AddonInfo.builder(a).isMasterAddonInfo(false).build())
-                            .collect(Collectors.toSet()));
-                } else {
-                    logger.warn("File '{}' contents are null or empty", f.getName());
-                }
-            } catch (IOException e) {
-                logger.warn("File '{}' could not be read", f.getName());
-            } catch (ConversionException e) {
-                logger.warn("File '{}' has invalid content: {}", f.getName(), e.getMessage());
-            } catch (XStreamException e) {
-                logger.warn("File '{}' could not be deserialized", f.getName());
-            } catch (SecurityException e) {
-                logger.warn("File '{}' threw a security exception: {}", folder, e.getMessage());
+        try {
+            String xml = Files.readString(file.toPath());
+            if (xml != null && !xml.isBlank()) {
+                addonInfos.addAll(reader.readFromXML(xml).getAddons().stream()
+                        .map(a -> AddonInfo.builder(a).isMasterAddonInfo(false).build()).collect(Collectors.toSet()));
+            } else {
+                logger.warn("File '{}' contents are null or empty", file.getName());
             }
-        });
+        } catch (IOException e) {
+            logger.warn("File '{}' could not be read", file.getName());
+        } catch (ConversionException e) {
+            logger.warn("File '{}' has invalid content: {}", file.getName(), e.getMessage());
+        } catch (XStreamException e) {
+            logger.warn("File '{}' could not be deserialized", file.getName());
+        } catch (SecurityException e) {
+            logger.warn("File '{}' threw a security exception: {}", file, e.getMessage());
+        }
     }
 
     /*
