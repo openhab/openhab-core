@@ -77,32 +77,29 @@ public class ColorChannelHandler extends AbstractTransformingChannelHandler {
     public Optional<State> toState(String string) {
         State newState = UnDefType.UNDEF;
         if (string.equals(channelConfig.onValue)) {
-            if (state instanceof HSBType) {
-                newState = new HSBType(((HSBType) state).getHue(), ((HSBType) state).getSaturation(),
-                        PercentType.HUNDRED);
+            if (state instanceof HSBType hsbType) {
+                newState = new HSBType(hsbType.getHue(), hsbType.getSaturation(), PercentType.HUNDRED);
             } else {
                 newState = HSBType.WHITE;
             }
         } else if (string.equals(channelConfig.offValue)) {
-            if (state instanceof HSBType) {
-                newState = new HSBType(((HSBType) state).getHue(), ((HSBType) state).getSaturation(), PercentType.ZERO);
+            if (state instanceof HSBType hsbType) {
+                newState = new HSBType(hsbType.getHue(), hsbType.getSaturation(), PercentType.ZERO);
             } else {
                 newState = HSBType.BLACK;
             }
-        } else if (string.equals(channelConfig.increaseValue) && state instanceof HSBType) {
-            BigDecimal newBrightness = ((HSBType) state).getBrightness().toBigDecimal().add(channelConfig.step);
+        } else if (string.equals(channelConfig.increaseValue) && state instanceof HSBType hsbType) {
+            BigDecimal newBrightness = hsbType.getBrightness().toBigDecimal().add(channelConfig.step);
             if (HUNDRED.compareTo(newBrightness) < 0) {
                 newBrightness = HUNDRED;
             }
-            newState = new HSBType(((HSBType) state).getHue(), ((HSBType) state).getSaturation(),
-                    new PercentType(newBrightness));
-        } else if (string.equals(channelConfig.decreaseValue) && state instanceof HSBType) {
-            BigDecimal newBrightness = ((HSBType) state).getBrightness().toBigDecimal().subtract(channelConfig.step);
+            newState = new HSBType(hsbType.getHue(), hsbType.getSaturation(), new PercentType(newBrightness));
+        } else if (string.equals(channelConfig.decreaseValue) && state instanceof HSBType hsbType) {
+            BigDecimal newBrightness = hsbType.getBrightness().toBigDecimal().subtract(channelConfig.step);
             if (BigDecimal.ZERO.compareTo(newBrightness) > 0) {
                 newBrightness = BigDecimal.ZERO;
             }
-            newState = new HSBType(((HSBType) state).getHue(), ((HSBType) state).getSaturation(),
-                    new PercentType(newBrightness));
+            newState = new HSBType(hsbType.getHue(), hsbType.getSaturation(), new PercentType(newBrightness));
         } else {
             Matcher matcher = TRIPLE_MATCHER.matcher(string);
             if (matcher.matches()) {

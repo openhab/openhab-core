@@ -151,7 +151,7 @@ public class XmlDocumentBundleTracker<@NonNull T> extends BundleTracker<Bundle> 
         if (bundleTracker == null || bundleTracker.getBundles() == null) {
             return Set.of();
         }
-        return (Set<Bundle>) Arrays.stream(bundleTracker.getBundles()).collect(Collectors.toSet());
+        return Arrays.stream(bundleTracker.getBundles()).collect(Collectors.toSet());
     }
 
     @Override

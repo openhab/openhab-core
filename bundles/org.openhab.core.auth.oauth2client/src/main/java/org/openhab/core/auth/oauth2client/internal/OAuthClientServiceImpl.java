@@ -421,6 +421,7 @@ public class OAuthClientServiceImpl implements OAuthClientService {
      * @param key The name of the key to add to the auth form
      * @param value The value of the new auth form param
      */
+    @Override
     public void addExtraAuthField(String key, String value) {
         if (extraAuthFields == null) {
             extraAuthFields = new Fields();

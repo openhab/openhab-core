@@ -17,7 +17,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -222,7 +221,7 @@ public class RuntimeRuleTest extends JavaOSGiTest {
 
     private void assertSatisfiedHandlerInput(final CompareConditionHandler handler, final boolean expected,
             final @Nullable Object input) {
-        final boolean is = handler.isSatisfied(Collections.singletonMap("input", input));
+        final boolean is = handler.isSatisfied(Map.of("input", input));
         if (expected) {
             assertTrue(is);
         } else {

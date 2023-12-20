@@ -142,8 +142,7 @@ public class NumberItem extends GenericItem implements MetadataAwareItem {
         if (state instanceof QuantityType<?> quantityType) {
             if (dimension == null) {
                 // QuantityType update to a NumberItem without unit, strip unit
-                DecimalType plainState = new DecimalType(quantityType.toBigDecimal());
-                return plainState;
+                return new DecimalType(quantityType.toBigDecimal());
             } else {
                 // QuantityType update to a NumberItem with unit, convert to item unit (if possible)
                 Unit<?> stateUnit = quantityType.getUnit();
