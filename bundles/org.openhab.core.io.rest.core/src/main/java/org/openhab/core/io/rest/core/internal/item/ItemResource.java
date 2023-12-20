@@ -42,7 +42,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
@@ -485,7 +484,7 @@ public class ItemResource implements RESTResource {
                 return Response.status(Status.BAD_REQUEST).build();
             }
         } else {
-            throw new WebApplicationException(404);
+            return getItemNotFoundResponse(itemname);
         }
     }
 
@@ -524,7 +523,7 @@ public class ItemResource implements RESTResource {
 
             return Response.ok(null, MediaType.TEXT_PLAIN).build();
         } catch (ItemNotFoundException e) {
-            return Response.status(Status.NOT_FOUND).build();
+            return getItemNotFoundResponse(itemName);
         }
     }
 
@@ -563,7 +562,7 @@ public class ItemResource implements RESTResource {
 
             return Response.ok(null, MediaType.TEXT_PLAIN).build();
         } catch (ItemNotFoundException e) {
-            return Response.status(Status.NOT_FOUND).build();
+            return getItemNotFoundResponse(itemName);
         }
     }
 
