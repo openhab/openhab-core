@@ -42,7 +42,7 @@ public interface AddonFinder {
     public void setAddonCandidates(List<AddonInfo> candidates);
 
     /**
-     * This method should be called from the framework to allow a finder to stop searching for addons and do cleanup.
+     * This method should be called from the framework to allow a finder to stop searching for add-ons and do cleanup.
      */
     public void unsetAddonCandidates();
 }
