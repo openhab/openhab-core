@@ -104,6 +104,10 @@ public class IpAddonFinder extends BaseAddonFinder {
     }
 
     private void startScan() {
+        // The setAddonCandidates() method is called for each info provider.
+        // In order to do the scan only once, but on the full set of candidates, we have to delay the execution.
+        // At the same time we must make sure that a scheduled scan is rescheduled - or (after more than our delay) is
+        // executed once more.
         stopScan();
         scanJob = scheduler.schedule(this::scan, 20, TimeUnit.SECONDS);
     }
