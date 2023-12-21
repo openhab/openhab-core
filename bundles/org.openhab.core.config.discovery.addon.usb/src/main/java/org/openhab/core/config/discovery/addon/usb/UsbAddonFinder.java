@@ -16,7 +16,6 @@ import static org.openhab.core.config.discovery.addon.AddonFinderConstants.SERVI
 import static org.openhab.core.config.discovery.addon.AddonFinderConstants.SERVICE_TYPE_USB;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -32,9 +31,7 @@ import org.openhab.core.config.discovery.addon.BaseAddonFinder;
 import org.openhab.core.config.discovery.usbserial.UsbSerialDeviceInformation;
 import org.openhab.core.config.discovery.usbserial.UsbSerialDiscovery;
 import org.openhab.core.config.discovery.usbserial.UsbSerialDiscoveryListener;
-import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
@@ -66,14 +63,6 @@ public class UsbAddonFinder extends BaseAddonFinder implements UsbSerialDiscover
     private final Set<UsbSerialDiscovery> usbSerialDiscoveries = new CopyOnWriteArraySet<>();
     private final Map<Integer, UsbSerialDeviceInformation> usbDeviceInformations = new ConcurrentHashMap<>();
 
-    @Activate
-    public UsbAddonFinder() {
-    }
-
-    @Deactivate
-    public void deactivate() {
-    }
-
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     protected void addUsbSerialDiscovery(UsbSerialDiscovery usbSerialDiscovery) {
         usbSerialDiscoveries.add(usbSerialDiscovery);
@@ -84,16 +73,6 @@ public class UsbAddonFinder extends BaseAddonFinder implements UsbSerialDiscover
     protected synchronized void removeUsbSerialDiscovery(UsbSerialDiscovery usbSerialDiscovery) {
         usbSerialDiscovery.unregisterDiscoveryListener(this);
         usbSerialDiscoveries.remove(usbSerialDiscovery);
-    }
-
-    @Override
-    public void setAddonCandidates(List<AddonInfo> candidates) {
-        super.setAddonCandidates(candidates);
-    }
-
-    @Override
-    public void unsetAddonCandidates() {
-        super.unsetAddonCandidates();
     }
 
     @Override

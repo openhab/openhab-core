@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
 import ch.qos.logback.classic.Level;
 
 /**
- * This contains Junit tests for the {@link UsbAddonFinder} class.
+ * This contains tests for the {@link UsbAddonFinder} class.
  *
  * @author Andrew Fiddian-Green - Initial contribution
  */
