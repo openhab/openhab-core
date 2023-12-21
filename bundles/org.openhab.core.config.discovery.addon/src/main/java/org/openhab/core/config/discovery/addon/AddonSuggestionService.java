@@ -161,32 +161,46 @@ public class AddonSuggestionService implements AutoCloseable {
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     public void addAddonInfoProvider(AddonInfoProvider addonInfoProvider) {
-        addonInfoProviders.add(addonInfoProvider);
+        synchronized (this) {
+            addonInfoProviders.add(addonInfoProvider);
+        }
         changed();
     }
 
     public void removeAddonInfoProvider(AddonInfoProvider addonInfoProvider) {
-        if (addonInfoProviders.remove(addonInfoProvider)) {
+        boolean removed;
+        synchronized (this) {
+            removed = addonInfoProviders.remove(addonInfoProvider);
+        }
+        if (removed) {
             changed();
         }
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     public void addAddonFinder(AddonFinder addonFinder) {
-        addonFinders.add(addonFinder);
+        synchronized (this) {
+            addonFinders.add(addonFinder);
+        }
         changed();
     }
 
     public void removeAddonFinder(AddonFinder addonFinder) {
-        if (addonFinders.remove(addonFinder)) {
+        boolean removed;
+        synchronized (this) {
+            removed = addonFinders.remove(addonFinder);
+        }
+        if (removed) {
             changed();
         }
     }
 
-    private synchronized void changed() {
-        List<AddonInfo> candidates = addonInfoProviders.stream().map(p -> p.getAddonInfos(localeProvider.getLocale()))
-                .flatMap(Collection::stream).toList();
-        addonFinders.stream().filter(this::isFinderEnabled).forEach(f -> f.setAddonCandidates(candidates));
+    private void changed() {
+        synchronized (this) {
+            List<AddonInfo> candidates = addonInfoProviders.stream()
+                    .map(p -> p.getAddonInfos(localeProvider.getLocale())).flatMap(Collection::stream).toList();
+            addonFinders.stream().filter(this::isFinderEnabled).forEach(f -> f.setAddonCandidates(candidates));
+        }
     }
 
     @Deactivate
