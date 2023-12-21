@@ -173,31 +173,39 @@ public class AddonSuggestionService implements AutoCloseable {
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     public void addAddonFinder(AddonFinder addonFinder) {
-        addonFinders.add(addonFinder);
+        synchronized (addonFinders) {
+            addonFinders.add(addonFinder);
+        }
         changed();
     }
 
     public void removeAddonFinder(AddonFinder addonFinder) {
-        if (addonFinders.remove(addonFinder)) {
-            changed();
+        synchronized (addonFinders) {
+            addonFinders.remove(addonFinder);
         }
     }
 
     private void changed() {
         List<AddonInfo> candidates = addonInfoProviders.stream().map(p -> p.getAddonInfos(localeProvider.getLocale()))
                 .flatMap(Collection::stream).toList();
-        addonFinders.stream().filter(this::isFinderEnabled).forEach(f -> f.setAddonCandidates(candidates));
+        synchronized (addonFinders) {
+            addonFinders.stream().filter(this::isFinderEnabled).forEach(f -> f.setAddonCandidates(candidates));
+        }
     }
 
     @Deactivate
     @Override
     public void close() throws Exception {
-        addonFinders.clear();
+        synchronized (addonFinders) {
+            addonFinders.clear();
+        }
         addonInfoProviders.clear();
     }
 
     public Set<AddonInfo> getSuggestedAddons(@Nullable Locale locale) {
-        return addonFinders.stream().filter(this::isFinderEnabled).map(f -> f.getSuggestedAddons())
-                .flatMap(Collection::stream).collect(Collectors.toSet());
+        synchronized (addonFinders) {
+            return addonFinders.stream().filter(this::isFinderEnabled).map(f -> f.getSuggestedAddons())
+                    .flatMap(Collection::stream).collect(Collectors.toSet());
+        }
     }
 }
