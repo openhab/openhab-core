@@ -498,7 +498,6 @@ public class PersistenceManager implements ItemRegistryChangeListener, StateChan
                 }
                 if (getMatchingConfigurations(FORECAST).anyMatch(configuration -> appliesToItem(configuration, item))) {
                     scheduleNextPersistedForecastForItem(item.getName());
-
                 }
             }
         }

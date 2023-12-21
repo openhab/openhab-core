@@ -50,7 +50,7 @@ public class CurrencyServiceConfigOptionProvider implements ConfigOptionProvider
     @Override
     public @Nullable Collection<ParameterOption> getParameterOptions(URI uri, String param, @Nullable String context,
             @Nullable Locale locale) {
-        if ("system:units".equals(uri.toString()) && param.equals("currencyProvider")) {
+        if ("system:units".equals(uri.toString()) && "currencyProvider".equals(param)) {
             return currencyProviders.stream().map(this::mapProvider).toList();
         }
         return null;

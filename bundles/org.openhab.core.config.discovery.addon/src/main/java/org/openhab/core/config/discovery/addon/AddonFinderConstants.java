@@ -18,7 +18,7 @@ import java.util.Map;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * This {@link AddonFinderConstants} contains constants describing addon finders available in core.
+ * This {@link AddonFinderConstants} contains constants describing add-on finders available in core.
  *
  * @author Mark Herwege - Initial contribution
  */

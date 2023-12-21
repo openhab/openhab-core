@@ -29,11 +29,17 @@ import org.osgi.framework.FrameworkUtil;
 @NonNullByDefault
 public class OpenHAB {
 
+    /** The program argument name for setting the runtime directory path */
+    public static final String RUNTIME_DIR_PROG_ARGUMENT = "openhab.runtime";
+
     /** The program argument name for setting the user data directory path */
     public static final String USERDATA_DIR_PROG_ARGUMENT = "openhab.userdata";
 
     /** The program argument name for setting the main config directory path */
     public static final String CONFIG_DIR_PROG_ARGUMENT = "openhab.conf";
+
+    /** The default runtime directory name */
+    public static final String DEFAULT_RUNTIME_FOLDER = "runtime";
 
     /** The default main configuration directory name */
     public static final String DEFAULT_CONFIG_FOLDER = "conf";
@@ -89,6 +95,21 @@ public class OpenHAB {
             // ignore if the file is not there or not readable
         }
         return "Unknown Build No.";
+    }
+
+    /**
+     * Returns the runtime folder path name. The runtime folder <code>&lt;openhab-home&gt;/runtime</code> can be
+     * overwritten by setting the System property <code>openhab.runtime</code>.
+     *
+     * @return the runtime folder path name
+     */
+    public static String getRuntimeFolder() {
+        String progArg = System.getProperty(RUNTIME_DIR_PROG_ARGUMENT);
+        if (progArg != null) {
+            return progArg;
+        } else {
+            return DEFAULT_RUNTIME_FOLDER;
+        }
     }
 
     /**

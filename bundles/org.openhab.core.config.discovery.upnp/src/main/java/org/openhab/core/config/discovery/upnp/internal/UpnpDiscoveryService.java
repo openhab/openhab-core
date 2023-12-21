@@ -24,6 +24,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jdt.annotation.Nullable;
 import org.jupnp.UpnpService;
+import org.jupnp.model.message.header.RootDeviceHeader;
 import org.jupnp.model.meta.LocalDevice;
 import org.jupnp.model.meta.RemoteDevice;
 import org.jupnp.model.types.UDN;
@@ -151,6 +152,7 @@ public class UpnpDiscoveryService extends AbstractDiscoveryService
         }
         upnpService.getRegistry().addListener(this);
         upnpService.getControlPoint().search();
+        upnpService.getControlPoint().search(new RootDeviceHeader());
     }
 
     @Override

@@ -1240,7 +1240,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
         if (tokenText.contains("?")) {
             throw new ParseException("The character '?' can only be used at the end of the expression", 0);
         }
-        if (tokenText.equals("|")) {
+        if ("|".equals(tokenText)) {
             throw new ParseException("The character '|' can not be used alone", 0);
         }
         Expression expression = seq(tokenText.contains("|") ? alt(Arrays.stream(tokenText.split("\\|"))//
@@ -1542,7 +1542,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
     public record ItemFilter(Set<String> itemNames, Set<String> excludedItemNames, Set<String> itemTags,
             Set<String> itemSemantics) {
 
-        private static final ItemFilter allInstance = new ItemFilter(Set.of(), Set.of(), Set.of(), Set.of());
+        private static final ItemFilter ALL_INSTANCE = new ItemFilter(Set.of(), Set.of(), Set.of(), Set.of());
         public boolean filterItem(Item item, MetadataRegistry metadataRegistry) {
             if (!itemNames.isEmpty() && !itemNames.contains(item.getName())) {
                 return false;
@@ -1563,7 +1563,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
         }
 
         public static ItemFilter all() {
-            return allInstance;
+            return ALL_INSTANCE;
         }
 
         public static ItemFilter forItem(Item item) {

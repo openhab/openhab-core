@@ -377,13 +377,12 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
                 for (Object sourceButton : (Collection<?>) sourceButtons) {
                     if (sourceButton instanceof String) {
                         String[] splitted1 = sourceButton.toString().split(":");
-                        String[] splitted2 = splitted1[0].split(",");
-                        int row = Integer.parseInt(splitted2[0].trim());
-                        int column = Integer.parseInt(splitted2[1].trim());
-                        String[] splitted3 = splitted1[1].trim().split("=");
-                        String cmd = splitted3[0].trim();
-                        String label = splitted3[1].trim();
-                        String icon = splitted3.length < 3 ? null : splitted3[2].trim();
+                        int row = Integer.parseInt(splitted1[0].trim());
+                        int column = Integer.parseInt(splitted1[1].trim());
+                        String[] splitted2 = splitted1[2].trim().split("=");
+                        String cmd = splitted2[0].trim();
+                        String label = splitted2[1].trim();
+                        String icon = splitted2.length < 3 ? null : splitted2[2].trim();
                         ButtonImpl button = (ButtonImpl) SitemapFactory.eINSTANCE.createButton();
                         button.setRow(row);
                         button.setColumn(column);
