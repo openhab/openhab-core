@@ -180,12 +180,8 @@ public class AddonSuggestionService implements AutoCloseable {
     }
 
     public void removeAddonFinder(AddonFinder addonFinder) {
-        boolean removed;
         synchronized (addonFinders) {
-            removed = addonFinders.remove(addonFinder);
-        }
-        if (removed) {
-            changed();
+            addonFinders.remove(addonFinder);
         }
     }
 
