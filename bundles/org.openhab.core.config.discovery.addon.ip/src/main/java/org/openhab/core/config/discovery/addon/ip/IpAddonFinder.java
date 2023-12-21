@@ -12,8 +12,7 @@
  */
 package org.openhab.core.config.discovery.addon.ip;
 
-import static org.openhab.core.config.discovery.addon.AddonFinderConstants.SERVICE_NAME_IP;
-import static org.openhab.core.config.discovery.addon.AddonFinderConstants.SERVICE_TYPE_IP;
+import static org.openhab.core.config.discovery.addon.AddonFinderConstants.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -58,7 +57,7 @@ import org.slf4j.LoggerFactory;
 /**
  * This is a {@link IpAddonFinder} for finding suggested add-ons by sending IP packets to the
  * network and collecting responses.
- * 
+ *
  * @implNote On activation, a thread is spawned which handles the detection. Scan runs once,
  *           no continuous background scanning.
  *
@@ -81,7 +80,8 @@ public class IpAddonFinder extends BaseAddonFinder {
     private static final String PARAMETER_TIMEOUT_MS = "timeoutMs";
 
     private final Logger logger = LoggerFactory.getLogger(IpAddonFinder.class);
-    private final ScheduledExecutorService scheduler = ThreadPoolManager.getScheduledPool(SERVICE_NAME);
+    private final ScheduledExecutorService scheduler = ThreadPoolManager
+            .getScheduledPool(ThreadPoolManager.THREAD_POOL_NAME_COMMON);
     private @Nullable Future<?> scanJob = null;
     Set<AddonInfo> suggestions = new HashSet<>();
 
@@ -96,34 +96,30 @@ public class IpAddonFinder extends BaseAddonFinder {
         stopScan();
     }
 
+    @Override
     public void setAddonCandidates(List<AddonInfo> candidates) {
         logger.debug("IpAddonFinder::setAddonCandidates({})", candidates.size());
         super.setAddonCandidates(candidates);
         startScan();
     }
 
-    synchronized void startScan() {
-        if (scanJob == null) {
-            scanJob = scheduler.schedule(this::scan, 1, TimeUnit.SECONDS);
-        }
+    private void startScan() {
+        stopScan();
+        scanJob = scheduler.schedule(this::scan, 20, TimeUnit.SECONDS);
     }
 
-    void stopScan() {
+    private void stopScan() {
         Future<?> tmpScanJob = scanJob;
         if (tmpScanJob != null) {
             if (!tmpScanJob.isDone()) {
                 logger.trace("Trying to cancel IP scan");
                 tmpScanJob.cancel(true);
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException ignore) {
-                }
             }
             scanJob = null;
         }
     }
 
-    void scan() {
+    private void scan() {
         logger.trace("IpAddonFinder::scan started");
         for (AddonInfo candidate : addonCandidates) {
             for (AddonDiscoveryMethod method : candidate.getDiscoveryMethods().stream()
@@ -136,7 +132,7 @@ public class IpAddonFinder extends BaseAddonFinder {
                 Map<String, String> matchProperties = method.getMatchProperties().stream()
                         .collect(Collectors.toMap(property -> property.getName(), property -> property.getRegex()));
 
-                // parse standard set op parameters:
+                // parse standard set of parameters
                 String type = Objects.toString(parameters.get("type"), "");
                 String request = Objects.toString(parameters.get(PARAMETER_REQUEST), "");
                 String response = Objects.toString(matchProperties.get(MATCH_PROPERTY_RESPONSE), "");
@@ -165,9 +161,7 @@ public class IpAddonFinder extends BaseAddonFinder {
                     continue;
                 }
 
-                //
                 // handle known types
-                //
                 try {
                     switch (Objects.toString(type)) {
                         case TYPE_IP_MULTICAST:
@@ -234,7 +228,8 @@ public class IpAddonFinder extends BaseAddonFinder {
         logger.trace("IpAddonFinder::scan completed");
     }
 
-    byte[] buildRequestArray(DatagramChannel channel, String request) throws java.io.IOException, ParseException {
+    private byte[] buildRequestArray(DatagramChannel channel, String request)
+            throws java.io.IOException, ParseException {
         InetSocketAddress sock = (InetSocketAddress) channel.getLocalAddress();
 
         ByteArrayOutputStream requestFrame = new ByteArrayOutputStream();
