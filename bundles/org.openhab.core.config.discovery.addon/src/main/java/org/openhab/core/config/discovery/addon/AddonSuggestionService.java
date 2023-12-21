@@ -12,9 +12,7 @@
  */
 package org.openhab.core.config.discovery.addon;
 
-import static org.openhab.core.config.discovery.addon.AddonFinderConstants.SUGGESTION_FINDERS;
-import static org.openhab.core.config.discovery.addon.AddonFinderConstants.SUGGESTION_FINDER_CONFIGS;
-import static org.openhab.core.config.discovery.addon.AddonFinderConstants.SUGGESTION_FINDER_FEATURES;
+import static org.openhab.core.config.discovery.addon.AddonFinderConstants.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -50,6 +48,8 @@ import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.component.annotations.ReferencePolicyOption;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This is a {@link AddonSuggestionService} which discovers suggested add-ons for the user to install.
@@ -63,6 +63,8 @@ public class AddonSuggestionService implements AutoCloseable {
 
     public static final String SERVICE_NAME = "addon-suggestion-service";
     public static final String CONFIG_PID = "org.openhab.addons";
+
+    private final Logger logger = LoggerFactory.getLogger(AddonSuggestionService.class);
 
     private final Set<AddonInfoProvider> addonInfoProviders = ConcurrentHashMap.newKeySet();
     private final List<AddonFinder> addonFinders = Collections.synchronizedList(new ArrayList<>());
@@ -148,7 +150,8 @@ public class AddonSuggestionService implements AutoCloseable {
             if (!cfgMap.equals(config)) {
                 modified(cfgMap);
             }
-        } catch (IOException e) {
+        } catch (IOException | IllegalStateException e) {
+            logger.debug("Exception occurred while trying to sync the configuration: {}", e.getMessage());
         }
     }
 
