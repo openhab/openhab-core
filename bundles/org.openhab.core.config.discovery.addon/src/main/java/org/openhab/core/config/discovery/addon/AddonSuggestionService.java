@@ -73,6 +73,7 @@ public class AddonSuggestionService implements AutoCloseable {
     private final ScheduledExecutorService scheduler;
     private final Map<String, Boolean> baseFinderConfig = new ConcurrentHashMap<>();
     private final List<Future<?>> tasks = new CopyOnWriteArrayList<>();
+    private final Object synchObject = new Object();
 
     @Activate
     public AddonSuggestionService(final @Reference ConfigurationAdmin configurationAdmin,
@@ -161,7 +162,7 @@ public class AddonSuggestionService implements AutoCloseable {
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     public void addAddonInfoProvider(AddonInfoProvider addonInfoProvider) {
-        synchronized (this) {
+        synchronized (synchObject) {
             addonInfoProviders.add(addonInfoProvider);
         }
         changed();
@@ -169,7 +170,7 @@ public class AddonSuggestionService implements AutoCloseable {
 
     public void removeAddonInfoProvider(AddonInfoProvider addonInfoProvider) {
         boolean removed;
-        synchronized (this) {
+        synchronized (synchObject) {
             removed = addonInfoProviders.remove(addonInfoProvider);
         }
         if (removed) {
@@ -179,7 +180,7 @@ public class AddonSuggestionService implements AutoCloseable {
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     public void addAddonFinder(AddonFinder addonFinder) {
-        synchronized (this) {
+        synchronized (synchObject) {
             addonFinders.add(addonFinder);
         }
         changed();
@@ -187,7 +188,7 @@ public class AddonSuggestionService implements AutoCloseable {
 
     public void removeAddonFinder(AddonFinder addonFinder) {
         boolean removed;
-        synchronized (this) {
+        synchronized (synchObject) {
             removed = addonFinders.remove(addonFinder);
         }
         if (removed) {
@@ -196,7 +197,7 @@ public class AddonSuggestionService implements AutoCloseable {
     }
 
     private void changed() {
-        synchronized (this) {
+        synchronized (synchObject) {
             List<AddonInfo> candidates = addonInfoProviders.stream()
                     .map(p -> p.getAddonInfos(localeProvider.getLocale())).flatMap(Collection::stream).toList();
             addonFinders.stream().filter(this::isFinderEnabled).forEach(f -> f.setAddonCandidates(candidates));
@@ -206,14 +207,14 @@ public class AddonSuggestionService implements AutoCloseable {
     @Deactivate
     @Override
     public void close() throws Exception {
-        synchronized (this) {
+        synchronized (synchObject) {
             addonFinders.clear();
             addonInfoProviders.clear();
         }
     }
 
     public Set<AddonInfo> getSuggestedAddons(@Nullable Locale locale) {
-        synchronized (this) {
+        synchronized (synchObject) {
             return addonFinders.stream().filter(this::isFinderEnabled).map(f -> f.getSuggestedAddons())
                     .flatMap(Collection::stream).collect(Collectors.toSet());
         }
