@@ -206,12 +206,16 @@ public class AddonSuggestionService implements AutoCloseable {
     @Deactivate
     @Override
     public void close() throws Exception {
-        addonFinders.clear();
-        addonInfoProviders.clear();
+        synchronized (this) {
+            addonFinders.clear();
+            addonInfoProviders.clear();
+        }
     }
 
     public Set<AddonInfo> getSuggestedAddons(@Nullable Locale locale) {
-        return addonFinders.stream().filter(this::isFinderEnabled).map(f -> f.getSuggestedAddons())
-                .flatMap(Collection::stream).collect(Collectors.toSet());
+        synchronized (this) {
+            return addonFinders.stream().filter(this::isFinderEnabled).map(f -> f.getSuggestedAddons())
+                    .flatMap(Collection::stream).collect(Collectors.toSet());
+        }
     }
 }
