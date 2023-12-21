@@ -184,9 +184,11 @@ public class AddonSuggestionService implements AutoCloseable {
     }
 
     private void changed() {
-        List<AddonInfo> candidates = addonInfoProviders.stream().map(p -> p.getAddonInfos(localeProvider.getLocale()))
-                .flatMap(Collection::stream).toList();
-        addonFinders.stream().filter(this::isFinderEnabled).forEach(f -> f.setAddonCandidates(candidates));
+        synchronized (addonInfoProviders) {
+            List<AddonInfo> candidates = addonInfoProviders.stream()
+                    .map(p -> p.getAddonInfos(localeProvider.getLocale())).flatMap(Collection::stream).toList();
+            addonFinders.stream().filter(this::isFinderEnabled).forEach(f -> f.setAddonCandidates(candidates));
+        }
     }
 
     @Deactivate
