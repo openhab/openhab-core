@@ -12,9 +12,7 @@
  */
 package org.openhab.core.config.discovery.addon;
 
-import static org.openhab.core.config.discovery.addon.AddonFinderConstants.SUGGESTION_FINDERS;
-import static org.openhab.core.config.discovery.addon.AddonFinderConstants.SUGGESTION_FINDER_CONFIGS;
-import static org.openhab.core.config.discovery.addon.AddonFinderConstants.SUGGESTION_FINDER_FEATURES;
+import static org.openhab.core.config.discovery.addon.AddonFinderConstants.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -50,6 +48,8 @@ import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.component.annotations.ReferencePolicyOption;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This is a {@link AddonSuggestionService} which discovers suggested add-ons for the user to install.
@@ -63,6 +63,8 @@ public class AddonSuggestionService implements AutoCloseable {
 
     public static final String SERVICE_NAME = "addon-suggestion-service";
     public static final String CONFIG_PID = "org.openhab.addons";
+
+    private final Logger logger = LoggerFactory.getLogger(AddonSuggestionService.class);
 
     private final Set<AddonInfoProvider> addonInfoProviders = ConcurrentHashMap.newKeySet();
     private final List<AddonFinder> addonFinders = Collections.synchronizedList(new ArrayList<>());
@@ -148,7 +150,8 @@ public class AddonSuggestionService implements AutoCloseable {
             if (!cfgMap.equals(config)) {
                 modified(cfgMap);
             }
-        } catch (IOException e) {
+        } catch (IOException | IllegalStateException e) {
+            logger.debug("Exception occurred while trying to sync the configuration: {}", e.getMessage());
         }
     }
 
@@ -173,31 +176,39 @@ public class AddonSuggestionService implements AutoCloseable {
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     public void addAddonFinder(AddonFinder addonFinder) {
-        addonFinders.add(addonFinder);
+        synchronized (addonFinders) {
+            addonFinders.add(addonFinder);
+        }
         changed();
     }
 
     public void removeAddonFinder(AddonFinder addonFinder) {
-        if (addonFinders.remove(addonFinder)) {
-            changed();
+        synchronized (addonFinders) {
+            addonFinders.remove(addonFinder);
         }
     }
 
     private void changed() {
         List<AddonInfo> candidates = addonInfoProviders.stream().map(p -> p.getAddonInfos(localeProvider.getLocale()))
                 .flatMap(Collection::stream).toList();
-        addonFinders.stream().filter(this::isFinderEnabled).forEach(f -> f.setAddonCandidates(candidates));
+        synchronized (addonFinders) {
+            addonFinders.stream().filter(this::isFinderEnabled).forEach(f -> f.setAddonCandidates(candidates));
+        }
     }
 
     @Deactivate
     @Override
     public void close() throws Exception {
-        addonFinders.clear();
+        synchronized (addonFinders) {
+            addonFinders.clear();
+        }
         addonInfoProviders.clear();
     }
 
     public Set<AddonInfo> getSuggestedAddons(@Nullable Locale locale) {
-        return addonFinders.stream().filter(this::isFinderEnabled).map(f -> f.getSuggestedAddons())
-                .flatMap(Collection::stream).collect(Collectors.toSet());
+        synchronized (addonFinders) {
+            return addonFinders.stream().filter(this::isFinderEnabled).map(f -> f.getSuggestedAddons())
+                    .flatMap(Collection::stream).collect(Collectors.toSet());
+        }
     }
 }
