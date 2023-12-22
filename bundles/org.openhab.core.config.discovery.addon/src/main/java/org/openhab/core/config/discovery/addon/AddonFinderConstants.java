@@ -45,8 +45,8 @@ public class AddonFinderConstants {
 
     public static final String SERVICE_TYPE_USB = "usb";
     public static final String CFG_FINDER_USB = "suggestionFinderUsb";
-    public static final String SERVICE_NAME_USB = SERVICE_TYPE_UPNP + ADDON_SUGGESTION_FINDER;
-    public static final String FEATURE_USB = ADDON_SUGGESTION_FINDER_FEATURE + SERVICE_TYPE_UPNP;
+    public static final String SERVICE_NAME_USB = SERVICE_TYPE_USB + ADDON_SUGGESTION_FINDER;
+    public static final String FEATURE_USB = ADDON_SUGGESTION_FINDER_FEATURE + SERVICE_TYPE_USB;
 
     public static final List<String> SUGGESTION_FINDERS = List.of(SERVICE_NAME_IP, SERVICE_NAME_MDNS, SERVICE_NAME_UPNP,
             SERVICE_NAME_USB);
