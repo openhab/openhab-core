@@ -40,6 +40,13 @@ import org.slf4j.LoggerFactory;
 
 /**
  * This is a {@link USBAddonFinder} for finding suggested add-ons related to USB devices.
+ * <p>
+ * It supports the following values for the 'match-property' 'name' element:
+ * <li>product - match on the product description text
+ * <li>manufacturer - match on the device manufacturer text
+ * <li>vendorId - match on the chip vendor id
+ * <li>productId - match on the chip product id
+ * <li>remote - match on whether the device is connected remotely or locally
  *
  * @author Andrew Fiddian-Green - Initial contribution
  */
@@ -57,11 +64,13 @@ public class UsbAddonFinder extends BaseAddonFinder implements UsbSerialDiscover
     public static final String MANUFACTURER = "manufacturer";
     public static final String VENDOR_ID = "vendorId";
     public static final String PRODUCT_ID = "productId";
-    public static final Set<String> SUPPORTED_PROPERTIES = Set.of(PRODUCT, MANUFACTURER, VENDOR_ID, PRODUCT_ID);
+    public static final String REMOTE = "remote";
+
+    public static final Set<String> SUPPORTED_PROPERTIES = Set.of(PRODUCT, MANUFACTURER, VENDOR_ID, PRODUCT_ID, REMOTE);
 
     private final Logger logger = LoggerFactory.getLogger(UsbAddonFinder.class);
     private final Set<UsbSerialDiscovery> usbSerialDiscoveries = new CopyOnWriteArraySet<>();
-    private final Map<Integer, UsbSerialDeviceInformation> usbDeviceInformations = new ConcurrentHashMap<>();
+    private final Map<Long, UsbSerialDeviceInformation> usbDeviceInformations = new ConcurrentHashMap<>();
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     protected void addUsbSerialDiscovery(UsbSerialDiscovery usbSerialDiscovery) {
@@ -100,7 +109,8 @@ public class UsbAddonFinder extends BaseAddonFinder implements UsbSerialDiscover
                     if (propertyMatches(matchProperties, PRODUCT, device.getProduct())
                             && propertyMatches(matchProperties, MANUFACTURER, device.getManufacturer())
                             && propertyMatches(matchProperties, VENDOR_ID, toHexString(device.getProductId()))
-                            && propertyMatches(matchProperties, PRODUCT_ID, toHexString(device.getProductId()))) {
+                            && propertyMatches(matchProperties, PRODUCT_ID, toHexString(device.getProductId()))
+                            && propertyMatches(matchProperties, REMOTE, String.valueOf(device.getRemote()))) {
                         result.add(candidate);
                         logger.debug("Suggested add-on found: {}", candidate.getUID());
                         break;
@@ -121,11 +131,12 @@ public class UsbAddonFinder extends BaseAddonFinder implements UsbSerialDiscover
     }
 
     /**
-     * Create a unique 32 bit integer map hash key that comprises the vendorId in the upper 16 bits, plus the productId
-     * in the lower 16 bits.
+     * Create a unique 33 bit integer map hash key comprising the remote flag in the upper bit, the vendorId in the
+     * middle 16 bits, and the productId in the lower 16 bits.
      */
-    private Integer keyOf(UsbSerialDeviceInformation deviceInfo) {
-        return (deviceInfo.getVendorId() * 0x10000) + deviceInfo.getProductId();
+    private long keyOf(UsbSerialDeviceInformation deviceInfo) {
+        return (deviceInfo.getRemote() ? 0x1_0000_0000L : 0) + (deviceInfo.getVendorId() * 0x1_0000L)
+                + deviceInfo.getProductId();
     }
 
     /**
@@ -156,10 +167,14 @@ public class UsbAddonFinder extends BaseAddonFinder implements UsbSerialDiscover
                 serialNumber = discoveredInfo.getSerialNumber();
                 isMerging = true;
             }
+            boolean remote = existingInfo.getRemote();
+            if (remote == discoveredInfo.getRemote()) {
+                isMerging = true;
+            }
             if (isMerging) {
                 targetInfo = new UsbSerialDeviceInformation(discoveredInfo.getVendorId(), discoveredInfo.getProductId(),
                         serialNumber, manufacturer, product, discoveredInfo.getInterfaceNumber(),
-                        discoveredInfo.getInterfaceDescription(), discoveredInfo.getSerialPort());
+                        discoveredInfo.getInterfaceDescription(), discoveredInfo.getSerialPort()).setRemote(remote);
             }
         }
 
