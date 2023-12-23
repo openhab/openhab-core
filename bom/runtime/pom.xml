@@ -18,7 +18,7 @@
   <properties>
     <californium.version>2.7.4</californium.version>
     <cxf.version>3.6.2</cxf.version>
-    <jackson.version>2.15.2</jackson.version>
+    <jackson.version>2.16.0</jackson.version>
     <jetty.version>9.4.52.v20230823</jetty.version>
     <pax.logging.version>2.2.3</pax.logging.version>
     <pax.web.version>8.0.22</pax.web.version>
