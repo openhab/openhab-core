@@ -345,6 +345,18 @@ Import-Package: \\
                 </script>
               ]]>
             </bottom>
+            <tags>
+              <tag>
+                <name>apiNote</name>
+                <placement>a</placement>
+                <head>API note:</head>
+              </tag>
+              <tag>
+                <name>implNote</name>
+                <placement>a</placement>
+                <head>Implementation note:</head>
+              </tag>
+            </tags>
           </configuration>
           <dependencies>
             <!-- This newer version fixes issues with resolving tech.units:indriya packages -->
