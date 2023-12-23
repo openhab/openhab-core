@@ -39,7 +39,7 @@ public class TriggerEventStringProfileTest {
 
     @Test
     public void testEventStringItem() {
-        TriggerProfile profile = new TriggerEventStringProfile((callbackMock));
+        TriggerProfile profile = new TriggerEventStringProfile(callbackMock);
         profile.onTriggerFromHandler(CommonTriggerEvents.PRESSED);
         verify(callbackMock, times(1)).sendCommand(eq(new StringType(CommonTriggerEvents.PRESSED)));
     }

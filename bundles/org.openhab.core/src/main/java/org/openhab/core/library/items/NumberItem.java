@@ -105,7 +105,7 @@ public class NumberItem extends GenericItem implements MetadataAwareItem {
 
     public void send(QuantityType<?> command) {
         if (dimension == null) {
-            DecimalType strippedCommand = new DecimalType(command.toBigDecimal());
+            DecimalType strippedCommand = new DecimalType(command);
             internalSend(strippedCommand);
         } else if (command.getUnit().isCompatible(unit) || command.getUnit().inverse().isCompatible(unit)) {
             internalSend(command);
@@ -142,8 +142,7 @@ public class NumberItem extends GenericItem implements MetadataAwareItem {
         if (state instanceof QuantityType<?> quantityType) {
             if (dimension == null) {
                 // QuantityType update to a NumberItem without unit, strip unit
-                DecimalType plainState = new DecimalType(quantityType.toBigDecimal());
-                return plainState;
+                return new DecimalType(quantityType);
             } else {
                 // QuantityType update to a NumberItem with unit, convert to item unit (if possible)
                 Unit<?> stateUnit = quantityType.getUnit();

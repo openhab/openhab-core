@@ -14,7 +14,6 @@ package org.openhab.core.config.core.xml.osgi;
 
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -151,7 +150,7 @@ public class XmlDocumentBundleTracker<@NonNull T> extends BundleTracker<Bundle> 
         if (bundleTracker == null || bundleTracker.getBundles() == null) {
             return Set.of();
         }
-        return (Set<Bundle>) Arrays.stream(bundleTracker.getBundles()).collect(Collectors.toSet());
+        return Set.of(bundleTracker.getBundles());
     }
 
     @Override

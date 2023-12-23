@@ -63,7 +63,7 @@ public class ProcessAddonFinder extends BaseAddonFinder {
             return command.get();
         }
         Optional<String[]> args = h.info().arguments();
-        if (!args.isPresent()) {
+        if (args.isEmpty()) {
             return "";
         }
         String[] argsArray = args.get();

@@ -84,8 +84,8 @@ public class SystemRangeStateProfile implements StateProfile {
 
         final Object paramValue = context.getConfiguration().get(INVERTED_PARAM);
         final boolean inverted = paramValue == null ? false : Boolean.valueOf(paramValue.toString());
-        this.inRange = inverted ? OnOffType.OFF : OnOffType.ON;
-        this.notInRange = inverted ? OnOffType.ON : OnOffType.OFF;
+        this.inRange = OnOffType.from(!inverted);
+        this.notInRange = OnOffType.from(inverted);
     }
 
     private @Nullable QuantityType<?> getParam(ProfileContext context, String param) {

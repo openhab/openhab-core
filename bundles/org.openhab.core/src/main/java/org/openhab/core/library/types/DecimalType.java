@@ -187,7 +187,7 @@ public class DecimalType extends Number implements PrimitiveType, State, Command
     @Override
     public <T extends State> @Nullable T as(@Nullable Class<T> target) {
         if (target == OnOffType.class) {
-            return target.cast(equals(ZERO) ? OnOffType.OFF : OnOffType.ON);
+            return target.cast(OnOffType.from(!equals(ZERO)));
         } else if (target == PercentType.class) {
             return target.cast(new PercentType(toBigDecimal().multiply(BIG_DECIMAL_HUNDRED)));
         } else if (target == UpDownType.class) {
