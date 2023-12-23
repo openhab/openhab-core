@@ -309,8 +309,7 @@ public class DialogProcessor implements KSListener, STTListener {
         processing = value;
         String item = dialogContext.listeningItem();
         if (item != null && ItemUtil.isValidItemName(item)) {
-            OnOffType command = value ? OnOffType.ON : OnOffType.OFF;
-            eventPublisher.post(ItemEventFactory.createCommandEvent(item, command));
+            eventPublisher.post(ItemEventFactory.createCommandEvent(item, OnOffType.from(value)));
         }
     }
 
