@@ -66,7 +66,7 @@ public final class ConfigStatusMessage {
          * The type for a pending message. It should be used if the transmission of the configuration parameter to the
          * entity is pending.
          */
-        PENDING;
+        PENDING
     }
 
     /** The name of the configuration parameter. */

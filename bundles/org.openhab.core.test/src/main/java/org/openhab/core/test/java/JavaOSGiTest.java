@@ -160,7 +160,7 @@ public class JavaOSGiTest extends JavaTest {
     private <T> ServiceReference<T> @Nullable [] getServices(final Class<T> clazz) {
         try {
             @SuppressWarnings("unchecked")
-            ServiceReference<T> serviceReferences[] = (ServiceReference<T>[]) bundleContext
+            ServiceReference<T>[] serviceReferences = (ServiceReference<T>[]) bundleContext
                     .getServiceReferences(clazz.getName(), null);
             return serviceReferences;
         } catch (InvalidSyntaxException e) {

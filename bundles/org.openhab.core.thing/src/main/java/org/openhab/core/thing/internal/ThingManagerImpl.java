@@ -1090,7 +1090,7 @@ public class ThingManagerImpl implements ReadyTracker, ThingManager, ThingTracke
         }
 
         // create a thing builder and apply the update instructions
-        ThingBuilder thingBuilder = thing instanceof Bridge ? BridgeBuilder.create((Bridge) thing)
+        ThingBuilder thingBuilder = thing instanceof Bridge bridge ? BridgeBuilder.create(bridge)
                 : ThingBuilder.create(thing);
         instructions.forEach(instruction -> instruction.perform(thing, thingBuilder));
         int newThingTypeVersion = instructions.get(instructions.size() - 1).getThingTypeVersion();

@@ -124,10 +124,12 @@ public final class CurrencyUnit implements Unit<Currency>, Comparable<Unit<Curre
         this.name = name;
     }
 
+    @Override
     public String getName() {
         return name;
     }
 
+    @Override
     public @Nullable String getSymbol() {
         return symbol;
     }
@@ -212,6 +214,7 @@ public final class CurrencyUnit implements Unit<Currency>, Comparable<Unit<Curre
                 "Could not get factor for converting " + this.getName() + " to " + that.getName());
     }
 
+    @Override
     public final Unit<?> multiply(@NonNullByDefault({}) Unit<?> that) {
         return that.equals(ONE) ? this : ProductUnit.ofProduct(this, that);
     }
