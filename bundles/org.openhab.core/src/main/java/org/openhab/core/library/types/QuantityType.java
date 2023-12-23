@@ -440,7 +440,7 @@ public class QuantityType<T extends Quantity<T>> extends Number
             if (intValue() == 0) {
                 return target.cast(OnOffType.OFF);
             } else if (Units.PERCENT.equals(getUnit())) {
-                return target.cast(toBigDecimal().compareTo(BigDecimal.ZERO) > 0 ? OnOffType.ON : OnOffType.OFF);
+                return target.cast(OnOffType.from(toBigDecimal().compareTo(BigDecimal.ZERO) > 0));
             } else if (toBigDecimal().compareTo(BigDecimal.ONE) == 0) {
                 return target.cast(OnOffType.ON);
             } else {

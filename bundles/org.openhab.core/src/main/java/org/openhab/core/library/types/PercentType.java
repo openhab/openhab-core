@@ -109,7 +109,7 @@ public class PercentType extends DecimalType {
     @Override
     public <T extends State> @Nullable T as(@Nullable Class<T> target) {
         if (target == OnOffType.class) {
-            return target.cast(equals(ZERO) ? OnOffType.OFF : OnOffType.ON);
+            return target.cast(OnOffType.from(!equals(ZERO)));
         } else if (target == DecimalType.class) {
             return target.cast(new DecimalType(toBigDecimal().divide(BIG_DECIMAL_HUNDRED, 8, RoundingMode.UP)));
         } else if (target == UpDownType.class) {
