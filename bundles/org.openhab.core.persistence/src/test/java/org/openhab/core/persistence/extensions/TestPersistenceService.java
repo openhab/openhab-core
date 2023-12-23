@@ -93,7 +93,7 @@ public class TestPersistenceService implements QueryablePersistenceService {
 
                         @Override
                         public State getState() {
-                            return hours < 5 || hours > 10 ? OnOffType.ON : OnOffType.OFF;
+                            return OnOffType.from(hours < 5 || hours > 10);
                         }
 
                         @Override

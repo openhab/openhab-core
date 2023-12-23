@@ -77,8 +77,8 @@ public class SystemHysteresisStateProfile implements StateProfile {
 
         final Object paramValue = context.getConfiguration().get(INVERTED_PARAM);
         final boolean inverted = paramValue == null ? false : Boolean.valueOf(paramValue.toString());
-        this.low = inverted ? OnOffType.ON : OnOffType.OFF;
-        this.high = inverted ? OnOffType.OFF : OnOffType.ON;
+        this.low = OnOffType.from(inverted);
+        this.high = OnOffType.from(!inverted);
     }
 
     private @Nullable QuantityType<?> getParam(ProfileContext context, String param) {
