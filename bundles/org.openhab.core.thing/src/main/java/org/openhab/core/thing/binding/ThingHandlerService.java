@@ -40,34 +40,42 @@ public interface ThingHandlerService {
     ThingHandler getThingHandler();
 
     /**
-     * Method that will be called if this service will be activated
+     * This method is used by the framework during activation of the OSGi component.
+     * It is called BEFORE the thing handler is set.
      *
-     * @deprecated please override initialize instead
+     * See {@link #initialize()}, {@link #deactivate()}
      */
-    @Deprecated
     default void activate() {
     }
 
     /**
-     * Method that will be called if this service will be deactivated
+     * This method is used by the framework during de-activation of the OSGi component.
+     * It is NOT guaranteed that the thing handler is still valid.
      *
-     * @deprecated please override dispose instead
+     * See {@link #dispose()}, {@link #activate()}
      */
-    @Deprecated
     default void deactivate() {
     }
 
     /**
-     * Method that will be called if this service will be initialized
+     * This method is used by the framework during activation of the service.
+     * It is called AFTER the component is fully activated and thing handler has been set.
+     *
+     * Implementations should override this method to add additional initialization code.
+     *
+     * See {@link #activate(), #{@link #dispose()}
      */
     default void initialize() {
-        activate();
     }
 
     /**
-     * Method that will be called if this service will be disposed
+     * This method is used by the framework during de-activation of the service.
+     * It is called while the component is still activated.
+     *
+     * Code depending on an activated service should go here.
+     *
+     * See {@link #deactivate()}, {@link #initialize()}
      */
     default void dispose() {
-        deactivate();
     }
 }

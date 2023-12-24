@@ -198,7 +198,7 @@ public abstract class BaseThingHandlerFactory implements ThingHandlerFactory {
         }
 
         String[] serviceNames = getAllInterfaces(c).stream()//
-                .map(clazz -> clazz.getCanonicalName())
+                .map(Class::getCanonicalName)
                 // we only add specific ThingHandlerServices, i.e. those that derive from the
                 // ThingHandlerService
                 // interface, NOT the ThingHandlerService itself. We do this to register them as specific OSGi
@@ -370,7 +370,7 @@ public abstract class BaseThingHandlerFactory implements ThingHandlerFactory {
 
     private class RegisteredThingHandlerService<T extends ThingHandlerService> {
 
-        private T serviceInstance;
+        private final T serviceInstance;
 
         private @Nullable ServiceObjects<T> serviceObjects;
 
@@ -397,11 +397,12 @@ public abstract class BaseThingHandlerFactory implements ThingHandlerFactory {
         }
 
         public void disposeService() {
+            this.serviceInstance.dispose();
+
             ServiceRegistration<?> serviceReg = this.serviceRegistration;
             if (serviceReg != null) {
                 serviceReg.unregister();
             }
-            this.serviceInstance.dispose();
 
             ServiceObjects<T> serviceObjs = this.serviceObjects;
             if (serviceObjs != null) {
