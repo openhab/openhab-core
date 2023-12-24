@@ -55,6 +55,7 @@ import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.config.discovery.addon.AddonFinder;
 import org.openhab.core.config.discovery.addon.BaseAddonFinder;
 import org.openhab.core.net.NetUtil;
+import org.openhab.core.util.StringUtils;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
@@ -147,7 +148,9 @@ public class IpAddonFinder extends BaseAddonFinder {
     private static final String MATCH_PROPERTY_RESPONSE = "response";
     private static final String PARAMETER_DEST_IP = "destIp";
     private static final String PARAMETER_DEST_PORT = "destPort";
+    private static final String PARAMETER_LISTEN_PORT = "listenPort";
     private static final String PARAMETER_REQUEST = "request";
+    private static final String PARAMETER_REQUEST_PLAIN = "requestPlain";
     private static final String PARAMETER_SRC_IP = "srcIp";
     private static final String PARAMETER_SRC_PORT = "srcPort";
     private static final String PARAMETER_TIMEOUT_MS = "timeoutMs";
@@ -229,6 +232,13 @@ public class IpAddonFinder extends BaseAddonFinder {
                 // parse standard set of parameters
                 String type = Objects.toString(parameters.get("type"), "");
                 String request = Objects.toString(parameters.get(PARAMETER_REQUEST), "");
+                String requestPlain = Objects.toString(parameters.get(PARAMETER_REQUEST_PLAIN), "");
+                // xor
+                if (!(request.isEmpty() ^ requestPlain.isEmpty())) {
+                    logger.warn("{}: discovery-parameter '{}' or '{}' required", candidate.getUID(), PARAMETER_REQUEST,
+                            PARAMETER_REQUEST_PLAIN);
+                    continue;
+                }
                 String response = Objects.toString(matchProperties.get(MATCH_PROPERTY_RESPONSE), "");
                 int timeoutMs;
                 try {
@@ -254,6 +264,22 @@ public class IpAddonFinder extends BaseAddonFinder {
                             PARAMETER_DEST_PORT);
                     continue;
                 }
+                int listenPort = 0; // default, pick a non-privileged port
+                if (parameters.get(PARAMETER_LISTEN_PORT) != null) {
+                    try {
+                        listenPort = Integer.parseInt(Objects.toString(parameters.get(PARAMETER_LISTEN_PORT)));
+                    } catch (NumberFormatException e) {
+                        logger.warn("{}: discovery-parameter '{}' cannot be parsed", candidate.getUID(),
+                                PARAMETER_LISTEN_PORT);
+                        continue;
+                    }
+                    // not not allow privileged ports
+                    if (listenPort < 1024) {
+                        logger.warn("{}: discovery-parameter '{}' not allowed, privileged port", candidate.getUID(),
+                                PARAMETER_LISTEN_PORT);
+                        continue;
+                    }
+                }
 
                 // handle known types
                 try {
@@ -268,15 +294,13 @@ public class IpAddonFinder extends BaseAddonFinder {
                                     DatagramChannel channel = (DatagramChannel) DatagramChannel
                                             .open(StandardProtocolFamily.INET)
                                             .setOption(StandardSocketOptions.SO_REUSEADDR, true)
-                                            .bind(new InetSocketAddress(localIp, 0))
+                                            .bind(new InetSocketAddress(localIp, listenPort))
                                             .setOption(StandardSocketOptions.IP_MULTICAST_TTL, 64)
                                             .configureBlocking(false);
 
                                     byte[] requestArray = buildRequestArray(channel, Objects.toString(request));
-                                    if (logger.isTraceEnabled()) {
-                                        logger.trace("{}: {}", candidate.getUID(),
-                                                HexFormat.of().withDelimiter(" ").formatHex(requestArray));
-                                    }
+                                    logger.trace("{}: {}", candidate.getUID(),
+                                            HexFormat.of().withDelimiter(" ").formatHex(requestArray));
 
                                     channel.send(ByteBuffer.wrap(requestArray),
                                             new InetSocketAddress(destIp, destPort));
@@ -324,6 +348,28 @@ public class IpAddonFinder extends BaseAddonFinder {
         logger.trace("IpAddonFinder::scan completed");
     }
 
+    // build from plaintext string
+    private byte[] buildRequestArrayPlain(DatagramChannel channel, String request)
+            throws java.io.IOException, ParseException {
+        InetSocketAddress sock = (InetSocketAddress) channel.getLocalAddress();
+
+        // replace first
+        StringBuffer req = new StringBuffer(request);
+        int p;
+        while ((p = req.indexOf("$" + PARAMETER_SRC_IP)) != -1) {
+            req.replace(p, p + PARAMETER_SRC_IP.length() + 1, sock.getAddress().getHostAddress());
+        }
+        while ((p = req.indexOf("$" + PARAMETER_SRC_PORT)) != -1) {
+            req.replace(p, p + PARAMETER_SRC_PORT.length() + 1, "" + sock.getPort());
+        }
+        while ((p = req.indexOf("$" + REPLACEMENT_UUID)) != -1) {
+            req.replace(p, p + REPLACEMENT_UUID.length() + 1, UUID.randomUUID().toString());
+        }
+
+        return StringUtils.unEscapeXml(req.toString()).getBytes();
+    }
+
+    // build from hex string
     private byte[] buildRequestArray(DatagramChannel channel, String request)
             throws java.io.IOException, ParseException {
         InetSocketAddress sock = (InetSocketAddress) channel.getLocalAddress();
