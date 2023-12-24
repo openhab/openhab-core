@@ -62,6 +62,8 @@ public class WindowsUsbSerialDiscovery implements UsbSerialDiscovery {
     private static final String SPLIT_VALUES = ";";
     private static final String KEY_MANUFACTURER = "Mfg";
     private static final String KEY_PRODUCT = "DeviceDesc";
+    private static final String KEY_DEVICE_PARAMETERS = "Device Parameters";
+    private static final String KEY_SERIAL_PORT = "PortName";
 
     private final Logger logger = LoggerFactory.getLogger(WindowsUsbSerialDiscovery.class);
     private final Set<UsbSerialDiscoveryListener> discoveryListeners = new CopyOnWriteArraySet<>();
@@ -139,16 +141,18 @@ public class WindowsUsbSerialDiscovery implements UsbSerialDiscovery {
         }
 
         Set<UsbSerialDeviceInformation> result = new HashSet<>();
-        String[] usbKeys = Advapi32Util.registryGetKeys(HKEY_LOCAL_MACHINE, USB_REGISTRY_ROOT);
+        String[] deviceKeys = Advapi32Util.registryGetKeys(HKEY_LOCAL_MACHINE, USB_REGISTRY_ROOT);
 
-        for (String usbKey : usbKeys) {
-            logger.trace("{}", usbKey);
+        String serialNumber = null; // this parameter is not available on Windows
 
-            if (!usbKey.startsWith(PREFIX_VID)) {
+        for (String deviceKey : deviceKeys) {
+            logger.trace("{}", deviceKey);
+
+            if (!deviceKey.startsWith(PREFIX_VID)) {
                 continue;
             }
 
-            String[] ids = usbKey.split(SPLIT_IDS);
+            String[] ids = deviceKey.split(SPLIT_IDS);
             if (ids.length < 2) {
                 continue;
             }
@@ -166,14 +170,15 @@ public class WindowsUsbSerialDiscovery implements UsbSerialDiscovery {
                 continue;
             }
 
-            String usbPath = USB_REGISTRY_ROOT + BACKSLASH + usbKey;
-            String[] usbSubKeys = Advapi32Util.registryGetKeys(HKEY_LOCAL_MACHINE, usbPath);
+            String devicePath = USB_REGISTRY_ROOT + BACKSLASH + deviceKey;
+            String[] interfaceNames = Advapi32Util.registryGetKeys(HKEY_LOCAL_MACHINE, devicePath);
 
-            for (String usbSubKey : usbSubKeys) {
-                logger.trace("  {}", usbSubKey);
+            int interfaceId = 0;
+            for (String interfaceName : interfaceNames) {
+                logger.trace("  interfaceId:{}, interfaceName:{}", interfaceId, interfaceName);
 
-                String usbSubPath = usbPath + BACKSLASH + usbSubKey;
-                TreeMap<String, Object> values = Advapi32Util.registryGetValues(HKEY_LOCAL_MACHINE, usbSubPath);
+                String interfacePath = devicePath + BACKSLASH + interfaceName;
+                TreeMap<String, Object> values = Advapi32Util.registryGetValues(HKEY_LOCAL_MACHINE, interfacePath);
 
                 if (logger.isTraceEnabled()) {
                     for (Entry<String, Object> value : values.entrySet()) {
@@ -182,8 +187,8 @@ public class WindowsUsbSerialDiscovery implements UsbSerialDiscovery {
                 }
 
                 String manufacturer;
-                Object manufacturerObject = values.get(KEY_MANUFACTURER);
-                if (manufacturerObject instanceof String manufacturerString) {
+                Object manufacturerValue = values.get(KEY_MANUFACTURER);
+                if (manufacturerValue instanceof String manufacturerString) {
                     String[] manufacturerData = manufacturerString.split(SPLIT_VALUES);
                     if (manufacturerData.length < 2) {
                         continue;
@@ -194,8 +199,8 @@ public class WindowsUsbSerialDiscovery implements UsbSerialDiscovery {
                 }
 
                 String product;
-                Object productObject = values.get(KEY_PRODUCT);
-                if (productObject instanceof String productString) {
+                Object productValue = values.get(KEY_PRODUCT);
+                if (productValue instanceof String productString) {
                     String[] productData = productString.split(SPLIT_VALUES);
                     if (productData.length < 2) {
                         continue;
@@ -205,12 +210,30 @@ public class WindowsUsbSerialDiscovery implements UsbSerialDiscovery {
                     continue;
                 }
 
+                String serialPort = "";
+                String[] interfaceSubKeys = Advapi32Util.registryGetKeys(HKEY_LOCAL_MACHINE, interfacePath);
+
+                for (String interfaceSubKey : interfaceSubKeys) {
+                    if (!KEY_DEVICE_PARAMETERS.equals(interfaceSubKey)) {
+                        continue;
+                    }
+                    String deviceParametersPath = interfacePath + BACKSLASH + interfaceSubKey;
+                    TreeMap<String, Object> deviceParameterValues = Advapi32Util.registryGetValues(HKEY_LOCAL_MACHINE,
+                            deviceParametersPath);
+                    Object serialPortValue = deviceParameterValues.get(KEY_SERIAL_PORT);
+                    if (serialPortValue instanceof String serialPortString) {
+                        serialPort = serialPortString;
+                    }
+                    break;
+                }
+
                 UsbSerialDeviceInformation usbSerialDeviceInformation = new UsbSerialDeviceInformation(vendorId,
-                        productId, null, manufacturer, product, 0, null, "");
+                        productId, serialNumber, manufacturer, product, interfaceId, interfaceName, serialPort);
 
                 logger.debug("Add {}", usbSerialDeviceInformation);
                 result.add(usbSerialDeviceInformation);
-                break;
+
+                interfaceId++;
             }
         }
         return result;
