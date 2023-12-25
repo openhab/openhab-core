@@ -196,6 +196,7 @@ public class IpAddonFinder extends BaseAddonFinder {
         // At the same time we must make sure that a scheduled scan is rescheduled - or (after more than our delay) is
         // executed once more.
         stopScan();
+        logger.trace("Scheduling new IP scan");
         scanJob = scheduler.schedule(this::scan, 20, TimeUnit.SECONDS);
     }
 
@@ -234,7 +235,7 @@ public class IpAddonFinder extends BaseAddonFinder {
                 String request = Objects.toString(parameters.get(PARAMETER_REQUEST), "");
                 String requestPlain = Objects.toString(parameters.get(PARAMETER_REQUEST_PLAIN), "");
                 // xor
-                if (!(request.isEmpty() ^ requestPlain.isEmpty())) {
+                if (!("".equals(request) ^ "".equals(requestPlain))) {
                     logger.warn("{}: discovery-parameter '{}' or '{}' required", candidate.getUID(), PARAMETER_REQUEST,
                             PARAMETER_REQUEST_PLAIN);
                     continue;
@@ -298,9 +299,19 @@ public class IpAddonFinder extends BaseAddonFinder {
                                             .setOption(StandardSocketOptions.IP_MULTICAST_TTL, 64)
                                             .configureBlocking(false);
 
-                                    byte[] requestArray = buildRequestArray(channel, Objects.toString(request));
-                                    logger.trace("{}: {}", candidate.getUID(),
-                                            HexFormat.of().withDelimiter(" ").formatHex(requestArray));
+                                    byte[] requestArray = "".equals(requestPlain)
+                                            ? buildRequestArray(channel, Objects.toString(request))
+                                            : buildRequestArrayPlain(channel, Objects.toString(requestPlain));
+                                    if (logger.isTraceEnabled()) {
+                                        InetSocketAddress sock = (InetSocketAddress) channel.getLocalAddress();
+                                        String id = candidate.getUID();
+                                        logger.trace("{}: probing {} -> {}:{}", id, localIp,
+                                                destIp != null ? destIp.getHostAddress() : "", destPort);
+                                        logger.trace("{}: {}", id,
+                                                HexFormat.of().withDelimiter(" ").formatHex(requestArray));
+                                        logger.trace("{}: listening on {}:{} for {} ms", id,
+                                                sock.getAddress().getHostAddress(), sock.getPort(), timeoutMs);
+                                    }
 
                                     channel.send(ByteBuffer.wrap(requestArray),
                                             new InetSocketAddress(destIp, destPort));
@@ -322,7 +333,8 @@ public class IpAddonFinder extends BaseAddonFinder {
                                                 suggestions.add(candidate);
                                                 logger.debug("Suggested add-on found: {}", candidate.getUID());
                                             } else {
-                                                logger.trace("{}: no response", candidate.getUID());
+                                                logger.trace("{}: no response received on {}", candidate.getUID(),
+                                                        localIp);
                                             }
                                             break;
                                         default:
@@ -366,7 +378,8 @@ public class IpAddonFinder extends BaseAddonFinder {
             req.replace(p, p + REPLACEMENT_UUID.length() + 1, UUID.randomUUID().toString());
         }
 
-        return StringUtils.unEscapeXml(req.toString()).getBytes();
+        String reqEscaped = Objects.toString(StringUtils.unEscapeXml(req.toString()), "");
+        return reqEscaped.getBytes();
     }
 
     // build from hex string
