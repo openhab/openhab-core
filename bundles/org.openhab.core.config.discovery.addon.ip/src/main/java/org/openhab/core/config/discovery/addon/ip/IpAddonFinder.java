@@ -307,6 +307,9 @@ public class IpAddonFinder extends BaseAddonFinder {
                                         String id = candidate.getUID();
                                         logger.trace("{}: probing {} -> {}:{}", id, localIp,
                                                 destIp != null ? destIp.getHostAddress() : "", destPort);
+                                        if (!"".equals(requestPlain)) {
+                                            logger.trace("{}: \'{}\'", id, new String(requestArray));
+                                        }
                                         logger.trace("{}: {}", id,
                                                 HexFormat.of().withDelimiter(" ").formatHex(requestArray));
                                         logger.trace("{}: listening on {}:{} for {} ms", id,
@@ -378,9 +381,9 @@ public class IpAddonFinder extends BaseAddonFinder {
             req.replace(p, p + REPLACEMENT_UUID.length() + 1, UUID.randomUUID().toString());
         }
 
-        String reqUnEscaped = Objects.toString(StringUtils.unEscapeXml(req.toString()), "");
-        logger.trace("plaintext: \'{}\'", reqUnEscaped);
-        return reqUnEscaped.getBytes();
+        @Nullable
+        String reqUnEscaped = StringUtils.unEscapeXml(req.toString());
+        return reqUnEscaped != null ? reqUnEscaped.getBytes() : new byte[0];
     }
 
     // build from hex string
