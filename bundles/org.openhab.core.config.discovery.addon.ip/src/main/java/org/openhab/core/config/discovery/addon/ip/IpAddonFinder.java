@@ -378,8 +378,9 @@ public class IpAddonFinder extends BaseAddonFinder {
             req.replace(p, p + REPLACEMENT_UUID.length() + 1, UUID.randomUUID().toString());
         }
 
-        String reqEscaped = Objects.toString(StringUtils.unEscapeXml(req.toString()), "");
-        return reqEscaped.getBytes();
+        String reqUnEscaped = Objects.toString(StringUtils.unEscapeXml(req.toString()), "");
+        logger.trace("plaintext: \'{}\'", reqUnEscaped);
+        return reqUnEscaped.getBytes();
     }
 
     // build from hex string
