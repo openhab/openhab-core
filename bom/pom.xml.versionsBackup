@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.openhab.core</groupId>
+    <artifactId>org.openhab.core.reactor</artifactId>
+    <version>4.2.0-SNAPSHOT</version>
+  </parent>
+
+  <groupId>org.openhab.core.bom</groupId>
+  <artifactId>org.openhab.core.reactor.bom</artifactId>
+  <packaging>pom</packaging>
+
+  <name>openHAB Core :: BOM</name>
+
+  <modules>
+    <module>compile</module>
+    <module>compile-model</module>
+    <module>runtime</module>
+    <module>runtime-index</module>
+    <module>test</module>
+    <module>test-index</module>
+    <module>openhab-core</module>
+    <module>openhab-core-index</module>
+  </modules>
+
+</project>
