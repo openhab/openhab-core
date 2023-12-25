@@ -44,8 +44,7 @@ import org.slf4j.LoggerFactory;
  * It supports the following values for the 'match-property' 'name' element:
  * <li>product - match on the product description text
  * <li>manufacturer - match on the device manufacturer text
- * <li>vendorId - match on the chip vendor id
- * <li>productId - match on the chip product id
+ * <li>chipId - match on the chip vendor id plus product id
  * <li>remote - match on whether the device is connected remotely or locally
  *
  * @author Andrew Fiddian-Green - Initial contribution
@@ -62,11 +61,10 @@ public class UsbAddonFinder extends BaseAddonFinder implements UsbSerialDiscover
      */
     public static final String PRODUCT = "product";
     public static final String MANUFACTURER = "manufacturer";
-    public static final String VENDOR_ID = "vendorId";
-    public static final String PRODUCT_ID = "productId";
+    public static final String CHIP_ID = "chipId";
     public static final String REMOTE = "remote";
 
-    public static final Set<String> SUPPORTED_PROPERTIES = Set.of(PRODUCT, MANUFACTURER, VENDOR_ID, PRODUCT_ID, REMOTE);
+    public static final Set<String> SUPPORTED_PROPERTIES = Set.of(PRODUCT, MANUFACTURER, CHIP_ID, REMOTE);
 
     private final Logger logger = LoggerFactory.getLogger(UsbAddonFinder.class);
     private final Set<UsbSerialDiscovery> usbSerialDiscoveries = new CopyOnWriteArraySet<>();
@@ -108,8 +106,8 @@ public class UsbAddonFinder extends BaseAddonFinder implements UsbSerialDiscover
 
                     if (propertyMatches(matchProperties, PRODUCT, device.getProduct())
                             && propertyMatches(matchProperties, MANUFACTURER, device.getManufacturer())
-                            && propertyMatches(matchProperties, VENDOR_ID, toHexString(device.getProductId()))
-                            && propertyMatches(matchProperties, PRODUCT_ID, toHexString(device.getProductId()))
+                            && propertyMatches(matchProperties, CHIP_ID,
+                                    toHexString(device.getVendorId(), device.getProductId()))
                             && propertyMatches(matchProperties, REMOTE, String.valueOf(device.getRemote()))) {
                         result.add(candidate);
                         logger.debug("Suggested add-on found: {}", candidate.getUID());
@@ -121,8 +119,8 @@ public class UsbAddonFinder extends BaseAddonFinder implements UsbSerialDiscover
         return result;
     }
 
-    private String toHexString(int value) {
-        return String.format("0x%04x", value);
+    private String toHexString(int vendorId, int productId) {
+        return String.format("0x%04x:0x%04x", vendorId, productId);
     }
 
     @Override
