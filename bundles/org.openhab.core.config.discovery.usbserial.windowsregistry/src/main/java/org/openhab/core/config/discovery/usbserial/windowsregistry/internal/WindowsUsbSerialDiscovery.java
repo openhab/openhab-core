@@ -143,8 +143,6 @@ public class WindowsUsbSerialDiscovery implements UsbSerialDiscovery {
         Set<UsbSerialDeviceInformation> result = new HashSet<>();
         String[] deviceKeys = Advapi32Util.registryGetKeys(HKEY_LOCAL_MACHINE, USB_REGISTRY_ROOT);
 
-        String serialNumber = null; // this parameter is not available on Windows
-
         for (String deviceKey : deviceKeys) {
             logger.trace("{}", deviceKey);
 
@@ -169,6 +167,8 @@ public class WindowsUsbSerialDiscovery implements UsbSerialDiscovery {
             } catch (NumberFormatException e) {
                 continue;
             }
+
+            String serialNumber = ids.length > 2 ? ids[2] : null;
 
             String devicePath = USB_REGISTRY_ROOT + BACKSLASH + deviceKey;
             String[] interfaceNames = Advapi32Util.registryGetKeys(HKEY_LOCAL_MACHINE, devicePath);
