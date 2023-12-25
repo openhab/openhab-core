@@ -12,19 +12,12 @@
  */
 package org.openhab.core.config.discovery.usbserial.javaxusb.test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import java.util.Optional;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
-import org.openhab.core.config.discovery.usbserial.UsbSerialDeviceInformation;
-import org.openhab.core.config.discovery.usbserial.javaxusb.internal.JavaxUsbDeviceInformationProvider;
+import org.openhab.core.config.discovery.usbserial.javaxusb.internal.JavaxUsbSerialDiscovery;
 
 /**
- * JUnit tests for {@link JavaxUsbDeviceInformationProvider}.
+ * Unit tests for {@link JavaxUsbSerialDiscovery}.
  *
  * @author Andrew Fiddian-Green - Initial contribution
  */
@@ -32,18 +25,6 @@ import org.openhab.core.config.discovery.usbserial.javaxusb.internal.JavaxUsbDev
 class JavaxUsbDiscoveryTests {
 
     @Test
-    void testInformationProvider() {
-        JavaxUsbDeviceInformationProvider provider = new JavaxUsbDeviceInformationProvider();
-
-        Optional<UsbSerialDeviceInformation> optionalInfo = provider.getDeviceInfo(0, 0);
-        assertFalse(optionalInfo.isPresent());
-
-        optionalInfo = provider.getDeviceInfo(0xFFFF, 0x1111);
-        assertTrue(optionalInfo.isPresent());
-        UsbSerialDeviceInformation info = optionalInfo.get();
-        assertEquals(0xFFFF, info.getVendorId());
-        assertEquals(0x1111, info.getProductId());
-        assertEquals("Test Manufacturer", info.getManufacturer());
-        assertEquals("Test Product", info.getProduct());
+    void test() {
     }
 }

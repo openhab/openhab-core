@@ -16,7 +16,6 @@ import java.io.UnsupportedEncodingException;
 import java.time.Duration;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.Executors;
@@ -24,12 +23,14 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import javax.usb.UsbConfiguration;
 import javax.usb.UsbDevice;
 import javax.usb.UsbDeviceDescriptor;
 import javax.usb.UsbDisconnectedException;
 import javax.usb.UsbException;
 import javax.usb.UsbHostManager;
 import javax.usb.UsbHub;
+import javax.usb.UsbInterface;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -65,7 +66,6 @@ public class JavaxUsbSerialDiscovery implements UsbSerialDiscovery {
 
     private Set<UsbSerialDeviceInformation> lastScanResult = new HashSet<>();
     private @Nullable ScheduledFuture<?> scanTask;
-    private @Nullable JavaxUsbDeviceInformationProvider infoProvider;
 
     @Activate
     public JavaxUsbSerialDiscovery() {
@@ -168,51 +168,46 @@ public class JavaxUsbSerialDiscovery implements UsbSerialDiscovery {
                  * - on Linux if the user has no write permission on the USB device file.
                  */
                 try {
-                    product = usbDevice.getString(d.iProduct());
                     manufacturer = usbDevice.getString(d.iManufacturer());
+                    product = usbDevice.getString(d.iProduct());
                     serialNumber = usbDevice.getString(d.iSerialNumber());
                 } catch (UnsupportedEncodingException | UsbDisconnectedException | UsbException e) {
                     // ignore because this would be a 'normal' runtime failure
                 }
 
-                if (product == null || manufacturer == null) {
-                    Optional<UsbSerialDeviceInformation> lookupInfo = getInfoProvider().getDeviceInfo(vendorId,
-                            productId);
-                    if (lookupInfo.isPresent()) {
-                        if (product == null) {
-                            product = lookupInfo.get().getProduct();
+                String serialPort = "";
+                int interfaceNumber = 0;
+                String interfaceDescription = null;
+
+                UsbConfiguration configuration = usbDevice.getActiveUsbConfiguration();
+                if (configuration == null) {
+                    UsbSerialDeviceInformation usbDeviceInfo = new UsbSerialDeviceInformation(vendorId, productId,
+                            serialNumber, manufacturer, product, interfaceNumber, interfaceDescription, serialPort);
+
+                    result.add(usbDeviceInfo);
+                    logger.trace("Added device: {}", usbDeviceInfo);
+                } else {
+                    @SuppressWarnings("unchecked")
+                    List<UsbInterface> interfaces = configuration.getUsbInterfaces();
+                    for (UsbInterface ifx : interfaces) {
+                        try {
+                            interfaceDescription = ifx.getInterfaceString();
+                        } catch (UnsupportedEncodingException | UsbDisconnectedException | UsbException e) {
+                            interfaceDescription = null;
                         }
-                        if (manufacturer == null) {
-                            manufacturer = lookupInfo.get().getManufacturer();
-                        }
+
+                        UsbSerialDeviceInformation usbDeviceInfo = new UsbSerialDeviceInformation(vendorId, productId,
+                                serialNumber, manufacturer, product, interfaceNumber, interfaceDescription, serialPort);
+
+                        result.add(usbDeviceInfo);
+                        logger.trace("Added device: {}", usbDeviceInfo);
+                        interfaceNumber++;
                     }
                 }
-
-                /*
-                 * TODO are the following three data required (??)
-                 */
-                int interfaceNumber = 0;
-                String interfaceDescription = "n/a";
-                String serialPort = "n/a";
-
-                UsbSerialDeviceInformation usbDeviceInfo = new UsbSerialDeviceInformation(vendorId, productId,
-                        serialNumber, manufacturer, product, interfaceNumber, interfaceDescription, serialPort);
-
-                result.add(usbDeviceInfo);
-                logger.trace("Added device: {}", usbDeviceInfo);
             }
         });
 
         return result;
-    }
-
-    private JavaxUsbDeviceInformationProvider getInfoProvider() {
-        JavaxUsbDeviceInformationProvider infoProvider = this.infoProvider;
-        if (infoProvider == null) {
-            infoProvider = new JavaxUsbDeviceInformationProvider();
-            this.infoProvider = infoProvider;
-        }
-        return infoProvider;
     }
 
     @Override
