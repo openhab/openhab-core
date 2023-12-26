@@ -416,6 +416,16 @@ public class UnitsTest {
         assertThat(converted.doubleValue(), is(closeTo(4184.0, DEFAULT_ERROR)));
     }
 
+    @Test
+    public void testYearMonthDay() {
+        QuantityType<?> year = QuantityType.valueOf("1 y");
+        assertThat(year.toString(), is("1 year"));
+        QuantityType<?> converted = year.toUnit("d");
+        assertThat(converted.doubleValue(), is(closeTo(365.2425, DEFAULT_ERROR)));
+        QuantityType<?> converted2 = year.toUnit("mo");
+        assertThat(converted2.doubleValue(), is(closeTo(12.0, DEFAULT_ERROR)));
+    }
+
     private static class QuantityEquals extends IsEqual<Quantity<?>> {
         private Quantity<?> quantity;
 
