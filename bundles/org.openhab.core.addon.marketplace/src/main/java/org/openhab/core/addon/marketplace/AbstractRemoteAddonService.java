@@ -16,7 +16,9 @@ import java.io.IOException;
 import java.net.URI;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Dictionary;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -58,6 +60,13 @@ import com.google.gson.JsonSyntaxException;
 public abstract class AbstractRemoteAddonService implements AddonService {
     static final String CONFIG_REMOTE_ENABLED = "remote";
     static final String CONFIG_INCLUDE_INCOMPATIBLE = "includeIncompatible";
+    static final Comparator<Addon> BY_COMPATIBLE_AND_VERSION = (addon1, addon2) -> {
+        // prefer compatible over incompatible
+        int compatible = Boolean.compare(addon2.getCompatible(), addon1.getCompatible());
+        // prefer newer version over older
+        return compatible != 0 ? compatible
+                : new BundleVersion(addon2.getVersion()).compareTo(new BundleVersion(addon1.getVersion()));
+    };
 
     protected final BundleVersion coreVersion;
 
@@ -130,6 +139,15 @@ public abstract class AbstractRemoteAddonService implements AddonService {
         // remove incompatible add-ons if not enabled
         boolean showIncompatible = includeIncompatible();
         addons.removeIf(addon -> !addon.isInstalled() && !addon.getCompatible() && !showIncompatible);
+
+        // check and remove duplicate uids
+        Map<String, List<Addon>> addonMap = new HashMap<>();
+        addons.forEach(a -> addonMap.computeIfAbsent(a.getUid(), k -> new ArrayList<>()).add(a));
+        for (List<Addon> partialAddonList : addonMap.values()) {
+            if (partialAddonList.size() > 1) {
+                partialAddonList.stream().sorted(BY_COMPATIBLE_AND_VERSION).skip(1).forEach(addons::remove);
+            }
+        }
 
         cachedAddons = addons;
         this.installedAddons = installedAddons;
