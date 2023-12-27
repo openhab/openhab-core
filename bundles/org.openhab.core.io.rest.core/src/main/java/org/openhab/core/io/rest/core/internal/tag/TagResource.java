@@ -133,6 +133,7 @@ public class TagResource implements RESTResource {
         }
 
         CacheControl cc = new CacheControl();
+        cc.setNoCache(true);
         cc.setMustRevalidate(true);
         cc.setPrivate(true);
 
@@ -165,6 +166,7 @@ public class TagResource implements RESTResource {
         }
 
         CacheControl cc = new CacheControl();
+        cc.setNoCache(true);
         cc.setMustRevalidate(true);
         cc.setPrivate(true);
 
