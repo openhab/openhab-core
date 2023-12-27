@@ -188,6 +188,7 @@ public class RuleResource implements RESTResource {
                     .map(rule -> EnrichedRuleDTOMapper.map(rule, ruleManager, managedRuleProvider));
 
             CacheControl cc = new CacheControl();
+            cc.setNoCache(true);
             cc.setMustRevalidate(true);
             cc.setPrivate(true);
             rules = dtoMapper.limitToFields(rules, "uid,templateUID,name,visibility,description,tags,editable");

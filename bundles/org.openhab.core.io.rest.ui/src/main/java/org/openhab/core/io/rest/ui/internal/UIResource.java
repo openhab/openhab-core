@@ -168,6 +168,7 @@ public class UIResource implements RESTResource {
             }
 
             CacheControl cc = new CacheControl();
+            cc.setNoCache(true);
             cc.setMustRevalidate(true);
             cc.setPrivate(true);
             return Response.ok(new Stream2JSONInputStream(components)).lastModified(lastModifiedDate).cacheControl(cc)

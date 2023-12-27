@@ -328,6 +328,7 @@ public class ThingResource implements RESTResource {
             }
 
             CacheControl cc = new CacheControl();
+            cc.setNoCache(true);
             cc.setMustRevalidate(true);
             cc.setPrivate(true);
             thingStream = dtoMapper.limitToFields(thingStream, "UID,label,bridgeUID,thingTypeUID,location,editable");

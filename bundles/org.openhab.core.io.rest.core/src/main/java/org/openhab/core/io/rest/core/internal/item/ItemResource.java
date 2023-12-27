@@ -271,6 +271,7 @@ public class ItemResource implements RESTResource {
                     "name,label,type,groupType,function,category,editable,groupNames,link,tags,metadata,commandDescription,stateDescription");
 
             CacheControl cc = new CacheControl();
+            cc.setNoCache(true);
             cc.setMustRevalidate(true);
             cc.setPrivate(true);
             return Response.ok(new Stream2JSONInputStream(itemStream)).lastModified(lastModifiedDate).cacheControl(cc)
