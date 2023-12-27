@@ -44,6 +44,8 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sun.jna.Platform;
+
 /**
  * This is a {@link UsbSerialDiscovery} implementation component that scans the system for USB devices by means of the
  * {@link org.usb4java} library implementation of the {@link javax.usb} interface.
@@ -212,8 +214,14 @@ public class JavaxUsbSerialDiscovery implements UsbSerialDiscovery {
 
     @Override
     public synchronized void startBackgroundScanning() {
-        scanTask = scheduler.scheduleWithFixedDelay(() -> doSingleScan(), 0, scanInterval.toSeconds(),
-                TimeUnit.SECONDS);
+        if (Platform.isWindows() || Platform.isLinux()) {
+            return;
+        }
+        ScheduledFuture<?> scanTask = this.scanTask;
+        if (scanTask == null || scanTask.isDone()) {
+            this.scanTask = scheduler.scheduleWithFixedDelay(() -> doSingleScan(), 0, scanInterval.toSeconds(),
+                    TimeUnit.SECONDS);
+        }
     }
 
     @Override
