@@ -241,8 +241,13 @@ public class WindowsUsbSerialDiscovery implements UsbSerialDiscovery {
 
     @Override
     public synchronized void startBackgroundScanning() {
-        scanTask = scheduler.scheduleWithFixedDelay(() -> doSingleScan(), 0, scanInterval.toSeconds(),
-                TimeUnit.SECONDS);
+        if (Platform.isWindows()) {
+            ScheduledFuture<?> scanTask = this.scanTask;
+            if (scanTask == null || scanTask.isDone()) {
+                this.scanTask = scheduler.scheduleWithFixedDelay(() -> doSingleScan(), 0, scanInterval.toSeconds(),
+                        TimeUnit.SECONDS);
+            }
+        }
     }
 
     @Override
