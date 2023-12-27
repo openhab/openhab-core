@@ -23,7 +23,6 @@ import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ExecutorService;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -338,13 +337,13 @@ public abstract class GenericItem implements ActiveItem {
         if (!getTags().isEmpty()) {
             sb.append(", ");
             sb.append("Tags=[");
-            sb.append(getTags().stream().collect(Collectors.joining(", ")));
+            sb.append(String.join(", ", getTags()));
             sb.append("]");
         }
         if (!getGroupNames().isEmpty()) {
             sb.append(", ");
             sb.append("Groups=[");
-            sb.append(getGroupNames().stream().collect(Collectors.joining(", ")));
+            sb.append(String.join(", ", getGroupNames()));
             sb.append("]");
         }
         sb.append(")");

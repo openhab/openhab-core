@@ -65,7 +65,7 @@ public class MetadataSelectorMatcher {
                     .distinct() //
                     .collect(Collectors.toSet());
 
-            String namespacePattern = originalNamespaces.stream().collect(Collectors.joining("|"));
+            String namespacePattern = String.join("|", originalNamespaces);
 
             Pattern pattern = Pattern.compile("(" + namespacePattern + ")$");
 

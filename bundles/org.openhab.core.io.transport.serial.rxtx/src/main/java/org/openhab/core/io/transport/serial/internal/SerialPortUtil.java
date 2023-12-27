@@ -114,8 +114,7 @@ public class SerialPortUtil {
             serialPorts = new HashSet<>();
         }
         if (serialPorts.add(port)) {
-            return serialPorts.stream().collect(Collectors.joining(pathSeparator)); // see
-                                                                                    // RXTXCommDriver#addSpecifiedPorts
+            return String.join(pathSeparator, serialPorts); // see RXTXCommDriver#addSpecifiedPorts
         }
         return null;
     }

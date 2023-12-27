@@ -12,9 +12,6 @@
  */
 package org.openhab.core.model.thing.valueconverter;
 
-import java.util.Arrays;
-import java.util.stream.Collectors;
-
 import org.eclipse.xtext.conversion.IValueConverter;
 import org.eclipse.xtext.conversion.ValueConverterException;
 import org.eclipse.xtext.nodemodel.INode;
@@ -48,7 +45,7 @@ public class UIDtoStringConverter implements IValueConverter<String> {
                 }
             }
         }
-        return Arrays.stream(ids).collect(Collectors.joining(SEPERATOR));
+        return String.join(SEPERATOR, ids);
     }
 
     @Override
@@ -65,7 +62,7 @@ public class UIDtoStringConverter implements IValueConverter<String> {
                 ids[i] = toEscapedString(id);
             }
         }
-        return Arrays.stream(ids).collect(Collectors.joining(SEPERATOR));
+        return String.join(SEPERATOR, ids);
     }
 
     protected String toEscapedString(String value) {

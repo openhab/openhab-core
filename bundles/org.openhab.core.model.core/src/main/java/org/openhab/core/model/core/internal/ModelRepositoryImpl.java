@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.stream.Collectors;
 
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
@@ -281,7 +280,7 @@ public class ModelRepositoryImpl implements ModelRepository {
                     }
                     if (!warnings.isEmpty()) {
                         logger.info("Validation issues found in configuration model '{}', using it anyway:\n{}", name,
-                                warnings.stream().collect(Collectors.joining("\n")));
+                                String.join("\n", warnings));
                     }
                 } catch (NullPointerException e) {
                     // see https://github.com/eclipse/smarthome/issues/3335

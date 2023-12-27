@@ -28,7 +28,6 @@ import java.nio.file.attribute.FileTime;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -1057,8 +1056,7 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
     private void truncateLastLine(File file) throws IOException {
         final Path path = file.toPath();
         List<String> lines = Files.readAllLines(path, StandardCharsets.UTF_8);
-        Files.writeString(path, lines.subList(0, lines.size() - 1).stream().collect(Collectors.joining("\n")),
-                StandardCharsets.UTF_8);
+        Files.writeString(path, String.join("\n", lines.subList(0, lines.size() - 1)), StandardCharsets.UTF_8);
     }
 
     private @Nullable String getLastModifiedValueForPoperty(String path, String property) {
