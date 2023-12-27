@@ -119,6 +119,7 @@ public class SystemInfoResource implements RESTResource, ConfigurationListener {
         }
 
         CacheControl cc = new CacheControl();
+        cc.setNoCache(true);
         cc.setMustRevalidate(true);
         cc.setPrivate(true);
 
