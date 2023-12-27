@@ -274,7 +274,7 @@ public class IpAddonFinder extends BaseAddonFinder {
                                 PARAMETER_LISTEN_PORT);
                         continue;
                     }
-                    // not not allow privileged ports
+                    // do not allow privileged ports
                     if (listenPort < 1024) {
                         logger.warn("{}: discovery-parameter '{}' not allowed, privileged port", candidate.getUID(),
                                 PARAMETER_LISTEN_PORT);
