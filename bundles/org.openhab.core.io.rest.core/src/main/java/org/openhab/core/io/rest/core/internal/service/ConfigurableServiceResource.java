@@ -296,7 +296,7 @@ public class ConfigurableServiceResource implements RESTResource {
             for (ServiceReference<?> serviceReference : serviceReferences) {
                 String id = getServiceId(serviceReference);
                 ConfigurableService configurableService = ConfigurableServiceUtil
-                        .asConfigurableService((key) -> serviceReference.getProperty(key));
+                        .asConfigurableService(serviceReference::getProperty);
 
                 String defaultLabel = configurableService.label();
                 if (defaultLabel.isEmpty()) { // for multi context services the label can be changed and must be read
@@ -336,7 +336,7 @@ public class ConfigurableServiceResource implements RESTResource {
 
             if (refs != null && refs.length > 0) {
                 ConfigurableService configurableService = ConfigurableServiceUtil
-                        .asConfigurableService((key) -> refs[0].getProperty(key));
+                        .asConfigurableService(key -> refs[0].getProperty(key));
                 configDescriptionURI = configurableService.description_uri();
             }
         } catch (InvalidSyntaxException e) {

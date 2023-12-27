@@ -1002,7 +1002,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
     @Nullable
     private Item filterMatchedItemsByLocation(Map<Item, ItemInterpretationMetadata> itemsData, String locationContext) {
         var itemsFilteredByLocation = itemsData.entrySet().stream()
-                .filter((entry) -> entry.getValue().locationParentNames.contains(locationContext)).toList();
+                .filter(entry -> entry.getValue().locationParentNames.contains(locationContext)).toList();
         if (itemsFilteredByLocation.size() != 1) {
             return null;
         }
@@ -1015,7 +1015,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
         String name = item.getName();
         boolean insert = items.keySet().stream().noneMatch(i -> name.startsWith(i.getName()));
         if (insert) {
-            items.keySet().removeIf((matchedItem) -> matchedItem.getName().startsWith(name));
+            items.keySet().removeIf(matchedItem -> matchedItem.getName().startsWith(name));
             items.put(item, interpretationMetadata);
         }
     }
@@ -1244,7 +1244,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
             throw new ParseException("The character '|' can not be used alone", 0);
         }
         Expression expression = seq(tokenText.contains("|") ? alt(Arrays.stream(tokenText.split("\\|"))//
-                .filter((s) -> !s.isBlank()).toArray()) : tokenText);
+                .filter(s -> !s.isBlank()).toArray()) : tokenText);
         if (optional) {
             return opt(expression);
         }

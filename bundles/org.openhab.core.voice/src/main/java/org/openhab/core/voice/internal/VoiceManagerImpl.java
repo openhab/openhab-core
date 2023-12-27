@@ -665,7 +665,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     }
 
     protected void removeAudioSink(AudioSink audioSink) {
-        stopDialogs((dialog) -> dialog.dialogContext.sink().getId().equals(audioSink.getId()));
+        stopDialogs(dialog -> dialog.dialogContext.sink().getId().equals(audioSink.getId()));
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
@@ -674,7 +674,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     }
 
     protected void removeAudioSource(AudioSource audioSource) {
-        stopDialogs((dialog) -> dialog.dialogContext.source().getId().equals(audioSource.getId()));
+        stopDialogs(dialog -> dialog.dialogContext.source().getId().equals(audioSource.getId()));
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
@@ -685,7 +685,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
 
     protected void removeKSService(KSService ksService) {
         this.ksServices.remove(ksService.getId());
-        stopDialogs((dialog) -> {
+        stopDialogs(dialog -> {
             var ks = dialog.dialogContext.ks();
             return ks != null && ks.getId().equals(ksService.getId());
         });
@@ -699,7 +699,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
 
     protected void removeSTTService(STTService sttService) {
         this.sttServices.remove(sttService.getId());
-        stopDialogs((dialog) -> dialog.dialogContext.stt().getId().equals(sttService.getId()));
+        stopDialogs(dialog -> dialog.dialogContext.stt().getId().equals(sttService.getId()));
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
@@ -710,7 +710,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
 
     protected void removeTTSService(TTSService ttsService) {
         this.ttsServices.remove(ttsService.getId());
-        stopDialogs((dialog) -> dialog.dialogContext.tts().getId().equals(ttsService.getId()));
+        stopDialogs(dialog -> dialog.dialogContext.tts().getId().equals(ttsService.getId()));
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
@@ -721,7 +721,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
 
     protected void removeHumanLanguageInterpreter(HumanLanguageInterpreter humanLanguageInterpreter) {
         this.humanLanguageInterpreters.remove(humanLanguageInterpreter.getId());
-        stopDialogs((dialog) -> dialog.dialogContext.hlis().stream()
+        stopDialogs(dialog -> dialog.dialogContext.hlis().stream()
                 .anyMatch(hli -> hli.getId().equals(humanLanguageInterpreter.getId())));
     }
 
