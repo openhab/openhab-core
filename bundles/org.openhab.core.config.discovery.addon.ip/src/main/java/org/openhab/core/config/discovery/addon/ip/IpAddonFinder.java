@@ -102,9 +102,28 @@ import org.slf4j.LoggerFactory;
  * <td></td>
  * </tr>
  * <tr>
+ * <td>{@code listenPort}</td>
+ * <td>port to use for listening to responses (optional)</td>
+ * <td>privileged ports ({@code <1024}) not allowed</td>
+ * </tr>
+ * <tr>
  * <td>{@code request}</td>
  * <td>description of request frame as hex bytes separated by spaces (e.g. 0x01 0x02 ...)</td>
- * <td>dynamic replacement of variables $srcIp and $srcPort, no others implemented yet
+ * <td>dynamic replacement of variables $srcIp, $srcPort and $uuid, no others implemented yet
+ * </tr>
+ * <tr>
+ * <td>{@code requestPlain}</td>
+ * <td>description of request frame as plaintext string</td>
+ * <td>dynamic replacement of variables $srcIp, $srcPort and $uuid, no others implemented yet;
+ * there are five XML special characters which need to be escaped:
+ *
+ * <pre>{@code
+ * & - &amp;
+ * < - &lt;
+ * > - &gt;
+ * " - &quot;
+ * ' - &apos;
+ * }</pre>
  * </tr>
  * <tr>
  * <td>{@code timeoutMs}</td>
@@ -113,7 +132,25 @@ import org.slf4j.LoggerFactory;
  * </tr>
  * </table>
  * <p>
- * Packets are sent out on ever available network interface.
+ * <table border="1">
+ * <tr>
+ * <td><b>dynamic replacement</b> (in {@code request*})</td>
+ * <td><b>value</b></td>
+ * </tr>
+ * <tr>
+ * <td>{@code $srcIp}</td>
+ * <td>source IP address</td>
+ * </tr>
+ * <tr>
+ * <td>{@code $srcPort}</td>
+ * <td>source port</td>
+ * </tr>
+ * <td>{@code $uuid}</td>
+ * <td>String returned by {@code java.util.UUID.randomUUID()}</td>
+ * </tr>
+ * </table>
+ * <p>
+ * Packets are sent out on every available network interface.
  * <p>
  * There is currently only one match-property defined: {@code response}.
  * It allows a regex match, but currently only ".*" is supported.
