@@ -591,7 +591,7 @@ public class NetUtil implements NetworkAddressService {
             return boolean1;
         }
         if (value instanceof String string) {
-            return Boolean.valueOf(string);
+            return Boolean.parseBoolean(string);
         } else {
             return defaultValue;
         }

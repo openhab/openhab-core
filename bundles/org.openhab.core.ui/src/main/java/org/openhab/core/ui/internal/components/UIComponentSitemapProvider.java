@@ -320,7 +320,7 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
             Object normalizedValue = ConfigUtil.normalizeType(value);
             if (widgetImpl.eGet(feature, false, false) instanceof Integer) {
                 normalizedValue = (normalizedValue instanceof BigDecimal bd) ? bd.intValue()
-                        : Integer.valueOf(normalizedValue.toString());
+                        : Integer.parseInt(normalizedValue.toString());
             } else if (widgetImpl.eGet(feature, false, false) instanceof Boolean
                     && !(normalizedValue instanceof Boolean)) {
                 normalizedValue = Boolean.valueOf(normalizedValue.toString());
@@ -337,7 +337,7 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
             return;
         }
         Object staticIcon = component.getConfig().get("staticIcon");
-        if (staticIcon != null && Boolean.valueOf(ConfigUtil.normalizeType(staticIcon).toString())) {
+        if (staticIcon != null && Boolean.parseBoolean(ConfigUtil.normalizeType(staticIcon).toString())) {
             setWidgetPropertyFromComponentConfig(widget, component, "icon", SitemapPackage.WIDGET__STATIC_ICON);
             return;
         }

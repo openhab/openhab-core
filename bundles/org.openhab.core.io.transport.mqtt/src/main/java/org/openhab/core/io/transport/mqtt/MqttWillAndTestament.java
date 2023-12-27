@@ -72,14 +72,14 @@ public class MqttWillAndTestament {
                         break;
                     case 2:
                         if (!"".equals(value)) {
-                            int tmp = Integer.valueOf(value);
+                            int tmp = Integer.parseInt(value);
                             if (tmp >= 0 && tmp <= 2) {
                                 tmpQos = tmp;
                             }
                         }
                         break;
                     case 3:
-                        tmpRetain = Boolean.valueOf(value);
+                        tmpRetain = Boolean.parseBoolean(value);
                         break;
                 }
             }
