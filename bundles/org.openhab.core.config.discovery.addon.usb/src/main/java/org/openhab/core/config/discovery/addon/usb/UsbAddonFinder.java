@@ -107,7 +107,7 @@ public class UsbAddonFinder extends BaseAddonFinder implements UsbSerialDiscover
                     if (propertyMatches(matchProperties, PRODUCT, device.getProduct())
                             && propertyMatches(matchProperties, MANUFACTURER, device.getManufacturer())
                             && propertyMatches(matchProperties, CHIP_ID,
-                                    toHexString(device.getVendorId(), device.getProductId()))
+                                    getChipId(device.getVendorId(), device.getProductId()))
                             && propertyMatches(matchProperties, REMOTE, String.valueOf(device.getRemote()))) {
                         result.add(candidate);
                         logger.debug("Suggested add-on found: {}", candidate.getUID());
@@ -119,8 +119,8 @@ public class UsbAddonFinder extends BaseAddonFinder implements UsbSerialDiscover
         return result;
     }
 
-    private String toHexString(int vendorId, int productId) {
-        return String.format("0x%04x:0x%04x", vendorId, productId);
+    private String getChipId(int vendorId, int productId) {
+        return String.format("%04x:%04x", vendorId, productId);
     }
 
     @Override
