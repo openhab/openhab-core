@@ -277,7 +277,7 @@ public class CronAdjuster implements SchedulerTemporalAdjuster {
                 return CronAdjuster::isLastWorkingDayInMonth;
             } else if (sub.endsWith("W")) {
                 final int n = parseInt(cronExpression, chronoField, sub.substring(0, sub.length() - 1));
-                return (temporal) -> isNearestWorkDay(temporal, n);
+                return temporal -> isNearestWorkDay(temporal, n);
             }
             // fall through, it is a normal expression
         }

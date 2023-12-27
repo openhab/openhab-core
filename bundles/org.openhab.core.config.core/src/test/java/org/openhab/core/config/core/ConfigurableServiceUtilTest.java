@@ -43,8 +43,7 @@ public class ConfigurableServiceUtilTest {
         properties.put(SERVICE_PROPERTY_FACTORY_SERVICE, factory);
         properties.put(SERVICE_PROPERTY_LABEL, label);
 
-        ConfigurableService configurableService = ConfigurableServiceUtil
-                .asConfigurableService((key) -> properties.get(key));
+        ConfigurableService configurableService = ConfigurableServiceUtil.asConfigurableService(properties::get);
 
         assertThat(configurableService.annotationType(), is(ConfigurableService.class));
         assertThat(configurableService.category(), is(category));
@@ -57,8 +56,7 @@ public class ConfigurableServiceUtilTest {
     public void asConfigurableServiceUndefinedProperties() {
         Properties properties = new Properties();
 
-        ConfigurableService configurableService = ConfigurableServiceUtil
-                .asConfigurableService((key) -> properties.get(key));
+        ConfigurableService configurableService = ConfigurableServiceUtil.asConfigurableService(properties::get);
 
         assertThat(configurableService.annotationType(), is(ConfigurableService.class));
         assertThat(configurableService.category(), is(emptyString()));

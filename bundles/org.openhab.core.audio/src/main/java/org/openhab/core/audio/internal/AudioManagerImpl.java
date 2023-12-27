@@ -120,7 +120,7 @@ public class AudioManagerImpl implements AudioManager, ConfigOptionProvider {
         AudioSink sink = getSink(sinkId);
         if (sink != null) {
             Runnable restoreVolume = handleVolumeCommand(volume, sink);
-            sink.processAndComplete(audioStream).exceptionally((exception) -> {
+            sink.processAndComplete(audioStream).exceptionally(exception -> {
                 logger.warn("Error playing '{}': {}", audioStream, exception.getMessage(), exception);
                 return null;
             }).thenRun(restoreVolume);

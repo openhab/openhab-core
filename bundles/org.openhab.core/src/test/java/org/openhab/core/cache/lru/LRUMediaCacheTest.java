@@ -271,7 +271,7 @@ public class LRUMediaCacheTest {
             file2Writer.write("falsedata");
         }
         when(storage.stream())
-                .thenAnswer((invocation) -> Stream.of(new AbstractMap.SimpleImmutableEntry("key1", metadataSample1),
+                .thenAnswer(invocation -> Stream.of(new AbstractMap.SimpleImmutableEntry("key1", metadataSample1),
                         new AbstractMap.SimpleImmutableEntry("key2", metadataSample2)));
 
         // create a LRU cache that will use the above data
@@ -322,7 +322,7 @@ public class LRUMediaCacheTest {
 
         // prepare storage map for stream operation
         when(storage.stream())
-                .thenAnswer((invocation) -> Stream.of(new AbstractMap.SimpleImmutableEntry("key1", metadataSample1),
+                .thenAnswer(invocation -> Stream.of(new AbstractMap.SimpleImmutableEntry("key1", metadataSample1),
                         new AbstractMap.SimpleImmutableEntry("key2", metadataSample2)));
 
         // prepare some files : orphan file
@@ -386,7 +386,7 @@ public class LRUMediaCacheTest {
     public void faultyStreamTest() throws IOException {
         MetadataSample metadata = new MetadataSample("meta1", 42);
 
-        when(supplier.get()).thenAnswer((invocation) -> new LRUMediaCacheEntry<>("key", inputStreamMock, metadata));
+        when(supplier.get()).thenAnswer(invocation -> new LRUMediaCacheEntry<>("key", inputStreamMock, metadata));
         // In this test the stream will return two bytes of data, then an empty stream so signal its end.
         // it will be called twice, so return it twice
         when(inputStreamMock.readNBytes(any(Integer.class))).thenReturn(new byte[2], new byte[0], new byte[2],

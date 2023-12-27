@@ -123,7 +123,7 @@ public class ThreadPoolManager {
      * @return an instance to use
      */
     public static ScheduledExecutorService getScheduledPool(String poolName) {
-        ExecutorService pool = pools.computeIfAbsent(poolName, (name) -> {
+        ExecutorService pool = pools.computeIfAbsent(poolName, name -> {
             int cfg = getConfig(name);
             ScheduledThreadPoolExecutor executor = new WrappedScheduledExecutorService(cfg,
                     new NamedThreadFactory(name, true, Thread.NORM_PRIORITY));
@@ -149,7 +149,7 @@ public class ThreadPoolManager {
      * @return an instance to use
      */
     public static ExecutorService getPool(String poolName) {
-        ExecutorService pool = pools.computeIfAbsent(poolName, (name) -> {
+        ExecutorService pool = pools.computeIfAbsent(poolName, name -> {
             int cfg = getConfig(name);
             ThreadPoolExecutor executor = QueueingThreadPoolExecutor.createInstance(name, cfg);
             executor.setKeepAliveTime(THREAD_TIMEOUT, TimeUnit.SECONDS);
