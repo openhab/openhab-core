@@ -105,7 +105,7 @@ public class ProcessAddonFinder extends BaseAddonFinder {
                 }
 
                 // now check if a process matches the pattern defined in addon.xml
-                logger.debug("Checking candidate: {}", candidate.getUID());
+                logger.trace("Checking candidate: {}", candidate.getUID());
 
                 for (AddonMatchProperty command : commands) {
                     logger.trace("Candidate {}, pattern \"{}\"", candidate.getUID(), command.getRegex());
