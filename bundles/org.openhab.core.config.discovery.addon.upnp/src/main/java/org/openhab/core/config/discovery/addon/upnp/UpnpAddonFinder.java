@@ -188,7 +188,7 @@ public class UpnpAddonFinder extends BaseAddonFinder implements RegistryListener
                             && propertyMatches(matchProperties, SERIAL_NUMBER, serialNumber)
                             && propertyMatches(matchProperties, FRIENDLY_NAME, friendlyName)) {
                         result.add(candidate);
-                        logger.debug("Suggested addon found: {}", candidate.getUID());
+                        logger.debug("Suggested add-on found: {}", candidate.getUID());
                         break;
                     }
                 }
