@@ -100,7 +100,7 @@ public class JsonStorage<T> implements Storage<T> {
         this.maxBackupFiles = maxBackupFiles;
         this.writeDelay = writeDelay;
         this.maxDeferredPeriod = maxDeferredPeriod;
-        this.typeMigrators = typeMigrators.stream().collect(Collectors.toMap(e -> e.getOldType(), e -> e));
+        this.typeMigrators = typeMigrators.stream().collect(Collectors.toMap(TypeMigrator::getOldType, e -> e));
 
         this.internalMapper = new GsonBuilder() //
                 .registerTypeHierarchyAdapter(Map.class, new OrderingMapSerializer())//

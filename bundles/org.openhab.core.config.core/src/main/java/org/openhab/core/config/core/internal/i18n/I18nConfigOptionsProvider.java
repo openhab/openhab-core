@@ -78,8 +78,8 @@ public class I18nConfigOptionsProvider implements ConfigOptionProvider {
     }
 
     private Collection<ParameterOption> processTimeZoneParam() {
-        Comparator<TimeZone> byOffset = (t1, t2) -> t1.getRawOffset() - t2.getRawOffset();
-        Comparator<TimeZone> byID = (t1, t2) -> t1.getID().compareTo(t2.getID());
+        Comparator<TimeZone> byOffset = Comparator.comparingInt(TimeZone::getRawOffset);
+        Comparator<TimeZone> byID = Comparator.comparing(TimeZone::getID);
         return ZoneId.getAvailableZoneIds().stream().map(TimeZone::getTimeZone).sorted(byOffset.thenComparing(byID))
                 .map(tz -> new ParameterOption(tz.getID(), getTimeZoneRepresentation(tz))).toList();
     }
@@ -105,7 +105,7 @@ public class I18nConfigOptionsProvider implements ConfigOptionProvider {
                 .map(mapFunction) //
                 .distinct() //
                 .filter(po -> !po.getValue().isEmpty()) //
-                .sorted(Comparator.comparing(a -> a.getLabel())) //
+                .sorted(Comparator.comparing(ParameterOption::getLabel)) //
                 .toList();
     }
 }

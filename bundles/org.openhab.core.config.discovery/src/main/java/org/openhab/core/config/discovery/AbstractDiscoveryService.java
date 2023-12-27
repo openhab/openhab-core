@@ -482,7 +482,7 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
                 this.args = null;
             } else {
                 this.args = Arrays.stream(parts[1].replaceAll("\\[|\\]|\"", "").split(","))
-                        .filter(s -> s != null && !s.isBlank()).map(s -> s.trim()).toArray(Object[]::new);
+                        .filter(s -> s != null && !s.isBlank()).map(String::trim).toArray(Object[]::new);
             }
         }
     }

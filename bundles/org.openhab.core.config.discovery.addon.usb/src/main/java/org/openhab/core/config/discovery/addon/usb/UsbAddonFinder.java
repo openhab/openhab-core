@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.addon.AddonDiscoveryMethod;
 import org.openhab.core.addon.AddonInfo;
+import org.openhab.core.addon.AddonMatchProperty;
 import org.openhab.core.config.discovery.addon.AddonFinder;
 import org.openhab.core.config.discovery.addon.BaseAddonFinder;
 import org.openhab.core.config.discovery.usbserial.UsbSerialDeviceInformation;
@@ -39,7 +40,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This is a {@link USBAddonFinder} for finding suggested add-ons related to USB devices.
+ * This is a {@link AddonFinder} for finding suggested add-ons related to USB devices.
  * <p>
  * It supports the following values for the 'match-property' 'name' element:
  * <li>product - match on the product description text
@@ -89,7 +90,7 @@ public class UsbAddonFinder extends BaseAddonFinder implements UsbSerialDiscover
             for (AddonDiscoveryMethod method : candidate.getDiscoveryMethods().stream()
                     .filter(method -> SERVICE_TYPE.equals(method.getServiceType())).toList()) {
                 Map<String, Pattern> matchProperties = method.getMatchProperties().stream()
-                        .collect(Collectors.toMap(property -> property.getName(), property -> property.getPattern()));
+                        .collect(Collectors.toMap(AddonMatchProperty::getName, AddonMatchProperty::getPattern));
 
                 Set<String> propertyNames = new HashSet<>(matchProperties.keySet());
                 propertyNames.removeAll(SUPPORTED_PROPERTIES);

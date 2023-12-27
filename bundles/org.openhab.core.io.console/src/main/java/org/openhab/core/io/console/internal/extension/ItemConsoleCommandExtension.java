@@ -72,7 +72,7 @@ public class ItemConsoleCommandExtension extends AbstractConsoleCommandExtension
                     default:
                         return false;
                 }
-                return new StringsCompleter(items.stream().map(i -> i.getName()).toList(), true).complete(args,
+                return new StringsCompleter(items.stream().map(Item::getName).toList(), true).complete(args,
                         cursorArgumentIndex, cursorPosition, candidates);
             }
             if (cursorArgumentIndex == 2 && args[0].equals(SUBCMD_RMTAG)) {

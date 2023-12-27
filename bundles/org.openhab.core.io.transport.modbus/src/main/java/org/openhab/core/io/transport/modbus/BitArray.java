@@ -118,7 +118,7 @@ public class BitArray implements Iterable<Boolean> {
 
     @Override
     public Iterator<Boolean> iterator() {
-        return IntStream.range(0, size()).mapToObj(i -> getBit(i)).iterator();
+        return IntStream.range(0, size()).mapToObj(this::getBit).iterator();
     }
 
     @Override

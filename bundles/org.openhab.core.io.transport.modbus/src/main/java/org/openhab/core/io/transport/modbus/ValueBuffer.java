@@ -108,7 +108,7 @@ public class ValueBuffer {
      * @throws InvalidMarkException If the mark has not been set
      */
     public ValueBuffer reset() throws InvalidMarkException {
-        int mark = Optional.ofNullable(this.mark.get()).map(i -> i.get()).orElse(-1);
+        int mark = Optional.ofNullable(this.mark.get()).map(AtomicInteger::get).orElse(-1);
         if (mark < 0) {
             throw new InvalidMarkException();
         }

@@ -111,7 +111,7 @@ public class AddonInfoConverter extends GenericUnmarshaller<AddonInfoXmlResult> 
 
         Object object = nodeIterator.nextList("discovery-methods", false);
         addonInfo.withDiscoveryMethods(!(object instanceof List<?> list) ? null
-                : list.stream().filter(e -> (e instanceof AddonDiscoveryMethod)).map(e -> ((AddonDiscoveryMethod) e))
+                : list.stream().filter(AddonDiscoveryMethod.class::isInstance).map(e -> ((AddonDiscoveryMethod) e))
                         .toList());
 
         nodeIterator.assertEndOfType();

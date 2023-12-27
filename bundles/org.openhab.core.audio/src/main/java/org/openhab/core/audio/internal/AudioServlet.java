@@ -102,7 +102,7 @@ public class AudioServlet extends HttpServlet implements AudioHTTPServer {
 
     @Deactivate
     protected synchronized void deactivate() {
-        servedStreams.values().stream().map(streamServed -> streamServed.audioStream()).forEach(this::tryClose);
+        servedStreams.values().stream().map(StreamServed::audioStream).forEach(this::tryClose);
         servedStreams.clear();
     }
 

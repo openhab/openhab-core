@@ -50,7 +50,7 @@ public class ModbusSlaveErrorResponseExceptionImpl extends ModbusSlaveErrorRespo
     @Override
     public @Nullable String getMessage() {
         return String.format("Slave responded with error=%d (%s)", rawCode,
-                exceptionCode.map(c -> c.name()).orElse("unknown error code"));
+                exceptionCode.map(Enum::name).orElse("unknown error code"));
     }
 
     @Override

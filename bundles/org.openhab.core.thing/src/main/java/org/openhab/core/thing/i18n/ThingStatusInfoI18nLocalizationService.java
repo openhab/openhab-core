@@ -172,7 +172,7 @@ public final class ThingStatusInfoI18nLocalizationService {
                 this.args = null;
             } else {
                 this.args = Arrays.stream(parts[1].replaceAll("\\[|\\]|\"", "").split(","))
-                        .filter(s -> s != null && !s.trim().isEmpty()).map(s -> s.trim()).toArray(String[]::new);
+                        .filter(s -> s != null && !s.trim().isEmpty()).map(String::trim).toArray(String[]::new);
             }
         }
     }

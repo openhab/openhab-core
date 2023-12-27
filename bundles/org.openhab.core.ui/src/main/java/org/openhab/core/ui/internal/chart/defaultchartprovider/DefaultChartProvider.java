@@ -153,7 +153,7 @@ public class DefaultChartProvider implements ChartProvider {
         QueryablePersistenceService persistenceService = (service instanceof QueryablePersistenceService qps) ? qps
                 : (QueryablePersistenceService) persistenceServiceRegistry.getAll() //
                         .stream() //
-                        .filter(it -> it instanceof QueryablePersistenceService) //
+                        .filter(QueryablePersistenceService.class::isInstance) //
                         .findFirst() //
                         .orElseThrow(() -> new IllegalArgumentException("No Persistence service found."));
 
