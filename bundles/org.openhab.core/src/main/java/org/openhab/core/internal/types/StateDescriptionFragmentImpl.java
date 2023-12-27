@@ -169,8 +169,7 @@ public class StateDescriptionFragmentImpl implements StateDescriptionFragment {
             return null;
         }
         final Boolean ro = readOnly;
-        return new StateDescriptionImpl(minimum, maximum, step, pattern, ro == null ? false : ro.booleanValue(),
-                options);
+        return new StateDescriptionImpl(minimum, maximum, step, pattern, ro != null && ro.booleanValue(), options);
     }
 
     /**

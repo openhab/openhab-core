@@ -105,8 +105,8 @@ public class ModbusSlaveConnectionFactoryImpl
             long reconnectAfterMillis = configuration.getReconnectAfterMillis();
             long connectionAgeMillis = System.currentTimeMillis() - localLastConnected;
             long disconnectIfConnectedBeforeMillis = disconnectIfConnectedBefore.getOrDefault(localEndpoint, -1L);
-            boolean disconnectSinceTooOldConnection = disconnectIfConnectedBeforeMillis < 0L ? false
-                    : localLastConnected <= disconnectIfConnectedBeforeMillis;
+            boolean disconnectSinceTooOldConnection = disconnectIfConnectedBeforeMillis >= 0L
+                    && localLastConnected <= disconnectIfConnectedBeforeMillis;
             boolean shouldBeDisconnected = (reconnectAfterMillis == 0
                     || (reconnectAfterMillis > 0 && connectionAgeMillis > reconnectAfterMillis)
                     || disconnectSinceTooOldConnection);

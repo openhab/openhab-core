@@ -94,7 +94,6 @@ public class ConfigDescriptionParameterGroupBuilder {
      * @return the desired result
      */
     public ConfigDescriptionParameterGroup build() throws IllegalArgumentException {
-        return new ConfigDescriptionParameterGroup(name, context, advanced != null ? advanced : false, label,
-                description);
+        return new ConfigDescriptionParameterGroup(name, context, advanced != null && advanced, label, description);
     }
 }

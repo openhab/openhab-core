@@ -71,7 +71,7 @@ public class UpgradeTool {
                         "Please either set the environment variable ${OPENHAB_USERDATA} or provide a directory through the --dir option.");
                 System.exit(0);
             } else {
-                boolean force = commandLine.hasOption(OPT_FORCE) ? true : false;
+                boolean force = commandLine.hasOption(OPT_FORCE);
 
                 Upgrader upgrader = new Upgrader(baseDir, force);
                 if (!commandLine.hasOption(OPT_COMMAND)

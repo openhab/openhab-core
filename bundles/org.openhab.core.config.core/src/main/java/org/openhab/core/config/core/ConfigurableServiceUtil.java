@@ -91,6 +91,6 @@ public class ConfigurableServiceUtil {
 
     private static boolean resolveBoolean(Function<String, @Nullable Object> propertyResolver, String key) {
         Boolean value = (Boolean) propertyResolver.apply(key);
-        return value == null ? false : value.booleanValue();
+        return value != null && value.booleanValue();
     }
 }

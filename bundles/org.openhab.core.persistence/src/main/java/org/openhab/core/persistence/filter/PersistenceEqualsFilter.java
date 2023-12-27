@@ -33,7 +33,7 @@ public class PersistenceEqualsFilter extends PersistenceFilter {
     public PersistenceEqualsFilter(String name, Collection<String> values, @Nullable Boolean inverted) {
         super(name);
         this.values = values;
-        this.inverted = (inverted == null) ? false : inverted;
+        this.inverted = inverted != null && inverted;
     }
 
     public Collection<String> getValues() {

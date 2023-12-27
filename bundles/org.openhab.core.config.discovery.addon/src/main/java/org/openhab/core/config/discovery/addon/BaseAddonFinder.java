@@ -41,7 +41,7 @@ public abstract class BaseAddonFinder implements AddonFinder {
     protected static boolean propertyMatches(Map<String, Pattern> propertyPatternMap, String propertyName,
             @Nullable String propertyValue) {
         Pattern pattern = propertyPatternMap.get(propertyName);
-        return pattern == null ? true : propertyValue == null ? false : pattern.matcher(propertyValue).matches();
+        return pattern == null || (propertyValue != null && pattern.matcher(propertyValue).matches());
     }
 
     protected volatile List<AddonInfo> addonCandidates = List.of();

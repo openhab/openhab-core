@@ -164,7 +164,7 @@ public class NumberExtensions {
         BigDecimal leftValue = numberToBigDecimal(left);
         BigDecimal rightValue = numberToBigDecimal(right);
         if (leftValue == null) {
-            return (rightValue != null) ? false : true;
+            return rightValue == null;
         } else if (rightValue == null) {
             return true;
         } else {
