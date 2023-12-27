@@ -281,7 +281,7 @@ public class HttpUtil {
             String proxyPortString = System.getProperty("http.proxyPort");
             if (proxyPortString != null && !proxyPortString.isBlank()) {
                 try {
-                    proxyParams.proxyPort = Integer.valueOf(proxyPortString);
+                    proxyParams.proxyPort = Integer.parseInt(proxyPortString);
                 } catch (NumberFormatException e) {
                     LOGGER.warn("'{}' is not a valid proxy port - using default port ({}) instead", proxyPortString,
                             proxyParams.proxyPort);

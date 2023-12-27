@@ -605,7 +605,7 @@ public class ThingResource implements RESTResource {
             return getThingNotFoundResponse(thingUID);
         }
 
-        thingManager.setEnabled(thingUIDObject, Boolean.valueOf(enabled));
+        thingManager.setEnabled(thingUIDObject, Boolean.parseBoolean(enabled));
 
         // everything went well
         return getThingResponse(Status.OK, thing, locale, null);

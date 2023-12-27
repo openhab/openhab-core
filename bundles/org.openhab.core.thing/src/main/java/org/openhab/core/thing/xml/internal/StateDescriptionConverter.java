@@ -73,7 +73,7 @@ public class StateDescriptionConverter extends GenericUnmarshaller<StateDescript
 
     private boolean toBoolean(Map<String, String> attributes, String attribute, boolean defaultValue) {
         String attrValueText = attributes.get(attribute);
-        return attrValueText == null ? defaultValue : Boolean.valueOf(attrValueText);
+        return attrValueText == null ? defaultValue : Boolean.parseBoolean(attrValueText);
     }
 
     private List<StateOption> toListOfChannelState(NodeList nodeList) throws ConversionException {
