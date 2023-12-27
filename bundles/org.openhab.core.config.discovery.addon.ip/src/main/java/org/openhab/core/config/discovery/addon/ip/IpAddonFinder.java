@@ -57,6 +57,70 @@ import org.slf4j.LoggerFactory;
 /**
  * This is a {@link IpAddonFinder} for finding suggested add-ons by sending IP packets to the
  * network and collecting responses.
+ * 
+ * This finder is intended to detect devices on the network which do not announce via UPnP
+ * or mDNS. Some devices respond to queries to defined multicast addresses and ports and thus
+ * can be detected by sending a single frame on the IP network.
+ * <p>
+ * Be aware of possible side effects of sending packets to unknown devices in the network!
+ * This is why the IP finder is not intended for large scale network scanning, e.g. using
+ * large port or IP ranges.
+ * <p>
+ * <strong>Configuration</strong>
+ * <p>
+ * The following parameters can be used to configure frames to be sent to the network:
+ * <p>
+ * <table border="1">
+ * <tr>
+ * <td><b>discovery-parameter</b></td>
+ * <td><b>values</b></td>
+ * <td><b>comment</b></td>
+ * </tr>
+ * <tr>
+ * <td>{@code type}</td>
+ * <td>ipMulticast</td>
+ * <td>no other options implemented</td>
+ * </tr>
+ * <tr>
+ * <td>{@code destIp}</td>
+ * <td>destination IP address</td>
+ * <td></td>
+ * </tr>
+ * <tr>
+ * <td>{@code destPort}</td>
+ * <td>destination port</td>
+ * <td></td>
+ * </tr>
+ * <tr>
+ * <td>{@code request}</td>
+ * <td>description of request frame as hex bytes separated by spaces (e.g. 0x01 0x02 ...)</td>
+ * <td>dynamic replacement of variables $srcIp and $srcPort, no others implemented yet
+ * </tr>
+ * <tr>
+ * <td>{@code timeoutMs}</td>
+ * <td>timeout to wait for a answers</td>
+ * <td></td>
+ * </tr>
+ * </table>
+ * <p>
+ * Packets are sent out on ever available network interface.
+ * <p>
+ * There is currently only one match-property defined: {@code response}.
+ * It allows a regex match, but currently only ".*" is supported.
+ * <p>
+ * <strong>Limitations</strong>
+ * <p>
+ * The {@link IpAddonFinder} is still under active development.
+ * There are limitations:
+ * <ul>
+ * <li>Currently every returned frame is considered as success, regex matching is not implemented.
+ * <li>Frames are sent only on startup (or if an {@link org.openhab.core.addon.AddonInfoProvider}
+ * calls {@link setAddonCandidates}), no background scanning.
+ * <ul>
+ *
+ * @apiNote The {@link IpAddonFinder} is still under active development, it has initially
+ *          been developed to detect KNX installations and will be extended. Configuration parameters
+ *          and supported features may still change.
  *
  * @implNote On activation, a thread is spawned which handles the detection. Scan runs once,
  *           no continuous background scanning.
