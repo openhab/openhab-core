@@ -53,7 +53,7 @@ public class PersistenceThresholdFilter extends PersistenceFilter {
         super(name);
         this.value = value;
         this.unit = (unit == null) ? "" : unit;
-        this.relative = (relative == null) ? false : relative;
+        this.relative = relative != null && relative;
     }
 
     public BigDecimal getValue() {

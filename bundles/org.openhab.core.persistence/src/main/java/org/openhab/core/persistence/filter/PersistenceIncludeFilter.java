@@ -45,7 +45,7 @@ public class PersistenceIncludeFilter extends PersistenceFilter {
         this.lower = lower;
         this.upper = upper;
         this.unit = (unit == null) ? "" : unit;
-        this.inverted = (inverted == null) ? false : inverted;
+        this.inverted = inverted != null && inverted;
     }
 
     public BigDecimal getLower() {

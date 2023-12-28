@@ -88,7 +88,7 @@ public class ConfigDescriptionParameterConverter extends GenericUnmarshaller<Con
     }
 
     private Boolean falseIfNull(@Nullable Boolean b) {
-        return b != null ? b : false;
+        return b != null && b;
     }
 
     @Override
