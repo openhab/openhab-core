@@ -43,7 +43,7 @@ public class SystemWideChannelTypesTest extends JavaOSGiTest {
     @BeforeEach
     public void setUp() {
         ChannelTypeProvider provider = getService(ChannelTypeProvider.class, DefaultSystemChannelTypeProvider.class);
-        assertTrue(provider instanceof DefaultSystemChannelTypeProvider);
+        assertInstanceOf(DefaultSystemChannelTypeProvider.class, provider);
         systemChannelTypeProvider = provider;
     }
 

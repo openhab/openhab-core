@@ -328,7 +328,7 @@ public class AutomationCommandList extends AutomationCommand {
                 return templates;
             } else {
                 for (String templateUID : list.keySet()) {
-                    if (templateUID.indexOf(id) != -1) {
+                    if (templateUID.contains(id)) {
                         templates.add(autoCommands.getTemplate(templateUID, locale));
                     }
                 }
@@ -363,7 +363,7 @@ public class AutomationCommandList extends AutomationCommand {
                     return moduleTypes;
                 } else {
                     for (String typeUID : list.values()) {
-                        if (typeUID.indexOf(id) != -1) {
+                        if (typeUID.contains(id)) {
                             moduleTypes.add(autoCommands.getModuleType(typeUID, locale));
                         }
                     }

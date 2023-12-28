@@ -708,7 +708,7 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
         groupItem.setState(new HSBType("200,80,80"));
         groupStateAsPercent = groupItem.getStateAs(PercentType.class);
 
-        assertTrue(groupStateAsPercent instanceof PercentType);
+        assertInstanceOf(PercentType.class, groupStateAsPercent);
         assertThat(((PercentType) groupStateAsPercent).intValue(), is(80));
     }
 
@@ -725,7 +725,7 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
         groupItem.setState(new PercentType(80));
         groupStateAsPercent = groupItem.getStateAs(PercentType.class);
 
-        assertTrue(groupStateAsPercent instanceof PercentType);
+        assertInstanceOf(PercentType.class, groupStateAsPercent);
         assertThat(((PercentType) groupStateAsPercent).intValue(), is(80));
     }
 
@@ -750,11 +750,11 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
         assertThat(change.getItemName(), is(groupItem.getName()));
 
         State newEventState = change.getItemState();
-        assertTrue(newEventState instanceof PercentType);
+        assertInstanceOf(PercentType.class, newEventState);
         assertThat(((PercentType) newEventState).intValue(), is(50));
 
         State newGroupState = groupItem.getState();
-        assertTrue(newGroupState instanceof PercentType);
+        assertInstanceOf(PercentType.class, newGroupState);
         assertThat(((PercentType) newGroupState).intValue(), is(50));
 
         events.clear();
@@ -770,11 +770,11 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
         assertThat(change.getItemName(), is(groupItem.getName()));
 
         newEventState = change.getItemState();
-        assertTrue(newEventState instanceof PercentType);
+        assertInstanceOf(PercentType.class, newEventState);
         assertThat(((PercentType) newEventState).intValue(), is(30));
 
         newGroupState = groupItem.getState();
-        assertTrue(newGroupState instanceof PercentType);
+        assertInstanceOf(PercentType.class, newGroupState);
         assertThat(((PercentType) newGroupState).intValue(), is(30));
     }
 

@@ -40,7 +40,7 @@ public class SystemProfileI18nOSGiTest extends JavaOSGiTest {
     @BeforeEach
     public void setUp() {
         ProfileTypeProvider provider = getService(ProfileTypeProvider.class, SystemProfileFactory.class);
-        assertTrue(provider instanceof SystemProfileFactory);
+        assertInstanceOf(SystemProfileFactory.class, provider);
         systemProfileTypeProvider = provider;
     }
 

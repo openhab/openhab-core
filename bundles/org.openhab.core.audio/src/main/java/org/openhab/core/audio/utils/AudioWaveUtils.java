@@ -89,7 +89,7 @@ public class AudioWaveUtils {
      */
     public static void removeFMT(InputStream data) throws IOException {
         DataInputStream dataInputStream = new DataInputStream(data);
-        Integer nextInt = dataInputStream.readInt();
+        int nextInt = dataInputStream.readInt();
         int i = 0;
         while (nextInt != DATA_MAGIC && i < 200) {
             nextInt = dataInputStream.readInt();

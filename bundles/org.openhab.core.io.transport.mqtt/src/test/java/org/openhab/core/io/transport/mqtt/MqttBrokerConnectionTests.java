@@ -173,7 +173,7 @@ public class MqttBrokerConnectionTests extends JavaTest {
                 "MqttBrokerConnectionTests");
 
         // Check if the default policy is set and that the broker within the policy is set.
-        assertTrue(connection.getReconnectStrategy() instanceof PeriodicReconnectStrategy);
+        assertInstanceOf(PeriodicReconnectStrategy.class, connection.getReconnectStrategy());
         AbstractReconnectStrategy p = connection.getReconnectStrategy();
         assertThat(p.getBrokerConnection(), equalTo(connection));
     }
