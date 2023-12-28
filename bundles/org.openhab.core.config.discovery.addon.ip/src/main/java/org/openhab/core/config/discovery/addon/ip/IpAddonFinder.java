@@ -328,14 +328,12 @@ public class IpAddonFinder extends BaseAddonFinder {
                                     .map(a -> a.getAddress().getHostAddress()).toList();
 
                             for (String localIp : ipAddresses) {
-                                try {
-                                    DatagramChannel channel = (DatagramChannel) DatagramChannel
-                                            .open(StandardProtocolFamily.INET)
-                                            .setOption(StandardSocketOptions.SO_REUSEADDR, true)
-                                            .bind(new InetSocketAddress(localIp, listenPort))
-                                            .setOption(StandardSocketOptions.IP_MULTICAST_TTL, 64)
-                                            .configureBlocking(false);
-
+                                try (DatagramChannel channel = (DatagramChannel) DatagramChannel
+                                        .open(StandardProtocolFamily.INET)
+                                        .setOption(StandardSocketOptions.SO_REUSEADDR, true)
+                                        .bind(new InetSocketAddress(localIp, listenPort))
+                                        .setOption(StandardSocketOptions.IP_MULTICAST_TTL, 64).configureBlocking(false);
+                                        Selector selector = Selector.open()) {
                                     byte[] requestArray = "".equals(requestPlain)
                                             ? buildRequestArray(channel, Objects.toString(request))
                                             : buildRequestArrayPlain(channel, Objects.toString(requestPlain));
@@ -357,7 +355,6 @@ public class IpAddonFinder extends BaseAddonFinder {
                                             new InetSocketAddress(destIp, destPort));
 
                                     // listen to responses
-                                    Selector selector = Selector.open();
                                     ByteBuffer buffer = ByteBuffer.wrap(new byte[50]);
                                     channel.register(selector, SelectionKey.OP_READ);
                                     selector.select(timeoutMs);
@@ -382,7 +379,6 @@ public class IpAddonFinder extends BaseAddonFinder {
                                                     candidate.getUID(), type);
                                             break; // end loop
                                     }
-
                                 } catch (IOException e) {
                                     logger.debug("{}: network error", candidate.getUID(), e);
                                 }
