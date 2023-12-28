@@ -13,6 +13,7 @@
 package org.openhab.core.addon.internal.xml;
 
 import java.util.List;
+import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -46,8 +47,8 @@ public class AddonInfoListConverter extends GenericUnmarshaller<AddonInfoList> {
 
         Object object = nodeIterator.nextList("addons", false);
         List<AddonInfo> addons = (object instanceof List<?> list)
-                ? list.stream().filter(e -> e != null).filter(e -> (e instanceof AddonInfoXmlResult))
-                        .map(e -> (AddonInfoXmlResult) e).map(r -> r.addonInfo()).toList()
+                ? list.stream().filter(Objects::nonNull).filter(AddonInfoXmlResult.class::isInstance)
+                        .map(e -> (AddonInfoXmlResult) e).map(AddonInfoXmlResult::addonInfo).toList()
                 : null;
 
         nodeIterator.assertEndOfType();

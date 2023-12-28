@@ -49,11 +49,11 @@ public class AddonDiscoveryMethodConverter extends GenericUnmarshaller<AddonDisc
 
         Object paramObject = nodeIterator.nextList("discovery-parameters", false);
         List<AddonParameter> parameters = !(paramObject instanceof List<?> list) ? null
-                : list.stream().filter(e -> (e instanceof AddonParameter)).map(e -> ((AddonParameter) e)).toList();
+                : list.stream().filter(AddonParameter.class::isInstance).map(e -> ((AddonParameter) e)).toList();
 
         Object matchPropObject = nodeIterator.nextList("match-properties", false);
         List<AddonMatchProperty> matchProperties = !(matchPropObject instanceof List<?> list) ? null
-                : list.stream().filter(e -> (e instanceof AddonMatchProperty)).map(e -> ((AddonMatchProperty) e))
+                : list.stream().filter(AddonMatchProperty.class::isInstance).map(e -> ((AddonMatchProperty) e))
                         .toList();
 
         nodeIterator.assertEndOfType();

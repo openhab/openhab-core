@@ -21,6 +21,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Opcodes;
 import org.openhab.core.common.registry.AbstractRegistry;
+import org.openhab.core.common.registry.Identifiable;
 import org.openhab.core.common.registry.Provider;
 import org.openhab.core.semantics.Equipment;
 import org.openhab.core.semantics.Location;
@@ -133,7 +134,7 @@ public class SemanticTagRegistryImpl extends AbstractRegistry<SemanticTag, Strin
 
     @Override
     public List<SemanticTag> getSubTree(SemanticTag tag) {
-        List<String> ids = getAll().stream().map(t -> t.getUID()).filter(uid -> uid.startsWith(tag.getUID() + "_"))
+        List<String> ids = getAll().stream().map(Identifiable::getUID).filter(uid -> uid.startsWith(tag.getUID() + "_"))
                 .toList();
         List<SemanticTag> tags = new ArrayList<>();
         tags.add(tag);

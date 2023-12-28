@@ -57,7 +57,7 @@ public class MetadataSelectorMatcher {
         } else {
             Set<String> originalNamespaces = Arrays.stream(namespaceSelector.split(",")) //
                     .filter(n -> !metadataRegistry.isInternalNamespace(n)) //
-                    .map(n -> n.trim()) //
+                    .map(String::trim) //
                     .collect(Collectors.toSet());
 
             Set<String> allMetadataNamespaces = metadataRegistry.getAll().stream() //

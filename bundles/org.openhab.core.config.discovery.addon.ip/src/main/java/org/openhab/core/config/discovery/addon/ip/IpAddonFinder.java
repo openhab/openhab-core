@@ -45,6 +45,8 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.addon.AddonDiscoveryMethod;
 import org.openhab.core.addon.AddonInfo;
+import org.openhab.core.addon.AddonMatchProperty;
+import org.openhab.core.addon.AddonParameter;
 import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.config.discovery.addon.AddonFinder;
 import org.openhab.core.config.discovery.addon.BaseAddonFinder;
@@ -196,9 +198,9 @@ public class IpAddonFinder extends BaseAddonFinder {
                 logger.trace("Checking candidate: {}", candidate.getUID());
 
                 Map<String, String> parameters = method.getParameters().stream()
-                        .collect(Collectors.toMap(property -> property.getName(), property -> property.getValue()));
+                        .collect(Collectors.toMap(AddonParameter::getName, AddonParameter::getValue));
                 Map<String, String> matchProperties = method.getMatchProperties().stream()
-                        .collect(Collectors.toMap(property -> property.getName(), property -> property.getRegex()));
+                        .collect(Collectors.toMap(AddonMatchProperty::getName, AddonMatchProperty::getRegex));
 
                 // parse standard set of parameters
                 String type = Objects.toString(parameters.get("type"), "");

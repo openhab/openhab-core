@@ -185,7 +185,7 @@ public abstract class AbstractLinkRegistry<L extends AbstractLink, P extends Pro
             if (forLinkedUID == null) {
                 return Set.of();
             }
-            return forLinkedUID.stream().map(link -> link.getItemName()).collect(Collectors.toSet());
+            return forLinkedUID.stream().map(AbstractLink::getItemName).collect(Collectors.toSet());
         } finally {
             toLinkLock.readLock().unlock();
         }

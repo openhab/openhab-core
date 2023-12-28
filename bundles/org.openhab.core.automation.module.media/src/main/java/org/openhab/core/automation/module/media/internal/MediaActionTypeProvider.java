@@ -148,7 +148,7 @@ public class MediaActionTypeProvider implements ModuleTypeProvider {
                     options.add(new ParameterOption(fileName, capitalizedSoundName));
                 }
             }
-            options.sort(comparing(o -> o.getLabel()));
+            options.sort(comparing(ParameterOption::getLabel));
         }
         return options;
     }

@@ -205,7 +205,7 @@ public class ModbusManagerImpl implements ModbusManager {
                     request.getFunctionCode(), libRequest.getHexMessage(), operationId);
             // Might throw ModbusIOException (I/O error) or ModbusSlaveException (explicit exception response from
             // slave)
-            timer.transaction.timeRunnableWithModbusException(() -> transaction.execute());
+            timer.transaction.timeRunnableWithModbusException(transaction::execute);
             ModbusResponse response = transaction.getResponse();
             logger.trace("Response for read request (FC={}, transaction ID={}): {} [operation ID {}]",
                     response.getFunctionCode(), response.getTransactionID(), response.getHexMessage(), operationId);
@@ -243,7 +243,7 @@ public class ModbusManagerImpl implements ModbusManager {
 
             // Might throw ModbusIOException (I/O error) or ModbusSlaveException (explicit exception response from
             // slave)
-            timer.transaction.timeRunnableWithModbusException(() -> transaction.execute());
+            timer.transaction.timeRunnableWithModbusException(transaction::execute);
             ModbusResponse response = transaction.getResponse();
             logger.trace("Response for write request (FC={}, transaction ID={}): {} [operation ID {}]",
                     response.getFunctionCode(), response.getTransactionID(), response.getHexMessage(), operationId);

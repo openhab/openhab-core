@@ -116,7 +116,7 @@ public class ProfileTypeResource implements RESTResource {
             @Nullable String itemType) {
         return profileTypeRegistry.getProfileTypes(locale).stream().filter(matchesChannelUID(channelTypeUID, locale))
                 .filter(matchesItemType(itemType)).sorted(Comparator.comparing(ProfileType::getLabel))
-                .map(profileType -> ProfileTypeDTOMapper.map(profileType));
+                .map(ProfileTypeDTOMapper::map);
     }
 
     private Predicate<ProfileType> matchesChannelUID(@Nullable String channelTypeUID, @Nullable Locale locale) {

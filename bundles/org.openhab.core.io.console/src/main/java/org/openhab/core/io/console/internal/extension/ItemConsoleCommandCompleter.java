@@ -50,8 +50,8 @@ public class ItemConsoleCommandCompleter implements ConsoleCommandCompleter {
     @SuppressWarnings("unchecked")
     public boolean complete(String[] args, int cursorArgumentIndex, int cursorPosition, List<String> candidates) {
         if (cursorArgumentIndex <= 0) {
-            return new StringsCompleter(itemRegistry.getAll().stream().map(i -> i.getName()).toList(), true)
-                    .complete(args, cursorArgumentIndex, cursorPosition, candidates);
+            return new StringsCompleter(itemRegistry.getAll().stream().map(Item::getName).toList(), true).complete(args,
+                    cursorArgumentIndex, cursorPosition, candidates);
         }
         var localDataTypeGetter = dataTypeGetter;
         if (cursorArgumentIndex == 1 && localDataTypeGetter != null) {
