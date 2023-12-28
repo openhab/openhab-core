@@ -74,14 +74,14 @@ public class JsonStorageTest extends JavaTest {
         DummyObject dummy = objectStorage.get("DummyObject");
 
         assertNotNull(dummy);
-        assertTrue(dummy.configuration.get("testShort") instanceof BigDecimal);
-        assertTrue(dummy.configuration.get("testInt") instanceof BigDecimal);
-        assertTrue(dummy.configuration.get("testLong") instanceof BigDecimal);
-        assertTrue(dummy.configuration.get("testDouble") instanceof BigDecimal);
-        assertTrue(dummy.configuration.get("testFloat") instanceof BigDecimal);
-        assertTrue(dummy.configuration.get("testBigDecimal") instanceof BigDecimal);
-        assertTrue(dummy.configuration.get("testBoolean") instanceof Boolean);
-        assertTrue(dummy.configuration.get("testString") instanceof String);
+        assertInstanceOf(BigDecimal.class, dummy.configuration.get("testShort"));
+        assertInstanceOf(BigDecimal.class, dummy.configuration.get("testInt"));
+        assertInstanceOf(BigDecimal.class, dummy.configuration.get("testLong"));
+        assertInstanceOf(BigDecimal.class, dummy.configuration.get("testDouble"));
+        assertInstanceOf(BigDecimal.class, dummy.configuration.get("testFloat"));
+        assertInstanceOf(BigDecimal.class, dummy.configuration.get("testBigDecimal"));
+        assertInstanceOf(Boolean.class, dummy.configuration.get("testBoolean"));
+        assertInstanceOf(String.class, dummy.configuration.get("testString"));
     }
 
     @Test
@@ -91,14 +91,14 @@ public class JsonStorageTest extends JavaTest {
         DummyObject dummy = objectStorage.get("DummyObject");
 
         assertNotNull(dummy);
-        assertTrue(dummy.configuration.get("testShort") instanceof BigDecimal);
-        assertTrue(dummy.configuration.get("testInt") instanceof BigDecimal);
-        assertTrue(dummy.configuration.get("testLong") instanceof BigDecimal);
-        assertTrue(dummy.configuration.get("testDouble") instanceof BigDecimal);
-        assertTrue(dummy.configuration.get("testFloat") instanceof BigDecimal);
-        assertTrue(dummy.configuration.get("testBigDecimal") instanceof BigDecimal);
-        assertTrue(dummy.configuration.get("testBoolean") instanceof Boolean);
-        assertTrue(dummy.configuration.get("testString") instanceof String);
+        assertInstanceOf(BigDecimal.class, dummy.configuration.get("testShort"));
+        assertInstanceOf(BigDecimal.class, dummy.configuration.get("testInt"));
+        assertInstanceOf(BigDecimal.class, dummy.configuration.get("testLong"));
+        assertInstanceOf(BigDecimal.class, dummy.configuration.get("testDouble"));
+        assertInstanceOf(BigDecimal.class, dummy.configuration.get("testFloat"));
+        assertInstanceOf(BigDecimal.class, dummy.configuration.get("testBigDecimal"));
+        assertInstanceOf(Boolean.class, dummy.configuration.get("testBoolean"));
+        assertInstanceOf(String.class, dummy.configuration.get("testString"));
     }
 
     @Test

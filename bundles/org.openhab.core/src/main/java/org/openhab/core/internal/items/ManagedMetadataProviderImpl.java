@@ -84,7 +84,7 @@ public class ManagedMetadataProviderImpl extends AbstractManagedProvider<Metadat
 
     @Override
     public Collection<Metadata> getAll() {
-        return super.getAll().stream().map(this::normalizeMetadata).collect(Collectors.toUnmodifiableList());
+        return super.getAll().stream().map(this::normalizeMetadata).toList();
     }
 
     @Override

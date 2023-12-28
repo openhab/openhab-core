@@ -77,7 +77,7 @@ public class UpnpAddonFinder extends BaseAddonFinder implements RegistryListener
 
     private final Logger logger = LoggerFactory.getLogger(UpnpAddonFinder.class);
     private final Map<String, RemoteDevice> devices = new ConcurrentHashMap<>();
-    private UpnpService upnpService;
+    private final UpnpService upnpService;
 
     @Activate
     public UpnpAddonFinder(@Reference UpnpService upnpService) {

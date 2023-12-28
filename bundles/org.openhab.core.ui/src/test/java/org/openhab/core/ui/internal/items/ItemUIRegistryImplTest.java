@@ -632,7 +632,7 @@ public class ItemUIRegistryImplTest {
 
         State stateForSlider = uiRegistry.getState(sliderWidget);
 
-        assertTrue(stateForSlider instanceof PercentType);
+        assertInstanceOf(PercentType.class, stateForSlider);
 
         PercentType pt = (PercentType) stateForSlider;
 

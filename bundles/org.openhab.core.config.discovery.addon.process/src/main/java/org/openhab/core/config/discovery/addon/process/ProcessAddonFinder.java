@@ -14,7 +14,6 @@ package org.openhab.core.config.discovery.addon.process;
 
 import static org.openhab.core.config.discovery.addon.AddonFinderConstants.ADDON_SUGGESTION_FINDER;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -28,7 +27,6 @@ import org.openhab.core.addon.AddonInfo;
 import org.openhab.core.addon.AddonMatchProperty;
 import org.openhab.core.config.discovery.addon.AddonFinder;
 import org.openhab.core.config.discovery.addon.BaseAddonFinder;
-import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,10 +48,6 @@ public class ProcessAddonFinder extends BaseAddonFinder {
     private static final String COMMAND = "command";
 
     private final Logger logger = LoggerFactory.getLogger(ProcessAddonFinder.class);
-
-    @Activate
-    public ProcessAddonFinder() {
-    }
 
     // get list of running processes visible to openHAB,
     // also tries to mitigate differences on different operating systems
@@ -77,7 +71,7 @@ public class ProcessAddonFinder extends BaseAddonFinder {
     public Set<AddonInfo> getSuggestedAddons() {
         logger.trace("ProcessAddonFinder::getSuggestedAddons");
         Set<AddonInfo> result = new HashSet<>();
-        Set<String> processList = Collections.emptySet();
+        Set<String> processList;
         try {
             processList = ProcessHandle.allProcesses().map(this::getProcessCommandProcess)
                     .filter(Predicate.not(String::isEmpty)).collect(Collectors.toUnmodifiableSet());
@@ -92,7 +86,7 @@ public class ProcessAddonFinder extends BaseAddonFinder {
 
                 List<AddonMatchProperty> matchProperties = method.getMatchProperties();
                 List<AddonMatchProperty> commands = matchProperties.stream()
-                        .filter(amp -> COMMAND.equals(amp.getName())).collect(Collectors.toUnmodifiableList());
+                        .filter(amp -> COMMAND.equals(amp.getName())).toList();
 
                 if (matchProperties.size() != commands.size()) {
                     logger.warn("Add-on '{}' addon.xml file contains unsupported 'match-property'", candidate.getUID());

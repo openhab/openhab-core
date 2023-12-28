@@ -934,7 +934,7 @@ public class ModbusManagerImpl implements ModbusManager {
 
     private void maybeCloseConnections(ModbusSlaveEndpoint endpoint) {
         boolean lastCommWithThisEndpointWasRemoved = communicationInterfaces.stream()
-                .filter(comm -> comm.endpoint.equals(endpoint)).count() == 0L;
+                .noneMatch(comm -> comm.endpoint.equals(endpoint));
         if (lastCommWithThisEndpointWasRemoved) {
             // Since last communication interface pointing to this endpoint was closed, we can clean up resources
             // and disconnect connections.

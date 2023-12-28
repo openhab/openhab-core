@@ -300,7 +300,7 @@ public class DefaultChartProvider implements ChartProvider {
         } else if (state instanceof OpenClosedType) {
             return state == OpenClosedType.CLOSED ? 0 : 1;
         } else {
-            logger.debug("Unsupported item type in chart: {}", state.getClass().toString());
+            logger.debug("Unsupported item type in chart: {}", state.getClass());
             return 0;
         }
     }

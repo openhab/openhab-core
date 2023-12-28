@@ -104,7 +104,7 @@ public class AnnotationActionModuleTypeProviderTest extends JavaTest {
         assertTrue(types.contains(TEST_ACTION_TYPE_ID));
 
         ModuleType mt = prov.getModuleType(TEST_ACTION_TYPE_ID, null);
-        assertTrue(mt instanceof ActionType);
+        assertInstanceOf(ActionType.class, mt);
 
         ActionType at = (ActionType) mt;
 

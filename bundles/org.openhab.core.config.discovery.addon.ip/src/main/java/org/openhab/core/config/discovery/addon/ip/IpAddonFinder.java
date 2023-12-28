@@ -249,8 +249,10 @@ public class IpAddonFinder extends BaseAddonFinder {
                                             .configureBlocking(false);
 
                                     byte[] requestArray = buildRequestArray(channel, Objects.toString(request));
-                                    logger.trace("{}: {}", candidate.getUID(),
-                                            HexFormat.of().withDelimiter(" ").formatHex(requestArray));
+                                    if (logger.isTraceEnabled()) {
+                                        logger.trace("{}: {}", candidate.getUID(),
+                                                HexFormat.of().withDelimiter(" ").formatHex(requestArray));
+                                    }
 
                                     channel.send(ByteBuffer.wrap(requestArray),
                                             new InetSocketAddress(destIp, destPort));

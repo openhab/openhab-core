@@ -188,7 +188,7 @@ public abstract class AbstractFileTransformationService<T> implements Transforma
     }
 
     private void watchSubDirectory(String subDirectory, final WatchService watchService) {
-        if (watchedDirectories.indexOf(subDirectory) == -1) {
+        if (!watchedDirectories.contains(subDirectory)) {
             String watchedDirectory = getSourcePath() + subDirectory;
             Path transformFilePath = Paths.get(watchedDirectory);
             try {

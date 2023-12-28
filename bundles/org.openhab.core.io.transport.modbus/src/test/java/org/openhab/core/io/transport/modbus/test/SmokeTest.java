@@ -169,7 +169,7 @@ public class SmokeTest extends IntegrationTestSupport {
 
             assertThat(okCount.get(), is(equalTo(0)));
             assertThat(errorCount.get(), is(equalTo(1)));
-            assertTrue(lastError.get() instanceof ModbusSlaveErrorResponseException, lastError.toString());
+            assertInstanceOf(ModbusSlaveErrorResponseException.class, lastError.get(), lastError.toString());
         }
     }
 
@@ -206,7 +206,7 @@ public class SmokeTest extends IntegrationTestSupport {
 
             assertThat(okCount.get(), is(equalTo(0)));
             assertThat(errorCount.get(), is(equalTo(1)));
-            assertTrue(lastError.get() instanceof ModbusConnectionException, lastError.toString());
+            assertInstanceOf(ModbusConnectionException.class, lastError.get(), lastError.toString());
         }
     }
 
@@ -239,7 +239,7 @@ public class SmokeTest extends IntegrationTestSupport {
             assertTrue(callbackCalled.await(15, TimeUnit.SECONDS));
             assertThat(okCount.get(), is(equalTo(0)));
             assertThat(lastError.toString(), errorCount.get(), is(equalTo(1)));
-            assertTrue(lastError.get() instanceof ModbusSlaveIOException, lastError.toString());
+            assertInstanceOf(ModbusSlaveIOException.class, lastError.get(), lastError.toString());
         }
     }
 
@@ -478,7 +478,7 @@ public class SmokeTest extends IntegrationTestSupport {
             assertTrue(callbackCalled.await(60, TimeUnit.SECONDS));
 
             assertThat(unexpectedCount.get(), is(equalTo(0)));
-            assertTrue(lastError.get() instanceof ModbusSlaveErrorResponseException, lastError.toString());
+            assertInstanceOf(ModbusSlaveErrorResponseException.class, lastError.get(), lastError.toString());
 
             assertThat(modbustRequestCaptor.getAllReturnValues().size(), is(equalTo(1)));
             ModbusRequest request = modbustRequestCaptor.getAllReturnValues().get(0);
@@ -555,7 +555,7 @@ public class SmokeTest extends IntegrationTestSupport {
             assertTrue(callbackCalled.await(60, TimeUnit.SECONDS));
 
             assertThat(unexpectedCount.get(), is(equalTo(0)));
-            assertTrue(lastError.get() instanceof ModbusSlaveErrorResponseException, lastError.toString());
+            assertInstanceOf(ModbusSlaveErrorResponseException.class, lastError.get(), lastError.toString());
 
             assertThat(modbustRequestCaptor.getAllReturnValues().size(), is(equalTo(1)));
             ModbusRequest request = modbustRequestCaptor.getAllReturnValues().get(0);

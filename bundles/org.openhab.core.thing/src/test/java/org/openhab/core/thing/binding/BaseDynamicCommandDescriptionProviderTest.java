@@ -86,7 +86,7 @@ class BaseDynamicCommandDescriptionProviderTest {
         verify(eventPublisherMock, times(1)).post(capture.capture());
 
         Event event = capture.getValue();
-        assertTrue(event instanceof ChannelDescriptionChangedEvent);
+        assertInstanceOf(ChannelDescriptionChangedEvent.class, event);
         ChannelDescriptionChangedEvent cdce = (ChannelDescriptionChangedEvent) event;
         assertEquals(CommonChannelDescriptionField.COMMAND_OPTIONS, cdce.getField());
 

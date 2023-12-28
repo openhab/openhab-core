@@ -195,7 +195,7 @@ public class SemanticTagRegistryImpl extends AbstractRegistry<SemanticTag, Strin
                             + "': only Equipment, Location, Point and Property are allowed as root tags.");
             }
             type = uid;
-            className = newTag.getClass().getName();
+            className = newTag.getName();
         } else {
             String name = uid.substring(lastSeparator + 1);
             String parentId = uid.substring(0, lastSeparator);
@@ -252,7 +252,7 @@ public class SemanticTagRegistryImpl extends AbstractRegistry<SemanticTag, Strin
     private void addTagSet(String tagId, Class<? extends Tag> tagSet) {
         logger.trace("addTagSet {}", tagId);
         String id = tagId;
-        while (id.indexOf("_") != -1) {
+        while (id.contains("_")) {
             SemanticTags.addTagSet(id, tagSet);
             id = id.substring(id.indexOf("_") + 1);
         }
@@ -266,7 +266,7 @@ public class SemanticTagRegistryImpl extends AbstractRegistry<SemanticTag, Strin
             return;
         }
         String id = tagId;
-        while (id.indexOf("_") != -1) {
+        while (id.contains("_")) {
             SemanticTags.removeTagSet(id, tagSet);
             id = id.substring(id.indexOf("_") + 1);
         }

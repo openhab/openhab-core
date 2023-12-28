@@ -67,7 +67,7 @@ public class SystemWideChannelTypesTest extends JavaOSGiTest {
         assertThat(channelTypeRegistry, is(notNullValue()));
 
         ChannelTypeProvider provider = getService(ChannelTypeProvider.class, DefaultSystemChannelTypeProvider.class);
-        assertTrue(provider instanceof DefaultSystemChannelTypeProvider);
+        assertInstanceOf(DefaultSystemChannelTypeProvider.class, provider);
         systemChannelTypeProvider = provider;
     }
 
