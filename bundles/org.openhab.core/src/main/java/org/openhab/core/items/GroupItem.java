@@ -342,13 +342,13 @@ public class GroupItem extends GenericItem implements StateChangeListener, Metad
         if (!getTags().isEmpty()) {
             sb.append(", ");
             sb.append("Tags=[");
-            sb.append(getTags().stream().collect(Collectors.joining(", ")));
+            sb.append(String.join(", ", getTags()));
             sb.append("]");
         }
         if (!getGroupNames().isEmpty()) {
             sb.append(", ");
             sb.append("Groups=[");
-            sb.append(getGroupNames().stream().collect(Collectors.joining(", ")));
+            sb.append(String.join(", ", getGroupNames()));
             sb.append("]");
         }
         sb.append(")");

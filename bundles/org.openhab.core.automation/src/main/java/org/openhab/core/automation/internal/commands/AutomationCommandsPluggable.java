@@ -16,7 +16,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -122,7 +121,7 @@ public class AutomationCommandsPluggable extends AutomationCommands implements C
     @Override
     public void execute(String[] args, Console console) {
         if (args.length == 0) {
-            console.println(getUsages().stream().collect(Collectors.joining("\n")));
+            console.println(String.join("\n", getUsages()));
             return;
         }
 
