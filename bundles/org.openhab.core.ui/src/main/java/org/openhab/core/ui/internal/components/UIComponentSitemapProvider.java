@@ -376,7 +376,7 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
             if (sourceButtons instanceof Collection<?>) {
                 for (Object sourceButton : (Collection<?>) sourceButtons) {
                     if (sourceButton instanceof String) {
-                        String[] splitted1 = sourceButton.toString().split(":");
+                        String[] splitted1 = sourceButton.toString().split(":", 3);
                         int row = Integer.parseInt(splitted1[0].trim());
                         int column = Integer.parseInt(splitted1[1].trim());
                         String[] splitted2 = splitted1[2].trim().split("=");
