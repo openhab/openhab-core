@@ -282,18 +282,19 @@ public class MDNSClientImpl implements MDNSClient, NetworkAddressChangeListener 
     public void onChanged(List<CidrAddress> added, List<CidrAddress> removed) {
         logger.debug("ip address change: added {}, removed {}", added, removed);
 
+        Set<InetAddress> filteredAddresses = getAllInetAddresses();
+
         // First check if there is really a jmdns instance to remove or add
         boolean changeRequired = false;
-        for (CidrAddress address : removed) {
-            JmDNS jmdns = jmdnsInstances.get(address.getAddress());
-            if (jmdns != null) {
+        for (InetAddress address : jmdnsInstances.keySet()) {
+            if (!filteredAddresses.contains(address)) {
                 changeRequired = true;
                 break;
             }
         }
         if (!changeRequired) {
-            for (CidrAddress address : added) {
-                JmDNS jmdns = jmdnsInstances.get(address.getAddress());
+            for (InetAddress address : filteredAddresses) {
+                JmDNS jmdns = jmdnsInstances.get(address);
                 if (jmdns == null) {
                     changeRequired = true;
                     break;
@@ -308,20 +309,23 @@ public class MDNSClientImpl implements MDNSClient, NetworkAddressChangeListener 
         for (ServiceDescription description : activeServices) {
             unregisterServiceInternal(description);
         }
-        for (CidrAddress address : removed) {
-            JmDNS jmdns = jmdnsInstances.remove(address.getAddress());
-            if (jmdns != null) {
-                closeQuietly(jmdns);
-                logger.debug("mDNS service has been stopped ({})", jmdns.getName());
+        for (InetAddress address : jmdnsInstances.keySet()) {
+            if (!filteredAddresses.contains(address)) {
+                JmDNS jmdns = jmdnsInstances.remove(address);
+                if (jmdns != null) {
+                    closeQuietly(jmdns);
+                    logger.debug("mDNS service has been stopped ({} for IP {})", jmdns.getName(),
+                            address.getHostAddress());
+                }
             }
         }
-        for (CidrAddress address : added) {
-            JmDNS jmdns = jmdnsInstances.get(address.getAddress());
+        for (InetAddress address : filteredAddresses) {
+            JmDNS jmdns = jmdnsInstances.get(address);
             if (jmdns == null) {
-                createJmDNSByAddress(address.getAddress());
+                createJmDNSByAddress(address);
             } else {
                 logger.debug("mDNS service was already started ({} for IP {})", jmdns.getName(),
-                        address.getAddress().getHostAddress());
+                        address.getHostAddress());
             }
         }
         for (ServiceDescription description : activeServices) {
