@@ -27,6 +27,7 @@ import java.util.concurrent.TimeUnit;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.ThreadPoolManager;
+import org.openhab.core.config.core.ConfigParser;
 import org.openhab.core.i18n.I18nUtil;
 import org.openhab.core.i18n.LocaleProvider;
 import org.openhab.core.i18n.TranslationProvider;
@@ -347,10 +348,8 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
      */
     protected void activate(@Nullable Map<String, Object> configProperties) {
         if (configProperties != null) {
-            Object property = configProperties.get(DiscoveryService.CONFIG_PROPERTY_BACKGROUND_DISCOVERY);
-            if (property != null) {
-                backgroundDiscoveryEnabled = getAutoDiscoveryEnabled(property);
-            }
+            backgroundDiscoveryEnabled = ConfigParser.valueAsOrElse(
+                    configProperties.get(DiscoveryService.CONFIG_PROPERTY_BACKGROUND_DISCOVERY), Boolean.class, false);
         }
         if (backgroundDiscoveryEnabled) {
             startBackgroundDiscovery();
@@ -370,20 +369,17 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
      */
     protected void modified(@Nullable Map<String, Object> configProperties) {
         if (configProperties != null) {
-            Object property = configProperties.get(DiscoveryService.CONFIG_PROPERTY_BACKGROUND_DISCOVERY);
-            if (property != null) {
-                boolean enabled = getAutoDiscoveryEnabled(property);
+            boolean enabled = ConfigParser.valueAsOrElse(
+                    configProperties.get(DiscoveryService.CONFIG_PROPERTY_BACKGROUND_DISCOVERY), Boolean.class, false);
 
-                if (backgroundDiscoveryEnabled && !enabled) {
-                    stopBackgroundDiscovery();
-                    logger.debug("Background discovery for discovery service '{}' disabled.",
-                            this.getClass().getName());
-                } else if (!backgroundDiscoveryEnabled && enabled) {
-                    startBackgroundDiscovery();
-                    logger.debug("Background discovery for discovery service '{}' enabled.", this.getClass().getName());
-                }
-                backgroundDiscoveryEnabled = enabled;
+            if (backgroundDiscoveryEnabled && !enabled) {
+                stopBackgroundDiscovery();
+                logger.debug("Background discovery for discovery service '{}' disabled.", this.getClass().getName());
+            } else if (!backgroundDiscoveryEnabled && enabled) {
+                startBackgroundDiscovery();
+                logger.debug("Background discovery for discovery service '{}' enabled.", this.getClass().getName());
             }
+            backgroundDiscoveryEnabled = enabled;
         }
     }
 
