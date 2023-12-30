@@ -422,14 +422,6 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
         return timestampOfLastScan;
     }
 
-    private boolean getAutoDiscoveryEnabled(Object autoDiscoveryEnabled) {
-        if (autoDiscoveryEnabled instanceof String string) {
-            return Boolean.parseBoolean(string);
-        } else {
-            return Boolean.TRUE.equals(autoDiscoveryEnabled);
-        }
-    }
-
     private String inferKey(DiscoveryResult discoveryResult, String lastSegment) {
         return "discovery." + discoveryResult.getThingUID().getAsString().replace(":", ".") + "." + lastSegment;
     }

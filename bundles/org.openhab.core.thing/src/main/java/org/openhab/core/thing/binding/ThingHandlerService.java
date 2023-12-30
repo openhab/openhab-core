@@ -61,7 +61,8 @@ public interface ThingHandlerService {
      * This method is used by the framework during activation of the service.
      * It is called AFTER the component is fully activated and thing handler has been set.
      *
-     * Implementations should override this method to add additional initialization code.
+     * Implementations should override this method to add additional initialization code. This method should call
+     * <code>super.initialize()</code> to ensure background discovery is properly handled.
      *
      * See {@link #activate(), #{@link #dispose()}
      */
@@ -72,7 +73,8 @@ public interface ThingHandlerService {
      * This method is used by the framework during de-activation of the service.
      * It is called while the component is still activated.
      *
-     * Code depending on an activated service should go here.
+     * Code depending on an activated service should go here. This method should call <code>super.dispose()</code> to
+     * ensure background discovery is properly handled.
      *
      * See {@link #deactivate()}, {@link #initialize()}
      */

@@ -15,11 +15,15 @@ package org.openhab.core.config.discovery;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.config.core.ConfigParser;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.binding.ThingHandler;
 import org.openhab.core.thing.binding.ThingHandlerService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The {@link AbstractThingHandlerDiscoveryService} extends the {@link AbstractDiscoveryService} for thing-based
@@ -32,9 +36,13 @@ import org.openhab.core.thing.binding.ThingHandlerService;
 @NonNullByDefault
 public abstract class AbstractThingHandlerDiscoveryService<T extends ThingHandler> extends AbstractDiscoveryService
         implements ThingHandlerService {
-
+    private final Logger logger = LoggerFactory.getLogger(AbstractThingHandlerDiscoveryService.class);
     private final Class<T> thingClazz;
-    protected @Nullable T thingHandler;
+    private boolean backgroundDiscoveryEnabled = false;
+
+    // this works around a bug in ecj: @NonNullByDefault({}) complains about the field not being
+    // initialized when the type is generic, so we have to initialize it with "something"
+    protected @NonNullByDefault({}) T thingHandler = (@NonNull T) null;
 
     public AbstractThingHandlerDiscoveryService(Class<T> thingClazz, @Nullable Set<ThingTypeUID> supportedThingTypes,
             int timeout, boolean backgroundDiscoveryEnabledByDefault) throws IllegalArgumentException {
@@ -74,11 +82,48 @@ public abstract class AbstractThingHandlerDiscoveryService<T extends ThingHandle
 
     @Override
     public void activate(@Nullable Map<String, Object> config) {
-        super.activate(config);
+        // do not call super.activate here, otherwise the scan might be background scan might be started before the
+        // thing handler is set. This is correctly handled in initialize
+        if (config != null) {
+            backgroundDiscoveryEnabled = ConfigParser.valueAsOrElse(
+                    config.get(DiscoveryService.CONFIG_PROPERTY_BACKGROUND_DISCOVERY), Boolean.class, false);
+        }
+    }
+
+    @Override
+    public void modified(@Nullable Map<String, Object> config) {
+        if (config != null) {
+            boolean enabled = ConfigParser.valueAsOrElse(
+                    config.get(DiscoveryService.CONFIG_PROPERTY_BACKGROUND_DISCOVERY), Boolean.class, false);
+
+            if (backgroundDiscoveryEnabled && !enabled) {
+                stopBackgroundDiscovery();
+                logger.debug("Background discovery for discovery service '{}' disabled.", this.getClass().getName());
+            } else if (!backgroundDiscoveryEnabled && enabled) {
+                startBackgroundDiscovery();
+                logger.debug("Background discovery for discovery service '{}' enabled.", this.getClass().getName());
+            }
+            backgroundDiscoveryEnabled = enabled;
+        }
     }
 
     @Override
     public void deactivate() {
-        super.deactivate();
+        // do not call super.deactivate here, background scan is already handled in dispose
+    }
+
+    @Override
+    public void initialize() {
+        if (backgroundDiscoveryEnabled) {
+            startBackgroundDiscovery();
+            logger.debug("Background discovery for discovery service '{}' enabled.", this.getClass().getName());
+        }
+    }
+
+    @Override
+    public void dispose() {
+        if (backgroundDiscoveryEnabled) {
+            stopBackgroundDiscovery();
+        }
     }
 }
