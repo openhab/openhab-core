@@ -106,9 +106,9 @@ public class WindowsUsbSerialDiscovery implements UsbSerialDiscovery {
 
         lastScanResult = scanResult;
 
-        removed.stream().forEach(this::announceRemovedDevice);
-        added.stream().forEach(this::announceAddedDevice);
-        unchanged.stream().forEach(this::announceAddedDevice);
+        removed.forEach(this::announceRemovedDevice);
+        added.forEach(this::announceAddedDevice);
+        unchanged.forEach(this::announceAddedDevice);
     }
 
     private <T> Set<T> setDifference(Set<T> set1, Set<T> set2) {
@@ -244,7 +244,7 @@ public class WindowsUsbSerialDiscovery implements UsbSerialDiscovery {
         if (Platform.isWindows()) {
             ScheduledFuture<?> scanTask = this.scanTask;
             if (scanTask == null || scanTask.isDone()) {
-                this.scanTask = scheduler.scheduleWithFixedDelay(() -> doSingleScan(), 0, scanInterval.toSeconds(),
+                this.scanTask = scheduler.scheduleWithFixedDelay(this::doSingleScan, 0, scanInterval.toSeconds(),
                         TimeUnit.SECONDS);
             }
         }
