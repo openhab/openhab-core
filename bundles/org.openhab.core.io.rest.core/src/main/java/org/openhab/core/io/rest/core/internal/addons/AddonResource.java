@@ -256,6 +256,7 @@ public class AddonResource implements RESTResource {
         if (addonService == null) {
             return Response.status(HttpStatus.NOT_FOUND_404).build();
         }
+
         ThreadPoolManager.getPool(THREAD_POOL_NAME).submit(() -> {
             try {
                 addonService.install(addonId);
