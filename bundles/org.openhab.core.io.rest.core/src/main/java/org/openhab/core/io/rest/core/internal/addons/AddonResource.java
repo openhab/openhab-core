@@ -253,7 +253,7 @@ public class AddonResource implements RESTResource {
     public Response installAddon(final @PathParam("addonId") @Parameter(description = "addon ID") String addonId,
             @QueryParam("serviceId") @Parameter(description = "service ID") @Nullable String serviceId) {
         AddonService addonService = (serviceId != null) ? getServiceById(serviceId) : getDefaultService();
-        if (addonService == null) {
+        if (addonService == null || addonService.getAddon(addonId, null) == null) {
             return Response.status(HttpStatus.NOT_FOUND_404).build();
         }
 
@@ -295,7 +295,7 @@ public class AddonResource implements RESTResource {
     public Response uninstallAddon(final @PathParam("addonId") @Parameter(description = "addon ID") String addonId,
             @QueryParam("serviceId") @Parameter(description = "service ID") @Nullable String serviceId) {
         AddonService addonService = (serviceId != null) ? getServiceById(serviceId) : getDefaultService();
-        if (addonService == null) {
+        if (addonService == null || addonService.getAddon(addonId, null) == null) {
             return Response.status(HttpStatus.NOT_FOUND_404).build();
         }
         ThreadPoolManager.getPool(THREAD_POOL_NAME).submit(() -> {
