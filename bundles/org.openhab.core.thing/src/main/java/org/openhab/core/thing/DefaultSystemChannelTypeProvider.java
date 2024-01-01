@@ -13,6 +13,7 @@
 package org.openhab.core.thing;
 
 import java.math.BigDecimal;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -266,7 +267,8 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
     public static final ChannelType SYSTEM_MUTE = ChannelTypeBuilder
             .state(SYSTEM_CHANNEL_TYPE_UID_MUTE, "Mute", CoreItemFactory.SWITCH)
             .withDescription("Mute audio of the device").withCategory("SoundVolume")
-            .withTags(List.of("Switch", "SoundVolume")).build();
+            .withConfigDescriptionURI(URI.create("channel-type:system:mute")).withTags(List.of("Switch", "SoundVolume"))
+            .build();
 
     /**
      * Media-control: system wide {@link ChannelType} which controls a media player
