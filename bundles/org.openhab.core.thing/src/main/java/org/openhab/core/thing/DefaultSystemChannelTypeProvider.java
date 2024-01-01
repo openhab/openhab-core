@@ -80,6 +80,7 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
             "color-temperature-abs");
     public static final ChannelTypeUID SYSTEM_CHANNEL_TYPE_UID_VOLUME = new ChannelTypeUID(BINDING_ID, "volume");
     public static final ChannelTypeUID SYSTEM_CHANNEL_TYPE_UID_MUTE = new ChannelTypeUID(BINDING_ID, "mute");
+    public static final String SYSTEM_CHANNEL_TYPE_MUTE_CFG_INVERTED = "inverted";
     public static final ChannelTypeUID SYSTEM_CHANNEL_TYPE_UID_MEDIA_CONTROL = new ChannelTypeUID(BINDING_ID,
             "media-control");
     public static final ChannelTypeUID SYSTEM_CHANNEL_TYPE_UID_MEDIA_TITLE = new ChannelTypeUID(BINDING_ID,
