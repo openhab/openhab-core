@@ -163,7 +163,6 @@ public abstract class BaseThingHandlerFactory implements ThingHandlerFactory {
 
     private <T extends ThingHandlerService> void registerThingHandlerService(ThingUID thingUID,
             ThingHandler thingHandler, Class<T> c) {
-
         RegisteredThingHandlerService<T> registeredService;
 
         Component component = c.getAnnotation(Component.class);
