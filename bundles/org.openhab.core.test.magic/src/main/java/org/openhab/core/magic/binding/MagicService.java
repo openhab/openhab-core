@@ -25,5 +25,5 @@ import org.openhab.core.config.core.ConfigOptionProvider;
 @NonNullByDefault
 public interface MagicService extends ConfigOptionProvider {
 
-    static final URI CONFIG_URI = URI.create("test:magic");
+    URI CONFIG_URI = URI.create("test:magic");
 }

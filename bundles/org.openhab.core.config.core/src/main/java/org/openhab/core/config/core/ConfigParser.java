@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
  */
 @NonNullByDefault
 public final class ConfigParser {
-    private static final transient Logger LOGGER = LoggerFactory.getLogger(ConfigParser.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConfigParser.class);
     private static final Map<String, Class<?>> WRAPPER_CLASSES_MAP = Map.of(//
             "float", Float.class, //
             "double", Double.class, //

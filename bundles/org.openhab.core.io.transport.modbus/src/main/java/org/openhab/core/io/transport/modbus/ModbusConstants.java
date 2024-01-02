@@ -55,7 +55,7 @@ public class ModbusConstants {
      * @author Sami Salonen - Initial contribution
      *
      */
-    public static enum ValueType {
+    public enum ValueType {
         BIT("bit", 1),
         INT8("int8", 8),
         UINT8("uint8", 8),

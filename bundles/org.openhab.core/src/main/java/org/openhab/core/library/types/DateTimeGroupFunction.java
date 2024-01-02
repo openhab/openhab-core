@@ -33,7 +33,7 @@ public interface DateTimeGroupFunction extends GroupFunction {
     /**
      * This calculates the maximum value of all item states of DateType type.
      */
-    static class Latest implements GroupFunction {
+    class Latest implements GroupFunction {
 
         public Latest() {
         }
@@ -76,7 +76,7 @@ public interface DateTimeGroupFunction extends GroupFunction {
     /**
      * This calculates the minimum value of all item states of DateType type.
      */
-    static class Earliest implements GroupFunction {
+    class Earliest implements GroupFunction {
 
         public Earliest() {
         }

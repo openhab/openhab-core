@@ -22,10 +22,10 @@ public interface Role {
     /**
      * Role of users with administrative rights
      */
-    final String ADMIN = "administrator";
+    String ADMIN = "administrator";
 
     /**
      * Role of a regular user without any exceptional permissions or restrictions
      */
-    final String USER = "user";
+    String USER = "user";
 }

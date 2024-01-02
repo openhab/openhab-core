@@ -88,7 +88,7 @@ public class XmlDocumentBundleTracker<@NonNull T> extends BundleTracker<Bundle> 
      * create, close, open
      * This can be handled correctly using three states and checking the transition.
      */
-    private static enum OpenState {
+    private enum OpenState {
         CREATED,
         OPENED,
         CLOSED

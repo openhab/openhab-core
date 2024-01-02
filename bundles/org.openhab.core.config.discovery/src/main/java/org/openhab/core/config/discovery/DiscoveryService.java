@@ -50,7 +50,7 @@ public interface DiscoveryService {
      * Configuration property for enabling the auto discovery feature of a
      * DiscoveryService.
      */
-    static final String CONFIG_PROPERTY_BACKGROUND_DISCOVERY = "background";
+    String CONFIG_PROPERTY_BACKGROUND_DISCOVERY = "background";
 
     /**
      * Returns the list of {@code Thing} types which are supported by the {@link DiscoveryService}.

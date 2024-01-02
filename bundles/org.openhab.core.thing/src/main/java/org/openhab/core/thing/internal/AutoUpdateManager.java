@@ -75,7 +75,7 @@ public class AutoUpdateManager {
     private boolean enabled = true;
     private boolean sendOptimisticUpdates = false;
 
-    private static enum Recommendation {
+    private enum Recommendation {
         /*
          * An automatic state update must be sent because no channels are linked to the item.
          */
