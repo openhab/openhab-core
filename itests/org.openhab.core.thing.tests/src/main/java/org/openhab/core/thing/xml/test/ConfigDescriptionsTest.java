@@ -141,7 +141,7 @@ public class ConfigDescriptionsTest extends JavaOSGiTest {
     private String join(Collection<?> elements, String separator) {
         StringBuilder sb = new StringBuilder();
         for (Object element : elements) {
-            if (sb.length() > 0) {
+            if (!sb.isEmpty()) {
                 sb.append(separator);
             }
             if (element != null) {

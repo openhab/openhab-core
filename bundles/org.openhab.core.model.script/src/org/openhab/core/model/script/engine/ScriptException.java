@@ -134,7 +134,7 @@ public abstract class ScriptException extends Exception {
 
             int i = 1;
             for (ScriptError e : getErrors()) {
-                if (sb.length() > 0) {
+                if (!sb.isEmpty()) {
                     sb.append('\n');
                 }
                 sb.append("   ");
