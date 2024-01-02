@@ -56,7 +56,7 @@ public abstract class AbstractThingHandlerDiscoveryService<T extends ThingHandle
         this.thingClazz = thingClazz;
     }
 
-    public AbstractThingHandlerDiscoveryService(Class<T> thingClazz, int timeout) throws IllegalArgumentException {
+    protected AbstractThingHandlerDiscoveryService(Class<T> thingClazz, int timeout) throws IllegalArgumentException {
         super(timeout);
         this.thingClazz = thingClazz;
     }
