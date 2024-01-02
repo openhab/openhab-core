@@ -250,7 +250,7 @@ public class ReferenceResolverUtilTest {
                 ReferenceResolver.splitReferenceToTokens("[2].value")));
     }
 
-    public class B1<T> {
+    public static class B1<T> {
         @SuppressWarnings("unused")
         private final T value;
 
@@ -259,7 +259,7 @@ public class ReferenceResolverUtilTest {
         }
     }
 
-    public class B2<T> {
+    public static class B2<T> {
         public T value;
 
         public B2(T value) {

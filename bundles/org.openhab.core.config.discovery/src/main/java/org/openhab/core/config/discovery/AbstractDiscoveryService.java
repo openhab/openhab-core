@@ -457,7 +457,7 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
     /**
      * Utility class to parse the key with parameters into the key and optional arguments.
      */
-    private final class ParsedKey {
+    private static final class ParsedKey {
 
         private static final int LIMIT = 2;
 

@@ -88,7 +88,7 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
         configDispatcher = new ConfigDispatcher(configAdmin);
     }
 
-    private class CopyDirectoryRecursive extends SimpleFileVisitor<Path> {
+    private static class CopyDirectoryRecursive extends SimpleFileVisitor<Path> {
         private final Path sourceDir;
         private final Path targetDir;
 

@@ -204,7 +204,7 @@ public class AnnotatedThingActionModuleTypeProviderTest extends JavaTest {
     }
 
     @ThingActionsScope(name = "test")
-    private class TestThingActionProvider implements ThingActions {
+    private static class TestThingActionProvider implements ThingActions {
 
         private @Nullable ThingHandler handler;
 

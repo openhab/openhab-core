@@ -31,7 +31,7 @@ import org.openhab.core.types.StateOption;
 @NonNullByDefault
 public class StateDescriptionFragmentImpl implements StateDescriptionFragment {
 
-    private class StateDescriptionImpl extends StateDescription {
+    private static class StateDescriptionImpl extends StateDescription {
         StateDescriptionImpl(@Nullable BigDecimal minimum, @Nullable BigDecimal maximum, @Nullable BigDecimal step,
                 @Nullable String pattern, boolean readOnly, @Nullable List<StateOption> options) {
             super(minimum, maximum, step, pattern, readOnly, options);

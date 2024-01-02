@@ -35,7 +35,7 @@ import org.openhab.core.types.StateDescriptionFragment;
 public class StateChannelTypeBuilderImpl extends AbstractChannelTypeBuilder<StateChannelTypeBuilder>
         implements StateChannelTypeBuilder {
 
-    private class StateChannelTypeImpl extends ChannelType {
+    private static class StateChannelTypeImpl extends ChannelType {
         private StateChannelTypeImpl(ChannelTypeUID uid, boolean advanced, String itemType, String label,
                 @Nullable String description, @Nullable String category, @Nullable Set<String> tags,
                 @Nullable StateDescription state, @Nullable CommandDescription commandDescription,

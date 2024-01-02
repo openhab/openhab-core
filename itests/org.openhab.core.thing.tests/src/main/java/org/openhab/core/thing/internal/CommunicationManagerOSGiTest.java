@@ -89,7 +89,7 @@ import org.openhab.core.types.TimeSeries;
 @NonNullByDefault
 public class CommunicationManagerOSGiTest extends JavaOSGiTest {
 
-    private class ItemChannelLinkRegistryAdvanced extends ItemChannelLinkRegistry {
+    private static class ItemChannelLinkRegistryAdvanced extends ItemChannelLinkRegistry {
         public ItemChannelLinkRegistryAdvanced(ThingRegistry thingRegistry, ItemRegistry itemRegistry) {
             super(thingRegistry, itemRegistry);
         }

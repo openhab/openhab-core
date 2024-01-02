@@ -69,7 +69,7 @@ public class Stream2JSONInputStreamTest {
     }
 
     @SuppressWarnings("unused")
-    private class DummyObject {
+    private static class DummyObject {
         private final String key;
         private final String value;
 

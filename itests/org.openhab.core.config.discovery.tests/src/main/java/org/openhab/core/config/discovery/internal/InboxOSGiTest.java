@@ -1076,7 +1076,7 @@ public class InboxOSGiTest extends JavaOSGiTest {
         assertThat(future.get(), is(true));
     }
 
-    class DummyThingHandlerFactory extends BaseThingHandlerFactory {
+    static class DummyThingHandlerFactory extends BaseThingHandlerFactory {
 
         public DummyThingHandlerFactory(ComponentContext context) {
             super.activate(context);

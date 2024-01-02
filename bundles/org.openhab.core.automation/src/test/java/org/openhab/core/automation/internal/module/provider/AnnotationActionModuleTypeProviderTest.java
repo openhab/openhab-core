@@ -188,7 +188,7 @@ public class AnnotationActionModuleTypeProviderTest extends JavaTest {
     }
 
     @ActionScope(name = "binding.test")
-    private class TestActionProvider implements AnnotatedActions {
+    private static class TestActionProvider implements AnnotatedActions {
 
         @RuleAction(label = ACTION_LABEL, description = ACTION_DESCRIPTION, visibility = Visibility.HIDDEN, tags = {
                 "tag1", "tag2" })

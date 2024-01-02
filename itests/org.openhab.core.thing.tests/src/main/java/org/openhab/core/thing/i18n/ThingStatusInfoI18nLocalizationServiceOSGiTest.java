@@ -276,7 +276,7 @@ public class ThingStatusInfoI18nLocalizationServiceOSGiTest extends JavaOSGiTest
         ((SimpleThingHandler) thing.getHandler()).setThingStatusInfo(thingStatusInfo);
     }
 
-    private class SimpleThingHandlerFactory extends BaseThingHandlerFactory {
+    private static class SimpleThingHandlerFactory extends BaseThingHandlerFactory {
 
         @Override
         public void activate(ComponentContext componentContext) {
@@ -294,7 +294,7 @@ public class ThingStatusInfoI18nLocalizationServiceOSGiTest extends JavaOSGiTest
         }
     }
 
-    private class SimpleThingHandler extends AbstractThingHandler {
+    private static class SimpleThingHandler extends AbstractThingHandler {
 
         SimpleThingHandler(Thing thing) {
             super(thing);
@@ -316,7 +316,7 @@ public class ThingStatusInfoI18nLocalizationServiceOSGiTest extends JavaOSGiTest
         }
     }
 
-    private abstract class AbstractThingHandler extends BaseThingHandler {
+    private abstract static class AbstractThingHandler extends BaseThingHandler {
         public AbstractThingHandler(Thing thing) {
             super(thing);
         }

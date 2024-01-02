@@ -131,7 +131,7 @@ public class JSONResponseTest {
     }
 
     @SuppressWarnings("unused")
-    private final class LargeEntity {
+    private static final class LargeEntity {
 
         private List<BigDecimal> randoms = getRandoms();
 

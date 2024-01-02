@@ -451,7 +451,7 @@ public class ChannelStateDescriptionProviderOSGiTest extends JavaOSGiTest {
         }
     }
 
-    class TestThingHandlerFactory extends BaseThingHandlerFactory {
+    static class TestThingHandlerFactory extends BaseThingHandlerFactory {
 
         @Override
         public void activate(final ComponentContext ctx) {

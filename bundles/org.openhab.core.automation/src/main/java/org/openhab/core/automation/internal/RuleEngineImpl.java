@@ -1414,7 +1414,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
         return result;
     }
 
-    class OutputRef {
+    static class OutputRef {
 
         private final String moduleId;
         private final String outputName;
