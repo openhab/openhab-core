@@ -214,20 +214,20 @@ public class QuantityTypeTest {
     public void testUnits() {
         QuantityType<Length> dt2 = new QuantityType<>("2 m");
         // Check that the unit has correctly been identified
-        assertEquals(dt2.getDimension(), UnitDimension.LENGTH);
-        assertEquals(dt2.getUnit(), SIUnits.METRE);
+        assertEquals(UnitDimension.LENGTH, dt2.getDimension());
+        assertEquals(SIUnits.METRE, dt2.getUnit());
         assertEquals("2 m", dt2.toString());
 
         QuantityType<Length> dt1 = new QuantityType<>("2.1cm");
         // Check that the unit has correctly been identified
-        assertEquals(dt1.getDimension(), UnitDimension.LENGTH);
-        assertEquals(dt1.getUnit(), CENTI(SIUnits.METRE));
+        assertEquals(UnitDimension.LENGTH, dt1.getDimension());
+        assertEquals(CENTI(SIUnits.METRE), dt1.getUnit());
         assertEquals("2.1 cm", dt1.toString());
 
         assertEquals(dt1.intValue(), dt2.intValue());
 
         QuantityType<Length> dt3 = new QuantityType<>("200cm");
-        assertEquals(dt3.compareTo(dt2), 0);
+        assertEquals(0, dt3.compareTo(dt2));
         assertTrue(dt3.equals(dt2));
 
         QuantityType dt4 = new QuantityType<>("2kg");

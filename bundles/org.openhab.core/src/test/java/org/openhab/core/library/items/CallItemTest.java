@@ -32,13 +32,13 @@ public class CallItemTest {
         CallItem callItem1 = new CallItem("testItem");
 
         callItem1.setState(callType1);
-        assertEquals(callItem1.toString(),
-                "testItem (Type=CallItem, State=0699222222,0179999998, Label=null, Category=null)");
+        assertEquals("testItem (Type=CallItem, State=0699222222,0179999998, Label=null, Category=null)",
+                callItem1.toString());
 
         callType1 = new StringListType("0699222222,0179999998");
         callItem1.setState(callType1);
-        assertEquals(callItem1.toString(),
-                "testItem (Type=CallItem, State=0699222222,0179999998, Label=null, Category=null)");
+        assertEquals("testItem (Type=CallItem, State=0699222222,0179999998, Label=null, Category=null)",
+                callItem1.toString());
     }
 
     @Test

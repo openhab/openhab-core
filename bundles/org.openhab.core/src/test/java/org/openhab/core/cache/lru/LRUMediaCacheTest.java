@@ -279,13 +279,13 @@ public class LRUMediaCacheTest {
 
         LRUMediaCacheEntry<MetadataSample> result1 = lruCache.cachedResults.get("key1");
         assertNotNull(result1);
-        assertEquals(result1.getMetadata().getMeta2(), 1);
-        assertEquals(result1.getMetadata().getMeta1(), "text1");
+        assertEquals(1, result1.getMetadata().getMeta2());
+        assertEquals("text1", result1.getMetadata().getMeta1());
 
         LRUMediaCacheEntry<MetadataSample> result2 = lruCache.cachedResults.get("key2");
         assertNotNull(result2);
-        assertEquals(result2.getMetadata().getMeta1(), "text2");
-        assertEquals(result2.getMetadata().getMeta2(), 2);
+        assertEquals("text2", result2.getMetadata().getMeta1());
+        assertEquals(2, result2.getMetadata().getMeta2());
 
         LRUMediaCacheEntry<MetadataSample> result3 = lruCache.cachedResults.get("key3");
         assertNull(result3);

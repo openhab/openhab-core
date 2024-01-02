@@ -33,7 +33,7 @@ public class StringListTypeTest {
         StringListType call2 = new StringListType("0699222222,0179999998");
 
         assertEquals(call1.getValue(origIdx), call2.getValue(destIdx));
-        assertEquals(call2.toString(), "0699222222,0179999998");
+        assertEquals("0699222222,0179999998", call2.toString());
     }
 
     @Test
