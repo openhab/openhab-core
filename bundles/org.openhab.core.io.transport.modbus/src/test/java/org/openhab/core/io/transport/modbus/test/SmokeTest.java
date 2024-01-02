@@ -157,7 +157,7 @@ public class SmokeTest extends IntegrationTestSupport {
         try (ModbusCommunicationInterface comms = modbusManager.newModbusCommunicationInterface(endpoint, null)) {
             comms.submitOneTimePoll(new ModbusReadRequestBlueprint(SLAVE_UNIT_ID,
                     ModbusReadFunctionCode.READ_MULTIPLE_REGISTERS, 0, 5, 1), result -> {
-                        assert result.getRegisters().isPresent();
+                        assertTrue(result.getRegisters().isPresent());
                         okCount.incrementAndGet();
                         callbackCalled.countDown();
                     }, failure -> {
@@ -194,7 +194,7 @@ public class SmokeTest extends IntegrationTestSupport {
                 configuration)) {
             comms.submitOneTimePoll(new ModbusReadRequestBlueprint(SLAVE_UNIT_ID,
                     ModbusReadFunctionCode.READ_MULTIPLE_REGISTERS, 0, 5, 1), result -> {
-                        assert result.getRegisters().isPresent();
+                        assertTrue(result.getRegisters().isPresent());
                         okCount.incrementAndGet();
                         callbackCalled.countDown();
                     }, failure -> {
@@ -228,7 +228,7 @@ public class SmokeTest extends IntegrationTestSupport {
         try (ModbusCommunicationInterface comms = modbusManager.newModbusCommunicationInterface(endpoint, null)) {
             comms.submitOneTimePoll(new ModbusReadRequestBlueprint(SLAVE_UNIT_ID,
                     ModbusReadFunctionCode.READ_MULTIPLE_REGISTERS, 0, 5, 1), result -> {
-                        assert result.getRegisters().isPresent();
+                        assertTrue(result.getRegisters().isPresent());
                         okCount.incrementAndGet();
                         callbackCalled.countDown();
                     }, failure -> {

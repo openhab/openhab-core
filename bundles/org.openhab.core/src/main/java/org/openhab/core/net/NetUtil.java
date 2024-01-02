@@ -346,9 +346,8 @@ public class NetUtil implements NetworkAddressService {
             }
 
             for (InterfaceAddress cidr : networkInterface.getInterfaceAddresses()) {
-                final InetAddress address = cidr.getAddress();
-                assert address != null; // NetworkInterface.getInterfaceAddresses() should return only non-null
-                                        // addresses
+                // NetworkInterface.getInterfaceAddresses() should return only non-null addresses
+                final InetAddress address = Objects.requireNonNull(cidr.getAddress());
                 interfaceIPs.add(new CidrAddress(address, cidr.getNetworkPrefixLength()));
             }
         }

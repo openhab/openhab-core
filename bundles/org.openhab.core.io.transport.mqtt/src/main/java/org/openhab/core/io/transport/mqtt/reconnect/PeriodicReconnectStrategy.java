@@ -12,6 +12,7 @@
  */
 package org.openhab.core.io.transport.mqtt.reconnect;
 
+import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -105,8 +106,7 @@ public class PeriodicReconnectStrategy extends AbstractReconnectStrategy {
             return;
         }
 
-        assert scheduler != null;
-        scheduledTask = scheduler.scheduleWithFixedDelay(() -> {
+        scheduledTask = Objects.requireNonNull(scheduler).scheduleWithFixedDelay(() -> {
             MqttBrokerConnection brokerConnection = this.brokerConnection;
             // If the broker connections is not available anymore, stop the timed reconnect.
             if (brokerConnection == null) {

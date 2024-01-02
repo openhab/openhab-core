@@ -278,7 +278,7 @@ public class IntegrationTestSupport extends JavaTest {
     }
 
     public ModbusSlaveEndpoint getEndpoint() {
-        assert tcpModbusPort > 0;
+        assertTrue(tcpModbusPort > 0);
         return new ModbusTCPSlaveEndpoint("127.0.0.1", tcpModbusPort, false);
     }
 

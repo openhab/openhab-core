@@ -367,8 +367,7 @@ public class I18nProviderImpl
             throw new IllegalArgumentException("Dimension " + dimension.getName() + " is unknown. This is a bug.");
         }
         Unit<T> unit = (Unit<T>) map.get(getMeasurementSystem());
-        assert unit != null;
-        return unit;
+        return Objects.requireNonNull(unit);
     }
 
     @Override
