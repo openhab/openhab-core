@@ -81,7 +81,7 @@ public class StateUtil {
         states.add(RewindFastforwardType.REWIND);
         states.add(RewindFastforwardType.FASTFORWARD);
 
-        StringListType stringList = new StringListType(new String[] { "foo", "bar" });
+        StringListType stringList = new StringListType("foo", "bar");
         states.add(stringList);
 
         StringType string = new StringType("foo");
