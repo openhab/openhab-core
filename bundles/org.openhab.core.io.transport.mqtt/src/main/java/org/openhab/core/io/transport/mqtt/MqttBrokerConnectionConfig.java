@@ -55,7 +55,7 @@ public class MqttBrokerConnectionConfig {
      */
     public String getBrokerID() {
         final String name = this.name;
-        if (name != null && name.length() > 0) {
+        if (name != null && !name.isEmpty()) {
             return name;
         } else {
             StringBuilder b = new StringBuilder();

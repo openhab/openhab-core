@@ -267,7 +267,7 @@ public class ModelRepositoryImpl implements ModelRepository {
                             .append(MessageFormat.format("[{0},{1}]: {2}\n", Integer.toString(diagnostic.getLine()),
                                     Integer.toString(diagnostic.getColumn()), diagnostic.getMessage()));
                 }
-                if (criticalErrors.length() > 0) {
+                if (!criticalErrors.isEmpty()) {
                     return criticalErrors.toString();
                 }
 
