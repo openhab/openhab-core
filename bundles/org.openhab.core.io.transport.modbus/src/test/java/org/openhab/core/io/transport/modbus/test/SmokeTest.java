@@ -952,7 +952,7 @@ public class SmokeTest extends IntegrationTestSupport {
      */
     private static class SpyingSocketFactory implements SocketImplFactory {
 
-        Queue<SocketImpl> sockets = new ConcurrentLinkedQueue<SocketImpl>();
+        Queue<SocketImpl> sockets = new ConcurrentLinkedQueue<>();
 
         @Override
         public SocketImpl createSocketImpl() {

@@ -375,10 +375,10 @@ public class QuantityTypeTest {
         assertEquals(ImperialUnits.FAHRENHEIT, result.getUnit());
 
         // test associativity of add
-        QuantityType<Temperature> tempResult = new QuantityType<Temperature>("1 °F")
-                .add(new QuantityType<Temperature>("2 °F")).add(new QuantityType<Temperature>("3 °F"));
+        QuantityType<Temperature> tempResult = new QuantityType<Temperature>("1 °F").add(new QuantityType<>("2 °F"))
+                .add(new QuantityType<>("3 °F"));
         assertThat(tempResult, is(new QuantityType<Temperature>("1 °F")
-                .add(new QuantityType<Temperature>("2 °F").add(new QuantityType<Temperature>("3 °F")))));
+                .add(new QuantityType<Temperature>("2 °F").add(new QuantityType<>("3 °F")))));
         assertThat(tempResult, is(new QuantityType<Temperature>("6 °F")));
 
         assertThat(new QuantityType<>("65 kWh").add(new QuantityType<>("1 kWh")), is(new QuantityType<>("66 kWh")));

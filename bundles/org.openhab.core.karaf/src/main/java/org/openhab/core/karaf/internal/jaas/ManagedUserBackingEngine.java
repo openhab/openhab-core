@@ -42,7 +42,7 @@ public class ManagedUserBackingEngine implements BackingEngine {
 
     @Override
     public void addUser(String username, String password) {
-        userRegistry.register(username, password, new HashSet<String>(Set.of(Role.USER)));
+        userRegistry.register(username, password, new HashSet<>(Set.of(Role.USER)));
     }
 
     @Override

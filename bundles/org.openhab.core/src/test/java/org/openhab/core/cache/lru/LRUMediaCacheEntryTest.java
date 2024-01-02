@@ -74,8 +74,7 @@ public class LRUMediaCacheEntryTest {
     }
 
     private LRUMediaCache<MetadataSample> createCache(long size) throws IOException {
-        return new LRUMediaCache<MetadataSample>(storageService, size, "lrucachetest.pid",
-                this.getClass().getClassLoader());
+        return new LRUMediaCache<>(storageService, size, "lrucachetest.pid", this.getClass().getClassLoader());
     }
 
     public static class FakeStream extends InputStream {

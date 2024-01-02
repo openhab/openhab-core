@@ -122,7 +122,7 @@ public class TTSLRUCacheImpl implements TTSCache {
             fileAndMetadata = lruMediaCacheLocal.get(key, () -> {
                 try {
                     AudioStream audioInputStream = tts.synthesizeForCache(text, voice, requestedFormat);
-                    return new LRUMediaCacheEntry<AudioFormatInfo>(key, audioInputStream,
+                    return new LRUMediaCacheEntry<>(key, audioInputStream,
                             new AudioFormatInfo(audioInputStream.getFormat()));
                 } catch (TTSException e) {
                     throw new IllegalStateException(e);

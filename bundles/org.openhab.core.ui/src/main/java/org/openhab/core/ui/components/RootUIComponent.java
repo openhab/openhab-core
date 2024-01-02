@@ -36,7 +36,7 @@ import org.openhab.core.config.core.dto.ConfigDescriptionDTO;
 public class RootUIComponent extends UIComponent implements Identifiable<String> {
     String uid;
 
-    Set<String> tags = new HashSet<String>();
+    Set<String> tags = new HashSet<>();
 
     ConfigDescriptionDTO props;
 

@@ -488,7 +488,7 @@ public class ModbusManagerImpl implements ModbusManager {
         try {
             logger.trace("Calling error response callback {} for request {}. Error was {} {}", callback, request,
                     error.getClass().getName(), error.getMessage());
-            callback.handle(new AsyncModbusFailure<R>(request, error));
+            callback.handle(new AsyncModbusFailure<>(request, error));
         } finally {
             logger.trace("Called write response callback {} for request {}. Error was {} {}", callback, request,
                     error.getClass().getName(), error.getMessage());
