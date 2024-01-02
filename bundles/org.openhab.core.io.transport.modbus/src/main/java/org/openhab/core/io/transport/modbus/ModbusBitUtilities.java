@@ -278,9 +278,7 @@ public class ModbusBitUtilities {
     public static short extractUInt8(byte[] bytes, int index) {
         assertIndexAndType(bytes, index, ValueType.UINT8);
         int signed = extractSInt8(bytes, index);
-        short unsigned = (short) (signed & 0xff);
-        assert unsigned >= 0;
-        return unsigned;
+        return (short) (signed & 0xff);
     }
 
     /**
@@ -313,9 +311,7 @@ public class ModbusBitUtilities {
     public static int extractUInt16(byte[] bytes, int index) {
         assertIndexAndType(bytes, index, ValueType.UINT16);
         int signed = extractSInt16(bytes, index);
-        int unsigned = signed & 0xffff;
-        assert unsigned >= 0;
-        return unsigned;
+        return signed & 0xffff;
     }
 
     /**
@@ -350,9 +346,7 @@ public class ModbusBitUtilities {
     public static long extractUInt32(byte[] bytes, int index) {
         assertIndexAndType(bytes, index, ValueType.UINT32);
         long signed = extractSInt32(bytes, index);
-        long unsigned = signed & 0xffff_ffffL;
-        assert unsigned >= 0;
-        return unsigned;
+        return signed & 0xffff_ffffL;
     }
 
     /**
@@ -392,9 +386,7 @@ public class ModbusBitUtilities {
     public static long extractUInt32Swap(byte[] bytes, int index) {
         assertIndexAndType(bytes, index, ValueType.UINT32_SWAP);
         long signed = extractSInt32Swap(bytes, index);
-        long unsigned = signed & 0xffff_ffffL;
-        assert unsigned >= 0;
-        return unsigned;
+        return signed & 0xffff_ffffL;
     }
 
     /**

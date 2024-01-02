@@ -244,8 +244,7 @@ public class NumberItem extends GenericItem implements MetadataAwareItem {
     public void removedMetadata(Metadata metadata) {
         Class<? extends Quantity<?>> dimension = this.dimension;
         if (dimension != null && UNIT_METADATA_NAMESPACE.equals(metadata.getUID().getNamespace())) {
-            assert unitProvider != null;
-            unit = unitProvider.getUnit((Class<? extends Quantity>) dimension);
+            unit = Objects.requireNonNull(unitProvider).getUnit((Class<? extends Quantity>) dimension);
             logger.trace("Item '{}' now has unit '{}'", name, unit);
         }
     }
