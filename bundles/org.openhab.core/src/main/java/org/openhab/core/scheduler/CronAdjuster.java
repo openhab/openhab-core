@@ -458,7 +458,7 @@ public class CronAdjuster implements SchedulerTemporalAdjuster {
      * because this object is ordered for temporal index no conversion is needed here.
      *
      * @param cronExpression the whole cron expression
-     * @param name the cron value to parse
+     * @param value the cron value to parse
      * @param names map with names of the week
      * @return temporal index of day of the week
      */

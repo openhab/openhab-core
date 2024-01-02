@@ -48,8 +48,7 @@ public class GroupFunctionHelper {
      * arithmetic group function will take unit conversion into account.
      *
      * @param function the {@link GroupFunctionDTO} describing the group function.
-     * @param args a list of {@link State}s as arguments for the resulting group function.
-     * @param dimension an optional interface class from {@link Quantity} defining the dimension for unit conversion.
+     * @param baseItem an optional {@link Item} defining the dimension for unit conversion.
      * @return a {@link GroupFunction} according to the given parameters.
      */
     public GroupFunction createGroupFunction(GroupFunctionDTO function, @Nullable Item baseItem) {

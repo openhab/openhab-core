@@ -30,7 +30,7 @@ import org.osgi.framework.Bundle;
  * A utility service which localizes {@link ChannelGroupDefinition}.
  * Falls back to a localized {@link ChannelGroupType} for label and description when not given otherwise.
  *
- * @see {@link ThingTypeI18nLocalizationService}
+ * @see org.openhab.core.thing.i18n.ThingTypeI18nLocalizationService ThingTypeI18nLocalizationService
  *
  * @author Christoph Weitkamp - Initial contribution
  */

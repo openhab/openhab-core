@@ -52,8 +52,6 @@ public class RuleResourceBundleImporter extends AbstractResourceBundleProvider<R
     /**
      * This constructor is responsible for initializing the path to resources and tracking the managing service of the
      * {@link Rule}s.
-     *
-     * @param registry the managing service of the {@link Rule}s.
      */
     public RuleResourceBundleImporter() {
         super(ROOT_DIRECTORY + "/rules/");

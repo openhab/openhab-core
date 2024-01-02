@@ -39,6 +39,7 @@ import javax.measure.quantity.Dimensionless;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.internal.library.unit.UnitInitializer;
+import org.openhab.core.items.events.ItemStateEvent;
 import org.openhab.core.library.unit.MetricPrefix;
 import org.openhab.core.library.unit.Units;
 import org.openhab.core.types.Command;
@@ -87,7 +88,8 @@ public class QuantityType<T extends Quantity<T>> extends Number
 
     /**
      * Creates a dimensionless {@link QuantityType} with scalar 0 and unit {@link AbstractUnit#ONE}.
-     * A default constructor is needed by {@link org.openhab.core.internal.items.ItemUpdater#receiveUpdate})
+     * A default constructor is needed by
+     * {@link org.openhab.core.internal.items.ItemUpdater#receiveUpdate(ItemStateEvent)})
      */
     @SuppressWarnings("unchecked")
     public QuantityType() {

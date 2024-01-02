@@ -129,7 +129,7 @@ public class MarketplaceRuleTemplateProvider extends AbstractManagedProvider<Rul
      * This adds a new rule template to the persistent storage from its YAML representation.
      *
      * @param uid the UID to be used for the template
-     * @param json the template content as a YAML string
+     * @param yaml the template content as a YAML string
      *
      * @throws ParsingException if the content cannot be parsed correctly
      */

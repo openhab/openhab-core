@@ -12,18 +12,20 @@
  */
 package org.openhab.core.thing.binding.firmware;
 
+import java.util.Locale;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingStatus;
 import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.ThingUID;
 import org.openhab.core.thing.firmware.FirmwareUpdateService;
 
 /**
  * The {@link FirmwareUpdateHandler} can be implemented and registered as an OSGi service in order to update the
  * firmware for the physical device of a {@link Thing}. The {@link FirmwareUpdateService} tracks each firmware
  * update handler and starts the firmware update process by the operation
- * {@link FirmwareUpdateService#updateFirmware(org.openhab.core.thing.ThingUID, FirmwareUID, java.util.Locale)}
- * .
+ * {@link FirmwareUpdateService#updateFirmware(ThingUID, String, Locale)}.
  *
  * @author Thomas Höfer - Initial contribution
  */

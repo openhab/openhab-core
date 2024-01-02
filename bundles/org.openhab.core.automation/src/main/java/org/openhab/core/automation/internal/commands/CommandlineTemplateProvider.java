@@ -146,8 +146,6 @@ public class CommandlineTemplateProvider extends AbstractCommandProvider<RuleTem
     /**
      * This method is responsible for removing a set of objects loaded from a specified file or URL resource.
      *
-     * @param providerType specifies the provider responsible for removing the objects loaded from a specified file or
-     *            URL resource.
      * @param url is a specified file or URL resource.
      * @return the string <b>SUCCESS</b>.
      */

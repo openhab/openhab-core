@@ -33,7 +33,7 @@ import org.openhab.core.types.UnDefType;
 import com.google.gson.Gson;
 
 /**
- * {@link ItemEventFactoryTests} tests the {@link ItemEventFactory}.
+ * {@link ItemEventFactoryTest} tests the {@link ItemEventFactory}.
  *
  * @author Stefan Bußweiler - Initial contribution
  */

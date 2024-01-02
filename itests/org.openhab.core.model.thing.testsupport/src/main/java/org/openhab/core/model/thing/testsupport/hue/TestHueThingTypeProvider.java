@@ -10,8 +10,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-/**
- */
 package org.openhab.core.model.thing.testsupport.hue;
 
 import java.net.URI;

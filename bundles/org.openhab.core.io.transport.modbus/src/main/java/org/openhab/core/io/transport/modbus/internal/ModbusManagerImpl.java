@@ -444,7 +444,7 @@ public class ModbusManagerImpl implements ModbusManager {
      *
      * In case connection cannot be established, callback is called with {@link ModbusConnectionException}
      *
-     * @param operationId id appened to log messages for identifying the operation
+     * @param timer the timer having an operationId that is appended to log messages for identifying the operation
      * @param oneOffTask whether this is one-off, or execution of previously scheduled poll
      * @param task task representing the read or write operation
      * @return {@link ModbusSlaveConnection} to the endpoint as specified by the task, or empty {@link Optional} when
@@ -575,7 +575,7 @@ public class ModbusManagerImpl implements ModbusManager {
             }
 
             int tryIndex = 0;
-            /**
+            /*
              * last execution is tracked such that the endpoint is not spammed on retry. First retry can be executed
              * right away since getConnection ensures enough time has passed since last transaction. More precisely,
              * ModbusSlaveConnectionFactoryImpl sleeps on activate() (i.e. before returning connection).

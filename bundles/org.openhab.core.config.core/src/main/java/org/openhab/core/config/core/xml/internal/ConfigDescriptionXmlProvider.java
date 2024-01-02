@@ -30,8 +30,6 @@ import org.osgi.framework.Bundle;
  * is itself registered as {@link ConfigDescriptionProvider} service at the <i>OSGi</i> service registry.
  *
  * @author Michael Grammling - Initial contribution
- *
- * @see ConfigDescriptionXmlProviderFactory
  */
 @NonNullByDefault
 public class ConfigDescriptionXmlProvider implements XmlDocumentProvider<List<ConfigDescription>> {

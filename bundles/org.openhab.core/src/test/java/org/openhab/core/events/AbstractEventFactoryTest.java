@@ -19,7 +19,7 @@ import org.junit.jupiter.api.Test;
 import org.openhab.core.items.events.ItemEventFactory;
 
 /**
- * {@link AbstractEventFactoryTests} tests the {@link org.openhab.core.events.AbstractEventFactory}.
+ * {@link AbstractEventFactoryTest} tests the {@link org.openhab.core.events.AbstractEventFactory}.
  *
  * @author Stefan Bußweiler - Initial contribution
  */

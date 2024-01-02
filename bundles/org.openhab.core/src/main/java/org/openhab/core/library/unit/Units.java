@@ -233,7 +233,7 @@ public final class Units extends CustomUnits {
     public static final Unit<DataTransferRate> GIGABIT_PER_SECOND = addUnit(MetricPrefix.GIGA(BIT_PER_SECOND));
     public static final Unit<DataTransferRate> TERABIT_PER_SECOND = addUnit(MetricPrefix.TERA(BIT_PER_SECOND));
 
-    /**
+    /*
      * Add unit symbols for custom openHAB units.
      */
     static {

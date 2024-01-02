@@ -50,7 +50,7 @@ import org.slf4j.LoggerFactory;
  * <br/>
  * {@code org.openhab.core.threadpool:<poolName>=<poolSize>}
  * <br/>
- * All threads will time out after {@link THREAD_TIMEOUT}.
+ * All threads will time out after {@link #THREAD_TIMEOUT}.
  *
  * @author Kai Kreuzer - Initial contribution
  */

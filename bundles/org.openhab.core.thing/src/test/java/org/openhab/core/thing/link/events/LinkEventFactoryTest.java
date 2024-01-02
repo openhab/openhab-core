@@ -26,7 +26,7 @@ import org.openhab.core.thing.link.dto.ItemChannelLinkDTO;
 import com.google.gson.Gson;
 
 /**
- * {@link LinkEventFactoryTests} tests the {@link LinkEventFactory}.
+ * {@link LinkEventFactoryTest} tests the {@link LinkEventFactory}.
  *
  * @author Christoph Weitkamp - Initial contribution
  */

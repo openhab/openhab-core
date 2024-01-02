@@ -63,7 +63,7 @@ import org.slf4j.LoggerFactory;
  * The {@link RuleRegistryImpl} provides basic functionality for managing {@link Rule}s.
  * It can be used to
  * <ul>
- * <li>Add Rules with the {@link #add(Rule)}, {@link #added(Provider, Rule)}, {@link #addProvider(RuleProvider)}
+ * <li>Add Rules with the {@link #add(Rule)}, {@link #added(Provider, Rule)}, {@link #addProvider(Provider)}
  * methods.</li>
  * <li>Get the existing rules with the {@link #get(String)}, {@link #getAll()}, {@link #getByTag(String)},
  * {@link #getByTags(String[])} methods.</li>
@@ -130,7 +130,7 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
     /**
      * Activates this component. Called from DS.
      *
-     * @param componentContext this component context.
+     * @param bundleContext this component context.
      */
     @Override
     @Activate

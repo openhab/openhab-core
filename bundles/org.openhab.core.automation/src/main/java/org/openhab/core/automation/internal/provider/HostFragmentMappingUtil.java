@@ -43,9 +43,7 @@ public class HostFragmentMappingUtil {
     /**
      * This method is used to get the host bundles of the parameter which is a fragment bundle.
      *
-     * @param pkgAdmin
-     *
-     * @param bundle an OSGi fragment bundle.
+     * @param fragment an OSGi fragment bundle.
      * @return a list with the hosts of the <code>fragment</code> parameter.
      */
     static List<Bundle> returnHostBundles(Bundle fragment) {

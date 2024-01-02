@@ -25,7 +25,8 @@ import org.osgi.dto.DTO;
  * Data transfer object until UIs are fixed.
  *
  * <p>
- * {@link https://github.com/openhab/openhab-core/issues/1216}
+ * 
+ * @see <a href="https://github.com/openhab/openhab-core/issues/1216">Sitemap Events: registration response buggy</a>
  *
  * @author Markus Rathgeb - Initial contribution
  */

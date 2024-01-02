@@ -38,7 +38,7 @@ import org.openhab.core.test.storage.VolatileStorage;
 
 /**
  * The {@link OAuthStoreHandlerTest} contains tests for
- * {@link org.openhab.core.auth.oauth2client.OAuthStoreHandlerImpl}
+ * {@link org.openhab.core.auth.oauth2client.internal.OAuthStoreHandlerImpl}
  *
  * @author Jacob Laursen - Initial contribution
  */

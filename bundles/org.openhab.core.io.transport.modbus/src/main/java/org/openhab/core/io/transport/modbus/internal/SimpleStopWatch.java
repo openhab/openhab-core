@@ -143,7 +143,7 @@ public class SimpleStopWatch {
      *
      * First StopWatch is resumed, then action is applied. Finally the StopWatch is suspended.
      *
-     * @param supplier action to time
+     * @param runnable action to time
      * @return return value from supplier
      */
     public void timeRunnable(Runnable runnable) {

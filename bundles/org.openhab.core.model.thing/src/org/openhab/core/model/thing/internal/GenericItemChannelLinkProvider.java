@@ -44,7 +44,7 @@ public class GenericItemChannelLinkProvider extends AbstractProvider<ItemChannel
         implements BindingConfigReader, ItemChannelLinkProvider {
 
     private final Logger logger = LoggerFactory.getLogger(GenericItemChannelLinkProvider.class);
-    /** caches binding configurations. maps itemNames to {@link BindingConfig}s */
+    /** caches binding configurations. maps itemNames to {@link ItemChannelLink}s */
     protected Map<String, Set<ItemChannelLink>> itemChannelLinkMap = new ConcurrentHashMap<>();
 
     /**
