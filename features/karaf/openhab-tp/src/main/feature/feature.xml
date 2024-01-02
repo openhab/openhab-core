@@ -34,6 +34,7 @@
 		<bundle dependency="true">mvn:tech.units/indriya/2.2</bundle>
 		<bundle dependency="true">mvn:tech.uom.lib/uom-lib-common/2.2</bundle>
 		<bundle dependency="true">mvn:org.apiguardian/apiguardian-api/1.1.2</bundle>
+		<bundle dependency="true">mvn:org.osgi/org.osgi.service.component.annotations/1.5.0</bundle>
 
 		<!-- TODO: Unbundled libraries -->
 		<bundle dependency="true">mvn:com.thoughtworks.xstream/xstream/1.4.20</bundle>
