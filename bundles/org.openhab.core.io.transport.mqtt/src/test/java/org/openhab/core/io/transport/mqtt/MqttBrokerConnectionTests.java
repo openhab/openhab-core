@@ -331,8 +331,8 @@ public class MqttBrokerConnectionTests extends JavaTest {
     public void setterGetterTests() {
         MqttBrokerConnectionEx connection = new MqttBrokerConnectionEx("123.123.123.123", null, false, false,
                 "setterGetterTests");
-        assertEquals(connection.getHost(), "123.123.123.123", "URL getter");
-        assertEquals(connection.getPort(), 1883, "Name getter"); // Check for non-secure port
+        assertEquals("123.123.123.123", connection.getHost(), "URL getter");
+        assertEquals(1883, connection.getPort(), "Name getter"); // Check for non-secure port
         assertFalse(connection.isSecure(), "Secure getter");
         assertFalse(connection.isHostnameValidated(), "HostnameValidated getter");
         assertEquals("setterGetterTests", connection.getClientId(), "ClientID getter");
