@@ -31,7 +31,7 @@ public final class Activator implements BundleActivator {
 
     @Override
     public void start(BundleContext bc) throws Exception {
-        logger.info("Starting openHAB {} (build {})", OpenHAB.getVersion(), OpenHAB.buildString());
+        logger.info("Starting openHAB {} ({})", OpenHAB.getVersion(), OpenHAB.buildString());
     }
 
     @Override
