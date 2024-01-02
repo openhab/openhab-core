@@ -27,7 +27,7 @@ public abstract class AbstractLinkDTO {
     protected AbstractLinkDTO() {
     }
 
-    public AbstractLinkDTO(String itemName) {
+    protected AbstractLinkDTO(String itemName) {
         this.itemName = itemName;
     }
 }

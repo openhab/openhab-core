@@ -36,7 +36,7 @@ public abstract class AbstractRuleRegistryEvent extends AbstractEvent {
      * @param source the source of the event
      * @param rule the rule for which this event is created
      */
-    public AbstractRuleRegistryEvent(String topic, String payload, @Nullable String source, RuleDTO rule) {
+    protected AbstractRuleRegistryEvent(String topic, String payload, @Nullable String source, RuleDTO rule) {
         super(topic, payload, source);
         this.rule = rule;
     }

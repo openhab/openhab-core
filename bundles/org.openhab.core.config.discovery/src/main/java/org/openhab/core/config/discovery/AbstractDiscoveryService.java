@@ -86,7 +86,7 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
      *            enable background discovery or not.
      * @throws IllegalArgumentException if {@code timeout < 0}
      */
-    public AbstractDiscoveryService(@Nullable Set<ThingTypeUID> supportedThingTypes, int timeout,
+    protected AbstractDiscoveryService(@Nullable Set<ThingTypeUID> supportedThingTypes, int timeout,
             boolean backgroundDiscoveryEnabledByDefault) throws IllegalArgumentException {
         if (timeout < 0) {
             throw new IllegalArgumentException("The timeout must be >= 0!");
@@ -105,7 +105,7 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
      *            If set to 0, disables the automatic stop.
      * @throws IllegalArgumentException if {@code timeout < 0}
      */
-    public AbstractDiscoveryService(@Nullable Set<ThingTypeUID> supportedThingTypes, int timeout)
+    protected AbstractDiscoveryService(@Nullable Set<ThingTypeUID> supportedThingTypes, int timeout)
             throws IllegalArgumentException {
         this(supportedThingTypes, timeout, true);
     }
@@ -118,7 +118,7 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
      *            If set to 0, disables the automatic stop.
      * @throws IllegalArgumentException if {@code timeout < 0}
      */
-    public AbstractDiscoveryService(int timeout) throws IllegalArgumentException {
+    protected AbstractDiscoveryService(int timeout) throws IllegalArgumentException {
         this(null, timeout);
     }
 

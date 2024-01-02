@@ -29,7 +29,7 @@ abstract class AbstractRequestComparer<T extends ModbusWriteRequestBlueprint> ex
     private ModbusWriteFunctionCode expectedFunctionCode;
     private int expectedMaxTries;
 
-    public AbstractRequestComparer(int expectedUnitId, int expectedAddress,
+    protected AbstractRequestComparer(int expectedUnitId, int expectedAddress,
             ModbusWriteFunctionCode expectedFunctionCode, int expectedMaxTries) {
         this.expectedUnitId = expectedUnitId;
         this.expectedAddress = expectedAddress;

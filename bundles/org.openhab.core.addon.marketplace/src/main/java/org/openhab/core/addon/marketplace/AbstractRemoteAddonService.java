@@ -83,7 +83,7 @@ public abstract class AbstractRemoteAddonService implements AddonService {
 
     private final Logger logger = LoggerFactory.getLogger(AbstractRemoteAddonService.class);
 
-    public AbstractRemoteAddonService(EventPublisher eventPublisher, ConfigurationAdmin configurationAdmin,
+    protected AbstractRemoteAddonService(EventPublisher eventPublisher, ConfigurationAdmin configurationAdmin,
             StorageService storageService, AddonInfoRegistry addonInfoRegistry, String servicePid) {
         this.addonInfoRegistry = addonInfoRegistry;
         this.eventPublisher = eventPublisher;

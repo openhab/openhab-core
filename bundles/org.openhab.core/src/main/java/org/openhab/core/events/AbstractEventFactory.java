@@ -38,7 +38,7 @@ public abstract class AbstractEventFactory implements EventFactory {
      *
      * @param supportedEventTypes the supported event types
      */
-    public AbstractEventFactory(Set<String> supportedEventTypes) {
+    protected AbstractEventFactory(Set<String> supportedEventTypes) {
         this.supportedEventTypes = Set.copyOf(supportedEventTypes);
     }
 

@@ -75,7 +75,7 @@ public abstract class AbstractStorageBasedTypeProvider
      *
      * @param storageService a persistent {@link StorageService}
      */
-    public AbstractStorageBasedTypeProvider(StorageService storageService) {
+    protected AbstractStorageBasedTypeProvider(StorageService storageService) {
         String thingTypeStorageName = getClass().getName() + "-ThingType";
         String channelTypeStorageName = getClass().getName() + "-ChannelType";
         String channelGroupTypeStorageName = getClass().getName() + "-ChannelGroupType";

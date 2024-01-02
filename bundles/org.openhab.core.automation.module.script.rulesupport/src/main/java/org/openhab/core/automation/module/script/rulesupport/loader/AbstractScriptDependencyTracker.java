@@ -52,7 +52,7 @@ public abstract class AbstractScriptDependencyTracker
     private final BidiSetBag<String, String> scriptToLibs = new BidiSetBag<>();
     private final WatchService watchService;
 
-    public AbstractScriptDependencyTracker(WatchService watchService, final String fileDirectory) {
+    protected AbstractScriptDependencyTracker(WatchService watchService, final String fileDirectory) {
         this.watchService = watchService;
         this.libraryPath = watchService.getWatchPath().resolve(fileDirectory);
 

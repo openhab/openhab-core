@@ -26,7 +26,7 @@ public abstract class AbstractItemChannelLinkRegistryEvent extends AbstractEvent
 
     private final ItemChannelLinkDTO link;
 
-    public AbstractItemChannelLinkRegistryEvent(String topic, String payload, ItemChannelLinkDTO link) {
+    protected AbstractItemChannelLinkRegistryEvent(String topic, String payload, ItemChannelLinkDTO link) {
         super(topic, payload, null);
         this.link = link;
     }

@@ -59,7 +59,7 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
 
     protected final String ruleUID;
 
-    public AbstractScriptModuleHandler(T module, String ruleUID, ScriptEngineManager scriptEngineManager) {
+    protected AbstractScriptModuleHandler(T module, String ruleUID, ScriptEngineManager scriptEngineManager) {
         super(module);
         this.scriptEngineManager = scriptEngineManager;
         this.ruleUID = ruleUID;

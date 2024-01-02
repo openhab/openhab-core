@@ -49,7 +49,7 @@ public abstract class AbstractDescriptionType implements Identifiable<UID> {
      * @param configDescriptionURI the {@link URI} that references the {@link ConfigDescription} of this type
      * @throws IllegalArgumentException if the UID is null, or the label is null or empty
      */
-    public AbstractDescriptionType(UID uid, String label, @Nullable String description,
+    protected AbstractDescriptionType(UID uid, String label, @Nullable String description,
             @Nullable URI configDescriptionURI) throws IllegalArgumentException {
         if (label.isEmpty()) {
             throw new IllegalArgumentException("The label must neither be null nor empty!");
