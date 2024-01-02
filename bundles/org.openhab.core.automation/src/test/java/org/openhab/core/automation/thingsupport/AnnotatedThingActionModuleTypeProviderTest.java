@@ -142,7 +142,7 @@ public class AnnotatedThingActionModuleTypeProviderTest extends JavaTest {
                 assertEquals(ACTION_INPUT1_DEFAULT_VALUE, in.getDefaultValue());
                 assertEquals(ACTION_INPUT1_DESCRIPTION, in.getDescription());
                 assertEquals(ACTION_INPUT1_REFERENCE, in.getReference());
-                assertEquals(true, in.isRequired());
+                assertTrue(in.isRequired());
                 assertEquals("Item", in.getType());
 
                 Set<String> inputTags = in.getTags();

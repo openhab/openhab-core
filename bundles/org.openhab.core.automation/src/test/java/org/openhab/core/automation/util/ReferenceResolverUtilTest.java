@@ -129,14 +129,14 @@ public class ReferenceResolverUtilTest {
     @Test
     public void testSplitReferenceToTokens() {
         assertNull(ReferenceResolver.splitReferenceToTokens(null));
-        assertTrue(ReferenceResolver.splitReferenceToTokens("").length == 0);
+        assertEquals(0, ReferenceResolver.splitReferenceToTokens("").length);
         final String[] referenceTokens = ReferenceResolver
                 .splitReferenceToTokens(".module.array[\".na[m}.\"e\"][1].values1");
-        assertTrue("module".equals(referenceTokens[0]));
-        assertTrue("array".equals(referenceTokens[1]));
-        assertTrue(".na[m}.\"e".equals(referenceTokens[2]));
-        assertTrue("1".equals(referenceTokens[3]));
-        assertTrue("values1".equals(referenceTokens[4]));
+        assertEquals("module", referenceTokens[0]);
+        assertEquals("array", referenceTokens[1]);
+        assertEquals(".na[m}.\"e", referenceTokens[2]);
+        assertEquals("1", referenceTokens[3]);
+        assertEquals("values1", referenceTokens[4]);
     }
 
     @Test

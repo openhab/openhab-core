@@ -55,14 +55,14 @@ public class ThingChannelsTest extends JavaOSGiTest {
         resultChannels = thing.getChannels();
         assertEquals(CHANNEL_IDS.size(), resultChannels.size());
         for (int i = 0; i < CHANNEL_IDS.size(); i++) {
-            assertTrue(CHANNEL_IDS.get(i).equals(resultChannels.get(i).getUID().getId()));
+            assertEquals(CHANNEL_IDS.get(i), resultChannels.get(i).getUID().getId());
         }
 
         // test #2: serialize/deserialize the thing via a DTO, and compare the resulting channel order
         resultChannels = ThingDTOMapper.map(ThingDTOMapper.map(thing), false).getChannels();
         assertEquals(CHANNEL_IDS.size(), resultChannels.size());
         for (int i = 0; i < CHANNEL_IDS.size(); i++) {
-            assertTrue(CHANNEL_IDS.get(i).equals(resultChannels.get(i).getUID().getId()));
+            assertEquals(CHANNEL_IDS.get(i), resultChannels.get(i).getUID().getId());
         }
     }
 

@@ -50,7 +50,7 @@ public class JavaTestTest {
     public void waitForAssertShouldRunAfterLastCallWhenAssertionFails() {
         Runnable afterLastCall = mock(Runnable.class);
         try {
-            javaTest.waitForAssert(() -> assertTrue(false), null, afterLastCall, 100, 50);
+            javaTest.waitForAssert(() -> fail(), null, afterLastCall, 100, 50);
         } catch (final AssertionError ex) {
         }
         verify(afterLastCall, times(1)).run();

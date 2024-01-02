@@ -90,7 +90,7 @@ public class LRUMediaCacheTest {
         LRUMediaCacheEntry<MetadataSample> cacheEntry = new LRUMediaCacheEntry<>("key1");
         lruCache.put(cacheEntry);
         assertEquals(cacheEntry, lruCache.cachedResults.get("key1"));
-        assertEquals(null, lruCache.cachedResults.get("key2"));
+        assertNull(lruCache.cachedResults.get("key2"));
     }
 
     /**
@@ -121,7 +121,7 @@ public class LRUMediaCacheTest {
         lruCache.makeSpace();
         // cacheEntry1 should be evicted now (size limit is 10, and effective size is 12 when we try to put the
         // cacheEntry4)
-        assertEquals(null, lruCache.cachedResults.get("key1"));
+        assertNull(lruCache.cachedResults.get("key1"));
 
         // getting cacheEntry2 will put it in head, cacheEntry3 is now tail
         assertEquals(cacheEntry2, lruCache.cachedResults.get("key2"));
@@ -129,7 +129,7 @@ public class LRUMediaCacheTest {
         // putting again cacheEntry1 should expel tail, which is cacheEntry3
         lruCache.cachedResults.put(cacheEntry1.getKey(), cacheEntry1);
         lruCache.makeSpace();
-        assertEquals(null, lruCache.cachedResults.get("key3"));
+        assertNull(lruCache.cachedResults.get("key3"));
     }
 
     /**
@@ -201,7 +201,7 @@ public class LRUMediaCacheTest {
         lruCache.makeSpace();
 
         // key2 should be expelled now
-        assertEquals(null, lruCache.cachedResults.get("key2"));
+        assertNull(lruCache.cachedResults.get("key2"));
 
         // key1 and key3 are a hit
         assertEquals(cacheEntry, lruCache.cachedResults.get("key1"));

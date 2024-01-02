@@ -14,7 +14,7 @@ package org.openhab.core.internal.items;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.*;
 
 import java.util.Locale;
@@ -88,7 +88,7 @@ public class ItemStateConverterImplTest {
         State originalState = new DecimalType(12.34);
         State state = itemStateConverter.convertToAcceptedState(originalState, item);
 
-        assertTrue(originalState == state);
+        assertSame(originalState, state);
     }
 
     @ParameterizedTest
