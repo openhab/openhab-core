@@ -61,7 +61,7 @@ import org.slf4j.LoggerFactory;
 @NonNullByDefault
 public abstract class BaseThingHandlerFactory implements ThingHandlerFactory {
 
-    private static final String THING_HANDER_SERVICE_CANONICAL_NAME = ThingHandlerService.class.getCanonicalName();
+    private static final String THING_HANDLER_SERVICE_CANONICAL_NAME = ThingHandlerService.class.getCanonicalName();
 
     protected @NonNullByDefault({}) BundleContext bundleContext;
 
@@ -202,7 +202,7 @@ public abstract class BaseThingHandlerFactory implements ThingHandlerFactory {
                 // ThingHandlerService
                 // interface, NOT the ThingHandlerService itself. We do this to register them as specific OSGi
                 // services later, rather than as a generic ThingHandlerService.
-                .filter(className -> className != null && !className.equals(THING_HANDER_SERVICE_CANONICAL_NAME))
+                .filter(className -> className != null && !className.equals(THING_HANDLER_SERVICE_CANONICAL_NAME))
                 .toArray(String[]::new);
 
         registeredService.initializeService(thingHandler, serviceNames);
@@ -385,18 +385,18 @@ public abstract class BaseThingHandlerFactory implements ThingHandlerFactory {
         }
 
         public void initializeService(ThingHandler handler, String[] serviceNames) {
-            this.serviceInstance.setThingHandler(handler);
+            serviceInstance.setThingHandler(handler);
             if (serviceNames.length > 0) {
                 ServiceRegistration<?> serviceReg = bundleContext.registerService(serviceNames, serviceInstance, null);
                 if (serviceReg != null) {
-                    this.serviceRegistration = serviceReg;
+                    serviceRegistration = serviceReg;
                 }
             }
-            this.serviceInstance.initialize();
+            serviceInstance.initialize();
         }
 
         public void disposeService() {
-            this.serviceInstance.dispose();
+            serviceInstance.dispose();
 
             ServiceRegistration<?> serviceReg = this.serviceRegistration;
             if (serviceReg != null) {
@@ -405,7 +405,7 @@ public abstract class BaseThingHandlerFactory implements ThingHandlerFactory {
 
             ServiceObjects<T> serviceObjs = this.serviceObjects;
             if (serviceObjs != null) {
-                serviceObjs.ungetService(this.serviceInstance);
+                serviceObjs.ungetService(serviceInstance);
             }
         }
     }
