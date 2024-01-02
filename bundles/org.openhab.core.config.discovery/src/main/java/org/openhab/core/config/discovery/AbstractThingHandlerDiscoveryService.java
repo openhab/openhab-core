@@ -50,7 +50,7 @@ public abstract class AbstractThingHandlerDiscoveryService<T extends ThingHandle
         this.thingClazz = thingClazz;
     }
 
-    public AbstractThingHandlerDiscoveryService(Class<T> thingClazz, @Nullable Set<ThingTypeUID> supportedThingTypes,
+    protected AbstractThingHandlerDiscoveryService(Class<T> thingClazz, @Nullable Set<ThingTypeUID> supportedThingTypes,
             int timeout) throws IllegalArgumentException {
         super(supportedThingTypes, timeout);
         this.thingClazz = thingClazz;
