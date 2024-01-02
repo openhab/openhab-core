@@ -183,7 +183,7 @@ final class ProgressCallbackImpl implements ProgressCallback {
 
     void failedInternal(String errorMessageKey) {
         this.state = InternalState.FINISHED;
-        String errorMessage = getMessage(ProgressCallbackImpl.class, errorMessageKey, new Object[] {});
+        String errorMessage = getMessage(ProgressCallbackImpl.class, errorMessageKey);
         postResultInfoEvent(FirmwareUpdateResult.ERROR, errorMessage);
     }
 

@@ -12,7 +12,6 @@
  */
 package org.openhab.core.automation.internal.commands;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
@@ -142,7 +141,7 @@ public class AutomationCommandsPluggable extends AutomationCommands implements C
 
     @Override
     public List<String> getUsages() {
-        return Arrays.asList(new String[] {
+        return List.of(
                 buildCommandUsage(LIST_MODULE_TYPES + " [-st] <filter> <language>",
                         "lists all Module Types. If filter is present, lists only matching Module Types."
                                 + " If language is missing, the default language will be used."),
@@ -174,7 +173,7 @@ public class AutomationCommandsPluggable extends AutomationCommands implements C
                         "Enables the Rule, specified by given UID. If enable parameter is missing, "
                                 + "the result of the command will be visualization of enabled/disabled state of the rule, "
                                 + "if its value is \"true\" or \"false\", "
-                                + "the result of the command will be to set enable/disable on the Rule.") });
+                                + "the result of the command will be to set enable/disable on the Rule."));
     }
 
     @Override
