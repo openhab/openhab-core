@@ -14,6 +14,7 @@ package org.openhab.core.thing.binding;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -105,8 +106,8 @@ public class ThingFactory {
                             thingHandlerFactory.getClass(), thingTypeUID);
                 } else {
                     if (properties != null) {
-                        for (String key : properties.keySet()) {
-                            thing.setProperty(key, properties.get(key));
+                        for (Entry<String, String> entry : properties.entrySet()) {
+                            thing.setProperty(entry.getKey(), entry.getValue());
                         }
                     }
                 }

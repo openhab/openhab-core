@@ -24,6 +24,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.WeakHashMap;
@@ -191,10 +192,11 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
             this.defaultVoice = config.containsKey(CONFIG_DEFAULT_VOICE) ? config.get(CONFIG_DEFAULT_VOICE).toString()
                     : null;
 
-            for (String key : config.keySet()) {
+            for (Entry<String, Object> entry : config.entrySet()) {
+                String key = entry.getKey();
                 if (key.startsWith(CONFIG_PREFIX_DEFAULT_VOICE)) {
                     String tts = key.substring(CONFIG_PREFIX_DEFAULT_VOICE.length());
-                    defaultVoices.put(tts, config.get(key).toString());
+                    defaultVoices.put(tts, entry.getValue().toString());
                 }
             }
         }

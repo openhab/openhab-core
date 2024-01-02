@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -101,8 +102,9 @@ public final class ConfigDescriptionValidatorImpl implements ConfigDescriptionVa
 
         Collection<ConfigValidationMessage> configDescriptionValidationMessages = new ArrayList<>();
 
-        for (String key : map.keySet()) {
-            ConfigDescriptionParameter configDescriptionParameter = map.get(key);
+        for (Entry<String, ConfigDescriptionParameter> entry : map.entrySet()) {
+            String key = entry.getKey();
+            ConfigDescriptionParameter configDescriptionParameter = entry.getValue();
             if (configDescriptionParameter != null) {
                 // If the parameter supports multiple selection, then it may be provided as an array
                 if (configDescriptionParameter.isMultiple() && configurationParameters.get(key) instanceof List) {
