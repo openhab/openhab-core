@@ -31,7 +31,7 @@ public enum EventType {
 
     private String name;
 
-    private EventType(String name) {
+    EventType(String name) {
         this.name = name;
     }
 

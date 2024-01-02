@@ -69,7 +69,7 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
     /**
      * This calculates the numeric average over all item states of {@link QuantityType}.
      */
-    static class Avg extends DimensionalGroupFunction {
+    class Avg extends DimensionalGroupFunction {
 
         public Avg(Class<? extends Quantity<?>> dimension) {
             super(dimension);
@@ -114,7 +114,7 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
     /**
      * This calculates the numeric sum over all item states of {@link QuantityType}.
      */
-    static class Sum extends DimensionalGroupFunction {
+    class Sum extends DimensionalGroupFunction {
 
         public Sum(Class<? extends Quantity<?>> dimension) {
             super(dimension);
@@ -151,7 +151,7 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
     /**
      * This calculates the minimum value of all item states of {@link QuantityType}.
      */
-    static class Min extends DimensionalGroupFunction {
+    class Min extends DimensionalGroupFunction {
 
         public Min(Class<? extends Quantity<?>> dimension) {
             super(dimension);
@@ -184,7 +184,7 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
     /**
      * This calculates the maximum value of all item states of {@link QuantityType}.
      */
-    static class Max extends DimensionalGroupFunction {
+    class Max extends DimensionalGroupFunction {
 
         public Max(Class<? extends Quantity<?>> dimension) {
             super(dimension);

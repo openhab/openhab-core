@@ -117,7 +117,7 @@ public class ModbusManagerImpl implements ModbusManager {
          *             (ill-behaving slave)
          * @throws ModbusUnexpectedResponseSizeException when data length of the response and request do not match
          */
-        public void accept(AggregateStopWatch timer, T task, ModbusSlaveConnection connection)
+        void accept(AggregateStopWatch timer, T task, ModbusSlaveConnection connection)
                 throws ModbusException, IIOException, ModbusUnexpectedTransactionIdException,
                 ModbusUnexpectedResponseFunctionCodeException, ModbusUnexpectedResponseSizeException;
     }

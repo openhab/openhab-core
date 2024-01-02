@@ -28,7 +28,7 @@ import org.openhab.core.common.registry.Registry;
 @NonNullByDefault
 public interface MetadataRegistry extends Registry<Metadata, MetadataKey> {
 
-    static final String INTERNAL_NAMESPACE_PREFIX = "_";
+    String INTERNAL_NAMESPACE_PREFIX = "_";
 
     /**
      * Determines whether the given namespace is internal.

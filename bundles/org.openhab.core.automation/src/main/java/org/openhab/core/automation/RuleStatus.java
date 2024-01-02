@@ -84,7 +84,7 @@ public enum RuleStatus {
 
     private final int value;
 
-    private RuleStatus(final int newValue) {
+    RuleStatus(final int newValue) {
         value = newValue;
     }
 

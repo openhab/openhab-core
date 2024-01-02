@@ -33,7 +33,7 @@ import org.openhab.core.automation.module.script.internal.provider.ScriptModuleT
 @NonNullByDefault
 public interface ScriptEngineFactory {
 
-    static final ScriptEngineManager ENGINE_MANAGER = new ScriptEngineManager();
+    ScriptEngineManager ENGINE_MANAGER = new ScriptEngineManager();
 
     /**
      * Key to access engine identifier in script context.

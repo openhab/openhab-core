@@ -114,7 +114,7 @@ public class ThingEventFactory extends AbstractEventFactory {
         }
     }
 
-    public static interface CommonChannelDescriptionFieldPayloadBean {
+    public interface CommonChannelDescriptionFieldPayloadBean {
     }
 
     public static class ChannelDescriptionPatternPayloadBean implements CommonChannelDescriptionFieldPayloadBean {

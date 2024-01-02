@@ -300,7 +300,7 @@ public interface OAuthClientService extends AutoCloseable {
      * @param key The name of the key to add to the auth form
      * @param value The value of the new auth form param
      */
-    public void addExtraAuthField(String key, String value);
+    void addExtraAuthField(String key, String value);
 
     /**
      * Adds a custom GsonBuilder to be used with the OAuth service instance.

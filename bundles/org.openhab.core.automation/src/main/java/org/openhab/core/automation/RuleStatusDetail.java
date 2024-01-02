@@ -95,7 +95,7 @@ public enum RuleStatusDetail {
 
     private final int value;
 
-    private RuleStatusDetail(final int newValue) {
+    RuleStatusDetail(final int newValue) {
         value = newValue;
     }
 

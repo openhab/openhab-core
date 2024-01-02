@@ -22,7 +22,7 @@ import org.eclipse.xtext.xbase.interpreter.IEvaluationContext;
 @SuppressWarnings("restriction")
 public interface Script {
 
-    static final String SCRIPT_FILEEXT = "script";
+    String SCRIPT_FILEEXT = "script";
 
     /**
      * Executes the script instance and returns the execution result
