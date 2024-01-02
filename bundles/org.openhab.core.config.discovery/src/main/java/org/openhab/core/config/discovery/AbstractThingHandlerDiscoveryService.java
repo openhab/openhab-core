@@ -98,7 +98,7 @@ public abstract class AbstractThingHandlerDiscoveryService<T extends ThingHandle
 
             if (backgroundDiscoveryEnabled && !enabled) {
                 stopBackgroundDiscovery();
-                logger.debug("Background discovery for discovery service '{}' disabled.", this.getClass().getName());
+                logger.debug("Background discovery for discovery service '{}' disabled.", getClass().getName());
             } else if (!backgroundDiscoveryEnabled && enabled) {
                 startBackgroundDiscovery();
                 logger.debug("Background discovery for discovery service '{}' enabled.", this.getClass().getName());
