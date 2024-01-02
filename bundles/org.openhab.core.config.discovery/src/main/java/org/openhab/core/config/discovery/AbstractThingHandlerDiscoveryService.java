@@ -44,7 +44,7 @@ public abstract class AbstractThingHandlerDiscoveryService<T extends ThingHandle
     // initialized when the type is generic, so we have to initialize it with "something"
     protected @NonNullByDefault({}) T thingHandler = (@NonNull T) null;
 
-    public AbstractThingHandlerDiscoveryService(Class<T> thingClazz, @Nullable Set<ThingTypeUID> supportedThingTypes,
+    protected AbstractThingHandlerDiscoveryService(Class<T> thingClazz, @Nullable Set<ThingTypeUID> supportedThingTypes,
             int timeout, boolean backgroundDiscoveryEnabledByDefault) throws IllegalArgumentException {
         super(supportedThingTypes, timeout, backgroundDiscoveryEnabledByDefault);
         this.thingClazz = thingClazz;
