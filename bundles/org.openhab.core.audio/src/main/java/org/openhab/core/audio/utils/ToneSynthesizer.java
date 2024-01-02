@@ -21,6 +21,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -112,17 +113,11 @@ public class ToneSynthesizer {
     }
 
     public ToneSynthesizer(AudioFormat audioFormat) {
-        assert audioFormat.getFrequency() != null;
-        this.sampleRate = audioFormat.getFrequency();
-        assert audioFormat.getBitDepth() != null;
-        this.bitDepth = audioFormat.getBitDepth();
-        assert audioFormat.getBitRate() != null;
-        this.bitRate = audioFormat.getBitRate();
-        assert audioFormat.getChannels() != null;
-        this.channels = audioFormat.getChannels();
-        var bigEndian = audioFormat.isBigEndian();
-        assert bigEndian != null;
-        this.bigEndian = bigEndian;
+        this.sampleRate = Objects.requireNonNull(audioFormat.getFrequency());
+        this.bitDepth = Objects.requireNonNull(audioFormat.getBitDepth());
+        this.bitRate = Objects.requireNonNull(audioFormat.getBitRate());
+        this.channels = Objects.requireNonNull(audioFormat.getChannels());
+        this.bigEndian = Objects.requireNonNull(audioFormat.isBigEndian());
     }
 
     /**
