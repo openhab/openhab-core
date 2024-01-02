@@ -32,22 +32,22 @@ public interface Parser<T> {
      * Example : "parser.type" = "parser.module.type";
      * It is used as registration property of the corresponding service.
      */
-    static String PARSER_TYPE = "parser.type";
+    String PARSER_TYPE = "parser.type";
 
     /**
      * Defines one of the possible values of property {@link #PARSER_TYPE}.
      */
-    static String PARSER_MODULE_TYPE = "parser.module.type";
+    String PARSER_MODULE_TYPE = "parser.module.type";
 
     /**
      * Defines one of the possible values of property {@link #PARSER_TYPE}.
      */
-    static String PARSER_TEMPLATE = "parser.template";
+    String PARSER_TEMPLATE = "parser.template";
 
     /**
      * Defines one of the possible values of property {@link #PARSER_TYPE}.
      */
-    static String PARSER_RULE = "parser.rule";
+    String PARSER_RULE = "parser.rule";
 
     /**
      * Defines a service registration property used for recognition of which file format is supported by the parser.
@@ -55,12 +55,12 @@ public interface Parser<T> {
      * Example : "format" = "json";
      * It is used as registration property of the corresponding service.
      */
-    static String FORMAT = "format";
+    String FORMAT = "format";
 
     /**
      * Defines the possible value of property {@link #FORMAT}. It means that the parser supports json format.
      */
-    static String FORMAT_JSON = "json";
+    String FORMAT_JSON = "json";
 
     /**
      * Loads a file with some particular format and parse it to the corresponding automation objects.

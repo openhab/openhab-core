@@ -33,13 +33,13 @@ public class SimpleStopWatch {
     private volatile long resumed;
 
     @FunctionalInterface
-    public abstract interface SupplierWithPollTaskUnregisteredException<T> {
-        public abstract T get() throws ModbusManagerImpl.PollTaskUnregistered;
+    public interface SupplierWithPollTaskUnregisteredException<T> {
+        T get() throws ModbusManagerImpl.PollTaskUnregistered;
     }
 
     @FunctionalInterface
-    public abstract interface RunnableWithModbusException {
-        public abstract void run() throws ModbusException;
+    public interface RunnableWithModbusException {
+        void run() throws ModbusException;
     }
 
     /**

@@ -27,5 +27,5 @@ public interface SizeableAudioStream {
      *
      * @return absolute length in bytes
      */
-    public long length();
+    long length();
 }

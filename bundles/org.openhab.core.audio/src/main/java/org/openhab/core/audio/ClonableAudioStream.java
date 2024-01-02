@@ -31,5 +31,5 @@ public interface ClonableAudioStream {
      * @return a new input stream that can be consumed by the caller
      * @throws AudioException if stream cannot be created
      */
-    public InputStream getClonedStream() throws AudioException;
+    InputStream getClonedStream() throws AudioException;
 }

@@ -33,7 +33,7 @@ public interface AudioManager {
     /**
      * Name of the sub-directory of the config folder, holding sound files.
      */
-    static final String SOUND_DIR = "sounds";
+    String SOUND_DIR = "sounds";
 
     /**
      * Plays the passed audio stream using the default audio sink.

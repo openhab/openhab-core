@@ -60,7 +60,7 @@ public interface GroupFunction {
      *
      * @author Kai Kreuzer - Initial contribution
      */
-    static class Equality implements GroupFunction {
+    class Equality implements GroupFunction {
 
         @Override
         public State calculate(@Nullable Set<Item> items) {

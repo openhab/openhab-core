@@ -29,7 +29,7 @@ public enum StorageRecordType {
 
     private String suffix;
 
-    private StorageRecordType(String suffix) {
+    StorageRecordType(String suffix) {
         this.suffix = suffix;
     }
 
