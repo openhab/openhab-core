@@ -249,7 +249,7 @@ public class QueueingThreadPoolExecutorTest {
         for (int i = 0; i < n; i++) {
             // we can only test if name is at least one character,
             // otherwise there will be threads found (handles poolName="")
-            if (poolName.length() > 0) {
+            if (!poolName.isEmpty()) {
                 if (l[i].getName().startsWith(poolName)) {
                     // enable printout to see threads
                     // System.out.println("areThreadsFromPoolRunning: " +

@@ -92,7 +92,7 @@ public final class WriteRequestJsonUtilities {
      */
     public static Collection<ModbusWriteRequestBlueprint> fromJson(int unitId, String jsonString) {
         JsonArray jsonArray = JsonParser.parseString(jsonString).getAsJsonArray();
-        if (jsonArray.size() == 0) {
+        if (jsonArray.isEmpty()) {
             return new LinkedList<>();
         }
         Deque<ModbusWriteRequestBlueprint> writes = new LinkedList<>();
@@ -173,7 +173,7 @@ public final class WriteRequestJsonUtilities {
                 }
                 // fall-through to WRITE_MULTIPLE_COILS
             case WRITE_MULTIPLE_COILS:
-                if (valuesElem.size() == 0) {
+                if (valuesElem.isEmpty()) {
                     throw new IllegalArgumentException("Must provide at least one coil");
                 } else if (valuesElem.size() > ModbusConstants.MAX_BITS_WRITE_COUNT) {
                     throw new IllegalArgumentException(

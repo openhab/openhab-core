@@ -336,7 +336,7 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
             ignoreStateUpdates = getBooleanConfigValue(configuration, CONFIG_IGNORE_STATE_UPDATES);
             ignoreCommands = getBooleanConfigValue(configuration, CONFIG_IGNORE_COMMANDS);
 
-            if ((stateOrCommand != null) && (stateOrCommand.length() > 0)) {
+            if ((stateOrCommand != null) && (!stateOrCommand.isEmpty())) {
                 if (stateOrCommand.startsWith(COMMAND_PREFIX)) {
                     String commandString = stateOrCommand.substring(COMMAND_PREFIX.length());
                     expireCommand = TypeParser.parseCommand(item.getAcceptedCommandTypes(), commandString);

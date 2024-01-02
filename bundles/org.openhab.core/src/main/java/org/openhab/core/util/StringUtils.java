@@ -129,7 +129,7 @@ public class StringUtils {
         final String delimiter = "_";
         StringBuilder capitalizedFully = new StringBuilder();
         for (String splitStr : str.split(delimiter)) {
-            if (splitStr.length() > 0) {
+            if (!splitStr.isEmpty()) {
                 capitalizedFully.append(splitStr.substring(0, 1).toUpperCase());
             }
             if (splitStr.length() > 1) {
