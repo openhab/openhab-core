@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -497,7 +498,7 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
             }
         }
         List<String> conditionsList = List.of(conditions.split(" AND "));
-        return conditionsList.stream().map(String::trim).toList();
+        return conditionsList.stream().filter(Predicate.not(String::isBlank)).map(String::trim).toList();
     }
 
     @Override
