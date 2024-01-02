@@ -311,7 +311,7 @@ public class ChannelCommandDescriptionProviderOSGiTest extends JavaOSGiTest {
                 @Nullable CommandDescription originalCommandDescription, @Nullable Locale locale) {
             String id = channel.getUID().getIdWithoutGroup();
             if ("7_2".equals(id)) {
-                assertEquals(channel.getChannelTypeUID(), CHANNEL_TYPE_UID);
+                assertEquals(CHANNEL_TYPE_UID, channel.getChannelTypeUID());
                 return newCommand;
             }
             return null;

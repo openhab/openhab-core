@@ -114,7 +114,7 @@ public class PointTypeTest {
         assertEquals(48.856614, pointParis.getLatitude().doubleValue(), 0.0000001);
 
         double gravParis = pointParis.getGravity().doubleValue();
-        assertEquals(gravParis, 9.809, 0.001);
+        assertEquals(9.809, gravParis, 0.001);
     }
 
     @Test

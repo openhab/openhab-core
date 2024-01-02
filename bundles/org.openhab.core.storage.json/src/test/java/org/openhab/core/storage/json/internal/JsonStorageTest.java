@@ -107,10 +107,10 @@ public class JsonStorageTest extends JavaTest {
         DummyObject dummy = objectStorage.get("DummyObject");
 
         assertNotNull(dummy);
-        assertEquals(((BigDecimal) dummy.configuration.get("testShort")).scale(), 0);
-        assertEquals(((BigDecimal) dummy.configuration.get("testInt")).scale(), 0);
-        assertEquals(((BigDecimal) dummy.configuration.get("testLong")).scale(), 0);
-        assertEquals(((BigDecimal) dummy.configuration.get("testBigDecimal")).scale(), 0);
+        assertEquals(0, ((BigDecimal) dummy.configuration.get("testShort")).scale());
+        assertEquals(0, ((BigDecimal) dummy.configuration.get("testInt")).scale());
+        assertEquals(0, ((BigDecimal) dummy.configuration.get("testLong")).scale());
+        assertEquals(0, ((BigDecimal) dummy.configuration.get("testBigDecimal")).scale());
     }
 
     @SuppressWarnings("unchecked")
@@ -121,14 +121,14 @@ public class JsonStorageTest extends JavaTest {
         DummyObject dummy = objectStorage.get("DummyObject");
 
         assertNotNull(dummy);
-        assertEquals(((BigDecimal) dummy.configuration.get("testShort")).scale(), 0);
-        assertEquals(((BigDecimal) dummy.configuration.get("testInt")).scale(), 0);
-        assertEquals(((BigDecimal) dummy.configuration.get("testLong")).scale(), 0);
-        assertEquals(((BigDecimal) dummy.configuration.get("testBigDecimal")).scale(), 0);
-        assertEquals(((List<BigDecimal>) dummy.configuration.get("multiInt")).get(0).scale(), 0);
-        assertEquals(((List<BigDecimal>) dummy.configuration.get("multiInt")).get(1).scale(), 0);
-        assertEquals(((List<BigDecimal>) dummy.configuration.get("multiInt")).get(2).scale(), 0);
-        assertEquals(((BigDecimal) dummy.channels.get(0).configuration.get("testChildLong")).scale(), 0);
+        assertEquals(0, ((BigDecimal) dummy.configuration.get("testShort")).scale());
+        assertEquals(0, ((BigDecimal) dummy.configuration.get("testInt")).scale());
+        assertEquals(0, ((BigDecimal) dummy.configuration.get("testLong")).scale());
+        assertEquals(0, ((BigDecimal) dummy.configuration.get("testBigDecimal")).scale());
+        assertEquals(0, ((List<BigDecimal>) dummy.configuration.get("multiInt")).get(0).scale());
+        assertEquals(0, ((List<BigDecimal>) dummy.configuration.get("multiInt")).get(1).scale());
+        assertEquals(0, ((List<BigDecimal>) dummy.configuration.get("multiInt")).get(2).scale());
+        assertEquals(0, ((BigDecimal) dummy.channels.get(0).configuration.get("testChildLong")).scale());
     }
 
     @Test
