@@ -156,13 +156,11 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
             for (UpnpIOParticipant participant : participants) {
                 if (Objects.equals(getDevice(participant), deviceRoot)) {
                     for (Entry<String, StateVariableValue> entry : values.entrySet()) {
-                        StateVariableValue value = entry.getValue();
-                        if (value.getValue() != null) {
-                            try {
-                                participant.onValueReceived(entry.getKey(), value.getValue().toString(), serviceId);
-                            } catch (Exception e) {
-                                logger.error("Participant threw an exception onValueReceived", e);
-                            }
+                        try {
+                            participant.onValueReceived(entry.getKey(), entry.getValue().getValue().toString(),
+                                    serviceId);
+                        } catch (Exception e) {
+                            logger.error("Participant threw an exception onValueReceived", e);
                         }
                     }
                     break;

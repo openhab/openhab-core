@@ -151,8 +151,7 @@ public class RuleResourceBundleImporter extends AbstractResourceBundleProvider<R
         if (portfolio == null) {
             for (Entry<Vendor, List<String>> entry : providerPortfolio.entrySet()) {
                 if (entry.getKey().getVendorSymbolicName().equals(vendor.getVendorSymbolicName())) {
-                    List<String> vendorPortfolio = entry.getValue();
-                    return vendorPortfolio == null ? List.of() : vendorPortfolio;
+                    return entry.getValue();
                 }
             }
         }
