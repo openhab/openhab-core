@@ -67,7 +67,7 @@ public abstract class AbstractAuthPageServlet extends HttpServlet {
 
     protected String pageTemplate;
 
-    public AbstractAuthPageServlet(BundleContext bundleContext, @Reference UserRegistry userRegistry,
+    protected AbstractAuthPageServlet(BundleContext bundleContext, @Reference UserRegistry userRegistry,
             @Reference AuthenticationProvider authProvider, @Reference LocaleProvider localeProvider) {
         this.userRegistry = userRegistry;
         this.authProvider = authProvider;

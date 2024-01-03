@@ -32,7 +32,7 @@ public abstract class AbstractConsoleCommandExtension implements ConsoleCommandE
      * @param cmd The command the extension is used for.
      * @param desc The description what this extension is handling.
      */
-    public AbstractConsoleCommandExtension(final String cmd, final String desc) {
+    protected AbstractConsoleCommandExtension(final String cmd, final String desc) {
         this.cmd = cmd;
         this.desc = desc;
     }

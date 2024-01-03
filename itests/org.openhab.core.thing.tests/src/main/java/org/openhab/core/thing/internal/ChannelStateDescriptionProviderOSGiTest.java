@@ -501,7 +501,7 @@ public class ChannelStateDescriptionProviderOSGiTest extends JavaOSGiTest {
     }
 
     private abstract static class AbstractThingHandler extends BaseThingHandler {
-        public AbstractThingHandler(Thing thing) {
+        protected AbstractThingHandler(Thing thing) {
             super(thing);
         }
     }

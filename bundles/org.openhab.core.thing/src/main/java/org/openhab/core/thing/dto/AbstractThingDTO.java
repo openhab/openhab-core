@@ -33,7 +33,7 @@ public abstract class AbstractThingDTO {
     public String thingTypeUID;
     public String location;
 
-    public AbstractThingDTO() {
+    protected AbstractThingDTO() {
     }
 
     protected AbstractThingDTO(String thingTypeUID, String uid, String label, String bridgeUID,

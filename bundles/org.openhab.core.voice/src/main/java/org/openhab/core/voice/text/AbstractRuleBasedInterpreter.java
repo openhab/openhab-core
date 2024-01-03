@@ -161,7 +161,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
         }
     };
 
-    public AbstractRuleBasedInterpreter(final EventPublisher eventPublisher, final ItemRegistry itemRegistry,
+    protected AbstractRuleBasedInterpreter(final EventPublisher eventPublisher, final ItemRegistry itemRegistry,
             final MetadataRegistry metadataRegistry) {
         this.eventPublisher = eventPublisher;
         this.itemRegistry = itemRegistry;

@@ -94,7 +94,7 @@ public abstract class AbstractCommandProvider<@NonNull E> implements ServiceTrac
      * @param context is the {@link BundleContext}, used for creating a tracker for {@link Parser} services.
      */
     @SuppressWarnings("unchecked")
-    public AbstractCommandProvider(BundleContext context) {
+    protected AbstractCommandProvider(BundleContext context) {
         this.bundleContext = context;
         parserTracker = new ServiceTracker(context, Parser.class.getName(), this);
         parserTracker.open();

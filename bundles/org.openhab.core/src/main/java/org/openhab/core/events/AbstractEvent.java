@@ -36,7 +36,7 @@ public abstract class AbstractEvent implements Event {
      * @param payload the payload
      * @param source the source
      */
-    public AbstractEvent(String topic, String payload, @Nullable String source) {
+    protected AbstractEvent(String topic, String payload, @Nullable String source) {
         this.topic = topic;
         this.payload = payload;
         this.source = source;
