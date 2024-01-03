@@ -71,9 +71,7 @@ public class MetadataConfigDescriptionProviderImpl implements ConfigDescriptionP
 
     @Override
     public Collection<ConfigDescription> getConfigDescriptions(@Nullable Locale locale) {
-        List<ConfigDescription> ret = new LinkedList<>();
-        ret.addAll(getValueConfigDescriptions(locale));
-        return ret;
+        return new LinkedList<>(getValueConfigDescriptions(locale));
     }
 
     @Override
