@@ -27,26 +27,26 @@ public class GlobalStrategies {
         @Override
         public String getName() {
             return "everyUpdate";
-        };
+        }
     };
 
     public static final Strategy CHANGE = new StrategyImpl() {
         @Override
         public String getName() {
             return "everyChange";
-        };
+        }
     };
 
     public static final Strategy RESTORE = new StrategyImpl() {
         @Override
         public String getName() {
             return "restoreOnStartup";
-        };
+        }
     };
     public static final Strategy FORECAST = new StrategyImpl() {
         @Override
         public String getName() {
             return "forecast";
-        };
+        }
     };
 }

@@ -49,7 +49,7 @@ public interface ItemUIRegistry extends ItemRegistry, ItemUIProvider {
         ITEM_NAME,
         /** No suitable label source could be determined */
         NONE
-    };
+    }
 
     /**
      * Retrieves the label for a widget.

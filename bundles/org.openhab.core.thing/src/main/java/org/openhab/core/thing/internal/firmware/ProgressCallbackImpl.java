@@ -64,7 +64,7 @@ final class ProgressCallbackImpl implements ProgressCallback {
         PENDING,
         RUNNING,
         INITIALIZED
-    };
+    }
 
     private InternalState state;
 

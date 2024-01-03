@@ -37,7 +37,7 @@ public class ChannelDescriptionChangedEvent extends AbstractEvent {
         COMMAND_OPTIONS,
         PATTERN,
         STATE_OPTIONS
-    };
+    }
 
     /**
      * The channel description changed event type.

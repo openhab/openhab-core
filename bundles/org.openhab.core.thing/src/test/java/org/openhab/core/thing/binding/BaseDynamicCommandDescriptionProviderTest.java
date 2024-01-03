@@ -67,7 +67,7 @@ class BaseDynamicCommandDescriptionProviderTest {
             this.eventPublisher = eventPublisherMock;
             this.itemChannelLinkRegistry = itemChannelLinkRegistryMock;
         }
-    };
+    }
 
     private @NonNullByDefault({}) TestDynamicCommandDescriptionProvider subject;
 
