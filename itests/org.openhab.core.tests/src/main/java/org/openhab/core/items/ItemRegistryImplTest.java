@@ -358,7 +358,7 @@ public class ItemRegistryImplTest extends JavaTest {
 
         ArgumentCaptor<Item> itemCaptor = ArgumentCaptor.forClass(Item.class);
         verify(registryChangeListener).removed(itemCaptor.capture());
-        assertTrue(itemCaptor.getValue() == item);
+        assertSame(itemCaptor.getValue(), item);
     }
 
     @Test

@@ -287,7 +287,7 @@ public class QuantityTypeTest {
         QuantityType<?> dt2 = QuantityType.valueOf("2");
         QuantityType<?> dt3 = dt2.toUnit("m");
         // Inconvertible units
-        assertTrue(dt3 == null);
+        assertNull(dt3);
     }
 
     @Test
@@ -343,7 +343,7 @@ public class QuantityTypeTest {
                 new QuantityType<>(0.1, Units.RADIAN).as(PercentType.class));
 
         // incompatible units
-        assertEquals(null, new QuantityType<>("0.5 m").as(PercentType.class));
+        assertNull(new QuantityType<>("0.5 m").as(PercentType.class));
     }
 
     @ParameterizedTest

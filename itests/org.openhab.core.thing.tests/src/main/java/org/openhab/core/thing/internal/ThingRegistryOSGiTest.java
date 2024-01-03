@@ -236,7 +236,7 @@ public class ThingRegistryOSGiTest extends JavaOSGiTest {
         Thing thing = thingRegistry.createThingOfType(expectedThingTypeUID, expectedThingUID, expectedBridgeUID,
                 expectedLabel, expectedConfiguration);
         waitForAssert(() -> {
-            assertTrue(thingResultWrapper.get() != null);
+            assertNotNull(thingResultWrapper.get());
         });
 
         assertThat(thing, is(notNullValue()));

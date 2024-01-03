@@ -76,6 +76,6 @@ public class AccessTokenResponseTest {
         // token has a life time of 60 seconds
         token.setExpiresIn(60);
 
-        assertTrue(!token.isExpired(Instant.now(), 10), "Token should have been expired due to buffer");
+        assertFalse(token.isExpired(Instant.now(), 10), "Token should not have been expired even due to buffer");
     }
 }
