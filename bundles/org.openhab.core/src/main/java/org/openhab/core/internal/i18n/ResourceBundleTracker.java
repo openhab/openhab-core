@@ -13,6 +13,7 @@
 package org.openhab.core.internal.i18n;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -127,9 +128,7 @@ public class ResourceBundleTracker extends BundleTracker {
         List<Bundle> hosts = new ArrayList<>();
         Bundle[] bundles = pkgAdmin.getHosts(fragment);
         if (bundles != null) {
-            for (int i = 0; i < bundles.length; i++) {
-                hosts.add(bundles[i]);
-            }
+            hosts.addAll(Arrays.asList(bundles));
         }
         return hosts;
     }

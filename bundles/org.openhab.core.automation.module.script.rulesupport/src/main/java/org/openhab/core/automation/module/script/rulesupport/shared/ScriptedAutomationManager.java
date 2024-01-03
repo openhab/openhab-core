@@ -164,8 +164,7 @@ public class ScriptedAutomationManager {
             // triggers are optional
         }
 
-        List<Action> actions = new ArrayList<>();
-        actions.addAll(element.getActions());
+        List<Action> actions = new ArrayList<>(element.getActions());
 
         if (element instanceof SimpleRuleActionHandler handler) {
             String privId = addPrivateActionHandler(new SimpleRuleActionHandlerDelegate(handler));
