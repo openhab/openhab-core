@@ -87,9 +87,7 @@ public class RulePredicates {
      */
     public static Predicate<Rule> hasAnyOfPrefixes(String... prefixes) {
         final HashSet<String> namespaceSet = new HashSet<>(prefixes.length);
-        for (final String namespace : prefixes) {
-            namespaceSet.add(namespace);
-        }
+        namespaceSet.addAll(Arrays.asList(prefixes));
 
         // this will even work for null namespace
         return r -> namespaceSet.contains(getPrefix(r));

@@ -396,8 +396,8 @@ public class Printer {
         int[] columnWidths = new int[] { COLUMN_PROPERTY_VALUE };
         List<String> columnValues = new ArrayList<>();
         columnValues.add(module.getId());
-        List<String> moduleContent = new ArrayList<>();
-        moduleContent.addAll(Utils.getTableTitle(Utils.getRow(columnWidths, columnValues), COLUMN_PROPERTY_VALUE));
+        List<String> moduleContent = new ArrayList<>(
+                Utils.getTableTitle(Utils.getRow(columnWidths, columnValues), COLUMN_PROPERTY_VALUE));
 
         columnWidths = new int[] { COLUMN_CONFIG_PARAMETER, COLUMN_CONFIG_PARAMETER_VALUE };
         columnValues.set(0, ID);

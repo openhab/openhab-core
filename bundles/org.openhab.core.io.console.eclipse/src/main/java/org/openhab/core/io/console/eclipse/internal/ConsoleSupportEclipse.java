@@ -17,7 +17,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -64,9 +63,7 @@ public class ConsoleSupportEclipse implements CommandProvider {
     }
 
     private Collection<ConsoleCommandExtension> getConsoleCommandExtensions() {
-        final Set<ConsoleCommandExtension> set = new HashSet<>();
-        set.addAll(consoleCommandExtensions.values());
-        return set;
+        return new HashSet<>(consoleCommandExtensions.values());
     }
 
     /**
