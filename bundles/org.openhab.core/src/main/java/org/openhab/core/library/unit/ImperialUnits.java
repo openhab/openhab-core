@@ -92,7 +92,7 @@ public final class ImperialUnits extends CustomUnits {
             new TransformedUnit<>("gal", CUBIC_INCH, MultiplyConverter.of(231.0)));
 
     public static final Unit<VolumetricFlowRate> GALLON_PER_MINUTE = addUnit(
-            new ProductUnit<VolumetricFlowRate>(GALLON_LIQUID_US.divide(tech.units.indriya.unit.Units.MINUTE)));
+            new ProductUnit<>(GALLON_LIQUID_US.divide(tech.units.indriya.unit.Units.MINUTE)));
 
     /**
      * Add unit symbols for imperial units.

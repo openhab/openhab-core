@@ -137,7 +137,7 @@ public class MarketplaceRuleTemplateProvider extends AbstractManagedProvider<Rul
         try {
             RuleTemplateDTO dto = yamlMapper.readValue(yaml, RuleTemplateDTO.class);
             // add a tag with the add-on ID to be able to identify the widget in the registry
-            dto.tags = new HashSet<@Nullable String>((dto.tags != null) ? dto.tags : new HashSet<String>());
+            dto.tags = new HashSet<@Nullable String>((dto.tags != null) ? dto.tags : new HashSet<>());
             dto.tags.add(uid);
             RuleTemplate entry = RuleTemplateDTOMapper.map(dto);
             RuleTemplate template = new RuleTemplate(entry.getUID(), entry.getLabel(), entry.getDescription(),

@@ -28,7 +28,7 @@ public class SitemapConverters extends DefaultTerminalConverters {
     @ValueConverter(rule = "Icon")
     public IValueConverter<String> Icon() {
 
-        return new IValueConverter<String>() {
+        return new IValueConverter<>() {
 
             @Override
             public String toValue(String string, INode node) throws ValueConverterException {
@@ -50,7 +50,7 @@ public class SitemapConverters extends DefaultTerminalConverters {
 
     @ValueConverter(rule = "Command")
     public IValueConverter<String> Command() {
-        return new AbstractNullSafeConverter<String>() {
+        return new AbstractNullSafeConverter<>() {
             @Override
             protected String internalToValue(String string, INode node) {
                 if ((string.startsWith("'") && string.endsWith("'"))

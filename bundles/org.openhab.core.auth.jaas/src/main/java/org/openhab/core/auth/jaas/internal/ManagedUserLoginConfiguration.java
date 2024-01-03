@@ -28,6 +28,6 @@ public class ManagedUserLoginConfiguration extends Configuration {
     @Override
     public AppConfigurationEntry[] getAppConfigurationEntry(String name) {
         return new AppConfigurationEntry[] { new AppConfigurationEntry(ManagedUserLoginModule.class.getCanonicalName(),
-                LoginModuleControlFlag.SUFFICIENT, new HashMap<String, Object>()) };
+                LoginModuleControlFlag.SUFFICIENT, new HashMap<>()) };
     }
 }

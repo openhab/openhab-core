@@ -40,8 +40,8 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 @Component
 public class StateDescriptionServiceImpl implements StateDescriptionService {
 
-    private final Set<StateDescriptionFragmentProvider> stateDescriptionFragmentProviders = Collections.synchronizedSet(
-            new TreeSet<StateDescriptionFragmentProvider>(new Comparator<StateDescriptionFragmentProvider>() {
+    private final Set<StateDescriptionFragmentProvider> stateDescriptionFragmentProviders = Collections
+            .synchronizedSet(new TreeSet<>(new Comparator<>() {
                 @Override
                 public int compare(StateDescriptionFragmentProvider provider1,
                         StateDescriptionFragmentProvider provider2) {
