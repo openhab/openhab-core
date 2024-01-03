@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -256,8 +256,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
     public RuleEngineImpl(final @Reference ModuleTypeRegistry moduleTypeRegistry,
             final @Reference RuleRegistry ruleRegistry, final @Reference StorageService storageService,
             final @Reference ReadyService readyService, final @Reference StartLevelService startLevelService) {
-        this.disabledRulesStorage = storageService.<Boolean> getStorage(DISABLED_RULE_STORAGE,
-                this.getClass().getClassLoader());
+        this.disabledRulesStorage = storageService.getStorage(DISABLED_RULE_STORAGE, this.getClass().getClassLoader());
 
         mtRegistry = moduleTypeRegistry;
         mtRegistry.addRegistryChangeListener(this);
