@@ -206,7 +206,7 @@ public class SerialPortImpl implements SerialPort {
 
     @Override
     public int getFlowControlMode() {
-        return getFlowControlMode();
+        return sp.getFlowControlMode();
     }
 
     @Override
