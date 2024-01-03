@@ -1349,10 +1349,10 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
         OutputRef outputRef = null;
         boolean conflict = false;
         if (!inputTags.isEmpty()) {
-            for (Set<String> outTags : outputTagMap.keySet()) {
-                if (outTags.containsAll(inputTags)) { // input tags must be subset of the output ones
+            for (Entry<Set<String>, OutputRef> entry : outputTagMap.entrySet()) {
+                if (entry.getKey().containsAll(inputTags)) { // input tags must be subset of the output ones
                     if (outputRef == null) {
-                        outputRef = outputTagMap.get(outTags);
+                        outputRef = entry.getValue();
                     } else {
                         conflict = true; // already exist candidate for autoMap
                         break;

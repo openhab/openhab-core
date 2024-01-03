@@ -17,7 +17,7 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.Map.Entry;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -95,9 +95,9 @@ public class CompositeModuleHandlerFactory extends BaseModuleHandlerFactory impl
         ModuleHandler handlerOfModule = getHandlers().get(getModuleIdentifier(childModulePrefix, module.getId()));
         if (handlerOfModule instanceof AbstractCompositeModuleHandler) {
             AbstractCompositeModuleHandler<ModuleImpl, ?, ?> h = (AbstractCompositeModuleHandler<ModuleImpl, ?, ?>) handlerOfModule;
-            Set<ModuleImpl> modules = h.moduleHandlerMap.keySet();
-            for (ModuleImpl child : modules) {
-                ModuleHandler childHandler = h.moduleHandlerMap.get(child);
+            for (Entry<ModuleImpl, @Nullable ? extends ModuleHandler> entry : h.moduleHandlerMap.entrySet()) {
+                ModuleImpl child = entry.getKey();
+                ModuleHandler childHandler = entry.getValue();
                 if (childHandler == null) {
                     continue;
                 }
