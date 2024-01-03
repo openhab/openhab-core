@@ -486,7 +486,7 @@
 
 	<feature name="openhab-transport-http" description="HTTP Transport" version="${project.version}">
 		<capability>openhab.tp;feature=httpclient;version=${jetty.version}</capability>
-		<feature dependency="true">openhab-core-auth-oauth2client</feature>
+		<feature>openhab-core-auth-oauth2client</feature>
 		<feature dependency="true">pax-web-jetty-extras</feature>
 		<feature dependency="true">pax-web-jetty-websockets</feature>
 	</feature>
