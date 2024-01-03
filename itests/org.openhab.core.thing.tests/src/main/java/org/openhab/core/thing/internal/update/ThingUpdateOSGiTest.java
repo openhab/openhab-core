@@ -375,7 +375,7 @@ public class ThingUpdateOSGiTest extends JavaOSGiTest {
         registerService(channelTypeRegistry);
     }
 
-    class TestThingHandlerFactory extends BaseThingHandlerFactory {
+    static class TestThingHandlerFactory extends BaseThingHandlerFactory {
         Logger logger = LoggerFactory.getLogger(TestThingHandlerFactory.class);
 
         @Override

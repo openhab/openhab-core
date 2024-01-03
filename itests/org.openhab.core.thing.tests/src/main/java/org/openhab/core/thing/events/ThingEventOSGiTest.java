@@ -40,7 +40,7 @@ import org.openhab.core.thing.type.ThingTypeBuilder;
 @NonNullByDefault
 public class ThingEventOSGiTest extends JavaOSGiTest {
 
-    class ThingEventSubscriber implements EventSubscriber {
+    static class ThingEventSubscriber implements EventSubscriber {
 
         private @Nullable Event lastReceivedEvent;
 

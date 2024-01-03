@@ -530,7 +530,7 @@ public class SitemapResourceTest extends JavaTest {
         when(sitemapProviderMock.getSitemap(SITEMAP_MODEL_NAME)).thenReturn(defaultSitemapMock);
     }
 
-    private class TestItem extends GenericItem {
+    private static class TestItem extends GenericItem {
 
         public TestItem(String name) {
             super("Number", name);

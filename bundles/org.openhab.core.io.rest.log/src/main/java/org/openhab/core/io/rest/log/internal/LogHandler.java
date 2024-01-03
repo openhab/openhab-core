@@ -82,7 +82,7 @@ public class LogHandler implements RESTResource {
     /**
      * Container for a log message
      */
-    public class LogMessage {
+    public static class LogMessage {
         public long timestamp;
         public @Nullable String severity;
         public @Nullable URL url;

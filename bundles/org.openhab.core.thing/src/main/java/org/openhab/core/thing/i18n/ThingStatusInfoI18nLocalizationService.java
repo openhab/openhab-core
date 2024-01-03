@@ -157,7 +157,7 @@ public final class ThingStatusInfoI18nLocalizationService {
     /**
      * Utility class to parse the thing status description into the text reference and optional arguments.
      */
-    private final class ParsedDescription {
+    private static final class ParsedDescription {
 
         private static final int LIMIT = 2;
 

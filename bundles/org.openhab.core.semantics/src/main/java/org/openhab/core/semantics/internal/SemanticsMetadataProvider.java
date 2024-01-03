@@ -290,7 +290,7 @@ public class SemanticsMetadataProvider extends AbstractProvider<Metadata>
         processItem(item);
     }
 
-    private class SemanticTagRegistryChangeListener implements RegistryChangeListener<SemanticTag> {
+    private static class SemanticTagRegistryChangeListener implements RegistryChangeListener<SemanticTag> {
 
         private SemanticsMetadataProvider provider;
 
