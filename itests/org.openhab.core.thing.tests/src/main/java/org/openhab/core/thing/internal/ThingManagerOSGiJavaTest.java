@@ -434,7 +434,7 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
             @Override
             public void childHandlerInitialized(ThingHandler childHandler, Thing childThing) {
                 assertDoesNotThrow(() -> childHandlerInitializedSemaphore.acquire());
-            };
+            }
         });
         registerThingHandlerFactory(THING_TYPE_UID, thing -> new BaseThingHandler(thing) {
             @Override
@@ -453,7 +453,7 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
             public void thingUpdated(Thing thing) {
                 this.thing = thing;
                 assertDoesNotThrow(() -> thingUpdatedSemapthore.acquire());
-            };
+            }
         });
 
         Bridge bridge = BridgeBuilder.create(BRIDGE_TYPE_UID, BRIDGE_UID).build();
@@ -502,7 +502,7 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
             @Override
             public void childHandlerInitialized(ThingHandler childHandler, Thing childThing) {
                 assertDoesNotThrow(() -> childHandlerInitializedSemaphore.acquire());
-            };
+            }
         });
 
         registerThingHandlerFactory(THING_TYPE_UID, thing -> new BaseThingHandler(thing) {
@@ -522,7 +522,7 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
             public void thingUpdated(Thing thing) {
                 this.thing = thing;
                 assertDoesNotThrow(() -> thingUpdatedSemapthore.acquire());
-            };
+            }
         });
 
         Bridge bridge = BridgeBuilder.create(BRIDGE_TYPE_UID, BRIDGE_UID).build();
@@ -571,7 +571,7 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
             @Override
             public void childHandlerInitialized(ThingHandler childHandler, Thing childThing) {
                 assertDoesNotThrow(() -> childHandlerInitializedSemaphore.acquire());
-            };
+            }
         });
         registerThingHandlerFactory(THING_TYPE_UID, thing -> new BaseThingHandler(thing) {
             @Override
@@ -587,7 +587,7 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
             public void thingUpdated(Thing thing) {
                 this.thing = thing;
                 assertDoesNotThrow(() -> thingUpdatedSemapthore.acquire());
-            };
+            }
         });
 
         Bridge bridge = BridgeBuilder.create(BRIDGE_TYPE_UID, BRIDGE_UID).build();
@@ -1115,7 +1115,7 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
         protected @Nullable ThingHandler createHandler(Thing thing) {
             return thingHandlerProducer.apply(thing);
         }
-    };
+    }
 
     private AtomicReference<ThingHandlerCallback> initializeThingHandlerCallback() throws Exception {
         AtomicReference<ThingHandlerCallback> thc = new AtomicReference<>();

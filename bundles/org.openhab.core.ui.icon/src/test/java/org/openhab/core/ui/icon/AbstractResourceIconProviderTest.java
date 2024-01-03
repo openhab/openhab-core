@@ -82,17 +82,17 @@ public class AbstractResourceIconProviderTest {
                 String state = substringAfterLast(resourceName, "-");
                 state = substringBeforeLast(state, ".");
                 return "30".equals(state) || "y z".equals(state);
-            };
+            }
 
             @Override
             public Set<IconSet> getIconSets(@Nullable Locale locale) {
                 return Set.of();
-            };
+            }
 
             @Override
             public Integer getPriority() {
                 return 0;
-            };
+            }
         };
     }
 

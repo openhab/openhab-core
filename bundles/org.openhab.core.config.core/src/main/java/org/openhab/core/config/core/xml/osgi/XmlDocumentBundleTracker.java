@@ -92,7 +92,7 @@ public class XmlDocumentBundleTracker<@NonNull T> extends BundleTracker<Bundle> 
         CREATED,
         OPENED,
         CLOSED
-    };
+    }
 
     public static final String THREAD_POOL_NAME = "file-processing";
 

@@ -50,7 +50,7 @@ public class DiscoveryResultBuilder {
 
     private DiscoveryResultBuilder(ThingUID thingUID) {
         this.thingUID = thingUID;
-    };
+    }
 
     /**
      * Creates a new builder for a given thing UID.
