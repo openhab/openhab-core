@@ -498,7 +498,7 @@ public class BindingBaseClassesOSGiTest extends JavaOSGiTest {
         public @Nullable Thing getThing() {
             return thing;
         }
-    };
+    }
 
     @Test
     public void assertThingCanBeUpdatedFromThingHandler() {

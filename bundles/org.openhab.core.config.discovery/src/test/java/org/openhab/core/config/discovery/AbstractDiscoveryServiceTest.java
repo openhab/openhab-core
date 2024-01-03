@@ -132,7 +132,7 @@ public class AbstractDiscoveryServiceTest implements DiscoveryListener {
                     .build();
             thingDiscovered(discoveryResult);
         }
-    };
+    }
 
     @Override
     public void thingDiscovered(DiscoveryService source, DiscoveryResult result) {

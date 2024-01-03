@@ -41,7 +41,7 @@ public class ConfigurationTest {
             ON,
             OFF,
             UNKNOWN
-        };
+        }
 
         public MyEnum enumField = MyEnum.UNKNOWN;
         public int intField;

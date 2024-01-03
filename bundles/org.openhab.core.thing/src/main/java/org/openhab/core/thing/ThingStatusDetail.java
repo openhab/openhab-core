@@ -67,7 +67,7 @@ public enum ThingStatusDetail {
         public ThingStatusDetail HANDLER_CONFIGURATION_PENDING = ThingStatusDetail.HANDLER_CONFIGURATION_PENDING;
         public ThingStatusDetail HANDLER_INITIALIZING_ERROR = ThingStatusDetail.HANDLER_INITIALIZING_ERROR;
         public ThingStatusDetail BRIDGE_UNINITIALIZED = ThingStatusDetail.BRIDGE_UNINITIALIZED;
-    };
+    }
 
     public static final class OnlineStatus {
         private OnlineStatus() {
@@ -75,7 +75,7 @@ public enum ThingStatusDetail {
 
         public ThingStatusDetail NONE = ThingStatusDetail.NONE;
         public ThingStatusDetail CONFIGURATION_PENDING = ThingStatusDetail.CONFIGURATION_PENDING;
-    };
+    }
 
     public static final class OfflineStatus {
         private OfflineStatus() {
@@ -88,5 +88,5 @@ public enum ThingStatusDetail {
         public ThingStatusDetail FIRMWARE_UPDATING = ThingStatusDetail.FIRMWARE_UPDATING;
         public ThingStatusDetail DUTY_CYCLE = ThingStatusDetail.DUTY_CYCLE;
         public ThingStatusDetail GONE = ThingStatusDetail.GONE;
-    };
+    }
 }

@@ -126,7 +126,7 @@ public class GenericThingProviderTest4 extends JavaOSGiTest {
                     return new BaseThingHandler(thing) {
                         @Override
                         public void handleCommand(ChannelUID arg0, Command arg1) {
-                        };
+                        }
 
                         @Override
                         public void initialize() {
