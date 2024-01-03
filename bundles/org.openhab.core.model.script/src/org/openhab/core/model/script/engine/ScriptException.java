@@ -74,8 +74,6 @@ public abstract class ScriptException extends Exception {
 
     /**
      * Creates a ScriptException with one Error.
-     *
-     * @param errors
      */
     private ScriptException(final String scriptText, final ScriptError error) {
         super(error.getMessage()); // ?

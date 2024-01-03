@@ -323,7 +323,6 @@ public class Printer {
      * This method is responsible for printing the strings, representing the auxiliary automation objects.
      *
      * @param columnWidths represents the column widths of the table.
-     * @param width represents the table width.
      * @param prop is a property name of the property with value the collection of the auxiliary automation objects for
      *            printing.
      * @param list with the auxiliary automation objects for printing.
@@ -530,10 +529,10 @@ public class Printer {
     }
 
     /**
-     * This method is responsible for printing the set of {@link Input}s or {@link Output}s or {@link Inputs}s.
+     * This method is responsible for printing the set of tags.
      *
-     * @param set is the set of {@link Input}s or {@link Output}s or {@link Inputs}s for printing.
-     * @return a formated string, representing the set of {@link Input}s or {@link Output}s or {@link Input}s.
+     * @param tags is the set of tags for printing.
+     * @return a formatted string, representing the set of tags.
      */
     private static String getTagsRecord(Set<String> tags) {
         if (tags == null || tags.isEmpty()) {

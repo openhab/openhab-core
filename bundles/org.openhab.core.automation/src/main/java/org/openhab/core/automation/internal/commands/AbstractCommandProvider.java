@@ -82,7 +82,7 @@ public abstract class AbstractCommandProvider<@NonNull E> implements ServiceTrac
      * high performance at runtime of the system, when the Rule Engine asks for any particular object, instead of
      * waiting it for parsing every time.
      * <p>
-     * The Map has for keys UIDs of the objects and for values {@link Localizer}s of the objects.
+     * The Map has for keys UIDs of the objects and for values the objects.
      */
     protected final Map<String, E> providedObjectsHolder = new HashMap<>();
 
@@ -101,7 +101,6 @@ public abstract class AbstractCommandProvider<@NonNull E> implements ServiceTrac
     }
 
     /**
-     * This method is inherited from {@link AbstractPersistentProvider}.
      * Extends parent's functionality with closing the {@link Parser} service tracker.
      * Clears the {@link #parsers}, {@link #providedObjectsHolder}, {@link #providerPortfolio}
      */

@@ -18,7 +18,7 @@ import org.openhab.core.automation.Trigger;
 import org.openhab.core.config.core.Configuration;
 
 /**
- * This class is implementation of {@link Trigger} modules used in the {@link RuleEngine}s.
+ * This class is implementation of {@link Trigger} modules used in the rule engines.
  *
  * @author Yordan Mihaylov - Initial contribution
  */

@@ -526,7 +526,8 @@ public class HttpUtil {
      * Check whether the content data is a JPEG file checking file start and end bytes.
      * {@link URLConnection#guessContentTypeFromStream(InputStream)} is wrong for some JPEG files.
      *
-     * @see https://en.wikipedia.org/wiki/JPEG#Syntax_and_structure
+     * @see <a href="https://en.wikipedia.org/wiki/JPEG#Syntax_and_structure">JPEG Syntax and structure</a>
+     *
      * @param data the data as buffer of bytes
      * @return <code>true</code> if the content is a JPEG file, <code>false</code> otherwise
      */

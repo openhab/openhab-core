@@ -74,7 +74,7 @@ public class ManagedMetadataProviderImpl extends AbstractManagedProvider<Metadat
     /**
      * Removes all metadata of a given item
      *
-     * @param itemname the name of the item for which the metadata is to be removed.
+     * @param name the name of the item for which the metadata is to be removed.
      */
     @Override
     public void removeItemMetadata(String name) {

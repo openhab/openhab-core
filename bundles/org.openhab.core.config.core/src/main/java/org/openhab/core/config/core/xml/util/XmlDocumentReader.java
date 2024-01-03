@@ -71,7 +71,7 @@ public abstract class XmlDocumentReader<@NonNull T> {
      *
      * @param xstream the XStream object to be configured
      *
-     * @see https://x-stream.github.io/security.html
+     * @see <a href="https://x-stream.github.io/security.html">XStream - Security Aspects</a>
      */
     protected void configureSecurity(XStream xstream) {
         xstream.allowTypesByWildcard(DEFAULT_ALLOWED_TYPES_WILDCARD);

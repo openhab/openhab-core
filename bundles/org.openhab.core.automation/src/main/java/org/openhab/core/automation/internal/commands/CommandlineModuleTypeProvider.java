@@ -71,7 +71,7 @@ public class CommandlineModuleTypeProvider extends AbstractCommandProvider<Modul
      * add any new functionality to the constructors of the providers. Only provides consistency by invoking the
      * parent's constructor.
      *
-     * @param context is the {@code BundleContext}, used for creating a tracker for {@link Parser} services.
+     * @param bundleContext is the {@code BundleContext}, used for creating a tracker for {@link Parser} services.
      * @param moduleTypeRegistry a ModuleTypeRegistry service
      */
     public CommandlineModuleTypeProvider(BundleContext bundleContext, ModuleTypeRegistry moduleTypeRegistry) {
@@ -152,8 +152,6 @@ public class CommandlineModuleTypeProvider extends AbstractCommandProvider<Modul
     /**
      * This method is responsible for removing a set of objects loaded from a specified file or URL resource.
      *
-     * @param providerType specifies the provider responsible for removing the objects loaded from a specified file or
-     *            URL resource.
      * @param url is a specified file or URL resource.
      * @return the string <b>SUCCESS</b>.
      */

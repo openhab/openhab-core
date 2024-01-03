@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
  * {@code javax.annotation.security.PermitAll} and {@code javax.annotation.security.DenyAll}
  * on resource methods and sub-resource methods.
  *
- * Ported from {@link RolesAllowedDynamicFeature} with modifications.
+ * Ported from the Jersey {@code RolesAllowedDynamicFeature} class with modifications.
  *
  * @author Paul Sandoz - initial contribution
  * @author Martin Matula - initial contribution

@@ -38,7 +38,7 @@ public class UserSecurityContext implements AuthenticationSecurityContext {
      * Constructs a security context from an instance of {@link User}
      *
      * @param user the user
-     * @param the related {@link Authentication}
+     * @param authentication the related {@link Authentication}
      * @param authenticationScheme the scheme that was used to authenticate the user, e.g. "Basic"
      */
     public UserSecurityContext(User user, Authentication authentication, String authenticationScheme) {

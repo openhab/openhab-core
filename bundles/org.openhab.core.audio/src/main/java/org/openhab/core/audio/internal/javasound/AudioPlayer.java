@@ -49,7 +49,7 @@ public class AudioPlayer extends Thread {
     /**
      * Constructs an AudioPlayer to play the passed AudioSource
      *
-     * @param audioSource The AudioSource to play
+     * @param audioStream The AudioStream to play
      */
     public AudioPlayer(AudioStream audioStream) {
         this.audioStream = audioStream;

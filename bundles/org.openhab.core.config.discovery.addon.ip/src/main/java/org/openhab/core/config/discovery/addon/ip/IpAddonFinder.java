@@ -117,7 +117,7 @@ import org.slf4j.LoggerFactory;
  * <ul>
  * <li>Currently every returned frame is considered as success, regex matching is not implemented.
  * <li>Frames are sent only on startup (or if an {@link org.openhab.core.addon.AddonInfoProvider}
- * calls {@link setAddonCandidates}), no background scanning.
+ * calls {@link #setAddonCandidates(List)}), no background scanning.
  * <ul>
  *
  * @apiNote The {@link IpAddonFinder} is still under active development, it has initially

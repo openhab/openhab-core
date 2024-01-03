@@ -415,7 +415,7 @@ public class InstallServiceCommand implements Action {
     /**
      * Silently close outputstream
      *
-     * @param is
+     * @param os
      *            outputstream
      */
     private void safeClose(OutputStream os) {

@@ -34,7 +34,6 @@ public class Exec {
      *
      * @param commandLine
      *            the command line to execute
-     * @see http://www.peterfriese.de/running-applescript-from-java/
      */
     public static void executeCommandLine(String... commandLine) {
         ExecUtil.executeCommandLine(commandLine);
