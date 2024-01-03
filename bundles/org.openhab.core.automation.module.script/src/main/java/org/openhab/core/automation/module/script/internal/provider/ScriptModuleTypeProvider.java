@@ -99,7 +99,7 @@ public class ScriptModuleTypeProvider extends AbstractProvider<ModuleType> imple
     }
 
     /**
-     * This method creates the {@link ConfigurationDescriptionParameter}s used by the generated ScriptActionType and
+     * This method creates the {@link ConfigDescriptionParameter}s used by the generated ScriptActionType and
      * ScriptConditionType. {@link AbstractScriptModuleHandler} requires that the names of these be 'type' and 'script'.
      *
      * @return a list of {#link ConfigurationDescriptionParameter}s

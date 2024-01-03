@@ -23,7 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This service is an implementation of an openHAB {@link AddonSuggestionFinderService} using the Karaf features
+ * This service is an implementation of an openHAB {@link AddonFinderService} using the Karaf features
  * service. This service allows dynamic installation/removal of add-on suggestion finders.
  *
  * @author Mark Herwege - Initial contribution

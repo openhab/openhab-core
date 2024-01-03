@@ -69,7 +69,7 @@ public class ModuleTypeI18nServiceImpl implements ModuleTypeI18nService {
     /**
      * This method is used to localize the {@link ModuleType}s.
      *
-     * @param element is the {@link ModuleType} that must be localized.
+     * @param defModuleType is the {@link ModuleType} that must be localized.
      * @param locale represents a specific geographical, political, or cultural region.
      * @return the localized {@link ModuleType}.
      */
@@ -180,7 +180,7 @@ public class ModuleTypeI18nServiceImpl implements ModuleTypeI18nService {
     /**
      * Utility method for localization of TriggerTypes.
      *
-     * @param ct is a TriggerType for localization.
+     * @param tt is a TriggerType for localization.
      * @param bundle the bundle providing localization resources.
      * @param moduleTypeUID is a TriggerType uid.
      * @param locale represents a specific geographical, political, or cultural region.

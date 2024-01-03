@@ -44,9 +44,9 @@ public class RulePredicates {
      * <br/>
      * The name space is part of the UID and the prefix thereof.
      * <br/>
-     * If the UID does not contain a {@link PREFIX_SEPARATOR} {@code null} will be returned.
+     * If the UID does not contain a {@link #PREFIX_SEPARATOR} {@code null} will be returned.
      * <br/>
-     * If the UID does contain a {@link PREFIX_SEPARATOR} the prefix until the first occurrence will be returned.
+     * If the UID does contain a {@link #PREFIX_SEPARATOR} the prefix until the first occurrence will be returned.
      * <br/>
      * If the prefix would have a zero length {@code null} will be returned.
      *

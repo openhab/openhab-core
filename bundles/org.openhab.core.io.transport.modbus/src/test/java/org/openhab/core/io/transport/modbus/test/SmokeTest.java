@@ -695,8 +695,7 @@ public class SmokeTest extends IntegrationTestSupport {
     /**
      *
      * @param unexpectedCount number of unexpected callback calls
-     * @param callbackCalled number of callback calls (including unexpected)
-     * @param dataReceived number of expected callback calls (onBits or onRegisters)
+     * @param expectedCount number of expected callback calls (onBits or onRegisters)
      * @param pollStartMillis poll start time in milliepoch
      * @param expectedPollAverageMin average poll period should be at least greater than this
      * @param expectedPollAverageMax average poll period less than this

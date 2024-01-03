@@ -50,9 +50,6 @@ public class ItemCommandActionHandler extends BaseActionModuleHandler {
 
     /**
      * constructs a new ItemCommandActionHandler
-     *
-     * @param module
-     * @param moduleTypes
      */
     public ItemCommandActionHandler(Action module, EventPublisher eventPublisher, ItemRegistry itemRegistry) {
         super(module);

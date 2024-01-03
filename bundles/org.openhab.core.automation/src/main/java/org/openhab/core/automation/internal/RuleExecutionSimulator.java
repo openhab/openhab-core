@@ -110,7 +110,7 @@ final class RuleExecutionSimulator {
      * @param rule {@link Rule} to be simulated.
      * @param from {@link ZonedDateTime} earliest time to be contained in the rule simulation.
      * @param until {@link ZonedDateTime} latest time to be contained in the rule simulation.
-     * @param cron cron-expression to be evaluated for determining the execution times.
+     * @param temporalAdjuster {@link SchedulerTemporalAdjuster} to be evaluated for determining the execution times.
      * @return a list of expected executions.
      */
     private List<RuleExecution> simulateExecutionsForCronBasedRule(Rule rule, ZonedDateTime from, ZonedDateTime until,

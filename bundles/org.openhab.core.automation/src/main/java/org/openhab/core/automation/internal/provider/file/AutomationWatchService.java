@@ -19,8 +19,8 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.service.WatchService;
 
 /**
- * This class is an implementation of {@link AbstractWatchService} which is responsible for tracking changes in file
- * system by Java WatchService.
+ * This class is an implementation of {@link WatchService.WatchEventListener} which is responsible for tracking file
+ * system changes.
  * <p>
  * It provides functionality for tracking {@link #watchingDir} changes to import or remove the automation objects.
  *

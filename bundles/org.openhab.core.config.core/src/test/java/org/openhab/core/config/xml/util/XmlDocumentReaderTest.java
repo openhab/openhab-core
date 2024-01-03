@@ -85,7 +85,7 @@ public class XmlDocumentReaderTest {
     }
 
     /**
-     * @see https://x-stream.github.io/CVE-2013-7285.html
+     * @see <a href="https://x-stream.github.io/CVE-2013-7285.html">XStream - CVE-2013-7285</a>
      */
     @Test
     public void defaultSecurityProtectsAgainstRemoteCodeExecution() throws Exception {
@@ -105,7 +105,7 @@ public class XmlDocumentReaderTest {
     }
 
     /**
-     * @see https://x-stream.github.io/CVE-2017-7957.html
+     * @see <a href="https://x-stream.github.io/CVE-2017-7957.html">XStream - CVE-2017-7957</a>
      */
     @Test
     public void defaultSecurityProtectsAgainstDenialOfServiceAttacks() throws Exception {

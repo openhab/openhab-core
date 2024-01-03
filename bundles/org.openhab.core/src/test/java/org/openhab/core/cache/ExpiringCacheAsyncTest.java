@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.openhab.core.JavaTest;
 
 /**
- * Tests cases for {@link ExpiringAsyncCache}.
+ * Tests cases for {@link ExpiringCacheAsync}.
  *
  * @author David Graeff - Initial contribution
  */

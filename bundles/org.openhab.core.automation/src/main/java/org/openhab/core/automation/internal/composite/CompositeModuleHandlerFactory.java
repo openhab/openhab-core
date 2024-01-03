@@ -65,8 +65,7 @@ public class CompositeModuleHandlerFactory extends BaseModuleHandlerFactory impl
     /**
      * The constructor of system handler factory for composite module types.
      *
-     * @param context is a bundle context
-     * @param mtManager is a module type manager
+     * @param mtRegistry is a module type registry
      * @param re is a rule engine
      */
     public CompositeModuleHandlerFactory(ModuleTypeRegistry mtRegistry, RuleEngineImpl re) {

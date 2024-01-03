@@ -31,7 +31,7 @@ import org.openhab.core.thing.binding.ThingHandler;
 import org.openhab.core.thing.binding.ThingHandlerCallback;
 
 /**
- * Tests cases for {@link MagicONOffLightHandler}. The tests provide mocks for supporting entities using Mockito.
+ * Tests cases for {@link MagicColorLightHandler}. The tests provide mocks for supporting entities using Mockito.
  *
  * @author Henning Treu - Initial contribution
  */

@@ -27,7 +27,7 @@ import org.osgi.framework.Bundle;
  * A utility service which localizes {@link Profile}s.
  * Falls back to a localized {@link ProfileType} for label and description when not given otherwise.
  *
- * @see {@link ProfileTypeI18nLocalizationService}
+ * @see org.openhab.core.thing.profiles.i18n.ProfileTypeI18nLocalizationService
  *
  * @author Christoph Weitkamp - Initial contribution
  */

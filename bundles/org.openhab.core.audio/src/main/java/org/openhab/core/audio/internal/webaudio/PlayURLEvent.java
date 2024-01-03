@@ -16,7 +16,8 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.events.AbstractEvent;
 
 /**
- * This is an {@link Event} that is sent when a web client should play an audio stream from a url.
+ * This is an {@link org.openhab.core.events.Event Event} that is sent when a web client should play an audio stream
+ * from a url.
  *
  * @author Kai Kreuzer - Initial contribution and API
  */

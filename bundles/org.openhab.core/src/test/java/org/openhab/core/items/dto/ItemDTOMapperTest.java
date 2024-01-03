@@ -10,9 +10,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-/**
- * @author Stefan Triller - Initial contribution
- */
 package org.openhab.core.items.dto;
 
 import static org.hamcrest.CoreMatchers.instanceOf;

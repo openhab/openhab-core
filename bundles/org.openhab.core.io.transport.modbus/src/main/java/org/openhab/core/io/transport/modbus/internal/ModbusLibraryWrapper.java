@@ -264,7 +264,7 @@ public class ModbusLibraryWrapper {
     /**
      * Convert {@link ModbusRegisterArray} to array of {@link Register}
      *
-     * @param bits
+     * @param arr
      * @return
      */
     public static Register[] convertRegisters(ModbusRegisterArray arr) {
@@ -303,7 +303,7 @@ public class ModbusLibraryWrapper {
     /**
      * Invoke callback with the data received
      *
-     * @param message original request
+     * @param request original request
      * @param callback callback for read
      * @param response Modbus library response object
      */

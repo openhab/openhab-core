@@ -333,9 +333,6 @@ public class SitemapResource
 
     /**
      * Subscribes the connecting client to the stream of sitemap events.
-     *
-     * @return {@link EventOutput} object associated with the incoming
-     *         connection.
      */
     @GET
     @Path(SEGMENT_EVENTS + "/{subscriptionid: [a-zA-Z_0-9-]+}")
