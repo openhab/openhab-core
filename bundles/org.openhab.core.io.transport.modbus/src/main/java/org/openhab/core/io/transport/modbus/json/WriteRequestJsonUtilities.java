@@ -169,7 +169,7 @@ public final class WriteRequestJsonUtilities {
                 writeSingle.set(true);
                 if (valuesElem.size() != 1) {
                     throw new IllegalArgumentException(String
-                            .format("Expecting single value with functionCode=%s, got: %d", functionCode, valuesElem));
+                            .format("Expecting single value with functionCode=%s, got: %s", functionCode, valuesElem));
                 }
                 // fall-through to WRITE_MULTIPLE_COILS
             case WRITE_MULTIPLE_COILS:
@@ -189,7 +189,7 @@ public final class WriteRequestJsonUtilities {
                 writeSingle.set(true);
                 if (valuesElem.size() != 1) {
                     throw new IllegalArgumentException(String
-                            .format("Expecting single value with functionCode=%s, got: %d", functionCode, valuesElem));
+                            .format("Expecting single value with functionCode=%s, got: %s", functionCode, valuesElem));
                 }
                 // fall-through to WRITE_MULTIPLE_REGISTERS
             case WRITE_MULTIPLE_REGISTERS: {

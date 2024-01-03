@@ -101,7 +101,7 @@ public class PercentTypeTest {
             assertEquals(new PercentType("1"), new PercentType("1", locale));
             assertEquals(new PercentType("12"), new PercentType("12", locale));
             assertEquals(new PercentType("12.56"), new PercentType(String.format("12%s56", ds), locale));
-            assertEquals(new PercentType("100"), new PercentType(String.format("100", gs, gs), locale));
+            assertEquals(new PercentType("100"), new PercentType("100", locale));
         });
     }
 

@@ -289,16 +289,14 @@ public class SysfsUsbSerialScanner implements UsbSerialScanner {
         }
 
         if (!canPerformScans()) {
-            String logString = String.format(
-                    "Cannot perform scans with this configuration: sysfsTtyDevicesDirectory: {}, devDirectory: {}",
-                    sysfsTtyDevicesDirectory, devDirectory);
+            String message = "Cannot perform scans with this configuration: sysfsTtyDevicesDirectory: {}, devDirectory: {}";
 
             if (configurationIsChanged) {
                 // Warn if the configuration was actively changed
-                logger.warn(logString);
+                logger.warn(message, sysfsTtyDevicesDirectory, devDirectory);
             } else {
                 // Otherwise, only debug log - so that, in particular, on Non-Linux systems users do not see warning
-                logger.debug(logString);
+                logger.debug(message, sysfsTtyDevicesDirectory, devDirectory);
             }
         }
     }
