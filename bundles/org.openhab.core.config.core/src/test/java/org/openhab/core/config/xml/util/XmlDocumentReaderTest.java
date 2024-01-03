@@ -44,7 +44,7 @@ public class XmlDocumentReaderTest {
 
     private static final String OHC_PACKAGE_PREFIX = "org.openhab.core.";
 
-    private class ConfigDescriptionReader extends XmlDocumentReader<ConfigDescription> {
+    private static class ConfigDescriptionReader extends XmlDocumentReader<ConfigDescription> {
         @Override
         protected void registerConverters(XStream xstream) {
         }

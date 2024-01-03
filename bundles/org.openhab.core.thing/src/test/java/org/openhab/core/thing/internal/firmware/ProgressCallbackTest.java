@@ -382,7 +382,7 @@ public final class ProgressCallbackTest {
         assertThat(fpiEvent.getFirmwareUpdateResultInfo().getResult(), is(expectedResult));
     }
 
-    class DummyFirmwareHandler implements FirmwareUpdateHandler {
+    static class DummyFirmwareHandler implements FirmwareUpdateHandler {
 
         @Override
         public Thing getThing() {

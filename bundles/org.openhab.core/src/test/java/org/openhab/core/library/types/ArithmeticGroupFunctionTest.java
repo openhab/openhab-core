@@ -273,7 +273,7 @@ public class ArithmeticGroupFunctionTest {
         assertEquals(new DecimalType("2"), state);
     }
 
-    private class TestItem extends GenericItem {
+    private static class TestItem extends GenericItem {
 
         public TestItem(String name, State state) {
             super("Test", name);

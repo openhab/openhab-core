@@ -40,7 +40,7 @@ public class LinkEventOSGiTest extends JavaOSGiTest {
     private @NonNullByDefault({}) ItemChannelLinkRegistry itemChannelLinkRegistry;
     private @NonNullByDefault({}) ItemChannelLinkEventSubscriber eventSubscriber;
 
-    class ItemChannelLinkEventSubscriber implements EventSubscriber {
+    static class ItemChannelLinkEventSubscriber implements EventSubscriber {
 
         private @Nullable Event lastReceivedEvent;
 

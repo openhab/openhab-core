@@ -79,7 +79,7 @@ public class DeltaUsbSerialScanner {
     /**
      * Delta between two subsequent scan results.
      */
-    class Delta<T> {
+    static class Delta<T> {
 
         private final Set<T> added;
         private final Set<T> removed;

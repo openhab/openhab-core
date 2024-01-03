@@ -68,7 +68,7 @@ public class DateTimeGroupFunctionTest {
         assertTrue(expectedDateTime.isEqual(((DateTimeType) state).getZonedDateTime()));
     }
 
-    private class TestItem extends GenericItem {
+    private static class TestItem extends GenericItem {
 
         public TestItem(String name, State state) {
             super("Test", name);

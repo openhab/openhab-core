@@ -220,7 +220,7 @@ public class RuntimeRuleTest extends JavaOSGiTest {
         });
     }
 
-    class TestItemProvider implements ItemProvider {
+    static class TestItemProvider implements ItemProvider {
         private final Collection<Item> items;
 
         TestItemProvider(Collection<Item> items) {

@@ -121,7 +121,7 @@ public class MqttBrokerConnection {
      * The callback will interact with the {@link AbstractReconnectStrategy} as well as inform registered
      * {@link MqttConnectionObserver}s.
      */
-    public class ConnectionCallback implements MqttClientConnectedListener, MqttClientDisconnectedListener {
+    public static class ConnectionCallback implements MqttClientConnectedListener, MqttClientDisconnectedListener {
         private final MqttBrokerConnection connection;
         private final Runnable cancelTimeoutFuture;
         private CompletableFuture<Boolean> future = new CompletableFuture<>();

@@ -298,7 +298,7 @@ public abstract class AbstractFileTransformationService<T> implements Transforma
         return Arrays.stream(path.listFiles(new FileExtensionsFilter(validExtensions))).map(File::getName).toList();
     }
 
-    protected class FileExtensionsFilter implements FilenameFilter {
+    protected static class FileExtensionsFilter implements FilenameFilter {
 
         private final String[] validExtensions;
 

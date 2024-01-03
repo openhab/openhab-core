@@ -32,7 +32,7 @@ import org.openhab.core.types.EventDescription;
 public class TriggerChannelTypeBuilderImpl extends AbstractChannelTypeBuilder<TriggerChannelTypeBuilder>
         implements TriggerChannelTypeBuilder {
 
-    private class TriggerChannelTypeImpl extends ChannelType {
+    private static class TriggerChannelTypeImpl extends ChannelType {
         TriggerChannelTypeImpl(ChannelTypeUID uid, boolean advanced, String label, @Nullable String description,
                 @Nullable String category, @Nullable Set<String> tags, @Nullable EventDescription event,
                 @Nullable URI configDescriptionURI) throws IllegalArgumentException {
