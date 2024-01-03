@@ -70,7 +70,7 @@ import org.slf4j.LoggerFactory;
 @NonNullByDefault
 public abstract class AbstractResourceBundleProvider<@NonNull E> {
 
-    public AbstractResourceBundleProvider(String path) {
+    protected AbstractResourceBundleProvider(String path) {
         this.path = path;
     }
 

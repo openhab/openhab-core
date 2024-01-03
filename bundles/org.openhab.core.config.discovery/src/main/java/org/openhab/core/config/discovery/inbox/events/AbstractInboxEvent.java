@@ -35,7 +35,7 @@ public abstract class AbstractInboxEvent extends AbstractEvent {
      * @param payload the payload
      * @param discoveryResult the discovery-result data transfer object
      */
-    public AbstractInboxEvent(String topic, String payload, DiscoveryResultDTO discoveryResult) {
+    protected AbstractInboxEvent(String topic, String payload, DiscoveryResultDTO discoveryResult) {
         super(topic, payload, null);
         this.discoveryResult = discoveryResult;
     }

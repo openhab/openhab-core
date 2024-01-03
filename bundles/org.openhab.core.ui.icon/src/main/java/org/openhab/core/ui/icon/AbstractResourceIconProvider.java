@@ -45,7 +45,7 @@ public abstract class AbstractResourceIconProvider implements IconProvider {
 
     protected final TranslationProvider i18nProvider;
 
-    public AbstractResourceIconProvider(final TranslationProvider i18nProvider) {
+    protected AbstractResourceIconProvider(final TranslationProvider i18nProvider) {
         this.i18nProvider = i18nProvider;
     }
 

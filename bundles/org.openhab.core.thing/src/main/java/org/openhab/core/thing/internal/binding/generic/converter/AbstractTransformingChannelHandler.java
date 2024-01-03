@@ -41,7 +41,7 @@ public abstract class AbstractTransformingChannelHandler implements ChannelHandl
 
     protected final ChannelValueConverterConfig channelConfig;
 
-    public AbstractTransformingChannelHandler(Consumer<State> updateState, Consumer<Command> postCommand,
+    protected AbstractTransformingChannelHandler(Consumer<State> updateState, Consumer<Command> postCommand,
             @Nullable Consumer<String> sendValue, ChannelTransformation stateTransformations,
             ChannelTransformation commandTransformations, ChannelValueConverterConfig channelConfig) {
         this.updateState = updateState;

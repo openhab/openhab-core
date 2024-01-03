@@ -67,7 +67,8 @@ public abstract class AbstractCompositeModuleHandler<M extends Module, MT extend
      * @param mapModuleToHandler map containing pairs of child modules instances (defined by module type) and their
      *            handlers
      */
-    public AbstractCompositeModuleHandler(M module, MT moduleType, LinkedHashMap<M, @Nullable H> mapModuleToHandler) {
+    protected AbstractCompositeModuleHandler(M module, MT moduleType,
+            LinkedHashMap<M, @Nullable H> mapModuleToHandler) {
         this.module = module;
         this.moduleType = moduleType;
         this.moduleHandlerMap = mapModuleToHandler;

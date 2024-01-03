@@ -50,7 +50,7 @@ public abstract class AbstractManagedProvider<@NonNull E extends Identifiable<K>
 
     protected final Logger logger = LoggerFactory.getLogger(AbstractManagedProvider.class);
 
-    public AbstractManagedProvider(final StorageService storageService) {
+    protected AbstractManagedProvider(final StorageService storageService) {
         storage = storageService.getStorage(getStorageName(), this.getClass().getClassLoader());
     }
 

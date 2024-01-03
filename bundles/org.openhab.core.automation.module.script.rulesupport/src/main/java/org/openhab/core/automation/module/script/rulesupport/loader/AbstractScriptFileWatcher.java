@@ -96,7 +96,7 @@ public abstract class AbstractScriptFileWatcher implements WatchService.WatchEve
 
     private volatile int currentStartLevel;
 
-    public AbstractScriptFileWatcher(final WatchService watchService, final ScriptEngineManager manager,
+    protected AbstractScriptFileWatcher(final WatchService watchService, final ScriptEngineManager manager,
             final ReadyService readyService, final StartLevelService startLevelService, final String fileDirectory,
             boolean watchSubDirectories) {
         this.watchService = watchService;

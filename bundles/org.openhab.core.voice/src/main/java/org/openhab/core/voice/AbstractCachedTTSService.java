@@ -32,7 +32,7 @@ public abstract class AbstractCachedTTSService implements CachedTTSService {
 
     private final TTSCache ttsCache;
 
-    public AbstractCachedTTSService(final @Reference TTSCache ttsCache) {
+    protected AbstractCachedTTSService(final @Reference TTSCache ttsCache) {
         this.ttsCache = ttsCache;
     }
 
