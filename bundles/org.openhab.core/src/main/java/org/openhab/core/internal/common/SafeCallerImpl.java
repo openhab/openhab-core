@@ -63,7 +63,7 @@ public class SafeCallerImpl implements SafeCaller {
 
     @Override
     public <T> SafeCallerBuilder<T> create(T target, Class<T> interfaceType) {
-        return new SafeCallerBuilderImpl<T>(target, new Class<?>[] { interfaceType }, manager);
+        return new SafeCallerBuilderImpl<>(target, new Class<?>[] { interfaceType }, manager);
     }
 
     protected ExecutorService getScheduler() {

@@ -190,7 +190,7 @@ public class ModbusLibraryWrapper {
      */
     public static ModbusTransaction createTransactionForEndpoint(ModbusSlaveEndpoint endpoint,
             ModbusSlaveConnection connection) {
-        ModbusTransaction transaction = endpoint.accept(new ModbusSlaveEndpointVisitor<ModbusTransaction>() {
+        ModbusTransaction transaction = endpoint.accept(new ModbusSlaveEndpointVisitor<>() {
 
             @Override
             public @NonNull ModbusTransaction visit(ModbusTCPSlaveEndpoint modbusIPSlavePoolingKey) {

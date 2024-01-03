@@ -115,7 +115,7 @@ public class ManagedThingProviderOSGiTest extends JavaOSGiTest {
         AsyncResultWrapper<Provider<Thing>> thingProviderWrapper = new AsyncResultWrapper<>();
         AsyncResultWrapper<Thing> thingWrapper = new AsyncResultWrapper<>();
 
-        registerThingsChangeListener(new ProviderChangeListener<Thing>() {
+        registerThingsChangeListener(new ProviderChangeListener<>() {
             @Override
             public void added(Provider<Thing> provider, Thing thing) {
                 thingProviderWrapper.set(provider);
@@ -150,7 +150,7 @@ public class ManagedThingProviderOSGiTest extends JavaOSGiTest {
         Thing thing1 = ThingBuilder.create(THING_TYPE_UID, THING1_ID).build();
         managedThingProvider.add(thing1);
 
-        registerThingsChangeListener(new ProviderChangeListener<Thing>() {
+        registerThingsChangeListener(new ProviderChangeListener<>() {
             @Override
             public void added(Provider<Thing> provider, Thing thing) {
             }
