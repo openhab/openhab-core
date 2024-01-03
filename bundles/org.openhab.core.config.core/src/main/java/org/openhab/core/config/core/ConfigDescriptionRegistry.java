@@ -126,10 +126,7 @@ public class ConfigDescriptionRegistry {
         }
 
         // Now convert the map into the collection
-        Collection<ConfigDescription> configDescriptions = new ArrayList<>(configMap.size());
-        configDescriptions.addAll(configMap.values());
-
-        return Collections.unmodifiableCollection(configDescriptions);
+        return Collections.unmodifiableCollection(new ArrayList<>(configMap.values()));
     }
 
     /**
