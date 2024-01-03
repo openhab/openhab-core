@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -148,10 +149,9 @@ public class RuleResourceBundleImporter extends AbstractResourceBundleProvider<R
     protected List<String> getPreviousPortfolio(Vendor vendor) {
         List<String> portfolio = providerPortfolio.get(vendor);
         if (portfolio == null) {
-            for (Vendor v : providerPortfolio.keySet()) {
-                if (v.getVendorSymbolicName().equals(vendor.getVendorSymbolicName())) {
-                    List<String> vendorPortfolio = providerPortfolio.get(v);
-                    return vendorPortfolio == null ? List.of() : vendorPortfolio;
+            for (Entry<Vendor, List<String>> entry : providerPortfolio.entrySet()) {
+                if (entry.getKey().getVendorSymbolicName().equals(vendor.getVendorSymbolicName())) {
+                    return entry.getValue();
                 }
             }
         }

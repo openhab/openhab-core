@@ -908,9 +908,9 @@ public class InboxOSGiTest extends JavaOSGiTest {
         assertNotNull(addedThing);
         assertNotNull(approvedThing);
         assertEquals(approvedThing, addedThing);
-        discoveryResultProperties.keySet().forEach(key -> {
+        discoveryResultProperties.forEach((key, value) -> {
             String thingProperty = addedThing.getProperties().get(key);
-            String descResultParam = String.valueOf(discoveryResultProperties.get(key));
+            String descResultParam = String.valueOf(value);
             assertThat(thingProperty, is(notNullValue()));
             assertThat(descResultParam, is(notNullValue()));
             assertThat(thingProperty, is(descResultParam));

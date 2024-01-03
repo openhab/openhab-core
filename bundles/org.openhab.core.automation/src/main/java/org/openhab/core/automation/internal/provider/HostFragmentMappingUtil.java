@@ -54,9 +54,9 @@ public class HostFragmentMappingUtil {
         if (bundles != null) {
             hosts = Arrays.asList(bundles);
         } else {
-            for (Bundle host : hostFragmentMapping.keySet()) {
-                if (hostFragmentMapping.get(host).contains(fragment)) {
-                    hosts.add(host);
+            for (Entry<Bundle, List<Bundle>> entry : hostFragmentMapping.entrySet()) {
+                if (entry.getValue().contains(fragment)) {
+                    hosts.add(entry.getKey());
                 }
             }
         }
