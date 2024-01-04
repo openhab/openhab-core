@@ -36,6 +36,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -43,16 +44,21 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.addon.Addon;
 import org.openhab.core.addon.AddonDiscoveryMethod;
 import org.openhab.core.addon.AddonInfo;
 import org.openhab.core.addon.AddonMatchProperty;
 import org.openhab.core.addon.AddonParameter;
+import org.openhab.core.addon.AddonService;
 import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.config.discovery.addon.AddonFinder;
 import org.openhab.core.config.discovery.addon.BaseAddonFinder;
 import org.openhab.core.net.NetUtil;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -148,6 +154,7 @@ public class IpAddonFinder extends BaseAddonFinder {
     private final Logger logger = LoggerFactory.getLogger(IpAddonFinder.class);
     private final ScheduledExecutorService scheduler = ThreadPoolManager
             .getScheduledPool(ThreadPoolManager.THREAD_POOL_NAME_COMMON);
+    private final Set<AddonService> addonServices = new CopyOnWriteArraySet<>();
     private @Nullable Future<?> scanJob = null;
     Set<AddonInfo> suggestions = new HashSet<>();
 
@@ -167,6 +174,15 @@ public class IpAddonFinder extends BaseAddonFinder {
         logger.debug("IpAddonFinder::setAddonCandidates({})", candidates.size());
         super.setAddonCandidates(candidates);
         startScan();
+    }
+
+    @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
+    protected void addAddonService(AddonService featureService) {
+        this.addonServices.add(featureService);
+    }
+
+    protected void removeAddonService(AddonService featureService) {
+        this.addonServices.remove(featureService);
     }
 
     private void startScan() {
@@ -196,6 +212,12 @@ public class IpAddonFinder extends BaseAddonFinder {
                     .filter(method -> SERVICE_TYPE.equals(method.getServiceType())).toList()) {
 
                 logger.trace("Checking candidate: {}", candidate.getUID());
+
+                // skip scanning if already installed
+                if (isAddonInstalled(candidate.getUID())) {
+                    logger.trace("Skipping {}, already installed", candidate.getUID());
+                    continue;
+                }
 
                 Map<String, String> parameters = method.getParameters().stream()
                         .collect(Collectors.toMap(AddonParameter::getName, AddonParameter::getValue));
@@ -341,5 +363,15 @@ public class IpAddonFinder extends BaseAddonFinder {
     @Override
     public String getServiceName() {
         return SERVICE_NAME;
+    }
+
+    private boolean isAddonInstalled(String addonId) {
+        for (AddonService addonService : addonServices) {
+            Addon addon = addonService.getAddon(addonId, null);
+            if (addon != null && addon.isInstalled()) {
+                return true;
+            }
+        }
+        return false;
     }
 }
