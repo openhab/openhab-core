@@ -152,7 +152,7 @@ public class IpAddonFinder extends BaseAddonFinder {
     private final Logger logger = LoggerFactory.getLogger(IpAddonFinder.class);
     private final ScheduledExecutorService scheduler = ThreadPoolManager
             .getScheduledPool(ThreadPoolManager.THREAD_POOL_NAME_COMMON);
-    private final @Nullable AddonService addonService;
+    private final AddonService addonService;
     private @Nullable Future<?> scanJob = null;
     Set<AddonInfo> suggestions = new HashSet<>();
 
@@ -205,13 +205,10 @@ public class IpAddonFinder extends BaseAddonFinder {
                 logger.trace("Checking candidate: {}", candidate.getUID());
 
                 // skip scanning if already installed
-                AddonService tmpAddonService = addonService;
-                if (tmpAddonService != null) {
-                    Addon a = tmpAddonService.getAddon(candidate.getUID(), null);
-                    if (a != null && a.isInstalled()) {
-                        logger.trace("Skipping {}, already installed", candidate.getUID());
-                        continue;
-                    }
+                Addon addon = addonService.getAddon(candidate.getUID(), null);
+                if (addon != null && addon.isInstalled()) {
+                    logger.trace("Skipping {}, already installed", candidate.getUID());
+                    continue;
                 }
 
                 Map<String, String> parameters = method.getParameters().stream()
