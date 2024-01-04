@@ -43,16 +43,20 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.addon.Addon;
 import org.openhab.core.addon.AddonDiscoveryMethod;
 import org.openhab.core.addon.AddonInfo;
 import org.openhab.core.addon.AddonMatchProperty;
 import org.openhab.core.addon.AddonParameter;
+import org.openhab.core.addon.AddonService;
 import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.config.discovery.addon.AddonFinder;
 import org.openhab.core.config.discovery.addon.BaseAddonFinder;
 import org.openhab.core.net.NetUtil;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -148,11 +152,14 @@ public class IpAddonFinder extends BaseAddonFinder {
     private final Logger logger = LoggerFactory.getLogger(IpAddonFinder.class);
     private final ScheduledExecutorService scheduler = ThreadPoolManager
             .getScheduledPool(ThreadPoolManager.THREAD_POOL_NAME_COMMON);
+    private @Nullable AddonService addonService;
     private @Nullable Future<?> scanJob = null;
     Set<AddonInfo> suggestions = new HashSet<>();
 
-    public IpAddonFinder() {
+    @Activate
+    public IpAddonFinder(@Reference AddonService as) {
         logger.trace("IpAddonFinder::IpAddonFinder");
+        this.addonService = as;
         // start of scan will be triggered by setAddonCandidates to ensure addonCandidates are available
     }
 
@@ -196,6 +203,16 @@ public class IpAddonFinder extends BaseAddonFinder {
                     .filter(method -> SERVICE_TYPE.equals(method.getServiceType())).toList()) {
 
                 logger.trace("Checking candidate: {}", candidate.getUID());
+
+                // skip scanning if already installed
+                if (addonService != null) {
+                    @Nullable
+                    Addon a = addonService.getAddon(candidate.getUID(), null);
+                    if (a != null && a.isInstalled()) {
+                        logger.trace("Skipping {}, already installed", candidate.getUID());
+                        continue;
+                    }
+                }
 
                 Map<String, String> parameters = method.getParameters().stream()
                         .collect(Collectors.toMap(AddonParameter::getName, AddonParameter::getValue));
