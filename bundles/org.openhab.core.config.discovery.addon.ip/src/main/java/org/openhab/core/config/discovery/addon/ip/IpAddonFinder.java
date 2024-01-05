@@ -228,7 +228,7 @@ public class IpAddonFinder extends BaseAddonFinder {
                 String type = Objects.toString(parameters.get("type"), "");
                 String request = Objects.toString(parameters.get(PARAMETER_REQUEST), "");
                 String response = Objects.toString(matchProperties.get(MATCH_PROPERTY_RESPONSE), "");
-                int timeoutMs = 0;
+                int timeoutMs;
                 try {
                     timeoutMs = Integer.parseInt(Objects.toString(parameters.get(PARAMETER_TIMEOUT_MS)));
                 } catch (NumberFormatException e) {
@@ -237,14 +237,14 @@ public class IpAddonFinder extends BaseAddonFinder {
                     continue;
                 }
                 @Nullable
-                InetAddress destIp = null;
+                InetAddress destIp;
                 try {
                     destIp = InetAddress.getByName(parameters.get(PARAMETER_DEST_IP));
                 } catch (UnknownHostException e) {
                     logger.warn("{}: discovery-parameter '{}' cannot be parsed", candidate.getUID(), PARAMETER_DEST_IP);
                     continue;
                 }
-                int destPort = 0;
+                int destPort;
                 try {
                     destPort = Integer.parseInt(Objects.toString(parameters.get(PARAMETER_DEST_PORT)));
                 } catch (NumberFormatException e) {

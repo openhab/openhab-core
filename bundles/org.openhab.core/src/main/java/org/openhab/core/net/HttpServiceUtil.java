@@ -76,7 +76,7 @@ public class HttpServiceUtil {
                 }
                 value = ref.getProperty(Constants.SERVICE_RANKING);
                 final int serviceRanking;
-                if (value == null || !(value instanceof Integer)) {
+                if (!(value instanceof Integer)) {
                     serviceRanking = 0;
                 } else {
                     serviceRanking = (Integer) value;

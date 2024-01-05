@@ -188,7 +188,7 @@ public class JavaSoundAudioSink extends AudioSinkAsync {
             if (cachedVolume == null) {
                 Process p = Runtime.getRuntime()
                         .exec(new String[] { "osascript", "-e", "output volume of (get volume settings)" });
-                String value = null;
+                String value;
                 try (Scanner scanner = new Scanner(p.getInputStream(), StandardCharsets.UTF_8.name())) {
                     value = scanner.useDelimiter("\\A").next().strip();
                 }

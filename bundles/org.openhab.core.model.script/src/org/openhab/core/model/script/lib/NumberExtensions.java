@@ -178,7 +178,7 @@ public class NumberExtensions {
         if (type instanceof QuantityType qtype && x instanceof QuantityType qx) {
             return operator_equals(qtype, qx);
         }
-        if (type != null && type instanceof DecimalType decimalType && x != null) {
+        if (type instanceof DecimalType decimalType && x != null) {
             return decimalType.toBigDecimal().compareTo(numberToBigDecimal(x)) == 0;
         } else {
             return type == x; // both might be null, then we should return true
@@ -189,7 +189,7 @@ public class NumberExtensions {
         if (type instanceof QuantityType qtype && x instanceof QuantityType qx) {
             return operator_notEquals(qtype, qx);
         }
-        if (type != null && type instanceof DecimalType decimalType && x != null) {
+        if (type instanceof DecimalType decimalType && x != null) {
             return decimalType.toBigDecimal().compareTo(numberToBigDecimal(x)) != 0;
         } else {
             return type != x; // both might be null, then we should return
@@ -201,7 +201,7 @@ public class NumberExtensions {
         if (type instanceof QuantityType qtype && x instanceof QuantityType qx) {
             return operator_greaterThan(qtype, qx);
         }
-        if (type != null && type instanceof DecimalType decimalType && x != null) {
+        if (type instanceof DecimalType decimalType && x != null) {
             return decimalType.toBigDecimal().compareTo(numberToBigDecimal(x)) > 0;
         } else {
             return false;
@@ -212,7 +212,7 @@ public class NumberExtensions {
         if (type instanceof QuantityType qtype && x instanceof QuantityType qx) {
             return operator_greaterEqualsThan(qtype, qx);
         }
-        if (type != null && type instanceof DecimalType decimalType && x != null) {
+        if (type instanceof DecimalType decimalType && x != null) {
             return decimalType.toBigDecimal().compareTo(numberToBigDecimal(x)) >= 0;
         } else {
             return false;
@@ -223,7 +223,7 @@ public class NumberExtensions {
         if (type instanceof QuantityType qtype && x instanceof QuantityType qx) {
             return operator_lessThan(qtype, qx);
         }
-        if (type != null && type instanceof DecimalType decimalType && x != null) {
+        if (type instanceof DecimalType decimalType && x != null) {
             return decimalType.toBigDecimal().compareTo(numberToBigDecimal(x)) < 0;
         } else {
             return false;
@@ -234,7 +234,7 @@ public class NumberExtensions {
         if (type instanceof QuantityType qtype && x instanceof QuantityType qx) {
             return operator_lessEqualsThan(qtype, qx);
         }
-        if (type != null && type instanceof DecimalType decimalType && x != null) {
+        if (type instanceof DecimalType decimalType && x != null) {
             return decimalType.toBigDecimal().compareTo(numberToBigDecimal(x)) <= 0;
         } else {
             return false;

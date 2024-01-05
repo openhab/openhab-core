@@ -17,7 +17,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -537,9 +536,7 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
     private boolean isOptionalConfig(List<ConfigDescriptionParameter> configDescriptions) {
         if (configDescriptions != null && !configDescriptions.isEmpty()) {
             boolean required = false;
-            Iterator<ConfigDescriptionParameter> i = configDescriptions.iterator();
-            while (i.hasNext()) {
-                ConfigDescriptionParameter param = i.next();
+            for (ConfigDescriptionParameter param : configDescriptions) {
                 required = required || param.isRequired();
             }
             return !required;

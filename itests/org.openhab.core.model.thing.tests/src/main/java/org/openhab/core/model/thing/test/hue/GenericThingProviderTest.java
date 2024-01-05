@@ -419,8 +419,10 @@ public class GenericThingProviderTest extends JavaOSGiTest {
     public void assertThatStandaloneThingsCanHaveBridgesInLongNotation() {
         assertThat(thingRegistry.getAll().size(), is(0));
 
-        String model = "Bridge hue:bridge:myBridge @ \"basement\" [ ip = \"1.2.3.4\", username = \"123\" ]\n"
-                + "hue:LCT001:bulb1 (hue:bridge:myBridge) [ lightId = \"1\" ] { Switch : notification }\n";
+        String model = """
+                Bridge hue:bridge:myBridge @ "basement" [ ip = "1.2.3.4", username = "123" ]
+                hue:LCT001:bulb1 (hue:bridge:myBridge) [ lightId = "1" ] { Switch : notification }
+                """;
 
         modelRepository.addOrRefreshModel(TESTMODEL_NAME, new ByteArrayInputStream(model.getBytes()));
         Collection<Thing> actualThings = thingRegistry.getAll();
@@ -462,8 +464,10 @@ public class GenericThingProviderTest extends JavaOSGiTest {
     public void assertThatStandaloneThingWithoutAbridgeDoesNotWorkInShortNotation() {
         assertThat(thingRegistry.getAll().size(), is(0));
 
-        String model = "LCT001 bulb1 [ lightId = \"1\" ] { Switch : notification }\n"
-                + "hue:LCT001:bulb2 (hue:bridge:myBridge) [ lightId = \"2\" ] { Switch : notification }\n";
+        String model = """
+                LCT001 bulb1 [ lightId = "1" ] { Switch : notification }
+                hue:LCT001:bulb2 (hue:bridge:myBridge) [ lightId = "2" ] { Switch : notification }
+                """;
 
         modelRepository.addOrRefreshModel(TESTMODEL_NAME, new ByteArrayInputStream(model.getBytes()));
         Collection<Thing> actualThings = thingRegistry.getAll();

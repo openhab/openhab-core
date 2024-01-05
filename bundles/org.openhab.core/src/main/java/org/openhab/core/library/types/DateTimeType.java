@@ -77,7 +77,7 @@ public class DateTimeType implements PrimitiveType, State, Command {
     }
 
     public DateTimeType(String zonedValue) {
-        ZonedDateTime date = null;
+        ZonedDateTime date;
         try {
             // direct parsing (date and time)
             try {
@@ -228,7 +228,7 @@ public class DateTimeType implements PrimitiveType, State, Command {
     }
 
     private ZonedDateTime parse(String value) throws DateTimeParseException {
-        ZonedDateTime date = null;
+        ZonedDateTime date;
         try {
             date = ZonedDateTime.parse(value, PARSER_TZ_RFC);
         } catch (DateTimeParseException tzMsRfcException) {

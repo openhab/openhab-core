@@ -199,7 +199,7 @@ public class ItemEventFactory extends AbstractEventFactory {
     }
 
     private static <T> T parseType(String typeName, String valueToParse, Class<T> desiredClass) {
-        Object parsedObject = null;
+        Object parsedObject;
         String simpleClassName = typeName + TYPE_POSTFIX;
         parsedObject = parseSimpleClassName(simpleClassName, valueToParse);
 

@@ -16,10 +16,10 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.BinaryOperator;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -79,9 +79,7 @@ public class AddonInfoRegistry {
      */
     public @Nullable AddonInfo getAddonInfo(String uid, @Nullable Locale locale) {
         return addonInfoProviders.stream().map(p -> p.getAddonInfo(uid, locale)).filter(Objects::nonNull)
-                .collect(Collectors.groupingBy(a -> a == null ? "" : a.getUID(),
-                        Collectors.collectingAndThen(Collectors.reducing(mergeAddonInfos), Optional::get)))
-                .get(uid);
+                .collect(Collectors.toMap(a -> a.getUID(), Function.identity(), mergeAddonInfos)).get(uid);
     }
 
     /**

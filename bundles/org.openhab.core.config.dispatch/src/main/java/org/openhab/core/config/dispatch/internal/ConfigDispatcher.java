@@ -13,7 +13,6 @@
 package org.openhab.core.config.dispatch.internal;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -190,7 +189,7 @@ public class ConfigDispatcher {
     private void processOrphanExclusivePIDs() {
         for (String orphanPID : exclusivePIDMap.getOrphanPIDs()) {
             try {
-                Configuration configuration = null;
+                Configuration configuration;
                 if (orphanPID.contains(OpenHAB.SERVICE_CONTEXT_MARKER)) {
                     configuration = getConfigurationWithContext(orphanPID);
                 } else {
@@ -276,7 +275,7 @@ public class ConfigDispatcher {
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    private void internalProcessConfigFile(File configFile) throws IOException, FileNotFoundException {
+    private void internalProcessConfigFile(File configFile) throws IOException {
         if (configFile.isDirectory() || !configFile.getName().endsWith(".cfg")) {
             logger.debug("Ignoring file '{}'", configFile.getName());
             return;

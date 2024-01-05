@@ -19,7 +19,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -57,7 +56,7 @@ public class XmlDocumentReaderTest {
     private @Nullable ConfigDescription readXML(String xml) throws IOException {
         Path tempFile = Files.createTempFile(null, null);
         tempFile.toFile().deleteOnExit();
-        Files.write(tempFile, xml.getBytes(StandardCharsets.UTF_8));
+        Files.writeString(tempFile, xml);
         return new ConfigDescriptionReader().readFromXML(tempFile.toUri().toURL());
     }
 

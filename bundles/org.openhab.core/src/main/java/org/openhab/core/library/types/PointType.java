@@ -223,15 +223,15 @@ public class PointType implements ComplexType, Command, State {
     private void canonicalize(DecimalType aLat, DecimalType aLon) {
         latitude = FLAT.add(aLat.toBigDecimal()).remainder(CIRCLE);
         longitude = aLon.toBigDecimal();
-        if (latitude.compareTo(BigDecimal.ZERO) == -1) {
+        if (latitude.compareTo(BigDecimal.ZERO) < 0) {
             latitude = latitude.add(CIRCLE);
         }
 
         latitude = latitude.subtract(FLAT);
-        if (latitude.compareTo(RIGHT) == 1) {
+        if (latitude.compareTo(RIGHT) > 0) {
             latitude = FLAT.subtract(latitude);
             longitude = longitude.add(FLAT);
-        } else if (latitude.compareTo(RIGHT.negate()) == -1) {
+        } else if (latitude.compareTo(RIGHT.negate()) < 0) {
             latitude = FLAT.negate().subtract(latitude);
             longitude = longitude.add(FLAT);
         }

@@ -164,7 +164,7 @@ public class LRUMediaCacheEntryTest {
         assertTrue(fakeStream.isClosed()); // all client closed, the main stream should also be closed
 
         assertArrayEquals(new byte[] { 5, 6, 7, 8 }, byteReadFromStream1);
-        assertArrayEquals(new byte[] { 5, 6, 7, 8 }, byteReadFromStream1);
+        assertArrayEquals(new byte[] { 5, 6, 7, 8 }, byteReadFromStream2);
 
         // we call the TTS service only once
         verify(supplier, times(1)).get();

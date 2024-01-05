@@ -243,7 +243,7 @@ public class ProxyServletService extends HttpServlet {
                         String.format("Widget '%s' could not be found!", widgetId));
             }
 
-            String uriString = null;
+            String uriString;
             if (widget instanceof Image image) {
                 uriString = image.getUrl();
             } else if (widget instanceof Video video) {

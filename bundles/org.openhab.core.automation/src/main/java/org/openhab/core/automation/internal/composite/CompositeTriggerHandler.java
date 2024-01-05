@@ -88,7 +88,7 @@ public class CompositeTriggerHandler
                                 ref = ref.substring(i + 1);
                             }
                         }
-                        Object value = null;
+                        Object value;
                         int idx = ReferenceResolver.getNextRefToken(ref, 1);
                         if (idx < ref.length()) {
                             String outputId = ref.substring(0, idx);

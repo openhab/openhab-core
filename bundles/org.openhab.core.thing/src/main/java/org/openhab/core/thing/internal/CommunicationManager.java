@@ -228,7 +228,7 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
 
     private @Nullable ProfileTypeUID determineProfileTypeUID(ItemChannelLink link, Item item, @Nullable Thing thing) {
         ProfileTypeUID profileTypeUID = getConfiguredProfileTypeUID(link);
-        Channel channel = null;
+        Channel channel;
         if (profileTypeUID == null) {
             if (thing == null) {
                 return null;

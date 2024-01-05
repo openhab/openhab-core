@@ -177,7 +177,7 @@ public class SitemapSubscriptionService implements ModelRepositoryChangeListener
         creationInstants.remove(subscriptionId);
         callbacks.remove(subscriptionId);
         String sitemapPage = pageOfSubscription.remove(subscriptionId);
-        if (sitemapPage != null && !pageOfSubscription.values().contains(sitemapPage)) {
+        if (sitemapPage != null && !pageOfSubscription.containsValue(sitemapPage)) {
             // this was the only subscription listening on this page, so we can dispose the listener
             ListenerRecord listener = pageChangeListeners.remove(sitemapPage);
             if (listener != null) {

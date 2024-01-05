@@ -189,7 +189,7 @@ public final class FirmwareImpl implements Firmware {
                         digestString.append(String.format("%02x", b));
                     }
 
-                    if (!md5Hash.equals(digestString.toString())) {
+                    if (!md5Hash.contentEquals(digestString)) {
                         bytes = null;
                         throw new IllegalStateException(
                                 String.format("Invalid MD5 checksum. Expected %s, but was %s.", md5Hash, digestString));

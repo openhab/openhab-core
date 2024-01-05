@@ -150,7 +150,7 @@ public class CommandlineTemplateProvider extends AbstractCommandProvider<RuleTem
      * @return the string <b>SUCCESS</b>.
      */
     public String remove(URL url) {
-        List<String> portfolio = null;
+        List<String> portfolio;
         synchronized (providerPortfolio) {
             portfolio = providerPortfolio.remove(url);
         }

@@ -15,6 +15,7 @@ package org.openhab.core.internal.types;
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -226,12 +227,9 @@ public class StateDescriptionFragmentImpl implements StateDescriptionFragment {
             return false;
         }
         StateDescriptionFragmentImpl other = (StateDescriptionFragmentImpl) obj;
-        return (minimum != null ? minimum.equals(other.minimum) : other.minimum == null)
-                && (maximum != null ? maximum.equals(other.maximum) : other.maximum == null)
-                && (step != null ? step.equals(other.step) : other.step == null)
-                && (pattern != null ? pattern.equals(other.pattern) : other.pattern == null)
-                && (readOnly != null ? readOnly.equals(other.readOnly) : other.readOnly == null)
-                && (options != null ? options.equals(other.options) : other.options == null);
+        return Objects.equals(minimum, other.minimum) && Objects.equals(maximum, other.maximum)
+                && Objects.equals(step, other.step) && Objects.equals(pattern, other.pattern)
+                && Objects.equals(readOnly, other.readOnly) && Objects.equals(options, other.options);
     }
 
     @Override

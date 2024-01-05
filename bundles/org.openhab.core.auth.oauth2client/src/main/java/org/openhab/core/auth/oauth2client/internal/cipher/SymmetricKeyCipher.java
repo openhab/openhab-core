@@ -132,7 +132,7 @@ public class SymmetricKeyCipher implements StorageCipher {
 
     private SecretKey getOrGenerateEncryptionKey() throws NoSuchAlgorithmException, IOException {
         Configuration configuration = configurationAdmin.getConfiguration(PID);
-        String encryptionKeyInBase64 = null;
+        String encryptionKeyInBase64;
         Dictionary<String, Object> properties = configuration.getProperties();
         if (properties == null) {
             properties = new Hashtable<>();
