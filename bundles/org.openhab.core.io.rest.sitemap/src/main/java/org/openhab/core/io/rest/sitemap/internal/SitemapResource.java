@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -333,9 +333,6 @@ public class SitemapResource
 
     /**
      * Subscribes the connecting client to the stream of sitemap events.
-     *
-     * @return {@link EventOutput} object associated with the incoming
-     *         connection.
      */
     @GET
     @Path(SEGMENT_EVENTS + "/{subscriptionid: [a-zA-Z_0-9-]+}")

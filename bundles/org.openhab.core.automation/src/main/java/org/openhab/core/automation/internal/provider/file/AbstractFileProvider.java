@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -86,7 +86,7 @@ public abstract class AbstractFileProvider<@NonNull E> implements Provider<E> {
     private final Map<String, List<URL>> urls = new ConcurrentHashMap<>();
     private final List<ProviderChangeListener<E>> listeners = new ArrayList<>();
 
-    public AbstractFileProvider(String root) {
+    protected AbstractFileProvider(String root) {
         this.rootSubdirectory = root;
         configurationRoots = new String[] { OpenHAB.getConfigFolder() + File.separator + "automation" };
     }

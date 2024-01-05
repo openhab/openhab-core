@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -89,7 +89,6 @@ public class OAuthClientServiceImpl implements OAuthClientService {
     /**
      * It should only be used internally, thus the access is package level
      *
-     * @param bundleContext Bundle Context
      * @param handle The handle produced previously from
      *            {@link org.openhab.core.auth.client.oauth2.OAuthFactory#createOAuthClientService}
      * @param storeHandler Storage handler
@@ -119,12 +118,11 @@ public class OAuthClientServiceImpl implements OAuthClientService {
     /**
      * It should only be used internally, thus the access is package level
      *
-     * @param bundleContext Bundle Context*
      * @param handle The handle produced previously from
      *            {@link org.openhab.core.auth.client.oauth2.OAuthFactory#createOAuthClientService}*
      * @param storeHandler Storage handler
      * @param httpClientFactory Http client factory
-     * @param persistedParams These parameters are static with respect to the OAuth provider and thus can be persisted.
+     * @param params These parameters are static with respect to the OAuth provider and thus can be persisted.
      * @return OAuthClientServiceImpl an instance
      */
     static OAuthClientServiceImpl createInstance(String handle, OAuthStoreHandler storeHandler,

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -90,7 +90,7 @@ public class StandardInterpreter extends AbstractRuleBasedInterpreter {
 
     @Override
     public void createRules(@Nullable Locale locale) {
-        /****************************** ENGLISH ******************************/
+        /* ***************************** ENGLISH ***************************** */
 
         if (locale == null || Objects.equals(locale.getLanguage(), Locale.ENGLISH.getLanguage())) {
             Expression onOff = alt(cmd("on", OnOffType.ON), cmd("off", OnOffType.OFF));
@@ -169,7 +169,7 @@ public class StandardInterpreter extends AbstractRuleBasedInterpreter {
                     Locale.ENGLISH).toArray(Rule[]::new));
         }
 
-        /****************************** GERMAN ******************************/
+        /* ***************************** GERMAN ***************************** */
 
         if (locale == null || Objects.equals(locale.getLanguage(), Locale.GERMAN.getLanguage())) {
             Expression einAnAus = alt(cmd("ein", OnOffType.ON), cmd("an", OnOffType.ON), cmd("aus", OnOffType.OFF));
@@ -237,7 +237,7 @@ public class StandardInterpreter extends AbstractRuleBasedInterpreter {
                     Locale.GERMAN).toArray(Rule[]::new));
         }
 
-        /****************************** FRENCH ******************************/
+        /* ***************************** FRENCH ***************************** */
 
         if (locale == null || Objects.equals(locale.getLanguage(), Locale.FRENCH.getLanguage())) {
             Expression allume = alt("allume", "démarre", "active");
@@ -304,7 +304,7 @@ public class StandardInterpreter extends AbstractRuleBasedInterpreter {
                     Locale.FRENCH).toArray(Rule[]::new));
         }
 
-        /****************************** SPANISH ******************************/
+        /* ***************************** SPANISH ***************************** */
 
         Locale localeES = new Locale("es");
         if (locale == null || Objects.equals(locale.getLanguage(), localeES.getLanguage())) {

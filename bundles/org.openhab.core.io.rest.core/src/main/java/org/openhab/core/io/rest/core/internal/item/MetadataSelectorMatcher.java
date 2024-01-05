@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -57,7 +57,7 @@ public class MetadataSelectorMatcher {
         } else {
             Set<String> originalNamespaces = Arrays.stream(namespaceSelector.split(",")) //
                     .filter(n -> !metadataRegistry.isInternalNamespace(n)) //
-                    .map(n -> n.trim()) //
+                    .map(String::trim) //
                     .collect(Collectors.toSet());
 
             Set<String> allMetadataNamespaces = metadataRegistry.getAll().stream() //
@@ -65,7 +65,7 @@ public class MetadataSelectorMatcher {
                     .distinct() //
                     .collect(Collectors.toSet());
 
-            String namespacePattern = originalNamespaces.stream().collect(Collectors.joining("|"));
+            String namespacePattern = String.join("|", originalNamespaces);
 
             Pattern pattern = Pattern.compile("(" + namespacePattern + ")$");
 

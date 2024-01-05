@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -41,7 +41,7 @@ public abstract class AbstractTransformingChannelHandler implements ChannelHandl
 
     protected final ChannelValueConverterConfig channelConfig;
 
-    public AbstractTransformingChannelHandler(Consumer<State> updateState, Consumer<Command> postCommand,
+    protected AbstractTransformingChannelHandler(Consumer<State> updateState, Consumer<Command> postCommand,
             @Nullable Consumer<String> sendValue, ChannelTransformation stateTransformations,
             ChannelTransformation commandTransformations, ChannelValueConverterConfig channelConfig) {
         this.updateState = updateState;

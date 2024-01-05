@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -328,6 +328,7 @@ public class ThingResource implements RESTResource {
             }
 
             CacheControl cc = new CacheControl();
+            cc.setNoCache(true);
             cc.setMustRevalidate(true);
             cc.setPrivate(true);
             thingStream = dtoMapper.limitToFields(thingStream, "UID,label,bridgeUID,thingTypeUID,location,editable");
@@ -605,7 +606,7 @@ public class ThingResource implements RESTResource {
             return getThingNotFoundResponse(thingUID);
         }
 
-        thingManager.setEnabled(thingUIDObject, Boolean.valueOf(enabled));
+        thingManager.setEnabled(thingUIDObject, Boolean.parseBoolean(enabled));
 
         // everything went well
         return getThingResponse(Status.OK, thing, locale, null);

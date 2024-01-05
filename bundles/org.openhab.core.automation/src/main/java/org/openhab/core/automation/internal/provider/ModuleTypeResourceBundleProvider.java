@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -61,8 +61,6 @@ public class ModuleTypeResourceBundleProvider extends AbstractResourceBundleProv
     /**
      * This constructor is responsible for initializing the path to resources and tracking the
      * {@link ModuleTypeRegistry}.
-     *
-     * @param context is the {@code BundleContext}, used for creating a tracker for {@link Parser} services.
      */
     @Activate
     public ModuleTypeResourceBundleProvider(final @Reference ModuleTypeI18nService moduleTypeI18nService) {
@@ -138,7 +136,7 @@ public class ModuleTypeResourceBundleProvider extends AbstractResourceBundleProv
     /**
      * This method is used to localize the {@link ModuleType}s.
      *
-     * @param element is the {@link ModuleType} that must be localized.
+     * @param defModuleType is the {@link ModuleType} that must be localized.
      * @param locale represents a specific geographical, political, or cultural region.
      * @return the localized {@link ModuleType}.
      */

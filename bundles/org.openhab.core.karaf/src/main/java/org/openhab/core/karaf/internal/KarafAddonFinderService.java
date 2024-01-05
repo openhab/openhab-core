@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -23,7 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This service is an implementation of an openHAB {@link AddonSuggestionFinderService} using the Karaf features
+ * This service is an implementation of an openHAB {@link AddonFinderService} using the Karaf features
  * service. This service allows dynamic installation/removal of add-on suggestion finders.
  *
  * @author Mark Herwege - Initial contribution

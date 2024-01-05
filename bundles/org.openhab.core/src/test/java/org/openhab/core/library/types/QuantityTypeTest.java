@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -214,20 +214,20 @@ public class QuantityTypeTest {
     public void testUnits() {
         QuantityType<Length> dt2 = new QuantityType<>("2 m");
         // Check that the unit has correctly been identified
-        assertEquals(dt2.getDimension(), UnitDimension.LENGTH);
-        assertEquals(dt2.getUnit(), SIUnits.METRE);
+        assertEquals(UnitDimension.LENGTH, dt2.getDimension());
+        assertEquals(SIUnits.METRE, dt2.getUnit());
         assertEquals("2 m", dt2.toString());
 
         QuantityType<Length> dt1 = new QuantityType<>("2.1cm");
         // Check that the unit has correctly been identified
-        assertEquals(dt1.getDimension(), UnitDimension.LENGTH);
-        assertEquals(dt1.getUnit(), CENTI(SIUnits.METRE));
+        assertEquals(UnitDimension.LENGTH, dt1.getDimension());
+        assertEquals(CENTI(SIUnits.METRE), dt1.getUnit());
         assertEquals("2.1 cm", dt1.toString());
 
         assertEquals(dt1.intValue(), dt2.intValue());
 
         QuantityType<Length> dt3 = new QuantityType<>("200cm");
-        assertEquals(dt3.compareTo(dt2), 0);
+        assertEquals(0, dt3.compareTo(dt2));
         assertTrue(dt3.equals(dt2));
 
         QuantityType dt4 = new QuantityType<>("2kg");
@@ -287,7 +287,7 @@ public class QuantityTypeTest {
         QuantityType<?> dt2 = QuantityType.valueOf("2");
         QuantityType<?> dt3 = dt2.toUnit("m");
         // Inconvertible units
-        assertTrue(dt3 == null);
+        assertNull(dt3);
     }
 
     @Test
@@ -343,7 +343,7 @@ public class QuantityTypeTest {
                 new QuantityType<>(0.1, Units.RADIAN).as(PercentType.class));
 
         // incompatible units
-        assertEquals(null, new QuantityType<>("0.5 m").as(PercentType.class));
+        assertNull(new QuantityType<>("0.5 m").as(PercentType.class));
     }
 
     @ParameterizedTest
@@ -375,10 +375,10 @@ public class QuantityTypeTest {
         assertEquals(ImperialUnits.FAHRENHEIT, result.getUnit());
 
         // test associativity of add
-        QuantityType<Temperature> tempResult = new QuantityType<Temperature>("1 °F")
-                .add(new QuantityType<Temperature>("2 °F")).add(new QuantityType<Temperature>("3 °F"));
+        QuantityType<Temperature> tempResult = new QuantityType<Temperature>("1 °F").add(new QuantityType<>("2 °F"))
+                .add(new QuantityType<>("3 °F"));
         assertThat(tempResult, is(new QuantityType<Temperature>("1 °F")
-                .add(new QuantityType<Temperature>("2 °F").add(new QuantityType<Temperature>("3 °F")))));
+                .add(new QuantityType<Temperature>("2 °F").add(new QuantityType<>("3 °F")))));
         assertThat(tempResult, is(new QuantityType<Temperature>("6 °F")));
 
         assertThat(new QuantityType<>("65 kWh").add(new QuantityType<>("1 kWh")), is(new QuantityType<>("66 kWh")));

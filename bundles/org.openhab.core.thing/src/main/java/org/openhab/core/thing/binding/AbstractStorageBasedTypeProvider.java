@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -75,7 +75,7 @@ public abstract class AbstractStorageBasedTypeProvider
      *
      * @param storageService a persistent {@link StorageService}
      */
-    public AbstractStorageBasedTypeProvider(StorageService storageService) {
+    protected AbstractStorageBasedTypeProvider(StorageService storageService) {
         String thingTypeStorageName = getClass().getName() + "-ThingType";
         String channelTypeStorageName = getClass().getName() + "-ChannelType";
         String channelGroupTypeStorageName = getClass().getName() + "-ChannelGroupType";

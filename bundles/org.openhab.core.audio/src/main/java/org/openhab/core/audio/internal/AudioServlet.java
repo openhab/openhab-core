@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -102,7 +102,7 @@ public class AudioServlet extends HttpServlet implements AudioHTTPServer {
 
     @Deactivate
     protected synchronized void deactivate() {
-        servedStreams.values().stream().map(streamServed -> streamServed.audioStream()).forEach(this::tryClose);
+        servedStreams.values().stream().map(StreamServed::audioStream).forEach(this::tryClose);
         servedStreams.clear();
     }
 

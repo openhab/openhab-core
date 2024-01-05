@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -76,7 +76,7 @@ public class SystemHysteresisStateProfile implements StateProfile {
         this.upper = convertedUpperParam;
 
         final Object paramValue = context.getConfiguration().get(INVERTED_PARAM);
-        final boolean inverted = paramValue == null ? false : Boolean.valueOf(paramValue.toString());
+        final boolean inverted = paramValue != null && Boolean.parseBoolean(paramValue.toString());
         this.low = OnOffType.from(inverted);
         this.high = OnOffType.from(!inverted);
     }

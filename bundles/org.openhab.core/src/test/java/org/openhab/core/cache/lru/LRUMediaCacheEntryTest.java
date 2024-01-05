@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -74,8 +74,7 @@ public class LRUMediaCacheEntryTest {
     }
 
     private LRUMediaCache<MetadataSample> createCache(long size) throws IOException {
-        return new LRUMediaCache<MetadataSample>(storageService, size, "lrucachetest.pid",
-                this.getClass().getClassLoader());
+        return new LRUMediaCache<>(storageService, size, "lrucachetest.pid", this.getClass().getClassLoader());
     }
 
     public static class FakeStream extends InputStream {

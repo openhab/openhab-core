@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -253,7 +253,7 @@ public class NumberExtensionsTest {
         BigDecimal result = NumberExtensions.operator_plus(x, y);
 
         assertNotNull(result);
-        assertEquals(result, new BigDecimal(9));
+        assertEquals(new BigDecimal(9), result);
     }
 
     /**
@@ -267,7 +267,7 @@ public class NumberExtensionsTest {
         BigDecimal result = NumberExtensions.operator_plus(x, y);
 
         assertNotNull(result);
-        assertEquals(result, new BigDecimal(5));
+        assertEquals(new BigDecimal(5), result);
     }
 
     /**
@@ -281,7 +281,7 @@ public class NumberExtensionsTest {
         BigDecimal result = NumberExtensions.operator_plus(x, y);
 
         assertNotNull(result);
-        assertEquals(result, new BigDecimal(10));
+        assertEquals(new BigDecimal(10), result);
     }
 
     /**
@@ -294,7 +294,7 @@ public class NumberExtensionsTest {
         BigDecimal result = NumberExtensions.operator_minus(x);
 
         assertNotNull(result);
-        assertEquals(result, new BigDecimal(-2));
+        assertEquals(new BigDecimal(-2), result);
     }
 
     /**
@@ -320,7 +320,7 @@ public class NumberExtensionsTest {
         BigDecimal result = NumberExtensions.operator_minus(x, y);
 
         assertNotNull(result);
-        assertEquals(result, new BigDecimal(10 - 100));
+        assertEquals(new BigDecimal(10 - 100), result);
     }
 
     /**
@@ -334,7 +334,7 @@ public class NumberExtensionsTest {
         BigDecimal result = NumberExtensions.operator_minus(x, y);
 
         assertNotNull(result);
-        assertEquals(result, new BigDecimal(-100));
+        assertEquals(new BigDecimal(-100), result);
     }
 
     /**
@@ -348,7 +348,7 @@ public class NumberExtensionsTest {
         BigDecimal result = NumberExtensions.operator_minus(x, y);
 
         assertNotNull(result);
-        assertEquals(result, new BigDecimal(10));
+        assertEquals(new BigDecimal(10), result);
     }
 
     /**
@@ -362,7 +362,7 @@ public class NumberExtensionsTest {
         BigDecimal result = NumberExtensions.operator_multiply(x, y);
 
         assertNotNull(result);
-        assertEquals(result, new BigDecimal(20 * 30));
+        assertEquals(new BigDecimal(20 * 30), result);
     }
 
     /**
@@ -376,7 +376,7 @@ public class NumberExtensionsTest {
         BigDecimal result = NumberExtensions.operator_multiply(x, y);
 
         assertNotNull(result);
-        assertEquals(result, new BigDecimal(0));
+        assertEquals(new BigDecimal(0), result);
     }
 
     /**
@@ -390,7 +390,7 @@ public class NumberExtensionsTest {
         BigDecimal result = NumberExtensions.operator_multiply(x, y);
 
         assertNotNull(result);
-        assertEquals(result, new BigDecimal(0));
+        assertEquals(new BigDecimal(0), result);
     }
 
     /**

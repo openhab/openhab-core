@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -39,6 +39,7 @@ import org.jupnp.registry.Registry;
 import org.jupnp.registry.RegistryListener;
 import org.openhab.core.addon.AddonDiscoveryMethod;
 import org.openhab.core.addon.AddonInfo;
+import org.openhab.core.addon.AddonMatchProperty;
 import org.openhab.core.config.discovery.addon.AddonFinder;
 import org.openhab.core.config.discovery.addon.BaseAddonFinder;
 import org.osgi.service.component.annotations.Activate;
@@ -76,7 +77,7 @@ public class UpnpAddonFinder extends BaseAddonFinder implements RegistryListener
 
     private final Logger logger = LoggerFactory.getLogger(UpnpAddonFinder.class);
     private final Map<String, RemoteDevice> devices = new ConcurrentHashMap<>();
-    private UpnpService upnpService;
+    private final UpnpService upnpService;
 
     @Activate
     public UpnpAddonFinder(@Reference UpnpService upnpService) {
@@ -126,7 +127,7 @@ public class UpnpAddonFinder extends BaseAddonFinder implements RegistryListener
             for (AddonDiscoveryMethod method : candidate.getDiscoveryMethods().stream()
                     .filter(method -> SERVICE_TYPE.equals(method.getServiceType())).toList()) {
                 Map<String, Pattern> matchProperties = method.getMatchProperties().stream()
-                        .collect(Collectors.toMap(property -> property.getName(), property -> property.getPattern()));
+                        .collect(Collectors.toMap(AddonMatchProperty::getName, AddonMatchProperty::getPattern));
 
                 Set<String> propertyNames = new HashSet<>(matchProperties.keySet());
                 propertyNames.removeAll(SUPPORTED_PROPERTIES);
@@ -188,7 +189,7 @@ public class UpnpAddonFinder extends BaseAddonFinder implements RegistryListener
                             && propertyMatches(matchProperties, SERIAL_NUMBER, serialNumber)
                             && propertyMatches(matchProperties, FRIENDLY_NAME, friendlyName)) {
                         result.add(candidate);
-                        logger.debug("Suggested addon found: {}", candidate.getUID());
+                        logger.debug("Suggested add-on found: {}", candidate.getUID());
                         break;
                     }
                 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -52,7 +52,7 @@ public abstract class AbstractScriptDependencyTracker
     private final BidiSetBag<String, String> scriptToLibs = new BidiSetBag<>();
     private final WatchService watchService;
 
-    public AbstractScriptDependencyTracker(WatchService watchService, final String fileDirectory) {
+    protected AbstractScriptDependencyTracker(WatchService watchService, final String fileDirectory) {
         this.watchService = watchService;
         this.libraryPath = watchService.getWatchPath().resolve(fileDirectory);
 

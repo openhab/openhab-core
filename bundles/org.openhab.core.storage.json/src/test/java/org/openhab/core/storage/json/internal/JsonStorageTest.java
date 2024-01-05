@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -74,14 +74,14 @@ public class JsonStorageTest extends JavaTest {
         DummyObject dummy = objectStorage.get("DummyObject");
 
         assertNotNull(dummy);
-        assertTrue(dummy.configuration.get("testShort") instanceof BigDecimal);
-        assertTrue(dummy.configuration.get("testInt") instanceof BigDecimal);
-        assertTrue(dummy.configuration.get("testLong") instanceof BigDecimal);
-        assertTrue(dummy.configuration.get("testDouble") instanceof BigDecimal);
-        assertTrue(dummy.configuration.get("testFloat") instanceof BigDecimal);
-        assertTrue(dummy.configuration.get("testBigDecimal") instanceof BigDecimal);
-        assertTrue(dummy.configuration.get("testBoolean") instanceof Boolean);
-        assertTrue(dummy.configuration.get("testString") instanceof String);
+        assertInstanceOf(BigDecimal.class, dummy.configuration.get("testShort"));
+        assertInstanceOf(BigDecimal.class, dummy.configuration.get("testInt"));
+        assertInstanceOf(BigDecimal.class, dummy.configuration.get("testLong"));
+        assertInstanceOf(BigDecimal.class, dummy.configuration.get("testDouble"));
+        assertInstanceOf(BigDecimal.class, dummy.configuration.get("testFloat"));
+        assertInstanceOf(BigDecimal.class, dummy.configuration.get("testBigDecimal"));
+        assertInstanceOf(Boolean.class, dummy.configuration.get("testBoolean"));
+        assertInstanceOf(String.class, dummy.configuration.get("testString"));
     }
 
     @Test
@@ -91,14 +91,14 @@ public class JsonStorageTest extends JavaTest {
         DummyObject dummy = objectStorage.get("DummyObject");
 
         assertNotNull(dummy);
-        assertTrue(dummy.configuration.get("testShort") instanceof BigDecimal);
-        assertTrue(dummy.configuration.get("testInt") instanceof BigDecimal);
-        assertTrue(dummy.configuration.get("testLong") instanceof BigDecimal);
-        assertTrue(dummy.configuration.get("testDouble") instanceof BigDecimal);
-        assertTrue(dummy.configuration.get("testFloat") instanceof BigDecimal);
-        assertTrue(dummy.configuration.get("testBigDecimal") instanceof BigDecimal);
-        assertTrue(dummy.configuration.get("testBoolean") instanceof Boolean);
-        assertTrue(dummy.configuration.get("testString") instanceof String);
+        assertInstanceOf(BigDecimal.class, dummy.configuration.get("testShort"));
+        assertInstanceOf(BigDecimal.class, dummy.configuration.get("testInt"));
+        assertInstanceOf(BigDecimal.class, dummy.configuration.get("testLong"));
+        assertInstanceOf(BigDecimal.class, dummy.configuration.get("testDouble"));
+        assertInstanceOf(BigDecimal.class, dummy.configuration.get("testFloat"));
+        assertInstanceOf(BigDecimal.class, dummy.configuration.get("testBigDecimal"));
+        assertInstanceOf(Boolean.class, dummy.configuration.get("testBoolean"));
+        assertInstanceOf(String.class, dummy.configuration.get("testString"));
     }
 
     @Test
@@ -107,10 +107,10 @@ public class JsonStorageTest extends JavaTest {
         DummyObject dummy = objectStorage.get("DummyObject");
 
         assertNotNull(dummy);
-        assertEquals(((BigDecimal) dummy.configuration.get("testShort")).scale(), 0);
-        assertEquals(((BigDecimal) dummy.configuration.get("testInt")).scale(), 0);
-        assertEquals(((BigDecimal) dummy.configuration.get("testLong")).scale(), 0);
-        assertEquals(((BigDecimal) dummy.configuration.get("testBigDecimal")).scale(), 0);
+        assertEquals(0, ((BigDecimal) dummy.configuration.get("testShort")).scale());
+        assertEquals(0, ((BigDecimal) dummy.configuration.get("testInt")).scale());
+        assertEquals(0, ((BigDecimal) dummy.configuration.get("testLong")).scale());
+        assertEquals(0, ((BigDecimal) dummy.configuration.get("testBigDecimal")).scale());
     }
 
     @SuppressWarnings("unchecked")
@@ -121,14 +121,14 @@ public class JsonStorageTest extends JavaTest {
         DummyObject dummy = objectStorage.get("DummyObject");
 
         assertNotNull(dummy);
-        assertEquals(((BigDecimal) dummy.configuration.get("testShort")).scale(), 0);
-        assertEquals(((BigDecimal) dummy.configuration.get("testInt")).scale(), 0);
-        assertEquals(((BigDecimal) dummy.configuration.get("testLong")).scale(), 0);
-        assertEquals(((BigDecimal) dummy.configuration.get("testBigDecimal")).scale(), 0);
-        assertEquals(((List<BigDecimal>) dummy.configuration.get("multiInt")).get(0).scale(), 0);
-        assertEquals(((List<BigDecimal>) dummy.configuration.get("multiInt")).get(1).scale(), 0);
-        assertEquals(((List<BigDecimal>) dummy.configuration.get("multiInt")).get(2).scale(), 0);
-        assertEquals(((BigDecimal) dummy.channels.get(0).configuration.get("testChildLong")).scale(), 0);
+        assertEquals(0, ((BigDecimal) dummy.configuration.get("testShort")).scale());
+        assertEquals(0, ((BigDecimal) dummy.configuration.get("testInt")).scale());
+        assertEquals(0, ((BigDecimal) dummy.configuration.get("testLong")).scale());
+        assertEquals(0, ((BigDecimal) dummy.configuration.get("testBigDecimal")).scale());
+        assertEquals(0, ((List<BigDecimal>) dummy.configuration.get("multiInt")).get(0).scale());
+        assertEquals(0, ((List<BigDecimal>) dummy.configuration.get("multiInt")).get(1).scale());
+        assertEquals(0, ((List<BigDecimal>) dummy.configuration.get("multiInt")).get(2).scale());
+        assertEquals(0, ((BigDecimal) dummy.channels.get(0).configuration.get("testChildLong")).scale());
     }
 
     @Test

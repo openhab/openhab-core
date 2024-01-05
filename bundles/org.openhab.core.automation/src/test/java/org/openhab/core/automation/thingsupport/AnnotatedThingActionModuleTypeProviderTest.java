@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -120,7 +120,7 @@ public class AnnotatedThingActionModuleTypeProviderTest extends JavaTest {
         assertTrue(types.contains(TEST_ACTION_TYPE_ID));
 
         ModuleType mt = prov.getModuleType(TEST_ACTION_TYPE_ID, null);
-        assertTrue(mt instanceof ActionType);
+        assertInstanceOf(ActionType.class, mt);
 
         ActionType at = (ActionType) mt;
 
@@ -142,7 +142,7 @@ public class AnnotatedThingActionModuleTypeProviderTest extends JavaTest {
                 assertEquals(ACTION_INPUT1_DEFAULT_VALUE, in.getDefaultValue());
                 assertEquals(ACTION_INPUT1_DESCRIPTION, in.getDescription());
                 assertEquals(ACTION_INPUT1_REFERENCE, in.getReference());
-                assertEquals(true, in.isRequired());
+                assertTrue(in.isRequired());
                 assertEquals("Item", in.getType());
 
                 Set<String> inputTags = in.getTags();
@@ -204,7 +204,7 @@ public class AnnotatedThingActionModuleTypeProviderTest extends JavaTest {
     }
 
     @ThingActionsScope(name = "test")
-    private class TestThingActionProvider implements ThingActions {
+    private static class TestThingActionProvider implements ThingActions {
 
         private @Nullable ThingHandler handler;
 

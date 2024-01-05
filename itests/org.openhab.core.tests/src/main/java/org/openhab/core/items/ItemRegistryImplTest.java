@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -358,7 +358,7 @@ public class ItemRegistryImplTest extends JavaTest {
 
         ArgumentCaptor<Item> itemCaptor = ArgumentCaptor.forClass(Item.class);
         verify(registryChangeListener).removed(itemCaptor.capture());
-        assertTrue(itemCaptor.getValue() == item);
+        assertSame(itemCaptor.getValue(), item);
     }
 
     @Test

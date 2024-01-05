@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -30,7 +30,7 @@ public interface AddonFinder {
      * The framework calls this method to scan through the candidate list of {@link AddonInfo} and return a subset of
      * those that it suggests to be installed.
      */
-    public Set<AddonInfo> getSuggestedAddons();
+    Set<AddonInfo> getSuggestedAddons();
 
     /**
      * The framework calls this method to provide a list of {@link AddonInfo} elements which contain potential
@@ -39,10 +39,10 @@ public interface AddonFinder {
      *
      * @param candidates a list of AddonInfo candidates.
      */
-    public void setAddonCandidates(List<AddonInfo> candidates);
+    void setAddonCandidates(List<AddonInfo> candidates);
 
     /**
      * This method should be called from the framework to allow a finder to stop searching for add-ons and do cleanup.
      */
-    public void unsetAddonCandidates();
+    void unsetAddonCandidates();
 }

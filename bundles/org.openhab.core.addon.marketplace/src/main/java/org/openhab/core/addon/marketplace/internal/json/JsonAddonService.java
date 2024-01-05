@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -131,8 +131,26 @@ public class JsonAddonService extends AbstractRemoteAddonService {
             } catch (IOException e) {
                 return List.of();
             }
-        }).flatMap(List::stream).filter(Objects::nonNull).map(e -> (AddonEntryDTO) e)
-                .filter(e -> showUnstable || "stable".equals(e.maturity)).map(this::fromAddonEntry).toList();
+        }).flatMap(List::stream).filter(Objects::nonNull).map(e -> (AddonEntryDTO) e).filter(this::showAddon)
+                .map(this::fromAddonEntry).toList();
+    }
+
+    /**
+     * Check if the addon UID is present and the entry is eitehr stable or unstable add-ons are requested
+     *
+     * @param addonEntry the add-on entry to check
+     * @return {@code true} if the add-on entry should be processed, {@code false otherwise}
+     */
+    private boolean showAddon(AddonEntryDTO addonEntry) {
+        if (addonEntry.uid.isBlank()) {
+            logger.debug("Skipping {} because the UID is not set", addonEntry);
+            return false;
+        }
+        if (!showUnstable && !"stable".equals(addonEntry.maturity)) {
+            logger.debug("Skipping {} because the the add-on is not stable and showUnstable is disabled.", addonEntry);
+            return false;
+        }
+        return true;
     }
 
     @Override

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -905,12 +905,12 @@ public class InboxOSGiTest extends JavaOSGiTest {
         Thing approvedThing = inbox.approve(testThing.getUID(), testThingLabel, null);
         Thing addedThing = registry.get(testThing.getUID());
 
-        assertFalse(addedThing == null);
-        assertFalse(approvedThing == null);
-        assertTrue(approvedThing.equals(addedThing));
-        discoveryResultProperties.keySet().forEach(key -> {
+        assertNotNull(addedThing);
+        assertNotNull(approvedThing);
+        assertEquals(approvedThing, addedThing);
+        discoveryResultProperties.forEach((key, value) -> {
             String thingProperty = addedThing.getProperties().get(key);
-            String descResultParam = String.valueOf(discoveryResultProperties.get(key));
+            String descResultParam = String.valueOf(value);
             assertThat(thingProperty, is(notNullValue()));
             assertThat(descResultParam, is(notNullValue()));
             assertThat(thingProperty, is(descResultParam));
@@ -946,9 +946,9 @@ public class InboxOSGiTest extends JavaOSGiTest {
         Thing approvedThing = inbox.approve(testThing.getUID(), null, testId2);
         Thing addedThing = registry.get(test2Thing.getUID());
 
-        assertFalse(addedThing == null);
-        assertFalse(approvedThing == null);
-        assertTrue(approvedThing.equals(addedThing));
+        assertNotNull(addedThing);
+        assertNotNull(approvedThing);
+        assertEquals(approvedThing, addedThing);
     }
 
     @Test
@@ -993,24 +993,24 @@ public class InboxOSGiTest extends JavaOSGiTest {
 
         Thing approvedThing = inbox.approve(testThing.getUID(), testThingLabel, null);
         Thing addedThing = registry.get(testThing.getUID());
-        assertTrue(approvedThing.equals(addedThing));
-        assertFalse(addedThing == null);
+        assertEquals(approvedThing, addedThing);
+        assertNotNull(addedThing);
         for (String key : keysInConfigDescription) {
             Object thingConfItem = addedThing.getConfiguration().get(key);
             Object descResultParam = discoveryResultProperties.get(key);
             if (descResultParam instanceof Number) {
                 descResultParam = new BigDecimal(descResultParam.toString());
             }
-            assertFalse(thingConfItem == null);
-            assertFalse(descResultParam == null);
-            assertTrue(thingConfItem.equals(descResultParam));
+            assertNotNull(thingConfItem);
+            assertNotNull(descResultParam);
+            assertEquals(thingConfItem, descResultParam);
         }
         for (String key : keysNotInConfigDescription) {
             String thingProperty = addedThing.getProperties().get(key);
             String descResultParam = String.valueOf(discoveryResultProperties.get(key));
-            assertFalse(thingProperty == null);
-            assertFalse(descResultParam == null);
-            assertTrue(thingProperty.equals(descResultParam));
+            assertNotNull(thingProperty);
+            assertNotNull(descResultParam);
+            assertEquals(thingProperty, descResultParam);
         }
 
         services.forEach(this::unregisterService);
@@ -1076,7 +1076,7 @@ public class InboxOSGiTest extends JavaOSGiTest {
         assertThat(future.get(), is(true));
     }
 
-    class DummyThingHandlerFactory extends BaseThingHandlerFactory {
+    static class DummyThingHandlerFactory extends BaseThingHandlerFactory {
 
         public DummyThingHandlerFactory(ComponentContext context) {
             super.activate(context);

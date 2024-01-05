@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -88,11 +88,11 @@ public class XmlDocumentBundleTracker<@NonNull T> extends BundleTracker<Bundle> 
      * create, close, open
      * This can be handled correctly using three states and checking the transition.
      */
-    private static enum OpenState {
+    private enum OpenState {
         CREATED,
         OPENED,
         CLOSED
-    };
+    }
 
     public static final String THREAD_POOL_NAME = "file-processing";
 

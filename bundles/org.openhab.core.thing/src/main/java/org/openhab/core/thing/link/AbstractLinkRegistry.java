@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -185,7 +185,7 @@ public abstract class AbstractLinkRegistry<L extends AbstractLink, P extends Pro
             if (forLinkedUID == null) {
                 return Set.of();
             }
-            return forLinkedUID.stream().map(link -> link.getItemName()).collect(Collectors.toSet());
+            return forLinkedUID.stream().map(AbstractLink::getItemName).collect(Collectors.toSet());
         } finally {
             toLinkLock.readLock().unlock();
         }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -122,7 +122,7 @@ public class TTSLRUCacheImpl implements TTSCache {
             fileAndMetadata = lruMediaCacheLocal.get(key, () -> {
                 try {
                     AudioStream audioInputStream = tts.synthesizeForCache(text, voice, requestedFormat);
-                    return new LRUMediaCacheEntry<AudioFormatInfo>(key, audioInputStream,
+                    return new LRUMediaCacheEntry<>(key, audioInputStream,
                             new AudioFormatInfo(audioInputStream.getFormat()));
                 } catch (TTSException e) {
                     throw new IllegalStateException(e);

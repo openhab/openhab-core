@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -36,7 +36,7 @@ import org.openhab.core.config.core.dto.ConfigDescriptionDTO;
 public class RootUIComponent extends UIComponent implements Identifiable<String> {
     String uid;
 
-    Set<String> tags = new HashSet<String>();
+    Set<String> tags = new HashSet<>();
 
     ConfigDescriptionDTO props;
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -188,7 +188,7 @@ public abstract class AbstractFileTransformationService<T> implements Transforma
     }
 
     private void watchSubDirectory(String subDirectory, final WatchService watchService) {
-        if (watchedDirectories.indexOf(subDirectory) == -1) {
+        if (!watchedDirectories.contains(subDirectory)) {
             String watchedDirectory = getSourcePath() + subDirectory;
             Path transformFilePath = Paths.get(watchedDirectory);
             try {
@@ -298,7 +298,7 @@ public abstract class AbstractFileTransformationService<T> implements Transforma
         return Arrays.stream(path.listFiles(new FileExtensionsFilter(validExtensions))).map(File::getName).toList();
     }
 
-    protected class FileExtensionsFilter implements FilenameFilter {
+    protected static class FileExtensionsFilter implements FilenameFilter {
 
         private final String[] validExtensions;
 

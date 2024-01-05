@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -198,7 +198,8 @@ public class Ser2NetUsbSerialDiscovery implements ServiceListener, UsbSerialDisc
                     serviceInfo.getPort());
 
             UsbSerialDeviceInformation deviceInfo = new UsbSerialDeviceInformation(vendorId, productId, serialNumber,
-                    manufacturer, product, interfaceNumber, interfaceDescription, serialPortName);
+                    manufacturer, product, interfaceNumber, interfaceDescription, serialPortName).setRemote(true);
+
             logger.debug("Created {} based on {}", deviceInfo, serviceInfo);
             return Optional.of(deviceInfo);
         } catch (NumberFormatException e) {
