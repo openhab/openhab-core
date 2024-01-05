@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -296,7 +296,7 @@ public class LRUMediaCacheEntry<V> {
             }
         }
         // the cache file is now filled, get bytes from it.
-        long maxToRead = Math.min(currentSize, sizeToRead);
+        long maxToRead = Math.min(fileChannelLocal.size(), sizeToRead);
         ByteBuffer byteBufferFromChannelFile = ByteBuffer.allocate((int) maxToRead);
         int byteReadNumber = fileChannelLocal.read(byteBufferFromChannelFile, Integer.valueOf(start).longValue());
         logger.trace("Read {} bytes from the filechannel", byteReadNumber);

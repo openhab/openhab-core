@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -45,7 +45,8 @@ import org.osgi.service.component.annotations.Reference;
  * @author Markus Rathgeb - Initial contribution
  * @author Markus Rathgeb - Move code from XML thing type provider to separate service
  * @author Laurent Garnier - fix localized label and description for channel group definition
- * @author Christoph Weitkamp - factored out from {@link XmlChannelTypeProvider} and {@link XmlChannelGroupTypeProvider}
+ * @author Christoph Weitkamp - factored out from {@link org.openhab.core.thing.xml.internal.XmlChannelTypeProvider} and
+ *         {@link org.openhab.core.thing.xml.internal.XmlChannelGroupTypeProvider}
  * @author Henning Treu - factored out from {@link ThingTypeI18nLocalizationService}
  */
 @Component(service = ChannelTypeI18nLocalizationService.class)

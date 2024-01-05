@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -27,9 +27,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
 import java.time.Instant;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -90,7 +88,7 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
         configDispatcher = new ConfigDispatcher(configAdmin);
     }
 
-    private class CopyDirectoryRecursive extends SimpleFileVisitor<Path> {
+    private static class CopyDirectoryRecursive extends SimpleFileVisitor<Path> {
         private final Path sourceDir;
         private final Path targetDir;
 
@@ -202,7 +200,7 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
         /*
          * Assert that the configuration is updated with an empty list for a file in the services directory.
          */
-        verifyValuesOfConfigurationProperty("local.service.fourth.pid", "service.property", 0, Collections.emptyList());
+        verifyValuesOfConfigurationProperty("local.service.fourth.pid", "service.property", 0, List.of());
 
         /*
          * Assert some edge cases containing special chars
@@ -1058,8 +1056,7 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
     private void truncateLastLine(File file) throws IOException {
         final Path path = file.toPath();
         List<String> lines = Files.readAllLines(path, StandardCharsets.UTF_8);
-        Files.writeString(path, lines.subList(0, lines.size() - 1).stream().collect(Collectors.joining("\n")),
-                StandardCharsets.UTF_8);
+        Files.writeString(path, String.join("\n", lines.subList(0, lines.size() - 1)), StandardCharsets.UTF_8);
     }
 
     private @Nullable String getLastModifiedValueForPoperty(String path, String property) {

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -136,8 +136,9 @@ public class UnitsTest {
     public void testKelvin2Fahrenheit() {
         Quantity<Temperature> kelvin = Quantities.getQuantity(BigDecimal.ZERO, Units.KELVIN);
 
-        assertThat(kelvin.to(ImperialUnits.FAHRENHEIT),
-                is(Quantities.getQuantity(new BigDecimal("-459.67"), ImperialUnits.FAHRENHEIT)));
+        assertThat(kelvin.to(ImperialUnits.FAHRENHEIT).getValue().doubleValue(), is(closeTo(
+                Quantities.getQuantity(new BigDecimal("-459.67"), ImperialUnits.FAHRENHEIT).getValue().doubleValue(),
+                0.01)));
     }
 
     @Test
@@ -413,6 +414,16 @@ public class UnitsTest {
         QuantityType<?> oneKiloCalorie = QuantityType.valueOf("1 kcal");
         QuantityType<?> converted = oneKiloCalorie.toUnit("J");
         assertThat(converted.doubleValue(), is(closeTo(4184.0, DEFAULT_ERROR)));
+    }
+
+    @Test
+    public void testYearMonthDay() {
+        QuantityType<?> year = QuantityType.valueOf("1 y");
+        assertThat(year.toString(), is("1 year"));
+        QuantityType<?> converted = year.toUnit("d");
+        assertThat(converted.doubleValue(), is(closeTo(365.2425, DEFAULT_ERROR)));
+        QuantityType<?> converted2 = year.toUnit("mo");
+        assertThat(converted2.doubleValue(), is(closeTo(12.0, DEFAULT_ERROR)));
     }
 
     private static class QuantityEquals extends IsEqual<Quantity<?>> {

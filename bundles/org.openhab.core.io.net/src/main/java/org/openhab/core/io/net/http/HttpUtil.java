@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -281,7 +281,7 @@ public class HttpUtil {
             String proxyPortString = System.getProperty("http.proxyPort");
             if (proxyPortString != null && !proxyPortString.isBlank()) {
                 try {
-                    proxyParams.proxyPort = Integer.valueOf(proxyPortString);
+                    proxyParams.proxyPort = Integer.parseInt(proxyPortString);
                 } catch (NumberFormatException e) {
                     LOGGER.warn("'{}' is not a valid proxy port - using default port ({}) instead", proxyPortString,
                             proxyParams.proxyPort);
@@ -526,7 +526,8 @@ public class HttpUtil {
      * Check whether the content data is a JPEG file checking file start and end bytes.
      * {@link URLConnection#guessContentTypeFromStream(InputStream)} is wrong for some JPEG files.
      *
-     * @see https://en.wikipedia.org/wiki/JPEG#Syntax_and_structure
+     * @see <a href="https://en.wikipedia.org/wiki/JPEG#Syntax_and_structure">JPEG Syntax and structure</a>
+     *
      * @param data the data as buffer of bytes
      * @return <code>true</code> if the content is a JPEG file, <code>false</code> otherwise
      */

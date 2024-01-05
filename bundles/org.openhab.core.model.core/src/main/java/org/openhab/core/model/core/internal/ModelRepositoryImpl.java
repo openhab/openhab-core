@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.stream.Collectors;
 
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
@@ -173,7 +172,7 @@ public class ModelRepositoryImpl implements ModelRepository {
             return resourceListCopy.stream()
                     .filter(input -> input.getURI().lastSegment().contains(".") && input.isLoaded()
                             && modelType.equalsIgnoreCase(input.getURI().fileExtension()))
-                    .map(from -> from.getURI().path()).collect(Collectors.toList());
+                    .map(from -> from.getURI().path()).toList();
         }
     }
 
@@ -268,7 +267,7 @@ public class ModelRepositoryImpl implements ModelRepository {
                             .append(MessageFormat.format("[{0},{1}]: {2}\n", Integer.toString(diagnostic.getLine()),
                                     Integer.toString(diagnostic.getColumn()), diagnostic.getMessage()));
                 }
-                if (criticalErrors.length() > 0) {
+                if (!criticalErrors.isEmpty()) {
                     return criticalErrors.toString();
                 }
 
@@ -281,7 +280,7 @@ public class ModelRepositoryImpl implements ModelRepository {
                     }
                     if (!warnings.isEmpty()) {
                         logger.info("Validation issues found in configuration model '{}', using it anyway:\n{}", name,
-                                warnings.stream().collect(Collectors.joining("\n")));
+                                String.join("\n", warnings));
                     }
                 } catch (NullPointerException e) {
                     // see https://github.com/eclipse/smarthome/issues/3335

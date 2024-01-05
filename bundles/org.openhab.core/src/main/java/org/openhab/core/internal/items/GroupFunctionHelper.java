@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,7 +13,6 @@
 package org.openhab.core.internal.items;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import javax.measure.Quantity;
@@ -49,8 +48,7 @@ public class GroupFunctionHelper {
      * arithmetic group function will take unit conversion into account.
      *
      * @param function the {@link GroupFunctionDTO} describing the group function.
-     * @param args a list of {@link State}s as arguments for the resulting group function.
-     * @param dimension an optional interface class from {@link Quantity} defining the dimension for unit conversion.
+     * @param baseItem an optional {@link Item} defining the dimension for unit conversion.
      * @return a {@link GroupFunction} according to the given parameters.
      */
     public GroupFunction createGroupFunction(GroupFunctionDTO function, @Nullable Item baseItem) {
@@ -63,7 +61,7 @@ public class GroupFunctionHelper {
 
     private List<State> parseStates(@Nullable Item baseItem, String @Nullable [] params) {
         if (params == null || baseItem == null) {
-            return Collections.emptyList();
+            return List.of();
         }
 
         List<State> states = new ArrayList<>();

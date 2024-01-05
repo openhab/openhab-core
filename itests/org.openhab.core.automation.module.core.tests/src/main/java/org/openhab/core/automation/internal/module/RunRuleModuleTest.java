@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,10 +14,8 @@ package org.openhab.core.automation.internal.module;
 
 import static java.util.Map.entry;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -77,8 +75,8 @@ public class RunRuleModuleTest extends JavaOSGiTest {
         startLevelService = mock(StartLevelService.class);
         when(startLevelService.getStartLevel()).thenReturn(100);
         registerService(startLevelService, StartLevelService.class.getName());
-        EventPublisher eventPublisher = getService(EventPublisher.class);
-        ItemRegistry itemRegistry = getService(ItemRegistry.class);
+        EventPublisher eventPublisher = Objects.requireNonNull(getService(EventPublisher.class));
+        ItemRegistry itemRegistry = Objects.requireNonNull(getService(ItemRegistry.class));
         CoreModuleHandlerFactory coreModuleHandlerFactory = new CoreModuleHandlerFactory(getBundleContext(),
                 eventPublisher, itemRegistry, mock(TimeZoneProvider.class), mock(StartLevelService.class));
         mock(CoreModuleHandlerFactory.class);
@@ -129,8 +127,7 @@ public class RunRuleModuleTest extends JavaOSGiTest {
         final Configuration outerRuleTriggerConfig = new Configuration(
                 Map.ofEntries(entry("topic", "openhab/items/ruleTrigger/*"), entry("types", "ItemStateEvent")));
 
-        final List<String> ruleUIDs = new ArrayList<>();
-        ruleUIDs.add("exampleSceneRule");
+        final List<String> ruleUIDs = List.of("exampleSceneRule");
 
         final Configuration outerRuleActionConfig = new Configuration(Map.of("ruleUIDs", ruleUIDs));
 
@@ -206,6 +203,6 @@ public class RunRuleModuleTest extends JavaOSGiTest {
         };
 
         ServiceReference<?> subscriberReference = registerService(eventSubscriber).getReference();
-        assertNotNull(getServices(EventSubscriber.class, (reference) -> reference.equals(subscriberReference)));
+        assertNotNull(getServices(EventSubscriber.class, reference -> reference.equals(subscriberReference)));
     }
 }

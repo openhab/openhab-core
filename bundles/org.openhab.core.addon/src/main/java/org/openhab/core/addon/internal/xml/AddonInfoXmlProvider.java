@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -26,7 +26,8 @@ import org.slf4j.LoggerFactory;
  * objects by a {@link AddonInfoReader} for a certain bundle.
  * <p>
  * This implementation registers each {@link AddonInfo} object at the {@link XmlAddonInfoProvider} which is itself
- * registered as {@link AddonInfoProvider} service at the <i>OSGi</i> service registry.
+ * registered as {@link org.openhab.core.addon.AddonInfoProvider AddonInfoProvider} service at the <i>OSGi</i> service
+ * registry.
  * <p>
  * If there is a {@link ConfigDescription} object within the {@link AddonInfoXmlResult} object, it is added to the
  * {@link AbstractXmlConfigDescriptionProvider} which is itself registered as <i>OSGi</i> service at the service

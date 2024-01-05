@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -24,7 +24,7 @@ import org.openhab.core.types.State;
  * <p>
  * It is designed as a Java bean, for which the different properties are constraints on the query result. These
  * properties include the item name, begin and end date and the item state. A compare operator can be defined to compare
- * not only state equality, but also its decimal value (<,>).
+ * not only state equality, but also its decimal value ({@code <,>}).
  *
  * <p>
  * Additionally, the filter criteria supports ordering and paging of the result, so the caller can ask to only return

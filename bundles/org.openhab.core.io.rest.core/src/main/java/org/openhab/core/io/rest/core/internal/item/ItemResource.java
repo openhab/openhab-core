@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -42,7 +42,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
@@ -272,6 +271,7 @@ public class ItemResource implements RESTResource {
                     "name,label,type,groupType,function,category,editable,groupNames,link,tags,metadata,commandDescription,stateDescription");
 
             CacheControl cc = new CacheControl();
+            cc.setNoCache(true);
             cc.setMustRevalidate(true);
             cc.setPrivate(true);
             return Response.ok(new Stream2JSONInputStream(itemStream)).lastModified(lastModifiedDate).cacheControl(cc)
@@ -386,7 +386,7 @@ public class ItemResource implements RESTResource {
     public Response getBinaryItemState(@HeaderParam("Accept") @Nullable String mediaType,
             @PathParam("itemname") @Parameter(description = "item name") String itemname) {
         List<String> acceptedMediaTypes = Arrays.stream(Objects.requireNonNullElse(mediaType, "").split(","))
-                .map(String::trim).collect(Collectors.toList());
+                .map(String::trim).toList();
 
         Item item = getItem(itemname);
 
@@ -485,7 +485,7 @@ public class ItemResource implements RESTResource {
                 return Response.status(Status.BAD_REQUEST).build();
             }
         } else {
-            throw new WebApplicationException(404);
+            return getItemNotFoundResponse(itemname);
         }
     }
 
@@ -524,7 +524,7 @@ public class ItemResource implements RESTResource {
 
             return Response.ok(null, MediaType.TEXT_PLAIN).build();
         } catch (ItemNotFoundException e) {
-            return Response.status(Status.NOT_FOUND).build();
+            return getItemNotFoundResponse(itemName);
         }
     }
 
@@ -563,7 +563,7 @@ public class ItemResource implements RESTResource {
 
             return Response.ok(null, MediaType.TEXT_PLAIN).build();
         } catch (ItemNotFoundException e) {
-            return Response.status(Status.NOT_FOUND).build();
+            return getItemNotFoundResponse(itemName);
         }
     }
 

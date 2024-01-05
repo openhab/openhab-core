@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,15 +12,15 @@
  */
 package org.openhab.core.ui.internal.chart;
 
-import static java.util.Map.entry;
-
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.Period;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.time.temporal.TemporalAmount;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -69,6 +69,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Chris Jackson - Initial contribution
  * @author Holger Reichert - Support for themes, DPI, legend hiding
+ * @author Laurent Garnier - Extend support to ISO8601 format for chart period parameter
  */
 @Component(immediate = true, service = { ChartServlet.class, Servlet.class }, configurationPid = "org.openhab.chart", //
         property = Constants.SERVICE_PID + "=org.openhab.chart")
@@ -100,16 +101,6 @@ public class ChartServlet extends HttpServlet {
     public static final String SERVLET_PATH = "/chart";
 
     private static final Duration DEFAULT_PERIOD = Duration.ofDays(1);
-
-    private static final Map<String, Duration> PERIODS = Map.ofEntries( //
-            entry("h", Duration.ofHours(1)), entry("4h", Duration.ofHours(4)), //
-            entry("8h", Duration.ofHours(8)), entry("12h", Duration.ofHours(12)), //
-            entry("D", Duration.ofDays(1)), entry("2D", Duration.ofDays(2)), //
-            entry("3D", Duration.ofDays(3)), entry("W", Duration.ofDays(7)), //
-            entry("2W", Duration.ofDays(14)), entry("M", Duration.ofDays(30)), //
-            entry("2M", Duration.ofDays(60)), entry("4M", Duration.ofDays(120)), //
-            entry("Y", Duration.ofDays(365))//
-    );
 
     protected static final Map<String, ChartProvider> CHART_PROVIDERS = new ConcurrentHashMap<>();
 
@@ -233,7 +224,7 @@ public class ChartServlet extends HttpServlet {
         }
 
         // Read out the parameter period, begin and end and save them.
-        Duration period = periodParam == null ? DEFAULT_PERIOD : PERIODS.getOrDefault(periodParam, DEFAULT_PERIOD);
+        TemporalAmount period = convertToTemporalAmount(periodParam, DEFAULT_PERIOD);
         ZonedDateTime timeBegin = null;
         ZonedDateTime timeEnd = null;
 
@@ -358,5 +349,38 @@ public class ChartServlet extends HttpServlet {
 
     @Override
     public void destroy() {
+    }
+
+    public static TemporalAmount convertToTemporalAmount(@Nullable String periodParam, TemporalAmount defaultPeriod) {
+        TemporalAmount period = defaultPeriod;
+        String convertedPeriod = convertPeriodToISO8601(periodParam);
+        if (convertedPeriod != null) {
+            boolean failed = false;
+            try {
+                period = Period.parse(convertedPeriod);
+            } catch (DateTimeParseException e) {
+                failed = true;
+            }
+            if (failed) {
+                try {
+                    period = Duration.parse(convertedPeriod);
+                } catch (DateTimeParseException e) {
+                    // Ignored
+                }
+            }
+        }
+        return period;
+    }
+
+    private static @Nullable String convertPeriodToISO8601(@Nullable String period) {
+        if (period == null || period.startsWith("P") || !(period.endsWith("h") || period.endsWith("D")
+                || period.endsWith("W") || period.endsWith("M") || period.endsWith("Y"))) {
+            return period;
+        }
+        String newPeriod = period.length() == 1 ? "1" + period : period;
+        if (newPeriod.endsWith("h")) {
+            newPeriod = "T" + newPeriod.replace("h", "H");
+        }
+        return "P" + newPeriod;
     }
 }

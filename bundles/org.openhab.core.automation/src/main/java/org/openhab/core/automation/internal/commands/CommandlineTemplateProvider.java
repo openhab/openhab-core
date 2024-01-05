@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -130,9 +130,9 @@ public class CommandlineTemplateProvider extends AbstractCommandProvider<RuleTem
     }
 
     @Override
-    public @Nullable RuleTemplate getTemplate(String UID, @Nullable Locale locale) {
+    public @Nullable RuleTemplate getTemplate(String uid, @Nullable Locale locale) {
         synchronized (providerPortfolio) {
-            return providedObjectsHolder.get(UID);
+            return providedObjectsHolder.get(uid);
         }
     }
 
@@ -146,8 +146,6 @@ public class CommandlineTemplateProvider extends AbstractCommandProvider<RuleTem
     /**
      * This method is responsible for removing a set of objects loaded from a specified file or URL resource.
      *
-     * @param providerType specifies the provider responsible for removing the objects loaded from a specified file or
-     *            URL resource.
      * @param url is a specified file or URL resource.
      * @return the string <b>SUCCESS</b>.
      */

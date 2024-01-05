@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -18,7 +18,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -66,7 +65,7 @@ public class HSBType extends PercentType implements ComplexType, State, Command 
     /**
      * Constructs a HSBType instance with the given values
      *
-     * @param h the hue value in the range from 0 <= h < 360
+     * @param h the hue value in the range from {@code 0 <= h < 360}
      * @param s the saturation as a percent value
      * @param b the brightness as a percent value
      */
@@ -81,12 +80,12 @@ public class HSBType extends PercentType implements ComplexType, State, Command 
      * Constructs a HSBType instance from a given string.
      * The string has to be in comma-separated format with exactly three segments, which correspond to the hue,
      * saturation and brightness values.
-     * where the hue value in the range from 0 <= h < 360 and the saturation and brightness are percent values.
+     * where the hue value in the range from {@code 0 <= h < 360} and the saturation and brightness are percent values.
      *
      * @param value a stringified HSBType value in the format "hue,saturation,brightness"
      */
     public HSBType(String value) {
-        List<String> constituents = Arrays.stream(value.split(",")).map(String::trim).collect(Collectors.toList());
+        List<String> constituents = Arrays.stream(value.split(",")).map(String::trim).toList();
         if (constituents.size() == 3) {
             this.hue = new BigDecimal(constituents.get(0));
             this.saturation = new BigDecimal(constituents.get(1));
@@ -274,7 +273,7 @@ public class HSBType extends PercentType implements ComplexType, State, Command 
     public <T extends State> @Nullable T as(@Nullable Class<T> target) {
         if (target == OnOffType.class) {
             // if brightness is not completely off, we consider the state to be on
-            return target.cast(PercentType.ZERO.equals(getBrightness()) ? OnOffType.OFF : OnOffType.ON);
+            return target.cast(OnOffType.from(!PercentType.ZERO.equals(getBrightness())));
         } else if (target == DecimalType.class) {
             return target.cast(
                     new DecimalType(getBrightness().toBigDecimal().divide(BIG_DECIMAL_HUNDRED, 8, RoundingMode.UP)));

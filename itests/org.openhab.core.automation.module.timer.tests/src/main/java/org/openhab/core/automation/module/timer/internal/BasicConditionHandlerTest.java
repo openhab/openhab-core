@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,10 +15,8 @@ package org.openhab.core.automation.module.timer.internal;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -91,8 +89,8 @@ public abstract class BasicConditionHandlerTest extends JavaOSGiTest {
         startLevelService = mock(StartLevelService.class);
         when(startLevelService.getStartLevel()).thenReturn(100);
         registerService(startLevelService, StartLevelService.class.getName());
-        EventPublisher eventPublisher = getService(EventPublisher.class);
-        ItemRegistry itemRegistry = getService(ItemRegistry.class);
+        EventPublisher eventPublisher = Objects.requireNonNull(getService(EventPublisher.class));
+        ItemRegistry itemRegistry = Objects.requireNonNull(getService(ItemRegistry.class));
         CoreModuleHandlerFactory coreModuleHandlerFactory = new CoreModuleHandlerFactory(getBundleContext(),
                 eventPublisher, itemRegistry, mock(TimeZoneProvider.class), mock(StartLevelService.class));
         mock(CoreModuleHandlerFactory.class);
@@ -105,10 +103,7 @@ public abstract class BasicConditionHandlerTest extends JavaOSGiTest {
 
             @Override
             public Collection<Item> getAll() {
-                List<Item> items = new ArrayList<>();
-                items.add(new SwitchItem("TriggeredItem"));
-                items.add(new SwitchItem("SwitchedItem"));
-                return items;
+                return List.of(new SwitchItem("TriggeredItem"), new SwitchItem("SwitchedItem"));
             }
 
             @Override

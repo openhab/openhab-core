@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -25,6 +25,7 @@ import java.util.UUID;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.jetty.util.Fields;
 import org.eclipse.jetty.util.UrlEncoded;
 import org.openhab.core.auth.client.oauth2.AccessTokenRefreshListener;
 import org.openhab.core.auth.client.oauth2.AccessTokenResponse;
@@ -73,6 +74,8 @@ public class OAuthClientServiceImpl implements OAuthClientService {
 
     private PersistedParams persistedParams = new PersistedParams();
 
+    private @Nullable Fields extraAuthFields = null;
+
     private volatile boolean closed = false;
 
     private OAuthClientServiceImpl(String handle, int tokenExpiresInSeconds, HttpClientFactory httpClientFactory,
@@ -86,7 +89,6 @@ public class OAuthClientServiceImpl implements OAuthClientService {
     /**
      * It should only be used internally, thus the access is package level
      *
-     * @param bundleContext Bundle Context
      * @param handle The handle produced previously from
      *            {@link org.openhab.core.auth.client.oauth2.OAuthFactory#createOAuthClientService}
      * @param storeHandler Storage handler
@@ -116,12 +118,11 @@ public class OAuthClientServiceImpl implements OAuthClientService {
     /**
      * It should only be used internally, thus the access is package level
      *
-     * @param bundleContext Bundle Context*
      * @param handle The handle produced previously from
      *            {@link org.openhab.core.auth.client.oauth2.OAuthFactory#createOAuthClientService}*
      * @param storeHandler Storage handler
      * @param httpClientFactory Http client factory
-     * @param persistedParams These parameters are static with respect to the OAuth provider and thus can be persisted.
+     * @param params These parameters are static with respect to the OAuth provider and thus can be persisted.
      * @return OAuthClientServiceImpl an instance
      */
     static OAuthClientServiceImpl createInstance(String handle, OAuthStoreHandler storeHandler,
@@ -157,8 +158,8 @@ public class OAuthClientServiceImpl implements OAuthClientService {
         }
 
         GsonBuilder gsonBuilder = this.gsonBuilder;
-        OAuthConnector connector = gsonBuilder == null ? new OAuthConnector(httpClientFactory)
-                : new OAuthConnector(httpClientFactory, gsonBuilder);
+        OAuthConnector connector = gsonBuilder == null ? new OAuthConnector(httpClientFactory, extraAuthFields)
+                : new OAuthConnector(httpClientFactory, extraAuthFields, gsonBuilder);
         return connector.getAuthorizationUrl(authorizationUrl, clientId, redirectURI, persistedParams.state,
                 scopeToUse);
     }
@@ -213,8 +214,8 @@ public class OAuthClientServiceImpl implements OAuthClientService {
         }
 
         GsonBuilder gsonBuilder = this.gsonBuilder;
-        OAuthConnector connector = gsonBuilder == null ? new OAuthConnector(httpClientFactory)
-                : new OAuthConnector(httpClientFactory, gsonBuilder);
+        OAuthConnector connector = gsonBuilder == null ? new OAuthConnector(httpClientFactory, extraAuthFields)
+                : new OAuthConnector(httpClientFactory, extraAuthFields, gsonBuilder);
         AccessTokenResponse accessTokenResponse = connector.grantTypeAuthorizationCode(tokenUrl, authorizationCode,
                 clientId, persistedParams.clientSecret, redirectURI,
                 Boolean.TRUE.equals(persistedParams.supportsBasicAuth));
@@ -247,8 +248,8 @@ public class OAuthClientServiceImpl implements OAuthClientService {
         }
 
         GsonBuilder gsonBuilder = this.gsonBuilder;
-        OAuthConnector connector = gsonBuilder == null ? new OAuthConnector(httpClientFactory)
-                : new OAuthConnector(httpClientFactory, gsonBuilder);
+        OAuthConnector connector = gsonBuilder == null ? new OAuthConnector(httpClientFactory, extraAuthFields)
+                : new OAuthConnector(httpClientFactory, extraAuthFields, gsonBuilder);
         AccessTokenResponse accessTokenResponse = connector.grantTypePassword(tokenUrl, username, password,
                 persistedParams.clientId, persistedParams.clientSecret, scope,
                 Boolean.TRUE.equals(persistedParams.supportsBasicAuth));
@@ -274,8 +275,8 @@ public class OAuthClientServiceImpl implements OAuthClientService {
         }
 
         GsonBuilder gsonBuilder = this.gsonBuilder;
-        OAuthConnector connector = gsonBuilder == null ? new OAuthConnector(httpClientFactory)
-                : new OAuthConnector(httpClientFactory, gsonBuilder);
+        OAuthConnector connector = gsonBuilder == null ? new OAuthConnector(httpClientFactory, extraAuthFields)
+                : new OAuthConnector(httpClientFactory, extraAuthFields, gsonBuilder);
         // depending on usage, cannot guarantee every parameter is not null at the beginning
         AccessTokenResponse accessTokenResponse = connector.grantTypeClientCredentials(tokenUrl, clientId,
                 persistedParams.clientSecret, scope, Boolean.TRUE.equals(persistedParams.supportsBasicAuth));
@@ -310,8 +311,8 @@ public class OAuthClientServiceImpl implements OAuthClientService {
         }
 
         GsonBuilder gsonBuilder = this.gsonBuilder;
-        OAuthConnector connector = gsonBuilder == null ? new OAuthConnector(httpClientFactory)
-                : new OAuthConnector(httpClientFactory, gsonBuilder);
+        OAuthConnector connector = gsonBuilder == null ? new OAuthConnector(httpClientFactory, extraAuthFields)
+                : new OAuthConnector(httpClientFactory, extraAuthFields, gsonBuilder);
         AccessTokenResponse accessTokenResponse = connector.grantTypeRefreshToken(tokenUrl,
                 lastAccessToken.getRefreshToken(), persistedParams.clientId, persistedParams.clientSecret,
                 persistedParams.scope, Boolean.TRUE.equals(persistedParams.supportsBasicAuth));
@@ -410,6 +411,20 @@ public class OAuthClientServiceImpl implements OAuthClientService {
 
     private String createNewState() {
         return UUID.randomUUID().toString();
+    }
+
+    /**
+     * Adds extra fields to include in the form data when doing the token request
+     *
+     * @param key The name of the key to add to the auth form
+     * @param value The value of the new auth form param
+     */
+    @Override
+    public void addExtraAuthField(String key, String value) {
+        if (extraAuthFields == null) {
+            extraAuthFields = new Fields();
+        }
+        extraAuthFields.add(key, value);
     }
 
     @Override

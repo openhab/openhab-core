@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,7 +12,6 @@
  */
 package org.openhab.core.model.script.internal;
 
-import java.util.Collections;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -110,6 +109,6 @@ public class RuleHumanLanguageInterpreter implements HumanLanguageInterpreter {
 
     @Override
     public Set<String> getSupportedGrammarFormats() {
-        return Collections.emptySet();
+        return Set.of();
     }
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,7 +14,6 @@ package org.openhab.core.config.discovery.internal;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -263,7 +262,7 @@ public final class DiscoveryServiceRegistryImpl implements DiscoveryServiceRegis
     @Override
     public synchronized void thingRemoved(final DiscoveryService source, final ThingUID thingUID) {
         synchronized (cachedResults) {
-            Iterator<DiscoveryResult> it = cachedResults.getOrDefault(source, Collections.emptySet()).iterator();
+            Iterator<DiscoveryResult> it = cachedResults.getOrDefault(source, Set.of()).iterator();
             while (it.hasNext()) {
                 if (it.next().getThingUID().equals(thingUID)) {
                     it.remove();

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -20,11 +20,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.mutable.Mutable;
 import org.apache.commons.lang3.mutable.MutableObject;
@@ -76,8 +74,7 @@ public class LRUMediaCacheEntryTest {
     }
 
     private LRUMediaCache<MetadataSample> createCache(long size) throws IOException {
-        return new LRUMediaCache<MetadataSample>(storageService, size, "lrucachetest.pid",
-                this.getClass().getClassLoader());
+        return new LRUMediaCache<>(storageService, size, "lrucachetest.pid", this.getClass().getClassLoader());
     }
 
     public static class FakeStream extends InputStream {
@@ -194,7 +191,7 @@ public class LRUMediaCacheEntryTest {
 
         // read bytes from the two stream concurrently
         Mutable<@Nullable IOException> exceptionCatched = new MutableObject<>();
-        List<InputStream> parallelAudioStreamList = Arrays.asList(actualAudioStream1, actualAudioStream2);
+        List<InputStream> parallelAudioStreamList = List.of(actualAudioStream1, actualAudioStream2);
         List<byte[]> bytesResultList = parallelAudioStreamList.parallelStream().map(stream -> {
             try {
                 return stream.readAllBytes();
@@ -202,7 +199,7 @@ public class LRUMediaCacheEntryTest {
                 exceptionCatched.setValue(e);
                 return new byte[0];
             }
-        }).collect(Collectors.toList());
+        }).toList();
 
         IOException possibleException = exceptionCatched.getValue();
         if (possibleException != null) {

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -154,9 +154,10 @@ public class JarFileAddonService extends BundleTracker<Bundle> implements AddonS
         String uid = ADDON_ID_PREFIX + addonInfo.getUID();
         return Addon.create(uid).withId(addonInfo.getId()).withType(addonInfo.getType()).withInstalled(true)
                 .withVersion(bundle.getVersion().toString()).withLabel(addonInfo.getName())
+                .withConnection(addonInfo.getConnection()).withCountries(addonInfo.getCountries())
                 .withConfigDescriptionURI(addonInfo.getConfigDescriptionURI())
                 .withDescription(Objects.requireNonNullElse(addonInfo.getDescription(), bundle.getSymbolicName()))
-                .withContentType(ADDONS_CONTENT_TYPE).build();
+                .withContentType(ADDONS_CONTENT_TYPE).withLoggerPackages(List.of(bundle.getSymbolicName())).build();
     }
 
     @Override

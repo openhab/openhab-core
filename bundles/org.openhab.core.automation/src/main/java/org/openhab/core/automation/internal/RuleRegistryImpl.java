@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -63,7 +63,7 @@ import org.slf4j.LoggerFactory;
  * The {@link RuleRegistryImpl} provides basic functionality for managing {@link Rule}s.
  * It can be used to
  * <ul>
- * <li>Add Rules with the {@link #add(Rule)}, {@link #added(Provider, Rule)}, {@link #addProvider(RuleProvider)}
+ * <li>Add Rules with the {@link #add(Rule)}, {@link #added(Provider, Rule)}, {@link #addProvider(Provider)}
  * methods.</li>
  * <li>Get the existing rules with the {@link #get(String)}, {@link #getAll()}, {@link #getByTag(String)},
  * {@link #getByTags(String[])} methods.</li>
@@ -93,7 +93,7 @@ import org.slf4j.LoggerFactory;
  * <li>If one of the Rule's Triggers is triggered, the Rule becomes {@link RuleStatus#RUNNING}.
  * When the execution is complete, it will become {@link RuleStatus#IDLE} again.</li>
  * <li>If a Rule is disabled with {@link #setEnabled(String, boolean)}, it's status is set to
- * {@link RuleStatus#DISABLED}.</li>
+ * {@link RuleStatusDetail#DISABLED}.</li>
  * </ul>
  *
  * @author Yordan Mihaylov - Initial contribution
@@ -130,7 +130,7 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
     /**
      * Activates this component. Called from DS.
      *
-     * @param componentContext this component context.
+     * @param bundleContext this component context.
      */
     @Override
     @Activate

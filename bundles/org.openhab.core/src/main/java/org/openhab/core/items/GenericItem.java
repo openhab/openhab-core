@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -23,7 +23,6 @@ import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ExecutorService;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -39,6 +38,7 @@ import org.openhab.core.types.CommandOption;
 import org.openhab.core.types.RefreshType;
 import org.openhab.core.types.State;
 import org.openhab.core.types.StateDescription;
+import org.openhab.core.types.TimeSeries;
 import org.openhab.core.types.UnDefType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,6 +51,7 @@ import org.slf4j.LoggerFactory;
  * @author Kai Kreuzer - Initial contribution
  * @author Andre Fuechsel - Added tags
  * @author Stefan Bußweiler - Migration to new ESH event concept
+ * @author Jan N. Klug - Added time series support
  */
 @NonNullByDefault
 public abstract class GenericItem implements ActiveItem {
@@ -62,6 +63,9 @@ public abstract class GenericItem implements ActiveItem {
     protected @Nullable EventPublisher eventPublisher;
 
     protected Set<StateChangeListener> listeners = new CopyOnWriteArraySet<>(
+            Collections.newSetFromMap(new WeakHashMap<>()));
+
+    protected Set<TimeSeriesListener> timeSeriesListeners = new CopyOnWriteArraySet<>(
             Collections.newSetFromMap(new WeakHashMap<>()));
 
     protected List<String> groupNames = new ArrayList<>();
@@ -116,7 +120,7 @@ public abstract class GenericItem implements ActiveItem {
 
     @Override
     public List<String> getGroupNames() {
-        return Collections.unmodifiableList(new ArrayList<>(groupNames));
+        return List.copyOf(groupNames);
     }
 
     /**
@@ -229,6 +233,50 @@ public abstract class GenericItem implements ActiveItem {
         }
     }
 
+    /**
+     * Set a new time series.
+     * <p/>
+     * Subclasses may override this method in order to do necessary conversions upfront. Afterwards,
+     * {@link #applyTimeSeries(TimeSeries)} should be called by classes overriding this method.
+     * <p/>
+     * A time series may only contain events that are compatible with the item's internal state.
+     *
+     * @param timeSeries new time series of this item
+     */
+    public void setTimeSeries(TimeSeries timeSeries) {
+        applyTimeSeries(timeSeries);
+    }
+
+    /**
+     * Sets new time series, notifies listeners and sends events.
+     * <p />
+     * Classes overriding the {@link #setTimeSeries(TimeSeries)} method should call this method in order to actually set
+     * the time series, inform listeners and send the event.
+     * <p/>
+     * A time series may only contain events that are compatible with the item's internal state.
+     *
+     * @param timeSeries new time series of this item
+     */
+    protected final void applyTimeSeries(TimeSeries timeSeries) {
+        // notify listeners
+        Set<TimeSeriesListener> clonedListeners = new CopyOnWriteArraySet<>(timeSeriesListeners);
+        ExecutorService pool = ThreadPoolManager.getPool(ITEM_THREADPOOLNAME);
+        clonedListeners.forEach(listener -> pool.execute(() -> {
+            try {
+                listener.timeSeriesUpdated(GenericItem.this, timeSeries);
+            } catch (Exception e) {
+                logger.warn("failed notifying listener '{}' about timeseries update of item {}: {}", listener,
+                        GenericItem.this.getName(), e.getMessage(), e);
+            }
+        }));
+
+        // send event
+        EventPublisher eventPublisher1 = this.eventPublisher;
+        if (eventPublisher1 != null) {
+            eventPublisher1.post(ItemEventFactory.createTimeSeriesUpdatedEvent(this.name, timeSeries, null));
+        }
+    }
+
     private void sendStateUpdatedEvent(State newState) {
         EventPublisher eventPublisher1 = this.eventPublisher;
         if (eventPublisher1 != null) {
@@ -289,13 +337,13 @@ public abstract class GenericItem implements ActiveItem {
         if (!getTags().isEmpty()) {
             sb.append(", ");
             sb.append("Tags=[");
-            sb.append(getTags().stream().collect(Collectors.joining(", ")));
+            sb.append(String.join(", ", getTags()));
             sb.append("]");
         }
         if (!getGroupNames().isEmpty()) {
             sb.append(", ");
             sb.append("Groups=[");
-            sb.append(getGroupNames().stream().collect(Collectors.joining(", ")));
+            sb.append(String.join(", ", getGroupNames()));
             sb.append("]");
         }
         sb.append(")");
@@ -311,6 +359,18 @@ public abstract class GenericItem implements ActiveItem {
     public void removeStateChangeListener(StateChangeListener listener) {
         synchronized (listeners) {
             listeners.remove(listener);
+        }
+    }
+
+    public void addTimeSeriesListener(TimeSeriesListener listener) {
+        synchronized (timeSeriesListeners) {
+            timeSeriesListeners.add(listener);
+        }
+    }
+
+    public void removeTimeSeriesListener(TimeSeriesListener listener) {
+        synchronized (timeSeriesListeners) {
+            timeSeriesListeners.remove(listener);
         }
     }
 
@@ -346,7 +406,7 @@ public abstract class GenericItem implements ActiveItem {
 
     @Override
     public Set<String> getTags() {
-        return Collections.unmodifiableSet(new HashSet<>(tags));
+        return Set.copyOf(tags);
     }
 
     @Override
@@ -437,8 +497,7 @@ public abstract class GenericItem implements ActiveItem {
      * @return true if state is an acceptedDataType or subclass thereof
      */
     public boolean isAcceptedState(List<Class<? extends State>> acceptedDataTypes, State state) {
-        return acceptedDataTypes.stream().map(clazz -> clazz.isAssignableFrom(state.getClass())).filter(found -> found)
-                .findAny().isPresent();
+        return acceptedDataTypes.stream().anyMatch(clazz -> clazz.isAssignableFrom(state.getClass()));
     }
 
     protected void logSetTypeError(State state) {
@@ -446,7 +505,12 @@ public abstract class GenericItem implements ActiveItem {
                 state.getClass().getSimpleName(), getName(), getClass().getSimpleName());
     }
 
-    private @Nullable CommandDescription stateOptions2CommandOptions(StateDescription stateDescription) {
+    protected void logSetTypeError(TimeSeries timeSeries) {
+        logger.error("Tried to set invalid state in time series {} on item {} of type {}, ignoring it", timeSeries,
+                getName(), getClass().getSimpleName());
+    }
+
+    private CommandDescription stateOptions2CommandOptions(StateDescription stateDescription) {
         CommandDescriptionBuilder builder = CommandDescriptionBuilder.create();
         stateDescription.getOptions()
                 .forEach(so -> builder.withCommandOption(new CommandOption(so.getValue(), so.getLabel())));

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -19,7 +19,8 @@ import org.openhab.core.auth.AuthenticationException;
  * An exception when the token endpoint encounters an error and must return an error response, according to RFC 6749
  * Section 5.2.
  *
- * {@linkplain https://tools.ietf.org/html/rfc6749#section-5.2}
+ * @see <a href="https://datatracker.ietf.org/doc/html/rfc6749#section-5.2">RFC 6749: Issuing an Access Token - Error
+ *      Response</a>
  *
  * @author Yannick Schaus - initial contribution
  */

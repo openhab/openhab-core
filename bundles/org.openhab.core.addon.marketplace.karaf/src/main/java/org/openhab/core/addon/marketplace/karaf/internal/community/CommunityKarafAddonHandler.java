@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -25,7 +25,6 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.karaf.kar.KarService;
@@ -123,7 +122,7 @@ public class CommunityKarafAddonHandler implements MarketplaceAddonHandler {
         try {
             Path addonPath = getAddonCacheDirectory(addon.getUid());
             List<String> repositories = karService.list();
-            for (Path path : karFilesStream(addonPath).collect(Collectors.toList())) {
+            for (Path path : karFilesStream(addonPath).toList()) {
                 String karRepoName = pathToKarRepoName(path);
                 if (repositories.contains(karRepoName)) {
                     karService.uninstall(karRepoName);

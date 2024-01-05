@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -11,8 +11,6 @@
  * SPDX-License-Identifier: EPL-2.0
  */
 package org.openhab.core.internal.items;
-
-import static java.util.stream.Collectors.toList;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -262,11 +260,11 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
         // don't use #initialize and retain order of items in groups:
         List<String> oldNames = oldItem.getGroupNames();
         List<String> newNames = item.getGroupNames();
-        List<String> commonNames = oldNames.stream().filter(newNames::contains).collect(toList());
+        List<String> commonNames = oldNames.stream().filter(newNames::contains).toList();
 
-        removeFromGroupItems(oldItem, oldNames.stream().filter(name -> !commonNames.contains(name)).collect(toList()));
+        removeFromGroupItems(oldItem, oldNames.stream().filter(name -> !commonNames.contains(name)).toList());
         replaceInGroupItems(oldItem, item, commonNames);
-        addToGroupItems(item, newNames.stream().filter(name -> !commonNames.contains(name)).collect(toList()));
+        addToGroupItems(item, newNames.stream().filter(name -> !commonNames.contains(name)).toList());
         if (item instanceof GroupItem groupItem) {
             addMembersToGroupItem(groupItem);
         }

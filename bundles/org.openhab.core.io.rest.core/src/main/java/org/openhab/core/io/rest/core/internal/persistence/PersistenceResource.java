@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -518,7 +518,7 @@ public class PersistenceResource implements RESTResource {
     private Response deletePersistenceItemData(@Nullable String serviceId, String itemName, @Nullable String timeBegin,
             @Nullable String timeEnd) {
         // For deleting, we must specify a service id - don't use the default service
-        if (serviceId == null || serviceId.length() == 0) {
+        if (serviceId == null || serviceId.isEmpty()) {
             logger.debug("Persistence service must be specified for delete operations.");
             return JSONResponse.createErrorResponse(Status.BAD_REQUEST,
                     "Persistence service must be specified for delete operations.");
@@ -598,7 +598,7 @@ public class PersistenceResource implements RESTResource {
         }
 
         ZonedDateTime dateTime = null;
-        if (time != null && time.length() != 0) {
+        if (time != null && !time.isEmpty()) {
             dateTime = convertTime(time);
         }
         if (dateTime == null || dateTime.toEpochSecond() == 0) {

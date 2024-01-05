@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -36,10 +36,12 @@ import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.Metadata;
+import org.openhab.core.library.items.NumberItem;
 import org.openhab.core.library.items.SwitchItem;
 import org.openhab.core.semantics.ManagedSemanticTagProvider;
 import org.openhab.core.semantics.SemanticTagRegistry;
 import org.openhab.core.semantics.model.DefaultSemanticTagProvider;
+import org.openhab.core.test.java.JavaTest;
 
 /**
  * @author Simon Lamon - Initial contribution
@@ -47,7 +49,7 @@ import org.openhab.core.semantics.model.DefaultSemanticTagProvider;
 @NonNullByDefault
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
-public class SemanticsMetadataProviderTest {
+public class SemanticsMetadataProviderTest extends JavaTest {
 
     private static final String ITEM_NAME = "switchItem";
 
@@ -61,6 +63,8 @@ public class SemanticsMetadataProviderTest {
 
     @BeforeEach
     public void beforeEach() throws Exception {
+        setupInterceptedLogger(SemanticsMetadataProvider.class, LogLevel.DEBUG);
+
         when(managedSemanticTagProviderMock.getAll()).thenReturn(List.of());
         SemanticTagRegistry semanticTagRegistry = new SemanticTagRegistryImpl(new DefaultSemanticTagProvider(),
                 managedSemanticTagProviderMock);
@@ -179,7 +183,7 @@ public class SemanticsMetadataProviderTest {
 
         Metadata metadata = Objects.requireNonNull(getMetadata(item));
         assertEquals("Equipment_Door", metadata.getValue());
-        assertEquals(metadata.getConfiguration().get("hasLocation"), GROUP_ITEM_NAME);
+        assertEquals(GROUP_ITEM_NAME, metadata.getConfiguration().get("hasLocation"));
     }
 
     @Test
@@ -204,7 +208,7 @@ public class SemanticsMetadataProviderTest {
 
         Metadata metadata = Objects.requireNonNull(getMetadata(item));
         assertEquals("Equipment_Door", oldMetadata.getValue());
-        assertEquals(metadata.getConfiguration().get("hasLocation"), GROUP_ITEM_NAME);
+        assertEquals(GROUP_ITEM_NAME, metadata.getConfiguration().get("hasLocation"));
     }
 
     @Test
@@ -224,7 +228,7 @@ public class SemanticsMetadataProviderTest {
 
         Metadata oldMetadata = Objects.requireNonNull(getMetadata(item));
         assertEquals("Equipment_Door", oldMetadata.getValue());
-        assertEquals(oldMetadata.getConfiguration().get("hasLocation"), GROUP_ITEM_NAME);
+        assertEquals(GROUP_ITEM_NAME, oldMetadata.getConfiguration().get("hasLocation"));
 
         when(itemRegistry.get(GROUP_ITEM_NAME)).thenReturn(null);
 
@@ -233,6 +237,51 @@ public class SemanticsMetadataProviderTest {
         Metadata metadata = Objects.requireNonNull(getMetadata(item));
         assertEquals("Equipment_Door", metadata.getValue());
         assertNull(metadata.getConfiguration().get("hasLocation"));
+    }
+
+    @Test
+    public void testRecursiveGroupMembershipDoesNotResultInStackOverflowError() {
+        GroupItem groupItem1 = new GroupItem("group1");
+        GroupItem groupItem2 = new GroupItem("group2");
+
+        groupItem1.addMember(groupItem2);
+        groupItem2.addMember(groupItem1);
+
+        assertDoesNotThrow(() -> semanticsMetadataProvider.added(groupItem1));
+
+        assertLogMessage(SemanticsMetadataProvider.class, LogLevel.ERROR,
+                "Recursive group membership found: group1 is both, a direct or indirect parent and a child of group2.");
+    }
+
+    @Test
+    public void testIndirectRecursiveMembershipDoesNotThrowStackOverflowError() {
+        GroupItem groupItem1 = new GroupItem("group1");
+        GroupItem groupItem2 = new GroupItem("group2");
+        GroupItem groupItem3 = new GroupItem("group3");
+
+        groupItem1.addMember(groupItem2);
+        groupItem2.addMember(groupItem3);
+        groupItem3.addMember(groupItem1);
+
+        assertDoesNotThrow(() -> semanticsMetadataProvider.added(groupItem1));
+
+        assertLogMessage(SemanticsMetadataProvider.class, LogLevel.ERROR,
+                "Recursive group membership found: group1 is both, a direct or indirect parent and a child of group3.");
+    }
+
+    @Test
+    public void testDuplicateMembershipOfPlainItemsDoesNotTriggerWarning() {
+        GroupItem groupItem1 = new GroupItem("group1");
+        GroupItem groupItem2 = new GroupItem("group2");
+        NumberItem numberItem = new NumberItem("number");
+
+        groupItem1.addMember(groupItem2);
+        groupItem1.addMember(numberItem);
+        groupItem2.addMember(numberItem);
+
+        semanticsMetadataProvider.added(groupItem1);
+
+        assertNoLogMessage(SemanticsMetadataProvider.class);
     }
 
     private @Nullable Metadata getMetadata(Item item) {

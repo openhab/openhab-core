@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,7 +14,6 @@ package org.openhab.core.addon.marketplace.internal.community;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -46,7 +45,7 @@ final class SerializedNameAnnotationIntrospector extends AnnotationIntrospector 
     @NonNullByDefault({})
     public List<PropertyName> findPropertyAliases(Annotated annotated) {
         return Optional.ofNullable(annotated.getAnnotation(SerializedName.class))
-                .map(s -> Stream.of(s.alternate()).map(PropertyName::new).collect(Collectors.toList()))
+                .map(s -> Stream.of(s.alternate()).map(PropertyName::new).toList())
                 .orElseGet(() -> super.findPropertyAliases(annotated));
     }
 

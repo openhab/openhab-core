@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -66,7 +66,7 @@ public class AudioConsoleCommandExtension extends AbstractConsoleCommandExtensio
 
     @Override
     public List<String> getUsages() {
-        return Arrays.asList(new String[] {
+        return List.of(
                 buildCommandUsage(SUBCMD_PLAY + " [<sink>] <filename>",
                         "plays a sound file from the sounds folder through the optionally specified audio sink(s)"),
                 buildCommandUsage(SUBCMD_PLAY + " <sink> <filename> <volume>",
@@ -79,7 +79,7 @@ public class AudioConsoleCommandExtension extends AbstractConsoleCommandExtensio
                 buildCommandUsage(SUBCMD_SYNTHESIZE + " <sink> \"<melody>\" <volume>",
                         "synthesize a tone melody and play it through the optionally specified audio sink(s) with the specified volume"),
                 buildCommandUsage(SUBCMD_SOURCES, "lists the audio sources"),
-                buildCommandUsage(SUBCMD_SINKS, "lists the audio sinks") });
+                buildCommandUsage(SUBCMD_SINKS, "lists the audio sinks"));
     }
 
     @Override

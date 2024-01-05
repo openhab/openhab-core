@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -49,7 +49,7 @@ public final class ConfigValidationException extends RuntimeException {
      *
      * @param bundle the bundle from which this exception is thrown
      * @param configValidationMessages the configuration description validation messages
-     * @throws NullPointException if given bundle or configuration description validation messages are null
+     * @throws NullPointerException if given bundle or configuration description validation messages are null
      */
     public ConfigValidationException(Bundle bundle, TranslationProvider translationProvider,
             Collection<ConfigValidationMessage> configValidationMessages) {

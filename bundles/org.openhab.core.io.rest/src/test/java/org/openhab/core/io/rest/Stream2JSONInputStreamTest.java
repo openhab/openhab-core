@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -18,7 +18,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -40,7 +39,7 @@ public class Stream2JSONInputStreamTest {
 
     @Test
     public void shouldReturnForEmptyStream() throws Exception {
-        List<Object> emptyList = Collections.emptyList();
+        List<Object> emptyList = List.of();
         Stream2JSONInputStream collection2InputStream = new Stream2JSONInputStream(emptyList.stream());
 
         assertThat(inputStreamToString(collection2InputStream), is(GSON.toJson(emptyList)));
@@ -70,7 +69,7 @@ public class Stream2JSONInputStreamTest {
     }
 
     @SuppressWarnings("unused")
-    private class DummyObject {
+    private static class DummyObject {
         private final String key;
         private final String value;
 

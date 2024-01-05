@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -20,7 +20,6 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -72,7 +71,7 @@ public class CommandlineModuleTypeProvider extends AbstractCommandProvider<Modul
      * add any new functionality to the constructors of the providers. Only provides consistency by invoking the
      * parent's constructor.
      *
-     * @param context is the {@code BundleContext}, used for creating a tracker for {@link Parser} services.
+     * @param bundleContext is the {@code BundleContext}, used for creating a tracker for {@link Parser} services.
      * @param moduleTypeRegistry a ModuleTypeRegistry service
      */
     public CommandlineModuleTypeProvider(BundleContext bundleContext, ModuleTypeRegistry moduleTypeRegistry) {
@@ -137,25 +136,22 @@ public class CommandlineModuleTypeProvider extends AbstractCommandProvider<Modul
 
     @SuppressWarnings("unchecked")
     @Override
-    public @Nullable ModuleType getModuleType(String UID, @Nullable Locale locale) {
+    public @Nullable ModuleType getModuleType(String uid, @Nullable Locale locale) {
         synchronized (providedObjectsHolder) {
-            return providedObjectsHolder.get(UID);
+            return providedObjectsHolder.get(uid);
         }
     }
 
     @Override
     public Collection<ModuleType> getModuleTypes(@Nullable Locale locale) {
         synchronized (providedObjectsHolder) {
-            return !providedObjectsHolder.isEmpty() ? providedObjectsHolder.values()
-                    : Collections.<ModuleType> emptyList();
+            return !providedObjectsHolder.isEmpty() ? providedObjectsHolder.values() : List.of();
         }
     }
 
     /**
      * This method is responsible for removing a set of objects loaded from a specified file or URL resource.
      *
-     * @param providerType specifies the provider responsible for removing the objects loaded from a specified file or
-     *            URL resource.
      * @param url is a specified file or URL resource.
      * @return the string <b>SUCCESS</b>.
      */

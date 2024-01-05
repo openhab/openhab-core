@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -614,9 +614,9 @@ class GenericThingProvider extends AbstractProviderLazyNullness<Thing> implement
                 createThing(newThings, factory)
             ]
         }
-        thingsMap.put(modelName, newThings)
 
         newThings.forEach [ newThing |
+            thingsMap.get(modelName).add(newThing)
             val oldThing = oldThings.findFirst[it.UID == newThing.UID]
             if (oldThing !== null) {
                 if (!ThingHelper.equals(oldThing, newThing)) {

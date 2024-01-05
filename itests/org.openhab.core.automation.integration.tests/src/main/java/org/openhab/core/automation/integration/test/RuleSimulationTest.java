@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -20,7 +20,6 @@ import static org.mockito.Mockito.when;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
@@ -31,7 +30,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -147,7 +145,7 @@ public class RuleSimulationTest extends JavaOSGiTest {
         final ZonedDateTime from = ZonedDateTime.of(2021, 1, 4, 0, 0, 0, 0, ZoneId.systemDefault());
         final ZonedDateTime until = ZonedDateTime.of(2021, 1, 17, 23, 59, 59, 0, ZoneId.systemDefault());
 
-        List<RuleExecution> executions = ruleEngine.simulateRuleExecutions(from, until).collect(Collectors.toList());
+        List<RuleExecution> executions = ruleEngine.simulateRuleExecutions(from, until).toList();
 
         // Every rule fires twice a week. We simulate for two weeks so we expect 12 executions
         // TODO: must be 12, but Ephemeris Condition is not yet evaluated in test, because dayset is not configured.
@@ -220,8 +218,7 @@ public class RuleSimulationTest extends JavaOSGiTest {
     private static Rule createRuleWithTimeOfDayTrigger() {
         int rand = new Random().nextInt();
 
-        Map<String, Object> configs = new HashMap<>();
-        configs.put(TimeOfDayTriggerHandler.CFG_TIME, "16:00");
+        Map<String, Object> configs = Map.of(TimeOfDayTriggerHandler.CFG_TIME, "16:00");
         final Configuration triggerConfig = new Configuration(configs);
         final String triggerUID = "TimeOfDayTrigger_" + rand;
         List<Trigger> triggers = List.of(ModuleBuilder.createTrigger().withId(triggerUID)
@@ -231,8 +228,7 @@ public class RuleSimulationTest extends JavaOSGiTest {
         List<Action> actions = List.of(ModuleBuilder.createAction().withId("ItemPostCommandAction_" + rand)
                 .withTypeUID("core.ItemCommandAction").withConfiguration(actionConfig).build());
 
-        configs = new HashMap<>();
-        configs.put(DayOfWeekConditionHandler.CFG_DAYS, Arrays.asList("MON", "WED"));
+        configs = Map.of(DayOfWeekConditionHandler.CFG_DAYS, List.of("MON", "WED"));
         final Configuration conditionConfig = new Configuration(configs);
         List<Condition> conditions = List.of(ModuleBuilder.createCondition().withId("DayCondition" + rand)
                 .withTypeUID(DayOfWeekConditionHandler.MODULE_TYPE_ID).withConfiguration(conditionConfig).build());
@@ -248,8 +244,7 @@ public class RuleSimulationTest extends JavaOSGiTest {
     private static Rule createRuleWithEphemerisCondition() {
         int rand = new Random().nextInt();
 
-        Map<String, Object> configs = new HashMap<>();
-        configs.put(TimeOfDayTriggerHandler.CFG_TIME, "10:00");
+        Map<String, Object> configs = Map.of(TimeOfDayTriggerHandler.CFG_TIME, "10:00");
         final Configuration triggerConfig = new Configuration(configs);
         final String triggerUID = "TimeOfDayTrigger_" + rand;
         List<Trigger> triggers = List.of(ModuleBuilder.createTrigger().withId(triggerUID)

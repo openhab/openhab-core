@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -16,14 +16,15 @@ import java.io.IOException;
 import java.net.URI;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Dictionary;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -59,6 +60,13 @@ import com.google.gson.JsonSyntaxException;
 public abstract class AbstractRemoteAddonService implements AddonService {
     static final String CONFIG_REMOTE_ENABLED = "remote";
     static final String CONFIG_INCLUDE_INCOMPATIBLE = "includeIncompatible";
+    static final Comparator<Addon> BY_COMPATIBLE_AND_VERSION = (addon1, addon2) -> {
+        // prefer compatible over incompatible
+        int compatible = Boolean.compare(addon2.getCompatible(), addon1.getCompatible());
+        // prefer newer version over older
+        return compatible != 0 ? compatible
+                : new BundleVersion(addon2.getVersion()).compareTo(new BundleVersion(addon1.getVersion()));
+    };
 
     protected final BundleVersion coreVersion;
 
@@ -75,7 +83,7 @@ public abstract class AbstractRemoteAddonService implements AddonService {
 
     private final Logger logger = LoggerFactory.getLogger(AbstractRemoteAddonService.class);
 
-    public AbstractRemoteAddonService(EventPublisher eventPublisher, ConfigurationAdmin configurationAdmin,
+    protected AbstractRemoteAddonService(EventPublisher eventPublisher, ConfigurationAdmin configurationAdmin,
             StorageService storageService, AddonInfoRegistry addonInfoRegistry, String servicePid) {
         this.addonInfoRegistry = addonInfoRegistry;
         this.eventPublisher = eventPublisher;
@@ -117,7 +125,7 @@ public abstract class AbstractRemoteAddonService implements AddonService {
         }
 
         // create lookup list to make sure installed addons take precedence
-        List<String> installedAddons = addons.stream().map(Addon::getUid).collect(Collectors.toList());
+        List<String> installedAddons = addons.stream().map(Addon::getUid).toList();
 
         if (remoteEnabled()) {
             List<Addon> remoteAddons = Objects.requireNonNullElse(cachedRemoteAddons.getValue(), List.of());
@@ -132,12 +140,21 @@ public abstract class AbstractRemoteAddonService implements AddonService {
         boolean showIncompatible = includeIncompatible();
         addons.removeIf(addon -> !addon.isInstalled() && !addon.getCompatible() && !showIncompatible);
 
+        // check and remove duplicate uids
+        Map<String, List<Addon>> addonMap = new HashMap<>();
+        addons.forEach(a -> addonMap.computeIfAbsent(a.getUid(), k -> new ArrayList<>()).add(a));
+        for (List<Addon> partialAddonList : addonMap.values()) {
+            if (partialAddonList.size() > 1) {
+                partialAddonList.stream().sorted(BY_COMPATIBLE_AND_VERSION).skip(1).forEach(addons::remove);
+            }
+        }
+
         cachedAddons = addons;
         this.installedAddons = installedAddons;
     }
 
     /**
-     * Add a {@link MarketplaceAddonHandler) to this service
+     * Add a {@link MarketplaceAddonHandler} to this service
      *
      * This needs to be implemented by the addon-services because the handlers are references to OSGi services and
      * the @Reference annotation is not inherited.
@@ -148,7 +165,7 @@ public abstract class AbstractRemoteAddonService implements AddonService {
     protected abstract void addAddonHandler(MarketplaceAddonHandler handler);
 
     /**
-     * Remove a {@link MarketplaceAddonHandler) from this service
+     * Remove a {@link MarketplaceAddonHandler} from this service
      *
      * This needs to be implemented by the addon-services because the handlers are references to OSGi services and
      * unbind methods can't be inherited.

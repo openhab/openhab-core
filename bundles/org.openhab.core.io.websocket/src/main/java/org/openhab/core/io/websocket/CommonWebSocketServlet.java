@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -30,6 +30,7 @@ import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
 import org.openhab.core.auth.AuthenticationException;
 import org.openhab.core.auth.Role;
 import org.openhab.core.io.rest.auth.AuthFilter;
+import org.openhab.core.io.websocket.event.EventWebSocketAdapter;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;

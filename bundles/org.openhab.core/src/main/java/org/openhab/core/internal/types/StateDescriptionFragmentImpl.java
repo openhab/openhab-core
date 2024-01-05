@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -31,7 +31,7 @@ import org.openhab.core.types.StateOption;
 @NonNullByDefault
 public class StateDescriptionFragmentImpl implements StateDescriptionFragment {
 
-    private class StateDescriptionImpl extends StateDescription {
+    private static class StateDescriptionImpl extends StateDescription {
         StateDescriptionImpl(@Nullable BigDecimal minimum, @Nullable BigDecimal maximum, @Nullable BigDecimal step,
                 @Nullable String pattern, boolean readOnly, @Nullable List<StateOption> options) {
             super(minimum, maximum, step, pattern, readOnly, options);
@@ -72,8 +72,7 @@ public class StateDescriptionFragmentImpl implements StateDescriptionFragment {
         this.step = step;
         this.pattern = pattern;
         this.readOnly = readOnly;
-        this.options = options == null || options.isEmpty() ? Collections.emptyList()
-                : Collections.unmodifiableList(options);
+        this.options = options == null || options.isEmpty() ? List.of() : Collections.unmodifiableList(options);
     }
 
     /**
@@ -170,8 +169,7 @@ public class StateDescriptionFragmentImpl implements StateDescriptionFragment {
             return null;
         }
         final Boolean ro = readOnly;
-        return new StateDescriptionImpl(minimum, maximum, step, pattern, ro == null ? false : ro.booleanValue(),
-                options);
+        return new StateDescriptionImpl(minimum, maximum, step, pattern, ro != null && ro.booleanValue(), options);
     }
 
     /**

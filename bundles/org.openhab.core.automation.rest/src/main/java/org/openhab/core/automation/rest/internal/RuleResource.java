@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -25,7 +25,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.annotation.security.RolesAllowed;
@@ -169,7 +168,6 @@ public class RuleResource implements RESTResource {
             @QueryParam("prefix") final @Nullable String prefix, @QueryParam("tags") final @Nullable List<String> tags,
             @QueryParam("summary") @Parameter(description = "summary fields only") @Nullable Boolean summary,
             @DefaultValue("false") @QueryParam("staticDataOnly") @Parameter(description = "provides a cacheable list of values not expected to change regularly and honors the If-Modified-Since header, all other parameters are ignored") boolean staticDataOnly) {
-
         if ((summary == null || !summary) && !securityContext.isUserInRole(Role.ADMIN)) {
             // users may only access the summary
             return JSONResponse.createErrorResponse(Status.UNAUTHORIZED, "Authentication required");
@@ -190,6 +188,7 @@ public class RuleResource implements RESTResource {
                     .map(rule -> EnrichedRuleDTOMapper.map(rule, ruleManager, managedRuleProvider));
 
             CacheControl cc = new CacheControl();
+            cc.setNoCache(true);
             cc.setMustRevalidate(true);
             cc.setPrivate(true);
             rules = dtoMapper.limitToFields(rules, "uid,templateUID,name,visibility,description,tags,editable");
@@ -434,7 +433,7 @@ public class RuleResource implements RESTResource {
         }
 
         final Stream<RuleExecution> ruleExecutions = ruleManager.simulateRuleExecutions(fromDate, untilDate);
-        return Response.ok(ruleExecutions.collect(Collectors.toList())).build();
+        return Response.ok(ruleExecutions.toList()).build();
     }
 
     private static ZonedDateTime parseTime(String sTime) {

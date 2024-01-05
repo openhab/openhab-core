@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -44,7 +44,7 @@ public class AudioFormat {
             null, null);
 
     /**
-     * {@link AudioCodec} encoded data without any container header or footer,
+     * {@code AudioCodec} encoded data without any container header or footer,
      * e.g. MP3 is a non-container format
      */
     public static final String CONTAINER_NONE = "NONE";

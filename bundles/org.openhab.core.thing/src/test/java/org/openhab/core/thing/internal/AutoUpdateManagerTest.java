@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -123,7 +123,7 @@ public class AutoUpdateManagerTest {
                 .thenAnswer(answer -> ChannelBuilder.create(CHANNEL_UID_OFFLINE_1, CoreItemFactory.STRING)
                         .withAutoUpdatePolicy(policies.get(CHANNEL_UID_OFFLINE_1)).build());
 
-        aum = new AutoUpdateManager(new HashMap<>(), channelTypeRegistryMock, eventPublisherMock, iclRegistryMock,
+        aum = new AutoUpdateManager(Map.of(), channelTypeRegistryMock, eventPublisherMock, iclRegistryMock,
                 metadataRegistryMock, thingRegistryMock);
     }
 

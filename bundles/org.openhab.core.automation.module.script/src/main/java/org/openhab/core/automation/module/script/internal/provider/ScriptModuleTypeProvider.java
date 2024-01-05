@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -68,12 +68,12 @@ public class ScriptModuleTypeProvider extends AbstractProvider<ModuleType> imple
 
     @SuppressWarnings("unchecked")
     @Override
-    public @Nullable ModuleType getModuleType(String UID, @Nullable Locale locale) {
+    public @Nullable ModuleType getModuleType(String uid, @Nullable Locale locale) {
         if (parameterOptions.isEmpty()) {
             return null;
-        } else if (ScriptActionHandler.TYPE_ID.equals(UID)) {
+        } else if (ScriptActionHandler.TYPE_ID.equals(uid)) {
             return getScriptActionType(locale);
-        } else if (ScriptConditionHandler.TYPE_ID.equals(UID)) {
+        } else if (ScriptConditionHandler.TYPE_ID.equals(uid)) {
             return getScriptConditionType(locale);
         } else {
             return null;
@@ -99,7 +99,7 @@ public class ScriptModuleTypeProvider extends AbstractProvider<ModuleType> imple
     }
 
     /**
-     * This method creates the {@link ConfigurationDescriptionParameter}s used by the generated ScriptActionType and
+     * This method creates the {@link ConfigDescriptionParameter}s used by the generated ScriptActionType and
      * ScriptConditionType. {@link AbstractScriptModuleHandler} requires that the names of these be 'type' and 'script'.
      *
      * @return a list of {#link ConfigurationDescriptionParameter}s

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -18,7 +18,6 @@ import java.time.temporal.ChronoUnit;
 import java.time.temporal.Temporal;
 import java.time.temporal.TemporalAdjuster;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -157,7 +156,7 @@ public class CronAdjuster implements SchedulerTemporalAdjuster {
             }
             return map;
         } else {
-            return Collections.emptyMap();
+            return Map.of();
         }
     }
 
@@ -208,7 +207,7 @@ public class CronAdjuster implements SchedulerTemporalAdjuster {
      * @param chronoField the chronoField is part belongs to
      */
     private void parseAndAdd(final String cronExpression, final String part, final ChronoField chronoField) {
-        parse(cronExpression, part, chronoField, Collections.emptyMap());
+        parse(cronExpression, part, chronoField, Map.of());
     }
 
     /**
@@ -278,7 +277,7 @@ public class CronAdjuster implements SchedulerTemporalAdjuster {
                 return CronAdjuster::isLastWorkingDayInMonth;
             } else if (sub.endsWith("W")) {
                 final int n = parseInt(cronExpression, chronoField, sub.substring(0, sub.length() - 1));
-                return (temporal) -> isNearestWorkDay(temporal, n);
+                return temporal -> isNearestWorkDay(temporal, n);
             }
             // fall through, it is a normal expression
         }
@@ -459,7 +458,7 @@ public class CronAdjuster implements SchedulerTemporalAdjuster {
      * because this object is ordered for temporal index no conversion is needed here.
      *
      * @param cronExpression the whole cron expression
-     * @param name the cron value to parse
+     * @param value the cron value to parse
      * @param names map with names of the week
      * @return temporal index of day of the week
      */

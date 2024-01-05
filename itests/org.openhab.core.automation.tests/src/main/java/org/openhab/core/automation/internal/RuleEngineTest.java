@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -293,47 +293,46 @@ public class RuleEngineTest extends JavaOSGiTest {
     }
 
     private List<Trigger> createTriggers(String type) {
-        List<Trigger> triggers = new ArrayList<>();
         Configuration configurations = new Configuration();
         configurations.put("a", "x");
         configurations.put("b", "y");
         configurations.put("c", "z");
-        triggers.add(ModuleBuilder.createTrigger().withId("triggerId").withTypeUID(type)
+
+        return List.of(ModuleBuilder.createTrigger().withId("triggerId").withTypeUID(type)
                 .withConfiguration(configurations).build());
-        return triggers;
     }
 
     private List<Condition> createConditions(String type) {
-        List<Condition> conditions = new ArrayList<>();
         Configuration configurations = new Configuration();
         configurations.put("a", "x");
         configurations.put("b", "y");
         configurations.put("c", "z");
-        Map<String, String> inputs = new HashMap<>(11);
-        String ouputModuleId = "triggerId";
+
+        String outputModuleId = "triggerId";
         String outputName = "triggerOutput";
         String inputName = "conditionInput";
-        inputs.put(inputName, ouputModuleId + "." + outputName);
-        conditions.add(ModuleBuilder.createCondition().withId("conditionId").withTypeUID(type)
+        Map<String, String> inputs = Map.of(inputName, outputModuleId + "." + outputName);
+
+        return List.of(ModuleBuilder.createCondition().withId("conditionId").withTypeUID(type)
                 .withConfiguration(configurations).withInputs(inputs).build());
-        return conditions;
     }
 
     private List<Action> createActions(String type) {
-        List<Action> actions = new ArrayList<>();
         Configuration configurations = new Configuration();
         configurations.put("a", "x");
         configurations.put("b", "y");
         configurations.put("c", "z");
-        Map<String, String> inputs = new HashMap<>(11);
-        String ouputModuleId = "triggerId";
+
+        String outputModuleId = "triggerId";
         String outputName = "triggerOutput";
         String inputName = "actionInput";
-        inputs.put(inputName, ouputModuleId + "." + outputName);
-        inputs.put("in6", ouputModuleId + "." + outputName);
-        actions.add(ModuleBuilder.createAction().withId("actionId").withTypeUID(type).withConfiguration(configurations)
-                .withInputs(inputs).build());
-        return actions;
+
+        Map<String, String> inputs = new HashMap<>(11);
+        inputs.put(inputName, outputModuleId + "." + outputName);
+        inputs.put("in6", outputModuleId + "." + outputName);
+
+        return List.of(ModuleBuilder.createAction().withId("actionId").withTypeUID(type)
+                .withConfiguration(configurations).withInputs(inputs).build());
     }
 
     private List<ConfigDescriptionParameter> createConfigDescriptions() {

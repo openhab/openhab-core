@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,7 +17,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.number.IsCloseTo.closeTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -274,7 +273,7 @@ public class ArithmeticGroupFunctionTest {
         assertEquals(new DecimalType("2"), state);
     }
 
-    private class TestItem extends GenericItem {
+    private static class TestItem extends GenericItem {
 
         public TestItem(String name, State state) {
             super("Test", name);
@@ -283,12 +282,12 @@ public class ArithmeticGroupFunctionTest {
 
         @Override
         public List<Class<? extends State>> getAcceptedDataTypes() {
-            return Collections.emptyList();
+            return List.of();
         }
 
         @Override
         public List<Class<? extends Command>> getAcceptedCommandTypes() {
-            return Collections.emptyList();
+            return List.of();
         }
     }
 }

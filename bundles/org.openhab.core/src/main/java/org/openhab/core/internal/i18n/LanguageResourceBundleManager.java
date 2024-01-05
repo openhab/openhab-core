@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -27,7 +27,7 @@ import org.osgi.framework.Bundle;
 
 /**
  * The {@link LanguageResourceBundleManager} class manages all available i18n resources for one
- * specific <i>OSGi</i> bundle. Any i18n resource is searched within the {@link RESOURCE_DIRECTORY} of the bundle and
+ * specific <i>OSGi</i> bundle. Any i18n resource is searched within the {@link #RESOURCE_DIRECTORY} of the bundle and
  * <i>not</i> within the general bundle classpath. For the translation, the
  * i18n mechanism of Java ({@link ResourceBundle}) is used.
  * <p>

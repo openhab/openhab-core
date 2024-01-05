@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -92,9 +92,9 @@ public final class ImperialUnits extends CustomUnits {
             new TransformedUnit<>("gal", CUBIC_INCH, MultiplyConverter.of(231.0)));
 
     public static final Unit<VolumetricFlowRate> GALLON_PER_MINUTE = addUnit(
-            new ProductUnit<VolumetricFlowRate>(GALLON_LIQUID_US.divide(tech.units.indriya.unit.Units.MINUTE)));
+            new ProductUnit<>(GALLON_LIQUID_US.divide(tech.units.indriya.unit.Units.MINUTE)));
 
-    /**
+    /*
      * Add unit symbols for imperial units.
      */
     static {

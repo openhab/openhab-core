@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -38,7 +38,7 @@ public class InstanceUUID {
     static String uuid;
 
     /**
-     * Retrieves a unified unique id, based on {@link java.util.UUID.randomUUID()}
+     * Retrieves a unified unique id, based on {@link java.util.UUID#randomUUID()}
      *
      * @return a UUID which identifies the instance or null, if uuid cannot be persisted
      */

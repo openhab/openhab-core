@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -98,11 +98,11 @@ class ScriptJvmModelInferrer extends AbstractModelInferrer {
     /**
      * Is called for each instance of the first argument's type contained in a resource.
      * 
-     * @param element - the model to create one or more JvmDeclaredTypes from.
-     * @param acceptor - each created JvmDeclaredType without a container should be passed to the acceptor in order get attached to the
+     * @param script the model to create one or more JvmDeclaredTypes from.
+     * @param acceptor each created JvmDeclaredType without a container should be passed to the acceptor in order get attached to the
      *                   current resource.
-     * @param isPreLinkingPhase - whether the method is called in a pre linking phase, i.e. when the global index isn't fully updated. You
-     *        must not rely on linking using the index if iPrelinkingPhase is <code>true</code>
+     * @param isPreIndexingPhase whether the method is called in a pre linking phase, i.e. when the global index isn't fully updated. You
+     *        must not rely on linking using the index if isPreIndexingPhase is <code>true</code>
      */
     def dispatch void infer(Script script, IJvmDeclaredTypeAcceptor acceptor, boolean isPreIndexingPhase) {
         val className = script.eResource.URI.lastSegment.split("\\.").head.toFirstUpper + "Script"

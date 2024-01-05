@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -59,7 +59,7 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
 
     protected final String ruleUID;
 
-    public AbstractScriptModuleHandler(T module, String ruleUID, ScriptEngineManager scriptEngineManager) {
+    protected AbstractScriptModuleHandler(T module, String ruleUID, ScriptEngineManager scriptEngineManager) {
         super(module);
         this.scriptEngineManager = scriptEngineManager;
         this.ruleUID = ruleUID;

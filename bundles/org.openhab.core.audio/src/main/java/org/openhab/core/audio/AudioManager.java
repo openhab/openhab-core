@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -33,7 +33,7 @@ public interface AudioManager {
     /**
      * Name of the sub-directory of the config folder, holding sound files.
      */
-    static final String SOUND_DIR = "sounds";
+    String SOUND_DIR = "sounds";
 
     /**
      * Plays the passed audio stream using the default audio sink.

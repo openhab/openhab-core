@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -41,7 +41,7 @@ public abstract class AbstractTransformingChannelHandler implements ChannelHandl
 
     protected final ChannelValueConverterConfig channelConfig;
 
-    public AbstractTransformingChannelHandler(Consumer<State> updateState, Consumer<Command> postCommand,
+    protected AbstractTransformingChannelHandler(Consumer<State> updateState, Consumer<Command> postCommand,
             @Nullable Consumer<String> sendValue, ChannelTransformation stateTransformations,
             ChannelTransformation commandTransformations, ChannelValueConverterConfig channelConfig) {
         this.updateState = updateState;
@@ -105,11 +105,4 @@ public abstract class AbstractTransformingChannelHandler implements ChannelHandl
      * @return the string representation of the command
      */
     protected abstract String toString(Command command);
-
-    @FunctionalInterface
-    public interface Factory {
-        ChannelHandler create(Consumer<State> updateState, Consumer<Command> postCommand,
-                @Nullable Consumer<String> sendHttpValue, ChannelTransformation stateTransformations,
-                ChannelTransformation commandTransformations, ChannelValueConverterConfig channelConfig);
-    }
 }

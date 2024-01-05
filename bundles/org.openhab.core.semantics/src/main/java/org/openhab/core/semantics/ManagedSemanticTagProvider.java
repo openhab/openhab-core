@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -27,8 +27,8 @@ import org.osgi.service.component.annotations.Reference;
 
 /**
  * {@link ManagedSemanticTagProvider} is an OSGi service, that allows to add or remove
- * semantic tags at runtime by calling {@link ManagedSemanticTagProvider#add(SemanticTag)}
- * or {@link ManagedSemanticTagProvider#remove(String)}.
+ * semantic tags at runtime by calling {@link ManagedSemanticTagProvider#add}
+ * or {@link ManagedSemanticTagProvider#remove}.
  * An added semantic tag is automatically exposed to the {@link SemanticTagRegistry}.
  * Persistence of added semantic tags is handled by a {@link StorageService}.
  *

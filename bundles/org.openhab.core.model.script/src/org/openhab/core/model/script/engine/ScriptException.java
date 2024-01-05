@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -74,8 +74,6 @@ public abstract class ScriptException extends Exception {
 
     /**
      * Creates a ScriptException with one Error.
-     *
-     * @param errors
      */
     private ScriptException(final String scriptText, final ScriptError error) {
         super(error.getMessage()); // ?
@@ -134,7 +132,7 @@ public abstract class ScriptException extends Exception {
 
             int i = 1;
             for (ScriptError e : getErrors()) {
-                if (sb.length() > 0) {
+                if (!sb.isEmpty()) {
                     sb.append('\n');
                 }
                 sb.append("   ");

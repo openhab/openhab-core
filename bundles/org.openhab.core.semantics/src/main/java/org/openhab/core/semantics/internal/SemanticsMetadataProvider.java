@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,8 +12,8 @@
  */
 package org.openhab.core.semantics.internal;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +22,7 @@ import java.util.TreeMap;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.common.registry.AbstractProvider;
+import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemRegistry;
@@ -33,6 +34,7 @@ import org.openhab.core.semantics.Equipment;
 import org.openhab.core.semantics.Location;
 import org.openhab.core.semantics.Point;
 import org.openhab.core.semantics.Property;
+import org.openhab.core.semantics.SemanticTag;
 import org.openhab.core.semantics.SemanticTagRegistry;
 import org.openhab.core.semantics.SemanticTags;
 import org.openhab.core.semantics.Tag;
@@ -40,6 +42,8 @@ import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This {@link MetadataProvider} collects semantic information about items and provides them as metadata under the
@@ -56,6 +60,8 @@ import org.osgi.service.component.annotations.Reference;
 public class SemanticsMetadataProvider extends AbstractProvider<Metadata>
         implements ItemRegistryChangeListener, MetadataProvider {
 
+    private final Logger logger = LoggerFactory.getLogger(SemanticsMetadataProvider.class);
+
     // the namespace to use for the metadata
     public static final String NAMESPACE = "semantics";
 
@@ -65,19 +71,19 @@ public class SemanticsMetadataProvider extends AbstractProvider<Metadata>
     private final Map<List<Class<? extends Tag>>, String> propertyRelations = new HashMap<>();
 
     // local cache of the created metadata as a map from itemName->Metadata
-    private final Map<String, Metadata> semantics = new TreeMap<>(new Comparator<String>() {
-        @Override
-        public int compare(String s1, String s2) {
-            return s1.compareTo(s2);
-        }
-    });
+    private final Map<String, Metadata> semantics = new TreeMap<>(String::compareTo);
 
     private final ItemRegistry itemRegistry;
+    private final SemanticTagRegistry semanticTagRegistry;
+
+    private SemanticTagRegistryChangeListener listener;
 
     @Activate
     public SemanticsMetadataProvider(final @Reference ItemRegistry itemRegistry,
             final @Reference SemanticTagRegistry semanticTagRegistry) {
         this.itemRegistry = itemRegistry;
+        this.semanticTagRegistry = semanticTagRegistry;
+        this.listener = new SemanticTagRegistryChangeListener(this);
     }
 
     @Activate
@@ -87,10 +93,12 @@ public class SemanticsMetadataProvider extends AbstractProvider<Metadata>
             processItem(item);
         }
         itemRegistry.addRegistryChangeListener(this);
+        semanticTagRegistry.addRegistryChangeListener(listener);
     }
 
     @Deactivate
     protected void deactivate() {
+        semanticTagRegistry.removeRegistryChangeListener(listener);
         itemRegistry.removeRegistryChangeListener(this);
         semantics.clear();
     }
@@ -106,6 +114,10 @@ public class SemanticsMetadataProvider extends AbstractProvider<Metadata>
      * @param item the item to update the metadata for
      */
     private void processItem(Item item) {
+        processItem(item, new ArrayList<>());
+    }
+
+    private void processItem(Item item, List<String> parentItems) {
         MetadataKey key = new MetadataKey(NAMESPACE, item.getName());
         Map<String, Object> configuration = new HashMap<>();
         Class<? extends Tag> type = SemanticTags.getSemanticType(item);
@@ -127,8 +139,15 @@ public class SemanticsMetadataProvider extends AbstractProvider<Metadata>
         }
 
         if (item instanceof GroupItem groupItem) {
+            parentItems.add(item.getName());
             for (Item memberItem : groupItem.getMembers()) {
-                processItem(memberItem);
+                if (parentItems.contains(memberItem.getName())) {
+                    logger.error(
+                            "Recursive group membership found: {} is both, a direct or indirect parent and a child of {}.",
+                            memberItem.getName(), groupItem.getName());
+                } else {
+                    processItem(memberItem, parentItems);
+                }
             }
         }
     }
@@ -269,5 +288,29 @@ public class SemanticsMetadataProvider extends AbstractProvider<Metadata>
     @Override
     public void updated(Item oldItem, Item item) {
         processItem(item);
+    }
+
+    private static class SemanticTagRegistryChangeListener implements RegistryChangeListener<SemanticTag> {
+
+        private SemanticsMetadataProvider provider;
+
+        public SemanticTagRegistryChangeListener(SemanticsMetadataProvider provider) {
+            this.provider = provider;
+        }
+
+        @Override
+        public void added(SemanticTag element) {
+            provider.allItemsChanged(List.of());
+        }
+
+        @Override
+        public void removed(SemanticTag element) {
+            provider.allItemsChanged(List.of());
+        }
+
+        @Override
+        public void updated(SemanticTag oldElement, SemanticTag element) {
+            provider.allItemsChanged(List.of());
+        }
     }
 }

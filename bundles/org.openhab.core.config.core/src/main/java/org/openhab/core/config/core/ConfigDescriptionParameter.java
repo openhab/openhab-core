@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,7 +15,6 @@ package org.openhab.core.config.core;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -26,7 +25,7 @@ import com.google.gson.annotations.SerializedName;
  * concrete configuration parameter. Such parameter descriptions are collected
  * within the {@link ConfigDescription} and can be retrieved from the {@link ConfigDescriptionRegistry}.
  *
- * This class defines available configuration parameter types in {@link ConfigDescriptionParameter#Type},
+ * This class defines available configuration parameter types in {@link ConfigDescriptionParameter.Type},
  * it defines available unit types in {@link ConfigDescriptionParameter#UNITS} and available
  * contexts (see {@link ConfigDescriptionParameter#getContext()}).
  *
@@ -224,12 +223,12 @@ public class ConfigDescriptionParameter {
         if (options != null) {
             this.options = Collections.unmodifiableList(options);
         } else {
-            this.options = Collections.unmodifiableList(new LinkedList<>());
+            this.options = List.of();
         }
         if (filterCriteria != null) {
             this.filterCriteria = Collections.unmodifiableList(filterCriteria);
         } else {
-            this.filterCriteria = Collections.unmodifiableList(new LinkedList<>());
+            this.filterCriteria = List.of();
         }
     }
 

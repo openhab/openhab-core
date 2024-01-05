@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -29,7 +29,7 @@ public interface ManagedMetadataProvider extends ManagedProvider<Metadata, Metad
     /**
      * Removes all metadata of a given item
      *
-     * @param itemname the name of the item for which the metadata is to be removed.
+     * @param name the name of the item for which the metadata is to be removed.
      */
     void removeItemMetadata(String name);
 }

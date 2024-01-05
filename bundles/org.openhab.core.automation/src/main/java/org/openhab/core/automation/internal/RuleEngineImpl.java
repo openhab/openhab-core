@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -178,7 +178,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
      * The context map of a {@link Rule} is cleaned when the execution is completed. The relation is
      * {@link Rule}'s UID to Rule context map.
      */
-    private final Map<String, Map<String, Object>> contextMap = new HashMap<>();
+    private final Map<String, Map<String, Object>> contextMap = new ConcurrentHashMap<>();
 
     /**
      * This field holds reference to {@link ModuleTypeRegistry}. The {@link RuleEngineImpl} needs it to auto-map
@@ -256,8 +256,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
     public RuleEngineImpl(final @Reference ModuleTypeRegistry moduleTypeRegistry,
             final @Reference RuleRegistry ruleRegistry, final @Reference StorageService storageService,
             final @Reference ReadyService readyService, final @Reference StartLevelService startLevelService) {
-        this.disabledRulesStorage = storageService.<Boolean> getStorage(DISABLED_RULE_STORAGE,
-                this.getClass().getClassLoader());
+        this.disabledRulesStorage = storageService.getStorage(DISABLED_RULE_STORAGE, this.getClass().getClassLoader());
 
         mtRegistry = moduleTypeRegistry;
         mtRegistry.addRegistryChangeListener(this);
@@ -1164,7 +1163,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
     }
 
     /**
-     * This method evaluates actions of the {@link Rule} and set their {@link Output}s when they exists.
+     * This method evaluates actions of the {@link Rule} and set their {@link Output}s when they exist.
      *
      * @param rule executed rule.
      */
@@ -1207,7 +1206,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
      * This method gets rule's status object.
      *
      * @param rUID rule's UID
-     * @return status of the rule or null when such rule does not exists.
+     * @return status of the rule or null when such rule does not exist.
      */
     protected @Nullable RuleStatus getRuleStatus(String rUID) {
         RuleStatusInfo info = getStatusInfo(rUID);
@@ -1349,10 +1348,10 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
         OutputRef outputRef = null;
         boolean conflict = false;
         if (!inputTags.isEmpty()) {
-            for (Set<String> outTags : outputTagMap.keySet()) {
-                if (outTags.containsAll(inputTags)) { // input tags must be subset of the output ones
+            for (Entry<Set<String>, OutputRef> entry : outputTagMap.entrySet()) {
+                if (entry.getKey().containsAll(inputTags)) { // input tags must be subset of the output ones
                     if (outputRef == null) {
-                        outputRef = outputTagMap.get(outTags);
+                        outputRef = entry.getValue();
                     } else {
                         conflict = true; // already exist candidate for autoMap
                         break;
@@ -1414,7 +1413,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
         return result;
     }
 
-    class OutputRef {
+    static class OutputRef {
 
         private final String moduleId;
         private final String outputName;

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,7 +15,6 @@ package org.openhab.core.library.types;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.ZonedDateTime;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -69,7 +68,7 @@ public class DateTimeGroupFunctionTest {
         assertTrue(expectedDateTime.isEqual(((DateTimeType) state).getZonedDateTime()));
     }
 
-    private class TestItem extends GenericItem {
+    private static class TestItem extends GenericItem {
 
         public TestItem(String name, State state) {
             super("Test", name);
@@ -78,12 +77,12 @@ public class DateTimeGroupFunctionTest {
 
         @Override
         public List<Class<? extends State>> getAcceptedDataTypes() {
-            return Collections.emptyList();
+            return List.of();
         }
 
         @Override
         public List<Class<? extends Command>> getAcceptedCommandTypes() {
-            return Collections.emptyList();
+            return List.of();
         }
     }
 }

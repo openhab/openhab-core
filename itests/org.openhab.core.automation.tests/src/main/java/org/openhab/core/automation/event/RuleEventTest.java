@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -16,8 +16,7 @@ import static java.util.Map.entry;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -26,7 +25,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -89,8 +87,8 @@ public class RuleEventTest extends JavaOSGiTest {
         startLevelService = mock(StartLevelService.class);
         when(startLevelService.getStartLevel()).thenReturn(100);
         registerService(startLevelService, StartLevelService.class.getName());
-        EventPublisher eventPublisher = getService(EventPublisher.class);
-        ItemRegistry itemRegistry = getService(ItemRegistry.class);
+        EventPublisher eventPublisher = Objects.requireNonNull(getService(EventPublisher.class));
+        ItemRegistry itemRegistry = Objects.requireNonNull(getService(ItemRegistry.class));
         CoreModuleHandlerFactory coreModuleHandlerFactory = new CoreModuleHandlerFactory(getBundleContext(),
                 eventPublisher, itemRegistry, mock(TimeZoneProvider.class), mock(StartLevelService.class));
         mock(CoreModuleHandlerFactory.class);
@@ -200,7 +198,7 @@ public class RuleEventTest extends JavaOSGiTest {
         assertThat(ruleEvents.stream().filter(e -> "openhab/rules/myRule21/state".equals(e.getTopic())).findFirst()
                 .isPresent(), is(true));
         List<Event> stateEvents = ruleEvents.stream().filter(e -> "openhab/rules/myRule21/state".equals(e.getTopic()))
-                .collect(Collectors.toList());
+                .toList();
         assertThat(stateEvents, is(notNullValue()));
         Optional<Event> runningEvent = stateEvents.stream()
                 .filter(e -> ((RuleStatusInfoEvent) e).getStatusInfo().getStatus() == RuleStatus.RUNNING).findFirst();

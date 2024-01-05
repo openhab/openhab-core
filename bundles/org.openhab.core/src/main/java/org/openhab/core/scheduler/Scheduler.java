@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -107,7 +107,7 @@ public interface Scheduler {
     /**
      * Schedules the callable once or repeating using the temporalAdjuster to determine the
      * time the callable should run. Runs until the job is cancelled or if the temporalAdjuster
-     * method {@link SchedulerTemporalAdjuster#isDone()) returns true.
+     * method {@link SchedulerTemporalAdjuster#isDone} returns true.
      *
      * @param callable Provides the result
      * @param temporalAdjuster the temperalAdjuster to return the time the callable should run
@@ -118,10 +118,10 @@ public interface Scheduler {
     /**
      * Schedules the callable once or repeating using the temporalAdjuster to determine the
      * time the callable should run. Runs until the job is cancelled or if the temporalAdjuster
-     * method {@link SchedulerTemporalAdjuster#isDone()) returns true.
+     * method {@link SchedulerTemporalAdjuster#isDone} returns true.
      *
      * @param callable Provides the result
-     * @param an optional identifier for this job
+     * @param identifier an optional identifier for this job
      * @param temporalAdjuster the temperalAdjuster to return the time the callable should run
      * @return A {@link ScheduledCompletableFuture}
      */

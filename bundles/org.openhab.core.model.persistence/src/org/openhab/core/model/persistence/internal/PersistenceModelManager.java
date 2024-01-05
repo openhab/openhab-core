@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -57,6 +57,8 @@ import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class is the central part of the persistence management and delegation. It reads the persistence
@@ -70,6 +72,7 @@ import org.osgi.service.component.annotations.Reference;
 @NonNullByDefault
 public class PersistenceModelManager extends AbstractProvider<PersistenceServiceConfiguration>
         implements ModelRepositoryChangeListener, PersistenceServiceConfigurationProvider {
+    private final Logger logger = LoggerFactory.getLogger(PersistenceModelManager.class);
     private final Map<String, PersistenceServiceConfiguration> configurations = new ConcurrentHashMap<>();
     private final ModelRepository modelRepository;
 

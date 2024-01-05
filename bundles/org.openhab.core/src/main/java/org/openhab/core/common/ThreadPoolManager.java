@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,13 +13,11 @@
 package org.openhab.core.common;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.WeakHashMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
@@ -52,7 +50,7 @@ import org.slf4j.LoggerFactory;
  * <br/>
  * {@code org.openhab.core.threadpool:<poolName>=<poolSize>}
  * <br/>
- * All threads will time out after {@link THREAD_TIMEOUT}.
+ * All threads will time out after {@link #THREAD_TIMEOUT}.
  *
  * @author Kai Kreuzer - Initial contribution
  */
@@ -75,7 +73,7 @@ public class ThreadPoolManager {
     protected static final long THREAD_TIMEOUT = 65L;
     protected static final long THREAD_MONITOR_SLEEP = 60000;
 
-    protected static Map<String, ExecutorService> pools = new WeakHashMap<>();
+    protected static Map<String, ExecutorService> pools = new ConcurrentHashMap<>();
 
     private static Map<String, Integer> configs = new ConcurrentHashMap<>();
 
@@ -125,23 +123,17 @@ public class ThreadPoolManager {
      * @return an instance to use
      */
     public static ScheduledExecutorService getScheduledPool(String poolName) {
-        ExecutorService pool = pools.get(poolName);
-        if (pool == null) {
-            synchronized (pools) {
-                // do a double check if it is still null or if another thread might have created it meanwhile
-                pool = pools.get(poolName);
-                if (pool == null) {
-                    int cfg = getConfig(poolName);
-                    pool = new WrappedScheduledExecutorService(cfg,
-                            new NamedThreadFactory(poolName, true, Thread.NORM_PRIORITY));
-                    ((ThreadPoolExecutor) pool).setKeepAliveTime(THREAD_TIMEOUT, TimeUnit.SECONDS);
-                    ((ThreadPoolExecutor) pool).allowCoreThreadTimeOut(true);
-                    ((ScheduledThreadPoolExecutor) pool).setRemoveOnCancelPolicy(true);
-                    pools.put(poolName, pool);
-                    LOGGER.debug("Created scheduled thread pool '{}' of size {}", poolName, cfg);
-                }
-            }
-        }
+        ExecutorService pool = pools.computeIfAbsent(poolName, name -> {
+            int cfg = getConfig(name);
+            ScheduledThreadPoolExecutor executor = new WrappedScheduledExecutorService(cfg,
+                    new NamedThreadFactory(name, true, Thread.NORM_PRIORITY));
+            executor.setKeepAliveTime(THREAD_TIMEOUT, TimeUnit.SECONDS);
+            executor.allowCoreThreadTimeOut(true);
+            executor.setRemoveOnCancelPolicy(true);
+            LOGGER.debug("Created scheduled thread pool '{}' of size {}", name, cfg);
+            return executor;
+        });
+
         if (pool instanceof ScheduledExecutorService service) {
             return new UnstoppableScheduledExecutorService(poolName, service);
         } else {
@@ -157,21 +149,15 @@ public class ThreadPoolManager {
      * @return an instance to use
      */
     public static ExecutorService getPool(String poolName) {
-        ExecutorService pool = pools.get(poolName);
-        if (pool == null) {
-            synchronized (pools) {
-                // do a double check if it is still null or if another thread might have created it meanwhile
-                pool = pools.get(poolName);
-                if (pool == null) {
-                    int cfg = getConfig(poolName);
-                    pool = QueueingThreadPoolExecutor.createInstance(poolName, cfg);
-                    ((ThreadPoolExecutor) pool).setKeepAliveTime(THREAD_TIMEOUT, TimeUnit.SECONDS);
-                    ((ThreadPoolExecutor) pool).allowCoreThreadTimeOut(true);
-                    pools.put(poolName, pool);
-                    LOGGER.debug("Created thread pool '{}' with size {}", poolName, cfg);
-                }
-            }
-        }
+        ExecutorService pool = pools.computeIfAbsent(poolName, name -> {
+            int cfg = getConfig(name);
+            ThreadPoolExecutor executor = QueueingThreadPoolExecutor.createInstance(name, cfg);
+            executor.setKeepAliveTime(THREAD_TIMEOUT, TimeUnit.SECONDS);
+            executor.allowCoreThreadTimeOut(true);
+            LOGGER.debug("Created thread pool '{}' with size {}", name, cfg);
+            return executor;
+        });
+
         return new UnstoppableExecutorService<>(poolName, pool);
     }
 
@@ -180,9 +166,9 @@ public class ThreadPoolManager {
         return (ThreadPoolExecutor) ret.getDelegate();
     }
 
-    static ThreadPoolExecutor getScheduledPoolUnwrapped(String poolName) {
+    static ScheduledThreadPoolExecutor getScheduledPoolUnwrapped(String poolName) {
         UnstoppableExecutorService<?> ret = (UnstoppableScheduledExecutorService) getScheduledPool(poolName);
-        return (ThreadPoolExecutor) ret.getDelegate();
+        return (ScheduledThreadPoolExecutor) ret.getDelegate();
     }
 
     protected static int getConfig(String poolName) {
@@ -215,7 +201,7 @@ public class ThreadPoolManager {
         public List<Runnable> shutdownNow() {
             logger.warn("shutdownNow() invoked on a shared thread pool '{}'. This is a bug, please submit a bug report",
                     threadPoolName, new IllegalStateException());
-            return Collections.emptyList();
+            return List.of();
         }
 
         @Override

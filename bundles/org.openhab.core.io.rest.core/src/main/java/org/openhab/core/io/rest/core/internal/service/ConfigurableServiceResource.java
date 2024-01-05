@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -18,11 +18,9 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.Consumes;
@@ -207,7 +205,7 @@ public class ConfigurableServiceResource implements RESTResource {
         try {
             Configuration configuration = configurationService.get(serviceId);
             return configuration != null ? Response.ok(configuration.getProperties()).build()
-                    : Response.ok(Collections.emptyMap()).build();
+                    : Response.ok(Map.of()).build();
         } catch (IOException ex) {
             logger.error("Cannot get configuration for service {}: ", serviceId, ex);
             return Response.status(Status.INTERNAL_SERVER_ERROR).build();
@@ -298,7 +296,7 @@ public class ConfigurableServiceResource implements RESTResource {
             for (ServiceReference<?> serviceReference : serviceReferences) {
                 String id = getServiceId(serviceReference);
                 ConfigurableService configurableService = ConfigurableServiceUtil
-                        .asConfigurableService((key) -> serviceReference.getProperty(key));
+                        .asConfigurableService(serviceReference::getProperty);
 
                 String defaultLabel = configurableService.label();
                 if (defaultLabel.isEmpty()) { // for multi context services the label can be changed and must be read
@@ -338,7 +336,7 @@ public class ConfigurableServiceResource implements RESTResource {
 
             if (refs != null && refs.length > 0) {
                 ConfigurableService configurableService = ConfigurableServiceUtil
-                        .asConfigurableService((key) -> refs[0].getProperty(key));
+                        .asConfigurableService(key -> refs[0].getProperty(key));
                 configDescriptionURI = configurableService.description_uri();
             }
         } catch (InvalidSyntaxException e) {
@@ -369,7 +367,7 @@ public class ConfigurableServiceResource implements RESTResource {
         } else if (pid instanceof String[] pids) {
             serviceId = getServicePID(cn, Arrays.asList(pids));
         } else if (pid instanceof Collection<?> pids) {
-            serviceId = getServicePID(cn, pids.stream().map(entry -> entry.toString()).collect(Collectors.toList()));
+            serviceId = getServicePID(cn, pids.stream().map(Object::toString).toList());
         } else {
             logger.warn("The component \"{}\" is using an unhandled service PID type ({}). Use component name.", cn,
                     pid.getClass());

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,7 +14,6 @@ package org.openhab.core.io.rest.core.internal.link;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.annotation.security.RolesAllowed;
@@ -172,10 +171,9 @@ public class ItemChannelLinkResource implements RESTResource {
             @PathParam("channelUID") @Parameter(description = "channel UID") String channelUid) {
         List<EnrichedItemChannelLinkDTO> links = itemChannelLinkRegistry.stream()
                 .filter(link -> channelUid.equals(link.getLinkedUID().getAsString()))
-                .filter(link -> itemName.equals(link.getItemName()))
-                .map(link -> EnrichedItemChannelLinkDTOMapper.map(link,
-                        isEditable(AbstractLink.getIDFor(link.getItemName(), link.getLinkedUID()))))
-                .collect(Collectors.toList());
+                .filter(link -> itemName.equals(link.getItemName())).map(link -> EnrichedItemChannelLinkDTOMapper
+                        .map(link, isEditable(AbstractLink.getIDFor(link.getItemName(), link.getLinkedUID()))))
+                .toList();
 
         if (!links.isEmpty()) {
             return JSONResponse.createResponse(Status.OK, links.get(0), null);

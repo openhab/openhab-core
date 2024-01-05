@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -44,7 +44,7 @@ public class XmlDocumentReaderTest {
 
     private static final String OHC_PACKAGE_PREFIX = "org.openhab.core.";
 
-    private class ConfigDescriptionReader extends XmlDocumentReader<ConfigDescription> {
+    private static class ConfigDescriptionReader extends XmlDocumentReader<ConfigDescription> {
         @Override
         protected void registerConverters(XStream xstream) {
         }
@@ -85,7 +85,7 @@ public class XmlDocumentReaderTest {
     }
 
     /**
-     * @see https://x-stream.github.io/CVE-2013-7285.html
+     * @see <a href="https://x-stream.github.io/CVE-2013-7285.html">XStream - CVE-2013-7285</a>
      */
     @Test
     public void defaultSecurityProtectsAgainstRemoteCodeExecution() throws Exception {
@@ -105,7 +105,7 @@ public class XmlDocumentReaderTest {
     }
 
     /**
-     * @see https://x-stream.github.io/CVE-2017-7957.html
+     * @see <a href="https://x-stream.github.io/CVE-2017-7957.html">XStream - CVE-2017-7957</a>
      */
     @Test
     public void defaultSecurityProtectsAgainstDenialOfServiceAttacks() throws Exception {

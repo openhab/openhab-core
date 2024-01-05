@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -83,7 +83,7 @@ public class LRUMediaCache<V> {
      * Constructs a cache system.
      *
      * @param storageService Storage service to store metadata
-     * @param cacheSize Limit size, in byte
+     * @param maxCacheSize Limit size, in byte
      * @param pid A pid identifying the cache on disk
      */
     public LRUMediaCache(@Reference StorageService storageService, long maxCacheSize, String pid,

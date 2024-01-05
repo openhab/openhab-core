@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,7 +17,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.*;
 
 import java.math.BigDecimal;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -46,7 +45,7 @@ public class StateDescriptionServiceImplTest {
     private static final BigDecimal STATE_DESCRIPTION_PROVIDER_DEFAULT_STEP = BigDecimal.ZERO;
     private static final String STATE_DESCRIPTION_PROVIDER_DEFAULT_PATTERN = "pattern1";
     private static final Boolean STATE_DESCRIPTION_PROVIDER_DEFAULT_IS_READONLY = Boolean.FALSE;
-    private static final List<StateOption> STATE_DESCRIPTION_PROVIDER_DEFAULT_OPTIONS = Collections.emptyList();
+    private static final List<StateOption> STATE_DESCRIPTION_PROVIDER_DEFAULT_OPTIONS = List.of();
 
     private @NonNullByDefault({}) StateDescriptionServiceImpl stateDescriptionService;
     private @NonNullByDefault({}) NumberItem item;

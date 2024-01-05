@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -56,6 +56,7 @@ import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionRegistry;
 import org.openhab.core.config.core.ConfigUtil;
 import org.openhab.core.config.core.Configuration;
+import org.openhab.core.config.discovery.addon.AddonSuggestionService;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.io.rest.JSONResponse;
@@ -120,6 +121,7 @@ public class AddonResource implements RESTResource {
     private final ConfigurationService configurationService;
     private final AddonInfoRegistry addonInfoRegistry;
     private final ConfigDescriptionRegistry configDescriptionRegistry;
+    private final AddonSuggestionService addonSuggestionService;
 
     private @Context @NonNullByDefault({}) UriInfo uriInfo;
 
@@ -127,12 +129,14 @@ public class AddonResource implements RESTResource {
     public AddonResource(final @Reference EventPublisher eventPublisher, final @Reference LocaleService localeService,
             final @Reference ConfigurationService configurationService,
             final @Reference AddonInfoRegistry addonInfoRegistry,
-            final @Reference ConfigDescriptionRegistry configDescriptionRegistry) {
+            final @Reference ConfigDescriptionRegistry configDescriptionRegistry,
+            final @Reference AddonSuggestionService addonSuggestionService) {
         this.eventPublisher = eventPublisher;
         this.localeService = localeService;
         this.configurationService = configurationService;
         this.addonInfoRegistry = addonInfoRegistry;
         this.configDescriptionRegistry = configDescriptionRegistry;
+        this.addonSuggestionService = addonSuggestionService;
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
@@ -176,6 +180,19 @@ public class AddonResource implements RESTResource {
         Locale locale = localeService.getLocale(language);
         Stream<AddonServiceDTO> addonTypeStream = addonServices.stream().map(s -> convertToAddonServiceDTO(s, locale));
         return Response.ok(new Stream2JSONInputStream(addonTypeStream)).build();
+    }
+
+    @GET
+    @Path("/suggestions")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(operationId = "getSuggestedAddons", summary = "Get suggested add-ons to be installed.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = Addon.class)))), })
+    public Response getSuggestions(
+            @HeaderParam("Accept-Language") @Parameter(description = "language") @Nullable String language) {
+        logger.debug("Received HTTP GET request at '{}'", uriInfo.getPath());
+        Locale locale = localeService.getLocale(language);
+        return Response.ok(new Stream2JSONInputStream(addonSuggestionService.getSuggestedAddons(locale).stream()))
+                .build();
     }
 
     @GET
@@ -236,9 +253,10 @@ public class AddonResource implements RESTResource {
     public Response installAddon(final @PathParam("addonId") @Parameter(description = "addon ID") String addonId,
             @QueryParam("serviceId") @Parameter(description = "service ID") @Nullable String serviceId) {
         AddonService addonService = (serviceId != null) ? getServiceById(serviceId) : getDefaultService();
-        if (addonService == null) {
+        if (addonService == null || addonService.getAddon(addonId, null) == null) {
             return Response.status(HttpStatus.NOT_FOUND_404).build();
         }
+
         ThreadPoolManager.getPool(THREAD_POOL_NAME).submit(() -> {
             try {
                 addonService.install(addonId);
@@ -277,7 +295,7 @@ public class AddonResource implements RESTResource {
     public Response uninstallAddon(final @PathParam("addonId") @Parameter(description = "addon ID") String addonId,
             @QueryParam("serviceId") @Parameter(description = "service ID") @Nullable String serviceId) {
         AddonService addonService = (serviceId != null) ? getServiceById(serviceId) : getDefaultService();
-        if (addonService == null) {
+        if (addonService == null || addonService.getAddon(addonId, null) == null) {
             return Response.status(HttpStatus.NOT_FOUND_404).build();
         }
         ThreadPoolManager.getPool(THREAD_POOL_NAME).submit(() -> {

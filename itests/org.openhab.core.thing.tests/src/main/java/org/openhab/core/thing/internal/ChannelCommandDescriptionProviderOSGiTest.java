@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -311,7 +311,7 @@ public class ChannelCommandDescriptionProviderOSGiTest extends JavaOSGiTest {
                 @Nullable CommandDescription originalCommandDescription, @Nullable Locale locale) {
             String id = channel.getUID().getIdWithoutGroup();
             if ("7_2".equals(id)) {
-                assertEquals(channel.getChannelTypeUID(), CHANNEL_TYPE_UID);
+                assertEquals(CHANNEL_TYPE_UID, channel.getChannelTypeUID());
                 return newCommand;
             }
             return null;
@@ -326,7 +326,7 @@ public class ChannelCommandDescriptionProviderOSGiTest extends JavaOSGiTest {
         }
     }
 
-    class TestThingHandlerFactory extends BaseThingHandlerFactory {
+    static class TestThingHandlerFactory extends BaseThingHandlerFactory {
 
         @Override
         public void activate(final ComponentContext ctx) {
@@ -376,7 +376,7 @@ public class ChannelCommandDescriptionProviderOSGiTest extends JavaOSGiTest {
     }
 
     private abstract static class AbstractThingHandler extends BaseThingHandler {
-        public AbstractThingHandler(Thing thing) {
+        protected AbstractThingHandler(Thing thing) {
             super(thing);
         }
     }

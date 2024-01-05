@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -284,7 +284,7 @@ public class ChannelLinkNotifierOSGiTest extends JavaOSGiTest {
     private Thing createThing() {
         ThingUID thingUID = new ThingUID(THING_TYPE_UID, "thing" + thingCount++);
         List<Channel> channels = IntStream.range(0, CHANNEL_COUNT).mapToObj(index -> createChannel(thingUID, index))
-                .collect(Collectors.toList());
+                .toList();
         return ThingBuilder.create(THING_TYPE_UID, thingUID).withChannels(channels).build();
     }
 

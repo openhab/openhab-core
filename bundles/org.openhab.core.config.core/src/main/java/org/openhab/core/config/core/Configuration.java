@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -26,7 +26,7 @@ import java.util.Set;
 import org.eclipse.jdt.annotation.Nullable;
 
 /**
- * This class is a wrapper for configuration settings of {@link Thing}s.
+ * This class is a wrapper for configuration settings of {@code org.openhab.core.thing.Thing}s.
  *
  * @author Dennis Nobel - Initial contribution
  * @author Kai Kreuzer - added constructors and normalization

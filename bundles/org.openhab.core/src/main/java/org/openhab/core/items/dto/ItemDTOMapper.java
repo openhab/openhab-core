@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -95,8 +95,6 @@ public class ItemDTOMapper {
      * Maps item into item DTO object.
      *
      * @param item the item
-     * @param drillDown the drill down
-     * @param uri the uri
      * @return item DTO object
      */
     public static ItemDTO map(Item item) {

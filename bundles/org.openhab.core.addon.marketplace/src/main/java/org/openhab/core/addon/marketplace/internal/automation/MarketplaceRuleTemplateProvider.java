@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -129,7 +129,7 @@ public class MarketplaceRuleTemplateProvider extends AbstractManagedProvider<Rul
      * This adds a new rule template to the persistent storage from its YAML representation.
      *
      * @param uid the UID to be used for the template
-     * @param json the template content as a YAML string
+     * @param yaml the template content as a YAML string
      *
      * @throws ParsingException if the content cannot be parsed correctly
      */
@@ -137,7 +137,7 @@ public class MarketplaceRuleTemplateProvider extends AbstractManagedProvider<Rul
         try {
             RuleTemplateDTO dto = yamlMapper.readValue(yaml, RuleTemplateDTO.class);
             // add a tag with the add-on ID to be able to identify the widget in the registry
-            dto.tags = new HashSet<@Nullable String>((dto.tags != null) ? dto.tags : new HashSet<String>());
+            dto.tags = new HashSet<@Nullable String>((dto.tags != null) ? dto.tags : new HashSet<>());
             dto.tags.add(uid);
             RuleTemplate entry = RuleTemplateDTOMapper.map(dto);
             RuleTemplate template = new RuleTemplate(entry.getUID(), entry.getLabel(), entry.getDescription(),

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -19,7 +19,6 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -329,6 +328,7 @@ public class ThingResource implements RESTResource {
             }
 
             CacheControl cc = new CacheControl();
+            cc.setNoCache(true);
             cc.setMustRevalidate(true);
             cc.setPrivate(true);
             thingStream = dtoMapper.limitToFields(thingStream, "UID,label,bridgeUID,thingTypeUID,location,editable");
@@ -606,7 +606,7 @@ public class ThingResource implements RESTResource {
             return getThingNotFoundResponse(thingUID);
         }
 
-        thingManager.setEnabled(thingUIDObject, Boolean.valueOf(enabled));
+        thingManager.setEnabled(thingUIDObject, Boolean.parseBoolean(enabled));
 
         // everything went well
         return getThingResponse(Status.OK, thing, locale, null);
@@ -637,7 +637,7 @@ public class ThingResource implements RESTResource {
         if (info != null) {
             return Response.ok().entity(info.getConfigStatusMessages()).build();
         }
-        return Response.ok().entity(Collections.EMPTY_SET).build();
+        return Response.ok().entity(Set.of()).build();
     }
 
     @PUT

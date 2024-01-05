@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -88,16 +88,14 @@ public class AnnotationActionModuleTypeProviderTest extends JavaTest {
     public void testMultiServiceAnnotationActions() {
         AnnotatedActionModuleTypeProvider prov = new AnnotatedActionModuleTypeProvider(moduleTypeI18nServiceMock);
 
-        Map<String, Object> properties1 = new HashMap<>();
-        properties1.put(OpenHAB.SERVICE_CONTEXT, "conf1");
+        Map<String, Object> properties1 = Map.of(OpenHAB.SERVICE_CONTEXT, "conf1");
         prov.addActionProvider(actionProviderConf1, properties1);
 
         Collection<String> types = prov.getTypes();
         assertEquals(1, types.size());
         assertTrue(types.contains(TEST_ACTION_TYPE_ID));
 
-        Map<String, Object> properties2 = new HashMap<>();
-        properties2.put(OpenHAB.SERVICE_CONTEXT, "conf2");
+        Map<String, Object> properties2 = Map.of(OpenHAB.SERVICE_CONTEXT, "conf2");
         prov.addActionProvider(actionProviderConf2, properties2);
 
         // we only have ONE type but TWO configurations for it
@@ -106,7 +104,7 @@ public class AnnotationActionModuleTypeProviderTest extends JavaTest {
         assertTrue(types.contains(TEST_ACTION_TYPE_ID));
 
         ModuleType mt = prov.getModuleType(TEST_ACTION_TYPE_ID, null);
-        assertTrue(mt instanceof ActionType);
+        assertInstanceOf(ActionType.class, mt);
 
         ActionType at = (ActionType) mt;
 
@@ -190,7 +188,7 @@ public class AnnotationActionModuleTypeProviderTest extends JavaTest {
     }
 
     @ActionScope(name = "binding.test")
-    private class TestActionProvider implements AnnotatedActions {
+    private static class TestActionProvider implements AnnotatedActions {
 
         @RuleAction(label = ACTION_LABEL, description = ACTION_DESCRIPTION, visibility = Visibility.HIDDEN, tags = {
                 "tag1", "tag2" })

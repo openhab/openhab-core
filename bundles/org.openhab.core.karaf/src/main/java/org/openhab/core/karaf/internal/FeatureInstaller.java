@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -89,8 +89,7 @@ public class FeatureInstaller implements ConfigurationListener {
     private static final String ADDONS_PID = "org.openhab.addons";
     private static final String PROPERTY_MVN_REPOS = "org.ops4j.pax.url.mvn.repositories";
 
-    public static final List<String> ADDON_TYPES = AddonType.DEFAULT_TYPES.stream().map(AddonType::getId)
-            .collect(Collectors.toList());
+    public static final List<String> ADDON_TYPES = AddonType.DEFAULT_TYPES.stream().map(AddonType::getId).toList();
 
     private final Logger logger = LoggerFactory.getLogger(FeatureInstaller.class);
 
@@ -468,26 +467,6 @@ public class FeatureInstaller implements ConfigurationListener {
             logger.error("Failed installing '{}': {}", String.join(", ", addons), e.getMessage(), debugException(e));
             configMapCache = null; // make sure we retry the installation
         }
-    }
-
-    private boolean installFeature(String name) {
-        try {
-            Feature[] features = featuresService.listInstalledFeatures();
-            if (!anyMatchingFeature(features, withName(name))) {
-                featuresService.installFeature(name,
-                        EnumSet.of(FeaturesService.Option.Upgrade, FeaturesService.Option.NoAutoRefreshBundles));
-                features = featuresService.listInstalledFeatures();
-                if (anyMatchingFeature(features, withName(name))) {
-                    logger.debug("Installed '{}'", name);
-                    postInstalledEvent(name);
-                    return true;
-                }
-            }
-        } catch (Exception e) {
-            logger.error("Failed installing '{}': {}", name, e.getMessage(), debugException(e));
-            configMapCache = null; // make sure we retry the installation
-        }
-        return false;
     }
 
     private void uninstallFeature(String name) {

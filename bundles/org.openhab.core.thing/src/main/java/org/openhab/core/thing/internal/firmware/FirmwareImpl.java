@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -101,7 +101,7 @@ public final class FirmwareImpl implements Firmware {
         this.onlineChangelog = onlineChangelog;
         this.inputStream = inputStream;
         this.md5Hash = md5Hash;
-        this.properties = Collections.unmodifiableMap(properties != null ? properties : Collections.emptyMap());
+        this.properties = properties != null ? Collections.unmodifiableMap(properties) : Map.of();
     }
 
     @Override

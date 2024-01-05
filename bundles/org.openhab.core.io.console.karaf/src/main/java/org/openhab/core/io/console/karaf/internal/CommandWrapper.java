@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,7 +13,6 @@
 package org.openhab.core.io.console.karaf.internal;
 
 import java.io.PrintStream;
-import java.util.Arrays;
 import java.util.List;
 
 import org.apache.felix.service.command.Process;
@@ -115,7 +114,7 @@ public class CommandWrapper implements Command, Action {
         List<Command> commands = registry.getCommands();
         for (Command command : commands) {
             if (SCOPE.equals(command.getScope()) && command instanceof CommandWrapper) {
-                command.execute(null, Arrays.asList(new Object[] { "--help" }));
+                command.execute(null, List.of("--help"));
             }
         }
 

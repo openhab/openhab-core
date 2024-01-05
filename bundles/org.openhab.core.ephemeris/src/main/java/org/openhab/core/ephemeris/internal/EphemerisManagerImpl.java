@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -36,7 +36,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -259,7 +258,7 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
         LocalDate toDate = from.plusDays(span).toLocalDate();
 
         Set<Holiday> days = holidayManager.getHolidays(fromDate, toDate, countryParameters.toArray(new String[0]));
-        return days.stream().sorted(Comparator.comparing(Holiday::getDate)).collect(Collectors.toList());
+        return days.stream().sorted(Comparator.comparing(Holiday::getDate)).toList();
     }
 
     @Override

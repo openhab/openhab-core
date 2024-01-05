@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -42,7 +42,7 @@ public interface SemanticTagRegistry extends Registry<SemanticTag, String> {
      * Checks if a tag with a given id can be added to the registry.
      *
      * To be added, no tag with this id must already exist in the registry, the tag name extracted from this id
-     * must have a valid syntax, the parent tag extracted from this id must already exists in the registry and
+     * must have a valid syntax, the parent tag extracted from this id must already exist in the registry and
      * should be either a default semantic tag or a managed semantic tag, and no tag with a same name must already
      * exist in the registry.
      *

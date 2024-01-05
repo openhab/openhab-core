@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,7 +13,6 @@
 package org.openhab.core.internal.events;
 
 import java.io.Closeable;
-import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
@@ -40,7 +39,7 @@ public class ThreadedEventHandler implements Closeable {
 
     private final Thread thread;
 
-    private final Event notifyEvent = new Event("notify", Collections.emptyMap());
+    private final Event notifyEvent = new Event("notify", Map.of());
     private final BlockingQueue<Event> queue = new LinkedBlockingQueue<>();
     private final AtomicBoolean running = new AtomicBoolean(true);
 

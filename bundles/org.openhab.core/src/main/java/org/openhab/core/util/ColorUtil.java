@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -44,8 +44,10 @@ public class ColorUtil {
     private static final BigDecimal BIG_DECIMAL_120 = BigDecimal.valueOf(120);
     private static final BigDecimal BIG_DECIMAL_100 = BigDecimal.valueOf(100);
     private static final BigDecimal BIG_DECIMAL_60 = BigDecimal.valueOf(60);
+    private static final BigDecimal BIG_DECIMAL_50 = BigDecimal.valueOf(50);
     private static final BigDecimal BIG_DECIMAL_5 = BigDecimal.valueOf(5);
     private static final BigDecimal BIG_DECIMAL_3 = BigDecimal.valueOf(3);
+    private static final BigDecimal BIG_DECIMAL_2 = BigDecimal.valueOf(2);
     private static final BigDecimal BIG_DECIMAL_2_POINT_55 = new BigDecimal("2.55");
 
     public static final Gamut DEFAULT_GAMUT = new Gamut(new double[] { 0.9961, 0.0001 }, new double[] { 0, 0.9961 },
@@ -61,7 +63,7 @@ public class ColorUtil {
      *
      * This function does rounding to integer valued components. It is the preferred way of doing HSB to RGB conversion.
      *
-     * See also: {@link #hsbToRgbPercent(HSBType)}, {@link #hsbTosRgb(HSBType)}
+     * See also: {@link #hsbToRgbPercent(HSBType)}, {@link #hsbToRgbw(HSBType)}, {@link #hsbTosRgb(HSBType)}
      *
      * @param hsb an {@link HSBType} value.
      * @return array of three int with the RGB values in the range 0 to 255.
@@ -76,10 +78,28 @@ public class ColorUtil {
      * Transform <a href="https://en.wikipedia.org/wiki/HSL_and_HSV">HSV</a> based {@link HSBType} to
      * <a href="https://en.wikipedia.org/wiki/SRGB">sRGB</a>.
      *
+     * This function does rounding to integer valued components. It is the preferred way of doing HSB to RGBW
+     * conversion.
+     *
+     * See also: {@link #hsbToRgbPercent(HSBType)}, {@link #hsbToRgbwPercent(HSBType)}, {@link #hsbTosRgb(HSBType)}
+     *
+     * @param hsb an {@link HSBType} value.
+     * @return array of four int with the RGBW values in the range 0 to 255.
+     */
+    public static int[] hsbToRgbw(HSBType hsb) {
+        final PercentType[] rgbPercent = hsbToRgbwPercent(hsb);
+        return new int[] { convertColorPercentToByte(rgbPercent[0]), convertColorPercentToByte(rgbPercent[1]),
+                convertColorPercentToByte(rgbPercent[2]), convertColorPercentToByte(rgbPercent[3]) };
+    }
+
+    /**
+     * Transform <a href="https://en.wikipedia.org/wiki/HSL_and_HSV">HSV</a> based {@link HSBType} to
+     * <a href="https://en.wikipedia.org/wiki/SRGB">sRGB</a>.
+     *
      * This function does not round the components. For conversion to integer values in the range 0 to 255 use
      * {@link #hsbToRgb(HSBType)}.
      *
-     * See also: {@link #hsbToRgb(HSBType)}, {@link #hsbTosRgb(HSBType)}
+     * See also: {@link #hsbToRgb(HSBType)}, {@link #hsbTosRgb(HSBType)}, {@link #hsbToRgbwPercent(HSBType)}
      *
      * @param hsb an {@link HSBType} value.
      * @return array of three {@link PercentType} with the RGB values in the range 0 to 100 percent.
@@ -138,6 +158,55 @@ public class ColorUtil {
                 throw new IllegalArgumentException("Could not convert to RGB.");
         }
         return new PercentType[] { red, green, blue };
+    }
+
+    /**
+     * Transform <a href="https://en.wikipedia.org/wiki/HSL_and_HSV">HSV</a> based {@link HSBType} to RGBW.
+     *
+     * See <a href=
+     * "https://stackoverflow.com/questions/40312216/converting-rgb-to-rgbw">Converting RGB to RGBW</a>.
+     *
+     * This function does not round the components. For conversion to integer values in the range 0 to 255 use
+     * {@link #hsbToRgb(HSBType)}.
+     *
+     * See also: {@link #hsbToRgb(HSBType)}, {@link #hsbTosRgb(HSBType)}, {@link #hsbToRgbPercent(HSBType)}
+     *
+     * @param hsb an {@link HSBType} value.
+     * @return array of four {@link PercentType} with the RGBW values in the range 0 to 100 percent.
+     */
+    public static PercentType[] hsbToRgbwPercent(HSBType hsb) {
+        PercentType[] rgb = hsbToRgbPercent(hsb);
+        final BigDecimal inRed = rgb[0].toBigDecimal();
+        final BigDecimal inGreen = rgb[1].toBigDecimal();
+        final BigDecimal inBlue = rgb[2].toBigDecimal();
+        // Get the maximum between R, G, and B
+        final BigDecimal maxColor = inRed.max(inGreen.max(inBlue));
+
+        // If the maximum value is 0, immediately return pure black.
+        if (BigDecimal.ZERO.equals(maxColor)) {
+            return new PercentType[] { PercentType.ZERO, PercentType.ZERO, PercentType.ZERO, PercentType.ZERO };
+        }
+
+        // This section serves to figure out what the color with 100% hue is
+        final BigDecimal multiplier = BIG_DECIMAL_100.divide(maxColor, 0, RoundingMode.DOWN);
+        final BigDecimal hR = inRed.multiply(multiplier);
+        final BigDecimal hG = inGreen.multiply(multiplier);
+        final BigDecimal hB = inBlue.multiply(multiplier);
+
+        // This calculates the Whiteness (not strictly speaking Luminance) of the color
+        final BigDecimal whitenessMax = hR.max(hG.max(hB));
+        final BigDecimal whitenessMin = hR.min(hG.min(hB));
+        final BigDecimal luminance = ((whitenessMax.add(whitenessMin).divide(BIG_DECIMAL_2).subtract(BIG_DECIMAL_50))
+                .multiply(BIG_DECIMAL_100.divide(BIG_DECIMAL_50))).divide(multiplier);
+
+        // check range
+        BigDecimal outRed = inRed.subtract(luminance).max(BigDecimal.ZERO);
+        BigDecimal outGreen = inGreen.subtract(luminance).max(BigDecimal.ZERO);
+        BigDecimal outBlue = inBlue.subtract(luminance).max(BigDecimal.ZERO);
+        BigDecimal outWhite = luminance.max(BigDecimal.ZERO);
+
+        return new PercentType[] { new PercentType(outRed), new PercentType(outGreen), new PercentType(outBlue),
+                new PercentType(outWhite) };
     }
 
     /**
@@ -211,27 +280,79 @@ public class ColorUtil {
      * Transform <a href="https://en.wikipedia.org/wiki/SRGB">sRGB</a> color format to
      * <a href="https://en.wikipedia.org/wiki/HSL_and_HSV">HSV</a> based {@link HSBType}.
      *
-     * @param rgb array of three int with the RGB values in the range 0 to 255.
+     * @param rgbw array of three or four int with the RGB(W) values in the range 0 to 255.
      * @return the corresponding {@link HSBType}.
      * @throws IllegalArgumentException when input array has wrong size or exceeds allowed value range.
      */
-    public static HSBType rgbToHsb(int[] rgb) throws IllegalArgumentException {
-        if (rgb.length != 3 || !inByteRange(rgb[0]) || !inByteRange(rgb[1]) || !inByteRange(rgb[2])) {
-            throw new IllegalArgumentException("RGB array only allows values between 0 and 255");
+    public static HSBType rgbToHsb(int[] rgbw) throws IllegalArgumentException {
+        if (rgbw.length == 4) {
+            if (!inByteRange(rgbw[0]) || !inByteRange(rgbw[1]) || !inByteRange(rgbw[2]) || !inByteRange(rgbw[3])) {
+                throw new IllegalArgumentException("rgbToHsb requires 3 or 4 values between 0 and 255");
+            }
+            return rgbwToHsb(new PercentType[] { convertByteToColorPercent(rgbw[0]), convertByteToColorPercent(rgbw[1]),
+                    convertByteToColorPercent(rgbw[2]), convertByteToColorPercent(rgbw[3]) });
         }
-        return rgbToHsb(new PercentType[] { convertByteToColorPercent(rgb[0]), convertByteToColorPercent(rgb[1]),
-                convertByteToColorPercent(rgb[2]) });
+        if (rgbw.length != 3 || !inByteRange(rgbw[0]) || !inByteRange(rgbw[1]) || !inByteRange(rgbw[2])) {
+            throw new IllegalArgumentException("rgbToHsb requires 3 or 4 values between 0 and 255");
+        }
+        return rgbToHsb(new PercentType[] { convertByteToColorPercent(rgbw[0]), convertByteToColorPercent(rgbw[1]),
+                convertByteToColorPercent(rgbw[2]) });
+    }
+
+    /**
+     * Transform RGBW to <a href="https://en.wikipedia.org/wiki/HSL_and_HSV">HSV</a> based {@link HSBType}.
+     *
+     * See <a href=
+     * "https://stackoverflow.com/questions/40312216/converting-rgb-to-rgbw">Converting RGB to RGBW</a>.
+     *
+     * See also: {@link #hsbToRgb(HSBType)}, {@link #hsbTosRgb(HSBType)}, {@link #hsbToRgbPercent(HSBType)}
+     *
+     * @param rgbw array of four int with the RGBW values in the range 0 to 255.
+     * @return hsb an {@link HSBType} value.
+     *
+     */
+    private static HSBType rgbwToHsb(PercentType[] rgbw) {
+        if (rgbw.length != 4) {
+            throw new IllegalArgumentException("RGBW requires 4 values");
+        }
+
+        BigDecimal luminance = BigDecimal.valueOf(rgbw[3].doubleValue() / PercentType.HUNDRED.doubleValue() * 255.0);
+        BigDecimal inRed = BigDecimal.valueOf(rgbw[0].doubleValue() / PercentType.HUNDRED.doubleValue() * 255.0)
+                .add(luminance);
+        BigDecimal inGreen = BigDecimal.valueOf(rgbw[1].doubleValue() / PercentType.HUNDRED.doubleValue() * 255.0)
+                .add(luminance);
+        BigDecimal inBlue = BigDecimal.valueOf(rgbw[2].doubleValue() / PercentType.HUNDRED.doubleValue() * 255.0)
+                .add(luminance);
+
+        // Get the maximum between R, G, and B
+        final BigDecimal maxColor = BIG_DECIMAL_255.min(inRed.max(inGreen.max(inBlue)).max(BigDecimal.ZERO));
+
+        // If the maximum value is 0, immediately return pure black.
+        if (BigDecimal.ZERO.compareTo(maxColor) == 0) {
+            return HSBType.BLACK;
+        }
+
+        final BigDecimal multiplier = BIG_DECIMAL_255.divide(maxColor, 0, RoundingMode.DOWN);
+
+        BigDecimal outRed = inRed.divide(multiplier).min(BIG_DECIMAL_255).max(BigDecimal.ZERO);
+        BigDecimal outGreen = inGreen.divide(multiplier).min(BIG_DECIMAL_255).max(BigDecimal.ZERO);
+        BigDecimal outBlue = inBlue.divide(multiplier).min(BIG_DECIMAL_255).max(BigDecimal.ZERO);
+
+        return HSBType.fromRGB(outRed.intValue(), outGreen.intValue(), outBlue.intValue());
     }
 
     /**
      * Transform <a href="https://en.wikipedia.org/wiki/SRGB">sRGB</a> color format to
      * <a href="https://en.wikipedia.org/wiki/HSL_and_HSV">HSV</a> based {@link HSBType}.
      *
-     * @param rgb array of three {@link PercentType] with the RGB values in the range 0 to 100 percent.
+     * @param rgb array of three or four {@link PercentType} with the RGB(W) values in the range 0 to 100 percent.
      * @return the corresponding {@link HSBType}.
      * @throws IllegalArgumentException when input array has wrong size or exceeds allowed value range.
      */
     public static HSBType rgbToHsb(PercentType[] rgb) throws IllegalArgumentException {
+        if (rgb.length == 4) {
+            return rgbwToHsb(rgb);
+        }
         if (rgb.length != 3) {
             throw new IllegalArgumentException("RGB array needs exactly three values!");
         }

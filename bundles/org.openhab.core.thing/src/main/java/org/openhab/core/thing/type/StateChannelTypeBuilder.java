@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -44,7 +44,7 @@ public interface StateChannelTypeBuilder extends ChannelTypeBuilder<StateChannel
     /**
      * Sets the list of {@link CommandOption}s for the {@link ChannelType}
      *
-     * @param commandOptions the list of {@link CommandOption}s
+     * @param commandDescription the list of {@link CommandOption}s
      * @return this builder
      */
     StateChannelTypeBuilder withCommandDescription(@Nullable CommandDescription commandDescription);

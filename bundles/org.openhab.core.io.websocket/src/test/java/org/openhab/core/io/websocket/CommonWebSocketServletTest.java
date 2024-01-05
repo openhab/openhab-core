@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -21,8 +21,7 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.HashMap;
-import java.util.List;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 
@@ -44,6 +43,7 @@ import org.mockito.quality.Strictness;
 import org.openhab.core.auth.AuthenticationException;
 import org.openhab.core.io.rest.auth.AnonymousUserSecurityContext;
 import org.openhab.core.io.rest.auth.AuthFilter;
+import org.openhab.core.io.websocket.event.EventWebSocket;
 import org.osgi.service.http.NamespaceException;
 
 /**
@@ -74,8 +74,7 @@ public class CommonWebSocketServletTest {
         when(factory.getPolicy()).thenReturn(wsPolicy);
         servlet.configure(factory);
         verify(factory).setCreator(webSocketCreatorAC.capture());
-        var params = new HashMap<String, List<String>>();
-        when(request.getParameterMap()).thenReturn(params);
+        when(request.getParameterMap()).thenReturn(Map.of());
         when(authFilter.getSecurityContext(any(), anyBoolean())).thenReturn(new AnonymousUserSecurityContext());
         when(testDefaultWsAdapter.getId()).thenReturn(CommonWebSocketServlet.DEFAULT_ADAPTER_ID);
         when(testWsAdapter.getId()).thenReturn(testAdapterId);

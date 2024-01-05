@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -18,8 +18,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.openhab.core.io.websocket.EventWebSocket.WEBSOCKET_EVENT_TYPE;
-import static org.openhab.core.io.websocket.EventWebSocket.WEBSOCKET_TOPIC_PREFIX;
+import static org.openhab.core.io.websocket.event.EventWebSocket.WEBSOCKET_EVENT_TYPE;
+import static org.openhab.core.io.websocket.event.EventWebSocket.WEBSOCKET_TOPIC_PREFIX;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -39,6 +39,10 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventPublisher;
+import org.openhab.core.io.websocket.event.EventDTO;
+import org.openhab.core.io.websocket.event.EventWebSocket;
+import org.openhab.core.io.websocket.event.EventWebSocketAdapter;
+import org.openhab.core.io.websocket.event.ItemEventUtility;
 import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.events.ItemEventFactory;

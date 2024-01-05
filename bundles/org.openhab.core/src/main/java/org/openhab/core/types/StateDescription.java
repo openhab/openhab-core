@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -51,7 +51,7 @@ public class StateDescription {
         this.step = step;
         this.pattern = pattern;
         this.readOnly = readOnly;
-        this.options = options == null ? Collections.emptyList() : Collections.unmodifiableList(options);
+        this.options = options == null ? List.of() : Collections.unmodifiableList(options);
     }
 
     /**
