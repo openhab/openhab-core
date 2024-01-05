@@ -12,6 +12,7 @@
  */
 package org.openhab.core.audio;
 
+import java.util.Objects;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -23,9 +24,13 @@ import org.eclipse.jdt.annotation.Nullable;
  * @author Harald Kuhn - Initial contribution
  * @author Kelly Davis - Modified to match discussion in #584
  * @author Kai Kreuzer - Moved class, included constants, added toString
+ * @author Miguel Álvarez Díez - Add pcm signed format
  */
 @NonNullByDefault
 public class AudioFormat {
+    // generic pcm signed format (no container) without any further constraints
+    public static final AudioFormat PCM_SIGNED = new AudioFormat(AudioFormat.CONTAINER_NONE,
+            AudioFormat.CODEC_PCM_SIGNED, null, null, null, null);
 
     // generic mp3 format without any further constraints
     public static final AudioFormat MP3 = new AudioFormat(AudioFormat.CONTAINER_NONE, AudioFormat.CODEC_MP3, null, null,
@@ -436,29 +441,13 @@ public class AudioFormat {
     @Override
     public boolean equals(@Nullable Object obj) {
         if (obj instanceof AudioFormat format) {
-            if (!(null == getCodec() ? null == format.getCodec() : getCodec().equals(format.getCodec()))) {
-                return false;
-            }
-            if (!(null == getContainer() ? null == format.getContainer()
-                    : getContainer().equals(format.getContainer()))) {
-                return false;
-            }
-            if (!(null == isBigEndian() ? null == format.isBigEndian() : isBigEndian().equals(format.isBigEndian()))) {
-                return false;
-            }
-            if (!(null == getBitDepth() ? null == format.getBitDepth() : getBitDepth().equals(format.getBitDepth()))) {
-                return false;
-            }
-            if (!(null == getBitRate() ? null == format.getBitRate() : getBitRate().equals(format.getBitRate()))) {
-                return false;
-            }
-            if (!(null == getFrequency() ? null == format.getFrequency()
-                    : getFrequency().equals(format.getFrequency()))) {
-                return false;
-            }
-            if (!(null == getChannels() ? null == format.getChannels() : getChannels().equals(format.getChannels()))) {
-                return false;
-            }
+            return Objects.equals(getCodec(), format.getCodec()) && //
+                    Objects.equals(getContainer(), format.getContainer()) && //
+                    Objects.equals(isBigEndian(), format.isBigEndian()) && //
+                    Objects.equals(getBitDepth(), format.getBitDepth()) && //
+                    Objects.equals(getBitRate(), format.getBitRate()) && //
+                    Objects.equals(getFrequency(), format.getFrequency()) && //
+                    Objects.equals(getChannels(), format.getChannels());
         }
         return super.equals(obj);
     }
