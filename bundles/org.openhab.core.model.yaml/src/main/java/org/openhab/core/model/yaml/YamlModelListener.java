@@ -23,7 +23,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * @author Laurent Garnier - Initial contribution
  */
 @NonNullByDefault
-public interface YamlModelListener<T extends YamlElement> {
+public interface YamlModelListener<T extends YamlDTO> {
 
     /**
      * Method called by the model repository when elements from a model are added.
@@ -31,7 +31,7 @@ public interface YamlModelListener<T extends YamlElement> {
      * @param modelName the name of the model
      * @param elements the collection of added elements
      */
-    void addedModel(String modelName, Collection<? extends YamlElement> elements);
+    void addedModel(String modelName, Collection<T> elements);
 
     /**
      * Method called by the model repository when elements from a model are updated.
@@ -39,7 +39,7 @@ public interface YamlModelListener<T extends YamlElement> {
      * @param modelName the name of the model
      * @param elements the collection of updated elements
      */
-    void updatedModel(String modelName, Collection<? extends YamlElement> elements);
+    void updatedModel(String modelName, Collection<T> elements);
 
     /**
      * Method called by the model repository when elements from a model are removed.
@@ -47,29 +47,19 @@ public interface YamlModelListener<T extends YamlElement> {
      * @param modelName the name of the model
      * @param elements the collection of removed elements
      */
-    void removedModel(String modelName, Collection<? extends YamlElement> elements);
+    void removedModel(String modelName, Collection<T> elements);
 
     /**
-     * Get the root name of this model type which is also the name of the root folder
-     * containing the user files for this model type.
-     *
-     * A path is unexpected. What is expected is for example "items" or "things".
+     * Get the name of the expected type
      *
      * @return the model root name
      */
-    String getRootName();
-
-    /**
-     * Get the DTO class to be used for a file providing objects for this model type.
-     *
-     * @return the DTO file class
-     */
-    Class<? extends AbstractYamlFile> getFileClass();
+    String getTypeName();
 
     /**
      * Get the DTO class to be used for each object of this model type.
      *
      * @return the DTO element class
      */
-    Class<T> getElementClass();
+    Class<T> getTypeClass();
 }

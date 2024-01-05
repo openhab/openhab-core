@@ -12,22 +12,23 @@
  */
 package org.openhab.core.model.yaml.internal;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.core.model.yaml.AbstractYamlFile;
-import org.openhab.core.model.yaml.YamlElement;
+import org.openhab.core.model.yaml.YamlDTO;
 import org.openhab.core.model.yaml.YamlModelListener;
-import org.openhab.core.model.yaml.YamlParseException;
 import org.openhab.core.service.WatchService;
 import org.openhab.core.service.WatchService.Kind;
 import org.osgi.service.component.annotations.Activate;
@@ -39,6 +40,8 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
@@ -48,19 +51,20 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
  * Data processed from these files are consumed by registered OSGi services that implement {@link YamlModelListener}.
  *
  * @author Laurent Garnier - Initial contribution
+ * @author Jan N. Klug - Refactored for multiple types per file
  */
 @NonNullByDefault
 @Component(immediate = true)
 public class YamlModelRepository implements WatchService.WatchEventListener {
-
     private final Logger logger = LoggerFactory.getLogger(YamlModelRepository.class);
 
     private final WatchService watchService;
     private final Path watchPath;
     private final ObjectMapper yamlReader;
 
-    private final Map<String, List<YamlModelListener<?>>> listeners = new ConcurrentHashMap<>();
-    private final Map<Path, List<? extends YamlElement>> objects = new ConcurrentHashMap<>();
+    private final Map<String, List<YamlModelListener<?>>> typeListeners = new ConcurrentHashMap<>();
+    // all model nodes, ordered by type and model name (full path as string)
+    private final Map<String, Map<String, List<JsonNode>>> modelCache = new ConcurrentHashMap<>();
 
     @Activate
     public YamlModelRepository(@Reference(target = WatchService.CONFIG_WATCHER_FILTER) WatchService watchService) {
@@ -81,119 +85,149 @@ public class YamlModelRepository implements WatchService.WatchEventListener {
     @Override
     public synchronized void processWatchEvent(Kind kind, Path path) {
         Path fullPath = watchPath.resolve(path);
-        String dirName = path.subpath(0, 1).toString();
+        String modelName = fullPath.toString();
 
-        if (Files.isDirectory(fullPath) || fullPath.toFile().isHidden() || !fullPath.toString().endsWith(".yaml")) {
+        if (Files.isDirectory(fullPath) || fullPath.toFile().isHidden() || !modelName.endsWith(".yaml")) {
             logger.trace("Ignored {}", fullPath);
             return;
         }
 
-        getListeners(dirName).forEach(listener -> processWatchEvent(dirName, kind, fullPath, listener));
+        process(modelName, kind, fullPath.toFile());
     }
 
-    private void processWatchEvent(String dirName, Kind kind, Path fullPath, YamlModelListener<?> listener) {
-        logger.debug("processWatchEvent dirName={} kind={} fullPath={} listener={}", dirName, kind, fullPath,
-                listener.getClass().getSimpleName());
-        Map<String, ? extends YamlElement> oldObjects;
-        Map<String, ? extends YamlElement> newObjects;
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    void process(String modelName, Kind kind, File file) {
         if (kind == WatchService.Kind.DELETE) {
-            newObjects = Map.of();
-
-            List<? extends YamlElement> oldListObjects = objects.remove(fullPath);
-            if (oldListObjects == null) {
-                oldListObjects = List.of();
+            logger.info("Removing YAML model {}", modelName);
+            for (Map.Entry<String, Map<String, List<JsonNode>>> typeEntry : modelCache.entrySet()) {
+                String typeName = typeEntry.getKey();
+                List<JsonNode> removedNodes = typeEntry.getValue().remove(modelName);
+                if (removedNodes != null && !removedNodes.isEmpty()) {
+                    getTypeListeners(typeName).forEach(listener -> {
+                        List removedElements = parseJsonNodes(removedNodes, listener.getTypeClass());
+                        listener.removedModel(modelName, removedElements);
+                    });
+                }
             }
-            oldObjects = oldListObjects.stream().collect(Collectors.toMap(YamlElement::getId, obj -> obj));
         } else {
-            AbstractYamlFile yamlData;
+            if (kind == Kind.CREATE) {
+                logger.info("Adding YAML model {}", modelName);
+            } else {
+                logger.info("Updating YAML model {}", modelName);
+            }
             try {
-                yamlData = readYamlFile(fullPath, listener.getFileClass());
-            } catch (YamlParseException e) {
-                logger.warn("Failed to parse Yaml file {} with DTO class {}: {}", fullPath,
-                        listener.getFileClass().getName(), e.getMessage());
-                return;
+                JsonNode fileContent = yamlReader.readTree(file);
+
+                // check version
+                JsonNode versionNode = fileContent.get("version");
+                if (versionNode == null || !versionNode.canConvertToInt()) {
+                    logger.warn("Version is missing or not a number in model {}. Ignoring it.", modelName);
+                    return;
+                }
+                int fileVersion = versionNode.asInt();
+                if (fileVersion != 1) {
+                    logger.warn("Model {} has version {}, but only version 1 is supported. Ignoring it.", modelName,
+                            fileVersion);
+                    return;
+                }
+
+                // get sub-elements
+                Iterator<Map.Entry<String, JsonNode>> it = fileContent.fields();
+                while (it.hasNext()) {
+                    Map.Entry<String, JsonNode> element = it.next();
+                    String typeName = element.getKey();
+                    JsonNode node = element.getValue();
+                    if (!node.isArray()) {
+                        // all processable sub-elements are arrays
+                        logger.trace("Element {} in model {} is not an array, ignoring it", typeName, modelName);
+                        continue;
+                    }
+
+                    Map<String, List<JsonNode>> typeCache = Objects
+                            .requireNonNull(modelCache.computeIfAbsent(typeName, k -> new ConcurrentHashMap<>()));
+                    List<JsonNode> oldNodeElements = typeCache.getOrDefault(modelName, List.of());
+                    List<JsonNode> newNodeElements = new ArrayList<>();
+                    node.elements().forEachRemaining(newNodeElements::add);
+
+                    for (YamlModelListener<?> typeListener : getTypeListeners(typeName)) {
+                        Class<? extends YamlDTO> typeClass = typeListener.getTypeClass();
+
+                        Map<String, ? extends YamlDTO> oldElements = listToMap(
+                                parseJsonNodes(oldNodeElements, typeClass));
+                        Map<String, ? extends YamlDTO> newElements = listToMap(
+                                parseJsonNodes(newNodeElements, typeClass));
+
+                        List addedElements = newElements.values().stream()
+                                .filter(e -> !oldElements.containsKey(e.getId())).toList();
+                        List removedElements = oldElements.values().stream()
+                                .filter(e -> !newElements.containsKey(e.getId())).toList();
+                        List updatedElements = newElements.values().stream().filter(
+                                e -> oldElements.containsKey(e.getId()) && !e.equals(oldElements.get(e.getId())))
+                                .toList();
+
+                        if (!addedElements.isEmpty()) {
+                            typeListener.addedModel(modelName, addedElements);
+                        }
+                        if (!removedElements.isEmpty()) {
+                            typeListener.removedModel(modelName, removedElements);
+                        }
+                        if (!updatedElements.isEmpty()) {
+                            typeListener.updatedModel(modelName, updatedElements);
+                        }
+                    }
+
+                    // replace cache
+                    typeCache.put(modelName, newNodeElements);
+                }
+            } catch (IOException e) {
+                logger.warn("Failed to read {}: {}", modelName, e.getMessage());
             }
-            List<? extends YamlElement> newListObjects = yamlData.getElements();
-            newObjects = newListObjects.stream().collect(Collectors.toMap(YamlElement::getId, obj -> obj));
-
-            List<? extends YamlElement> oldListObjects = objects.get(fullPath);
-            if (oldListObjects == null) {
-                oldListObjects = List.of();
-            }
-            oldObjects = oldListObjects.stream().collect(Collectors.toMap(YamlElement::getId, obj -> obj));
-
-            objects.put(fullPath, newListObjects);
-        }
-
-        String modelName = fullPath.toFile().getName();
-        modelName = modelName.substring(0, modelName.indexOf(".yaml"));
-        List<? extends YamlElement> listElements;
-        listElements = oldObjects.entrySet().stream()
-                .filter(entry -> entry.getValue().getClass().equals(listener.getElementClass())
-                        && !newObjects.containsKey(entry.getKey()))
-                .map(Map.Entry::getValue).toList();
-        if (!listElements.isEmpty()) {
-            listener.removedModel(modelName, listElements);
-        }
-
-        listElements = newObjects.entrySet().stream()
-                .filter(entry -> entry.getValue().getClass().equals(listener.getElementClass())
-                        && !oldObjects.containsKey(entry.getKey()))
-                .map(Map.Entry::getValue).toList();
-        if (!listElements.isEmpty()) {
-            listener.addedModel(modelName, listElements);
-        }
-
-        // Object is ignored if unchanged
-        listElements = newObjects.entrySet().stream()
-                .filter(entry -> entry.getValue().getClass().equals(listener.getElementClass())
-                        && oldObjects.containsKey(entry.getKey())
-                        && !entry.getValue().equals(oldObjects.get(entry.getKey())))
-                .map(Map.Entry::getValue).toList();
-        if (!listElements.isEmpty()) {
-            listener.updatedModel(modelName, listElements);
         }
     }
 
-    private AbstractYamlFile readYamlFile(Path path, Class<? extends AbstractYamlFile> dtoClass)
-            throws YamlParseException {
-        logger.info("Loading model '{}'", path.toFile().getName());
-        logger.debug("readYamlFile {} with {}", path.toFile().getAbsolutePath(), dtoClass.getName());
+    private Map<String, ? extends YamlDTO> listToMap(List<? extends YamlDTO> elements) {
+        return elements.stream().collect(Collectors.toMap(YamlDTO::getId, e -> e));
+    }
+
+    private <T extends YamlDTO> List<T> parseJsonNodes(List<JsonNode> nodes, Class<T> typeClass) {
+        return nodes.stream().map(nE -> parseJsonNode(nE, typeClass)).filter(Optional::isPresent).map(Optional::get)
+                .filter(YamlDTO::isValid).toList();
+    }
+
+    private <T extends YamlDTO> Optional<T> parseJsonNode(JsonNode node, Class<T> typeClass) {
         try {
-            AbstractYamlFile dto = yamlReader.readValue(path.toFile(), dtoClass);
-            if (!dto.isValid()) {
-                throw new YamlParseException("The file is not valid, some checks failed!");
-            }
-            return dto;
-        } catch (IOException e) {
-            throw new YamlParseException(e);
+            return Optional.of(yamlReader.treeToValue(node, typeClass));
+        } catch (JsonProcessingException e) {
+            logger.warn("Could not parse element {} to {}: {}", node.toString(), typeClass, e.getMessage());
+            return Optional.empty();
         }
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     protected void addYamlModelListener(YamlModelListener<?> listener) {
-        String dirName = listener.getRootName();
-        logger.debug("Adding model listener for {}", dirName);
-        getListeners(dirName).add(listener);
+        String typeName = listener.getTypeName();
+        Class<? extends YamlDTO> typeClass = listener.getTypeClass();
+        logger.debug("Adding model listener for {}", typeName);
+        getTypeListeners(typeName).add(listener);
 
-        // Load all existing YAML files
-        try (Stream<Path> stream = Files.walk(watchPath.resolve(dirName))) {
-            stream.forEach(path -> {
-                if (!Files.isDirectory(path) && !path.toFile().isHidden() && path.toString().endsWith(".yaml")) {
-                    processWatchEvent(dirName, Kind.CREATE, path, listener);
-                }
-            });
-        } catch (IOException ignored) {
+        Map<String, List<JsonNode>> cachedModels = modelCache.getOrDefault(typeName, Map.of());
+        for (Map.Entry<String, List<JsonNode>> model : cachedModels.entrySet()) {
+            if (model.getValue().isEmpty()) {
+                continue;
+            }
+            List modelElements = parseJsonNodes(model.getValue(), typeClass);
+            listener.addedModel(model.getKey(), modelElements);
         }
     }
 
     protected void removeYamlModelListener(YamlModelListener<?> listener) {
-        String dirName = listener.getRootName();
-        logger.debug("Removing model listener for {}", dirName);
-        getListeners(dirName).remove(listener);
+        String typeName = listener.getTypeName();
+        logger.debug("Removing model listener for {}", typeName);
+        getTypeListeners(typeName).remove(listener);
     }
 
-    private List<YamlModelListener<?>> getListeners(String dirName) {
-        return Objects.requireNonNull(listeners.computeIfAbsent(dirName, k -> new CopyOnWriteArrayList<>()));
+    private List<YamlModelListener<?>> getTypeListeners(String typeName) {
+        return Objects.requireNonNull(typeListeners.computeIfAbsent(typeName, k -> new CopyOnWriteArrayList<>()));
     }
 }
