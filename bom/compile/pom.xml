@@ -19,9 +19,9 @@
   <properties>
     <californium.version>2.7.4</californium.version>
     <bouncycastle.version>1.75</bouncycastle.version>
-    <jetty.version>9.4.50.v20221201</jetty.version>
-    <pax.web.version>8.0.15</pax.web.version>
-    <swagger.version>2.1.9</swagger.version>
+    <jetty.version>9.4.52.v20230823</jetty.version>
+    <pax.web.version>8.0.22</pax.web.version>
+    <swagger.version>2.2.15</swagger.version>
   </properties>
 
   <dependencies>
