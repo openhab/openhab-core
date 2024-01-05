@@ -64,7 +64,7 @@ public interface ThingHandlerService {
      * Implementations should override this method to add additional initialization code. This method should call
      * <code>super.initialize()</code> to ensure background discovery is properly handled.
      *
-     * See {@link #activate(), #{@link #dispose()}
+     * See {@link #activate()}, {@link #dispose()}
      */
     default void initialize() {
     }
