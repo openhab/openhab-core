@@ -22,6 +22,7 @@ import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Predicate;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -264,11 +265,8 @@ public class JavaOSGiTest extends JavaTest {
     }
 
     private void saveServiceRegistration(final String interfaceName, final ServiceRegistration<?> srvReg) {
-        List<ServiceRegistration<?>> regs = registeredServices.get(interfaceName);
-        if (regs == null) {
-            regs = new ArrayList<>();
-            registeredServices.put(interfaceName, regs);
-        }
+        List<ServiceRegistration<?>> regs = Objects
+                .requireNonNull(registeredServices.computeIfAbsent(interfaceName, k -> new ArrayList<>()));
         regs.add(srvReg);
     }
 
