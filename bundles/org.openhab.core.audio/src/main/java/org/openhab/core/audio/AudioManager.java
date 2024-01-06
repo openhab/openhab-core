@@ -206,7 +206,7 @@ public interface AudioManager {
     /**
      * Get a list of source ids that match a given pattern
      *
-     * @param pattern pattern to search, can include `*` and `?` placeholders
+     * @param pattern pattern to search, can include {@code *} and {@code ?} placeholders
      * @return ids of matching sources
      */
     Set<String> getSourceIds(String pattern);
@@ -248,7 +248,7 @@ public interface AudioManager {
     /**
      * Get a list of sink ids that match a given pattern
      *
-     * @param pattern pattern to search, can include `*` and `?` placeholders
+     * @param pattern pattern to search, can include {@code *} and {@code ?} placeholders
      * @return ids of matching sinks
      */
     Set<String> getSinkIds(String pattern);

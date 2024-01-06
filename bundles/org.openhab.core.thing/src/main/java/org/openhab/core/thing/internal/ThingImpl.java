@@ -43,7 +43,7 @@ import org.openhab.core.thing.binding.builder.ThingStatusInfoBuilder;
  *         ThingType Description
  * @author Thomas Höfer - Added thing and thing type properties
  * @author Simon Kaufmann - Added label
- * @author Christoph Weitkamp - Added method `getChannel(ChannelUID)`
+ * @author Christoph Weitkamp - Added method {@code getChannel(ChannelUID)}
  */
 @NonNullByDefault
 public class ThingImpl implements Thing {

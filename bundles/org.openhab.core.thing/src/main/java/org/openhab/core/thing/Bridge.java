@@ -22,7 +22,7 @@ import org.openhab.core.thing.binding.BridgeHandler;
  * A {@link Bridge} is a {@link Thing} that connects other {@link Thing}s.
  *
  * @author Dennis Nobel - Initial contribution
- * @author Christoph Weitkamp - Added method `getThing(ThingUID)`
+ * @author Christoph Weitkamp - Added method {@code getThing(ThingUID)}
  */
 @NonNullByDefault
 public interface Bridge extends Thing {

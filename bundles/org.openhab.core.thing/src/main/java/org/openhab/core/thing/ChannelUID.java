@@ -25,7 +25,7 @@ import org.eclipse.jdt.annotation.Nullable;
  * @author Jochen Hiller - Bugfix 455434: added default constructor
  * @author Dennis Nobel - Added channel group id
  * @author Kai Kreuzer - Changed creation of channels to not require a thing type
- * @author Christoph Weitkamp - Changed pattern for validating last segment to contain either a single `#` or none
+ * @author Christoph Weitkamp - Changed pattern for validating last segment to contain either a single {@code #} or none
  */
 @NonNullByDefault
 public class ChannelUID extends UID {

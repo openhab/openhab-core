@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Test;
  * Tests for class {@link ChannelUID}.
  *
  * @author Simon Kaufmann - Initial contribution
- * @author Christoph Weitkamp - Changed pattern for validating last segment to contain either a single `#` or none
+ * @author Christoph Weitkamp - Changed pattern for validating last segment to contain either a single {@code #} or none
  */
 @NonNullByDefault
 public class ChannelUIDTest {
