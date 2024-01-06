@@ -98,10 +98,12 @@ public final class CurrencyUnit extends AbstractUnit<Currency> {
         this.name = name;
     }
 
+    @Override
     public String getName() {
         return name;
     }
 
+    @Override
     public @Nullable String getSymbol() {
         return symbol;
     }
@@ -149,41 +151,6 @@ public final class CurrencyUnit extends AbstractUnit<Currency> {
         }
         throw new UnconvertibleException(
                 "Could not get factor for converting " + this.getName() + " to " + that.getName());
-    }
-
-    public final Unit<?> multiply(@NonNullByDefault({}) Unit<?> that) {
-        return that.equals(ONE) ? this : ProductUnit.ofProduct(this, that);
-    }
-
-    @Override
-    public final Unit<?> inverse() {
-        return ProductUnit.ofQuotient(ONE, this);
-    }
-
-    @Override
-    public final Unit<Currency> divide(@NonNullByDefault({}) Number divisor) {
-        if (Calculus.currentNumberSystem().isOne(divisor)) {
-            return this;
-        }
-        BigDecimal factor = BigDecimal.ONE.divide(new BigDecimal(divisor.toString()), MathContext.DECIMAL128);
-        return transform(MultiplyConverter.of(factor));
-    }
-
-    @Override
-    public final Unit<?> divide(@NonNullByDefault({}) Unit<?> that) {
-        return this.multiply(that.inverse());
-    }
-
-    @Override
-    public final Unit<?> root(int n) {
-        if (n > 0) {
-            return ProductUnit.ofRoot(this, n);
-        } else if (n == 0) {
-            throw new ArithmeticException("Root's order of zero");
-        } else {
-            // n < 0
-            return ONE.divide(this.root(-n));
-        }
     }
 
     @Override
