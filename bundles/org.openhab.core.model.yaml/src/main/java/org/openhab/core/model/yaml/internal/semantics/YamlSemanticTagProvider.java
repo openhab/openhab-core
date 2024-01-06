@@ -74,7 +74,7 @@ public class YamlSemanticTagProvider extends AbstractProvider<SemanticTag>
 
     @Override
     public void addedModel(String modelName, Collection<YamlSemanticTagDTO> elements) {
-        List<SemanticTag> added = elements.stream().map(e -> mapSemanticTag((YamlSemanticTagDTO) e))
+        List<SemanticTag> added = elements.stream().map(this::mapSemanticTag)
                 .sorted(Comparator.comparing(SemanticTag::getUID)).toList();
         tags.addAll(added);
         added.forEach(t -> {
@@ -85,7 +85,7 @@ public class YamlSemanticTagProvider extends AbstractProvider<SemanticTag>
 
     @Override
     public void updatedModel(String modelName, Collection<YamlSemanticTagDTO> elements) {
-        List<SemanticTag> updated = elements.stream().map(e -> mapSemanticTag((YamlSemanticTagDTO) e)).toList();
+        List<SemanticTag> updated = elements.stream().map(this::mapSemanticTag).toList();
         updated.forEach(t -> {
             tags.stream().filter(tag -> tag.getUID().equals(t.getUID())).findFirst().ifPresentOrElse(oldTag -> {
                 tags.remove(oldTag);
@@ -98,7 +98,7 @@ public class YamlSemanticTagProvider extends AbstractProvider<SemanticTag>
 
     @Override
     public void removedModel(String modelName, Collection<YamlSemanticTagDTO> elements) {
-        List<SemanticTag> removed = elements.stream().map(e -> mapSemanticTag((YamlSemanticTagDTO) e))
+        List<SemanticTag> removed = elements.stream().map(this::mapSemanticTag)
                 .sorted(Comparator.comparing(SemanticTag::getUID).reversed()).toList();
         removed.forEach(t -> {
             tags.stream().filter(tag -> tag.getUID().equals(t.getUID())).findFirst().ifPresentOrElse(oldTag -> {
