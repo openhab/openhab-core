@@ -52,7 +52,7 @@ public class CommandWrapper implements Command, Action {
 
     /**
      * The constructor for the "help" instance of this class. This instance will be created by
-     * {@code org.apache.karaf.shell.impl.action.command.ManagerImpl.instantiate(Class, Registry)} and
+     * {@code org.apache.karaf.shell.impl.action.command.ManagerImpl.instantiate(Class<? extends T>, Registry)} and
      * is used to print all usages from the {@code openhab} scope.
      * The wrapped command is unused here because the karaf infrastructure will call the {@link #execute()} method.
      */
