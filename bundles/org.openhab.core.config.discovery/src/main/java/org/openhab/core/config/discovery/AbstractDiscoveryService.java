@@ -12,9 +12,9 @@
  */
 package org.openhab.core.config.discovery;
 
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -69,7 +69,7 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
     private final Set<ThingTypeUID> supportedThingTypes;
     private final int timeout;
 
-    private long timestampOfLastScan = 0L;
+    private Instant timestampOfLastScan = Instant.MIN;
 
     private @Nullable ScheduledFuture<?> scheduledStop;
 
@@ -190,7 +190,7 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
                     }
                 }, getScanTimeout(), TimeUnit.SECONDS);
             }
-            timestampOfLastScan = new Date().getTime();
+            timestampOfLastScan = Instant.now();
 
             try {
                 startScan();
@@ -421,7 +421,7 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
      * @return timestamp as long
      */
     protected long getTimestampOfLastScan() {
-        return timestampOfLastScan;
+        return Instant.MIN.equals(timestampOfLastScan) ? 0 : timestampOfLastScan.toEpochMilli();
     }
 
     private String inferKey(DiscoveryResult discoveryResult, String lastSegment) {

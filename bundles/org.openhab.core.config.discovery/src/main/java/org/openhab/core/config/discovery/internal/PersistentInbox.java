@@ -15,9 +15,9 @@ package org.openhab.core.config.discovery.internal;
 import static org.openhab.core.config.discovery.inbox.InboxPredicates.forThingUID;
 
 import java.net.URI;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -112,7 +112,7 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
 
         @Override
         public void run() {
-            long now = new Date().getTime();
+            Instant now = Instant.now();
             for (DiscoveryResult result : inbox.getAll()) {
                 if (isResultExpired(result, now)) {
                     logger.debug("Inbox entry for thing '{}' is expired and will be removed.", result.getThingUID());
@@ -121,11 +121,12 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
             }
         }
 
-        private boolean isResultExpired(DiscoveryResult result, long now) {
-            if (result.getTimeToLive() == DiscoveryResult.TTL_UNLIMITED) {
+        private boolean isResultExpired(DiscoveryResult result, Instant now) {
+            long ttl = result.getTimeToLive();
+            if (ttl == DiscoveryResult.TTL_UNLIMITED) {
                 return false;
             }
-            return (result.getTimestamp() + result.getTimeToLive() * 1000 < now);
+            return Instant.ofEpochMilli(result.getTimestamp()).plusSeconds(ttl).isBefore(now);
         }
     }
 
@@ -442,7 +443,7 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
                     removedThings.add(thingUID);
                     remove(thingUID);
                     logger.debug("Removed thing '{}' from inbox because it was older than {}.", thingUID,
-                            new Date(timestamp));
+                            Instant.ofEpochMilli(timestamp));
                 }
             }
         }
