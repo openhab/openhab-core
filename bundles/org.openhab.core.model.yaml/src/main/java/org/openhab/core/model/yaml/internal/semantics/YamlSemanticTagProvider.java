@@ -63,11 +63,6 @@ public class YamlSemanticTagProvider extends AbstractProvider<SemanticTag>
     }
 
     @Override
-    public String getTypeName() {
-        return "tags";
-    }
-
-    @Override
     public Class<YamlSemanticTagDTO> getTypeClass() {
         return YamlSemanticTagDTO.class;
     }

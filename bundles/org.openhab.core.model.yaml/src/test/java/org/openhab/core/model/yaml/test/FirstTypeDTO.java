@@ -16,12 +16,14 @@ import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.openhab.core.model.yaml.YamlDTO;
+import org.openhab.core.model.yaml.YamlElementName;
 
 /**
  * The {@link FirstTypeDTO} is a test type implementing {@link YamlDTO}
  *
  * @author Jan N. Klug - Initial contribution
  */
+@YamlElementName("firstType")
 public class FirstTypeDTO implements YamlDTO {
     public String uid;
     public String description;

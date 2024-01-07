@@ -50,13 +50,6 @@ public interface YamlModelListener<T extends YamlDTO> {
     void removedModel(String modelName, Collection<T> elements);
 
     /**
-     * Get the name of the expected type
-     *
-     * @return the model root name
-     */
-    String getTypeName();
-
-    /**
      * Get the DTO class to be used for each object of this model type.
      *
      * @return the DTO element class

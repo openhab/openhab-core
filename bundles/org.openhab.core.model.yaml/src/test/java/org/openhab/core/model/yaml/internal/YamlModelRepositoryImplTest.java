@@ -73,11 +73,8 @@ public class YamlModelRepositoryImplTest {
         when(watchServiceMock.getWatchPath()).thenReturn(watchPath);
 
         when(firstTypeListener.getTypeClass()).thenReturn(FirstTypeDTO.class);
-        when(firstTypeListener.getTypeName()).thenReturn("firstType");
         when(secondTypeListener1.getTypeClass()).thenReturn(SecondTypeDTO.class);
-        when(secondTypeListener1.getTypeName()).thenReturn("secondType");
         when(secondTypeListener2.getTypeClass()).thenReturn(SecondTypeDTO.class);
-        when(secondTypeListener2.getTypeName()).thenReturn("secondType");
     }
 
     @Test
@@ -203,7 +200,7 @@ public class YamlModelRepositoryImplTest {
         modelRepository.processWatchEvent(WatchService.Kind.CREATE, MODEL_PATH);
 
         FirstTypeDTO added = new FirstTypeDTO("element3", "description3");
-        modelRepository.addElementToModel(MODEL_NAME, "firstType", added);
+        modelRepository.addElementToModel(MODEL_NAME, added);
 
         String actualFileContent = Files.readString(fullModelPath);
         String expectedFileContent = Files.readString(SOURCE_PATH.resolve("addToModelExpectedContent.yaml"));
@@ -219,7 +216,7 @@ public class YamlModelRepositoryImplTest {
         modelRepository.processWatchEvent(WatchService.Kind.CREATE, MODEL_PATH);
 
         FirstTypeDTO updated = new FirstTypeDTO("element1", "newDescription1");
-        modelRepository.updateElementInModel(MODEL_NAME, "firstType", updated);
+        modelRepository.updateElementInModel(MODEL_NAME, updated);
 
         String actualFileContent = Files.readString(fullModelPath);
         String expectedFileContent = Files.readString(SOURCE_PATH.resolve("updateInModelExpectedContent.yaml"));
@@ -235,7 +232,7 @@ public class YamlModelRepositoryImplTest {
         modelRepository.processWatchEvent(WatchService.Kind.CREATE, MODEL_PATH);
 
         FirstTypeDTO removed = new FirstTypeDTO("element1", "description1");
-        modelRepository.removeElementFromModel(MODEL_NAME, "firstType", removed);
+        modelRepository.removeElementFromModel(MODEL_NAME, removed);
 
         String actualFileContent = Files.readString(fullModelPath);
         String expectedFileContent = Files.readString(SOURCE_PATH.resolve("removeFromModelExpectedContent.yaml"));

@@ -18,6 +18,7 @@ import java.util.Objects;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.model.yaml.YamlDTO;
+import org.openhab.core.model.yaml.YamlElementName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,6 +28,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Laurent Garnier - Initial contribution
  */
+@YamlElementName("tags")
 public class YamlSemanticTagDTO implements YamlDTO {
 
     private final Logger logger = LoggerFactory.getLogger(YamlSemanticTagDTO.class);

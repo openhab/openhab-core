@@ -10,10 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.model.yaml.internal;
+package org.openhab.core.model.yaml;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.core.model.yaml.YamlDTO;
 
 /**
  * The {@link YamlModelRepository} defines methods to update elements in a YAML model.
@@ -22,9 +21,9 @@ import org.openhab.core.model.yaml.YamlDTO;
  */
 @NonNullByDefault
 public interface YamlModelRepository {
-    void addElementToModel(String modelName, String typeName, YamlDTO element);
+    void addElementToModel(String modelName, YamlDTO element);
 
-    void removeElementFromModel(String modelName, String typeName, YamlDTO element);
+    void removeElementFromModel(String modelName, YamlDTO element);
 
-    void updateElementInModel(String modelName, String typeName, YamlDTO element);
+    void updateElementInModel(String modelName, YamlDTO element);
 }

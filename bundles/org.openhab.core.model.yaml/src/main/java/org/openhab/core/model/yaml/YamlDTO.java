@@ -19,19 +19,30 @@ import org.openhab.core.model.yaml.internal.YamlModelRepositoryImpl;
  * The {@link YamlDTO} interface must be implemented by any classes that need to be handled by the
  * {@link YamlModelRepositoryImpl}.
  * <p />
- * Implementations MUST provide {@code equals(Object other)} and {@code hashcode()} methods
+ * <p />
+ * Implementations
+ * <ul>
+ * <li>MUST have a default constructor to allow deserialization with Jackson</li>
+ * <li>MUST provide {@code equals(Object other)} and {@code hashcode()} methods</li>
+ * <li>MUST be annotated with {@link YamlElementName} containing the element name</li>
+ * <li>SHOULD implement a proper {@code toString()} method</li>
+ * </ul>
  *
  * @author Laurent Garnier - Initial contribution
+ * @author Jan N. Klug - Refactoring and improvments to JavaDoc
  */
 public interface YamlDTO {
 
     /**
-     * Get the identifier of this element
-     *
+     * Get the identifier of this element.
+     * <p />
+     * <p />
      * Identifiers
-     *
-     * - MUST be unique within a model
-     * - SHOULD be unique across all models
+     * <ul>
+     * <li>MUST not non-null</li>
+     * <li>MUST be unique within a model</li>
+     * <li>SHOULD be unique across all models</li>
+     * </ul>
      *
      * @return the identifier as a string
      */
@@ -39,13 +50,15 @@ public interface YamlDTO {
     String getId();
 
     /**
-     * Check if this element is valid
-     *
+     * Check if this element is valid and should be included in the model.
+     * <p />
+     * <p />
      * Implementations
-     *
-     * - MUST check that at least {link #getId()} returns a non-null value
-     * - SHOULD log the reason of failed checks at WARN level
-     * - CAN perform additional checks
+     * <ul>
+     * <li>MUST check that at least {link #getId()} returns a non-null value</li>
+     * <li>SHOULD log the reason of failed checks at WARN level</li>
+     * <li>MAY perform additional checks</li>
+     * </ul>
      *
      * @return {@code true} if all the checks are completed successfully
      */

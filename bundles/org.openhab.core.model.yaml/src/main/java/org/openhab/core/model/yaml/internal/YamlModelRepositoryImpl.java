@@ -28,7 +28,9 @@ import java.util.stream.Collectors;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.model.yaml.YamlDTO;
+import org.openhab.core.model.yaml.YamlElementName;
 import org.openhab.core.model.yaml.YamlModelListener;
+import org.openhab.core.model.yaml.YamlModelRepository;
 import org.openhab.core.service.WatchService;
 import org.openhab.core.service.WatchService.Kind;
 import org.osgi.service.component.annotations.Activate;
@@ -203,9 +205,13 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public void addYamlModelListener(YamlModelListener<? extends YamlDTO> listener) {
-        String typeName = listener.getTypeName();
         Class<? extends YamlDTO> typeClass = listener.getTypeClass();
-        logger.debug("Adding model listener for {}", typeName);
+        YamlElementName annotation = typeClass.getAnnotation(YamlElementName.class);
+        if (annotation == null) {
+            logger.warn("Class {} is missing the mandatory YamlElementName annotation. This is a bug.", typeClass);
+            return;
+        }
+        String typeName = annotation.value();
         getTypeListeners(typeName).add(listener);
 
         // iterate over all models and notify he new listener of already existing models with this type
@@ -221,14 +227,20 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
     }
 
     public void removeYamlModelListener(YamlModelListener<? extends YamlDTO> listener) {
-        String typeName = listener.getTypeName();
-        logger.debug("Removing model listener for {}", typeName);
-        getTypeListeners(typeName).remove(listener);
+        typeListeners.values().forEach(list -> list.remove(listener));
     }
 
     @Override
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public void addElementToModel(String modelName, String typeName, YamlDTO element) {
+    public void addElementToModel(String modelName, YamlDTO element) {
+        YamlElementName annotation = element.getClass().getAnnotation(YamlElementName.class);
+        if (annotation == null) {
+            logger.warn(
+                    "Failed to add element {}. Class {}) is missing the mandatory YamlElementName annotation. This is a bug.",
+                    element.getId(), element.getClass());
+            return;
+        }
+        String typeName = annotation.value();
         Map<String, List<JsonNode>> model = Objects
                 .requireNonNull(modelCache.computeIfAbsent(modelName, k -> new ConcurrentHashMap<>()));
         List<JsonNode> modelNodes = model.computeIfAbsent(typeName, k -> new CopyOnWriteArrayList<>());
@@ -247,12 +259,21 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
 
     @Override
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public void removeElementFromModel(String modelName, String typeName, YamlDTO element) {
+    public void removeElementFromModel(String modelName, YamlDTO element) {
+        YamlElementName annotation = element.getClass().getAnnotation(YamlElementName.class);
+        if (annotation == null) {
+            logger.warn(
+                    "Failed to remove element {}. Class {}) is missing the mandatory YamlElementName annotation. This is a bug.",
+                    element.getId(), element.getClass());
+            return;
+        }
+        String typeName = annotation.value();
         Map<String, List<JsonNode>> model = modelCache.get(modelName);
         if (model == null) {
             logger.warn("Failed to remove {} from model {} because the model is not known.", element, modelName);
             return;
         }
+
         List<JsonNode> modelNodes = model.get(typeName);
         if (modelNodes == null) {
             logger.warn("Failed to remove {} from model {} because type {} is not known in the model.", element,
@@ -278,7 +299,15 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
 
     @Override
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public void updateElementInModel(String modelName, String typeName, YamlDTO element) {
+    public void updateElementInModel(String modelName, YamlDTO element) {
+        YamlElementName annotation = element.getClass().getAnnotation(YamlElementName.class);
+        if (annotation == null) {
+            logger.warn(
+                    "Failed to update element {}. Class {}) is missing the mandatory YamlElementName annotation. This is a bug.",
+                    element.getId(), element.getClass());
+            return;
+        }
+        String typeName = annotation.value();
         Map<String, List<JsonNode>> model = modelCache.get(modelName);
         if (model == null) {
             logger.warn("Failed to update {} in model {} because the model is not known.", element, modelName);
