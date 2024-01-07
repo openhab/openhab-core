@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 /**
  * This is an implementation of an {@link AudioStream} used to transmit raw audio data to a sink.
  *
- * It just pipes the audio through it, the default pipe size its equal to 1s of audio,
+ * It just pipes the audio through it, the default pipe size is equal to 0.5 seconds of audio,
  * the implementation locks if you set a pipe size lower to the byte length used to write.
  *
  * In order to support audio multiplex out of the box you should create a {@link PipedAudioStream.Group} instance
@@ -99,7 +99,7 @@ public class PipedAudioStream extends AudioStream {
      * Add a new handler that will be executed on stream close.
      * It will be chained to the previous handler if any, and executed in order.
      * 
-     * @param onClose block to run on stream close.
+     * @param onClose block to run on stream close
      */
     public void onClose(Runnable onClose) {
         this.onCloseChain.add(onClose);
@@ -112,10 +112,10 @@ public class PipedAudioStream extends AudioStream {
     /**
      * Creates a new piped stream group used to open new streams and write data to them.
      *
-     * Internal pipe size 0.5s.
+     * Internal pipe size is 0.5s.
      *
      * @param format the audio format of the group audio streams
-     * @return a group instance.
+     * @return a group instance
      */
     public static Group newGroup(AudioFormat format) {
         int pipeSize = Math.round(( //
@@ -130,19 +130,18 @@ public class PipedAudioStream extends AudioStream {
      * Creates a new piped stream group used to open new streams and write data to them.
      *
      * @param format the audio format of the group audio streams
-     * @param pipeSize the pipe size of the created streams.
-     * @return a piped stream group instance.
+     * @param pipeSize the pipe size of the created streams
+     * @return a piped stream group instance
      */
     public static Group newGroup(AudioFormat format, int pipeSize) {
         return new Group(format, pipeSize);
     }
 
     /**
-     * The {@link PipedAudioStream.Group} its an {@link OutputStream} implementation that use can use to
+     * The {@link PipedAudioStream.Group} is an {@link OutputStream} implementation that can be use to
      * create one or more {@link PipedAudioStream} instances and write to them at once.
      *
      * The created {@link PipedAudioStream} instances are removed from the group when closed.
-     *
      */
     public static class Group extends OutputStream {
         private final int pipeSize;
@@ -157,10 +156,10 @@ public class PipedAudioStream extends AudioStream {
 
         /**
          * Creates a new {@link PipedAudioStream} connected to the group.
-         * The stream unregister itself from the group on close.
+         * The stream unregisters itself from the group on close.
          * 
-         * @return a new {@link PipedAudioStream} to pipe data written to the group.
-         * @throws IOException when unable to create the stream.
+         * @return a new {@link PipedAudioStream} to pipe data written to the group
+         * @throws IOException when unable to create the stream
          */
         public PipedAudioStream getAudioStreamInGroup() throws IOException {
             var pipedOutput = new PipedOutputStream();
@@ -180,10 +179,19 @@ public class PipedAudioStream extends AudioStream {
         /**
          * Returns true if this group has no streams connected
          *
-         * @return true if this group has no streams connected.
+         * @return true if this group has no streams connected
          */
         public boolean isEmpty() {
             return openPipes.isEmpty();
+        }
+
+        /**
+         * Returns the number of streams connected
+         *
+         * @return the number of streams connected
+         */
+        public int size() {
+            return openPipes.size();
         }
 
         @Override
