@@ -77,6 +77,7 @@
     <module>org.openhab.core.io.transport.mdns</module>
     <module>org.openhab.core.io.transport.modbus</module>
     <module>org.openhab.core.io.transport.mqtt</module>
+    <module>org.openhab.core.io.transport.sbus</module>
     <module>org.openhab.core.io.transport.serial</module>
     <module>org.openhab.core.io.transport.serial.javacomm</module>
     <module>org.openhab.core.io.transport.serial.rxtx</module>
