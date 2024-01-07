@@ -63,7 +63,7 @@ public class YamlSemanticTagProvider extends AbstractProvider<SemanticTag>
     }
 
     @Override
-    public Class<YamlSemanticTagDTO> getTypeClass() {
+    public Class<YamlSemanticTagDTO> getElementClass() {
         return YamlSemanticTagDTO.class;
     }
 

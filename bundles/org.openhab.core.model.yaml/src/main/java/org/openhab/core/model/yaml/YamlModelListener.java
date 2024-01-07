@@ -61,5 +61,5 @@ public interface YamlModelListener<T extends YamlElement> {
      *
      * @return the DTO element class
      */
-    Class<T> getTypeClass();
+    Class<T> getElementClass();
 }

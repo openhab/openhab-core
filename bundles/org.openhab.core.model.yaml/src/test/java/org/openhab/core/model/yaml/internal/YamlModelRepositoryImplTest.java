@@ -72,9 +72,9 @@ public class YamlModelRepositoryImplTest {
         fullModelPath = watchPath.resolve(MODEL_PATH);
         when(watchServiceMock.getWatchPath()).thenReturn(watchPath);
 
-        when(firstTypeListener.getTypeClass()).thenReturn(FirstTypeDTO.class);
-        when(secondTypeListener1.getTypeClass()).thenReturn(SecondTypeDTO.class);
-        when(secondTypeListener2.getTypeClass()).thenReturn(SecondTypeDTO.class);
+        when(firstTypeListener.getElementClass()).thenReturn(FirstTypeDTO.class);
+        when(secondTypeListener1.getElementClass()).thenReturn(SecondTypeDTO.class);
+        when(secondTypeListener2.getElementClass()).thenReturn(SecondTypeDTO.class);
     }
 
     @Test
