@@ -177,7 +177,7 @@ public class PipedAudioStream extends AudioStream {
         }
 
         /**
-         * Returns true if this group has no streams connected
+         * Returns true if this group has no streams connected.
          *
          * @return true if this group has no streams connected
          */
@@ -186,7 +186,7 @@ public class PipedAudioStream extends AudioStream {
         }
 
         /**
-         * Returns the number of streams connected
+         * Returns the number of streams connected.
          *
          * @return the number of streams connected
          */
