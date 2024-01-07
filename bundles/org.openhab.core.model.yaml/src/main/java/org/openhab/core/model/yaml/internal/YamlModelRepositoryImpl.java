@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.model.yaml.YamlDTO;
+import org.openhab.core.model.yaml.YamlElement;
 import org.openhab.core.model.yaml.YamlElementName;
 import org.openhab.core.model.yaml.YamlModelListener;
 import org.openhab.core.model.yaml.YamlModelRepository;
@@ -167,11 +167,11 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
                     node.elements().forEachRemaining(newNodeElements::add);
 
                     for (YamlModelListener<?> typeListener : getTypeListeners(typeName)) {
-                        Class<? extends YamlDTO> typeClass = typeListener.getTypeClass();
+                        Class<? extends YamlElement> typeClass = typeListener.getTypeClass();
 
-                        Map<String, ? extends YamlDTO> oldElements = listToMap(
+                        Map<String, ? extends YamlElement> oldElements = listToMap(
                                 parseJsonNodes(oldNodeElements, typeClass));
-                        Map<String, ? extends YamlDTO> newElements = listToMap(
+                        Map<String, ? extends YamlElement> newElements = listToMap(
                                 parseJsonNodes(newNodeElements, typeClass));
 
                         List addedElements = newElements.values().stream()
@@ -204,8 +204,8 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public void addYamlModelListener(YamlModelListener<? extends YamlDTO> listener) {
-        Class<? extends YamlDTO> typeClass = listener.getTypeClass();
+    public void addYamlModelListener(YamlModelListener<? extends YamlElement> listener) {
+        Class<? extends YamlElement> typeClass = listener.getTypeClass();
         YamlElementName annotation = typeClass.getAnnotation(YamlElementName.class);
         if (annotation == null) {
             logger.warn("Class {} is missing the mandatory YamlElementName annotation. This is a bug.", typeClass);
@@ -226,13 +226,13 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
         }
     }
 
-    public void removeYamlModelListener(YamlModelListener<? extends YamlDTO> listener) {
+    public void removeYamlModelListener(YamlModelListener<? extends YamlElement> listener) {
         typeListeners.values().forEach(list -> list.remove(listener));
     }
 
     @Override
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public void addElementToModel(String modelName, YamlDTO element) {
+    public void addElementToModel(String modelName, YamlElement element) {
         YamlElementName annotation = element.getClass().getAnnotation(YamlElementName.class);
         if (annotation == null) {
             logger.warn(
@@ -259,7 +259,7 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
 
     @Override
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public void removeElementFromModel(String modelName, YamlDTO element) {
+    public void removeElementFromModel(String modelName, YamlElement element) {
         YamlElementName annotation = element.getClass().getAnnotation(YamlElementName.class);
         if (annotation == null) {
             logger.warn(
@@ -299,7 +299,7 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
 
     @Override
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public void updateElementInModel(String modelName, YamlDTO element) {
+    public void updateElementInModel(String modelName, YamlElement element) {
         YamlElementName annotation = element.getClass().getAnnotation(YamlElementName.class);
         if (annotation == null) {
             logger.warn(
@@ -374,23 +374,24 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
         return Objects.requireNonNull(typeListeners.computeIfAbsent(typeName, k -> new CopyOnWriteArrayList<>()));
     }
 
-    private <T extends YamlDTO> @Nullable JsonNode findNodeById(List<JsonNode> nodes, Class<T> typeClass, String id) {
+    private <T extends YamlElement> @Nullable JsonNode findNodeById(List<JsonNode> nodes, Class<T> typeClass,
+            String id) {
         return nodes.stream().filter(node -> {
             Optional<T> parsedNode = parseJsonNode(node, typeClass);
             return parsedNode.filter(yamlDTO -> id.equals(yamlDTO.getId())).isPresent();
         }).findAny().orElse(null);
     }
 
-    private Map<String, ? extends YamlDTO> listToMap(List<? extends YamlDTO> elements) {
-        return elements.stream().collect(Collectors.toMap(YamlDTO::getId, e -> e));
+    private Map<String, ? extends YamlElement> listToMap(List<? extends YamlElement> elements) {
+        return elements.stream().collect(Collectors.toMap(YamlElement::getId, e -> e));
     }
 
-    private <T extends YamlDTO> List<T> parseJsonNodes(List<JsonNode> nodes, Class<T> typeClass) {
+    private <T extends YamlElement> List<T> parseJsonNodes(List<JsonNode> nodes, Class<T> typeClass) {
         return nodes.stream().map(nE -> parseJsonNode(nE, typeClass)).filter(Optional::isPresent).map(Optional::get)
-                .filter(YamlDTO::isValid).toList();
+                .filter(YamlElement::isValid).toList();
     }
 
-    private <T extends YamlDTO> Optional<T> parseJsonNode(JsonNode node, Class<T> typeClass) {
+    private <T extends YamlElement> Optional<T> parseJsonNode(JsonNode node, Class<T> typeClass) {
         try {
             return Optional.of(objectMapper.treeToValue(node, typeClass));
         } catch (JsonProcessingException e) {

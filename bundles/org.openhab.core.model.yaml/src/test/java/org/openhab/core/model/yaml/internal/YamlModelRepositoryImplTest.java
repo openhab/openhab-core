@@ -36,7 +36,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
-import org.openhab.core.model.yaml.YamlDTO;
+import org.openhab.core.model.yaml.YamlElement;
 import org.openhab.core.model.yaml.YamlModelListener;
 import org.openhab.core.model.yaml.test.FirstTypeDTO;
 import org.openhab.core.model.yaml.test.SecondTypeDTO;
@@ -98,9 +98,9 @@ public class YamlModelRepositoryImplTest {
         verify(secondTypeListener2, never()).updatedModel(any(), any());
         verify(secondTypeListener2, never()).removedModel(any(), any());
 
-        Collection<? extends YamlDTO> firstTypeElements = firstTypeCaptor.getValue();
-        Collection<? extends YamlDTO> secondTypeElements1 = secondTypeCaptor1.getValue();
-        Collection<? extends YamlDTO> secondTypeElements2 = secondTypeCaptor2.getValue();
+        Collection<? extends YamlElement> firstTypeElements = firstTypeCaptor.getValue();
+        Collection<? extends YamlElement> secondTypeElements1 = secondTypeCaptor1.getValue();
+        Collection<? extends YamlElement> secondTypeElements2 = secondTypeCaptor2.getValue();
 
         assertThat(firstTypeElements, hasSize(2));
         assertThat(secondTypeElements1, hasSize(1));

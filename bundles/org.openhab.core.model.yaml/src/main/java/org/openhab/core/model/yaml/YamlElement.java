@@ -16,9 +16,8 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.openhab.core.model.yaml.internal.YamlModelRepositoryImpl;
 
 /**
- * The {@link YamlDTO} interface must be implemented by any classes that need to be handled by the
+ * The {@link YamlElement} interface must be implemented by any classes that need to be handled by the
  * {@link YamlModelRepositoryImpl}.
- * <p />
  * <p />
  * Implementations
  * <ul>
@@ -31,7 +30,7 @@ import org.openhab.core.model.yaml.internal.YamlModelRepositoryImpl;
  * @author Laurent Garnier - Initial contribution
  * @author Jan N. Klug - Refactoring and improvments to JavaDoc
  */
-public interface YamlDTO {
+public interface YamlElement {
 
     /**
      * Get the identifier of this element.

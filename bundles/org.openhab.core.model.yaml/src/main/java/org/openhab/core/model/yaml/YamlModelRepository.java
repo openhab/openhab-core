@@ -21,9 +21,9 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  */
 @NonNullByDefault
 public interface YamlModelRepository {
-    void addElementToModel(String modelName, YamlDTO element);
+    void addElementToModel(String modelName, YamlElement element);
 
-    void removeElementFromModel(String modelName, YamlDTO element);
+    void removeElementFromModel(String modelName, YamlElement element);
 
-    void updateElementInModel(String modelName, YamlDTO element);
+    void updateElementInModel(String modelName, YamlElement element);
 }

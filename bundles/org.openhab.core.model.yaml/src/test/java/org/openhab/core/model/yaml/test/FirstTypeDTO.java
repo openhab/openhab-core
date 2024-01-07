@@ -15,16 +15,16 @@ package org.openhab.core.model.yaml.test;
 import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNull;
-import org.openhab.core.model.yaml.YamlDTO;
+import org.openhab.core.model.yaml.YamlElement;
 import org.openhab.core.model.yaml.YamlElementName;
 
 /**
- * The {@link FirstTypeDTO} is a test type implementing {@link YamlDTO}
+ * The {@link FirstTypeDTO} is a test type implementing {@link YamlElement}
  *
  * @author Jan N. Klug - Initial contribution
  */
 @YamlElementName("firstType")
-public class FirstTypeDTO implements YamlDTO {
+public class FirstTypeDTO implements YamlElement {
     public String uid;
     public String description;
 
