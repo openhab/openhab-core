@@ -13,10 +13,11 @@
 package org.openhab.core.model.yaml;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.openhab.core.model.yaml.internal.YamlModelRepositoryImpl;
 
 /**
  * The {@link YamlDTO} interface must be implemented by any classes that need to be handled by the
- * {@link org.openhab.core.model.yaml.internal.YamlModelRepository}.
+ * {@link YamlModelRepositoryImpl}.
  * <p />
  * Implementations MUST provide {@code equals(Object other)} and {@code hashcode()} methods
  *

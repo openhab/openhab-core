@@ -1,0 +1,6 @@
+version: 1
+firstType:
+  - uid: element1
+    description: newDescription1
+  - uid: element2
+    description: description2
