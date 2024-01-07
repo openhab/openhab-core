@@ -20,9 +20,9 @@ import static org.openhab.core.config.discovery.inbox.InboxPredicates.*;
 
 import java.math.BigDecimal;
 import java.net.URI;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -148,7 +148,7 @@ public class InboxOSGiTest extends JavaOSGiTest {
             put("pnr", 1234455);
             put("snr", 12345);
             put("manufacturer", "huawei");
-            put("manufactured", new Date(12344));
+            put("manufactured", Instant.ofEpochMilli(12344));
         }
     };
 
@@ -1019,7 +1019,7 @@ public class InboxOSGiTest extends JavaOSGiTest {
     @Test
     public void assertThatRemoveOlderResultsOnlyRemovesResultsFromTheSameDiscoveryService() {
         inbox.thingDiscovered(discoveryService1, testDiscoveryResult);
-        long now = new Date().getTime() + 1;
+        long now = Instant.now().toEpochMilli() + 1;
         assertThat(inbox.getAll().size(), is(1));
 
         // should not remove a result
@@ -1034,7 +1034,7 @@ public class InboxOSGiTest extends JavaOSGiTest {
     @Test
     public void assertThatRemoveOlderResultsRemovesResultsWithoutAsource() {
         inbox.add(testDiscoveryResult);
-        long now = new Date().getTime() + 1;
+        long now = Instant.now().toEpochMilli() + 1;
         assertThat(inbox.getAll().size(), is(1));
 
         // should remove a result
