@@ -43,7 +43,7 @@ public class DiscoveryResultImpl implements DiscoveryResult {
     private @Nullable String representationProperty;
     private @NonNullByDefault({}) DiscoveryResultFlag flag;
     private @NonNullByDefault({}) String label;
-    private Instant timestamp = Instant.MIN;
+    private long timestamp;
     private long timeToLive = TTL_UNLIMITED;
 
     /**
@@ -86,7 +86,7 @@ public class DiscoveryResultImpl implements DiscoveryResult {
         this.representationProperty = representationProperty;
         this.label = label == null ? "" : label;
 
-        this.timestamp = Instant.now();
+        this.timestamp = Instant.now().toEpochMilli();
         this.timeToLive = timeToLive;
 
         this.flag = DiscoveryResultFlag.NEW;
@@ -157,7 +157,7 @@ public class DiscoveryResultImpl implements DiscoveryResult {
             this.properties = sourceResult.getProperties();
             this.representationProperty = sourceResult.getRepresentationProperty();
             this.label = sourceResult.getLabel();
-            this.timestamp = Instant.now();
+            this.timestamp = Instant.now().toEpochMilli();
             this.timeToLive = sourceResult.getTimeToLive();
         }
     }
@@ -216,12 +216,12 @@ public class DiscoveryResultImpl implements DiscoveryResult {
     public String toString() {
         return "DiscoveryResult [thingUID=" + thingUID + ", properties=" + properties + ", representationProperty="
                 + representationProperty + ", flag=" + flag + ", label=" + label + ", bridgeUID=" + bridgeUID + ", ttl="
-                + timeToLive + ", timestamp=" + timestamp + "]";
+                + timeToLive + ", timestamp=" + Instant.ofEpochMilli(timestamp) + "]";
     }
 
     @Override
     public long getTimestamp() {
-        return Instant.MIN.equals(timestamp) ? 0 : timestamp.toEpochMilli();
+        return timestamp;
     }
 
     @Override
