@@ -64,6 +64,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 @NonNullByDefault
 @Component(immediate = true)
 public class YamlModelRepositoryImpl implements WatchService.WatchEventListener, YamlModelRepository {
+    private static final int DEFAULT_MODEL_VERSION = 1;
     private final Logger logger = LoggerFactory.getLogger(YamlModelRepositoryImpl.class);
 
     private final WatchService watchService;
@@ -72,7 +73,7 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
 
     private final Map<String, List<YamlModelListener<?>>> elementListeners = new ConcurrentHashMap<>();
     // all model nodes, ordered by model name (full path as string) and type
-    private final Map<String, Map<String, List<JsonNode>>> modelCache = new ConcurrentHashMap<>();
+    private final Map<String, YamlModelWrapper> modelCache = new ConcurrentHashMap<>();
 
     @Activate
     public YamlModelRepositoryImpl(@Reference(target = WatchService.CONFIG_WATCHER_FILTER) WatchService watchService) {
@@ -102,20 +103,22 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public synchronized void processWatchEvent(Kind kind, Path path) {
         Path fullPath = watchPath.resolve(path);
-        String modelName = path.toString();
-
-        if (Files.isDirectory(fullPath) || fullPath.toFile().isHidden() || !modelName.endsWith(".yaml")) {
+        String pathString = path.toString();
+        if (Files.isDirectory(fullPath) || fullPath.toFile().isHidden() || !pathString.endsWith(".yaml")) {
             logger.trace("Ignored {}", fullPath);
             return;
         }
 
+        // strip extension for model name
+        String modelName = pathString.substring(0, pathString.lastIndexOf("."));
+
         if (kind == WatchService.Kind.DELETE) {
             logger.info("Removing YAML model {}", modelName);
-            Map<String, List<JsonNode>> removedModel = modelCache.remove(modelName);
+            YamlModelWrapper removedModel = modelCache.remove(modelName);
             if (removedModel == null) {
                 return;
             }
-            for (Map.Entry<String, List<JsonNode>> modelEntry : removedModel.entrySet()) {
+            for (Map.Entry<String, List<JsonNode>> modelEntry : removedModel.getNodes().entrySet()) {
                 String elementName = modelEntry.getKey();
                 List<JsonNode> removedNodes = modelEntry.getValue();
                 if (!removedNodes.isEmpty()) {
@@ -140,15 +143,17 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
                     logger.warn("Version is missing or not a number in model {}. Ignoring it.", modelName);
                     return;
                 }
-                int fileVersion = versionNode.asInt();
-                if (fileVersion != 1) {
+                int modelVersion = versionNode.asInt();
+                if (modelVersion != DEFAULT_MODEL_VERSION) {
                     logger.warn("Model {} has version {}, but only version 1 is supported. Ignoring it.", modelName,
-                            fileVersion);
+                            modelVersion);
                     return;
                 }
+                JsonNode readOnlyNode = fileContent.get("readOnly");
+                boolean readOnly = readOnlyNode == null || readOnlyNode.asBoolean(false);
 
-                Map<String, List<JsonNode>> model = Objects
-                        .requireNonNull(modelCache.computeIfAbsent(modelName, k -> new ConcurrentHashMap<>()));
+                YamlModelWrapper model = Objects.requireNonNull(
+                        modelCache.computeIfAbsent(modelName, k -> new YamlModelWrapper(modelVersion, readOnly)));
 
                 // get sub-elements
                 Iterator<Map.Entry<String, JsonNode>> it = fileContent.fields();
@@ -162,7 +167,7 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
                         continue;
                     }
 
-                    List<JsonNode> oldNodeElements = model.getOrDefault(elementName, List.of());
+                    List<JsonNode> oldNodeElements = model.getNodes().getOrDefault(elementName, List.of());
                     List<JsonNode> newNodeElements = new ArrayList<>();
                     node.elements().forEachRemaining(newNodeElements::add);
 
@@ -194,7 +199,7 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
                     }
 
                     // replace cache
-                    model.put(elementName, newNodeElements);
+                    model.getNodes().put(elementName, newNodeElements);
                 }
             } catch (IOException e) {
                 logger.warn("Failed to read {}: {}", modelName, e.getMessage());
@@ -215,9 +220,9 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
         getElementListeners(elementName).add(listener);
 
         // iterate over all models and notify he new listener of already existing models with this type
-        for (Map.Entry<String, Map<String, List<JsonNode>>> model : modelCache.entrySet()) {
+        for (Map.Entry<String, YamlModelWrapper> model : modelCache.entrySet()) {
             String modelName = model.getKey();
-            List<JsonNode> modelNodes = model.getValue().get(elementName);
+            List<JsonNode> modelNodes = model.getValue().getNodes().get(elementName);
             if (modelNodes == null || modelNodes.isEmpty()) {
                 continue;
             }
@@ -241,9 +246,14 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
             return;
         }
         String elementName = annotation.value();
-        Map<String, List<JsonNode>> model = Objects
-                .requireNonNull(modelCache.computeIfAbsent(modelName, k -> new ConcurrentHashMap<>()));
-        List<JsonNode> modelNodes = model.computeIfAbsent(elementName, k -> new CopyOnWriteArrayList<>());
+        YamlModelWrapper model = Objects.requireNonNull(
+                modelCache.computeIfAbsent(modelName, k -> new YamlModelWrapper(DEFAULT_MODEL_VERSION, false)));
+        if (model.isReadOnly()) {
+            logger.warn("Modifying {} is not allowed, model is marked read-only", modelName);
+            return;
+        }
+
+        List<JsonNode> modelNodes = model.getNodes().computeIfAbsent(elementName, k -> new CopyOnWriteArrayList<>());
         JsonNode newNode = objectMapper.convertValue(element, JsonNode.class);
         modelNodes.add(newNode);
         // notify listeners
@@ -268,13 +278,17 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
             return;
         }
         String elementName = annotation.value();
-        Map<String, List<JsonNode>> model = modelCache.get(modelName);
+        YamlModelWrapper model = modelCache.get(modelName);
         if (model == null) {
             logger.warn("Failed to remove {} from model {} because the model is not known.", element, modelName);
             return;
         }
+        if (model.isReadOnly()) {
+            logger.warn("Modifying {} is not allowed, model is marked read-only", modelName);
+            return;
+        }
 
-        List<JsonNode> modelNodes = model.get(elementName);
+        List<JsonNode> modelNodes = model.getNodes().get(elementName);
         if (modelNodes == null) {
             logger.warn("Failed to remove {} from model {} because type {} is not known in the model.", element,
                     modelName, elementName);
@@ -308,12 +322,17 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
             return;
         }
         String elementName = annotation.value();
-        Map<String, List<JsonNode>> model = modelCache.get(modelName);
+        YamlModelWrapper model = modelCache.get(modelName);
         if (model == null) {
             logger.warn("Failed to update {} in model {} because the model is not known.", element, modelName);
             return;
         }
-        List<JsonNode> modelNodes = model.get(elementName);
+        if (model.isReadOnly()) {
+            logger.warn("Modifying {} is not allowed, model is marked read-only", modelName);
+            return;
+        }
+
+        List<JsonNode> modelNodes = model.getNodes().get(elementName);
         if (modelNodes == null) {
             logger.warn("Failed to update {} in model {} because type {} is not known in the model.", element,
                     modelName, elementName);
@@ -339,24 +358,31 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
     }
 
     private void writeModel(String modelName) {
-        Map<String, List<JsonNode>> model = modelCache.get(modelName);
+        YamlModelWrapper model = modelCache.get(modelName);
         if (model == null) {
-            logger.warn("Failed to write model to disc {} because it is not known.", modelName);
+            logger.warn("Failed to write model {} to disk because it is not known.", modelName);
+            return;
+        }
+
+        if (model.isReadOnly()) {
+            logger.warn("Failed to write model {} to disk because it is marked as read-only.", modelName);
             return;
         }
 
         // create the model
         JsonNodeFactory nodeFactory = objectMapper.getNodeFactory();
         ObjectNode rootNode = nodeFactory.objectNode();
-        rootNode.put("version", 1);
-        for (Map.Entry<String, List<JsonNode>> elementNodes : model.entrySet()) {
+
+        rootNode.put("version", model.getVersion());
+        rootNode.put("readOnly", model.isReadOnly());
+        for (Map.Entry<String, List<JsonNode>> elementNodes : model.getNodes().entrySet()) {
             ArrayNode arrayNode = nodeFactory.arrayNode();
             elementNodes.getValue().forEach(arrayNode::add);
             rootNode.set(elementNodes.getKey(), arrayNode);
         }
 
         try {
-            Path outFile = watchPath.resolve(modelName);
+            Path outFile = watchPath.resolve(modelName + ".yaml");
             String fileContent = objectMapper.writeValueAsString(rootNode);
             if (Files.exists(outFile) && !Files.isWritable(outFile)) {
                 logger.warn("Failed writing model {}: model exists but is read-only.", modelName);

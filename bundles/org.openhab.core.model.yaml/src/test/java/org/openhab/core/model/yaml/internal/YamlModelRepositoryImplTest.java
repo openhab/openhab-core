@@ -52,8 +52,8 @@ import org.openhab.core.service.WatchService;
 @NonNullByDefault
 public class YamlModelRepositoryImplTest {
     private static final Path SOURCE_PATH = Path.of("src/test/resources");
-    private static final String MODEL_NAME = "model.yaml";
-    private static final Path MODEL_PATH = Path.of(MODEL_NAME);
+    private static final String MODEL_NAME = "model";
+    private static final Path MODEL_PATH = Path.of(MODEL_NAME + ".yaml");
 
     private @Mock @NonNullByDefault({}) WatchService watchServiceMock;
     private @TempDir @NonNullByDefault({}) Path watchPath;
