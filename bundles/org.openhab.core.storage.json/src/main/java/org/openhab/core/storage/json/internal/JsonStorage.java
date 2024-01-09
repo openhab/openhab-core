@@ -17,6 +17,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -112,6 +113,8 @@ public class JsonStorage<T> implements Storage<T> {
                 .registerTypeHierarchyAdapter(Map.class, new OrderingMapSerializer())//
                 .registerTypeHierarchyAdapter(Set.class, new OrderingSetSerializer())//
                 .registerTypeAdapter(Configuration.class, new ConfigurationDeserializer()) //
+                .registerTypeAdapter(Instant.class, new InstantSerializer()) //
+                .registerTypeAdapter(Instant.class, new InstantDeserializer()) //
                 .setPrettyPrinting() //
                 .create();
 
