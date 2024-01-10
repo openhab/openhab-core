@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,11 +13,9 @@
 package org.openhab.core.addon.marketplace;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.openhab.core.addon.marketplace.AbstractRemoteAddonService.CONFIG_REMOTE_ENABLED;
 import static org.openhab.core.addon.marketplace.test.TestAddonService.ALL_ADDON_COUNT;
 import static org.openhab.core.addon.marketplace.test.TestAddonService.COMPATIBLE_ADDON_COUNT;
@@ -31,6 +29,7 @@ import java.io.IOException;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
@@ -254,6 +253,27 @@ public class AbstractRemoteAddonServiceTest {
         addonService.uninstall(TEST_ADDON);
 
         checkResult(TEST_ADDON, getFullAddonId(TEST_ADDON) + "/failed", false, true);
+    }
+
+    // add-comparisons
+    @Test
+    public void testAddonOrdering() {
+        Addon addon1 = getMockedAddon("4.1.0", false);
+        Addon addon2 = getMockedAddon("4.2.0", true);
+        Addon addon3 = getMockedAddon("4.1.4", false);
+        Addon addon4 = getMockedAddon("4.2.1", true);
+        List<Addon> actual = Stream.of(addon1, addon2, addon3, addon4)
+                .sorted(AbstractRemoteAddonService.BY_COMPATIBLE_AND_VERSION).toList();
+        List<Addon> expected = List.of(addon4, addon2, addon3, addon1);
+
+        assertThat(actual, is(equalTo(expected)));
+    }
+
+    private Addon getMockedAddon(String version, boolean compatible) {
+        Addon addon = mock(Addon.class);
+        when(addon.getVersion()).thenReturn(version);
+        when(addon.getCompatible()).thenReturn(compatible);
+        return addon;
     }
 
     /**

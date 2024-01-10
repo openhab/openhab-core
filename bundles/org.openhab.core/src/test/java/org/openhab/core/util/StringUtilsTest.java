@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -10,7 +10,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-
 package org.openhab.core.util;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -29,7 +28,7 @@ public class StringUtilsTest {
     @Test
     public void chompTest() {
         assertEquals("", StringUtils.chomp(""));
-        assertEquals(null, StringUtils.chomp(null));
+        assertNull(StringUtils.chomp(null));
         assertEquals("abc ", StringUtils.chomp("abc \r"));
         assertEquals("abc", StringUtils.chomp("abc\n"));
         assertEquals("abc", StringUtils.chomp("abc\r\n"));
@@ -43,7 +42,7 @@ public class StringUtilsTest {
 
     @Test
     public void escapeXmlTest() {
-        assertEquals(null, StringUtils.escapeXml(null));
+        assertNull(StringUtils.escapeXml(null));
         assertEquals(" ", StringUtils.escapeXml(" "));
         assertEquals("invalidxml", StringUtils.escapeXml("invalidxml"));
         assertEquals("&lt;xmlExample&gt;&amp;&lt;/xmlExample&gt;", StringUtils.escapeXml("<xmlExample>&</xmlExample>"));
@@ -55,7 +54,7 @@ public class StringUtilsTest {
 
     @Test
     public void capitalizeTest() {
-        assertEquals(null, StringUtils.capitalize(null));
+        assertNull(StringUtils.capitalize(null));
         assertEquals(" ", StringUtils.capitalize(" "));
         assertEquals("Cat", StringUtils.capitalize("cat"));
         assertEquals("CAt", StringUtils.capitalize("cAt"));
@@ -64,7 +63,7 @@ public class StringUtilsTest {
 
     @Test
     public void capitalizeAllWordsTest() {
-        assertEquals(null, StringUtils.capitalizeByUnderscore(null));
+        assertNull(StringUtils.capitalizeByUnderscore(null));
         assertEquals("Openhab_Is_Cool", StringUtils.capitalizeByUnderscore("openHAB_is_cool"));
         assertEquals("Foobar_Example", StringUtils.capitalizeByUnderscore("foobar_Example"));
         assertEquals("'another_Test'", StringUtils.capitalizeByUnderscore("'another_test'"));

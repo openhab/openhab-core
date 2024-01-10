@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -271,6 +271,7 @@ public class ItemResource implements RESTResource {
                     "name,label,type,groupType,function,category,editable,groupNames,link,tags,metadata,commandDescription,stateDescription");
 
             CacheControl cc = new CacheControl();
+            cc.setNoCache(true);
             cc.setMustRevalidate(true);
             cc.setPrivate(true);
             return Response.ok(new Stream2JSONInputStream(itemStream)).lastModified(lastModifiedDate).cacheControl(cc)

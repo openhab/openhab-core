@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -96,7 +96,7 @@ public abstract class AbstractScriptFileWatcher implements WatchService.WatchEve
 
     private volatile int currentStartLevel;
 
-    public AbstractScriptFileWatcher(final WatchService watchService, final ScriptEngineManager manager,
+    protected AbstractScriptFileWatcher(final WatchService watchService, final ScriptEngineManager manager,
             final ReadyService readyService, final StartLevelService startLevelService, final String fileDirectory,
             boolean watchSubDirectories) {
         this.watchService = watchService;

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -27,7 +27,7 @@ import org.osgi.framework.Bundle;
  * A utility service which localizes {@link Profile}s.
  * Falls back to a localized {@link ProfileType} for label and description when not given otherwise.
  *
- * @see {@link ProfileTypeI18nLocalizationService}
+ * @see org.openhab.core.thing.profiles.i18n.ProfileTypeI18nLocalizationService
  *
  * @author Christoph Weitkamp - Initial contribution
  */

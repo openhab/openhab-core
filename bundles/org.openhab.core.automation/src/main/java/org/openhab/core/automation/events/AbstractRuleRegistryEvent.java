@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -36,7 +36,7 @@ public abstract class AbstractRuleRegistryEvent extends AbstractEvent {
      * @param source the source of the event
      * @param rule the rule for which this event is created
      */
-    public AbstractRuleRegistryEvent(String topic, String payload, @Nullable String source, RuleDTO rule) {
+    protected AbstractRuleRegistryEvent(String topic, String payload, @Nullable String source, RuleDTO rule) {
         super(topic, payload, source);
         this.rule = rule;
     }

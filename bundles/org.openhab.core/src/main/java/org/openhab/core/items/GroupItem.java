@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -342,13 +342,13 @@ public class GroupItem extends GenericItem implements StateChangeListener, Metad
         if (!getTags().isEmpty()) {
             sb.append(", ");
             sb.append("Tags=[");
-            sb.append(getTags().stream().collect(Collectors.joining(", ")));
+            sb.append(String.join(", ", getTags()));
             sb.append("]");
         }
         if (!getGroupNames().isEmpty()) {
             sb.append(", ");
             sb.append("Groups=[");
-            sb.append(getGroupNames().stream().collect(Collectors.joining(", ")));
+            sb.append(String.join(", ", getGroupNames()));
             sb.append("]");
         }
         sb.append(")");

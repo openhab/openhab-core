@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -92,7 +92,7 @@ public final class WriteRequestJsonUtilities {
      */
     public static Collection<ModbusWriteRequestBlueprint> fromJson(int unitId, String jsonString) {
         JsonArray jsonArray = JsonParser.parseString(jsonString).getAsJsonArray();
-        if (jsonArray.size() == 0) {
+        if (jsonArray.isEmpty()) {
             return new LinkedList<>();
         }
         Deque<ModbusWriteRequestBlueprint> writes = new LinkedList<>();
@@ -169,11 +169,11 @@ public final class WriteRequestJsonUtilities {
                 writeSingle.set(true);
                 if (valuesElem.size() != 1) {
                     throw new IllegalArgumentException(String
-                            .format("Expecting single value with functionCode=%s, got: %d", functionCode, valuesElem));
+                            .format("Expecting single value with functionCode=%s, got: %s", functionCode, valuesElem));
                 }
                 // fall-through to WRITE_MULTIPLE_COILS
             case WRITE_MULTIPLE_COILS:
-                if (valuesElem.size() == 0) {
+                if (valuesElem.isEmpty()) {
                     throw new IllegalArgumentException("Must provide at least one coil");
                 } else if (valuesElem.size() > ModbusConstants.MAX_BITS_WRITE_COUNT) {
                     throw new IllegalArgumentException(
@@ -189,7 +189,7 @@ public final class WriteRequestJsonUtilities {
                 writeSingle.set(true);
                 if (valuesElem.size() != 1) {
                     throw new IllegalArgumentException(String
-                            .format("Expecting single value with functionCode=%s, got: %d", functionCode, valuesElem));
+                            .format("Expecting single value with functionCode=%s, got: %s", functionCode, valuesElem));
                 }
                 // fall-through to WRITE_MULTIPLE_REGISTERS
             case WRITE_MULTIPLE_REGISTERS: {

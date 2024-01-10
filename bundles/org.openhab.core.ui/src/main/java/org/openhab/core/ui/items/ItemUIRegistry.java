@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -40,7 +40,7 @@ import org.openhab.core.types.State;
  */
 @NonNullByDefault
 public interface ItemUIRegistry extends ItemRegistry, ItemUIProvider {
-    public enum WidgetLabelSource {
+    enum WidgetLabelSource {
         /** Label is taken from widget definition in sitemap */
         SITEMAP_WIDGET,
         /** Label is taken from the widget's backing item definition */
@@ -49,7 +49,7 @@ public interface ItemUIRegistry extends ItemRegistry, ItemUIProvider {
         ITEM_NAME,
         /** No suitable label source could be determined */
         NONE
-    };
+    }
 
     /**
      * Retrieves the label for a widget.

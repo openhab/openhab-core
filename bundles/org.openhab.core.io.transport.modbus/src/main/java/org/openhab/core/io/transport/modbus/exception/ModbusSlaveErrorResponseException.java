@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -41,7 +41,7 @@ public abstract class ModbusSlaveErrorResponseException extends ModbusTransportE
      * @author Sami Salonen - Initial contribution
      *
      */
-    public static enum KnownExceptionCode {
+    public enum KnownExceptionCode {
         ILLEGAL_FUNCTION(1),
         ILLEGAL_DATA_ACCESS(2),
         ILLEGAL_DATA_VALUE(3),
@@ -55,7 +55,7 @@ public abstract class ModbusSlaveErrorResponseException extends ModbusTransportE
 
         private final int exceptionCode;
 
-        private KnownExceptionCode(int exceptionCode) {
+        KnownExceptionCode(int exceptionCode) {
             this.exceptionCode = exceptionCode;
         }
 

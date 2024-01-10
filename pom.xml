@@ -345,6 +345,18 @@ Import-Package: \\
                 </script>
               ]]>
             </bottom>
+            <tags>
+              <tag>
+                <name>apiNote</name>
+                <placement>a</placement>
+                <head>API note:</head>
+              </tag>
+              <tag>
+                <name>implNote</name>
+                <placement>a</placement>
+                <head>Implementation note:</head>
+              </tag>
+            </tags>
           </configuration>
           <dependencies>
             <!-- This newer version fixes issues with resolving tech.units:indriya packages -->
@@ -449,7 +461,7 @@ Import-Package: \\
             </mapping>
             <useDefaultExcludes>true</useDefaultExcludes>
             <properties>
-              <year>2023</year>
+              <year>2024</year>
             </properties>
             <encoding>UTF-8</encoding>
             <licenseSets>
@@ -460,6 +472,7 @@ Import-Package: \\
                 </headerDefinitions>
                 <includes>
                   <include>**/archetype/**/*.groovy</include>
+                  <include>**/com/acme/**/*.java</include>
                   <include>**/org/openhab/core/**/*.java</include>
                   <include>**/org/openhab/core/**/*.mwe2</include>
                   <include>**/org/openhab/core/**/*.xtend</include>

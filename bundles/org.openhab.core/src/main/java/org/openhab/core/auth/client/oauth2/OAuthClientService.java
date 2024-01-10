@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -153,7 +153,7 @@ public interface OAuthClientService extends AutoCloseable {
      * @return AccessTokenResponse
      * @throws IOException IO/ network exceptions
      * @throws OAuthException Other exceptions
-     * @throws OAuthErrorException Error codes given by authorization provider, as in RFC 6749 section 5.2 Error
+     * @throws OAuthResponseException Error codes given by authorization provider, as in RFC 6749 section 5.2 Error
      *             Response
      * @see <a href="https://tools.ietf.org/html/rfc6749#section-4.1.3">Access Token Request - rfc6749 section-4.1.3</a>
      * @see <a href="https://tools.ietf.org/html/rfc6749#section-5.2">Error Response - rfc6749 section-5.2</a>
@@ -171,7 +171,7 @@ public interface OAuthClientService extends AutoCloseable {
      * @return AccessTokenResponse
      * @throws IOException IO/ network exceptions
      * @throws OAuthException Other exceptions
-     * @throws OAuthErrorException Error codes given by authorization provider, as in RFC 6749 section 5.2 Error
+     * @throws OAuthResponseException Error codes given by authorization provider, as in RFC 6749 section 5.2 Error
      *             Response
      * @see <a href="https://tools.ietf.org/html/rfc6749#section-4.3.2">rfc6749 section-4.3.2</>
      */
@@ -187,7 +187,7 @@ public interface OAuthClientService extends AutoCloseable {
      *
      * @return new AccessTokenResponse from authorization server
      * @throws IOException Web/ network issues etc.
-     * @throws OAuthErrorException For OAUTH error responses.
+     * @throws OAuthResponseException For OAUTH error responses.
      * @throws OAuthException For other exceptions.
      * @see <a href="https://tools.ietf.org/html/rfc6749#section-5.2">rfc6749 section-5.2</a>
      */
@@ -202,7 +202,7 @@ public interface OAuthClientService extends AutoCloseable {
      * @param scope of the access, a space delimited separated list
      * @return AccessTokenResponse
      * @throws IOException Web/ network issues etc.
-     * @throws OAuthErrorException For OAUTH error responses.
+     * @throws OAuthResponseException For OAUTH error responses.
      * @throws OAuthException For other exceptions.
      */
     AccessTokenResponse getAccessTokenByClientCredentials(@Nullable String scope)
@@ -221,7 +221,7 @@ public interface OAuthClientService extends AutoCloseable {
      *            to prevent cross-site forgery.
      * @return AccessTokenResponse
      * @throws IOException Web/ network issues etc.
-     * @throws OAuthErrorException For OAUTH error responses.
+     * @throws OAuthResponseException For OAUTH error responses.
      * @throws OAuthException For other exceptions.
      * @see <a href="https://tools.ietf.org/html/rfc6749#section-4.2">Implicit Grant - rfc6749 section-4.2</a>
      */
@@ -253,7 +253,7 @@ public interface OAuthClientService extends AutoCloseable {
      *
      * @return AccessTokenResponse or null, depending on situations listed above.
      * @throws IOException Web/ network issues etc.
-     * @throws OAuthErrorException For OAUTH error responses.
+     * @throws OAuthResponseException For OAUTH error responses.
      * @throws OAuthException For other exceptions.
      */
     @Nullable
@@ -300,7 +300,7 @@ public interface OAuthClientService extends AutoCloseable {
      * @param key The name of the key to add to the auth form
      * @param value The value of the new auth form param
      */
-    public void addExtraAuthField(String key, String value);
+    void addExtraAuthField(String key, String value);
 
     /**
      * Adds a custom GsonBuilder to be used with the OAuth service instance.

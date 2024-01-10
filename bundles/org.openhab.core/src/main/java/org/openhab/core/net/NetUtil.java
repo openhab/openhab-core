@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -346,9 +346,8 @@ public class NetUtil implements NetworkAddressService {
             }
 
             for (InterfaceAddress cidr : networkInterface.getInterfaceAddresses()) {
-                final InetAddress address = cidr.getAddress();
-                assert address != null; // NetworkInterface.getInterfaceAddresses() should return only non-null
-                                        // addresses
+                // NetworkInterface.getInterfaceAddresses() should return only non-null addresses
+                final InetAddress address = Objects.requireNonNull(cidr.getAddress());
                 interfaceIPs.add(new CidrAddress(address, cidr.getNetworkPrefixLength()));
             }
         }
@@ -591,7 +590,7 @@ public class NetUtil implements NetworkAddressService {
             return boolean1;
         }
         if (value instanceof String string) {
-            return Boolean.valueOf(string);
+            return Boolean.parseBoolean(string);
         } else {
             return defaultValue;
         }

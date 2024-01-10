@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -68,7 +68,7 @@ public class DateTimeGroupFunctionTest {
         assertTrue(expectedDateTime.isEqual(((DateTimeType) state).getZonedDateTime()));
     }
 
-    private class TestItem extends GenericItem {
+    private static class TestItem extends GenericItem {
 
         public TestItem(String name, State state) {
             super("Test", name);

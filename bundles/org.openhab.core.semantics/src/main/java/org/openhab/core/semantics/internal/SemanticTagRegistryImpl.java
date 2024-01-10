@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -21,6 +21,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Opcodes;
 import org.openhab.core.common.registry.AbstractRegistry;
+import org.openhab.core.common.registry.Identifiable;
 import org.openhab.core.common.registry.Provider;
 import org.openhab.core.semantics.Equipment;
 import org.openhab.core.semantics.Location;
@@ -133,7 +134,7 @@ public class SemanticTagRegistryImpl extends AbstractRegistry<SemanticTag, Strin
 
     @Override
     public List<SemanticTag> getSubTree(SemanticTag tag) {
-        List<String> ids = getAll().stream().map(t -> t.getUID()).filter(uid -> uid.startsWith(tag.getUID() + "_"))
+        List<String> ids = getAll().stream().map(Identifiable::getUID).filter(uid -> uid.startsWith(tag.getUID() + "_"))
                 .toList();
         List<SemanticTag> tags = new ArrayList<>();
         tags.add(tag);
@@ -194,7 +195,7 @@ public class SemanticTagRegistryImpl extends AbstractRegistry<SemanticTag, Strin
                             + "': only Equipment, Location, Point and Property are allowed as root tags.");
             }
             type = uid;
-            className = newTag.getClass().getName();
+            className = newTag.getName();
         } else {
             String name = uid.substring(lastSeparator + 1);
             String parentId = uid.substring(0, lastSeparator);
@@ -251,7 +252,7 @@ public class SemanticTagRegistryImpl extends AbstractRegistry<SemanticTag, Strin
     private void addTagSet(String tagId, Class<? extends Tag> tagSet) {
         logger.trace("addTagSet {}", tagId);
         String id = tagId;
-        while (id.indexOf("_") != -1) {
+        while (id.contains("_")) {
             SemanticTags.addTagSet(id, tagSet);
             id = id.substring(id.indexOf("_") + 1);
         }
@@ -265,7 +266,7 @@ public class SemanticTagRegistryImpl extends AbstractRegistry<SemanticTag, Strin
             return;
         }
         String id = tagId;
-        while (id.indexOf("_") != -1) {
+        while (id.contains("_")) {
             SemanticTags.removeTagSet(id, tagSet);
             id = id.substring(id.indexOf("_") + 1);
         }

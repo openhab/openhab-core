@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -63,7 +63,7 @@ public class SafeCallerImpl implements SafeCaller {
 
     @Override
     public <T> SafeCallerBuilder<T> create(T target, Class<T> interfaceType) {
-        return new SafeCallerBuilderImpl<T>(target, new Class<?>[] { interfaceType }, manager);
+        return new SafeCallerBuilderImpl<>(target, new Class<?>[] { interfaceType }, manager);
     }
 
     protected ExecutorService getScheduler() {

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -114,12 +114,12 @@ public class PersistentInboxTest {
         when(thingRegistryMock.get(eq(THING_UID))).thenReturn(thing);
         when(thingProviderMock.get(eq(THING_UID))).thenReturn(thing);
 
-        assertTrue(thing.getConfiguration().get("foo") instanceof String);
+        assertInstanceOf(String.class, thing.getConfiguration().get("foo"));
 
         inbox.activate();
         inbox.add(DiscoveryResultBuilder.create(THING_UID).withProperty("foo", 3).build());
 
-        assertTrue(thing.getConfiguration().get("foo") instanceof String);
+        assertInstanceOf(String.class, thing.getConfiguration().get("foo"));
         // thing updated if managed
         assertEquals("3", thing.getConfiguration().get("foo"));
     }
@@ -131,12 +131,12 @@ public class PersistentInboxTest {
         configureConfigDescriptionRegistryMock("foo", Type.TEXT);
         when(thingRegistryMock.get(eq(THING_UID))).thenReturn(thing);
 
-        assertTrue(thing.getConfiguration().get("foo") instanceof String);
+        assertInstanceOf(String.class, thing.getConfiguration().get("foo"));
 
         inbox.activate();
         inbox.add(DiscoveryResultBuilder.create(THING_UID).withProperty("foo", 3).build());
 
-        assertTrue(thing.getConfiguration().get("foo") instanceof String);
+        assertInstanceOf(String.class, thing.getConfiguration().get("foo"));
         // thing not updated if unmanaged
         assertEquals("1", thing.getConfiguration().get("foo"));
     }
@@ -151,7 +151,7 @@ public class PersistentInboxTest {
         inbox.approve(THING_UID, "Test", null);
 
         assertEquals(THING_UID, lastAddedThing.getUID());
-        assertTrue(lastAddedThing.getConfiguration().get("foo") instanceof String);
+        assertInstanceOf(String.class, lastAddedThing.getConfiguration().get("foo"));
         assertEquals("3", lastAddedThing.getConfiguration().get("foo"));
     }
 
@@ -165,7 +165,7 @@ public class PersistentInboxTest {
         inbox.approve(THING_UID, "Test", THING_OTHER_ID);
 
         assertEquals(THING_OTHER_UID, lastAddedThing.getUID());
-        assertTrue(lastAddedThing.getConfiguration().get("foo") instanceof String);
+        assertInstanceOf(String.class, lastAddedThing.getConfiguration().get("foo"));
         assertEquals("3", lastAddedThing.getConfiguration().get("foo"));
     }
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -277,7 +277,7 @@ public class CronAdjuster implements SchedulerTemporalAdjuster {
                 return CronAdjuster::isLastWorkingDayInMonth;
             } else if (sub.endsWith("W")) {
                 final int n = parseInt(cronExpression, chronoField, sub.substring(0, sub.length() - 1));
-                return (temporal) -> isNearestWorkDay(temporal, n);
+                return temporal -> isNearestWorkDay(temporal, n);
             }
             // fall through, it is a normal expression
         }
@@ -458,7 +458,7 @@ public class CronAdjuster implements SchedulerTemporalAdjuster {
      * because this object is ordered for temporal index no conversion is needed here.
      *
      * @param cronExpression the whole cron expression
-     * @param name the cron value to parse
+     * @param value the cron value to parse
      * @param names map with names of the week
      * @return temporal index of day of the week
      */

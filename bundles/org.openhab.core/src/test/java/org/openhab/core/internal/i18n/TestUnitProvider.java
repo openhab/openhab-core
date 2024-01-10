@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,6 +14,7 @@ package org.openhab.core.internal.i18n;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.measure.Quantity;
@@ -38,9 +39,8 @@ public class TestUnitProvider implements UnitProvider {
     @Override
     @SuppressWarnings("unchecked")
     public <T extends Quantity<T>> Unit<T> getUnit(Class<T> dimension) {
-        Unit<T> unit = (Unit<T>) dimensionMap.getOrDefault(dimension, Map.of()).get(SIUnits.getInstance());
-        assert unit != null;
-        return unit;
+        return Objects
+                .requireNonNull((Unit<T>) dimensionMap.getOrDefault(dimension, Map.of()).get(SIUnits.getInstance()));
     }
 
     @Override

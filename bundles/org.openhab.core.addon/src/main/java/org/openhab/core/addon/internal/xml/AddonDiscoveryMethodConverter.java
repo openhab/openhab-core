@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -22,6 +22,7 @@ import org.openhab.core.addon.AddonParameter;
 import org.openhab.core.config.core.xml.util.GenericUnmarshaller;
 import org.openhab.core.config.core.xml.util.NodeIterator;
 
+import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 
@@ -49,11 +50,11 @@ public class AddonDiscoveryMethodConverter extends GenericUnmarshaller<AddonDisc
 
         Object paramObject = nodeIterator.nextList("discovery-parameters", false);
         List<AddonParameter> parameters = !(paramObject instanceof List<?> list) ? null
-                : list.stream().filter(e -> (e instanceof AddonParameter)).map(e -> ((AddonParameter) e)).toList();
+                : list.stream().filter(AddonParameter.class::isInstance).map(e -> ((AddonParameter) e)).toList();
 
         Object matchPropObject = nodeIterator.nextList("match-properties", false);
         List<AddonMatchProperty> matchProperties = !(matchPropObject instanceof List<?> list) ? null
-                : list.stream().filter(e -> (e instanceof AddonMatchProperty)).map(e -> ((AddonMatchProperty) e))
+                : list.stream().filter(AddonMatchProperty.class::isInstance).map(e -> ((AddonMatchProperty) e))
                         .toList();
 
         nodeIterator.assertEndOfType();

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-	Copyright (c) 2010-2023 Contributors to the openHAB project
+	Copyright (c) 2010-2024 Contributors to the openHAB project
 
 	See the NOTICE file(s) distributed with this work for additional
 	information.
@@ -34,6 +34,7 @@
 		<bundle dependency="true">mvn:tech.units/indriya/2.2</bundle>
 		<bundle dependency="true">mvn:tech.uom.lib/uom-lib-common/2.2</bundle>
 		<bundle dependency="true">mvn:org.apiguardian/apiguardian-api/1.1.2</bundle>
+		<bundle dependency="true">mvn:org.osgi/org.osgi.service.component.annotations/1.5.0</bundle>
 
 		<!-- TODO: Unbundled libraries -->
 		<bundle dependency="true">mvn:com.thoughtworks.xstream/xstream/1.4.20</bundle>
@@ -79,18 +80,18 @@
 	</feature>
 
 	<feature name="openhab.tp-jackson" description="FasterXML Jackson bundles" version="${project.version}">
-		<capability>openhab.tp;feature=jackson;version=2.15.2</capability>
-		<bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-annotations/2.15.2</bundle>
-		<bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-core/2.15.2</bundle>
-		<bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-databind/2.15.2</bundle>
-		<bundle dependency="true">mvn:com.fasterxml.jackson.dataformat/jackson-dataformat-cbor/2.15.2</bundle>
-		<bundle dependency="true">mvn:com.fasterxml.jackson.dataformat/jackson-dataformat-xml/2.15.2</bundle>
-		<bundle dependency="true">mvn:com.fasterxml.jackson.dataformat/jackson-dataformat-yaml/2.15.2</bundle>
-		<bundle dependency="true">mvn:com.fasterxml.jackson.datatype/jackson-datatype-jsr310/2.15.2</bundle>
-		<bundle dependency="true">mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-base/2.15.2</bundle>
-		<bundle dependency="true">mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-json-provider/2.15.2</bundle>
-		<bundle dependency="true">mvn:com.fasterxml.jackson.module/jackson-module-jaxb-annotations/2.15.2</bundle>
-		<bundle dependency="true">mvn:org.yaml/snakeyaml/2.1</bundle>
+		<capability>openhab.tp;feature=jackson;version=2.16.0</capability>
+		<bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-annotations/2.16.0</bundle>
+		<bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-core/2.16.0</bundle>
+		<bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-databind/2.16.0</bundle>
+		<bundle dependency="true">mvn:com.fasterxml.jackson.dataformat/jackson-dataformat-cbor/2.16.0</bundle>
+		<bundle dependency="true">mvn:com.fasterxml.jackson.dataformat/jackson-dataformat-xml/2.16.0</bundle>
+		<bundle dependency="true">mvn:com.fasterxml.jackson.dataformat/jackson-dataformat-yaml/2.16.0</bundle>
+		<bundle dependency="true">mvn:com.fasterxml.jackson.datatype/jackson-datatype-jsr310/2.16.0</bundle>
+		<bundle dependency="true">mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-base/2.16.0</bundle>
+		<bundle dependency="true">mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-json-provider/2.16.0</bundle>
+		<bundle dependency="true">mvn:com.fasterxml.jackson.module/jackson-module-jaxb-annotations/2.16.0</bundle>
+		<bundle dependency="true">mvn:org.yaml/snakeyaml/2.2</bundle>
 	</feature>
 
 	<feature name="openhab.tp-jax-rs-whiteboard" description="Aries JAX-RS Whiteboard" version="${project.version}">
@@ -136,23 +137,23 @@
 	</feature>
 
 	<feature name="openhab.tp-netty" description="Netty bundles" version="${project.version}">
-		<capability>openhab.tp;feature=netty;version=4.1.99.Final</capability>
-		<bundle dependency="true">mvn:io.netty/netty-buffer/4.1.99.Final</bundle>
-		<bundle dependency="true">mvn:io.netty/netty-common/4.1.99.Final</bundle>
-		<bundle dependency="true">mvn:io.netty/netty-codec/4.1.99.Final</bundle>
-		<bundle dependency="true">mvn:io.netty/netty-codec-http/4.1.99.Final</bundle>
-		<bundle dependency="true">mvn:io.netty/netty-codec-http2/4.1.99.Final</bundle>
-		<bundle dependency="true">mvn:io.netty/netty-codec-mqtt/4.1.99.Final</bundle>
-		<bundle dependency="true">mvn:io.netty/netty-codec-socks/4.1.99.Final</bundle>
-		<bundle dependency="true">mvn:io.netty/netty-handler/4.1.99.Final</bundle>
-		<bundle dependency="true">mvn:io.netty/netty-handler-proxy/4.1.99.Final</bundle>
-		<bundle dependency="true">mvn:io.netty/netty-resolver/4.1.99.Final</bundle>
-		<bundle dependency="true">mvn:io.netty/netty-transport/4.1.99.Final</bundle>
-		<bundle dependency="true">mvn:io.netty/netty-transport-native-epoll/4.1.99.Final</bundle>
-		<bundle dependency="true">mvn:io.netty/netty-transport-native-kqueue/4.1.99.Final</bundle>
-		<bundle dependency="true">mvn:io.netty/netty-transport-native-unix-common/4.1.99.Final</bundle>
-		<bundle dependency="true">mvn:io.netty/netty-transport-classes-epoll/4.1.99.Final</bundle>
-		<bundle dependency="true">mvn:io.netty/netty-tcnative-classes/2.0.61.Final</bundle>
+		<capability>openhab.tp;feature=netty;version=4.1.104.Final</capability>
+		<bundle dependency="true">mvn:io.netty/netty-buffer/4.1.104.Final</bundle>
+		<bundle dependency="true">mvn:io.netty/netty-common/4.1.104.Final</bundle>
+		<bundle dependency="true">mvn:io.netty/netty-codec/4.1.104.Final</bundle>
+		<bundle dependency="true">mvn:io.netty/netty-codec-http/4.1.104.Final</bundle>
+		<bundle dependency="true">mvn:io.netty/netty-codec-http2/4.1.104.Final</bundle>
+		<bundle dependency="true">mvn:io.netty/netty-codec-mqtt/4.1.104.Final</bundle>
+		<bundle dependency="true">mvn:io.netty/netty-codec-socks/4.1.104.Final</bundle>
+		<bundle dependency="true">mvn:io.netty/netty-handler/4.1.104.Final</bundle>
+		<bundle dependency="true">mvn:io.netty/netty-handler-proxy/4.1.104.Final</bundle>
+		<bundle dependency="true">mvn:io.netty/netty-resolver/4.1.104.Final</bundle>
+		<bundle dependency="true">mvn:io.netty/netty-transport/4.1.104.Final</bundle>
+		<bundle dependency="true">mvn:io.netty/netty-transport-native-epoll/4.1.104.Final</bundle>
+		<bundle dependency="true">mvn:io.netty/netty-transport-native-kqueue/4.1.104.Final</bundle>
+		<bundle dependency="true">mvn:io.netty/netty-transport-native-unix-common/4.1.104.Final</bundle>
+		<bundle dependency="true">mvn:io.netty/netty-transport-classes-epoll/4.1.104.Final</bundle>
+		<bundle dependency="true">mvn:io.netty/netty-tcnative-classes/2.0.62.Final</bundle>
 	</feature>
 
 	<feature name="openhab.tp-jaxb" description="JAXB bundles" version="${project.version}">
@@ -178,8 +179,8 @@
 	</feature>
 
 	<feature name="openhab.tp-jmdns" description="An implementation of multi-cast DNS in Java." version="${project.version}">
-		<capability>openhab.tp;feature=jmdns;version=3.5.8</capability>
-		<bundle>mvn:org.jmdns/jmdns/3.5.8</bundle>
+		<capability>openhab.tp;feature=jmdns;version=3.5.9</capability>
+		<bundle>mvn:org.jmdns/jmdns/3.5.9</bundle>
 	</feature>
 
 	<feature name="openhab.tp-jose4j" description="jose4j JWT library" version="${project.version}">

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -50,7 +50,7 @@ public interface DiscoveryService {
      * Configuration property for enabling the auto discovery feature of a
      * DiscoveryService.
      */
-    static final String CONFIG_PROPERTY_BACKGROUND_DISCOVERY = "background";
+    String CONFIG_PROPERTY_BACKGROUND_DISCOVERY = "background";
 
     /**
      * Returns the list of {@code Thing} types which are supported by the {@link DiscoveryService}.

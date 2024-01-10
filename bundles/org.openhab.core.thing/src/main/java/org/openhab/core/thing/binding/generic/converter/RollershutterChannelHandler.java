@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -51,7 +51,7 @@ public class RollershutterChannelHandler extends AbstractTransformingChannelHand
             return string;
         }
 
-        if (command instanceof PercentType) {
+        if (command instanceof PercentType percentCommand) {
             final String downValue = channelConfig.downValue;
             final String upValue = channelConfig.upValue;
             if (command.equals(PercentType.HUNDRED) && downValue != null) {
@@ -59,7 +59,7 @@ public class RollershutterChannelHandler extends AbstractTransformingChannelHand
             } else if (command.equals(PercentType.ZERO) && upValue != null) {
                 return upValue;
             } else {
-                return ((PercentType) command).toString();
+                return percentCommand.toString();
             }
         }
 

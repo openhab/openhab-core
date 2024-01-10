@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -106,29 +106,29 @@ public class SystemProfileFactory implements ProfileFactory, ProfileAdvisor, Pro
         } else if (RANGE.equals(profileTypeUID)) {
             return new SystemRangeStateProfile(callback, context);
         } else if (BUTTON_TOGGLE_SWITCH.equals(profileTypeUID)) {
-            return new ToggleProfile<OnOffType>(callback, context, BUTTON_TOGGLE_SWITCH,
+            return new ToggleProfile<>(callback, context, BUTTON_TOGGLE_SWITCH,
                     DefaultSystemChannelTypeProvider.SYSTEM_BUTTON, OnOffType.ON, OnOffType.OFF,
                     CommonTriggerEvents.SHORT_PRESSED);
         } else if (BUTTON_TOGGLE_PLAYER.equals(profileTypeUID)) {
-            return new ToggleProfile<PlayPauseType>(callback, context, BUTTON_TOGGLE_PLAYER,
+            return new ToggleProfile<>(callback, context, BUTTON_TOGGLE_PLAYER,
                     DefaultSystemChannelTypeProvider.SYSTEM_BUTTON, PlayPauseType.PLAY, PlayPauseType.PAUSE,
                     CommonTriggerEvents.SHORT_PRESSED);
         } else if (BUTTON_TOGGLE_ROLLERSHUTTER.equals(profileTypeUID)) {
-            return new ToggleProfile<UpDownType>(callback, context, BUTTON_TOGGLE_ROLLERSHUTTER,
+            return new ToggleProfile<>(callback, context, BUTTON_TOGGLE_ROLLERSHUTTER,
                     DefaultSystemChannelTypeProvider.SYSTEM_BUTTON, UpDownType.UP, UpDownType.DOWN,
                     CommonTriggerEvents.SHORT_PRESSED);
         } else if (RAWBUTTON_ON_OFF_SWITCH.equals(profileTypeUID)) {
             return new RawButtonOnOffSwitchProfile(callback);
         } else if (RAWBUTTON_TOGGLE_SWITCH.equals(profileTypeUID)) {
-            return new ToggleProfile<OnOffType>(callback, context, RAWBUTTON_TOGGLE_SWITCH,
+            return new ToggleProfile<>(callback, context, RAWBUTTON_TOGGLE_SWITCH,
                     DefaultSystemChannelTypeProvider.SYSTEM_RAWBUTTON, OnOffType.ON, OnOffType.OFF,
                     CommonTriggerEvents.PRESSED);
         } else if (RAWBUTTON_TOGGLE_PLAYER.equals(profileTypeUID)) {
-            return new ToggleProfile<PlayPauseType>(callback, context, RAWBUTTON_TOGGLE_PLAYER,
+            return new ToggleProfile<>(callback, context, RAWBUTTON_TOGGLE_PLAYER,
                     DefaultSystemChannelTypeProvider.SYSTEM_RAWBUTTON, PlayPauseType.PLAY, PlayPauseType.PAUSE,
                     CommonTriggerEvents.PRESSED);
         } else if (RAWBUTTON_TOGGLE_ROLLERSHUTTER.equals(profileTypeUID)) {
-            return new ToggleProfile<UpDownType>(callback, context, RAWBUTTON_TOGGLE_ROLLERSHUTTER,
+            return new ToggleProfile<>(callback, context, RAWBUTTON_TOGGLE_ROLLERSHUTTER,
                     DefaultSystemChannelTypeProvider.SYSTEM_RAWBUTTON, UpDownType.UP, UpDownType.DOWN,
                     CommonTriggerEvents.PRESSED);
         } else if (RAWROCKER_DIMMER.equals(profileTypeUID)) {

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -61,7 +61,7 @@ public class TimestampOffsetProfile implements StateProfile {
         if (offsetParam instanceof Number bd) {
             offset = Duration.ofSeconds(bd.longValue());
         } else if (offsetParam instanceof String s) {
-            offset = Duration.ofSeconds(Long.valueOf(s));
+            offset = Duration.ofSeconds(Long.parseLong(s));
         } else {
             logger.error(
                     "Parameter '{}' is not of type String or Number. Please make sure it is one of both, e.g. 3 or \"-1\".",

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -43,7 +43,7 @@ public interface ArithmeticGroupFunction extends GroupFunction {
      * Through the getStateAs() method, it can be determined, how many
      * items actually are not in the 'activeState'.
      */
-    static class And implements GroupFunction {
+    class And implements GroupFunction {
 
         protected final State activeState;
         protected final State passiveState;
@@ -112,7 +112,7 @@ public interface ArithmeticGroupFunction extends GroupFunction {
      * Through the getStateAs() method, it can be determined, how many
      * items actually are in the 'activeState'.
      */
-    static class Or implements GroupFunction {
+    class Or implements GroupFunction {
 
         protected final State activeState;
         protected final State passiveState;
@@ -177,7 +177,7 @@ public interface ArithmeticGroupFunction extends GroupFunction {
      * value. E.g. when the 'and' operation calculates the activeValue the
      * passiveValue will be returned and vice versa.
      */
-    static class NAnd extends And {
+    class NAnd extends And {
 
         public NAnd(@Nullable State activeValue, @Nullable State passiveValue) {
             super(activeValue, passiveValue);
@@ -196,7 +196,7 @@ public interface ArithmeticGroupFunction extends GroupFunction {
      * value. E.g. when the 'or' operation calculates the activeValue the
      * passiveValue will be returned and vice versa.
      */
-    static class NOr extends Or {
+    class NOr extends Or {
 
         public NOr(@Nullable State activeValue, @Nullable State passiveValue) {
             super(activeValue, passiveValue);
@@ -212,7 +212,7 @@ public interface ArithmeticGroupFunction extends GroupFunction {
     /**
      * This calculates the numeric average over all item states of decimal type.
      */
-    static class Avg implements GroupFunction {
+    class Avg implements GroupFunction {
 
         public Avg() {
         }
@@ -256,7 +256,7 @@ public interface ArithmeticGroupFunction extends GroupFunction {
     /**
      * This calculates the numeric sum over all item states of decimal type.
      */
-    static class Sum implements GroupFunction {
+    class Sum implements GroupFunction {
 
         public Sum() {
         }
@@ -294,7 +294,7 @@ public interface ArithmeticGroupFunction extends GroupFunction {
     /**
      * This calculates the minimum value of all item states of decimal type.
      */
-    static class Min implements GroupFunction {
+    class Min implements GroupFunction {
 
         public Min() {
         }
@@ -337,7 +337,7 @@ public interface ArithmeticGroupFunction extends GroupFunction {
     /**
      * This calculates the maximum value of all item states of decimal type.
      */
-    static class Max implements GroupFunction {
+    class Max implements GroupFunction {
 
         public Max() {
         }
@@ -384,7 +384,7 @@ public interface ArithmeticGroupFunction extends GroupFunction {
      * Group:Number:COUNT("[5-9]") will count all items having a string state between 5 and 9
      * ...
      */
-    static class Count implements GroupFunction {
+    class Count implements GroupFunction {
 
         protected final Pattern pattern;
 

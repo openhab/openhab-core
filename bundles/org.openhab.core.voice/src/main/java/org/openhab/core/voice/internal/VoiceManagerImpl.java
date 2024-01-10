@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -24,6 +24,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.WeakHashMap;
@@ -191,10 +192,11 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
             this.defaultVoice = config.containsKey(CONFIG_DEFAULT_VOICE) ? config.get(CONFIG_DEFAULT_VOICE).toString()
                     : null;
 
-            for (String key : config.keySet()) {
+            for (Entry<String, Object> entry : config.entrySet()) {
+                String key = entry.getKey();
                 if (key.startsWith(CONFIG_PREFIX_DEFAULT_VOICE)) {
                     String tts = key.substring(CONFIG_PREFIX_DEFAULT_VOICE.length());
-                    defaultVoices.put(tts, config.get(key).toString());
+                    defaultVoices.put(tts, entry.getValue().toString());
                 }
             }
         }
@@ -665,7 +667,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     }
 
     protected void removeAudioSink(AudioSink audioSink) {
-        stopDialogs((dialog) -> dialog.dialogContext.sink().getId().equals(audioSink.getId()));
+        stopDialogs(dialog -> dialog.dialogContext.sink().getId().equals(audioSink.getId()));
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
@@ -674,7 +676,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     }
 
     protected void removeAudioSource(AudioSource audioSource) {
-        stopDialogs((dialog) -> dialog.dialogContext.source().getId().equals(audioSource.getId()));
+        stopDialogs(dialog -> dialog.dialogContext.source().getId().equals(audioSource.getId()));
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
@@ -685,7 +687,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
 
     protected void removeKSService(KSService ksService) {
         this.ksServices.remove(ksService.getId());
-        stopDialogs((dialog) -> {
+        stopDialogs(dialog -> {
             var ks = dialog.dialogContext.ks();
             return ks != null && ks.getId().equals(ksService.getId());
         });
@@ -699,7 +701,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
 
     protected void removeSTTService(STTService sttService) {
         this.sttServices.remove(sttService.getId());
-        stopDialogs((dialog) -> dialog.dialogContext.stt().getId().equals(sttService.getId()));
+        stopDialogs(dialog -> dialog.dialogContext.stt().getId().equals(sttService.getId()));
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
@@ -710,7 +712,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
 
     protected void removeTTSService(TTSService ttsService) {
         this.ttsServices.remove(ttsService.getId());
-        stopDialogs((dialog) -> dialog.dialogContext.tts().getId().equals(ttsService.getId()));
+        stopDialogs(dialog -> dialog.dialogContext.tts().getId().equals(ttsService.getId()));
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
@@ -721,7 +723,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
 
     protected void removeHumanLanguageInterpreter(HumanLanguageInterpreter humanLanguageInterpreter) {
         this.humanLanguageInterpreters.remove(humanLanguageInterpreter.getId());
-        stopDialogs((dialog) -> dialog.dialogContext.hlis().stream()
+        stopDialogs(dialog -> dialog.dialogContext.hlis().stream()
                 .anyMatch(hli -> hli.getId().equals(humanLanguageInterpreter.getId())));
     }
 

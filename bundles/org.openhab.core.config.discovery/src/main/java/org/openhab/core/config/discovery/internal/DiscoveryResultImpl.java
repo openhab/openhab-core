@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,8 +12,8 @@
  */
 package org.openhab.core.config.discovery.internal;
 
+import java.time.Instant;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -43,7 +43,7 @@ public class DiscoveryResultImpl implements DiscoveryResult {
     private @Nullable String representationProperty;
     private @NonNullByDefault({}) DiscoveryResultFlag flag;
     private @NonNullByDefault({}) String label;
-    private long timestamp;
+    private Instant timestamp = Instant.MIN;
     private long timeToLive = TTL_UNLIMITED;
 
     /**
@@ -86,7 +86,7 @@ public class DiscoveryResultImpl implements DiscoveryResult {
         this.representationProperty = representationProperty;
         this.label = label == null ? "" : label;
 
-        this.timestamp = new Date().getTime();
+        this.timestamp = Instant.now();
         this.timeToLive = timeToLive;
 
         this.flag = DiscoveryResultFlag.NEW;
@@ -157,7 +157,7 @@ public class DiscoveryResultImpl implements DiscoveryResult {
             this.properties = sourceResult.getProperties();
             this.representationProperty = sourceResult.getRepresentationProperty();
             this.label = sourceResult.getLabel();
-            this.timestamp = new Date().getTime();
+            this.timestamp = Instant.now();
             this.timeToLive = sourceResult.getTimeToLive();
         }
     }
@@ -221,7 +221,7 @@ public class DiscoveryResultImpl implements DiscoveryResult {
 
     @Override
     public long getTimestamp() {
-        return timestamp;
+        return Instant.MIN.equals(timestamp) ? 0 : timestamp.toEpochMilli();
     }
 
     @Override

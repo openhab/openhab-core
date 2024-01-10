@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -31,6 +31,8 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.addon.AddonDiscoveryMethod;
 import org.openhab.core.addon.AddonInfo;
+import org.openhab.core.addon.AddonMatchProperty;
+import org.openhab.core.addon.AddonParameter;
 import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.config.discovery.addon.AddonFinder;
 import org.openhab.core.config.discovery.addon.BaseAddonFinder;
@@ -127,7 +129,7 @@ public class MDNSAddonFinder extends BaseAddonFinder implements ServiceListener 
             for (AddonDiscoveryMethod method : candidate.getDiscoveryMethods().stream()
                     .filter(method -> SERVICE_TYPE.equals(method.getServiceType())).toList()) {
                 Map<String, Pattern> matchProperties = method.getMatchProperties().stream()
-                        .collect(Collectors.toMap(property -> property.getName(), property -> property.getPattern()));
+                        .collect(Collectors.toMap(AddonMatchProperty::getName, AddonMatchProperty::getPattern));
 
                 Set<String> matchPropertyKeys = matchProperties.keySet().stream()
                         .filter(property -> (!NAME.equals(property) && !APPLICATION.equals(property)))
@@ -154,7 +156,7 @@ public class MDNSAddonFinder extends BaseAddonFinder implements ServiceListener 
 
     private String getMdnsServiceType(AddonDiscoveryMethod method) {
         String param = method.getParameters().stream().filter(p -> MDNS_SERVICE_TYPE.equals(p.getName()))
-                .map(p -> p.getValue()).findFirst().orElse("");
+                .map(AddonParameter::getValue).findFirst().orElse("");
         return param == null ? "" : param;
     }
 

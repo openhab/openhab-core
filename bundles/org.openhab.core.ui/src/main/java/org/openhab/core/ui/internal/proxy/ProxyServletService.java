@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -21,6 +21,7 @@ import java.util.Base64;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.servlet.Servlet;
@@ -161,8 +162,8 @@ public class ProxyServletService extends HttpServlet {
     private Hashtable<String, @Nullable String> propsFromConfig(Map<String, Object> config, Servlet servlet) {
         Hashtable<String, @Nullable String> props = new Hashtable<>();
 
-        for (String key : config.keySet()) {
-            props.put(key, config.get(key).toString());
+        for (Entry<String, Object> entry : config.entrySet()) {
+            props.put(entry.getKey(), entry.getValue().toString());
         }
 
         // must specify for Jetty proxy servlet, per http://stackoverflow.com/a/27625380
