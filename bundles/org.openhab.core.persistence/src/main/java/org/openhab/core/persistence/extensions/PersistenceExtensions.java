@@ -187,7 +187,8 @@ public class PersistenceExtensions {
 
     private static void internalPersist(Item item, TimeSeries timeSeries, String serviceId) {
         PersistenceService service = getService(serviceId);
-        ZoneId timeZone = timeZoneProvider != null ? timeZoneProvider.getTimeZone() : ZoneId.systemDefault();
+        TimeZoneProvider tzProvider = timeZoneProvider;
+        ZoneId timeZone = tzProvider != null ? tzProvider.getTimeZone() : ZoneId.systemDefault();
         if (service != null && service instanceof ModifiablePersistenceService modifiableService) {
             timeSeries.getStates()
                     .forEach(s -> modifiableService.store(item, s.timestamp().atZone(timeZone), s.state(), serviceId));
@@ -2214,12 +2215,14 @@ public class PersistenceExtensions {
     }
 
     private static @Nullable PersistenceService getService(String serviceId) {
-        return registry != null ? registry.get(serviceId) : null;
+        PersistenceServiceRegistry reg = registry;
+        return reg != null ? reg.get(serviceId) : null;
     }
 
     private static @Nullable String getDefaultServiceId() {
-        if (registry != null) {
-            String id = registry.getDefaultId();
+        PersistenceServiceRegistry reg = registry;
+        if (reg != null) {
+            String id = reg.getDefaultId();
             if (id != null) {
                 return id;
             } else {
