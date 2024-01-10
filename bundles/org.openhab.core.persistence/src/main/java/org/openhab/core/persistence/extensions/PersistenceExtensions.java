@@ -1390,8 +1390,8 @@ public class PersistenceExtensions {
         // }
         while (it.hasNext()) {
             HistoricItem thisItem = it.next();
-            if (lastItem != null && lastItem.getState() instanceof State state) {
-                DecimalType dtState = state.as(DecimalType.class);
+            if (lastItem != null) {
+                DecimalType dtState = lastItem.getState().as(DecimalType.class);
                 if (dtState != null) {
                     BigDecimal value = dtState.toBigDecimal();
                     BigDecimal weight = BigDecimal
