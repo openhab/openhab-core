@@ -2166,6 +2166,125 @@ public class PersistenceExtensions {
         return null;
     }
 
+    /**
+     * Removes from persistence the historic items for a given <code>item</code> since a certain point in time.
+     * The default persistence service is used.
+     * This will only have effect if the p{@link PersistenceService} is a {@link ModifiablePersistenceService}.
+     *
+     * @param item the item for which to remove the historic item
+     * @param timestamp the point in time from which to remove the states
+     */
+    public static void removeAllStatesSince(Item item, ZonedDateTime timestamp) {
+        internalRemoveAllStatesBetween(item, timestamp, null);
+    }
+
+    /**
+     * Removes from persistence the future items for a given <code>item</code> till a certain point in time.
+     * The default persistence service is used.
+     * This will only have effect if the p{@link PersistenceService} is a {@link ModifiablePersistenceService}.
+     *
+     * @param item the item for which to remove the future item
+     * @param timestamp the point in time to which to remove the states
+     */
+    public static void removeAllStatesTill(Item item, ZonedDateTime timestamp) {
+        internalRemoveAllStatesBetween(item, null, timestamp);
+    }
+
+    /**
+     * Removes from persistence the historic items for a given <code>item</code> between two certain points in time.
+     * The default persistence service is used.
+     * This will only have effect if the p{@link PersistenceService} is a {@link ModifiablePersistenceService}.
+     *
+     * @param item the item for which to remove the historic item
+     * @param begin the point in time from which to remove the states
+     * @param end the point in time to which to remove the states
+     */
+    public static void removeAllStatesBetween(Item item, ZonedDateTime begin, ZonedDateTime end) {
+        internalRemoveAllStatesBetween(item, begin, end);
+    }
+
+    /**
+     * Removes from persistence the historic items for a given <code>item</code> since a certain point in time
+     * through a {@link PersistenceService} identified by the <code>serviceId</code>.
+     * This will only have effect if the p{@link PersistenceService} is a {@link ModifiablePersistenceService}.
+     *
+     * @param item the item for which to remove the historic item
+     * @param timestamp the point in time from which to remove the states
+     * @param serviceId the name of the {@link PersistenceService} to use
+     */
+    public void removeAllStatesSince(Item item, ZonedDateTime timestamp, String serviceId) {
+        internalRemoveAllStatesBetween(item, timestamp, null, serviceId);
+    }
+
+    /**
+     * Removes from persistence the future items for a given <code>item</code> till a certain point in time
+     * through a {@link PersistenceService} identified by the <code>serviceId</code>.
+     * This will only have effect if the p{@link PersistenceService} is a {@link ModifiablePersistenceService}.
+     *
+     * @param item the item for which to remove the future item
+     * @param timestamp the point in time to which to remove the states
+     * @param serviceId the name of the {@link PersistenceService} to use
+     */
+    public static void removeAllStatesTill(Item item, ZonedDateTime timestamp, String serviceId) {
+        internalRemoveAllStatesBetween(item, null, timestamp, serviceId);
+    }
+
+    /**
+     * Removes from persistence the historic items for a given <code>item</code> beetween two certain points in time
+     * through a {@link PersistenceService} identified by the <code>serviceId</code>.
+     * This will only have effect if the p{@link PersistenceService} is a {@link ModifiablePersistenceService}.
+     *
+     * @param item the item for which to remove the historic item
+     * @param begin the point in time from which to remove the states
+     * @param end the point in time to which to remove the states
+     * @param serviceId the name of the {@link PersistenceService} to use
+     */
+    public static void removeAllStatesBetween(Item item, ZonedDateTime begin, ZonedDateTime end, String serviceId) {
+        internalRemoveAllStatesBetween(item, begin, end, serviceId);
+    }
+
+    private static void internalRemoveAllStatesBetween(Item item, @Nullable ZonedDateTime begin,
+            @Nullable ZonedDateTime end) {
+        String serviceId = getDefaultServiceId();
+        if (serviceId != null) {
+            internalRemoveAllStatesBetween(item, begin, end, serviceId);
+        }
+    }
+
+    private static void internalRemoveAllStatesBetween(Item item, @Nullable ZonedDateTime begin,
+            @Nullable ZonedDateTime end, String serviceId) {
+        PersistenceService service = getService(serviceId);
+        if (service != null && service instanceof ModifiablePersistenceService mService) {
+            FilterCriteria filter = new FilterCriteria();
+            ZonedDateTime now = ZonedDateTime.now();
+            if ((begin == null && end == null) || (begin != null && end == null && begin.isAfter(now))
+                    || (begin == null && end != null && end.isBefore(now))) {
+                LoggerFactory.getLogger(PersistenceExtensions.class).warn(
+                        "Querying persistence service with open begin and/or end not allowed: begin {}, end {}, now {}",
+                        begin, end, now);
+                return;
+            }
+            if (begin != null) {
+                filter.setBeginDate(begin);
+            } else {
+                filter.setBeginDate(ZonedDateTime.now());
+            }
+            if (end != null) {
+                filter.setEndDate(end);
+            } else {
+                filter.setEndDate(ZonedDateTime.now());
+            }
+            filter.setItemName(item.getName());
+            filter.setOrdering(Ordering.ASCENDING);
+
+            mService.remove(filter);
+            return;
+        }
+        LoggerFactory.getLogger(PersistenceExtensions.class)
+                .warn("There is no queryable persistence service registered with the id '{}'", serviceId);
+        return;
+    }
+
     private static @Nullable Iterable<HistoricItem> getAllStatesBetweenWithBoundaries(Item item,
             @Nullable ZonedDateTime begin, @Nullable ZonedDateTime end, String serviceId) {
         Iterable<HistoricItem> betweenItems = internalGetAllStatesBetween(item, begin, end, serviceId);
