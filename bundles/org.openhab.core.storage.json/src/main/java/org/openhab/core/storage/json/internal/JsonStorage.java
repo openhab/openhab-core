@@ -113,8 +113,7 @@ public class JsonStorage<T> implements Storage<T> {
                 .registerTypeHierarchyAdapter(Map.class, new OrderingMapSerializer())//
                 .registerTypeHierarchyAdapter(Set.class, new OrderingSetSerializer())//
                 .registerTypeAdapter(Configuration.class, new ConfigurationDeserializer()) //
-                .registerTypeAdapter(Instant.class, new InstantSerializer()) //
-                .registerTypeAdapter(Instant.class, new InstantDeserializer()) //
+                .registerTypeAdapter(Instant.class, new InstantTypeAdapter()) //
                 .setPrettyPrinting() //
                 .create();
 

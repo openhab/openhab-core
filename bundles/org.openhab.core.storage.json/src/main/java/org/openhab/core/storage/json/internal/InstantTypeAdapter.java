@@ -23,15 +23,32 @@ import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
 
 /**
- * The {@link InstantDeserializer} converts a formatted UTC string to {@link Instant}.
- * As fallback, milliseconds since epoch is supported as well.
+ * The {@link InstantTypeAdapter} implements serialization and deserialization of {@link Instant}.
+ * as formatted UTC strings.
+ *
+ * Deserialization supports milliseconds since epoch as well.
  *
  * @author Jacob Laursen - Initial contribution
  */
 @NonNullByDefault
-public class InstantDeserializer implements JsonDeserializer<Instant> {
+public class InstantTypeAdapter implements JsonSerializer<Instant>, JsonDeserializer<Instant> {
+    /**
+     * Converts an {@link Instant} to a formatted UTC string.
+     */
+    @Override
+    public JsonElement serialize(Instant instant, Type typeOfSrc, JsonSerializationContext context) {
+        return new JsonPrimitive(instant.toString());
+    }
+
+    /**
+     * Converts a formatted UTC string to {@link Instant}.
+     * As fallback, milliseconds since epoch is supported as well.
+     */
     @Override
     public @Nullable Instant deserialize(JsonElement element, Type arg1, JsonDeserializationContext arg2)
             throws JsonParseException {
