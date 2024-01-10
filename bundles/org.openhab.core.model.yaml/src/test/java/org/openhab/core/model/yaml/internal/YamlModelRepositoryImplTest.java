@@ -239,4 +239,26 @@ public class YamlModelRepositoryImplTest {
 
         assertThat(actualFileContent, is(expectedFileContent));
     }
+
+    @Test
+    public void testReadOnlyModelNotUpdated() throws IOException {
+        Files.copy(SOURCE_PATH.resolve("modelFileAddedOrRemoved.yaml"), fullModelPath);
+
+        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
+        modelRepository.processWatchEvent(WatchService.Kind.CREATE, MODEL_PATH);
+
+        FirstTypeDTO added = new FirstTypeDTO("element3", "description3");
+        modelRepository.addElementToModel(MODEL_NAME, added);
+
+        FirstTypeDTO removed = new FirstTypeDTO("element1", "description1");
+        modelRepository.removeElementFromModel(MODEL_NAME, removed);
+
+        FirstTypeDTO updated = new FirstTypeDTO("element2", "newDescription2");
+        modelRepository.updateElementInModel(MODEL_NAME, updated);
+
+        String actualFileContent = Files.readString(fullModelPath);
+        String expectedFileContent = Files.readString(SOURCE_PATH.resolve("modelFileAddedOrRemoved.yaml"));
+
+        assertThat(actualFileContent, is(expectedFileContent));
+    }
 }
