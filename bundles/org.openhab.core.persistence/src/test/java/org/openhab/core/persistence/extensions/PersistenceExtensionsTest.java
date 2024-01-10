@@ -258,7 +258,6 @@ public class PersistenceExtensionsTest {
                 SERVICE_ID);
         assertNotNull(historicItem);
         assertEquals(switchValue(SWITCH_ON_INTERMEDIATE_3), historicItem.getState());
-
     }
 
     @Test

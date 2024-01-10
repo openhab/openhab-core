@@ -427,7 +427,6 @@ public class PersistenceExtensions {
      */
     public static @Nullable HistoricItem previousState(Item item, boolean skipEqual, String serviceId) {
         return internalAdjacentState(item, skipEqual, false, serviceId);
-
     }
 
     /**
