@@ -2212,7 +2212,7 @@ public class PersistenceExtensions {
      * @param timestamp the point in time from which to remove the states
      * @param serviceId the name of the {@link PersistenceService} to use
      */
-    public void removeAllStatesSince(Item item, ZonedDateTime timestamp, String serviceId) {
+    public static void removeAllStatesSince(Item item, ZonedDateTime timestamp, String serviceId) {
         internalRemoveAllStatesBetween(item, timestamp, null, serviceId);
     }
 
