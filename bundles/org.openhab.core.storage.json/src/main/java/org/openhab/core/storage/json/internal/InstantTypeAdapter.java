@@ -52,16 +52,11 @@ public class InstantTypeAdapter implements JsonSerializer<Instant>, JsonDeserial
     @Override
     public @Nullable Instant deserialize(JsonElement element, Type arg1, JsonDeserializationContext arg2)
             throws JsonParseException {
-        String content = element.getAsString();
         try {
-            return Instant.parse(content);
+            return Instant.parse(element.getAsString());
         } catch (DateTimeParseException e) {
             // Fallback to milliseconds since epoch for backwards compatibility.
-        }
-        try {
-            return Instant.ofEpochMilli(Long.parseLong(content));
-        } catch (NumberFormatException e) {
-            throw new JsonParseException("Could not parse as Instant: " + content, e);
+            return Instant.ofEpochMilli(element.getAsLong());
         }
     }
 }
