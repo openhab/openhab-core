@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -736,7 +736,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
 
     @Override
     public @Nullable Widget getWidget(Sitemap sitemap, String id) {
-        if (id.length() > 0) {
+        if (!id.isEmpty()) {
             // see if the id is an itemName and try to get the widget for it
             Widget w = getWidget(id);
             if (w == null) {

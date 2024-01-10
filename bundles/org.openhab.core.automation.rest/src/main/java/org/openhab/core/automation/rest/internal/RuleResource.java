@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -188,6 +188,7 @@ public class RuleResource implements RESTResource {
                     .map(rule -> EnrichedRuleDTOMapper.map(rule, ruleManager, managedRuleProvider));
 
             CacheControl cc = new CacheControl();
+            cc.setNoCache(true);
             cc.setMustRevalidate(true);
             cc.setPrivate(true);
             rules = dtoMapper.limitToFields(rules, "uid,templateUID,name,visibility,description,tags,editable");

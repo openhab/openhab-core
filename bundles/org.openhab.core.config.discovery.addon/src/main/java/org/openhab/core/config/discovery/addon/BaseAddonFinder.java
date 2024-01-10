@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -41,7 +41,7 @@ public abstract class BaseAddonFinder implements AddonFinder {
     protected static boolean propertyMatches(Map<String, Pattern> propertyPatternMap, String propertyName,
             @Nullable String propertyValue) {
         Pattern pattern = propertyPatternMap.get(propertyName);
-        return pattern == null ? true : propertyValue == null ? false : pattern.matcher(propertyValue).matches();
+        return pattern == null || (propertyValue != null && pattern.matcher(propertyValue).matches());
     }
 
     protected volatile List<AddonInfo> addonCandidates = List.of();

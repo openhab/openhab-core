@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,6 +15,7 @@ package org.openhab.core.io.transport.upnp.internal;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -154,14 +155,12 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
                     deviceRoot.getIdentity().getUdn());
             for (UpnpIOParticipant participant : participants) {
                 if (Objects.equals(getDevice(participant), deviceRoot)) {
-                    for (String stateVariable : values.keySet()) {
-                        StateVariableValue value = values.get(stateVariable);
-                        if (value.getValue() != null) {
-                            try {
-                                participant.onValueReceived(stateVariable, value.getValue().toString(), serviceId);
-                            } catch (Exception e) {
-                                logger.error("Participant threw an exception onValueReceived", e);
-                            }
+                    for (Entry<String, StateVariableValue> entry : values.entrySet()) {
+                        try {
+                            participant.onValueReceived(entry.getKey(), entry.getValue().getValue().toString(),
+                                    serviceId);
+                        } catch (Exception e) {
+                            logger.error("Participant threw an exception onValueReceived", e);
                         }
                     }
                     break;
@@ -300,8 +299,8 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
                     if (action != null) {
                         ActionInvocation invocation = new ActionInvocation(action);
                         if (inputs != null) {
-                            for (String variable : inputs.keySet()) {
-                                invocation.setInput(variable, inputs.get(variable));
+                            for (Entry<String, String> entry : inputs.entrySet()) {
+                                invocation.setInput(entry.getKey(), entry.getValue());
                             }
                         }
 
@@ -316,10 +315,11 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
 
                         Map<String, ActionArgumentValue> result = invocation.getOutputMap();
                         if (result != null) {
-                            for (String variable : result.keySet()) {
+                            for (Entry<String, ActionArgumentValue> entry : result.entrySet()) {
+                                String variable = entry.getKey();
                                 final ActionArgumentValue newArgument;
                                 try {
-                                    newArgument = result.get(variable);
+                                    newArgument = entry.getValue();
                                 } catch (final Exception ex) {
                                     logger.debug("An exception '{}' occurred, cannot get argument for variable '{}'",
                                             ex.getMessage(), variable);

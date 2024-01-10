@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -33,7 +33,7 @@ public class PersistenceEqualsFilter extends PersistenceFilter {
     public PersistenceEqualsFilter(String name, Collection<String> values, @Nullable Boolean inverted) {
         super(name);
         this.values = values;
-        this.inverted = (inverted == null) ? false : inverted;
+        this.inverted = inverted != null && inverted;
     }
 
     public Collection<String> getValues() {

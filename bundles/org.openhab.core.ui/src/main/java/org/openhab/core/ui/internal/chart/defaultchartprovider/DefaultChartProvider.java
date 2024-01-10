@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -153,7 +153,7 @@ public class DefaultChartProvider implements ChartProvider {
         QueryablePersistenceService persistenceService = (service instanceof QueryablePersistenceService qps) ? qps
                 : (QueryablePersistenceService) persistenceServiceRegistry.getAll() //
                         .stream() //
-                        .filter(it -> it instanceof QueryablePersistenceService) //
+                        .filter(QueryablePersistenceService.class::isInstance) //
                         .findFirst() //
                         .orElseThrow(() -> new IllegalArgumentException("No Persistence service found."));
 
@@ -300,7 +300,7 @@ public class DefaultChartProvider implements ChartProvider {
         } else if (state instanceof OpenClosedType) {
             return state == OpenClosedType.CLOSED ? 0 : 1;
         } else {
-            logger.debug("Unsupported item type in chart: {}", state.getClass().toString());
+            logger.debug("Unsupported item type in chart: {}", state.getClass());
             return 0;
         }
     }

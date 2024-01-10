@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -105,7 +105,7 @@ public class NumberItem extends GenericItem implements MetadataAwareItem {
 
     public void send(QuantityType<?> command) {
         if (dimension == null) {
-            DecimalType strippedCommand = new DecimalType(command.toBigDecimal());
+            DecimalType strippedCommand = new DecimalType(command);
             internalSend(strippedCommand);
         } else if (command.getUnit().isCompatible(unit) || command.getUnit().inverse().isCompatible(unit)) {
             internalSend(command);
@@ -142,8 +142,7 @@ public class NumberItem extends GenericItem implements MetadataAwareItem {
         if (state instanceof QuantityType<?> quantityType) {
             if (dimension == null) {
                 // QuantityType update to a NumberItem without unit, strip unit
-                DecimalType plainState = new DecimalType(quantityType.toBigDecimal());
-                return plainState;
+                return new DecimalType(quantityType);
             } else {
                 // QuantityType update to a NumberItem with unit, convert to item unit (if possible)
                 Unit<?> stateUnit = quantityType.getUnit();
@@ -245,8 +244,7 @@ public class NumberItem extends GenericItem implements MetadataAwareItem {
     public void removedMetadata(Metadata metadata) {
         Class<? extends Quantity<?>> dimension = this.dimension;
         if (dimension != null && UNIT_METADATA_NAMESPACE.equals(metadata.getUID().getNamespace())) {
-            assert unitProvider != null;
-            unit = unitProvider.getUnit((Class<? extends Quantity>) dimension);
+            unit = Objects.requireNonNull(unitProvider).getUnit((Class<? extends Quantity>) dimension);
             logger.trace("Item '{}' now has unit '{}'", name, unit);
         }
     }

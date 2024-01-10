@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -50,7 +50,7 @@ import org.slf4j.LoggerFactory;
  * <br/>
  * {@code org.openhab.core.threadpool:<poolName>=<poolSize>}
  * <br/>
- * All threads will time out after {@link THREAD_TIMEOUT}.
+ * All threads will time out after {@link #THREAD_TIMEOUT}.
  *
  * @author Kai Kreuzer - Initial contribution
  */
@@ -123,7 +123,7 @@ public class ThreadPoolManager {
      * @return an instance to use
      */
     public static ScheduledExecutorService getScheduledPool(String poolName) {
-        ExecutorService pool = pools.computeIfAbsent(poolName, (name) -> {
+        ExecutorService pool = pools.computeIfAbsent(poolName, name -> {
             int cfg = getConfig(name);
             ScheduledThreadPoolExecutor executor = new WrappedScheduledExecutorService(cfg,
                     new NamedThreadFactory(name, true, Thread.NORM_PRIORITY));
@@ -149,7 +149,7 @@ public class ThreadPoolManager {
      * @return an instance to use
      */
     public static ExecutorService getPool(String poolName) {
-        ExecutorService pool = pools.computeIfAbsent(poolName, (name) -> {
+        ExecutorService pool = pools.computeIfAbsent(poolName, name -> {
             int cfg = getConfig(name);
             ThreadPoolExecutor executor = QueueingThreadPoolExecutor.createInstance(name, cfg);
             executor.setKeepAliveTime(THREAD_TIMEOUT, TimeUnit.SECONDS);

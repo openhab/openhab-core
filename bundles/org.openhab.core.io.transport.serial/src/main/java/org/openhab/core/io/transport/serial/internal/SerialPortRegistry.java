@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -70,12 +70,10 @@ public class SerialPortRegistry {
         final Predicate<SerialPortProvider> filter;
         if (scheme != null) {
             // Get port providers which accept exactly the port with its scheme.
-            filter = provider -> provider.getAcceptedProtocols().filter(prot -> prot.getScheme().equals(scheme))
-                    .count() > 0;
+            filter = provider -> provider.getAcceptedProtocols().anyMatch(prot -> prot.getScheme().equals(scheme));
         } else {
             // Get port providers which accept the same type (local, net)
-            filter = provider -> provider.getAcceptedProtocols().filter(prot -> prot.getPathType().equals(pathType))
-                    .count() > 0;
+            filter = provider -> provider.getAcceptedProtocols().anyMatch(prot -> prot.getPathType().equals(pathType));
         }
 
         return portCreators.stream().filter(filter).toList();

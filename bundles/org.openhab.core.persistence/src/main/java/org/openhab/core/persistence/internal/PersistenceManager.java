@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -200,13 +200,13 @@ public class PersistenceManager implements ItemRegistryChangeListener, StateChan
         for (PersistenceConfig itemCfg : itemConfig.items()) {
             if (itemCfg instanceof PersistenceAllConfig) {
                 return true;
-            } else if (itemCfg instanceof PersistenceItemConfig) {
-                if (item.getName().equals(((PersistenceItemConfig) itemCfg).getItem())) {
+            } else if (itemCfg instanceof PersistenceItemConfig persistenceItemConfig) {
+                if (item.getName().equals(persistenceItemConfig.getItem())) {
                     return true;
                 }
-            } else if (itemCfg instanceof PersistenceGroupConfig) {
+            } else if (itemCfg instanceof PersistenceGroupConfig persistenceGroupConfig) {
                 try {
-                    Item gItem = itemRegistry.getItem(((PersistenceGroupConfig) itemCfg).getGroup());
+                    Item gItem = itemRegistry.getItem(persistenceGroupConfig.getGroup());
                     if (gItem instanceof GroupItem gItem2 && gItem2.getAllMembers().contains(item)) {
                         return true;
                     }
@@ -233,16 +233,16 @@ public class PersistenceManager implements ItemRegistryChangeListener, StateChan
         // otherwise, go through the detailed definitions
         Set<Item> items = new HashSet<>();
         for (Object itemCfg : config.items()) {
-            if (itemCfg instanceof PersistenceItemConfig) {
-                String itemName = ((PersistenceItemConfig) itemCfg).getItem();
+            if (itemCfg instanceof PersistenceItemConfig persistenceItemConfig) {
+                String itemName = persistenceItemConfig.getItem();
                 try {
                     items.add(itemRegistry.getItem(itemName));
                 } catch (ItemNotFoundException e) {
                     logger.debug("Item '{}' does not exist.", itemName);
                 }
             }
-            if (itemCfg instanceof PersistenceGroupConfig) {
-                String groupName = ((PersistenceGroupConfig) itemCfg).getGroup();
+            if (itemCfg instanceof PersistenceGroupConfig persistenceGroupConfig) {
+                String groupName = persistenceGroupConfig.getGroup();
                 try {
                     Item gItem = itemRegistry.getItem(groupName);
                     if (gItem instanceof GroupItem groupItem) {

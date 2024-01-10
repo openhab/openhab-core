@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -70,7 +70,7 @@ import org.slf4j.LoggerFactory;
 @NonNullByDefault
 public abstract class AbstractResourceBundleProvider<@NonNull E> {
 
-    public AbstractResourceBundleProvider(String path) {
+    protected AbstractResourceBundleProvider(String path) {
         this.path = path;
     }
 
@@ -162,12 +162,6 @@ public abstract class AbstractResourceBundleProvider<@NonNull E> {
         }
     }
 
-    /**
-     * This method is used to initialize field {@link #queue}, when the instance of
-     * {@link AutomationResourceBundlesEventQueue} is created.
-     *
-     * @param queue provides an access to the queue for processing bundles.
-     */
     protected AutomationResourceBundlesEventQueue getQueue() {
         return queue;
     }
@@ -399,7 +393,6 @@ public abstract class AbstractResourceBundleProvider<@NonNull E> {
      * This method is called from {@link #processAutomationProvider(Bundle)} to process the loading of the provided
      * objects.
      *
-     * @param vendor is a holder of information about the bundle providing data for import.
      * @param parser the {@link Parser} which is responsible for parsing of a particular format in which the provided
      *            objects are presented
      * @param url the resource which is used for loading the objects.

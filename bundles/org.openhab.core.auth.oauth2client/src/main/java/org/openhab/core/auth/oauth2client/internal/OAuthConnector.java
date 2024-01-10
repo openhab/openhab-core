@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -356,14 +356,16 @@ public class OAuthConnector {
 
     /**
      * This is a special case where the httpClient (jetty) is created due to the need for certificate pinning.
-     * If certificate pinning is needed, please refer to {@code TrustManagerProvider}. The http client is
-     * created, used and then shutdown immediately after use. There is little reason to cache the client/ connections
+     * If certificate pinning is needed, please refer to
+     * {@code org.openhab.core.io.net.http.ExtensibleTrustManager ExtensibleTrustManager}.
+     * The http client is created, used and then shutdown immediately after use. There is little reason to cache the
+     * client/ connections
      * because oauth requests are short; and it may take hours/ days before the next request is needed.
      *
      * @param tokenUrl access token url
      * @return http client. This http client
      * @throws OAuthException If any exception is thrown while starting the http client.
-     * @see TrustManagerProvider
+     * @see org.openhab.core.io.net.http.ExtensibleTrustManager
      */
     private HttpClient createHttpClient(String tokenUrl) throws OAuthException {
         HttpClient httpClient = httpClientFactory.createHttpClient(HTTP_CLIENT_CONSUMER_NAME);

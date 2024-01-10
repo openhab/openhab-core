@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -165,8 +165,8 @@ public class DialogProcessor implements KSListener, STTListener {
                 return;
             }
             try {
-                if (ksService instanceof KSEdgeService) {
-                    ((KSEdgeService) ksService).spot(this);
+                if (ksService instanceof KSEdgeService service) {
+                    service.spot(this);
                 } else {
                     AudioStream stream = dialogContext.source().getInputStream(fmt);
                     streamKS = stream;
@@ -309,8 +309,7 @@ public class DialogProcessor implements KSListener, STTListener {
         processing = value;
         String item = dialogContext.listeningItem();
         if (item != null && ItemUtil.isValidItemName(item)) {
-            OnOffType command = (value) ? OnOffType.ON : OnOffType.OFF;
-            eventPublisher.post(ItemEventFactory.createCommandEvent(item, command));
+            eventPublisher.post(ItemEventFactory.createCommandEvent(item, OnOffType.from(value)));
         }
     }
 

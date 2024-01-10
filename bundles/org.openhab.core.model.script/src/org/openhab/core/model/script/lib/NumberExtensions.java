@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -164,7 +164,7 @@ public class NumberExtensions {
         BigDecimal leftValue = numberToBigDecimal(left);
         BigDecimal rightValue = numberToBigDecimal(right);
         if (leftValue == null) {
-            return (rightValue != null) ? false : true;
+            return rightValue == null;
         } else if (rightValue == null) {
             return true;
         } else {

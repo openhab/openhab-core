@@ -198,7 +198,8 @@ public class Ser2NetUsbSerialDiscovery implements ServiceListener, UsbSerialDisc
                     serviceInfo.getPort());
 
             UsbSerialDeviceInformation deviceInfo = new UsbSerialDeviceInformation(vendorId, productId, serialNumber,
-                    manufacturer, product, interfaceNumber, interfaceDescription, serialPortName);
+                    manufacturer, product, interfaceNumber, interfaceDescription, serialPortName).setRemote(true);
+
             logger.debug("Created {} based on {}", deviceInfo, serviceInfo);
             return Optional.of(deviceInfo);
         } catch (NumberFormatException e) {

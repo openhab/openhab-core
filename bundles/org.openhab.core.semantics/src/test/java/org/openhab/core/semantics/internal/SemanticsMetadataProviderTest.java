@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -183,7 +183,7 @@ public class SemanticsMetadataProviderTest extends JavaTest {
 
         Metadata metadata = Objects.requireNonNull(getMetadata(item));
         assertEquals("Equipment_Door", metadata.getValue());
-        assertEquals(metadata.getConfiguration().get("hasLocation"), GROUP_ITEM_NAME);
+        assertEquals(GROUP_ITEM_NAME, metadata.getConfiguration().get("hasLocation"));
     }
 
     @Test
@@ -208,7 +208,7 @@ public class SemanticsMetadataProviderTest extends JavaTest {
 
         Metadata metadata = Objects.requireNonNull(getMetadata(item));
         assertEquals("Equipment_Door", oldMetadata.getValue());
-        assertEquals(metadata.getConfiguration().get("hasLocation"), GROUP_ITEM_NAME);
+        assertEquals(GROUP_ITEM_NAME, metadata.getConfiguration().get("hasLocation"));
     }
 
     @Test
@@ -228,7 +228,7 @@ public class SemanticsMetadataProviderTest extends JavaTest {
 
         Metadata oldMetadata = Objects.requireNonNull(getMetadata(item));
         assertEquals("Equipment_Door", oldMetadata.getValue());
-        assertEquals(oldMetadata.getConfiguration().get("hasLocation"), GROUP_ITEM_NAME);
+        assertEquals(GROUP_ITEM_NAME, oldMetadata.getConfiguration().get("hasLocation"));
 
         when(itemRegistry.get(GROUP_ITEM_NAME)).thenReturn(null);
 

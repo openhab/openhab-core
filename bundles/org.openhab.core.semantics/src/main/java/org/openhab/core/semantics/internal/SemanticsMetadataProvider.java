@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -290,7 +290,7 @@ public class SemanticsMetadataProvider extends AbstractProvider<Metadata>
         processItem(item);
     }
 
-    private class SemanticTagRegistryChangeListener implements RegistryChangeListener<SemanticTag> {
+    private static class SemanticTagRegistryChangeListener implements RegistryChangeListener<SemanticTag> {
 
         private SemanticsMetadataProvider provider;
 

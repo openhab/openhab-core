@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -67,7 +67,7 @@ public abstract class AbstractAuthPageServlet extends HttpServlet {
 
     protected String pageTemplate;
 
-    public AbstractAuthPageServlet(BundleContext bundleContext, @Reference UserRegistry userRegistry,
+    protected AbstractAuthPageServlet(BundleContext bundleContext, @Reference UserRegistry userRegistry,
             @Reference AuthenticationProvider authProvider, @Reference LocaleProvider localeProvider) {
         this.userRegistry = userRegistry;
         this.authProvider = authProvider;

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -114,8 +114,7 @@ public class SerialPortUtil {
             serialPorts = new HashSet<>();
         }
         if (serialPorts.add(port)) {
-            return serialPorts.stream().collect(Collectors.joining(pathSeparator)); // see
-                                                                                    // RXTXCommDriver#addSpecifiedPorts
+            return String.join(pathSeparator, serialPorts); // see RXTXCommDriver#addSpecifiedPorts
         }
         return null;
     }

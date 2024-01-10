@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -320,7 +321,7 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
             Object normalizedValue = ConfigUtil.normalizeType(value);
             if (widgetImpl.eGet(feature, false, false) instanceof Integer) {
                 normalizedValue = (normalizedValue instanceof BigDecimal bd) ? bd.intValue()
-                        : Integer.valueOf(normalizedValue.toString());
+                        : Integer.parseInt(normalizedValue.toString());
             } else if (widgetImpl.eGet(feature, false, false) instanceof Boolean
                     && !(normalizedValue instanceof Boolean)) {
                 normalizedValue = Boolean.valueOf(normalizedValue.toString());
@@ -337,7 +338,7 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
             return;
         }
         Object staticIcon = component.getConfig().get("staticIcon");
-        if (staticIcon != null && Boolean.valueOf(ConfigUtil.normalizeType(staticIcon).toString())) {
+        if (staticIcon != null && Boolean.parseBoolean(ConfigUtil.normalizeType(staticIcon).toString())) {
             setWidgetPropertyFromComponentConfig(widget, component, "icon", SitemapPackage.WIDGET__STATIC_ICON);
             return;
         }
@@ -376,7 +377,7 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
             if (sourceButtons instanceof Collection<?>) {
                 for (Object sourceButton : (Collection<?>) sourceButtons) {
                     if (sourceButton instanceof String) {
-                        String[] splitted1 = sourceButton.toString().split(":");
+                        String[] splitted1 = sourceButton.toString().split(":", 3);
                         int row = Integer.parseInt(splitted1[0].trim());
                         int column = Integer.parseInt(splitted1[1].trim());
                         String[] splitted2 = splitted1[2].trim().split("=");
@@ -497,7 +498,7 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
             }
         }
         List<String> conditionsList = List.of(conditions.split(" AND "));
-        return conditionsList.stream().map(String::trim).toList();
+        return conditionsList.stream().filter(Predicate.not(String::isBlank)).map(String::trim).toList();
     }
 
     @Override

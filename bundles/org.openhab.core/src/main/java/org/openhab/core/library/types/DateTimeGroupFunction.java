@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -33,7 +33,7 @@ public interface DateTimeGroupFunction extends GroupFunction {
     /**
      * This calculates the maximum value of all item states of DateType type.
      */
-    static class Latest implements GroupFunction {
+    class Latest implements GroupFunction {
 
         public Latest() {
         }
@@ -76,7 +76,7 @@ public interface DateTimeGroupFunction extends GroupFunction {
     /**
      * This calculates the minimum value of all item states of DateType type.
      */
-    static class Earliest implements GroupFunction {
+    class Earliest implements GroupFunction {
 
         public Earliest() {
         }

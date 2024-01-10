@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,7 +14,7 @@ package org.openhab.core.config.discovery.internal.console;
 
 import static org.openhab.core.config.discovery.inbox.InboxPredicates.*;
 
-import java.util.Date;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -163,7 +163,7 @@ public class InboxConsoleCommandExtension extends AbstractConsoleCommandExtensio
             ThingUID bridgeId = discoveryResult.getBridgeUID();
             Map<String, Object> properties = discoveryResult.getProperties();
             String representationProperty = discoveryResult.getRepresentationProperty();
-            String timestamp = new Date(discoveryResult.getTimestamp()).toString();
+            String timestamp = Instant.ofEpochMilli(discoveryResult.getTimestamp()).toString();
             String timeToLive = discoveryResult.getTimeToLive() == DiscoveryResult.TTL_UNLIMITED ? "UNLIMITED"
                     : "" + discoveryResult.getTimeToLive();
             console.println(String.format(

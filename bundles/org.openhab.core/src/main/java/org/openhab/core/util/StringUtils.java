@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -129,7 +129,7 @@ public class StringUtils {
         final String delimiter = "_";
         StringBuilder capitalizedFully = new StringBuilder();
         for (String splitStr : str.split(delimiter)) {
-            if (splitStr.length() > 0) {
+            if (!splitStr.isEmpty()) {
                 capitalizedFully.append(splitStr.substring(0, 1).toUpperCase());
             }
             if (splitStr.length() > 1) {

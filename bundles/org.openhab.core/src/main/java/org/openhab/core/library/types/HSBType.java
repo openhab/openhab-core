@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -273,7 +273,7 @@ public class HSBType extends PercentType implements ComplexType, State, Command 
     public <T extends State> @Nullable T as(@Nullable Class<T> target) {
         if (target == OnOffType.class) {
             // if brightness is not completely off, we consider the state to be on
-            return target.cast(PercentType.ZERO.equals(getBrightness()) ? OnOffType.OFF : OnOffType.ON);
+            return target.cast(OnOffType.from(!PercentType.ZERO.equals(getBrightness())));
         } else if (target == DecimalType.class) {
             return target.cast(
                     new DecimalType(getBrightness().toBigDecimal().divide(BIG_DECIMAL_HUNDRED, 8, RoundingMode.UP)));

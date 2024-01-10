@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+ * Copyright (c) 2010-2024 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,9 +12,9 @@
  */
 package org.openhab.core.config.discovery;
 
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -27,6 +27,7 @@ import java.util.concurrent.TimeUnit;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.ThreadPoolManager;
+import org.openhab.core.config.core.ConfigParser;
 import org.openhab.core.i18n.I18nUtil;
 import org.openhab.core.i18n.LocaleProvider;
 import org.openhab.core.i18n.TranslationProvider;
@@ -68,7 +69,7 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
     private final Set<ThingTypeUID> supportedThingTypes;
     private final int timeout;
 
-    private long timestampOfLastScan = 0L;
+    private Instant timestampOfLastScan = Instant.MIN;
 
     private @Nullable ScheduledFuture<?> scheduledStop;
 
@@ -85,7 +86,7 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
      *            enable background discovery or not.
      * @throws IllegalArgumentException if {@code timeout < 0}
      */
-    public AbstractDiscoveryService(@Nullable Set<ThingTypeUID> supportedThingTypes, int timeout,
+    protected AbstractDiscoveryService(@Nullable Set<ThingTypeUID> supportedThingTypes, int timeout,
             boolean backgroundDiscoveryEnabledByDefault) throws IllegalArgumentException {
         if (timeout < 0) {
             throw new IllegalArgumentException("The timeout must be >= 0!");
@@ -104,7 +105,7 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
      *            If set to 0, disables the automatic stop.
      * @throws IllegalArgumentException if {@code timeout < 0}
      */
-    public AbstractDiscoveryService(@Nullable Set<ThingTypeUID> supportedThingTypes, int timeout)
+    protected AbstractDiscoveryService(@Nullable Set<ThingTypeUID> supportedThingTypes, int timeout)
             throws IllegalArgumentException {
         this(supportedThingTypes, timeout, true);
     }
@@ -117,7 +118,7 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
      *            If set to 0, disables the automatic stop.
      * @throws IllegalArgumentException if {@code timeout < 0}
      */
-    public AbstractDiscoveryService(int timeout) throws IllegalArgumentException {
+    protected AbstractDiscoveryService(int timeout) throws IllegalArgumentException {
         this(null, timeout);
     }
 
@@ -189,7 +190,7 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
                     }
                 }, getScanTimeout(), TimeUnit.SECONDS);
             }
-            timestampOfLastScan = new Date().getTime();
+            timestampOfLastScan = Instant.now();
 
             try {
                 startScan();
@@ -347,10 +348,9 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
      */
     protected void activate(@Nullable Map<String, Object> configProperties) {
         if (configProperties != null) {
-            Object property = configProperties.get(DiscoveryService.CONFIG_PROPERTY_BACKGROUND_DISCOVERY);
-            if (property != null) {
-                backgroundDiscoveryEnabled = getAutoDiscoveryEnabled(property);
-            }
+            backgroundDiscoveryEnabled = ConfigParser.valueAsOrElse(
+                    configProperties.get(DiscoveryService.CONFIG_PROPERTY_BACKGROUND_DISCOVERY), Boolean.class,
+                    backgroundDiscoveryEnabled);
         }
         if (backgroundDiscoveryEnabled) {
             startBackgroundDiscovery();
@@ -370,20 +370,18 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
      */
     protected void modified(@Nullable Map<String, Object> configProperties) {
         if (configProperties != null) {
-            Object property = configProperties.get(DiscoveryService.CONFIG_PROPERTY_BACKGROUND_DISCOVERY);
-            if (property != null) {
-                boolean enabled = getAutoDiscoveryEnabled(property);
+            boolean enabled = ConfigParser.valueAsOrElse(
+                    configProperties.get(DiscoveryService.CONFIG_PROPERTY_BACKGROUND_DISCOVERY), Boolean.class,
+                    backgroundDiscoveryEnabled);
 
-                if (backgroundDiscoveryEnabled && !enabled) {
-                    stopBackgroundDiscovery();
-                    logger.debug("Background discovery for discovery service '{}' disabled.",
-                            this.getClass().getName());
-                } else if (!backgroundDiscoveryEnabled && enabled) {
-                    startBackgroundDiscovery();
-                    logger.debug("Background discovery for discovery service '{}' enabled.", this.getClass().getName());
-                }
-                backgroundDiscoveryEnabled = enabled;
+            if (backgroundDiscoveryEnabled && !enabled) {
+                stopBackgroundDiscovery();
+                logger.debug("Background discovery for discovery service '{}' disabled.", this.getClass().getName());
+            } else if (!backgroundDiscoveryEnabled && enabled) {
+                startBackgroundDiscovery();
+                logger.debug("Background discovery for discovery service '{}' enabled.", this.getClass().getName());
             }
+            backgroundDiscoveryEnabled = enabled;
         }
     }
 
@@ -423,15 +421,7 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
      * @return timestamp as long
      */
     protected long getTimestampOfLastScan() {
-        return timestampOfLastScan;
-    }
-
-    private boolean getAutoDiscoveryEnabled(Object autoDiscoveryEnabled) {
-        if (autoDiscoveryEnabled instanceof String string) {
-            return Boolean.valueOf(string);
-        } else {
-            return Boolean.TRUE.equals(autoDiscoveryEnabled);
-        }
+        return Instant.MIN.equals(timestampOfLastScan) ? 0 : timestampOfLastScan.toEpochMilli();
     }
 
     private String inferKey(DiscoveryResult discoveryResult, String lastSegment) {
@@ -467,7 +457,7 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
     /**
      * Utility class to parse the key with parameters into the key and optional arguments.
      */
-    private final class ParsedKey {
+    private static final class ParsedKey {
 
         private static final int LIMIT = 2;
 
@@ -482,7 +472,7 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
                 this.args = null;
             } else {
                 this.args = Arrays.stream(parts[1].replaceAll("\\[|\\]|\"", "").split(","))
-                        .filter(s -> s != null && !s.isBlank()).map(s -> s.trim()).toArray(Object[]::new);
+                        .filter(s -> s != null && !s.isBlank()).map(String::trim).toArray(Object[]::new);
             }
         }
     }
