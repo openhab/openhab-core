@@ -125,9 +125,9 @@ public class Ser2NetUsbSerialDiscovery implements ServiceListener, UsbSerialDisc
 
         lastScanResult = scanResult;
 
-        removed.stream().forEach(this::announceRemovedDevice);
-        added.stream().forEach(this::announceAddedDevice);
-        unchanged.stream().forEach(this::announceAddedDevice);
+        removed.forEach(this::announceRemovedDevice);
+        added.forEach(this::announceAddedDevice);
+        unchanged.forEach(this::announceAddedDevice);
 
         logger.debug("Completed ser2net USB-Serial mDNS single discovery scan");
     }
