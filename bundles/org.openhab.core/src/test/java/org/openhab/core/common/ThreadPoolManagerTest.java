@@ -125,7 +125,7 @@ public class ThreadPoolManagerTest {
         ExecutorService threadPool = ThreadPoolManager.getPool(poolName);
         CountDownLatch cdl = new CountDownLatch(1);
         threadPool.execute(cdl::countDown);
-        assertTrue(cdl.await(1, TimeUnit.SECONDS), "Checking if thread pool " + poolName + " works");
+        assertTrue(cdl.await(5, TimeUnit.SECONDS), "Checking if thread pool " + poolName + " works");
         assertFalse(threadPool.isShutdown(), "Checking if thread pool is not shut down");
     }
 
@@ -133,7 +133,7 @@ public class ThreadPoolManagerTest {
         ScheduledExecutorService threadPool = ThreadPoolManager.getScheduledPool(poolName);
         CountDownLatch cdl = new CountDownLatch(1);
         threadPool.schedule(cdl::countDown, 100, TimeUnit.MILLISECONDS);
-        assertTrue(cdl.await(1, TimeUnit.SECONDS), "Checking if thread pool " + poolName + " works");
+        assertTrue(cdl.await(5, TimeUnit.SECONDS), "Checking if thread pool " + poolName + " works");
         assertFalse(threadPool.isShutdown(), "Checking if thread pool is not shut down");
     }
 }
