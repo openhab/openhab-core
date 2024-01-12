@@ -2043,8 +2043,10 @@ public class PersistenceExtensions {
      *
      * @param item the item for which to retrieve the historic item
      * @param timestamp the point in time from which to retrieve the states
-     * @return the historic items since the given point in time, or <code>null</code> if no historic items could be
-     *         found.
+     * @return the historic items since the given point in time, or <code>null</code>
+     *         if the default persistence service is not available or does not refer to a
+     *         {@link QueryablePersistenceService}
+     * 
      */
     public static @Nullable Iterable<HistoricItem> getAllStatesSince(Item item, ZonedDateTime timestamp) {
         return internalGetAllStatesBetween(item, timestamp, null);
@@ -2056,8 +2058,9 @@ public class PersistenceExtensions {
      *
      * @param item the item for which to retrieve the future item
      * @param timestamp the point in time to which to retrieve the states
-     * @return the future items to the given point in time, or <code>null</code> if no future items could be
-     *         found.
+     * @return the future items to the given point in time, or <code>null</code>
+     *         if the default persistence service is not available or does not refer to a
+     *         {@link QueryablePersistenceService}
      */
     public static @Nullable Iterable<HistoricItem> getAllStatesTill(Item item, ZonedDateTime timestamp) {
         return internalGetAllStatesBetween(item, null, timestamp);
@@ -2070,8 +2073,9 @@ public class PersistenceExtensions {
      * @param item the item for which to retrieve the historic item
      * @param begin the point in time from which to retrieve the states
      * @param end the point in time to which to retrieve the states
-     * @return the historic items between the given points in time, or <code>null</code> if no historic items could be
-     *         found.
+     * @return the historic items between the given points in time, or <code>null</code>
+     *         if the default persistence service is not available or does not refer to a
+     *         {@link QueryablePersistenceService}
      */
     public static @Nullable Iterable<HistoricItem> getAllStatesBetween(Item item, ZonedDateTime begin,
             ZonedDateTime end) {
@@ -2085,8 +2089,8 @@ public class PersistenceExtensions {
      * @param item the item for which to retrieve the historic item
      * @param timestamp the point in time from which to retrieve the states
      * @param serviceId the name of the {@link PersistenceService} to use
-     * @return the future items to the given point in time, or <code>null</code> if no historic items could be
-     *         found or if the provided <code>serviceId</code> does not refer to an available
+     * @return the historic items since the given point in time, or <code>null</code>
+     *         if the provided <code>serviceId</code> does not refer to an available
      *         {@link QueryablePersistenceService}
      */
     public static @Nullable Iterable<HistoricItem> getAllStatesSince(Item item, ZonedDateTime timestamp,
@@ -2101,8 +2105,8 @@ public class PersistenceExtensions {
      * @param item the item for which to retrieve the future item
      * @param timestamp the point in time to which to retrieve the states
      * @param serviceId the name of the {@link PersistenceService} to use
-     * @return the historic items since the given point in time, or <code>null</code> if no historic items could be
-     *         found or if the provided <code>serviceId</code> does not refer to an available
+     * @return the future items to the given point in time, or <code>null</code>
+     *         if the provided <code>serviceId</code> does not refer to an available
      *         {@link QueryablePersistenceService}
      */
     public static @Nullable Iterable<HistoricItem> getAllStatesTill(Item item, ZonedDateTime timestamp,
@@ -2118,8 +2122,8 @@ public class PersistenceExtensions {
      * @param begin the point in time from which to retrieve the states
      * @param end the point in time to which to retrieve the states
      * @param serviceId the name of the {@link PersistenceService} to use
-     * @return the historic items between the given points in time, or <code>null</code> if no historic items could be
-     *         found or if the provided <code>serviceId</code> does not refer to an available
+     * @return the historic items between the given points in time, or <code>null</code>
+     *         if the provided <code>serviceId</code> does not refer to an available
      *         {@link QueryablePersistenceService}
      */
     public static @Nullable Iterable<HistoricItem> getAllStatesBetween(Item item, ZonedDateTime begin,

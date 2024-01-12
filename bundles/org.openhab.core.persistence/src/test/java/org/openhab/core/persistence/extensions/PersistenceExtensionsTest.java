@@ -1286,55 +1286,25 @@ public class PersistenceExtensionsTest {
 
     @Test
     public void testAverageSinceDecimalTypeIrregularTimespans() {
-        TestCachedValuesPersistenceService persistenceService = new TestCachedValuesPersistenceService();
-        new PersistenceExtensions(new PersistenceServiceRegistry() {
-
-            @Override
-            public @Nullable String getDefaultId() {
-                // not available
-                return null;
-            }
-
-            @Override
-            public @Nullable PersistenceService getDefault() {
-                // not available
-                return null;
-            }
-
-            @Override
-            public Set<PersistenceService> getAll() {
-                return Set.of(persistenceService);
-            }
-
-            @Override
-            public @Nullable PersistenceService get(@Nullable String serviceId) {
-                return TestCachedValuesPersistenceService.ID.equals(serviceId) ? persistenceService : null;
-            }
-        }, timeZoneProviderMock);
-
         ZonedDateTime now = ZonedDateTime.now();
-        ZonedDateTime beginStored = now.minusHours(27);
+        int historicHours = 27;
+        int futureHours = 0;
 
-        persistenceService.addHistoricItem(beginStored, new DecimalType(0), TEST_NUMBER);
-        persistenceService.addHistoricItem(beginStored.plusHours(1), new DecimalType(100), TEST_NUMBER);
-        persistenceService.addHistoricItem(beginStored.plusHours(2), new DecimalType(0), TEST_NUMBER);
-        persistenceService.addHistoricItem(beginStored.plusHours(25), new DecimalType(50), TEST_NUMBER);
-        persistenceService.addHistoricItem(beginStored.plusHours(26), new DecimalType(0), TEST_NUMBER);
-        numberItem.setState(new DecimalType(0));
+        createTestCachedValuesPersistenceService(now, historicHours, futureHours);
 
-        State average = PersistenceExtensions.averageSince(numberItem, beginStored,
+        State average = PersistenceExtensions.averageSince(numberItem, now.minusHours(historicHours),
                 TestCachedValuesPersistenceService.ID);
         assertNotNull(average);
         DecimalType dt = average.as(DecimalType.class);
         assertNotNull(dt);
-        assertThat(dt.doubleValue(), is(closeTo((100.0 + 50.0) / 27.0, 0.01)));
+        assertThat(dt.doubleValue(), is(closeTo((100.0 + 50.0) / historicHours, 0.01)));
 
-        average = PersistenceExtensions.averageSince(numberItem, beginStored.plusHours(3),
+        average = PersistenceExtensions.averageSince(numberItem, now.minusHours(historicHours).plusHours(3),
                 TestCachedValuesPersistenceService.ID);
         assertNotNull(average);
         dt = average.as(DecimalType.class);
         assertNotNull(dt);
-        assertThat(dt.doubleValue(), is(closeTo(50.0 / 24.0, 0.01)));
+        assertThat(dt.doubleValue(), is(closeTo(50.0 / (historicHours - 3.0), 0.01)));
 
         average = PersistenceExtensions.averageSince(numberItem, now.minusMinutes(30),
                 TestCachedValuesPersistenceService.ID);
@@ -1346,55 +1316,25 @@ public class PersistenceExtensionsTest {
 
     @Test
     public void testAverageTillDecimalTypeIrregularTimespans() {
-        TestCachedValuesPersistenceService persistenceService = new TestCachedValuesPersistenceService();
-        new PersistenceExtensions(new PersistenceServiceRegistry() {
-
-            @Override
-            public @Nullable String getDefaultId() {
-                // not available
-                return null;
-            }
-
-            @Override
-            public @Nullable PersistenceService getDefault() {
-                // not available
-                return null;
-            }
-
-            @Override
-            public Set<PersistenceService> getAll() {
-                return Set.of(persistenceService);
-            }
-
-            @Override
-            public @Nullable PersistenceService get(@Nullable String serviceId) {
-                return TestCachedValuesPersistenceService.ID.equals(serviceId) ? persistenceService : null;
-            }
-        }, timeZoneProviderMock);
-
         ZonedDateTime now = ZonedDateTime.now();
-        ZonedDateTime beginStored = now.plusHours(1);
+        int historicHours = 0;
+        int futureHours = 27;
 
-        persistenceService.addHistoricItem(beginStored, new DecimalType(0), TEST_NUMBER);
-        persistenceService.addHistoricItem(beginStored.plusHours(1), new DecimalType(0), TEST_NUMBER);
-        persistenceService.addHistoricItem(beginStored.plusHours(2), new DecimalType(50), TEST_NUMBER);
-        persistenceService.addHistoricItem(beginStored.plusHours(3), new DecimalType(0), TEST_NUMBER);
-        persistenceService.addHistoricItem(beginStored.plusHours(25), new DecimalType(100), TEST_NUMBER);
-        numberItem.setState(new DecimalType(0));
+        createTestCachedValuesPersistenceService(now, historicHours, futureHours);
 
-        State average = PersistenceExtensions.averageTill(numberItem, beginStored.plusHours(26),
+        State average = PersistenceExtensions.averageTill(numberItem, now.plusHours(futureHours),
                 TestCachedValuesPersistenceService.ID);
         assertNotNull(average);
         DecimalType dt = average.as(DecimalType.class);
         assertNotNull(dt);
-        assertThat(dt.doubleValue(), is(closeTo((100.0 + 50.0) / 27.0, 0.01)));
+        assertThat(dt.doubleValue(), is(closeTo((100.0 + 50.0) / futureHours, 0.01)));
 
-        average = PersistenceExtensions.averageTill(numberItem, beginStored.plusHours(24),
+        average = PersistenceExtensions.averageTill(numberItem, now.plusHours(futureHours).minusHours(2),
                 TestCachedValuesPersistenceService.ID);
         assertNotNull(average);
         dt = average.as(DecimalType.class);
         assertNotNull(dt);
-        assertThat(dt.doubleValue(), is(closeTo(50.0 / 25.0, 0.01)));
+        assertThat(dt.doubleValue(), is(closeTo(50.0 / (futureHours - 2.0), 0.01)));
 
         average = PersistenceExtensions.averageTill(numberItem, now.plusMinutes(30),
                 TestCachedValuesPersistenceService.ID);
@@ -2241,5 +2181,214 @@ public class PersistenceExtensionsTest {
                 ZonedDateTime.of(HISTORIC_INTERMEDIATE_VALUE_1, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()),
                 ZonedDateTime.of(HISTORIC_INTERMEDIATE_VALUE_2, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()));
         assertNull(counts);
+    }
+
+    @Test
+    public void testRemoveAllStatesSince() {
+        ZonedDateTime now = ZonedDateTime.now();
+        int historicHours = 27;
+        int futureHours = 27;
+        createTestCachedValuesPersistenceService(now, historicHours, futureHours);
+
+        assertNotNull(PersistenceExtensions.getAllStatesSince(numberItem, now.minusHours(historicHours),
+                TestCachedValuesPersistenceService.ID));
+        assertThat(PersistenceExtensions.countSince(numberItem, now.minusHours(historicHours),
+                TestCachedValuesPersistenceService.ID), is(5L));
+        HistoricItem historicItem = PersistenceExtensions.previousState(numberItem,
+                TestCachedValuesPersistenceService.ID);
+        assertNotNull(historicItem);
+        assertThat(historicItem.getState(), is(new DecimalType(0)));
+
+        PersistenceExtensions.removeAllStatesSince(numberItem, now.minusHours(1),
+                TestCachedValuesPersistenceService.ID);
+        assertNotNull(PersistenceExtensions.getAllStatesSince(numberItem, now.minusHours(historicHours),
+                TestCachedValuesPersistenceService.ID));
+        assertThat(PersistenceExtensions.countSince(numberItem, now.minusHours(historicHours),
+                TestCachedValuesPersistenceService.ID), is(4L));
+        historicItem = PersistenceExtensions.previousState(numberItem, TestCachedValuesPersistenceService.ID);
+        assertNotNull(historicItem);
+        assertThat(historicItem.getState(), is(new DecimalType(50)));
+
+        PersistenceExtensions.removeAllStatesSince(numberItem, now.minusHours(3),
+                TestCachedValuesPersistenceService.ID);
+        assertNotNull(PersistenceExtensions.getAllStatesSince(numberItem, now.minusHours(historicHours),
+                TestCachedValuesPersistenceService.ID));
+        assertThat(PersistenceExtensions.countSince(numberItem, now.minusHours(historicHours),
+                TestCachedValuesPersistenceService.ID), is(3L));
+        historicItem = PersistenceExtensions.previousState(numberItem, TestCachedValuesPersistenceService.ID);
+        assertNotNull(historicItem);
+        assertThat(historicItem.getState(), is(new DecimalType(0)));
+
+        PersistenceExtensions.removeAllStatesSince(numberItem, now.minusHours(historicHours + 1),
+                TestCachedValuesPersistenceService.ID);
+        assertNotNull(PersistenceExtensions.getAllStatesSince(numberItem, now.minusHours(historicHours),
+                TestCachedValuesPersistenceService.ID));
+        assertThat(PersistenceExtensions.countSince(numberItem, now.minusHours(historicHours),
+                TestCachedValuesPersistenceService.ID), is(0L));
+        historicItem = PersistenceExtensions.previousState(numberItem, TestCachedValuesPersistenceService.ID);
+        assertNull(historicItem);
+    }
+
+    @Test
+    public void testRemoveAllStatesTill() {
+        ZonedDateTime now = ZonedDateTime.now();
+        int historicHours = 27;
+        int futureHours = 27;
+        createTestCachedValuesPersistenceService(now, historicHours, futureHours);
+
+        assertNotNull(PersistenceExtensions.getAllStatesTill(numberItem, now.plusHours(futureHours),
+                TestCachedValuesPersistenceService.ID));
+        assertThat(PersistenceExtensions.countTill(numberItem, now.plusHours(futureHours),
+                TestCachedValuesPersistenceService.ID), is(5L));
+        HistoricItem historicItem = PersistenceExtensions.nextState(numberItem, TestCachedValuesPersistenceService.ID);
+        assertNotNull(historicItem);
+        assertThat(historicItem.getState(), is(new DecimalType(0)));
+
+        PersistenceExtensions.removeAllStatesTill(numberItem, now.plusHours(1), TestCachedValuesPersistenceService.ID);
+        assertNotNull(PersistenceExtensions.getAllStatesTill(numberItem, now.plusHours(futureHours),
+                TestCachedValuesPersistenceService.ID));
+        assertThat(PersistenceExtensions.countTill(numberItem, now.plusHours(futureHours),
+                TestCachedValuesPersistenceService.ID), is(4L));
+        historicItem = PersistenceExtensions.nextState(numberItem, TestCachedValuesPersistenceService.ID);
+        assertNotNull(historicItem);
+        assertThat(historicItem.getState(), is(new DecimalType(50)));
+
+        PersistenceExtensions.removeAllStatesTill(numberItem, now.plusHours(2), TestCachedValuesPersistenceService.ID);
+        assertNotNull(PersistenceExtensions.getAllStatesTill(numberItem, now.plusHours(futureHours),
+                TestCachedValuesPersistenceService.ID));
+        assertThat(PersistenceExtensions.countTill(numberItem, now.plusHours(futureHours),
+                TestCachedValuesPersistenceService.ID), is(3L));
+        historicItem = PersistenceExtensions.nextState(numberItem, TestCachedValuesPersistenceService.ID);
+        assertNotNull(historicItem);
+        assertThat(historicItem.getState(), is(new DecimalType(0)));
+
+        PersistenceExtensions.removeAllStatesTill(numberItem, now.plusHours(futureHours + 1),
+                TestCachedValuesPersistenceService.ID);
+        assertNotNull(PersistenceExtensions.getAllStatesTill(numberItem, now.plusHours(futureHours),
+                TestCachedValuesPersistenceService.ID));
+        assertThat(PersistenceExtensions.countTill(numberItem, now.plusHours(futureHours),
+                TestCachedValuesPersistenceService.ID), is(0L));
+        historicItem = PersistenceExtensions.nextState(numberItem, TestCachedValuesPersistenceService.ID);
+        assertNull(historicItem);
+    }
+
+    @Test
+    public void testRemoveAllStatesBetween() {
+        ZonedDateTime now = ZonedDateTime.now();
+        int historicHours = 27;
+        int futureHours = 27;
+        createTestCachedValuesPersistenceService(now, historicHours, futureHours);
+
+        assertNotNull(PersistenceExtensions.getAllStatesBetween(numberItem, now.minusHours(historicHours),
+                now.plusHours(futureHours), TestCachedValuesPersistenceService.ID));
+        assertThat(PersistenceExtensions.countBetween(numberItem, now.minusHours(historicHours),
+                now.plusHours(futureHours), TestCachedValuesPersistenceService.ID), is(10L));
+        HistoricItem historicItem = PersistenceExtensions.previousState(numberItem,
+                TestCachedValuesPersistenceService.ID);
+        assertNotNull(historicItem);
+        assertThat(historicItem.getState(), is(new DecimalType(0)));
+        historicItem = PersistenceExtensions.nextState(numberItem, TestCachedValuesPersistenceService.ID);
+        assertNotNull(historicItem);
+        assertThat(historicItem.getState(), is(new DecimalType(0)));
+
+        PersistenceExtensions.removeAllStatesBetween(numberItem, now.minusHours(2), now.minusHours(1),
+                TestCachedValuesPersistenceService.ID);
+        assertNotNull(PersistenceExtensions.getAllStatesBetween(numberItem, now.minusHours(historicHours),
+                now.plusHours(futureHours), TestCachedValuesPersistenceService.ID));
+        assertThat(PersistenceExtensions.countBetween(numberItem, now.minusHours(historicHours),
+                now.plusHours(futureHours), TestCachedValuesPersistenceService.ID), is(8L));
+        historicItem = PersistenceExtensions.previousState(numberItem, TestCachedValuesPersistenceService.ID);
+        assertNotNull(historicItem);
+        assertThat(historicItem.getState(), is(new DecimalType(0)));
+        historicItem = PersistenceExtensions.nextState(numberItem, TestCachedValuesPersistenceService.ID);
+        assertNotNull(historicItem);
+        assertThat(historicItem.getState(), is(new DecimalType(0)));
+
+        PersistenceExtensions.removeAllStatesBetween(numberItem, now.plusHours(1), now.plusHours(2),
+                TestCachedValuesPersistenceService.ID);
+        assertNotNull(PersistenceExtensions.getAllStatesBetween(numberItem, now.minusHours(historicHours),
+                now.plusHours(futureHours), TestCachedValuesPersistenceService.ID));
+        assertThat(PersistenceExtensions.countBetween(numberItem, now.minusHours(historicHours),
+                now.plusHours(futureHours), TestCachedValuesPersistenceService.ID), is(6L));
+        historicItem = PersistenceExtensions.previousState(numberItem, TestCachedValuesPersistenceService.ID);
+        assertNotNull(historicItem);
+        assertThat(historicItem.getState(), is(new DecimalType(0)));
+        historicItem = PersistenceExtensions.nextState(numberItem, TestCachedValuesPersistenceService.ID);
+        assertNotNull(historicItem);
+        assertThat(historicItem.getState(), is(new DecimalType(0)));
+
+        PersistenceExtensions.removeAllStatesBetween(numberItem, now.minusHours(historicHours - 2),
+                now.plusHours(futureHours - 2), TestCachedValuesPersistenceService.ID);
+        assertNotNull(PersistenceExtensions.getAllStatesBetween(numberItem, now.minusHours(historicHours),
+                now.plusHours(futureHours), TestCachedValuesPersistenceService.ID));
+        assertThat(PersistenceExtensions.countBetween(numberItem, now.minusHours(historicHours),
+                now.plusHours(futureHours), TestCachedValuesPersistenceService.ID), is(3L));
+        historicItem = PersistenceExtensions.previousState(numberItem, TestCachedValuesPersistenceService.ID);
+        assertNotNull(historicItem);
+        assertThat(historicItem.getState(), is(new DecimalType(100)));
+        historicItem = PersistenceExtensions.nextState(numberItem, TestCachedValuesPersistenceService.ID);
+        assertNotNull(historicItem);
+        assertThat(historicItem.getState(), is(new DecimalType(0)));
+
+        PersistenceExtensions.removeAllStatesBetween(numberItem, now.minusHours(historicHours + 1),
+                now.plusHours(futureHours + 1), TestCachedValuesPersistenceService.ID);
+        assertNotNull(PersistenceExtensions.getAllStatesBetween(numberItem, now.minusHours(historicHours),
+                now.plusHours(futureHours), TestCachedValuesPersistenceService.ID));
+        assertThat(PersistenceExtensions.countBetween(numberItem, now.minusHours(historicHours),
+                now.plusHours(futureHours), TestCachedValuesPersistenceService.ID), is(0L));
+        historicItem = PersistenceExtensions.previousState(numberItem, TestCachedValuesPersistenceService.ID);
+        assertNull(historicItem);
+        historicItem = PersistenceExtensions.nextState(numberItem, TestCachedValuesPersistenceService.ID);
+        assertNull(historicItem);
+    }
+
+    private void createTestCachedValuesPersistenceService(ZonedDateTime now, int historicHours, int futureHours) {
+        // Check that test is relevant and fail if badly configured
+        assertTrue(historicHours == 0 || historicHours > 5);
+        assertTrue(futureHours == 0 || futureHours > 5);
+
+        TestCachedValuesPersistenceService persistenceService = new TestCachedValuesPersistenceService();
+        new PersistenceExtensions(new PersistenceServiceRegistry() {
+
+            @Override
+            public @Nullable String getDefaultId() {
+                // not available
+                return null;
+            }
+
+            @Override
+            public @Nullable PersistenceService getDefault() {
+                // not available
+                return null;
+            }
+
+            @Override
+            public Set<PersistenceService> getAll() {
+                return Set.of(persistenceService);
+            }
+
+            @Override
+            public @Nullable PersistenceService get(@Nullable String serviceId) {
+                return TestCachedValuesPersistenceService.ID.equals(serviceId) ? persistenceService : null;
+            }
+        }, timeZoneProviderMock);
+
+        if (historicHours > 0) {
+            ZonedDateTime beginHistory = now.minusHours(historicHours);
+            persistenceService.store(numberItem, beginHistory, new DecimalType(0));
+            persistenceService.store(numberItem, beginHistory.plusHours(1), new DecimalType(100));
+            persistenceService.store(numberItem, beginHistory.plusHours(2), new DecimalType(0));
+            persistenceService.store(numberItem, now.minusHours(2), new DecimalType(50));
+            persistenceService.store(numberItem, now.minusHours(1), new DecimalType(0));
+        }
+        numberItem.setState(new DecimalType(0));
+        if (futureHours > 0) {
+            ZonedDateTime endFuture = now.plusHours(futureHours);
+            persistenceService.store(numberItem, now.plusHours(1), new DecimalType(0));
+            persistenceService.store(numberItem, now.plusHours(2), new DecimalType(50));
+            persistenceService.store(numberItem, now.plusHours(3), new DecimalType(0));
+            persistenceService.store(numberItem, endFuture.minusHours(2), new DecimalType(100));
+            persistenceService.store(numberItem, endFuture.minusHours(1), new DecimalType(0));
+        }
     }
 }
