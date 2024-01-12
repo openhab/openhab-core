@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -45,10 +46,6 @@ public class TestCachedValuesPersistenceService implements ModifiablePersistence
     public TestCachedValuesPersistenceService() {
     }
 
-    public void addHistoricItem(ZonedDateTime timestamp, State state, String itemName) {
-        historicItems.add(new CachedHistoricItem(timestamp, state, itemName));
-    }
-
     @Override
     public String getId() {
         return ID;
@@ -64,6 +61,7 @@ public class TestCachedValuesPersistenceService implements ModifiablePersistence
 
     @Override
     public void store(Item item, ZonedDateTime date, State state) {
+        historicItems.add(new CachedHistoricItem(date, state, item.getName()));
     }
 
     @Override
@@ -72,7 +70,7 @@ public class TestCachedValuesPersistenceService implements ModifiablePersistence
 
     @Override
     public boolean remove(FilterCriteria filter) throws IllegalArgumentException {
-        return true;
+        return historicItems.removeAll(StreamSupport.stream(query(filter).spliterator(), false).toList());
     }
 
     @Override
