@@ -12,11 +12,13 @@
  */
 package org.openhab.core.io.transport.sbus.test;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.spy;
 
 import java.io.File;
 import java.io.UncheckedIOException;
@@ -37,7 +39,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.openhab.core.io.transport.sbus.endpoint.ModbusSlaveEndpoint;
-import org.openhab.core.io.transport.sbus.endpoint.ModbusTCPSlaveEndpoint;
+import org.openhab.core.io.transport.sbus.endpoint.ModbusUDPSlaveEndpoint;
 import org.openhab.core.io.transport.sbus.internal.ModbusManagerImpl;
 import org.openhab.core.test.java.JavaTest;
 import org.slf4j.Logger;
@@ -49,13 +51,10 @@ import ro.ciprianpascu.sbus.ModbusCoupler;
 import ro.ciprianpascu.sbus.io.ModbusTransport;
 import ro.ciprianpascu.sbus.msg.ModbusRequest;
 import ro.ciprianpascu.sbus.net.ModbusSerialListener;
-import ro.ciprianpascu.sbus.net.ModbusTCPListener;
 import ro.ciprianpascu.sbus.net.ModbusUDPListener;
 import ro.ciprianpascu.sbus.net.SerialConnection;
 import ro.ciprianpascu.sbus.net.SerialConnectionFactory;
-import ro.ciprianpascu.sbus.net.TCPSlaveConnection;
 import ro.ciprianpascu.sbus.net.TCPSlaveConnection.ModbusTCPTransportFactory;
-import ro.ciprianpascu.sbus.net.TCPSlaveConnectionFactory;
 import ro.ciprianpascu.sbus.net.UDPSlaveTerminal;
 import ro.ciprianpascu.sbus.net.UDPSlaveTerminal.ModbusUDPTransportFactoryImpl;
 import ro.ciprianpascu.sbus.net.UDPSlaveTerminalFactory;
@@ -75,7 +74,6 @@ public class IntegrationTestSupport extends JavaTest {
     private final Logger logger = LoggerFactory.getLogger(IntegrationTestSupport.class);
 
     public enum ServerType {
-        TCP,
         UDP,
         SERIAL
     }
@@ -84,8 +82,7 @@ public class IntegrationTestSupport extends JavaTest {
      * Servers to test
      * Serial is system dependent
      */
-    public static final ServerType[] TEST_SERVERS = new ServerType[] { ServerType.TCP
-            // ServerType.UDP,
+    public static final ServerType[] TEST_SERVERS = new ServerType[] { ServerType.UDP,
             // ServerType.SERIAL
     };
 
@@ -124,19 +121,16 @@ public class IntegrationTestSupport extends JavaTest {
 
     private static AtomicCounter udpServerIndex = new AtomicCounter(0);
 
-    protected @Spy TCPSlaveConnectionFactory tcpConnectionFactory = new TCPSlaveConnectionFactoryImpl();
     protected @Spy UDPSlaveTerminalFactory udpTerminalFactory = new UDPSlaveTerminalFactoryImpl();
     protected @Spy SerialConnectionFactory serialConnectionFactory = new SerialConnectionFactoryImpl();
 
     protected @NonNullByDefault({}) ResultCaptor<ModbusRequest> modbustRequestCaptor;
 
-    protected @NonNullByDefault({}) ModbusTCPListener tcpListener;
     protected @NonNullByDefault({}) ModbusUDPListener udpListener;
     protected @NonNullByDefault({}) ModbusSerialListener serialListener;
     protected @NonNullByDefault({}) SimpleProcessImage spi;
-    protected int tcpModbusPort = -1;
     protected int udpModbusPort = -1;
-    protected ServerType serverType = ServerType.TCP;
+    protected ServerType serverType = ServerType.UDP;
     protected long artificialServerWait = 0;
 
     protected @NonNullByDefault({}) NonOSGIModbusManager modbusManager;
@@ -183,9 +177,7 @@ public class IntegrationTestSupport extends JavaTest {
 
     protected void waitForConnectionsReceived(int expectedConnections) {
         waitForAssert(() -> {
-            if (ServerType.TCP.equals(serverType)) {
-                verify(tcpConnectionFactory, times(expectedConnections)).create(any(Socket.class));
-            } else if (ServerType.UDP.equals(serverType)) {
+            if (ServerType.UDP.equals(serverType)) {
                 logger.debug("No-op, UDP server type");
             } else if (ServerType.SERIAL.equals(serverType)) {
                 logger.debug("No-op, SERIAL server type");
@@ -202,9 +194,7 @@ public class IntegrationTestSupport extends JavaTest {
         ModbusCoupler.getReference().setSubnetID(SLAVE_SUBNET_ID);
         ModbusCoupler.getReference().setUnitID(SLAVE_UNIT_ID);
 
-        if (ServerType.TCP.equals(serverType)) {
-            startTCPServer();
-        } else if (ServerType.UDP.equals(serverType)) {
+        if (ServerType.UDP.equals(serverType)) {
             startUDPServer();
         } else if (ServerType.SERIAL.equals(serverType)) {
             startSerialServer();
@@ -214,10 +204,7 @@ public class IntegrationTestSupport extends JavaTest {
     }
 
     private void stopServer() {
-        if (ServerType.TCP.equals(serverType)) {
-            tcpListener.stop();
-            logger.debug("Stopped TCP listener, tcpModbusPort={}", tcpModbusPort);
-        } else if (ServerType.UDP.equals(serverType)) {
+        if (ServerType.UDP.equals(serverType)) {
             udpListener.stop();
             logger.debug("Stopped UDP listener, udpModbusPort={}", udpModbusPort);
         } else if (ServerType.SERIAL.equals(serverType)) {
@@ -257,31 +244,14 @@ public class IntegrationTestSupport extends JavaTest {
         udpModbusPort = udpListener.getLocalPort();
     }
 
-    private void startTCPServer() {
-        // Serve single user at a time
-        tcpListener = new ModbusTCPListener(SERVER_THREADS, localAddress(), tcpConnectionFactory);
-        // Use any open port
-        tcpListener.setPort(0);
-        tcpListener.start();
-        // Query server port. It seems to take time (probably due to thread starting)
-        waitForTCPServerStartup();
-        assertNotSame(-1, tcpModbusPort);
-        assertNotSame(0, tcpModbusPort);
-    }
-
-    private void waitForTCPServerStartup() {
-        waitFor(() -> tcpListener.getLocalPort() > 0, 10_000, 5);
-        tcpModbusPort = tcpListener.getLocalPort();
-    }
-
     private void startSerialServer() {
         serialServerThread.start();
         assertDoesNotThrow(() -> Thread.sleep(1000));
     }
 
     public ModbusSlaveEndpoint getEndpoint() {
-        assert tcpModbusPort > 0;
-        return new ModbusTCPSlaveEndpoint("127.0.0.1", tcpModbusPort, false);
+        assert udpModbusPort > 0;
+        return new ModbusUDPSlaveEndpoint("127.0.0.1", udpModbusPort);
     }
 
     /**
@@ -306,14 +276,6 @@ public class IntegrationTestSupport extends JavaTest {
             // Capture requests produced by our server transport
             assertDoesNotThrow(() -> doAnswer(modbustRequestCaptor).when(transport).readRequest());
             return transport;
-        }
-    }
-
-    public class TCPSlaveConnectionFactoryImpl implements TCPSlaveConnectionFactory {
-
-        @Override
-        public TCPSlaveConnection create(@NonNullByDefault({}) Socket socket) {
-            return new TCPSlaveConnection(socket, new SpyingModbusTCPTransportFactory());
         }
     }
 

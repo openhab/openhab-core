@@ -56,6 +56,7 @@ import org.openhab.core.io.transport.sbus.endpoint.ModbusSlaveEndpointVisitor;
 import org.openhab.core.io.transport.sbus.endpoint.ModbusTCPSlaveEndpoint;
 import org.openhab.core.io.transport.sbus.endpoint.ModbusUDPSlaveEndpoint;
 import org.openhab.core.io.transport.sbus.exception.ModbusConnectionException;
+import org.openhab.core.io.transport.sbus.exception.ModbusSlaveErrorResponseException.KnownExceptionCode;
 import org.openhab.core.io.transport.sbus.exception.ModbusUnexpectedResponseFunctionCodeException;
 import org.openhab.core.io.transport.sbus.exception.ModbusUnexpectedResponseSizeException;
 import org.openhab.core.io.transport.sbus.exception.ModbusUnexpectedTransactionIdException;
@@ -84,7 +85,7 @@ import ro.ciprianpascu.sbus.net.ModbusSlaveConnection;
  *
  * @author Sami Salonen - Initial contribution
  */
-@Component(service = ModbusManager.class, configurationPid = "transport.modbus")
+@Component(service = ModbusManager.class, configurationPid = "transport.sbus")
 @NonNullByDefault
 public class ModbusManagerImpl implements ModbusManager {
 
@@ -207,6 +208,11 @@ public class ModbusManagerImpl implements ModbusManager {
             // slave)
             timer.transaction.timeRunnableWithModbusException(transaction::execute);
             ModbusResponse response = transaction.getResponse();
+
+            if (response == null)
+                throw new ModbusSlaveException(
+                        KnownExceptionCode.GATEWAY_TARGET_DEVICE_FAILED_TO_RESPOND.getExceptionCode());
+
             logger.trace("Response for read request (FC={}, transaction ID={}): {} [operation ID {}]",
                     response.getFunctionCode(), response.getTransactionID(), response.getHexMessage(), operationId);
             checkTransactionId(response, libRequest, operationId);

@@ -118,8 +118,8 @@ public class ModbusReadRequestBlueprint {
 
     @Override
     public String toString() {
-        return "ModbusReadRequestBlueprint [slaveId=" + slaveId + ", functionCode=" + functionCode + ", start=" + start
-                + ", length=" + length + ", maxTries=" + maxTries + "]";
+        return "ModbusReadRequestBlueprint [subnetId=" + subnetId + ", slaveId=" + slaveId + ", functionCode="
+                + functionCode + ", start=" + start + ", length=" + length + ", maxTries=" + maxTries + "]";
     }
 
     @Override

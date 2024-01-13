@@ -12,10 +12,17 @@
  */
 package org.openhab.core.io.transport.sbus.test;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.anyOf;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assumptions.*;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
@@ -51,9 +58,10 @@ import org.openhab.core.io.transport.sbus.PollTask;
 import org.openhab.core.io.transport.sbus.endpoint.EndpointPoolConfiguration;
 import org.openhab.core.io.transport.sbus.endpoint.ModbusSlaveEndpoint;
 import org.openhab.core.io.transport.sbus.endpoint.ModbusTCPSlaveEndpoint;
+import org.openhab.core.io.transport.sbus.endpoint.ModbusUDPSlaveEndpoint;
 import org.openhab.core.io.transport.sbus.exception.ModbusConnectionException;
 import org.openhab.core.io.transport.sbus.exception.ModbusSlaveErrorResponseException;
-import org.openhab.core.io.transport.sbus.exception.ModbusSlaveIOException;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ro.ciprianpascu.sbus.msg.ModbusRequest;
@@ -69,6 +77,8 @@ import ro.ciprianpascu.sbus.util.BitVector;
  */
 @NonNullByDefault
 public class SmokeTest extends IntegrationTestSupport {
+	
+	private static final Logger logger = LoggerFactory.getLogger(SmokeTest.class);
 
     private static final int COIL_EVERY_N_TRUE = 2;
     private static final int DISCRETE_EVERY_N_TRUE = 3;
@@ -239,7 +249,7 @@ public class SmokeTest extends IntegrationTestSupport {
             assertTrue(callbackCalled.await(15, TimeUnit.SECONDS));
             assertThat(okCount.get(), is(equalTo(0)));
             assertThat(lastError.toString(), errorCount.get(), is(equalTo(1)));
-            assertInstanceOf(ModbusSlaveIOException.class, lastError.get(), lastError.toString());
+            assertInstanceOf(ModbusSlaveErrorResponseException.class, lastError.get(), lastError.toString());
         }
     }
 
@@ -834,120 +844,6 @@ public class SmokeTest extends IntegrationTestSupport {
         assertThat(modbusManager.getEndpointPoolConfiguration(getEndpoint()), is(equalTo(defaultConfig)));
     }
 
-    @Test
-    public void testConnectionCloseAfterLastCommunicationInterfaceClosed() throws Exception {
-        assumeFalse(isRunningInCI(), "Running in CI! Will not test timing-sensitive details");
-        ModbusSlaveEndpoint endpoint = getEndpoint();
-        assumeTrue(endpoint instanceof ModbusTCPSlaveEndpoint,
-                "Connection closing test supported only with TCP slaves");
-
-        // Generate server data
-        generateData();
-
-        EndpointPoolConfiguration config = new EndpointPoolConfiguration();
-        config.setReconnectAfterMillis(9_000_000);
-
-        // 1. capture open connections at this point
-        long openSocketsBefore = getNumberOfOpenClients(SOCKET_SPY);
-        assertThat(openSocketsBefore, is(equalTo(0L)));
-
-        // 2. make poll, binding opens the tcp connection
-        try (ModbusCommunicationInterface comms = modbusManager.newModbusCommunicationInterface(endpoint, config)) {
-            {
-                CountDownLatch latch = new CountDownLatch(1);
-                comms.submitOneTimePoll(
-                        new ModbusReadRequestBlueprint(1, 1, ModbusReadFunctionCode.READ_COILS, 0, 1, 1), response -> {
-                            latch.countDown();
-                        }, failure -> {
-                            latch.countDown();
-                        });
-                assertTrue(latch.await(60, TimeUnit.SECONDS));
-            }
-            waitForAssert(() -> {
-                // 3. ensure one open connection
-                long openSocketsAfter = getNumberOfOpenClients(SOCKET_SPY);
-                assertThat(openSocketsAfter, is(equalTo(1L)));
-            });
-            try (ModbusCommunicationInterface comms2 = modbusManager.newModbusCommunicationInterface(endpoint,
-                    config)) {
-                {
-                    CountDownLatch latch = new CountDownLatch(1);
-                    comms.submitOneTimePoll(
-                            new ModbusReadRequestBlueprint(1, 1, ModbusReadFunctionCode.READ_COILS, 0, 1, 1),
-                            response -> {
-                                latch.countDown();
-                            }, failure -> {
-                                latch.countDown();
-                            });
-                    assertTrue(latch.await(60, TimeUnit.SECONDS));
-                }
-                assertThat(getNumberOfOpenClients(SOCKET_SPY), is(equalTo(1L)));
-                // wait for moment (to check that no connections are closed)
-                Thread.sleep(1000);
-                // no more than 1 connection, even though requests are going through
-                assertThat(getNumberOfOpenClients(SOCKET_SPY), is(equalTo(1L)));
-            }
-            Thread.sleep(1000);
-            // Still one connection open even after closing second connection
-            assertThat(getNumberOfOpenClients(SOCKET_SPY), is(equalTo(1L)));
-        } // 4. close (the last) comms
-          // ensure that open connections are closed
-          // (despite huge "reconnect after millis")
-        waitForAssert(() -> {
-            long openSocketsAfterClose = getNumberOfOpenClients(SOCKET_SPY);
-            assertThat(openSocketsAfterClose, is(equalTo(0L)));
-        });
-    }
-
-    @Test
-    public void testConnectionCloseAfterOneOffPoll() throws Exception {
-        assumeFalse(isRunningInCI(), "Running in CI! Will not test timing-sensitive details");
-        ModbusSlaveEndpoint endpoint = getEndpoint();
-        assumeTrue(endpoint instanceof ModbusTCPSlaveEndpoint,
-                "Connection closing test supported only with TCP slaves");
-
-        // Generate server data
-        generateData();
-
-        EndpointPoolConfiguration config = new EndpointPoolConfiguration();
-        config.setReconnectAfterMillis(2_000);
-
-        // 1. capture open connections at this point
-        long openSocketsBefore = getNumberOfOpenClients(SOCKET_SPY);
-        assertThat(openSocketsBefore, is(equalTo(0L)));
-
-        // 2. make poll, binding opens the tcp connection
-        try (ModbusCommunicationInterface comms = modbusManager.newModbusCommunicationInterface(endpoint, config)) {
-            {
-                CountDownLatch latch = new CountDownLatch(1);
-                comms.submitOneTimePoll(
-                        new ModbusReadRequestBlueprint(1, 1, ModbusReadFunctionCode.READ_COILS, 0, 1, 1), response -> {
-                            latch.countDown();
-                        }, failure -> {
-                            latch.countDown();
-                        });
-                assertTrue(latch.await(60, TimeUnit.SECONDS));
-            }
-            // Right after the poll we should have one connection open
-            waitForAssert(() -> {
-                // 3. ensure one open connection
-                long openSocketsAfter = getNumberOfOpenClients(SOCKET_SPY);
-                assertThat(openSocketsAfter, is(equalTo(1L)));
-            });
-            // 4. Connection should close itself by the commons pool eviction policy (checking for old idle connection
-            // every now and then)
-            waitForAssert(() -> {
-                // 3. ensure one open connection
-                long openSocketsAfter = getNumberOfOpenClients(SOCKET_SPY);
-                assertThat(openSocketsAfter, is(equalTo(0L)));
-            }, 60_000, 50);
-        }
-    }
-
-    private long getNumberOfOpenClients(SpyingSocketFactory socketSpy) {
-        localAddress();
-        return socketSpy.sockets.stream().filter(this::isConnectedToTestServer).count();
-    }
 
     /**
      * Spy all sockets that are created
@@ -1044,6 +940,6 @@ public class SmokeTest extends IntegrationTestSupport {
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
-        return port == tcpModbusPort && connected && address.equals(testServerAddress);
+        return port == udpModbusPort && connected && address.equals(testServerAddress);
     }
 }
