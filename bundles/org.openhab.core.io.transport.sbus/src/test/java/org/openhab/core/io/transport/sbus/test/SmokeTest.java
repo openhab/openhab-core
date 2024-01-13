@@ -22,7 +22,6 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
@@ -58,7 +57,6 @@ import org.openhab.core.io.transport.sbus.PollTask;
 import org.openhab.core.io.transport.sbus.endpoint.EndpointPoolConfiguration;
 import org.openhab.core.io.transport.sbus.endpoint.ModbusSlaveEndpoint;
 import org.openhab.core.io.transport.sbus.endpoint.ModbusTCPSlaveEndpoint;
-import org.openhab.core.io.transport.sbus.endpoint.ModbusUDPSlaveEndpoint;
 import org.openhab.core.io.transport.sbus.exception.ModbusConnectionException;
 import org.openhab.core.io.transport.sbus.exception.ModbusSlaveErrorResponseException;
 import org.slf4j.Logger;
@@ -77,8 +75,8 @@ import ro.ciprianpascu.sbus.util.BitVector;
  */
 @NonNullByDefault
 public class SmokeTest extends IntegrationTestSupport {
-	
-	private static final Logger logger = LoggerFactory.getLogger(SmokeTest.class);
+
+    private static final Logger logger = LoggerFactory.getLogger(SmokeTest.class);
 
     private static final int COIL_EVERY_N_TRUE = 2;
     private static final int DISCRETE_EVERY_N_TRUE = 3;
@@ -843,7 +841,6 @@ public class SmokeTest extends IntegrationTestSupport {
         // Should match the default
         assertThat(modbusManager.getEndpointPoolConfiguration(getEndpoint()), is(equalTo(defaultConfig)));
     }
-
 
     /**
      * Spy all sockets that are created
