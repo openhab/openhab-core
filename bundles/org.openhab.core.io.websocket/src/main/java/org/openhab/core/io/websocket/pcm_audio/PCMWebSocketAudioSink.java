@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.audio.internal.websocket;
+package org.openhab.core.io.websocket.pcm_audio;
 
 import java.io.IOException;
 import java.io.InputStream;

@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.voice.internal;
+package org.openhab.core.io.websocket.pcm_audio;
 
 import java.util.Locale;
 
@@ -18,7 +18,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.audio.AudioSink;
 import org.openhab.core.audio.AudioSource;
-import org.openhab.core.audio.internal.websocket.PCMWebSocketAdapter;
 import org.openhab.core.voice.KSEdgeService;
 import org.openhab.core.voice.KSException;
 import org.openhab.core.voice.KSListener;
@@ -36,6 +35,7 @@ import org.osgi.service.component.annotations.Reference;
  */
 @NonNullByDefault
 @Component(immediate = true)
+@SuppressWarnings("unused")
 public class PCMWebSocketDialogProvider implements PCMWebSocketAdapter.DialogProvider {
     private final VoiceManager voiceManager;
 
