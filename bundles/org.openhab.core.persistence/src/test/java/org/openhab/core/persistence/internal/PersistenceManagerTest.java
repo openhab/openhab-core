@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
@@ -125,7 +126,7 @@ public class PersistenceManagerTest {
     private @NonNullByDefault({}) @Mock ScheduledCompletableFuture<Void> scheduledFutureMock;
     private @NonNullByDefault({}) @Mock ItemRegistry itemRegistryMock;
     private @NonNullByDefault({}) @Mock SafeCaller safeCallerMock;
-    private @NonNullByDefault({}) @Mock SafeCallerBuilder<QueryablePersistenceService> safeCallerBuilderMock;
+    private @NonNullByDefault({}) @Mock SafeCallerBuilder<@NonNull QueryablePersistenceService> safeCallerBuilderMock;
     private @NonNullByDefault({}) @Mock ReadyService readyServiceMock;
     private @NonNullByDefault({}) @Mock PersistenceServiceConfigurationRegistry persistenceServiceConfigurationRegistryMock;
 

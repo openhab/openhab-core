@@ -27,6 +27,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
@@ -301,12 +302,7 @@ public class DateTimeTypeTest {
         TimeZone inputTimeZone = parameterSet.inputTimeZone;
         String inputTimeString = parameterSet.inputTimeString;
         if (inputTimeMap != null && inputTimeZone != null) {
-            int durationInNano = (int) TimeUnit.NANOSECONDS.convert(inputTimeMap.get("milliseconds"),
-                    TimeUnit.MILLISECONDS);
-
-            LocalDateTime dateTime = LocalDateTime.of(inputTimeMap.get("year"), inputTimeMap.get("month") + 1,
-                    inputTimeMap.get("date"), inputTimeMap.get("hourOfDay"), inputTimeMap.get("minute"),
-                    inputTimeMap.get("second"), durationInNano);
+            LocalDateTime dateTime = createLocalDateTimeFromInput(inputTimeMap);
             ZonedDateTime zonedDate = ZonedDateTime.of(dateTime, inputTimeZone.toZoneId());
             dt1 = new DateTimeType(zonedDate);
             dt3 = new DateTimeType(
@@ -368,17 +364,25 @@ public class DateTimeTypeTest {
         TimeZone inputTimeZone = parameterSet.inputTimeZone;
         String inputTimeString = parameterSet.inputTimeString;
         if (inputTimeMap != null && inputTimeZone != null) {
-            int durationInNano = (int) TimeUnit.NANOSECONDS.convert(inputTimeMap.get("milliseconds"),
-                    TimeUnit.MILLISECONDS);
-
-            LocalDateTime dateTime = LocalDateTime.of(inputTimeMap.get("year"), inputTimeMap.get("month") + 1,
-                    inputTimeMap.get("date"), inputTimeMap.get("hourOfDay"), inputTimeMap.get("minute"),
-                    inputTimeMap.get("second"), durationInNano);
+            LocalDateTime dateTime = createLocalDateTimeFromInput(inputTimeMap);
             ZonedDateTime zonedDate = ZonedDateTime.of(dateTime, inputTimeZone.toZoneId());
             return new DateTimeType(zonedDate);
         } else if (inputTimeString != null) {
             return new DateTimeType(inputTimeString);
         }
         throw new DateTimeException("Invalid inputs in parameter set");
+    }
+
+    private LocalDateTime createLocalDateTimeFromInput(Map<String, Integer> inputTimeMap) {
+        Integer year = Objects.requireNonNull(inputTimeMap.get("year"));
+        Integer month = Objects.requireNonNull(inputTimeMap.get("month"));
+        Integer dayOfMonth = Objects.requireNonNull(inputTimeMap.get("date"));
+        Integer hourOfDay = Objects.requireNonNull(inputTimeMap.get("hourOfDay"));
+        Integer minute = Objects.requireNonNull(inputTimeMap.get("minute"));
+        Integer second = Objects.requireNonNull(inputTimeMap.get("second"));
+        Integer milliseconds = Objects.requireNonNull(inputTimeMap.get("milliseconds"));
+        int durationInNano = (int) TimeUnit.NANOSECONDS.convert(milliseconds, TimeUnit.MILLISECONDS);
+
+        return LocalDateTime.of(year, month + 1, dayOfMonth, hourOfDay, minute, second, durationInNano);
     }
 }
