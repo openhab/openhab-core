@@ -114,7 +114,7 @@ public class DialogProcessor implements KSListener, STTListener {
         this.activeDialogGroups = activeDialogGroups;
         this.bundle = bundle;
         var ks = context.ks();
-        this.ksFormat = ks != null
+        this.ksFormat = ks != null && !(ks instanceof KSEdgeService)
                 ? VoiceManagerImpl.getBestMatch(context.source().getSupportedFormats(), ks.getSupportedFormats())
                 : null;
         this.sttFormat = VoiceManagerImpl.getBestMatch(context.source().getSupportedFormats(),
@@ -159,7 +159,7 @@ public class DialogProcessor implements KSListener, STTListener {
             abortKS();
             closeStreamKS();
             AudioFormat fmt = ksFormat;
-            if (fmt == null) {
+            if (fmt == null && !(ksService instanceof KSEdgeService)) {
                 logger.warn("No compatible audio format found for ks '{}' and source '{}'", ksService.getId(),
                         dialogContext.source().getId());
                 return;

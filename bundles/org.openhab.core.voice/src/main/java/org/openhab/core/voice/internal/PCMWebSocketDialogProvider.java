@@ -45,7 +45,7 @@ public class PCMWebSocketDialogProvider implements PCMWebSocketAdapter.DialogPro
     }
 
     /**
-     * Starts a dialog and return a runnable instance that triggers the dialog.
+     * Starts a dialog and returns a runnable instance that triggers the dialog.
      * @param sink the audio sink
      * @param source the audio source
      * @return a runnable that triggers the dialog
@@ -70,6 +70,12 @@ public class PCMWebSocketDialogProvider implements PCMWebSocketAdapter.DialogPro
         private @Nullable KSListener ksListener = null;
         public WebSocketKeywordSpotter() {
         }
+        public void trigger() {
+            var ksListener = this.ksListener;
+            if(ksListener != null) {
+                ksListener.ksEventReceived(new KSpottedEvent());
+            }
+        }
         @Override
         public KSServiceHandle spot(KSListener ksListener) throws KSException {
             this.ksListener = ksListener;
@@ -78,13 +84,6 @@ public class PCMWebSocketDialogProvider implements PCMWebSocketAdapter.DialogPro
                     this.ksListener = null;
                 }
             };
-        }
-
-        public void trigger() {
-            var ksListener = this.ksListener;
-            if(ksListener != null) {
-                ksListener.ksEventReceived(new KSpottedEvent());
-            }
         }
 
         @Override
@@ -96,16 +95,6 @@ public class PCMWebSocketDialogProvider implements PCMWebSocketAdapter.DialogPro
         public String getLabel(@Nullable Locale locale) {
             // never shown
             return "Anonymous";
-        }
-
-        @Override
-        public Set<Locale> getSupportedLocales() {
-            return Set.of();
-        }
-
-        @Override
-        public Set<AudioFormat> getSupportedFormats() {
-            return Set.of(AudioFormat.WAV, AudioFormat.PCM_SIGNED);
         }
     }
 }
