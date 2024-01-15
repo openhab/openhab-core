@@ -269,6 +269,18 @@ public class AbstractRemoteAddonServiceTest {
         assertThat(actual, is(equalTo(expected)));
     }
 
+    @Test
+    public void testSnapshotVersionsAreParsedProperly() {
+        Addon addon1 = getMockedAddon("4.1.0", true);
+        Addon addon2 = getMockedAddon("4.2.0-SNAPSHOT", true);
+
+        List<Addon> actual = Stream.of(addon1, addon2).sorted(AbstractRemoteAddonService.BY_COMPATIBLE_AND_VERSION)
+                .toList();
+        List<Addon> expected = List.of(addon2, addon1);
+
+        assertThat(actual, is(equalTo(expected)));
+    }
+
     private Addon getMockedAddon(String version, boolean compatible) {
         Addon addon = mock(Addon.class);
         when(addon.getVersion()).thenReturn(version);

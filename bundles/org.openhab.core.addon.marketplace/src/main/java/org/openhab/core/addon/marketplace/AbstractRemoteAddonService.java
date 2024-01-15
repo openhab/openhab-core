@@ -65,11 +65,17 @@ public abstract class AbstractRemoteAddonService implements AddonService {
     static final String CONFIG_REMOTE_ENABLED = "remote";
     static final String CONFIG_INCLUDE_INCOMPATIBLE = "includeIncompatible";
     static final Comparator<Addon> BY_COMPATIBLE_AND_VERSION = (addon1, addon2) -> {
-        // prefer compatible over incompatible
+        // prefer compatible to incompatible
         int compatible = Boolean.compare(addon2.getCompatible(), addon1.getCompatible());
+        if (compatible != 0) {
+            return compatible;
+        }
+        // Add-on versions often contain a dash instead of a dot as separator for the qualifier (e.g. -SNAPSHOT)
+        // This is not a valid format and everything after the dash needs to be removed.
+        BundleVersion version1 = new BundleVersion(addon1.getVersion().replaceAll("-.*", ".0"));
+        BundleVersion version2 = new BundleVersion(addon2.getVersion().replaceAll("-.*", ".0"));
         // prefer newer version over older
-        return compatible != 0 ? compatible
-                : new BundleVersion(addon2.getVersion()).compareTo(new BundleVersion(addon1.getVersion()));
+        return version2.compareTo(version1);
     };
 
     protected final BundleVersion coreVersion;
