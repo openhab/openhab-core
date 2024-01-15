@@ -61,7 +61,7 @@ public abstract class AbstractRemoteAddonService implements AddonService {
     static final String CONFIG_REMOTE_ENABLED = "remote";
     static final String CONFIG_INCLUDE_INCOMPATIBLE = "includeIncompatible";
     static final Comparator<Addon> BY_COMPATIBLE_AND_VERSION = (addon1, addon2) -> {
-        // prefer compatible over incompatible
+        // prefer compatible to incompatible
         int compatible = Boolean.compare(addon2.getCompatible(), addon1.getCompatible());
         // prefer newer version over older
         return compatible != 0 ? compatible

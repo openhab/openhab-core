@@ -34,6 +34,7 @@ import org.openhab.core.addon.AddonService;
 import org.openhab.core.addon.marketplace.AbstractRemoteAddonService;
 import org.openhab.core.addon.marketplace.MarketplaceAddonHandler;
 import org.openhab.core.addon.marketplace.internal.json.model.AddonEntryDTO;
+import org.openhab.core.config.core.ConfigParser;
 import org.openhab.core.config.core.ConfigurableService;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.storage.StorageService;
@@ -87,9 +88,9 @@ public class JsonAddonService extends AbstractRemoteAddonService {
     @Modified
     public void modified(@Nullable Map<String, Object> config) {
         if (config != null) {
-            String urls = Objects.requireNonNullElse((String) config.get(CONFIG_URLS), "");
+            String urls = ConfigParser.valueAsOrElse(config.get(CONFIG_URLS), String.class, "");
             addonServiceUrls = Arrays.asList(urls.split("\\|"));
-            showUnstable = (Boolean) config.getOrDefault(CONFIG_SHOW_UNSTABLE, false);
+            showUnstable = ConfigParser.valueAsOrElse(config.get(CONFIG_SHOW_UNSTABLE), Boolean.class, false);
             cachedRemoteAddons.invalidateValue();
             refreshSource();
         }
