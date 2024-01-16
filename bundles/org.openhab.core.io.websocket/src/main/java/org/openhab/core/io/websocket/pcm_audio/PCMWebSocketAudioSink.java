@@ -26,9 +26,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
-
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -60,7 +58,8 @@ public class PCMWebSocketAudioSink implements AudioSink {
      * Byte send to the sink after last chunk to indicate that streaming has ended.
      * Should try to be sent event on and error as the client should be aware that data transmission has ended.
      */
-    private static byte terminationByte = (byte) 254;
+    private static final byte terminationByte = (byte) 254;
+    private static final int DEFAULT_BUFFER_SIZE = 8192;
     private final HashSet<AudioFormat> supportedFormats = new HashSet<>();
     private final HashSet<Class<? extends AudioStream>> supportedStreams = new HashSet<>();
 
@@ -69,21 +68,16 @@ public class PCMWebSocketAudioSink implements AudioSink {
     private final String sinkId;
     private final String sinkLabel;
     private final PCMWebSocketConnection websocket;
-    private final int channelNumber;
-    private final long clientSampleRate;
     private PercentType sinkVolume = new PercentType(100);
 
-    public PCMWebSocketAudioSink(String id, String label, PCMWebSocketConnection websocket, int channelNumber,
-            long clientSampleRate) {
+    public PCMWebSocketAudioSink(String id, String label, PCMWebSocketConnection websocket) {
         this.sinkId = id;
         this.sinkLabel = label;
         this.websocket = websocket;
-        this.channelNumber = channelNumber;
-        this.clientSampleRate = clientSampleRate;
         supportedStreams.add(FixedLengthAudioStream.class);
         supportedStreams.add(PipedAudioStream.class);
         for (var container : List.of(AudioFormat.CONTAINER_NONE, AudioFormat.CONTAINER_WAVE)) {
-            for (var sampleRate : List.of(8000L, 16000L, 32000L, 44100L, 48000L)) {
+            for (var sampleRate : List.of(16000L, 8000L, 32000L, 44100L, 48000L)) {
                 for (var bitDepth : List.of(16, 32)) {
                     for (var channels : List.of(1, 2)) {
                         supportedFormats.add(new AudioFormat( //
@@ -91,7 +85,7 @@ public class PCMWebSocketAudioSink implements AudioSink {
                                 AudioFormat.CODEC_PCM_SIGNED, //
                                 false, //
                                 bitDepth, //
-                                Math.toIntExact(sampleRate * bitDepth * channelNumber), //
+                                Math.toIntExact(sampleRate * bitDepth * channels), //
                                 sampleRate, //
                                 channels //
                         ));
@@ -117,8 +111,6 @@ public class PCMWebSocketAudioSink implements AudioSink {
         if (audioStream == null) {
             return;
         }
-        var format = audioStream.getFormat();
-        InputStream convertedAudioStream = null;
         OutputStream outputStream = null;
         try {
             long duration = -1;
@@ -140,29 +132,18 @@ public class PCMWebSocketAudioSink implements AudioSink {
                 duration = Math.round(durationInSeconds * 1000);
                 logger.debug("Duration of input stream : {}", duration);
             }
-            if (audioStream instanceof PipedAudioStream && isDirectStreamSupported(format)) {
-                // TODO: review
-                outputStream = new PCMWebSocketOutputStream(websocket, format);
-                convertedAudioStream = getPCMStreamNormalized(audioStream, audioStream.getFormat());
-                transferAudio(convertedAudioStream, outputStream, -1);
-            } else {
-                outputStream = new PCMWebSocketOutputStream(websocket, format);
-                convertedAudioStream = getPCMStreamNormalized(audioStream, audioStream.getFormat());
-                transferAudio(convertedAudioStream, outputStream, duration);
+            AtomicBoolean transferenceAborted = new AtomicBoolean(false);
+            if (audioStream instanceof PipedAudioStream pipedAudioStream) {
+                pipedAudioStream.onClose(() -> transferenceAborted.set(true));
             }
+            outputStream = new PCMWebSocketOutputStream(websocket, audioStream.getFormat());
+            transferAudio(audioStream, outputStream, duration, transferenceAborted);
         } catch (InterruptedIOException ignored) {
         } catch (IOException e) {
             logger.warn("IOException: {}", e.getMessage());
         } catch (InterruptedException e) {
             logger.warn("InterruptedException: {}", e.getMessage());
         } finally {
-            if (convertedAudioStream != null) {
-                try {
-                    convertedAudioStream.close();
-                } catch (IOException e) {
-                    logger.warn("IOException: {}", e.getMessage(), e);
-                }
-            }
             try {
                 audioStream.close();
             } catch (IOException e) {
@@ -178,44 +159,19 @@ public class PCMWebSocketAudioSink implements AudioSink {
         }
     }
 
-    private boolean isDirectStreamSupported(AudioFormat format) {
-        var bigEndian = format.isBigEndian();
-        var bitDepth = format.getBitDepth();
-        return AudioFormat.PCM_SIGNED.isCompatible(format) && //
-                bitDepth != null && bitDepth == 16 && //
-                bigEndian != null && !bigEndian;
-    }
-
-    private InputStream getPCMStreamNormalized(InputStream pcmInputStream, AudioFormat format) {
-        if (format.getChannels() != channelNumber || format.getBitDepth() != 16
-                || format.getFrequency() != clientSampleRate) {
-            logger.debug("Sound is not in the target format. Trying to re-encode it");
-            javax.sound.sampled.AudioFormat jFormat = new javax.sound.sampled.AudioFormat( //
-                    (float) format.getFrequency(), //
-                    format.getBitDepth(), //
-                    format.getChannels(), //
-                    true, //
-                    false //
-            );
-            javax.sound.sampled.AudioFormat fixedJFormat = new javax.sound.sampled.AudioFormat( //
-                    (float) clientSampleRate, //
-                    16, //
-                    channelNumber, //
-                    true, //
-                    false //
-            );
-            return AudioSystem.getAudioInputStream(fixedJFormat, new AudioInputStream(pcmInputStream, jFormat, -1));
-        } else {
-            return pcmInputStream;
-        }
-    }
-
-    private void transferAudio(InputStream inputStream, OutputStream outputStream, long duration)
+    private void transferAudio(InputStream inputStream, OutputStream outputStream, long duration, AtomicBoolean aborted)
             throws IOException, InterruptedException {
         Instant start = Instant.now();
+        long transferred = 0;
         try {
-            inputStream.transferTo(outputStream);
+            byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
+            int read;
+            while (!aborted.get() && (read = inputStream.read(buffer, 0, DEFAULT_BUFFER_SIZE)) >= 0) {
+                outputStream.write(buffer, 0, read);
+                transferred += read;
+            }
         } finally {
+            logger.debug("Stream ended after transfer {} bytes", transferred);
             try {
                 // send a byte indicating this stream has ended, so it can be tear down on the client
                 outputStream.write(new byte[] { terminationByte }, 0, 1);
@@ -302,10 +258,10 @@ public class PCMWebSocketAudioSink implements AudioSink {
             SecureRandom sr = new SecureRandom();
             byte[] rndBytes = new byte[6];
             sr.nextBytes(rndBytes);
-            rndBytes[4] = StreamSampleRate.fromValue(Objects.requireNonNull(audioFormat.getFrequency()).intValue())
+            rndBytes[3] = StreamSampleRate.fromValue(Objects.requireNonNull(audioFormat.getFrequency()).intValue())
                     .get();
-            rndBytes[5] = StreamBitDepth.fromValue(Objects.requireNonNull(audioFormat.getBitDepth())).get();
-            rndBytes[6] = StreamChannels.fromValue(Objects.requireNonNull(audioFormat.getChannels())).get();
+            rndBytes[4] = StreamBitDepth.fromValue(Objects.requireNonNull(audioFormat.getBitDepth())).get();
+            rndBytes[5] = StreamChannels.fromValue(Objects.requireNonNull(audioFormat.getChannels())).get();
             return rndBytes;
         }
     }

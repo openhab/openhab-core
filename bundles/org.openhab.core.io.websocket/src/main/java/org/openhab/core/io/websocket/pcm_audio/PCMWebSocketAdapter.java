@@ -75,7 +75,7 @@ public class PCMWebSocketAdapter implements WebSocketAdapter {
         }
     }
 
-    private void onSpeakerDisconnected(PCMWebSocketConnection connection) {
+    protected void onSpeakerDisconnected(PCMWebSocketConnection connection) {
         logger.debug("speaker disconnected '{}'", connection.getId());
         synchronized (speakerConnections) {
             speakerConnections.remove(connection);

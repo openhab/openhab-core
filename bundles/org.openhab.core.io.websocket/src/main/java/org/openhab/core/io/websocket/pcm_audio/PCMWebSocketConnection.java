@@ -164,8 +164,7 @@ public class PCMWebSocketConnection implements WebSocketListener {
                             }
                             // update connection settings
                             id = initializeArgs.id;
-                            registerSpeakerComponents(id, initializeArgs.sinkSampleRate,
-                                    initializeArgs.sourceSampleRate);
+                            registerSpeakerComponents(id, initializeArgs.sourceSampleRate);
                             sendClientCommand(new WebSocketCommand(WebSocketCommand.OutputCommands.INITIALIZED));
                         }
                         case ON_SPOT -> onRemoteSpot();
@@ -191,6 +190,7 @@ public class PCMWebSocketConnection implements WebSocketListener {
         this.session = null;
         this.remote = null;
         logger.debug("Session closed with code {}: {}", statusCode, reason);
+        wsAdapter.onSpeakerDisconnected(this);
         unregisterSpeakerComponents(id);
     }
 
@@ -221,8 +221,7 @@ public class PCMWebSocketConnection implements WebSocketListener {
         return sess != null && sess.isOpen();
     }
 
-    protected synchronized void registerSpeakerComponents(String id, int sourceSampleRate, int sinkSampleRate)
-            throws IOException {
+    protected synchronized void registerSpeakerComponents(String id, int sourceSampleRate) throws IOException {
         if (id.isBlank()) {
             throw new IOException("Unable to register audio components");
         }
@@ -231,11 +230,9 @@ public class PCMWebSocketConnection implements WebSocketListener {
             throw new IOException("Voice functionality is not ready");
         }
         String label = "UI (" + id + ")";
-        var sinkStereo = false;
         @Nullable
         String listeningItem = null;
-        logger.debug("Registering dialog components for '{}' (source sample rate {}, sink sample rate {})", id,
-                sourceSampleRate, sinkSampleRate);
+        logger.debug("Registering dialog components for '{}' (source sample rate {})", id, sourceSampleRate);
         this.initialized = true;
         // register source
         var audioSource = this.audioSource = new PCMWebSocketAudioSource(getSourceId(id), label, sourceSampleRate,
@@ -244,7 +241,7 @@ public class PCMWebSocketConnection implements WebSocketListener {
         audioComponentRegistrations.put(this.audioSource.getId(), wsAdapter.bundleContext
                 .registerService(AudioSource.class.getName(), this.audioSource, new Hashtable<>()));
         // register sink
-        var audioSink = new PCMWebSocketAudioSink(getSinkId(id), label, this, sinkStereo ? 2 : 1, sinkSampleRate);
+        var audioSink = new PCMWebSocketAudioSink(getSinkId(id), label, this);
         logger.debug("Registering audio sink {}", audioSink.getId());
         audioComponentRegistrations.put(audioSink.getId(),
                 wsAdapter.bundleContext.registerService(AudioSink.class.getName(), audioSink, new Hashtable<>()));
@@ -298,7 +295,7 @@ public class PCMWebSocketConnection implements WebSocketListener {
         return id;
     }
 
-    private class WebSocketCommand {
+    private static class WebSocketCommand {
         public String cmd = "";
         public Map<String, Object> args;
 
@@ -325,9 +322,10 @@ public class PCMWebSocketConnection implements WebSocketListener {
         }
 
         public class InitializeArgs {
-            String id = "";
-            int sourceSampleRate;
-            int sinkSampleRate;
+            public String id = "";
+            public int sourceSampleRate;
+            public String listeningItem = "";
+            public String locationItem = "";
 
             public InitializeArgs() {
             }
