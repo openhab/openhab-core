@@ -39,14 +39,17 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
- * The {@link PCMWebSocketConnection} represents a WebSocket connection used to transmit pcm audio.
+ * The {@link PCMWebSocketConnection} represents a WebSocket connection used to transmit pcm audio
  * <p>
  * The websocket uses the text protocol for send commands represented by {@link WebSocketCommand} and the binary
- * protocol to transmit the audio data.
+ * protocol to transmit the audio data
  * <p>
- * The websocket supports only one line for the {@link PCMWebSocketAudioSource} (the audio is shared on the server).
- * The websocket supports multiple lines for the {@link PCMWebSocketAudioSink} (to accomplis that the outgoing data
- * chucks contain a header).
+ * The websocket supports only one line for the {@link PCMWebSocketAudioSource} (the audio is shared on the server),
+ * the data transmission is instructed by the server (START_LISTENING and STOP_LISTENING commands)
+ * <p>
+ * The websocket supports multiple lines for the {@link PCMWebSocketAudioSink} (to accomplis that, the outgoing data
+ * chucks are prefixed with a 6 byte header to transmit the identity and format specification, check
+ * {@link PCMWebSocketAudioSink.PCMWebSocketOutputStream})
  *
  * @author Miguel Álvarez Díez - Initial contribution
  */
@@ -166,9 +169,9 @@ public class PCMWebSocketConnection implements WebSocketListener {
                             }
                             // update connection settings
                             id = initializeArgs.id;
-                            registerSpeakerComponents(id, initializeArgs.sourceSampleRate, initializeArgs.sampleRate,
-                                    initializeArgs.runDialog, initializeArgs.listeningItem,
-                                    initializeArgs.locationItem);
+                            registerSpeakerComponents(id, initializeArgs.sourceSampleRate,
+                                    initializeArgs.prefSampleRate, initializeArgs.runDialog,
+                                    initializeArgs.listeningItem, initializeArgs.locationItem);
                             sendClientCommand(new WebSocketCommand(WebSocketCommand.OutputCommands.INITIALIZED));
                         }
                         case ON_SPOT -> onRemoteSpot();
@@ -194,7 +197,7 @@ public class PCMWebSocketConnection implements WebSocketListener {
         this.session = null;
         this.remote = null;
         logger.debug("Session closed with code {}: {}", statusCode, reason);
-        wsAdapter.onSpeakerDisconnected(this);
+        wsAdapter.onClientDisconnected(this);
         unregisterSpeakerComponents(id);
     }
 
@@ -331,27 +334,28 @@ public class PCMWebSocketConnection implements WebSocketListener {
 
         public static class InitializeArgs {
             /**
-             * Identifier to concatenate to the audio source/sink id.
+             * Identifier to concatenate to the audio source/sink id
              */
             public String id = "";
             /**
-             * Sample rate of the source audio line.
+             * Sample rate of the source audio line, if this is not 16000 the audio will be resampled at
+             * {@link PCMWebSocketAudioSource}
              */
             public int sourceSampleRate;
             /**
-             * Client preferred sample rate.
+             * Client preferred sample rate
              */
-            public int sampleRate;
+            public int prefSampleRate;
             /**
-             * Start a dialog processor using the registered audio components.
+             * Start a dialog processor using the registered audio components
              */
             public boolean runDialog = false;
             /**
-             * Listening item for the dialog.
+             * Listening item for the dialog
              */
             public String listeningItem = "";
             /**
-             * Location item for the dialog.
+             * Location item for the dialog
              */
             public String locationItem = "";
 

@@ -36,12 +36,13 @@ import org.openhab.core.io.websocket.WebSocketAdapter;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The {@link PCMWebSocketAdapter} creates instances of {@link PCMWebSocketConnection} to handle pcm audio.
+ * The {@link PCMWebSocketAdapter} creates instances of {@link PCMWebSocketConnection} to handle pcm audio
  *
  * @author Miguel Álvarez Díez - Initial contribution
  */
@@ -56,7 +57,7 @@ public class PCMWebSocketAdapter implements WebSocketAdapter {
     protected final AudioManager audioManager;
     protected PCMWebSocketAdapter.@Nullable DialogProvider dialogProvider = null;
     private final ScheduledFuture<?> pingTask;
-    private final Set<PCMWebSocketConnection> speakerConnections = Collections.synchronizedSet(new HashSet<>());
+    private final Set<PCMWebSocketConnection> webSocketConnections = Collections.synchronizedSet(new HashSet<>());
 
     @Activate
     public PCMWebSocketAdapter(BundleContext bundleContext, final @Reference AudioManager audioManager) {
@@ -66,26 +67,26 @@ public class PCMWebSocketAdapter implements WebSocketAdapter {
     }
 
     protected void onSpeakerConnected(PCMWebSocketConnection speaker) throws IllegalStateException {
-        synchronized (speakerConnections) {
+        synchronized (webSocketConnections) {
             if (getSpeakerConnection(speaker.getId()) != null) {
                 throw new IllegalStateException("Another speaker with the same id is already connected");
             }
-            speakerConnections.add(speaker);
-            logger.debug("connected speakers {}", speakerConnections.size());
+            webSocketConnections.add(speaker);
+            logger.debug("connected speakers {}", webSocketConnections.size());
         }
     }
 
-    protected void onSpeakerDisconnected(PCMWebSocketConnection connection) {
+    protected void onClientDisconnected(PCMWebSocketConnection connection) {
         logger.debug("speaker disconnected '{}'", connection.getId());
-        synchronized (speakerConnections) {
-            speakerConnections.remove(connection);
-            logger.debug("connected speakers {}", speakerConnections.size());
+        synchronized (webSocketConnections) {
+            webSocketConnections.remove(connection);
+            logger.debug("connected speakers {}", webSocketConnections.size());
         }
     }
 
     public @Nullable PCMWebSocketConnection getSpeakerConnection(String id) {
-        synchronized (speakerConnections) {
-            return speakerConnections.stream()
+        synchronized (webSocketConnections) {
+            return webSocketConnections.stream()
                     .filter(speakerConnection -> speakerConnection.getId().equalsIgnoreCase(id)).findAny().orElse(null);
         }
     }
@@ -106,14 +107,16 @@ public class PCMWebSocketAdapter implements WebSocketAdapter {
         return new PCMWebSocketConnection(this, executor);
     }
 
-    public synchronized void dispose() {
-        logger.debug("Unregistering protocols");
+    @Deactivate
+    @SuppressWarnings("unused")
+    public synchronized void deactivate() {
+        logger.debug("stopping connection check");
         pingTask.cancel(true);
-        disconnectHandlers();
+        disconnectAll();
     }
 
     private void pingHandlers() {
-        var handlers = new ArrayList<>(speakerConnections);
+        var handlers = new ArrayList<>(webSocketConnections);
         for (var handler : handlers) {
             if (handler != null) {
                 boolean pinned = false;
@@ -137,31 +140,23 @@ public class PCMWebSocketAdapter implements WebSocketAdapter {
         }
     }
 
-    private void disconnectHandlers() {
-        logger.debug("Disconnecting {} clients...", speakerConnections.size());
-        var handlers = new ArrayList<>(speakerConnections);
-        for (var handler : handlers) {
-            onSpeakerDisconnected(handler);
-            var session = handler.getSession();
-            if (session != null) {
-                try {
-                    session.disconnect();
-                } catch (IOException e) {
-                    logger.debug("Disconnect failed: {}", e.getMessage());
-                }
-            }
+    private void disconnectAll() {
+        logger.debug("Disconnecting {} clients...", webSocketConnections.size());
+        var connections = new ArrayList<>(webSocketConnections);
+        for (var connection : connections) {
+            onClientDisconnected(connection);
+            connection.disconnect();
         }
     }
 
     /**
-     * These interface is meant to be implemented in the voice bundle for providing the dialog initialization
-     * functionality to these websocket connections.
+     * These interface provides the dialog initialization functionality to this websocket connections
      */
     public interface DialogProvider {
         /**
-         * Starts a dialog and returns a runnable that triggers it.
+         * Starts a dialog and returns a runnable that triggers it
          *
-         * @param webSocket the WebSocket connection associated with these dialog
+         * @param webSocket the WebSocket connection associated with this dialog
          * @param audioSink the audio sink to play sound
          * @param audioSource the audio source to capture sound
          * @param locationItem an Item name to scope dialog commands
