@@ -191,9 +191,11 @@ public abstract class AbstractRegistry<@NonNull E extends Identifiable<K>, @NonN
         @Nullable
         E existingElement = identifierToElement.get(uid);
         if (existingElement != null) {
+            Provider<E> existingElementProvider = elementToProvider.get(existingElement);
             logger.debug(
                     "Cannot add \"{}\" with key \"{}\". It exists already from provider \"{}\"! Failed to add a second with the same UID from provider \"{}\"!",
-                    element.getClass().getSimpleName(), uid, existingElement.getClass().getSimpleName(),
+                    element.getClass().getSimpleName(), uid,
+                    existingElementProvider != null ? existingElementProvider.getClass().getSimpleName() : null,
                     provider.getClass().getSimpleName());
             return false;
         }
