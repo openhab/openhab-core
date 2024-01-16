@@ -161,13 +161,14 @@ public class PCMWebSocketAdapter implements WebSocketAdapter {
         /**
          * Starts a dialog and returns a runnable that triggers it.
          *
+         * @param webSocket the WebSocket connection associated with these dialog
          * @param audioSink the audio sink to play sound
          * @param audioSource the audio source to capture sound
          * @param locationItem an Item name to scope dialog commands
          * @param listeningItem an Item name to toggle while dialog is listening
          * @return a {@link Runnable} instance to trigger dialog processing
          */
-        Runnable startDialog(AudioSink audioSink, AudioSource audioSource, @Nullable String locationItem,
-                @Nullable String listeningItem);
+        Runnable startDialog(PCMWebSocketConnection webSocket, AudioSink audioSink, AudioSource audioSource,
+                @Nullable String locationItem, @Nullable String listeningItem);
     }
 }

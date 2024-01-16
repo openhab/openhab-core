@@ -70,14 +70,20 @@ public class PCMWebSocketAudioSink implements AudioSink {
     private final PCMWebSocketConnection websocket;
     private PercentType sinkVolume = new PercentType(100);
 
-    public PCMWebSocketAudioSink(String id, String label, PCMWebSocketConnection websocket) {
+    public PCMWebSocketAudioSink(String id, String label, PCMWebSocketConnection websocket, long prefSampleRate) {
         this.sinkId = id;
         this.sinkLabel = label;
         this.websocket = websocket;
         supportedStreams.add(FixedLengthAudioStream.class);
         supportedStreams.add(PipedAudioStream.class);
+        // Sort sample rates prioritizing preferred then 16000hz
+        var sampleRates = List.of(8000L, 16000L, 32000L, 44100L, 48000L) //
+                .stream() //
+                .sorted((a, b) -> a == prefSampleRate ? -1
+                        : a == 16000L ? b == prefSampleRate ? 1 : -1 : a.compareTo(b)) //
+                .toList();
         for (var container : List.of(AudioFormat.CONTAINER_NONE, AudioFormat.CONTAINER_WAVE)) {
-            for (var sampleRate : List.of(16000L, 8000L, 32000L, 44100L, 48000L)) {
+            for (var sampleRate : sampleRates) {
                 for (var bitDepth : List.of(16, 32)) {
                     for (var channels : List.of(1, 2)) {
                         supportedFormats.add(new AudioFormat( //

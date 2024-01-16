@@ -53,9 +53,9 @@ public class PCMWebSocketDialogProvider implements PCMWebSocketAdapter.DialogPro
      * @param source the audio source
      * @return a runnable that triggers the dialog
      */
-    public Runnable startDialog(AudioSink sink, AudioSource source, @Nullable String locationItem,
-            @Nullable String listeningItem) {
-        var ks = new WebSocketKeywordSpotter();
+    public Runnable startDialog(PCMWebSocketConnection webSocket, AudioSink sink, AudioSource source,
+            @Nullable String locationItem, @Nullable String listeningItem) {
+        var ks = new WebSocketKeywordSpotter(webSocket::disconnect);
         voiceManager.startDialog( //
                 voiceManager.getDialogContextBuilder() //
                         .withSource(source) //
@@ -71,10 +71,12 @@ public class PCMWebSocketDialogProvider implements PCMWebSocketAdapter.DialogPro
     /**
      * Anonymous keyword spotter used to trigger the dialog
      */
-    private class WebSocketKeywordSpotter implements KSEdgeService {
+    private static class WebSocketKeywordSpotter implements KSEdgeService {
+        private final Runnable onAbort;
         private @Nullable KSListener ksListener = null;
 
-        public WebSocketKeywordSpotter() {
+        public WebSocketKeywordSpotter(Runnable onAbort) {
+            this.onAbort = onAbort;
         }
 
         public void trigger() {
@@ -90,6 +92,7 @@ public class PCMWebSocketDialogProvider implements PCMWebSocketAdapter.DialogPro
             return () -> {
                 if (ksListener.equals(this.ksListener)) {
                     this.ksListener = null;
+                    this.onAbort.run();
                 }
             };
         }

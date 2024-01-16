@@ -35,6 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
@@ -156,7 +157,8 @@ public class PCMWebSocketConnection implements WebSocketListener {
                     switch (messageType) {
                         case INITIALIZE -> {
                             wsAdapter.onSpeakerConnected(this);
-                            var initializeArgs = jsonMapper.readValue(rootMessageNode.get("args").asText(),
+                            JsonNode argsNode = rootMessageNode.get("args");
+                            var initializeArgs = jsonMapper.treeToValue(argsNode,
                                     WebSocketCommand.InitializeArgs.class);
                             var scheduledDisconnection = this.scheduledDisconnection;
                             if (scheduledDisconnection != null) {
@@ -164,7 +166,9 @@ public class PCMWebSocketConnection implements WebSocketListener {
                             }
                             // update connection settings
                             id = initializeArgs.id;
-                            registerSpeakerComponents(id, initializeArgs.sourceSampleRate);
+                            registerSpeakerComponents(id, initializeArgs.sourceSampleRate, initializeArgs.sampleRate,
+                                    initializeArgs.runDialog, initializeArgs.listeningItem,
+                                    initializeArgs.locationItem);
                             sendClientCommand(new WebSocketCommand(WebSocketCommand.OutputCommands.INITIALIZED));
                         }
                         case ON_SPOT -> onRemoteSpot();
@@ -221,17 +225,12 @@ public class PCMWebSocketConnection implements WebSocketListener {
         return sess != null && sess.isOpen();
     }
 
-    protected synchronized void registerSpeakerComponents(String id, int sourceSampleRate) throws IOException {
+    private synchronized void registerSpeakerComponents(String id, int sourceSampleRate, int prefSampleRate,
+            boolean runDialog, String listeningItem, String locationItem) throws IOException {
         if (id.isBlank()) {
             throw new IOException("Unable to register audio components");
         }
-        var dialogProvider = this.wsAdapter.dialogProvider;
-        if (dialogProvider == null) {
-            throw new IOException("Voice functionality is not ready");
-        }
         String label = "UI (" + id + ")";
-        @Nullable
-        String listeningItem = null;
         logger.debug("Registering dialog components for '{}' (source sample rate {})", id, sourceSampleRate);
         this.initialized = true;
         // register source
@@ -241,15 +240,24 @@ public class PCMWebSocketConnection implements WebSocketListener {
         audioComponentRegistrations.put(this.audioSource.getId(), wsAdapter.bundleContext
                 .registerService(AudioSource.class.getName(), this.audioSource, new Hashtable<>()));
         // register sink
-        var audioSink = new PCMWebSocketAudioSink(getSinkId(id), label, this);
+        var audioSink = new PCMWebSocketAudioSink(getSinkId(id), label, this, prefSampleRate);
         logger.debug("Registering audio sink {}", audioSink.getId());
         audioComponentRegistrations.put(audioSink.getId(),
                 wsAdapter.bundleContext.registerService(AudioSink.class.getName(), audioSink, new Hashtable<>()));
         // init dialog
-        dialogTrigger = dialogProvider.startDialog(audioSink, audioSource, null, null);
+        if (runDialog) {
+            var dialogProvider = this.wsAdapter.dialogProvider;
+            if (dialogProvider == null) {
+                throw new IOException("Voice functionality is not ready");
+            }
+            dialogTrigger = dialogProvider.startDialog(this, audioSink, audioSource,
+                    !locationItem.isBlank() ? locationItem : null, !listeningItem.isBlank() ? listeningItem : null);
+        } else {
+            dialogTrigger = null;
+        }
     }
 
-    protected synchronized void unregisterSpeakerComponents(String id) {
+    private synchronized void unregisterSpeakerComponents(String id) {
         initialized = false;
         dialogTrigger = null;
         var source = wsAdapter.audioManager.getSource(getSourceId(id));
@@ -276,7 +284,7 @@ public class PCMWebSocketConnection implements WebSocketListener {
         }
     }
 
-    protected void onRemoteSpot() {
+    private void onRemoteSpot() {
         var dialogTrigger = this.dialogTrigger;
         if (dialogTrigger != null) {
             dialogTrigger.run();
@@ -321,10 +329,30 @@ public class PCMWebSocketConnection implements WebSocketListener {
             ON_SPOT,
         }
 
-        public class InitializeArgs {
+        public static class InitializeArgs {
+            /**
+             * Identifier to concatenate to the audio source/sink id.
+             */
             public String id = "";
+            /**
+             * Sample rate of the source audio line.
+             */
             public int sourceSampleRate;
+            /**
+             * Client preferred sample rate.
+             */
+            public int sampleRate;
+            /**
+             * Start a dialog processor using the registered audio components.
+             */
+            public boolean runDialog = false;
+            /**
+             * Listening item for the dialog.
+             */
             public String listeningItem = "";
+            /**
+             * Location item for the dialog.
+             */
             public String locationItem = "";
 
             public InitializeArgs() {

@@ -115,7 +115,7 @@ public class PCMWebSocketAudioSource implements AudioSource {
     private void onStreamCreated() {
         logger.debug("Registering source stream for '{}'", getId());
         synchronized (streamGroup) {
-            if (this.streamGroup.isEmpty()) {
+            if (this.streamGroup.size() == 1) {
                 try {
                     var pipedOutput = new PipedOutputStream();
                     this.sourceAudioPipedOutput = pipedOutput;
