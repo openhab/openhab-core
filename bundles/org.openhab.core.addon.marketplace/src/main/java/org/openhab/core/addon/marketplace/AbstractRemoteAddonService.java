@@ -70,12 +70,18 @@ public abstract class AbstractRemoteAddonService implements AddonService {
         if (compatible != 0) {
             return compatible;
         }
-        // Add-on versions often contain a dash instead of a dot as separator for the qualifier (e.g. -SNAPSHOT)
-        // This is not a valid format and everything after the dash needs to be removed.
-        BundleVersion version1 = new BundleVersion(addon1.getVersion().replaceAll("-.*", ".0"));
-        BundleVersion version2 = new BundleVersion(addon2.getVersion().replaceAll("-.*", ".0"));
-        // prefer newer version over older
-        return version2.compareTo(version1);
+        try {
+            // Add-on versions often contain a dash instead of a dot as separator for the qualifier (e.g. -SNAPSHOT)
+            // This is not a valid format and everything after the dash needs to be removed.
+            BundleVersion version1 = new BundleVersion(addon1.getVersion().replaceAll("-.*", ".0"));
+            BundleVersion version2 = new BundleVersion(addon2.getVersion().replaceAll("-.*", ".0"));
+
+            // prefer newer version over older
+            return version2.compareTo(version1);
+        } catch (IllegalArgumentException e) {
+            // assume they are equal (for ordering) if we can't compare the versions
+            return 0;
+        }
     };
 
     protected final BundleVersion coreVersion;
