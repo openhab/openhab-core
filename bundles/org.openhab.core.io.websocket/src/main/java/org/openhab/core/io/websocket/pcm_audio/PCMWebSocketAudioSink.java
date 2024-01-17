@@ -276,15 +276,15 @@ public class PCMWebSocketAudioSink implements AudioSink {
      * Byte sent to indicate the sample rate
      */
     private enum StreamSampleRate {
-        // 16bit int 1 channel little-endian
+        // 8000hz audio
         S8000((byte) 1),
-        // 16bit int 2 channel little-endian
+        // 16000hz audio
         S16000((byte) 2),
-        // 16bit int 2 channel little-endian
+        // 32000hz audio
         S32000((byte) 3),
-        // 16bit int 2 channel little-endian
+        // 44100hz audio
         S44100((byte) 4),
-        // 16bit int 2 channel little-endian
+        // 48000hz audio
         S48000((byte) 5);
 
         private final byte b;
@@ -341,8 +341,9 @@ public class PCMWebSocketAudioSink implements AudioSink {
      * Byte sent to indicate the stream channels
      */
     private enum StreamChannels {
-        // 16bit int 2 channel little-endian
+        // mono audio
         C1((byte) 1),
+        // stereo audio
         C2((byte) 2);
 
         private final byte b;
