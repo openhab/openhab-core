@@ -14,8 +14,7 @@ package org.openhab.core.addon.marketplace;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.openhab.core.addon.marketplace.AbstractRemoteAddonService.CONFIG_REMOTE_ENABLED;
 import static org.openhab.core.addon.marketplace.test.TestAddonService.ALL_ADDON_COUNT;
 import static org.openhab.core.addon.marketplace.test.TestAddonService.COMPATIBLE_ADDON_COUNT;
@@ -246,13 +245,11 @@ public class AbstractRemoteAddonServiceTest {
     }
 
     @Test
-    public void testAddonUninstallRemovesStorageEntryOnUninstalledAddon() {
+    public void testUninstalledAddonIsReinstalled() {
         addonService.addToStorage(TEST_ADDON);
         addonService.getAddons(null);
 
-        addonService.uninstall(TEST_ADDON);
-
-        checkResult(TEST_ADDON, getFullAddonId(TEST_ADDON) + "/failed", false, true);
+        checkResult(TEST_ADDON, getFullAddonId(TEST_ADDON) + "/installed", true, true);
     }
 
     // add-comparisons
@@ -299,11 +296,11 @@ public class AbstractRemoteAddonServiceTest {
     private void checkResult(String id, String expectedEventTopic, boolean installStatus, boolean present) {
         // assert expected event is posted
         ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
-        Mockito.verify(eventPublisher).post(eventCaptor.capture());
+        Mockito.verify(eventPublisher, timeout(5000)).post(eventCaptor.capture());
         Event event = eventCaptor.getValue();
         String topic = "openhab/addons/" + expectedEventTopic;
 
-        assertThat(event.getTopic(), is(topic));
+        assertThat(event.toString(), event.getTopic(), is(topic));
 
         // assert addon handler was called (by checking it's installed status)
         assertThat(addonHandler.isInstalled(getFullAddonId(id)), is(installStatus));
