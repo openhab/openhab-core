@@ -315,6 +315,8 @@ public class SitemapResource
             @ApiResponse(responseCode = "201", description = "Subscription created."),
             @ApiResponse(responseCode = "503", description = "Subscriptions limit reached.") })
     public Object createEventSubscription() {
+        logger.debug("Received HTTP POST request from IP {} at '{}'", request.getRemoteAddr(), uriInfo.getPath());
+
         String subscriptionId = subscriptions.createSubscription(this);
         if (subscriptionId == null) {
             return JSONResponse.createResponse(Status.SERVICE_UNAVAILABLE, null,
@@ -345,6 +347,9 @@ public class SitemapResource
             @PathParam("subscriptionid") @Parameter(description = "subscription id") String subscriptionId,
             @QueryParam("sitemap") @Parameter(description = "sitemap name") @Nullable String sitemapname,
             @QueryParam("pageid") @Parameter(description = "page id") @Nullable String pageId) {
+        logger.debug("Received HTTP GET request from IP {} at '{}' for sitemap {} and page {}", request.getRemoteAddr(),
+                uriInfo.getPath(), sitemapname, pageId);
+
         final SseSinkInfo sinkInfo = knownSubscriptions.get(subscriptionId);
         if (sinkInfo == null) {
             logger.debug("Subscription id {} does not exist.", subscriptionId);
