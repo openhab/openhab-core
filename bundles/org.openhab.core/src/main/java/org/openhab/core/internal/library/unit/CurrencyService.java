@@ -108,10 +108,8 @@ public class CurrencyService {
         Unit<Currency> baseCurrency = currencyProvider.getBaseCurrency();
         ((CurrencyUnit) BASE_CURRENCY).setSymbol(baseCurrency.getSymbol());
         ((CurrencyUnit) BASE_CURRENCY).setName(baseCurrency.getName());
-        unitFormatter.label(BASE_CURRENCY, baseCurrency.getName());
-        if (baseCurrency.getSymbol() != null) {
-            unitFormatter.alias(BASE_CURRENCY, baseCurrency.getSymbol());
-        }
+        unitFormatter.label(BASE_CURRENCY,
+                Objects.requireNonNullElse(baseCurrency.getSymbol(), baseCurrency.getName()));
 
         currencyProvider.getAdditionalCurrencies().forEach(CurrencyUnits::addUnit);
 
