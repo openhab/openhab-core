@@ -16,16 +16,13 @@ import static org.eclipse.jdt.annotation.DefaultLocation.*;
 import static org.openhab.core.library.unit.CurrencyUnits.BASE_CURRENCY;
 import static tech.units.indriya.AbstractUnit.ONE;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.Map;
 import java.util.Objects;
 
 import javax.measure.Dimension;
-import javax.measure.IncommensurableException;
 import javax.measure.Prefix;
-import javax.measure.Quantity;
 import javax.measure.UnconvertibleException;
 import javax.measure.Unit;
 import javax.measure.UnitConverter;
@@ -38,17 +35,11 @@ import org.openhab.core.library.dimension.Currency;
 
 import tech.units.indriya.AbstractUnit;
 import tech.units.indriya.function.AbstractConverter;
-import tech.units.indriya.function.AddConverter;
 import tech.units.indriya.function.Calculus;
 import tech.units.indriya.function.MultiplyConverter;
 import tech.units.indriya.function.RationalNumber;
-import tech.units.indriya.unit.AlternateUnit;
 import tech.units.indriya.unit.ProductUnit;
-import tech.units.indriya.unit.TransformedUnit;
 import tech.units.indriya.unit.UnitDimension;
-import tech.uom.lib.common.function.Nameable;
-import tech.uom.lib.common.function.PrefixOperator;
-import tech.uom.lib.common.function.SymbolSupplier;
 
 /**
  * The {@link CurrencyUnit} is a UoM compatible unit for currencies.
