@@ -163,10 +163,6 @@ public class GroupItem extends GenericItem implements StateChangeListener, Metad
      * @throws IllegalArgumentException if the given item is null
      */
     public void addMember(Item item) {
-        if (item == null) {
-            throw new IllegalArgumentException("Item must not be null!");
-        }
-
         boolean added = members.addIfAbsent(item);
 
         // in case membership is constructed programmatically this sanitizes
@@ -190,9 +186,6 @@ public class GroupItem extends GenericItem implements StateChangeListener, Metad
     }
 
     public void replaceMember(Item oldItem, Item newItem) {
-        if (oldItem == null || newItem == null) {
-            throw new IllegalArgumentException("Items must not be null!");
-        }
         int index = members.indexOf(oldItem);
         if (index > -1) {
             Item old = members.set(index, newItem);
@@ -208,9 +201,6 @@ public class GroupItem extends GenericItem implements StateChangeListener, Metad
      * @throws IllegalArgumentException if the given item is null
      */
     public void removeMember(Item item) {
-        if (item == null) {
-            throw new IllegalArgumentException("Item must not be null!");
-        }
         members.remove(item);
         unregisterStateListener(item);
     }
@@ -287,6 +277,7 @@ public class GroupItem extends GenericItem implements StateChangeListener, Metad
 
     @Override
     protected void internalSend(Command command) {
+        EventPublisher eventPublisher = this.eventPublisher;
         if (eventPublisher != null) {
             for (Item member : members) {
                 // try to send the command to the bus
@@ -304,7 +295,8 @@ public class GroupItem extends GenericItem implements StateChangeListener, Metad
             newState = function.getStateAs(getStateMembers(getMembers()), typeClass);
         }
 
-        if (newState == null && baseItem != null && baseItem instanceof GenericItem item) {
+        Item baseItem = this.baseItem;
+        if (newState == null && baseItem instanceof GenericItem item) {
             // we use the transformation method from the base item
             item.setState(state);
             newState = baseItem.getStateAs(typeClass);
@@ -363,6 +355,7 @@ public class GroupItem extends GenericItem implements StateChangeListener, Metad
     public void stateUpdated(Item item, State state) {
         State oldState = this.state;
         State newState = oldState;
+        ItemStateConverter itemStateConverter = this.itemStateConverter;
         if (function != null && baseItem != null && itemStateConverter != null) {
             State calculatedState = function.calculate(getStateMembers(getMembers()));
             newState = itemStateConverter.convertToAcceptedState(calculatedState, baseItem);
@@ -377,7 +370,8 @@ public class GroupItem extends GenericItem implements StateChangeListener, Metad
     @Override
     public void setState(State state) {
         State oldState = this.state;
-        if (baseItem != null && baseItem instanceof GenericItem item) {
+        Item baseItem = this.baseItem;
+        if (baseItem instanceof GenericItem item) {
             item.setState(state);
             this.state = baseItem.getState();
         } else {

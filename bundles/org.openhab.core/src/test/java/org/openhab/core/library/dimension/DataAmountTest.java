@@ -30,7 +30,7 @@ public class DataAmountTest {
 
     @Test
     public void testBToMB() {
-        QuantityType<DataAmount> quantityType = new QuantityType("1000 B");
+        QuantityType<DataAmount> quantityType = new QuantityType<>("1000 B");
         QuantityType<DataAmount> converted = quantityType.toUnit("MB");
 
         assertThat(converted.toString(), is(equalTo("0.001 MB")));
@@ -38,7 +38,7 @@ public class DataAmountTest {
 
     @Test
     public void testKBToMB() {
-        QuantityType<DataAmount> quantityType = new QuantityType("1000 kB");
+        QuantityType<DataAmount> quantityType = new QuantityType<>("1000 kB");
         QuantityType<DataAmount> converted = quantityType.toUnit("MB");
 
         assertThat(converted.toString(), is(equalTo("1 MB")));
@@ -46,7 +46,7 @@ public class DataAmountTest {
 
     @Test
     public void testInvertibleUnit() {
-        QuantityType<DataAmount> quantityType = new QuantityType("1000 kB");
+        QuantityType<DataAmount> quantityType = new QuantityType<>("1000 kB");
         QuantityType<?> inverted = quantityType.toInvertibleUnit(Units.MEGABYTE);
 
         assertThat(quantityType, is(equalTo(inverted)));

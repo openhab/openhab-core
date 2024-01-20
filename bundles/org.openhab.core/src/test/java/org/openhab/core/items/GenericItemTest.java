@@ -18,7 +18,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
@@ -104,25 +103,6 @@ public class GenericItemTest {
         assertEquals("openhab/items/member1/stateupdated", updated.getTopic());
         assertEquals(item.getState(), updated.getItemState());
         assertEquals(ItemStateUpdatedEvent.TYPE, updated.getType());
-    }
-
-    @Test
-    public void testAddGroupNameWithNull() {
-        TestItem item = new TestItem("member1");
-        assertThrows(IllegalArgumentException.class, () -> item.addGroupName(toNull()));
-    }
-
-    @Test
-    public void testAddGroupNamesWithNull() {
-        TestItem item = new TestItem("member1");
-        assertThrows(IllegalArgumentException.class,
-                () -> item.addGroupNames(Arrays.asList("group-a", toNull(), "group-b")));
-    }
-
-    @Test
-    public void testRemoveGroupNameWithNull() {
-        TestItem item = new TestItem("member1");
-        assertThrows(IllegalArgumentException.class, () -> item.removeGroupName(toNull()));
     }
 
     @Test

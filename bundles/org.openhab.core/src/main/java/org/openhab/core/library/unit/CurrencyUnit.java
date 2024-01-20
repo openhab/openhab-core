@@ -12,12 +12,8 @@
  */
 package org.openhab.core.library.unit;
 
-import static org.eclipse.jdt.annotation.DefaultLocation.FIELD;
-import static org.eclipse.jdt.annotation.DefaultLocation.PARAMETER;
-import static org.eclipse.jdt.annotation.DefaultLocation.RETURN_TYPE;
-import static org.eclipse.jdt.annotation.DefaultLocation.TYPE_BOUND;
+import static org.eclipse.jdt.annotation.DefaultLocation.*;
 import static org.openhab.core.library.unit.CurrencyUnits.BASE_CURRENCY;
-import static tech.units.indriya.AbstractUnit.ONE;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
@@ -70,6 +66,7 @@ public final class CurrencyUnit extends AbstractUnit<Currency> {
         this.name = name;
     }
 
+    @Override
     public UnitConverter getSystemConverter() {
         return internalGetConverterTo(getSystemUnit());
     }
@@ -94,6 +91,7 @@ public final class CurrencyUnit extends AbstractUnit<Currency> {
         return DIMENSION;
     }
 
+    @Override
     public void setName(@NonNullByDefault({}) String name) {
         this.name = name;
     }
@@ -108,6 +106,7 @@ public final class CurrencyUnit extends AbstractUnit<Currency> {
         return symbol;
     }
 
+    @Override
     public void setSymbol(@Nullable String s) {
         this.symbol = s;
     }
