@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+ * Copyright (c) 2010-2023 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,20 +12,20 @@
  */
 package org.openhab.core.library.unit;
 
-import static org.eclipse.jdt.annotation.DefaultLocation.FIELD;
-import static org.eclipse.jdt.annotation.DefaultLocation.PARAMETER;
-import static org.eclipse.jdt.annotation.DefaultLocation.RETURN_TYPE;
-import static org.eclipse.jdt.annotation.DefaultLocation.TYPE_BOUND;
+import static org.eclipse.jdt.annotation.DefaultLocation.*;
 import static org.openhab.core.library.unit.CurrencyUnits.BASE_CURRENCY;
 import static tech.units.indriya.AbstractUnit.ONE;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.Map;
 import java.util.Objects;
 
 import javax.measure.Dimension;
+import javax.measure.IncommensurableException;
 import javax.measure.Prefix;
+import javax.measure.Quantity;
 import javax.measure.UnconvertibleException;
 import javax.measure.Unit;
 import javax.measure.UnitConverter;
@@ -38,9 +38,17 @@ import org.openhab.core.library.dimension.Currency;
 
 import tech.units.indriya.AbstractUnit;
 import tech.units.indriya.function.AbstractConverter;
+import tech.units.indriya.function.AddConverter;
+import tech.units.indriya.function.Calculus;
 import tech.units.indriya.function.MultiplyConverter;
 import tech.units.indriya.function.RationalNumber;
+import tech.units.indriya.unit.AlternateUnit;
+import tech.units.indriya.unit.ProductUnit;
+import tech.units.indriya.unit.TransformedUnit;
 import tech.units.indriya.unit.UnitDimension;
+import tech.uom.lib.common.function.Nameable;
+import tech.uom.lib.common.function.PrefixOperator;
+import tech.uom.lib.common.function.SymbolSupplier;
 
 /**
  * The {@link CurrencyUnit} is a UoM compatible unit for currencies.
@@ -70,6 +78,7 @@ public final class CurrencyUnit extends AbstractUnit<Currency> {
         this.name = name;
     }
 
+    @Override
     public UnitConverter getSystemConverter() {
         return internalGetConverterTo(getSystemUnit());
     }
@@ -94,6 +103,7 @@ public final class CurrencyUnit extends AbstractUnit<Currency> {
         return DIMENSION;
     }
 
+    @Override
     public void setName(@NonNullByDefault({}) String name) {
         this.name = name;
     }
@@ -108,6 +118,7 @@ public final class CurrencyUnit extends AbstractUnit<Currency> {
         return symbol;
     }
 
+    @Override
     public void setSymbol(@Nullable String s) {
         this.symbol = s;
     }
@@ -151,6 +162,42 @@ public final class CurrencyUnit extends AbstractUnit<Currency> {
         }
         throw new UnconvertibleException(
                 "Could not get factor for converting " + this.getName() + " to " + that.getName());
+    }
+
+    @Override
+    public final Unit<?> multiply(@NonNullByDefault({}) Unit<?> that) {
+        return that.equals(ONE) ? this : ProductUnit.ofProduct(this, that);
+    }
+
+    @Override
+    public final Unit<?> inverse() {
+        return ProductUnit.ofQuotient(ONE, this);
+    }
+
+    @Override
+    public final Unit<Currency> divide(@NonNullByDefault({}) Number divisor) {
+        if (Calculus.currentNumberSystem().isOne(divisor)) {
+            return this;
+        }
+        BigDecimal factor = BigDecimal.ONE.divide(new BigDecimal(divisor.toString()), MathContext.DECIMAL128);
+        return transform(MultiplyConverter.of(factor));
+    }
+
+    @Override
+    public final Unit<?> divide(@NonNullByDefault({}) Unit<?> that) {
+        return this.multiply(that.inverse());
+    }
+
+    @Override
+    public final Unit<?> root(int n) {
+        if (n > 0) {
+            return ProductUnit.ofRoot(this, n);
+        } else if (n == 0) {
+            throw new ArithmeticException("Root's order of zero");
+        } else {
+            // n < 0
+            return ONE.divide(this.root(-n));
+        }
     }
 
     @Override

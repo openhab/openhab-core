@@ -132,11 +132,7 @@ public class AutomationCommandsPluggable extends AutomationCommands implements C
         }
 
         String res = super.executeCommand(command, params);
-        if (res == null) {
-            console.println(String.format("Unsupported command %s", command));
-        } else {
-            console.println(res);
-        }
+        console.println(res);
     }
 
     @Override

@@ -227,7 +227,7 @@ public class ColorUtil {
 
     /**
      * Transform <a href="https://en.wikipedia.org/wiki/HSL_and_HSV">HSV</a> based {@link HSBType} to
-     * <a href="https://en.wikipedia.org/wiki/CIE_1931_color_space">CIE 1931</a> `xy` format.
+     * <a href="https://en.wikipedia.org/wiki/CIE_1931_color_space">CIE 1931</a> {@code xy} format.
      *
      * See <a href=
      * "https://developers.meethue.com/develop/application-design-guidance/color-conversion-formulas-rgb-to-xy-and-back/">Hue
@@ -242,7 +242,7 @@ public class ColorUtil {
 
     /**
      * Transform <a href="https://en.wikipedia.org/wiki/HSL_and_HSV">HSV</a> based {@link HSBType} to
-     * <a href="https://en.wikipedia.org/wiki/CIE_1931_color_space">CIE 1931</a> `xy` format.
+     * <a href="https://en.wikipedia.org/wiki/CIE_1931_color_space">CIE 1931</a> {@code xy} format.
      *
      * See <a href=
      * "https://developers.meethue.com/develop/application-design-guidance/color-conversion-formulas-rgb-to-xy-and-back/">Hue
@@ -398,7 +398,7 @@ public class ColorUtil {
     }
 
     /**
-     * Transform <a href="https://en.wikipedia.org/wiki/CIE_1931_color_space">CIE 1931</a> `xy` format to
+     * Transform <a href="https://en.wikipedia.org/wiki/CIE_1931_color_space">CIE 1931</a> {@code xy} format to
      * <a href="https://en.wikipedia.org/wiki/HSL_and_HSV">HSV</a> based {@link HSBType}.
      *
      * See <a href=
@@ -414,7 +414,7 @@ public class ColorUtil {
     }
 
     /**
-     * Transform <a href="https://en.wikipedia.org/wiki/CIE_1931_color_space">CIE 1931</a> `xy` format to
+     * Transform <a href="https://en.wikipedia.org/wiki/CIE_1931_color_space">CIE 1931</a> {@code xy} format to
      * <a href="https://en.wikipedia.org/wiki/HSL_and_HSV">HSV</a> based {@link HSBType}.
      *
      * See <a href=
@@ -560,9 +560,9 @@ public class ColorUtil {
         /**
          * Color <a href="https://en.wikipedia.org/wiki/Gamut">gamut</a>
          *
-         * @param r double array with `xy` coordinates for red, x, y between 0.0000 and 1.0000.
-         * @param g double array with `xy` coordinates for green, x, y between 0.0000 and 1.0000.
-         * @param b double array with `xy` coordinates for blue, x, y between 0.0000 and 1.0000.
+         * @param r double array with {@code xy} coordinates for red, x, y between 0.0000 and 1.0000.
+         * @param g double array with {@code xy} coordinates for green, x, y between 0.0000 and 1.0000.
+         * @param b double array with {@code xy} coordinates for blue, x, y between 0.0000 and 1.0000.
          */
         public Gamut {
         }

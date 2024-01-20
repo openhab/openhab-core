@@ -14,6 +14,7 @@ package org.openhab.core.common;
 
 import java.util.function.Consumer;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
@@ -24,7 +25,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * @param <T>
  */
 @NonNullByDefault
-public interface SafeCallerBuilder<T> {
+public interface SafeCallerBuilder<@NonNull T> {
 
     /**
      * Creates a dynamic proxy with the according properties which guards the caller from hanging implementations in the

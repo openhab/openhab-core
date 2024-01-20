@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.thing.internal.profiles.StateProfileTypeImpl;
 import org.openhab.core.thing.internal.profiles.TriggerProfileTypeImpl;
@@ -31,7 +32,7 @@ import org.openhab.core.thing.type.ChannelTypeUID;
  * @param <T> the concrete {@link ProfileType} sub-interface.
  */
 @NonNullByDefault
-public final class ProfileTypeBuilder<T extends ProfileType> {
+public final class ProfileTypeBuilder<@NonNull T extends ProfileType> {
 
     @FunctionalInterface
     private interface ProfileTypeFactory<T extends ProfileType> {

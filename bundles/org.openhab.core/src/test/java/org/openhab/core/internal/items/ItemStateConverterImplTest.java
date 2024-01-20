@@ -146,7 +146,7 @@ public class ItemStateConverterImplTest {
         State originalState = new QuantityType<>("153 mired");
         State convertedState = itemStateConverter.convertToAcceptedState(originalState, item);
 
-        assertThat(((QuantityType) convertedState).intValue(), is(6535));
+        assertThat(((QuantityType<?>) convertedState).intValue(), is(6535));
     }
 
     @ParameterizedTest

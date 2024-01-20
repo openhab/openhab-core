@@ -95,9 +95,7 @@ final class RuleExecutionSimulator {
             // Only triggers that are time-based will be considered within the simulation
             if (triggerHandler instanceof TimeBasedTriggerHandler handler) {
                 SchedulerTemporalAdjuster temporalAdjuster = handler.getTemporalAdjuster();
-                if (temporalAdjuster != null) {
-                    executions.addAll(simulateExecutionsForCronBasedRule(rule, from, until, temporalAdjuster));
-                }
+                executions.addAll(simulateExecutionsForCronBasedRule(rule, from, until, temporalAdjuster));
             }
         }
         logger.debug("Created {} rule simulations for rule {}.", executions.size(), rule.getName());

@@ -188,11 +188,14 @@ public abstract class AbstractRegistry<@NonNull E extends Identifiable<K>, @NonN
      */
     private boolean added(Provider<E> provider, E element, Collection<E> providerElements) {
         final K uid = element.getUID();
-        if (identifierToElement.containsKey(uid)) {
+        @Nullable
+        E existingElement = identifierToElement.get(uid);
+        if (existingElement != null) {
+            Provider<E> existingElementProvider = elementToProvider.get(existingElement);
             logger.debug(
                     "Cannot add \"{}\" with key \"{}\". It exists already from provider \"{}\"! Failed to add a second with the same UID from provider \"{}\"!",
                     element.getClass().getSimpleName(), uid,
-                    elementToProvider.get(identifierToElement.get(uid)).getClass().getSimpleName(),
+                    existingElementProvider != null ? existingElementProvider.getClass().getSimpleName() : null,
                     provider.getClass().getSimpleName());
             return false;
         }
@@ -245,7 +248,7 @@ public abstract class AbstractRegistry<@NonNull E extends Identifiable<K>, @NonN
                 return;
             }
             Provider<E> elementProvider = elementToProvider.get(existingElement);
-            if (!elementProvider.equals(provider)) {
+            if (elementProvider != null && !elementProvider.equals(provider)) {
                 logger.error(
                         "Provider '{}' is not allowed to remove element '{}' with key '{}' from the registry because it was added by provider '{}'.",
                         provider.getClass().getSimpleName(), element.getClass().getSimpleName(), uid,
@@ -439,7 +442,7 @@ public abstract class AbstractRegistry<@NonNull E extends Identifiable<K>, @NonN
         }
         elementsAdded.forEach(this::notifyListenersAboutAddedElement);
 
-        if (provider instanceof ManagedProvider && readyService != null) {
+        if (provider instanceof ManagedProvider && providerClazz != null && readyService != null) {
             readyService.markReady(
                     new ReadyMarker("managed", providerClazz.getSimpleName().replace("Provider", "").toLowerCase()));
         }
