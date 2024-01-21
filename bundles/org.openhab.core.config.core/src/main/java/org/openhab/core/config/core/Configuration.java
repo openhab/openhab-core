@@ -12,7 +12,7 @@
  */
 package org.openhab.core.config.core;
 
-import static java.util.Collections.*;
+import static java.util.Collections.synchronizedMap;
 import static org.openhab.core.config.core.ConfigUtil.normalizeTypes;
 
 import java.util.ArrayList;

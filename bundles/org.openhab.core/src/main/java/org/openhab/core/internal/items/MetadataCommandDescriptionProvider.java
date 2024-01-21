@@ -60,8 +60,9 @@ public class MetadataCommandDescriptionProvider implements CommandDescriptionPro
         if (metadata != null) {
             try {
                 CommandDescriptionImpl commandDescription = new CommandDescriptionImpl();
-                if (metadata.getConfiguration().containsKey("options")) {
-                    Stream.of(metadata.getConfiguration().get("options").toString().split(",")).forEach(o -> {
+                Object options = metadata.getConfiguration().get("options");
+                if (options != null) {
+                    Stream.of(options.toString().split(",")).forEach(o -> {
                         if (o.contains("=")) {
                             var pair = parseValueLabelPair(o.trim());
                             commandDescription.addCommandOption(new CommandOption(pair[0], pair[1]));

@@ -15,6 +15,7 @@ package org.openhab.core.thing.type;
 import java.net.URI;
 import java.util.Collection;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.thing.internal.type.StateChannelTypeBuilderImpl;
 import org.openhab.core.thing.internal.type.TriggerChannelTypeBuilderImpl;
@@ -25,7 +26,7 @@ import org.openhab.core.thing.internal.type.TriggerChannelTypeBuilderImpl;
  * @author Stefan Triller - Initial contribution
  */
 @NonNullByDefault
-public interface ChannelTypeBuilder<T extends ChannelTypeBuilder<T>> {
+public interface ChannelTypeBuilder<@NonNull T extends ChannelTypeBuilder<T>> {
     /**
      * Specify whether this is an advanced channel, default is false
      *

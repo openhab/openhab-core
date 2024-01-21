@@ -62,12 +62,12 @@ public class LocaleServiceImpl implements LocaleService {
 
     @Reference(policy = ReferencePolicy.DYNAMIC)
     protected void setLocaleProvider(LocaleProvider provider) {
-        logger.debug("The localeProvider in LocaleUtilService has been set");
+        logger.debug("The localeProvider in {} has been set", LocaleServiceImpl.class.getSimpleName());
         localeProvider = provider;
     }
 
     protected void unsetLocaleProvider(LocaleProvider provider) {
-        logger.debug("The localeProvider in LocaleUtilService has been unset");
+        logger.debug("The localeProvider in {} has been unset", LocaleServiceImpl.class.getSimpleName());
         localeProvider = null;
     }
 

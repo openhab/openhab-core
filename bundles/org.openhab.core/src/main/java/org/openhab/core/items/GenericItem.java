@@ -131,9 +131,6 @@ public abstract class GenericItem implements ActiveItem {
      */
     @Override
     public void addGroupName(String groupItemName) {
-        if (groupItemName == null) {
-            throw new IllegalArgumentException("Group item name must not be null!");
-        }
         if (!groupNames.contains(groupItemName)) {
             groupNames.add(groupItemName);
         }
@@ -161,9 +158,6 @@ public abstract class GenericItem implements ActiveItem {
      */
     @Override
     public void removeGroupName(String groupItemName) {
-        if (groupItemName == null) {
-            throw new IllegalArgumentException("Group item name must not be null!");
-        }
         groupNames.remove(groupItemName);
     }
 

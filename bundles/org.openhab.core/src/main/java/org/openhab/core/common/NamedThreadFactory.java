@@ -77,9 +77,7 @@ public class NamedThreadFactory implements ThreadFactory {
         this.daemonize = daemonize;
         this.priority = priority;
         this.namePrefix = "OH-" + id + "-";
-        final SecurityManager securityManager = System.getSecurityManager();
-        this.group = securityManager != null ? securityManager.getThreadGroup()
-                : Thread.currentThread().getThreadGroup();
+        this.group = Thread.currentThread().getThreadGroup();
     }
 
     @Override
