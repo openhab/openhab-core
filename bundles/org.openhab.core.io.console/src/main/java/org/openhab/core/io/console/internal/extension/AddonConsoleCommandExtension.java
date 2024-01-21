@@ -76,7 +76,7 @@ public class AddonConsoleCommandExtension extends AbstractConsoleCommandExtensio
     public List<String> getUsages() {
         return List.of(buildCommandUsage(SUBCMD_SERVICES, "list all available add-on services"),
                 buildCommandUsage(SUBCMD_LIST + " [<serviceId>]",
-                        "lists names of all items (from the names service, if given)"),
+                        "lists names of all add-ons (from the named service, if given)"),
                 buildCommandUsage(SUBCMD_INSTALL + " <addonUid>", "installs the given add-on"),
                 buildCommandUsage(SUBCMD_UNINSTALL + " <addonUid>", "uninstalls the given add-on"));
     }
@@ -97,7 +97,7 @@ public class AddonConsoleCommandExtension extends AbstractConsoleCommandExtensio
                         installAddon(console, args[1]);
                     } else {
                         console.println("Specify the UID of the add-on to install: " + getCommand() + " "
-                                + SUBCMD_INSTALL + " <addonUid");
+                                + SUBCMD_INSTALL + " <addonUid>");
                     }
                     break;
                 case SUBCMD_UNINSTALL:
@@ -105,7 +105,7 @@ public class AddonConsoleCommandExtension extends AbstractConsoleCommandExtensio
                         uninstallAddon(console, args[1]);
                     } else {
                         console.println("Specify the UID of the add-on to uninstall: " + getCommand() + " "
-                                + SUBCMD_UNINSTALL + " <addonUid");
+                                + SUBCMD_UNINSTALL + " <addonUid>");
                     }
                     break;
                 default:
@@ -134,7 +134,7 @@ public class AddonConsoleCommandExtension extends AbstractConsoleCommandExtensio
         } else {
             AddonService service = addonServices.get(serviceId);
             if (service == null) {
-                console.println("AddonService unknown");
+                console.println("Add-on service '" + serviceId + "' is not known.");
                 return;
             }
             addons = service.getAddons(null);
