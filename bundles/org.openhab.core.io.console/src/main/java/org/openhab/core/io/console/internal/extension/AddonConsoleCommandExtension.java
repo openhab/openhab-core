@@ -60,7 +60,7 @@ public class AddonConsoleCommandExtension extends AbstractConsoleCommandExtensio
 
     @Activate
     public AddonConsoleCommandExtension() {
-        super("addons", "Manage addons.");
+        super("addons", "Manage add-ons.");
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE)
