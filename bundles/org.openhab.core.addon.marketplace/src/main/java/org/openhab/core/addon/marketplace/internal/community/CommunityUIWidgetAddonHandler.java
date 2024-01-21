@@ -86,7 +86,8 @@ public class CommunityUIWidgetAddonHandler implements MarketplaceAddonHandler {
             } else if (yamlContent != null) {
                 addWidgetAsYAML(addon.getUid(), yamlContent);
             } else {
-                throw new IllegalArgumentException("Couldn't find the widget in the add-on entry. The starting code fence may not be marked as ```yaml");
+                throw new IllegalArgumentException(
+                        "Couldn't find the widget in the add-on entry. The starting code fence may not be marked as ```yaml");
             }
         } catch (IOException e) {
             logger.error("Widget from marketplace cannot be downloaded: {}", e.getMessage());
