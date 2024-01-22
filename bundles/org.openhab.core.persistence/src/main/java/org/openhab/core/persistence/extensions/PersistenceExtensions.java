@@ -663,12 +663,12 @@ public class PersistenceExtensions {
     }
 
     /**
-     * Checks if the state of a given <code>item</code> will be updated till a certain point in time.
+     * Checks if the state of a given <code>item</code> will be updated until a certain point in time.
      * The default persistence service is used.
      *
      * @param item the item to check for state updates
      * @param timestamp the point in time to end the check
-     * @return <code>true</code> if item state is updated, <code>false</code> if either item is not updated till
+     * @return <code>true</code> if item state is updated, <code>false</code> if either item is not updated until
      *         <code>timestamp</code>, <code>null</code> if the default persistence does not refer to a
      *         {@link QueryablePersistenceService}, or <code>null</code> if the default persistence service is not
      *         available
@@ -709,7 +709,7 @@ public class PersistenceExtensions {
     }
 
     /**
-     * Checks if the state of a given <code>item</code> will be updated till a certain point in time.
+     * Checks if the state of a given <code>item</code> will be updated until a certain point in time.
      * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
      *
      * @param item the item to check for state changes
@@ -770,12 +770,12 @@ public class PersistenceExtensions {
     }
 
     /**
-     * Gets the historic item with the maximum value of the state of a given <code>item</code> till
+     * Gets the historic item with the maximum value of the state of a given <code>item</code> until
      * a certain point in time. The default persistence service is used.
      *
      * @param item the item to get the maximum state value for
      * @param timestamp the point in time to end the check
-     * @return a historic item with the maximum state value till the given point in time, or a {@link HistoricItem}
+     * @return a historic item with the maximum state value until the given point in time, or a {@link HistoricItem}
      *         constructed from the <code>item</code> if the default persistence service does not refer to a
      *         {@link QueryablePersistenceService}
      */
@@ -815,13 +815,13 @@ public class PersistenceExtensions {
     }
 
     /**
-     * Gets the historic item with the maximum value of the state of a given <code>item</code> till
+     * Gets the historic item with the maximum value of the state of a given <code>item</code> until
      * a certain point in time. The {@link PersistenceService} identified by the <code>serviceId</code> is used.
      *
      * @param item the item to get the maximum state value for
      * @param timestamp the point in time to end the check
      * @param serviceId the name of the {@link PersistenceService} to use
-     * @return a {@link HistoricItem} with the maximum state value till the given point in time, or a
+     * @return a {@link HistoricItem} with the maximum state value until the given point in time, or a
      *         {@link HistoricItem} constructed from the <code>item</code>'s state if <code>item</code>'s state is the
      *         maximum value or if the given <code>serviceId</code> does not refer to an available
      *         {@link QueryablePersistenceService}
@@ -891,12 +891,12 @@ public class PersistenceExtensions {
     }
 
     /**
-     * Gets the historic item with the minimum value of the state of a given <code>item</code> till
+     * Gets the historic item with the minimum value of the state of a given <code>item</code> until
      * a certain point in time. The default persistence service is used.
      *
      * @param item the item to get the minimum state value for
      * @param timestamp the point in time to which to search for the minimum state value
-     * @return the historic item with the minimum state value till the given point in time or a {@link HistoricItem}
+     * @return the historic item with the minimum state value until the given point in time or a {@link HistoricItem}
      *         constructed from the <code>item</code>'s state if <code>item</code>'s state is the minimum value or if
      *         the default persistence service does not refer to an available {@link QueryablePersistenceService}
      */
@@ -935,13 +935,13 @@ public class PersistenceExtensions {
     }
 
     /**
-     * Gets the historic item with the minimum value of the state of a given <code>item</code> till
+     * Gets the historic item with the minimum value of the state of a given <code>item</code> until
      * a certain point in time. The {@link PersistenceService} identified by the <code>serviceId</code> is used.
      *
      * @param item the item to get the minimum state value for
      * @param timestamp the point in time to which to search for the minimum state value
      * @param serviceId the name of the {@link PersistenceService} to use
-     * @return the historic item with the minimum state value till the given point in time, or a {@link HistoricItem}
+     * @return the historic item with the minimum state value until the given point in time, or a {@link HistoricItem}
      *         constructed from the <code>item</code>'s state if <code>item</code>'s state is the minimum value or if
      *         the given <code>serviceId</code> does not refer to an available {@link QueryablePersistenceService}.
      */
@@ -1010,7 +1010,7 @@ public class PersistenceExtensions {
     }
 
     /**
-     * Gets the variance of the state of the given {@link Item} till a certain point in time.
+     * Gets the variance of the state of the given {@link Item} until a certain point in time.
      * The default {@link PersistenceService} is used.
      *
      * @param item the {@link Item} to get the variance for
@@ -1054,7 +1054,7 @@ public class PersistenceExtensions {
     }
 
     /**
-     * Gets the variance of the state of the given {@link Item} till a certain point in time.
+     * Gets the variance of the state of the given {@link Item} until a certain point in time.
      * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
      *
      * @param item the {@link Item} to get the variance for
@@ -1147,7 +1147,7 @@ public class PersistenceExtensions {
     }
 
     /**
-     * Gets the standard deviation of the state of the given {@link Item} till a certain point in time.
+     * Gets the standard deviation of the state of the given {@link Item} until a certain point in time.
      * The default {@link PersistenceService} is used.
      *
      * <b>Note:</b> If you need variance and standard deviation at the same time do not query both as it is a costly
@@ -1200,7 +1200,7 @@ public class PersistenceExtensions {
     }
 
     /**
-     * Gets the standard deviation of the state of the given {@link Item} till a certain point in time.
+     * Gets the standard deviation of the state of the given {@link Item} until a certain point in time.
      * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
      *
      * <b>Note:</b> If you need variance and standard deviation at the same time do not query both as it is a costly
@@ -1279,7 +1279,7 @@ public class PersistenceExtensions {
     }
 
     /**
-     * Gets the average value of the state of a given {@link Item} till a certain point in time.
+     * Gets the average value of the state of a given {@link Item} until a certain point in time.
      * The default {@link PersistenceService} is used.
      *
      * @param item the {@link Item} to get the average value for
@@ -1324,7 +1324,7 @@ public class PersistenceExtensions {
     }
 
     /**
-     * Gets the average value of the state of a given {@link Item} till a certain point in time.
+     * Gets the average value of the state of a given {@link Item} until a certain point in time.
      * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
      *
      * @param item the {@link Item} to get the average value for
@@ -1448,7 +1448,7 @@ public class PersistenceExtensions {
     }
 
     /**
-     * Gets the sum of the state of a given <code>item</code> till a certain point in time.
+     * Gets the sum of the state of a given <code>item</code> until a certain point in time.
      * The default persistence service is used.
      *
      * @param item the item for which we will sum its persisted state values to <code>timestamp</code>
@@ -1493,7 +1493,7 @@ public class PersistenceExtensions {
     }
 
     /**
-     * Gets the sum of the state of a given <code>item</code> till a certain point in time.
+     * Gets the sum of the state of a given <code>item</code> until a certain point in time.
      * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
      *
      * @param item the item for which we will sum its persisted state values to <code>timestamp</code>
@@ -1571,7 +1571,7 @@ public class PersistenceExtensions {
     }
 
     /**
-     * Gets the difference value of the state of a given <code>item</code> till a certain point in time.
+     * Gets the difference value of the state of a given <code>item</code> until a certain point in time.
      * The default persistence service is used.
      *
      * @param item the item to get the average state value for
@@ -1617,7 +1617,7 @@ public class PersistenceExtensions {
     }
 
     /**
-     * Gets the difference value of the state of a given <code>item</code> till a certain point in time.
+     * Gets the difference value of the state of a given <code>item</code> until a certain point in time.
      * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
      *
      * @param item the item to get the delta for
@@ -1694,7 +1694,7 @@ public class PersistenceExtensions {
     }
 
     /**
-     * Gets the evolution rate of the state of a given {@link Item} till a certain point in time.
+     * Gets the evolution rate of the state of a given {@link Item} until a certain point in time.
      * The default {@link PersistenceService} is used.
      *
      * @param item the item to get the evolution rate value for
@@ -1745,7 +1745,7 @@ public class PersistenceExtensions {
     }
 
     /**
-     * Gets the evolution rate of the state of a given {@link Item} till a certain point in time.
+     * Gets the evolution rate of the state of a given {@link Item} until a certain point in time.
      * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
      *
      * @param item the {@link Item} to get the evolution rate value for
@@ -2053,7 +2053,7 @@ public class PersistenceExtensions {
     }
 
     /**
-     * Retrieves the future items for a given <code>item</code> till a certain point in time.
+     * Retrieves the future items for a given <code>item</code> until a certain point in time.
      * The default persistence service is used.
      *
      * @param item the item for which to retrieve the future item
@@ -2099,7 +2099,7 @@ public class PersistenceExtensions {
     }
 
     /**
-     * Retrieves the future items for a given <code>item</code> till a certain point in time
+     * Retrieves the future items for a given <code>item</code> until a certain point in time
      * through a {@link PersistenceService} identified by the <code>serviceId</code>.
      *
      * @param item the item for which to retrieve the future item
@@ -2183,7 +2183,7 @@ public class PersistenceExtensions {
     }
 
     /**
-     * Removes from persistence the future items for a given <code>item</code> till a certain point in time.
+     * Removes from persistence the future items for a given <code>item</code> until a certain point in time.
      * The default persistence service is used.
      * This will only have effect if the p{@link PersistenceService} is a {@link ModifiablePersistenceService}.
      *
@@ -2221,7 +2221,7 @@ public class PersistenceExtensions {
     }
 
     /**
-     * Removes from persistence the future items for a given <code>item</code> till a certain point in time
+     * Removes from persistence the future items for a given <code>item</code> until a certain point in time
      * through a {@link PersistenceService} identified by the <code>serviceId</code>.
      * This will only have effect if the p{@link PersistenceService} is a {@link ModifiablePersistenceService}.
      *
