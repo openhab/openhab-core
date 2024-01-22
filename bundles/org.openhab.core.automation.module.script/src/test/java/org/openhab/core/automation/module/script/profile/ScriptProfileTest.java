@@ -18,7 +18,9 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.openhab.core.automation.module.script.profile.ScriptProfile.CONFIG_TO_HANDLER_COMMAND_SCRIPT;
 import static org.openhab.core.automation.module.script.profile.ScriptProfile.CONFIG_TO_HANDLER_SCRIPT;
+import static org.openhab.core.automation.module.script.profile.ScriptProfile.CONFIG_TO_HANDLER_STATE_SCRIPT;
 import static org.openhab.core.automation.module.script.profile.ScriptProfile.CONFIG_TO_ITEM_SCRIPT;
 
 import java.util.HashMap;
@@ -90,14 +92,14 @@ public class ScriptProfileTest extends JavaTest {
         verify(profileCallback, never()).sendCommand(any());
 
         assertLogMessage(ScriptProfile.class, LogLevel.ERROR,
-                "Neither 'toItemScript' nor 'toHandlerScript' defined in link '" + link.toString()
-                        + "'. Profile will discard all states and commands.");
+                "Neither 'toItemScript', 'toHandlerCommandScript' nor 'toHandlerStateScript' defined in link '"
+                        + link.toString() + "'. Profile will discard all states and commands.");
     }
 
     @Test
     public void scriptExecutionErrorForwardsNoValueToCallback() throws TransformationException {
         ProfileContext profileContext = ProfileContextBuilder.create().withToItemScript("inScript")
-                .withToHandlerScript("outScript").build();
+                .withToHandlerCommandScript("outScript").withToHandlerStateScript("outScript").build();
 
         when(transformationServiceMock.transform(any(), any()))
                 .thenThrow(new TransformationException("intentional failure"));
@@ -108,8 +110,9 @@ public class ScriptProfileTest extends JavaTest {
         scriptProfile.onCommandFromHandler(OnOffType.ON);
         scriptProfile.onStateUpdateFromHandler(OnOffType.ON);
         scriptProfile.onCommandFromItem(OnOffType.ON);
+        scriptProfile.onStateUpdateFromItem(OnOffType.ON);
 
-        verify(transformationServiceMock, times(3)).transform(any(), any());
+        verify(transformationServiceMock, times(4)).transform(any(), any());
         verify(profileCallback, never()).handleCommand(any());
         verify(profileCallback, never()).sendUpdate(any());
         verify(profileCallback, never()).sendCommand(any());
@@ -118,7 +121,7 @@ public class ScriptProfileTest extends JavaTest {
     @Test
     public void scriptExecutionResultNullForwardsNoValueToCallback() throws TransformationException {
         ProfileContext profileContext = ProfileContextBuilder.create().withToItemScript("inScript")
-                .withToHandlerScript("outScript").build();
+                .withToHandlerCommandScript("outScript").withToHandlerStateScript("outScript").build();
 
         when(transformationServiceMock.transform(any(), any())).thenReturn(null);
 
@@ -128,8 +131,9 @@ public class ScriptProfileTest extends JavaTest {
         scriptProfile.onCommandFromHandler(OnOffType.ON);
         scriptProfile.onStateUpdateFromHandler(OnOffType.ON);
         scriptProfile.onCommandFromItem(OnOffType.ON);
+        scriptProfile.onStateUpdateFromItem(OnOffType.ON);
 
-        verify(transformationServiceMock, times(3)).transform(any(), any());
+        verify(transformationServiceMock, times(4)).transform(any(), any());
         verify(profileCallback, never()).handleCommand(any());
         verify(profileCallback, never()).sendUpdate(any());
         verify(profileCallback, never()).sendCommand(any());
@@ -138,8 +142,8 @@ public class ScriptProfileTest extends JavaTest {
     @Test
     public void scriptExecutionResultForwardsTransformedValueToCallback() throws TransformationException {
         ProfileContext profileContext = ProfileContextBuilder.create().withToItemScript("inScript")
-                .withToHandlerScript("outScript").withAcceptedCommandTypes(List.of(OnOffType.class))
-                .withAcceptedDataTypes(List.of(OnOffType.class))
+                .withToHandlerCommandScript("outScript").withToHandlerStateScript("outScript")
+                .withAcceptedCommandTypes(List.of(OnOffType.class)).withAcceptedDataTypes(List.of(OnOffType.class))
                 .withHandlerAcceptedCommandTypes(List.of(OnOffType.class)).build();
 
         when(transformationServiceMock.transform(any(), any())).thenReturn(OnOffType.OFF.toString());
@@ -150,9 +154,10 @@ public class ScriptProfileTest extends JavaTest {
         scriptProfile.onCommandFromHandler(DecimalType.ZERO);
         scriptProfile.onStateUpdateFromHandler(DecimalType.ZERO);
         scriptProfile.onCommandFromItem(DecimalType.ZERO);
+        scriptProfile.onStateUpdateFromItem(DecimalType.ZERO);
 
-        verify(transformationServiceMock, times(3)).transform(any(), any());
-        verify(profileCallback).handleCommand(OnOffType.OFF);
+        verify(transformationServiceMock, times(4)).transform(any(), any());
+        verify(profileCallback, times(2)).handleCommand(OnOffType.OFF);
         verify(profileCallback).sendUpdate(OnOffType.OFF);
         verify(profileCallback).sendCommand(OnOffType.OFF);
     }
@@ -171,6 +176,7 @@ public class ScriptProfileTest extends JavaTest {
         scriptProfile.onCommandFromHandler(DecimalType.ZERO);
         scriptProfile.onStateUpdateFromHandler(DecimalType.ZERO);
         scriptProfile.onCommandFromItem(DecimalType.ZERO);
+        scriptProfile.onStateUpdateFromItem(DecimalType.ZERO);
 
         verify(transformationServiceMock, times(2)).transform(any(), any());
         verify(profileCallback, never()).handleCommand(any());
@@ -179,7 +185,74 @@ public class ScriptProfileTest extends JavaTest {
     }
 
     @Test
-    public void onlyToHandlerScriptDoesNotForwardInboundCommands() throws TransformationException {
+    public void onlyToHandlerCommandScriptDoesNotForwardInboundCommands() throws TransformationException {
+        ProfileContext profileContext = ProfileContextBuilder.create().withToHandlerCommandScript("outScript")
+                .withAcceptedCommandTypes(List.of(DecimalType.class)).withAcceptedDataTypes(List.of(DecimalType.class))
+                .withHandlerAcceptedCommandTypes(List.of(OnOffType.class)).build();
+
+        when(transformationServiceMock.transform(any(), any())).thenReturn(OnOffType.OFF.toString());
+
+        ScriptProfile scriptProfile = new ScriptProfile(mock(ProfileTypeUID.class), profileCallback, profileContext,
+                transformationServiceMock);
+
+        scriptProfile.onCommandFromHandler(DecimalType.ZERO);
+        scriptProfile.onStateUpdateFromHandler(DecimalType.ZERO);
+        scriptProfile.onCommandFromItem(DecimalType.ZERO);
+        scriptProfile.onStateUpdateFromItem(DecimalType.ZERO);
+
+        verify(transformationServiceMock, times(1)).transform(any(), any());
+        verify(profileCallback, times(1)).handleCommand(OnOffType.OFF);
+        verify(profileCallback, never()).sendUpdate(any());
+        verify(profileCallback, never()).sendCommand(any());
+    }
+
+    @Test
+    public void onlyToHandlerStateScriptDoesNotForwardInboundCommands() throws TransformationException {
+        ProfileContext profileContext = ProfileContextBuilder.create().withToHandlerStateScript("outScript")
+                .withAcceptedCommandTypes(List.of(DecimalType.class)).withAcceptedDataTypes(List.of(DecimalType.class))
+                .withHandlerAcceptedCommandTypes(List.of(OnOffType.class)).build();
+
+        when(transformationServiceMock.transform(any(), any())).thenReturn(OnOffType.OFF.toString());
+
+        ScriptProfile scriptProfile = new ScriptProfile(mock(ProfileTypeUID.class), profileCallback, profileContext,
+                transformationServiceMock);
+
+        scriptProfile.onCommandFromHandler(DecimalType.ZERO);
+        scriptProfile.onStateUpdateFromHandler(DecimalType.ZERO);
+        scriptProfile.onCommandFromItem(DecimalType.ZERO);
+        scriptProfile.onStateUpdateFromItem(DecimalType.ZERO);
+
+        verify(transformationServiceMock, times(1)).transform(any(), any());
+        verify(profileCallback, times(1)).handleCommand(OnOffType.OFF);
+        verify(profileCallback, never()).sendUpdate(any());
+        verify(profileCallback, never()).sendCommand(any());
+    }
+
+    @Test
+    public void incompatibleStateOrCommandNotForwardedToCallback() throws TransformationException {
+        ProfileContext profileContext = ProfileContextBuilder.create().withToItemScript("inScript")
+                .withToHandlerCommandScript("outScript").withToHandlerStateScript("outScript")
+                .withAcceptedCommandTypes(List.of(DecimalType.class)).withAcceptedDataTypes(List.of(PercentType.class))
+                .withHandlerAcceptedCommandTypes(List.of(HSBType.class)).build();
+
+        when(transformationServiceMock.transform(any(), any())).thenReturn(OnOffType.OFF.toString());
+
+        ScriptProfile scriptProfile = new ScriptProfile(mock(ProfileTypeUID.class), profileCallback, profileContext,
+                transformationServiceMock);
+
+        scriptProfile.onCommandFromHandler(DecimalType.ZERO);
+        scriptProfile.onStateUpdateFromHandler(DecimalType.ZERO);
+        scriptProfile.onCommandFromItem(DecimalType.ZERO);
+        scriptProfile.onStateUpdateFromItem(DecimalType.ZERO);
+
+        verify(transformationServiceMock, times(4)).transform(any(), any());
+        verify(profileCallback, never()).handleCommand(any());
+        verify(profileCallback, never()).sendUpdate(any());
+        verify(profileCallback, never()).sendCommand(any());
+    }
+
+    @Test
+    public void fallbackToToHandlerScriptIfNotToHandlerCommandScript() throws TransformationException {
         ProfileContext profileContext = ProfileContextBuilder.create().withToHandlerScript("outScript")
                 .withAcceptedCommandTypes(List.of(DecimalType.class)).withAcceptedDataTypes(List.of(DecimalType.class))
                 .withHandlerAcceptedCommandTypes(List.of(OnOffType.class)).build();
@@ -192,31 +265,10 @@ public class ScriptProfileTest extends JavaTest {
         scriptProfile.onCommandFromHandler(DecimalType.ZERO);
         scriptProfile.onStateUpdateFromHandler(DecimalType.ZERO);
         scriptProfile.onCommandFromItem(DecimalType.ZERO);
+        scriptProfile.onStateUpdateFromItem(DecimalType.ZERO);
 
-        verify(transformationServiceMock).transform(any(), any());
-        verify(profileCallback).handleCommand(OnOffType.OFF);
-        verify(profileCallback, never()).sendUpdate(any());
-        verify(profileCallback, never()).sendCommand(any());
-    }
-
-    @Test
-    public void incompatibleStateOrCommandNotForwardedToCallback() throws TransformationException {
-        ProfileContext profileContext = ProfileContextBuilder.create().withToItemScript("inScript")
-                .withToHandlerScript("outScript").withAcceptedCommandTypes(List.of(DecimalType.class))
-                .withAcceptedDataTypes(List.of(PercentType.class))
-                .withHandlerAcceptedCommandTypes(List.of(HSBType.class)).build();
-
-        when(transformationServiceMock.transform(any(), any())).thenReturn(OnOffType.OFF.toString());
-
-        ScriptProfile scriptProfile = new ScriptProfile(mock(ProfileTypeUID.class), profileCallback, profileContext,
-                transformationServiceMock);
-
-        scriptProfile.onCommandFromHandler(DecimalType.ZERO);
-        scriptProfile.onStateUpdateFromHandler(DecimalType.ZERO);
-        scriptProfile.onCommandFromItem(DecimalType.ZERO);
-
-        verify(transformationServiceMock, times(3)).transform(any(), any());
-        verify(profileCallback, never()).handleCommand(any());
+        verify(transformationServiceMock, times(1)).transform(any(), any());
+        verify(profileCallback, times(1)).handleCommand(OnOffType.OFF);
         verify(profileCallback, never()).sendUpdate(any());
         verify(profileCallback, never()).sendCommand(any());
     }
@@ -238,6 +290,16 @@ public class ScriptProfileTest extends JavaTest {
 
         public ProfileContextBuilder withToHandlerScript(String toHandlerScript) {
             configuration.put(CONFIG_TO_HANDLER_SCRIPT, toHandlerScript);
+            return this;
+        }
+
+        public ProfileContextBuilder withToHandlerCommandScript(String toHandlerCommandScript) {
+            configuration.put(CONFIG_TO_HANDLER_COMMAND_SCRIPT, toHandlerCommandScript);
+            return this;
+        }
+
+        public ProfileContextBuilder withToHandlerStateScript(String toHandlerStateScript) {
+            configuration.put(CONFIG_TO_HANDLER_STATE_SCRIPT, toHandlerStateScript);
             return this;
         }
 
