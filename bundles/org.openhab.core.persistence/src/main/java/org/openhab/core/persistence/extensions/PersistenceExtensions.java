@@ -444,7 +444,7 @@ public class PersistenceExtensions {
     /**
      * Returns the next state of a given <code>item</code>.
      *
-     * @param item the item to get the previous state value for
+     * @param item the item to get the next state value for
      * @param skipEqual if true, skips equal state values and searches the first state not equal the current state
      * @return the next state or <code>null</code> if no next state could be found, or if the default
      *         persistence service is not configured or does not refer to a {@link QueryablePersistenceService}
@@ -1439,9 +1439,8 @@ public class PersistenceExtensions {
      *
      * @param item the item for which we will sum its persisted state values since <code>timestamp</code>
      * @param timestamp the point in time from which to start the summation
-     * @return the sum of the state values since <code>timestamp</code>, or {@link DecimalType#ZERO} if no historic
-     *         states could be found or if the default persistence service does not refer to a
-     *         {@link QueryablePersistenceService}
+     * @return the sum of the state values since <code>timestamp</code>, or null if <code>timestamp</code> is in the
+     *         future or the default persistence service does not refer to a {@link QueryablePersistenceService}
      */
     public @Nullable static State sumSince(Item item, ZonedDateTime timestamp) {
         return internalSumBetween(item, timestamp, null);
@@ -1453,9 +1452,8 @@ public class PersistenceExtensions {
      *
      * @param item the item for which we will sum its persisted state values to <code>timestamp</code>
      * @param timestamp the point in time to which to start the summation
-     * @return the sum of the state values to <code>timestamp</code>, or {@link DecimalType#ZERO} if no historic
-     *         states could be found or if the default persistence service does not refer to a
-     *         {@link QueryablePersistenceService}
+     * @return the sum of the state values until <code>timestamp</code>, or null if <code>timestamp</code> is in the
+     *         past or the default persistence service does not refer to a {@link QueryablePersistenceService}
      */
     public @Nullable static State sumUntil(Item item, ZonedDateTime timestamp) {
         return internalSumBetween(item, null, timestamp);
@@ -1469,8 +1467,8 @@ public class PersistenceExtensions {
      *            <code>end</code>
      * @param begin the point in time from which to start the summation
      * @param end the point in time to which to start the summation
-     * @return the sum of the state values between the given points in time, or {@link DecimalType#ZERO} if no historic
-     *         states could be found or if the default persistence service does not refer to a
+     * @return the sum of the state values between the given points in time, or null if <code>begin</code> is after
+     *         <code>end</code> or if the default persistence service does not refer to a
      *         {@link QueryablePersistenceService}
      */
     public @Nullable static State sumBetween(Item item, ZonedDateTime begin, ZonedDateTime end) {
@@ -1484,9 +1482,8 @@ public class PersistenceExtensions {
      * @param item the item for which we will sum its persisted state values since <code>timestamp</code>
      * @param timestamp the point in time from which to start the summation
      * @param serviceId the name of the {@link PersistenceService} to use
-     * @return the sum of the state values since the given point in time, or {@link DecimalType#ZERO} if no historic
-     *         states could be found for the <code>item</code> or if <code>serviceId</code> does not refer to a
-     *         {@link QueryablePersistenceService}
+     * @return the sum of the state values since <code>timestamp</code>, or null if <code>timestamp</code> is in the
+     *         future or <code>serviceId</code> does not refer to a {@link QueryablePersistenceService}
      */
     public @Nullable static State sumSince(Item item, ZonedDateTime timestamp, String serviceId) {
         return internalSumBetween(item, timestamp, null, serviceId);
@@ -1499,9 +1496,8 @@ public class PersistenceExtensions {
      * @param item the item for which we will sum its persisted state values to <code>timestamp</code>
      * @param timestamp the point in time to which to start the summation
      * @param serviceId the name of the {@link PersistenceService} to use
-     * @return the sum of the state values to the given point in time, or {@link DecimalType#ZERO} if no historic
-     *         states could be found for the <code>item</code> or if <code>serviceId</code> does not refer to a
-     *         {@link QueryablePersistenceService}
+     * @return the sum of the state values until <code>timestamp</code>, or null if <code>timestamp</code> is in the
+     *         past or <code>serviceId</code> does not refer to a {@link QueryablePersistenceService}
      */
     public @Nullable static State sumUntil(Item item, ZonedDateTime timestamp, String serviceId) {
         return internalSumBetween(item, null, timestamp, serviceId);
@@ -1516,9 +1512,8 @@ public class PersistenceExtensions {
      * @param begin the point in time from which to start the summation
      * @param end the point in time to which to start the summation
      * @param serviceId the name of the {@link PersistenceService} to use
-     * @return the sum of the state values between the given points in time, or {@link DecimalType#ZERO} if no historic
-     *         states could be found for the <code>item</code> or if <code>serviceId</code> does not refer to a
-     *         {@link QueryablePersistenceService}
+     * @return the sum of the state values between the given points in time, or null if <code>begin</code> is after
+     *         <code>end</code> or <code>serviceId</code> does not refer to a {@link QueryablePersistenceService}
      */
     public @Nullable static State sumBetween(Item item, ZonedDateTime begin, ZonedDateTime end, String serviceId) {
         return internalSumBetween(item, begin, end, serviceId);
