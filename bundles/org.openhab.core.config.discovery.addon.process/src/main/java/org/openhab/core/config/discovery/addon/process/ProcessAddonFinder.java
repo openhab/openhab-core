@@ -31,6 +31,8 @@ import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sun.jna.Platform;
+
 /**
  * This is a {@link ProcessAddonFinder} for finding suggested add-ons by checking processes running
  * on the openHAB server.
@@ -49,6 +51,8 @@ public class ProcessAddonFinder extends BaseAddonFinder {
     private static final String COMMAND_LINE = "commandLine";
     private static final Set<String> SUPPORTED_PROPERTIES = Set.of(COMMAND, COMMAND_LINE);
 
+    private static final boolean NOT_WINDOWS = !Platform.isWindows();
+
     private final Logger logger = LoggerFactory.getLogger(ProcessAddonFinder.class);
 
     /**
@@ -61,9 +65,8 @@ public class ProcessAddonFinder extends BaseAddonFinder {
 
         protected ProcessInfo(ProcessHandle.Info info) {
             String cmd = info.command().orElse(null);
-            if (cmd == null) {
-                String[] args = info.arguments().orElse(new String[] {});
-                // TODO (TBC) I think that the following use of args[0] may be wrong ??
+            if ((cmd == null || cmd.isEmpty()) && NOT_WINDOWS) {
+                String[] args = info.commandLine().orElse("").split("\\s+");
                 cmd = args.length > 0 ? args[0] : null;
             }
             command = cmd;
@@ -92,9 +95,13 @@ public class ProcessAddonFinder extends BaseAddonFinder {
                 Map<String, Pattern> matchProperties = method.getMatchProperties().stream()
                         .collect(Collectors.toMap(AddonMatchProperty::getName, AddonMatchProperty::getPattern));
 
+                if (matchProperties.isEmpty()) {
+                    logger.warn("Add-on '{}' addon.xml file contains no 'match-property'", candidate.getUID());
+                    break;
+                }
+
                 Set<String> propertyNames = new HashSet<>(matchProperties.keySet());
                 propertyNames.removeAll(SUPPORTED_PROPERTIES);
-
                 if (!propertyNames.isEmpty()) {
                     logger.warn("Add-on '{}' addon.xml file contains unsupported 'match-property' [{}]",
                             candidate.getUID(), String.join(",", propertyNames));
