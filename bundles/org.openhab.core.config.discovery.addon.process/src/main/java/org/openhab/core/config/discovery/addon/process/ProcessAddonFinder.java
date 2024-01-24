@@ -64,13 +64,14 @@ public class ProcessAddonFinder extends BaseAddonFinder {
         protected final @Nullable String commandLine;
 
         protected ProcessInfo(ProcessHandle.Info info) {
-            String cmd = info.command().orElse(null);
-            if ((cmd == null || cmd.isEmpty()) && NOT_WINDOWS) {
-                String[] args = info.commandLine().orElse("").split("\\s+");
-                cmd = args.length > 0 ? args[0] : null;
-            }
-            command = cmd;
             commandLine = info.commandLine().orElse(null);
+            String cmd = info.command().orElse(null);
+            if ((cmd == null || cmd.isEmpty()) && commandLine != null && NOT_WINDOWS) {
+                String[] args = commandLine.split("\\s+");
+                command = args.length > 0 ? args[0] : null;
+            } else {
+                command = cmd;
+            }
         }
     }
 
