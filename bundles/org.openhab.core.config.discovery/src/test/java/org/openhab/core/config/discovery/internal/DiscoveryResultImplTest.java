@@ -18,14 +18,14 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
-import org.openhab.core.config.discovery.DiscoveryResult;
 import org.openhab.core.config.discovery.DiscoveryResultFlag;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
 
 /**
  * The {@link DiscoveryResultImplTest} checks if any invalid input parameters
- * and the synchronization of {@link DiscoveryResult}s work in a correct way.
+ * and the synchronization of {@link org.openhab.core.config.discovery.DiscoveryResult}s
+ * work in a correct way.
  *
  * @author Michael Grammling - Initial contribution
  * @author Thomas Höfer - Added representation
