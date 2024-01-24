@@ -537,6 +537,7 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
     }
 
     private void postEvent(DiscoveryResult result, EventType eventType) {
+        EventPublisher eventPublisher = this.eventPublisher;
         if (eventPublisher != null) {
             try {
                 switch (eventType) {
@@ -575,7 +576,7 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
     private List<ThingUID> getResultsForBridge(ThingUID bridgeUID) {
         List<ThingUID> thingsForBridge = new ArrayList<>();
         for (DiscoveryResult result : discoveryResultStorage.getValues()) {
-            if (bridgeUID.equals(result.getBridgeUID())) {
+            if (result != null && bridgeUID.equals(result.getBridgeUID())) {
                 thingsForBridge.add(result.getThingUID());
             }
         }

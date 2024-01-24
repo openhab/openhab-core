@@ -19,6 +19,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -84,6 +85,7 @@ public final class DiscoveryServiceRegistryImpl implements DiscoveryServiceRegis
                 logger.debug("Finished {} of {} discovery services.", finishedDiscoveryServices,
                         numberOfDiscoveryServices);
                 if (!errorOccurred && finishedDiscoveryServices == numberOfDiscoveryServices) {
+                    ScanListener listener = this.listener;
                     if (listener != null) {
                         listener.onFinished();
                     }
@@ -95,6 +97,7 @@ public final class DiscoveryServiceRegistryImpl implements DiscoveryServiceRegis
         public void onErrorOccurred(@Nullable Exception exception) {
             synchronized (this) {
                 if (!errorOccurred) {
+                    ScanListener listener = this.listener;
                     if (listener != null) {
                         listener.onErrorOccurred(exception);
                     }
@@ -115,6 +118,7 @@ public final class DiscoveryServiceRegistryImpl implements DiscoveryServiceRegis
             synchronized (this) {
                 numberOfDiscoveryServices--;
                 if (!errorOccurred && finishedDiscoveryServices == numberOfDiscoveryServices) {
+                    ScanListener listener = this.listener;
                     if (listener != null) {
                         listener.onFinished();
                     }
@@ -247,7 +251,7 @@ public final class DiscoveryServiceRegistryImpl implements DiscoveryServiceRegis
     @Override
     public synchronized void thingDiscovered(final DiscoveryService source, final DiscoveryResult result) {
         synchronized (cachedResults) {
-            cachedResults.computeIfAbsent(source, unused -> new HashSet<>()).add(result);
+            Objects.requireNonNull(cachedResults.computeIfAbsent(source, unused -> new HashSet<>())).add(result);
         }
         for (final DiscoveryListener listener : listeners) {
             try {

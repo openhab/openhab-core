@@ -173,9 +173,10 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
             // we first stop any currently running scan and its scheduled stop
             // call
             stopScan();
+            ScheduledFuture<?> scheduledStop = this.scheduledStop;
             if (scheduledStop != null) {
                 scheduledStop.cancel(false);
-                scheduledStop = null;
+                this.scheduledStop = null;
             }
 
             scanListener = listener;
@@ -195,9 +196,10 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
             try {
                 startScan();
             } catch (Exception ex) {
+                scheduledStop = this.scheduledStop;
                 if (scheduledStop != null) {
                     scheduledStop.cancel(false);
-                    scheduledStop = null;
+                    this.scheduledStop = null;
                 }
                 scanListener = null;
                 throw ex;
@@ -208,9 +210,10 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
     @Override
     public synchronized void abortScan() {
         synchronized (this) {
+            ScheduledFuture<?> scheduledStop = this.scheduledStop;
             if (scheduledStop != null) {
                 scheduledStop.cancel(false);
-                scheduledStop = null;
+                this.scheduledStop = null;
             }
             final ScanListener scanListener = this.scanListener;
             if (scanListener != null) {
@@ -233,9 +236,10 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
      * This method cleans up after a scan, i.e. it removes listeners and other required operations.
      */
     protected synchronized void stopScan() {
+        ScanListener scanListener = this.scanListener;
         if (scanListener != null) {
             scanListener.onFinished();
-            scanListener = null;
+            this.scanListener = null;
         }
     }
 
