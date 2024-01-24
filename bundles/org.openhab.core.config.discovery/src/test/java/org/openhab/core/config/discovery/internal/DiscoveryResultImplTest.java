@@ -36,12 +36,14 @@ public class DiscoveryResultImplTest {
 
     private static final int DEFAULT_TTL = 60;
 
+    @SuppressWarnings("deprecation")
     @Test
     public void testInvalidConstructorForThingType() {
         assertThrows(IllegalArgumentException.class,
                 () -> new DiscoveryResultImpl(null, new ThingUID("aa"), null, null, null, null, DEFAULT_TTL));
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     public void testInvalidConstructorForTTL() {
         ThingTypeUID thingTypeUID = new ThingTypeUID("bindingId", "thingType");
@@ -49,6 +51,7 @@ public class DiscoveryResultImplTest {
                 new ThingUID(thingTypeUID, "thingId"), null, null, null, null, -2));
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     public void testValidConstructor() {
         ThingTypeUID thingTypeUID = new ThingTypeUID("bindingId", "thingType");
@@ -66,6 +69,7 @@ public class DiscoveryResultImplTest {
         assertNull(discoveryResult.getRepresentationProperty());
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     public void testInvalidSynchronize() {
         ThingTypeUID thingTypeUID = new ThingTypeUID("bindingId", "thingType");
@@ -85,6 +89,7 @@ public class DiscoveryResultImplTest {
         assertEquals(DiscoveryResultFlag.IGNORED, discoveryResult.getFlag());
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     public void testIrrelevantSynchronize() {
         ThingTypeUID thingTypeUID = new ThingTypeUID("bindingId", "thingType");
@@ -107,6 +112,7 @@ public class DiscoveryResultImplTest {
         assertEquals(DiscoveryResultFlag.IGNORED, discoveryResult.getFlag());
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     public void testSynchronize() {
         ThingTypeUID thingTypeUID = new ThingTypeUID("bindingId", "thingType");
@@ -135,6 +141,7 @@ public class DiscoveryResultImplTest {
         assertEquals(DiscoveryResultFlag.IGNORED, discoveryResult.getFlag());
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     public void testThingTypeCompatibility() {
         ThingTypeUID thingTypeUID = new ThingTypeUID("bindingId", "thingType");
