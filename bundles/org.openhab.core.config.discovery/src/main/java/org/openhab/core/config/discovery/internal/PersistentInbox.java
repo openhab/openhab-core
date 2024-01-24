@@ -185,9 +185,6 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
 
     @Override
     public @Nullable Thing approve(ThingUID thingUID, @Nullable String label, @Nullable String newThingId) {
-        if (thingUID == null) {
-            throw new IllegalArgumentException("Thing UID must not be null");
-        }
         List<DiscoveryResult> results = stream().filter(forThingUID(thingUID)).toList();
         if (results.isEmpty()) {
             throw new IllegalArgumentException("No Thing with UID " + thingUID.getAsString() + " in inbox");
@@ -373,22 +370,7 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
 
     @Override
     public Stream<DiscoveryResult> stream() {
-        final Storage<DiscoveryResult> discoveryResultStorage = this.discoveryResultStorage;
-        if (discoveryResultStorage == null) {
-            final ScheduledFuture<?> timeToLiveChecker = this.timeToLiveChecker;
-            logger.error("The OSGi lifecycle has been violated (storage: {}, ttl checker cancelled: {}).",
-                    this.discoveryResultStorage == null ? "null" : this.discoveryResultStorage,
-                    timeToLiveChecker == null ? "null" : timeToLiveChecker.isCancelled());
-            return Stream.empty();
-        }
-        final Collection<@Nullable DiscoveryResult> values = discoveryResultStorage.getValues();
-        if (values == null) {
-            logger.warn(
-                    "The storage service violates the nullness requirements (get values must not return null) (storage class: {}).",
-                    discoveryResultStorage.getClass());
-            return Stream.empty();
-        }
-        return (Stream<DiscoveryResult>) values.stream().filter(Objects::nonNull);
+        return (Stream<DiscoveryResult>) discoveryResultStorage.getValues().stream().filter(Objects::nonNull);
     }
 
     @Override
@@ -497,10 +479,7 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
      *         null, if no discovery result could be found
      */
     private @Nullable DiscoveryResult get(ThingUID thingUID) {
-        if (thingUID != null) {
-            return discoveryResultStorage.get(thingUID.toString());
-        }
-        return null;
+        return discoveryResultStorage.get(thingUID.toString());
     }
 
     private void notifyListeners(DiscoveryResult result, EventType type) {
@@ -610,10 +589,8 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
 
     private Set<String> getConfigDescParamNames(List<ConfigDescriptionParameter> configDescParams) {
         Set<String> paramNames = new HashSet<>();
-        if (configDescParams != null) {
-            for (ConfigDescriptionParameter param : configDescParams) {
-                paramNames.add(param.getName());
-            }
+        for (ConfigDescriptionParameter param : configDescParams) {
+            paramNames.add(param.getName());
         }
         return paramNames;
     }

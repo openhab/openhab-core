@@ -70,9 +70,6 @@ public class DiscoveryResultImpl implements DiscoveryResult {
     public DiscoveryResultImpl(@Nullable ThingTypeUID thingTypeUID, ThingUID thingUID, @Nullable ThingUID bridgeUID,
             @Nullable Map<String, Object> properties, @Nullable String representationProperty, @Nullable String label,
             long timeToLive) throws IllegalArgumentException {
-        if (thingUID == null) {
-            throw new IllegalArgumentException("The thing UID must not be null!");
-        }
         if (timeToLive < 1 && timeToLive != TTL_UNLIMITED) {
             throw new IllegalArgumentException("The ttl must not be 0 or negative!");
         }
