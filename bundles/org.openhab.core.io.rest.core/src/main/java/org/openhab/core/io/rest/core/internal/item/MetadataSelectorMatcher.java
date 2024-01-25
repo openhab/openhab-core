@@ -78,8 +78,7 @@ public class MetadataSelectorMatcher {
             result.addAll(metadataNamespaces);
 
             // filter all name spaces which do not match the UID segment pattern (this will be the regex tokens):
-            return result.stream().filter(namespace -> namespace.matches(AbstractUID.SEGMENT_PATTERN))
-                    .collect(Collectors.toSet());
+            return result.stream().filter(AbstractUID::isValid).collect(Collectors.toSet());
         }
     }
 }
