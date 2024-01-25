@@ -64,8 +64,8 @@ public class ProcessAddonFinder extends BaseAddonFinder {
          * Initializes the command and commandLine fields.
          * If the command field is not present, it parses the first token in the command line.
          * <p>
-         * Note: the parser would produce a wrong result if the command line would contain two identical arguments.
-         * e.g. 'C:\path\to file\program.exe arg0 arg0 arg1'. This is very unlikely, but perhaps not impossible.
+         * Note: the parser would produce a wrong result if argument separators are NOT just a single space.
+         * e.g. "C:\path\to file\program.exe arg0 ~t arg1 ~s arg2 arg3" -- ~t=tab, ~s=space, etc.
          */
         protected ProcessInfo(ProcessHandle.Info info) {
             commandLine = info.commandLine().orElse(null);
@@ -74,12 +74,9 @@ public class ProcessAddonFinder extends BaseAddonFinder {
                 cmd = Objects.requireNonNull(commandLine);
                 String[] args = info.arguments().orElse(null);
                 if (args != null && args.length > 0) {
-                    if (args.length == 1) {
-                        cmd = cmd + " ";
-                    }
-                    int iArg0 = cmd.lastIndexOf(" " + args[0] + " ");
-                    if (iArg0 > 0) {
-                        cmd = cmd.substring(0, iArg0);
+                    int iArgs = cmd.lastIndexOf(String.join(" ", args));
+                    if (iArgs > 0) {
+                        cmd = cmd.substring(0, iArgs);
                     }
                 }
                 cmd = cmd.stripTrailing();
