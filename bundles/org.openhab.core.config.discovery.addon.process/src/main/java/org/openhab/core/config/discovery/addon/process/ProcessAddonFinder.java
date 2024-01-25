@@ -18,7 +18,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -51,8 +50,6 @@ public class ProcessAddonFinder extends BaseAddonFinder {
     private static final String COMMAND_LINE = "commandLine";
     private static final Set<String> SUPPORTED_PROPERTIES = Set.of(COMMAND, COMMAND_LINE);
 
-    private static final Pattern WHITE_SPACE = Pattern.compile("\\s+");
-
     private final Logger logger = LoggerFactory.getLogger(ProcessAddonFinder.class);
 
     /**
@@ -67,26 +64,27 @@ public class ProcessAddonFinder extends BaseAddonFinder {
          * Initializes the command and commandLine fields.
          * If the command field is not present, it parses the first token in the command line.
          * <p>
-         * Note: the parser could produce a wrong result if BOTH the executable path/filename contains space(s) AND
-         * it contains the identical sub-string as argument[0] after the first space. This is very unlikely, but not
-         * completely impossible. e.g. 'C:\path\to arg0\program.exe arg0 arg1 arg2'
+         * Note: the parser would produce a wrong result if the command line would contain two identical arguments.
+         * e.g. 'C:\path\to file\program.exe arg0 arg0 arg1'. This is very unlikely, but perhaps not impossible.
          */
         protected ProcessInfo(ProcessHandle.Info info) {
             commandLine = info.commandLine().orElse(null);
             String cmd = info.command().orElse(null);
             if ((cmd == null || cmd.isEmpty()) && commandLine != null) {
+                cmd = Objects.requireNonNull(commandLine);
                 String[] args = info.arguments().orElse(null);
                 if (args != null && args.length > 0) {
-                    Matcher whiteSpaceMatcher = WHITE_SPACE.matcher(commandLine);
-                    int iWhite = whiteSpaceMatcher.find() ? whiteSpaceMatcher.start() : 1;
-                    int iArg0 = Objects.requireNonNull(commandLine).indexOf(args[0]);
-                    command = iArg0 > iWhite ? Objects.requireNonNull(commandLine).substring(0, iArg0).trim() : null;
-                } else {
-                    command = Objects.requireNonNull(commandLine).trim();
+                    if (args.length == 1) {
+                        cmd = cmd + " ";
+                    }
+                    int iArg0 = cmd.lastIndexOf(" " + args[0] + " ");
+                    if (iArg0 > 0) {
+                        cmd = cmd.substring(0, iArg0);
+                    }
                 }
-            } else {
-                command = cmd;
+                cmd = cmd.stripTrailing();
             }
+            command = cmd;
         }
     }
 
@@ -117,11 +115,15 @@ public class ProcessAddonFinder extends BaseAddonFinder {
                 }
 
                 Set<String> propertyNames = new HashSet<>(matchProperties.keySet());
-                propertyNames.removeAll(SUPPORTED_PROPERTIES);
+                boolean noSupportedProperty = !propertyNames.removeAll(SUPPORTED_PROPERTIES);
+
                 if (!propertyNames.isEmpty()) {
                     logger.warn("Add-on '{}' addon.xml file contains unsupported 'match-property' [{}]",
                             candidate.getUID(), String.join(",", propertyNames));
-                    break;
+
+                    if (noSupportedProperty) {
+                        break;
+                    }
                 }
 
                 logger.trace("Checking candidate: {}", candidate.getUID());
