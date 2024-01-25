@@ -72,7 +72,10 @@ public class ProcessAddonFinder extends BaseAddonFinder {
                 String[] args = info.arguments().orElse(null);
                 if (args != null) {
                     for (int i = args.length - 1; i >= 0; i--) {
-                        cmd = cmd.substring(0, cmd.lastIndexOf(args[i]));
+                        int index = cmd.lastIndexOf(args[i]);
+                        if (index >= 0) {
+                            cmd = cmd.substring(0, index);
+                        }
                     }
                 }
                 cmd = cmd.stripTrailing();
