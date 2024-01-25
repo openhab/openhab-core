@@ -13,15 +13,21 @@
 package org.openhab.core.internal.types;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Collections;
 import java.util.List;
+import java.util.regex.Pattern;
+
+import javax.measure.Unit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.types.StateDescription;
 import org.openhab.core.types.StateDescriptionFragment;
 import org.openhab.core.types.StateDescriptionFragmentBuilder;
 import org.openhab.core.types.StateOption;
+import org.openhab.core.types.util.UnitUtils;
 
 /**
  * Data holder for StateDescriptionFragment creation.
@@ -30,6 +36,8 @@ import org.openhab.core.types.StateOption;
  */
 @NonNullByDefault
 public class StateDescriptionFragmentImpl implements StateDescriptionFragment {
+    private static final Pattern PATTERN_PRECISION_PATTERN = Pattern.compile("%[-#+ ,\\(<0-9$]*.(\\d+)[eEf]");
+    private static final String INTEGER_FORMAT_TYPE = "d";
 
     private static class StateDescriptionImpl extends StateDescription {
         StateDescriptionImpl(@Nullable BigDecimal minimum, @Nullable BigDecimal maximum, @Nullable BigDecimal step,
@@ -180,13 +188,90 @@ public class StateDescriptionFragmentImpl implements StateDescriptionFragment {
      * @return this instance with the fields merged.
      */
     public StateDescriptionFragment merge(StateDescriptionFragment fragment) {
+        String newPattern = fragment.getPattern();
+        // Do unit conversions if possible.
+        // Example:
+        // The GenericItemProvider sets a pattern of ° F, but no min, max, or step.
+        // The ChannelStateDescriptionProvider sets a pattern of ° C, min of 0, max of 100, step of 0.5
+        // The latter is lower priority, so gets merged into the former.
+        // We want to construct a final description with a pattern of ° F, min of 32, max of 212, and step of 0.9
+        //
+        // In other words, we keep the user's overridden unit, but convert the bounds provided by the
+        // channel (that is describing the bounds in terms of its unit) to the user's preferred unit.
+        boolean skipStep = false;
+        if (pattern != null && newPattern != null) {
+            Unit<?> oldUnit = UnitUtils.parseUnit(pattern);
+            Unit<?> newUnit = UnitUtils.parseUnit(newPattern);
+            if (oldUnit != null && newUnit != null && !oldUnit.equals(newUnit)
+                    && (oldUnit.isCompatible(newUnit) || oldUnit.inverse().isCompatible(newUnit))) {
+                BigDecimal newValue;
+                // when inverting, min and max will swap
+                if (oldUnit.inverse().isCompatible(newUnit)) {
+                    // It's highly likely that an invertible unit conversion will end up with a very long decimal
+                    // So use the format to round min/max to what we're going to display.
+                    Integer scale = null;
+                    var m = PATTERN_PRECISION_PATTERN.matcher(pattern);
+                    if (m.find()) {
+                        String precision = m.group(1);
+                        if (precision != null) {
+                            scale = Integer.valueOf(precision);
+                        } else if (m.group(2).equals(INTEGER_FORMAT_TYPE)) {
+                            scale = 0;
+                        }
+                    }
+
+                    if (minimum == null && (newValue = fragment.getMaximum()) != null) {
+                        minimum = new QuantityType(newValue, newUnit).toInvertibleUnit(oldUnit).toBigDecimal();
+                        if (minimum.scale() > 0) {
+                            minimum = minimum.stripTrailingZeros();
+                        }
+                        if (scale != null && minimum.scale() > scale) {
+                            minimum = minimum.setScale(scale, RoundingMode.FLOOR);
+                        }
+                    }
+                    if (maximum == null && (newValue = fragment.getMinimum()) != null) {
+                        maximum = new QuantityType(newValue, newUnit).toInvertibleUnit(oldUnit).toBigDecimal();
+                        if (maximum.scale() > 0) {
+                            maximum = maximum.stripTrailingZeros();
+                        }
+                        if (scale != null && maximum.scale() > scale) {
+                            maximum = maximum.setScale(scale, RoundingMode.CEILING);
+                        }
+                    }
+
+                    // Invertible units cannot have a linear relationship, so just leave step blank.
+                    // Make sure it doesn't get overwritten below with a non-sensical value
+                    skipStep = true;
+                } else {
+                    if (minimum == null && (newValue = fragment.getMinimum()) != null) {
+                        minimum = new QuantityType(newValue, newUnit).toInvertibleUnit(oldUnit).toBigDecimal();
+                        if (minimum.scale() > 0) {
+                            minimum = minimum.stripTrailingZeros();
+                        }
+                    }
+                    if (maximum == null && (newValue = fragment.getMaximum()) != null) {
+                        maximum = new QuantityType(newValue, newUnit).toInvertibleUnit(oldUnit).toBigDecimal();
+                        if (maximum.scale() > 0) {
+                            maximum = maximum.stripTrailingZeros();
+                        }
+                    }
+                    if (step == null && (newValue = fragment.getStep()) != null) {
+                        step = new QuantityType(newValue, newUnit).toUnitRelative(oldUnit).toBigDecimal();
+                        if (step.scale() > 0) {
+                            step = step.stripTrailingZeros();
+                        }
+                    }
+                }
+            }
+        }
+
         if (minimum == null) {
             minimum = fragment.getMinimum();
         }
         if (maximum == null) {
             maximum = fragment.getMaximum();
         }
-        if (step == null) {
+        if (step == null && !skipStep) {
             step = fragment.getStep();
         }
         if (pattern == null) {
