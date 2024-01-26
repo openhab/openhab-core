@@ -234,7 +234,7 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
                 return null;
             }
 
-            channel = thing.getChannel(link.getLinkedUID().getId());
+            channel = thing.getChannel(link.getLinkedUID());
             if (channel == null) {
                 return null;
             }
@@ -399,7 +399,7 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
             ThingUID thingUID = channelUID.getThingUID();
             Thing thing = thingRegistry.get(thingUID);
             if (thing != null) {
-                Channel channel = thing.getChannel(channelUID.getId());
+                Channel channel = thing.getChannel(channelUID);
                 if (channel != null) {
                     if (thing.getHandler() != null) {
                         // fix QuantityType/DecimalType, leave others as-is

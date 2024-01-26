@@ -90,7 +90,7 @@ public class ItemChannelLinkConfigDescriptionProvider implements ConfigDescripti
             if (thing == null) {
                 return null;
             }
-            Channel channel = thing.getChannel(link.getLinkedUID().getId());
+            Channel channel = thing.getChannel(link.getLinkedUID());
             if (channel == null) {
                 return null;
             }
