@@ -92,6 +92,7 @@ public class ProcessAddonFinder extends BaseAddonFinder {
 
         try {
             processInfos = ProcessHandle.allProcesses().map(process -> new ProcessInfo(process.info()))
+                    .filter(info -> (info.command != null) || (info.commandLine != null))
                     .collect(Collectors.toUnmodifiableSet());
         } catch (SecurityException | UnsupportedOperationException unused) {
             logger.info("Cannot obtain process list, suggesting add-ons based on running processes is not possible");
