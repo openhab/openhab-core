@@ -75,6 +75,7 @@ import org.openhab.core.library.dimension.DataAmount;
 import org.openhab.core.library.dimension.DataTransferRate;
 import org.openhab.core.library.dimension.Density;
 import org.openhab.core.library.dimension.ElectricConductivity;
+import org.openhab.core.library.dimension.EmissionIntensity;
 import org.openhab.core.library.dimension.EnergyPrice;
 import org.openhab.core.library.dimension.Intensity;
 import org.openhab.core.library.dimension.RadiationSpecificActivity;
@@ -411,6 +412,7 @@ public class I18nProviderImpl
         addDefaultUnit(dimensionMap, ElectricInductance.class, Units.HENRY);
         addDefaultUnit(dimensionMap, ElectricPotential.class, Units.VOLT);
         addDefaultUnit(dimensionMap, ElectricResistance.class, Units.OHM);
+        addDefaultUnit(dimensionMap, EmissionIntensity.class, Units.GRAM_PER_KILOWATT_HOUR);
         addDefaultUnit(dimensionMap, Energy.class, Units.KILOWATT_HOUR);
         addDefaultUnit(dimensionMap, Force.class, Units.NEWTON);
         addDefaultUnit(dimensionMap, Frequency.class, Units.HERTZ);

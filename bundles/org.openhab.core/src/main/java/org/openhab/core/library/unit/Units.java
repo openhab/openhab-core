@@ -55,6 +55,7 @@ import org.openhab.core.library.dimension.DataAmount;
 import org.openhab.core.library.dimension.DataTransferRate;
 import org.openhab.core.library.dimension.Density;
 import org.openhab.core.library.dimension.ElectricConductivity;
+import org.openhab.core.library.dimension.EmissionIntensity;
 import org.openhab.core.library.dimension.Intensity;
 import org.openhab.core.library.dimension.RadiationSpecificActivity;
 import org.openhab.core.library.dimension.VolumetricFlowRate;
@@ -131,6 +132,8 @@ public final class Units extends CustomUnits {
             new ProductUnit<>(tech.units.indriya.unit.Units.WATT.multiply(tech.units.indriya.unit.Units.HOUR)));
     public static final Unit<Energy> KILOWATT_HOUR = addUnit(MetricPrefix.KILO(WATT_HOUR));
     public static final Unit<Energy> MEGAWATT_HOUR = addUnit(MetricPrefix.MEGA(WATT_HOUR));
+    public static final Unit<EmissionIntensity> GRAM_PER_KILOWATT_HOUR = addUnit(
+            new ProductUnit<>(tech.units.indriya.unit.Units.GRAM.divide(KILOWATT_HOUR)));
     public static final Unit<Power> VAR = addUnit(new AlternateUnit<>(tech.units.indriya.unit.Units.WATT, "var"));
     public static final Unit<Power> KILOVAR = addUnit(MetricPrefix.KILO(VAR));
     public static final Unit<Energy> VAR_HOUR = addUnit(
@@ -261,6 +264,7 @@ public final class Units extends CustomUnits {
         SimpleUnitFormat.getInstance().label(DEGREE_ANGLE, "°");
         SimpleUnitFormat.getInstance().label(DEUTSCHE_HAERTE, "°dH");
         SimpleUnitFormat.getInstance().label(DOBSON_UNIT, "DU");
+        SimpleUnitFormat.getInstance().label(GRAM_PER_KILOWATT_HOUR, "g/kWh");
         SimpleUnitFormat.getInstance().label(GIGABYTE, "GB");
         SimpleUnitFormat.getInstance().label(GIBIBYTE, "GiB");
         SimpleUnitFormat.getInstance().alias(GIBIBYTE, "Gio");

@@ -112,6 +112,11 @@ public class UnitsTest {
     }
 
     @Test
+    public void testGramPerKiloWattHourUnitSymbol() {
+        assertThat(Units.GRAM_PER_KILOWATT_HOUR.toString(), is("g/kWh"));
+    }
+
+    @Test
     public void testPascal2mmHgConversion() {
         Quantity<Pressure> pascal = Quantities.getQuantity(new BigDecimal("133.322368"), SIUnits.PASCAL);
 
