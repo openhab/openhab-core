@@ -22,9 +22,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.AbstractUID;
 import org.openhab.core.config.discovery.DiscoveryResult;
-import org.openhab.core.config.discovery.DiscoveryResultBuilder;
 import org.openhab.core.config.discovery.DiscoveryResultFlag;
-import org.openhab.core.thing.Bridge;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
 
@@ -59,22 +57,19 @@ public class DiscoveryResultImpl implements DiscoveryResult {
      * @param thingUID the {@link ThingUID} to be set. If a {@code Thing} disappears and is discovered again, the same
      *            {@code Thing} ID must be created. A typical {@code Thing} ID could be the serial number. It's usually
      *            <i>not</i> a product name.
-     * @param bridgeUID the unique {@link Bridge} ID to be set
+     * @param bridgeUID the unique {@link org.openhab.core.thing.Bridge} ID to be set
      * @param properties the properties to be set
      * @param representationProperty the representationProperty to be set
      * @param label the human readable label to set
      * @param timeToLive time to live in seconds
      *
      * @throws IllegalArgumentException if the {@link ThingUID} is null or the time to live is less than 1
-     * @deprecated use {@link DiscoveryResultBuilder} instead.
+     * @deprecated use {@link org.openhab.core.config.discovery.DiscoveryResultBuilder} instead.
      */
     @Deprecated
     public DiscoveryResultImpl(@Nullable ThingTypeUID thingTypeUID, ThingUID thingUID, @Nullable ThingUID bridgeUID,
             @Nullable Map<String, Object> properties, @Nullable String representationProperty, @Nullable String label,
             long timeToLive) throws IllegalArgumentException {
-        if (thingUID == null) {
-            throw new IllegalArgumentException("The thing UID must not be null!");
-        }
         if (timeToLive < 1 && timeToLive != TTL_UNLIMITED) {
             throw new IllegalArgumentException("The ttl must not be 0 or negative!");
         }

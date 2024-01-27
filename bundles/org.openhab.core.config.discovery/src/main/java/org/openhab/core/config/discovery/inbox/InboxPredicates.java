@@ -47,7 +47,7 @@ public class InboxPredicates {
 
     public static Predicate<DiscoveryResult> withProperty(@Nullable String propertyName, String propertyValue) {
         return r -> r.getProperties().containsKey(propertyName)
-                && r.getProperties().get(propertyName).equals(propertyValue);
+                && propertyValue.equals(r.getProperties().get(propertyName));
     }
 
     public static Predicate<DiscoveryResult> withRepresentationProperty(@Nullable String propertyName) {
