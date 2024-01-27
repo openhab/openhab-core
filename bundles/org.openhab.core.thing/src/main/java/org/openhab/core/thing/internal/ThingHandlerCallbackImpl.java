@@ -226,7 +226,7 @@ class ThingHandlerCallbackImpl implements ThingHandlerCallback {
 
     @Override
     public ChannelBuilder editChannel(Thing thing, ChannelUID channelUID) {
-        Channel channel = thing.getChannel(channelUID.getId());
+        Channel channel = thing.getChannel(channelUID);
         if (channel == null) {
             throw new IllegalArgumentException(
                     String.format("Channel '%s' does not exist for thing '%s'", channelUID, thing.getUID()));
