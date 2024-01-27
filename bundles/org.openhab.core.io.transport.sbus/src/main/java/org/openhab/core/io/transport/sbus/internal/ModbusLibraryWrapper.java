@@ -174,6 +174,7 @@ public class ModbusLibraryWrapper {
                         String.format("Unexpected function code %s", message.getFunctionCode()));
         }
         ModbusRequest modbusRequest = request.get();
+        modbusRequest.setSubnetID(message.getSubnetID());
         modbusRequest.setUnitID(message.getUnitID());
         modbusRequest.setProtocolID(message.getProtocolID());
         return modbusRequest;
@@ -243,6 +244,7 @@ public class ModbusLibraryWrapper {
         } else {
             throw new IllegalArgumentException(String.format("Unexpected function code %s", message.getFunctionCode()));
         }
+        request.setSubnetID(message.getSubnetID());
         request.setUnitID(message.getUnitID());
         request.setProtocolID(message.getProtocolID());
 
