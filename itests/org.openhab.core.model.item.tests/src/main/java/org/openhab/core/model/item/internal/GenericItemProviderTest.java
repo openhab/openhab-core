@@ -12,7 +12,7 @@
  */
 package org.openhab.core.model.item.internal;
 
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.joining;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
@@ -655,5 +655,28 @@ public class GenericItemProviderTest extends JavaOSGiTest {
         StateDescription stateDescription = item.getStateDescription();
         assertThat(stateDescription, is(notNullValue()));
         assertThat(stateDescription.getPattern(), is("XPATH(/*[name()='liveStreams']/*[name()='stream']):%s"));
+
+        model = "Switch s \"Info [%s]\"";
+        modelRepository.addOrRefreshModel(TESTMODEL_NAME, new ByteArrayInputStream(model.getBytes()));
+        item = itemRegistry.get("s");
+        assertThat(item, is(notNullValue()));
+        stateDescription = item.getStateDescription();
+        assertThat(stateDescription, is(notNullValue()));
+        assertThat(stateDescription.getPattern(), is("%s"));
+
+        model = "Switch s \"Info\"";
+        modelRepository.addOrRefreshModel(TESTMODEL_NAME, new ByteArrayInputStream(model.getBytes()));
+        item = itemRegistry.get("s");
+        assertThat(item, is(notNullValue()));
+        stateDescription = item.getStateDescription();
+        assertThat(stateDescription, is(nullValue()));
+
+        model = "Switch s \"Info [%s]\"";
+        modelRepository.addOrRefreshModel(TESTMODEL_NAME, new ByteArrayInputStream(model.getBytes()));
+        item = itemRegistry.get("s");
+        assertThat(item, is(notNullValue()));
+        stateDescription = item.getStateDescription();
+        assertThat(stateDescription, is(notNullValue()));
+        assertThat(stateDescription.getPattern(), is("%s"));
     }
 }
