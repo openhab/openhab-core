@@ -255,6 +255,8 @@ public class GenericItemProvider extends AbstractProvider<Item>
                 label = label.substring(0, label.indexOf("[")).trim();
                 stateDescriptionFragments.put(modelItem.getName(),
                         StateDescriptionFragmentBuilder.create().withPattern(format).build());
+            } else {
+                stateDescriptionFragments.remove(modelItem.getName());
             }
             activeItem.setLabel(label);
             activeItem.setCategory(modelItem.getIcon());
