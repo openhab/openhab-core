@@ -11,13 +11,13 @@
 				may return null to discard the updates/commands and not pass them through.</description>
 			<limitToOptions>false</limitToOptions>
 		</parameter>
-		<parameter name="toHandlerCommandScript" type="text">
+		<parameter name="commandFromItemScript" type="text">
 			<label>Item Command To Thing Transformation</label>
 			<description>The Script for transforming commands from the item to the Thing handler. The script may return null to
 				discard the commands and not pass them through.</description>
 			<limitToOptions>false</limitToOptions>
 		</parameter>
-		<parameter name="toHandlerStateScript" type="text">
+		<parameter name="stateFromItemScript" type="text">
 			<label>Item State To Thing Transformation</label>
 			<description>The Script for transforming states from the item to the Thing handler. The script may return null to
 				discard the states and not pass them through.</description>

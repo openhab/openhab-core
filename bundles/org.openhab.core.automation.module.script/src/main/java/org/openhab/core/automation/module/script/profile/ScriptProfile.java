@@ -43,8 +43,8 @@ public class ScriptProfile implements StateProfile {
 
     public static final String CONFIG_TO_ITEM_SCRIPT = "toItemScript";
     public static final String CONFIG_TO_HANDLER_SCRIPT = "toHandlerScript";
-    public static final String CONFIG_TO_HANDLER_COMMAND_SCRIPT = "toHandlerCommandScript";
-    public static final String CONFIG_TO_HANDLER_STATE_SCRIPT = "toHandlerStateScript";
+    public static final String CONFIG_COMMAND_FROM_ITEM_SCRIPT = "commandFromItemScript";
+    public static final String CONFIG_STATE_FROM_ITEM_SCRIPT = "stateFromItemScript";
 
     private final Logger logger = LoggerFactory.getLogger(ScriptProfile.class);
 
@@ -56,8 +56,8 @@ public class ScriptProfile implements StateProfile {
     private final List<Class<? extends Command>> handlerAcceptedCommandTypes;
 
     private final String toItemScript;
-    private final String toHandlerCommandScript;
-    private final String toHandlerStateScript;
+    private final String commandFromItemScript;
+    private final String stateFromItemScript;
     private final ProfileTypeUID profileTypeUID;
 
     private final boolean isConfigured;
@@ -76,20 +76,20 @@ public class ScriptProfile implements StateProfile {
                 String.class, "");
         String toHandlerScript = ConfigParser
                 .valueAsOrElse(profileContext.getConfiguration().get(CONFIG_TO_HANDLER_SCRIPT), String.class, "");
-        String localToHandlerCommandScript = ConfigParser.valueAsOrElse(
-                profileContext.getConfiguration().get(CONFIG_TO_HANDLER_COMMAND_SCRIPT), String.class, "");
-        this.toHandlerCommandScript = localToHandlerCommandScript.isBlank() ? toHandlerScript
-                : localToHandlerCommandScript;
-        this.toHandlerStateScript = ConfigParser
-                .valueAsOrElse(profileContext.getConfiguration().get(CONFIG_TO_HANDLER_STATE_SCRIPT), String.class, "");
+        String localCommandFromItemScript = ConfigParser.valueAsOrElse(
+                profileContext.getConfiguration().get(CONFIG_COMMAND_FROM_ITEM_SCRIPT), String.class, "");
+        this.commandFromItemScript = localCommandFromItemScript.isBlank() ? toHandlerScript
+                : localCommandFromItemScript;
+        this.stateFromItemScript = ConfigParser
+                .valueAsOrElse(profileContext.getConfiguration().get(CONFIG_STATE_FROM_ITEM_SCRIPT), String.class, "");
 
-        if (!toHandlerScript.isBlank() && toHandlerCommandScript.isBlank()) {
-            logger.warn("'toHandlerScript' has been deprecated! Please use 'toHandlerCommandScript' instead.");
+        if (!toHandlerScript.isBlank() && commandFromItemScript.isBlank()) {
+            logger.warn("'toHandlerScript' has been deprecated! Please use 'commandFromItemScript' instead.");
         }
 
-        if (toItemScript.isBlank() && toHandlerCommandScript.isBlank() && toHandlerStateScript.isBlank()) {
+        if (toItemScript.isBlank() && commandFromItemScript.isBlank() && stateFromItemScript.isBlank()) {
             logger.error(
-                    "Neither 'toItemScript', 'toHandlerCommandScript' nor 'toHandlerStateScript' defined in link '{}'. Profile will discard all states and commands.",
+                    "Neither 'toItemScript', 'commandFromItemScript' nor 'stateFromItemScript' defined in link '{}'. Profile will discard all states and commands.",
                     callback.getItemChannelLink());
             isConfigured = false;
             return;
@@ -105,25 +105,27 @@ public class ScriptProfile implements StateProfile {
 
     @Override
     public void onStateUpdateFromItem(State state) {
-        if (isConfigured && !toHandlerStateScript.isBlank()) {
-            internalFromItem(toHandlerStateScript, state);
+        if (isConfigured) {
+            fromItem(stateFromItemScript, state);
         }
     }
 
     @Override
     public void onCommandFromItem(Command command) {
-        if (isConfigured && !toHandlerCommandScript.isBlank()) {
-            internalFromItem(toHandlerCommandScript, command);
+        if (isConfigured) {
+            fromItem(commandFromItemScript, command);
         }
     }
 
-    private void internalFromItem(String script, Type type) {
+    private void fromItem(String script, Type type) {
         String returnValue = executeScript(script, type);
         if (returnValue != null) {
             // try to parse the value
             Command newCommand = TypeParser.parseCommand(handlerAcceptedCommandTypes, returnValue);
             if (newCommand != null) {
                 callback.handleCommand(newCommand);
+            } else {
+                logger.debug("The given type {} could not be transformed to a command", type);
             }
         }
     }
