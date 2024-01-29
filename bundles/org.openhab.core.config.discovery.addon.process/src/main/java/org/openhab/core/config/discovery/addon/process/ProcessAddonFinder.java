@@ -53,19 +53,17 @@ public class ProcessAddonFinder extends BaseAddonFinder {
     private final Logger logger = LoggerFactory.getLogger(ProcessAddonFinder.class);
 
     /**
-     * Private class to extract match property parameters from a {@link ProcessHandle.Info} object.
+     * Private record to extract match property parameters from a {@link ProcessHandle.Info} object.
      * Tries to mitigate differences on different operating systems.
      */
-    protected static class ProcessInfo {
-        protected final @Nullable String command;
-        protected final @Nullable String commandLine;
+    protected static record ProcessInfo(@Nullable String command, @Nullable String commandLine) {
 
         /**
          * Initializes the command and commandLine fields.
          * If the command field is not present, it parses the first token in the command line.
          */
-        protected ProcessInfo(ProcessHandle.Info info) {
-            commandLine = info.commandLine().orElse(null);
+        protected static ProcessInfo from(ProcessHandle.Info info) {
+            String commandLine = info.commandLine().orElse(null);
             String cmd = info.command().orElse(null);
             if ((cmd == null || cmd.isEmpty()) && commandLine != null) {
                 cmd = Objects.requireNonNull(commandLine);
@@ -80,7 +78,7 @@ public class ProcessAddonFinder extends BaseAddonFinder {
                 }
                 cmd = cmd.stripTrailing();
             }
-            command = cmd;
+            return new ProcessInfo(cmd, commandLine);
         }
     }
 
@@ -91,7 +89,7 @@ public class ProcessAddonFinder extends BaseAddonFinder {
         Set<ProcessInfo> processInfos;
 
         try {
-            processInfos = ProcessHandle.allProcesses().map(process -> new ProcessInfo(process.info()))
+            processInfos = ProcessHandle.allProcesses().map(process -> ProcessInfo.from(process.info()))
                     .filter(info -> (info.command != null) || (info.commandLine != null))
                     .collect(Collectors.toUnmodifiableSet());
         } catch (SecurityException | UnsupportedOperationException unused) {
