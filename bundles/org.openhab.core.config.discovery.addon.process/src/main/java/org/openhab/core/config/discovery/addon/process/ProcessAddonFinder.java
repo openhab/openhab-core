@@ -16,7 +16,6 @@ import static org.openhab.core.config.discovery.addon.AddonFinderConstants.ADDON
 
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -66,7 +65,7 @@ public class ProcessAddonFinder extends BaseAddonFinder {
             String commandLine = info.commandLine().orElse(null);
             String cmd = info.command().orElse(null);
             if ((cmd == null || cmd.isEmpty()) && commandLine != null) {
-                cmd = Objects.requireNonNull(commandLine);
+                cmd = commandLine;
                 String[] args = info.arguments().orElse(null);
                 if (args != null) {
                     for (int i = args.length - 1; i >= 0; i--) {
@@ -105,7 +104,7 @@ public class ProcessAddonFinder extends BaseAddonFinder {
                         .collect(Collectors.toMap(AddonMatchProperty::getName, AddonMatchProperty::getPattern));
 
                 if (matchProperties.isEmpty()) {
-                    logger.warn("Add-on '{}' addon.xml file contains no 'match-property'", candidate.getUID());
+                    logger.warn("Add-on info for '{}' contains no 'match-property'", candidate.getUID());
                     break;
                 }
 
@@ -113,8 +112,8 @@ public class ProcessAddonFinder extends BaseAddonFinder {
                 boolean noSupportedProperty = !propertyNames.removeAll(SUPPORTED_PROPERTIES);
 
                 if (!propertyNames.isEmpty()) {
-                    logger.warn("Add-on '{}' addon.xml file contains unsupported 'match-property' [{}]",
-                            candidate.getUID(), String.join(",", propertyNames));
+                    logger.warn("Add-on info for '{}' contains unsupported 'match-property' [{}]", candidate.getUID(),
+                            String.join(",", propertyNames));
 
                     if (noSupportedProperty) {
                         break;
