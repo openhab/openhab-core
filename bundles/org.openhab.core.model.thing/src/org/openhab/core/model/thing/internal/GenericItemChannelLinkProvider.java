@@ -13,6 +13,7 @@
 package org.openhab.core.model.thing.internal;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
@@ -45,7 +46,7 @@ public class GenericItemChannelLinkProvider extends AbstractProvider<ItemChannel
 
     private final Logger logger = LoggerFactory.getLogger(GenericItemChannelLinkProvider.class);
     /** caches binding configurations. maps itemNames to {@link ItemChannelLink}s */
-    protected Map<String, Set<ItemChannelLink>> itemChannelLinkMap = new ConcurrentHashMap<>();
+    protected Map<String, Map<ChannelUID, ItemChannelLink>> itemChannelLinkMap = new ConcurrentHashMap<>();
 
     /**
      * stores information about the context of items. The map has this content
@@ -98,15 +99,16 @@ public class GenericItemChannelLinkProvider extends AbstractProvider<ItemChannel
             previousItemNames.remove(itemName);
         }
 
-        Set<ItemChannelLink> links = itemChannelLinkMap.get(itemName);
+        Map<ChannelUID, ItemChannelLink> links = itemChannelLinkMap.get(itemName);
         if (links == null) {
-            itemChannelLinkMap.put(itemName, links = new HashSet<>());
+            itemChannelLinkMap.put(itemName, links = new HashMap<>(2));
         }
-        if (!links.contains(itemChannelLink)) {
-            links.add(itemChannelLink);
+
+        ItemChannelLink oldLink = links.put(channelUIDObject, itemChannelLink);
+        if (oldLink == null) {
             notifyListenersAboutAddedElement(itemChannelLink);
         } else {
-            notifyListenersAboutUpdatedElement(itemChannelLink, itemChannelLink);
+            notifyListenersAboutUpdatedElement(oldLink, itemChannelLink);
         }
     }
 
@@ -128,9 +130,9 @@ public class GenericItemChannelLinkProvider extends AbstractProvider<ItemChannel
         }
         for (String itemName : previousItemNames) {
             // we remove all binding configurations that were not processed
-            Set<ItemChannelLink> links = itemChannelLinkMap.remove(itemName);
+            Map<ChannelUID, ItemChannelLink> links = itemChannelLinkMap.remove(itemName);
             if (links != null) {
-                for (ItemChannelLink removedItemChannelLink : links) {
+                for (ItemChannelLink removedItemChannelLink : links.values()) {
                     notifyListenersAboutRemovedElement(removedItemChannelLink);
                 }
             }
@@ -140,6 +142,6 @@ public class GenericItemChannelLinkProvider extends AbstractProvider<ItemChannel
 
     @Override
     public Collection<ItemChannelLink> getAll() {
-        return itemChannelLinkMap.values().stream().flatMap(Collection::stream).toList();
+        return itemChannelLinkMap.values().stream().flatMap(m -> m.values().stream()).toList();
     }
 }
