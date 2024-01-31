@@ -28,7 +28,7 @@ import org.openhab.core.model.yaml.internal.YamlModelRepositoryImpl;
  * </ul>
  *
  * @author Laurent Garnier - Initial contribution
- * @author Jan N. Klug - Refactoring and improvments to JavaDoc
+ * @author Jan N. Klug - Refactoring and improvements to JavaDoc
  */
 public interface YamlElement {
 
@@ -38,7 +38,7 @@ public interface YamlElement {
      * <p />
      * Identifiers
      * <ul>
-     * <li>MUST not non-null</li>
+     * <li>MUST be non-null</li>
      * <li>MUST be unique within a model</li>
      * <li>SHOULD be unique across all models</li>
      * </ul>
