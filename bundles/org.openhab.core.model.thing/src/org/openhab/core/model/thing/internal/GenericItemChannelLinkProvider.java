@@ -136,9 +136,7 @@ public class GenericItemChannelLinkProvider extends AbstractProvider<ItemChannel
             // we remove all binding configurations that were not processed
             Map<ChannelUID, ItemChannelLink> links = itemChannelLinkMap.remove(itemName);
             if (links != null) {
-                for (ItemChannelLink removedItemChannelLink : links.values()) {
-                    notifyListenersAboutRemovedElement(removedItemChannelLink);
-                }
+                links.values().forEach(this::notifyListenersAboutRemovedElement);
             }
         }
         Optional.ofNullable(contextMap.get(context)).ifPresent(ctx -> ctx.removeAll(previousItemNames));
