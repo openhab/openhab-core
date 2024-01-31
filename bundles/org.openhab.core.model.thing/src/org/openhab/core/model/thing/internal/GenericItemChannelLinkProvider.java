@@ -101,6 +101,10 @@ public class GenericItemChannelLinkProvider extends AbstractProvider<ItemChannel
 
         Map<ChannelUID, ItemChannelLink> links = itemChannelLinkMap.get(itemName);
         if (links == null) {
+            // Create a HashMap with an initial capacity of 2 (the default is 16) to save memory
+            // because most items have only one channel. A capacity of 2 is enough to avoid
+            // resizing the HashMap in most cases, whereas 1 would trigger a resize as soon as
+            // one element is added.
             itemChannelLinkMap.put(itemName, links = new HashMap<>(2));
         }
 
