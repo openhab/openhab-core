@@ -51,4 +51,14 @@ public final class NormalizerFactory {
         Normalizer ret = NORMALIZERS.get(configDescriptionParameter.getType());
         return configDescriptionParameter.isMultiple() ? new ListNormalizer(ret) : ret;
     }
+
+    /**
+     * Returns the {@link Normalizer} for the given ConfigDescriptionParameter type.
+     *
+     * @param type the type
+     * @return the corresponding {@link Normalizer} (not null)
+     */
+    public static Normalizer getNormalizer(Type type) {
+        return NORMALIZERS.get(type);
+    }
 }

@@ -37,6 +37,9 @@ final class DecimalNormalizer extends AbstractNormalizer {
             if (value instanceof Byte byteValue) {
                 return new BigDecimal(byteValue).setScale(1);
             }
+            if (value instanceof Short shortValue) {
+                return new BigDecimal(shortValue).setScale(1);
+            }
             if (value instanceof Integer integerValue) {
                 return new BigDecimal(integerValue).setScale(1);
             }
