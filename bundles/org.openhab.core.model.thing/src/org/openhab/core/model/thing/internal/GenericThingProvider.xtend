@@ -605,8 +605,8 @@ class GenericThingProvider extends AbstractProviderLazyNullness<Thing> implement
         if (!loadedXmlThingTypes.contains(factory.bundleName) || modelRepository == null) {
             return
         }
-        val oldThings = thingsMap.get(modelName).clone
         val newThings = newArrayList()
+        val oldThings = thingsMap.put(modelName, newThings)
 
         val model = modelRepository.getModel(modelName) as ThingModel
         if (model !== null) {
@@ -616,7 +616,6 @@ class GenericThingProvider extends AbstractProviderLazyNullness<Thing> implement
         }
 
         newThings.forEach [ newThing |
-            thingsMap.get(modelName).add(newThing)
             val oldThing = oldThings.findFirst[it.UID == newThing.UID]
             if (oldThing !== null) {
                 if (!ThingHelper.equals(oldThing, newThing)) {
