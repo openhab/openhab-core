@@ -295,6 +295,12 @@
       </exclusions>
     </dependency>
     <dependency>
+      <groupId>com.fazecast</groupId>
+      <artifactId>jSerialComm</artifactId>
+      <version>2.10.4</version>
+      <scope>compile</scope>
+    </dependency>
+	<dependency>
       <groupId>com.neuronrobotics</groupId>
       <artifactId>nrjavaserial</artifactId>
       <version>3.14.0</version>
