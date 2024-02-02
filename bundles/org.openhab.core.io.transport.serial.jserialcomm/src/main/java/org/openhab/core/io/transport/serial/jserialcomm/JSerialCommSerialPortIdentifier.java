@@ -10,26 +10,25 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.io.transport.serial.internal;
+package org.openhab.core.io.transport.serial.jserialcomm;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.io.transport.serial.PortInUseException;
 import org.openhab.core.io.transport.serial.SerialPort;
 import org.openhab.core.io.transport.serial.SerialPortIdentifier;
-import org.openhab.core.io.transport.serial.jserialcomm.JSerialCommSerialPort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Specific serial port identifier implementation.
+ * Specific OH serial transport SerialPortIdentifier implementation using com.fazecast.jSerialComm.SerialPort
  *
  * @author Massimo Valla - Initial contribution
  */
 @NonNullByDefault
-public class SerialPortIdentifierImpl implements SerialPortIdentifier {
+public class JSerialCommSerialPortIdentifier implements SerialPortIdentifier {
 
-    private final Logger logger = LoggerFactory.getLogger(SerialPortIdentifierImpl.class);
+    private final Logger logger = LoggerFactory.getLogger(JSerialCommSerialPortIdentifier.class);
 
     final com.fazecast.jSerialComm.SerialPort sp;
 
@@ -38,7 +37,7 @@ public class SerialPortIdentifierImpl implements SerialPortIdentifier {
      *
      * @param sp
      */
-    public SerialPortIdentifierImpl(final com.fazecast.jSerialComm.SerialPort sp) {
+    public JSerialCommSerialPortIdentifier(final com.fazecast.jSerialComm.SerialPort sp) {
         this.sp = sp;
     }
 
@@ -50,16 +49,13 @@ public class SerialPortIdentifierImpl implements SerialPortIdentifier {
 
     @Override
     public SerialPort open(String owner, int timeout) throws PortInUseException {
-
-        logger.debug("jSerialComm --- SerialPort.getReadTimeout() = " + sp.getReadTimeout());
-        logger.debug("jSerialComm --- SerialPort.getPortDescription() = " + sp.getPortDescription());
-
+        logger.debug("--------TRANSPORT-jSerialComm--- SerialPort.getReadTimeout() = {}", sp.getReadTimeout());
+        logger.debug("--------TRANSPORT-jSerialComm--- SerialPort.getPortDescription() = {}", sp.getPortDescription());
         boolean success = sp.openPort();
         if (success) {
             return new JSerialCommSerialPort(sp);
         } else {
-            logger.error("jSerialComm --- Could not open port: " + sp.getSystemPortName());
-
+            logger.error("--------TRANSPORT-jSerialComm--- Could not open port: {}", sp.getSystemPortName());
             throw new PortInUseException(new Exception("Could not open port: " + sp.getSystemPortName()));
         }
     }
@@ -71,6 +67,7 @@ public class SerialPortIdentifierImpl implements SerialPortIdentifier {
 
     @Override
     public @Nullable String getCurrentOwner() {
+        // FIXME !!!!! placeholder implementation
         return "jserialcomm owner";
     }
 }

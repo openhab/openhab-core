@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.io.transport.serial.internal;
+package org.openhab.core.io.transport.serial.jserialcomm;
 
 import java.net.URI;
 import java.util.Arrays;
@@ -30,9 +30,9 @@ import com.fazecast.jSerialComm.SerialPort;
 import com.fazecast.jSerialComm.SerialPortInvalidPortException;
 
 /**
+ * Specific OH serial transport SerialPortProvider implementation using com.fazecast.jSerialComm.SerialPort
  *
  * @author Massimo Valla - Initial contribution
- *
  */
 @NonNullByDefault
 @Component(service = SerialPortProvider.class)
@@ -45,9 +45,9 @@ public class JSerialCommPortProvider implements SerialPortProvider {
         String portPathAsString = port.getPath();
         try {
             SerialPort spFound = SerialPort.getCommPort(portPathAsString);
-            return new SerialPortIdentifierImpl(spFound);
+            return new JSerialCommSerialPortIdentifier(spFound);
         } catch (SerialPortInvalidPortException e) {
-            logger.debug("jSerialComm --- No SerialPortr found for: {}", portPathAsString, e);
+            logger.debug("--------TRANSPORT-jSerialComm--- No SerialPort found for: {}", portPathAsString, e);
             return null;
         }
     }
@@ -60,10 +60,10 @@ public class JSerialCommPortProvider implements SerialPortProvider {
     @Override
     public Stream<SerialPortIdentifier> getSerialPortIdentifiers() {
         com.fazecast.jSerialComm.SerialPort[] portsArray = com.fazecast.jSerialComm.SerialPort.getCommPorts();
-        logger.debug("jSerialComm --- Found ports: " + portsArray);
+        logger.debug("--------TRANSPORT-jSerialComm---  Found ports: {}", portsArray);
 
         Stream<com.fazecast.jSerialComm.SerialPort> ports = Arrays.stream(portsArray);
 
-        return ports.map(sid -> new SerialPortIdentifierImpl(sid));
+        return ports.map(sid -> new JSerialCommSerialPortIdentifier(sid));
     }
 }
