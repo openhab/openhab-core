@@ -402,7 +402,7 @@ public class I18nProviderImpl
         addDefaultUnit(dimensionMap, DataAmount.class, Units.BYTE);
         addDefaultUnit(dimensionMap, DataTransferRate.class, Units.MEGABIT_PER_SECOND);
         addDefaultUnit(dimensionMap, Density.class, Units.KILOGRAM_PER_CUBICMETRE);
-        addDefaultUnit(dimensionMap, Dimensionless.class, Units.ONE);
+        addDefaultUnit(dimensionMap, Dimensionless.class, Units.PERCENT);
         addDefaultUnit(dimensionMap, ElectricCapacitance.class, Units.FARAD);
         addDefaultUnit(dimensionMap, ElectricCharge.class, Units.COULOMB);
         addDefaultUnit(dimensionMap, ElectricConductance.class, Units.SIEMENS);
