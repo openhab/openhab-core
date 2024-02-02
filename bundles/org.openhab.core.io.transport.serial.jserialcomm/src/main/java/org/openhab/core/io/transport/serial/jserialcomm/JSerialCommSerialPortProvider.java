@@ -36,9 +36,9 @@ import com.fazecast.jSerialComm.SerialPortInvalidPortException;
  */
 @NonNullByDefault
 @Component(service = SerialPortProvider.class)
-public class JSerialCommPortProvider implements SerialPortProvider {
+public class JSerialCommSerialPortProvider implements SerialPortProvider {
 
-    private final Logger logger = LoggerFactory.getLogger(JSerialCommPortProvider.class);
+    private final Logger logger = LoggerFactory.getLogger(JSerialCommSerialPortProvider.class);
 
     @Override
     public @Nullable SerialPortIdentifier getPortIdentifier(URI port) {
