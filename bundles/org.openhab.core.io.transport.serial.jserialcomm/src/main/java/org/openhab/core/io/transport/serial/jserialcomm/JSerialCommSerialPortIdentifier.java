@@ -43,7 +43,7 @@ public class JSerialCommSerialPortIdentifier implements SerialPortIdentifier {
 
     @Override
     public String getName() {
-        final String name = sp.getSystemPortName();
+        final String name = sp.getSystemPortPath();
         return name != null ? name : "";
     }
 
@@ -55,8 +55,8 @@ public class JSerialCommSerialPortIdentifier implements SerialPortIdentifier {
         if (success) {
             return new JSerialCommSerialPort(sp);
         } else {
-            logger.error("--------TRANSPORT-jSerialComm--- Could not open port: {}", sp.getSystemPortName());
-            throw new PortInUseException(new Exception("Could not open port: " + sp.getSystemPortName()));
+            logger.error("--------TRANSPORT-jSerialComm--- Could not open port: {}", getName());
+            throw new PortInUseException(new Exception("Could not open port: " + getName()));
         }
     }
 

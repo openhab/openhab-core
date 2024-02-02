@@ -269,7 +269,7 @@ public class JSerialCommSerialPort implements SerialPort {
 
     @Override
     public String getName() {
-        return sp.getSystemPortName();
+        return sp.getSystemPortPath();
     }
 
     @Override

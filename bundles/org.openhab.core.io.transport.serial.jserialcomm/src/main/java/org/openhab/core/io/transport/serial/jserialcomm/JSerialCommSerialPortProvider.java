@@ -60,7 +60,11 @@ public class JSerialCommSerialPortProvider implements SerialPortProvider {
     @Override
     public Stream<SerialPortIdentifier> getSerialPortIdentifiers() {
         com.fazecast.jSerialComm.SerialPort[] portsArray = com.fazecast.jSerialComm.SerialPort.getCommPorts();
-        logger.debug("--------TRANSPORT-jSerialComm---  Found ports: {}", portsArray);
+        logger.debug("--------TRANSPORT-jSerialComm--- getSerialPortIdentifiers() - Listing Found ports:");
+        for (com.fazecast.jSerialComm.SerialPort port : portsArray) {
+            logger.debug("--------TRANSPORT-jSerialComm---     port: {} ({} - {})", port.getSystemPortName(),
+                    port.getSystemPortPath(), port.getPortDescription());
+        }
 
         Stream<com.fazecast.jSerialComm.SerialPort> ports = Arrays.stream(portsArray);
 
