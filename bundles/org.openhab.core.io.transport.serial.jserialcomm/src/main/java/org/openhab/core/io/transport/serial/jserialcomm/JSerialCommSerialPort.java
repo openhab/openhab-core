@@ -22,12 +22,11 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.io.transport.serial.SerialPort;
 import org.openhab.core.io.transport.serial.SerialPortEventListener;
 import org.openhab.core.io.transport.serial.UnsupportedCommOperationException;
-import org.openhab.core.io.transport.serial.internal.SerialPortEventImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Specific serial port implementation using com.fazecast.jSerialComm.SerialPort.
+ * Specific OH serial transport SerialPort implementation using com.fazecast.jSerialComm.SerialPort.
  *
  * @author Massimo Valla - Initial contribution
  */
@@ -86,65 +85,67 @@ public class JSerialCommSerialPort implements SerialPort {
         int combined = 0;
         if (notifyOnDataAvailable) {
             combined = combined | com.fazecast.jSerialComm.SerialPort.LISTENING_EVENT_DATA_AVAILABLE;
-            logger.debug("JSerialComm --- subscribed notifyOnDataAvailable({}) - combined now is: {}",
+            logger.debug("--------TRANSPORT-jSerialComm--- subscribed notifyOnDataAvailable({}) - combined now is: {}",
                     com.fazecast.jSerialComm.SerialPort.LISTENING_EVENT_DATA_AVAILABLE, combined);
         }
         if (notifyOnBreakInterrupt) {
             combined = combined | com.fazecast.jSerialComm.SerialPort.LISTENING_EVENT_BREAK_INTERRUPT;
-            logger.debug("JSerialComm --- subscribed notifyOnBreakInterrupt({}) - combined now is: {}",
+            logger.debug("--------TRANSPORT-jSerialComm--- subscribed notifyOnBreakInterrupt({}) - combined now is: {}",
                     com.fazecast.jSerialComm.SerialPort.LISTENING_EVENT_BREAK_INTERRUPT, combined);
         }
         if (notifyOnFramingError) {
             combined = combined | com.fazecast.jSerialComm.SerialPort.LISTENING_EVENT_FRAMING_ERROR;
-            logger.debug("JSerialComm --- subscribed notifyOnFramingError({}) - combined now is: {}",
+            logger.debug("--------TRANSPORT-jSerialComm--- subscribed notifyOnFramingError({}) - combined now is: {}",
                     com.fazecast.jSerialComm.SerialPort.LISTENING_EVENT_FRAMING_ERROR, combined);
         }
         if (notifyOnOverrunError) {
             combined = combined | com.fazecast.jSerialComm.SerialPort.LISTENING_EVENT_FIRMWARE_OVERRUN_ERROR;
-            logger.debug("JSerialComm --- subscribed notifyOnOverrunError({}) - combined now is: {}",
+            logger.debug("--------TRANSPORT-jSerialComm--- subscribed notifyOnOverrunError({}) - combined now is: {}",
                     com.fazecast.jSerialComm.SerialPort.LISTENING_EVENT_FIRMWARE_OVERRUN_ERROR, combined);
         }
         if (notifyOnParityError) {
             combined = combined | com.fazecast.jSerialComm.SerialPort.LISTENING_EVENT_PARITY_ERROR;
-            logger.debug("JSerialComm --- subscribed notifyOnParityError({}) - combined now is: {}",
+            logger.debug("--------TRANSPORT-jSerialComm--- subscribed notifyOnParityError({}) - combined now is: {}",
                     com.fazecast.jSerialComm.SerialPort.LISTENING_EVENT_PARITY_ERROR, combined);
         }
         if (notifyOnOutputEmpty) {
             combined = combined | com.fazecast.jSerialComm.SerialPort.LISTENING_EVENT_DATA_WRITTEN;
-            logger.debug("JSerialComm --- subscribed notifyOnOutputEmpty({}) - combined now is: {}",
+            logger.debug("--------TRANSPORT-jSerialComm--- subscribed notifyOnOutputEmpty({}) - combined now is: {}",
                     com.fazecast.jSerialComm.SerialPort.LISTENING_EVENT_DATA_WRITTEN, combined);
         }
         if (notifyOnCTS) {
             combined = combined | com.fazecast.jSerialComm.SerialPort.LISTENING_EVENT_CTS;
-            logger.debug("JSerialComm --- subscribed notifyOnCTS({}) - combined now is: {}",
+            logger.debug("--------TRANSPORT-jSerialComm--- subscribed notifyOnCTS({}) - combined now is: {}",
                     com.fazecast.jSerialComm.SerialPort.LISTENING_EVENT_CTS, combined);
         }
         if (notifyOnDSR) {
             combined = combined | com.fazecast.jSerialComm.SerialPort.LISTENING_EVENT_DSR;
-            logger.debug("JSerialComm --- subscribed notifyOnDSR({}) - combined now is: {}",
+            logger.debug("--------TRANSPORT-jSerialComm--- subscribed notifyOnDSR({}) - combined now is: {}",
                     com.fazecast.jSerialComm.SerialPort.LISTENING_EVENT_DSR, combined);
         }
         if (notifyOnRingIndicator) {
             combined = combined | com.fazecast.jSerialComm.SerialPort.LISTENING_EVENT_RING_INDICATOR;
-            logger.debug("JSerialComm --- subscribed notifyOnRingIndicator({}) - combined now is: {}",
+            logger.debug("--------TRANSPORT-jSerialComm--- subscribed notifyOnRingIndicator({}) - combined now is: {}",
                     com.fazecast.jSerialComm.SerialPort.LISTENING_EVENT_RING_INDICATOR, combined);
         }
         if (notifyOnCarrierDetect) {
             combined = combined | com.fazecast.jSerialComm.SerialPort.LISTENING_EVENT_CARRIER_DETECT;
-            logger.debug("JSerialComm --- subscribed notifyOnCarrierDetect({}) - combined now is: {}",
+            logger.debug("--------TRANSPORT-jSerialComm--- subscribed notifyOnCarrierDetect({}) - combined now is: {}",
                     com.fazecast.jSerialComm.SerialPort.LISTENING_EVENT_CARRIER_DETECT, combined);
         }
 
         combined = combined | com.fazecast.jSerialComm.SerialPort.LISTENING_EVENT_PORT_DISCONNECTED;
-        logger.debug("JSerialComm --- subscribed LISTENING_EVENT_PORT_DISCONNECTED({}) - combined now is: {}",
+        logger.debug(
+                "--------TRANSPORT-jSerialComm--- subscribed LISTENING_EVENT_PORT_DISCONNECTED({}) - combined now is: {}",
                 com.fazecast.jSerialComm.SerialPort.LISTENING_EVENT_PORT_DISCONNECTED, combined);
 
-        logger.debug("JSerialComm --- FINAL combined is: {}", combined);
+        logger.debug("--------TRANSPORT-jSerialComm--- FINAL combined is: {}", combined);
 
         return combined;
 
         /*
-         * return (notifyOnDataAvailable ? com.fazecast.jSerialComm.SerialPort.LISTENING_EVENT_DATA_AVAILABLE : 0)
+         * return com.fazecast.jSerialComm.SerialPort.LISTENING_EVENT_PORT_DISCONNECTED
+         * | (notifyOnDataAvailable ? com.fazecast.jSerialComm.SerialPort.LISTENING_EVENT_DATA_AVAILABLE : 0)
          * | (notifyOnBreakInterrupt ? com.fazecast.jSerialComm.SerialPort.LISTENING_EVENT_BREAK_INTERRUPT : 0)
          * | (notifyOnFramingError ? com.fazecast.jSerialComm.SerialPort.LISTENING_EVENT_FRAMING_ERROR : 0)
          * | (notifyOnOverrunError ? com.fazecast.jSerialComm.SerialPort.LISTENING_EVENT_FIRMWARE_OVERRUN_ERROR
@@ -166,18 +167,19 @@ public class JSerialCommSerialPort implements SerialPort {
                 if (event == null) {
                     return;
                 }
-                listener.serialEvent(new SerialPortEventImpl(event));
+                listener.serialEvent(new JSerialCommSerialPortEvent(event));
             }
 
             @Override
             public int getListeningEvents() {
                 int subscribedEvents = combineListeningEvents();
-                logger.debug("JSerialComm --- {} is subscribed to events: {}", this.toString(), subscribedEvents);
+                logger.debug("--------TRANSPORT-jSerialComm--- {} is subscribed to events: {}", this.toString(),
+                        subscribedEvents);
                 return subscribedEvents;
             }
         });
         if (!success) {
-            logger.error("JSerialComm --- Could not add SerialPortDataListener to SerialPort {}",
+            logger.error("--------TRANSPORT-jSerialComm--- Could not add SerialPortDataListener to SerialPort {}",
                     sp.getSystemPortName());
             throw new TooManyListenersException(
                     ("Could not add SerialPortDataListener to SerialPort " + sp.getSystemPortName()));
@@ -228,7 +230,7 @@ public class JSerialCommSerialPort implements SerialPort {
         if (timeout < 0) {
             throw new IllegalArgumentException(String.format("timeout must be non negative (is: %d)", timeout));
         }
-        // FIXME placeholder implementation
+        // FIXME !!!!! placeholder implementation
         boolean success = sp.setComPortTimeouts(com.fazecast.jSerialComm.SerialPort.TIMEOUT_READ_BLOCKING, timeout, 0);
         if (!success) {
             throw new UnsupportedCommOperationException();
@@ -237,7 +239,7 @@ public class JSerialCommSerialPort implements SerialPort {
 
     @Override
     public void disableReceiveTimeout() {
-        // FIXME placeholder implementation
+        // FIXME !!!!! placeholder implementation
         sp.setComPortTimeouts(com.fazecast.jSerialComm.SerialPort.TIMEOUT_NONBLOCKING, 0, 0);
     }
 
@@ -256,7 +258,7 @@ public class JSerialCommSerialPort implements SerialPort {
 
     @Override
     public void enableReceiveThreshold(int i) throws UnsupportedCommOperationException {
-        // FIXME placeholder implementation
+        // FIXME !!!!! placeholder implementation
         /*
          * try {
          * sp.enableReceiveThreshold(i);
@@ -358,7 +360,7 @@ public class JSerialCommSerialPort implements SerialPort {
 
     @Override
     public void sendBreak(int duration) {
-        // FIXME placeholder implementation
+        // FIXME !!!!! placeholder implementation
         sp.setBreak();
         // sp.sendBreak(duration);
     }

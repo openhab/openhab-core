@@ -10,18 +10,22 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.io.transport.serial.internal;
+package org.openhab.core.io.transport.serial.jserialcomm;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.io.transport.serial.SerialPortEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * Specific serial port implementation using com.fazecast.jSerialComm.SerialPortEvent.
+ * Specific OH serial transport SerialPortEvent implementation using com.fazecast.jSerialComm.SerialPortEvent
  *
  * @author Massimo Valla - Initial contribution
  */
 @NonNullByDefault
-public class SerialPortEventImpl implements SerialPortEvent {
+public class JSerialCommSerialPortEvent implements SerialPortEvent {
+
+    private final Logger logger = LoggerFactory.getLogger(JSerialCommSerialPortEvent.class);
 
     private final com.fazecast.jSerialComm.SerialPortEvent event;
 
@@ -30,7 +34,8 @@ public class SerialPortEventImpl implements SerialPortEvent {
      *
      * @param event the underlying event implementation
      */
-    public SerialPortEventImpl(final com.fazecast.jSerialComm.SerialPortEvent event) {
+    public JSerialCommSerialPortEvent(final com.fazecast.jSerialComm.SerialPortEvent event) {
+        logger.debug("--------TRANSPORT-jSerialComm--- New event of type: {}", event.getEventType());
         this.event = event;
     }
 
@@ -42,7 +47,7 @@ public class SerialPortEventImpl implements SerialPortEvent {
 
     @Override
     public boolean getNewValue() {
-        // FIXME placeholder implementation
+        // FIXME !!!!! placeholder implementation
         return false;
         // return event.getNewValue();
     }
