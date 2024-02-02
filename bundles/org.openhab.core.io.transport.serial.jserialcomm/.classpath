@@ -8,15 +8,14 @@
 	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-17">
 		<attributes>
-			<attribute name="annotationpath" value="target/dependency"/>
-			<attribute name="module" value="true"/>
 			<attribute name="maven.pomderived" value="true"/>
+			<attribute name="annotationpath" value="target/dependency"/>
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER">
 		<attributes>
-			<attribute name="annotationpath" value="target/dependency"/>
 			<attribute name="maven.pomderived" value="true"/>
+			<attribute name="annotationpath" value="target/dependency"/>
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="src" output="target/test-classes" path="src/test/java">

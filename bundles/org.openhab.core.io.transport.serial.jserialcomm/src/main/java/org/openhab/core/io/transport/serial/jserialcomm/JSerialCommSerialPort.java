@@ -48,6 +48,8 @@ public class JSerialCommSerialPort implements SerialPort {
     private boolean notifyOnRingIndicator = false;
     private boolean notifyOnCarrierDetect = false;
 
+    private @Nullable SerialPortEventListener eventListener;
+
     /**
      * Constructor.
      *
@@ -184,6 +186,23 @@ public class JSerialCommSerialPort implements SerialPort {
             throw new TooManyListenersException(
                     ("Could not add SerialPortDataListener to SerialPort " + sp.getSystemPortName()));
         }
+        eventListener = listener;
+    }
+
+    // private method to refresh listener (if exists) in order to refresh subscriptions to lib
+    private synchronized void refreshListener() {
+        SerialPortEventListener eL = eventListener;
+        if (eL != null) {
+            sp.removeDataListener();
+            try {
+                this.addEventListener(eL);
+                logger.debug("--------TRANSPORT-jSerialComm--- LISTENER REFRESHED!");
+
+            } catch (TooManyListenersException e) {
+                logger.error("--------TRANSPORT-jSerialComm--- Could not add SerialPortDataListener to SerialPort {}",
+                        sp.getSystemPortName());
+            }
+        }
     }
 
     @Override
@@ -194,26 +213,31 @@ public class JSerialCommSerialPort implements SerialPort {
     @Override
     public void notifyOnDataAvailable(boolean enable) {
         this.notifyOnDataAvailable = enable;
+        refreshListener();
     }
 
     @Override
     public void notifyOnBreakInterrupt(boolean enable) {
         this.notifyOnBreakInterrupt = enable;
+        refreshListener();
     }
 
     @Override
     public void notifyOnFramingError(boolean enable) {
         this.notifyOnFramingError = enable;
+        refreshListener();
     }
 
     @Override
     public void notifyOnOverrunError(boolean enable) {
         this.notifyOnOverrunError = enable;
+        refreshListener();
     }
 
     @Override
     public void notifyOnParityError(boolean enable) {
         this.notifyOnParityError = enable;
+        refreshListener();
     }
 
     @Override
@@ -291,16 +315,19 @@ public class JSerialCommSerialPort implements SerialPort {
     @Override
     public void notifyOnOutputEmpty(boolean enable) {
         this.notifyOnOutputEmpty = enable;
+        refreshListener();
     }
 
     @Override
     public void notifyOnCTS(boolean enable) {
         this.notifyOnCTS = enable;
+        refreshListener();
     }
 
     @Override
     public void notifyOnDSR(boolean enable) {
         this.notifyOnDSR = enable;
+        refreshListener();
     }
 
     @Override
@@ -311,6 +338,7 @@ public class JSerialCommSerialPort implements SerialPort {
     @Override
     public void notifyOnCarrierDetect(boolean enable) {
         this.notifyOnCarrierDetect = enable;
+        refreshListener();
     }
 
     @Override
@@ -360,7 +388,8 @@ public class JSerialCommSerialPort implements SerialPort {
 
     @Override
     public void sendBreak(int duration) {
-        // FIXME !!!!! placeholder implementation
+        // FIXME !!!!! placeholder implementation - or remove from serial transport interface if it's not used by any
+        // binding
         sp.setBreak();
         // sp.sendBreak(duration);
     }
