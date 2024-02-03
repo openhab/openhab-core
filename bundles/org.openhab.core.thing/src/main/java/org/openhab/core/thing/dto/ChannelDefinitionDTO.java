@@ -22,6 +22,7 @@ import org.openhab.core.types.StateDescription;
  *
  * @author Dennis Nobel - Initial contribution
  * @author Chris Jackson - Added properties
+ * @author Mark Herwege - added unit hint
  */
 public class ChannelDefinitionDTO {
 
@@ -32,6 +33,7 @@ public class ChannelDefinitionDTO {
     public Map<String, String> properties;
     public String category;
     public StateDescription stateDescription;
+    public String unitHint;
     public boolean advanced;
     public String typeUID;
 
@@ -39,7 +41,8 @@ public class ChannelDefinitionDTO {
     }
 
     public ChannelDefinitionDTO(String id, String typeUID, String label, String description, Set<String> tags,
-            String category, StateDescription stateDescription, boolean advanced, Map<String, String> properties) {
+            String category, StateDescription stateDescription, String unitHint, boolean advanced,
+            Map<String, String> properties) {
         this.description = description;
         this.label = label;
         this.id = id;
@@ -47,6 +50,7 @@ public class ChannelDefinitionDTO {
         this.tags = tags;
         this.category = category;
         this.stateDescription = stateDescription;
+        this.unitHint = unitHint;
         this.advanced = advanced;
         this.properties = properties;
     }

@@ -36,7 +36,7 @@ public class TriggerChannelTypeBuilderImpl extends AbstractChannelTypeBuilder<Tr
         TriggerChannelTypeImpl(ChannelTypeUID uid, boolean advanced, String label, @Nullable String description,
                 @Nullable String category, @Nullable Set<String> tags, @Nullable EventDescription event,
                 @Nullable URI configDescriptionURI) throws IllegalArgumentException {
-            super(uid, advanced, null, ChannelKind.TRIGGER, label, description, category, tags, null, null, event,
+            super(uid, advanced, null, ChannelKind.TRIGGER, label, description, category, tags, null, null, null, event,
                     configDescriptionURI, null);
         }
     }

@@ -53,6 +53,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader;
  *
  * @author Michael Grammling - Initial contribution
  * @author Ivan Iliev - Added support for system wide channel types
+ * @author Mark Herwege - added unit hint
  */
 @NonNullByDefault
 public class ChannelTypeConverter extends AbstractDescriptionTypeConverter<ChannelTypeXmlResult> {
@@ -161,6 +162,10 @@ public class ChannelTypeConverter extends AbstractDescriptionTypeConverter<Chann
         return null;
     }
 
+    private @Nullable String readUnitHint(NodeIterator nodeIterator) throws ConversionException {
+        return (String) nodeIterator.nextValue("unit-hint", false);
+    }
+
     @Override
     protected @Nullable ChannelTypeXmlResult unmarshalType(HierarchicalStreamReader reader,
             UnmarshallingContext context, Map<String, String> attributes, NodeIterator nodeIterator)
@@ -184,6 +189,7 @@ public class ChannelTypeConverter extends AbstractDescriptionTypeConverter<Chann
                 : null;
 
         CommandDescription commandDescription = readCommandDescription(nodeIterator);
+        String unitHint = readUnitHint(nodeIterator);
         EventDescription eventDescription = readEventDescription(nodeIterator);
 
         AutoUpdatePolicy autoUpdatePolicy = readAutoUpdatePolicy(nodeIterator);
@@ -203,7 +209,7 @@ public class ChannelTypeConverter extends AbstractDescriptionTypeConverter<Chann
             builder = ChannelTypeBuilder.state(channelTypeUID, label, itemType).isAdvanced(advanced)
                     .withConfigDescriptionURI(configDescriptionURI)
                     .withStateDescriptionFragment(stateDescriptionFragment).withAutoUpdatePolicy(autoUpdatePolicy)
-                    .withCommandDescription(commandDescription);
+                    .withCommandDescription(commandDescription).withUnitHint(unitHint);
         } else if (cKind == ChannelKind.TRIGGER) {
             TriggerChannelTypeBuilder triggerChannelTypeBuilder = ChannelTypeBuilder.trigger(channelTypeUID, label)
                     .isAdvanced(advanced).withConfigDescriptionURI(configDescriptionURI);

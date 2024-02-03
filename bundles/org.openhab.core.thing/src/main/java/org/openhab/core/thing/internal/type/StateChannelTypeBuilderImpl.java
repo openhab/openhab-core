@@ -30,6 +30,7 @@ import org.openhab.core.types.StateDescriptionFragment;
  * StateChannelTypeBuilder to create {@link ChannelType}s of kind STATE
  *
  * @author Stefan Triller - Initial contribution
+ * @author Mark Herwege - added unit hint
  */
 @NonNullByDefault
 public class StateChannelTypeBuilderImpl extends AbstractChannelTypeBuilder<StateChannelTypeBuilder>
@@ -39,10 +40,10 @@ public class StateChannelTypeBuilderImpl extends AbstractChannelTypeBuilder<Stat
         private StateChannelTypeImpl(ChannelTypeUID uid, boolean advanced, String itemType, String label,
                 @Nullable String description, @Nullable String category, @Nullable Set<String> tags,
                 @Nullable StateDescription state, @Nullable CommandDescription commandDescription,
-                @Nullable URI configDescriptionURI, @Nullable AutoUpdatePolicy autoUpdatePolicy)
-                throws IllegalArgumentException {
+                @Nullable String unitHint, @Nullable URI configDescriptionURI,
+                @Nullable AutoUpdatePolicy autoUpdatePolicy) throws IllegalArgumentException {
             super(uid, advanced, itemType, ChannelKind.STATE, label, description, category, tags, state,
-                    commandDescription, null, configDescriptionURI, autoUpdatePolicy);
+                    commandDescription, unitHint, null, configDescriptionURI, autoUpdatePolicy);
         }
     }
 
@@ -50,6 +51,7 @@ public class StateChannelTypeBuilderImpl extends AbstractChannelTypeBuilder<Stat
     private @Nullable StateDescriptionFragment stateDescriptionFragment;
     private @Nullable AutoUpdatePolicy autoUpdatePolicy;
     private @Nullable CommandDescription commandDescription;
+    private @Nullable String unitHint;
 
     public StateChannelTypeBuilderImpl(ChannelTypeUID channelTypeUID, String label, String itemType) {
         super(channelTypeUID, label);
@@ -81,9 +83,15 @@ public class StateChannelTypeBuilderImpl extends AbstractChannelTypeBuilder<Stat
     }
 
     @Override
+    public StateChannelTypeBuilder withUnitHint(@Nullable String unitHint) {
+        this.unitHint = unitHint;
+        return this;
+    }
+
+    @Override
     public ChannelType build() {
         return new StateChannelTypeImpl(channelTypeUID, advanced, itemType, label, description, category, tags,
                 stateDescriptionFragment != null ? stateDescriptionFragment.toStateDescription() : null,
-                commandDescription, configDescriptionURI, autoUpdatePolicy);
+                commandDescription, unitHint, configDescriptionURI, autoUpdatePolicy);
     }
 }

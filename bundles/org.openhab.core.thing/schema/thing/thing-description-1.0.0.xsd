@@ -71,6 +71,7 @@
             <xs:element name="tags" type="thing-description:tags" minOccurs="0"/>
             <xs:element name="state" type="thing-description:state" minOccurs="0"/>
             <xs:element name="command" type="thing-description:command" minOccurs="0"/>
+            <xs:element name="unit-hint" type="xs:string" minOccurs="0"/>
             <xs:element name="event" type="thing-description:event" minOccurs="0"/>
             <xs:element name="autoUpdatePolicy" type="thing-description:auto-update-policy" minOccurs="0"/>
             <xs:choice minOccurs="0">

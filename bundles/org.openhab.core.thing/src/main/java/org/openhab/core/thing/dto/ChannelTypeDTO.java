@@ -25,6 +25,7 @@ import org.openhab.core.types.StateDescription;
  * This is a data transfer object that is used with to serialize channel types.
  *
  * @author Chris Jackson - Initial contribution
+ * @author Mark Herwege - added unit hint
  */
 public class ChannelTypeDTO {
 
@@ -36,6 +37,7 @@ public class ChannelTypeDTO {
     public String itemType;
     public String kind;
     public StateDescription stateDescription;
+    public String unitHint;
     public Set<String> tags;
     public String UID;
     public boolean advanced;
@@ -47,7 +49,7 @@ public class ChannelTypeDTO {
     public ChannelTypeDTO(String uid, String label, String description, String category, String itemType,
             ChannelKind kind, List<ConfigDescriptionParameterDTO> parameters,
             List<ConfigDescriptionParameterGroupDTO> parameterGroups, StateDescription stateDescription,
-            Set<String> tags, boolean advanced, CommandDescription commandDescription) {
+            String unitHint, Set<String> tags, boolean advanced, CommandDescription commandDescription) {
         this.UID = uid;
         this.label = label;
         this.description = description;
@@ -55,6 +57,7 @@ public class ChannelTypeDTO {
         this.parameters = parameters;
         this.parameterGroups = parameterGroups;
         this.stateDescription = stateDescription;
+        this.unitHint = unitHint;
         this.tags = tags;
         this.kind = kind.toString();
         this.itemType = itemType;

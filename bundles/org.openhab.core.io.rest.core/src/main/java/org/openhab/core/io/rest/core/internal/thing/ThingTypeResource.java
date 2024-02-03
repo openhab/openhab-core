@@ -90,6 +90,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * @author Yannick Schaus - Added filter to getAll
  * @author Markus Rathgeb - Migrated to JAX-RS Whiteboard Specification
  * @author Wouter Born - Migrated to OpenAPI annotations
+ * @author Mark Herwege - added unit hint
  */
 @Component
 @JaxrsResource
@@ -250,8 +251,8 @@ public class ThingTypeResource implements RESTResource {
 
                 ChannelDefinitionDTO channelDefinitionDTO = new ChannelDefinitionDTO(channelDefinition.getId(),
                         channelDefinition.getChannelTypeUID().toString(), label, description, channelType.getTags(),
-                        channelType.getCategory(), channelType.getState(), channelType.isAdvanced(),
-                        channelDefinition.getProperties());
+                        channelType.getCategory(), channelType.getState(), channelType.getUnitHint(),
+                        channelType.isAdvanced(), channelDefinition.getProperties());
                 channelDefinitionDTOs.add(channelDefinitionDTO);
             }
         }
