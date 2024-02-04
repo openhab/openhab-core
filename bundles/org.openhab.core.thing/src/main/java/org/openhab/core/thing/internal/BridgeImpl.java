@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 /**
  *
  * @author Denis Nobel - Initial contribution
- * @author Christoph Weitkamp - Added method `getThing(ThingUID)`
+ * @author Christoph Weitkamp - Added method {@code getThing(ThingUID)}
  */
 @NonNullByDefault
 public class BridgeImpl extends ThingImpl implements Bridge {

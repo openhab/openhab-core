@@ -323,7 +323,7 @@ public class Voice {
         }
         if (locale != null) {
             String[] split = locale.split("-");
-            Locale loc = null;
+            Locale loc;
             if (split.length == 2) {
                 loc = new Locale(split[0], split[1]);
             } else {
@@ -450,7 +450,7 @@ public class Voice {
                 dialogContextBuilder.withListeningItem(listeningItem);
             }
             if (locale != null) {
-                Locale loc = null;
+                Locale loc;
                 String[] split = locale.split("-");
                 if (split.length == 2) {
                     loc = new Locale(split[0], split[1]);

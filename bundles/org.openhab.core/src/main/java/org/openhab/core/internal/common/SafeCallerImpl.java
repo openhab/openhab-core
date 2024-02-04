@@ -17,6 +17,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.SafeCaller;
@@ -62,7 +63,7 @@ public class SafeCallerImpl implements SafeCaller {
     }
 
     @Override
-    public <T> SafeCallerBuilder<T> create(T target, Class<T> interfaceType) {
+    public <T> SafeCallerBuilder<@NonNull T> create(T target, Class<T> interfaceType) {
         return new SafeCallerBuilderImpl<>(target, new Class<?>[] { interfaceType }, manager);
     }
 

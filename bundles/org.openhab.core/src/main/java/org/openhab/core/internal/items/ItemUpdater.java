@@ -71,7 +71,7 @@ public class ItemUpdater extends AbstractItemEventSubscriber {
                     } catch (ReflectiveOperationException e) {
                         // Should never happen
                         logger.warn("{} while creating {} instance: {}", e.getClass().getSimpleName(),
-                                state.getClass().getSimpleName(), e.getMessage());
+                                state.getSimpleName(), e.getMessage());
                     }
                 }
             }

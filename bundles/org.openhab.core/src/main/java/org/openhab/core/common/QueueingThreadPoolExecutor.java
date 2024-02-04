@@ -167,10 +167,6 @@ public class QueueingThreadPoolExecutor extends ThreadPoolExecutor {
         if (taskQueue.isEmpty()) {
             super.execute(command);
         } else {
-            if (command == null) {
-                throw new IllegalArgumentException("Command can not be null.");
-            }
-
             // ignore incoming tasks when the executor is shutdown
             if (!isShutdown()) {
                 addToQueue(command);
@@ -240,8 +236,7 @@ public class QueueingThreadPoolExecutor extends ThreadPoolExecutor {
 
         public CommonThreadFactory(String name) {
             this.name = name;
-            SecurityManager s = System.getSecurityManager();
-            group = (s != null) ? s.getThreadGroup() : Thread.currentThread().getThreadGroup();
+            group = Thread.currentThread().getThreadGroup();
         }
 
         @Override

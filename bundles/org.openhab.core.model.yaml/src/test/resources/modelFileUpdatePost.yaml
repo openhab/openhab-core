@@ -1,0 +1,11 @@
+# A YAML test file for updating the model
+
+version: 1
+
+firstType:
+  - uid: First
+    description: First original
+  - uid: Second
+    description: Second original
+  - uid: Third
+    description: Third original

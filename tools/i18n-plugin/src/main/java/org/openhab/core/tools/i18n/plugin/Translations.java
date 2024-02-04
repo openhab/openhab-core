@@ -14,7 +14,6 @@ package org.openhab.core.tools.i18n.plugin;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -123,9 +122,7 @@ public class Translations {
         }
 
         public Stream<String> keysStream() {
-            return groups.stream() //
-                    .map(TranslationsGroup::keysStream) //
-                    .flatMap(Function.identity());
+            return groups.stream().flatMap(TranslationsGroup::keysStream);
         }
 
         public Stream<String> linesStream() {
@@ -138,8 +135,7 @@ public class Translations {
             }
             groups.stream() //
                     .filter(TranslationsGroup::hasTranslations) //
-                    .map(TranslationsGroup::linesStream) //
-                    .flatMap(Function.identity()) //
+                    .flatMap(TranslationsGroup::linesStream) //
                     .forEach(builder::add);
             builder.add("");
             return builder.build();
@@ -181,16 +177,13 @@ public class Translations {
     }
 
     public Stream<String> keysStream() {
-        return sections.stream() //
-                .map(TranslationsSection::keysStream) //
-                .flatMap(Function.identity());
+        return sections.stream().flatMap(TranslationsSection::keysStream);
     }
 
     public Stream<String> linesStream() {
         return sections.stream() //
                 .filter(TranslationsSection::hasTranslations) //
-                .map(TranslationsSection::linesStream) //
-                .flatMap(Function.identity());
+                .flatMap(TranslationsSection::linesStream);
     }
 
     public void removeEntries(Predicate<? super TranslationsEntry> filter) {

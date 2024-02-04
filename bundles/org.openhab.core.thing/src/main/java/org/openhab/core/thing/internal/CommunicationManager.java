@@ -228,13 +228,13 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
 
     private @Nullable ProfileTypeUID determineProfileTypeUID(ItemChannelLink link, Item item, @Nullable Thing thing) {
         ProfileTypeUID profileTypeUID = getConfiguredProfileTypeUID(link);
-        Channel channel = null;
+        Channel channel;
         if (profileTypeUID == null) {
             if (thing == null) {
                 return null;
             }
 
-            channel = thing.getChannel(link.getLinkedUID().getId());
+            channel = thing.getChannel(link.getLinkedUID());
             if (channel == null) {
                 return null;
             }
@@ -399,7 +399,7 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
             ThingUID thingUID = channelUID.getThingUID();
             Thing thing = thingRegistry.get(thingUID);
             if (thing != null) {
-                Channel channel = thing.getChannel(channelUID.getId());
+                Channel channel = thing.getChannel(channelUID);
                 if (channel != null) {
                     if (thing.getHandler() != null) {
                         // fix QuantityType/DecimalType, leave others as-is

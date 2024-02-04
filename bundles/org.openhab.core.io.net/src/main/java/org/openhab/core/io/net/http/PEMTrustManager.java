@@ -232,7 +232,7 @@ public final class PEMTrustManager extends X509ExtendedTrustManager {
         File certFile = new File(path);
         if (certFile.exists()) {
             try {
-                return new String(Files.readAllBytes(certFile.toPath()), StandardCharsets.UTF_8);
+                return Files.readString(certFile.toPath());
             } catch (IOException e) {
                 LoggerFactory.getLogger(PEMTrustManager.class).error("An unexpected IOException occurred: ", e);
             }

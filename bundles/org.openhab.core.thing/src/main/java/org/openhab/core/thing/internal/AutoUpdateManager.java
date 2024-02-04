@@ -204,7 +204,7 @@ public class AutoUpdateManager {
         for (ChannelUID channelUID : linkedChannelUIDs) {
             Thing thing = thingRegistry.get(channelUID.getThingUID());
             if (thing == null //
-                    || thing.getChannel(channelUID.getId()) == null //
+                    || thing.getChannel(channelUID) == null //
                     || thing.getHandler() == null //
                     || !ThingStatus.ONLINE.equals(thing.getStatus()) //
             ) {
@@ -223,7 +223,7 @@ public class AutoUpdateManager {
                 continue;
             }
             AutoUpdatePolicy policy = AutoUpdatePolicy.DEFAULT;
-            Channel channel = thing.getChannel(channelUID.getId());
+            Channel channel = thing.getChannel(channelUID);
             if (channel != null) {
                 AutoUpdatePolicy channelpolicy = channel.getAutoUpdatePolicy();
                 if (channelpolicy != null) {

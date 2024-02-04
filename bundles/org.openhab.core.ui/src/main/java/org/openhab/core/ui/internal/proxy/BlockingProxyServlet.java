@@ -15,7 +15,6 @@ package org.openhab.core.ui.internal.proxy;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -29,7 +28,6 @@ import org.eclipse.jetty.client.api.Request;
 import org.eclipse.jetty.client.api.Response;
 import org.eclipse.jetty.client.util.InputStreamResponseListener;
 import org.eclipse.jetty.http.HttpField;
-import org.eclipse.jetty.http.HttpFields;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -91,13 +89,8 @@ public class BlockingProxyServlet extends HttpServlet {
                 // wait for the response headers to arrive or the timeout to expire
                 Response httpResponse = listener.get(TIMEOUT, TimeUnit.MILLISECONDS);
 
-                // get response headers
-                HttpFields headers = httpResponse.getHeaders();
-                Iterator<HttpField> iterator = headers.iterator();
-
-                // copy all headers
-                while (iterator.hasNext()) {
-                    HttpField header = iterator.next();
+                // copy all response headers
+                for (HttpField header : httpResponse.getHeaders()) {
                     response.setHeader(header.getName(), header.getValue());
                 }
             } catch (TimeoutException e) {

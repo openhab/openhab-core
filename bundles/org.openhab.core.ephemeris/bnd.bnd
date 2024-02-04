@@ -1,0 +1,5 @@
+Automatic-Module-Name: ${def;bsn}
+Bundle-SymbolicName: ${project.artifactId}
+Import-Package: \
+  *, \
+  de.focus_shift.jollyday.jackson

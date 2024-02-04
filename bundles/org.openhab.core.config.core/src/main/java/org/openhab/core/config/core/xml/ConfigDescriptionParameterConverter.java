@@ -93,7 +93,7 @@ public class ConfigDescriptionParameterConverter extends GenericUnmarshaller<Con
 
     @Override
     public @Nullable Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext context) {
-        ConfigDescriptionParameter configDescriptionParam = null;
+        ConfigDescriptionParameter configDescriptionParam;
 
         // read attributes
         Map<String, String> attributes = this.attributeMapValidator.readValidatedAttributes(reader);

@@ -114,7 +114,7 @@ public class JsonStorageServiceOSGiTest extends JavaOSGiTest {
 
     @Test
     public void testOverride() {
-        PersistedItem pItem = null;
+        PersistedItem pItem;
 
         assertThat(storage.getKeys().size(), is(0));
 

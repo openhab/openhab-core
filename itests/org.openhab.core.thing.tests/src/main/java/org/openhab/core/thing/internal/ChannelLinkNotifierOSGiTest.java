@@ -295,7 +295,7 @@ public class ChannelLinkNotifierOSGiTest extends JavaOSGiTest {
     }
 
     private void forEachThingChannelUID(Thing thing, Consumer<ChannelUID> consumer) {
-        thing.getChannels().stream().map(Channel::getUID).forEach(consumer::accept);
+        thing.getChannels().stream().map(Channel::getUID).forEach(consumer);
     }
 
     private void addItemsAndLinks(Thing thing, String itemSuffix) {

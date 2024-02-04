@@ -106,7 +106,7 @@ public class ThingConfigDescriptionAliasProvider implements ConfigDescriptionAli
             return null;
         }
 
-        Channel channel = thing.getChannel(channelUID.getId());
+        Channel channel = thing.getChannel(channelUID);
         if (channel == null) {
             return null;
         }

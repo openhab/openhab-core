@@ -15,6 +15,7 @@ package org.openhab.core.types;
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -136,10 +137,8 @@ public class StateDescription {
             return false;
         }
         StateDescription other = (StateDescription) obj;
-        return (minimum != null ? minimum.equals(other.minimum) : other.minimum == null)
-                && (maximum != null ? maximum.equals(other.maximum) : other.maximum == null)
-                && (step != null ? step.equals(other.step) : other.step == null)
-                && (pattern != null ? pattern.equals(other.pattern) : other.pattern == null)
+        return Objects.equals(minimum, other.minimum) && Objects.equals(maximum, other.maximum)
+                && Objects.equals(step, other.step) && Objects.equals(pattern, other.pattern)
                 && readOnly == other.readOnly //
                 && options.equals(other.options);
     }

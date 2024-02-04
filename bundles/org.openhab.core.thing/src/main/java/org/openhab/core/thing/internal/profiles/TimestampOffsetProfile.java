@@ -118,7 +118,7 @@ public class TimestampOffsetProfile implements StateProfile {
         }
 
         Duration finalOffset = towardsItem ? offset : offset.negated();
-        Type result = UnDefType.UNDEF;
+        Type result;
         if (type instanceof DateTimeType timeType) {
             ZonedDateTime zdt = timeType.getZonedDateTime();
 

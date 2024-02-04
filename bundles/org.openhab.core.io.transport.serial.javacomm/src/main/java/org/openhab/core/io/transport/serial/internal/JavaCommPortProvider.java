@@ -44,7 +44,7 @@ public class JavaCommPortProvider implements SerialPortProvider {
 
     @Override
     public @Nullable SerialPortIdentifier getPortIdentifier(URI port) {
-        CommPortIdentifier ident = null;
+        CommPortIdentifier ident;
         try {
             ident = CommPortIdentifier.getPortIdentifier(port.getPath());
         } catch (javax.comm.NoSuchPortException e) {

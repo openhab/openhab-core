@@ -107,7 +107,7 @@ public class SerialPortUtil {
 
     static @Nullable String initSerialPort(String port, @Nullable String serialPortsProperty) {
         String pathSeparator = File.pathSeparator;
-        Set<String> serialPorts = null;
+        Set<String> serialPorts;
         if (serialPortsProperty != null) {
             serialPorts = Stream.of(serialPortsProperty.split(pathSeparator)).collect(Collectors.toSet());
         } else {

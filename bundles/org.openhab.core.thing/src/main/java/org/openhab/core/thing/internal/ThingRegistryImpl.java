@@ -80,7 +80,7 @@ public class ThingRegistryImpl extends AbstractRegistry<Thing, ThingUID, ThingPr
         ThingUID thingUID = channelUID.getThingUID();
         Thing thing = get(thingUID);
         if (thing != null) {
-            return thing.getChannel(channelUID.getId());
+            return thing.getChannel(channelUID);
         }
         return null;
     }

@@ -12,6 +12,8 @@
  */
 package org.openhab.core.types;
 
+import java.util.Objects;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
@@ -76,7 +78,7 @@ public final class StateOption {
             return false;
         }
         StateOption other = (StateOption) obj;
-        return value.equals(other.value) && (label != null ? label.equals(other.label) : other.label == null);
+        return value.equals(other.value) && Objects.equals(label, other.label);
     }
 
     @Override

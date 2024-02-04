@@ -21,10 +21,10 @@ import java.util.List;
  */
 public class TokenList {
 
-    private List<String> list = null;
+    private List<String> list;
 
-    private int head = 0;
-    private int tail = 0;
+    private int head;
+    private int tail;
 
     /**
      * Constructs a new instance.

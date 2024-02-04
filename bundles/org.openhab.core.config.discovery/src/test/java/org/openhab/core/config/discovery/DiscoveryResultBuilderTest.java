@@ -56,6 +56,7 @@ public class DiscoveryResultBuilderTest {
         discoveryResult = builder.build();
     }
 
+    @Test
     public void testInstance() {
         assertThat(builder, is(instanceOf(DiscoveryResultBuilder.class)));
         assertThat(builder.withLabel("TEST"), is(instanceOf(DiscoveryResultBuilder.class)));
