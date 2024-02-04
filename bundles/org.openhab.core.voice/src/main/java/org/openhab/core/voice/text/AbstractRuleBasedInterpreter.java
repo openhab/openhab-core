@@ -856,7 +856,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
                 if (!isForced && newState.equals(oldState)) {
                     String template = language.getString(STATE_ALREADY_SINGULAR);
                     String cmdName = "state_" + command.toString().toLowerCase();
-                    String stateText = null;
+                    String stateText;
                     try {
                         stateText = language.getString(cmdName);
                     } catch (Exception e) {

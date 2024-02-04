@@ -98,7 +98,7 @@ public class ModelRepositoryImpl implements ModelRepository {
     public boolean addOrRefreshModel(String name, final InputStream originalInputStream) {
         logger.info("Loading model '{}'", name);
         Resource resource = null;
-        byte[] bytes = null;
+        byte[] bytes;
         try (InputStream inputStream = originalInputStream) {
             bytes = inputStream.readAllBytes();
             String validationResult = validateModel(name, new ByteArrayInputStream(bytes));

@@ -708,7 +708,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
      * @return the {@link ModuleHandlerFactory} responsible for the {@link ModuleType}.
      */
     public @Nullable ModuleHandlerFactory getModuleHandlerFactory(String moduleTypeId) {
-        ModuleHandlerFactory mhf = null;
+        ModuleHandlerFactory mhf;
         synchronized (this) {
             mhf = moduleHandlerFactories.get(moduleTypeId);
         }
@@ -918,7 +918,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
     private void removeMissingModuleTypes(Collection<String> moduleTypes) {
         Map<String, List<String>> mapMissingHandlers = null;
         for (String moduleTypeName : moduleTypes) {
-            Set<String> rules = null;
+            Set<String> rules;
             synchronized (this) {
                 rules = mapModuleTypeToRules.get(moduleTypeName);
             }
@@ -1145,7 +1145,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
             return true;
         }
         final String ruleUID = rule.getUID();
-        RuleStatus ruleStatus = null;
+        RuleStatus ruleStatus;
         for (WrappedCondition wrappedCondition : conditions) {
             ruleStatus = getRuleStatus(ruleUID);
             if (ruleStatus != RuleStatus.RUNNING) {
@@ -1173,7 +1173,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
         if (actions.isEmpty()) {
             return;
         }
-        RuleStatus ruleStatus = null;
+        RuleStatus ruleStatus;
         for (WrappedAction wrappedAction : actions) {
             ruleStatus = getRuleStatus(ruleUID);
             if (ruleStatus != RuleStatus.RUNNING) {

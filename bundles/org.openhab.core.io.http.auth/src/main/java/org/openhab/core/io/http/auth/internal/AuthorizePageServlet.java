@@ -77,7 +77,7 @@ public class AuthorizePageServlet extends AbstractAuthPageServlet {
         Map<String, String[]> params = req.getParameterMap();
 
         try {
-            String message = "";
+            String message;
             String scope = params.containsKey("scope") ? params.get("scope")[0] : "";
             String clientId = params.containsKey("client_id") ? params.get("client_id")[0] : "";
 

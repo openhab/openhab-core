@@ -65,7 +65,7 @@ public class ConfigDescriptionConverter extends GenericUnmarshaller<ConfigDescri
             uriText = (String) context.get("config-description.uri");
         }
 
-        URI uri = null;
+        URI uri;
         if (uriText == null) {
             throw new ConversionException("No URI provided");
         }

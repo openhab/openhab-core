@@ -51,12 +51,11 @@ public class CompareConditionHandler extends BaseConditionModuleHandler {
     @Override
     public boolean isSatisfied(Map<String, @Nullable Object> context) {
         Object operatorObj = this.module.getConfiguration().get(OPERATOR);
-        String operator = (operatorObj != null && operatorObj instanceof String s) ? s : null;
+        String operator = operatorObj instanceof String s ? s : null;
         Object rightObj = this.module.getConfiguration().get(RIGHT_OP);
-        String rightOperandString = (rightObj != null && rightObj instanceof String s) ? s : null;
+        String rightOperandString = rightObj instanceof String s ? s : null;
         Object leftObjFieldNameObj = this.module.getConfiguration().get(INPUT_LEFT_FIELD);
-        String leftObjectFieldName = (leftObjFieldNameObj != null && leftObjFieldNameObj instanceof String s) ? s
-                : null;
+        String leftObjectFieldName = leftObjFieldNameObj instanceof String s ? s : null;
         if (rightOperandString == null || operator == null) {
             return false;
         } else {

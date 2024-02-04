@@ -12,6 +12,8 @@
  */
 package org.openhab.core.types;
 
+import java.util.Objects;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
@@ -84,7 +86,7 @@ public class CommandOption {
             return false;
         }
         CommandOption other = (CommandOption) obj;
-        return command.equals(other.command) && (label != null ? label.equals(other.label) : other.label == null);
+        return command.equals(other.command) && Objects.equals(label, other.label);
     }
 
     @Override

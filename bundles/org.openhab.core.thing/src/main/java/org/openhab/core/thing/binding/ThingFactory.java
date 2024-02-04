@@ -54,7 +54,7 @@ public class ThingFactory {
      */
     public static ThingUID generateRandomThingUID(ThingTypeUID thingTypeUID) {
         String uuid = UUID.randomUUID().toString();
-        String thingId = uuid.substring(uuid.length() - 12, uuid.length());
+        String thingId = uuid.substring(uuid.length() - 12);
         return new ThingUID(thingTypeUID, thingId);
     }
 

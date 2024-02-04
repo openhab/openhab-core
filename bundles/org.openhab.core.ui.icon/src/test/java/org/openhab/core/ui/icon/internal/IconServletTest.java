@@ -66,7 +66,7 @@ public class IconServletTest {
         }
 
         public String getOutput() {
-            return new String(outputStream.toByteArray());
+            return outputStream.toString();
         }
 
         public void reset() {

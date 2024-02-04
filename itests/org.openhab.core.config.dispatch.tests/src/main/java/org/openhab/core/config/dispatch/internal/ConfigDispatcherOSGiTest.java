@@ -926,15 +926,15 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
     }
 
     private @Nullable Configuration getConfigurationWithContext(String pidWithContext) {
-        String pid = null;
-        String configContext = null;
+        String pid;
+        String configContext;
         if (pidWithContext.contains(OpenHAB.SERVICE_CONTEXT_MARKER)) {
             pid = pidWithContext.split(OpenHAB.SERVICE_CONTEXT_MARKER)[0];
             configContext = pidWithContext.split(OpenHAB.SERVICE_CONTEXT_MARKER)[1];
         } else {
             throw new IllegalArgumentException("PID does not have a context");
         }
-        Configuration[] configs = null;
+        Configuration[] configs;
         try {
             configs = configAdmin.listConfigurations(
                     "(&(service.factoryPid=" + pid + ")(" + OpenHAB.SERVICE_CONTEXT + "=" + configContext + "))");

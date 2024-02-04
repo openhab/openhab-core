@@ -179,11 +179,7 @@ public class Utils {
         if (count < 1) {
             return "";
         }
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < count; i++) {
-            sb.append(ch);
-        }
-        return sb.toString();
+        return String.valueOf(ch).repeat(count);
     }
 
     /**

@@ -161,7 +161,7 @@ public class AudioConsoleCommandExtension extends AbstractConsoleCommandExtensio
                 playOnSinks(args[0], args[1], null, console);
                 break;
             case 3:
-                PercentType volume = null;
+                PercentType volume;
                 try {
                     volume = PercentType.valueOf(args[2]);
                 } catch (Exception e) {
@@ -184,7 +184,7 @@ public class AudioConsoleCommandExtension extends AbstractConsoleCommandExtensio
                 playMelodyOnSinks(args[0], args[1], null, console);
                 break;
             case 3:
-                PercentType volume = null;
+                PercentType volume;
                 try {
                     volume = PercentType.valueOf(args[2]);
                 } catch (Exception e) {

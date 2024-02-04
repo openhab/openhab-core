@@ -80,7 +80,7 @@ public class GenericItemChannelLinkProvider extends AbstractProvider<ItemChannel
 
     private void createItemChannelLink(String context, String itemName, String channelUID, Configuration configuration)
             throws BindingConfigParseException {
-        ChannelUID channelUIDObject = null;
+        ChannelUID channelUIDObject;
         try {
             channelUIDObject = new ChannelUID(channelUID);
         } catch (IllegalArgumentException e) {

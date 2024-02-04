@@ -94,7 +94,7 @@ public class ProxyFilter implements ContainerRequestFilter {
         // it
         String uriString = scheme + "://" + host.trim();
 
-        URI newBaseUri = null;
+        URI newBaseUri;
         try {
             newBaseUri = new URI(uriString);
         } catch (URISyntaxException e) {

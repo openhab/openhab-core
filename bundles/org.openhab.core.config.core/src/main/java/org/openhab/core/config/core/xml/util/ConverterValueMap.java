@@ -62,7 +62,7 @@ public class ConverterValueMap {
             throws ConversionException {
         this.reader = reader;
         this.context = context;
-        this.valueMap = readValueMap(this.reader, numberOfValues >= -1 ? numberOfValues : -1, this.context);
+        this.valueMap = readValueMap(this.reader, Math.max(numberOfValues, -1), this.context);
     }
 
     /**

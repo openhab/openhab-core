@@ -116,7 +116,7 @@ public class InboxResource implements RESTResource {
         ThingUID thingUIDObject = new ThingUID(thingUID);
         String notEmptyLabel = label != null && !label.isEmpty() ? label : null;
         String notEmptyNewThingId = newThingId != null && !newThingId.isEmpty() ? newThingId : null;
-        Thing thing = null;
+        Thing thing;
         try {
             thing = inbox.approve(thingUIDObject, notEmptyLabel, notEmptyNewThingId);
         } catch (IllegalArgumentException e) {

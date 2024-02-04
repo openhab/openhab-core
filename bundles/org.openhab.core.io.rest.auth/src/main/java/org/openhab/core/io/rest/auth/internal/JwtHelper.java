@@ -14,7 +14,6 @@ package org.openhab.core.io.rest.auth.internal;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -72,7 +71,7 @@ public class JwtHelper {
         }
     }
 
-    private RsaJsonWebKey generateNewKey() throws JoseException, FileNotFoundException, IOException {
+    private RsaJsonWebKey generateNewKey() throws JoseException, IOException {
         RsaJsonWebKey newKey = RsaJwkGenerator.generateJwk(2048);
 
         File file = new File(KEY_FILE_PATH);
@@ -84,7 +83,7 @@ public class JwtHelper {
         return newKey;
     }
 
-    private RsaJsonWebKey loadOrGenerateKey() throws FileNotFoundException, JoseException, IOException {
+    private RsaJsonWebKey loadOrGenerateKey() throws JoseException, IOException {
         try (final BufferedReader reader = Files.newBufferedReader(Paths.get(KEY_FILE_PATH))) {
             return (RsaJsonWebKey) JsonWebKey.Factory.newJwk(reader.readLine());
         } catch (IOException | JoseException e) {

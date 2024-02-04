@@ -99,7 +99,7 @@ public class MDNSAnnouncer {
     private ServiceDescription getSSLServiceDescription() {
         ServiceDescription description = getDefaultServiceDescription();
         description.serviceType = "_" + mdnsName + "-server-ssl._tcp.local.";
-        description.serviceName = "" + mdnsName + "-ssl";
+        description.serviceName = mdnsName + "-ssl";
         description.servicePort = httpSSLPort;
         return description;
     }

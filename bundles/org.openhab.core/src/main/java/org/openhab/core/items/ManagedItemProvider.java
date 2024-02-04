@@ -186,7 +186,7 @@ public class ManagedItemProvider extends AbstractManagedProvider<Item, String, P
                 String itemName = entry.getKey();
                 PersistedItem persistedItem = entry.getValue();
                 Item item = itemFactory.createItem(persistedItem.itemType, itemName);
-                if (item != null && item instanceof GenericItem genericItem) {
+                if (item instanceof GenericItem genericItem) {
                     iterator.remove();
                     configureItem(persistedItem, genericItem);
                     notifyListenersAboutAddedElement(item);
@@ -217,7 +217,7 @@ public class ManagedItemProvider extends AbstractManagedProvider<Item, String, P
 
     @Override
     protected @Nullable Item toElement(String itemName, PersistedItem persistedItem) {
-        Item item = null;
+        Item item;
 
         if (GroupItem.TYPE.equals(persistedItem.itemType)) {
             String baseItemType = persistedItem.baseItemType;
@@ -236,7 +236,7 @@ public class ManagedItemProvider extends AbstractManagedProvider<Item, String, P
             item = createItem(persistedItem.itemType, itemName);
         }
 
-        if (item != null && item instanceof GenericItem genericItem) {
+        if (item instanceof GenericItem genericItem) {
             configureItem(persistedItem, genericItem);
         }
 

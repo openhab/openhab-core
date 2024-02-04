@@ -105,9 +105,9 @@ public class ColorUtil {
      * @return array of three {@link PercentType} with the RGB values in the range 0 to 100 percent.
      */
     public static PercentType[] hsbToRgbPercent(HSBType hsb) {
-        PercentType red = null;
-        PercentType green = null;
-        PercentType blue = null;
+        PercentType red;
+        PercentType green;
+        PercentType blue;
 
         final BigDecimal h = hsb.getHue().toBigDecimal().divide(BIG_DECIMAL_100, 10, RoundingMode.HALF_UP);
         final BigDecimal s = hsb.getSaturation().toBigDecimal().divide(BIG_DECIMAL_100);

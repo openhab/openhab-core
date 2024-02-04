@@ -50,8 +50,8 @@ public class UsbSerialDeviceInformation {
     public UsbSerialDeviceInformation(int vendorId, int productId, @Nullable String serialNumber,
             @Nullable String manufacturer, @Nullable String product, int interfaceNumber,
             @Nullable String interfaceDescription, String serialPort) {
-        this.vendorId = requireNonNull(vendorId);
-        this.productId = requireNonNull(productId);
+        this.vendorId = vendorId;
+        this.productId = productId;
 
         this.serialNumber = serialNumber;
         this.manufacturer = manufacturer;
