@@ -1,0 +1,7 @@
+version: 1
+readOnly: false
+firstType:
+  - uid: element1
+    description: newDescription1
+  - uid: element2
+    description: description2

@@ -1,0 +1,9 @@
+version: 1
+readOnly: false
+firstType:
+  - uid: element1
+    description: description1
+  - uid: element2
+    description: description2
+  - uid: element3
+    description: description3
