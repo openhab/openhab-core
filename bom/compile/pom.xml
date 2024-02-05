@@ -300,7 +300,7 @@
       <version>2.10.4</version>
       <scope>compile</scope>
     </dependency>
-	<dependency>
+    <dependency>
       <groupId>com.neuronrobotics</groupId>
       <artifactId>nrjavaserial</artifactId>
       <version>3.14.0</version>
