@@ -269,12 +269,17 @@ public class JSerialCommSerialPort implements SerialPort {
 
     @Override
     public String getName() {
-        return sp.getSystemPortPath();
+        String sysPortName = sp.getSystemPortName();
+        if (sysPortName != null && sysPortName.startsWith("COM")) {
+            return sysPortName;
+        } else {
+            return sp.getSystemPortPath();
+        }
     }
 
     @Override
     public void setFlowControlMode(int flowcontrolRtsctsOut) throws UnsupportedCommOperationException {
-        // TODO check mapping
+        // FIXME check mapping
         if (!sp.setFlowControl(flowcontrolRtsctsOut)) {
             throw new UnsupportedCommOperationException();
         }
@@ -388,8 +393,7 @@ public class JSerialCommSerialPort implements SerialPort {
 
     @Override
     public void sendBreak(int duration) {
-        // FIXME !!!!! placeholder implementation - or remove from serial transport interface if it's not used by any
-        // binding
+        // FIXME !!!!! placeholder implementation. Remove from OH serial transport since it's not used by any binding??
         sp.setBreak();
         // sp.sendBreak(duration);
     }
