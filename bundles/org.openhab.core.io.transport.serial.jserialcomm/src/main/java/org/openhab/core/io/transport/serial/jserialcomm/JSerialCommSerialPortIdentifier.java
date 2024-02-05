@@ -32,6 +32,8 @@ public class JSerialCommSerialPortIdentifier implements SerialPortIdentifier {
 
     final com.fazecast.jSerialComm.SerialPort sp;
 
+    private @Nullable String owner;
+
     /**
      * Constructor.
      *
@@ -43,8 +45,13 @@ public class JSerialCommSerialPortIdentifier implements SerialPortIdentifier {
 
     @Override
     public String getName() {
-        final String name = sp.getSystemPortPath();
-        return name != null ? name : "";
+        final String sysPortName = sp.getSystemPortName();
+        if (sysPortName != null && sysPortName.startsWith("COM")) {
+            return sysPortName;
+        } else {
+            return sp.getSystemPortPath();
+        }
+        // return name != null ? name : "";
     }
 
     @Override
@@ -53,6 +60,7 @@ public class JSerialCommSerialPortIdentifier implements SerialPortIdentifier {
         logger.debug("--------TRANSPORT-jSerialComm--- SerialPort.getPortDescription() = {}", sp.getPortDescription());
         boolean success = sp.openPort();
         if (success) {
+            this.owner = owner;
             return new JSerialCommSerialPort(sp);
         } else {
             logger.error("--------TRANSPORT-jSerialComm--- Could not open port: {}", getName());
@@ -62,12 +70,11 @@ public class JSerialCommSerialPortIdentifier implements SerialPortIdentifier {
 
     @Override
     public boolean isCurrentlyOwned() {
-        return false;
+        return (owner != null);
     }
 
     @Override
     public @Nullable String getCurrentOwner() {
-        // FIXME !!!!! placeholder implementation
-        return "jserialcomm owner";
+        return owner;
     }
 }

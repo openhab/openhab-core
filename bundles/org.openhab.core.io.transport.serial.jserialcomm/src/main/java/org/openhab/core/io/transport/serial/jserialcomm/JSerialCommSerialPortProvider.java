@@ -47,7 +47,9 @@ public class JSerialCommSerialPortProvider implements SerialPortProvider {
             SerialPort spFound = SerialPort.getCommPort(portPathAsString);
             return new JSerialCommSerialPortIdentifier(spFound);
         } catch (SerialPortInvalidPortException e) {
-            logger.debug("--------TRANSPORT-jSerialComm--- No SerialPort found for: {}", portPathAsString, e);
+            logger.debug(
+                    "--------TRANSPORT-jSerialComm--- No SerialPort found for: {} (SerialPortInvalidPortException: {})",
+                    portPathAsString, e.getMessage());
             return null;
         }
     }
@@ -60,11 +62,12 @@ public class JSerialCommSerialPortProvider implements SerialPortProvider {
     @Override
     public Stream<SerialPortIdentifier> getSerialPortIdentifiers() {
         com.fazecast.jSerialComm.SerialPort[] portsArray = com.fazecast.jSerialComm.SerialPort.getCommPorts();
-        logger.debug("--------TRANSPORT-jSerialComm--- getSerialPortIdentifiers() - Listing Found ports:");
+        logger.debug("--------TRANSPORT-jSerialComm--- getSerialPortIdentifiers() :: Listing found ports:");
         for (com.fazecast.jSerialComm.SerialPort port : portsArray) {
             logger.debug("--------TRANSPORT-jSerialComm---     port: {} ({} - {})", port.getSystemPortName(),
                     port.getSystemPortPath(), port.getPortDescription());
         }
+        logger.debug("--------TRANSPORT-jSerialComm--- ...finished listing found ports.");
 
         Stream<com.fazecast.jSerialComm.SerialPort> ports = Arrays.stream(portsArray);
 
