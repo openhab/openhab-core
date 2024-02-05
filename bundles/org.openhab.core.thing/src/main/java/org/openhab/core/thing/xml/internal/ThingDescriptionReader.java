@@ -105,6 +105,7 @@ public class ThingDescriptionReader extends XmlDocumentReader<List<?>> {
         xstream.alias("tag", NodeValue.class);
         xstream.alias("state", StateDescription.class);
         xstream.alias("command", CommandDescription.class);
+        xstream.alias("unit-hint", NodeValue.class);
         xstream.alias("event", EventDescription.class);
         xstream.alias("options", NodeList.class);
         xstream.alias("option", NodeValue.class);
