@@ -200,8 +200,8 @@ public class ChannelTypeResource implements RESTResource {
                 : configDescriptionDTO.parameterGroups;
 
         return new ChannelTypeDTO(channelType.getUID().toString(), channelType.getLabel(), channelType.getDescription(),
-                channelType.getCategory(), channelType.getItemType(), channelType.getKind(), parameters,
-                parameterGroups, channelType.getState(), channelType.getUnitHint(), channelType.getTags(),
-                channelType.isAdvanced(), channelType.getCommandDescription());
+                channelType.getCategory(), channelType.getItemType(), channelType.getUnitHint(), channelType.getKind(),
+                parameters, parameterGroups, channelType.getState(), channelType.getTags(), channelType.isAdvanced(),
+                channelType.getCommandDescription());
     }
 }

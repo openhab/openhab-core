@@ -70,11 +70,12 @@ public class ChannelType extends AbstractDescriptionType {
      * @throws IllegalArgumentException if the UID or the item type is null or empty,
      *             or the meta information is null
      */
-    protected ChannelType(ChannelTypeUID uid, boolean advanced, @Nullable String itemType, ChannelKind kind,
-            String label, @Nullable String description, @Nullable String category, @Nullable Set<String> tags,
-            @Nullable StateDescription state, @Nullable CommandDescription commandDescription,
-            @Nullable String unitHint, @Nullable EventDescription event, @Nullable URI configDescriptionURI,
-            @Nullable AutoUpdatePolicy autoUpdatePolicy) throws IllegalArgumentException {
+    protected ChannelType(ChannelTypeUID uid, boolean advanced, @Nullable String itemType, @Nullable String unitHint,
+            ChannelKind kind, String label, @Nullable String description, @Nullable String category,
+            @Nullable Set<String> tags, @Nullable StateDescription state,
+            @Nullable CommandDescription commandDescription, @Nullable EventDescription event,
+            @Nullable URI configDescriptionURI, @Nullable AutoUpdatePolicy autoUpdatePolicy)
+            throws IllegalArgumentException {
         super(uid, label, description, configDescriptionURI);
 
         if (kind == ChannelKind.STATE && (itemType == null || itemType.isBlank())) {
@@ -85,6 +86,7 @@ public class ChannelType extends AbstractDescriptionType {
         }
 
         this.itemType = itemType;
+        this.unitHint = unitHint;
         this.kind = kind;
 
         this.tags = tags == null ? Set.of() : Set.copyOf(tags);
@@ -92,7 +94,6 @@ public class ChannelType extends AbstractDescriptionType {
         this.category = category;
         this.state = state;
         this.commandDescription = commandDescription;
-        this.unitHint = unitHint;
         this.event = event;
         this.autoUpdatePolicy = autoUpdatePolicy;
     }

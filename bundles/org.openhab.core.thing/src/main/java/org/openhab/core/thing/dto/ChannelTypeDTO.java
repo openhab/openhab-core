@@ -35,9 +35,9 @@ public class ChannelTypeDTO {
     public String label;
     public String category;
     public String itemType;
+    public String unitHint;
     public String kind;
     public StateDescription stateDescription;
-    public String unitHint;
     public Set<String> tags;
     public String UID;
     public boolean advanced;
@@ -47,9 +47,9 @@ public class ChannelTypeDTO {
     }
 
     public ChannelTypeDTO(String uid, String label, String description, String category, String itemType,
-            ChannelKind kind, List<ConfigDescriptionParameterDTO> parameters,
+            String unitHint, ChannelKind kind, List<ConfigDescriptionParameterDTO> parameters,
             List<ConfigDescriptionParameterGroupDTO> parameterGroups, StateDescription stateDescription,
-            String unitHint, Set<String> tags, boolean advanced, CommandDescription commandDescription) {
+            Set<String> tags, boolean advanced, CommandDescription commandDescription) {
         this.UID = uid;
         this.label = label;
         this.description = description;
@@ -57,10 +57,10 @@ public class ChannelTypeDTO {
         this.parameters = parameters;
         this.parameterGroups = parameterGroups;
         this.stateDescription = stateDescription;
-        this.unitHint = unitHint;
         this.tags = tags;
         this.kind = kind.toString();
         this.itemType = itemType;
+        this.unitHint = unitHint;
         this.advanced = advanced;
         this.commandDescription = commandDescription;
     }

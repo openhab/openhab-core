@@ -58,6 +58,9 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 @NonNullByDefault
 public class ChannelTypeConverter extends AbstractDescriptionTypeConverter<ChannelTypeXmlResult> {
 
+    record ItemType(@Nullable String itemType, @Nullable String unitHint) {
+    }
+
     public ChannelTypeConverter() {
         super(ChannelTypeXmlResult.class, "channel-type");
         attributeMapValidator = new ConverterAttributeMapValidator(
@@ -74,8 +77,15 @@ public class ChannelTypeConverter extends AbstractDescriptionTypeConverter<Chann
         return defaultValue;
     }
 
-    private @Nullable String readItemType(NodeIterator nodeIterator) throws ConversionException {
-        return (String) nodeIterator.nextValue("item-type", false);
+    private ItemType readItemType(NodeIterator nodeIterator) throws ConversionException {
+        Object next = nodeIterator.next("item-type", false);
+        if (next instanceof NodeValue nodeValue) {
+            String itemType = (String) nodeValue.getValue();
+            Map<String, String> attributes = nodeValue.getAttributes();
+            String unitHint = attributes != null ? attributes.get("unitHint") : null;
+            return new ItemType(itemType, unitHint);
+        }
+        return new ItemType(null, null);
     }
 
     private @Nullable String readKind(NodeIterator nodeIterator) throws ConversionException {
@@ -162,10 +172,6 @@ public class ChannelTypeConverter extends AbstractDescriptionTypeConverter<Chann
         return null;
     }
 
-    private @Nullable String readUnitHint(NodeIterator nodeIterator) throws ConversionException {
-        return (String) nodeIterator.nextValue("unit-hint", false);
-    }
-
     @Override
     protected @Nullable ChannelTypeXmlResult unmarshalType(HierarchicalStreamReader reader,
             UnmarshallingContext context, Map<String, String> attributes, NodeIterator nodeIterator)
@@ -176,7 +182,10 @@ public class ChannelTypeConverter extends AbstractDescriptionTypeConverter<Chann
         String uid = system ? XmlHelper.getSystemUID(super.getID(attributes)) : super.getUID(attributes, context);
         ChannelTypeUID channelTypeUID = new ChannelTypeUID(uid);
 
-        String itemType = readItemType(nodeIterator);
+        ItemType type = readItemType(nodeIterator);
+        String itemType = type.itemType();
+        String unitHint = type.unitHint();
+
         String kind = readKind(nodeIterator);
         String label = super.readLabel(nodeIterator);
         String description = super.readDescription(nodeIterator);
@@ -189,7 +198,6 @@ public class ChannelTypeConverter extends AbstractDescriptionTypeConverter<Chann
                 : null;
 
         CommandDescription commandDescription = readCommandDescription(nodeIterator);
-        String unitHint = readUnitHint(nodeIterator);
         EventDescription eventDescription = readEventDescription(nodeIterator);
 
         AutoUpdatePolicy autoUpdatePolicy = readAutoUpdatePolicy(nodeIterator);

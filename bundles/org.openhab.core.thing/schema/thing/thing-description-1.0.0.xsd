@@ -63,7 +63,7 @@
 
     <xs:complexType name="channelType">
         <xs:sequence>
-            <xs:element name="item-type" type="xs:string" minOccurs="0"/>
+            <xs:element name="item-type" type="thing-description:itemType" minOccurs="0"/>
             <xs:element name="kind" type="xs:string" minOccurs="0"/>
             <xs:element name="label" type="xs:string"/>
             <xs:element name="description" type="xs:string" minOccurs="0"/>
@@ -71,7 +71,6 @@
             <xs:element name="tags" type="thing-description:tags" minOccurs="0"/>
             <xs:element name="state" type="thing-description:state" minOccurs="0"/>
             <xs:element name="command" type="thing-description:command" minOccurs="0"/>
-            <xs:element name="unit-hint" type="xs:string" minOccurs="0"/>
             <xs:element name="event" type="thing-description:event" minOccurs="0"/>
             <xs:element name="autoUpdatePolicy" type="thing-description:auto-update-policy" minOccurs="0"/>
             <xs:choice minOccurs="0">
@@ -140,6 +139,14 @@
         </xs:sequence>
         <xs:attribute name="id" type="config-description:idRestrictionPattern" use="required"/>
         <xs:attribute name="typeId" type="config-description:idRestrictionPattern" use="required"/>
+    </xs:complexType>
+
+    <xs:complexType name="itemType">
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:attribute name="unitHint" type="xs:string" use="optional" />
+            </xs:extension>
+        </xs:simpleContent>
     </xs:complexType>
 
     <xs:complexType name="tags">
