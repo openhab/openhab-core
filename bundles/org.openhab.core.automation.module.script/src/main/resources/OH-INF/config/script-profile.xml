@@ -27,8 +27,9 @@
 			<label>Item To Thing Transformation (DEPRECATED)</label>
 			<description>The Script for transforming commands from the item to the Thing handler. The script may return null to
 				discard the commands and not pass them through. This is deprecated and has been replaced by
-				'toHandlerCommandScript'.</description>
+				'commandFromItemScript'.</description>
 			<limitToOptions>false</limitToOptions>
+			<advanced>true</advanced>
 		</parameter>
 	</config-description>
 
