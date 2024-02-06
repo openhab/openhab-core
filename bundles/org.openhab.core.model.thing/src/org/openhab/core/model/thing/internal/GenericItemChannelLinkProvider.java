@@ -16,6 +16,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -89,24 +90,17 @@ public class GenericItemChannelLinkProvider extends AbstractProvider<ItemChannel
         }
         ItemChannelLink itemChannelLink = new ItemChannelLink(itemName, channelUIDObject, configuration);
 
-        Set<String> itemNames = contextMap.get(context);
-        if (itemNames == null) {
-            itemNames = new HashSet<>();
-            contextMap.put(context, itemNames);
-        }
+        Set<String> itemNames = Objects.requireNonNull(contextMap.computeIfAbsent(context, k -> new HashSet<>()));
         itemNames.add(itemName);
         if (previousItemNames != null) {
             previousItemNames.remove(itemName);
         }
 
-        Map<ChannelUID, ItemChannelLink> links = itemChannelLinkMap.get(itemName);
-        if (links == null) {
-            // Create a HashMap with an initial capacity of 2 (the default is 16) to save memory
-            // because most items have only one channel. A capacity of 2 is enough to avoid
-            // resizing the HashMap in most cases, whereas 1 would trigger a resize as soon as
-            // one element is added.
-            itemChannelLinkMap.put(itemName, links = new HashMap<>(2));
-        }
+        // Create a HashMap with an initial capacity of 2 (the default is 16) to save memory because most items have
+        // only one channel. A capacity of 2 is enough to avoid resizing the HashMap in most cases, whereas 1 would
+        // trigger a resize as soon as one element is added.
+        Map<ChannelUID, ItemChannelLink> links = Objects
+                .requireNonNull(itemChannelLinkMap.computeIfAbsent(itemName, k -> new HashMap<>(2)));
 
         ItemChannelLink oldLink = links.put(channelUIDObject, itemChannelLink);
         if (oldLink == null) {

@@ -20,6 +20,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -376,11 +377,8 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
      */
     private void updateRuleTemplateMapping(String templateUID, String ruleUID, boolean resolved) {
         synchronized (this) {
-            Set<String> ruleUIDs = mapTemplateToRules.get(templateUID);
-            if (ruleUIDs == null) {
-                ruleUIDs = new HashSet<>();
-                mapTemplateToRules.put(templateUID, ruleUIDs);
-            }
+            Set<String> ruleUIDs = Objects
+                    .requireNonNull(mapTemplateToRules.computeIfAbsent(templateUID, k -> new HashSet<>()));
             if (resolved) {
                 ruleUIDs.remove(ruleUID);
             } else {
