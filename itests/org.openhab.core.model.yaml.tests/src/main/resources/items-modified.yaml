@@ -1,0 +1,21 @@
+version: 1
+readOnly: false
+items:
+  - name: TestGroup1
+    label: Group with Function
+    type: Group
+    groupType: Contact
+    function:
+      name: AND
+      params:
+        - OPEN
+        - CLOSED
+  - name: TestItem1
+    label: Test Item1
+    type: Switch
+    tags:
+      - AlarmSystem
+    groupNames:
+      - TestGroup
+  - name: TestItem3
+    type: Contact

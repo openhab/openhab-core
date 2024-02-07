@@ -1,0 +1,10 @@
+version: 1
+metadata:
+  - namespace: ns1
+    itemName: testItem
+    value: Foo
+    config:
+      key: newValue
+  - namespace: ns3
+    itemName: testItem
+    value: Baz

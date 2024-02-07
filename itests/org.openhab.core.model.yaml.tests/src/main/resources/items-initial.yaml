@@ -1,0 +1,27 @@
+version: 1
+readOnly: false
+items:
+  - name: TestGroup1
+    label: Group with Function
+    type: Group
+    groupType: Switch
+    function:
+      name: OR
+      params:
+        - ON
+        - OFF
+  - name: TestGroup2
+    label: Simple Group
+    type: Group
+  - name: TestItem1
+    type: Switch
+    tags:
+      - AlarmSystem
+    groupNames:
+      - TestGroup
+  - name: TestItem2
+    label: Test Label
+    type: Number:Temperature
+    category: temperature
+    groupNames:
+      - TestGroup2

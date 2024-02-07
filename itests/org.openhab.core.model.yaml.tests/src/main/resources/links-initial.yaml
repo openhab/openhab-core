@@ -1,0 +1,10 @@
+version: 1
+readOnly: false
+links:
+  - itemName: TestItem1
+    channelUID: testBinding:testThingType:testThing:testChannel1
+  - itemName: TestItem2
+    channelUID: testBinding:testThingType:testThing:testChannel2
+    configuration:
+      offset: 5 s
+      profile: system:offset

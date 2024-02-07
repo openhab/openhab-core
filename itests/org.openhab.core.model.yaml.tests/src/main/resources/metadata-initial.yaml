@@ -1,0 +1,10 @@
+version: 1
+metadata:
+  - namespace: ns1
+    itemName: testItem
+    value: Foo
+    config:
+      key: value
+  - namespace: ns2
+    itemName: testItem
+    value: Bar
