@@ -51,7 +51,7 @@ import org.openhab.core.service.WatchService;
 @MockitoSettings(strictness = Strictness.LENIENT)
 @NonNullByDefault
 public class YamlModelRepositoryImplTest {
-    private static final Path SOURCE_PATH = Path.of("src/test/resources");
+    private static final Path SOURCE_PATH = Path.of("src/test/resources/model");
     private static final String MODEL_NAME = "model";
     private static final Path MODEL_PATH = Path.of(MODEL_NAME + ".yaml");
 

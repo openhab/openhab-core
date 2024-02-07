@@ -52,6 +52,7 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
+import com.fasterxml.jackson.dataformat.yaml.YAMLParser;
 
 /**
  * The {@link YamlModelRepositoryImpl} is an OSGi service, that encapsulates all YAML file processing
@@ -82,7 +83,8 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
                 .disable(YAMLGenerator.Feature.SPLIT_LINES) // do not split long lines
                 .enable(YAMLGenerator.Feature.INDENT_ARRAYS_WITH_INDICATOR) // indent arrays
                 .enable(YAMLGenerator.Feature.MINIMIZE_QUOTES) // use quotes only where necessary
-                .build();
+                .enable(YAMLParser.Feature.PARSE_BOOLEAN_LIKE_WORDS_AS_STRINGS).build(); // do not parse ON/OFF/... as
+                                                                                         // booleans
         this.objectMapper = new ObjectMapper(yamlFactory);
         objectMapper.findAndRegisterModules();
         objectMapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE);
