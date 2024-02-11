@@ -127,7 +127,8 @@ Slider:
         ('icon=[' (IconRules+=IconRule (',' IconRules+=IconRule)*) ']') |
         ('staticIcon=' staticIcon=Icon))? &
     ('sendFrequency=' frequency=INT)? & (switchEnabled?='switchSupport')? &
-    ('minValue=' minValue=Number)? & ('maxValue=' maxValue=Number)? & ('step=' step=Number)? &
+    (releaseOnly?='releaseOnly')? & ('minValue=' minValue=Number)? &
+    ('maxValue=' maxValue=Number)? & ('step=' step=Number)? &
     ('labelcolor=[' (LabelColor+=ColorArray (',' LabelColor+=ColorArray)*) ']')? &
     ('valuecolor=[' (ValueColor+=ColorArray (',' ValueColor+=ColorArray)*) ']')? &
     ('iconcolor=[' (IconColor+=ColorArray (',' IconColor+=ColorArray)*) ']')? &
