@@ -12,11 +12,10 @@
  */
 package org.openhab.core.internal.service;
 
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Consumer;
 
@@ -38,7 +37,7 @@ public class ReadyServiceImpl implements ReadyService {
     private final Logger logger = LoggerFactory.getLogger(ReadyServiceImpl.class);
     private static final ReadyMarkerFilter ANY = new ReadyMarkerFilter();
 
-    private final Set<ReadyMarker> markers = Collections.synchronizedSet(new LinkedHashSet<>());
+    private final Set<ReadyMarker> markers = new CopyOnWriteArraySet<>();
 
     private final Map<ReadyTracker, ReadyMarkerFilter> trackers = new HashMap<>();
     private final ReentrantReadWriteLock rwlTrackers = new ReentrantReadWriteLock(true);
