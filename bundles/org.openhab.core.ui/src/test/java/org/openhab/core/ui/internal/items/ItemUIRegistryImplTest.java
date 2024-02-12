@@ -815,6 +815,7 @@ public class ItemUIRegistryImplTest {
         defaultWidget = uiRegistry.getDefaultWidget(DimmerItem.class, ITEM_NAME);
         assertThat(defaultWidget, is(instanceOf(Slider.class)));
         assertThat(((Slider) defaultWidget).isSwitchEnabled(), is(true));
+        assertThat(((Slider) defaultWidget).isReleaseOnly(), is(true));
 
         defaultWidget = uiRegistry.getDefaultWidget(ImageItem.class, ITEM_NAME);
         assertThat(defaultWidget, is(instanceOf(Image.class)));

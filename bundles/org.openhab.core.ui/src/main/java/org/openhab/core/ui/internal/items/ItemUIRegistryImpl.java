@@ -284,6 +284,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         } else if (DimmerItem.class.equals(itemType)) {
             Slider slider = SitemapFactory.eINSTANCE.createSlider();
             slider.setSwitchEnabled(true);
+            slider.setReleaseOnly(true);
             return slider;
         } else if (ImageItem.class.equals(itemType)) {
             return SitemapFactory.eINSTANCE.createImage();

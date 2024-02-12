@@ -584,6 +584,7 @@ public class SitemapResource
         if (widget instanceof Slider sliderWidget) {
             bean.sendFrequency = sliderWidget.getFrequency();
             bean.switchSupport = sliderWidget.isSwitchEnabled();
+            bean.releaseOnly = sliderWidget.isReleaseOnly();
             bean.minValue = sliderWidget.getMinValue();
             bean.maxValue = sliderWidget.getMaxValue();
             bean.step = sliderWidget.getStep();

@@ -240,6 +240,8 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
                 setWidgetPropertyFromComponentConfig(widget, component, "step", SitemapPackage.SLIDER__STEP);
                 setWidgetPropertyFromComponentConfig(widget, component, "switchEnabled",
                         SitemapPackage.SLIDER__SWITCH_ENABLED);
+                setWidgetPropertyFromComponentConfig(widget, component, "releaseOnly",
+                        SitemapPackage.SLIDER__RELEASE_ONLY);
                 setWidgetPropertyFromComponentConfig(widget, component, "sendFrequency",
                         SitemapPackage.SLIDER__FREQUENCY);
                 break;
