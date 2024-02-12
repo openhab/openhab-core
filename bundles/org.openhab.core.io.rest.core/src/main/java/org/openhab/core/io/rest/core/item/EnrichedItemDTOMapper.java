@@ -105,10 +105,10 @@ public class EnrichedItemDTOMapper {
                 for (Item member : groupItem.getMembers()) {
                     if (parents.contains(member)) {
                         LOGGER.error(
-                                "Recursive group membership found: {} is both, a direct or indirect parent and a child of {}.",
+                                "Recursive group membership found: {} is a member of {}, but it is also one of its ancestors.",
                                 member.getName(), groupItem.getName());
                     } else if (itemFilter == null || itemFilter.test(member)) {
-                        members.add(mapRecursive(member, itemFilter, uriBuilder, locale, parents));
+                        members.add(mapRecursive(member, itemFilter, uriBuilder, locale, new ArrayList<>(parents)));
                     }
                 }
                 memberDTOs = members.toArray(new EnrichedItemDTO[0]);
