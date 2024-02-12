@@ -95,7 +95,7 @@ public class EnrichedItemDTOMapperTest extends JavaTest {
         assertDoesNotThrow(() -> EnrichedItemDTOMapper.map(groupItem1, true, null, null, null));
 
         assertLogMessage(EnrichedItemDTOMapper.class, LogLevel.ERROR,
-                "Recursive group membership found: group1 is both, a direct or indirect parent and a child of group2.");
+                "Recursive group membership found: group1 is a member of group2, but it is also one of its ancestors.");
     }
 
     @Test
@@ -111,7 +111,7 @@ public class EnrichedItemDTOMapperTest extends JavaTest {
         assertDoesNotThrow(() -> EnrichedItemDTOMapper.map(groupItem1, true, null, null, null));
 
         assertLogMessage(EnrichedItemDTOMapper.class, LogLevel.ERROR,
-                "Recursive group membership found: group1 is both, a direct or indirect parent and a child of group3.");
+                "Recursive group membership found: group1 is a member of group3, but it is also one of its ancestors.");
     }
 
     @Test
@@ -123,6 +123,21 @@ public class EnrichedItemDTOMapperTest extends JavaTest {
         groupItem1.addMember(groupItem2);
         groupItem1.addMember(numberItem);
         groupItem2.addMember(numberItem);
+
+        EnrichedItemDTOMapper.map(groupItem1, true, null, null, null);
+
+        assertNoLogMessage(EnrichedItemDTOMapper.class);
+    }
+
+    @Test
+    public void testDuplicateMembershipOfGroupItemsDoesNotTriggerWarning() {
+        GroupItem groupItem1 = new GroupItem("group1");
+        GroupItem groupItem2 = new GroupItem("group2");
+        GroupItem groupItem3 = new GroupItem("group3");
+
+        groupItem1.addMember(groupItem2);
+        groupItem1.addMember(groupItem3);
+        groupItem2.addMember(groupItem3);
 
         EnrichedItemDTOMapper.map(groupItem1, true, null, null, null);
 

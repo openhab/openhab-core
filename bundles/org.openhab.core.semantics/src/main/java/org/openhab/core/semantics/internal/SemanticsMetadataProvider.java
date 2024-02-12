@@ -143,10 +143,10 @@ public class SemanticsMetadataProvider extends AbstractProvider<Metadata>
             for (Item memberItem : groupItem.getMembers()) {
                 if (parentItems.contains(memberItem.getName())) {
                     logger.error(
-                            "Recursive group membership found: {} is both, a direct or indirect parent and a child of {}.",
+                            "Recursive group membership found: {} is a member of {}, but it is also one of its ancestors.",
                             memberItem.getName(), groupItem.getName());
                 } else {
-                    processItem(memberItem, parentItems);
+                    processItem(memberItem, new ArrayList<>(parentItems));
                 }
             }
         }
