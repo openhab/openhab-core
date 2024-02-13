@@ -424,7 +424,8 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
     }
 
     /**
-     * Extends the default {@link HttpClientTransportOverHTTP) but exposes the underling {@link EndPoint} of each request/response.
+     * Extends the default {@link HttpClientTransportOverHTTP) but exposes the underling {@link EndPoint} of each
+     * request/response.
      * It mimics the way it's done in higher Jetty Http client versions.
      */
     private static class CustomHttpClientTransportOverHTTP extends HttpClientTransportOverHTTP {
@@ -444,6 +445,7 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
                 }
             };
         }
+
         private static class CustomHttpReceiverOverHTTP extends HttpReceiverOverHTTP {
             private final HttpChannelOverHTTP channel;
 
@@ -464,6 +466,4 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
             }
         }
     }
-
-
 }
