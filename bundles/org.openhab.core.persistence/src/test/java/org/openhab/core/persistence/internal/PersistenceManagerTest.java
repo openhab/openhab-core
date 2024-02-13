@@ -79,7 +79,7 @@ import org.openhab.core.types.TimeSeries;
 import org.openhab.core.types.UnDefType;
 
 /**
- * The {@link PersistenceManagerTest} contains tests for the {@link PersistenceManager}
+ * The {@link PersistenceManagerTest} contains tests for the {@link PersistenceManagerImpl}
  *
  * @author Jan N. Klug - Initial contribution
  */
@@ -134,7 +134,7 @@ public class PersistenceManagerTest {
     private @NonNullByDefault({}) @Mock QueryablePersistenceService queryablePersistenceServiceMock;
     private @NonNullByDefault({}) @Mock ModifiablePersistenceService modifiablePersistenceServiceMock;
 
-    private @NonNullByDefault({}) PersistenceManager manager;
+    private @NonNullByDefault({}) PersistenceManagerImpl manager;
 
     @BeforeEach
     public void setUp() throws ItemNotFoundException {
@@ -156,7 +156,7 @@ public class PersistenceManagerTest {
         when(queryablePersistenceServiceMock.query(any())).thenReturn(List.of(TEST_HISTORIC_ITEM));
         when(modifiablePersistenceServiceMock.getId()).thenReturn(TEST_MODIFIABLE_PERSISTENCE_SERVICE_ID);
 
-        manager = new PersistenceManager(cronSchedulerMock, schedulerMock, itemRegistryMock, safeCallerMock,
+        manager = new PersistenceManagerImpl(cronSchedulerMock, schedulerMock, itemRegistryMock, safeCallerMock,
                 readyServiceMock, persistenceServiceConfigurationRegistryMock);
         manager.addPersistenceService(persistenceServiceMock);
         manager.addPersistenceService(queryablePersistenceServiceMock);

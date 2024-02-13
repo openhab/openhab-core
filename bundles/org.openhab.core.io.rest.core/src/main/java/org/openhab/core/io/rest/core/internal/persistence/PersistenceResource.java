@@ -55,6 +55,7 @@ import org.openhab.core.persistence.FilterCriteria.Ordering;
 import org.openhab.core.persistence.HistoricItem;
 import org.openhab.core.persistence.ModifiablePersistenceService;
 import org.openhab.core.persistence.PersistenceItemInfo;
+import org.openhab.core.persistence.PersistenceManager;
 import org.openhab.core.persistence.PersistenceService;
 import org.openhab.core.persistence.PersistenceServiceRegistry;
 import org.openhab.core.persistence.QueryablePersistenceService;
@@ -121,6 +122,7 @@ public class PersistenceResource implements RESTResource {
     private final ItemRegistry itemRegistry;
     private final LocaleService localeService;
     private final PersistenceServiceRegistry persistenceServiceRegistry;
+    private final PersistenceManager persistenceManager;
     private final PersistenceServiceConfigurationRegistry persistenceServiceConfigurationRegistry;
     private final ManagedPersistenceServiceConfigurationProvider managedPersistenceServiceConfigurationProvider;
     private final TimeZoneProvider timeZoneProvider;
@@ -130,12 +132,14 @@ public class PersistenceResource implements RESTResource {
             final @Reference ItemRegistry itemRegistry, //
             final @Reference LocaleService localeService,
             final @Reference PersistenceServiceRegistry persistenceServiceRegistry,
+            final @Reference PersistenceManager persistenceManager,
             final @Reference PersistenceServiceConfigurationRegistry persistenceServiceConfigurationRegistry,
             final @Reference ManagedPersistenceServiceConfigurationProvider managedPersistenceServiceConfigurationProvider,
             final @Reference TimeZoneProvider timeZoneProvider) {
         this.itemRegistry = itemRegistry;
         this.localeService = localeService;
         this.persistenceServiceRegistry = persistenceServiceRegistry;
+        this.persistenceManager = persistenceManager;
         this.persistenceServiceConfigurationRegistry = persistenceServiceConfigurationRegistry;
         this.managedPersistenceServiceConfigurationProvider = managedPersistenceServiceConfigurationProvider;
         this.timeZoneProvider = timeZoneProvider;
@@ -608,6 +612,9 @@ public class PersistenceResource implements RESTResource {
 
         ModifiablePersistenceService mService = (ModifiablePersistenceService) service;
         mService.store(item, dateTime, state);
+
+        persistenceManager.handleExternalPersistenceDataChange(mService, item);
+
         return Response.status(Status.OK).build();
     }
 }

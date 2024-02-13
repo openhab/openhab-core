@@ -24,21 +24,29 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.ws.rs.core.HttpHeaders;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.openhab.core.i18n.TimeZoneProvider;
 import org.openhab.core.io.rest.LocaleService;
+import org.openhab.core.items.Item;
+import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.library.items.NumberItem;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.persistence.HistoricItem;
+import org.openhab.core.persistence.ModifiablePersistenceService;
 import org.openhab.core.persistence.PersistenceServiceRegistry;
-import org.openhab.core.persistence.QueryablePersistenceService;
 import org.openhab.core.persistence.dto.ItemHistoryDTO;
 import org.openhab.core.persistence.dto.ItemHistoryDTO.HistoryDataBean;
+import org.openhab.core.persistence.internal.PersistenceManagerImpl;
 import org.openhab.core.persistence.registry.ManagedPersistenceServiceConfigurationProvider;
 import org.openhab.core.persistence.registry.PersistenceServiceConfigurationRegistry;
 import org.openhab.core.types.State;
@@ -49,6 +57,7 @@ import org.openhab.core.types.State;
  * @author Stefan Triller - Initial contribution
  */
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 @NonNullByDefault
 public class PersistenceResourceTest {
 
@@ -60,6 +69,8 @@ public class PersistenceResourceTest {
     private @Mock @NonNullByDefault({}) ItemRegistry itemRegistryMock;
     private @Mock @NonNullByDefault({}) LocaleService localeServiceMock;
     private @Mock @NonNullByDefault({}) PersistenceServiceRegistry persistenceServiceRegistryMock;
+    private @Mock @NonNullByDefault({}) ModifiablePersistenceService pServiceMock;
+    private @Mock @NonNullByDefault({}) PersistenceManagerImpl persistenceManagerMock;
     private @Mock @NonNullByDefault({}) PersistenceServiceConfigurationRegistry persistenceServiceConfigurationRegistryMock;
     private @Mock @NonNullByDefault({}) ManagedPersistenceServiceConfigurationProvider managedPersistenceServiceConfigurationProviderMock;
     private @Mock @NonNullByDefault({}) TimeZoneProvider timeZoneProviderMock;
@@ -67,8 +78,8 @@ public class PersistenceResourceTest {
     @BeforeEach
     public void beforeEach() {
         pResource = new PersistenceResource(itemRegistryMock, localeServiceMock, persistenceServiceRegistryMock,
-                persistenceServiceConfigurationRegistryMock, managedPersistenceServiceConfigurationProviderMock,
-                timeZoneProviderMock);
+                persistenceManagerMock, persistenceServiceConfigurationRegistryMock,
+                managedPersistenceServiceConfigurationProviderMock, timeZoneProviderMock);
 
         int startValue = 2016;
         int endValue = 2018;
@@ -97,10 +108,9 @@ public class PersistenceResourceTest {
             });
         }
 
-        QueryablePersistenceService pService = mock(QueryablePersistenceService.class);
-        when(pService.query(any())).thenReturn(items);
+        when(pServiceMock.query(any())).thenReturn(items);
 
-        when(persistenceServiceRegistryMock.get(PERSISTENCE_SERVICE_ID)).thenReturn(pService);
+        when(persistenceServiceRegistryMock.get(PERSISTENCE_SERVICE_ID)).thenReturn(pServiceMock);
         when(timeZoneProviderMock.getTimeZone()).thenReturn(ZoneId.systemDefault());
     }
 
@@ -141,5 +151,17 @@ public class PersistenceResourceTest {
 
         assertThat(Integer.parseInt(dto.datapoints), is(7));
         assertThat(dto.data, hasSize(7));
+    }
+
+    @Test
+    public void testPutPersistenceItemData() throws ItemNotFoundException {
+        HttpHeaders headersMock = mock(HttpHeaders.class);
+        Item item = new NumberItem("itemName");
+        when(itemRegistryMock.getItem("itemName")).thenReturn(item);
+
+        pResource.httpPutPersistenceItemData(headersMock, PERSISTENCE_SERVICE_ID, "itemName",
+                "2024-02-01T00:00:00.000Z", "0");
+
+        verify(persistenceManagerMock).handleExternalPersistenceDataChange(eq(pServiceMock), eq(item));
     }
 }
