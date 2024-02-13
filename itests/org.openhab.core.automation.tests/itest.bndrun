@@ -80,4 +80,6 @@ Fragment-Host: org.openhab.core.automation
 	com.fasterxml.jackson.dataformat.jackson-dataformat-xml;version='[2.16.0,2.16.1)',\
 	stax2-api;version='[4.2.1,4.2.2)',\
 	de.focus_shift.jollyday-core;version='[0.23.2,0.23.3)',\
-	de.focus_shift.jollyday-jackson;version='[0.23.2,0.23.3)'
+	de.focus_shift.jollyday-jackson;version='[0.23.2,0.23.3)',\
+	org.openhab.core.addon;version='[4.2.0,4.2.1)',\
+	org.osgi.service.cm;version='[1.6.0,1.6.1)'

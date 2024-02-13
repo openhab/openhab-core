@@ -91,7 +91,7 @@ public class AutoUpdateManagerTest extends JavaTest {
         when(thingRegistry.get(any(ThingUID.class))).thenReturn(thing);
         when(thing.getStatus()).thenReturn(ThingStatus.ONLINE);
         when(thing.getHandler()).thenReturn(mock(ThingHandler.class));
-        when(thing.getChannel(any(String.class))).thenReturn(channel);
+        when(thing.getChannel(any(ChannelUID.class))).thenReturn(channel);
     }
 
     @Test

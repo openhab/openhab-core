@@ -131,4 +131,6 @@ Fragment-Host: org.openhab.core.model.rule.runtime
 	stax2-api;version='[4.2.1,4.2.2)',\
 	de.focus_shift.jollyday-core;version='[0.23.2,0.23.3)',\
 	de.focus_shift.jollyday-jackson;version='[0.23.2,0.23.3)',\
-	org.openhab.core.model.persistence.runtime;version='[4.2.0,4.2.1)'
+	org.openhab.core.addon;version='[4.2.0,4.2.1)',\
+	org.openhab.core.model.item.runtime;version='[4.2.0,4.2.1)',\
+	org.osgi.service.cm;version='[1.6.0,1.6.1)'
