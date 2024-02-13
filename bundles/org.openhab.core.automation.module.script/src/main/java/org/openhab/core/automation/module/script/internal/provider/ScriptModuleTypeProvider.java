@@ -84,7 +84,7 @@ public class ScriptModuleTypeProvider extends AbstractProvider<ModuleType> imple
         List<Output> outputs = new ArrayList<>();
         Output result = new Output("result", "java.lang.Object", "result", "the script result", null, null, null);
         outputs.add(result);
-        return new ActionType(ScriptActionHandler.TYPE_ID, getConfigDescriptions(locale), "execute an inline script",
+        return new ActionType(ScriptActionHandler.TYPE_ID, getConfigDescriptions(locale), "Execute an inline script",
                 "Allows the execution of a user-defined script.", null, Visibility.VISIBLE, null, outputs);
     }
 
