@@ -51,6 +51,7 @@ import org.openhab.core.persistence.FilterCriteria;
 import org.openhab.core.persistence.HistoricItem;
 import org.openhab.core.persistence.ModifiablePersistenceService;
 import org.openhab.core.persistence.PersistenceItemConfiguration;
+import org.openhab.core.persistence.PersistenceManager;
 import org.openhab.core.persistence.PersistenceService;
 import org.openhab.core.persistence.QueryablePersistenceService;
 import org.openhab.core.persistence.config.PersistenceAllConfig;
@@ -90,11 +91,11 @@ import org.slf4j.LoggerFactory;
  * @author Jan N. Klug - Refactored to use service configuration registry
  * @author Jan N. Klug - Added time series support
  */
-@Component(immediate = true)
+@Component(immediate = true, service = PersistenceManager.class)
 @NonNullByDefault
-public class PersistenceManager implements ItemRegistryChangeListener, StateChangeListener, ReadyTracker,
-        PersistenceServiceConfigurationRegistryChangeListener, TimeSeriesListener {
-    private final Logger logger = LoggerFactory.getLogger(PersistenceManager.class);
+public class PersistenceManagerImpl implements ItemRegistryChangeListener, StateChangeListener, ReadyTracker,
+        PersistenceServiceConfigurationRegistryChangeListener, TimeSeriesListener, PersistenceManager {
+    private final Logger logger = LoggerFactory.getLogger(PersistenceManagerImpl.class);
 
     private final ReadyMarker marker = new ReadyMarker("persistence", "restore");
 
@@ -111,7 +112,7 @@ public class PersistenceManager implements ItemRegistryChangeListener, StateChan
     private final Map<String, PersistenceServiceContainer> persistenceServiceContainers = new ConcurrentHashMap<>();
 
     @Activate
-    public PersistenceManager(final @Reference CronScheduler cronScheduler, final @Reference Scheduler scheduler,
+    public PersistenceManagerImpl(final @Reference CronScheduler cronScheduler, final @Reference Scheduler scheduler,
             final @Reference ItemRegistry itemRegistry, final @Reference SafeCaller safeCaller,
             final @Reference ReadyService readyService,
             final @Reference PersistenceServiceConfigurationRegistry persistenceServiceConfigurationRegistry) {
@@ -392,6 +393,14 @@ public class PersistenceManager implements ItemRegistryChangeListener, StateChan
         added(element);
     }
 
+    @Override
+    public void handleExternalPersistenceDataChange(PersistenceService persistenceService, Item item) {
+        persistenceServiceContainers.values().stream()
+                .filter(container -> container.persistenceService.equals(persistenceService) && container
+                        .getMatchingConfigurations(FORECAST).anyMatch(itemConf -> appliesToItem(itemConf, item)))
+                .forEach(container -> container.scheduleNextPersistedForecastForItem(item.getName()));
+    }
+
     private class PersistenceServiceContainer {
         private final PersistenceService persistenceService;
         private final Set<ScheduledCompletableFuture<?>> persistJobs = new HashSet<>();
@@ -534,9 +543,9 @@ public class PersistenceManager implements ItemRegistryChangeListener, StateChan
                     // someone else already restored the state or a new state was set
                     return;
                 }
-                genericItem.removeStateChangeListener(PersistenceManager.this);
+                genericItem.removeStateChangeListener(PersistenceManagerImpl.this);
                 genericItem.setState(historicItem.getState());
-                genericItem.addStateChangeListener(PersistenceManager.this);
+                genericItem.addStateChangeListener(PersistenceManagerImpl.this);
                 if (logger.isDebugEnabled()) {
                     logger.debug("Restored item state from '{}' for item '{}' -> '{}'",
                             DateTimeFormatter.ISO_ZONED_DATE_TIME.format(historicItem.getTimestamp()), item.getName(),
