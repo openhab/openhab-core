@@ -402,7 +402,7 @@ public class IpAddonFinder extends BaseAddonFinder {
         InetSocketAddress sock = (InetSocketAddress) channel.getLocalAddress();
 
         // replace first
-        StringBuffer req = new StringBuffer(request);
+        StringBuilder req = new StringBuilder(request);
         int p;
         while ((p = req.indexOf("$" + PARAMETER_SRC_IP)) != -1) {
             req.replace(p, p + PARAMETER_SRC_IP.length() + 1, sock.getAddress().getHostAddress());
