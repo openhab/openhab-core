@@ -399,7 +399,8 @@ public class IpAddonFinder extends BaseAddonFinder implements NetworkAddressChan
     }
 
     private void doIpMulticastScan(AddonInfo candidate, String type, String request, String requestPlain,
-            String response, int timeoutMs, InetAddress destIp, int destPort, int listenPort, String localIp) {
+            String response, int timeoutMs, @Nullable InetAddress destIp, int destPort, int listenPort,
+            String localIp) {
         try (DatagramChannel channel = (DatagramChannel) DatagramChannel.open(StandardProtocolFamily.INET)
                 .setOption(StandardSocketOptions.SO_REUSEADDR, true).bind(new InetSocketAddress(localIp, listenPort))
                 .setOption(StandardSocketOptions.IP_MULTICAST_TTL, 64).configureBlocking(false);
