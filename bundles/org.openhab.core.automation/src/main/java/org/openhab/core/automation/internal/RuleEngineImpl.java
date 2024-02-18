@@ -76,6 +76,7 @@ import org.openhab.core.common.NamedThreadFactory;
 import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventPublisher;
+import org.openhab.core.events.system.SystemEventFactory;
 import org.openhab.core.service.ReadyMarker;
 import org.openhab.core.service.ReadyMarkerFilter;
 import org.openhab.core.service.ReadyService;
@@ -854,8 +855,8 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
         if (slTriggers.stream()
                 .anyMatch(t -> ((BigDecimal) t.getConfiguration().get(SystemTriggerHandler.CFG_STARTLEVEL))
                         .intValue() <= startLevelService.getStartLevel())) {
-            runNow(rule.getUID(), true,
-                    Map.of(SystemTriggerHandler.OUT_STARTLEVEL, StartLevelService.STARTLEVEL_RULES));
+            runNow(rule.getUID(), true, Map.of(SystemTriggerHandler.OUT_STARTLEVEL, StartLevelService.STARTLEVEL_RULES,
+                    "event", SystemEventFactory.createStartlevelEvent(StartLevelService.STARTLEVEL_RULES)));
         }
 
         return true;
@@ -1447,7 +1448,8 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
             ruleRegistry.getAll().stream() //
                     .filter(this::mustTrigger) //
                     .forEach(r -> runNow(r.getUID(), true,
-                            Map.of(SystemTriggerHandler.OUT_STARTLEVEL, StartLevelService.STARTLEVEL_RULES)));
+                            Map.of(SystemTriggerHandler.OUT_STARTLEVEL, StartLevelService.STARTLEVEL_RULES, "event",
+                                    SystemEventFactory.createStartlevelEvent(StartLevelService.STARTLEVEL_RULES))));
             started = true;
             readyService.markReady(MARKER);
             logger.info("Rule engine started.");
