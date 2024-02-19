@@ -74,6 +74,6 @@ public class ContactItem extends GenericItem {
 
     @Override
     public @Nullable CommandDescription getCommandDescription(@Nullable Locale locale) {
-        return null;
+        return getCommandOptions(locale);
     }
 }
