@@ -42,7 +42,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -270,12 +269,8 @@ public class ItemResource implements RESTResource {
             itemStream = dtoMapper.limitToFields(itemStream,
                     "name,label,type,groupType,function,category,editable,groupNames,link,tags,metadata,commandDescription,stateDescription");
 
-            CacheControl cc = new CacheControl();
-            cc.setNoCache(true);
-            cc.setMustRevalidate(true);
-            cc.setPrivate(true);
-            return Response.ok(new Stream2JSONInputStream(itemStream)).lastModified(lastModifiedDate).cacheControl(cc)
-                    .build();
+            return Response.ok(new Stream2JSONInputStream(itemStream)).lastModified(lastModifiedDate)
+                    .cacheControl(RESTConstants.CACHE_CONTROL).build();
         }
 
         Stream<EnrichedItemDTO> itemStream = getItems(type, tags).stream() //

@@ -12,6 +12,8 @@
  */
 package org.openhab.core.io.rest;
 
+import javax.ws.rs.core.CacheControl;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
@@ -38,4 +40,11 @@ public class RESTConstants {
      * Version 6: extended chart period parameter format (#3863)
      */
     public static final String API_VERSION = "6";
+
+    public static final CacheControl CACHE_CONTROL = new CacheControl();
+    static {
+        CACHE_CONTROL.setNoCache(true);
+        CACHE_CONTROL.setMustRevalidate(true);
+        CACHE_CONTROL.setPrivate(true);
+    }
 }
