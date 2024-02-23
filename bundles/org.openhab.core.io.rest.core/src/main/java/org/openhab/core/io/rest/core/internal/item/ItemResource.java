@@ -181,16 +181,12 @@ public class ItemResource implements RESTResource {
     private final MetadataSelectorMatcher metadataSelectorMatcher;
     private final SemanticTagRegistry semanticTagRegistry;
 
-    private void resetCacheableListsLastModified() {
-        this.cacheableListsLastModified.clear();
-    }
-
     private final RegistryChangedRunnableListener<Item> resetLastModifiedItemChangeListener = new RegistryChangedRunnableListener<>(
-            this::resetCacheableListsLastModified);
+            () -> lastModified = null);
     private final RegistryChangedRunnableListener<Metadata> resetLastModifiedMetadataChangeListener = new RegistryChangedRunnableListener<>(
-            this::resetCacheableListsLastModified);
+            () -> lastModified = null);
 
-    private Map<@Nullable String, Date> cacheableListsLastModified = new HashMap<>();
+    private @Nullable Date lastModified = null;
 
     @Activate
     public ItemResource(//
@@ -249,17 +245,14 @@ public class ItemResource implements RESTResource {
         final UriBuilder uriBuilder = uriBuilder(uriInfo, httpHeaders);
 
         if (staticDataOnly) {
-            Date lastModifiedDate = Date.from(Instant.now());
-            if (cacheableListsLastModified.containsKey(namespaceSelector)) {
-                lastModifiedDate = cacheableListsLastModified.get(namespaceSelector);
-                Response.ResponseBuilder responseBuilder = request.evaluatePreconditions(lastModifiedDate);
+            if (lastModified != null) {
+                Response.ResponseBuilder responseBuilder = request.evaluatePreconditions(lastModified);
                 if (responseBuilder != null) {
                     // send 304 Not Modified
                     return responseBuilder.build();
                 }
             } else {
-                lastModifiedDate = Date.from(Instant.now().truncatedTo(ChronoUnit.SECONDS));
-                cacheableListsLastModified.put(namespaceSelector, lastModifiedDate);
+                lastModified = Date.from(Instant.now().truncatedTo(ChronoUnit.SECONDS));
             }
 
             Stream<EnrichedItemDTO> itemStream = getItems(null, null).stream() //
@@ -269,7 +262,7 @@ public class ItemResource implements RESTResource {
             itemStream = dtoMapper.limitToFields(itemStream,
                     "name,label,type,groupType,function,category,editable,groupNames,link,tags,metadata,commandDescription,stateDescription");
 
-            return Response.ok(new Stream2JSONInputStream(itemStream)).lastModified(lastModifiedDate)
+            return Response.ok(new Stream2JSONInputStream(itemStream)).lastModified(lastModified)
                     .cacheControl(RESTConstants.CACHE_CONTROL).build();
         }
 
