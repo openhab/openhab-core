@@ -32,6 +32,7 @@ import javax.ws.rs.core.Response.Status;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.auth.Role;
+import org.openhab.core.config.discovery.DiscoveryResult;
 import org.openhab.core.config.discovery.DiscoveryResultFlag;
 import org.openhab.core.config.discovery.dto.DiscoveryResultDTO;
 import org.openhab.core.config.discovery.dto.DiscoveryResultDTOMapper;
@@ -153,11 +154,15 @@ public class InboxResource implements RESTResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(operationId = "getDiscoveredInboxItems", summary = "Get all discovered things.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = DiscoveryResultDTO.class)))) })
-    public Response getAll() {
-        Stream<DiscoveryResultDTO> discoveryStream = inbox.getAll().stream().map(DiscoveryResultDTOMapper::map);
-        return Response.ok(new Stream2JSONInputStream(discoveryStream)).build();
+    public Response getAll(
+            @QueryParam("includeIgnored") @Parameter(description = "If true, include ignored inbox entries. Defaults to false") boolean includeIgnored) {
+        Stream<DiscoveryResult> discoveryStream = inbox.getAll().stream();
+        if (!includeIgnored) {
+            discoveryStream = discoveryStream
+                    .filter(discoveryResult -> discoveryResult.getFlag() != DiscoveryResultFlag.IGNORED);
+        }
+        return Response.ok(new Stream2JSONInputStream(discoveryStream.map(DiscoveryResultDTOMapper::map))).build();
     }
-
     @POST
     @Path("/{thingUID}/ignore")
     @Operation(operationId = "flagInboxItemAsIgnored", summary = "Flags a discovery result as ignored for further processing.", responses = {
