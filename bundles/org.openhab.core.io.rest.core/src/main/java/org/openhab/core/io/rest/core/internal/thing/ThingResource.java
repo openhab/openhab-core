@@ -170,10 +170,10 @@ public class ThingResource implements RESTResource {
     private final ThingStatusInfoI18nLocalizationService thingStatusInfoI18nLocalizationService;
     private final ThingTypeRegistry thingTypeRegistry;
     private final RegistryChangedRunnableListener<Thing> resetLastModifiedChangeListener = new RegistryChangedRunnableListener<>(
-            () -> cacheableListLastModified = null);
+            () -> lastModified = null);
 
     private @Context @NonNullByDefault({}) UriInfo uriInfo;
-    private @Nullable Date cacheableListLastModified = null;
+    private @Nullable Date lastModified = null;
 
     @Activate
     public ThingResource( //
@@ -316,18 +316,18 @@ public class ThingResource implements RESTResource {
                 .distinct();
 
         if (staticDataOnly) {
-            if (cacheableListLastModified != null) {
-                Response.ResponseBuilder responseBuilder = request.evaluatePreconditions(cacheableListLastModified);
+            if (lastModified != null) {
+                Response.ResponseBuilder responseBuilder = request.evaluatePreconditions(lastModified);
                 if (responseBuilder != null) {
                     // send 304 Not Modified
                     return responseBuilder.build();
                 }
             } else {
-                cacheableListLastModified = Date.from(Instant.now().truncatedTo(ChronoUnit.SECONDS));
+                lastModified = Date.from(Instant.now().truncatedTo(ChronoUnit.SECONDS));
             }
 
             thingStream = dtoMapper.limitToFields(thingStream, "UID,label,bridgeUID,thingTypeUID,location,editable");
-            return Response.ok(new Stream2JSONInputStream(thingStream)).lastModified(cacheableListLastModified)
+            return Response.ok(new Stream2JSONInputStream(thingStream)).lastModified(lastModified)
                     .cacheControl(RESTConstants.CACHE_CONTROL).build();
         }
 
