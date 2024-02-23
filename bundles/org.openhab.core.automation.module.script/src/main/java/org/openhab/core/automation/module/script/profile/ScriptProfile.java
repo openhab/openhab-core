@@ -83,7 +83,7 @@ public class ScriptProfile implements StateProfile {
         this.stateFromItemScript = ConfigParser
                 .valueAsOrElse(profileContext.getConfiguration().get(CONFIG_STATE_FROM_ITEM_SCRIPT), String.class, "");
 
-        if (!toHandlerScript.isBlank() && commandFromItemScript.isBlank()) {
+        if (!toHandlerScript.isBlank() && localCommandFromItemScript.isBlank()) {
             logger.warn("'toHandlerScript' has been deprecated! Please use 'commandFromItemScript' instead.");
         }
 
