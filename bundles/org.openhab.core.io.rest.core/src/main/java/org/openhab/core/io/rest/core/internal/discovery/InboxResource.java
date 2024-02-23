@@ -163,6 +163,7 @@ public class InboxResource implements RESTResource {
         }
         return Response.ok(new Stream2JSONInputStream(discoveryStream.map(DiscoveryResultDTOMapper::map))).build();
     }
+
     @POST
     @Path("/{thingUID}/ignore")
     @Operation(operationId = "flagInboxItemAsIgnored", summary = "Flags a discovery result as ignored for further processing.", responses = {
