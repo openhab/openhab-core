@@ -97,6 +97,37 @@ public class ScriptProfileTest extends JavaTest {
     }
 
     @Test
+    public void fallsBackToToHandlerScriptIfCommandFromItemScriptNotDefined() throws TransformationException {
+        ProfileContext profileContext = ProfileContextBuilder.create().withToItemScript("inScript")
+                .withToHandlerScript("outScript").withAcceptedCommandTypes(List.of(OnOffType.class))
+                .withAcceptedDataTypes(List.of(OnOffType.class))
+                .withHandlerAcceptedCommandTypes(List.of(OnOffType.class)).build();
+
+        ItemChannelLink link = new ItemChannelLink("DummyItem", new ChannelUID("foo:bar:baz:qux"));
+        when(profileCallback.getItemChannelLink()).thenReturn(link);
+
+        when(transformationServiceMock.transform(any(), any())).thenReturn(OnOffType.OFF.toString());
+
+        setupInterceptedLogger(ScriptProfile.class, LogLevel.WARN);
+
+        ScriptProfile scriptProfile = new ScriptProfile(mock(ProfileTypeUID.class), profileCallback, profileContext,
+                transformationServiceMock);
+
+        scriptProfile.onCommandFromHandler(DecimalType.ZERO);
+        scriptProfile.onStateUpdateFromHandler(DecimalType.ZERO);
+        scriptProfile.onCommandFromItem(DecimalType.ZERO);
+
+        verify(transformationServiceMock, times(3)).transform(any(), any());
+        verify(profileCallback, times(1)).handleCommand(OnOffType.OFF);
+        verify(profileCallback).sendUpdate(OnOffType.OFF);
+        verify(profileCallback).sendCommand(OnOffType.OFF);
+
+        assertLogMessage(ScriptProfile.class, LogLevel.WARN,
+                "'toHandlerScript' has been deprecated! Please use 'commandFromItemScript' instead in link '"
+                        + link.toString() + "'.");
+    }
+
+    @Test
     public void scriptExecutionErrorForwardsNoValueToCallback() throws TransformationException {
         ProfileContext profileContext = ProfileContextBuilder.create().withToItemScript("inScript")
                 .withCommandFromItemScript("outScript").withStateFromItemScript("outScript").build();
