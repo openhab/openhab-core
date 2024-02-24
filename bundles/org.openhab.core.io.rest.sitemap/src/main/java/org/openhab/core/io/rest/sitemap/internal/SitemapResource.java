@@ -427,7 +427,7 @@ public class SitemapResource
         if (sitemapname != null) {
             if (subscribeToWholeSitemap) {
                 subscriptions.unsetPageId(subscriptionId, sitemapname);
-            } else {
+            } else if (pageId != null) {
                 subscriptions.setPageId(subscriptionId, sitemapname, pageId);
             }
         }
