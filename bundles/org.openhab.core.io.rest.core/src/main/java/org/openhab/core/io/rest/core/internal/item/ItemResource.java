@@ -281,7 +281,8 @@ public class ItemResource implements RESTResource {
         Stream<EnrichedItemDTO> itemStream = getItems(type, tags).stream() //
                 .map(item -> EnrichedItemDTOMapper.map(item, recursive, null, uriBuilder, locale)) //
                 .peek(dto -> addMetadata(dto, namespaces, null)) //
-                .peek(dto -> dto.editable = isEditable(dto.name)).peek(dto -> {
+                .peek(dto -> dto.editable = isEditable(dto.name)) //
+                .peek(dto -> {
                     if (dto instanceof EnrichedGroupItemDTO) {
                         for (EnrichedItemDTO member : ((EnrichedGroupItemDTO) dto).members) {
                             member.editable = isEditable(member.name);
