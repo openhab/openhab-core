@@ -21,7 +21,6 @@ import java.nio.file.Path;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 import javax.measure.Unit;
 
@@ -50,8 +49,6 @@ public class Upgrader {
     public static final String ITEM_COPY_UNIT_TO_METADATA = "itemCopyUnitToMetadata";
     public static final String LINK_UPGRADE_JS_PROFILE = "linkUpgradeJsProfile";
     public static final String LINK_UPGRADE_SCRIPT_PROFILE = "linkUpgradeScriptProfile";
-    private static final Set<String> SCRIPT_PROFILE_NAMES = Set.of("transform:NASHORNJS", "transform:JS",
-            "transform:GROOVY", "transform:PY", "transform:RB", "transform:DSL");
 
     private final Logger logger = LoggerFactory.getLogger(Upgrader.class);
     private final String baseDir;
@@ -263,7 +260,7 @@ public class Upgrader {
             ItemChannelLink link = Objects.requireNonNull(linkStorage.get(linkUid));
             Configuration configuration = link.getConfiguration();
             String profileName = (String) configuration.get(ItemChannelLinkConfigDescriptionProvider.PARAM_PROFILE);
-            if (SCRIPT_PROFILE_NAMES.contains(profileName)) {
+            if (profileName.matches("^transform:*")) {
                 String toHandlerScript = (String) configuration.get("toHandlerScript");
                 if (toHandlerScript != null) {
                     configuration.put("commandFromItemScript", toHandlerScript);
@@ -272,7 +269,7 @@ public class Upgrader {
                     linkStorage.put(linkUid, link);
                     logger.info("{}: rewrote script profile link to new format", linkUid);
                 } else {
-                    logger.info("{}: link already has correct configuration", linkUid);
+                    logger.info("{}: link already has correct configuration or does not require an upgrade", linkUid);
                 }
             }
         });
