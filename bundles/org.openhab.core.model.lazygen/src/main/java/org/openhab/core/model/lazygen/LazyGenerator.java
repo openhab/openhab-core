@@ -17,14 +17,14 @@ import org.eclipse.emf.mwe.core.issues.Issues;
 import org.eclipse.emf.mwe.core.monitor.ProgressMonitor;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.xtext.generator.Generator;
+import org.eclipse.xtext.xtext.generator.XtextGenerator;
 
 /**
  *
  * @author Holger Schill, Simon Kaufmann - Initial contribution
  */
 @NonNullByDefault
-public class LazyGenerator extends Generator {
+public class LazyGenerator extends XtextGenerator {
 
     @Nullable
     LazyLanguageConfig langConfig = null;
