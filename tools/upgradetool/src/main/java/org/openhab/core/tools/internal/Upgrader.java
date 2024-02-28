@@ -269,7 +269,7 @@ public class Upgrader {
                     linkStorage.put(linkUid, link);
                     logger.info("{}: rewrote script profile link to new format", linkUid);
                 } else {
-                    logger.info("{}: link already has correct configuration or does not require an upgrade", linkUid);
+                    logger.info("{}: link already has correct configuration", linkUid);
                 }
             }
         });
