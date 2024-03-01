@@ -20,6 +20,7 @@ package org.openhab.core.io.rest.sse.internal.dto;
 public class StateDTO {
     public String state;
     public String displayState;
+    public Number numericState;
 
     public String type;
 

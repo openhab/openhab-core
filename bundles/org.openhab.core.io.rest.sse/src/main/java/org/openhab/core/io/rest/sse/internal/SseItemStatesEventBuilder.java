@@ -31,6 +31,7 @@ import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.library.types.DateTimeType;
+import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.service.StartLevelService;
 import org.openhab.core.transform.TransformationException;
@@ -86,6 +87,9 @@ public class SseItemStatesEventBuilder {
                 // Only include the display state if it's different than the raw state
                 if (stateDto.state != null && !stateDto.state.equals(displayState)) {
                     stateDto.displayState = displayState;
+                }
+                if (item.getState() instanceof DecimalType decimalState) {
+                    stateDto.numericState = decimalState.floatValue();
                 }
                 payload.put(itemName, stateDto);
             } catch (ItemNotFoundException e) {
