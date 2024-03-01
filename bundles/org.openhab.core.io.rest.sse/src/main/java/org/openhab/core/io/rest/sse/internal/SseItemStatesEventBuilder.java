@@ -91,6 +91,10 @@ public class SseItemStatesEventBuilder {
                 if (item.getState() instanceof DecimalType decimalState) {
                     stateDto.numericState = decimalState.floatValue();
                 }
+                if (item.getState() instanceof QuantityType quantityState) {
+                    stateDto.numericState = quantityState.floatValue();
+                    stateDto.unit = quantityState.getUnit().toString();
+                }
                 payload.put(itemName, stateDto);
             } catch (ItemNotFoundException e) {
                 if (startLevelService.getStartLevel() >= StartLevelService.STARTLEVEL_MODEL) {
