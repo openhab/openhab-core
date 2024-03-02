@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
  * @author Jan N. Klug - Initial contribution
  * @author Holger Friedrich - Transfer RGB color conversion from HSBType, improve RGB conversion, restructuring
  * @author Chris Jackson - Added fromRGB (moved from HSBType)
+ * @author Andrew Fiddian-Green - Extensive revamp to fix bugs and improve accuracy
  */
 @NonNullByDefault
 public class ColorUtil {

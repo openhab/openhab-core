@@ -44,6 +44,7 @@ import org.openhab.core.util.ColorUtil.Point;
  *
  * @author Jan N. Klug - Initial contribution
  * @author Holger Friedrich - Parameterized tests for RGB and HSB conversion
+ * @author Andrew Fiddian-Green - Added tests to detect prior bugs and accuracy limitations
  */
 @NonNullByDefault
 public class ColorUtilTest {
