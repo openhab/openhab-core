@@ -416,8 +416,8 @@ public class ColorUtilTest {
     public void hsbToRgb2rgbToHsb() {
         boolean assertionExecuted = false;
         for (int h = 0; h < 360; h = h + 5) {
-            for (int s = 0; s < 105; s = s + 5) {
-                for (int b = 0; b < 105; b = b + 5) {
+            for (int s = 0; s <= 100; s = s + 5) {
+                for (int b = 0; b <= 100; b = b + 5) {
                     HSBType hsb1 = new HSBType(new DecimalType((double) h), new PercentType(new BigDecimal(s)),
                             new PercentType(new BigDecimal(b)));
                     PercentType[] rgb = new PercentType[3];
