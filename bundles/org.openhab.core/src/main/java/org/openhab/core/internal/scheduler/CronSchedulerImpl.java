@@ -107,7 +107,7 @@ public class CronSchedulerImpl implements CronScheduler {
             for (Iterator<Cron> cron = crons.iterator(); cron.hasNext();) {
                 final Cron c = cron.next();
 
-                if (c.target == s) {
+                if (c.target.equals(s)) {
                     cron.remove();
                     c.schedule.cancel(true);
                 }
