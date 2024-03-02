@@ -15,7 +15,7 @@
   <packaging>jar</packaging>
 
   <name>openHAB Core :: Tools :: Upgrade tool</name>
-  <description>A tool for upgrading openHAB from 3.4 to 4.0</description>
+  <description>A tool for upgrading openHAB</description>
 
   <dependencies>
     <dependency>
