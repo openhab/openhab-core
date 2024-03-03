@@ -281,7 +281,14 @@ public class ItemResource implements RESTResource {
         Stream<EnrichedItemDTO> itemStream = getItems(type, tags).stream() //
                 .map(item -> EnrichedItemDTOMapper.map(item, recursive, null, uriBuilder, locale)) //
                 .peek(dto -> addMetadata(dto, namespaces, null)) //
-                .peek(dto -> dto.editable = isEditable(dto.name));
+                .peek(dto -> dto.editable = isEditable(dto.name)) //
+                .peek(dto -> {
+                    if (dto instanceof EnrichedGroupItemDTO) {
+                        for (EnrichedItemDTO member : ((EnrichedGroupItemDTO) dto).members) {
+                            member.editable = isEditable(member.name);
+                        }
+                    }
+                });
         itemStream = dtoMapper.limitToFields(itemStream, fields);
         return Response.ok(new Stream2JSONInputStream(itemStream)).build();
     }
@@ -317,7 +324,7 @@ public class ItemResource implements RESTResource {
     @Operation(operationId = "getItemByName", summary = "Gets a single item.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = EnrichedItemDTO.class))),
             @ApiResponse(responseCode = "404", description = "Item not found") })
-    public Response getItemData(final @Context UriInfo uriInfo, final @Context HttpHeaders httpHeaders,
+    public Response getItemByName(final @Context UriInfo uriInfo, final @Context HttpHeaders httpHeaders,
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @DefaultValue(".*") @QueryParam("metadata") @Parameter(description = "metadata selector - a comma separated list or a regular expression (returns all if no value given)") @Nullable String namespaceSelector,
             @DefaultValue("true") @QueryParam("recursive") @Parameter(description = "get member items if the item is a group item") boolean recursive,
@@ -334,6 +341,11 @@ public class ItemResource implements RESTResource {
                     locale);
             addMetadata(dto, namespaces, null);
             dto.editable = isEditable(dto.name);
+            if (dto instanceof EnrichedGroupItemDTO) {
+                for (EnrichedItemDTO member : ((EnrichedGroupItemDTO) dto).members) {
+                    member.editable = isEditable(member.name);
+                }
+            }
             return JSONResponse.createResponse(Status.OK, dto, null);
         } else {
             return getItemNotFoundResponse(itemname);

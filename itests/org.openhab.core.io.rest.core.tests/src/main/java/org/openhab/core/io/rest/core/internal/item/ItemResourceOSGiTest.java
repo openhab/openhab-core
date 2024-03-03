@@ -138,7 +138,7 @@ public class ItemResourceOSGiTest extends JavaOSGiTest {
     public void shouldReturnUnicodeItem() throws IOException, TransformationException {
         item4.setLabel(ITEM_LABEL4);
 
-        Response response = itemResource.getItemData(uriInfoMock, httpHeadersMock, null, null, true, ITEM_NAME4);
+        Response response = itemResource.getItemByName(uriInfoMock, httpHeadersMock, null, null, true, ITEM_NAME4);
         assertThat(readItemLabelsFromResponse(response), hasItems(ITEM_LABEL4));
     }
 
