@@ -260,7 +260,7 @@ public class Upgrader {
             ItemChannelLink link = Objects.requireNonNull(linkStorage.get(linkUid));
             Configuration configuration = link.getConfiguration();
             String profileName = (String) configuration.get(ItemChannelLinkConfigDescriptionProvider.PARAM_PROFILE);
-            if (profileName.matches("^transform:*")) {
+            if (profileName != null && profileName.startsWith("transform:")) {
                 String toHandlerScript = (String) configuration.get("toHandlerScript");
                 if (toHandlerScript != null) {
                     configuration.put("commandFromItemScript", toHandlerScript);
