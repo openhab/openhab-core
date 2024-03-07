@@ -66,6 +66,8 @@ import org.openhab.core.persistence.registry.ManagedPersistenceServiceConfigurat
 import org.openhab.core.persistence.registry.PersistenceServiceConfiguration;
 import org.openhab.core.persistence.registry.PersistenceServiceConfigurationDTOMapper;
 import org.openhab.core.persistence.registry.PersistenceServiceConfigurationRegistry;
+import org.openhab.core.persistence.strategy.PersistenceCronStrategy;
+import org.openhab.core.persistence.strategy.PersistenceStrategy;
 import org.openhab.core.types.State;
 import org.openhab.core.types.TypeParser;
 import org.osgi.service.component.annotations.Activate;
@@ -170,11 +172,24 @@ public class PersistenceResource implements RESTResource {
     public Response httpGetPersistenceServiceConfiguration(@Context HttpHeaders headers,
             @Parameter(description = "Id of the persistence service.") @PathParam("serviceId") String serviceId) {
         PersistenceServiceConfiguration configuration = persistenceServiceConfigurationRegistry.get(serviceId);
+        boolean editable = managedPersistenceServiceConfigurationProvider.get(serviceId) != null;
+
+        if (configuration == null) {
+            PersistenceService service = persistenceServiceRegistry.get(serviceId);
+            if (service != null) {
+                List<PersistenceStrategy> defaults = service.getDefaultStrategies();
+                List<PersistenceStrategy> strategies = defaults.stream()
+                        .filter(s -> s instanceof PersistenceCronStrategy).toList();
+                configuration = new PersistenceServiceConfiguration(serviceId, List.of(), defaults, strategies,
+                        List.of());
+                editable = true;
+            }
+        }
 
         if (configuration != null) {
             PersistenceServiceConfigurationDTO configurationDTO = PersistenceServiceConfigurationDTOMapper
                     .map(configuration);
-            configurationDTO.editable = managedPersistenceServiceConfigurationProvider.get(serviceId) != null;
+            configurationDTO.editable = editable;
             return JSONResponse.createResponse(Status.OK, configurationDTO, null);
         } else {
             return Response.status(Status.NOT_FOUND).build();
