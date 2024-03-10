@@ -24,6 +24,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -155,7 +156,7 @@ public class InboxResource implements RESTResource {
     @Operation(operationId = "getDiscoveredInboxItems", summary = "Get all discovered things.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = DiscoveryResultDTO.class)))) })
     public Response getAll(
-            @QueryParam("includeIgnored") @Parameter(description = "If true, include ignored inbox entries. Defaults to false") boolean includeIgnored) {
+            @QueryParam("includeIgnored") @DefaultValue("true") @Parameter(description = "If true, include ignored inbox entries. Defaults to true") boolean includeIgnored) {
         Stream<DiscoveryResult> discoveryStream = inbox.getAll().stream();
         if (!includeIgnored) {
             discoveryStream = discoveryStream
