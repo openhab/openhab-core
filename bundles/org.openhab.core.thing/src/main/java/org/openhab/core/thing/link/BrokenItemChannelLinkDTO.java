@@ -10,9 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.io.rest.core.link;
-
-import org.openhab.core.thing.link.ItemChannelLink;
+package org.openhab.core.thing.link;
 
 /**
  * Transfer object for broken item channel links.
@@ -20,17 +18,13 @@ import org.openhab.core.thing.link.ItemChannelLink;
  * @author Arne Seime - Initial contribution
  */
 public class BrokenItemChannelLinkDTO {
-    public ItemChannelLink itemChannelLink;
+    public EnrichedItemChannelLinkDTO itemChannelLink;
 
     public ItemChannelLinkProblem problem;
 
-    public boolean isEditable;
-
-    public BrokenItemChannelLinkDTO(ItemChannelLink itemChannelLink, ItemChannelLinkProblem problem,
-            boolean isEditable) {
+    public BrokenItemChannelLinkDTO(EnrichedItemChannelLinkDTO itemChannelLink, ItemChannelLinkProblem problem) {
         this.itemChannelLink = itemChannelLink;
         this.problem = problem;
-        this.isEditable = isEditable;
     }
 
     public enum ItemChannelLinkProblem {

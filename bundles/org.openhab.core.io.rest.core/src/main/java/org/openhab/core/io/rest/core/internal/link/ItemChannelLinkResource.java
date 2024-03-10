@@ -12,11 +12,8 @@
  */
 package org.openhab.core.io.rest.core.internal.link;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.annotation.security.RolesAllowed;
@@ -41,9 +38,6 @@ import org.openhab.core.io.rest.JSONResponse;
 import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
 import org.openhab.core.io.rest.Stream2JSONInputStream;
-import org.openhab.core.io.rest.core.link.BrokenItemChannelLinkDTO;
-import org.openhab.core.io.rest.core.link.EnrichedItemChannelLinkDTO;
-import org.openhab.core.io.rest.core.link.EnrichedItemChannelLinkDTOMapper;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemRegistry;
@@ -54,6 +48,8 @@ import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingRegistry;
 import org.openhab.core.thing.ThingUID;
 import org.openhab.core.thing.link.AbstractLink;
+import org.openhab.core.thing.link.EnrichedItemChannelLinkDTO;
+import org.openhab.core.thing.link.EnrichedItemChannelLinkDTOMapper;
 import org.openhab.core.thing.link.ItemChannelLink;
 import org.openhab.core.thing.link.ItemChannelLinkRegistry;
 import org.openhab.core.thing.link.ManagedItemChannelLinkProvider;
@@ -325,39 +321,6 @@ public class ItemChannelLinkResource implements RESTResource {
     @Operation(operationId = "getOrphanLinks", summary = "Get orphan links between items and broken/non-existent thing channels", responses = {
             @ApiResponse(responseCode = "200", description = "List of broken links") })
     public Response getOrphanLinks() {
-        return Response.ok(getOrphanInternalLinks()).build();
-    }
-
-    public List<BrokenItemChannelLinkDTO> getOrphanInternalLinks() {
-        Collection<Item> items = itemRegistry.getItems();
-        Collection<Thing> things = thingRegistry.getAll();
-        Collection<ItemChannelLink> itemChannelLinks = itemChannelLinkRegistry.getAll();
-
-        List<BrokenItemChannelLinkDTO> results = new ArrayList<>();
-
-        Collection<ChannelUID> channelUIDS = things.stream().map(Thing::getChannels).flatMap(List::stream)
-                .map(Channel::getUID).collect(Collectors.toSet());
-        Collection<String> itemNames = items.stream().map(Item::getName).collect(Collectors.toSet());
-
-        itemChannelLinks.forEach(itemChannelLink -> {
-            if (!channelUIDS.contains(itemChannelLink.getLinkedUID())) {
-                boolean isEditable = isEditable(itemChannelLink.getUID());
-
-                if (!itemNames.contains(itemChannelLink.getItemName())) {
-                    results.add(new BrokenItemChannelLinkDTO(itemChannelLink,
-                            BrokenItemChannelLinkDTO.ItemChannelLinkProblem.ITEM_AND_THING_CHANNEL_MISSING,
-                            isEditable));
-                } else {
-                    results.add(new BrokenItemChannelLinkDTO(itemChannelLink,
-                            BrokenItemChannelLinkDTO.ItemChannelLinkProblem.THING_CHANNEL_MISSING, isEditable));
-                }
-
-            } else if (!itemNames.contains(itemChannelLink.getItemName())) {
-                boolean isEditable = isEditable(itemChannelLink.getUID());
-                results.add(new BrokenItemChannelLinkDTO(itemChannelLink,
-                        BrokenItemChannelLinkDTO.ItemChannelLinkProblem.ITEM_MISSING, isEditable));
-            }
-        });
-        return results;
+        return Response.ok(itemChannelLinkRegistry.getOrphanLinks()).build();
     }
 }

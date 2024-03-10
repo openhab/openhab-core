@@ -12,9 +12,7 @@
  */
 package org.openhab.core.thing.link;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -155,8 +153,9 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
     }
 
     /**
-     * Remove all orphaned (item or channel missing) links
+     * Remove all orphaned (item or channel missing) links that are editable
      *
+     * @see #getOrphanLinks()
      * @return the number of removed links
      */
     public int purge() {
@@ -176,6 +175,44 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
         return toRemove.size();
     }
 
+    /**
+     * Get all orphan links (item or channel missing)
+     *
+     * @see #purge()
+     *
+     * @return a list of orphan links including information whether the link is managed (editable) or not
+     */
+    public List<BrokenItemChannelLinkDTO> getOrphanLinks() {
+        Collection<Item> items = itemRegistry.getItems();
+        Collection<Thing> things = thingRegistry.getAll();
+
+        List<BrokenItemChannelLinkDTO> results = new ArrayList<>();
+
+        Collection<ChannelUID> channelUIDS = things.stream().map(Thing::getChannels).flatMap(List::stream)
+                .map(Channel::getUID).collect(Collectors.toSet());
+        Collection<String> itemNames = items.stream().map(Item::getName).collect(Collectors.toSet());
+
+        getAll().forEach(itemChannelLink -> {
+            boolean isEditable = isEditable(itemChannelLink.getUID());
+            if (!channelUIDS.contains(itemChannelLink.getLinkedUID())) {
+                if (!itemNames.contains(itemChannelLink.getItemName())) {
+                    results.add(new BrokenItemChannelLinkDTO(
+                            EnrichedItemChannelLinkDTOMapper.map(itemChannelLink, isEditable),
+                            BrokenItemChannelLinkDTO.ItemChannelLinkProblem.ITEM_AND_THING_CHANNEL_MISSING));
+                } else {
+                    results.add(new BrokenItemChannelLinkDTO(
+                            EnrichedItemChannelLinkDTOMapper.map(itemChannelLink, isEditable),
+                            BrokenItemChannelLinkDTO.ItemChannelLinkProblem.THING_CHANNEL_MISSING));
+                }
+            } else if (!itemNames.contains(itemChannelLink.getItemName())) {
+                results.add(
+                        new BrokenItemChannelLinkDTO(EnrichedItemChannelLinkDTOMapper.map(itemChannelLink, isEditable),
+                                BrokenItemChannelLinkDTO.ItemChannelLinkProblem.ITEM_MISSING));
+            }
+        });
+        return results;
+    }
+
     @Override
     protected void notifyListenersAboutAddedElement(final ItemChannelLink element) {
         super.notifyListenersAboutAddedElement(element);
@@ -192,5 +229,12 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
     protected void notifyListenersAboutUpdatedElement(final ItemChannelLink oldElement, final ItemChannelLink element) {
         super.notifyListenersAboutUpdatedElement(oldElement, element);
         // it is not needed to send an event, because links can not be updated
+    }
+
+    private boolean isEditable(String linkId) {
+        if (getManagedProvider().isPresent()) {
+            return getManagedProvider().get().get(linkId) != null;
+        }
+        return false;
     }
 }

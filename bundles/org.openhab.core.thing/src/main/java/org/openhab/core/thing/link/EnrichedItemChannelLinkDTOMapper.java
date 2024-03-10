@@ -10,10 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.io.rest.core.link;
+package org.openhab.core.thing.link;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.core.thing.link.ItemChannelLink;
 
 /**
  * The {@link EnrichedItemChannelLinkDTOMapper} is a utility class to map item channel links into enriched item channel
