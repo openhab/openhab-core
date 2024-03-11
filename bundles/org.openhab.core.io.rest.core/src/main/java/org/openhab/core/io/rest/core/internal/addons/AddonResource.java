@@ -38,6 +38,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
@@ -168,6 +169,12 @@ public class AddonResource implements RESTResource, EventSubscriber {
         lastModified = null;
     }
 
+    private boolean lastModifiedIsValid() {
+        if (lastModified == null)
+            return false;
+        return (new Date().getTime() - lastModified.getTime()) <= 450 * 1000;
+    }
+
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "getAddons", summary = "Get all add-ons.", responses = {
@@ -177,7 +184,7 @@ public class AddonResource implements RESTResource, EventSubscriber {
             @HeaderParam("Accept-Language") @Parameter(description = "language") @Nullable String language,
             @QueryParam("serviceId") @Parameter(description = "service ID") @Nullable String serviceId) {
         logger.debug("Received HTTP GET request at '{}'", uriInfo.getPath());
-        if (lastModified != null) {
+        if (lastModifiedIsValid()) {
             Response.ResponseBuilder responseBuilder = request.evaluatePreconditions(lastModified);
             if (responseBuilder != null) {
                 // send 304 Not Modified
@@ -209,7 +216,7 @@ public class AddonResource implements RESTResource, EventSubscriber {
     public Response getServices(final @Context Request request,
             @HeaderParam("Accept-Language") @Parameter(description = "language") @Nullable String language) {
         logger.debug("Received HTTP GET request at '{}'", uriInfo.getPath());
-        if (lastModified != null) {
+        if (lastModifiedIsValid()) {
             Response.ResponseBuilder responseBuilder = request.evaluatePreconditions(lastModified);
             if (responseBuilder != null) {
                 // send 304 Not Modified
