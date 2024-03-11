@@ -137,7 +137,7 @@ public class TagResource implements RESTResource {
                 .sorted(Comparator.comparing(SemanticTag::getUID))
                 .map(t -> new EnrichedSemanticTagDTO(t.localized(locale), semanticTagRegistry.isEditable(t)));
         return Response.ok(new Stream2JSONInputStream(tagsStream)).lastModified(lastModified)
-                .cacheControl(RESTConstants.CACHE_CONTROL).build();
+                .cacheControl(RESTConstants.cacheControl()).build();
     }
 
     @GET
@@ -169,7 +169,7 @@ public class TagResource implements RESTResource {
                     .sorted(Comparator.comparing(SemanticTag::getUID))
                     .map(t -> new EnrichedSemanticTagDTO(t.localized(locale), semanticTagRegistry.isEditable(t)));
             return Response.ok(new Stream2JSONInputStream(tagsStream)).lastModified(lastModified)
-                    .cacheControl(RESTConstants.CACHE_CONTROL).build();
+                    .cacheControl(RESTConstants.cacheControl()).build();
         } else {
             return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Tag " + uid + " does not exist!");
         }

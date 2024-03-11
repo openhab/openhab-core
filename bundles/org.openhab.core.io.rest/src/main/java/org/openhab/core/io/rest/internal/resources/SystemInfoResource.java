@@ -118,6 +118,6 @@ public class SystemInfoResource implements RESTResource, ConfigurationListener {
         }
 
         final UoMInfoBean bean = new UoMInfoBean(unitProvider);
-        return Response.ok(bean).lastModified(lastModified).cacheControl(RESTConstants.CACHE_CONTROL).build();
+        return Response.ok(bean).lastModified(lastModified).cacheControl(RESTConstants.cacheControl()).build();
     }
 }

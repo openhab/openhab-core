@@ -190,14 +190,14 @@ public class AddonResource implements RESTResource, EventSubscriber {
         final Locale locale = localeService.getLocale(language);
         if ("all".equals(serviceId)) {
             return Response.ok(new Stream2JSONInputStream(getAllAddons(locale))).lastModified(lastModified)
-                    .cacheControl(RESTConstants.CACHE_CONTROL).build();
+                    .cacheControl(RESTConstants.cacheControl()).build();
         } else {
             AddonService addonService = (serviceId != null) ? getServiceById(serviceId) : getDefaultService();
             if (addonService == null) {
                 return Response.status(HttpStatus.NOT_FOUND_404).build();
             }
             return Response.ok(new Stream2JSONInputStream(addonService.getAddons(locale).stream()))
-                    .lastModified(lastModified).cacheControl(RESTConstants.CACHE_CONTROL).build();
+                    .lastModified(lastModified).cacheControl(RESTConstants.cacheControl()).build();
         }
     }
 
@@ -222,7 +222,7 @@ public class AddonResource implements RESTResource, EventSubscriber {
         final Locale locale = localeService.getLocale(language);
         Stream<AddonServiceDTO> addonTypeStream = addonServices.stream().map(s -> convertToAddonServiceDTO(s, locale));
         return Response.ok(new Stream2JSONInputStream(addonTypeStream)).lastModified(lastModified)
-                .cacheControl(RESTConstants.CACHE_CONTROL).build();
+                .cacheControl(RESTConstants.cacheControl()).build();
     }
 
     @GET

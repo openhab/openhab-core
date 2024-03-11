@@ -167,7 +167,7 @@ public class UIResource implements RESTResource {
             }
 
             return Response.ok(new Stream2JSONInputStream(components)).lastModified(lastModifiedDate)
-                    .cacheControl(RESTConstants.CACHE_CONTROL).build();
+                    .cacheControl(RESTConstants.cacheControl()).build();
         }
     }
 

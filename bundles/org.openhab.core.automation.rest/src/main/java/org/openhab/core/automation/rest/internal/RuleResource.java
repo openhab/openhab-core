@@ -188,7 +188,7 @@ public class RuleResource implements RESTResource {
 
             rules = dtoMapper.limitToFields(rules, "uid,templateUID,name,visibility,description,tags,editable");
             return Response.ok(new Stream2JSONInputStream(rules)).lastModified(lastModified)
-                    .cacheControl(RESTConstants.CACHE_CONTROL).build();
+                    .cacheControl(RESTConstants.cacheControl()).build();
         }
 
         // match all
