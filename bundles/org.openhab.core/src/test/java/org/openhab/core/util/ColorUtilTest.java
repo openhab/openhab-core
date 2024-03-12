@@ -151,6 +151,69 @@ public class ColorUtilTest {
                 new PercentType[] { new PercentType(0), new PercentType(0), new PercentType(0), new PercentType(0) });
         convertedRgb = ColorUtil.hsbToRgb(hsb);
         assertRgbEquals(new int[] { 0, 0, 0 }, convertedRgb);
+
+        // Test Over-Drive Red
+        hsb = ColorUtil.rgbToHsb(new int[] { 255, 0, 0, 255 });
+        convertedRgb = ColorUtil.hsbToRgb(hsb);
+        assertRgbEquals(new int[] { 255, 0, 0 }, convertedRgb);
+        hsb = ColorUtil.rgbToHsb(new PercentType[] { new PercentType(100), new PercentType(0), new PercentType(0),
+                new PercentType(100) });
+        convertedRgb = ColorUtil.hsbToRgb(hsb);
+        assertRgbEquals(new int[] { 255, 0, 0 }, convertedRgb);
+
+        // Test Over-Drive Green
+        hsb = ColorUtil.rgbToHsb(new int[] { 0, 255, 0, 255 });
+        convertedRgb = ColorUtil.hsbToRgb(hsb);
+        assertRgbEquals(new int[] { 0, 255, 0 }, convertedRgb);
+        hsb = ColorUtil.rgbToHsb(new PercentType[] { new PercentType(0), new PercentType(100), new PercentType(0),
+                new PercentType(100) });
+        convertedRgb = ColorUtil.hsbToRgb(hsb);
+        assertRgbEquals(new int[] { 0, 255, 0 }, convertedRgb);
+
+        // Test Over-Drive Blue
+        hsb = ColorUtil.rgbToHsb(new int[] { 0, 0, 255, 255 });
+        convertedRgb = ColorUtil.hsbToRgb(hsb);
+        assertRgbEquals(new int[] { 0, 0, 255 }, convertedRgb);
+        hsb = ColorUtil.rgbToHsb(new PercentType[] { new PercentType(0), new PercentType(0), new PercentType(100),
+                new PercentType(100) });
+        convertedRgb = ColorUtil.hsbToRgb(hsb);
+        assertRgbEquals(new int[] { 0, 0, 255 }, convertedRgb);
+
+        // Test White - Alternate B
+        hsb = ColorUtil.rgbToHsb(new int[] { 255, 255, 255, 0 });
+        convertedRgb = ColorUtil.hsbToRgb(hsb);
+        assertRgbEquals(new int[] { 255, 255, 255 }, convertedRgb);
+        hsb = ColorUtil.rgbToHsb(new PercentType[] { new PercentType(100), new PercentType(100), new PercentType(100),
+                new PercentType(0) });
+        convertedRgb = ColorUtil.hsbToRgb(hsb);
+        assertRgbEquals(new int[] { 255, 255, 255 }, convertedRgb);
+
+        // Test Over-Drive White
+        hsb = ColorUtil.rgbToHsb(new int[] { 255, 255, 255, 255 });
+        convertedRgb = ColorUtil.hsbToRgb(hsb);
+        assertRgbEquals(new int[] { 255, 255, 255 }, convertedRgb);
+        hsb = ColorUtil.rgbToHsb(new PercentType[] { new PercentType(100), new PercentType(100), new PercentType(100),
+                new PercentType(100) });
+        convertedRgb = ColorUtil.hsbToRgb(hsb);
+        assertRgbEquals(new int[] { 255, 255, 255 }, convertedRgb);
+
+        // Test Unsaturated Orange-Yellow
+        hsb = ColorUtil.rgbToHsb(new int[] { 255, 191, 128, 0 });
+        convertedRgb = ColorUtil.hsbToRgb(hsb);
+        assertRgbEquals(new int[] { 255, 191, 128 }, convertedRgb);
+        hsb = ColorUtil.rgbToHsb(new PercentType[] { new PercentType(100), new PercentType(75), new PercentType(50),
+                new PercentType(0) });
+        convertedRgb = ColorUtil.hsbToRgb(hsb);
+        assertRgbEquals(new int[] { 255, 191, 128 }, convertedRgb);
+
+        // Test Unsaturated Orange-Yellow - With White
+        hsb = ColorUtil.rgbToHsb(new int[] { 155, 91, 28, 100 });
+        convertedRgb = ColorUtil.hsbToRgb(hsb);
+        assertRgbEquals(new int[] { 255, 191, 128 }, convertedRgb);
+        hsb = ColorUtil.rgbToHsb(new PercentType[] { new PercentType(61), new PercentType(36), new PercentType(11),
+                new PercentType(39) });
+        convertedRgb = ColorUtil.hsbToRgb(hsb);
+        assertRgbEquals(new int[] { 255, 191, 128 }, convertedRgb);
     }
 
     @ParameterizedTest
@@ -322,6 +385,9 @@ public class ColorUtilTest {
         }
     }
 
+    /**
+     * Test round trips HSB => xyY => HSB
+     */
     @Test
     public void hsbToXY2xyToHsb() {
         boolean assertionExecuted = false;
@@ -330,14 +396,14 @@ public class ColorUtilTest {
                 for (double b = 0; b <= 100; b = b + 5) {
                     HSBType hsb1 = new HSBType(new DecimalType(h), new PercentType(new BigDecimal(s)),
                             new PercentType(new BigDecimal(b)));
-                    double[] xyYF = new double[3];
+                    double[] xyY = new double[3];
                     HSBType hsb2 = HSBType.BLACK;
                     try {
-                        xyYF = ColorUtil.hsbToXY(hsb1);
-                        hsb2 = ColorUtil.xyToHsb(xyYF);
+                        xyY = ColorUtil.hsbToXY(hsb1);
+                        hsb2 = ColorUtil.xyToHsb(xyY);
 
                         // HSB assertions are meaningless if B is zero, or xy was forced into gamut
-                        if (b == 0 || xyYF.length > 3) {
+                        if (b == 0 || xyY.length > 3) {
                             continue;
                         }
 
@@ -364,9 +430,9 @@ public class ColorUtilTest {
                         throw new AssertionError(String.format(
                                 "HSB1:[%.6f,%.6f,%.6f] - xyY:[%.6f,%.6f,%.6f] - HSB2:[%.6f,%.6f,%.6f] - %s",
                                 hsb1.getHue().doubleValue(), hsb1.getSaturation().doubleValue(),
-                                hsb1.getBrightness().doubleValue(), xyYF[0], xyYF[1], xyYF[2],
-                                hsb2.getHue().doubleValue(), hsb2.getSaturation().doubleValue(),
-                                hsb2.getBrightness().doubleValue(), e.getMessage()));
+                                hsb1.getBrightness().doubleValue(), xyY[0], xyY[1], xyY[2], hsb2.getHue().doubleValue(),
+                                hsb2.getSaturation().doubleValue(), hsb2.getBrightness().doubleValue(),
+                                e.getMessage()));
                     }
                 }
             }
@@ -374,6 +440,9 @@ public class ColorUtilTest {
         assertTrue(assertionExecuted);
     }
 
+    /**
+     * Test round trips xyY => HSB => xyY
+     */
     @Test
     public void xyToHsb2hsbToXY() {
         boolean assertionExecuted = false;
@@ -412,6 +481,9 @@ public class ColorUtilTest {
         assertTrue(assertionExecuted);
     }
 
+    /**
+     * Test round trips HSB => RGB => HSB
+     */
     @Test
     public void hsbToRgb2rgbToHsb() {
         boolean assertionExecuted = false;
@@ -457,6 +529,9 @@ public class ColorUtilTest {
         assertTrue(assertionExecuted);
     }
 
+    /**
+     * Test round trips RGB => HSB => RGB
+     */
     @Test
     public void rgbToHsb2hsbToRgb() {
         boolean assertionExecuted = false;
@@ -495,6 +570,9 @@ public class ColorUtilTest {
         assertTrue(assertionExecuted);
     }
 
+    /**
+     * Test round trips RGBW => HSB => RGBW
+     */
     @Test
     public void rgbwToHsb2hsbToRgbw() {
         boolean assertionExecuted = false;

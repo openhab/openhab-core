@@ -54,6 +54,10 @@ public class ColorUtil {
     public static final Gamut DEFAULT_GAMUT = new Gamut(new double[] { 0.9961, 0.0001 }, new double[] { 0, 0.9961 },
             new double[] { 0, 0.0001 });
 
+    // revision of Philips Default Gamut to prevent clipping XY colors to the CIE chart hypotenuse
+    public static final Gamut REVISED_DEFAULT_GAMUT = new Gamut(new double[] { 0.825, 0.185 },
+            new double[] { 0, 0.9961 }, new double[] { 0, 0.0001 });
+
     private ColorUtil() {
         // prevent instantiation
     }
@@ -172,17 +176,34 @@ public class ColorUtil {
      * @return array of four {@link PercentType} with the RGBW values in the range 0 to 100 percent.
      */
     public static PercentType[] hsbToRgbwPercent(HSBType hsb) {
-        PercentType[] rgb = hsbToRgbPercent(hsb);
+        PercentType[] rgbPercents = hsbToRgbPercent(hsb);
 
-        // calculate white value
-        double white = Math.min(rgb[0].doubleValue(), Math.min(rgb[1].doubleValue(), rgb[2].doubleValue()));
+        // convert RGB PercentTypes to RGB doubles
+        double[] rgb = new double[3];
+        for (int i = 0; i < 3; i++) {
+            rgb[i] = rgbPercents[i].doubleValue();
+        }
 
         // create RGBW array
         PercentType[] rgbw = new PercentType[4];
-        for (int i = 0; i < 3; i++) {
-            rgbw[i] = new PercentType(new BigDecimal(Math.max(0, Math.min(100, rgb[i].doubleValue() - white))));
+        if (Math.max(rgb[0], Math.max(rgb[1], rgb[2])) > 0) {
+            double whi = Math.min(rgb[0], Math.min(rgb[1], rgb[2]));
+            for (int i = 0; i < 3; i++) {
+                rgbw[i] = new PercentType(BigDecimal.valueOf(rgb[i] - whi));
+            }
+            rgbw[3] = new PercentType(BigDecimal.valueOf(whi));
+        } else {
+            for (int i = 0; i < 4; i++) {
+                rgbw[i] = PercentType.ZERO;
+            }
         }
-        rgbw[3] = new PercentType(new BigDecimal(white));
+
+        if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("{}",
+                    String.format("RGB:[%.6f,%.6f,%.6f] - RGBW:[%.6f,%.6f,%.6f,%.6f]", rgbPercents[0].doubleValue(),
+                            rgbPercents[1].doubleValue(), rgbPercents[2].doubleValue(), rgbw[0].doubleValue(),
+                            rgbw[1].doubleValue(), rgbw[2].doubleValue(), rgbw[3].doubleValue()));
+        }
 
         return rgbw;
     }
@@ -325,16 +346,37 @@ public class ColorUtil {
             throw new IllegalArgumentException("rgbToHsb() requires 3 or 4 arguments");
         }
 
-        BigDecimal r = rgbw[0].toBigDecimal();
-        BigDecimal g = rgbw[1].toBigDecimal();
-        BigDecimal b = rgbw[2].toBigDecimal();
+        BigDecimal r;
+        BigDecimal g;
+        BigDecimal b;
 
-        // if necessary convert RGBW to RGB
-        if (rgbw.length == 4) {
-            BigDecimal w = rgbw[3].toBigDecimal().min(BIG_DECIMAL_100.subtract(r.max(g).max(b)));
-            r = r.add(w);
-            g = g.add(w);
-            b = b.add(w);
+        if (rgbw.length < 4) {
+            // use RGB BigDecimal values as-is
+            r = rgbw[0].toBigDecimal();
+            g = rgbw[1].toBigDecimal();
+            b = rgbw[2].toBigDecimal();
+        } else {
+            // convert RGBW BigDecimal values to RGB BigDecimal values
+            double red = rgbw[0].doubleValue();
+            double grn = rgbw[1].doubleValue();
+            double blu = rgbw[2].doubleValue();
+            double max = Math.max(red, Math.max(grn, blu));
+            double whi = Math.min(100 - max, rgbw[3].doubleValue());
+
+            if (max > 0 || whi > 0) {
+                r = BigDecimal.valueOf(red + whi);
+                g = BigDecimal.valueOf(grn + whi);
+                b = BigDecimal.valueOf(blu + whi);
+            } else {
+                r = BigDecimal.ZERO;
+                g = BigDecimal.ZERO;
+                b = BigDecimal.ZERO;
+            }
+
+            if (LOGGER.isTraceEnabled()) {
+                LOGGER.trace("{}", String.format("RGBW:[%.6f,%.6f,%.6f,%.6f] - RGB:[%.6f,%.6f,%.6f]", red, grn, blu,
+                        whi, r.doubleValue(), g.doubleValue(), b.doubleValue()));
+            }
         }
 
         BigDecimal max = r.max(g).max(b);
