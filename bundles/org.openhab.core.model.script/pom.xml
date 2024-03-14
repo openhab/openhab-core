@@ -14,6 +14,11 @@
 
   <name>openHAB Core :: Bundles :: Model Script</name>
 
+  <properties>
+    <maven.compiler.target>17</maven.compiler.target>
+    <maven.compiler.source>17</maven.compiler.source>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>org.openhab.core.bundles</groupId>
