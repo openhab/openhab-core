@@ -278,7 +278,7 @@ public class ColorUtil {
         double Y = rgb[0] * 0.283881 + rgb[1] * 0.668433 + rgb[2] * 0.047685;
         double Z = rgb[0] * 0.000088 + rgb[1] * 0.072310 + rgb[2] * 0.986039;
 
-        // convert XYZ to xyY
+        // convert XYZ to xyz
         double sum = X + Y + Z;
         double x = X / sum;
         double y = Y / sum;
@@ -288,7 +288,7 @@ public class ColorUtil {
         Point xy = gamut.closest(new Point(x, y));
         boolean xyForced = xy.x != x || xy.y != y;
 
-        // add extra element to xyY array to flag that xy was forced
+        // create xyY; increment array size to flag if xy was forced
         double[] xyY = new double[xyForced ? 4 : 3];
         xyY[0] = xy.x;
         xyY[1] = xy.y;
@@ -296,9 +296,11 @@ public class ColorUtil {
 
         if (LOGGER.isTraceEnabled()) {
             LOGGER.trace("{}", String.format(
-                    "HSB:[%.6f,%.6f,%.6f] - RGB:[%.6f,%.6f,%.6f] - XYZ:[%.6f,%.6f,%.6f] - xyz:[%.6f,%.6f,%.6f] - xyY:[%.6f,%.6f,%.6f] (xyForced:%b)",
+                    "HSB:[%.6f,%.6f,%.6f] - RGB:[%.6f,%.6f,%.6f] - RGB':[%.6f,%.6f,%.6f] - XYZ:[%.6f,%.6f,%.6f] - xyz:[%.6f,%.6f,%.6f] - xyY:[%.6f,%.6f,%.6f] (xyForced:%b)",
                     hsb.getHue().doubleValue(), hsb.getSaturation().doubleValue(), hsb.getBrightness().doubleValue(),
-                    rgb[0], rgb[1], rgb[2], X, Y, Z, x, y, z, xyY[0], xyY[1], xyY[2], xyForced));
+                    rgbPercents[0].doubleValue() / 100.0, rgbPercents[1].doubleValue() / 100.0,
+                    rgbPercents[2].doubleValue() / 100.0, rgb[0], rgb[1], rgb[2], X, Y, Z, x, y, z, xyY[0], xyY[1],
+                    xyY[2], xyForced));
         }
 
         return xyY;
@@ -408,7 +410,7 @@ public class ColorUtil {
         }
         if (hue.compareTo(BigDecimal.ZERO) < 0) {
             hue = hue.add(BIG_DECIMAL_360);
-        } else if (hue.compareTo(BIG_DECIMAL_360) > 0) {
+        } else if (hue.compareTo(BIG_DECIMAL_360) >= 0) {
             hue = hue.subtract(BIG_DECIMAL_360);
         }
 
@@ -465,7 +467,7 @@ public class ColorUtil {
         final double z = 1.0 - x - y;
 
         // convert xy(Y) to XYZ
-        final double Y = xyY.length == 3 && xyY[2] > 0.0 ? xyY[2] : y;
+        final double Y = xyY.length == 3 && xyY[2] > 0.0 ? xyY[2] : 1.0;
         final double X = (Y / y) * x;
         final double Z = (Y / y) * z;
 
@@ -476,6 +478,8 @@ public class ColorUtil {
                 X * -0.707196 + Y *  1.655397 + Z *  0.036152,
                 X *  0.051713 + Y * -0.121364 + Z *  1.011530 };
             // @formatter:on
+
+        final double[] rgbPrime = rgb.clone();
 
         // correction for negative values is missing from Philips' documentation.
         double min = Math.min(rgb[0], Math.min(rgb[1], rgb[2]));
@@ -516,9 +520,9 @@ public class ColorUtil {
 
         if (LOGGER.isTraceEnabled()) {
             LOGGER.trace("{}", String.format(
-                    "xyY:[%.6f,%.6f,%.6f] - xyz:[%.6f,%.6f,%.6f] - XYZ:[%.6f,%.6f,%.6f] - RGB:[%.6f,%.6f,%.6f] - HSB:[%.6f,%.6f,%.6f] (xyForced:%b)",
-                    xyY[0], xyY[1], Y, x, y, z, X, Y, Z, rgb[0], rgb[1], rgb[2], hsb.getHue().doubleValue(),
-                    hsb.getSaturation().doubleValue(), hsb.getBrightness().doubleValue(),
+                    "xyY:[%.6f,%.6f,%.6f] - xyz:[%.6f,%.6f,%.6f] - XYZ:[%.6f,%.6f,%.6f] - RGB':[%.6f,%.6f,%.6f] - RGB:[%.6f,%.6f,%.6f] - HSB:[%.6f,%.6f,%.6f] (xyForced:%b)",
+                    xyY[0], xyY[1], Y, x, y, z, X, Y, Z, rgbPrime[0], rgbPrime[1], rgbPrime[2], rgb[0], rgb[1], rgb[2],
+                    hsb.getHue().doubleValue(), hsb.getSaturation().doubleValue(), hsb.getBrightness().doubleValue(),
                     xy.x != xyY[0] || xy.y != xyY[1]));
         }
 
