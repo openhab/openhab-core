@@ -14,12 +14,9 @@ package org.openhab.core.thing.internal.profiles;
 
 import java.math.BigDecimal;
 
-import javax.measure.UnconvertibleException;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.QuantityType;
-import org.openhab.core.library.unit.Units;
 import org.openhab.core.thing.profiles.ProfileCallback;
 import org.openhab.core.thing.profiles.ProfileContext;
 import org.openhab.core.thing.profiles.ProfileTypeUID;
@@ -46,7 +43,7 @@ public class SystemDivideProfile implements StateProfile {
 
     private final ProfileCallback callback;
 
-    private QuantityType<?> divisor = QuantityType.ONE;
+    private BigDecimal divisor = BigDecimal.ONE;
 
     public SystemDivideProfile(ProfileCallback callback, ProfileContext context) {
         this.callback = callback;
@@ -55,17 +52,17 @@ public class SystemDivideProfile implements StateProfile {
         logger.debug("Configuring profile with {} parameter '{}'", DIVISOR_PARAM, paramValue);
         if (paramValue instanceof String string) {
             try {
-                divisor = new QuantityType<>(string);
+                divisor = new BigDecimal(string);
             } catch (IllegalArgumentException e) {
                 logger.error(
-                        "Cannot convert value '{}' of parameter '{}' into a valid divisor of type QuantityType. Using divisor 1 now.",
+                        "Cannot convert value '{}' of parameter '{}' into a valid divisor of type BigDecimal. Using divisor 1 now.",
                         paramValue, DIVISOR_PARAM);
             }
         } else if (paramValue instanceof BigDecimal bd) {
-            divisor = new QuantityType<>(bd.toString());
+            divisor = bd;
         } else {
             logger.error(
-                    "Parameter '{}' is not of type String or BigDecimal. Please make sure it is one of both, e.g. 3, \"-1.4\" or \"3.2°C\".",
+                    "Parameter '{}' is not of type String or BigDecimal. Please make sure it is one of both, e.g. 10, \"0.1\".",
                     DIVISOR_PARAM);
         }
     }
@@ -101,22 +98,13 @@ public class SystemDivideProfile implements StateProfile {
             return state;
         }
 
-        QuantityType finalDivisor = divisor;
+        BigDecimal finalDivisor = divisor;
         Type result = UnDefType.UNDEF;
         if (state instanceof QuantityType qtState) {
-            try {
-                if (Units.ONE.equals(finalDivisor.getUnit()) && !Units.ONE.equals(qtState.getUnit())) {
-                    // allow divisors without unit -> implicitly assume its the same as the one from the state
-                    finalDivisor = new QuantityType<>(finalDivisor.toBigDecimal(), qtState.getUnit());
-                }
-                result = towardsItem ? qtState.divide(finalDivisor) : qtState.multiply(finalDivisor);
-            } catch (UnconvertibleException e) {
-                logger.warn("Cannot apply divisor '{}' to state '{}' because types do not match.", finalDivisor,
-                        qtState);
-            }
-        } else if (state instanceof DecimalType decState && Units.ONE.equals(finalDivisor.getUnit())) {
-            result = new DecimalType(towardsItem ? decState.toBigDecimal().divide(finalDivisor.toBigDecimal())
-                    : decState.toBigDecimal().multiply(finalDivisor.toBigDecimal()));
+            result = towardsItem ? qtState.divide(finalDivisor) : qtState.multiply(finalDivisor);
+        } else if (state instanceof DecimalType decState) {
+            result = new DecimalType(towardsItem ? decState.toBigDecimal().divide(finalDivisor)
+                    : decState.toBigDecimal().multiply(finalDivisor));
         } else {
             logger.warn(
                     "Divisor '{}' cannot be applied to the incompatible state '{}' sent from the binding. Returning original state.",
