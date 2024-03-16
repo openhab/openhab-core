@@ -8,8 +8,9 @@
 	<config-description uri="profile:system:divide">
 		<parameter name="divisor" type="text" required="true">
 			<label>Divisor</label>
-			<description>Divisor (plain number or number with unit) used to divide the numerical state towards the item. The divisor
-				will instead be used to mutiply in the reverse direction. See Offset profile for addition and subtraction.</description>
+			<description>Divisor (plain number or number with unit) used to divide the numerical state towards the item. The
+				divisor will instead be used to mutiply in the reverse direction. See Offset profile for addition and
+				subtraction.</description>
 		</parameter>
 	</config-description>
 </config-description:config-descriptions>
