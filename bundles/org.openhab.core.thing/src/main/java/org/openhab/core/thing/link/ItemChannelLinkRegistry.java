@@ -162,13 +162,8 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
         ManagedProvider<ItemChannelLink, String> managedProvider = getManagedProvider()
                 .orElseThrow(() -> new IllegalStateException("ManagedProvider is not available"));
 
-        Set<String> allItems = itemRegistry.stream().map(Item::getName).collect(Collectors.toSet());
-        Set<ChannelUID> allChannels = thingRegistry.stream().map(Thing::getChannels).flatMap(List::stream)
-                .map(Channel::getUID).collect(Collectors.toSet());
-
-        Set<String> toRemove = managedProvider.getAll().stream()
-                .filter(link -> !allItems.contains(link.getItemName()) || !allChannels.contains(link.getLinkedUID()))
-                .map(ItemChannelLink::getUID).collect(Collectors.toSet());
+        List<String> toRemove = getOrphanLinks().keySet().stream().map(ItemChannelLink::getUID)
+                .filter(i -> managedProvider.get(i) != null).toList();
 
         toRemove.forEach(managedProvider::remove);
 
@@ -180,34 +175,27 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
      *
      * @see #purge()
      *
-     * @return a list of orphan links including information whether the link is managed (editable) or not
+     * @return a map with orphan links as key and reason they are broken as value
      */
-    public List<BrokenItemChannelLinkDTO> getOrphanLinks() {
+    public Map<ItemChannelLink, ItemChannelLinkProblem> getOrphanLinks() {
         Collection<Item> items = itemRegistry.getItems();
         Collection<Thing> things = thingRegistry.getAll();
 
-        List<BrokenItemChannelLinkDTO> results = new ArrayList<>();
+        Map<ItemChannelLink, ItemChannelLinkProblem> results = new HashMap<>();
 
         Collection<ChannelUID> channelUIDS = things.stream().map(Thing::getChannels).flatMap(List::stream)
                 .map(Channel::getUID).collect(Collectors.toSet());
         Collection<String> itemNames = items.stream().map(Item::getName).collect(Collectors.toSet());
 
         getAll().forEach(itemChannelLink -> {
-            boolean isEditable = isEditable(itemChannelLink.getUID());
             if (!channelUIDS.contains(itemChannelLink.getLinkedUID())) {
                 if (!itemNames.contains(itemChannelLink.getItemName())) {
-                    results.add(new BrokenItemChannelLinkDTO(
-                            EnrichedItemChannelLinkDTOMapper.map(itemChannelLink, isEditable),
-                            BrokenItemChannelLinkDTO.ItemChannelLinkProblem.ITEM_AND_THING_CHANNEL_MISSING));
+                    results.put(itemChannelLink, ItemChannelLinkProblem.ITEM_AND_THING_CHANNEL_MISSING);
                 } else {
-                    results.add(new BrokenItemChannelLinkDTO(
-                            EnrichedItemChannelLinkDTOMapper.map(itemChannelLink, isEditable),
-                            BrokenItemChannelLinkDTO.ItemChannelLinkProblem.THING_CHANNEL_MISSING));
+                    results.put(itemChannelLink, ItemChannelLinkProblem.THING_CHANNEL_MISSING);
                 }
             } else if (!itemNames.contains(itemChannelLink.getItemName())) {
-                results.add(
-                        new BrokenItemChannelLinkDTO(EnrichedItemChannelLinkDTOMapper.map(itemChannelLink, isEditable),
-                                BrokenItemChannelLinkDTO.ItemChannelLinkProblem.ITEM_MISSING));
+                results.put(itemChannelLink, ItemChannelLinkProblem.ITEM_MISSING);
             }
         });
         return results;
@@ -236,5 +224,11 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
             return getManagedProvider().get().get(linkId) != null;
         }
         return false;
+    }
+
+    public enum ItemChannelLinkProblem {
+        THING_CHANNEL_MISSING,
+        ITEM_MISSING,
+        ITEM_AND_THING_CHANNEL_MISSING;
     }
 }

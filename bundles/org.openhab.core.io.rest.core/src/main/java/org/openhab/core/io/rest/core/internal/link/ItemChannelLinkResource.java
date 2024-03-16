@@ -38,6 +38,9 @@ import org.openhab.core.io.rest.JSONResponse;
 import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
 import org.openhab.core.io.rest.Stream2JSONInputStream;
+import org.openhab.core.io.rest.core.link.BrokenItemChannelLinkDTO;
+import org.openhab.core.io.rest.core.link.EnrichedItemChannelLinkDTO;
+import org.openhab.core.io.rest.core.link.EnrichedItemChannelLinkDTOMapper;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemRegistry;
@@ -48,10 +51,9 @@ import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingRegistry;
 import org.openhab.core.thing.ThingUID;
 import org.openhab.core.thing.link.AbstractLink;
-import org.openhab.core.thing.link.EnrichedItemChannelLinkDTO;
-import org.openhab.core.thing.link.EnrichedItemChannelLinkDTOMapper;
 import org.openhab.core.thing.link.ItemChannelLink;
 import org.openhab.core.thing.link.ItemChannelLinkRegistry;
+import org.openhab.core.thing.link.ItemChannelLinkRegistry.ItemChannelLinkProblem;
 import org.openhab.core.thing.link.ManagedItemChannelLinkProvider;
 import org.openhab.core.thing.link.dto.ItemChannelLinkDTO;
 import org.openhab.core.thing.profiles.ProfileType;
@@ -321,6 +323,12 @@ public class ItemChannelLinkResource implements RESTResource {
     @Operation(operationId = "getOrphanLinks", summary = "Get orphan links between items and broken/non-existent thing channels", responses = {
             @ApiResponse(responseCode = "200", description = "List of broken links") })
     public Response getOrphanLinks() {
-        return Response.ok(itemChannelLinkRegistry.getOrphanLinks()).build();
+        Map<ItemChannelLink, ItemChannelLinkProblem> orphanLinks = itemChannelLinkRegistry.getOrphanLinks();
+        List<BrokenItemChannelLinkDTO> brokenLinks = orphanLinks.entrySet().stream()
+                .map(e -> new BrokenItemChannelLinkDTO(EnrichedItemChannelLinkDTOMapper.map(e.getKey(),
+                        managedItemChannelLinkProvider.get(e.getKey().getUID()) != null), e.getValue()))
+                .toList();
+
+        return Response.ok(brokenLinks).build();
     }
 }

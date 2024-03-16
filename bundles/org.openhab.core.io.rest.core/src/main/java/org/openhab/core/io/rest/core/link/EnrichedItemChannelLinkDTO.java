@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.thing.link;
+package org.openhab.core.io.rest.core.link;
 
 import java.util.Map;
 
