@@ -53,9 +53,9 @@ import org.openhab.core.thing.type.ChannelType;
 @NonNullByDefault
 public class SystemProfileFactoryOSGiTest extends JavaOSGiTest {
 
-    private final Map<String, Object> properties = Map.of(SystemOffsetProfile.OFFSET_PARAM, BigDecimal.ZERO,
-            SystemHysteresisStateProfile.LOWER_PARAM, BigDecimal.TEN, SystemRangeStateProfile.UPPER_PARAM,
-            BigDecimal.valueOf(40));
+    private final Map<String, Object> properties = Map.of(SystemDivideProfile.DIVISOR_PARAM, BigDecimal.TEN,
+            SystemOffsetProfile.OFFSET_PARAM, BigDecimal.ZERO, SystemHysteresisStateProfile.LOWER_PARAM, BigDecimal.TEN,
+            SystemRangeStateProfile.UPPER_PARAM, BigDecimal.valueOf(40));
 
     private @NonNullByDefault({}) SystemProfileFactory profileFactory;
 
@@ -73,7 +73,7 @@ public class SystemProfileFactoryOSGiTest extends JavaOSGiTest {
     @Test
     public void systemProfileTypesAndUidsShouldBeAvailable() {
         Collection<ProfileTypeUID> systemProfileTypeUIDs = profileFactory.getSupportedProfileTypeUIDs();
-        assertThat(systemProfileTypeUIDs, hasSize(21));
+        assertThat(systemProfileTypeUIDs, hasSize(22));
 
         Collection<ProfileType> systemProfileTypes = profileFactory.getProfileTypes(null);
         assertThat(systemProfileTypes, hasSize(systemProfileTypeUIDs.size()));
