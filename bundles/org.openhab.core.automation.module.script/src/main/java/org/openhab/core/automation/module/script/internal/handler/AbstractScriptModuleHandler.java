@@ -65,13 +65,14 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
         this.ruleUID = ruleUID;
         this.engineIdentifier = UUID.randomUUID().toString();
 
-        this.type = getValidConfigParameter(SCRIPT_TYPE, module.getConfiguration(), module.getId());
-        this.script = getValidConfigParameter(SCRIPT, module.getConfiguration(), module.getId());
+        this.type = getValidConfigParameter(SCRIPT_TYPE, module.getConfiguration(), module.getId(), false);
+        this.script = getValidConfigParameter(SCRIPT, module.getConfiguration(), module.getId(), true);
     }
 
-    private static String getValidConfigParameter(String parameter, Configuration config, String moduleId) {
+    private static String getValidConfigParameter(String parameter, Configuration config, String moduleId,
+            boolean emptyAllowed) {
         Object value = config.get(parameter);
-        if (value instanceof String string && !string.trim().isEmpty()) {
+        if (value instanceof String string && (emptyAllowed || !string.trim().isEmpty())) {
             return string;
         } else {
             throw new IllegalStateException(String.format(
