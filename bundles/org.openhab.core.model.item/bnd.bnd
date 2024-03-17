@@ -38,10 +38,9 @@ Require-Bundle: com.ibm.icu;resolution:=optional,\
  org.eclipse.emf.ecore;visibility:=reexport,\
  org.eclipse.emf.mwe.utils;resolution:=optional,\
  org.eclipse.emf.mwe2.launch;resolution:=optional,\
- org.openhab.core.model.lazygen;resolution:=optional,\
  org.eclipse.xtend.lib;resolution:=optional,\
  org.eclipse.xtext,\
  org.eclipse.xtext.common.types,\
- org.eclipse.xtext.generator;resolution:=optional,\
+ org.eclipse.xtext.xtext.generator;resolution:=optional,\
  org.eclipse.xtext.util,\
- org.eclipse.xtext.xbase.lib;bundle-version="2.26.0"
+ org.eclipse.xtext.xbase.lib;bundle-version="2.34.0"

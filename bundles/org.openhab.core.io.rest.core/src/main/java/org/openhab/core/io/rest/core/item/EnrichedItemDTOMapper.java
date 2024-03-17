@@ -99,6 +99,9 @@ public class EnrichedItemDTOMapper {
             unitSymbol = numberItem.getUnitSymbol();
         }
         if (item instanceof GroupItem groupItem) {
+            if (groupItem.getBaseItem() instanceof NumberItem baseNumberItem) {
+                unitSymbol = baseNumberItem.getUnitSymbol();
+            }
             EnrichedItemDTO[] memberDTOs;
             if (drillDown) {
                 Collection<EnrichedItemDTO> members = new LinkedHashSet<>();

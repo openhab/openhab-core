@@ -263,7 +263,7 @@ public class ItemResource implements RESTResource {
                 cacheableListsLastModified.put(namespaceSelector, lastModifiedDate);
             }
 
-            Stream<EnrichedItemDTO> itemStream = getItems(null, null).stream() //
+            Stream<EnrichedItemDTO> itemStream = getItems(type, tags).stream() //
                     .map(item -> EnrichedItemDTOMapper.map(item, false, null, uriBuilder, locale)) //
                     .peek(dto -> addMetadata(dto, namespaces, null)) //
                     .peek(dto -> dto.editable = isEditable(dto.name));
