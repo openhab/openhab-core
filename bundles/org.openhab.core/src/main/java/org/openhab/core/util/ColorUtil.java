@@ -54,10 +54,6 @@ public class ColorUtil {
     public static final Gamut DEFAULT_GAMUT = new Gamut(new double[] { 0.9961, 0.0001 }, new double[] { 0, 0.9961 },
             new double[] { 0, 0.0001 });
 
-    // revision of Philips Default Gamut to prevent clipping XY colors to the CIE chart hypotenuse
-    public static final Gamut REVISED_DEFAULT_GAMUT = new Gamut(new double[] { 0.825, 0.185 },
-            new double[] { 0, 0.9961 }, new double[] { 0, 0.0001 });
-
     private ColorUtil() {
         // prevent instantiation
     }
