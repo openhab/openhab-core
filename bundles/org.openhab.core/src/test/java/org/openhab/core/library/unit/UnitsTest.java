@@ -431,6 +431,41 @@ public class UnitsTest {
         assertThat(converted2.doubleValue(), is(closeTo(12.0, DEFAULT_ERROR)));
     }
 
+    @Test
+    public void testAbsoluteHumidityByDensity() {
+        QuantityType<?> h = QuantityType.valueOf("50 g/m³");
+        assertThat(h.toString(), is("50 g/m³"));
+        h = h.toUnit("kg/m³");
+        assertThat(h.toString(), is("0.05 kg/m³"));
+    }
+
+    @Test
+    public void testAbsoluteHumidityByMassRatio() {
+        QuantityType<?> h = QuantityType.valueOf("50 g/kg");
+        assertThat(h.toString(), is("50 g/kg"));
+    }
+
+    @Test
+    public void testRelativeHumidity() {
+        QuantityType<?> h = QuantityType.valueOf("50 %rH");
+        assertThat(h.toString(), is("50 %rH"));
+        h = QuantityType.valueOf("50 %r.H.");
+        assertThat(h.toString(), is("50 %rH"));
+        h = QuantityType.valueOf("50 %\u00A0rH");
+        assertThat(h.toString(), is("50 %rH"));
+        h = QuantityType.valueOf("50 %\u00A0r.H.");
+        assertThat(h.toString(), is("50 %rH"));
+        h = h.toUnit(Units.PERCENT);
+        assertThat(h.toString(), is("50 %"));
+    }
+
+    @Test
+    public void testHumidityConversion() {
+        QuantityType<?> h = QuantityType.valueOf("100 %rH");
+        h = h.toUnit(Units.HUMIDITY_ABSOLUTE_MASS_RATIO);
+        assertThat(h.toString(), is("14.7 g/kg"));
+    }
+
     private static class QuantityEquals extends IsEqual<Quantity<?>> {
         private Quantity<?> quantity;
 

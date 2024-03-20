@@ -103,6 +103,8 @@ public final class Units extends CustomUnits {
             tech.units.indriya.unit.Units.KILOGRAM.divide(tech.units.indriya.unit.Units.CUBIC_METRE)));
     public static final Unit<Density> MICROGRAM_PER_CUBICMETRE = addUnit(new TransformedUnit<>(KILOGRAM_PER_CUBICMETRE,
             MultiplyConverter.ofRational(BigInteger.ONE, BigInteger.valueOf(1000000000))));
+    public static final Unit<Density> HUMIDITY_ABSOLUTE_DENSITY = addUnit(
+            new ProductUnit<>(tech.units.indriya.unit.Units.GRAM.divide(tech.units.indriya.unit.Units.CUBIC_METRE)));
     public static final Unit<Dimensionless> ONE = addUnit(AbstractUnit.ONE);
     public static final Unit<Dimensionless> PERCENT = addUnit(tech.units.indriya.unit.Units.PERCENT);
     public static final Unit<Dimensionless> PARTS_PER_BILLION = addUnit(
@@ -111,6 +113,11 @@ public final class Units extends CustomUnits {
             new TransformedUnit<>(ONE, MultiplyConverter.ofRational(BigInteger.ONE, BigInteger.valueOf(1000000))));
     public static final Unit<Dimensionless> DECIBEL = addUnit(ONE.transform(
             new LogConverter(10).inverse().concatenate(MultiplyConverter.ofRational(BigInteger.ONE, BigInteger.TEN))));
+    public static final Unit<Dimensionless> HUMIDITY_ABSOLUTE_MASS_RATIO = addUnit(
+            new TransformedUnit<>("g/kg", "Humidity-Absolute-Mass-Ratio", ONE,
+                    MultiplyConverter.ofRational(BigInteger.TEN, BigInteger.valueOf(147))));
+    public static final Unit<Dimensionless> HUMIDITY_RELATIVE = addUnit(
+            new TransformedUnit<>("%rH", "Humidity-Relative", PERCENT, MultiplyConverter.identity()));
     public static final Unit<ElectricCurrent> AMPERE = addUnit(tech.units.indriya.unit.Units.AMPERE);
     public static final Unit<ElectricCapacitance> FARAD = addUnit(tech.units.indriya.unit.Units.FARAD);
     public static final Unit<ElectricCharge> COULOMB = addUnit(tech.units.indriya.unit.Units.COULOMB);
@@ -270,6 +277,11 @@ public final class Units extends CustomUnits {
         SimpleUnitFormat.getInstance().alias(GIBIBYTE, "Gio");
         SimpleUnitFormat.getInstance().label(GIGABIT, "Gbit");
         SimpleUnitFormat.getInstance().label(GIGABIT_PER_SECOND, "Gbit/s");
+        SimpleUnitFormat.getInstance().label(HUMIDITY_ABSOLUTE_MASS_RATIO, "g/kg");
+        SimpleUnitFormat.getInstance().label(HUMIDITY_RELATIVE, "%rH");
+        SimpleUnitFormat.getInstance().alias(HUMIDITY_RELATIVE, "%\u00A0rH");
+        SimpleUnitFormat.getInstance().alias(HUMIDITY_RELATIVE, "%r.H.");
+        SimpleUnitFormat.getInstance().alias(HUMIDITY_RELATIVE, "%\u00A0r.H.");
         SimpleUnitFormat.getInstance().label(IRRADIANCE, "W/m²");
         SimpleUnitFormat.getInstance().label(KILOBYTE, "kB");
         SimpleUnitFormat.getInstance().label(KIBIBYTE, "kiB");
