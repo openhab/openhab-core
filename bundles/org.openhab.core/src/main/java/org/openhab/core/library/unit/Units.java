@@ -103,8 +103,6 @@ public final class Units extends CustomUnits {
             tech.units.indriya.unit.Units.KILOGRAM.divide(tech.units.indriya.unit.Units.CUBIC_METRE)));
     public static final Unit<Density> MICROGRAM_PER_CUBICMETRE = addUnit(new TransformedUnit<>(KILOGRAM_PER_CUBICMETRE,
             MultiplyConverter.ofRational(BigInteger.ONE, BigInteger.valueOf(1000000000))));
-    public static final Unit<Density> HUMIDITY_ABSOLUTE_DENSITY = addUnit(
-            new ProductUnit<>(tech.units.indriya.unit.Units.GRAM.divide(tech.units.indriya.unit.Units.CUBIC_METRE)));
     public static final Unit<Dimensionless> ONE = addUnit(AbstractUnit.ONE);
     public static final Unit<Dimensionless> PERCENT = addUnit(tech.units.indriya.unit.Units.PERCENT);
     public static final Unit<Dimensionless> PARTS_PER_BILLION = addUnit(
@@ -181,7 +179,6 @@ public final class Units extends CustomUnits {
     public static final Unit<Radioactivity> PICO_CURIE = addUnit(MetricPrefix.PICO(CURIE));
     public static final Unit<RadiationSpecificActivity> BECQUEREL_PER_CUBIC_METRE = addUnit(new ProductUnit<>(
             tech.units.indriya.unit.Units.BECQUEREL.divide(tech.units.indriya.unit.Units.CUBIC_METRE)));
-
     public static final Unit<RadiationDoseAbsorbed> GRAY = addUnit(tech.units.indriya.unit.Units.GRAY);
     public static final Unit<RadiationDoseEffective> SIEVERT = addUnit(tech.units.indriya.unit.Units.SIEVERT);
     public static final Unit<Speed> MILLIMETRE_PER_HOUR = addUnit(

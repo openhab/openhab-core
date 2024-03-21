@@ -16,6 +16,7 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.number.IsCloseTo.closeTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.math.BigDecimal;
 
@@ -436,12 +437,16 @@ public class UnitsTest {
         QuantityType<?> h = QuantityType.valueOf("50 g/m³");
         assertThat(h.toString(), is("50 g/m³"));
         h = h.toUnit("kg/m³");
+        assertNotNull(h);
         assertThat(h.toString(), is("0.05 kg/m³"));
     }
 
     @Test
     public void testAbsoluteHumidityByMassRatio() {
         QuantityType<?> h = QuantityType.valueOf("50 g/kg");
+        assertThat(h.toString(), is("50 g/kg"));
+        h = new QuantityType<>(50, Units.HUMIDITY_ABSOLUTE_MASS_RATIO);
+        assertNotNull(h);
         assertThat(h.toString(), is("50 g/kg"));
     }
 
@@ -455,7 +460,11 @@ public class UnitsTest {
         assertThat(h.toString(), is("50 %rH"));
         h = QuantityType.valueOf("50 %\u00A0r.H.");
         assertThat(h.toString(), is("50 %rH"));
+        h = new QuantityType<>(50, Units.HUMIDITY_RELATIVE);
+        assertNotNull(h);
+        assertThat(h.toString(), is("50 %rH"));
         h = h.toUnit(Units.PERCENT);
+        assertNotNull(h);
         assertThat(h.toString(), is("50 %"));
     }
 
@@ -463,6 +472,7 @@ public class UnitsTest {
     public void testHumidityConversion() {
         QuantityType<?> h = QuantityType.valueOf("100 %rH");
         h = h.toUnit(Units.HUMIDITY_ABSOLUTE_MASS_RATIO);
+        assertNotNull(h);
         assertThat(h.toString(), is("14.7 g/kg"));
     }
 
