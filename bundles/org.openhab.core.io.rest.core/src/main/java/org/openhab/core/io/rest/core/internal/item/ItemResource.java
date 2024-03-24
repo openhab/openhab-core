@@ -263,7 +263,7 @@ public class ItemResource implements RESTResource {
                     "name,label,type,groupType,function,category,editable,groupNames,link,tags,metadata,commandDescription,stateDescription");
 
             return Response.ok(new Stream2JSONInputStream(itemStream)).lastModified(lastModified)
-                    .cacheControl(RESTConstants.cacheControl()).build();
+                    .cacheControl(RESTConstants.CACHE_CONTROL).build();
         }
 
         Stream<EnrichedItemDTO> itemStream = getItems(type, tags).stream() //

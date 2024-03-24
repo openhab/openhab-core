@@ -328,7 +328,7 @@ public class ThingResource implements RESTResource {
 
             thingStream = dtoMapper.limitToFields(thingStream, "UID,label,bridgeUID,thingTypeUID,location,editable");
             return Response.ok(new Stream2JSONInputStream(thingStream)).lastModified(lastModified)
-                    .cacheControl(RESTConstants.cacheControl()).build();
+                    .cacheControl(RESTConstants.CACHE_CONTROL).build();
         }
 
         if (summary != null && summary) {

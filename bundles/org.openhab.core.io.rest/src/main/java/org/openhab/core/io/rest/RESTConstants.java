@@ -41,11 +41,10 @@ public class RESTConstants {
      */
     public static final String API_VERSION = "6";
 
-    public static CacheControl cacheControl() {
-        CacheControl cc = new CacheControl();
-        cc.setNoCache(true);
-        cc.setMustRevalidate(true);
-        cc.setPrivate(true);
-        return cc;
+    public static final CacheControl CACHE_CONTROL = new CacheControl();
+    static {
+        CACHE_CONTROL.setNoCache(true);
+        CACHE_CONTROL.setMustRevalidate(true);
+        CACHE_CONTROL.setPrivate(true);
     }
 }
