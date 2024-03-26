@@ -46,14 +46,14 @@ import org.openhab.core.types.State;
 import org.openhab.core.ui.items.ItemUIRegistry;
 
 /**
- * This is a class that listens on item state change events and creates sitemap events for a dedicated sitemap page.
+ * This is a class that listens on item state change events and creates sitemap events for the registered widgets.
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Laurent Garnier - Added support for icon color
  * @author Laurent Garnier - Support added for multiple AND conditions in labelcolor/valuecolor/visibility
  * @author Laurent Garnier - New widget icon parameter based on conditional rules
  */
-public class PageChangeListener implements EventSubscriber {
+public class WidgetsChangeListener implements EventSubscriber {
 
     private static final int REVERT_INTERVAL = 300;
     private final ScheduledExecutorService scheduler = ThreadPoolManager
@@ -75,7 +75,8 @@ public class PageChangeListener implements EventSubscriber {
      * @param itemUIRegistry the ItemUIRegistry which is needed for the functionality
      * @param widgets the list of widgets that are part of the page.
      */
-    public PageChangeListener(String sitemapName, String pageId, ItemUIRegistry itemUIRegistry, EList<Widget> widgets) {
+    public WidgetsChangeListener(String sitemapName, String pageId, ItemUIRegistry itemUIRegistry,
+            EList<Widget> widgets) {
         this.sitemapName = sitemapName;
         this.pageId = pageId;
         this.itemUIRegistry = itemUIRegistry;
