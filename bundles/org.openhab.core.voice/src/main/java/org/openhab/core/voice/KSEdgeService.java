@@ -13,8 +13,10 @@
 package org.openhab.core.voice;
 
 import java.util.Locale;
+import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.core.audio.AudioFormat;
 import org.openhab.core.audio.AudioStream;
 
 /**
@@ -40,5 +42,15 @@ public interface KSEdgeService extends KSService {
     default KSServiceHandle spot(KSListener ksListener, AudioStream audioStream, Locale locale, String keyword)
             throws KSException {
         throw new KSException("An edge keyword spotter is not meant to process audio in the server");
+    }
+
+    @Override
+    default Set<AudioFormat> getSupportedFormats() {
+        return Set.of();
+    }
+
+    @Override
+    default Set<Locale> getSupportedLocales() {
+        return Set.of();
     }
 }
