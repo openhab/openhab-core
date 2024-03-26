@@ -28,14 +28,17 @@ final class DecimalNormalizer extends AbstractNormalizer {
     @Override
     public Object doNormalize(Object value) {
         try {
-            if (value instanceof BigDecimal) {
-                return stripTrailingZeros((BigDecimal) value);
+            if (value instanceof BigDecimal bd) {
+                return stripTrailingZeros(bd);
             }
-            if (value instanceof String) {
-                return stripTrailingZeros(new BigDecimal((String) value));
+            if (value instanceof String strValue) {
+                return stripTrailingZeros(new BigDecimal(strValue));
             }
             if (value instanceof Byte) {
                 return new BigDecimal((Byte) value).setScale(1);
+            }
+            if (value instanceof Short) {
+                return new BigDecimal((Short) value).setScale(1);
             }
             if (value instanceof Integer) {
                 return new BigDecimal((Integer) value).setScale(1);
