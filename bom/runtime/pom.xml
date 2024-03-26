@@ -19,7 +19,7 @@
     <californium.version>2.7.4</californium.version>
     <cxf.version>3.6.2</cxf.version>
     <jackson.version>2.16.0</jackson.version>
-    <jetty.version>9.4.53.v20231009</jetty.version>
+    <jetty.version>9.4.54.v20240208</jetty.version>
     <pax.logging.version>2.2.6</pax.logging.version>
     <pax.web.version>8.0.24</pax.web.version>
     <swagger.version>2.2.15</swagger.version>
