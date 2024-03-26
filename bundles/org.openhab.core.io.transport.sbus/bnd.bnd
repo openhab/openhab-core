@@ -1,0 +1,10 @@
+Bundle-SymbolicName: ${project.artifactId}
+Automatic-Module-Name: ${def;bsn}
+Import-Package: \
+ org.eclipse.jdt.annotation.*;resolution:=optional,\
+ org.openhab.*;version=!,\
+ !net.sf.cglib.proxy,\
+ gnu.io;version="[3.12,6)",\
+ *
+-sources: false
+-contract: *
