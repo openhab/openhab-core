@@ -18,7 +18,7 @@
 
   <properties>
     <californium.version>2.7.4</californium.version>
-    <jetty.version>9.4.53.v20231009</jetty.version>
+    <jetty.version>9.4.54.v20240208</jetty.version>
     <pax.web.version>8.0.24</pax.web.version>
     <swagger.version>2.2.15</swagger.version>
   </properties>
