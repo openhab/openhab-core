@@ -14,6 +14,11 @@
 
   <name>openHAB Core :: Bundles :: Model Sitemap IDE</name>
 
+  <properties>
+    <maven.compiler.source>17</maven.compiler.source>
+    <maven.compiler.target>17</maven.compiler.target>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>org.openhab.core.bundles</groupId>
