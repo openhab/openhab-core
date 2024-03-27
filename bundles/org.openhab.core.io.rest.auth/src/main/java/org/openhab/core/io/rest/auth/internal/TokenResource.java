@@ -246,8 +246,7 @@ public class TokenResource implements RESTResource {
             try {
                 URI domainUri = new URI(session.get().getRedirectUri());
                 // workaround to set the SameSite cookie attribute until we upgrade to
-                // jakarta.ws.rs/jakarta.ws.rs-api/3.1.0 or newer, which is provided by
-                // org.apache.aries.spec/org.apache.aries.javax.jax.rs-api
+                // jakarta.ws.rs/jakarta.ws.rs-api/3.1.0 or newer
                 response.header("Set-Cookie",
                         SESSIONID_COOKIE_FORMAT.formatted(UUID.randomUUID(), domainUri.getHost()));
             } catch (Exception e) {
@@ -355,8 +354,7 @@ public class TokenResource implements RESTResource {
                             "Will not honor the request to set a session cookie for this client, because it's only allowed for root redirect URIs");
                 }
                 // workaround to set the SameSite cookie attribute until we upgrade to
-                // jakarta.ws.rs/jakarta.ws.rs-api/3.1.0 or newer, which is provided by
-                // org.apache.aries.spec/org.apache.aries.javax.jax.rs-api
+                // jakarta.ws.rs/jakarta.ws.rs-api/3.1.0 or newer
                 response.header("Set-Cookie", SESSIONID_COOKIE_FORMAT.formatted(sessionId, domainUri.getHost()));
 
                 // also mark the session as supported by a cookie
