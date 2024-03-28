@@ -64,7 +64,7 @@ public class AudioWaveUtils {
             } else {
                 codecPCMSignedOrUnsigned = null;
             }
-            Integer bitRate = Math.round(format.getFrameRate() * format.getSampleSizeInBits() * format.getChannels());
+            Integer bitRate = Math.round(format.getSampleRate() * format.getSampleSizeInBits() * format.getChannels());
             Long frequency = Float.valueOf(format.getSampleRate()).longValue();
             return new AudioFormat(AudioFormat.CONTAINER_WAVE, codecPCMSignedOrUnsigned, format.isBigEndian(),
                     format.getSampleSizeInBits(), bitRate, frequency, format.getChannels());
