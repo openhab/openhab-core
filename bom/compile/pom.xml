@@ -18,8 +18,8 @@
 
   <properties>
     <californium.version>2.7.4</californium.version>
-    <jetty.version>9.4.53.v20231009</jetty.version>
-    <pax.web.version>8.0.24</pax.web.version>
+    <jetty.version>9.4.54.v20240208</jetty.version>
+    <pax.web.version>8.0.27</pax.web.version>
     <swagger.version>2.2.15</swagger.version>
   </properties>
 
@@ -37,12 +37,12 @@
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.service.component</artifactId>
-      <version>1.5.0</version>
+      <version>1.5.1</version>
     </dependency>
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.service.component.annotations</artifactId>
-      <version>1.5.0</version>
+      <version>1.5.1</version>
     </dependency>
     <dependency>
       <groupId>org.osgi</groupId>
@@ -76,7 +76,7 @@
     <dependency>
       <groupId>javax.annotation</groupId>
       <artifactId>javax.annotation-api</artifactId>
-      <version>1.2</version>
+      <version>1.3.2</version>
       <scope>compile</scope>
     </dependency>
 
