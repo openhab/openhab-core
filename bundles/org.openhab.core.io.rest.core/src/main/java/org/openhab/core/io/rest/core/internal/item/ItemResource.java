@@ -42,7 +42,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -182,16 +181,12 @@ public class ItemResource implements RESTResource {
     private final MetadataSelectorMatcher metadataSelectorMatcher;
     private final SemanticTagRegistry semanticTagRegistry;
 
-    private void resetCacheableListsLastModified() {
-        this.cacheableListsLastModified.clear();
-    }
-
     private final RegistryChangedRunnableListener<Item> resetLastModifiedItemChangeListener = new RegistryChangedRunnableListener<>(
-            this::resetCacheableListsLastModified);
+            () -> lastModified = null);
     private final RegistryChangedRunnableListener<Metadata> resetLastModifiedMetadataChangeListener = new RegistryChangedRunnableListener<>(
-            this::resetCacheableListsLastModified);
+            () -> lastModified = null);
 
-    private Map<@Nullable String, Date> cacheableListsLastModified = new HashMap<>();
+    private @Nullable Date lastModified = null;
 
     @Activate
     public ItemResource(//
@@ -250,17 +245,14 @@ public class ItemResource implements RESTResource {
         final UriBuilder uriBuilder = uriBuilder(uriInfo, httpHeaders);
 
         if (staticDataOnly) {
-            Date lastModifiedDate = Date.from(Instant.now());
-            if (cacheableListsLastModified.containsKey(namespaceSelector)) {
-                lastModifiedDate = cacheableListsLastModified.get(namespaceSelector);
-                Response.ResponseBuilder responseBuilder = request.evaluatePreconditions(lastModifiedDate);
+            if (lastModified != null) {
+                Response.ResponseBuilder responseBuilder = request.evaluatePreconditions(lastModified);
                 if (responseBuilder != null) {
                     // send 304 Not Modified
                     return responseBuilder.build();
                 }
             } else {
-                lastModifiedDate = Date.from(Instant.now().truncatedTo(ChronoUnit.SECONDS));
-                cacheableListsLastModified.put(namespaceSelector, lastModifiedDate);
+                lastModified = Date.from(Instant.now().truncatedTo(ChronoUnit.SECONDS));
             }
 
             Stream<EnrichedItemDTO> itemStream = getItems(type, tags).stream() //
@@ -270,12 +262,8 @@ public class ItemResource implements RESTResource {
             itemStream = dtoMapper.limitToFields(itemStream,
                     "name,label,type,groupType,function,category,editable,groupNames,link,tags,metadata,commandDescription,stateDescription");
 
-            CacheControl cc = new CacheControl();
-            cc.setNoCache(true);
-            cc.setMustRevalidate(true);
-            cc.setPrivate(true);
-            return Response.ok(new Stream2JSONInputStream(itemStream)).lastModified(lastModifiedDate).cacheControl(cc)
-                    .build();
+            return Response.ok(new Stream2JSONInputStream(itemStream)).lastModified(lastModified)
+                    .cacheControl(RESTConstants.CACHE_CONTROL).build();
         }
 
         Stream<EnrichedItemDTO> itemStream = getItems(type, tags).stream() //
