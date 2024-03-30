@@ -16,13 +16,13 @@ import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.common.registry.Registry;
-
+// TODO
 /**
  * An interface for a generic {@link Registry} of {@link User} entities. User registries can also be used as
  * {@link AuthenticationProvider}.
  *
  * @author Yannick Schaus - initial contribution
- *
+ * @author Nicolas Gennart - roles management
  */
 @NonNullByDefault
 public interface UserRegistry extends Registry<User, String>, AuthenticationProvider {
@@ -40,13 +40,68 @@ public interface UserRegistry extends Registry<User, String>, AuthenticationProv
     User register(String username, String password, Set<String> roles);
 
     /**
-     * Change the password for a {@link User} in this registry. The implementation receives the new password and is
+     *
+     * Change the role for an {@link User} in this registry.
+     *
+     * @param user informations of the user
+     * @param oldRole old role to be replace
+     * @param newRole new role that will be replace
+     *            Change the role of a user. If the user has more than one role, replace only the role to be replaced.
+     */
+    void changeRole(User user, String oldRole, String newRole);
+
+    /**
+     * Add a role for an {@link User} in this registry.
+     *
+     * @param user informations of the user
+     * @param role role to be added
+     * @return return true if the role is added and false otherwise.
+     */
+    boolean addRole(User user, String role);
+
+    /**
+     * Remove the specific role of the user
+     *
+     * @param user informations of the user
+     * @param role role to be added
+     * @return return true if the role is removed and false otherwise.
+     */
+    boolean removeRole(User user, String role);
+
+    /**
+     * Checks if in the user registry there is a user with the role specified in the argument.
+     *
+     * @param role verify if a user has this role in the user registry.
+     * @return return true if at least a user in the user registry has the role and false otherwise.
+     */
+    boolean containRole(String role);
+
+    /**
+     * Count the number of user with the role administrator.
+     *
+     * @param role role to be count
+     * @return the number of time the role is present in the user registry
+     */
+    int countRole(String role);
+
+    /**
+     * Change the password for an {@link User} in this registry. The implementation receives the new password and is
      * responsible for their secure storage (for instance by hashing the password).
      *
-     * @param user the username of the existing user
+     * @param username the username of the existing user
      * @param newPassword the new password
      */
     void changePassword(User user, String newPassword);
+
+    /**
+     * Check if the password of the user with administrator role is correct.
+     *
+     * @param user the user with the role administrator.
+     * @param password the password of the user with the role administrator.
+     * @return true if the password of the user is correct and if the user has the administrator role, return false
+     *         otherwise.
+     */
+    boolean checkAdministratorCredential(User user, String password);
 
     /**
      * Adds a new session to the user profile

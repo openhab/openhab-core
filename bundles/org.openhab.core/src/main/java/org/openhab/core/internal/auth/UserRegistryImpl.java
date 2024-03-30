@@ -17,6 +17,7 @@ import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
@@ -52,10 +53,12 @@ import org.slf4j.LoggerFactory;
  * The implementation of a {@link UserRegistry} for {@link ManagedUser} entities.
  *
  * @author Yannick Schaus - initial contribution
+ * @author Nicolas Gennart - roles management
  */
 @NonNullByDefault
 @Component(service = UserRegistry.class, immediate = true)
 public class UserRegistryImpl extends AbstractRegistry<User, String, UserProvider> implements UserRegistry {
+    
 
     private final Logger logger = LoggerFactory.getLogger(UserRegistryImpl.class);
 
@@ -97,6 +100,107 @@ public class UserRegistryImpl extends AbstractRegistry<User, String, UserProvide
         user.setRoles(new HashSet<>(roles));
         super.add(user);
         return user;
+    }
+
+    @Override
+    public void changeRole(User user, String oldRole, String newRole) {
+        if (oldRole.equals(newRole)) {
+            return;
+        }
+
+        // We make sure that it remains at least one user with the administrator role.
+        if (countRole("administrator") == 1 && oldRole.equals("administrator") && user.getRoles().contains(oldRole)) {
+            throw new IllegalArgumentException(
+                    "There must always be at least one user with the administrator role, so we can't remove it.");
+        }
+
+        if (!(user instanceof ManagedUser)) {
+            throw new IllegalArgumentException("User is not managed: " + user.getName());
+        }
+        ManagedUser managedUser = (ManagedUser) user;
+
+        Set<String> newRoles = new HashSet<>();
+        Set<String> roles = managedUser.getRoles();
+
+        // if the role to be changed does not exist throw a new IllegalArgumentException
+        if (!roles.contains(oldRole)) {
+            throw new IllegalArgumentException(
+                    "the role " + oldRole + " does not exist for the user " + user.getName() + ", we can't change it.");
+        }
+
+        // if the new role already exist, simply remove the oldrole.
+        if (roles.contains(newRole)) {
+            roles.remove(oldRole);
+            newRoles = roles;
+        } else {
+            newRoles = new HashSet<>();
+            for (String role : roles) {
+                // change the old role with the new role.
+                if (oldRole.equals(role)) {
+                    newRoles.add(newRole);
+                } else {
+                    newRoles.add(role);
+                }
+            }
+        }
+
+        managedUser.setRoles(newRoles);
+        update(user);
+    }
+
+    @Override
+    public boolean addRole(User user, String role) {
+        if (!(user instanceof ManagedUser)) {
+            throw new IllegalArgumentException("User is not managed: " + user.getName());
+        }
+        ManagedUser managedUser = (ManagedUser) user;
+
+        Set<String> roles = managedUser.getRoles();
+
+        boolean ret = roles.add(role);
+
+        managedUser.setRoles(roles);
+        update(managedUser);
+        return ret;
+    }
+
+    @Override
+    public boolean removeRole(User user, String role) {
+        // We make sure that it remains at least one user with the administrator role.
+        if (countRole("administrator") == 1 && role.equals("administrator") && user.getRoles().contains(role)) {
+            throw new IllegalArgumentException(
+                    "There must always be at least one user with the administrator role, so we can't remove it.");
+        }
+
+        if (!(user instanceof ManagedUser)) {
+            throw new IllegalArgumentException("User is not managed: " + user.getName());
+        }
+        ManagedUser managedUser = (ManagedUser) user;
+
+        Set<String> roles = managedUser.getRoles();
+
+        boolean ret = roles.remove(role);
+
+        managedUser.setRoles(roles);
+        update(managedUser);
+        return ret;
+    }
+
+    @Override
+    public boolean containRole(String role) {
+        return false;
+    }
+
+    @Override
+    public int countRole(String role) {
+        int count = 0;
+        Collection<User> users = super.getAll();
+        for (User user : users) {
+            if (user.getRoles().contains(role)) {
+                count++;
+            }
+        }
+        return count;
     }
 
     private Optional<String> generateSalt(final int length) {
@@ -188,6 +292,24 @@ public class UserRegistryImpl extends AbstractRegistry<User, String, UserProvide
         managedUser.setPasswordSalt(passwordSalt);
         managedUser.setPasswordHash(passwordHash);
         update(user);
+    }
+
+    @Override
+    public boolean checkAdministratorCredential(User user, String password) {
+        if (!(user instanceof ManagedUser)) {
+            throw new IllegalArgumentException("User is not managed: " + user.getName());
+        }
+        ManagedUser managedUser = (ManagedUser) user;
+        Set<String> roles = managedUser.getRoles();
+        if (roles.contains("administrator")) {
+            String passwordSalt = managedUser.getPasswordSalt();
+            String passwordHash = managedUser.getPasswordHash();
+
+            String checkPasswordHash = hash(password, passwordSalt, PASSWORD_ITERATIONS).get();
+            return passwordHash.equals(checkPasswordHash);
+        } else {
+            return false;
+        }
     }
 
     @Override

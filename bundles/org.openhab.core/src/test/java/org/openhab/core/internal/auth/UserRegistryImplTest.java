@@ -39,6 +39,7 @@ import org.osgi.framework.ServiceReference;
 
 /**
  * @author Yannick Schaus - Initial contribution
+ * @author Nicolas Gennart - roles management
  */
 @ExtendWith(MockitoExtension.class)
 @NonNullByDefault
@@ -78,8 +79,30 @@ public class UserRegistryImplTest {
         User user = registry.register("username", "password", Set.of("administrator"));
         registry.added(managedProviderMock, user);
         assertNotNull(user);
+        assertTrue(registry.containRole("administrator"));
+        assertEquals(registry.countRole("administrator"), 1);
+
+        // test roles management.
+        registry.addRole(user, "test");
+        user = registry.get("username");
+        Set<String> roles = user.getRoles();
+        assertTrue(roles.contains("test"));
+        assertTrue(registry.containRole("test"));
+        assertEquals(registry.countRole("test"), 1);
+        registry.changeRole(user, "test", "testChange");
+        user = registry.get("username");
+        roles = user.getRoles();
+        assertTrue(roles.contains("testChange"));
+
+        registry.removeRole(user, "testChange");
+        user = registry.get("username");
+        roles = user.getRoles();
+        assertFalse(roles.contains("testChange"));
+
+        // test to modify the password and to authenticate a user
         registry.authenticate(new UsernamePasswordCredentials("username", "password"));
         registry.changePassword(user, "password2");
+
         registry.authenticate(new UsernamePasswordCredentials("username", "password2"));
         registry.remove(user.getName());
         registry.removed(managedProviderMock, user);
@@ -118,7 +141,7 @@ public class UserRegistryImplTest {
         registry.authenticate(new UserApiTokenCredentials(token2));
         registry.authenticate(new UserApiTokenCredentials(token3));
         registry.removeUserApiToken(user,
-                user.getApiTokens().stream().filter(t -> "token1".equals(t.getName())).findAny().get());
+                user.getApiTokens().stream().filter(t -> t.getName().equals("token1")).findAny().get());
         registry.removeUserApiToken(user,
                 user.getApiTokens().stream().filter(t -> "token2".equals(t.getName())).findAny().get());
         registry.removeUserApiToken(user,
@@ -126,3 +149,4 @@ public class UserRegistryImplTest {
         assertEquals(user.getApiTokens().size(), 0);
     }
 }
+
