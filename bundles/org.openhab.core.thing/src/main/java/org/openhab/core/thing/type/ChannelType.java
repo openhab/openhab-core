@@ -84,6 +84,10 @@ public class ChannelType extends AbstractDescriptionType {
         if (kind == ChannelKind.TRIGGER && itemType != null) {
             throw new IllegalArgumentException("If the kind is 'trigger', the item type must not be set!");
         }
+        if ((itemType == null || !itemType.startsWith("Number:")) && unitHint != null) {
+            throw new IllegalArgumentException(
+                    "A unit hint must not be set if the item type is not a number with dimension!");
+        }
 
         this.itemType = itemType;
         this.unitHint = unitHint;
