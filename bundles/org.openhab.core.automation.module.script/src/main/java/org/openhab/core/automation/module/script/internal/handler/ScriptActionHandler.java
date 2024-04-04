@@ -65,6 +65,10 @@ public class ScriptActionHandler extends AbstractScriptModuleHandler<Action> imp
     public @Nullable Map<String, Object> execute(final Map<String, Object> context) {
         Map<String, Object> resultMap = new HashMap<>();
 
+        if (script.isEmpty()) {
+            return resultMap;
+        }
+
         getScriptEngine().ifPresent(scriptEngine -> {
             setExecutionContext(scriptEngine, context);
             try {

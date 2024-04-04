@@ -64,19 +64,16 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <oh.java.version>17</oh.java.version>
-    <maven.compiler.source>${oh.java.version}</maven.compiler.source>
-    <maven.compiler.target>${oh.java.version}</maven.compiler.target>
-    <maven.compiler.compilerVersion>${oh.java.version}</maven.compiler.compilerVersion>
+    <maven.compiler.release>17</maven.compiler.release>
 
     <bnd.version>7.0.0</bnd.version>
     <commons.net.version>3.7.2</commons.net.version>
     <eea.version>2.3.0</eea.version>
-    <karaf.compile.version>4.4.4</karaf.compile.version>
-    <karaf.tooling.version>4.4.4</karaf.tooling.version>
-    <sat.version>0.15.0</sat.version>
-    <slf4j.version>2.0.6</slf4j.version>
-    <xtext.version>2.32.0</xtext.version>
+    <karaf.compile.version>4.4.5</karaf.compile.version>
+    <karaf.tooling.version>4.4.5</karaf.tooling.version>
+    <sat.version>0.16.0</sat.version>
+    <slf4j.version>2.0.7</slf4j.version>
+    <xtext.version>2.34.0</xtext.version>
     <spotless.version>2.38.0</spotless.version>
     <!-- Eclipse Java formatter version 4.26+ does not check test files -->
     <spotless.eclipse.version>4.25</spotless.eclipse.version>
@@ -277,7 +274,7 @@ Import-Package: \\
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.11.0</version>
+          <version>3.13.0</version>
           <configuration>
             <compilerId>eclipse</compilerId>
             <compilerArgs>
@@ -300,7 +297,7 @@ Import-Package: \\
             <dependency>
               <groupId>org.eclipse.jdt</groupId>
               <artifactId>ecj</artifactId>
-              <version>3.30.0</version>
+              <version>3.36.0</version>
             </dependency>
           </dependencies>
         </plugin>
@@ -308,7 +305,7 @@ Import-Package: \\
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-enforcer-plugin</artifactId>
-          <version>3.4.0</version>
+          <version>3.4.1</version>
         </plugin>
 
         <plugin>
@@ -371,7 +368,7 @@ Import-Package: \\
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-plugin-plugin</artifactId>
-          <version>3.9.0</version>
+          <version>3.11.0</version>
         </plugin>
 
         <plugin>
@@ -670,7 +667,7 @@ Import-Package: \\
             <configuration>
               <rules>
                 <requireJavaVersion>
-                  <version>[17.0,18.0)</version>
+                  <version>[17.0,18.0),[21.0,22.0)</version>
                 </requireJavaVersion>
               </rules>
             </configuration>
@@ -844,6 +841,12 @@ Import-Package: \\
           </plugins>
         </pluginManagement>
       </build>
+    </profile>
+    <profile>
+      <id>j21</id>
+      <properties>
+        <maven.compiler.release>21</maven.compiler.release>
+      </properties>
     </profile>
   </profiles>
 </project>

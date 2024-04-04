@@ -45,6 +45,11 @@ public class ScriptConditionHandler extends AbstractScriptModuleHandler<Conditio
     @Override
     public boolean isSatisfied(final Map<String, Object> context) {
         boolean result = false;
+
+        if (script.isEmpty()) {
+            return true;
+        }
+
         Optional<ScriptEngine> engine = getScriptEngine();
 
         if (engine.isPresent()) {
