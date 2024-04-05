@@ -340,7 +340,7 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
      */
     public static final ChannelType SYSTEM_ATMOSPHERIC_HUMIDITY = ChannelTypeBuilder
             .state(SYSTEM_CHANNEL_TYPE_UID_ATMOSPHERIC_HUMIDITY, "Atmospheric Humidity", "Number:Dimensionless")
-            .withDescription("Current atmospheric relative humidity").withCategory("Humidity")
+            .withUnitHint("%").withDescription("Current atmospheric relative humidity").withCategory("Humidity")
             .withStateDescriptionFragment(
                     StateDescriptionFragmentBuilder.create().withReadOnly(true).withPattern("%.0f %%").build())
             .withTags(List.of("Measurement", "Humidity")).build();
