@@ -28,6 +28,25 @@ import org.eclipse.jdt.annotation.Nullable;
 public class StringUtils {
 
     /**
+     * Input string is shortened to the maxwidth, the last 3 chars are replaced by ...
+     * 
+     * For example: (maxWidth 18) input="openHAB is the greatest ever", return="openHAB is the ..."
+     * 
+     * @param input input string
+     * @param maxWidth maxmimum amount of characters to return (including ...)
+     * @return Abbreviated String
+     */
+    public static @Nullable String abbreviate(final @Nullable String input, final int maxWidth) {
+        if (input != null) {
+            if (input.length() < 4 || input.length() <= maxWidth) {
+                return input;
+            }
+            return input.substring(0, maxWidth - 3) + "...";
+        }
+        return input;
+    }
+
+    /**
      * If a newline char exists at the end of the line, it is removed
      *
      * <pre>

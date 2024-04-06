@@ -26,6 +26,17 @@ import org.junit.jupiter.api.Test;
 public class StringUtilsTest {
 
     @Test
+    public void abbreviateTest() {
+        assertEquals("", StringUtils.abbreviate("", 10));
+        assertEquals(null, StringUtils.abbreviate(null, 5));
+        assertEquals("openHAB is the ...", StringUtils.abbreviate("openHAB is the greatest ever", 18));
+        assertEquals("four", StringUtils.abbreviate("four", 4));
+        assertEquals("...", StringUtils.abbreviate("four", 3));
+        assertEquals("abc", StringUtils.abbreviate("abc", 3));
+        assertEquals("abc", StringUtils.abbreviate("abc", 2));
+    }
+
+    @Test
     public void chompTest() {
         assertEquals("", StringUtils.chomp(""));
         assertNull(StringUtils.chomp(null));
