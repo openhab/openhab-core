@@ -174,7 +174,7 @@ public class ChartServletPeriodParamTest {
     }
 
     @Test
-    public void getPeriodBeginEndWithBeginndEnd() {
+    public void getPeriodBeginEndWithBeginAndEnd() {
         ZonedDateTime now = ZonedDateTime.of(2024, 4, 9, 12, 0, 0, 0, ZoneId.systemDefault());
         ZonedDateTime begin = ZonedDateTime.of(2024, 4, 9, 11, 30, 0, 0, ZoneId.systemDefault());
         ZonedDateTime end = ZonedDateTime.of(2024, 4, 9, 13, 30, 0, 0, ZoneId.systemDefault());
