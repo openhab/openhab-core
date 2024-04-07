@@ -38,8 +38,9 @@ public class RESTConstants {
      * Version 4: OH3, refactored extensions to addons (#1560)
      * Version 5: transparent charts (#2502)
      * Version 6: extended chart period parameter format (#3863)
+     * Version 7: extended chart period parameter format to cover past and future
      */
-    public static final String API_VERSION = "6";
+    public static final String API_VERSION = "7";
 
     public static final CacheControl CACHE_CONTROL = new CacheControl();
     static {
