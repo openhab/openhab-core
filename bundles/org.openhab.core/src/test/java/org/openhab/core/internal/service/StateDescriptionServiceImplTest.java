@@ -160,6 +160,20 @@ public class StateDescriptionServiceImplTest {
     }
 
     @Test
+    public void testPatternWhenTwoDescriptionProvidersHigherRankingDoesntProvidePattern() {
+        StateDescriptionFragment stateDescriptionFragment1 = StateDescriptionFragmentBuilder.create().build();
+        registerStateDescriptionFragmentProvider(stateDescriptionFragment1, -1);
+
+        StateDescriptionFragment stateDescriptionFragment2 = StateDescriptionFragmentBuilder.create()
+                .withPattern("pattern").build();
+        registerStateDescriptionFragmentProvider(stateDescriptionFragment2, -2);
+
+        StateDescription stateDescription = Objects.requireNonNull(item.getStateDescription());
+
+        assertThat(stateDescription.getPattern(), is(stateDescriptionFragment2.getPattern()));
+    }
+
+    @Test
     public void testFragmentsAreMergedInProviderOrder() {
         final List<StateOption> options = List.of(new StateOption("value", "label"));
 

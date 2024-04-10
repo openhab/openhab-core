@@ -71,6 +71,7 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
     private @Nullable StateDescriptionService stateDescriptionService;
     private @Nullable CommandDescriptionService commandDescriptionService;
     private final MetadataRegistry metadataRegistry;
+    private @Nullable DefaultStateDescriptionFragmentProvider defaultStateDescriptionFragmentProvider;
 
     private @Nullable ItemStateConverter itemStateConverter;
 
@@ -198,6 +199,11 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
 
         // add the item to all relevant groups
         addToGroupItems(item, item.getGroupNames());
+
+        DefaultStateDescriptionFragmentProvider stateDescriptionProvider = defaultStateDescriptionFragmentProvider;
+        if (stateDescriptionProvider != null) {
+            stateDescriptionProvider.onItemAdded(item);
+        }
     }
 
     private void injectServices(Item item) {
@@ -246,6 +252,10 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
             genericItem.dispose();
         }
         removeFromGroupItems(element, element.getGroupNames());
+        DefaultStateDescriptionFragmentProvider stateDescriptionProvider = defaultStateDescriptionFragmentProvider;
+        if (stateDescriptionProvider != null) {
+            stateDescriptionProvider.onItemRemoved(element);
+        }
     }
 
     @Override
@@ -269,6 +279,12 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
             addMembersToGroupItem(groupItem);
         }
         injectServices(item);
+
+        DefaultStateDescriptionFragmentProvider stateDescriptionProvider = defaultStateDescriptionFragmentProvider;
+        if (stateDescriptionProvider != null) {
+            stateDescriptionProvider.onItemRemoved(oldItem);
+            stateDescriptionProvider.onItemAdded(item);
+        }
     }
 
     @Override
@@ -467,6 +483,22 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
         for (Item item : getItems()) {
             ((GenericItem) item).setCommandDescriptionService(null);
         }
+    }
+
+    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
+    public void setDefaultStateDescriptionFragmentProvider(
+            DefaultStateDescriptionFragmentProvider defaultStateDescriptionFragmentProvider) {
+        this.defaultStateDescriptionFragmentProvider = defaultStateDescriptionFragmentProvider;
+
+        defaultStateDescriptionFragmentProvider.onAllItemsRemoved();
+        for (Item item : getItems()) {
+            defaultStateDescriptionFragmentProvider.onItemAdded(item);
+        }
+    }
+
+    public void unsetDefaultStateDescriptionFragmentProvider(
+            DefaultStateDescriptionFragmentProvider defaultStateDescriptionFragmentProvider) {
+        this.defaultStateDescriptionFragmentProvider = null;
     }
 
     @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
