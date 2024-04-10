@@ -21,8 +21,6 @@ import java.net.DatagramSocket;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.InterfaceAddress;
-import java.net.NetworkInterface;
 import java.net.SocketAddress;
 import java.net.SocketTimeoutException;
 import java.net.StandardProtocolFamily;
@@ -34,7 +32,6 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.text.ParseException;
 import java.util.Arrays;
-import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.HexFormat;
 import java.util.Iterator;
@@ -62,7 +59,9 @@ import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.config.discovery.addon.AddonFinder;
 import org.openhab.core.config.discovery.addon.BaseAddonFinder;
 import org.openhab.core.net.NetUtil;
+import org.openhab.core.net.NetworkAddressService;
 import org.openhab.core.util.StringUtils;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
@@ -180,6 +179,7 @@ import org.slf4j.LoggerFactory;
  *           no continuous background scanning.
  *
  * @author Holger Friedrich - Initial contribution
+ * @author Jacob Laursen - Added support for broadcast-based scanning
  */
 @NonNullByDefault
 @Component(service = AddonFinder.class, name = IpAddonFinder.SERVICE_NAME)
@@ -202,15 +202,18 @@ public class IpAddonFinder extends BaseAddonFinder {
     private static final String REPLACEMENT_UUID = "uuid";
 
     private final Logger logger = LoggerFactory.getLogger(IpAddonFinder.class);
+    private final NetworkAddressService networkAddressService;
     private final ScheduledExecutorService scheduler = ThreadPoolManager
             .getScheduledPool(ThreadPoolManager.THREAD_POOL_NAME_COMMON);
     private final Set<AddonService> addonServices = new CopyOnWriteArraySet<>();
     private @Nullable Future<?> scanJob = null;
     Set<AddonInfo> suggestions = new HashSet<>();
 
-    public IpAddonFinder() {
+    @Activate
+    public IpAddonFinder(final @Reference NetworkAddressService networkAddressService) {
         logger.trace("IpAddonFinder::IpAddonFinder");
         // start of scan will be triggered by setAddonCandidates to ensure addonCandidates are available
+        this.networkAddressService = networkAddressService;
     }
 
     @Deactivate
@@ -359,42 +362,32 @@ public class IpAddonFinder extends BaseAddonFinder {
             logger.warn("{}: match-property response \"{}\" is unknown", candidate.getUID(), TYPE_IP_BROADCAST);
             return;
         }
+        String broadcastAddress = networkAddressService.getConfiguredBroadcastAddress();
+        logger.debug("Starting broadcast scan with address {}", broadcastAddress);
+
         try (DatagramSocket socket = new DatagramSocket()) {
-            Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
-            while (interfaces.hasMoreElements()) {
-                @Nullable
-                NetworkInterface networkInterface = interfaces.nextElement();
-                if (networkInterface.isLoopback() || !networkInterface.isUp()) {
-                    continue;
+            socket.setBroadcast(true);
+            socket.setSoTimeout(timeoutMs);
+            byte[] sendBuffer = buildByteArray(request);
+            DatagramPacket sendPacket = new DatagramPacket(sendBuffer, sendBuffer.length,
+                    InetAddress.getByName(broadcastAddress), destPort);
+            socket.send(sendPacket);
+
+            // wait for responses
+            while (!Thread.currentThread().isInterrupted()) {
+                byte[] discoverReceive = buildByteArray(response);
+                byte[] receiveBuffer = new byte[discoverReceive.length];
+                DatagramPacket receivePacket = new DatagramPacket(receiveBuffer, receiveBuffer.length);
+                try {
+                    socket.receive(receivePacket);
+                } catch (SocketTimeoutException e) {
+                    break; // leave the endless loop
                 }
-                for (InterfaceAddress interfaceAddress : networkInterface.getInterfaceAddresses()) {
-                    if (interfaceAddress.getBroadcast() == null) {
-                        continue;
-                    }
-                    socket.setBroadcast(true);
-                    socket.setSoTimeout(timeoutMs);
-                    byte[] sendBuffer = buildByteArray(request);
-                    DatagramPacket sendPacket = new DatagramPacket(sendBuffer, sendBuffer.length,
-                            interfaceAddress.getBroadcast(), destPort);
-                    socket.send(sendPacket);
 
-                    // wait for responses
-                    while (!Thread.currentThread().isInterrupted()) {
-                        byte[] discoverReceive = buildByteArray(response);
-                        byte[] receiveBuffer = new byte[discoverReceive.length];
-                        DatagramPacket receivePacket = new DatagramPacket(receiveBuffer, receiveBuffer.length);
-                        try {
-                            socket.receive(receivePacket);
-                        } catch (SocketTimeoutException e) {
-                            break; // leave the endless loop
-                        }
-
-                        byte[] data = receivePacket.getData();
-                        if (Arrays.equals(data, discoverReceive)) {
-                            suggestions.add(candidate);
-                            logger.debug("Suggested add-on found: {}", candidate.getUID());
-                        }
-                    }
+                byte[] data = receivePacket.getData();
+                if (Arrays.equals(data, discoverReceive)) {
+                    suggestions.add(candidate);
+                    logger.debug("Suggested add-on found: {}", candidate.getUID());
                 }
             }
         } catch (IOException e) {
