@@ -359,11 +359,14 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
                 for (Object sourceMapping : (Collection<?>) sourceMappings) {
                     if (sourceMapping instanceof String) {
                         String[] splitMapping = sourceMapping.toString().split("=");
-                        String cmd = splitMapping[0].trim();
+                        String[] splitCmd = splitMapping[0].trim().split(":");
+                        String cmd = splitCmd[0].trim();
+                        String releaseCmd = splitCmd.length < 2 ? null : splitCmd[1].trim();
                         String label = splitMapping[1].trim();
                         String icon = splitMapping.length < 3 ? null : splitMapping[2].trim();
                         MappingImpl mapping = (MappingImpl) SitemapFactory.eINSTANCE.createMapping();
                         mapping.setCmd(cmd);
+                        mapping.setReleaseCmd(releaseCmd);
                         mapping.setLabel(label);
                         mapping.setIcon(icon);
                         mappings.add(mapping);

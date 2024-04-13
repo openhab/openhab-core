@@ -139,6 +139,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * @author Laurent Garnier - Added icon field for mappings used for switch element
  * @author Laurent Garnier - Support added for multiple AND conditions in labelcolor/valuecolor/visibility
  * @author Laurent Garnier - New widget icon parameter based on conditional rules
+ * @author Laurent Garnier - Added releaseCmd field for mappings used for switch element
  */
 @Component(service = { RESTResource.class, EventSubscriber.class })
 @JaxrsResource
@@ -565,6 +566,7 @@ public class SitemapResource
             for (Mapping mapping : switchWidget.getMappings()) {
                 MappingDTO mappingBean = new MappingDTO();
                 mappingBean.command = mapping.getCmd();
+                mappingBean.releaseCommand = mapping.getReleaseCmd();
                 mappingBean.label = mapping.getLabel();
                 mappingBean.icon = mapping.getIcon();
                 bean.mappings.add(mappingBean);
