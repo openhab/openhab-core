@@ -65,6 +65,7 @@ public abstract class AbstractAuthPageServlet extends HttpServlet {
 
     protected Map<String, Instant> csrfTokens = new HashMap<>();
 
+    // TODD **Critical** Stateful application... this could cause leaking of session information.
     protected String pageTemplate;
 
     public AbstractAuthPageServlet(BundleContext bundleContext, @Reference UserRegistry userRegistry,
