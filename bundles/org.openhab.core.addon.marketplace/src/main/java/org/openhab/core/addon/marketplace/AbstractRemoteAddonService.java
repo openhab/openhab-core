@@ -275,7 +275,7 @@ public abstract class AbstractRemoteAddonService implements AddonService {
             Dictionary<String, Object> properties = configuration.getProperties();
             if (properties == null) {
                 // if we can't determine a set property, we use false (default is show compatible only)
-                return true;
+                return false;
             }
             return ConfigParser.valueAsOrElse(properties.get(CONFIG_INCLUDE_INCOMPATIBLE), Boolean.class, false);
         } catch (IOException e) {
