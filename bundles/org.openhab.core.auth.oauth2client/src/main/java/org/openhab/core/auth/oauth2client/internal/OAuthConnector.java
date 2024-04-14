@@ -39,6 +39,7 @@ import org.openhab.core.auth.client.oauth2.AccessTokenResponse;
 import org.openhab.core.auth.client.oauth2.OAuthException;
 import org.openhab.core.auth.client.oauth2.OAuthResponseException;
 import org.openhab.core.io.net.http.HttpClientFactory;
+import org.openhab.core.library.types.DateTimeType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,7 +84,8 @@ public class OAuthConnector {
     public OAuthConnector(HttpClientFactory httpClientFactory, @Nullable Fields extraFields, GsonBuilder gsonBuilder) {
         this.httpClientFactory = httpClientFactory;
         this.extraFields = extraFields;
-        gson = gsonBuilder.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+        gson = gsonBuilder.setDateFormat(DateTimeType.DATE_PATTERN_JSON_COMPAT)
+                .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
                 .registerTypeAdapter(Instant.class, (JsonDeserializer<Instant>) (json, typeOfT, context) -> {
                     try {
                         return Instant.parse(json.getAsString());
