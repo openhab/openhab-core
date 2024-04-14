@@ -169,7 +169,12 @@ public class QuantityType<T extends Quantity<T>> extends Number
      */
     public QuantityType(Number value, Unit<T> unit) {
         // Avoid scientific notation for double
-        BigDecimal bd = new BigDecimal(value.toString());
+        BigDecimal bd;
+        if (value instanceof BigDecimal decimal) {
+            bd = decimal;
+        } else {
+            bd = new BigDecimal(value.toString());
+        }
         quantity = (Quantity<T>) Quantities.getQuantity(bd, unit, Scale.RELATIVE);
     }
 
