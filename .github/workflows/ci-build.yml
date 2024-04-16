@@ -92,7 +92,7 @@ jobs:
             -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
 
       - name: Upload Build Log
-        if: ${{ always() && ((steps.build.outcome == 'success') || (steps.build.outcome == 'failure')) }}
+        if: ${{ always() && ((steps.build.outcome == 'success') || (steps.build.outcome == 'failure') || (steps.build-j21.outcome == 'success') || (steps.build-j21.outcome == 'failure')) }}
         uses: actions/upload-artifact@v4
         with:
           name: build-log-java-${{ matrix.java }}-${{ matrix.os }}
