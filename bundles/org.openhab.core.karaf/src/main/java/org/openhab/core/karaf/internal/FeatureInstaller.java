@@ -91,8 +91,7 @@ public class FeatureInstaller implements ConfigurationListener {
 
     public static final String FINDER_ADDON_TYPE = "core-config-discovery-addon";
     public static final List<String> ADDON_TYPES = Stream
-            .concat(AddonType.DEFAULT_TYPES.stream().map(AddonType::getId), Stream.of(FINDER_ADDON_TYPE))
-            .toList();
+            .concat(AddonType.DEFAULT_TYPES.stream().map(AddonType::getId), Stream.of(FINDER_ADDON_TYPE)).toList();
 
     private final Logger logger = LoggerFactory.getLogger(FeatureInstaller.class);
 
