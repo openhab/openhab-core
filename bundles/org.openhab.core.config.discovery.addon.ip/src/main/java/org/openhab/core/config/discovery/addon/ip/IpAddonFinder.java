@@ -58,7 +58,9 @@ import org.openhab.core.addon.AddonService;
 import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.config.discovery.addon.AddonFinder;
 import org.openhab.core.config.discovery.addon.BaseAddonFinder;
+import org.openhab.core.net.CidrAddress;
 import org.openhab.core.net.NetUtil;
+import org.openhab.core.net.NetworkAddressChangeListener;
 import org.openhab.core.net.NetworkAddressService;
 import org.openhab.core.util.StringUtils;
 import org.osgi.service.component.annotations.Activate;
@@ -183,7 +185,7 @@ import org.slf4j.LoggerFactory;
  */
 @NonNullByDefault
 @Component(service = AddonFinder.class, name = IpAddonFinder.SERVICE_NAME)
-public class IpAddonFinder extends BaseAddonFinder {
+public class IpAddonFinder extends BaseAddonFinder implements NetworkAddressChangeListener {
 
     public static final String SERVICE_TYPE = SERVICE_TYPE_IP;
     public static final String SERVICE_NAME = SERVICE_NAME_IP;
@@ -216,9 +218,16 @@ public class IpAddonFinder extends BaseAddonFinder {
         this.networkAddressService = networkAddressService;
     }
 
+    @Activate
+    public void activate() {
+        logger.trace("IpAddonFinder::activate");
+        networkAddressService.addNetworkAddressChangeListener(this);
+    }
+
     @Deactivate
     public void deactivate() {
         logger.trace("IpAddonFinder::deactivate");
+        networkAddressService.removeNetworkAddressChangeListener(this);
         stopScan();
     }
 
@@ -236,6 +245,16 @@ public class IpAddonFinder extends BaseAddonFinder {
 
     protected void removeAddonService(AddonService featureService) {
         this.addonServices.remove(featureService);
+    }
+
+    @Override
+    public void onChanged(List<CidrAddress> added, List<CidrAddress> removed) {
+        // Nothing to do
+    }
+
+    @Override
+    public void onPrimaryAddressChanged(@Nullable String oldPrimaryAddress, @Nullable String newPrimaryAddress) {
+        startScan();
     }
 
     private void startScan() {
