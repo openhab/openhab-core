@@ -413,7 +413,7 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
     }
 
     private <T extends YamlElement> List<T> parseJsonNodes(List<JsonNode> nodes, Class<T> elementClass) {
-        return nodes.stream().map(nE -> parseJsonNode(nE, elementClass)).filter(Optional::isPresent).map(Optional::get)
+        return nodes.stream().map(nE -> parseJsonNode(nE, elementClass)).flatMap(Optional::stream)
                 .filter(YamlElement::isValid).toList();
     }
 
