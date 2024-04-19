@@ -61,8 +61,8 @@ public class MetadataStateDescriptionFragmentProvider implements StateDescriptio
         this.metadataRegistry = metadataRegistry;
 
         Object serviceRanking = properties.get(Constants.SERVICE_RANKING);
-        if (serviceRanking instanceof Integer) {
-            rank = (Integer) serviceRanking;
+        if (serviceRanking instanceof Integer rankValue) {
+            rank = rankValue;
         } else {
             rank = 1; // takes precedence over other providers usually ranked 0
         }
