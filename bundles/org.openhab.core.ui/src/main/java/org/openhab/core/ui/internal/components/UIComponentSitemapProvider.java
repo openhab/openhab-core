@@ -99,6 +99,11 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
 
     private static final Pattern CONDITION_PATTERN = Pattern
             .compile("(?<item>[A-Za-z]\\w*)?\\s*(?<condition>==|!=|<=|>=|<|>)?\\s*(?<sign>\\+|-)?(?<state>.+)");
+    private static final Pattern COMMANDS_PATTERN1 = Pattern.compile("^\"(?<cmd1>[^\"]*)\":\"(?<cmd2>[^\"]*)\"$");
+    private static final Pattern COMMANDS_PATTERN2 = Pattern.compile("^\"(?<cmd1>[^\"]*)\":(?<cmd2>.*)$");
+    private static final Pattern COMMANDS_PATTERN3 = Pattern.compile("^(?<cmd1>.*):\"(?<cmd2>[^\"]*)\"$");
+    private static final Pattern COMMANDS_PATTERN4 = Pattern.compile("^\"(?<cmd>.*)\"$");
+    private static final Pattern COMMANDS_PATTERN5 = Pattern.compile("^(?<cmd1>.*):\"(?<cmd2>.*)$");
 
     private Map<String, Sitemap> sitemaps = new HashMap<>();
     private @Nullable UIComponentRegistryFactory componentRegistryFactory;
@@ -359,9 +364,36 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
                 for (Object sourceMapping : (Collection<?>) sourceMappings) {
                     if (sourceMapping instanceof String) {
                         String[] splitMapping = sourceMapping.toString().split("=");
-                        String[] splitCmd = splitMapping[0].trim().split(":");
-                        String cmd = splitCmd[0].trim();
-                        String releaseCmd = splitCmd.length < 2 ? null : splitCmd[1].trim();
+                        String cmd = splitMapping[0].trim();
+                        String releaseCmd = null;
+                        Matcher matcher = COMMANDS_PATTERN1.matcher(cmd);
+                        if (matcher.matches()) {
+                            cmd = matcher.group("cmd1");
+                            releaseCmd = matcher.group("cmd2");
+                        } else {
+                            matcher = COMMANDS_PATTERN2.matcher(cmd);
+                            if (matcher.matches()) {
+                                cmd = matcher.group("cmd1");
+                                releaseCmd = matcher.group("cmd2");
+                            } else {
+                                matcher = COMMANDS_PATTERN3.matcher(cmd);
+                                if (matcher.matches()) {
+                                    cmd = matcher.group("cmd1");
+                                    releaseCmd = matcher.group("cmd2");
+                                } else {
+                                    matcher = COMMANDS_PATTERN4.matcher(cmd);
+                                    if (matcher.matches()) {
+                                        cmd = matcher.group("cmd");
+                                    } else {
+                                        matcher = COMMANDS_PATTERN5.matcher(cmd);
+                                        if (matcher.matches()) {
+                                            cmd = matcher.group("cmd1");
+                                            releaseCmd = matcher.group("cmd2");
+                                        }
+                                    }
+                                }
+                            }
+                        }
                         String label = splitMapping[1].trim();
                         String icon = splitMapping.length < 3 ? null : splitMapping[2].trim();
                         MappingImpl mapping = (MappingImpl) SitemapFactory.eINSTANCE.createMapping();
