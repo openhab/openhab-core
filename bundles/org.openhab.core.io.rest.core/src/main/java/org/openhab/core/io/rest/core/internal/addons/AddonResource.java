@@ -169,9 +169,7 @@ public class AddonResource implements RESTResource, EventSubscriber {
     }
 
     private boolean lastModifiedIsValid() {
-        if (lastModified == null)
-            return false;
-        return (new Date().getTime() - lastModified.getTime()) <= 450 * 1000;
+        return (lastModified != null) && ((new Date().getTime() - lastModified.getTime()) <= 450 * 1000);
     }
 
     @GET
