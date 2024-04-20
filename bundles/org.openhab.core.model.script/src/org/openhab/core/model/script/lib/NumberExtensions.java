@@ -372,9 +372,8 @@ public class NumberExtensions {
      * @return the given number as BigDecimal or null if number is null
      */
     public static BigDecimal numberToBigDecimal(Number number) {
-        if (number instanceof QuantityType) {
-            QuantityType<?> state = ((QuantityType<?>) number)
-                    .toInvertibleUnit(((QuantityType<?>) number).getUnit().getSystemUnit());
+        if (number instanceof QuantityType quantity) {
+            QuantityType<?> state = quantity.toInvertibleUnit(quantity.getUnit().getSystemUnit());
             if (state != null) {
                 return state.toBigDecimal();
             }
@@ -388,8 +387,8 @@ public class NumberExtensions {
     }
 
     private static boolean oneIsQuantity(Number left, Number right) {
-        return (left instanceof QuantityType && !isAbstractUnitOne((QuantityType<?>) left))
-                || (right instanceof QuantityType && !isAbstractUnitOne((QuantityType<?>) right));
+        return (left instanceof QuantityType leftQuantity && !isAbstractUnitOne(leftQuantity))
+                || (right instanceof QuantityType rightQuantity && !isAbstractUnitOne(rightQuantity));
     }
 
     private static boolean isAbstractUnitOne(QuantityType<?> left) {
