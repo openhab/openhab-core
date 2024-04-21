@@ -97,8 +97,8 @@ public class GenericItemProvider extends AbstractProvider<Item>
         this.genericMetaDataProvider = genericMetadataProvider;
 
         Object serviceRanking = properties.get(Constants.SERVICE_RANKING);
-        if (serviceRanking instanceof Integer) {
-            rank = (Integer) serviceRanking;
+        if (serviceRanking instanceof Integer integerValue) {
+            rank = integerValue;
         } else {
             rank = 0;
         }

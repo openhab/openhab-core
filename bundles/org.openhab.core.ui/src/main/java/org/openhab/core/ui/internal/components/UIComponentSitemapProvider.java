@@ -355,8 +355,8 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
     private void addWidgetMappings(EList<Mapping> mappings, UIComponent component) {
         if (component.getConfig() != null && component.getConfig().containsKey("mappings")) {
             Object sourceMappings = component.getConfig().get("mappings");
-            if (sourceMappings instanceof Collection<?>) {
-                for (Object sourceMapping : (Collection<?>) sourceMappings) {
+            if (sourceMappings instanceof Collection<?> sourceMappingsCollection) {
+                for (Object sourceMapping : sourceMappingsCollection) {
                     if (sourceMapping instanceof String) {
                         String[] splitMapping = sourceMapping.toString().split("=");
                         String cmd = splitMapping[0].trim();
@@ -376,8 +376,8 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
     private void addWidgetButtons(EList<Button> buttons, UIComponent component) {
         if (component.getConfig() != null && component.getConfig().containsKey("buttons")) {
             Object sourceButtons = component.getConfig().get("buttons");
-            if (sourceButtons instanceof Collection<?>) {
-                for (Object sourceButton : (Collection<?>) sourceButtons) {
+            if (sourceButtons instanceof Collection<?> sourceButtonsCollection) {
+                for (Object sourceButton : sourceButtonsCollection) {
                     if (sourceButton instanceof String) {
                         String[] splitted1 = sourceButton.toString().split(":", 3);
                         int row = Integer.parseInt(splitted1[0].trim());
@@ -402,8 +402,8 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
     private void addWidgetVisibility(EList<VisibilityRule> visibility, UIComponent component) {
         if (component.getConfig() != null && component.getConfig().containsKey("visibility")) {
             Object sourceVisibilities = component.getConfig().get("visibility");
-            if (sourceVisibilities instanceof Collection<?>) {
-                for (Object sourceVisibility : (Collection<?>) sourceVisibilities) {
+            if (sourceVisibilities instanceof Collection<?> sourceVisibilitiesCollection) {
+                for (Object sourceVisibility : sourceVisibilitiesCollection) {
                     if (sourceVisibility instanceof String) {
                         List<String> conditionsString = getRuleConditions(sourceVisibility.toString(), null);
                         VisibilityRuleImpl visibilityRule = (VisibilityRuleImpl) SitemapFactory.eINSTANCE
@@ -432,8 +432,8 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
     private void addColor(EList<ColorArray> color, UIComponent component, String key) {
         if (component.getConfig() != null && component.getConfig().containsKey(key)) {
             Object sourceColors = component.getConfig().get(key);
-            if (sourceColors instanceof Collection<?>) {
-                for (Object sourceColor : (Collection<?>) sourceColors) {
+            if (sourceColors instanceof Collection<?> sourceColorsCollection) {
+                for (Object sourceColor : sourceColorsCollection) {
                     if (sourceColor instanceof String) {
                         String argument = getRuleArgument(sourceColor.toString());
                         List<String> conditionsString = getRuleConditions(sourceColor.toString(), argument);
@@ -451,8 +451,8 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
     private void addIconRules(EList<IconRule> icon, UIComponent component) {
         if (component.getConfig() != null && component.getConfig().containsKey("iconrules")) {
             Object sourceIcons = component.getConfig().get("iconrules");
-            if (sourceIcons instanceof Collection<?>) {
-                for (Object sourceIcon : (Collection<?>) sourceIcons) {
+            if (sourceIcons instanceof Collection<?> sourceIconsCollection) {
+                for (Object sourceIcon : sourceIconsCollection) {
                     if (sourceIcon instanceof String) {
                         String argument = getRuleArgument(sourceIcon.toString());
                         List<String> conditionsString = getRuleConditions(sourceIcon.toString(), argument);
