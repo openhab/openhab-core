@@ -358,7 +358,12 @@ public class QuantityType<T extends Quantity<T>> extends Number
     }
 
     public BigDecimal toBigDecimal() {
-        return new BigDecimal(quantity.getValue().toString());
+        Number value = quantity.getValue();
+        if (value instanceof BigDecimal decimal) {
+            return decimal;
+        } else {
+            return new BigDecimal(value.toString());
+        }
     }
 
     @Override

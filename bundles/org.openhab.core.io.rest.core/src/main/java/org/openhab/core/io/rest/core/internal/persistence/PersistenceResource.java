@@ -406,7 +406,6 @@ public class PersistenceResource implements RESTResource {
         }
 
         Iterable<HistoricItem> result;
-        State state;
 
         long quantity = 0L;
 
@@ -446,23 +445,24 @@ public class PersistenceResource implements RESTResource {
         Iterator<HistoricItem> it = result.iterator();
 
         // Iterate through the data
-        HistoricItem lastItem = null;
+        State lastState = null;
         while (it.hasNext()) {
             HistoricItem historicItem = it.next();
-            state = historicItem.getState();
+            State state = historicItem.getState();
+            long timestamp = historicItem.getTimestamp().toInstant().toEpochMilli();
 
             // For 'binary' states, we need to replicate the data
             // to avoid diagonal lines
             if (state instanceof OnOffType || state instanceof OpenClosedType) {
-                if (lastItem != null) {
-                    dto.addData(historicItem.getTimestamp().toInstant().toEpochMilli(), lastItem.getState());
+                if (lastState != null && !lastState.equals(state)) {
+                    dto.addData(timestamp, lastState);
                     quantity++;
                 }
             }
 
-            dto.addData(historicItem.getTimestamp().toInstant().toEpochMilli(), state);
+            dto.addData(timestamp, state);
             quantity++;
-            lastItem = historicItem;
+            lastState = state;
         }
 
         if (boundary) {
