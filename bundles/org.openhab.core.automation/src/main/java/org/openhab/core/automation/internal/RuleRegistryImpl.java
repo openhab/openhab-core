@@ -589,7 +589,7 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
                 return configValue instanceof Boolean;
             case INTEGER:
                 return configValue instanceof BigDecimal || configValue instanceof Integer
-                        || configValue instanceof Double doubleValue && doubleValue.intValue() == (Double) configValue;
+                        || configValue instanceof Double doubleValue && doubleValue.intValue() == doubleValue;
             case DECIMAL:
                 return configValue instanceof BigDecimal || configValue instanceof Double;
         }
