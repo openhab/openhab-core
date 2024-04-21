@@ -15,6 +15,7 @@ package org.openhab.core.persistence.dto;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.types.State;
 
@@ -41,12 +42,15 @@ public class ItemHistoryDTO {
      * @param time the time of the record
      * @param state the state at this time
      */
-    public void addData(Long time, State state) {
+    public void addData(long time, State state) {
         HistoryDataBean newVal = new HistoryDataBean();
         newVal.time = time;
         if (state instanceof QuantityType quantityState) {
             // we strip the unit from the state, since historic item states are expected to be all in the default unit
             newVal.state = quantityState.toBigDecimal().toString();
+        } else if (state instanceof DecimalType decimalType) {
+            // use BigDecimal.toString() to hit the internal cache
+            newVal.state = decimalType.toBigDecimal().toString();
         } else {
             newVal.state = state.toString();
         }
@@ -54,7 +58,7 @@ public class ItemHistoryDTO {
     }
 
     public static class HistoryDataBean {
-        public Long time;
+        public long time;
         public String state;
     }
 }
