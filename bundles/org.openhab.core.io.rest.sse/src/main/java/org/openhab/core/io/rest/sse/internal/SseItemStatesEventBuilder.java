@@ -14,6 +14,7 @@ package org.openhab.core.io.rest.sse.internal;
 
 import java.time.DateTimeException;
 import java.util.HashMap;
+import java.util.IllegalFormatException;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -41,7 +42,6 @@ import org.openhab.core.types.StateDescription;
 import org.openhab.core.types.StateOption;
 import org.openhab.core.types.UnDefType;
 import org.openhab.core.types.util.UnitUtils;
-import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -61,15 +61,13 @@ public class SseItemStatesEventBuilder {
 
     private final Logger logger = LoggerFactory.getLogger(SseItemStatesEventBuilder.class);
 
-    private final BundleContext bundleContext;
     private final ItemRegistry itemRegistry;
     private final LocaleService localeService;
     private final StartLevelService startLevelService;
 
     @Activate
-    public SseItemStatesEventBuilder(final BundleContext bundleContext, final @Reference ItemRegistry itemRegistry,
+    public SseItemStatesEventBuilder(final @Reference ItemRegistry itemRegistry,
             final @Reference LocaleService localeService, final @Reference StartLevelService startLevelService) {
-        this.bundleContext = bundleContext;
         this.itemRegistry = itemRegistry;
         this.localeService = localeService;
         this.startLevelService = startLevelService;
@@ -117,64 +115,68 @@ public class SseItemStatesEventBuilder {
 
         if (!(state instanceof UnDefType)) {
             if (stateDescription != null) {
-                if (!stateDescription.getOptions().isEmpty()) {
+                String pattern = stateDescription.getPattern();
+                // If there's a pattern, first check if it's a transformation
+                if (pattern != null && TransformationHelper.isTransform(pattern)) {
+                    try {
+                        displayState = TransformationHelper.transform(pattern, state.toString());
+                    } catch (NoClassDefFoundError ex) {
+                        // TransformationHelper is optional dependency, so ignore if class not found
+                        // return state as it is without transformation
+                    } catch (TransformationException e) {
+                        logger.warn("Failed transforming the state '{}' on item '{}' with pattern '{}': {}", state,
+                                item.getName(), pattern, e.getMessage());
+                    }
+                } else if (!stateDescription.getOptions().isEmpty()) {
                     // Look for a state option with a label corresponding to the state
                     for (StateOption option : stateDescription.getOptions()) {
-                        if (option.getValue().equals(state.toString()) && option.getLabel() != null) {
-                            displayState = option.getLabel();
+                        String label = option.getLabel();
+                        if (option.getValue().equals(state.toString()) && label != null) {
+                            try {
+                                displayState = pattern == null ? label : String.format(pattern, label);
+                            } catch (IllegalFormatException e) {
+                                logger.debug(
+                                        "Unable to format option label '{}' of item {} with format '{}': {}, displaying raw option label",
+                                        label, item.getName(), pattern, e.getMessage());
+                                displayState = label;
+                            }
                             break;
                         }
                     }
-                } else {
-                    // If there's a pattern, first check if it's a transformation
-                    String pattern = stateDescription.getPattern();
-                    if (pattern != null) {
-                        if (TransformationHelper.isTransform(pattern)) {
-                            try {
-                                displayState = TransformationHelper.transform(bundleContext, pattern, state.toString());
-                            } catch (NoClassDefFoundError ex) {
-                                // TransformationHelper is optional dependency, so ignore if class not found
-                                // return state as it is without transformation
-                            } catch (TransformationException e) {
-                                logger.warn("Failed transforming the state '{}' on item '{}' with pattern '{}': {}",
-                                        state, item.getName(), pattern, e.getMessage());
-                            }
-                        } else {
-                            // if it's not a transformation pattern, then it must be a format string
+                } else if (pattern != null) {
+                    // if it's not a transformation pattern, then it must be a format string
 
-                            if (state instanceof QuantityType quantityState) {
-                                // sanity convert current state to the item state description unit in case it was
-                                // updated in the meantime. The item state is still in the "original" unit while the
-                                // state description will display the new unit:
-                                Unit<?> patternUnit = UnitUtils.parseUnit(pattern);
-                                if (patternUnit != null && !quantityState.getUnit().equals(patternUnit)) {
-                                    quantityState = quantityState.toInvertibleUnit(patternUnit);
-                                }
-
-                                if (quantityState != null) {
-                                    state = quantityState;
-                                }
-                            } else if (state instanceof DateTimeType type) {
-                                // Translate a DateTimeType state to the local time zone
-                                try {
-                                    state = type.toLocaleZone();
-                                } catch (DateTimeException e) {
-                                }
-                            }
-
-                            // The following exception handling has been added to work around a Java bug with formatting
-                            // numbers. See http://bugs.sun.com/view_bug.do?bug_id=6476425
-                            // This also handles IllegalFormatConversionException, which is a subclass of
-                            // IllegalArgument.
-                            try {
-                                displayState = state.format(pattern);
-                            } catch (IllegalArgumentException e) {
-                                logger.debug(
-                                        "Unable to format value '{}' of item {} with format '{}': {}, displaying raw state",
-                                        state, item.getName(), pattern, e.getMessage());
-                                displayState = state.toString();
-                            }
+                    if (state instanceof QuantityType quantityState) {
+                        // sanity convert current state to the item state description unit in case it was
+                        // updated in the meantime. The item state is still in the "original" unit while the
+                        // state description will display the new unit:
+                        Unit<?> patternUnit = UnitUtils.parseUnit(pattern);
+                        if (patternUnit != null && !quantityState.getUnit().equals(patternUnit)) {
+                            quantityState = quantityState.toInvertibleUnit(patternUnit);
                         }
+
+                        if (quantityState != null) {
+                            state = quantityState;
+                        }
+                    } else if (state instanceof DateTimeType type) {
+                        // Translate a DateTimeType state to the local time zone
+                        try {
+                            state = type.toLocaleZone();
+                        } catch (DateTimeException e) {
+                        }
+                    }
+
+                    // The following exception handling has been added to work around a Java bug with formatting
+                    // numbers. See http://bugs.sun.com/view_bug.do?bug_id=6476425
+                    // This also handles IllegalFormatConversionException, which is a subclass of
+                    // IllegalArgument.
+                    try {
+                        displayState = state.format(pattern);
+                    } catch (IllegalArgumentException e) {
+                        logger.debug(
+                                "Unable to format value '{}' of item {} with format '{}': {}, displaying raw state",
+                                state, item.getName(), pattern, e.getMessage());
+                        displayState = state.toString();
                     }
                 }
             }
