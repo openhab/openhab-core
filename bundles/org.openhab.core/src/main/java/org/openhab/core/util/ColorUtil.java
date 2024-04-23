@@ -252,27 +252,26 @@ public class ColorUtil {
         PercentType[] rgbPercents = hsbToRgbPercent(hsb);
 
         // convert rgbPercents to doubles
-        double[] rgb = new double[rgbPercents.length];
-        for (int i = 0; i < rgb.length; i++) {
-            rgb[i] = rgbPercents[i].doubleValue() / 100.0;
-        }
+        double r = rgbPercents[0].doubleValue() / 100.0;
+        double g = rgbPercents[1].doubleValue() / 100.0;
+        double b = rgbPercents[2].doubleValue() / 100.0;
 
         // prevent divide by zero errors
-        if (Math.max(rgb[0], Math.max(rgb[1], rgb[2])) <= 0.0) {
-            for (int i = 0; i < rgb.length; i++) {
-                rgb[i] = 0.000001;
-            }
+        if (Math.max(r, Math.max(g, b)) <= 0.0) {
+            r = 0.000001;
+            g = 0.000001;
+            b = 0.000001;
         }
 
         // apply gamma correction
-        for (int i = 0; i < rgb.length; i++) {
-            rgb[i] = rgb[i] > 0.04045 ? Math.pow((rgb[i] + 0.055) / (1.0 + 0.055), 2.4) : rgb[i] / 12.92;
-        }
+        r = r > 0.04045 ? Math.pow((r + 0.055) / (1.0 + 0.055), 2.4) : r / 12.92;
+        g = g > 0.04045 ? Math.pow((g + 0.055) / (1.0 + 0.055), 2.4) : g / 12.92;
+        b = b > 0.04045 ? Math.pow((b + 0.055) / (1.0 + 0.055), 2.4) : b / 12.92;
 
         // convert RGB to XYZ using 'Wide RGB D65' formula
-        double X = rgb[0] * 0.664511 + rgb[1] * 0.154324 + rgb[2] * 0.162028;
-        double Y = rgb[0] * 0.283881 + rgb[1] * 0.668433 + rgb[2] * 0.047685;
-        double Z = rgb[0] * 0.000088 + rgb[1] * 0.072310 + rgb[2] * 0.986039;
+        double X = r * 0.664511 + g * 0.154324 + b * 0.162028;
+        double Y = r * 0.283881 + g * 0.668433 + b * 0.047685;
+        double Z = r * 0.000088 + g * 0.072310 + b * 0.986039;
 
         // convert XYZ to xyz
         double sum = X + Y + Z;
@@ -295,8 +294,7 @@ public class ColorUtil {
                     "HSB:[%.6f,%.6f,%.6f] - RGB:[%.6f,%.6f,%.6f] - RGB':[%.6f,%.6f,%.6f] - XYZ:[%.6f,%.6f,%.6f] - xyz:[%.6f,%.6f,%.6f] - xyY:[%.6f,%.6f,%.6f] (xyForced:%b)",
                     hsb.getHue().doubleValue(), hsb.getSaturation().doubleValue(), hsb.getBrightness().doubleValue(),
                     rgbPercents[0].doubleValue() / 100.0, rgbPercents[1].doubleValue() / 100.0,
-                    rgbPercents[2].doubleValue() / 100.0, rgb[0], rgb[1], rgb[2], X, Y, Z, x, y, z, xyY[0], xyY[1],
-                    xyY[2], xyForced));
+                    rgbPercents[2].doubleValue() / 100.0, r, g, b, X, Y, Z, x, y, z, xyY[0], xyY[1], xyY[2], xyForced));
         }
 
         return xyY;
@@ -348,7 +346,7 @@ public class ColorUtil {
         BigDecimal g;
         BigDecimal b;
 
-        if (rgbw.length < 4) {
+        if (rgbw.length == 3) {
             // use RGB BigDecimal values as-is
             r = rgbw[0].toBigDecimal();
             g = rgbw[1].toBigDecimal();
@@ -531,14 +529,13 @@ public class ColorUtil {
     private static int[] getIntArray(PercentType[] percents) {
         int[] ints = new int[percents.length];
         for (int i = 0; i < percents.length; i++) {
-            ints[i] = percents[i].toBigDecimal().multiply(BIG_DECIMAL_255)
-                    .divide(BIG_DECIMAL_100, 0, RoundingMode.HALF_UP).intValue();
+            ints[i] = percents[i].toBigDecimal().multiply(BIG_DECIMAL_2_POINT_55).intValue();
         }
         return ints;
     }
 
     /**
-     * Private class for points in the CIE xy color space
+     * Class for points in the CIE xy color space
      */
     public static class Point {
         public final double x;

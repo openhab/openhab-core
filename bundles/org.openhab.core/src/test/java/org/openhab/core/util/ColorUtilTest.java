@@ -21,6 +21,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -286,26 +288,28 @@ public class ColorUtilTest {
      * Use ColorUtil fine precision methods for conversions.
      * Test on Hue standard Gamuts 'A', 'B', and 'C'.
      */
-    @Test
-    public void testXyHsbRoundTrips() {
-        Gamut[] gamuts = new Gamut[] {
-                new Gamut(new double[] { 0.704, 0.296 }, new double[] { 0.2151, 0.7106 }, new double[] { 0.138, 0.08 }),
-                new Gamut(new double[] { 0.675, 0.322 }, new double[] { 0.409, 0.518 }, new double[] { 0.167, 0.04 }),
-                new Gamut(new double[] { 0.6915, 0.3038 }, new double[] { 0.17, 0.7 }, new double[] { 0.1532, 0.0475 }) //
-        };
-        for (Gamut g : gamuts) {
-            xyToXY(g.r(), g);
-            xyToXY(g.g(), g);
-            xyToXY(g.b(), g);
-            xyToXY(new double[] { (g.r()[0] + g.g()[0]) / 2f, (g.r()[1] + g.g()[1]) / 2f }, g);
-            xyToXY(new double[] { (g.g()[0] + g.b()[0]) / 2f, (g.g()[1] + g.b()[1]) / 2f }, g);
-            xyToXY(new double[] { (g.b()[0] + g.r()[0]) / 2f, (g.b()[1] + g.r()[1]) / 2f }, g);
-            xyToXY(new double[] { (g.r()[0] + g.g()[0] + g.b()[0]) / 3f, (g.r()[1] + g.g()[1] + g.b()[1]) / 3f }, g);
-            xyToXY(ColorUtil.hsbToXY(HSBType.WHITE), g);
-        }
+    @ParameterizedTest
+    @MethodSource("gamuts")
+    public void testXyHsbRoundTrips(Gamut g) {
+        xyToXY(g.r(), g);
+        xyToXY(g.g(), g);
+        xyToXY(g.b(), g);
+        xyToXY(new double[] { (g.r()[0] + g.g()[0]) / 2f, (g.r()[1] + g.g()[1]) / 2f }, g);
+        xyToXY(new double[] { (g.g()[0] + g.b()[0]) / 2f, (g.g()[1] + g.b()[1]) / 2f }, g);
+        xyToXY(new double[] { (g.b()[0] + g.r()[0]) / 2f, (g.b()[1] + g.r()[1]) / 2f }, g);
+        xyToXY(new double[] { (g.r()[0] + g.g()[0] + g.b()[0]) / 3f, (g.r()[1] + g.g()[1] + g.b()[1]) / 3f }, g);
+        xyToXY(ColorUtil.hsbToXY(HSBType.WHITE), g);
     }
 
     /* Providers for parameterized tests */
+
+    private static Stream<Arguments> gamuts() {
+        return Stream.of(
+                new Gamut(new double[] { 0.704, 0.296 }, new double[] { 0.2151, 0.7106 }, new double[] { 0.138, 0.08 }),
+                new Gamut(new double[] { 0.675, 0.322 }, new double[] { 0.409, 0.518 }, new double[] { 0.167, 0.04 }),
+                new Gamut(new double[] { 0.6915, 0.3038 }, new double[] { 0.17, 0.7 }, new double[] { 0.1532, 0.0475 }))
+                .map(Arguments::of);
+    }
 
     private static Stream<Arguments> colors() {
         return Stream
@@ -365,6 +369,70 @@ public class ColorUtilTest {
         }
     }
 
+    /*
+     * Return an extended stream of HSB values.
+     */
+    private static Stream<Arguments> allHSB() {
+        List<Arguments> result = new ArrayList<>();
+        final double step = 5.0;
+        for (double h = 0; h < 360; h = h + step) {
+            for (double s = 0; s <= 100; s = s + step) {
+                for (double b = 0; b <= 100; b = b + step) {
+                    result.add(Arguments.of(new double[] { h, s, b }));
+                }
+            }
+        }
+        return result.stream();
+    }
+
+    /*
+     * Return a extended stream of RGB values.
+     */
+    private static Stream<Arguments> allRGB() {
+        List<Arguments> result = new ArrayList<>();
+        final double step = 5.0;
+        for (double r = 0; r <= 100; r = r + step) {
+            for (double g = 0; g <= 100; g = g + step) {
+                for (double b = 0; b <= 100; b = b + step) {
+                    result.add(Arguments.of(new double[] { r, g, b }));
+                }
+            }
+        }
+        return result.stream();
+    }
+
+    /*
+     * Return an extended stream of XY values within Gamut C overall limits.
+     */
+    private static Stream<Arguments> allXY() {
+        List<Arguments> result = new ArrayList<>();
+        final double step = 0.01;
+        for (double x = 0.1532; x <= 0.6915; x = x + step) {
+            for (double y = 0.0475; y <= 0.7; y = y + step) {
+                result.add(Arguments.of(new double[] { x, y }));
+            }
+        }
+        return result.stream();
+    }
+
+    /*
+     * Return an extended stream of RGBW values.
+     */
+    private static Stream<Arguments> allRGBW() {
+        List<Arguments> result = new ArrayList<>();
+        final double step = 5.0;
+        for (double r = 0; r <= 100; r = r + step) {
+            for (double g = 0; g <= 100; g = g + step) {
+                for (double b = 0; b <= 100; b = b + step) {
+                    for (double w = 0; w <= 100; w = w + step) {
+                        result.add(Arguments.of(new double[] { r, g, b, w }));
+                    }
+                }
+            }
+        }
+        return result.stream();
+    }
+
     /* Helper functions */
 
     /**
@@ -388,237 +456,189 @@ public class ColorUtilTest {
     /**
      * Test round trips HSB => xyY => HSB
      */
-    @Test
-    public void hsbToXY2xyToHsb() {
-        boolean assertionExecuted = false;
-        for (double h = 0; h < 360; h = h + 5) {
-            for (double s = 0; s <= 100; s = s + 5) {
-                for (double b = 0; b <= 100; b = b + 5) {
-                    HSBType hsb1 = new HSBType(new DecimalType(h), new PercentType(new BigDecimal(s)),
-                            new PercentType(new BigDecimal(b)));
-                    double[] xyY = new double[3];
-                    HSBType hsb2 = HSBType.BLACK;
-                    try {
-                        xyY = ColorUtil.hsbToXY(hsb1);
-                        hsb2 = ColorUtil.xyToHsb(xyY);
+    @ParameterizedTest
+    @MethodSource("allHSB")
+    public void hsbToXY2xyToHsb(double[] hsb) {
+        HSBType hsb1 = new HSBType(new DecimalType(hsb[0]), new PercentType(new BigDecimal(hsb[1])),
+                new PercentType(new BigDecimal(hsb[2])));
+        double[] xyY = new double[3];
+        HSBType hsb2 = HSBType.BLACK;
+        try {
+            xyY = ColorUtil.hsbToXY(hsb1);
+            hsb2 = ColorUtil.xyToHsb(xyY);
 
-                        // HSB assertions are meaningless if B is zero, or xy was forced into gamut
-                        if (b == 0 || xyY.length > 3) {
-                            continue;
-                        }
-
-                        // assert that S values are within 0.01%
-                        assertEquals(hsb1.getSaturation().doubleValue(), hsb2.getSaturation().doubleValue(), 0.01);
-
-                        // assert that B values are within 0.01%
-                        assertEquals(hsb1.getBrightness().doubleValue(), hsb2.getBrightness().doubleValue(), 0.01);
-
-                        // H assertions are meaningless if S is zero
-                        if (s == 0) {
-                            continue;
-                        }
-
-                        // assert that H values are within 0.05 degrees
-                        double h1 = hsb1.getHue().doubleValue();
-                        h1 = h1 >= 180.0 ? 360.0 - h1 : h1;
-                        double h2 = hsb2.getHue().doubleValue();
-                        h2 = h2 >= 180.0 ? 360.0 - h2 : h2;
-                        assertEquals(h1, h2, 0.05);
-
-                        assertionExecuted = true;
-                    } catch (AssertionError e) {
-                        throw new AssertionError(String.format(
-                                "HSB1:[%.6f,%.6f,%.6f] - xyY:[%.6f,%.6f,%.6f] - HSB2:[%.6f,%.6f,%.6f] - %s",
-                                hsb1.getHue().doubleValue(), hsb1.getSaturation().doubleValue(),
-                                hsb1.getBrightness().doubleValue(), xyY[0], xyY[1], xyY[2], hsb2.getHue().doubleValue(),
-                                hsb2.getSaturation().doubleValue(), hsb2.getBrightness().doubleValue(),
-                                e.getMessage()));
-                    }
-                }
+            // HSB assertions are meaningless if B is zero, or xy was forced into gamut
+            if (hsb[2] == 0 || xyY.length > 3) {
+                return;
             }
+
+            // assert that S values are within 0.01%
+            assertEquals(hsb1.getSaturation().doubleValue(), hsb2.getSaturation().doubleValue(), 0.01);
+
+            // assert that B values are within 0.01%
+            assertEquals(hsb1.getBrightness().doubleValue(), hsb2.getBrightness().doubleValue(), 0.01);
+
+            // H assertions are meaningless if S is zero
+            if (hsb[1] == 0) {
+                return;
+            }
+
+            // assert that H values are within 0.05 degrees
+            double h1 = hsb1.getHue().doubleValue();
+            h1 = h1 >= 180.0 ? 360.0 - h1 : h1;
+            double h2 = hsb2.getHue().doubleValue();
+            h2 = h2 >= 180.0 ? 360.0 - h2 : h2;
+            assertEquals(h1, h2, 0.05);
+        } catch (AssertionError e) {
+            throw new AssertionError(
+                    String.format("HSB1:[%.6f,%.6f,%.6f] - xyY:[%.6f,%.6f,%.6f] - HSB2:[%.6f,%.6f,%.6f] - %s",
+                            hsb1.getHue().doubleValue(), hsb1.getSaturation().doubleValue(),
+                            hsb1.getBrightness().doubleValue(), xyY[0], xyY[1], xyY[2], hsb2.getHue().doubleValue(),
+                            hsb2.getSaturation().doubleValue(), hsb2.getBrightness().doubleValue(), e.getMessage()));
         }
-        assertTrue(assertionExecuted);
     }
 
     /**
      * Test round trips xyY => HSB => xyY
      */
-    @Test
-    public void xyToHsb2hsbToXY() {
-        boolean assertionExecuted = false;
+    @ParameterizedTest
+    @MethodSource("allXY")
+    public void xyToHsb2hsbToXY(double[] xy) {
         Gamut gamutC = new Gamut(new double[] { 0.6915, 0.3038 }, new double[] { 0.17, 0.7 },
                 new double[] { 0.1532, 0.0475 });
-        for (double x = gamutC.b()[0]; x <= gamutC.r()[0]; x = x + 0.01) {
-            for (double y = gamutC.b()[1]; y <= gamutC.g()[1]; y = y + 0.01) {
-                double[] xy1 = new double[] { x, y };
-                HSBType hsb = HSBType.BLACK;
-                double[] xy2 = new double[3];
-                try {
-                    Point p = gamutC.closest(new Point(xy1[0], xy1[1]));
+        HSBType hsb = HSBType.BLACK;
+        double[] xy2 = new double[2];
+        try {
+            Point p = gamutC.closest(new Point(xy[0], xy[1]));
 
-                    // XY assertions are meaningless if if xy was forced into gamut
-                    if (!(p.x == xy1[0] && p.y == xy1[1])) {
-                        continue;
-                    }
-
-                    xy1 = new double[] { p.x, p.y };
-                    hsb = ColorUtil.xyToHsb(xy1, gamutC);
-                    xy2 = ColorUtil.hsbToXY(hsb, gamutC);
-
-                    // assert that x and y values are within 0.01%
-                    assertEquals(xy1[0], xy2[0], 0.01);
-                    assertEquals(xy1[1], xy2[1], 0.01);
-
-                    assertionExecuted = true;
-                } catch (AssertionError e) {
-                    throw new AssertionError(
-                            String.format("xy1:[%.6f,%.6f] - HSB:[%.6f,%.6f,%.6f] - xyY2:[%.6f,%.6f,%.6f] - %s", xy1[0],
-                                    xy1[1], hsb.getHue().doubleValue(), hsb.getSaturation().doubleValue(),
-                                    hsb.getBrightness().doubleValue(), xy2[0], xy2[1], xy2[2], e.getMessage()));
-                }
+            // XY assertions are meaningless if if xy was forced into gamut
+            if (!(p.x == xy[0] && p.y == xy[1])) {
+                return;
             }
+
+            double[] xy1 = new double[] { p.x, p.y };
+            hsb = ColorUtil.xyToHsb(xy1, gamutC);
+            xy2 = ColorUtil.hsbToXY(hsb, gamutC);
+
+            // assert that x and y values are within 0.01%
+            assertEquals(xy1[0], xy2[0], 0.01);
+            assertEquals(xy1[1], xy2[1], 0.01);
+        } catch (AssertionError e) {
+            throw new AssertionError(
+                    String.format("xy1:[%.6f,%.6f] - HSB:[%.6f,%.6f,%.6f] - xyY2:[%.6f,%.6f,%.6f] - %s", xy[0], xy[1],
+                            hsb.getHue().doubleValue(), hsb.getSaturation().doubleValue(),
+                            hsb.getBrightness().doubleValue(), xy2[0], xy2[1], xy2[2], e.getMessage()));
         }
-        assertTrue(assertionExecuted);
     }
 
     /**
      * Test round trips HSB => RGB => HSB
      */
-    @Test
-    public void hsbToRgb2rgbToHsb() {
-        boolean assertionExecuted = false;
-        for (int h = 0; h < 360; h = h + 5) {
-            for (int s = 0; s <= 100; s = s + 5) {
-                for (int b = 0; b <= 100; b = b + 5) {
-                    HSBType hsb1 = new HSBType(new DecimalType((double) h), new PercentType(new BigDecimal(s)),
-                            new PercentType(new BigDecimal(b)));
-                    PercentType[] rgb = new PercentType[3];
-                    HSBType hsb2 = HSBType.BLACK;
-                    try {
-                        rgb = ColorUtil.hsbToRgbPercent(hsb1);
-                        hsb2 = ColorUtil.rgbToHsb(rgb);
+    @ParameterizedTest
+    @MethodSource("allHSB")
+    public void hsbToRgb2rgbToHsb(double[] hsb) {
+        HSBType hsb1 = new HSBType(new DecimalType(hsb[0]), new PercentType(new BigDecimal(hsb[1])),
+                new PercentType(new BigDecimal(hsb[2])));
+        PercentType[] rgb = new PercentType[3];
+        HSBType hsb2 = HSBType.BLACK;
+        try {
+            rgb = ColorUtil.hsbToRgbPercent(hsb1);
+            hsb2 = ColorUtil.rgbToHsb(rgb);
 
-                        // HSB assertions are meaningless if B is zero
-                        if (b == 0) {
-                            continue;
-                        }
-
-                        assertEquals(hsb1.getSaturation().doubleValue(), hsb2.getSaturation().doubleValue(), 0.01);
-                        assertEquals(hsb1.getBrightness().doubleValue(), hsb2.getBrightness().doubleValue(), 0.01);
-
-                        // H assertions are meaningless if S is zero
-                        if (s == 0) {
-                            continue;
-                        }
-
-                        assertEquals(hsb1.getHue().doubleValue(), hsb2.getHue().doubleValue(), 0.05);
-
-                        assertionExecuted = true;
-                    } catch (AssertionError e) {
-                        throw new AssertionError(String.format(
-                                "HSB1:[%.6f,%.6f,%.6f] - RGB:[%.6f,%.6f,%.6f] - HSB2:[%.6f,%.6f,%.6f] - %s",
-                                hsb1.getHue().doubleValue() / 100, hsb1.getSaturation().doubleValue() / 100,
-                                hsb1.getBrightness().doubleValue() / 100, rgb[0].doubleValue() / 100,
-                                rgb[1].doubleValue() / 100, rgb[2].doubleValue() / 100,
-                                hsb2.getHue().doubleValue() / 100, hsb2.getSaturation().doubleValue() / 100,
-                                hsb2.getBrightness().doubleValue() / 100, e.getMessage()));
-                    }
-                }
+            // HSB assertions are meaningless if B is zero
+            if (hsb[2] == 0) {
+                return;
             }
+
+            assertEquals(hsb1.getSaturation().doubleValue(), hsb2.getSaturation().doubleValue(), 0.01);
+            assertEquals(hsb1.getBrightness().doubleValue(), hsb2.getBrightness().doubleValue(), 0.01);
+
+            // H assertions are meaningless if S is zero
+            if (hsb[1] == 0) {
+                return;
+            }
+
+            assertEquals(hsb1.getHue().doubleValue(), hsb2.getHue().doubleValue(), 0.05);
+        } catch (AssertionError e) {
+            throw new AssertionError(
+                    String.format("HSB1:[%.6f,%.6f,%.6f] - RGB:[%.6f,%.6f,%.6f] - HSB2:[%.6f,%.6f,%.6f] - %s",
+                            hsb1.getHue().doubleValue() / 100, hsb1.getSaturation().doubleValue() / 100,
+                            hsb1.getBrightness().doubleValue() / 100, rgb[0].doubleValue() / 100,
+                            rgb[1].doubleValue() / 100, rgb[2].doubleValue() / 100, hsb2.getHue().doubleValue() / 100,
+                            hsb2.getSaturation().doubleValue() / 100, hsb2.getBrightness().doubleValue() / 100,
+                            e.getMessage()));
         }
-        assertTrue(assertionExecuted);
     }
 
     /**
      * Test round trips RGB => HSB => RGB
      */
-    @Test
-    public void rgbToHsb2hsbToRgb() {
-        boolean assertionExecuted = false;
-        for (double r = 0; r <= 100; r = r + 5) {
-            for (double g = 0; g <= 100; g = g + 5) {
-                for (double b = 0; b <= 100; b = b + 5) {
-                    PercentType[] rgb1 = new PercentType[] { new PercentType(new BigDecimal(r)),
-                            new PercentType(new BigDecimal(g)), new PercentType(new BigDecimal(b)) };
-                    HSBType hsb = HSBType.BLACK;
-                    PercentType[] rgb2 = new PercentType[3];
-                    try {
-                        hsb = ColorUtil.rgbToHsb(rgb1);
-                        rgb2 = ColorUtil.hsbToRgbPercent(hsb);
+    @ParameterizedTest
+    @MethodSource("allRGB")
+    public void rgbToHsb2hsbToRgb(double[] rgb) {
+        PercentType[] rgb1 = new PercentType[] { new PercentType(new BigDecimal(rgb[0])),
+                new PercentType(new BigDecimal(rgb[1])), new PercentType(new BigDecimal(rgb[2])) };
+        HSBType hsb = HSBType.BLACK;
+        PercentType[] rgb2 = new PercentType[3];
+        try {
+            hsb = ColorUtil.rgbToHsb(rgb1);
+            rgb2 = ColorUtil.hsbToRgbPercent(hsb);
 
-                        // RGB assertions are meaningless if B or S are zero
-                        if (hsb.getBrightness().doubleValue() == 0 || hsb.getSaturation().doubleValue() == 0) {
-                            continue;
-                        }
-
-                        for (int i = 0; i < rgb1.length; i++) {
-                            assertEquals(rgb1[i].doubleValue(), rgb2[i].doubleValue(), 0.05);
-                        }
-
-                        assertionExecuted = true;
-                    } catch (AssertionError e) {
-                        throw new AssertionError(String.format(
-                                "RGB1:[%.6f,%.6f,%.6f] - HSB:[%.6f,%.6f,%.6f] - RGB2:[%.6f,%.6f,%.6f] - %s",
-                                rgb1[0].doubleValue() / 100, rgb1[1].doubleValue() / 100, rgb1[2].doubleValue() / 100,
-                                hsb.getHue().doubleValue() / 100, hsb.getSaturation().doubleValue() / 100,
-                                hsb.getBrightness().doubleValue() / 100, rgb2[0].doubleValue() / 100,
-                                rgb2[1].doubleValue() / 100, rgb2[2].doubleValue() / 100, e.getMessage()));
-                    }
-                }
+            // RGB assertions are meaningless if B or S are zero
+            if (hsb.getBrightness().doubleValue() == 0 || hsb.getSaturation().doubleValue() == 0) {
+                return;
             }
+
+            for (int i = 0; i < rgb1.length; i++) {
+                assertEquals(rgb1[i].doubleValue(), rgb2[i].doubleValue(), 0.05);
+            }
+        } catch (AssertionError e) {
+            throw new AssertionError(
+                    String.format("RGB1:[%.6f,%.6f,%.6f] - HSB:[%.6f,%.6f,%.6f] - RGB2:[%.6f,%.6f,%.6f] - %s",
+                            rgb1[0].doubleValue() / 100, rgb1[1].doubleValue() / 100, rgb1[2].doubleValue() / 100,
+                            hsb.getHue().doubleValue() / 100, hsb.getSaturation().doubleValue() / 100,
+                            hsb.getBrightness().doubleValue() / 100, rgb2[0].doubleValue() / 100,
+                            rgb2[1].doubleValue() / 100, rgb2[2].doubleValue() / 100, e.getMessage()));
         }
-        assertTrue(assertionExecuted);
     }
 
     /**
      * Test round trips RGBW => HSB => RGBW
      */
-    @Test
-    public void rgbwToHsb2hsbToRgbw() {
-        boolean assertionExecuted = false;
-        for (double r = 0; r <= 100; r = r + 5) {
-            for (double g = 0; g <= 100; g = g + 5) {
-                for (double b = 0; b <= 100; b = b + 5) {
-                    for (double w = 0; w <= 100; w = w + 5) {
-                        PercentType[] rgbw1 = new PercentType[] { new PercentType(new BigDecimal(r)),
-                                new PercentType(new BigDecimal(g)), new PercentType(new BigDecimal(b)),
-                                new PercentType(new BigDecimal(w)) };
-                        HSBType hsb = HSBType.BLACK;
-                        PercentType[] rgbw2 = new PercentType[4];
-                        try {
-                            hsb = ColorUtil.rgbToHsb(rgbw1);
-                            rgbw2 = ColorUtil.hsbToRgbwPercent(hsb);
+    @ParameterizedTest
+    @MethodSource("allRGBW")
+    public void rgbwToHsb2hsbToRgbw(double[] rgbw) {
+        PercentType[] rgbw1 = new PercentType[] { new PercentType(new BigDecimal(rgbw[0])),
+                new PercentType(new BigDecimal(rgbw[1])), new PercentType(new BigDecimal(rgbw[2])),
+                new PercentType(new BigDecimal(rgbw[3])) };
+        HSBType hsb = HSBType.BLACK;
+        PercentType[] rgbw2 = new PercentType[4];
+        try {
+            hsb = ColorUtil.rgbToHsb(rgbw1);
+            rgbw2 = ColorUtil.hsbToRgbwPercent(hsb);
 
-                            // RGB assertions are meaningless if B or S are zero
-                            if (hsb.getBrightness().doubleValue() == 0 || hsb.getSaturation().doubleValue() == 0) {
-                                continue;
-                            }
-
-                            // RGB assertions are meaningless if W exceeds max head-room
-                            if (w > 100 - Math.max(r, Math.max(g, b))) {
-                                continue;
-                            }
-
-                            for (int i = 0; i < 3; i++) {
-                                assertEquals(rgbw1[i].doubleValue() + rgbw1[3].doubleValue(),
-                                        rgbw2[i].doubleValue() + rgbw2[3].doubleValue(), 0.05);
-                            }
-
-                            assertionExecuted = true;
-                        } catch (AssertionError e) {
-                            throw new AssertionError(String.format(
-                                    "RGB1:[%.6f,%.6f,%.6f,%.6f] - HSB:[%.6f,%.6f,%.6f] - RGB2:[%.6f,%.6f,%.6f,%.6f] - %s",
-                                    rgbw1[0].doubleValue() / 100, rgbw1[1].doubleValue() / 100,
-                                    rgbw1[2].doubleValue() / 100, rgbw1[3].doubleValue() / 100,
-                                    hsb.getHue().doubleValue() / 100, hsb.getSaturation().doubleValue() / 100,
-                                    hsb.getBrightness().doubleValue() / 100, rgbw2[0].doubleValue() / 100,
-                                    rgbw2[1].doubleValue() / 100, rgbw2[2].doubleValue() / 100,
-                                    rgbw2[3].doubleValue() / 100, e.getMessage()));
-                        }
-                    }
-                }
+            // RGB assertions are meaningless if B or S are zero
+            if (hsb.getBrightness().doubleValue() == 0 || hsb.getSaturation().doubleValue() == 0) {
+                return;
             }
+
+            // RGB assertions are meaningless if W exceeds max head-room
+            if (rgbw[3] > 100 - Math.max(rgbw[0], Math.max(rgbw[1], rgbw[2]))) {
+                return;
+            }
+
+            for (int i = 0; i < 3; i++) {
+                assertEquals(rgbw1[i].doubleValue() + rgbw1[3].doubleValue(),
+                        rgbw2[i].doubleValue() + rgbw2[3].doubleValue(), 0.05);
+            }
+        } catch (AssertionError e) {
+            throw new AssertionError(
+                    String.format("RGB1:[%.6f,%.6f,%.6f,%.6f] - HSB:[%.6f,%.6f,%.6f] - RGB2:[%.6f,%.6f,%.6f,%.6f] - %s",
+                            rgbw1[0].doubleValue() / 100, rgbw1[1].doubleValue() / 100, rgbw1[2].doubleValue() / 100,
+                            rgbw1[3].doubleValue() / 100, hsb.getHue().doubleValue() / 100,
+                            hsb.getSaturation().doubleValue() / 100, hsb.getBrightness().doubleValue() / 100,
+                            rgbw2[0].doubleValue() / 100, rgbw2[1].doubleValue() / 100, rgbw2[2].doubleValue() / 100,
+                            rgbw2[3].doubleValue() / 100, e.getMessage()));
         }
-        assertTrue(assertionExecuted);
     }
 }
