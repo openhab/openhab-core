@@ -529,7 +529,8 @@ public class ColorUtil {
     private static int[] getIntArray(PercentType[] percents) {
         int[] ints = new int[percents.length];
         for (int i = 0; i < percents.length; i++) {
-            ints[i] = percents[i].toBigDecimal().multiply(BIG_DECIMAL_2_POINT_55).intValue();
+            ints[i] = percents[i].toBigDecimal().multiply(BIG_DECIMAL_255)
+                    .divide(BIG_DECIMAL_100, 0, RoundingMode.HALF_UP).intValue();
         }
         return ints;
     }
