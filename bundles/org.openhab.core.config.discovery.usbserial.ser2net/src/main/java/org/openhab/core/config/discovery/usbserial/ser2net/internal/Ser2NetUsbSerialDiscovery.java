@@ -115,8 +115,7 @@ public class Ser2NetUsbSerialDiscovery implements ServiceListener, UsbSerialDisc
 
         Set<UsbSerialDeviceInformation> scanResult = Stream.of(mdnsClient.list(SERVICE_TYPE, SINGLE_SCAN_DURATION))
                 .map(this::createUsbSerialDeviceInformation) //
-                .filter(Optional::isPresent) //
-                .map(Optional::get) //
+                .flatMap(Optional::stream) //
                 .collect(Collectors.toSet());
 
         Set<UsbSerialDeviceInformation> added = setDifference(scanResult, lastScanResult);

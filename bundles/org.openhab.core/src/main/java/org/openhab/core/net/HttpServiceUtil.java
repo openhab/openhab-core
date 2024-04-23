@@ -100,8 +100,8 @@ public class HttpServiceUtil {
                 } catch (final NumberFormatException ex) {
                     // If the property could not be parsed, the HTTP servlet itself has to care and warn about.
                 }
-            } else if (value instanceof Integer) {
-                return (Integer) value;
+            } else if (value instanceof Integer integerValue) {
+                return integerValue;
             }
         }
 

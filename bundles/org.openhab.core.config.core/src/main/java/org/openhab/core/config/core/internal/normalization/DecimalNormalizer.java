@@ -28,26 +28,26 @@ final class DecimalNormalizer extends AbstractNormalizer {
     @Override
     public Object doNormalize(Object value) {
         try {
-            if (value instanceof BigDecimal) {
-                return stripTrailingZeros((BigDecimal) value);
+            if (value instanceof BigDecimal bigDecimalValue) {
+                return stripTrailingZeros(bigDecimalValue);
             }
-            if (value instanceof String) {
-                return stripTrailingZeros(new BigDecimal((String) value));
+            if (value instanceof String stringValue) {
+                return stripTrailingZeros(new BigDecimal(stringValue));
             }
-            if (value instanceof Byte) {
-                return new BigDecimal((Byte) value).setScale(1);
+            if (value instanceof Byte byteValue) {
+                return new BigDecimal(byteValue).setScale(1);
             }
-            if (value instanceof Integer) {
-                return new BigDecimal((Integer) value).setScale(1);
+            if (value instanceof Integer integerValue) {
+                return new BigDecimal(integerValue).setScale(1);
             }
-            if (value instanceof Long) {
-                return new BigDecimal((Long) value).setScale(1);
+            if (value instanceof Long longValue) {
+                return new BigDecimal(longValue).setScale(1);
             }
-            if (value instanceof Float) {
-                return new BigDecimal(((Float) value).toString());
+            if (value instanceof Float floatValue) {
+                return new BigDecimal(floatValue.toString());
             }
-            if (value instanceof Double) {
-                return BigDecimal.valueOf((Double) value);
+            if (value instanceof Double doubleValue) {
+                return BigDecimal.valueOf(doubleValue);
             }
         } catch (ArithmeticException | NumberFormatException e) {
             logger.trace("\"{}\" is not a valid decimal number.", value, e);

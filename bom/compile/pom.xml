@@ -203,7 +203,7 @@
     <dependency>
       <groupId>org.jupnp</groupId>
       <artifactId>org.jupnp</artifactId>
-      <version>3.0.0</version>
+      <version>3.0.1</version>
       <scope>compile</scope>
     </dependency>
 
@@ -365,7 +365,7 @@
     <dependency>
       <groupId>de.focus-shift</groupId>
       <artifactId>jollyday-jackson</artifactId>
-      <version>0.23.2</version>
+      <version>0.27.0</version>
       <scope>compile</scope>
     </dependency>
 

@@ -169,7 +169,12 @@ public class QuantityType<T extends Quantity<T>> extends Number
      */
     public QuantityType(Number value, Unit<T> unit) {
         // Avoid scientific notation for double
-        BigDecimal bd = new BigDecimal(value.toString());
+        BigDecimal bd;
+        if (value instanceof BigDecimal decimal) {
+            bd = decimal;
+        } else {
+            bd = new BigDecimal(value.toString());
+        }
         quantity = (Quantity<T>) Quantities.getQuantity(bd, unit, Scale.RELATIVE);
     }
 
@@ -353,7 +358,12 @@ public class QuantityType<T extends Quantity<T>> extends Number
     }
 
     public BigDecimal toBigDecimal() {
-        return new BigDecimal(quantity.getValue().toString());
+        Number value = quantity.getValue();
+        if (value instanceof BigDecimal decimal) {
+            return decimal;
+        } else {
+            return new BigDecimal(value.toString());
+        }
     }
 
     @Override

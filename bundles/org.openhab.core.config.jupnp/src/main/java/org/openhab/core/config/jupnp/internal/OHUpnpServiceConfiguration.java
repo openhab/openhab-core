@@ -20,6 +20,8 @@ import org.jupnp.UpnpServiceConfiguration;
 import org.openhab.basefixes.util.concurrent.LinkedTransferQueue;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.ConfigurationPolicy;
+import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.http.HttpService;
 
 /**
  * Uses the Java 11 {@link LinkedTransferQueue} with jUPnP as workaround for the buggy OpenJDK 17 implementation.
@@ -33,6 +35,12 @@ import org.osgi.service.component.annotations.ConfigurationPolicy;
  */
 @Component(configurationPid = "org.jupnp", configurationPolicy = ConfigurationPolicy.REQUIRE, service = UpnpServiceConfiguration.class)
 public class OHUpnpServiceConfiguration extends OSGiUpnpServiceConfiguration {
+    @Reference
+    @Override
+    public void setHttpService(HttpService httpService) {
+        super.setHttpService(httpService);
+    }
+
     @Override
     protected ExecutorService createMainExecutorService() {
         return QueueingThreadPoolExecutor.createInstance("upnp-main", threadPoolSize, new LinkedTransferQueue<>());

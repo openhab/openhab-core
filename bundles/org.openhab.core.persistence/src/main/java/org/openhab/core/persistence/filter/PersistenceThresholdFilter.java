@@ -83,9 +83,9 @@ public class PersistenceThresholdFilter extends PersistenceFilter {
             return true;
         }
 
-        if (state instanceof DecimalType) {
+        if (state instanceof DecimalType decimalState) {
             BigDecimal oldState = ((DecimalType) cachedState).toBigDecimal();
-            BigDecimal delta = oldState.subtract(((DecimalType) state).toBigDecimal());
+            BigDecimal delta = oldState.subtract(decimalState.toBigDecimal());
             if (relative && !BigDecimal.ZERO.equals(oldState)) {
                 delta = delta.multiply(HUNDRED).divide(oldState, 2, RoundingMode.HALF_UP);
             }
