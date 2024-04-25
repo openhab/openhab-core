@@ -108,7 +108,7 @@ public class SseItemStatesEventBuilder {
         return null;
     }
 
-    private @Nullable String getDisplayState(Item item, Locale locale) {
+    protected @Nullable String getDisplayState(Item item, Locale locale) {
         StateDescription stateDescription = item.getStateDescription(locale);
         State state = item.getState();
         String displayState = state.toString();
