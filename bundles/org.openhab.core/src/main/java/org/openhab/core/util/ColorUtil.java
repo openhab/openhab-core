@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
  * @author Jan N. Klug - Initial contribution
  * @author Holger Friedrich - Transfer RGB color conversion from HSBType, improve RGB conversion, restructuring
  * @author Chris Jackson - Added fromRGB (moved from HSBType)
+ * @author Andrew Fiddian-Green - Extensive revamp to fix bugs and improve accuracy
  */
 @NonNullByDefault
 public class ColorUtil {
@@ -69,9 +70,7 @@ public class ColorUtil {
      * @return array of three int with the RGB values in the range 0 to 255.
      */
     public static int[] hsbToRgb(HSBType hsb) {
-        final PercentType[] rgbPercent = hsbToRgbPercent(hsb);
-        return new int[] { convertColorPercentToByte(rgbPercent[0]), convertColorPercentToByte(rgbPercent[1]),
-                convertColorPercentToByte(rgbPercent[2]) };
+        return getIntArray(hsbToRgbPercent(hsb));
     }
 
     /**
@@ -87,9 +86,7 @@ public class ColorUtil {
      * @return array of four int with the RGBW values in the range 0 to 255.
      */
     public static int[] hsbToRgbw(HSBType hsb) {
-        final PercentType[] rgbPercent = hsbToRgbwPercent(hsb);
-        return new int[] { convertColorPercentToByte(rgbPercent[0]), convertColorPercentToByte(rgbPercent[1]),
-                convertColorPercentToByte(rgbPercent[2]), convertColorPercentToByte(rgbPercent[3]) };
+        return getIntArray(hsbToRgbwPercent(hsb));
     }
 
     /**
@@ -175,38 +172,36 @@ public class ColorUtil {
      * @return array of four {@link PercentType} with the RGBW values in the range 0 to 100 percent.
      */
     public static PercentType[] hsbToRgbwPercent(HSBType hsb) {
-        PercentType[] rgb = hsbToRgbPercent(hsb);
-        final BigDecimal inRed = rgb[0].toBigDecimal();
-        final BigDecimal inGreen = rgb[1].toBigDecimal();
-        final BigDecimal inBlue = rgb[2].toBigDecimal();
-        // Get the maximum between R, G, and B
-        final BigDecimal maxColor = inRed.max(inGreen.max(inBlue));
+        PercentType[] rgbPercents = hsbToRgbPercent(hsb);
 
-        // If the maximum value is 0, immediately return pure black.
-        if (BigDecimal.ZERO.equals(maxColor)) {
-            return new PercentType[] { PercentType.ZERO, PercentType.ZERO, PercentType.ZERO, PercentType.ZERO };
+        // convert RGB PercentTypes to RGB doubles
+        double[] rgb = new double[3];
+        for (int i = 0; i < 3; i++) {
+            rgb[i] = rgbPercents[i].doubleValue();
         }
 
-        // This section serves to figure out what the color with 100% hue is
-        final BigDecimal multiplier = BIG_DECIMAL_100.divide(maxColor, 0, RoundingMode.DOWN);
-        final BigDecimal hR = inRed.multiply(multiplier);
-        final BigDecimal hG = inGreen.multiply(multiplier);
-        final BigDecimal hB = inBlue.multiply(multiplier);
+        // create RGBW array
+        PercentType[] rgbw = new PercentType[4];
+        if (Math.max(rgb[0], Math.max(rgb[1], rgb[2])) > 0) {
+            double whi = Math.min(rgb[0], Math.min(rgb[1], rgb[2]));
+            for (int i = 0; i < 3; i++) {
+                rgbw[i] = new PercentType(BigDecimal.valueOf(rgb[i] - whi));
+            }
+            rgbw[3] = new PercentType(BigDecimal.valueOf(whi));
+        } else {
+            for (int i = 0; i < 4; i++) {
+                rgbw[i] = PercentType.ZERO;
+            }
+        }
 
-        // This calculates the Whiteness (not strictly speaking Luminance) of the color
-        final BigDecimal whitenessMax = hR.max(hG.max(hB));
-        final BigDecimal whitenessMin = hR.min(hG.min(hB));
-        final BigDecimal luminance = ((whitenessMax.add(whitenessMin).divide(BIG_DECIMAL_2).subtract(BIG_DECIMAL_50))
-                .multiply(BIG_DECIMAL_100.divide(BIG_DECIMAL_50))).divide(multiplier);
+        if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("{}",
+                    String.format("RGB:[%.6f,%.6f,%.6f] - RGBW:[%.6f,%.6f,%.6f,%.6f]", rgbPercents[0].doubleValue(),
+                            rgbPercents[1].doubleValue(), rgbPercents[2].doubleValue(), rgbw[0].doubleValue(),
+                            rgbw[1].doubleValue(), rgbw[2].doubleValue(), rgbw[3].doubleValue()));
+        }
 
-        // check range
-        BigDecimal outRed = inRed.subtract(luminance).max(BigDecimal.ZERO);
-        BigDecimal outGreen = inGreen.subtract(luminance).max(BigDecimal.ZERO);
-        BigDecimal outBlue = inBlue.subtract(luminance).max(BigDecimal.ZERO);
-        BigDecimal outWhite = luminance.max(BigDecimal.ZERO);
-
-        return new PercentType[] { new PercentType(outRed), new PercentType(outGreen), new PercentType(outBlue),
-                new PercentType(outWhite) };
+        return rgbw;
     }
 
     /**
@@ -221,7 +216,7 @@ public class ColorUtil {
      * @return the RGB value of the color in the default sRGB color model.
      */
     public static int hsbTosRgb(HSBType hsb) {
-        final int[] rgb = hsbToRgb(hsb);
+        final int[] rgb = getIntArray(hsbToRgbPercent(hsb));
         return (0xFF << 24) | ((rgb[0] & 0xFF) << 16) | ((rgb[1] & 0xFF) << 8) | ((rgb[2] & 0xFF) << 0);
     }
 
@@ -250,29 +245,58 @@ public class ColorUtil {
      *
      * @param hsb an {@link HSBType} value.
      * @param gamut the color Gamut supported by the light.
-     * @return array of three double with the closest matching CIE 1931 x,y,Y in the range 0.0000 to 1.0000
+     * @return array of three or four double with the closest matching CIE 1931 x,y,Y in the range 0.0000 to 1.0000 -
+     *         plus an optional extra empty element to flag if the xyY result has been forced inside the given Gamut.
      */
     public static double[] hsbToXY(HSBType hsb, Gamut gamut) {
-        PercentType[] rgb = hsbToRgbPercent(hsb);
-        double r = inverseCompand(rgb[0].doubleValue() / PercentType.HUNDRED.doubleValue());
-        double g = inverseCompand(rgb[1].doubleValue() / PercentType.HUNDRED.doubleValue());
-        double b = inverseCompand(rgb[2].doubleValue() / PercentType.HUNDRED.doubleValue());
+        PercentType[] rgbPercents = hsbToRgbPercent(hsb);
 
+        // convert rgbPercents to doubles
+        double r = rgbPercents[0].doubleValue() / 100.0;
+        double g = rgbPercents[1].doubleValue() / 100.0;
+        double b = rgbPercents[2].doubleValue() / 100.0;
+
+        // prevent divide by zero errors
+        if (Math.max(r, Math.max(g, b)) <= 0.0) {
+            r = 0.000001;
+            g = 0.000001;
+            b = 0.000001;
+        }
+
+        // apply gamma correction
+        r = r > 0.04045 ? Math.pow((r + 0.055) / (1.0 + 0.055), 2.4) : r / 12.92;
+        g = g > 0.04045 ? Math.pow((g + 0.055) / (1.0 + 0.055), 2.4) : g / 12.92;
+        b = b > 0.04045 ? Math.pow((b + 0.055) / (1.0 + 0.055), 2.4) : b / 12.92;
+
+        // convert RGB to XYZ using 'Wide RGB D65' formula
         double X = r * 0.664511 + g * 0.154324 + b * 0.162028;
         double Y = r * 0.283881 + g * 0.668433 + b * 0.047685;
         double Z = r * 0.000088 + g * 0.072310 + b * 0.986039;
 
+        // convert XYZ to xyz
         double sum = X + Y + Z;
-        Point p = sum == 0.0 ? new Point() : new Point(X / sum, Y / sum);
-        Point q = gamut.closest(p);
+        double x = X / sum;
+        double y = Y / sum;
+        double z = Y;
 
-        double[] xyY = new double[] { ((int) (q.x * 10000.0)) / 10000.0, ((int) (q.y * 10000.0)) / 10000.0,
-                ((int) (Y * 10000.0)) / 10000.0 };
+        // force xy point to be inside the gamut
+        Point xy = gamut.closest(new Point(x, y));
+        boolean xyForced = xy.x != x || xy.y != y;
+
+        // create xyY; increment array size to flag if xy was forced
+        double[] xyY = new double[xyForced ? 4 : 3];
+        xyY[0] = xy.x;
+        xyY[1] = xy.y;
+        xyY[2] = Y;
 
         if (LOGGER.isTraceEnabled()) {
-            LOGGER.trace("HSB: {} - RGB: {} - XYZ: {} {} {} - xyY: {}", hsb, ColorUtil.hsbToRgbPercent(hsb), X, Y, Z,
-                    xyY);
+            LOGGER.trace("{}", String.format(
+                    "HSB:[%.6f,%.6f,%.6f] - RGB:[%.6f,%.6f,%.6f] - RGB':[%.6f,%.6f,%.6f] - XYZ:[%.6f,%.6f,%.6f] - xyz:[%.6f,%.6f,%.6f] - xyY:[%.6f,%.6f,%.6f] (xyForced:%b)",
+                    hsb.getHue().doubleValue(), hsb.getSaturation().doubleValue(), hsb.getBrightness().doubleValue(),
+                    rgbPercents[0].doubleValue() / 100.0, rgbPercents[1].doubleValue() / 100.0,
+                    rgbPercents[2].doubleValue() / 100.0, r, g, b, X, Y, Z, x, y, z, xyY[0], xyY[1], xyY[2], xyForced));
         }
+
         return xyY;
     }
 
@@ -285,60 +309,24 @@ public class ColorUtil {
      * @throws IllegalArgumentException when input array has wrong size or exceeds allowed value range.
      */
     public static HSBType rgbToHsb(int[] rgbw) throws IllegalArgumentException {
-        if (rgbw.length == 4) {
-            if (!inByteRange(rgbw[0]) || !inByteRange(rgbw[1]) || !inByteRange(rgbw[2]) || !inByteRange(rgbw[3])) {
-                throw new IllegalArgumentException("rgbToHsb requires 3 or 4 values between 0 and 255");
+        if (rgbw.length < 3 || rgbw.length > 4) {
+            throw new IllegalArgumentException("rgbToHsb() requires 3 or 4 arguments");
+        }
+
+        for (int i = 0; i < rgbw.length; i++) {
+            if (rgbw[i] < 0 || rgbw[i] > 255) {
+                throw new IllegalArgumentException(
+                        String.format("rgbToHsb() argument %d value '%f' out of range [0..255]", i, rgbw[i]));
             }
-            return rgbwToHsb(new PercentType[] { convertByteToColorPercent(rgbw[0]), convertByteToColorPercent(rgbw[1]),
-                    convertByteToColorPercent(rgbw[2]), convertByteToColorPercent(rgbw[3]) });
-        }
-        if (rgbw.length != 3 || !inByteRange(rgbw[0]) || !inByteRange(rgbw[1]) || !inByteRange(rgbw[2])) {
-            throw new IllegalArgumentException("rgbToHsb requires 3 or 4 values between 0 and 255");
-        }
-        return rgbToHsb(new PercentType[] { convertByteToColorPercent(rgbw[0]), convertByteToColorPercent(rgbw[1]),
-                convertByteToColorPercent(rgbw[2]) });
-    }
-
-    /**
-     * Transform RGBW to <a href="https://en.wikipedia.org/wiki/HSL_and_HSV">HSV</a> based {@link HSBType}.
-     *
-     * See <a href=
-     * "https://stackoverflow.com/questions/40312216/converting-rgb-to-rgbw">Converting RGB to RGBW</a>.
-     *
-     * See also: {@link #hsbToRgb(HSBType)}, {@link #hsbTosRgb(HSBType)}, {@link #hsbToRgbPercent(HSBType)}
-     *
-     * @param rgbw array of four int with the RGBW values in the range 0 to 255.
-     * @return hsb an {@link HSBType} value.
-     *
-     */
-    private static HSBType rgbwToHsb(PercentType[] rgbw) {
-        if (rgbw.length != 4) {
-            throw new IllegalArgumentException("RGBW requires 4 values");
         }
 
-        BigDecimal luminance = BigDecimal.valueOf(rgbw[3].doubleValue() / PercentType.HUNDRED.doubleValue() * 255.0);
-        BigDecimal inRed = BigDecimal.valueOf(rgbw[0].doubleValue() / PercentType.HUNDRED.doubleValue() * 255.0)
-                .add(luminance);
-        BigDecimal inGreen = BigDecimal.valueOf(rgbw[1].doubleValue() / PercentType.HUNDRED.doubleValue() * 255.0)
-                .add(luminance);
-        BigDecimal inBlue = BigDecimal.valueOf(rgbw[2].doubleValue() / PercentType.HUNDRED.doubleValue() * 255.0)
-                .add(luminance);
-
-        // Get the maximum between R, G, and B
-        final BigDecimal maxColor = BIG_DECIMAL_255.min(inRed.max(inGreen.max(inBlue)).max(BigDecimal.ZERO));
-
-        // If the maximum value is 0, immediately return pure black.
-        if (BigDecimal.ZERO.compareTo(maxColor) == 0) {
-            return HSBType.BLACK;
+        PercentType[] rgbwPercents = new PercentType[rgbw.length];
+        for (int i = 0; i < rgbw.length; i++) {
+            rgbwPercents[i] = new PercentType(
+                    new BigDecimal(rgbw[i]).divide(BIG_DECIMAL_2_POINT_55, COLOR_MATH_CONTEXT));
         }
 
-        final BigDecimal multiplier = BIG_DECIMAL_255.divide(maxColor, 0, RoundingMode.DOWN);
-
-        BigDecimal outRed = inRed.divide(multiplier).min(BIG_DECIMAL_255).max(BigDecimal.ZERO);
-        BigDecimal outGreen = inGreen.divide(multiplier).min(BIG_DECIMAL_255).max(BigDecimal.ZERO);
-        BigDecimal outBlue = inBlue.divide(multiplier).min(BIG_DECIMAL_255).max(BigDecimal.ZERO);
-
-        return HSBType.fromRGB(outRed.intValue(), outGreen.intValue(), outBlue.intValue());
+        return rgbToHsb(rgbwPercents);
     }
 
     /**
@@ -349,17 +337,43 @@ public class ColorUtil {
      * @return the corresponding {@link HSBType}.
      * @throws IllegalArgumentException when input array has wrong size or exceeds allowed value range.
      */
-    public static HSBType rgbToHsb(PercentType[] rgb) throws IllegalArgumentException {
-        if (rgb.length == 4) {
-            return rgbwToHsb(rgb);
-        }
-        if (rgb.length != 3) {
-            throw new IllegalArgumentException("RGB array needs exactly three values!");
+    public static HSBType rgbToHsb(PercentType[] rgbw) throws IllegalArgumentException {
+        if (rgbw.length < 3 || rgbw.length > 4) {
+            throw new IllegalArgumentException("rgbToHsb() requires 3 or 4 arguments");
         }
 
-        BigDecimal r = rgb[0].toBigDecimal();
-        BigDecimal g = rgb[1].toBigDecimal();
-        BigDecimal b = rgb[2].toBigDecimal();
+        BigDecimal r;
+        BigDecimal g;
+        BigDecimal b;
+
+        if (rgbw.length == 3) {
+            // use RGB BigDecimal values as-is
+            r = rgbw[0].toBigDecimal();
+            g = rgbw[1].toBigDecimal();
+            b = rgbw[2].toBigDecimal();
+        } else {
+            // convert RGBW BigDecimal values to RGB BigDecimal values
+            double red = rgbw[0].doubleValue();
+            double grn = rgbw[1].doubleValue();
+            double blu = rgbw[2].doubleValue();
+            double max = Math.max(red, Math.max(grn, blu));
+            double whi = Math.min(100 - max, rgbw[3].doubleValue());
+
+            if (max > 0 || whi > 0) {
+                r = BigDecimal.valueOf(red + whi);
+                g = BigDecimal.valueOf(grn + whi);
+                b = BigDecimal.valueOf(blu + whi);
+            } else {
+                r = BigDecimal.ZERO;
+                g = BigDecimal.ZERO;
+                b = BigDecimal.ZERO;
+            }
+
+            if (LOGGER.isTraceEnabled()) {
+                LOGGER.trace("{}", String.format("RGBW:[%.6f,%.6f,%.6f,%.6f] - RGB:[%.6f,%.6f,%.6f]", red, grn, blu,
+                        whi, r.doubleValue(), g.doubleValue(), b.doubleValue()));
+            }
+        }
 
         BigDecimal max = r.max(g).max(b);
         BigDecimal min = r.min(g).min(b);
@@ -390,7 +404,7 @@ public class ColorUtil {
         }
         if (hue.compareTo(BigDecimal.ZERO) < 0) {
             hue = hue.add(BIG_DECIMAL_360);
-        } else if (hue.compareTo(BIG_DECIMAL_360) > 0) {
+        } else if (hue.compareTo(BIG_DECIMAL_360) >= 0) {
             hue = hue.subtract(BIG_DECIMAL_360);
         }
 
@@ -421,82 +435,110 @@ public class ColorUtil {
      * "https://developers.meethue.com/develop/application-design-guidance/color-conversion-formulas-rgb-to-xy-and-back/">Hue
      * developer portal</a>.
      *
-     * @param xy array of double with CIE 1931 x,y[,Y] in the range 0.0000 to 1.0000 <code>Y</code> value is optional.
+     * @param xyY array of double with CIE 1931 x,y[,Y] in the range 0.0000 to 1.0000 <code>Y</code> value is optional.
      * @param gamut the color Gamut supported by the light.
      * @return the corresponding {@link HSBType}.
      * @throws IllegalArgumentException when input array has wrong size or exceeds allowed value range
      */
-    public static HSBType xyToHsb(double[] xy, Gamut gamut) throws IllegalArgumentException {
-        if (xy.length < 2 || xy.length > 3 || !inRange(xy[0]) || !inRange(xy[1])
-                || (xy.length == 3 && !inRange(xy[2]))) {
-            throw new IllegalArgumentException("xy array only allows two or three values between 0.0 and 1.0.");
+    public static HSBType xyToHsb(double[] xyY, Gamut gamut) throws IllegalArgumentException {
+        if (xyY.length < 2 || xyY.length > 4) {
+            throw new IllegalArgumentException("xyToHsb() requires 2, 3 or 4 arguments");
         }
-        Point p = gamut.closest(new Point(xy[0], xy[1]));
-        double x = p.x;
-        double y = p.y == 0.0 ? 0.000001 : p.y;
-        double z = 1.0 - x - y;
-        double Y = (xy.length == 3) ? xy[2] : 1.0;
-        double X = (Y / y) * x;
-        double Z = (Y / y) * z;
-        double r = X * 1.656492 + Y * -0.354851 + Z * -0.255038;
-        double g = X * -0.707196 + Y * 1.655397 + Z * 0.036152;
-        double b = X * 0.051713 + Y * -0.121364 + Z * 1.011530;
 
-        // Correction for negative values is missing from Philips' documentation.
-        double min = Math.min(r, Math.min(g, b));
+        for (int i = 0; i < xyY.length; i++) {
+            if (xyY[i] < 0 || xyY[i] > 1) {
+                throw new IllegalArgumentException(
+                        String.format("xyToHsb() argument %d value '%f' out of range [0..1.0]", i, xyY[i]));
+            }
+        }
+
+        // map xy to the closest point on the gamut
+        final Point xy = gamut.closest(new Point(xyY[0], xyY[1]));
+
+        // convert to xyz
+        final double x = xy.x;
+        final double y = xy.y == 0.0 ? 0.000001 : xy.y;
+        final double z = 1.0 - x - y;
+
+        // convert xy(Y) to XYZ
+        final double Y = xyY.length == 3 && xyY[2] > 0.0 ? xyY[2] : 1.0;
+        final double X = (Y / y) * x;
+        final double Z = (Y / y) * z;
+
+        // convert XYZ to RGB using 'Wide RGB D65' formula
+        final double[] rgb = new double[] {
+            // @formatter:off
+                X *  1.656492 + Y * -0.354851 + Z * -0.255038,
+                X * -0.707196 + Y *  1.655397 + Z *  0.036152,
+                X *  0.051713 + Y * -0.121364 + Z *  1.011530 };
+            // @formatter:on
+
+        final double[] rgbPrime = rgb.clone();
+
+        // correction for negative values is missing from Philips' documentation.
+        double min = Math.min(rgb[0], Math.min(rgb[1], rgb[2]));
         if (min < 0.0) {
-            r -= min;
-            g -= min;
-            b -= min;
+            for (int i = 0; i < rgb.length; i++) {
+                rgb[i] -= min;
+            }
         }
 
         // rescale
-        double max = Math.max(r, Math.max(g, b));
+        double max = Math.max(rgb[0], Math.max(rgb[1], rgb[2]));
         if (max > 1.0) {
-            r /= max;
-            g /= max;
-            b /= max;
+            for (int i = 0; i < rgb.length; i++) {
+                rgb[i] /= max;
+            }
         }
 
-        r = compand(r);
-        g = compand(g);
-        b = compand(b);
+        // remove gamma correction
+        for (int i = 0; i < rgb.length; i++) {
+            rgb[i] = rgb[i] <= 0.0031308 ? 12.92 * rgb[i] : (1.0 + 0.055) * Math.pow(rgb[i], (1.0 / 2.4)) - 0.055;
+        }
 
         // rescale
-        max = Math.max(r, Math.max(g, b));
+        max = Math.max(rgb[0], Math.max(rgb[1], rgb[2]));
         if (max > 1.0) {
-            r /= max;
-            g /= max;
-            b /= max;
+            for (int i = 0; i < rgb.length; i++) {
+                rgb[i] /= max;
+            }
         }
 
-        LOGGER.trace("xy: {} - XYZ: {} {} {} - RGB: {} {} {}", xy, X, Y, Z, r, g, b);
+        // convert double[] to PercentType[]
+        PercentType[] rgbPercents = new PercentType[rgb.length];
+        for (int i = 0; i < rgb.length; i++) {
+            rgbPercents[i] = new PercentType(new BigDecimal(rgb[i]).multiply(BIG_DECIMAL_100, COLOR_MATH_CONTEXT));
+        }
 
-        return rgbToHsb(new PercentType[] { convertDoubleToColorPercent(r), convertDoubleToColorPercent(g),
-                convertDoubleToColorPercent(b) });
+        HSBType hsb = rgbToHsb(rgbPercents);
+
+        if (LOGGER.isTraceEnabled()) {
+            LOGGER.trace("{}", String.format(
+                    "xyY:[%.6f,%.6f,%.6f] - xyz:[%.6f,%.6f,%.6f] - XYZ:[%.6f,%.6f,%.6f] - RGB':[%.6f,%.6f,%.6f] - RGB:[%.6f,%.6f,%.6f] - HSB:[%.6f,%.6f,%.6f] (xyForced:%b)",
+                    xyY[0], xyY[1], Y, x, y, z, X, Y, Z, rgbPrime[0], rgbPrime[1], rgbPrime[2], rgb[0], rgb[1], rgb[2],
+                    hsb.getHue().doubleValue(), hsb.getSaturation().doubleValue(), hsb.getBrightness().doubleValue(),
+                    xy.x != xyY[0] || xy.y != xyY[1]));
+        }
+
+        return hsb;
     }
 
     /**
-     * Gamma correction (inverse sRGB companding)
-     *
-     * @param value the value to process
-     * @return the processed value
+     * Get an array of int from an array of PercentType.
      */
-    private static double inverseCompand(double value) {
-        return value > 0.04045 ? Math.pow((value + 0.055) / (1.0 + 0.055), 2.4) : value / 12.92;
+    private static int[] getIntArray(PercentType[] percents) {
+        int[] ints = new int[percents.length];
+        for (int i = 0; i < percents.length; i++) {
+            ints[i] = percents[i].toBigDecimal().multiply(BIG_DECIMAL_255)
+                    .divide(BIG_DECIMAL_100, 0, RoundingMode.HALF_UP).intValue();
+        }
+        return ints;
     }
 
     /**
-     * Inverse Gamma correction (sRGB companding)
-     *
-     * @param value the value to process
-     * @return the processed value
+     * Class for points in the CIE xy color space
      */
-    public static double compand(double value) {
-        return value <= 0.0031308 ? 12.92 * value : (1.0 + 0.055) * Math.pow(value, (1.0 / 2.4)) - 0.055;
-    }
-
-    private static class Point {
+    public static class Point {
         public final double x;
         public final double y;
 
@@ -556,14 +598,15 @@ public class ColorUtil {
         }
     }
 
+    /**
+     * Color <a href="https://en.wikipedia.org/wiki/Gamut">gamut</a>
+     *
+     * @param r double array with {@code xy} coordinates for red, x, y between 0.0000 and 1.0000.
+     * @param g double array with {@code xy} coordinates for green, x, y between 0.0000 and 1.0000.
+     * @param b double array with {@code xy} coordinates for blue, x, y between 0.0000 and 1.0000.
+     */
     public record Gamut(double[] r, double[] g, double[] b) {
-        /**
-         * Color <a href="https://en.wikipedia.org/wiki/Gamut">gamut</a>
-         *
-         * @param r double array with {@code xy} coordinates for red, x, y between 0.0000 and 1.0000.
-         * @param g double array with {@code xy} coordinates for green, x, y between 0.0000 and 1.0000.
-         * @param b double array with {@code xy} coordinates for blue, x, y between 0.0000 and 1.0000.
-         */
+
         public Gamut {
         }
 
@@ -606,26 +649,5 @@ public class ColorUtil {
             }
             return retVal;
         }
-    }
-
-    private static boolean inByteRange(int val) {
-        return val >= 0 && val <= 255;
-    }
-
-    private static boolean inRange(double val) {
-        return val >= 0.0 && val <= 1.0;
-    }
-
-    private static int convertColorPercentToByte(PercentType percent) {
-        return percent.toBigDecimal().multiply(BIG_DECIMAL_255).divide(BIG_DECIMAL_100, 0, RoundingMode.HALF_UP)
-                .intValue();
-    }
-
-    private static PercentType convertByteToColorPercent(int b) {
-        return new PercentType(new BigDecimal(b).divide(BIG_DECIMAL_2_POINT_55, COLOR_MATH_CONTEXT));
-    }
-
-    private static PercentType convertDoubleToColorPercent(double d) {
-        return new PercentType(new BigDecimal(d).multiply(BIG_DECIMAL_100, COLOR_MATH_CONTEXT));
     }
 }
