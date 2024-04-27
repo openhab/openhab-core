@@ -167,7 +167,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
-        <version>3.6.0</version>
+        <version>3.6.1</version>
         <executions>
           <execution>
             <id>unpack-eea</id>
@@ -204,7 +204,7 @@
           <plugin>
             <groupId>org.jvnet.jaxb2.maven2</groupId>
             <artifactId>maven-jaxb2-plugin</artifactId>
-            <version>0.15.2</version>
+            <version>0.15.3</version>
             <configuration>
               <schemaDirectory>schema</schemaDirectory>
               <bindingDirectory>schema/binding</bindingDirectory>
