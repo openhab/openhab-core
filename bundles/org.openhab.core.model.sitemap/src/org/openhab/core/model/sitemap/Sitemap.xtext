@@ -80,7 +80,7 @@ Chart:
     (('icon=' icon=Icon) |
         ('icon=[' (IconRules+=IconRule (',' IconRules+=IconRule)*) ']') |
         ('staticIcon=' staticIcon=Icon))? &
-    ('service=' service=STRING)? & ('refresh=' refresh=INT)? & ('period=' period=ID) &
+    ('service=' service=STRING)? & ('refresh=' refresh=INT)? & ('period=' period=Period) &
     ('legend=' legend=BOOLEAN_OBJECT)? & ('forceasitem=' forceAsItem=BOOLEAN_OBJECT)? &
     ('labelcolor=[' (LabelColor+=ColorArray (',' LabelColor+=ColorArray)*) ']')? &
     ('valuecolor=[' (ValueColor+=ColorArray (',' ValueColor+=ColorArray)*) ']')? &
@@ -221,6 +221,9 @@ Icon returns ecore::EString:
 // Allow hyphen inside an icon name
 IconName:
     (ID '-')* ID;
+
+Period:
+    (ID '-')? ID;
 
 ColorArray:
     ((conditions+=Condition ('AND' conditions+=Condition)*) '=')? (arg=STRING);

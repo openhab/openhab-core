@@ -95,10 +95,6 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
     final Map<String, Set<DayOfWeek>> daysets = new HashMap<>();
     private final Map<Object, HolidayManager> holidayManagers = new HashMap<>();
     private final List<String> countryParameters = new ArrayList<>();
-    /**
-     * Utility for accessing resources.
-     */
-    private final ResourceUtil resourceUtil = new ResourceUtil();
 
     private final LocaleProvider localeProvider;
     private final Bundle bundle;
@@ -432,6 +428,6 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
 
     @Override
     public @Nullable String getHolidayDescription(@Nullable String holiday) {
-        return holiday != null ? resourceUtil.getHolidayDescription(localeProvider.getLocale(), holiday) : null;
+        return holiday != null ? ResourceUtil.getHolidayDescription(localeProvider.getLocale(), holiday) : null;
     }
 }

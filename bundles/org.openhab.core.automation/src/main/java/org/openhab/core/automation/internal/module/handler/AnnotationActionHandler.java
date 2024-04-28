@@ -105,16 +105,16 @@ public class AnnotationActionHandler extends BaseActionModuleHandler {
                             method, moduleType.getUID(), ex.getMessage());
                 }
                 // we allow simple data types as return values and put them under the context key "result".
-            } else if (result instanceof Boolean boolean1) {
-                output.put(MODULE_RESULT, boolean1);
+            } else if (result instanceof Boolean booleanValue) {
+                output.put(MODULE_RESULT, booleanValue);
             } else if (result instanceof String) {
                 output.put(MODULE_RESULT, result);
             } else if (result instanceof Integer) {
                 output.put(MODULE_RESULT, result);
-            } else if (result instanceof Double) {
-                output.put(MODULE_RESULT, (double) result);
-            } else if (result instanceof Float) {
-                output.put(MODULE_RESULT, (float) result);
+            } else if (result instanceof Double doubleValue) {
+                output.put(MODULE_RESULT, doubleValue);
+            } else if (result instanceof Float floatValue) {
+                output.put(MODULE_RESULT, floatValue);
             } else {
                 logger.warn("Non compatible return type '{}' on action method.", result.getClass());
             }

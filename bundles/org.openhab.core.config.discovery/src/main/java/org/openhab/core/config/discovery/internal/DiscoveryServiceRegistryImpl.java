@@ -346,7 +346,6 @@ public final class DiscoveryServiceRegistryImpl implements DiscoveryServiceRegis
             if (startScan(discoveryServices.iterator().next(), listener)) {
                 atLeastOneDiscoveryServiceHasBeenStarted = true;
             }
-
         }
 
         return atLeastOneDiscoveryServiceHasBeenStarted;

@@ -87,7 +87,7 @@ public class PipedAudioStream extends AudioStream {
         if (closed.getAndSet(true)) {
             return;
         }
-        if (this.onCloseChain.size() > 0) {
+        if (!this.onCloseChain.isEmpty()) {
             this.onCloseChain.forEach(Runnable::run);
             this.onCloseChain.clear();
         }

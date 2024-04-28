@@ -468,11 +468,9 @@ public abstract class GenericItem implements ActiveItem {
 
     @Override
     public @Nullable CommandDescription getCommandDescription(@Nullable Locale locale) {
-        if (commandDescriptionService != null) {
-            CommandDescription commandDescription = commandDescriptionService.getCommandDescription(this.name, locale);
-            if (commandDescription != null) {
-                return commandDescription;
-            }
+        CommandDescription commandOptions = getCommandOptions(locale);
+        if (commandOptions != null) {
+            return commandOptions;
         }
 
         StateDescription stateDescription = getStateDescription(locale);
@@ -502,6 +500,17 @@ public abstract class GenericItem implements ActiveItem {
     protected void logSetTypeError(TimeSeries timeSeries) {
         logger.error("Tried to set invalid state in time series {} on item {} of type {}, ignoring it", timeSeries,
                 getName(), getClass().getSimpleName());
+    }
+
+    protected @Nullable CommandDescription getCommandOptions(@Nullable Locale locale) {
+        if (commandDescriptionService != null) {
+            CommandDescription commandDescription = commandDescriptionService.getCommandDescription(this.name, locale);
+            if (commandDescription != null) {
+                return commandDescription;
+            }
+        }
+
+        return null;
     }
 
     private CommandDescription stateOptions2CommandOptions(StateDescription stateDescription) {

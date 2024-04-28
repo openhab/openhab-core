@@ -205,7 +205,7 @@ public class YamlModelRepositoryImplTest {
         String actualFileContent = Files.readString(fullModelPath);
         String expectedFileContent = Files.readString(SOURCE_PATH.resolve("addToModelExpectedContent.yaml"));
 
-        assertThat(actualFileContent, is(expectedFileContent));
+        assertThat(actualFileContent, is(expectedFileContent.replaceAll("\r\n", "\n")));
     }
 
     @Test
@@ -221,7 +221,7 @@ public class YamlModelRepositoryImplTest {
         String actualFileContent = Files.readString(fullModelPath);
         String expectedFileContent = Files.readString(SOURCE_PATH.resolve("updateInModelExpectedContent.yaml"));
 
-        assertThat(actualFileContent, is(expectedFileContent));
+        assertThat(actualFileContent, is(expectedFileContent.replaceAll("\r\n", "\n")));
     }
 
     @Test
@@ -237,7 +237,7 @@ public class YamlModelRepositoryImplTest {
         String actualFileContent = Files.readString(fullModelPath);
         String expectedFileContent = Files.readString(SOURCE_PATH.resolve("removeFromModelExpectedContent.yaml"));
 
-        assertThat(actualFileContent, is(expectedFileContent));
+        assertThat(actualFileContent, is(expectedFileContent.replaceAll("\r\n", "\n")));
     }
 
     @Test

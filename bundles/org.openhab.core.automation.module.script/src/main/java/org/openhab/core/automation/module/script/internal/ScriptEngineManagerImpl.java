@@ -175,7 +175,13 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
                 return true;
             } catch (Exception ex) {
                 logger.error("Error during evaluation of script '{}': {}", engineIdentifier, ex.getMessage());
-                logger.debug("", ex);
+                // Only call logger if debug level is actually enabled, because OPS4J Pax Logging holds (at least for
+                // some time) a reference to the exception and its cause, which may hold a reference to the script
+                // engine.
+                // This prevents garbage collection (at least for some time) to remove the script engine from heap.
+                if (logger.isDebugEnabled()) {
+                    logger.debug("", ex);
+                }
             }
         }
         return false;

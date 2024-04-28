@@ -45,6 +45,11 @@ public class ScriptConditionHandler extends AbstractScriptModuleHandler<Conditio
     @Override
     public boolean isSatisfied(final Map<String, Object> context) {
         boolean result = false;
+
+        if (script.isEmpty()) {
+            return true;
+        }
+
         Optional<ScriptEngine> engine = getScriptEngine();
 
         if (engine.isPresent()) {
@@ -55,10 +60,12 @@ public class ScriptConditionHandler extends AbstractScriptModuleHandler<Conditio
                 if (returnVal instanceof Boolean boolean1) {
                     result = boolean1;
                 } else {
-                    logger.error("Script did not return a boolean value, but '{}'", returnVal);
+                    logger.error("Script of rule with UID '{}' did not return a boolean value, but '{}'", ruleUID,
+                            returnVal);
                 }
             } catch (ScriptException e) {
-                logger.error("Script execution failed: {}", e.getMessage());
+                logger.error("Script execution of rule with UID '{}' failed: {}", ruleUID, e.getMessage(),
+                        logger.isDebugEnabled() ? e : null);
             }
         }
 

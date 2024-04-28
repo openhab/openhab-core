@@ -54,11 +54,13 @@ import org.openhab.core.persistence.FilterCriteria;
 import org.openhab.core.persistence.FilterCriteria.Ordering;
 import org.openhab.core.persistence.HistoricItem;
 import org.openhab.core.persistence.ModifiablePersistenceService;
+import org.openhab.core.persistence.PersistenceItemConfiguration;
 import org.openhab.core.persistence.PersistenceItemInfo;
 import org.openhab.core.persistence.PersistenceManager;
 import org.openhab.core.persistence.PersistenceService;
 import org.openhab.core.persistence.PersistenceServiceRegistry;
 import org.openhab.core.persistence.QueryablePersistenceService;
+import org.openhab.core.persistence.config.PersistenceAllConfig;
 import org.openhab.core.persistence.dto.ItemHistoryDTO;
 import org.openhab.core.persistence.dto.PersistenceServiceConfigurationDTO;
 import org.openhab.core.persistence.dto.PersistenceServiceDTO;
@@ -66,6 +68,7 @@ import org.openhab.core.persistence.registry.ManagedPersistenceServiceConfigurat
 import org.openhab.core.persistence.registry.PersistenceServiceConfiguration;
 import org.openhab.core.persistence.registry.PersistenceServiceConfigurationDTOMapper;
 import org.openhab.core.persistence.registry.PersistenceServiceConfigurationRegistry;
+import org.openhab.core.persistence.strategy.PersistenceStrategy;
 import org.openhab.core.types.State;
 import org.openhab.core.types.TypeParser;
 import org.osgi.service.component.annotations.Activate;
@@ -170,11 +173,24 @@ public class PersistenceResource implements RESTResource {
     public Response httpGetPersistenceServiceConfiguration(@Context HttpHeaders headers,
             @Parameter(description = "Id of the persistence service.") @PathParam("serviceId") String serviceId) {
         PersistenceServiceConfiguration configuration = persistenceServiceConfigurationRegistry.get(serviceId);
+        boolean editable = managedPersistenceServiceConfigurationProvider.get(serviceId) != null;
+
+        if (configuration == null) {
+            PersistenceService service = persistenceServiceRegistry.get(serviceId);
+            if (service != null) {
+                List<PersistenceStrategy> strategies = service.getDefaultStrategies();
+                List<PersistenceItemConfiguration> configs = List.of(
+                        new PersistenceItemConfiguration(List.of(new PersistenceAllConfig()), null, strategies, null));
+                configuration = new PersistenceServiceConfiguration(serviceId, configs, strategies, strategies,
+                        List.of());
+                editable = true;
+            }
+        }
 
         if (configuration != null) {
             PersistenceServiceConfigurationDTO configurationDTO = PersistenceServiceConfigurationDTOMapper
                     .map(configuration);
-            configurationDTO.editable = managedPersistenceServiceConfigurationProvider.get(serviceId) != null;
+            configurationDTO.editable = editable;
             return JSONResponse.createResponse(Status.OK, configurationDTO, null);
         } else {
             return Response.status(Status.NOT_FOUND).build();
@@ -390,7 +406,6 @@ public class PersistenceResource implements RESTResource {
         }
 
         Iterable<HistoricItem> result;
-        State state;
 
         long quantity = 0L;
 
@@ -430,23 +445,24 @@ public class PersistenceResource implements RESTResource {
         Iterator<HistoricItem> it = result.iterator();
 
         // Iterate through the data
-        HistoricItem lastItem = null;
+        State lastState = null;
         while (it.hasNext()) {
             HistoricItem historicItem = it.next();
-            state = historicItem.getState();
+            State state = historicItem.getState();
+            long timestamp = historicItem.getTimestamp().toInstant().toEpochMilli();
 
             // For 'binary' states, we need to replicate the data
             // to avoid diagonal lines
             if (state instanceof OnOffType || state instanceof OpenClosedType) {
-                if (lastItem != null) {
-                    dto.addData(historicItem.getTimestamp().toInstant().toEpochMilli(), lastItem.getState());
+                if (lastState != null && !lastState.equals(state)) {
+                    dto.addData(timestamp, lastState);
                     quantity++;
                 }
             }
 
-            dto.addData(historicItem.getTimestamp().toInstant().toEpochMilli(), state);
+            dto.addData(timestamp, state);
             quantity++;
-            lastItem = historicItem;
+            lastState = state;
         }
 
         if (boundary) {

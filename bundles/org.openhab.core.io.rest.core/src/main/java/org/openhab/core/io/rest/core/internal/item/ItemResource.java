@@ -42,7 +42,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -182,16 +181,12 @@ public class ItemResource implements RESTResource {
     private final MetadataSelectorMatcher metadataSelectorMatcher;
     private final SemanticTagRegistry semanticTagRegistry;
 
-    private void resetCacheableListsLastModified() {
-        this.cacheableListsLastModified.clear();
-    }
-
     private final RegistryChangedRunnableListener<Item> resetLastModifiedItemChangeListener = new RegistryChangedRunnableListener<>(
-            this::resetCacheableListsLastModified);
+            () -> lastModified = null);
     private final RegistryChangedRunnableListener<Metadata> resetLastModifiedMetadataChangeListener = new RegistryChangedRunnableListener<>(
-            this::resetCacheableListsLastModified);
+            () -> lastModified = null);
 
-    private Map<@Nullable String, Date> cacheableListsLastModified = new HashMap<>();
+    private @Nullable Date lastModified = null;
 
     @Activate
     public ItemResource(//
@@ -250,38 +245,38 @@ public class ItemResource implements RESTResource {
         final UriBuilder uriBuilder = uriBuilder(uriInfo, httpHeaders);
 
         if (staticDataOnly) {
-            Date lastModifiedDate = Date.from(Instant.now());
-            if (cacheableListsLastModified.containsKey(namespaceSelector)) {
-                lastModifiedDate = cacheableListsLastModified.get(namespaceSelector);
-                Response.ResponseBuilder responseBuilder = request.evaluatePreconditions(lastModifiedDate);
+            if (lastModified != null) {
+                Response.ResponseBuilder responseBuilder = request.evaluatePreconditions(lastModified);
                 if (responseBuilder != null) {
                     // send 304 Not Modified
                     return responseBuilder.build();
                 }
             } else {
-                lastModifiedDate = Date.from(Instant.now().truncatedTo(ChronoUnit.SECONDS));
-                cacheableListsLastModified.put(namespaceSelector, lastModifiedDate);
+                lastModified = Date.from(Instant.now().truncatedTo(ChronoUnit.SECONDS));
             }
 
-            Stream<EnrichedItemDTO> itemStream = getItems(null, null).stream() //
+            Stream<EnrichedItemDTO> itemStream = getItems(type, tags).stream() //
                     .map(item -> EnrichedItemDTOMapper.map(item, false, null, uriBuilder, locale)) //
                     .peek(dto -> addMetadata(dto, namespaces, null)) //
                     .peek(dto -> dto.editable = isEditable(dto.name));
             itemStream = dtoMapper.limitToFields(itemStream,
                     "name,label,type,groupType,function,category,editable,groupNames,link,tags,metadata,commandDescription,stateDescription");
 
-            CacheControl cc = new CacheControl();
-            cc.setNoCache(true);
-            cc.setMustRevalidate(true);
-            cc.setPrivate(true);
-            return Response.ok(new Stream2JSONInputStream(itemStream)).lastModified(lastModifiedDate).cacheControl(cc)
-                    .build();
+            return Response.ok(new Stream2JSONInputStream(itemStream)).lastModified(lastModified)
+                    .cacheControl(RESTConstants.CACHE_CONTROL).build();
         }
 
         Stream<EnrichedItemDTO> itemStream = getItems(type, tags).stream() //
                 .map(item -> EnrichedItemDTOMapper.map(item, recursive, null, uriBuilder, locale)) //
                 .peek(dto -> addMetadata(dto, namespaces, null)) //
-                .peek(dto -> dto.editable = isEditable(dto.name));
+                .peek(dto -> dto.editable = isEditable(dto.name)) //
+                .peek(dto -> {
+                    if (dto instanceof EnrichedGroupItemDTO enrichedGroupItemDTO) {
+                        for (EnrichedItemDTO member : enrichedGroupItemDTO.members) {
+                            member.editable = isEditable(member.name);
+                        }
+                    }
+                });
         itemStream = dtoMapper.limitToFields(itemStream, fields);
         return Response.ok(new Stream2JSONInputStream(itemStream)).build();
     }
@@ -317,7 +312,7 @@ public class ItemResource implements RESTResource {
     @Operation(operationId = "getItemByName", summary = "Gets a single item.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = EnrichedItemDTO.class))),
             @ApiResponse(responseCode = "404", description = "Item not found") })
-    public Response getItemData(final @Context UriInfo uriInfo, final @Context HttpHeaders httpHeaders,
+    public Response getItemByName(final @Context UriInfo uriInfo, final @Context HttpHeaders httpHeaders,
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @DefaultValue(".*") @QueryParam("metadata") @Parameter(description = "metadata selector - a comma separated list or a regular expression (returns all if no value given)") @Nullable String namespaceSelector,
             @DefaultValue("true") @QueryParam("recursive") @Parameter(description = "get member items if the item is a group item") boolean recursive,
@@ -334,6 +329,11 @@ public class ItemResource implements RESTResource {
                     locale);
             addMetadata(dto, namespaces, null);
             dto.editable = isEditable(dto.name);
+            if (dto instanceof EnrichedGroupItemDTO enrichedGroupItemDTO) {
+                for (EnrichedItemDTO member : enrichedGroupItemDTO.members) {
+                    member.editable = isEditable(member.name);
+                }
+            }
             return JSONResponse.createResponse(Status.OK, dto, null);
         } else {
             return getItemNotFoundResponse(itemname);

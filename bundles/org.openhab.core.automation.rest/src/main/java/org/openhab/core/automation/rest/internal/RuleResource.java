@@ -38,7 +38,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
@@ -135,10 +134,10 @@ public class RuleResource implements RESTResource {
     private final RuleRegistry ruleRegistry;
     private final ManagedRuleProvider managedRuleProvider;
     private final RegistryChangedRunnableListener<Rule> resetLastModifiedChangeListener = new RegistryChangedRunnableListener<>(
-            () -> cacheableListLastModified = null);
+            () -> lastModified = null);
 
     private @Context @NonNullByDefault({}) UriInfo uriInfo;
-    private @Nullable Date cacheableListLastModified = null;
+    private @Nullable Date lastModified = null;
 
     @Activate
     public RuleResource( //
@@ -174,26 +173,22 @@ public class RuleResource implements RESTResource {
         }
 
         if (staticDataOnly) {
-            if (cacheableListLastModified != null) {
-                Response.ResponseBuilder responseBuilder = request.evaluatePreconditions(cacheableListLastModified);
+            if (lastModified != null) {
+                Response.ResponseBuilder responseBuilder = request.evaluatePreconditions(lastModified);
                 if (responseBuilder != null) {
                     // send 304 Not Modified
                     return responseBuilder.build();
                 }
             } else {
-                cacheableListLastModified = Date.from(Instant.now().truncatedTo(ChronoUnit.SECONDS));
+                lastModified = Date.from(Instant.now().truncatedTo(ChronoUnit.SECONDS));
             }
 
             Stream<EnrichedRuleDTO> rules = ruleRegistry.stream()
                     .map(rule -> EnrichedRuleDTOMapper.map(rule, ruleManager, managedRuleProvider));
 
-            CacheControl cc = new CacheControl();
-            cc.setNoCache(true);
-            cc.setMustRevalidate(true);
-            cc.setPrivate(true);
             rules = dtoMapper.limitToFields(rules, "uid,templateUID,name,visibility,description,tags,editable");
-            return Response.ok(new Stream2JSONInputStream(rules)).lastModified(cacheableListLastModified)
-                    .cacheControl(cc).build();
+            return Response.ok(new Stream2JSONInputStream(rules)).lastModified(lastModified)
+                    .cacheControl(RESTConstants.CACHE_CONTROL).build();
         }
 
         // match all

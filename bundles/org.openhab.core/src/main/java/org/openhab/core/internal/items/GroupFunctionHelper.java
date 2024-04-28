@@ -79,8 +79,8 @@ public class GroupFunctionHelper {
     }
 
     private @Nullable Class<? extends Quantity<?>> getDimension(@Nullable Item baseItem) {
-        if (baseItem instanceof NumberItem) {
-            return ((NumberItem) baseItem).getDimension();
+        if (baseItem instanceof NumberItem numberItem) {
+            return numberItem.getDimension();
         }
         return null;
     }
