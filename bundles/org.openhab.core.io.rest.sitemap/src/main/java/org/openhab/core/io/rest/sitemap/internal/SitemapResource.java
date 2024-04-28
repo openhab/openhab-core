@@ -282,7 +282,7 @@ public class SitemapResource
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SitemapDTO.class))),
             @ApiResponse(responseCode = "404", description = "Sitemap with requested name does not exist"),
             @ApiResponse(responseCode = "400", description = "Invalid subscription id has been provided.") })
-    public Response getPageData(@Context HttpHeaders headers,
+    public Response getSitemapData(@Context HttpHeaders headers,
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @PathParam("sitemapname") @Parameter(description = "sitemap name") String sitemapname,
             @QueryParam("subscriptionid") @Parameter(description = "subscriptionid") @Nullable String subscriptionId,

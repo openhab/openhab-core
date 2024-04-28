@@ -187,7 +187,7 @@ public class SitemapResourceTest extends JavaTest {
         // non-null is sufficient here.
         when(headersMock.getRequestHeader(HTTP_HEADER_X_ATMOSPHERE_TRANSPORT)).thenReturn(List.of());
 
-        Response response = sitemapResource.getPageData(headersMock, null, SITEMAP_MODEL_NAME, null, false);
+        Response response = sitemapResource.getSitemapData(headersMock, null, SITEMAP_MODEL_NAME, null, false);
 
         SitemapDTO sitemapDTO = (SitemapDTO) response.getEntity();
         // assert that the item state change did trigger the blocking method to return
