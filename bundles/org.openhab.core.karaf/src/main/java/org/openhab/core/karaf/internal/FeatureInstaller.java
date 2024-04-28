@@ -89,7 +89,9 @@ public class FeatureInstaller implements ConfigurationListener {
     private static final String ADDONS_PID = "org.openhab.addons";
     private static final String PROPERTY_MVN_REPOS = "org.ops4j.pax.url.mvn.repositories";
 
-    public static final List<String> ADDON_TYPES = AddonType.DEFAULT_TYPES.stream().map(AddonType::getId).toList();
+    public static final String FINDER_ADDON_TYPE = "core-config-discovery-addon";
+    public static final List<String> ADDON_TYPES = Stream
+            .concat(AddonType.DEFAULT_TYPES.stream().map(AddonType::getId), Stream.of(FINDER_ADDON_TYPE)).toList();
 
     private final Logger logger = LoggerFactory.getLogger(FeatureInstaller.class);
 
