@@ -145,7 +145,6 @@ public class SseItemStatesEventBuilder {
                     }
                 } else if (pattern != null) {
                     // if it's not a transformation pattern, then it must be a format string
-
                     if (state instanceof QuantityType quantityState) {
                         // sanity convert current state to the item state description unit in case it was
                         // updated in the meantime. The item state is still in the "original" unit while the
