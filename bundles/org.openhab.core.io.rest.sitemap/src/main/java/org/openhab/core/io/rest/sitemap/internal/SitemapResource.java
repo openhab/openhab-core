@@ -270,7 +270,7 @@ public class SitemapResource
     /**
      *
      * Subscribe to a whole sitemap (all pages at once).
-     * This is not a recommended option as it incurs high SSE traffic
+     * This is not a recommended option as it incurs high traffic
      * and might pose a high load on the server, depending on the sitemap size.
      * No built-in openhab UI should use this functionality.
      *
