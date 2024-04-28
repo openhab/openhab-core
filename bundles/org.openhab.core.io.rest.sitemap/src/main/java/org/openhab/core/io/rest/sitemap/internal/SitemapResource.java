@@ -424,8 +424,7 @@ public class SitemapResource
             response.setStatus(Status.NOT_FOUND.getStatusCode());
             return;
         }
-        if (sitemapname != null
-                && (subscribeToWholeSitemap || pageId != null)) {
+        if (sitemapname != null && (subscribeToWholeSitemap || pageId != null)) {
             subscriptions.setPageId(subscriptionId, sitemapname, pageId);
         }
         if (subscriptions.getSitemapName(subscriptionId) == null
