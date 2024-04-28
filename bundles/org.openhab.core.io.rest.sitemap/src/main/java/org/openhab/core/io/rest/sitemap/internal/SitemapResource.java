@@ -276,9 +276,11 @@ public class SitemapResource
      *
      */
     @GET
-    @Path("/{sitemapname: [a-zA-Z_0-9]+}/wholeSitemap")
+    @Path("/{sitemapname: [a-zA-Z_0-9]+}/*")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(operationId = "pollDataForSitemap", summary = "Polls the data for a sitemap.", responses = {
+    @Operation(operationId = "pollDataForSitemap",
+            summary = "Polls the data for a whole sitemap. Not recommended due to potentially high traffic.",
+            responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SitemapDTO.class))),
             @ApiResponse(responseCode = "404", description = "Sitemap with requested name does not exist"),
             @ApiResponse(responseCode = "400", description = "Invalid subscription id has been provided.") })
@@ -384,9 +386,9 @@ public class SitemapResource
      *
      */
     @GET
-    @Path(SEGMENT_EVENTS + "/{subscriptionid: [a-zA-Z_0-9-]+}/wholeSitemap")
+    @Path(SEGMENT_EVENTS + "/{subscriptionid: [a-zA-Z_0-9-]+}/*")
     @Produces(MediaType.SERVER_SENT_EVENTS)
-    @Operation(operationId = "getSitemapEvents", summary = "Get sitemap events.", responses = {
+    @Operation(operationId = "getSitemapEvents", summary = "Get sitemap events for a whole sitemap. Not recommended due to potentially high traffic.", responses = {
             @ApiResponse(responseCode = "200", description = "OK"),
             @ApiResponse(responseCode = "400", description = "Page not linked to the subscription."),
             @ApiResponse(responseCode = "404", description = "Subscription not found.") })
