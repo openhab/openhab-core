@@ -386,8 +386,9 @@ public class AudioFormat {
                 continue;
             }
 
-            // Prefer WAVE container
-            if (!CONTAINER_WAVE.equals(format.getContainer())) {
+            // Prefer WAVE container or raw SIGNED PCM encoded audio
+            if (!CONTAINER_WAVE.equals(format.getContainer())
+                    && !(CONTAINER_NONE.equals(format.getContainer()) && CODEC_PCM_SIGNED.equals(format.getCodec()))) {
                 continue;
             }
 
