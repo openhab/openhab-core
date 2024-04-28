@@ -317,7 +317,7 @@ public class SitemapSubscriptionService implements ModelRepositoryChangeListener
     }
 
     private String getScopeIdentifier(String sitemapName, @Nullable String pageId) {
-        return sitemapName + (pageId == null ? "" : SITEMAP_PAGE_SEPARATOR + pageId);
+        return pageId == null ? sitemapName : sitemapName + SITEMAP_PAGE_SEPARATOR + pageId;
     }
 
     private @Nullable Sitemap getSitemap(String sitemapName) {
