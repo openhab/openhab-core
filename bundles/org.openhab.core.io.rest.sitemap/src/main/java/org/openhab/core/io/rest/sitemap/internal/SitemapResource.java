@@ -278,9 +278,7 @@ public class SitemapResource
     @GET
     @Path("/{sitemapname: [a-zA-Z_0-9]+}/*")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(operationId = "pollDataForSitemap",
-            summary = "Polls the data for a whole sitemap. Not recommended due to potentially high traffic.",
-            responses = {
+    @Operation(operationId = "pollDataForSitemap", summary = "Polls the data for a whole sitemap. Not recommended due to potentially high traffic.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SitemapDTO.class))),
             @ApiResponse(responseCode = "404", description = "Sitemap with requested name does not exist"),
             @ApiResponse(responseCode = "400", description = "Invalid subscription id has been provided.") })
@@ -294,7 +292,7 @@ public class SitemapResource
 
         if (subscriptionId != null) {
             try {
-                subscriptions.unsetPageId(subscriptionId, sitemapname);
+                subscriptions.setPageId(subscriptionId, sitemapname, null);
             } catch (IllegalArgumentException e) {
                 return JSONResponse.createErrorResponse(Response.Status.BAD_REQUEST, e.getMessage());
             }
@@ -426,12 +424,9 @@ public class SitemapResource
             response.setStatus(Status.NOT_FOUND.getStatusCode());
             return;
         }
-        if (sitemapname != null) {
-            if (subscribeToWholeSitemap) {
-                subscriptions.unsetPageId(subscriptionId, sitemapname);
-            } else if (pageId != null) {
-                subscriptions.setPageId(subscriptionId, sitemapname, pageId);
-            }
+        if (sitemapname != null
+                && (subscribeToWholeSitemap || pageId != null)) {
+            subscriptions.setPageId(subscriptionId, sitemapname, pageId);
         }
         if (subscriptions.getSitemapName(subscriptionId) == null
                 || subscriptions.getPageId(subscriptionId) == null && !subscribeToWholeSitemap) {
