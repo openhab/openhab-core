@@ -120,9 +120,6 @@ public class SseItemStatesEventBuilder {
                 if (pattern != null && TransformationHelper.isTransform(pattern)) {
                     try {
                         displayState = TransformationHelper.transform(pattern, state.toString());
-                    } catch (NoClassDefFoundError ex) {
-                        // TransformationHelper is optional dependency, so ignore if class not found
-                        // return state as it is without transformation
                     } catch (TransformationException e) {
                         logger.warn("Failed transforming the state '{}' on item '{}' with pattern '{}': {}", state,
                                 item.getName(), pattern, e.getMessage());
