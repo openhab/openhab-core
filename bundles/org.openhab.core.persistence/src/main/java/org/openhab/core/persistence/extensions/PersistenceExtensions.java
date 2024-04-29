@@ -147,7 +147,7 @@ public class PersistenceExtensions {
 
     private static void internalPersist(Item item, ZonedDateTime timestamp, State state, String serviceId) {
         PersistenceService service = getService(serviceId);
-        if (service != null && service instanceof ModifiablePersistenceService modifiableService) {
+        if (service instanceof ModifiablePersistenceService modifiableService) {
             modifiableService.store(item, timestamp, state, serviceId);
             return;
         }
@@ -189,7 +189,7 @@ public class PersistenceExtensions {
         PersistenceService service = getService(serviceId);
         TimeZoneProvider tzProvider = timeZoneProvider;
         ZoneId timeZone = tzProvider != null ? tzProvider.getTimeZone() : ZoneId.systemDefault();
-        if (service != null && service instanceof ModifiablePersistenceService modifiableService) {
+        if (service instanceof ModifiablePersistenceService modifiableService) {
             timeSeries.getStates()
                     .forEach(s -> modifiableService.store(item, s.timestamp().atZone(timeZone), s.state(), serviceId));
             return;
@@ -277,7 +277,7 @@ public class PersistenceExtensions {
             return null;
         }
         PersistenceService service = getService(serviceId);
-        if (service != null && service instanceof QueryablePersistenceService qService) {
+        if (service instanceof QueryablePersistenceService qService) {
             FilterCriteria filter = new FilterCriteria();
             filter.setEndDate(timestamp);
             filter.setItemName(item.getName());
@@ -286,12 +286,11 @@ public class PersistenceExtensions {
             Iterable<HistoricItem> result = qService.query(filter);
             if (result.iterator().hasNext()) {
                 return result.iterator().next();
-            } else {
-                return null;
             }
+        } else {
+            LoggerFactory.getLogger(PersistenceExtensions.class)
+                    .warn("There is no queryable persistence service registered with the id '{}'", serviceId);
         }
-        LoggerFactory.getLogger(PersistenceExtensions.class)
-                .warn("There is no queryable persistence service registered with the id '{}'", serviceId);
         return null;
     }
 
@@ -352,7 +351,7 @@ public class PersistenceExtensions {
 
     private static @Nullable ZonedDateTime internalAdjacentUpdate(Item item, boolean forward, String serviceId) {
         PersistenceService service = getService(serviceId);
-        if (service != null && service instanceof QueryablePersistenceService qService) {
+        if (service instanceof QueryablePersistenceService qService) {
             FilterCriteria filter = new FilterCriteria();
             filter.setItemName(item.getName());
             if (forward) {
@@ -365,12 +364,11 @@ public class PersistenceExtensions {
             Iterable<HistoricItem> result = qService.query(filter);
             if (result.iterator().hasNext()) {
                 return result.iterator().next().getTimestamp();
-            } else {
-                return null;
             }
+        } else {
+            LoggerFactory.getLogger(PersistenceExtensions.class)
+                    .warn("There is no queryable persistence service registered with the id '{}'", serviceId);
         }
-        LoggerFactory.getLogger(PersistenceExtensions.class)
-                .warn("There is no queryable persistence service registered with the id '{}'", serviceId);
         return null;
     }
 
@@ -484,7 +482,7 @@ public class PersistenceExtensions {
     private static @Nullable HistoricItem internalAdjacentState(Item item, boolean skipEqual, boolean forward,
             String serviceId) {
         PersistenceService service = getService(serviceId);
-        if (service != null && service instanceof QueryablePersistenceService qService) {
+        if (service instanceof QueryablePersistenceService qService) {
             FilterCriteria filter = new FilterCriteria();
             filter.setItemName(item.getName());
             if (forward) {
@@ -516,9 +514,10 @@ public class PersistenceExtensions {
                     items = null;
                 }
             }
+        } else {
+            LoggerFactory.getLogger(PersistenceExtensions.class)
+                    .warn("There is no queryable persistence service registered with the id '{}'", serviceId);
         }
-        LoggerFactory.getLogger(PersistenceExtensions.class)
-                .warn("There is no queryable persistence service registered with the id '{}'", serviceId);
         return null;
     }
 
@@ -2182,7 +2181,7 @@ public class PersistenceExtensions {
     private static @Nullable Iterable<HistoricItem> internalGetAllStatesBetween(Item item,
             @Nullable ZonedDateTime begin, @Nullable ZonedDateTime end, String serviceId) {
         PersistenceService service = getService(serviceId);
-        if (service != null && service instanceof QueryablePersistenceService qService) {
+        if (service instanceof QueryablePersistenceService qService) {
             FilterCriteria filter = new FilterCriteria();
             ZonedDateTime now = ZonedDateTime.now();
             if ((begin == null && end == null) || (begin != null && end == null && begin.isAfter(now))
@@ -2206,9 +2205,10 @@ public class PersistenceExtensions {
             filter.setOrdering(Ordering.ASCENDING);
 
             return qService.query(filter);
+        } else {
+            LoggerFactory.getLogger(PersistenceExtensions.class)
+                    .warn("There is no queryable persistence service registered with the id '{}'", serviceId);
         }
-        LoggerFactory.getLogger(PersistenceExtensions.class)
-                .warn("There is no queryable persistence service registered with the id '{}'", serviceId);
         return null;
     }
 
@@ -2300,7 +2300,7 @@ public class PersistenceExtensions {
     private static void internalRemoveAllStatesBetween(Item item, @Nullable ZonedDateTime begin,
             @Nullable ZonedDateTime end, String serviceId) {
         PersistenceService service = getService(serviceId);
-        if (service != null && service instanceof ModifiablePersistenceService mService) {
+        if (service instanceof ModifiablePersistenceService mService) {
             FilterCriteria filter = new FilterCriteria();
             ZonedDateTime now = ZonedDateTime.now();
             if ((begin == null && end == null) || (begin != null && end == null && begin.isAfter(now))
@@ -2324,10 +2324,10 @@ public class PersistenceExtensions {
             filter.setOrdering(Ordering.ASCENDING);
 
             mService.remove(filter);
-            return;
+        } else {
+            LoggerFactory.getLogger(PersistenceExtensions.class)
+                    .warn("There is no queryable persistence service registered with the id '{}'", serviceId);
         }
-        LoggerFactory.getLogger(PersistenceExtensions.class)
-                .warn("There is no queryable persistence service registered with the id '{}'", serviceId);
         return;
     }
 
