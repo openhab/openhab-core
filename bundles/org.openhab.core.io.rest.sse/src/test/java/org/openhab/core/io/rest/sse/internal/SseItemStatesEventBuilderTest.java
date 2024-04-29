@@ -105,7 +105,7 @@ public class SseItemStatesEventBuilderTest {
     }
 
     @Test
-    public void getDisplayStatWhenMatchingStateOptionAndNoPattern() {
+    public void getDisplayStateWhenMatchingStateOptionAndNoPattern() {
         StateDescription stateDescription = StateDescriptionFragmentBuilder.create()
                 .withOption(new StateOption(ITEM_STATE_VALUE, ITEM_STATE_OPTION_LABEL)).build().toStateDescription();
         Mockito.when(itemMock.getStateDescription(eq(Locale.ENGLISH))).thenReturn(stateDescription);
@@ -156,7 +156,7 @@ public class SseItemStatesEventBuilderTest {
 
         Mockito.when(itemMock.getState()).thenReturn(new StringType(ITEM_STATE_VALUE2));
         String result = sseItemStatesEventBuilder.getDisplayState(itemMock, Locale.ENGLISH);
-        assertEquals(ITEM_STATE_VALUE2, result);
+        assertEquals(String.format(PATTERN, ITEM_STATE_VALUE2), result);
     }
 
     @Test

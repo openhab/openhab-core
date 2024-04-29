@@ -115,9 +115,12 @@ public class SseItemStatesEventBuilder {
 
         if (!(state instanceof UnDefType)) {
             if (stateDescription != null) {
+                boolean transformUsed = false;
+                boolean optionUsed = false;
                 String pattern = stateDescription.getPattern();
                 // If there's a pattern, first check if it's a transformation
                 if (pattern != null && TransformationHelper.isTransform(pattern)) {
+                    transformUsed = true;
                     try {
                         displayState = TransformationHelper.transform(pattern, state.toString());
                     } catch (TransformationException e) {
@@ -129,6 +132,7 @@ public class SseItemStatesEventBuilder {
                     for (StateOption option : stateDescription.getOptions()) {
                         String label = option.getLabel();
                         if (option.getValue().equals(state.toString()) && label != null) {
+                            optionUsed = true;
                             try {
                                 displayState = pattern == null ? label : String.format(pattern, label);
                             } catch (IllegalFormatException e) {
@@ -140,7 +144,8 @@ public class SseItemStatesEventBuilder {
                             break;
                         }
                     }
-                } else if (pattern != null) {
+                }
+                if (pattern != null && !transformUsed && !optionUsed) {
                     // if it's not a transformation pattern, then it must be a format string
                     if (state instanceof QuantityType quantityState) {
                         // sanity convert current state to the item state description unit in case it was
