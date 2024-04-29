@@ -29,6 +29,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.NamedThreadFactory;
+import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventFactory;
 import org.openhab.core.events.EventFilter;
@@ -69,9 +70,8 @@ public class EventHandler implements AutoCloseable {
     }
 
     private synchronized ExecutorRecord createExecutorRecord(Class<? extends EventSubscriber> subscriber) {
-        return new ExecutorRecord(
-                Executors.newSingleThreadExecutor(new NamedThreadFactory("eventexecutor-" + executors.size())),
-                new AtomicInteger());
+        return new ExecutorRecord(ThreadPoolManager.getPoolBasedSequentialScheduledExecutorService("events",
+                "eventexecutor-" + executors.size()), new AtomicInteger());
     }
 
     @Override
