@@ -73,7 +73,7 @@ public class SitemapSubscriptionService implements ModelRepositoryChangeListener
     private static final String SITEMAP_PAGE_SEPARATOR = "#";
     private static final String SITEMAP_SUFFIX = ".sitemap";
     private static final int DEFAULT_MAX_SUBSCRIPTIONS = 50;
-    public static final Duration WAIT_AFTER_CREATE_SECONDS = Duration.ofSeconds(30);
+    private static final Duration WAIT_AFTER_CREATE_SECONDS = Duration.ofSeconds(30);
 
     private final Logger logger = LoggerFactory.getLogger(SitemapSubscriptionService.class);
     private final BundleContext bundleContext;
@@ -234,7 +234,7 @@ public class SitemapSubscriptionService implements ModelRepositoryChangeListener
     }
 
     /**
-     * Updates the subscription to send events for the provided page id (or whole sitemap if page is is null).
+     * Updates the subscription to send events for the provided page id (or whole sitemap if pageId is is null).
      *
      * @param subscriptionId the subscription to update
      * @param sitemapName the current sitemap name

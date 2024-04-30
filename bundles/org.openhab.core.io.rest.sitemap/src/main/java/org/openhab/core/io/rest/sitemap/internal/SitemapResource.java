@@ -262,8 +262,8 @@ public class SitemapResource
         final Locale locale = localeService.getLocale(language);
         logger.debug("Received HTTP GET request from IP {} at '{}' for media type '{}'.", request.getRemoteAddr(),
                 uriInfo.getPath(), type);
-        SitemapDTO responseObject = getSitemapBean(sitemapname, uriInfo.getBaseUriBuilder().build(), locale,
-                includeHiddenWidgets);
+        URI uri = uriInfo.getBaseUriBuilder().build();
+        SitemapDTO responseObject = getSitemapBean(sitemapname, uri, locale, includeHiddenWidgets, false);
         return Response.ok(responseObject).build();
     }
 
@@ -388,7 +388,7 @@ public class SitemapResource
     @Produces(MediaType.SERVER_SENT_EVENTS)
     @Operation(operationId = "getSitemapEvents", summary = "Get sitemap events for a whole sitemap. Not recommended due to potentially high traffic.", responses = {
             @ApiResponse(responseCode = "200", description = "OK"),
-            @ApiResponse(responseCode = "400", description = "Page not linked to the subscription."),
+            @ApiResponse(responseCode = "400", description = "Missing sitemap parameter, or sitemap not linked successfully to the subscription."),
             @ApiResponse(responseCode = "404", description = "Subscription not found.") })
     public void getSitemapEvents(@Context final SseEventSink sseEventSink, @Context final HttpServletResponse response,
             @PathParam("subscriptionid") @Parameter(description = "subscription id") String subscriptionId,
@@ -405,7 +405,7 @@ public class SitemapResource
     @Produces(MediaType.SERVER_SENT_EVENTS)
     @Operation(operationId = "getSitemapEvents", summary = "Get sitemap events.", responses = {
             @ApiResponse(responseCode = "200", description = "OK"),
-            @ApiResponse(responseCode = "400", description = "Page not linked to the subscription."),
+            @ApiResponse(responseCode = "400", description = "Missing sitemapname or page parameter, or page not linked successfully to the subscription."),
             @ApiResponse(responseCode = "404", description = "Subscription not found.") })
     public void getSitemapEvents(@Context final SseEventSink sseEventSink, @Context final HttpServletResponse response,
             @PathParam("subscriptionid") @Parameter(description = "subscription id") String subscriptionId,
@@ -522,10 +522,6 @@ public class SitemapResource
         return beans;
     }
 
-    private SitemapDTO getSitemapBean(String sitemapname, URI uri, Locale locale, boolean includeHiddenWidgets) {
-        return getSitemapBean(sitemapname, uri, locale, includeHiddenWidgets, false);
-    }
-
     private SitemapDTO getSitemapBean(String sitemapname, URI uri, Locale locale, boolean includeHiddenWidgets,
             boolean timeout) {
         Sitemap sitemap = getSitemap(sitemapname);
@@ -545,11 +541,10 @@ public class SitemapResource
         bean.name = sitemapName;
         bean.icon = sitemap.getIcon();
         bean.label = sitemap.getLabel();
-        bean.timeout = timeout;
 
         bean.link = UriBuilder.fromUri(uri).path(SitemapResource.PATH_SITEMAPS).path(bean.name).build().toASCIIString();
         bean.homepage = createPageBean(sitemap.getName(), sitemap.getLabel(), sitemap.getIcon(), sitemap.getName(),
-                itemUIRegistry.getChildren(sitemap), true, false, uri, locale, false, includeHiddenWidgets);
+                itemUIRegistry.getChildren(sitemap), true, false, uri, locale, timeout, includeHiddenWidgets);
         return bean;
     }
 
