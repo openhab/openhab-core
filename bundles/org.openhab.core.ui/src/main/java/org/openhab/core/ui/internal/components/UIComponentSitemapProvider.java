@@ -352,6 +352,14 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
         setWidgetPropertyFromComponentConfig(widget, component, "icon", SitemapPackage.WIDGET__ICON);
     }
 
+    private String stripQuotes(String input) {
+        if (input.length() >= 2 && input.charAt(0) == '\"' && input.charAt(input.length() - 1) == '\"') {
+            return input.substring(1, input.length() - 1);
+        } else {
+            return input;
+        }
+    }
+
     private void addWidgetMappings(EList<Mapping> mappings, UIComponent component) {
         if (component.getConfig() != null && component.getConfig().containsKey("mappings")) {
             Object sourceMappings = component.getConfig().get("mappings");
@@ -359,9 +367,9 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
                 for (Object sourceMapping : sourceMappingsCollection) {
                     if (sourceMapping instanceof String) {
                         String[] splitMapping = sourceMapping.toString().split("=");
-                        String cmd = splitMapping[0].trim();
-                        String label = splitMapping[1].trim();
-                        String icon = splitMapping.length < 3 ? null : splitMapping[2].trim();
+                        String cmd = stripQuotes(splitMapping[0].trim());
+                        String label = stripQuotes(splitMapping[1].trim());
+                        String icon = splitMapping.length < 3 ? null : stripQuotes(splitMapping[2].trim());
                         MappingImpl mapping = (MappingImpl) SitemapFactory.eINSTANCE.createMapping();
                         mapping.setCmd(cmd);
                         mapping.setLabel(label);
@@ -383,9 +391,9 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
                         int row = Integer.parseInt(splitted1[0].trim());
                         int column = Integer.parseInt(splitted1[1].trim());
                         String[] splitted2 = splitted1[2].trim().split("=");
-                        String cmd = splitted2[0].trim();
-                        String label = splitted2[1].trim();
-                        String icon = splitted2.length < 3 ? null : splitted2[2].trim();
+                        String cmd = stripQuotes(splitted2[0].trim());
+                        String label = stripQuotes(splitted2[1].trim());
+                        String icon = splitted2.length < 3 ? null : stripQuotes(splitted2[2].trim());
                         ButtonImpl button = (ButtonImpl) SitemapFactory.eINSTANCE.createButton();
                         button.setRow(row);
                         button.setColumn(column);
@@ -476,7 +484,7 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
                 condition.setItem(matcher.group("item"));
                 condition.setCondition(matcher.group("condition"));
                 condition.setSign(matcher.group("sign"));
-                condition.setState(matcher.group("state"));
+                condition.setState(stripQuotes(matcher.group("state")));
                 conditions.add(condition);
             } else {
                 logger.warn("Syntax error in {} rule condition '{}' for widget {}", key, conditionString,
@@ -488,7 +496,7 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
 
     private String getRuleArgument(String rule) {
         int argIndex = rule.lastIndexOf("=") + 1;
-        return rule.substring(argIndex).trim();
+        return stripQuotes(rule.substring(argIndex).trim());
     }
 
     private List<String> getRuleConditions(String rule, @Nullable String argument) {
