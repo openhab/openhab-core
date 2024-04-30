@@ -99,6 +99,7 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
 
     private static final Pattern CONDITION_PATTERN = Pattern
             .compile("(?<item>[A-Za-z]\\w*)?\\s*(?<condition>==|!=|<=|>=|<|>)?\\s*(?<sign>\\+|-)?(?<state>.+)");
+    private static final Pattern COMMANDS_PATTERN = Pattern.compile("^(?<cmd1>\"[^\"]*\"|[^\": ]*):(?<cmd2>.*)$");
 
     private Map<String, Sitemap> sitemaps = new HashMap<>();
     private @Nullable UIComponentRegistryFactory componentRegistryFactory;
@@ -352,8 +353,9 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
         setWidgetPropertyFromComponentConfig(widget, component, "icon", SitemapPackage.WIDGET__ICON);
     }
 
-    private String stripQuotes(String input) {
-        if (input.length() >= 2 && input.charAt(0) == '\"' && input.charAt(input.length() - 1) == '\"') {
+    private @Nullable String stripQuotes(@Nullable String input) {
+        if ((input != null) && (input.length() >= 2) && (input.charAt(0) == '\"')
+                && (input.charAt(input.length() - 1) == '\"')) {
             return input.substring(1, input.length() - 1);
         } else {
             return input;
@@ -367,11 +369,20 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
                 for (Object sourceMapping : sourceMappingsCollection) {
                     if (sourceMapping instanceof String) {
                         String[] splitMapping = sourceMapping.toString().split("=");
-                        String cmd = stripQuotes(splitMapping[0].trim());
+                        String cmd = splitMapping[0].trim();
+                        String releaseCmd = null;
+                        Matcher matcher = COMMANDS_PATTERN.matcher(cmd);
+                        if (matcher.matches()) {
+                            cmd = matcher.group("cmd1");
+                            releaseCmd = matcher.group("cmd2");
+                        }
+                        cmd = stripQuotes(cmd);
+                        releaseCmd = stripQuotes(releaseCmd);
                         String label = stripQuotes(splitMapping[1].trim());
                         String icon = splitMapping.length < 3 ? null : stripQuotes(splitMapping[2].trim());
                         MappingImpl mapping = (MappingImpl) SitemapFactory.eINSTANCE.createMapping();
                         mapping.setCmd(cmd);
+                        mapping.setReleaseCmd(releaseCmd);
                         mapping.setLabel(label);
                         mapping.setIcon(icon);
                         mappings.add(mapping);
@@ -496,7 +507,8 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
 
     private String getRuleArgument(String rule) {
         int argIndex = rule.lastIndexOf("=") + 1;
-        return stripQuotes(rule.substring(argIndex).trim());
+        String strippedRule = stripQuotes(rule.substring(argIndex).trim());
+        return strippedRule != null ? strippedRule : "";
     }
 
     private List<String> getRuleConditions(String rule, @Nullable String argument) {
