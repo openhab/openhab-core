@@ -292,7 +292,7 @@ public class SitemapResource
 
         if (subscriptionId != null) {
             try {
-                subscriptions.setPageId(subscriptionId, sitemapname, null);
+                subscriptions.updateSubscriptionLocation(subscriptionId, sitemapname, null);
             } catch (IllegalArgumentException e) {
                 return JSONResponse.createErrorResponse(Response.Status.BAD_REQUEST, e.getMessage());
             }
@@ -325,7 +325,7 @@ public class SitemapResource
 
         if (subscriptionId != null) {
             try {
-                subscriptions.setPageId(subscriptionId, sitemapname, pageId);
+                subscriptions.updateSubscriptionLocation(subscriptionId, sitemapname, pageId);
             } catch (IllegalArgumentException e) {
                 return JSONResponse.createErrorResponse(Response.Status.BAD_REQUEST, e.getMessage());
             }
@@ -425,7 +425,7 @@ public class SitemapResource
             return;
         }
         if (sitemapname != null && (subscribeToWholeSitemap || pageId != null)) {
-            subscriptions.setPageId(subscriptionId, sitemapname, pageId);
+            subscriptions.updateSubscriptionLocation(subscriptionId, sitemapname, pageId);
         }
         if (subscriptions.getSitemapName(subscriptionId) == null
                 || subscriptions.getPageId(subscriptionId) == null && !subscribeToWholeSitemap) {

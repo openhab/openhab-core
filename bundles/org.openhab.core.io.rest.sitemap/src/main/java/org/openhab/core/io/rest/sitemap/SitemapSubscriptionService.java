@@ -240,7 +240,7 @@ public class SitemapSubscriptionService implements ModelRepositoryChangeListener
      * @param sitemapName the current sitemap name
      * @param pageId the current page id or null for whole sitemap subscription
      */
-    public void setPageId(String subscriptionId, String sitemapName, @Nullable String pageId) {
+    public void updateSubscriptionLocation(String subscriptionId, String sitemapName, @Nullable String pageId) {
         SitemapSubscriptionCallback callback = callbacks.get(subscriptionId);
         if (callback != null) {
             String oldSitemapWithPage = scopeOfSubscription.remove(subscriptionId);
