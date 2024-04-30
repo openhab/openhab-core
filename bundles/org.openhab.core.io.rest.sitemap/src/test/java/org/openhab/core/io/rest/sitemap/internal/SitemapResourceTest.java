@@ -191,7 +191,7 @@ public class SitemapResourceTest extends JavaTest {
 
         SitemapDTO sitemapDTO = (SitemapDTO) response.getEntity();
         // assert that the item state change did trigger the blocking method to return
-        assertThat(sitemapDTO.timeout, is(false));
+        assertThat(sitemapDTO.homepage.timeout, is(false));
     }
 
     @Test
