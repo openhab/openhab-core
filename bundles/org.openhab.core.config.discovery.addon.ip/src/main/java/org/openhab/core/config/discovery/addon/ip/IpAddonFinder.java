@@ -355,7 +355,7 @@ public class IpAddonFinder extends BaseAddonFinder implements NetworkAddressChan
                 try {
                     switch (Objects.toString(type)) {
                         case TYPE_IP_BROADCAST:
-                            scanBroadcast(candidate, request, response, timeoutMs, destPort);
+                            scanBroadcast(candidate, request, requestPlain, response, timeoutMs, destPort);
                             break;
                         case TYPE_IP_MULTICAST:
                             scanMulticast(candidate, request, requestPlain, response, timeoutMs, listenPort, destIp,
@@ -372,9 +372,16 @@ public class IpAddonFinder extends BaseAddonFinder implements NetworkAddressChan
         logger.trace("IpAddonFinder::scan completed");
     }
 
-    private void scanBroadcast(AddonInfo candidate, String request, String response, int timeoutMs, int destPort) {
-        if (request.isEmpty()) {
-            logger.warn("{}: match-property request \"{}\" is unknown", candidate.getUID(), TYPE_IP_BROADCAST);
+    private void scanBroadcast(AddonInfo candidate, String request, String requestPlain, String response, int timeoutMs,
+            int destPort) {
+        if (request.isEmpty() && requestPlain.isEmpty()) {
+            logger.warn("{}: match-property request and requestPlain \"{}\" is unknown", candidate.getUID(),
+                    TYPE_IP_BROADCAST);
+            return;
+        }
+        if (!request.isEmpty() && !requestPlain.isEmpty()) {
+            logger.warn("{}: match-properties request and requestPlain \"{}\" are both present", candidate.getUID(),
+                    TYPE_IP_BROADCAST);
             return;
         }
         if (response.isEmpty()) {
@@ -387,7 +394,7 @@ public class IpAddonFinder extends BaseAddonFinder implements NetworkAddressChan
         try (DatagramSocket socket = new DatagramSocket()) {
             socket.setBroadcast(true);
             socket.setSoTimeout(timeoutMs);
-            byte[] sendBuffer = buildByteArray(request);
+            byte[] sendBuffer = requestPlain.isEmpty() ? buildByteArray(request) : buildByteArrayPlain(requestPlain);
             DatagramPacket sendPacket = new DatagramPacket(sendBuffer, sendBuffer.length,
                     InetAddress.getByName(broadcastAddress), destPort);
             socket.send(sendPacket);
@@ -424,6 +431,11 @@ public class IpAddonFinder extends BaseAddonFinder implements NetworkAddressChan
             requestFrame.write((byte) i);
         }
         return requestFrame.toByteArray();
+    }
+
+    private byte[] buildByteArrayPlain(String input) {
+        String reqUnEscaped = StringUtils.unEscapeXml(input);
+        return reqUnEscaped != null ? reqUnEscaped.getBytes() : new byte[0];
     }
 
     private void scanMulticast(AddonInfo candidate, String request, String requestPlain, String response, int timeoutMs,
