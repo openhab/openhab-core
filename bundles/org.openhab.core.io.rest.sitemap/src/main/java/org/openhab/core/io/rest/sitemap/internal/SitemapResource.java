@@ -18,8 +18,10 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ScheduledExecutorService;
@@ -260,15 +262,55 @@ public class SitemapResource
         final Locale locale = localeService.getLocale(language);
         logger.debug("Received HTTP GET request from IP {} at '{}' for media type '{}'.", request.getRemoteAddr(),
                 uriInfo.getPath(), type);
+        URI uri = uriInfo.getBaseUriBuilder().build();
+        SitemapDTO responseObject = getSitemapBean(sitemapname, uri, locale, includeHiddenWidgets, false);
+        return Response.ok(responseObject).build();
+    }
+
+    /**
+     *
+     * Subscribe to a whole sitemap (all pages at once).
+     * This is not a recommended option as it incurs high traffic
+     * and might pose a high load on the server, depending on the sitemap size.
+     * No built-in openhab UI should use this functionality.
+     *
+     */
+    @GET
+    @Path("/{sitemapname: [a-zA-Z_0-9]+}/*")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(operationId = "pollDataForSitemap", summary = "Polls the data for a whole sitemap. Not recommended due to potentially high traffic.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = SitemapDTO.class))),
+            @ApiResponse(responseCode = "404", description = "Sitemap with requested name does not exist"),
+            @ApiResponse(responseCode = "400", description = "Invalid subscription id has been provided.") })
+    public Response getSitemapData(@Context HttpHeaders headers,
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
+            @PathParam("sitemapname") @Parameter(description = "sitemap name") String sitemapname,
+            @QueryParam("subscriptionid") @Parameter(description = "subscriptionid") @Nullable String subscriptionId,
+            @QueryParam("includeHidden") @Parameter(description = "include hidden widgets") boolean includeHiddenWidgets) {
+        final Locale locale = localeService.getLocale(language);
+        logger.debug("Received HTTP GET request from IP {} at '{}'", request.getRemoteAddr(), uriInfo.getPath());
+
+        if (subscriptionId != null) {
+            try {
+                subscriptions.updateSubscriptionLocation(subscriptionId, sitemapname, null);
+            } catch (IllegalArgumentException e) {
+                return JSONResponse.createErrorResponse(Response.Status.BAD_REQUEST, e.getMessage());
+            }
+        }
+
+        boolean timeout = false;
+        if (headers.getRequestHeader("X-Atmosphere-Transport") != null) {
+            timeout = blockUntilChangeOccurs(sitemapname, null);
+        }
         SitemapDTO responseObject = getSitemapBean(sitemapname, uriInfo.getBaseUriBuilder().build(), locale,
-                includeHiddenWidgets);
+                includeHiddenWidgets, timeout);
         return Response.ok(responseObject).build();
     }
 
     @GET
     @Path("/{sitemapname: [a-zA-Z_0-9]+}/{pageid: [a-zA-Z_0-9]+}")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(operationId = "pollDataForSitemap", summary = "Polls the data for a sitemap.", responses = {
+    @Operation(operationId = "pollDataForPage", summary = "Polls the data for one page of a sitemap.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = PageDTO.class))),
             @ApiResponse(responseCode = "404", description = "Sitemap with requested name does not exist or page does not exist, or page refers to a non-linkable widget"),
             @ApiResponse(responseCode = "400", description = "Invalid subscription id has been provided.") })
@@ -283,7 +325,7 @@ public class SitemapResource
 
         if (subscriptionId != null) {
             try {
-                subscriptions.setPageId(subscriptionId, sitemapname, pageId);
+                subscriptions.updateSubscriptionLocation(subscriptionId, sitemapname, pageId);
             } catch (IllegalArgumentException e) {
                 return JSONResponse.createErrorResponse(Response.Status.BAD_REQUEST, e.getMessage());
             }
@@ -296,7 +338,7 @@ public class SitemapResource
             // so we do a simply listening for changes on the appropriate items
             // The blocking has a timeout of 30 seconds. If this timeout is reached,
             // we notice this information in the response object.
-            timeout = blockUnlessChangeOccurs(sitemapname, pageId);
+            timeout = blockUntilChangeOccurs(sitemapname, pageId);
         }
         PageDTO responseObject = getPageBean(sitemapname, pageId, uriInfo.getBaseUriBuilder().build(), locale, timeout,
                 includeHiddenWidgets);
@@ -334,6 +376,28 @@ public class SitemapResource
     }
 
     /**
+     *
+     * Subscribe to a whole sitemap (all pages at once).
+     * This is not a recommended option as it incurs high SSE traffic
+     * and might pose a high load on the server, depending on the sitemap size.
+     * No built-in openhab UI should use this functionality.
+     *
+     */
+    @GET
+    @Path(SEGMENT_EVENTS + "/{subscriptionid: [a-zA-Z_0-9-]+}/*")
+    @Produces(MediaType.SERVER_SENT_EVENTS)
+    @Operation(operationId = "getSitemapEvents", summary = "Get sitemap events for a whole sitemap. Not recommended due to potentially high traffic.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "400", description = "Missing sitemap parameter, or sitemap not linked successfully to the subscription."),
+            @ApiResponse(responseCode = "404", description = "Subscription not found.") })
+    public void getSitemapEvents(@Context final SseEventSink sseEventSink, @Context final HttpServletResponse response,
+            @PathParam("subscriptionid") @Parameter(description = "subscription id") String subscriptionId,
+            @QueryParam("sitemap") @Parameter(description = "sitemap name") @Nullable String sitemapname) {
+
+        getSitemapEvents(sseEventSink, response, subscriptionId, sitemapname, null, true);
+    }
+
+    /**
      * Subscribes the connecting client to the stream of sitemap events.
      */
     @GET
@@ -341,26 +405,31 @@ public class SitemapResource
     @Produces(MediaType.SERVER_SENT_EVENTS)
     @Operation(operationId = "getSitemapEvents", summary = "Get sitemap events.", responses = {
             @ApiResponse(responseCode = "200", description = "OK"),
-            @ApiResponse(responseCode = "400", description = "Page not linked to the subscription."),
+            @ApiResponse(responseCode = "400", description = "Missing sitemap or page parameter, or page not linked successfully to the subscription."),
             @ApiResponse(responseCode = "404", description = "Subscription not found.") })
     public void getSitemapEvents(@Context final SseEventSink sseEventSink, @Context final HttpServletResponse response,
             @PathParam("subscriptionid") @Parameter(description = "subscription id") String subscriptionId,
             @QueryParam("sitemap") @Parameter(description = "sitemap name") @Nullable String sitemapname,
             @QueryParam("pageid") @Parameter(description = "page id") @Nullable String pageId) {
+        getSitemapEvents(sseEventSink, response, subscriptionId, sitemapname, pageId, false);
         logger.debug("Received HTTP GET request from IP {} at '{}' for sitemap {} and page {}", request.getRemoteAddr(),
                 uriInfo.getPath(), sitemapname, pageId);
+    }
 
+    private void getSitemapEvents(SseEventSink sseEventSink, HttpServletResponse response, String subscriptionId,
+            @Nullable String sitemapname, @Nullable String pageId, boolean subscribeToWholeSitemap) {
         final SseSinkInfo sinkInfo = knownSubscriptions.get(subscriptionId);
         if (sinkInfo == null) {
             logger.debug("Subscription id {} does not exist.", subscriptionId);
             response.setStatus(Status.NOT_FOUND.getStatusCode());
             return;
         }
-        if (sitemapname != null && pageId != null) {
-            subscriptions.setPageId(subscriptionId, sitemapname, pageId);
+        if (sitemapname != null && (subscribeToWholeSitemap || pageId != null)) {
+            subscriptions.updateSubscriptionLocation(subscriptionId, sitemapname, pageId);
         }
-        if (subscriptions.getSitemapName(subscriptionId) == null || subscriptions.getPageId(subscriptionId) == null) {
-            logger.debug("Subscription id {} is not yet linked to a sitemap/page.", subscriptionId);
+        if (subscriptions.getSitemapName(subscriptionId) == null
+                || (subscriptions.getPageId(subscriptionId) == null && !subscribeToWholeSitemap)) {
+            logger.debug("Subscription id {} is not yet linked to a sitemap (or sitemap and page).", subscriptionId);
             response.setStatus(Status.BAD_REQUEST.getStatusCode());
             return;
         }
@@ -453,10 +522,11 @@ public class SitemapResource
         return beans;
     }
 
-    private SitemapDTO getSitemapBean(String sitemapname, URI uri, Locale locale, boolean includeHiddenWidgets) {
+    private SitemapDTO getSitemapBean(String sitemapname, URI uri, Locale locale, boolean includeHiddenWidgets,
+            boolean timeout) {
         Sitemap sitemap = getSitemap(sitemapname);
         if (sitemap != null) {
-            return createSitemapBean(sitemapname, sitemap, uri, locale, includeHiddenWidgets);
+            return createSitemapBean(sitemapname, sitemap, uri, locale, includeHiddenWidgets, timeout);
         } else {
             logger.info("Received HTTP GET request at '{}' for the unknown sitemap '{}'.", uriInfo.getPath(),
                     sitemapname);
@@ -465,7 +535,7 @@ public class SitemapResource
     }
 
     private SitemapDTO createSitemapBean(String sitemapName, Sitemap sitemap, URI uri, Locale locale,
-            boolean includeHiddenWidgets) {
+            boolean includeHiddenWidgets, boolean timeout) {
         SitemapDTO bean = new SitemapDTO();
 
         bean.name = sitemapName;
@@ -474,7 +544,7 @@ public class SitemapResource
 
         bean.link = UriBuilder.fromUri(uri).path(SitemapResource.PATH_SITEMAPS).path(bean.name).build().toASCIIString();
         bean.homepage = createPageBean(sitemap.getName(), sitemap.getLabel(), sitemap.getIcon(), sitemap.getName(),
-                itemUIRegistry.getChildren(sitemap), true, false, uri, locale, false, includeHiddenWidgets);
+                itemUIRegistry.getChildren(sitemap), true, false, uri, locale, timeout, includeHiddenWidgets);
         return bean;
     }
 
@@ -688,22 +758,12 @@ public class SitemapResource
         return null;
     }
 
-    private boolean blockUnlessChangeOccurs(String sitemapname, String pageId) {
-        boolean timeout = false;
-        Sitemap sitemap = getSitemap(sitemapname);
-        if (sitemap != null) {
-            if (pageId.equals(sitemap.getName())) {
-                EList<Widget> children = itemUIRegistry.getChildren(sitemap);
-                timeout = waitForChanges(children);
-            } else {
-                Widget pageWidget = itemUIRegistry.getWidget(sitemap, pageId);
-                if (pageWidget instanceof LinkableWidget widget) {
-                    EList<Widget> children = itemUIRegistry.getChildren(widget);
-                    timeout = waitForChanges(children);
-                }
-            }
+    private boolean blockUntilChangeOccurs(String sitemapname, @Nullable String pageId) {
+        EList<Widget> widgets = subscriptions.collectWidgets(sitemapname, pageId);
+        if (widgets.isEmpty()) {
+            return false;
         }
-        return timeout;
+        return waitForChanges(widgets);
     }
 
     /**
@@ -714,12 +774,14 @@ public class SitemapResource
      *            the widgets of the page to observe
      * @return true if the timeout is reached
      */
-    private boolean waitForChanges(EList<Widget> widgets) {
+    private boolean waitForChanges(List<Widget> widgets) {
         long startTime = (new Date()).getTime();
         boolean timeout = false;
         Set<String> items = getAllItems(widgets).stream().map(Item::getName).collect(Collectors.toSet());
         BlockingStateChangeListener listener = new BlockingStateChangeListener(items);
         stateChangeListeners.add(listener);
+
+        logger.debug("Waiting for changes on {} items from {} widgets", items.size(), widgets.size());
 
         while (!listener.hasChanged() && !timeout) {
             timeout = (new Date()).getTime() - startTime > TIMEOUT_IN_MS;
@@ -742,7 +804,7 @@ public class SitemapResource
      *            the widget list to get the items for added to all bundles containing REST resources
      * @return all items that are represented by the list of widgets
      */
-    private Set<GenericItem> getAllItems(EList<Widget> widgets) {
+    private Set<GenericItem> getAllItems(List<Widget> widgets) {
         Set<GenericItem> items = new HashSet<>();
         for (Widget widget : widgets) {
             // We skip the chart widgets having a refresh argument
@@ -845,7 +907,7 @@ public class SitemapResource
             String sitemapName = event.sitemapName;
             String pageId = event.pageId;
             if (sitemapName != null && sitemapName.equals(subscriptions.getSitemapName(info.subscriptionId))
-                    && pageId != null && pageId.equals(subscriptions.getPageId(info.subscriptionId))) {
+                    && Objects.equals(pageId, subscriptions.getPageId(info.subscriptionId))) {
                 if (logger.isDebugEnabled()) {
                     if (event instanceof SitemapWidgetEvent widgetEvent) {
                         logger.debug("Sent sitemap event for widget {} to subscription {}.", widgetEvent.widgetId,
