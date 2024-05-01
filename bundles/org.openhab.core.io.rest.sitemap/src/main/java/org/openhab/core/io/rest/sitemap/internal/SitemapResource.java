@@ -781,6 +781,8 @@ public class SitemapResource
         BlockingStateChangeListener listener = new BlockingStateChangeListener(items);
         stateChangeListeners.add(listener);
 
+        logger.debug("Waiting for changes on {} items from {} widgets", items.size(), widgets.size());
+
         while (!listener.hasChanged() && !timeout) {
             timeout = (new Date()).getTime() - startTime > TIMEOUT_IN_MS;
             try {
