@@ -56,13 +56,13 @@ public class DefaultStateDescriptionFragmentProvider implements StateDescription
 
     private final Map<String, StateDescriptionFragment> stateDescriptionFragments = new ConcurrentHashMap<>();
 
-    private Integer rank = -2; // takes less precedence over all other providers
+    private Integer rank = -2; // takes less precedence than all other providers
 
     @Activate
     public DefaultStateDescriptionFragmentProvider(Map<String, Object> properties) {
         Object serviceRanking = properties.get(Constants.SERVICE_RANKING);
-        if (serviceRanking instanceof Integer) {
-            rank = (Integer) serviceRanking;
+        if (serviceRanking instanceof Integer rankValue) {
+            rank = rankValue;
         }
     }
 

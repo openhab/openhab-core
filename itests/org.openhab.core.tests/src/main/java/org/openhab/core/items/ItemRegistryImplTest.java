@@ -35,6 +35,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.i18n.UnitProvider;
+import org.openhab.core.internal.items.DefaultStateDescriptionFragmentProvider;
 import org.openhab.core.internal.items.ItemBuilderFactoryImpl;
 import org.openhab.core.internal.items.ItemRegistryImpl;
 import org.openhab.core.items.events.ItemAddedEvent;
@@ -101,7 +102,8 @@ public class ItemRegistryImplTest extends JavaTest {
         itemProvider.add(cameraItem4);
 
         // setup ItemRegistryImpl with necessary dependencies:
-        itemRegistry = new ItemRegistryImpl(mock(MetadataRegistry.class)) {
+        itemRegistry = new ItemRegistryImpl(mock(MetadataRegistry.class),
+                mock(DefaultStateDescriptionFragmentProvider.class)) {
             {
                 addProvider(itemProvider);
                 setManagedProvider(itemProvider);

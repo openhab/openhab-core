@@ -59,6 +59,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Stefan Bußweiler - Migration to new event mechanism
+ * @author Laurent Garnier - handle new DefaultStateDescriptionFragmentProvider
  */
 @NonNullByDefault
 @Component(immediate = true)
@@ -71,14 +72,16 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
     private @Nullable StateDescriptionService stateDescriptionService;
     private @Nullable CommandDescriptionService commandDescriptionService;
     private final MetadataRegistry metadataRegistry;
-    private @Nullable DefaultStateDescriptionFragmentProvider defaultStateDescriptionFragmentProvider;
+    private final DefaultStateDescriptionFragmentProvider defaultStateDescriptionFragmentProvider;
 
     private @Nullable ItemStateConverter itemStateConverter;
 
     @Activate
-    public ItemRegistryImpl(final @Reference MetadataRegistry metadataRegistry) {
+    public ItemRegistryImpl(final @Reference MetadataRegistry metadataRegistry,
+            final @Reference DefaultStateDescriptionFragmentProvider defaultStateDescriptionFragmentProvider) {
         super(ItemProvider.class);
         this.metadataRegistry = metadataRegistry;
+        this.defaultStateDescriptionFragmentProvider = defaultStateDescriptionFragmentProvider;
     }
 
     @Activate
@@ -200,10 +203,7 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
         // add the item to all relevant groups
         addToGroupItems(item, item.getGroupNames());
 
-        DefaultStateDescriptionFragmentProvider stateDescriptionProvider = defaultStateDescriptionFragmentProvider;
-        if (stateDescriptionProvider != null) {
-            stateDescriptionProvider.onItemAdded(item);
-        }
+        defaultStateDescriptionFragmentProvider.onItemAdded(item);
     }
 
     private void injectServices(Item item) {
@@ -252,10 +252,7 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
             genericItem.dispose();
         }
         removeFromGroupItems(element, element.getGroupNames());
-        DefaultStateDescriptionFragmentProvider stateDescriptionProvider = defaultStateDescriptionFragmentProvider;
-        if (stateDescriptionProvider != null) {
-            stateDescriptionProvider.onItemRemoved(element);
-        }
+        defaultStateDescriptionFragmentProvider.onItemRemoved(element);
     }
 
     @Override
@@ -280,11 +277,8 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
         }
         injectServices(item);
 
-        DefaultStateDescriptionFragmentProvider stateDescriptionProvider = defaultStateDescriptionFragmentProvider;
-        if (stateDescriptionProvider != null) {
-            stateDescriptionProvider.onItemRemoved(oldItem);
-            stateDescriptionProvider.onItemAdded(item);
-        }
+        defaultStateDescriptionFragmentProvider.onItemRemoved(oldItem);
+        defaultStateDescriptionFragmentProvider.onItemAdded(item);
     }
 
     @Override
@@ -483,22 +477,6 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
         for (Item item : getItems()) {
             ((GenericItem) item).setCommandDescriptionService(null);
         }
-    }
-
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
-    public void setDefaultStateDescriptionFragmentProvider(
-            DefaultStateDescriptionFragmentProvider defaultStateDescriptionFragmentProvider) {
-        this.defaultStateDescriptionFragmentProvider = defaultStateDescriptionFragmentProvider;
-
-        defaultStateDescriptionFragmentProvider.onAllItemsRemoved();
-        for (Item item : getItems()) {
-            defaultStateDescriptionFragmentProvider.onItemAdded(item);
-        }
-    }
-
-    public void unsetDefaultStateDescriptionFragmentProvider(
-            DefaultStateDescriptionFragmentProvider defaultStateDescriptionFragmentProvider) {
-        this.defaultStateDescriptionFragmentProvider = null;
     }
 
     @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
