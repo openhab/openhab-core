@@ -234,7 +234,7 @@ public class SitemapSubscriptionService implements ModelRepositoryChangeListener
     }
 
     /**
-     * Updates the subscription to send events for the provided page id (or whole sitemap if pageId is is null).
+     * Updates the subscription to send events for the provided page id (or whole sitemap if pageId is null).
      *
      * @param subscriptionId the subscription to update
      * @param sitemapName the current sitemap name
