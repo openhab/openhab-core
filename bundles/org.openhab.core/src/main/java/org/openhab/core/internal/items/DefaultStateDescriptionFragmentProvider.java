@@ -68,11 +68,11 @@ public class DefaultStateDescriptionFragmentProvider implements StateDescription
 
     @Deactivate
     protected void deactivate() {
-        onAllItemsRemoved();
+        stateDescriptionFragments.clear();
     }
 
     public void onItemAdded(Item item) {
-        logger.debug("DefaultStateDescriptionFragmentProvider onItemAdded {} {}", item.getName(), item.getType());
+        logger.trace("onItemAdded {} {}", item.getName(), item.getType());
         if (item instanceof GroupItem group) {
             Item baseItem = group.getBaseItem();
             if (baseItem != null) {
@@ -98,13 +98,8 @@ public class DefaultStateDescriptionFragmentProvider implements StateDescription
     }
 
     public void onItemRemoved(Item item) {
-        logger.debug("DefaultStateDescriptionFragmentProvider onItemRemoved {}", item.getName());
+        logger.trace("onItemRemoved {}", item.getName());
         stateDescriptionFragments.remove(item.getName());
-    }
-
-    public void onAllItemsRemoved() {
-        logger.debug("DefaultStateDescriptionFragmentProvider onAllItemsRemoved");
-        stateDescriptionFragments.clear();
     }
 
     @Override
