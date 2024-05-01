@@ -428,7 +428,7 @@ public class SitemapResource
             subscriptions.updateSubscriptionLocation(subscriptionId, sitemapname, pageId);
         }
         if (subscriptions.getSitemapName(subscriptionId) == null
-                || subscriptions.getPageId(subscriptionId) == null && !subscribeToWholeSitemap) {
+                || (subscriptions.getPageId(subscriptionId) == null && !subscribeToWholeSitemap)) {
             logger.debug("Subscription id {} is not yet linked to a sitemap (or sitemap and page).", subscriptionId);
             response.setStatus(Status.BAD_REQUEST.getStatusCode());
             return;
