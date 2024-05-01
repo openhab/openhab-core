@@ -690,7 +690,7 @@ public class ItemUIRegistryImplTest {
     }
 
     @Test
-    public void getLabelLabelWithMappedOption() {
+    public void getLabelStringItemLabelWithMappedOption() {
         String testLabel = "Label";
 
         StateDescription stateDescription = mock(StateDescription.class);
@@ -707,7 +707,7 @@ public class ItemUIRegistryImplTest {
     }
 
     @Test
-    public void getLabelLabelWithUnmappedOption() {
+    public void getLabelStringItemLabelWithUnmappedOption() {
         String testLabel = "Label";
 
         StateDescription stateDescription = mock(StateDescription.class);
@@ -721,6 +721,78 @@ public class ItemUIRegistryImplTest {
         when(itemMock.getState()).thenReturn(new StringType("State"));
         String label = uiRegistry.getLabel(widgetMock);
         assertEquals("Label [State]", label);
+    }
+
+    @Test
+    public void getLabelStringItemLabelWithMappedOptionButInappropriatePattern() {
+        String testLabel = "Label";
+
+        StateDescription stateDescription = mock(StateDescription.class);
+        List<StateOption> options = new ArrayList<>();
+        options.add(new StateOption("State0", "This is the state 0"));
+        options.add(new StateOption("State1", "This is the state 1"));
+        when(widgetMock.getLabel()).thenReturn(testLabel);
+        when(itemMock.getStateDescription()).thenReturn(stateDescription);
+        when(stateDescription.getPattern()).thenReturn("Value: %f");
+        when(stateDescription.getOptions()).thenReturn(options);
+        when(itemMock.getState()).thenReturn(new StringType("State0"));
+        String label = uiRegistry.getLabel(widgetMock);
+        assertEquals("Label [This is the state 0]", label);
+    }
+
+    @Test
+    public void getLabelNumberItemLabelWithMappedOption() {
+        String testLabel = "Label";
+
+        StateDescription stateDescription = mock(StateDescription.class);
+        List<StateOption> options = new ArrayList<>();
+        options.add(new StateOption("0", "This is the state number 0"));
+        options.add(new StateOption("1", "This is the state number 1"));
+        when(widgetMock.getLabel()).thenReturn(testLabel);
+        when(itemMock.getStateDescription()).thenReturn(stateDescription);
+        when(stateDescription.getPattern()).thenReturn("%s");
+        when(stateDescription.getOptions()).thenReturn(options);
+        when(itemMock.getState()).thenReturn(new DecimalType(1));
+        String label = uiRegistry.getLabel(widgetMock);
+        assertEquals("Label [This is the state number 1]", label);
+    }
+
+    @Test
+    public void getLabelNumberItemLabelWithUnmappedOption() {
+        String testLabel = "Label";
+
+        StateDescription stateDescription = mock(StateDescription.class);
+        List<StateOption> options = new ArrayList<>();
+        options.add(new StateOption("0", "This is the state number 0"));
+        options.add(new StateOption("1", "This is the state number 1"));
+        when(widgetMock.getLabel()).thenReturn(testLabel);
+        when(itemMock.getStateDescription()).thenReturn(stateDescription);
+        when(stateDescription.getPattern()).thenReturn("%s");
+        when(stateDescription.getOptions()).thenReturn(options);
+        when(itemMock.getState()).thenReturn(new DecimalType(2));
+        String label = uiRegistry.getLabel(widgetMock);
+        assertEquals("Label [2]", label);
+    }
+
+    @Test
+    public void getLabelNumberItemLabelWithMappedOptionButInappropriatePattern() {
+        String testLabel = "Label";
+
+        StateDescription stateDescription = mock(StateDescription.class);
+        List<StateOption> options = new ArrayList<>();
+        options.add(new StateOption("0", "This is the state number 0"));
+        options.add(new StateOption("1", "This is the state number 1"));
+        when(widgetMock.getLabel()).thenReturn(testLabel);
+        when(itemMock.getStateDescription()).thenReturn(stateDescription);
+        when(stateDescription.getPattern()).thenReturn("Value: %f");
+        when(stateDescription.getOptions()).thenReturn(options);
+        when(itemMock.getState()).thenReturn(new DecimalType(0));
+        String label = uiRegistry.getLabel(widgetMock);
+        assertEquals("Label [This is the state number 0]", label);
+
+        when(stateDescription.getPattern()).thenReturn("Value: %d");
+        label = uiRegistry.getLabel(widgetMock);
+        assertEquals("Label [This is the state number 0]", label);
     }
 
     @Test

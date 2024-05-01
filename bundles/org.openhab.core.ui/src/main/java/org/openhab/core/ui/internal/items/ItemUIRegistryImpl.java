@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.IllegalFormatException;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -64,7 +65,6 @@ import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.library.types.PercentType;
 import org.openhab.core.library.types.PlayPauseType;
 import org.openhab.core.library.types.QuantityType;
-import org.openhab.core.library.types.StringType;
 import org.openhab.core.model.sitemap.sitemap.ColorArray;
 import org.openhab.core.model.sitemap.sitemap.Default;
 import org.openhab.core.model.sitemap.sitemap.Group;
@@ -401,19 +401,20 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
                     // if the channel contains options, we build a label with the mapped option value
                     if (stateDescription != null) {
                         for (StateOption option : stateDescription.getOptions()) {
-                            if (option.getValue().equals(state.toString()) && option.getLabel() != null) {
-                                State stateOption = new StringType(option.getLabel());
+                            String optionLabel = option.getLabel();
+                            if (option.getValue().equals(state.toString()) && optionLabel != null) {
+                                String formatPatternOption;
                                 try {
-                                    String formatPatternOption = stateOption.format(formatPattern);
-                                    labelMappedOption = label.trim();
-                                    labelMappedOption = labelMappedOption.substring(0,
-                                            labelMappedOption.indexOf("[") + 1) + formatPatternOption + "]";
-                                } catch (IllegalArgumentException e) {
+                                    formatPatternOption = String.format(formatPattern, optionLabel);
+                                } catch (IllegalFormatException e) {
                                     logger.debug(
-                                            "Mapping option value '{}' for item {} using format '{}' failed ({}); mapping is ignored",
-                                            stateOption, itemName, formatPattern, e.getMessage());
-                                    labelMappedOption = null;
+                                            "Mapping option value '{}' for item {} using format '{}' failed ({}); format is ignored and option label is used",
+                                            optionLabel, itemName, formatPattern, e.getMessage());
+                                    formatPatternOption = optionLabel;
                                 }
+                                labelMappedOption = label.trim();
+                                labelMappedOption = labelMappedOption.substring(0, labelMappedOption.indexOf("[") + 1)
+                                        + formatPatternOption + "]";
                                 break;
                             }
                         }
