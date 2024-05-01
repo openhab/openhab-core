@@ -405,7 +405,7 @@ public class SitemapResource
     @Produces(MediaType.SERVER_SENT_EVENTS)
     @Operation(operationId = "getSitemapEvents", summary = "Get sitemap events.", responses = {
             @ApiResponse(responseCode = "200", description = "OK"),
-            @ApiResponse(responseCode = "400", description = "Missing sitemapname or page parameter, or page not linked successfully to the subscription."),
+            @ApiResponse(responseCode = "400", description = "Missing sitemap or page parameter, or page not linked successfully to the subscription."),
             @ApiResponse(responseCode = "404", description = "Subscription not found.") })
     public void getSitemapEvents(@Context final SseEventSink sseEventSink, @Context final HttpServletResponse response,
             @PathParam("subscriptionid") @Parameter(description = "subscription id") String subscriptionId,
