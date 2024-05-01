@@ -271,32 +271,35 @@ public class SitemapSubscriptionService implements ModelRepositoryChangeListener
         listener.widgetsChangeListener().addCallback(callback);
     }
 
-    private EList<Widget> collectWidgets(String sitemapName, @Nullable String pageId) {
+    public EList<Widget> collectWidgets(String sitemapName, @Nullable String pageId) {
         EList<Widget> widgets = new BasicEList<>();
 
         Sitemap sitemap = getSitemap(sitemapName);
-        if (sitemap != null) {
-            if (pageId != null && !pageId.equals(sitemap.getName())) {
-                // subscribing to subpage of sitemap --> get all widgets from that page
-                Widget pageWidget = itemUIRegistry.getWidget(sitemap, pageId);
-                if (pageWidget instanceof LinkableWidget widget) {
-                    widgets = itemUIRegistry.getChildren(widget);
-                    // We add the page widget. It will help any UI to update the page title.
-                    widgets.add(pageWidget);
-                }
-            } else {
-                // subscribing to main page --> get immediate children of sitemap
-                widgets = itemUIRegistry.getChildren(sitemap);
-                if (pageId == null) {
-                    // subscribing to whole sitemap --> get items for all subpages as well
-                    LinkedList<Widget> childrenQueue = new LinkedList<>(widgets);
-                    while (!childrenQueue.isEmpty()) {
-                        Widget child = childrenQueue.remove(0);
-                        if (child instanceof LinkableWidget) {
-                            List<Widget> subWidgets = itemUIRegistry.getChildren((LinkableWidget) child);
-                            widgets.addAll(subWidgets);
-                            childrenQueue.addAll(subWidgets);
-                        }
+        if (sitemap == null) {
+            // no sitemap found with the given name
+            return widgets;
+        }
+
+        if (pageId != null && !pageId.equals(sitemap.getName())) {
+            // subscribing to subpage of sitemap --> get all widgets from that page
+            Widget pageWidget = itemUIRegistry.getWidget(sitemap, pageId);
+            if (pageWidget instanceof LinkableWidget widget) {
+                widgets = itemUIRegistry.getChildren(widget);
+                // We add the page widget. It will help any UI to update the page title.
+                widgets.add(pageWidget);
+            }
+        } else {
+            // subscribing to main page --> get immediate children of sitemap
+            widgets = itemUIRegistry.getChildren(sitemap);
+            if (pageId == null) {
+                // subscribing to whole sitemap --> get items for all subpages as well
+                LinkedList<Widget> childrenQueue = new LinkedList<>(widgets);
+                while (!childrenQueue.isEmpty()) {
+                    Widget child = childrenQueue.remove(0);
+                    if (child instanceof LinkableWidget) {
+                        List<Widget> subWidgets = itemUIRegistry.getChildren((LinkableWidget) child);
+                        widgets.addAll(subWidgets);
+                        childrenQueue.addAll(subWidgets);
                     }
                 }
             }

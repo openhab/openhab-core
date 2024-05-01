@@ -300,7 +300,7 @@ public class SitemapResource
 
         boolean timeout = false;
         if (headers.getRequestHeader("X-Atmosphere-Transport") != null) {
-            timeout = blockUnlessChangeOccursAnywhere(sitemapname);
+            timeout = blockUntilChangeOccurs(sitemapname, null);
         }
         SitemapDTO responseObject = getSitemapBean(sitemapname, uriInfo.getBaseUriBuilder().build(), locale,
                 includeHiddenWidgets, timeout);
@@ -338,7 +338,7 @@ public class SitemapResource
             // so we do a simply listening for changes on the appropriate items
             // The blocking has a timeout of 30 seconds. If this timeout is reached,
             // we notice this information in the response object.
-            timeout = blockUnlessChangeOccursOnPage(sitemapname, pageId);
+            timeout = blockUntilChangeOccurs(sitemapname, pageId);
         }
         PageDTO responseObject = getPageBean(sitemapname, pageId, uriInfo.getBaseUriBuilder().build(), locale, timeout,
                 includeHiddenWidgets);
@@ -758,41 +758,12 @@ public class SitemapResource
         return null;
     }
 
-    private boolean blockUnlessChangeOccursAnywhere(String sitemapname) {
-        Sitemap sitemap = getSitemap(sitemapname);
-        List<Widget> widgets;
-        if (sitemap == null) {
+    private boolean blockUntilChangeOccurs(String sitemapname, @Nullable String pageId) {
+        EList<Widget> widgets = subscriptions.collectWidgets(sitemapname, pageId);
+        if (widgets.isEmpty()) {
             return false;
         }
-        widgets = itemUIRegistry.getChildren(sitemap);
-        LinkedList<Widget> childrenQueue = new LinkedList<>(widgets);
-        while (!childrenQueue.isEmpty()) {
-            Widget child = childrenQueue.remove(0);
-            if (child instanceof LinkableWidget) {
-                List<Widget> subWidgets = itemUIRegistry.getChildren((LinkableWidget) child);
-                widgets.addAll(subWidgets);
-                childrenQueue.addAll(subWidgets);
-            }
-        }
         return waitForChanges(widgets);
-    }
-
-    private boolean blockUnlessChangeOccursOnPage(String sitemapname, String pageId) {
-        Sitemap sitemap = getSitemap(sitemapname);
-        boolean timeout = false;
-        if (sitemap != null) {
-            if (pageId.equals(sitemap.getName())) {
-                List<Widget> widgets = itemUIRegistry.getChildren(sitemap);
-                timeout = waitForChanges(widgets);
-            } else {
-                Widget pageWidget = itemUIRegistry.getWidget(sitemap, pageId);
-                if (pageWidget instanceof LinkableWidget widget) {
-                    List<Widget> widgets = itemUIRegistry.getChildren(widget);
-                    timeout = waitForChanges(widgets);
-                }
-            }
-        }
-        return timeout;
     }
 
     /**
