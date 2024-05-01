@@ -304,6 +304,7 @@ public class SitemapSubscriptionService implements ModelRepositoryChangeListener
                 }
             }
         }
+        logger.debug("Collected {} widgets for sitemap: {}, page id {}", widgets.size(), sitemapName, pageId);
         return widgets;
     }
 
