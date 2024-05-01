@@ -20,6 +20,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -61,6 +62,7 @@ import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
 import org.openhab.core.ui.items.ItemUIRegistry;
 import org.openhab.core.ui.items.ItemUIRegistry.WidgetLabelSource;
+import org.osgi.framework.BundleContext;
 
 /**
  * Test aspects of the {@link SitemapResource}.
@@ -105,7 +107,7 @@ public class SitemapResourceTest extends JavaTest {
     private static final String CLIENT_IP = "127.0.0.1";
 
     private @NonNullByDefault({}) SitemapResource sitemapResource;
-
+    private @NonNullByDefault({}) SitemapSubscriptionService subscriptions;
     private @NonNullByDefault({}) GenericItem item;
     private @NonNullByDefault({}) GenericItem visibilityRuleItem;
     private @NonNullByDefault({}) GenericItem labelColorItem;
@@ -119,14 +121,17 @@ public class SitemapResourceTest extends JavaTest {
     private @Mock @NonNullByDefault({}) LocaleService localeServiceMock;
     private @Mock @NonNullByDefault({}) HttpServletRequest requestMock;
     private @Mock @NonNullByDefault({}) SitemapProvider sitemapProviderMock;
-    private @Mock @NonNullByDefault({}) SitemapSubscriptionService subscriptionsMock;
     private @Mock @NonNullByDefault({}) UriInfo uriInfoMock;
+    private @Mock @NonNullByDefault({}) BundleContext bundleContextMock;
 
     private EList<Widget> widgets = new BasicEList<>();
 
     @BeforeEach
     public void setup() throws Exception {
-        sitemapResource = new SitemapResource(itemUIRegistryMock, localeServiceMock, subscriptionsMock);
+        subscriptions = new SitemapSubscriptionService(Collections.emptyMap(), itemUIRegistryMock, bundleContextMock);
+        subscriptions.addSitemapProvider(sitemapProviderMock);
+
+        sitemapResource = new SitemapResource(itemUIRegistryMock, localeServiceMock, subscriptions);
 
         when(uriInfoMock.getAbsolutePathBuilder()).thenReturn(UriBuilder.fromPath(SITEMAP_PATH));
         when(uriInfoMock.getBaseUriBuilder()).thenReturn(UriBuilder.fromPath(SITEMAP_PATH));

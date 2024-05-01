@@ -141,12 +141,12 @@ public class SitemapSubscriptionService implements ModelRepositoryChangeListener
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
-    protected void addSitemapProvider(SitemapProvider provider) {
+    public void addSitemapProvider(SitemapProvider provider) {
         sitemapProviders.add(provider);
         provider.addModelChangeListener(this);
     }
 
-    protected void removeSitemapProvider(SitemapProvider provider) {
+    public void removeSitemapProvider(SitemapProvider provider) {
         sitemapProviders.remove(provider);
         provider.removeModelChangeListener(this);
     }
@@ -284,13 +284,13 @@ public class SitemapSubscriptionService implements ModelRepositoryChangeListener
             // subscribing to subpage of sitemap --> get all widgets from that page
             Widget pageWidget = itemUIRegistry.getWidget(sitemap, pageId);
             if (pageWidget instanceof LinkableWidget widget) {
-                widgets = itemUIRegistry.getChildren(widget);
+                widgets.addAll(itemUIRegistry.getChildren(widget));
                 // We add the page widget. It will help any UI to update the page title.
                 widgets.add(pageWidget);
             }
         } else {
             // subscribing to main page --> get immediate children of sitemap
-            widgets = itemUIRegistry.getChildren(sitemap);
+            widgets.addAll(itemUIRegistry.getChildren(sitemap));
             if (pageId == null) {
                 // subscribing to whole sitemap --> get items for all subpages as well
                 LinkedList<Widget> childrenQueue = new LinkedList<>(widgets);
