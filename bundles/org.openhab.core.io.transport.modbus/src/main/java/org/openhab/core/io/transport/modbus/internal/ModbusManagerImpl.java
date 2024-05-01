@@ -285,6 +285,12 @@ public class ModbusManagerImpl implements ModbusManager {
     private static final String MODBUS_POLLER_THREAD_POOL_NAME = "modbusManagerPollerThreadPool";
 
     /**
+     * The slave exception code indicating that the device is currently busy processing another
+     * command.
+     */
+    private static final int MODBUS_EXCEPTION_SLAVE_DEVICE_BUSY = 6;
+
+    /**
      * Log message with WARN level if the task queues exceed this limit.
      *
      * If the queues grow too large, it might be an issue with consumer of the ModbusManager.
@@ -662,7 +668,11 @@ public class ModbusManagerImpl implements ModbusManager {
                 } catch (ModbusSlaveException e) {
                     lastError.set(new ModbusSlaveErrorResponseExceptionImpl(e));
                     // Slave returned explicit error response, no reason to re-establish new connection
-                    if (willRetry) {
+                    if (willRetry && e.getType() == MODBUS_EXCEPTION_SLAVE_DEVICE_BUSY) {
+                        logger.debug(
+                                "Try {} out of {} failed when executing request ({}). The slave device is busy (exception code {}). Will try again soon. [operation ID {}]",
+                                tryIndex, maxTries, request, e.getType(), operationId);
+                    } else if (willRetry) {
                         logger.warn(
                                 "Try {} out of {} failed when executing request ({}). Will try again soon. Error was: {} {} [operation ID {}]",
                                 tryIndex, maxTries, request, e.getClass().getName(), e.getMessage(), operationId);

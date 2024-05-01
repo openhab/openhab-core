@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import javax.measure.Unit;
 
@@ -106,7 +107,15 @@ public class TestPersistenceService implements QueryablePersistenceService {
             if (filter.getOrdering() == Ordering.DESCENDING) {
                 Collections.reverse(results);
             }
-            return results;
+            Stream<HistoricItem> stream = results.stream();
+            if (filter.getPageNumber() > 0) {
+                stream = stream.skip(filter.getPageSize() * filter.getPageNumber());
+            }
+
+            if (filter.getPageSize() != Integer.MAX_VALUE) {
+                stream = stream.limit(filter.getPageSize());
+            }
+            return stream.toList();
         } else {
             int startValue = 1950;
             int endValue = 2012;
@@ -147,7 +156,15 @@ public class TestPersistenceService implements QueryablePersistenceService {
             if (filter.getOrdering() == Ordering.DESCENDING) {
                 Collections.reverse(results);
             }
-            return results;
+            Stream<HistoricItem> stream = results.stream();
+            if (filter.getPageNumber() > 0) {
+                stream = stream.skip(filter.getPageSize() * filter.getPageNumber());
+            }
+
+            if (filter.getPageSize() != Integer.MAX_VALUE) {
+                stream = stream.limit(filter.getPageSize());
+            }
+            return stream.toList();
         }
     }
 

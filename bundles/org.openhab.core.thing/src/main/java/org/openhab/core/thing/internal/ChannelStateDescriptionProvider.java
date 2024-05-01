@@ -70,8 +70,8 @@ public class ChannelStateDescriptionProvider implements StateDescriptionFragment
     @Activate
     protected void activate(Map<String, Object> properties) {
         Object serviceRanking = properties.get(Constants.SERVICE_RANKING);
-        if (serviceRanking instanceof Integer rankValue) {
-            rank = rankValue;
+        if (serviceRanking instanceof Integer integerValue) {
+            rank = integerValue;
         }
     }
 

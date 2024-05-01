@@ -271,8 +271,8 @@ public class ItemResource implements RESTResource {
                 .peek(dto -> addMetadata(dto, namespaces, null)) //
                 .peek(dto -> dto.editable = isEditable(dto.name)) //
                 .peek(dto -> {
-                    if (dto instanceof EnrichedGroupItemDTO) {
-                        for (EnrichedItemDTO member : ((EnrichedGroupItemDTO) dto).members) {
+                    if (dto instanceof EnrichedGroupItemDTO enrichedGroupItemDTO) {
+                        for (EnrichedItemDTO member : enrichedGroupItemDTO.members) {
                             member.editable = isEditable(member.name);
                         }
                     }
@@ -329,8 +329,8 @@ public class ItemResource implements RESTResource {
                     locale);
             addMetadata(dto, namespaces, null);
             dto.editable = isEditable(dto.name);
-            if (dto instanceof EnrichedGroupItemDTO) {
-                for (EnrichedItemDTO member : ((EnrichedGroupItemDTO) dto).members) {
+            if (dto instanceof EnrichedGroupItemDTO enrichedGroupItemDTO) {
+                for (EnrichedItemDTO member : enrichedGroupItemDTO.members) {
                     member.editable = isEditable(member.name);
                 }
             }
