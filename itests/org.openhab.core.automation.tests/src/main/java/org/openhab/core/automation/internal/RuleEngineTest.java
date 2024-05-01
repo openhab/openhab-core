@@ -180,7 +180,7 @@ public class RuleEngineTest extends JavaOSGiTest {
         List<ConfigDescriptionParameter> rule4cfgD = rule4Get.getConfigurationDescriptions();
         assertNotNull(rule4cfg, "RuleImpl configuration is null");
         assertTrue(rule4cfg.containsKey("config1"), "Missing config property in rule copy");
-        assertEquals(new BigDecimal(5), rule4cfg.get("config1"), "Wrong config value");
+        assertEquals(new BigDecimal(5).setScale(1), rule4cfg.get("config1"), "Wrong config value");
 
         assertNotNull(rule4cfgD, "RuleImpl configuration description is null");
         assertEquals(1, rule4cfgD.size(), "Missing config description in rule copy");
