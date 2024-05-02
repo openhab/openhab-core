@@ -58,8 +58,8 @@ import org.slf4j.LoggerFactory;
 /**
  * This is a service that provides the possibility to manage subscriptions to sitemaps.
  * As such subscriptions are stateful, they need to be created and removed upon disposal.
- * The subscription mechanism makes sure that only events for widgets of the currently active sitemap page are sent as
- * events to the subscriber.
+ * The subscription mechanism makes sure that only events for widgets of the currently active sitemap or sitemap page
+ * are sent as events to the subscriber.
  * For this to work correctly, the subscriber needs to make sure that {@link #updateSubscriptionLocation} is called
  * whenever it switches to a new page.
  *
