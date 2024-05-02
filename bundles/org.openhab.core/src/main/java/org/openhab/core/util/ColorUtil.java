@@ -333,7 +333,7 @@ public class ColorUtil {
      * Transform <a href="https://en.wikipedia.org/wiki/SRGB">sRGB</a> color format to
      * <a href="https://en.wikipedia.org/wiki/HSL_and_HSV">HSV</a> based {@link HSBType}.
      *
-     * @param rgb array of three or four {@link PercentType} with the RGB(W) values in the range 0 to 100 percent.
+     * @param rgbw array of three or four {@link PercentType} with the RGB(W) values in the range 0 to 100 percent.
      * @return the corresponding {@link HSBType}.
      * @throws IllegalArgumentException when input array has wrong size or exceeds allowed value range.
      */
