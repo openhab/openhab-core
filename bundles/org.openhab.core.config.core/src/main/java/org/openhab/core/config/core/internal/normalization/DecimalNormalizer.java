@@ -35,16 +35,16 @@ final class DecimalNormalizer extends AbstractNormalizer {
                 return stripTrailingZeros(new BigDecimal(stringValue));
             }
             if (value instanceof Byte byteValue) {
-                return new BigDecimal(byteValue).setScale(1);
+                return new BigDecimal(byteValue);
             }
             if (value instanceof Short shortValue) {
-                return new BigDecimal(shortValue).setScale(1);
+                return new BigDecimal(shortValue);
             }
             if (value instanceof Integer integerValue) {
-                return new BigDecimal(integerValue).setScale(1);
+                return new BigDecimal(integerValue);
             }
             if (value instanceof Long longValue) {
-                return new BigDecimal(longValue).setScale(1);
+                return new BigDecimal(longValue);
             }
             if (value instanceof Float floatValue) {
                 return new BigDecimal(floatValue.toString());
@@ -61,9 +61,12 @@ final class DecimalNormalizer extends AbstractNormalizer {
     }
 
     private BigDecimal stripTrailingZeros(BigDecimal value) {
-        BigDecimal ret = new BigDecimal(value.stripTrailingZeros().toPlainString());
-        if (ret.scale() == 0) {
-            ret = ret.setScale(1);
+        BigDecimal ret = value;
+        if (ret.scale() > 1) {
+            ret = ret.stripTrailingZeros();
+            if (ret.scale() == 0) {
+                ret = ret.setScale(1);
+            }
         }
         return ret;
     }

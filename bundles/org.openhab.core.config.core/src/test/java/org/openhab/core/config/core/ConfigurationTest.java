@@ -140,7 +140,7 @@ public class ConfigurationTest {
 
         Configuration configuration = new Configuration(orgProperties);
 
-        assertThat(configuration.get("intField"), is(equalTo(BigDecimal.ONE.setScale(1))));
+        assertThat(configuration.get("intField"), is(equalTo(BigDecimal.ONE)));
 
         configuration.setProperties(newProperties);
 
@@ -170,13 +170,13 @@ public class ConfigurationTest {
 
         Configuration configuration = new Configuration();
         configuration.setProperties(properties);
-        assertThat(configuration.get("byteField"), is(equalTo(BigDecimal.ONE.setScale(1))));
-        assertThat(configuration.get("shortField"), is(equalTo(BigDecimal.ONE.setScale(1))));
-        assertThat(configuration.get("intField"), is(equalTo(BigDecimal.ONE.setScale(1))));
-        assertThat(configuration.get("longField"), is(equalTo(BigDecimal.ONE.setScale(1))));
-        assertThat(configuration.get("doubleField"), is(equalTo(BigDecimal.ONE.setScale(1))));
-        assertThat(configuration.get("floatField"), is(equalTo(BigDecimal.ONE.setScale(1))));
-        assertThat(configuration.get("bigDecimalField"), is(equalTo(BigDecimal.ONE.setScale(1))));
+        assertThat(configuration.get("byteField"), is(equalTo(BigDecimal.ONE)));
+        assertThat(configuration.get("shortField"), is(equalTo(BigDecimal.ONE)));
+        assertThat(configuration.get("intField"), is(equalTo(BigDecimal.ONE)));
+        assertThat(configuration.get("longField"), is(equalTo(BigDecimal.ONE)));
+        assertThat(configuration.get("doubleField"), is(equalTo(new BigDecimal("1.0"))));
+        assertThat(configuration.get("floatField"), is(equalTo(new BigDecimal("1.0"))));
+        assertThat(configuration.get("bigDecimalField"), is(equalTo(BigDecimal.ONE)));
     }
 
     @Test
@@ -189,13 +189,13 @@ public class ConfigurationTest {
         configuration.put("doubleField", Double.valueOf("1"));
         configuration.put("floatField", Float.valueOf("1"));
         configuration.put("bigDecimalField", BigDecimal.ONE);
-        assertThat(configuration.get("byteField"), is(equalTo(BigDecimal.ONE.setScale(1))));
-        assertThat(configuration.get("shortField"), is(equalTo(BigDecimal.ONE.setScale(1))));
-        assertThat(configuration.get("intField"), is(equalTo(BigDecimal.ONE.setScale(1))));
-        assertThat(configuration.get("longField"), is(equalTo(BigDecimal.ONE.setScale(1))));
-        assertThat(configuration.get("doubleField"), is(equalTo(BigDecimal.ONE.setScale(1))));
-        assertThat(configuration.get("floatField"), is(equalTo(BigDecimal.ONE.setScale(1))));
-        assertThat(configuration.get("bigDecimalField"), is(equalTo(BigDecimal.ONE.setScale(1))));
+        assertThat(configuration.get("byteField"), is(equalTo(BigDecimal.ONE)));
+        assertThat(configuration.get("shortField"), is(equalTo(BigDecimal.ONE)));
+        assertThat(configuration.get("intField"), is(equalTo(BigDecimal.ONE)));
+        assertThat(configuration.get("longField"), is(equalTo(BigDecimal.ONE)));
+        assertThat(configuration.get("doubleField"), is(equalTo(new BigDecimal("1.0"))));
+        assertThat(configuration.get("floatField"), is(equalTo(new BigDecimal("1.0"))));
+        assertThat(configuration.get("bigDecimalField"), is(equalTo(BigDecimal.ONE)));
     }
 
     @Test
