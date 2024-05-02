@@ -61,7 +61,8 @@ import org.slf4j.LoggerFactory;
  * The subscription mechanism makes sure that only events for widgets of the currently active sitemap or sitemap page
  * are sent as events to the subscriber.
  * For this to work correctly, the subscriber needs to make sure that {@link #updateSubscriptionLocation} is called
- * whenever it switches to a new page.
+ * whenever it switches to a new page, unless a subscription for the whole sitemap is made.
+ * Subscribing to whole sitemaps is discouraged, since a large number of item updates may result in a high SSE traffic.
  *
  * @author Kai Kreuzer - Initial contribution
  */
