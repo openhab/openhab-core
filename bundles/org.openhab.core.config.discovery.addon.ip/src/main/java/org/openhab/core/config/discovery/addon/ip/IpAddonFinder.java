@@ -373,7 +373,7 @@ public class IpAddonFinder extends BaseAddonFinder implements NetworkAddressChan
     }
 
     private void scanBroadcast(AddonInfo candidate, String request, String requestPlain, String response, int timeoutMs,
-            int destPort) {
+            int destPort) throws ParseException {
         if (request.isEmpty() && requestPlain.isEmpty()) {
             logger.warn("{}: match-property request and requestPlain \"{}\" is unknown", candidate.getUID(),
                     TYPE_IP_BROADCAST);
@@ -394,7 +394,8 @@ public class IpAddonFinder extends BaseAddonFinder implements NetworkAddressChan
         try (DatagramSocket socket = new DatagramSocket()) {
             socket.setBroadcast(true);
             socket.setSoTimeout(timeoutMs);
-            byte[] sendBuffer = requestPlain.isEmpty() ? buildByteArray(request) : buildByteArrayPlain(requestPlain);
+            byte[] sendBuffer = requestPlain.isEmpty() ? buildRequestArray(socket.getLocalSocketAddress(), request)
+                    : buildRequestArrayPlain(socket.getLocalSocketAddress(), requestPlain);
             DatagramPacket sendPacket = new DatagramPacket(sendBuffer, sendBuffer.length,
                     InetAddress.getByName(broadcastAddress), destPort);
             socket.send(sendPacket);
@@ -433,11 +434,6 @@ public class IpAddonFinder extends BaseAddonFinder implements NetworkAddressChan
         return requestFrame.toByteArray();
     }
 
-    private byte[] buildByteArrayPlain(String input) {
-        String reqUnEscaped = StringUtils.unEscapeXml(input);
-        return reqUnEscaped != null ? reqUnEscaped.getBytes() : new byte[0];
-    }
-
     private void scanMulticast(AddonInfo candidate, String request, String requestPlain, String response, int timeoutMs,
             int listenPort, @Nullable InetAddress destIp, int destPort) throws ParseException {
         List<String> ipAddresses = NetUtil.getAllInterfaceAddresses().stream()
@@ -449,8 +445,9 @@ public class IpAddonFinder extends BaseAddonFinder implements NetworkAddressChan
                     .bind(new InetSocketAddress(localIp, listenPort))
                     .setOption(StandardSocketOptions.IP_MULTICAST_TTL, 64).configureBlocking(false);
                     Selector selector = Selector.open()) {
-                byte[] requestArray = "".equals(requestPlain) ? buildRequestArray(channel, Objects.toString(request))
-                        : buildRequestArrayPlain(channel, Objects.toString(requestPlain));
+                byte[] requestArray = "".equals(requestPlain)
+                        ? buildRequestArray(channel.getLocalAddress(), Objects.toString(request))
+                        : buildRequestArrayPlain(channel.getLocalAddress(), Objects.toString(requestPlain));
                 if (logger.isTraceEnabled()) {
                     InetSocketAddress sock = (InetSocketAddress) channel.getLocalAddress();
                     String id = candidate.getUID();
@@ -496,9 +493,9 @@ public class IpAddonFinder extends BaseAddonFinder implements NetworkAddressChan
     }
 
     // build from plaintext string
-    private byte[] buildRequestArrayPlain(DatagramChannel channel, String request)
+    private byte[] buildRequestArrayPlain(SocketAddress address, String request)
             throws java.io.IOException, ParseException {
-        InetSocketAddress sock = (InetSocketAddress) channel.getLocalAddress();
+        InetSocketAddress sock = (InetSocketAddress) address;
 
         // replace first
         StringBuilder req = new StringBuilder(request);
@@ -519,9 +516,8 @@ public class IpAddonFinder extends BaseAddonFinder implements NetworkAddressChan
     }
 
     // build from hex string
-    private byte[] buildRequestArray(DatagramChannel channel, String request)
-            throws java.io.IOException, ParseException {
-        InetSocketAddress sock = (InetSocketAddress) channel.getLocalAddress();
+    private byte[] buildRequestArray(SocketAddress address, String request) throws java.io.IOException, ParseException {
+        InetSocketAddress sock = (InetSocketAddress) address;
 
         ByteArrayOutputStream requestFrame = new ByteArrayOutputStream();
         StringTokenizer parts = new StringTokenizer(request);
