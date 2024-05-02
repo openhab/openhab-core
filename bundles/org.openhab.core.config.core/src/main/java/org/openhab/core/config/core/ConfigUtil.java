@@ -177,10 +177,12 @@ public class ConfigUtil {
         if (configDescriptionParameter != null) {
             Normalizer normalizer = NormalizerFactory.getNormalizer(configDescriptionParameter);
             return normalizer.normalize(value);
-        } else if (value instanceof Boolean || value instanceof String || value instanceof BigDecimal) {
-            return value;
+        } else if (value instanceof Boolean) {
+            return NormalizerFactory.getNormalizer(Type.BOOLEAN).normalize(value);
+        } else if (value instanceof String) {
+            return NormalizerFactory.getNormalizer(Type.TEXT).normalize(value);
         } else if (value instanceof Number) {
-            return new BigDecimal(value.toString());
+            return NormalizerFactory.getNormalizer(Type.DECIMAL).normalize(value);
         } else if (value instanceof Collection collection) {
             return normalizeCollection(collection);
         }
