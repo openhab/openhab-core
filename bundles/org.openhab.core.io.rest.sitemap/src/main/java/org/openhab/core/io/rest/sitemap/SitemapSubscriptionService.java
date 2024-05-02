@@ -60,8 +60,8 @@ import org.slf4j.LoggerFactory;
  * As such subscriptions are stateful, they need to be created and removed upon disposal.
  * The subscription mechanism makes sure that only events for widgets of the currently active sitemap page are sent as
  * events to the subscriber.
- * For this to work correctly, the subscriber needs to make sure that setPageId is called whenever it switches to a new
- * page.
+ * For this to work correctly, the subscriber needs to make sure that {@link #updateSubscriptionLocation} is called
+ * whenever it switches to a new page.
  *
  * @author Kai Kreuzer - Initial contribution
  */
@@ -234,7 +234,7 @@ public class SitemapSubscriptionService implements ModelRepositoryChangeListener
     }
 
     /**
-     * Updates the subscription to send events for the provided page id (or whole sitemap if pageId is null).
+     * Updates the subscription to send events for the provided page id (or whole sitemap if {@code pageId} is null).
      *
      * @param subscriptionId the subscription to update
      * @param sitemapName the current sitemap name
