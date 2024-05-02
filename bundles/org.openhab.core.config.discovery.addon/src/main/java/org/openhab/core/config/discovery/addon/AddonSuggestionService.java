@@ -81,6 +81,7 @@ public class AddonSuggestionService implements AutoCloseable {
         this.localeProvider = localeProvider;
 
         SUGGESTION_FINDERS.forEach(f -> baseFinderConfig.put(f, true));
+        modified(config);
 
         // Changes to the configuration are expected to call the {@link modified} method. This works well when running
         // in Eclipse. Running in Karaf, the method was not consistently called. Therefore regularly check for changes
