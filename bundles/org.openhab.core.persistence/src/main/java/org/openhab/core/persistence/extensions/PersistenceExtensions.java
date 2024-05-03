@@ -1739,6 +1739,26 @@ public class PersistenceExtensions {
      *         at the given interval, or if there is a state but it is zero (which would cause a
      *         divide-by-zero error)
      */
+    @Deprecated
+    public static @Nullable DecimalType evolutionRate(Item item, ZonedDateTime begin, ZonedDateTime end) {
+        LoggerFactory.getLogger(PersistenceExtensions.class).info(
+                "The evolutionRate method has been deprecated and will be removed in a future version, use evolutionRateBetween instead.");
+        return internalEvolutionRateBetween(item, begin, end);
+    }
+
+    /**
+     * Gets the evolution rate of the state of a given {@link Item} between two points in time.
+     * The default {@link PersistenceService} is used.
+     *
+     * @param item the item to get the evolution rate value for
+     * @param begin the beginning point in time
+     * @param end the end point in time
+     * @return the evolution rate in percent (positive and negative) in the given interval, or <code>null</code> if
+     *         there is no default persistence service available, the default persistence service is not a
+     *         {@link QueryablePersistenceService}, or if there are no persisted state for the given <code>item</code>
+     *         at the given interval, or if there is a state but it is zero (which would cause a
+     *         divide-by-zero error)
+     */
     public static @Nullable DecimalType evolutionRateBetween(Item item, ZonedDateTime begin, ZonedDateTime end) {
         return internalEvolutionRateBetween(item, begin, end);
     }
@@ -1801,6 +1821,29 @@ public class PersistenceExtensions {
      */
     public static @Nullable DecimalType evolutionRateUntil(Item item, ZonedDateTime timestamp, String serviceId) {
         return internalEvolutionRateBetween(item, null, timestamp, serviceId);
+    }
+
+    /**
+     * Gets the evolution rate of the state of a given {@link Item} between two points in time.
+     * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
+     *
+     * @param item the {@link Item} to get the evolution rate value for
+     * @param begin the beginning point in time
+     * @param end the end point in time
+     * @param serviceId the name of the {@link PersistenceService} to use
+     * @return the evolution rate in percent (positive and negative) in the given interval, or <code>null</code> if
+     *         the persistence service given by <code>serviceId</code> is not available or is not a
+     *         {@link QueryablePersistenceService}, or if there is no persisted state for the given
+     *         <code>item</code> at the given <code>begin</code> and <code>end</code> using the persistence service
+     *         given by <code>serviceId</code>, or if there is a state but it is zero (which would cause a
+     *         divide-by-zero error)
+     */
+    @Deprecated
+    public static @Nullable DecimalType evolutionRate(Item item, ZonedDateTime begin, ZonedDateTime end,
+            String serviceId) {
+        LoggerFactory.getLogger(PersistenceExtensions.class).info(
+                "The evolutionRate method has been deprecated and will be removed in a future version, use evolutionRateBetween instead.");
+        return internalEvolutionRateBetween(item, begin, end, serviceId);
     }
 
     /**
