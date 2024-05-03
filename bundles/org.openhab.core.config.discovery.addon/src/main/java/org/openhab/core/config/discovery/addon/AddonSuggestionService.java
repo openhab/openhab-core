@@ -80,7 +80,7 @@ public class AddonSuggestionService implements AutoCloseable {
         this.configurationAdmin = configurationAdmin;
         this.localeProvider = localeProvider;
 
-        SUGGESTION_FINDERS.forEach(f -> baseFinderConfig.put(f, true));
+        SUGGESTION_FINDERS.forEach(f -> baseFinderConfig.put(f, false));
         modified(config);
 
         // Changes to the configuration are expected to call the {@link modified} method. This works well when running
@@ -115,13 +115,13 @@ public class AddonSuggestionService implements AutoCloseable {
             String cfgParam = SUGGESTION_FINDER_CONFIGS.get(finder);
             if (cfgParam != null) {
                 boolean enabled = (config != null)
-                        ? ConfigParser.valueAsOrElse(config.get(cfgParam), Boolean.class, cfg)
-                        : cfg;
+                        ? ConfigParser.valueAsOrElse(config.get(cfgParam), Boolean.class, true)
+                        : true;
                 if (cfg != enabled) {
-                    baseFinderConfig.put(finder, enabled);
                     String type = SUGGESTION_FINDER_TYPES.get(finder);
                     AddonFinderService finderService = addonFinderService;
                     if (type != null && finderService != null) {
+                        baseFinderConfig.put(finder, enabled);
                         if (enabled) {
                             finderService.install(type);
                         } else {
