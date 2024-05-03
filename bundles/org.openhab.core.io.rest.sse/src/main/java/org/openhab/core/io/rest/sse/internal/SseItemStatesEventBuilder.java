@@ -137,7 +137,7 @@ public class SseItemStatesEventBuilder {
                                 displayState = pattern == null ? label : String.format(pattern, label);
                             } catch (IllegalFormatException e) {
                                 logger.debug(
-                                        "Unable to format option label '{}' of item {} with format '{}': {}, displaying raw option label",
+                                        "Unable to format option label '{}' of item {} using format pattern '{}': {}, displaying option label",
                                         label, item.getName(), pattern, e.getMessage());
                                 displayState = label;
                             }
@@ -175,7 +175,7 @@ public class SseItemStatesEventBuilder {
                         displayState = state.format(pattern);
                     } catch (IllegalArgumentException e) {
                         logger.debug(
-                                "Unable to format value '{}' of item {} with format '{}': {}, displaying raw state",
+                                "Unable to format value '{}' of item {} using format pattern '{}': {}, displaying raw state",
                                 state, item.getName(), pattern, e.getMessage());
                         displayState = state.toString();
                     }
