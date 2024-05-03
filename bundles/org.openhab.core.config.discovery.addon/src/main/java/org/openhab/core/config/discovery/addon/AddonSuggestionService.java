@@ -116,7 +116,7 @@ public class AddonSuggestionService implements AutoCloseable {
             if (cfgParam != null) {
                 boolean enabled = (config != null)
                         ? ConfigParser.valueAsOrElse(config.get(cfgParam), Boolean.class, true)
-                        : true;
+                        : cfg;
                 if (cfg != enabled) {
                     String type = SUGGESTION_FINDER_TYPES.get(finder);
                     AddonFinderService finderService = addonFinderService;
