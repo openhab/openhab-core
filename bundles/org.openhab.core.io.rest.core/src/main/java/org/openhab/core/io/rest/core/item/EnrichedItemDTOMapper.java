@@ -18,6 +18,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.Predicate;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.ws.rs.core.UriBuilder;
 
@@ -30,9 +32,11 @@ import org.openhab.core.items.dto.ItemDTOMapper;
 import org.openhab.core.library.items.NumberItem;
 import org.openhab.core.transform.TransformationException;
 import org.openhab.core.transform.TransformationHelper;
+import org.openhab.core.transform.TransformationService;
+import org.openhab.core.types.State;
 import org.openhab.core.types.StateDescription;
 import org.openhab.core.types.StateDescriptionFragmentBuilder;
-import org.osgi.framework.FrameworkUtil;
+import org.openhab.core.types.UnDefType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,6 +48,8 @@ import org.slf4j.LoggerFactory;
  */
 @NonNullByDefault
 public class EnrichedItemDTOMapper {
+
+    private static final Pattern EXTRACT_TRANSFORM_FUNCTION_PATTERN = Pattern.compile("(.*?)\\((.*)\\):(.*)");
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EnrichedItemDTOMapper.class);
 
@@ -79,8 +85,8 @@ public class EnrichedItemDTOMapper {
             parents.add(item);
         }
         String state = item.getState().toFullString();
-        String transformedState = considerTransformation(state, item, locale);
-        if (transformedState != null && transformedState.equals(state)) {
+        String transformedState = considerTransformation(item, locale);
+        if (state.equals(transformedState)) {
             transformedState = null;
         }
         StateDescription stateDescription = considerTransformation(item.getStateDescription(locale));
@@ -132,37 +138,48 @@ public class EnrichedItemDTOMapper {
         if (stateDescription != null) {
             String pattern = stateDescription.getPattern();
             if (pattern != null) {
-                try {
-                    return TransformationHelper.isTransform(pattern)
-                            ? StateDescriptionFragmentBuilder.create(stateDescription).withPattern(pattern).build()
-                                    .toStateDescription()
-                            : stateDescription;
-                } catch (NoClassDefFoundError ex) {
-                    // TransformationHelper is optional dependency, so ignore if class not found
-                    // return state description as it is without transformation
-                }
+                return TransformationHelper.isTransform(pattern)
+                        ? StateDescriptionFragmentBuilder.create(stateDescription).withPattern(pattern).build()
+                                .toStateDescription()
+                        : stateDescription;
             }
         }
         return stateDescription;
     }
 
-    private static @Nullable String considerTransformation(String state, Item item, @Nullable Locale locale) {
+    private static @Nullable String considerTransformation(Item item, @Nullable Locale locale) {
         StateDescription stateDescription = item.getStateDescription(locale);
         if (stateDescription != null) {
             String pattern = stateDescription.getPattern();
-            if (pattern != null) {
+            Matcher matcher;
+            if (pattern != null && (matcher = EXTRACT_TRANSFORM_FUNCTION_PATTERN.matcher(pattern)).find()) {
+                State state = item.getState();
                 try {
-                    return TransformationHelper.transform(
-                            FrameworkUtil.getBundle(EnrichedItemDTOMapper.class).getBundleContext(), pattern, state);
-                } catch (NoClassDefFoundError ex) {
-                    // TransformationHelper is optional dependency, so ignore if class not found
-                    // return state as it is without transformation
+                    String type = matcher.group(1);
+                    String function = matcher.group(2);
+                    String value = matcher.group(3);
+                    TransformationService transformation = TransformationHelper.getTransformationService(type);
+                    if (transformation != null) {
+                        String format = state instanceof UnDefType ? "%s" : value;
+                        try {
+                            return transformation.transform(function, state.format(format));
+                        } catch (IllegalArgumentException e) {
+                            throw new TransformationException(
+                                    "Cannot format state '" + state + "' to format '" + format + "'", e);
+                        } catch (RuntimeException e) {
+                            throw new TransformationException("Transformation service of type '" + type
+                                    + "' threw an exception: " + e.getMessage(), e);
+                        }
+                    } else {
+                        throw new TransformationException(
+                                "Transformation service of type '" + type + "' is not available.");
+                    }
                 } catch (TransformationException e) {
                     LOGGER.warn("Failed transforming the state '{}' on item '{}' with pattern '{}': {}", state,
                             item.getName(), pattern, e.getMessage());
                 }
             }
         }
-        return state;
+        return null;
     }
 }

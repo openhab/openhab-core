@@ -18,6 +18,8 @@ import java.util.IllegalFormatException;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.measure.Unit;
 import javax.ws.rs.core.MediaType;
@@ -37,6 +39,7 @@ import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.service.StartLevelService;
 import org.openhab.core.transform.TransformationException;
 import org.openhab.core.transform.TransformationHelper;
+import org.openhab.core.transform.TransformationService;
 import org.openhab.core.types.State;
 import org.openhab.core.types.StateDescription;
 import org.openhab.core.types.StateOption;
@@ -58,6 +61,8 @@ import org.slf4j.LoggerFactory;
 @Component(service = SseItemStatesEventBuilder.class)
 @NonNullByDefault
 public class SseItemStatesEventBuilder {
+
+    private static final Pattern EXTRACT_TRANSFORM_FUNCTION_PATTERN = Pattern.compile("(.*?)\\((.*)\\):(.*)");
 
     private final Logger logger = LoggerFactory.getLogger(SseItemStatesEventBuilder.class);
 
@@ -113,22 +118,43 @@ public class SseItemStatesEventBuilder {
         State state = item.getState();
         String displayState = state.toString();
 
-        // NULL/UNDEF state is returned as "NULL"/"UNDEF" without considering anything else
-        if (!(state instanceof UnDefType)) {
-            if (stateDescription != null) {
-                boolean transformUsed = false;
-                boolean optionMatched = false;
-                String pattern = stateDescription.getPattern();
-                // If there's a pattern, first check if it's a transformation
-                if (pattern != null && TransformationHelper.isTransform(pattern)) {
-                    transformUsed = true;
-                    try {
-                        displayState = TransformationHelper.transform(pattern, state.toString());
-                    } catch (TransformationException e) {
-                        logger.warn("Failed transforming the state '{}' on item '{}' with pattern '{}': {}", state,
-                                item.getName(), pattern, e.getMessage());
+        if (stateDescription != null) {
+            String pattern = stateDescription.getPattern();
+            // First check if the pattern is a transformation
+            Matcher matcher;
+            if (pattern != null && (matcher = EXTRACT_TRANSFORM_FUNCTION_PATTERN.matcher(pattern)).find()) {
+                try {
+                    String type = matcher.group(1);
+                    String function = matcher.group(2);
+                    String value = matcher.group(3);
+                    TransformationService transformation = TransformationHelper.getTransformationService(type);
+                    if (transformation != null) {
+                        String format = state instanceof UnDefType ? "%s" : value;
+                        try {
+                            displayState = transformation.transform(function, state.format(format));
+                            if (displayState == null) {
+                                displayState = state.toString();
+                            }
+                        } catch (IllegalArgumentException e) {
+                            throw new TransformationException(
+                                    "Cannot format state '" + state + "' to format '" + format + "'", e);
+                        } catch (RuntimeException e) {
+                            throw new TransformationException("Transformation service of type '" + type
+                                    + "' threw an exception: " + e.getMessage(), e);
+                        }
+                    } else {
+                        throw new TransformationException(
+                                "Transformation service of type '" + type + "' is not available.");
                     }
-                } else if (!stateDescription.getOptions().isEmpty()) {
+                } catch (TransformationException e) {
+                    logger.warn("Failed transforming the state '{}' on item '{}' with pattern '{}': {}", state,
+                            item.getName(), pattern, e.getMessage());
+                }
+            }
+            // If no transformation, NULL/UNDEF state is returned as "NULL"/"UNDEF" without considering anything else
+            else if (!(state instanceof UnDefType)) {
+                boolean optionMatched = false;
+                if (!stateDescription.getOptions().isEmpty()) {
                     // Look for a state option with a value corresponding to the state
                     for (StateOption option : stateDescription.getOptions()) {
                         String label = option.getLabel();
@@ -146,7 +172,7 @@ public class SseItemStatesEventBuilder {
                         }
                     }
                 }
-                if (pattern != null && !transformUsed && !optionMatched) {
+                if (pattern != null && !optionMatched) {
                     // if it's not a transformation pattern and there is no matching state option,
                     // then it must be a format string
                     if (state instanceof QuantityType quantityState) {

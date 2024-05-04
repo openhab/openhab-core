@@ -86,7 +86,6 @@ import org.openhab.core.types.StateDescription;
 import org.openhab.core.types.StateOption;
 import org.openhab.core.types.UnDefType;
 import org.openhab.core.types.util.UnitUtils;
-import org.openhab.core.ui.internal.UIActivator;
 import org.openhab.core.ui.items.ItemUIProvider;
 import org.openhab.core.ui.items.ItemUIRegistry;
 import org.osgi.framework.Constants;
@@ -341,7 +340,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
 
         String itemName = w.getItem();
         if (itemName == null || itemName.isBlank()) {
-            return transform(label, true, null);
+            return transform(label, true, null, null);
         }
 
         String labelMappedOption = null;
@@ -373,7 +372,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
                 state = item.getState();
 
                 if (formatPattern.contains("%d")) {
-                    if (!(state instanceof Number)) {
+                    if (!(state instanceof UnDefType) && !(state instanceof Number)) {
                         // States which do not provide a Number will be converted to DecimalType.
                         // e.g.: GroupItem can provide a count of items matching the active state
                         // for some group functions.
@@ -390,13 +389,25 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         }
 
         boolean considerTransform = false;
+        String transformFailbackValue = null;
         if (formatPattern != null) {
             if (formatPattern.isEmpty()) {
                 label = label.substring(0, label.indexOf("[")).trim();
             } else {
-                if (state == null || state instanceof UnDefType) {
+                if (state == null) {
                     formatPattern = formatUndefined(formatPattern);
                     considerTransform = true;
+                } else if (state instanceof UnDefType) {
+                    Matcher matcher = EXTRACT_TRANSFORM_FUNCTION_PATTERN.matcher(formatPattern);
+                    if (matcher.find()) {
+                        considerTransform = true;
+                        String type = matcher.group(1);
+                        String function = matcher.group(2);
+                        formatPattern = type + "(" + function + "):" + state.toString();
+                        transformFailbackValue = "-";
+                    } else {
+                        formatPattern = formatUndefined(formatPattern);
+                    }
                 } else {
                     // if the channel contains options, we build a label with the mapped option value
                     if (stateDescription != null) {
@@ -457,9 +468,10 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
                         if (matcher.find()) {
                             considerTransform = true;
                             String type = matcher.group(1);
-                            String pattern = matcher.group(2);
+                            String function = matcher.group(2);
                             String value = matcher.group(3);
-                            formatPattern = type + "(" + pattern + "):" + state.format(value);
+                            formatPattern = type + "(" + function + "):" + state.format(value);
+                            transformFailbackValue = state.toString();
                         } else {
                             formatPattern = state.format(formatPattern);
                         }
@@ -478,7 +490,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
             }
         }
 
-        return transform(label, considerTransform, labelMappedOption);
+        return transform(label, considerTransform, transformFailbackValue, labelMappedOption);
     }
 
     @Override
@@ -619,36 +631,40 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
      * If the value does not start with the call to a transformation service,
      * we return the label with the mapped option value if provided (not null).
      */
-    private String transform(String label, boolean matchTransform, @Nullable String labelMappedOption) {
+    private String transform(String label, boolean matchTransform, @Nullable String transformFailbackValue,
+            @Nullable String labelMappedOption) {
         String ret = label;
         String formatPattern = getFormatPattern(label);
         if (formatPattern != null) {
             Matcher matcher = EXTRACT_TRANSFORM_FUNCTION_PATTERN.matcher(formatPattern);
             if (matchTransform && matcher.find()) {
                 String type = matcher.group(1);
-                String pattern = matcher.group(2);
+                String function = matcher.group(2);
                 String value = matcher.group(3);
-                TransformationService transformation = TransformationHelper
-                        .getTransformationService(UIActivator.getContext(), type);
-                if (transformation != null) {
-                    try {
-                        String transformationResult = transformation.transform(pattern, value);
-                        if (transformationResult != null) {
-                            ret = insertInLabel(label, transformationResult);
-                        } else {
-                            logger.warn("transformation of type {} did not return a valid result", type);
-                            ret = insertInLabel(label, UnDefType.NULL);
+                String failbackValue = transformFailbackValue != null ? transformFailbackValue : value;
+                try {
+                    TransformationService transformation = TransformationHelper.getTransformationService(type);
+                    if (transformation != null) {
+                        try {
+                            String transformationResult = transformation.transform(function, value);
+                            if (transformationResult != null) {
+                                ret = insertInLabel(label, transformationResult);
+                            } else {
+                                logger.warn("Transformation of type {} did not return a valid result", type);
+                                ret = insertInLabel(label, failbackValue);
+                            }
+                        } catch (RuntimeException e) {
+                            throw new TransformationException("Transformation service of type '" + type
+                                    + "' threw an exception: " + e.getMessage(), e);
                         }
-                    } catch (TransformationException e) {
-                        logger.error("transformation throws exception [transformation={}, value={}]", transformation,
-                                value, e);
-                        ret = insertInLabel(label, value);
+                    } else {
+                        throw new TransformationException(
+                                "Transformation service of type '" + type + "' is not available.");
                     }
-                } else {
-                    logger.warn(
-                            "couldn't transform value in label because transformationService of type '{}' is unavailable",
-                            type);
-                    ret = insertInLabel(label, value);
+                } catch (TransformationException e) {
+                    logger.warn("Failed transforming the value '{}' with pattern '{}': {}", value, formatPattern,
+                            e.getMessage());
+                    ret = insertInLabel(label, failbackValue);
                 }
             } else if (labelMappedOption != null) {
                 ret = labelMappedOption;

@@ -810,6 +810,45 @@ public class ItemUIRegistryImplTest {
     }
 
     @Test
+    public void getLabelFailingTransformation() throws ItemNotFoundException {
+        String testLabel = "Memory [FOO(echo %s):__%d__]";
+        Widget w = mock(Widget.class);
+        Item item = mock(Item.class);
+        when(w.getLabel()).thenReturn(testLabel);
+        when(w.getItem()).thenReturn(ITEM_NAME);
+        when(registryMock.getItem(ITEM_NAME)).thenReturn(item);
+        when(item.getState()).thenReturn(new DecimalType(11));
+        String label = uiRegistry.getLabel(w);
+        assertEquals("Memory [11]", label);
+    }
+
+    @Test
+    public void getLabelFailingTransformationWithNullState() throws ItemNotFoundException {
+        String testLabel = "Memory [FOO(echo %s):__%d__]";
+        Widget w = mock(Widget.class);
+        Item item = mock(Item.class);
+        when(w.getLabel()).thenReturn(testLabel);
+        when(w.getItem()).thenReturn(ITEM_NAME);
+        when(registryMock.getItem(ITEM_NAME)).thenReturn(item);
+        when(item.getState()).thenReturn(UnDefType.NULL);
+        String label = uiRegistry.getLabel(w);
+        assertEquals("Memory [-]", label);
+    }
+
+    @Test
+    public void getLabelFailingTransformationWithUndefState() throws ItemNotFoundException {
+        String testLabel = "Memory [FOO(echo %s):__%d__]";
+        Widget w = mock(Widget.class);
+        Item item = mock(Item.class);
+        when(w.getLabel()).thenReturn(testLabel);
+        when(w.getItem()).thenReturn(ITEM_NAME);
+        when(registryMock.getItem(ITEM_NAME)).thenReturn(item);
+        when(item.getState()).thenReturn(UnDefType.UNDEF);
+        String label = uiRegistry.getLabel(w);
+        assertEquals("Memory [-]", label);
+    }
+
+    @Test
     public void getLabelColorLabelWithDecimalValue() {
         String testLabel = "Label [%.3f]";
 
