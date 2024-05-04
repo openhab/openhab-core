@@ -379,6 +379,20 @@ public class NumberExtensions {
             }
             return null;
         }
+        if (number instanceof DecimalType dtype) {
+            return dtype.toBigDecimal();
+        }
+        if (number instanceof BigDecimal decimal) {
+            return decimal;
+        }
+        if (number instanceof Long value) {
+            // use valueOf to hit the internal cache
+            return BigDecimal.valueOf(value);
+        }
+        if (number instanceof Integer value) {
+            // use valueOf to hit the internal cache
+            return BigDecimal.valueOf(value);
+        }
         if (number != null) {
             return new BigDecimal(number.toString());
         } else {

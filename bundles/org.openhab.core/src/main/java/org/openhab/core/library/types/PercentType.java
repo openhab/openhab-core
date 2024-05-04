@@ -131,7 +131,7 @@ public class PercentType extends DecimalType {
         } else if (target == HSBType.class) {
             return target.cast(new HSBType(DecimalType.ZERO, PercentType.ZERO, this));
         } else if (target == QuantityType.class) {
-            return target.cast(new QuantityType<>(toBigDecimal().doubleValue(), Units.PERCENT));
+            return target.cast(new QuantityType<>(toBigDecimal(), Units.PERCENT));
         } else {
             return defaultConversion(target);
         }
