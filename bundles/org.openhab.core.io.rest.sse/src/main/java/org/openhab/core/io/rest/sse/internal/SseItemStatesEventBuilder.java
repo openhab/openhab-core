@@ -113,10 +113,11 @@ public class SseItemStatesEventBuilder {
         State state = item.getState();
         String displayState = state.toString();
 
+        // NULL/UNDEF state is returned as "NULL"/"UNDEF" without considering anything else
         if (!(state instanceof UnDefType)) {
             if (stateDescription != null) {
                 boolean transformUsed = false;
-                boolean optionUsed = false;
+                boolean optionMatched = false;
                 String pattern = stateDescription.getPattern();
                 // If there's a pattern, first check if it's a transformation
                 if (pattern != null && TransformationHelper.isTransform(pattern)) {
@@ -128,11 +129,11 @@ public class SseItemStatesEventBuilder {
                                 item.getName(), pattern, e.getMessage());
                     }
                 } else if (!stateDescription.getOptions().isEmpty()) {
-                    // Look for a state option with a label corresponding to the state
+                    // Look for a state option with a value corresponding to the state
                     for (StateOption option : stateDescription.getOptions()) {
                         String label = option.getLabel();
                         if (option.getValue().equals(state.toString()) && label != null) {
-                            optionUsed = true;
+                            optionMatched = true;
                             try {
                                 displayState = pattern == null ? label : String.format(pattern, label);
                             } catch (IllegalFormatException e) {
@@ -145,8 +146,9 @@ public class SseItemStatesEventBuilder {
                         }
                     }
                 }
-                if (pattern != null && !transformUsed && !optionUsed) {
-                    // if it's not a transformation pattern, then it must be a format string
+                if (pattern != null && !transformUsed && !optionMatched) {
+                    // if it's not a transformation pattern and there is no matching state option,
+                    // then it must be a format string
                     if (state instanceof QuantityType quantityState) {
                         // sanity convert current state to the item state description unit in case it was
                         // updated in the meantime. The item state is still in the "original" unit while the
