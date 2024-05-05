@@ -12,7 +12,7 @@
  */
 package org.openhab.core.addon.marketplace.karaf.internal.community;
 
-import static org.openhab.core.addon.marketplace.internal.community.CommunityMarketplaceAddonService.KAR_CONTENT_TYPE;
+import static MarketplaceConstants.KAR_CONTENT_TYPE;
 
 import java.io.File;
 import java.io.IOException;
