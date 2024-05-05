@@ -97,7 +97,6 @@ import org.slf4j.LoggerFactory;
 public class CommunicationManager implements EventSubscriber, RegistryChangeListener<ItemChannelLink> {
 
     private record CacheKey(String type, Profile profile, Thing thing) {
-
     }
 
     private static final Profile NO_OP_PROFILE = new Profile() {
