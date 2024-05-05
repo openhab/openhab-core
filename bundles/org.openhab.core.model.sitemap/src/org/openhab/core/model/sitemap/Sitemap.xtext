@@ -204,7 +204,7 @@ Button:
     row=INT ':' column=INT ':' cmd=Command '=' label=(ID | STRING) ('=' icon=Icon)?;
 
 Mapping:
-    cmd=Command '=' label=(ID | STRING) ('=' icon=Icon)?;
+    cmd=Command (':' releaseCmd=Command)? '=' label=(ID | STRING) ('=' icon=Icon)?;
 
 VisibilityRule:
     conditions+=Condition ('AND' conditions+=Condition)*;
