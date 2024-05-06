@@ -605,8 +605,9 @@ class GenericThingProvider extends AbstractProviderLazyNullness<Thing> implement
         if (!loadedXmlThingTypes.contains(factory.bundleName) || modelRepository == null) {
             return
         }
+        val things = thingsMap.get(modelName)
+        val oldThings = things.clone
         val newThings = newArrayList()
-        val oldThings = thingsMap.put(modelName, newThings)
 
         val model = modelRepository.getModel(modelName) as ThingModel
         if (model !== null) {
@@ -619,10 +620,13 @@ class GenericThingProvider extends AbstractProviderLazyNullness<Thing> implement
             val oldThing = oldThings.findFirst[it.UID == newThing.UID]
             if (oldThing !== null) {
                 if (!ThingHelper.equals(oldThing, newThing)) {
+                    things.remove(oldThing)
+                    things.add(newThing)
                     logger.debug("Updating thing '{}' from model '{}'.", newThing.UID, modelName);
                     notifyListenersAboutUpdatedElement(oldThing, newThing)
                 }
             } else {
+                things.add(newThing)
                 logger.debug("Adding thing '{}' from model '{}'.", newThing.UID, modelName);
                 newThing.notifyListenersAboutAddedElement
             }
