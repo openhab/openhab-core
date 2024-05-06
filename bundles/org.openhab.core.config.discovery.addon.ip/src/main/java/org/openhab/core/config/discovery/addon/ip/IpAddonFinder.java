@@ -216,12 +216,7 @@ public class IpAddonFinder extends BaseAddonFinder implements NetworkAddressChan
         logger.trace("IpAddonFinder::IpAddonFinder");
         // start of scan will be triggered by setAddonCandidates to ensure addonCandidates are available
         this.networkAddressService = networkAddressService;
-    }
-
-    @Activate
-    public void activate() {
-        logger.trace("IpAddonFinder::activate");
-        networkAddressService.addNetworkAddressChangeListener(this);
+        this.networkAddressService.addNetworkAddressChangeListener(this);
     }
 
     @Deactivate
@@ -235,7 +230,7 @@ public class IpAddonFinder extends BaseAddonFinder implements NetworkAddressChan
     public void setAddonCandidates(List<AddonInfo> candidates) {
         logger.debug("IpAddonFinder::setAddonCandidates({})", candidates.size());
         super.setAddonCandidates(candidates);
-        startScan();
+        startScan(20);
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
@@ -254,17 +249,17 @@ public class IpAddonFinder extends BaseAddonFinder implements NetworkAddressChan
 
     @Override
     public void onPrimaryAddressChanged(@Nullable String oldPrimaryAddress, @Nullable String newPrimaryAddress) {
-        startScan();
+        startScan(0);
     }
 
-    private void startScan() {
+    private void startScan(long delayInSeconds) {
         // The setAddonCandidates() method is called for each info provider.
         // In order to do the scan only once, but on the full set of candidates, we have to delay the execution.
         // At the same time we must make sure that a scheduled scan is rescheduled - or (after more than our delay) is
         // executed once more.
         stopScan();
         logger.trace("Scheduling new IP scan");
-        scanJob = scheduler.schedule(this::scan, 20, TimeUnit.SECONDS);
+        scanJob = scheduler.schedule(this::scan, delayInSeconds, TimeUnit.SECONDS);
     }
 
     private void stopScan() {
