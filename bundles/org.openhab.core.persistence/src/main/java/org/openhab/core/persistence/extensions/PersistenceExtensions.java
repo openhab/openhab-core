@@ -80,7 +80,7 @@ public class PersistenceExtensions {
      * @param item the item to store
      */
     public static void persist(Item item) {
-        internalPersist(item, (String) null);
+        internalPersist(item, null);
     }
 
     /**
@@ -95,17 +95,17 @@ public class PersistenceExtensions {
     }
 
     private static void internalPersist(Item item, @Nullable String serviceId) {
-        String sId = serviceId == null ? getDefaultServiceId() : serviceId;
-        if (sId == null) {
+        String effectiveServiceId = serviceId == null ? getDefaultServiceId() : serviceId;
+        if (effectiveServiceId == null) {
             return;
         }
-        PersistenceService service = getService(sId);
+        PersistenceService service = getService(effectiveServiceId);
         if (service != null) {
             service.store(item);
             return;
         }
         LoggerFactory.getLogger(PersistenceExtensions.class)
-                .warn("There is no persistence service registered with the id '{}'", sId);
+                .warn("There is no persistence service registered with the id '{}'", effectiveServiceId);
     }
 
     /**
@@ -134,17 +134,17 @@ public class PersistenceExtensions {
     }
 
     private static void internalPersist(Item item, ZonedDateTime timestamp, State state, @Nullable String serviceId) {
-        String sId = serviceId == null ? getDefaultServiceId() : serviceId;
-        if (sId == null) {
+        String effectiveServiceId = serviceId == null ? getDefaultServiceId() : serviceId;
+        if (effectiveServiceId == null) {
             return;
         }
-        PersistenceService service = getService(sId);
+        PersistenceService service = getService(effectiveServiceId);
         if (service instanceof ModifiablePersistenceService modifiableService) {
-            modifiableService.store(item, timestamp, state, sId);
+            modifiableService.store(item, timestamp, state, effectiveServiceId);
             return;
         }
         LoggerFactory.getLogger(PersistenceExtensions.class)
-                .warn("There is no modifiable persistence service registered with the id '{}'", sId);
+                .warn("There is no modifiable persistence service registered with the id '{}'", effectiveServiceId);
     }
 
     /**
@@ -170,20 +170,20 @@ public class PersistenceExtensions {
     }
 
     private static void internalPersist(Item item, TimeSeries timeSeries, @Nullable String serviceId) {
-        String sId = serviceId == null ? getDefaultServiceId() : serviceId;
-        if (sId == null) {
+        String effectiveServiceId = serviceId == null ? getDefaultServiceId() : serviceId;
+        if (effectiveServiceId == null) {
             return;
         }
-        PersistenceService service = getService(sId);
+        PersistenceService service = getService(effectiveServiceId);
         TimeZoneProvider tzProvider = timeZoneProvider;
         ZoneId timeZone = tzProvider != null ? tzProvider.getTimeZone() : ZoneId.systemDefault();
         if (service instanceof ModifiablePersistenceService modifiableService) {
-            timeSeries.getStates()
-                    .forEach(s -> modifiableService.store(item, s.timestamp().atZone(timeZone), s.state(), sId));
+            timeSeries.getStates().forEach(
+                    s -> modifiableService.store(item, s.timestamp().atZone(timeZone), s.state(), effectiveServiceId));
             return;
         }
         LoggerFactory.getLogger(PersistenceExtensions.class)
-                .warn("There is no modifiable persistence service registered with the id '{}'", sId);
+                .warn("There is no modifiable persistence service registered with the id '{}'", effectiveServiceId);
     }
 
     /**
@@ -260,11 +260,11 @@ public class PersistenceExtensions {
         if (timestamp == null) {
             return null;
         }
-        String sId = serviceId == null ? getDefaultServiceId() : serviceId;
-        if (sId == null) {
+        String effectiveServiceId = serviceId == null ? getDefaultServiceId() : serviceId;
+        if (effectiveServiceId == null) {
             return null;
         }
-        PersistenceService service = getService(sId);
+        PersistenceService service = getService(effectiveServiceId);
         if (service instanceof QueryablePersistenceService qService) {
             FilterCriteria filter = new FilterCriteria();
             filter.setEndDate(timestamp);
@@ -277,7 +277,7 @@ public class PersistenceExtensions {
             }
         } else {
             LoggerFactory.getLogger(PersistenceExtensions.class)
-                    .warn("There is no queryable persistence service registered with the id '{}'", sId);
+                    .warn("There is no queryable persistence service registered with the id '{}'", effectiveServiceId);
         }
         return null;
     }
@@ -334,11 +334,11 @@ public class PersistenceExtensions {
 
     private static @Nullable ZonedDateTime internalAdjacentUpdate(Item item, boolean forward,
             @Nullable String serviceId) {
-        String sId = serviceId == null ? getDefaultServiceId() : serviceId;
-        if (sId == null) {
+        String effectiveServiceId = serviceId == null ? getDefaultServiceId() : serviceId;
+        if (effectiveServiceId == null) {
             return null;
         }
-        PersistenceService service = getService(sId);
+        PersistenceService service = getService(effectiveServiceId);
         if (service instanceof QueryablePersistenceService qService) {
             FilterCriteria filter = new FilterCriteria();
             filter.setItemName(item.getName());
@@ -355,7 +355,7 @@ public class PersistenceExtensions {
             }
         } else {
             LoggerFactory.getLogger(PersistenceExtensions.class)
-                    .warn("There is no queryable persistence service registered with the id '{}'", sId);
+                    .warn("There is no queryable persistence service registered with the id '{}'", effectiveServiceId);
         }
         return null;
     }
@@ -464,11 +464,11 @@ public class PersistenceExtensions {
 
     private static @Nullable HistoricItem internalAdjacentState(Item item, boolean skipEqual, boolean forward,
             @Nullable String serviceId) {
-        String sId = serviceId == null ? getDefaultServiceId() : serviceId;
-        if (sId == null) {
+        String effectiveServiceId = serviceId == null ? getDefaultServiceId() : serviceId;
+        if (effectiveServiceId == null) {
             return null;
         }
-        PersistenceService service = getService(sId);
+        PersistenceService service = getService(effectiveServiceId);
         if (service instanceof QueryablePersistenceService qService) {
             FilterCriteria filter = new FilterCriteria();
             filter.setItemName(item.getName());
@@ -503,7 +503,7 @@ public class PersistenceExtensions {
             }
         } else {
             LoggerFactory.getLogger(PersistenceExtensions.class)
-                    .warn("There is no queryable persistence service registered with the id '{}'", sId);
+                    .warn("There is no queryable persistence service registered with the id '{}'", effectiveServiceId);
         }
         return null;
     }
@@ -599,14 +599,14 @@ public class PersistenceExtensions {
 
     private static @Nullable Boolean internalChangedBetween(Item item, @Nullable ZonedDateTime begin,
             @Nullable ZonedDateTime end, @Nullable String serviceId) {
-        String sId = serviceId == null ? getDefaultServiceId() : serviceId;
-        if (sId == null) {
+        String effectiveServiceId = serviceId == null ? getDefaultServiceId() : serviceId;
+        if (effectiveServiceId == null) {
             return null;
         }
-        Iterable<HistoricItem> result = internalGetAllStatesBetween(item, begin, end, sId);
+        Iterable<HistoricItem> result = internalGetAllStatesBetween(item, begin, end, effectiveServiceId);
         if (result != null) {
             Iterator<HistoricItem> it = result.iterator();
-            HistoricItem itemThen = internalPersistedState(item, begin, sId);
+            HistoricItem itemThen = internalPersistedState(item, begin, effectiveServiceId);
             if (itemThen == null) {
                 // Can't get the state at the start time
                 // If we've got results more recent than this, it must have changed
@@ -721,11 +721,11 @@ public class PersistenceExtensions {
 
     private static @Nullable Boolean internalUpdatedBetween(Item item, @Nullable ZonedDateTime begin,
             @Nullable ZonedDateTime end, @Nullable String serviceId) {
-        String sId = serviceId == null ? getDefaultServiceId() : serviceId;
-        if (sId == null) {
+        String effectiveServiceId = serviceId == null ? getDefaultServiceId() : serviceId;
+        if (effectiveServiceId == null) {
             return null;
         }
-        Iterable<HistoricItem> result = internalGetAllStatesBetween(item, begin, end, sId);
+        Iterable<HistoricItem> result = internalGetAllStatesBetween(item, begin, end, effectiveServiceId);
         if (result != null) {
             return result.iterator().hasNext();
         }
@@ -832,11 +832,11 @@ public class PersistenceExtensions {
 
     private static @Nullable HistoricItem internalMaximumBetween(final Item item, @Nullable ZonedDateTime begin,
             @Nullable ZonedDateTime end, @Nullable String serviceId) {
-        String sId = serviceId == null ? getDefaultServiceId() : serviceId;
-        if (sId == null) {
+        String effectiveServiceId = serviceId == null ? getDefaultServiceId() : serviceId;
+        if (effectiveServiceId == null) {
             return null;
         }
-        Iterable<HistoricItem> result = getAllStatesBetweenWithBoundaries(item, begin, end, sId);
+        Iterable<HistoricItem> result = getAllStatesBetweenWithBoundaries(item, begin, end, effectiveServiceId);
         if (result == null) {
             return null;
         }
@@ -957,11 +957,11 @@ public class PersistenceExtensions {
 
     private static @Nullable HistoricItem internalMinimumBetween(final Item item, @Nullable ZonedDateTime begin,
             @Nullable ZonedDateTime end, @Nullable String serviceId) {
-        String sId = serviceId == null ? getDefaultServiceId() : serviceId;
-        if (sId == null) {
+        String effectiveServiceId = serviceId == null ? getDefaultServiceId() : serviceId;
+        if (effectiveServiceId == null) {
             return null;
         }
-        Iterable<HistoricItem> result = getAllStatesBetweenWithBoundaries(item, begin, end, sId);
+        Iterable<HistoricItem> result = getAllStatesBetweenWithBoundaries(item, begin, end, effectiveServiceId);
         if (result == null) {
             return null;
         }
@@ -1079,15 +1079,15 @@ public class PersistenceExtensions {
 
     private static @Nullable State internalVarianceBetween(Item item, @Nullable ZonedDateTime begin,
             @Nullable ZonedDateTime end, @Nullable String serviceId) {
-        String sId = serviceId == null ? getDefaultServiceId() : serviceId;
-        if (sId == null) {
+        String effectiveServiceId = serviceId == null ? getDefaultServiceId() : serviceId;
+        if (effectiveServiceId == null) {
             return null;
         }
-        Iterable<HistoricItem> result = getAllStatesBetweenWithBoundaries(item, begin, end, sId);
+        Iterable<HistoricItem> result = getAllStatesBetweenWithBoundaries(item, begin, end, effectiveServiceId);
         if (result == null) {
             return null;
         }
-        State averageState = internalAverageBetween(item, begin, end, sId);
+        State averageState = internalAverageBetween(item, begin, end, effectiveServiceId);
 
         if (averageState != null) {
             DecimalType dt = averageState.as(DecimalType.class);
@@ -1237,11 +1237,11 @@ public class PersistenceExtensions {
 
     private static @Nullable State internalDeviationBetween(Item item, @Nullable ZonedDateTime begin,
             @Nullable ZonedDateTime end, @Nullable String serviceId) {
-        String sId = serviceId == null ? getDefaultServiceId() : serviceId;
-        if (sId == null) {
+        String effectiveServiceId = serviceId == null ? getDefaultServiceId() : serviceId;
+        if (effectiveServiceId == null) {
             return null;
         }
-        State variance = internalVarianceBetween(item, begin, end, sId);
+        State variance = internalVarianceBetween(item, begin, end, effectiveServiceId);
 
         if (variance != null) {
             DecimalType dt = variance.as(DecimalType.class);
@@ -1354,11 +1354,11 @@ public class PersistenceExtensions {
 
     private static @Nullable State internalAverageBetween(Item item, @Nullable ZonedDateTime begin,
             @Nullable ZonedDateTime end, @Nullable String serviceId) {
-        String sId = serviceId == null ? getDefaultServiceId() : serviceId;
-        if (sId == null) {
+        String effectiveServiceId = serviceId == null ? getDefaultServiceId() : serviceId;
+        if (effectiveServiceId == null) {
             return null;
         }
-        Iterable<HistoricItem> result = getAllStatesBetweenWithBoundaries(item, begin, end, sId);
+        Iterable<HistoricItem> result = getAllStatesBetweenWithBoundaries(item, begin, end, effectiveServiceId);
         if (result == null) {
             return null;
         }
@@ -1368,7 +1368,7 @@ public class PersistenceExtensions {
         ZonedDateTime endTime = end == null ? now : end;
 
         if (beginTime.isEqual(endTime)) {
-            HistoricItem historicItem = internalPersistedState(item, beginTime, sId);
+            HistoricItem historicItem = internalPersistedState(item, beginTime, effectiveServiceId);
             return historicItem != null ? historicItem.getState() : null;
         }
 
@@ -1502,11 +1502,11 @@ public class PersistenceExtensions {
 
     private @Nullable static State internalSumBetween(Item item, @Nullable ZonedDateTime begin,
             @Nullable ZonedDateTime end, @Nullable String serviceId) {
-        String sId = serviceId == null ? getDefaultServiceId() : serviceId;
-        if (sId == null) {
+        String effectiveServiceId = serviceId == null ? getDefaultServiceId() : serviceId;
+        if (effectiveServiceId == null) {
             return null;
         }
-        Iterable<HistoricItem> result = internalGetAllStatesBetween(item, begin, end, sId);
+        Iterable<HistoricItem> result = internalGetAllStatesBetween(item, begin, end, effectiveServiceId);
         if (result != null) {
             Iterator<HistoricItem> it = result.iterator();
 
@@ -1625,12 +1625,12 @@ public class PersistenceExtensions {
 
     private static @Nullable State internalDeltaBetween(Item item, @Nullable ZonedDateTime begin,
             @Nullable ZonedDateTime end, @Nullable String serviceId) {
-        String sId = serviceId == null ? getDefaultServiceId() : serviceId;
-        if (sId == null) {
+        String effectiveServiceId = serviceId == null ? getDefaultServiceId() : serviceId;
+        if (effectiveServiceId == null) {
             return null;
         }
-        HistoricItem itemStart = internalPersistedState(item, begin, sId);
-        HistoricItem itemStop = internalPersistedState(item, end, sId);
+        HistoricItem itemStart = internalPersistedState(item, begin, effectiveServiceId);
+        HistoricItem itemStop = internalPersistedState(item, end, effectiveServiceId);
         DecimalType valueStart = itemStart != null ? itemStart.getState().as(DecimalType.class) : null;
         DecimalType valueStop = itemStop != null ? itemStop.getState().as(DecimalType.class) : null;
         if (begin == null && end != null && end.isAfter(ZonedDateTime.now())) {
@@ -1706,6 +1706,9 @@ public class PersistenceExtensions {
     /**
      * Gets the evolution rate of the state of a given {@link Item} between two points in time.
      * The default {@link PersistenceService} is used.
+     *
+     * This method has been deprecated and {@link #evolutionRateBetween(Item, ZonedDateTime, ZonedDateTime)} should be
+     * used instead.
      *
      * @param item the item to get the evolution rate value for
      * @param begin the beginning point in time
@@ -1806,6 +1809,9 @@ public class PersistenceExtensions {
      * Gets the evolution rate of the state of a given {@link Item} between two points in time.
      * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
      *
+     * This method has been deprecated and {@link #evolutionRateBetween(Item, ZonedDateTime, ZonedDateTime, String)}
+     * should be used instead.
+     *
      * @param item the {@link Item} to get the evolution rate value for
      * @param begin the beginning point in time
      * @param end the end point in time
@@ -1847,12 +1853,12 @@ public class PersistenceExtensions {
 
     private static @Nullable DecimalType internalEvolutionRateBetween(Item item, @Nullable ZonedDateTime begin,
             @Nullable ZonedDateTime end, @Nullable String serviceId) {
-        String sId = serviceId == null ? getDefaultServiceId() : serviceId;
-        if (sId == null) {
+        String effectiveServiceId = serviceId == null ? getDefaultServiceId() : serviceId;
+        if (effectiveServiceId == null) {
             return null;
         }
-        HistoricItem itemStart = internalPersistedState(item, begin, sId);
-        HistoricItem itemStop = internalPersistedState(item, end, sId);
+        HistoricItem itemStart = internalPersistedState(item, begin, effectiveServiceId);
+        HistoricItem itemStop = internalPersistedState(item, end, effectiveServiceId);
         DecimalType valueStart = itemStart != null ? itemStart.getState().as(DecimalType.class) : null;
         DecimalType valueStop = itemStop != null ? itemStop.getState().as(DecimalType.class) : null;
         if (begin == null && end != null && end.isAfter(ZonedDateTime.now())) {
@@ -1961,11 +1967,11 @@ public class PersistenceExtensions {
 
     private static @Nullable Long internalCountBetween(Item item, @Nullable ZonedDateTime begin,
             @Nullable ZonedDateTime end, @Nullable String serviceId) {
-        String sId = serviceId == null ? getDefaultServiceId() : serviceId;
-        if (sId == null) {
+        String effectiveServiceId = serviceId == null ? getDefaultServiceId() : serviceId;
+        if (effectiveServiceId == null) {
             return null;
         }
-        Iterable<HistoricItem> result = internalGetAllStatesBetween(item, begin, end, sId);
+        Iterable<HistoricItem> result = internalGetAllStatesBetween(item, begin, end, effectiveServiceId);
         if (result != null) {
             if (result instanceof Collection<?> collection) {
                 return Long.valueOf(collection.size());
@@ -2070,11 +2076,11 @@ public class PersistenceExtensions {
 
     private static @Nullable Long internalCountStateChangesBetween(Item item, @Nullable ZonedDateTime begin,
             @Nullable ZonedDateTime end, @Nullable String serviceId) {
-        String sId = serviceId == null ? getDefaultServiceId() : serviceId;
-        if (sId == null) {
+        String effectiveServiceId = serviceId == null ? getDefaultServiceId() : serviceId;
+        if (effectiveServiceId == null) {
             return null;
         }
-        Iterable<HistoricItem> result = internalGetAllStatesBetween(item, begin, end, sId);
+        Iterable<HistoricItem> result = internalGetAllStatesBetween(item, begin, end, effectiveServiceId);
         if (result != null) {
             Iterator<HistoricItem> it = result.iterator();
 
@@ -2193,11 +2199,11 @@ public class PersistenceExtensions {
 
     private static @Nullable Iterable<HistoricItem> internalGetAllStatesBetween(Item item,
             @Nullable ZonedDateTime begin, @Nullable ZonedDateTime end, @Nullable String serviceId) {
-        String sId = serviceId == null ? getDefaultServiceId() : serviceId;
-        if (sId == null) {
+        String effectiveServiceId = serviceId == null ? getDefaultServiceId() : serviceId;
+        if (effectiveServiceId == null) {
             return null;
         }
-        PersistenceService service = getService(sId);
+        PersistenceService service = getService(effectiveServiceId);
         if (service instanceof QueryablePersistenceService qService) {
             FilterCriteria filter = new FilterCriteria();
             ZonedDateTime now = ZonedDateTime.now();
@@ -2224,7 +2230,7 @@ public class PersistenceExtensions {
             return qService.query(filter);
         } else {
             LoggerFactory.getLogger(PersistenceExtensions.class)
-                    .warn("There is no queryable persistence service registered with the id '{}'", sId);
+                    .warn("There is no queryable persistence service registered with the id '{}'", effectiveServiceId);
         }
         return null;
     }
@@ -2309,11 +2315,11 @@ public class PersistenceExtensions {
 
     private static void internalRemoveAllStatesBetween(Item item, @Nullable ZonedDateTime begin,
             @Nullable ZonedDateTime end, @Nullable String serviceId) {
-        String sId = serviceId == null ? getDefaultServiceId() : serviceId;
-        if (sId == null) {
+        String effectiveServiceId = serviceId == null ? getDefaultServiceId() : serviceId;
+        if (effectiveServiceId == null) {
             return;
         }
-        PersistenceService service = getService(sId);
+        PersistenceService service = getService(effectiveServiceId);
         if (service instanceof ModifiablePersistenceService mService) {
             FilterCriteria filter = new FilterCriteria();
             ZonedDateTime now = ZonedDateTime.now();
@@ -2340,7 +2346,7 @@ public class PersistenceExtensions {
             mService.remove(filter);
         } else {
             LoggerFactory.getLogger(PersistenceExtensions.class)
-                    .warn("There is no queryable persistence service registered with the id '{}'", sId);
+                    .warn("There is no queryable persistence service registered with the id '{}'", effectiveServiceId);
         }
         return;
     }
