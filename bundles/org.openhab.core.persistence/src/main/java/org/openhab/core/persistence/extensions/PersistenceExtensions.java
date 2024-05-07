@@ -2346,7 +2346,7 @@ public class PersistenceExtensions {
             mService.remove(filter);
         } else {
             LoggerFactory.getLogger(PersistenceExtensions.class)
-                    .warn("There is no queryable persistence service registered with the id '{}'", effectiveServiceId);
+                    .warn("There is no modifiable persistence service registered with the id '{}'", effectiveServiceId);
         }
         return;
     }
