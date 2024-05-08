@@ -79,6 +79,7 @@ import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.library.types.HSBType;
 import org.openhab.core.model.sitemap.SitemapProvider;
 import org.openhab.core.model.sitemap.sitemap.Button;
+import org.openhab.core.model.sitemap.sitemap.ButtonDefinition;
 import org.openhab.core.model.sitemap.sitemap.Buttongrid;
 import org.openhab.core.model.sitemap.sitemap.Chart;
 import org.openhab.core.model.sitemap.sitemap.ColorArray;
@@ -101,6 +102,7 @@ import org.openhab.core.model.sitemap.sitemap.Webview;
 import org.openhab.core.model.sitemap.sitemap.Widget;
 import org.openhab.core.types.State;
 import org.openhab.core.ui.items.ItemUIRegistry;
+import org.openhab.core.ui.items.ItemUIRegistry.WidgetLabelSource;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -142,6 +144,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * @author Laurent Garnier - Support added for multiple AND conditions in labelcolor/valuecolor/visibility
  * @author Laurent Garnier - New widget icon parameter based on conditional rules
  * @author Laurent Garnier - Added releaseCmd field for mappings used for switch element
+ * @author Laurent Garnier - Added support for Buttongrid as container for Button elements
  */
 @Component(service = { RESTResource.class, EventSubscriber.class })
 @JaxrsResource
@@ -616,7 +619,7 @@ public class SitemapResource
         bean.visibility = itemUIRegistry.getVisiblity(widget);
         if (widget instanceof LinkableWidget linkableWidget) {
             EList<Widget> children = itemUIRegistry.getChildren(linkableWidget);
-            if (widget instanceof Frame) {
+            if (widget instanceof Frame || widget instanceof Buttongrid) {
                 for (Widget child : children) {
                     String wID = itemUIRegistry.getWidgetId(child);
                     WidgetDTO subWidget = createWidgetBean(sitemapName, child, drillDown, uri, wID, locale,
@@ -700,7 +703,7 @@ public class SitemapResource
             bean.step = setpointWidget.getStep();
         }
         if (widget instanceof Buttongrid buttonGridWidget) {
-            for (Button button : buttonGridWidget.getButtons()) {
+            for (ButtonDefinition button : buttonGridWidget.getButtons()) {
                 MappingDTO mappingBean = new MappingDTO();
                 mappingBean.row = button.getRow();
                 mappingBean.column = button.getColumn();
@@ -709,6 +712,23 @@ public class SitemapResource
                 mappingBean.icon = button.getIcon();
                 bean.mappings.add(mappingBean);
             }
+        }
+        if (widget instanceof Button buttonWidget) {
+            // Get the icon from the widget only
+            if (widget.getIcon() == null && widget.getStaticIcon() == null && widget.getIconRules().isEmpty()) {
+                bean.icon = null;
+                bean.staticIcon = null;
+            }
+            // Get the label from the widget only and fail back to the command if not set
+            bean.label = widget.getLabel() != null ? widget.getLabel() : buttonWidget.getCmd();
+            bean.labelSource = WidgetLabelSource.SITEMAP_WIDGET.toString();
+            bean.pattern = null;
+            bean.unit = null;
+            bean.row = buttonWidget.getRow();
+            bean.column = buttonWidget.getColumn();
+            bean.command = buttonWidget.getCmd();
+            bean.releaseCommand = buttonWidget.getReleaseCmd();
+            bean.stateless = buttonWidget.isStateless();
         }
         return bean;
     }
@@ -738,6 +758,10 @@ public class SitemapResource
         for (Widget w : children) {
             if (w instanceof Frame frame) {
                 if (isLeaf(frame.getChildren())) {
+                    return false;
+                }
+            } else if (w instanceof Buttongrid grid) {
+                if (isLeaf(grid.getChildren())) {
                     return false;
                 }
             } else if (w instanceof LinkableWidget linkableWidget) {
@@ -828,6 +852,8 @@ public class SitemapResource
             // Consider all items inside the frame
             if (widget instanceof Frame frame) {
                 items.addAll(getAllItems(frame.getChildren()));
+            } else if (widget instanceof Buttongrid grid) {
+                items.addAll(getAllItems(grid.getChildren()));
             }
             // Consider items involved in any icon condition
             items.addAll(getItemsInIconCond(widget.getIconRules()));

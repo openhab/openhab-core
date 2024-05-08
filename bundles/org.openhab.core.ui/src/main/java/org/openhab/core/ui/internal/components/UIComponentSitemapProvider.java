@@ -32,7 +32,7 @@ import org.openhab.core.config.core.ConfigUtil;
 import org.openhab.core.model.core.EventType;
 import org.openhab.core.model.core.ModelRepositoryChangeListener;
 import org.openhab.core.model.sitemap.SitemapProvider;
-import org.openhab.core.model.sitemap.sitemap.Button;
+import org.openhab.core.model.sitemap.sitemap.ButtonDefinition;
 import org.openhab.core.model.sitemap.sitemap.ColorArray;
 import org.openhab.core.model.sitemap.sitemap.IconRule;
 import org.openhab.core.model.sitemap.sitemap.LinkableWidget;
@@ -42,7 +42,7 @@ import org.openhab.core.model.sitemap.sitemap.SitemapFactory;
 import org.openhab.core.model.sitemap.sitemap.SitemapPackage;
 import org.openhab.core.model.sitemap.sitemap.VisibilityRule;
 import org.openhab.core.model.sitemap.sitemap.Widget;
-import org.openhab.core.model.sitemap.sitemap.impl.ButtonImpl;
+import org.openhab.core.model.sitemap.sitemap.impl.ButtonDefinitionImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.ButtongridImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.ChartImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.ColorArrayImpl;
@@ -392,7 +392,7 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
         }
     }
 
-    private void addWidgetButtons(EList<Button> buttons, UIComponent component) {
+    private void addWidgetButtons(EList<ButtonDefinition> buttons, UIComponent component) {
         if (component.getConfig() != null && component.getConfig().containsKey("buttons")) {
             Object sourceButtons = component.getConfig().get("buttons");
             if (sourceButtons instanceof Collection<?> sourceButtonsCollection) {
@@ -405,7 +405,8 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
                         String cmd = stripQuotes(splitted2[0].trim());
                         String label = stripQuotes(splitted2[1].trim());
                         String icon = splitted2.length < 3 ? null : stripQuotes(splitted2[2].trim());
-                        ButtonImpl button = (ButtonImpl) SitemapFactory.eINSTANCE.createButton();
+                        ButtonDefinitionImpl button = (ButtonDefinitionImpl) SitemapFactory.eINSTANCE
+                                .createButtonDefinition();
                         button.setRow(row);
                         button.setColumn(column);
                         button.setCmd(cmd);

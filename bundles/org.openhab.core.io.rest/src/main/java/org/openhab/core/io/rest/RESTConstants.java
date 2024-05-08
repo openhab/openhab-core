@@ -39,8 +39,9 @@ public class RESTConstants {
      * Version 5: transparent charts (#2502)
      * Version 6: extended chart period parameter format (#3863)
      * Version 7: extended chart period parameter format to cover past and future
+     * Version 8: Buttongrid as container for new Button elements
      */
-    public static final String API_VERSION = "7";
+    public static final String API_VERSION = "8";
 
     public static final CacheControl CACHE_CONTROL = new CacheControl();
     static {

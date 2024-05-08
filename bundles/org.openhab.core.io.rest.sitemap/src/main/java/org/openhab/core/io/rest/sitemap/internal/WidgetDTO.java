@@ -28,6 +28,7 @@ import org.openhab.core.io.rest.core.item.EnrichedItemDTO;
  * @author Laurent Garnier - New field columns
  * @author Danny Baumann - New field labelSource
  * @author Laurent Garnier - Remove field columns
+ * @author Laurent Garnier - New fields row, column, command, releaseCommand and stateless for Button element
  */
 public class WidgetDTO {
 
@@ -70,12 +71,17 @@ public class WidgetDTO {
     public String yAxisDecimalPattern;
     public Boolean legend;
     public Boolean forceAsItem;
+    public Integer row;
+    public Integer column;
+    public String command;
+    public String releaseCommand;
+    public Boolean stateless;
     public String state;
 
     public EnrichedItemDTO item;
     public PageDTO linkedPage;
 
-    // only for frames, other linkable widgets link to a page
+    // only for frames and button grids, other linkable widgets link to a page
     public final List<WidgetDTO> widgets = new ArrayList<>();
 
     public WidgetDTO() {
