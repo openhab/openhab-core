@@ -195,8 +195,6 @@ public class FeatureInstaller implements ConfigurationListener {
             }
         }
 
-        processingConfigQueue.set(false);
-
         try {
             if (changed) {
                 featuresService.refreshFeatures(EnumSet.noneOf(FeaturesService.Option.class));
@@ -204,6 +202,8 @@ public class FeatureInstaller implements ConfigurationListener {
         } catch (Exception e) {
             logger.error("Failed to refresh bundles after processing config update", e);
         }
+
+        processingConfigQueue.set(false);
     }
 
     public void addAddon(String type, String id) {
