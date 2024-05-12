@@ -194,11 +194,11 @@ public class AudioConsoleCommandExtension extends AbstractConsoleCommandExtensio
             int seconds = Integer.parseInt(args.length > 2 ? args[1] : args[0]);
             String filename = args.length > 2 ? args[2] : args[1];
             audioManager.record(seconds, filename, sourceId);
-            console.println("Record done.");
+            console.println("Recording completed");
         } catch (NumberFormatException e) {
-            console.println("Unable to parse record time: " + e.getMessage());
+            console.println("Unable to parse the recording time: " + e.getMessage());
         } catch (AudioException e) {
-            console.println("Record terminated with audio exception: " + e.getMessage());
+            console.println("Recording terminated with audio exception: " + e.getMessage());
         }
     }
 

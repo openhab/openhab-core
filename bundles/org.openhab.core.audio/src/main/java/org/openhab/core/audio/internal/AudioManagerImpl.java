@@ -233,12 +233,12 @@ public class AudioManagerImpl implements AudioManager, ConfigOptionProvider {
                         break;
                     }
                     if (recordBuffer.position() + bytes.length > recordBuffer.limit()) {
-                        logger.debug("Record limit reached");
+                        logger.debug("Recording limit reached");
                         break;
                     }
                     recordBuffer.put(bytes);
                 } catch (IOException e) {
-                    logger.warn("Read failed");
+                    logger.warn("Reading audio data failed");
                 }
             }
         } catch (IOException e) {

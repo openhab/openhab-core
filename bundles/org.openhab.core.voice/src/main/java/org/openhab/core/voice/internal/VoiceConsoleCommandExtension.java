@@ -101,7 +101,6 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
         return List.of(buildCommandUsage(SUBCMD_SAY + " <text>", "speaks a text"), buildCommandUsage(
                 SUBCMD_TRANSCRIBE + " [--source <source>]|[--file <file>] [<sttId>] [<locale>]",
                 "transcribe audio from default source, optionally specify a different source/file, speech-to-text service or locale"),
-                buildCommandUsage(SUBCMD_SAY + " <text>", "speaks a text"),
                 buildCommandUsage(SUBCMD_INTERPRET + " <command>", "interprets a human language command"),
                 buildCommandUsage(SUBCMD_VOICES, "lists available voices of the TTS services"),
                 buildCommandUsage(SUBCMD_DIALOGS, "lists the running dialog and their audio/voice services"),
@@ -361,7 +360,7 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
         if (!text.isBlank()) {
             console.println("Transcription: " + text);
         } else {
-            console.println("No transcription generated.");
+            console.println("No transcription generated");
         }
     }
 
