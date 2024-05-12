@@ -16,10 +16,13 @@ import static org.openhab.core.config.discovery.addon.AddonFinderConstants.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.net.SocketTimeoutException;
 import java.net.StandardProtocolFamily;
 import java.net.StandardSocketOptions;
 import java.net.UnknownHostException;
@@ -28,6 +31,7 @@ import java.nio.channels.DatagramChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.text.ParseException;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.HexFormat;
 import java.util.Iterator;
@@ -54,8 +58,12 @@ import org.openhab.core.addon.AddonService;
 import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.config.discovery.addon.AddonFinder;
 import org.openhab.core.config.discovery.addon.BaseAddonFinder;
+import org.openhab.core.net.CidrAddress;
 import org.openhab.core.net.NetUtil;
+import org.openhab.core.net.NetworkAddressChangeListener;
+import org.openhab.core.net.NetworkAddressService;
 import org.openhab.core.util.StringUtils;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
@@ -173,14 +181,16 @@ import org.slf4j.LoggerFactory;
  *           no continuous background scanning.
  *
  * @author Holger Friedrich - Initial contribution
+ * @author Jacob Laursen - Added support for broadcast-based scanning
  */
 @NonNullByDefault
 @Component(service = AddonFinder.class, name = IpAddonFinder.SERVICE_NAME)
-public class IpAddonFinder extends BaseAddonFinder {
+public class IpAddonFinder extends BaseAddonFinder implements NetworkAddressChangeListener {
 
     public static final String SERVICE_TYPE = SERVICE_TYPE_IP;
     public static final String SERVICE_NAME = SERVICE_NAME_IP;
 
+    private static final String TYPE_IP_BROADCAST = "ipBroadcast";
     private static final String TYPE_IP_MULTICAST = "ipMulticast";
     private static final String MATCH_PROPERTY_RESPONSE = "response";
     private static final String PARAMETER_DEST_IP = "destIp";
@@ -194,20 +204,25 @@ public class IpAddonFinder extends BaseAddonFinder {
     private static final String REPLACEMENT_UUID = "uuid";
 
     private final Logger logger = LoggerFactory.getLogger(IpAddonFinder.class);
+    private final NetworkAddressService networkAddressService;
     private final ScheduledExecutorService scheduler = ThreadPoolManager
             .getScheduledPool(ThreadPoolManager.THREAD_POOL_NAME_COMMON);
     private final Set<AddonService> addonServices = new CopyOnWriteArraySet<>();
     private @Nullable Future<?> scanJob = null;
     Set<AddonInfo> suggestions = new HashSet<>();
 
-    public IpAddonFinder() {
+    @Activate
+    public IpAddonFinder(final @Reference NetworkAddressService networkAddressService) {
         logger.trace("IpAddonFinder::IpAddonFinder");
         // start of scan will be triggered by setAddonCandidates to ensure addonCandidates are available
+        this.networkAddressService = networkAddressService;
+        this.networkAddressService.addNetworkAddressChangeListener(this);
     }
 
     @Deactivate
     public void deactivate() {
         logger.trace("IpAddonFinder::deactivate");
+        networkAddressService.removeNetworkAddressChangeListener(this);
         stopScan();
     }
 
@@ -215,7 +230,7 @@ public class IpAddonFinder extends BaseAddonFinder {
     public void setAddonCandidates(List<AddonInfo> candidates) {
         logger.debug("IpAddonFinder::setAddonCandidates({})", candidates.size());
         super.setAddonCandidates(candidates);
-        startScan();
+        startScan(20);
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
@@ -227,14 +242,24 @@ public class IpAddonFinder extends BaseAddonFinder {
         this.addonServices.remove(featureService);
     }
 
-    private void startScan() {
+    @Override
+    public void onChanged(List<CidrAddress> added, List<CidrAddress> removed) {
+        // Nothing to do
+    }
+
+    @Override
+    public void onPrimaryAddressChanged(@Nullable String oldPrimaryAddress, @Nullable String newPrimaryAddress) {
+        startScan(0);
+    }
+
+    private void startScan(long delayInSeconds) {
         // The setAddonCandidates() method is called for each info provider.
         // In order to do the scan only once, but on the full set of candidates, we have to delay the execution.
         // At the same time we must make sure that a scheduled scan is rescheduled - or (after more than our delay) is
         // executed once more.
         stopScan();
         logger.trace("Scheduling new IP scan");
-        scanJob = scheduler.schedule(this::scan, 20, TimeUnit.SECONDS);
+        scanJob = scheduler.schedule(this::scan, delayInSeconds, TimeUnit.SECONDS);
     }
 
     private void stopScan() {
@@ -269,15 +294,17 @@ public class IpAddonFinder extends BaseAddonFinder {
 
                 // parse standard set of parameters
                 String type = Objects.toString(parameters.get("type"), "");
-                String request = Objects.toString(parameters.get(PARAMETER_REQUEST), "");
-                String requestPlain = Objects.toString(parameters.get(PARAMETER_REQUEST_PLAIN), "");
+                String request = Objects.requireNonNull(Objects.toString(parameters.get(PARAMETER_REQUEST), ""));
+                String requestPlain = Objects
+                        .requireNonNull(Objects.toString(parameters.get(PARAMETER_REQUEST_PLAIN), ""));
                 // xor
                 if (!("".equals(request) ^ "".equals(requestPlain))) {
                     logger.warn("{}: discovery-parameter '{}' or '{}' required", candidate.getUID(), PARAMETER_REQUEST,
                             PARAMETER_REQUEST_PLAIN);
                     continue;
                 }
-                String response = Objects.toString(matchProperties.get(MATCH_PROPERTY_RESPONSE), "");
+                String response = Objects
+                        .requireNonNull(Objects.toString(matchProperties.get(MATCH_PROPERTY_RESPONSE), ""));
                 int timeoutMs;
                 try {
                     timeoutMs = Integer.parseInt(Objects.toString(parameters.get(PARAMETER_TIMEOUT_MS)));
@@ -322,69 +349,13 @@ public class IpAddonFinder extends BaseAddonFinder {
                 // handle known types
                 try {
                     switch (Objects.toString(type)) {
-                        case TYPE_IP_MULTICAST:
-                            List<String> ipAddresses = NetUtil.getAllInterfaceAddresses().stream()
-                                    .filter(a -> a.getAddress() instanceof Inet4Address)
-                                    .map(a -> a.getAddress().getHostAddress()).toList();
-
-                            for (String localIp : ipAddresses) {
-                                try (DatagramChannel channel = (DatagramChannel) DatagramChannel
-                                        .open(StandardProtocolFamily.INET)
-                                        .setOption(StandardSocketOptions.SO_REUSEADDR, true)
-                                        .bind(new InetSocketAddress(localIp, listenPort))
-                                        .setOption(StandardSocketOptions.IP_MULTICAST_TTL, 64).configureBlocking(false);
-                                        Selector selector = Selector.open()) {
-                                    byte[] requestArray = "".equals(requestPlain)
-                                            ? buildRequestArray(channel, Objects.toString(request))
-                                            : buildRequestArrayPlain(channel, Objects.toString(requestPlain));
-                                    if (logger.isTraceEnabled()) {
-                                        InetSocketAddress sock = (InetSocketAddress) channel.getLocalAddress();
-                                        String id = candidate.getUID();
-                                        logger.trace("{}: probing {} -> {}:{}", id, localIp,
-                                                destIp != null ? destIp.getHostAddress() : "", destPort);
-                                        if (!"".equals(requestPlain)) {
-                                            logger.trace("{}: \'{}\'", id, new String(requestArray));
-                                        }
-                                        logger.trace("{}: {}", id,
-                                                HexFormat.of().withDelimiter(" ").formatHex(requestArray));
-                                        logger.trace("{}: listening on {}:{} for {} ms", id,
-                                                sock.getAddress().getHostAddress(), sock.getPort(), timeoutMs);
-                                    }
-
-                                    channel.send(ByteBuffer.wrap(requestArray),
-                                            new InetSocketAddress(destIp, destPort));
-
-                                    // listen to responses
-                                    ByteBuffer buffer = ByteBuffer.wrap(new byte[50]);
-                                    channel.register(selector, SelectionKey.OP_READ);
-                                    selector.select(timeoutMs);
-                                    Iterator<SelectionKey> it = selector.selectedKeys().iterator();
-
-                                    switch (Objects.toString(response)) {
-                                        case ".*":
-                                            if (it.hasNext()) {
-                                                final SocketAddress source = ((DatagramChannel) it.next().channel())
-                                                        .receive(buffer);
-                                                logger.debug("Received return frame from {}",
-                                                        ((InetSocketAddress) source).getAddress().getHostAddress());
-                                                suggestions.add(candidate);
-                                                logger.debug("Suggested add-on found: {}", candidate.getUID());
-                                            } else {
-                                                logger.trace("{}: no response received on {}", candidate.getUID(),
-                                                        localIp);
-                                            }
-                                            break;
-                                        default:
-                                            logger.warn("{}: match-property response \"{}\" is unknown",
-                                                    candidate.getUID(), type);
-                                            break; // end loop
-                                    }
-                                } catch (IOException e) {
-                                    logger.debug("{}: network error", candidate.getUID(), e);
-                                }
-                            }
+                        case TYPE_IP_BROADCAST:
+                            scanBroadcast(candidate, request, requestPlain, response, timeoutMs, destPort);
                             break;
-
+                        case TYPE_IP_MULTICAST:
+                            scanMulticast(candidate, request, requestPlain, response, timeoutMs, listenPort, destIp,
+                                    destPort);
+                            break;
                         default:
                             logger.warn("{}: discovery-parameter type \"{}\" is unknown", candidate.getUID(), type);
                     }
@@ -396,10 +367,130 @@ public class IpAddonFinder extends BaseAddonFinder {
         logger.trace("IpAddonFinder::scan completed");
     }
 
+    private void scanBroadcast(AddonInfo candidate, String request, String requestPlain, String response, int timeoutMs,
+            int destPort) throws ParseException {
+        if (request.isEmpty() && requestPlain.isEmpty()) {
+            logger.warn("{}: match-property request and requestPlain \"{}\" is unknown", candidate.getUID(),
+                    TYPE_IP_BROADCAST);
+            return;
+        }
+        if (!request.isEmpty() && !requestPlain.isEmpty()) {
+            logger.warn("{}: match-properties request and requestPlain \"{}\" are both present", candidate.getUID(),
+                    TYPE_IP_BROADCAST);
+            return;
+        }
+        if (response.isEmpty()) {
+            logger.warn("{}: match-property response \"{}\" is unknown", candidate.getUID(), TYPE_IP_BROADCAST);
+            return;
+        }
+        String broadcastAddress = networkAddressService.getConfiguredBroadcastAddress();
+        logger.debug("Starting broadcast scan with address {}", broadcastAddress);
+
+        try (DatagramSocket socket = new DatagramSocket()) {
+            socket.setBroadcast(true);
+            socket.setSoTimeout(timeoutMs);
+            byte[] sendBuffer = requestPlain.isEmpty() ? buildRequestArray(socket.getLocalSocketAddress(), request)
+                    : buildRequestArrayPlain(socket.getLocalSocketAddress(), requestPlain);
+            DatagramPacket sendPacket = new DatagramPacket(sendBuffer, sendBuffer.length,
+                    InetAddress.getByName(broadcastAddress), destPort);
+            socket.send(sendPacket);
+
+            // wait for responses
+            while (!Thread.currentThread().isInterrupted()) {
+                byte[] discoverReceive = buildByteArray(response);
+                byte[] receiveBuffer = new byte[discoverReceive.length];
+                DatagramPacket receivePacket = new DatagramPacket(receiveBuffer, receiveBuffer.length);
+                try {
+                    socket.receive(receivePacket);
+                } catch (SocketTimeoutException e) {
+                    break; // leave the endless loop
+                }
+
+                byte[] data = receivePacket.getData();
+                if (Arrays.equals(data, discoverReceive)) {
+                    suggestions.add(candidate);
+                    logger.debug("Suggested add-on found: {}", candidate.getUID());
+                }
+            }
+        } catch (IOException e) {
+            logger.debug("{}: network error", candidate.getUID(), e);
+        }
+    }
+
+    private byte[] buildByteArray(String input) {
+        ByteArrayOutputStream requestFrame = new ByteArrayOutputStream();
+        StringTokenizer parts = new StringTokenizer(input);
+
+        while (parts.hasMoreTokens()) {
+            String token = parts.nextToken();
+            int i = Integer.decode(token);
+            requestFrame.write((byte) i);
+        }
+        return requestFrame.toByteArray();
+    }
+
+    private void scanMulticast(AddonInfo candidate, String request, String requestPlain, String response, int timeoutMs,
+            int listenPort, @Nullable InetAddress destIp, int destPort) throws ParseException {
+        List<String> ipAddresses = NetUtil.getAllInterfaceAddresses().stream()
+                .filter(a -> a.getAddress() instanceof Inet4Address).map(a -> a.getAddress().getHostAddress()).toList();
+
+        for (String localIp : ipAddresses) {
+            try (DatagramChannel channel = (DatagramChannel) DatagramChannel.open(StandardProtocolFamily.INET)
+                    .setOption(StandardSocketOptions.SO_REUSEADDR, true)
+                    .bind(new InetSocketAddress(localIp, listenPort))
+                    .setOption(StandardSocketOptions.IP_MULTICAST_TTL, 64).configureBlocking(false);
+                    Selector selector = Selector.open()) {
+                byte[] requestArray = "".equals(requestPlain)
+                        ? buildRequestArray(channel.getLocalAddress(), Objects.toString(request))
+                        : buildRequestArrayPlain(channel.getLocalAddress(), Objects.toString(requestPlain));
+                if (logger.isTraceEnabled()) {
+                    InetSocketAddress sock = (InetSocketAddress) channel.getLocalAddress();
+                    String id = candidate.getUID();
+                    logger.trace("{}: probing {} -> {}:{}", id, localIp, destIp != null ? destIp.getHostAddress() : "",
+                            destPort);
+                    if (!"".equals(requestPlain)) {
+                        logger.trace("{}: \'{}\'", id, new String(requestArray));
+                    }
+                    logger.trace("{}: {}", id, HexFormat.of().withDelimiter(" ").formatHex(requestArray));
+                    logger.trace("{}: listening on {}:{} for {} ms", id, sock.getAddress().getHostAddress(),
+                            sock.getPort(), timeoutMs);
+                }
+
+                channel.send(ByteBuffer.wrap(requestArray), new InetSocketAddress(destIp, destPort));
+
+                // listen to responses
+                ByteBuffer buffer = ByteBuffer.wrap(new byte[50]);
+                channel.register(selector, SelectionKey.OP_READ);
+                selector.select(timeoutMs);
+                Iterator<SelectionKey> it = selector.selectedKeys().iterator();
+
+                switch (Objects.toString(response)) {
+                    case ".*":
+                        if (it.hasNext()) {
+                            final SocketAddress source = ((DatagramChannel) it.next().channel()).receive(buffer);
+                            logger.debug("Received return frame from {}",
+                                    ((InetSocketAddress) source).getAddress().getHostAddress());
+                            suggestions.add(candidate);
+                            logger.debug("Suggested add-on found: {}", candidate.getUID());
+                        } else {
+                            logger.trace("{}: no response received on {}", candidate.getUID(), localIp);
+                        }
+                        break;
+                    default:
+                        logger.warn("{}: match-property response \"{}\" is unknown", candidate.getUID(),
+                                TYPE_IP_MULTICAST);
+                        break; // end loop
+                }
+            } catch (IOException e) {
+                logger.debug("{}: network error", candidate.getUID(), e);
+            }
+        }
+    }
+
     // build from plaintext string
-    private byte[] buildRequestArrayPlain(DatagramChannel channel, String request)
+    private byte[] buildRequestArrayPlain(SocketAddress address, String request)
             throws java.io.IOException, ParseException {
-        InetSocketAddress sock = (InetSocketAddress) channel.getLocalAddress();
+        InetSocketAddress sock = (InetSocketAddress) address;
 
         // replace first
         StringBuilder req = new StringBuilder(request);
@@ -420,9 +511,8 @@ public class IpAddonFinder extends BaseAddonFinder {
     }
 
     // build from hex string
-    private byte[] buildRequestArray(DatagramChannel channel, String request)
-            throws java.io.IOException, ParseException {
-        InetSocketAddress sock = (InetSocketAddress) channel.getLocalAddress();
+    private byte[] buildRequestArray(SocketAddress address, String request) throws java.io.IOException, ParseException {
+        InetSocketAddress sock = (InetSocketAddress) address;
 
         ByteArrayOutputStream requestFrame = new ByteArrayOutputStream();
         StringTokenizer parts = new StringTokenizer(request);
