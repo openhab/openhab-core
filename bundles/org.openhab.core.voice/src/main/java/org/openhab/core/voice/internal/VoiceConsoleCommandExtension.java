@@ -99,7 +99,7 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
     @Override
     public List<String> getUsages() {
         return List.of(buildCommandUsage(SUBCMD_SAY + " <text>", "speaks a text"), buildCommandUsage(
-                SUBCMD_TRANSCRIBE + " [--source <source>]|[--file <file>] [<sttId>] [<locale>]",
+                SUBCMD_TRANSCRIBE + " [--source <source>]|[--file <file>] [--stt <stt>] [--locale <locale>]",
                 "transcribe audio from default source, optionally specify a different source/file, speech-to-text service or locale"),
                 buildCommandUsage(SUBCMD_INTERPRET + " <command>", "interprets a human language command"),
                 buildCommandUsage(SUBCMD_VOICES, "lists available voices of the TTS services"),
@@ -353,9 +353,9 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
                 console.println("Error: File '" + parameters.get("file") + "' not found in sound folder.");
                 return;
             }
-            text = voiceManager.transcribe(fileAudioStream, parameters.get("sttId"), locale);
+            text = voiceManager.transcribe(fileAudioStream, parameters.get("stt"), locale);
         } else {
-            text = voiceManager.transcribe(parameters.get("source"), parameters.get("sttId"), null);
+            text = voiceManager.transcribe(parameters.get("source"), parameters.get("stt"), null);
         }
         if (!text.isBlank()) {
             console.println("Transcription: " + text);
