@@ -727,7 +727,8 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
                 returnState = itemState.as(DecimalType.class);
             }
         } else if (w instanceof Switch sw) {
-            if (sw.getMappings().isEmpty()) {
+            StateDescription stateDescr = i.getStateDescription();
+            if (sw.getMappings().isEmpty() && (stateDescr == null || stateDescr.getOptions().isEmpty())) {
                 returnState = itemState.as(OnOffType.class);
             }
         }
