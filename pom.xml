@@ -562,6 +562,7 @@ Import-Package: \\
                 <!-- *.xml -->
                 <includes>
                   <include>src/**/*.xml</include>
+                  <include>schema/**/*.xsd</include>
                 </includes>
                 <excludes>
                   <exclude>**/feature.xml</exclude>
