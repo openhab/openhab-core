@@ -35,6 +35,8 @@ import org.openhab.core.items.events.GroupStateUpdatedEvent;
 import org.openhab.core.items.events.ItemEvent;
 import org.openhab.core.items.events.ItemStateChangedEvent;
 import org.openhab.core.library.CoreItemFactory;
+import org.openhab.core.model.sitemap.sitemap.Button;
+import org.openhab.core.model.sitemap.sitemap.Buttongrid;
 import org.openhab.core.model.sitemap.sitemap.Chart;
 import org.openhab.core.model.sitemap.sitemap.ColorArray;
 import org.openhab.core.model.sitemap.sitemap.Condition;
@@ -44,6 +46,7 @@ import org.openhab.core.model.sitemap.sitemap.VisibilityRule;
 import org.openhab.core.model.sitemap.sitemap.Widget;
 import org.openhab.core.types.State;
 import org.openhab.core.ui.items.ItemUIRegistry;
+import org.openhab.core.ui.items.ItemUIRegistry.WidgetLabelSource;
 
 /**
  * This is a class that listens on item state change events and creates sitemap events for the registered widgets.
@@ -52,6 +55,7 @@ import org.openhab.core.ui.items.ItemUIRegistry;
  * @author Laurent Garnier - Added support for icon color
  * @author Laurent Garnier - Support added for multiple AND conditions in labelcolor/valuecolor/visibility
  * @author Laurent Garnier - New widget icon parameter based on conditional rules
+ * @author Laurent Garnier - Buttongrid as container for Button elements
  */
 public class WidgetsChangeListener implements EventSubscriber {
 
@@ -124,6 +128,8 @@ public class WidgetsChangeListener implements EventSubscriber {
                 addItemWithName(items, widget.getItem());
                 if (widget instanceof Frame frame) {
                     items.addAll(getAllItems(frame.getChildren()));
+                } else if (widget instanceof Buttongrid grid) {
+                    items.addAll(getAllItems(grid.getChildren()));
                 }
                 // now scan icon rules
                 for (IconRule rule : widget.getIconRules()) {
@@ -193,6 +199,8 @@ public class WidgetsChangeListener implements EventSubscriber {
         for (Widget w : widgets) {
             if (w instanceof Frame frame) {
                 events.addAll(constructSitemapEvents(item, state, itemUIRegistry.getChildren(frame)));
+            } else if (w instanceof Buttongrid grid) {
+                events.addAll(constructSitemapEvents(item, state, itemUIRegistry.getChildren(grid)));
             }
 
             boolean itemBelongsToWidget = w.getItem() != null && w.getItem().equals(item.getName());
@@ -218,6 +226,16 @@ public class WidgetsChangeListener implements EventSubscriber {
         event.widgetId = itemUIRegistry.getWidgetId(widget);
         event.icon = itemUIRegistry.getCategory(widget);
         event.reloadIcon = widget.getStaticIcon() == null;
+        if (widget instanceof Button buttonWidget) {
+            // Get the icon from the widget only
+            if (widget.getIcon() == null && widget.getStaticIcon() == null && widget.getIconRules().isEmpty()) {
+                event.icon = null;
+                event.reloadIcon = false;
+            }
+            // Get the label from the widget only and fail back to the command if not set
+            event.label = widget.getLabel() != null ? widget.getLabel() : buttonWidget.getCmd();
+            event.labelSource = WidgetLabelSource.SITEMAP_WIDGET.toString();
+        }
         event.visibility = itemUIRegistry.getVisiblity(widget);
         event.descriptionChanged = false;
         // event.item contains the (potentially changed) data of the item belonging to
@@ -311,6 +329,8 @@ public class WidgetsChangeListener implements EventSubscriber {
         for (Widget w : widgets) {
             if (w instanceof Frame frame) {
                 events.addAll(constructSitemapEventsForUpdatedDescr(item, itemUIRegistry.getChildren(frame)));
+            } else if (w instanceof Buttongrid grid) {
+                events.addAll(constructSitemapEventsForUpdatedDescr(item, itemUIRegistry.getChildren(grid)));
             }
 
             boolean itemBelongsToWidget = w.getItem() != null && w.getItem().equals(item.getName());
