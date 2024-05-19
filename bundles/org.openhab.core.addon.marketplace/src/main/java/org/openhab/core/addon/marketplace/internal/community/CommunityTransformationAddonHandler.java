@@ -97,9 +97,10 @@ public class CommunityTransformationAddonHandler implements MarketplaceAddonHand
                 persistedTransformation = addTransformationFromYAML(addon.getUid(), yamlContent);
             } else {
                 throw new IllegalArgumentException(
-                        "Couldn't find the widget in the add-on entry. The starting code fence may not be marked as ```yaml");
+                        "Couldn't find the transformation in the add-on entry. The starting code fence may not be marked as ```yaml");
             }
             Transformation transformation = map(persistedTransformation);
+
             changeListeners.forEach(l -> l.added(this, transformation));
         } catch (IOException e) {
             logger.error("Transformation from marketplace cannot be downloaded: {}", e.getMessage());

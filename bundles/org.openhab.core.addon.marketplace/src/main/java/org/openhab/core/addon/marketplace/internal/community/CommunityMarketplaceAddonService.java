@@ -102,7 +102,7 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
     private static final Integer UIWIDGETS_CATEGORY = 75;
     private static final Integer BLOCKLIBRARIES_CATEGORY = 76;
     // TODO: confirm category
-    private static final Integer TRANSFORMATIONS_CATEGORY = 77;
+    private static final Integer TRANSFORMATIONS_CATEGORY = 80;
 
     private static final String PUBLISHED_TAG = "published";
 
