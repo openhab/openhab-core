@@ -93,15 +93,14 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
     private static final String SERVICE_ID = "marketplace";
     private static final String ADDON_ID_PREFIX = SERVICE_ID + ":";
 
-    private static final String JSON_CODE_MARKUP_START = "<pre><code class=\"lang-json\">";
-    private static final String YAML_CODE_MARKUP_START = "<pre><code class=\"lang-yaml\">";
+    private static final String JSON_CODE_MARKUP_START = "<code class=\"lang-json\">";
+    private static final String YAML_CODE_MARKUP_START = "<code class=\"lang-yaml\">";
     private static final String CODE_MARKUP_END = "</code></pre>";
 
     private static final Integer BUNDLES_CATEGORY = 73;
     private static final Integer RULETEMPLATES_CATEGORY = 74;
     private static final Integer UIWIDGETS_CATEGORY = 75;
     private static final Integer BLOCKLIBRARIES_CATEGORY = 76;
-    // TODO: confirm category
     private static final Integer TRANSFORMATIONS_CATEGORY = 80;
 
     private static final String PUBLISHED_TAG = "published";
