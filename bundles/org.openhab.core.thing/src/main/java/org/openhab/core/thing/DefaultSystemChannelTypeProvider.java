@@ -403,9 +403,8 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
      */
     public static final ChannelType SYSTEM_UV_INDEX = ChannelTypeBuilder
             .state(SYSTEM_CHANNEL_TYPE_UID_UV_INDEX, "UV Index", CoreItemFactory.NUMBER)
-            .withDescription("Current UV index")
-            .withStateDescriptionFragment(StateDescriptionFragmentBuilder.create().withReadOnly(true)
-                    .withPattern("%.0f/16").withMinimum(BigDecimal.ZERO).withMaximum(new BigDecimal(16)).build())
+            .withDescription("Current UV index").withStateDescriptionFragment(StateDescriptionFragmentBuilder.create()
+                    .withReadOnly(true).withPattern("%d").withMinimum(BigDecimal.ONE).build())
             .withTags(List.of("Measurement", "Ultraviolet")).build();
 
     private static final Collection<ChannelType> CHANNEL_TYPES = List.of(SYSTEM_CHANNEL_SIGNAL_STRENGTH,
