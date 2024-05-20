@@ -13,6 +13,7 @@
 package org.openhab.core.addon.marketplace.internal.community;
 
 import static org.openhab.core.addon.marketplace.MarketplaceConstants.*;
+import static org.openhab.core.addon.marketplace.internal.community.CommunityMarketplaceAddonService.JSON_CONTENT_PROPERTY;
 import static org.openhab.core.addon.marketplace.internal.community.CommunityMarketplaceAddonService.YAML_CONTENT_PROPERTY;
 
 import java.io.IOException;
@@ -45,6 +46,8 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.introspect.AnnotationIntrospectorPair;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.google.gson.Gson;
+import com.google.gson.JsonParseException;
 
 /**
  * A {@link MarketplaceAddonHandler} implementation, which handles community provided transformations
@@ -58,6 +61,7 @@ public class CommunityTransformationAddonHandler implements MarketplaceAddonHand
     private final Logger logger = LoggerFactory.getLogger(CommunityTransformationAddonHandler.class);
 
     private final ObjectMapper yamlMapper;
+    private final Gson gson = new Gson();
     private final Storage<PersistedTransformation> storage;
     private final List<ProviderChangeListener<Transformation>> changeListeners = new CopyOnWriteArrayList<>();
 
@@ -87,6 +91,8 @@ public class CommunityTransformationAddonHandler implements MarketplaceAddonHand
         try {
             String yamlDownloadUrl = (String) addon.getProperties().get(YAML_DOWNLOAD_URL_PROPERTY);
             String yamlContent = (String) addon.getProperties().get(YAML_CONTENT_PROPERTY);
+            String jsonDownloadUrl = (String) addon.getProperties().get(JSON_DOWNLOAD_URL_PROPERTY);
+            String jsonContent = (String) addon.getProperties().get(JSON_CONTENT_PROPERTY);
 
             PersistedTransformation persistedTransformation;
 
@@ -95,6 +101,11 @@ public class CommunityTransformationAddonHandler implements MarketplaceAddonHand
                         downloadTransformation(yamlDownloadUrl));
             } else if (yamlContent != null) {
                 persistedTransformation = addTransformationFromYAML(addon.getUid(), yamlContent);
+            } else if (jsonDownloadUrl != null) {
+                persistedTransformation = addTransformationFromJSON(addon.getUid(),
+                        downloadTransformation(jsonDownloadUrl));
+            } else if (jsonContent != null) {
+                persistedTransformation = addTransformationFromJSON(addon.getUid(), jsonContent);
             } else {
                 throw new IllegalArgumentException(
                         "Couldn't find the transformation in the add-on entry. The starting code fence may not be marked as ```yaml");
@@ -135,6 +146,17 @@ public class CommunityTransformationAddonHandler implements MarketplaceAddonHand
         } catch (IOException e) {
             logger.error("Unable to parse YAML: {}", e.getMessage());
             throw new IllegalArgumentException("Unable to parse YAML");
+        }
+    }
+
+    private PersistedTransformation addTransformationFromJSON(String id, String json) {
+        try {
+            PersistedTransformation transformation = gson.fromJson(json, PersistedTransformation.class);
+            storage.put(id, transformation);
+            return transformation;
+        } catch (JsonParseException e) {
+            logger.error("Unable to parse JSON: {}", e.getMessage());
+            throw new IllegalArgumentException("Unable to parse JSON");
         }
     }
 
