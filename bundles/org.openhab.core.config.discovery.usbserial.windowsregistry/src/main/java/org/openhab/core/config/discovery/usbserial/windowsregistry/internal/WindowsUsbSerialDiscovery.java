@@ -137,7 +137,7 @@ public class WindowsUsbSerialDiscovery implements UsbSerialDiscovery {
      */
     public Set<UsbSerialDeviceInformation> scanAllUsbDevicesInformation() {
         if (!Platform.isWindows()) {
-            return Set.of();
+            return new HashSet<>();
         }
 
         Set<UsbSerialDeviceInformation> result = new HashSet<>();
