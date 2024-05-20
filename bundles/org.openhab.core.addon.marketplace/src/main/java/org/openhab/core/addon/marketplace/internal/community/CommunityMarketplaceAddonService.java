@@ -74,8 +74,9 @@ import org.slf4j.LoggerFactory;
 @ConfigurableService(category = "system", label = CommunityMarketplaceAddonService.SERVICE_NAME, description_uri = CommunityMarketplaceAddonService.CONFIG_URI)
 @NonNullByDefault
 public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService {
-    public static final String JSON_CONTENT_PROPERTY = "json_content";
-    public static final String YAML_CONTENT_PROPERTY = "yaml_content";
+    public static final String CODE_CONTENT_SUFFIX = "_content";
+    public static final String JSON_CONTENT_PROPERTY = "json" + CODE_CONTENT_SUFFIX;
+    public static final String YAML_CONTENT_PROPERTY = "yaml" + CODE_CONTENT_SUFFIX;
 
     // constants for the configuration properties
     static final String SERVICE_NAME = "Community Marketplace";
@@ -93,9 +94,9 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
     private static final String SERVICE_ID = "marketplace";
     private static final String ADDON_ID_PREFIX = SERVICE_ID + ":";
 
-    private static final String JSON_CODE_MARKUP_START = "<code class=\"lang-json\">";
-    private static final String YAML_CODE_MARKUP_START = "<code class=\"lang-yaml\">";
-    private static final String CODE_MARKUP_END = "</code></pre>";
+    private static final Pattern CODE_MARKUP_PATTERN = Pattern.compile(
+            "<pre(?: data-code-wrap=\"[a-z]+\")?><code class=\"lang-(?<lang>[a-z]+)\">(?<content>.*?)</code></pre>",
+            Pattern.DOTALL);
 
     private static final Integer BUNDLES_CATEGORY = 73;
     private static final Integer RULETEMPLATES_CATEGORY = 74;
@@ -426,17 +427,10 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
             id = topic.id.toString(); // this is a fallback if we couldn't find a better id
         }
 
-        if (detailedDescription.contains(JSON_CODE_MARKUP_START)) {
-            String jsonContent = detailedDescription.substring(
-                    detailedDescription.indexOf(JSON_CODE_MARKUP_START) + JSON_CODE_MARKUP_START.length(),
-                    detailedDescription.indexOf(CODE_MARKUP_END, detailedDescription.indexOf(JSON_CODE_MARKUP_START)));
-            properties.put(JSON_CONTENT_PROPERTY, unescapeEntities(jsonContent));
-        }
-        if (detailedDescription.contains(YAML_CODE_MARKUP_START)) {
-            String yamlContent = detailedDescription.substring(
-                    detailedDescription.indexOf(YAML_CODE_MARKUP_START) + YAML_CODE_MARKUP_START.length(),
-                    detailedDescription.indexOf(CODE_MARKUP_END, detailedDescription.indexOf(YAML_CODE_MARKUP_START)));
-            properties.put(YAML_CONTENT_PROPERTY, unescapeEntities(yamlContent));
+        Matcher codeMarkup = CODE_MARKUP_PATTERN.matcher(detailedDescription);
+        if (codeMarkup.find()) {
+            properties.put(codeMarkup.group("lang") + CODE_CONTENT_SUFFIX,
+                    unescapeEntities(codeMarkup.group("content")));
         }
 
         // try to use a handler to determine if the add-on is installed
