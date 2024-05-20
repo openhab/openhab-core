@@ -35,6 +35,10 @@ public class AddonFinderConstants {
     public static final String CFG_FINDER_MDNS = "suggestionFinderMdns";
     public static final String SERVICE_NAME_MDNS = SERVICE_TYPE_MDNS + ADDON_SUGGESTION_FINDER;
 
+    public static final String SERVICE_TYPE_SDDP = "sddp";
+    public static final String CFG_FINDER_SDDP = "suggestionFinderSddp";
+    public static final String SERVICE_NAME_SDDP = SERVICE_TYPE_SDDP + ADDON_SUGGESTION_FINDER;
+
     public static final String SERVICE_TYPE_UPNP = "upnp";
     public static final String CFG_FINDER_UPNP = "suggestionFinderUpnp";
     public static final String SERVICE_NAME_UPNP = SERVICE_TYPE_UPNP + ADDON_SUGGESTION_FINDER;

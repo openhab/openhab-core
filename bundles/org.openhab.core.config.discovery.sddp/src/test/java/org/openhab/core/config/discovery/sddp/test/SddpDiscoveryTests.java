@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.config.discovery.sddp;
+package org.openhab.core.config.discovery.sddp.test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -21,6 +21,7 @@ import java.util.Optional;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
+import org.openhab.core.config.discovery.sddp.SddpDevice;
 import org.openhab.core.config.discovery.sddp.internal.SddpDiscoveryService;
 
 /**
@@ -74,55 +75,55 @@ public class SddpDiscoveryTests {
 
     @Test
     void testAliveNotification() throws Exception {
-        try (SddpDiscoveryService sddpService = new SddpDiscoveryService()) {
-            Optional<SddpInfo> sddpInfoOptional = sddpService.createSddpInfo(ALIVE_NOTIFICATION);
-            assertTrue(sddpInfoOptional.isPresent());
-            SddpInfo sddpInfo = sddpInfoOptional.orElse(null);
-            assertNotNull(sddpInfo);
-            assertEquals("192.168.4.237:1902", sddpInfo.from);
-            assertEquals("JVC_PROJECTOR-E0DADC152802", sddpInfo.host);
-            assertEquals("1800", sddpInfo.maxAge);
-            assertEquals("JVCKENWOOD:Projector", sddpInfo.type);
-            assertEquals("projector", sddpInfo.primaryProxy);
-            assertEquals("projector", sddpInfo.proxies);
-            assertEquals("JVCKENWOOD", sddpInfo.manufacturer);
-            assertEquals("DLA-RS3100_NZ8", sddpInfo.model);
-            assertEquals("projector_JVCKENWOOD_DLA-RS3100_NZ8.c4i", sddpInfo.driver);
+        try (SddpDiscoveryService service = new SddpDiscoveryService()) {
+            Optional<SddpDevice> deviceOptional = service.createSddpDeviceInfo(ALIVE_NOTIFICATION);
+            assertTrue(deviceOptional.isPresent());
+            SddpDevice device = deviceOptional.orElse(null);
+            assertNotNull(device);
+            assertEquals("192.168.4.237:1902", device.from);
+            assertEquals("JVC_PROJECTOR-E0DADC152802", device.host);
+            assertEquals("1800", device.maxAge);
+            assertEquals("JVCKENWOOD:Projector", device.type);
+            assertEquals("projector", device.primaryProxy);
+            assertEquals("projector", device.proxies);
+            assertEquals("JVCKENWOOD", device.manufacturer);
+            assertEquals("DLA-RS3100_NZ8", device.model);
+            assertEquals("projector_JVCKENWOOD_DLA-RS3100_NZ8.c4i", device.driver);
         }
     }
 
     @Test
     void testBadHeader() throws Exception {
-        try (SddpDiscoveryService sddpService = new SddpDiscoveryService()) {
-            Optional<SddpInfo> sddpInfoOptional = sddpService.createSddpInfo(BAD_HEADER);
-            assertFalse(sddpInfoOptional.isPresent());
+        try (SddpDiscoveryService service = new SddpDiscoveryService()) {
+            Optional<SddpDevice> deviceOptional = service.createSddpDeviceInfo(BAD_HEADER);
+            assertFalse(deviceOptional.isPresent());
         }
     }
 
     @Test
     void testBadPayload() throws Exception {
-        try (SddpDiscoveryService sddpService = new SddpDiscoveryService()) {
-            Optional<SddpInfo> sddpInfoOptional = sddpService.createSddpInfo(BAD_PAYLOAD);
-            assertFalse(sddpInfoOptional.isPresent());
+        try (SddpDiscoveryService service = new SddpDiscoveryService()) {
+            Optional<SddpDevice> deviceOptional = service.createSddpDeviceInfo(BAD_PAYLOAD);
+            assertFalse(deviceOptional.isPresent());
         }
     }
 
     @Test
     void testSearchResponse() throws Exception {
-        try (SddpDiscoveryService sddpService = new SddpDiscoveryService()) {
-            Optional<SddpInfo> sddpInfoOptional = sddpService.createSddpInfo(SEARCH_RESPONSE);
-            assertTrue(sddpInfoOptional.isPresent());
-            SddpInfo sddpInfo = sddpInfoOptional.orElse(null);
-            assertNotNull(sddpInfo);
-            assertEquals("192.168.4.237:1902", sddpInfo.from);
-            assertEquals("JVC_PROJECTOR-E0DADC152802", sddpInfo.host);
-            assertEquals("1800", sddpInfo.maxAge);
-            assertEquals("JVCKENWOOD:Projector", sddpInfo.type);
-            assertEquals("projector", sddpInfo.primaryProxy);
-            assertEquals("projector", sddpInfo.proxies);
-            assertEquals("JVCKENWOOD", sddpInfo.manufacturer);
-            assertEquals("DLA-RS3100_NZ8", sddpInfo.model);
-            assertEquals("projector_JVCKENWOOD_DLA-RS3100_NZ8.c4i", sddpInfo.driver);
+        try (SddpDiscoveryService service = new SddpDiscoveryService()) {
+            Optional<SddpDevice> deviceOptional = service.createSddpDeviceInfo(SEARCH_RESPONSE);
+            assertTrue(deviceOptional.isPresent());
+            SddpDevice device = deviceOptional.orElse(null);
+            assertNotNull(device);
+            assertEquals("192.168.4.237:1902", device.from);
+            assertEquals("JVC_PROJECTOR-E0DADC152802", device.host);
+            assertEquals("1800", device.maxAge);
+            assertEquals("JVCKENWOOD:Projector", device.type);
+            assertEquals("projector", device.primaryProxy);
+            assertEquals("projector", device.proxies);
+            assertEquals("JVCKENWOOD", device.manufacturer);
+            assertEquals("DLA-RS3100_NZ8", device.model);
+            assertEquals("projector_JVCKENWOOD_DLA-RS3100_NZ8.c4i", device.driver);
         }
     }
 }

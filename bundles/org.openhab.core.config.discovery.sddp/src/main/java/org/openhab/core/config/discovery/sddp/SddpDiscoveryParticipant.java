@@ -44,7 +44,7 @@ public interface SddpDiscoveryParticipant {
      *         supported by this participant
      */
     @Nullable
-    DiscoveryResult createResult(SddpInfo device);
+    DiscoveryResult createResult(SddpDevice device);
 
     /**
      * Returns the thing UID for a SDDP device
@@ -54,5 +54,5 @@ public interface SddpDiscoveryParticipant {
      *         by this participant
      */
     @Nullable
-    ThingUID getThingUID(SddpInfo device);
+    ThingUID getThingUID(SddpDevice device);
 }
