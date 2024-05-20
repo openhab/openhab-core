@@ -18,7 +18,7 @@
     <dependency>
       <groupId>org.eclipse.platform</groupId>
       <artifactId>org.eclipse.osgi</artifactId>
-      <version>3.13.100</version>
+      <version>3.18.0</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
