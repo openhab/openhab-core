@@ -179,7 +179,7 @@ Input:
     ('visibility=[' (Visibility+=VisibilityRule (',' Visibility+=VisibilityRule)*) ']')?);
 
 Buttongrid:
-    'Buttongrid' (('item=' item=ItemRef)? & ('label=' label=(ID | STRING))? &
+    {Buttongrid} 'Buttongrid' (('item=' item=ItemRef)? & ('label=' label=(ID | STRING))? &
     (('icon=' icon=Icon) |
         ('icon=[' (IconRules+=IconRule (',' IconRules+=IconRule)*) ']') |
         ('staticIcon=' staticIcon=Icon))? &
