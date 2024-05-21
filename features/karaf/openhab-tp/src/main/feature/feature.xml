@@ -34,7 +34,7 @@
 		<bundle dependency="true">mvn:tech.units/indriya/2.2</bundle>
 		<bundle dependency="true">mvn:tech.uom.lib/uom-lib-common/2.2</bundle>
 		<bundle dependency="true">mvn:org.apiguardian/apiguardian-api/1.1.2</bundle>
-		<bundle dependency="true">mvn:org.osgi/org.osgi.service.component.annotations/1.5.0</bundle>
+		<bundle dependency="true">mvn:org.osgi/org.osgi.service.component.annotations/1.5.1</bundle>
 
 		<!-- TODO: Unbundled libraries -->
 		<bundle dependency="true">mvn:com.thoughtworks.xstream/xstream/1.4.20</bundle>
@@ -96,7 +96,7 @@
 	</feature>
 
 	<feature name="openhab.tp-jax-rs-whiteboard" description="Aries JAX-RS Whiteboard" version="${project.version}">
-		<capability>openhab.tp;feature=jax-rs-whiteboard;version=2.0.0</capability>
+		<capability>openhab.tp;feature=jax-rs-whiteboard;version=2.0.2</capability>
 		<feature dependency="true">spifly</feature>
 		<feature dependency="true">http-whiteboard</feature>
 		<feature dependency="true">openhab.tp-cxf</feature>
@@ -105,7 +105,7 @@
 		<bundle dependency="true">mvn:org.osgi/org.osgi.util.promise/1.3.0</bundle>
 		<bundle dependency="true">mvn:org.osgi/org.osgi.service.jaxrs/1.0.1</bundle>
 		<bundle>mvn:org.apache.aries.component-dsl/org.apache.aries.component-dsl.component-dsl/1.2.2</bundle>
-		<bundle>mvn:org.apache.aries.jax.rs/org.apache.aries.jax.rs.whiteboard/2.0.0</bundle>
+		<bundle>mvn:org.apache.aries.jax.rs/org.apache.aries.jax.rs.whiteboard/2.0.2</bundle>
 	</feature>
 
 	<feature name="openhab.tp-jna" description="Java Native Access (JNA)" version="${project.version}">
@@ -237,7 +237,7 @@
 		<bundle dependency="true">mvn:org.eclipse.emf/org.eclipse.emf.ecore.xmi/2.16.0</bundle>
 		<bundle dependency="true">mvn:org.eclipse.xtext/org.eclipse.xtext.common.types/${xtext.version}</bundle>
 
-		<bundle dependency="true">mvn:javax.annotation/javax.annotation-api/1.2</bundle>
+		<bundle dependency="true">mvn:javax.annotation/javax.annotation-api/1.3.2</bundle>
 
 		<bundle dependency="true">mvn:org.eclipse.xtext/org.eclipse.xtext.xbase/${xtext.version}</bundle>
 		<bundle dependency="true">mvn:org.eclipse.xtext/org.eclipse.xtext.xbase.lib/${xtext.version}</bundle>
@@ -247,12 +247,12 @@
 		<bundle dependency="true">mvn:org.eclipse.xtend/org.eclipse.xtend.lib.macro/${xtext.version}</bundle>
 
 		<bundle dependency="true">mvn:com.google.guava/failureaccess/1.0.2</bundle>
-		<bundle dependency="true">mvn:com.google.guava/guava/33.0.0-jre</bundle>
+		<bundle dependency="true">mvn:com.google.guava/guava/33.1.0-jre</bundle>
 		<bundle dependency="true">mvn:com.google.inject/guice/7.0.0</bundle>
 		<bundle dependency="true">mvn:jakarta.inject/jakarta.inject-api/2.0.1</bundle>
 
 		<bundle dependency="true">mvn:org.eclipse.orbit.bundles/org.aopalliance/1.0.0.v201105210816</bundle>
-		<bundle dependency="true">mvn:io.github.classgraph/classgraph/4.8.165</bundle>
+		<bundle dependency="true">mvn:io.github.classgraph/classgraph/4.8.172</bundle>
 		<bundle dependency="true">mvn:org.eclipse.orbit.bundles/org.antlr.runtime/3.2.0.v201101311130</bundle>
 
 		<bundle dependency="true">mvn:org.eclipse.platform/org.eclipse.equinox.common/3.18.0</bundle>
