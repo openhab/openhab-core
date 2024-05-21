@@ -146,7 +146,7 @@ public class SddpDiscoveryService extends AbstractDiscoveryService implements Au
     /**
      * Create an {@link SddpDevice) object from UDP packet data.
      */
-    public Optional<SddpDevice> createSddpDeviceInfo(String data) {
+    public Optional<SddpDevice> createSddpDevice(String data) {
         if (!data.isBlank()) {
             List<String> headers = data.lines().toList();
             if (headers.size() > 1) {
@@ -244,7 +244,7 @@ public class SddpDiscoveryService extends AbstractDiscoveryService implements Au
      * foundDevices map, and notifying all listeners.
      */
     private synchronized void processDatagramPacket(DatagramPacket packet) {
-        Optional<SddpDevice> deviceOptional = createSddpDeviceInfo(
+        Optional<SddpDevice> deviceOptional = createSddpDevice(
                 new String(packet.getData(), 0, packet.getLength(), StandardCharsets.UTF_8));
         if (deviceOptional.isPresent()) {
             SddpDevice device = deviceOptional.get();

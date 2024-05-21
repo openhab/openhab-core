@@ -76,7 +76,7 @@ public class SddpDiscoveryTests {
     @Test
     void testAliveNotification() throws Exception {
         try (SddpDiscoveryService service = new SddpDiscoveryService()) {
-            Optional<SddpDevice> deviceOptional = service.createSddpDeviceInfo(ALIVE_NOTIFICATION);
+            Optional<SddpDevice> deviceOptional = service.createSddpDevice(ALIVE_NOTIFICATION);
             assertTrue(deviceOptional.isPresent());
             SddpDevice device = deviceOptional.orElse(null);
             assertNotNull(device);
@@ -95,7 +95,7 @@ public class SddpDiscoveryTests {
     @Test
     void testBadHeader() throws Exception {
         try (SddpDiscoveryService service = new SddpDiscoveryService()) {
-            Optional<SddpDevice> deviceOptional = service.createSddpDeviceInfo(BAD_HEADER);
+            Optional<SddpDevice> deviceOptional = service.createSddpDevice(BAD_HEADER);
             assertFalse(deviceOptional.isPresent());
         }
     }
@@ -103,7 +103,7 @@ public class SddpDiscoveryTests {
     @Test
     void testBadPayload() throws Exception {
         try (SddpDiscoveryService service = new SddpDiscoveryService()) {
-            Optional<SddpDevice> deviceOptional = service.createSddpDeviceInfo(BAD_PAYLOAD);
+            Optional<SddpDevice> deviceOptional = service.createSddpDevice(BAD_PAYLOAD);
             assertFalse(deviceOptional.isPresent());
         }
     }
@@ -111,7 +111,7 @@ public class SddpDiscoveryTests {
     @Test
     void testSearchResponse() throws Exception {
         try (SddpDiscoveryService service = new SddpDiscoveryService()) {
-            Optional<SddpDevice> deviceOptional = service.createSddpDeviceInfo(SEARCH_RESPONSE);
+            Optional<SddpDevice> deviceOptional = service.createSddpDevice(SEARCH_RESPONSE);
             assertTrue(deviceOptional.isPresent());
             SddpDevice device = deviceOptional.orElse(null);
             assertNotNull(device);
