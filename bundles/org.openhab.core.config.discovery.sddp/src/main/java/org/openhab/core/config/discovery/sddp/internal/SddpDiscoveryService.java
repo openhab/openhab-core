@@ -113,6 +113,7 @@ public class SddpDiscoveryService extends AbstractDiscoveryService implements Au
     protected void addSddpDeviceListener(SddpDeviceListener listener) {
         finders.add(listener);
         foundDeviceCache.stream().filter(d -> !d.isExpired()).forEach(d -> listener.deviceAdded(d));
+        startScan();
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
@@ -301,7 +302,10 @@ public class SddpDiscoveryService extends AbstractDiscoveryService implements Au
     @Override
     protected void startScan() {
         listenUnicast = true;
-        listenUnicastTask = scheduler.submit(() -> listenUnicast());
+        Future<?> task = listenUnicastTask;
+        if (task == null || task.isDone()) {
+            listenUnicastTask = scheduler.submit(() -> listenUnicast());
+        }
         try (DatagramSocket socket = new DatagramSocket()) {
             byte[] buf = String.format(SEARCH_REQUEST, addressUnicast.getHostAddress(), PORT_UNICAST)
                     .getBytes(StandardCharsets.UTF_8);
