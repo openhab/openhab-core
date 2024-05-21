@@ -32,46 +32,48 @@ import org.openhab.core.config.discovery.sddp.internal.SddpDiscoveryService;
 @NonNullByDefault
 public class SddpDiscoveryTests {
 
-    private static final String ALIVE_NOTIFICATION = "NOTIFY ALIVE SDDP/1.0\r\n" +
-    // @formatter:off
-            "From: \"192.168.4.237:1902\"\r\n" +
-            "Host: \"JVC_PROJECTOR-E0DADC152802\"\r\n" +
-            "Max-Age: 1800\r\n" +
-            "Type: \"JVCKENWOOD:Projector\"\r\n" +
-            "Primary-Proxy: \"projector\"\r\n" +
-            "Proxies: \"projector\"\r\n" +
-            "Manufacturer: \"JVCKENWOOD\"\r\n" +
-            "Model: \"DLA-RS3100_NZ8\"\r\n" +
-            "Driver: \"projector_JVCKENWOOD_DLA-RS3100_NZ8.c4i\"\r\n";
-    // @formatter:on
+    private static final String ALIVE_NOTIFICATION = """
+            NOTIFY ALIVE SDDP/1.0
+            From: "192.168.4.237:1902"
+            Host: "JVC_PROJECTOR-E0DADC152802"
+            Max-Age: 1800
+            Type: "JVCKENWOOD:Projector"
+            Primary-Proxy: "projector"
+            Proxies: "projector"
+            Manufacturer: "JVCKENWOOD"
+            Model: "DLA-RS3100_NZ8"
+            Driver: "projector_JVCKENWOOD_DLA-RS3100_NZ8.c4i"
+            """;
 
-    private static final String BAD_HEADER = "SDDP/1.0 404 NOT FOUND\r\n" +
-    // @formatter:off
-            "From: \"192.168.4.237:1902\"\r\n" +
-            "Host: \"JVC_PROJECTOR-E0DADC152802\"\r\n" +
-            "Max-Age: 1800\r\n" +
-            "Type: \"JVCKENWOOD:Projector\"\r\n" +
-            "Primary-Proxy: \"projector\"\r\n" +
-            "Proxies: \"projector\"\r\n" +
-            "Manufacturer: \"JVCKENWOOD\"\r\n" +
-            "Model: \"DLA-RS3100_NZ8\"\r\n" +
-            "Driver: \"projector_JVCKENWOOD_DLA-RS3100_NZ8.c4i\"\r\n";
-    // @formatter:on
+    private static final String BAD_HEADER = """
+            SDDP/1.0 404 NOT FOUND
+            From: "192.168.4.237:1902"
+            Host: "JVC_PROJECTOR-E0DADC152802"
+            Max-Age: 1800
+            Type: "JVCKENWOOD:Projector"
+            Primary-Proxy: "projector"
+            Proxies: "projector"
+            Manufacturer: "JVCKENWOOD"
+            Model: "DLA-RS3100_NZ8"
+            Driver: "projector_JVCKENWOOD_DLA-RS3100_NZ8.c4i"
+            """;
 
-    private static final String BAD_PAYLOAD = "SDDP/1.0 200 OK\\r\\n";
+    private static final String BAD_PAYLOAD = """
+            SDDP/1.0 200 OK
+            """;
 
-    private static final String SEARCH_RESPONSE = "SDDP/1.0 200 OK\r\n" +
-    // @formatter:off
-            "From: \"192.168.4.237:1902\"\r\n" +
-            "Host: \"JVC_PROJECTOR-E0DADC152802\"\r\n" +
-            "Max-Age: 1800\r\n" +
-            "Type: \"JVCKENWOOD:Projector\"\r\n" +
-            "Primary-Proxy: \"projector\"\r\n" +
-            "Proxies: \"projector\"\r\n" +
-            "Manufacturer: \"JVCKENWOOD\"\r\n" +
-            "Model: \"DLA-RS3100_NZ8\"\r\n" +
-            "Driver: \"projector_JVCKENWOOD_DLA-RS3100_NZ8.c4i\"\r\n";
-    // @formatter:on
+    private static final String SEARCH_RESPONSE = """
+            SDDP/1.0 200 OK
+            From: "192.168.4.237:1902"
+            Host: "JVC_PROJECTOR-E0DADC152802"
+            Max-Age: 1800
+            Type: "JVCKENWOOD:Projector"
+            Primary-Proxy: "projector"
+            Proxies: "projector"
+            Manufacturer: "JVCKENWOOD"
+            Model: "DLA-RS3100_NZ8"
+            Driver: "projector_JVCKENWOOD_DLA-RS3100_NZ8.c4i"
+            """;
 
     @Test
     void testAliveNotification() throws Exception {
