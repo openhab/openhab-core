@@ -19,7 +19,6 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.MulticastSocket;
 import java.net.NetworkInterface;
-import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
@@ -84,7 +83,7 @@ public class SddpDiscoveryService extends AbstractDiscoveryService implements Au
     private final InetAddress addressUnicast;
 
     private final Logger logger = LoggerFactory.getLogger(SddpDiscoveryService.class);
-    private final Set<SddpDevice> foundDevices = ConcurrentHashMap.newKeySet();
+    private final Set<SddpDevice> foundDeviceCache = ConcurrentHashMap.newKeySet();
     private final Set<SddpDiscoveryParticipant> participants = new CopyOnWriteArraySet<>();
     private final Set<SddpDeviceListener> finders = new CopyOnWriteArraySet<>();
 
@@ -99,7 +98,7 @@ public class SddpDiscoveryService extends AbstractDiscoveryService implements Au
     private @Nullable ScheduledFuture<?> removeExpiredDevicesTask = null;
 
     @Activate
-    public SddpDiscoveryService() throws SocketException, UnknownHostException {
+    public SddpDiscoveryService() throws UnknownHostException {
         super((int) LISTEN_DURATION.getSeconds());
         addressMulticast = InetAddress.getByName(ADDRESS_MULTICAST);
         addressUnicast = InetAddress.getLocalHost();
@@ -113,13 +112,13 @@ public class SddpDiscoveryService extends AbstractDiscoveryService implements Au
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     protected void addSddpDeviceListener(SddpDeviceListener listener) {
         finders.add(listener);
-        foundDevices.stream().filter(d -> !d.isExpired()).forEach(d -> listener.deviceAdded(d));
+        foundDeviceCache.stream().filter(d -> !d.isExpired()).forEach(d -> listener.deviceAdded(d));
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     protected void addSddpDiscoveryParticipant(SddpDiscoveryParticipant participant) {
         participants.add(participant);
-        foundDevices.stream().filter(d -> !d.isExpired()).forEach(d -> {
+        foundDeviceCache.stream().filter(d -> !d.isExpired()).forEach(d -> {
             DiscoveryResult result = participant.createResult(d);
             if (result != null) {
                 DiscoveryResult localizedResult = getLocalizedDiscoveryResult(result,
@@ -172,7 +171,7 @@ public class SddpDiscoveryService extends AbstractDiscoveryService implements Au
         closing = true;
         listenMulticast = false;
         listenUnicast = false;
-        foundDevices.clear();
+        foundDeviceCache.clear();
         participants.clear();
         finders.clear();
         cancelTask(listenMulticastTask);
@@ -199,7 +198,7 @@ public class SddpDiscoveryService extends AbstractDiscoveryService implements Au
         try (MulticastSocket socket = new MulticastSocket(PORT_MULTICAST)) {
             socket.joinGroup(new InetSocketAddress(addressMulticast, PORT_MULTICAST), NetworkInterface.getByIndex(0));
             socket.setSoTimeout((int) READ_TIMOUT.toMillis());
-            while (listenMulticast) {
+            while (listenMulticast && !Thread.currentThread().isInterrupted()) {
                 byte[] buf = new byte[2048];
                 DatagramPacket packet = new DatagramPacket(buf, buf.length);
                 try {
@@ -222,7 +221,7 @@ public class SddpDiscoveryService extends AbstractDiscoveryService implements Au
     private void listenUnicast() {
         try (DatagramSocket socket = new DatagramSocket(PORT_UNICAST)) {
             socket.setSoTimeout((int) READ_TIMOUT.toMillis());
-            while (listenUnicast) {
+            while (listenUnicast && !Thread.currentThread().isInterrupted()) {
                 byte[] buf = new byte[2048];
                 DatagramPacket packet = new DatagramPacket(buf, buf.length);
                 try {
@@ -248,8 +247,8 @@ public class SddpDiscoveryService extends AbstractDiscoveryService implements Au
                 new String(packet.getData(), 0, packet.getLength(), StandardCharsets.UTF_8));
         if (deviceOptional.isPresent()) {
             SddpDevice device = deviceOptional.get();
-            foundDevices.remove(device); // force update fields that are not set-unique
-            foundDevices.add(device);
+            foundDeviceCache.remove(device); // force update fields that are not set-unique
+            foundDeviceCache.add(device);
             participants.forEach(p -> {
                 DiscoveryResult result = p.createResult(device);
                 if (result != null) {
@@ -266,7 +265,7 @@ public class SddpDiscoveryService extends AbstractDiscoveryService implements Au
      * Remove expired devices and notify all listeners.
      */
     private void removeExpiredDevices() {
-        Set<SddpDevice> devices = new HashSet<>(foundDevices);
+        Set<SddpDevice> devices = new HashSet<>(foundDeviceCache);
         devices.stream().filter(d -> d.isExpired()).forEach(d -> {
             participants.forEach(p -> {
                 ThingUID thingUID = p.getThingUID(d);
@@ -276,8 +275,8 @@ public class SddpDiscoveryService extends AbstractDiscoveryService implements Au
             });
             finders.forEach(f -> f.deviceRemoved(d));
         });
-        foundDevices.clear();
-        foundDevices.addAll(devices.stream().filter(d -> !d.isExpired()).collect(Collectors.toSet()));
+        foundDeviceCache.clear();
+        foundDeviceCache.addAll(devices.stream().filter(d -> !d.isExpired()).collect(Collectors.toSet()));
     }
 
     protected void removeSddpDeviceListener(SddpDeviceListener listener) {
@@ -304,7 +303,6 @@ public class SddpDiscoveryService extends AbstractDiscoveryService implements Au
         listenUnicast = true;
         listenUnicastTask = scheduler.submit(() -> listenUnicast());
         try (DatagramSocket socket = new DatagramSocket()) {
-            socket.setBroadcast(true);
             byte[] buf = String.format(SEARCH_REQUEST, addressUnicast.getHostAddress(), PORT_UNICAST)
                     .getBytes(StandardCharsets.UTF_8);
             DatagramPacket packet = new DatagramPacket(buf, buf.length, addressMulticast, PORT_MULTICAST);

@@ -41,16 +41,16 @@ public class SddpAddonFinderTests {
 
     private static final Map<String, String> DEVICE_FIELDS = Map.of(
     // @formatter:off
-                "From", "\"192.168.4.237:1902\"",
-                "Host", "\"JVC_PROJECTOR-E0DADC152802\"",
-                "Max-Age", "1800",
-                "Type", "\"JVCKENWOOD:Projector\"",
-                "Primary-Proxy", "\"projector\"",
-                "Proxies", "\"projector\"",
-                "Manufacturer", "\"JVCKENWOOD\"",
-                "Model", "\"DLA-RS3100_NZ8\"",
-                "Driver", "\"projector_JVCKENWOOD_DLA-RS3100_NZ8.c4i\"");
-        // @formatter:on
+            "From", "\"192.168.4.237:1902\"",
+            "Host", "\"JVC_PROJECTOR-E0DADC152802\"",
+            "Max-Age", "1800",
+            "Type", "\"JVCKENWOOD:Projector\"",
+            "Primary-Proxy", "\"projector\"",
+            "Proxies", "\"projector\"",
+            "Manufacturer", "\"JVCKENWOOD\"",
+            "Model", "\"DLA-RS3100_NZ8\"",
+            "Driver", "\"projector_JVCKENWOOD_DLA-RS3100_NZ8.c4i\"");
+   // @formatter:on
 
     private SddpDevice createDevice() {
         return new SddpDevice(DEVICE_FIELDS);
