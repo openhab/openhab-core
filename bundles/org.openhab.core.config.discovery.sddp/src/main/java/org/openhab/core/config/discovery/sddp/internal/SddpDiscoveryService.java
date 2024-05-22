@@ -19,14 +19,16 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.MulticastSocket;
 import java.net.NetworkInterface;
+import java.net.ServerSocket;
 import java.net.SocketTimeoutException;
-import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -44,6 +46,7 @@ import org.openhab.core.config.discovery.DiscoveryService;
 import org.openhab.core.config.discovery.sddp.SddpDevice;
 import org.openhab.core.config.discovery.sddp.SddpDeviceListener;
 import org.openhab.core.config.discovery.sddp.SddpDiscoveryParticipant;
+import org.openhab.core.net.NetworkAddressService;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
 import org.osgi.framework.FrameworkUtil;
@@ -67,59 +70,74 @@ import org.slf4j.LoggerFactory;
 @Component(immediate = true, service = DiscoveryService.class, configurationPid = "discovery.sddp")
 public class SddpDiscoveryService extends AbstractDiscoveryService implements AutoCloseable {
 
-    private static final String SEARCH_REQUEST = "SEARCH * SDDP/1.0\r\nHost: \"%s:%d\"\r\n";
-    private static final String SEARCH_RESPONSE = "SDDP/1.0 200 OK";
-    private static final String ALIVE_NOTIFICATION = "NOTIFY ALIVE SDDP/1.0";
-
-    private static final String ADDRESS_MULTICAST = "239.255.255.250";
+    private static final String IP_ADDRESS_MULTICAST = "239.255.255.250";
     private static final int PORT_MULTICAST = 1902;
-    private static final int PORT_UNICAST = 24378;
 
+    private static final int READ_BUFFER_SIZE = 1024;
     private static final Duration READ_TIMOUT = Duration.ofMillis(1000);
-    private static final Duration LISTEN_DURATION = Duration.ofSeconds(5);
-    private static final Duration CACHE_CLEAN_INTERVAL = Duration.ofSeconds(60);
+    private static final Duration SEARCH_LISTEN_DURATION = Duration.ofSeconds(5);
+    private static final Duration CACHE_PURGE_INTERVAL = Duration.ofSeconds(60);
 
-    private final InetAddress addressMulticast;
-    private final InetAddress addressUnicast;
+    private static final String SEARCH_RESPONSE_HEADER = "SDDP/1.0 200 OK";
+    private static final String ALIVE_NOTIFICATION_HEADER = "NOTIFY ALIVE SDDP/1.0";
+
+    private static final String SEARCH_REQUEST_BODY_FORMAT = """
+            SEARCH * SDDP/1.0
+            Host: "%s:%d"
+            """;
 
     private final Logger logger = LoggerFactory.getLogger(SddpDiscoveryService.class);
-    private final Set<SddpDevice> foundDeviceCache = ConcurrentHashMap.newKeySet();
+    private final Set<SddpDevice> foundDevicesCache = ConcurrentHashMap.newKeySet();
     private final Set<SddpDiscoveryParticipant> participants = new CopyOnWriteArraySet<>();
     private final Set<SddpDeviceListener> finders = new CopyOnWriteArraySet<>();
 
-    private boolean listenMulticast = false;
-    private boolean listenUnicast = false;
+    private final int portLocalSearch;
+    private final String ipAddressLocal;
+    private final String searchRequestBody;
+    private final NetworkInterface networkInterface;
+    private final InetSocketAddress addressLocalSearch;
+    private final InetSocketAddress addressLocalMulticast;
+    private final InetSocketAddress addressRemoteMulticast;
 
     private boolean closing = false;
 
     private @Nullable Future<?> listenMulticastTask = null;
     private @Nullable Future<?> listenUnicastTask = null;
-    private @Nullable ScheduledFuture<?> cancelListenUnicastTask = null;
-    private @Nullable ScheduledFuture<?> removeExpiredDevicesTask = null;
+    private @Nullable ScheduledFuture<?> purgeExpiredDevicesTask = null;
 
     @Activate
-    public SddpDiscoveryService() throws UnknownHostException {
-        super((int) LISTEN_DURATION.getSeconds());
-        addressMulticast = InetAddress.getByName(ADDRESS_MULTICAST);
-        addressUnicast = InetAddress.getLocalHost();
+    public SddpDiscoveryService(final @Reference NetworkAddressService networkAddressService) throws IOException {
+        super((int) SEARCH_LISTEN_DURATION.getSeconds());
+
+        try (ServerSocket portFindTemporarySocket = new ServerSocket(0)) {
+            portLocalSearch = portFindTemporarySocket.getLocalPort();
+        }
+        ipAddressLocal = Objects.requireNonNull(networkAddressService.getPrimaryIpv4HostAddress());
+        searchRequestBody = String.format(SEARCH_REQUEST_BODY_FORMAT, ipAddressLocal, portLocalSearch);
+        networkInterface = NetworkInterface.getByInetAddress(InetAddress.getByName(ipAddressLocal));
+        addressLocalSearch = new InetSocketAddress(ipAddressLocal, portLocalSearch);
+        addressLocalMulticast = new InetSocketAddress(ipAddressLocal, PORT_MULTICAST);
+        addressRemoteMulticast = new InetSocketAddress(IP_ADDRESS_MULTICAST, PORT_MULTICAST);
+
         if (isBackgroundDiscoveryEnabled()) {
             startBackgroundDiscovery();
         }
-        removeExpiredDevicesTask = scheduler.scheduleWithFixedDelay(() -> removeExpiredDevices(),
-                CACHE_CLEAN_INTERVAL.getSeconds(), CACHE_CLEAN_INTERVAL.getSeconds(), TimeUnit.SECONDS);
+
+        purgeExpiredDevicesTask = scheduler.scheduleWithFixedDelay(() -> purgeExpiredDevices(),
+                CACHE_PURGE_INTERVAL.getSeconds(), CACHE_PURGE_INTERVAL.getSeconds(), TimeUnit.SECONDS);
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     protected void addSddpDeviceListener(SddpDeviceListener listener) {
         finders.add(listener);
-        foundDeviceCache.stream().filter(d -> !d.isExpired()).forEach(d -> listener.deviceAdded(d));
+        foundDevicesCache.stream().filter(d -> !d.isExpired()).forEach(d -> listener.deviceAdded(d));
         startScan();
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     protected void addSddpDiscoveryParticipant(SddpDiscoveryParticipant participant) {
         participants.add(participant);
-        foundDeviceCache.stream().filter(d -> !d.isExpired()).forEach(d -> {
+        foundDevicesCache.stream().filter(d -> !d.isExpired()).forEach(d -> {
             DiscoveryResult result = participant.createResult(d);
             if (result != null) {
                 DiscoveryResult localizedResult = getLocalizedDiscoveryResult(result,
@@ -151,7 +169,7 @@ public class SddpDiscoveryService extends AbstractDiscoveryService implements Au
             List<String> headers = data.lines().toList();
             if (headers.size() > 1) {
                 String method = headers.get(0).strip();
-                if (method.startsWith(ALIVE_NOTIFICATION) || method.startsWith(SEARCH_RESPONSE)) {
+                if (method.startsWith(ALIVE_NOTIFICATION_HEADER) || method.startsWith(SEARCH_RESPONSE_HEADER)) {
                     Map<String, String> headerMap = new HashMap<>();
                     for (int i = 1; i < headers.size(); i++) {
                         String[] header = headers.get(i).split(":", 2);
@@ -170,19 +188,15 @@ public class SddpDiscoveryService extends AbstractDiscoveryService implements Au
     @Override
     protected void deactivate() {
         closing = true;
-        listenMulticast = false;
-        listenUnicast = false;
-        foundDeviceCache.clear();
+        foundDevicesCache.clear();
         participants.clear();
         finders.clear();
-        cancelTask(listenMulticastTask);
         cancelTask(listenUnicastTask);
-        cancelTask(cancelListenUnicastTask);
-        cancelTask(removeExpiredDevicesTask);
-        listenMulticastTask = null;
+        cancelTask(listenMulticastTask);
+        cancelTask(purgeExpiredDevicesTask);
         listenUnicastTask = null;
-        cancelListenUnicastTask = null;
-        removeExpiredDevicesTask = null;
+        listenMulticastTask = null;
+        purgeExpiredDevicesTask = null;
     }
 
     @Override
@@ -193,63 +207,119 @@ public class SddpDiscoveryService extends AbstractDiscoveryService implements Au
     }
 
     /**
-     * Listen for incoming SDDP multicast messages.
+     * Continue to listen for incoming SDDP multicast messages until the thread is externally interrupted.
      */
     private void listenMulticast() {
-        try (MulticastSocket socket = new MulticastSocket(PORT_MULTICAST)) {
-            socket.joinGroup(new InetSocketAddress(addressMulticast, PORT_MULTICAST), NetworkInterface.getByIndex(0));
-            socket.setSoTimeout((int) READ_TIMOUT.toMillis());
-            while (listenMulticast && !Thread.currentThread().isInterrupted()) {
-                byte[] buf = new byte[2048];
-                DatagramPacket packet = new DatagramPacket(buf, buf.length);
+        MulticastSocket readSocket = null;
+        try {
+            byte[] buffer;
+            DatagramPacket packet;
+
+            readSocket = new MulticastSocket(addressLocalMulticast);
+            readSocket.joinGroup(addressRemoteMulticast, networkInterface);
+            readSocket.setSoTimeout((int) READ_TIMOUT.toMillis());
+
+            while (!Thread.currentThread().isInterrupted()) {
                 try {
-                    socket.receive(packet);
-                    processDatagramPacket(packet);
+                    buffer = new byte[READ_BUFFER_SIZE];
+                    packet = new DatagramPacket(buffer, buffer.length);
+                    readSocket.receive(packet);
+                    processPacket(packet);
                 } catch (SocketTimeoutException e) {
-                    // simply avoid blocking the thread
+                    // receive will time out every 1 second so the thread won't block
                 }
             }
         } catch (IOException e) {
             if (!closing) {
-                logger.warn("SDDP multicast listen error {}", e.getMessage());
+                logger.warn("listenMulticast() error {}", e.getMessage());
+            }
+        } finally {
+            if (readSocket != null) {
+                try {
+                    readSocket.leaveGroup(addressRemoteMulticast, networkInterface);
+                } catch (IOException e) {
+                    if (!closing) {
+                        logger.warn("listenMulticast() error {}", e.getMessage());
+                    }
+                }
+                readSocket.close();
             }
         }
     }
 
     /**
-     * Listen for incoming SDDP unicast messages.
+     * Send a single outgoing SEARCH 'ping' and then continue to listen for incoming SDDP unicast responses until the
+     * finish time elapses or the thread is externally interrupted.
      */
     private void listenUnicast() {
-        try (DatagramSocket socket = new DatagramSocket(PORT_UNICAST)) {
-            socket.setSoTimeout((int) READ_TIMOUT.toMillis());
-            while (listenUnicast && !Thread.currentThread().isInterrupted()) {
-                byte[] buf = new byte[2048];
-                DatagramPacket packet = new DatagramPacket(buf, buf.length);
+        DatagramSocket sendSocket = null;
+        DatagramSocket readSocket = null;
+        try {
+            byte[] buffer;
+            DatagramPacket packet;
+
+            sendSocket = new DatagramSocket(addressLocalSearch);
+            readSocket = new DatagramSocket(addressLocalSearch);
+
+            sendSocket.setReuseAddress(true);
+            readSocket.setReuseAddress(true);
+
+            sendSocket.setSoTimeout((int) READ_TIMOUT.toMillis());
+            readSocket.setSoTimeout((int) READ_TIMOUT.toMillis());
+
+            buffer = searchRequestBody.getBytes(StandardCharsets.UTF_8);
+            packet = new DatagramPacket(buffer, buffer.length, addressRemoteMulticast);
+
+            sendSocket.send(packet);
+
+            if (logger.isDebugEnabled()) {
+                logger.debug("Packet sent to ipAddr:{}:{}, content:\r\n{}", packet.getAddress().getHostAddress(),
+                        packet.getPort(), searchRequestBody);
+            }
+
+            final Instant finishTime = Instant.now().plus(SEARCH_LISTEN_DURATION);
+
+            while (Instant.now().isBefore(finishTime) && !Thread.currentThread().isInterrupted()) {
                 try {
-                    socket.receive(packet);
-                    processDatagramPacket(packet);
+                    buffer = new byte[READ_BUFFER_SIZE];
+                    packet = new DatagramPacket(buffer, buffer.length);
+                    readSocket.receive(packet);
+                    processPacket(packet);
                 } catch (SocketTimeoutException e) {
-                    // simply avoid blocking the thread
+                    // receive will time out every 1 second so the thread won't block
                 }
             }
         } catch (IOException e) {
             if (!closing) {
-                logger.warn("SDDP unicast listen error {}", e.getMessage());
+                logger.warn("listenUnicast() error {}", e.getMessage());
+            }
+        } finally {
+            if (sendSocket != null) {
+                sendSocket.close();
+            }
+            if (readSocket != null) {
+                readSocket.close();
             }
         }
     }
 
     /**
-     * Process the {@link DatagramPacket} by trying to create an {@link SddpDevice} and eventually adding it to the
-     * foundDevices map, and notifying all listeners.
+     * Process the {@link DatagramPacket} content by trying to create an {@link SddpDevice} and eventually adding it to
+     * the foundDevicesCache, and if so, then notifying all listeners.
+     * 
+     * @param packet a datagram packet that arrived over the network.
      */
-    private synchronized void processDatagramPacket(DatagramPacket packet) {
-        Optional<SddpDevice> deviceOptional = createSddpDevice(
-                new String(packet.getData(), 0, packet.getLength(), StandardCharsets.UTF_8));
+    private synchronized void processPacket(DatagramPacket packet) {
+        String content = new String(packet.getData(), StandardCharsets.UTF_8);
+        if (logger.isDebugEnabled()) {
+            logger.debug("Packet received from ipAddr:{}:{}, content:\r\n{}", packet.getAddress().getHostAddress(),
+                    packet.getPort(), content);
+        }
+        Optional<SddpDevice> deviceOptional = createSddpDevice(content);
         if (deviceOptional.isPresent()) {
             SddpDevice device = deviceOptional.get();
-            foundDeviceCache.remove(device); // force update fields that are not set-unique
-            foundDeviceCache.add(device);
+            foundDevicesCache.remove(device); // force update fields that are not set-unique
+            foundDevicesCache.add(device);
             participants.forEach(p -> {
                 DiscoveryResult result = p.createResult(device);
                 if (result != null) {
@@ -263,10 +333,10 @@ public class SddpDiscoveryService extends AbstractDiscoveryService implements Au
     }
 
     /**
-     * Remove expired devices and notify all listeners.
+     * Purge expired devices and notify all listeners.
      */
-    private void removeExpiredDevices() {
-        Set<SddpDevice> devices = new HashSet<>(foundDeviceCache);
+    private synchronized void purgeExpiredDevices() {
+        Set<SddpDevice> devices = new HashSet<>(foundDevicesCache);
         devices.stream().filter(d -> d.isExpired()).forEach(d -> {
             participants.forEach(p -> {
                 ThingUID thingUID = p.getThingUID(d);
@@ -276,8 +346,8 @@ public class SddpDiscoveryService extends AbstractDiscoveryService implements Au
             });
             finders.forEach(f -> f.deviceRemoved(d));
         });
-        foundDeviceCache.clear();
-        foundDeviceCache.addAll(devices.stream().filter(d -> !d.isExpired()).collect(Collectors.toSet()));
+        foundDevicesCache.clear();
+        foundDevicesCache.addAll(devices.stream().filter(d -> !d.isExpired()).collect(Collectors.toSet()));
     }
 
     protected void removeSddpDeviceListener(SddpDeviceListener listener) {
@@ -290,39 +360,25 @@ public class SddpDiscoveryService extends AbstractDiscoveryService implements Au
 
     @Override
     protected void startBackgroundDiscovery() {
-        if (!listenMulticast) {
-            listenMulticast = true;
-            listenMulticastTask = scheduler.submit(() -> listenMulticast());
+        Future<?> listenMulticastTask = this.listenMulticastTask;
+        if (listenMulticastTask == null || listenMulticastTask.isDone()) {
+            this.listenMulticastTask = scheduler.submit(() -> listenMulticast());
         }
     }
 
     /**
-     * Broadcast one single SDDP SEARCH request.
+     * Schedule to send one single SDDP SEARCH request, and listen for responses.
      */
     @Override
     protected void startScan() {
-        listenUnicast = true;
-        Future<?> task = listenUnicastTask;
-        if (task == null || task.isDone()) {
-            listenUnicastTask = scheduler.submit(() -> listenUnicast());
-        }
-        try (DatagramSocket socket = new DatagramSocket()) {
-            byte[] buf = String.format(SEARCH_REQUEST, addressUnicast.getHostAddress(), PORT_UNICAST)
-                    .getBytes(StandardCharsets.UTF_8);
-            DatagramPacket packet = new DatagramPacket(buf, buf.length, addressMulticast, PORT_MULTICAST);
-            socket.send(packet);
-            cancelListenUnicastTask = scheduler.schedule(() -> listenUnicast = false, LISTEN_DURATION.getSeconds(),
-                    TimeUnit.SECONDS);
-        } catch (IOException e) {
-            if (!closing) {
-                logger.warn("SDDP client error {}", e.getMessage());
-            }
+        Future<?> listenUnicastTask = this.listenUnicastTask;
+        if (listenUnicastTask == null || listenUnicastTask.isDone()) {
+            this.listenUnicastTask = scheduler.submit(() -> listenUnicast());
         }
     }
 
     @Override
     protected void stopBackgroundDiscovery() {
-        listenMulticast = false;
         cancelTask(listenMulticastTask);
         listenMulticastTask = null;
     }

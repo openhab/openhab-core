@@ -38,6 +38,11 @@ public class SddpDevice {
     public final String driver;
     public final Instant expireInstant;
 
+    /**
+     * Constructor
+     * 
+     * @param headers a map of parameter name / value pairs.
+     */
     public SddpDevice(Map<String, String> headers) {
         from = headers.getOrDefault("From", "").replaceAll("^\"|\"$", "");
         host = headers.getOrDefault("Host", "").replaceAll("^\"|\"$", "");
@@ -52,7 +57,7 @@ public class SddpDevice {
     }
 
     /**
-     * set uniqueness determined by From field only
+     * Set uniqueness is determined by the From field only
      */
     @Override
     public boolean equals(@Nullable Object obj) {
@@ -63,13 +68,16 @@ public class SddpDevice {
     }
 
     /**
-     * set uniqueness determined by From field only
+     * Set uniqueness is determined by the From field only
      */
     @Override
     public int hashCode() {
         return Objects.hash(from);
     }
 
+    /**
+     * Check if the creation time plus max-age instant is exceeded.
+     */
     public boolean isExpired() {
         return Instant.now().isAfter(expireInstant);
     }

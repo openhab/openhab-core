@@ -16,13 +16,19 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.openhab.core.config.discovery.sddp.SddpDevice;
 import org.openhab.core.config.discovery.sddp.internal.SddpDiscoveryService;
+import org.openhab.core.net.NetworkAddressService;
 
 /**
  * JUnit tests for parsing SDDP discovery results.
@@ -30,6 +36,7 @@ import org.openhab.core.config.discovery.sddp.internal.SddpDiscoveryService;
  * @author Andrew Fiddian-Green - Initial contribution
  */
 @NonNullByDefault
+@TestInstance(Lifecycle.PER_CLASS)
 public class SddpDiscoveryTests {
 
     private static final String ALIVE_NOTIFICATION = """
@@ -75,9 +82,17 @@ public class SddpDiscoveryTests {
             Driver: "projector_JVCKENWOOD_DLA-RS3100_NZ8.c4i"
             """;
 
+    private @NonNullByDefault({}) NetworkAddressService networkAddressService;
+
+    @BeforeAll
+    public void setup() {
+        networkAddressService = mock(NetworkAddressService.class);
+        when(networkAddressService.getPrimaryIpv4HostAddress()).thenReturn("192.168.1.1");
+    }
+
     @Test
     void testAliveNotification() throws Exception {
-        try (SddpDiscoveryService service = new SddpDiscoveryService()) {
+        try (SddpDiscoveryService service = new SddpDiscoveryService(networkAddressService)) {
             Optional<SddpDevice> deviceOptional = service.createSddpDevice(ALIVE_NOTIFICATION);
             assertTrue(deviceOptional.isPresent());
             SddpDevice device = deviceOptional.orElse(null);
@@ -96,7 +111,7 @@ public class SddpDiscoveryTests {
 
     @Test
     void testBadHeader() throws Exception {
-        try (SddpDiscoveryService service = new SddpDiscoveryService()) {
+        try (SddpDiscoveryService service = new SddpDiscoveryService(networkAddressService)) {
             Optional<SddpDevice> deviceOptional = service.createSddpDevice(BAD_HEADER);
             assertFalse(deviceOptional.isPresent());
         }
@@ -104,7 +119,7 @@ public class SddpDiscoveryTests {
 
     @Test
     void testBadPayload() throws Exception {
-        try (SddpDiscoveryService service = new SddpDiscoveryService()) {
+        try (SddpDiscoveryService service = new SddpDiscoveryService(networkAddressService)) {
             Optional<SddpDevice> deviceOptional = service.createSddpDevice(BAD_PAYLOAD);
             assertFalse(deviceOptional.isPresent());
         }
@@ -112,7 +127,7 @@ public class SddpDiscoveryTests {
 
     @Test
     void testSearchResponse() throws Exception {
-        try (SddpDiscoveryService service = new SddpDiscoveryService()) {
+        try (SddpDiscoveryService service = new SddpDiscoveryService(networkAddressService)) {
             Optional<SddpDevice> deviceOptional = service.createSddpDevice(SEARCH_RESPONSE);
             assertTrue(deviceOptional.isPresent());
             SddpDevice device = deviceOptional.orElse(null);
