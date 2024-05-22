@@ -190,7 +190,7 @@ Buttongrid:
     ('visibility=[' (Visibility+=VisibilityRule (',' Visibility+=VisibilityRule)*) ']')?);
 
 Button:
-    'Button' (('item=' item=ItemRef) & ('label=' label=(ID | STRING))? &
+    'Button' (('item=' item=ItemRef)? & ('label=' label=(ID | STRING))? &
     (('icon=' icon=Icon) |
         ('icon=[' (IconRules+=IconRule (',' IconRules+=IconRule)*) ']') |
         ('staticIcon=' staticIcon=Icon))? &
