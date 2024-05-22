@@ -65,7 +65,7 @@ public class ColorChannelHandler extends AbstractTransformingChannelHandler {
             state = newState;
             return hsbToString(newState);
         } else if (command instanceof PercentType percentCommand && state instanceof HSBType colorState) {
-            HSBType newState = new HSBType(colorState.getBrightness(), colorState.getSaturation(), percentCommand);
+            HSBType newState = new HSBType(colorState.getHue(), colorState.getSaturation(), percentCommand);
             state = newState;
             return hsbToString(newState);
         }
