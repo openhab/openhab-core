@@ -18,7 +18,7 @@
   <properties>
     <californium.version>2.7.4</californium.version>
     <cxf.version>3.6.2</cxf.version>
-    <jackson.version>2.16.0</jackson.version>
+    <jackson.version>2.17.1</jackson.version>
     <jetty.version>9.4.54.v20240208</jetty.version>
     <pax.logging.version>2.2.7</pax.logging.version>
     <pax.web.version>8.0.27</pax.web.version>
@@ -950,7 +950,7 @@
     <dependency>
       <groupId>de.focus-shift</groupId>
       <artifactId>jollyday-jackson</artifactId>
-      <version>0.27.0</version>
+      <version>0.28.1</version>
       <scope>compile</scope>
     </dependency>
 
