@@ -78,11 +78,11 @@ Fragment-Host: org.openhab.core.model.item
 	org.openhab.core.transform;version='[4.2.0,4.2.1)',\
 	org.openhab.core.voice;version='[4.2.0,4.2.1)',\
 	org.osgi.service.component.annotations;version='[1.5.1,1.5.2)',\
-	org.threeten.extra;version='[1.7.2,1.7.3)',\
-	com.fasterxml.jackson.core.jackson-annotations;version='[2.16.0,2.16.1)',\
-	com.fasterxml.jackson.core.jackson-core;version='[2.16.0,2.16.1)',\
-	com.fasterxml.jackson.core.jackson-databind;version='[2.16.0,2.16.1)',\
-	com.fasterxml.jackson.dataformat.jackson-dataformat-xml;version='[2.16.0,2.16.1)',\
+	org.threeten.extra;version='[1.8.0,1.8.1)',\
+	com.fasterxml.jackson.core.jackson-annotations;version='[2.17.1,2.17.2)',\
+	com.fasterxml.jackson.core.jackson-core;version='[2.17.1,2.17.2)',\
+	com.fasterxml.jackson.core.jackson-databind;version='[2.17.1,2.17.2)',\
+	com.fasterxml.jackson.dataformat.jackson-dataformat-xml;version='[2.17.1,2.17.2)',\
 	stax2-api;version='[4.2.1,4.2.2)',\
 	org.openhab.core.addon;version='[4.2.0,4.2.1)',\
 	com.google.guava;version='[33.1.0,33.1.1)',\
@@ -127,6 +127,6 @@ Fragment-Host: org.openhab.core.model.item
 	org.ops4j.pax.web.pax-web-runtime;version='[8.0.27,8.0.28)',\
 	org.ops4j.pax.web.pax-web-spi;version='[8.0.27,8.0.28)',\
 	org.ops4j.pax.web.pax-web-tomcat-common;version='[8.0.27,8.0.28)',\
-	de.focus_shift.jollyday-core;version='[0.27.0,0.27.1)',\
-	de.focus_shift.jollyday-jackson;version='[0.27.0,0.27.1)',\
+	de.focus_shift.jollyday-core;version='[0.28.1,0.28.2)',\
+	de.focus_shift.jollyday-jackson;version='[0.28.1,0.28.2)',\
 	org.openhab.core.model.thing.runtime;version='[4.2.0,4.2.1)'

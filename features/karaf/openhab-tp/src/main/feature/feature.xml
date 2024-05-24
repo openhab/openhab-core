@@ -80,17 +80,17 @@
 	</feature>
 
 	<feature name="openhab.tp-jackson" description="FasterXML Jackson bundles" version="${project.version}">
-		<capability>openhab.tp;feature=jackson;version=2.16.0</capability>
-		<bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-annotations/2.16.0</bundle>
-		<bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-core/2.16.0</bundle>
-		<bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-databind/2.16.0</bundle>
-		<bundle dependency="true">mvn:com.fasterxml.jackson.dataformat/jackson-dataformat-cbor/2.16.0</bundle>
-		<bundle dependency="true">mvn:com.fasterxml.jackson.dataformat/jackson-dataformat-xml/2.16.0</bundle>
-		<bundle dependency="true">mvn:com.fasterxml.jackson.dataformat/jackson-dataformat-yaml/2.16.0</bundle>
-		<bundle dependency="true">mvn:com.fasterxml.jackson.datatype/jackson-datatype-jsr310/2.16.0</bundle>
-		<bundle dependency="true">mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-base/2.16.0</bundle>
-		<bundle dependency="true">mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-json-provider/2.16.0</bundle>
-		<bundle dependency="true">mvn:com.fasterxml.jackson.module/jackson-module-jaxb-annotations/2.16.0</bundle>
+		<capability>openhab.tp;feature=jackson;version=2.17.1</capability>
+		<bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-annotations/2.17.1</bundle>
+		<bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-core/2.17.1</bundle>
+		<bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-databind/2.17.1</bundle>
+		<bundle dependency="true">mvn:com.fasterxml.jackson.dataformat/jackson-dataformat-cbor/2.17.1</bundle>
+		<bundle dependency="true">mvn:com.fasterxml.jackson.dataformat/jackson-dataformat-xml/2.17.1</bundle>
+		<bundle dependency="true">mvn:com.fasterxml.jackson.dataformat/jackson-dataformat-yaml/2.17.1</bundle>
+		<bundle dependency="true">mvn:com.fasterxml.jackson.datatype/jackson-datatype-jsr310/2.17.1</bundle>
+		<bundle dependency="true">mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-base/2.17.1</bundle>
+		<bundle dependency="true">mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-json-provider/2.17.1</bundle>
+		<bundle dependency="true">mvn:com.fasterxml.jackson.module/jackson-module-jaxb-annotations/2.17.1</bundle>
 		<bundle dependency="true">mvn:org.codehaus.woodstox/stax2-api/4.2.2</bundle>
 		<bundle dependency="true">mvn:org.yaml/snakeyaml/2.2</bundle>
 	</feature>
@@ -174,12 +174,12 @@
 	</feature>
 
 	<feature name="openhab.tp-jollyday" description="Jollyday library" version="${project.version}">
-		<capability>openhab.tp;feature=jollyday;version=0.27.0</capability>
+		<capability>openhab.tp;feature=jollyday;version=0.28.1</capability>
 		<feature dependency="true">openhab.tp-jackson</feature>
 		<feature dependency="true">spifly</feature>
-		<bundle>mvn:org.threeten/threeten-extra/1.7.2</bundle>
-		<bundle>mvn:de.focus-shift/jollyday-core/0.27.0</bundle>
-		<bundle>mvn:de.focus-shift/jollyday-jackson/0.27.0</bundle>
+		<bundle>mvn:org.threeten/threeten-extra/1.8.0</bundle>
+		<bundle>mvn:de.focus-shift/jollyday-core/0.28.1</bundle>
+		<bundle>mvn:de.focus-shift/jollyday-jackson/0.28.1</bundle>
 	</feature>
 
 	<feature name="openhab.tp-jmdns" description="An implementation of multi-cast DNS in Java." version="${project.version}">
