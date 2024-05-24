@@ -266,7 +266,7 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
      */
     public static final ChannelType SYSTEM_MUTE = ChannelTypeBuilder
             .state(SYSTEM_CHANNEL_TYPE_UID_MUTE, "Mute", CoreItemFactory.SWITCH)
-            .withDescription("Mute audio of the device").withCategory("SoundVolume")
+            .withDescription("Mute audio of the device").withCategory("SoundVolume_Mute")
             .withTags(List.of("Switch", "SoundVolume")).build();
 
     /**
