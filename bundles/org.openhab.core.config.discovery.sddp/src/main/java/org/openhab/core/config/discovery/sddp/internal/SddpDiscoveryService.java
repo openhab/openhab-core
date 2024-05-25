@@ -32,7 +32,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -93,8 +92,8 @@ public class SddpDiscoveryService extends AbstractDiscoveryService
 
     private final Logger logger = LoggerFactory.getLogger(SddpDiscoveryService.class);
     private final Set<SddpDevice> foundDevicesCache = ConcurrentHashMap.newKeySet();
-    private final Set<SddpDiscoveryParticipant> discoveryParticipants = new CopyOnWriteArraySet<>();
-    private final Set<SddpDeviceParticipant> deviceParticipants = new CopyOnWriteArraySet<>();
+    private final Set<SddpDiscoveryParticipant> discoveryParticipants = ConcurrentHashMap.newKeySet();
+    private final Set<SddpDeviceParticipant> deviceParticipants = ConcurrentHashMap.newKeySet();
 
     private final NetworkAddressService networkAddressService;
 
@@ -216,7 +215,6 @@ public class SddpDiscoveryService extends AbstractDiscoveryService
         try {
             networkInterface = NetworkInterface
                     .getByInetAddress(InetAddress.getByName(networkAddressService.getPrimaryIpv4HostAddress()));
-            networkInterface.getHardwareAddress();
 
             if (logger.isDebugEnabled()) {
                 logger.debug("listenMulticast() starting on interface '{}'", networkInterface.getDisplayName());
@@ -327,12 +325,12 @@ public class SddpDiscoveryService extends AbstractDiscoveryService
         logger.trace("onChanged() i.e. network interfaces");
         Future<?> multicastTask = listenMulticastTask;
         if (multicastTask != null && !multicastTask.isDone()) {
-            multicastTask.cancel(false);
+            multicastTask.cancel(true);
             listenMulticastTask = scheduler.submit(() -> listenMulticast());
         }
         Future<?> unicastTask = listenUnicastTask;
         if (unicastTask != null && !unicastTask.isDone()) {
-            unicastTask.cancel(false);
+            unicastTask.cancel(true);
             listenUnicastTask = scheduler.submit(() -> listenUnicast());
         }
     }
