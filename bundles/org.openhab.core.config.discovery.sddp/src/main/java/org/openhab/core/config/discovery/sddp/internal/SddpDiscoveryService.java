@@ -355,7 +355,7 @@ public class SddpDiscoveryService extends AbstractDiscoveryService
             SddpDevice device = deviceOptional.get();
             foundDevicesCache.remove(device); // force update fields that are not set-unique
             foundDevicesCache.add(device);
-            logger.debug("processPacket() foundDevicesCache={}, deviceParticipants={}, discoveryParticipants={}",
+            logger.debug("processPacket() foundDevices={}, deviceParticipants={}, discoveryParticipants={}",
                     foundDevicesCache.size(), deviceParticipants.size(), discoveryParticipants.size());
             discoveryParticipants.forEach(p -> {
                 DiscoveryResult result = p.createResult(device);
