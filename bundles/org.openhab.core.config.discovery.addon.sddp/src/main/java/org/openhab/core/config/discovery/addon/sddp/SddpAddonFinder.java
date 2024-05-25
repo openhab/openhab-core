@@ -57,7 +57,7 @@ import org.slf4j.LoggerFactory;
  * @author Andrew Fiddian-Green - Initial contribution
  */
 @NonNullByDefault
-@Component(immediate = true, service = AddonFinder.class, name = SddpAddonFinder.SERVICE_NAME)
+@Component(service = AddonFinder.class, name = SddpAddonFinder.SERVICE_NAME)
 public class SddpAddonFinder extends BaseAddonFinder implements SddpDeviceParticipant {
 
     public static final String SERVICE_TYPE = SERVICE_TYPE_SDDP;
