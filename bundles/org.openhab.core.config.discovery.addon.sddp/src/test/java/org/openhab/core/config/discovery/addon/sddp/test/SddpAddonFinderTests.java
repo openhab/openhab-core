@@ -16,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +31,7 @@ import org.openhab.core.addon.AddonMatchProperty;
 import org.openhab.core.config.discovery.addon.AddonFinderConstants;
 import org.openhab.core.config.discovery.addon.sddp.SddpAddonFinder;
 import org.openhab.core.config.discovery.sddp.SddpDevice;
+import org.openhab.core.config.discovery.sddp.internal.SddpDiscoveryService;
 
 /**
  * JUnit tests for the {@link SddpAddonFinder}.
@@ -69,7 +71,7 @@ public class SddpAddonFinderTests {
     public void testFinder() {
         SddpDevice device = createDevice();
         List<AddonInfo> addonInfos = createAddonInfos();
-        SddpAddonFinder finder = new SddpAddonFinder();
+        SddpAddonFinder finder = new SddpAddonFinder(mock(SddpDiscoveryService.class));
 
         finder.setAddonCandidates(addonInfos);
 

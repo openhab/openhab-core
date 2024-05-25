@@ -13,16 +13,15 @@
 package org.openhab.core.config.discovery.sddp;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.core.config.discovery.sddp.internal.SddpDiscoveryService;
 
 /**
- * A {@link SddpDeviceListener} is a call-back interface for informing about SDDP device added and removed events.
+ * The {@link SddpDiscoveryServiceInterface} is a 'tag' interface to identify an instance
+ * of the {@link SddpDiscoveryService} component.
  *
  * @author Andrew Fiddian-Green - Initial contribution
  */
 @NonNullByDefault
-public interface SddpDeviceListener {
+public interface SddpDiscoveryServiceInterface {
 
-    void deviceAdded(SddpDevice device);
-
-    void deviceRemoved(SddpDevice device);
 }

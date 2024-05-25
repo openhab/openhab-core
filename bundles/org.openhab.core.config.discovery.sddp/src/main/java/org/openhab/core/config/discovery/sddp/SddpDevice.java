@@ -36,6 +36,9 @@ public class SddpDevice {
     public final String manufacturer;
     public final String model;
     public final String driver;
+    public final String ipAddress;
+    public final String port;
+    public final String macAddress;
     public final Instant expireInstant;
 
     /**
@@ -53,6 +56,14 @@ public class SddpDevice {
         manufacturer = headers.getOrDefault("Manufacturer", "").replaceAll("^\"|\"$", "");
         model = headers.getOrDefault("Model", "").replaceAll("^\"|\"$", "");
         driver = headers.getOrDefault("Driver", "").replaceAll("^\"|\"$", "");
+
+        String[] fromParts = from.split(":");
+        ipAddress = fromParts[0];
+        port = fromParts.length > 1 ? fromParts[1] : "";
+
+        String[] hostParts = host.split("-|_");
+        macAddress = hostParts.length > 2 ? hostParts[2].replaceAll("(..)(?!$)", "$1:") : "";
+
         expireInstant = Instant.now().plusSeconds(maxAge.isBlank() ? 0 : Integer.parseInt(maxAge));
     }
 

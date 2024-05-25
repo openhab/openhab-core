@@ -17,12 +17,13 @@ import java.util.Set;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.discovery.DiscoveryResult;
+import org.openhab.core.config.discovery.sddp.internal.SddpDiscoveryService;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
 
 /**
- * A {@link SddpDiscoveryParticipant} that is registered as a service is picked up by the SddpDiscoveryService and can
- * thus contribute {@link DiscoveryResult}s from SDDP scans.
+ * A {@link SddpDiscoveryParticipant} that is registered as a service is picked up by the {@link SddpDiscoveryService}
+ * and can thus contribute {@link DiscoveryResult}s from SDDP scans.
  *
  * @author Andrew Fiddian-Green - Initial contribution
  */

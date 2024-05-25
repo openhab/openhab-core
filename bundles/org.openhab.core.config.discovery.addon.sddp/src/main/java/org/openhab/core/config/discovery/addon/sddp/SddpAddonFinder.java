@@ -16,6 +16,7 @@ import static org.openhab.core.config.discovery.addon.AddonFinderConstants.SERVI
 import static org.openhab.core.config.discovery.addon.AddonFinderConstants.SERVICE_TYPE_SDDP;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -28,66 +29,99 @@ import org.openhab.core.addon.AddonMatchProperty;
 import org.openhab.core.config.discovery.addon.AddonFinder;
 import org.openhab.core.config.discovery.addon.BaseAddonFinder;
 import org.openhab.core.config.discovery.sddp.SddpDevice;
-import org.openhab.core.config.discovery.sddp.SddpDeviceListener;
+import org.openhab.core.config.discovery.sddp.SddpDeviceParticipant;
+import org.openhab.core.config.discovery.sddp.SddpDiscoveryServiceInterface;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * This is a {@link SddpAddonFinder} for finding suggested Addons via SDDP.
- *
+ * <p>
+ * It checks the binding's addon.xml 'match-property' elements for the following SDDP properties:
+ * <li>driver</li>
+ * <li>host</li>
+ * <li>ipAddress</li>
+ * <li>macAddress</li>
+ * <li>manufacturer</li>
+ * <li>model</li>
+ * <li>port</li>
+ * <li>primaryProxy</li>
+ * <li>proxies</li>
+ * <li>type</li>
+ * <p>
+ * 
  * @author Andrew Fiddian-Green - Initial contribution
  */
 @NonNullByDefault
-@Component(service = AddonFinder.class, name = SddpAddonFinder.SERVICE_NAME)
-public class SddpAddonFinder extends BaseAddonFinder implements SddpDeviceListener {
+@Component(immediate = true, service = AddonFinder.class, name = SddpAddonFinder.SERVICE_NAME)
+public class SddpAddonFinder extends BaseAddonFinder implements SddpDeviceParticipant {
 
     public static final String SERVICE_TYPE = SERVICE_TYPE_SDDP;
     public static final String SERVICE_NAME = SERVICE_NAME_SDDP;
 
     private static final String DRIVER = "driver";
     private static final String HOST = "host";
+    private static final String IP_ADDRESS = "ipAddress";
+    private static final String MAC_ADDRESS = "macAddress";
     private static final String MANUFACTURER = "manufacturer";
     private static final String MODEL = "model";
+    private static final String PORT = "port";
     private static final String PRIMARY_PROXY = "primaryProxy";
     private static final String PROXIES = "proxies";
     private static final String TYPE = "type";
 
-    private static final Set<String> SUPPORTED_PROPERTIES = //
-            Set.of(DRIVER, HOST, MANUFACTURER, MODEL, PRIMARY_PROXY, PROXIES, TYPE);
+    private static final Set<String> SUPPORTED_PROPERTIES = Set.of(DRIVER, HOST, IP_ADDRESS, MAC_ADDRESS, MANUFACTURER,
+            MODEL, PORT, PRIMARY_PROXY, PROXIES, TYPE);
 
     private final Logger logger = LoggerFactory.getLogger(SddpAddonFinder.class);
-    private final Set<SddpDevice> devices = new HashSet<>();
+    private final Set<SddpDevice> foundDevices = new HashSet<>();
+
+    @SuppressWarnings("unused") // keep the {@link SddpDiscoveryService} loaded
+    private final SddpDiscoveryServiceInterface sddpDiscoveryService;
 
     @Activate
-    public SddpAddonFinder() {
+    public SddpAddonFinder(@Reference SddpDiscoveryServiceInterface sddpDiscoveryService) {
+        logger.trace("SddpAddonFinder()");
+        this.sddpDiscoveryService = sddpDiscoveryService;
     }
 
     @Deactivate
     public void deactivate() {
+        logger.trace("deactivate()");
         unsetAddonCandidates();
-        devices.clear();
+        foundDevices.clear();
     }
 
     @Override
     public void deviceAdded(SddpDevice device) {
-        devices.add(device);
+        logger.trace("deviceAdded()");
+        foundDevices.add(device);
     }
 
     @Override
     public void deviceRemoved(SddpDevice device) {
-        devices.remove(device);
+        logger.trace("deviceRemoved()");
+        foundDevices.remove(device);
+    }
+
+    @Override
+    public void setAddonCandidates(List<AddonInfo> candidates) {
+        super.setAddonCandidates(candidates);
     }
 
     @Override
     public String getServiceName() {
+        logger.trace("getServiceName() {}", SERVICE_NAME);
         return SERVICE_NAME;
     }
 
     @Override
     public Set<AddonInfo> getSuggestedAddons() {
+        logger.trace("getSuggestedAddons()");
         Set<AddonInfo> result = new HashSet<>();
         for (AddonInfo candidate : addonCandidates) {
             for (AddonDiscoveryMethod method : candidate.getDiscoveryMethods().stream()
@@ -105,11 +139,14 @@ public class SddpAddonFinder extends BaseAddonFinder implements SddpDeviceListen
                 }
 
                 logger.trace("Checking candidate: {}", candidate.getUID());
-                for (SddpDevice device : devices) {
+                for (SddpDevice device : foundDevices) {
                     logger.trace("Checking device: {}", device.host);
                     if (propertyMatches(matchProperties, HOST, device.host)
+                            && propertyMatches(matchProperties, IP_ADDRESS, device.ipAddress)
+                            && propertyMatches(matchProperties, MAC_ADDRESS, device.macAddress)
                             && propertyMatches(matchProperties, MANUFACTURER, device.manufacturer)
                             && propertyMatches(matchProperties, MODEL, device.model)
+                            && propertyMatches(matchProperties, PORT, device.port)
                             && propertyMatches(matchProperties, PRIMARY_PROXY, device.primaryProxy)
                             && propertyMatches(matchProperties, PROXIES, device.proxies)
                             && propertyMatches(matchProperties, TYPE, device.type)) {

@@ -106,6 +106,9 @@ public class SddpDiscoveryTests {
             assertEquals("JVCKENWOOD", device.manufacturer);
             assertEquals("DLA-RS3100_NZ8", device.model);
             assertEquals("projector_JVCKENWOOD_DLA-RS3100_NZ8.c4i", device.driver);
+            assertEquals("192.168.4.237", device.ipAddress);
+            assertEquals("E0:DA:DC:15:28:02", device.macAddress);
+            assertEquals("1902", device.port);
         }
     }
 
@@ -141,6 +144,9 @@ public class SddpDiscoveryTests {
             assertEquals("JVCKENWOOD", device.manufacturer);
             assertEquals("DLA-RS3100_NZ8", device.model);
             assertEquals("projector_JVCKENWOOD_DLA-RS3100_NZ8.c4i", device.driver);
+            assertEquals("192.168.4.237", device.ipAddress);
+            assertEquals("E0:DA:DC:15:28:02", device.macAddress);
+            assertEquals("1902", device.port);
         }
     }
 }
