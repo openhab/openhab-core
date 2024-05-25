@@ -46,7 +46,6 @@
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery.addon.process/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery.sddp/${project.version}</bundle>
-		<bundle dependency="true">mvn:org.openhab.core.bundles/org.openhab.core.config.discovery.addon.sddp/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.dispatch/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core/${project.version}</bundle>
 		<bundle>mvn:org.openhab.osgiify/io.methvin.directory-watcher/0.18.0</bundle>
@@ -90,6 +89,13 @@
 		<feature>openhab-core-base</feature>
 		<feature>openhab-core-config-discovery-addon</feature>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery.addon.ip/${project.version}</bundle>
+	</feature>
+
+	<feature name="openhab-core-config-discovery-addon-sddp" version="${project.version}">
+		<feature>openhab-core-base</feature>
+		<feature>openhab-core-config-discovery-addon</feature>
+		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery.sddp/${project.version}</bundle>
+		<bundle dependency="true">mvn:org.openhab.core.bundles/org.openhab.core.config.discovery.addon.sddp/${project.version}</bundle>
 	</feature>
 
 	<feature name="openhab-core-config-discovery-addon-upnp" version="${project.version}">

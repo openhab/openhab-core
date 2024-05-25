@@ -115,7 +115,7 @@ public class SddpAddonFinder extends BaseAddonFinder implements SddpDevicePartic
 
     @Override
     public String getServiceName() {
-        logger.trace("getServiceName() {}", SERVICE_NAME);
+        logger.trace("getServiceName() is '{}'", SERVICE_NAME);
         return SERVICE_NAME;
     }
 
