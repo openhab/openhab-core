@@ -12,9 +12,6 @@
  */
 package org.openhab.core.config.discovery.addon.sddp;
 
-import static org.openhab.core.config.discovery.addon.AddonFinderConstants.SERVICE_NAME_SDDP;
-import static org.openhab.core.config.discovery.addon.AddonFinderConstants.SERVICE_TYPE_SDDP;
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -27,10 +24,11 @@ import org.openhab.core.addon.AddonDiscoveryMethod;
 import org.openhab.core.addon.AddonInfo;
 import org.openhab.core.addon.AddonMatchProperty;
 import org.openhab.core.config.discovery.addon.AddonFinder;
+import org.openhab.core.config.discovery.addon.AddonFinderConstants;
 import org.openhab.core.config.discovery.addon.BaseAddonFinder;
 import org.openhab.core.config.discovery.sddp.SddpDevice;
 import org.openhab.core.config.discovery.sddp.SddpDeviceParticipant;
-import org.openhab.core.config.discovery.sddp.SddpDiscoveryServiceInterface;
+import org.openhab.core.config.discovery.sddp.SddpDiscoveryService;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -60,8 +58,8 @@ import org.slf4j.LoggerFactory;
 @Component(service = AddonFinder.class, name = SddpAddonFinder.SERVICE_NAME)
 public class SddpAddonFinder extends BaseAddonFinder implements SddpDeviceParticipant {
 
-    public static final String SERVICE_TYPE = SERVICE_TYPE_SDDP;
-    public static final String SERVICE_NAME = SERVICE_NAME_SDDP;
+    public static final String SERVICE_TYPE = AddonFinderConstants.SERVICE_TYPE_SDDP;
+    public static final String SERVICE_NAME = AddonFinderConstants.SERVICE_NAME_SDDP;
 
     private static final String DRIVER = "driver";
     private static final String HOST = "host";
@@ -81,10 +79,10 @@ public class SddpAddonFinder extends BaseAddonFinder implements SddpDevicePartic
     private final Set<SddpDevice> foundDevices = new HashSet<>();
 
     @SuppressWarnings("unused") // keep the {@link SddpDiscoveryService} loaded
-    private final SddpDiscoveryServiceInterface sddpDiscoveryService;
+    private final SddpDiscoveryService sddpDiscoveryService;
 
     @Activate
-    public SddpAddonFinder(@Reference SddpDiscoveryServiceInterface sddpDiscoveryService) {
+    public SddpAddonFinder(@Reference SddpDiscoveryService sddpDiscoveryService) {
         logger.trace("SddpAddonFinder()");
         this.sddpDiscoveryService = sddpDiscoveryService;
     }
@@ -106,11 +104,6 @@ public class SddpAddonFinder extends BaseAddonFinder implements SddpDevicePartic
     public void deviceRemoved(SddpDevice device) {
         logger.trace("deviceRemoved()");
         foundDevices.remove(device);
-    }
-
-    @Override
-    public void setAddonCandidates(List<AddonInfo> candidates) {
-        super.setAddonCandidates(candidates);
     }
 
     @Override
@@ -158,5 +151,10 @@ public class SddpAddonFinder extends BaseAddonFinder implements SddpDevicePartic
             }
         }
         return result;
+    }
+
+    @Override
+    public void setAddonCandidates(List<AddonInfo> candidates) {
+        super.setAddonCandidates(candidates);
     }
 }

@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.config.discovery.sddp.internal;
+package org.openhab.core.config.discovery.sddp;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -42,10 +42,8 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.discovery.AbstractDiscoveryService;
 import org.openhab.core.config.discovery.DiscoveryResult;
 import org.openhab.core.config.discovery.DiscoveryService;
-import org.openhab.core.config.discovery.sddp.SddpDevice;
-import org.openhab.core.config.discovery.sddp.SddpDeviceParticipant;
-import org.openhab.core.config.discovery.sddp.SddpDiscoveryParticipant;
-import org.openhab.core.config.discovery.sddp.SddpDiscoveryServiceInterface;
+import org.openhab.core.i18n.LocaleProvider;
+import org.openhab.core.i18n.TranslationProvider;
 import org.openhab.core.net.CidrAddress;
 import org.openhab.core.net.NetworkAddressChangeListener;
 import org.openhab.core.net.NetworkAddressService;
@@ -55,6 +53,7 @@ import org.osgi.framework.FrameworkUtil;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Modified;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
@@ -71,7 +70,7 @@ import org.slf4j.LoggerFactory;
 @NonNullByDefault
 @Component(immediate = true, service = DiscoveryService.class, configurationPid = "discovery.sddp")
 public class SddpDiscoveryService extends AbstractDiscoveryService
-        implements AutoCloseable, NetworkAddressChangeListener, SddpDiscoveryServiceInterface {
+        implements AutoCloseable, NetworkAddressChangeListener {
 
     private static final int SDDP_PORT = 1902;
     private static final String SDDP_IP_ADDRESS = "239.255.255.250";
@@ -99,19 +98,22 @@ public class SddpDiscoveryService extends AbstractDiscoveryService
 
     private boolean closing = false;
 
-    private @Nullable Future<?> listenMulticastTask = null;
-    private @Nullable Future<?> listenUnicastTask = null;
+    private @Nullable Future<?> listenBackgroundMulticastTask = null;
+    private @Nullable Future<?> listenActiveScanUnicastTask = null;
     private @Nullable ScheduledFuture<?> purgeExpiredDevicesTask = null;
 
     @Activate
-    public SddpDiscoveryService(final @Reference NetworkAddressService networkAddressService) throws IOException {
+    public SddpDiscoveryService(final @Nullable Map<String, Object> configProperties, //
+            final @Reference NetworkAddressService networkAddressService, //
+            final @Reference TranslationProvider i18nProvider, //
+            final @Reference LocaleProvider localeProvider) {
         super((int) SEARCH_LISTEN_DURATION.getSeconds());
 
         this.networkAddressService = networkAddressService;
+        this.i18nProvider = i18nProvider;
+        this.localeProvider = localeProvider;
 
-        if (isBackgroundDiscoveryEnabled()) {
-            startBackgroundDiscovery();
-        }
+        super.activate(configProperties); // note: this starts listenBackgroundMulticastTask
 
         purgeExpiredDevicesTask = scheduler.scheduleWithFixedDelay(() -> purgeExpiredDevices(),
                 CACHE_PURGE_INTERVAL.getSeconds(), CACHE_PURGE_INTERVAL.getSeconds(), TimeUnit.SECONDS);
@@ -158,7 +160,7 @@ public class SddpDiscoveryService extends AbstractDiscoveryService
     }
 
     /**
-     * Create an {@link SddpDevice) object from UDP packet data.
+     * Optionally create an {@link SddpDevice) object from UDP packet data if the data is good.
      */
     public Optional<SddpDevice> createSddpDevice(String data) {
         logger.trace("createSddpDevice()");
@@ -186,14 +188,17 @@ public class SddpDiscoveryService extends AbstractDiscoveryService
     protected void deactivate() {
         logger.trace("deactivate()");
         closing = true;
+
         foundDevicesCache.clear();
         discoveryParticipants.clear();
         deviceParticipants.clear();
-        cancelTask(listenUnicastTask);
-        cancelTask(listenMulticastTask);
+
+        super.deactivate(); // note: this cancels and nulls listenBackgroundMulticastTask
+
+        cancelTask(listenActiveScanUnicastTask);
+        listenActiveScanUnicastTask = null;
+
         cancelTask(purgeExpiredDevicesTask);
-        listenUnicastTask = null;
-        listenMulticastTask = null;
         purgeExpiredDevicesTask = null;
     }
 
@@ -208,7 +213,7 @@ public class SddpDiscoveryService extends AbstractDiscoveryService
     /**
      * Continue to listen for incoming SDDP multicast messages until the thread is externally interrupted.
      */
-    private void listenMulticast() {
+    private void listenBackGroundMulticast() {
         MulticastSocket socket = null;
         NetworkInterface networkInterface = null;
 
@@ -262,7 +267,7 @@ public class SddpDiscoveryService extends AbstractDiscoveryService
      * Send a single outgoing SEARCH 'ping' and then continue to listen for incoming SDDP unicast responses until the
      * loop time elapses or the thread is externally interrupted.
      */
-    private void listenUnicast() {
+    private void listenActiveScanUnicast() {
         // get a free port number
         int port;
         try (ServerSocket portFinder = new ServerSocket(0)) {
@@ -317,21 +322,27 @@ public class SddpDiscoveryService extends AbstractDiscoveryService
         }
     }
 
+    @Modified
+    @Override
+    protected void modified(@Nullable Map<String, Object> configProperties) {
+        super.modified(configProperties);
+    }
+
     /**
      * If the network interfaces change then cancel and recreate all pending tasks.
      */
     @Override
     public synchronized void onChanged(List<CidrAddress> added, List<CidrAddress> removed) {
         logger.trace("onChanged() i.e. network interfaces");
-        Future<?> multicastTask = listenMulticastTask;
+        Future<?> multicastTask = listenBackgroundMulticastTask;
         if (multicastTask != null && !multicastTask.isDone()) {
             multicastTask.cancel(true);
-            listenMulticastTask = scheduler.submit(() -> listenMulticast());
+            listenBackgroundMulticastTask = scheduler.submit(() -> listenBackGroundMulticast());
         }
-        Future<?> unicastTask = listenUnicastTask;
+        Future<?> unicastTask = listenActiveScanUnicastTask;
         if (unicastTask != null && !unicastTask.isDone()) {
             unicastTask.cancel(true);
-            listenUnicastTask = scheduler.submit(() -> listenUnicast());
+            listenActiveScanUnicastTask = scheduler.submit(() -> listenActiveScanUnicast());
         }
     }
 
@@ -399,9 +410,9 @@ public class SddpDiscoveryService extends AbstractDiscoveryService
     @Override
     protected void startBackgroundDiscovery() {
         logger.trace("startBackgroundDiscovery()");
-        Future<?> task = listenMulticastTask;
+        Future<?> task = listenBackgroundMulticastTask;
         if (task == null || task.isDone()) {
-            listenMulticastTask = scheduler.submit(() -> listenMulticast());
+            listenBackgroundMulticastTask = scheduler.submit(() -> listenBackGroundMulticast());
         }
     }
 
@@ -411,16 +422,16 @@ public class SddpDiscoveryService extends AbstractDiscoveryService
     @Override
     protected void startScan() {
         logger.trace("startScan()");
-        Future<?> task = listenUnicastTask;
+        Future<?> task = listenActiveScanUnicastTask;
         if (task == null || task.isDone()) {
-            listenUnicastTask = scheduler.submit(() -> listenUnicast());
+            listenActiveScanUnicastTask = scheduler.submit(() -> listenActiveScanUnicast());
         }
     }
 
     @Override
     protected void stopBackgroundDiscovery() {
         logger.trace("stopBackgroundDiscovery()");
-        cancelTask(listenMulticastTask);
-        listenMulticastTask = null;
+        cancelTask(listenBackgroundMulticastTask);
+        listenBackgroundMulticastTask = null;
     }
 }

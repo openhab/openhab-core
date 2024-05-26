@@ -45,7 +45,6 @@
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.core/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery.addon.process/${project.version}</bundle>
-		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery.sddp/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.dispatch/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core/${project.version}</bundle>
 		<bundle>mvn:org.openhab.osgiify/io.methvin.directory-watcher/0.18.0</bundle>
@@ -69,6 +68,7 @@
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.rest.core/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.rest.sse/${project.version}</bundle>
 		<feature>openhab-core-config-discovery-addon</feature>
+		<feature>openhab-core-config-discovery-sddp</feature>
 	</feature>
 
 	<feature name="openhab-core-config-discovery-addon" version="${project.version}">
@@ -91,11 +91,16 @@
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery.addon.ip/${project.version}</bundle>
 	</feature>
 
+	<feature name="openhab-core-config-discovery-sddp" version="${project.version}">
+		<feature>openhab-core-base</feature>
+		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery.sddp/${project.version}</bundle>
+	</feature>
+
 	<feature name="openhab-core-config-discovery-addon-sddp" version="${project.version}">
 		<feature>openhab-core-base</feature>
 		<feature>openhab-core-config-discovery-addon</feature>
+		<feature dependency="true">openhab-core-config-discovery-sddp</feature>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery.sddp/${project.version}</bundle>
-		<bundle dependency="true">mvn:org.openhab.core.bundles/org.openhab.core.config.discovery.addon.sddp/${project.version}</bundle>
 	</feature>
 
 	<feature name="openhab-core-config-discovery-addon-upnp" version="${project.version}">

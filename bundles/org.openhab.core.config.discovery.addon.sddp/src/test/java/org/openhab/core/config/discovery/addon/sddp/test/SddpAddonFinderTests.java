@@ -28,10 +28,9 @@ import org.junit.jupiter.api.Test;
 import org.openhab.core.addon.AddonDiscoveryMethod;
 import org.openhab.core.addon.AddonInfo;
 import org.openhab.core.addon.AddonMatchProperty;
-import org.openhab.core.config.discovery.addon.AddonFinderConstants;
 import org.openhab.core.config.discovery.addon.sddp.SddpAddonFinder;
 import org.openhab.core.config.discovery.sddp.SddpDevice;
-import org.openhab.core.config.discovery.sddp.internal.SddpDiscoveryService;
+import org.openhab.core.config.discovery.sddp.SddpDiscoveryService;
 
 /**
  * JUnit tests for the {@link SddpAddonFinder}.
@@ -59,7 +58,7 @@ public class SddpAddonFinderTests {
     }
 
     private List<AddonInfo> createAddonInfos() {
-        AddonDiscoveryMethod method = new AddonDiscoveryMethod().setServiceType(AddonFinderConstants.SERVICE_TYPE_SDDP)
+        AddonDiscoveryMethod method = new AddonDiscoveryMethod().setServiceType(SddpAddonFinder.SERVICE_TYPE)
                 .setMatchProperties(List.of(new AddonMatchProperty("host", "JVC.*")));
         List<AddonInfo> addonInfos = new ArrayList<>();
         addonInfos.add(AddonInfo.builder("jvc", "binding").withName("JVC").withDescription("JVC Kenwood")

@@ -13,7 +13,6 @@
 package org.openhab.core.config.discovery.sddp;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.core.config.discovery.sddp.internal.SddpDiscoveryService;
 
 /**
  * A {@link SddpDeviceParticipant} that is registered as a service is picked up by the {@link SddpDiscoveryService} and

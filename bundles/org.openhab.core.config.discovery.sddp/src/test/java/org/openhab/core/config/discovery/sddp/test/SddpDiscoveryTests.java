@@ -27,7 +27,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.openhab.core.config.discovery.sddp.SddpDevice;
-import org.openhab.core.config.discovery.sddp.internal.SddpDiscoveryService;
+import org.openhab.core.config.discovery.sddp.SddpDiscoveryService;
+import org.openhab.core.i18n.LocaleProvider;
+import org.openhab.core.i18n.TranslationProvider;
 import org.openhab.core.net.NetworkAddressService;
 
 /**
@@ -92,7 +94,8 @@ public class SddpDiscoveryTests {
 
     @Test
     void testAliveNotification() throws Exception {
-        try (SddpDiscoveryService service = new SddpDiscoveryService(networkAddressService)) {
+        try (SddpDiscoveryService service = new SddpDiscoveryService(null, networkAddressService,
+                mock(TranslationProvider.class), mock(LocaleProvider.class))) {
             Optional<SddpDevice> deviceOptional = service.createSddpDevice(ALIVE_NOTIFICATION);
             assertTrue(deviceOptional.isPresent());
             SddpDevice device = deviceOptional.orElse(null);
@@ -114,7 +117,8 @@ public class SddpDiscoveryTests {
 
     @Test
     void testBadHeader() throws Exception {
-        try (SddpDiscoveryService service = new SddpDiscoveryService(networkAddressService)) {
+        try (SddpDiscoveryService service = new SddpDiscoveryService(null, networkAddressService,
+                mock(TranslationProvider.class), mock(LocaleProvider.class))) {
             Optional<SddpDevice> deviceOptional = service.createSddpDevice(BAD_HEADER);
             assertFalse(deviceOptional.isPresent());
         }
@@ -122,7 +126,8 @@ public class SddpDiscoveryTests {
 
     @Test
     void testBadPayload() throws Exception {
-        try (SddpDiscoveryService service = new SddpDiscoveryService(networkAddressService)) {
+        try (SddpDiscoveryService service = new SddpDiscoveryService(null, networkAddressService,
+                mock(TranslationProvider.class), mock(LocaleProvider.class))) {
             Optional<SddpDevice> deviceOptional = service.createSddpDevice(BAD_PAYLOAD);
             assertFalse(deviceOptional.isPresent());
         }
@@ -130,7 +135,8 @@ public class SddpDiscoveryTests {
 
     @Test
     void testSearchResponse() throws Exception {
-        try (SddpDiscoveryService service = new SddpDiscoveryService(networkAddressService)) {
+        try (SddpDiscoveryService service = new SddpDiscoveryService(null, networkAddressService,
+                mock(TranslationProvider.class), mock(LocaleProvider.class))) {
             Optional<SddpDevice> deviceOptional = service.createSddpDevice(SEARCH_RESPONSE);
             assertTrue(deviceOptional.isPresent());
             SddpDevice device = deviceOptional.orElse(null);
