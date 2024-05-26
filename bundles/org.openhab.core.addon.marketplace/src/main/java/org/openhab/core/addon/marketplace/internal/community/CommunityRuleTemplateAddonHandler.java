@@ -12,6 +12,10 @@
  */
 package org.openhab.core.addon.marketplace.internal.community;
 
+import static org.openhab.core.addon.marketplace.MarketplaceConstants.*;
+import static org.openhab.core.addon.marketplace.internal.community.CommunityMarketplaceAddonService.JSON_CONTENT_PROPERTY;
+import static org.openhab.core.addon.marketplace.internal.community.CommunityMarketplaceAddonService.YAML_CONTENT_PROPERTY;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -42,12 +46,6 @@ import org.slf4j.LoggerFactory;
 @Component(immediate = true)
 @NonNullByDefault
 public class CommunityRuleTemplateAddonHandler implements MarketplaceAddonHandler {
-    private static final String JSON_DOWNLOAD_URL_PROPERTY = "json_download_url";
-    private static final String YAML_DOWNLOAD_URL_PROPERTY = "yaml_download_url";
-    private static final String JSON_CONTENT_PROPERTY = "json_content";
-    private static final String YAML_CONTENT_PROPERTY = "yaml_content";
-    private static final String RULETEMPLATES_CONTENT_TYPE = "application/vnd.openhab.ruletemplate";
-
     private final Logger logger = LoggerFactory.getLogger(CommunityRuleTemplateAddonHandler.class);
 
     private final MarketplaceRuleTemplateProvider marketplaceRuleTemplateProvider;
