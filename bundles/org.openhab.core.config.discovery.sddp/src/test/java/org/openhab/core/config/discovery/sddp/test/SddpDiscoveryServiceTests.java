@@ -39,7 +39,7 @@ import org.openhab.core.net.NetworkAddressService;
  */
 @NonNullByDefault
 @TestInstance(Lifecycle.PER_CLASS)
-public class SddpDiscoveryTests {
+public class SddpDiscoveryServiceTests {
 
     private static final String ALIVE_NOTIFICATION = """
             NOTIFY ALIVE SDDP/1.0
@@ -110,7 +110,7 @@ public class SddpDiscoveryTests {
             assertEquals("DLA-RS3100_NZ8", device.model);
             assertEquals("projector_JVCKENWOOD_DLA-RS3100_NZ8.c4i", device.driver);
             assertEquals("192.168.4.237", device.ipAddress);
-            assertEquals("E0-DA-DC-15-28-02", device.macAddress);
+            assertEquals("e0-da-dc-15-28-02", device.macAddress);
             assertEquals("1902", device.port);
         }
     }
@@ -151,7 +151,7 @@ public class SddpDiscoveryTests {
             assertEquals("DLA-RS3100_NZ8", device.model);
             assertEquals("projector_JVCKENWOOD_DLA-RS3100_NZ8.c4i", device.driver);
             assertEquals("192.168.4.237", device.ipAddress);
-            assertEquals("E0-DA-DC-15-28-02", device.macAddress);
+            assertEquals("e0-da-dc-15-28-02", device.macAddress);
             assertEquals("1902", device.port);
         }
     }

@@ -68,7 +68,6 @@
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.rest.core/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.rest.sse/${project.version}</bundle>
 		<feature>openhab-core-config-discovery-addon</feature>
-		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery.sddp/${project.version}</bundle>
 	</feature>
 
 	<feature name="openhab-core-config-discovery-addon" version="${project.version}">
@@ -91,12 +90,6 @@
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery.addon.ip/${project.version}</bundle>
 	</feature>
 
-	<feature name="openhab-core-config-discovery-addon-sddp" version="${project.version}">
-		<feature>openhab-core-base</feature>
-		<feature>openhab-core-config-discovery-addon</feature>
-		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery.sddp/${project.version}</bundle>
-	</feature>
-
 	<feature name="openhab-core-config-discovery-addon-upnp" version="${project.version}">
 		<feature>openhab-core-base</feature>
 		<feature>openhab-core-config-discovery-addon</feature>
@@ -110,6 +103,19 @@
 		<feature>openhab-core-config-discovery-addon</feature>
 		<feature dependency="true">openhab-transport-serial</feature>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery.addon.usb/${project.version}</bundle>
+	</feature>
+
+	<feature name="openhab-core-config-discovery-sddp" version="${project.version}">
+		<feature>openhab-core-base</feature>
+		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery.sddp/${project.version}</bundle>
+	</feature>
+
+	<feature name="openhab-core-config-discovery-addon-sddp" version="${project.version}">
+		<feature>openhab-core-base</feature>
+		<feature>openhab-core-config-discovery-addon</feature>
+		<feature>openhab-runtime-base</feature>
+		<!-- Adding the following line causes a compiler error. I don't know why. Please help! -->
+		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery.addon.sddp/${project.version}</bundle>
 	</feature>
 
 	<feature name="openhab-core-addon-marketplace" version="${project.version}">
@@ -445,6 +451,7 @@
 		<feature>openhab-core-automation-module-script</feature>
 		<feature>openhab-core-automation-module-script-rulesupport</feature>
 		<feature>openhab-core-automation-module-media</feature>
+		<feature>openhab-core-config-discovery-sddp</feature>
 		<feature>openhab-core-io-console-karaf</feature>
 		<feature>openhab-core-io-http-auth</feature>
 		<feature>openhab-core-io-rest-audio</feature>
