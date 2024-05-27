@@ -219,7 +219,8 @@ public class SddpDiscoveryService extends AbstractDiscoveryService
                     .getByInetAddress(InetAddress.getByName(networkAddressService.getPrimaryIpv4HostAddress()));
 
             if (logger.isDebugEnabled()) {
-                logger.debug("listenMulticast() starting on interface '{}'", networkInterface.getDisplayName());
+                logger.debug("listenBackGroundMulticast() starting on interface '{}'",
+                        networkInterface.getDisplayName());
             }
 
             socket = new MulticastSocket(SDDP_PORT);
@@ -244,7 +245,7 @@ public class SddpDiscoveryService extends AbstractDiscoveryService
             }
         } catch (IOException e) {
             if (!closing) {
-                logger.warn("listenMulticast() error '{}'", e.getMessage());
+                logger.warn("listenBackGroundMulticast error '{}'", e.getMessage());
             }
         } finally {
             if (socket != null && networkInterface != null) {
@@ -252,7 +253,7 @@ public class SddpDiscoveryService extends AbstractDiscoveryService
                     socket.leaveGroup(SDDP_GROUP, networkInterface);
                 } catch (IOException e) {
                     if (!closing) {
-                        logger.warn("listenMulticast() error '{}'", e.getMessage());
+                        logger.warn("listenBackGroundMulticast() error '{}'", e.getMessage());
                     }
                 }
                 socket.close();
@@ -270,7 +271,7 @@ public class SddpDiscoveryService extends AbstractDiscoveryService
         try (ServerSocket portFinder = new ServerSocket(0)) {
             port = portFinder.getLocalPort();
         } catch (IOException e) {
-            logger.warn("listenUnicast() port finder error '{}'", e.getMessage());
+            logger.warn("listenActiveScanUnicast() port finder error '{}'", e.getMessage());
             return;
         }
 
@@ -279,7 +280,7 @@ public class SddpDiscoveryService extends AbstractDiscoveryService
             NetworkInterface networkInterface = NetworkInterface.getByInetAddress(InetAddress.getByName(ipAddress));
 
             if (logger.isDebugEnabled()) {
-                logger.debug("listenUnicast() starting on '{}:{}' on interface '{}'", ipAddress, port,
+                logger.debug("listenActiveScanUnicast() starting on '{}:{}' on interface '{}'", ipAddress, port,
                         networkInterface.getDisplayName());
             }
 
@@ -315,7 +316,7 @@ public class SddpDiscoveryService extends AbstractDiscoveryService
             }
         } catch (IOException e) {
             if (!closing) {
-                logger.warn("listenUnicast() error '{}'", e.getMessage());
+                logger.warn("listenActiveScanUnicast() error '{}'", e.getMessage());
             }
         }
     }
