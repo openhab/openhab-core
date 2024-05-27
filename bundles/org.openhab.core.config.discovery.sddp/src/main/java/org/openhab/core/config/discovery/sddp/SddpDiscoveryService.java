@@ -84,10 +84,7 @@ public class SddpDiscoveryService extends AbstractDiscoveryService
     private static final String SEARCH_RESPONSE_HEADER = "SDDP/1.0 200 OK";
     private static final String ALIVE_NOTIFICATION_HEADER = "NOTIFY ALIVE SDDP/1.0";
 
-    private static final String SEARCH_REQUEST_BODY_FORMAT = """
-            SEARCH * SDDP/1.0
-            Host: "%s:%d"
-            """;
+    private static final String SEARCH_REQUEST_BODY_FORMAT = "SEARCH * SDDP/1.0\r\nHost: \"%s:%d\"\r\n";
 
     private final Logger logger = LoggerFactory.getLogger(SddpDiscoveryService.class);
     private final Set<SddpDevice> foundDevicesCache = ConcurrentHashMap.newKeySet();
@@ -297,10 +294,11 @@ public class SddpDiscoveryService extends AbstractDiscoveryService
             buffer = search.getBytes(StandardCharsets.UTF_8);
             packet = new DatagramPacket(buffer, buffer.length, new InetSocketAddress(SDDP_IP_ADDRESS, SDDP_PORT));
             socket.send(packet);
-            packet = null;
             logger.debug("Packet sent to '{}:{}' content:\r\n{}", SDDP_IP_ADDRESS, SDDP_PORT, search);
 
             final Instant listenDoneTime = Instant.now().plus(SEARCH_LISTEN_DURATION);
+            buffer = new byte[READ_BUFFER_SIZE];
+            packet = null;
 
             // loop listen for responses
             while (Instant.now().isBefore(listenDoneTime) && !Thread.currentThread().isInterrupted()) {

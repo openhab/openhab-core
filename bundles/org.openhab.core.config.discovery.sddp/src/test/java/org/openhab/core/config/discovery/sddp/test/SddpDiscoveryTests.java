@@ -55,33 +55,33 @@ public class SddpDiscoveryTests {
             """;
 
     private static final String BAD_HEADER = """
-            SDDP/1.0 404 NOT FOUND
-            From: "192.168.4.237:1902"
-            Host: "JVC_PROJECTOR-E0DADC152802"
-            Max-Age: 1800
-            Type: "JVCKENWOOD:Projector"
-            Primary-Proxy: "projector"
-            Proxies: "projector"
-            Manufacturer: "JVCKENWOOD"
-            Model: "DLA-RS3100_NZ8"
-            Driver: "projector_JVCKENWOOD_DLA-RS3100_NZ8.c4i"
+            SDDP/1.0 404 NOT FOUND\r
+            From: "192.168.4.237:1902"\r
+            Host: "JVC_PROJECTOR-E0DADC152802"\r
+            Max-Age: 1800\r
+            Type: "JVCKENWOOD:Projector"\r
+            Primary-Proxy: "projector"\r
+            Proxies: "projector"\r
+            Manufacturer: "JVCKENWOOD"\r
+            Model: "DLA-RS3100_NZ8"\r
+            Driver: "projector_JVCKENWOOD_DLA-RS3100_NZ8.c4i"\r
             """;
 
     private static final String BAD_PAYLOAD = """
-            SDDP/1.0 200 OK
+            SDDP/1.0 200 OK\r
             """;
 
     private static final String SEARCH_RESPONSE = """
-            SDDP/1.0 200 OK
-            From: "192.168.4.237:1902"
-            Host: "JVC_PROJECTOR-E0DADC152802"
-            Max-Age: 1800
-            Type: "JVCKENWOOD:Projector"
-            Primary-Proxy: "projector"
-            Proxies: "projector"
-            Manufacturer: "JVCKENWOOD"
-            Model: "DLA-RS3100_NZ8"
-            Driver: "projector_JVCKENWOOD_DLA-RS3100_NZ8.c4i"
+            SDDP/1.0 200 OK\r
+            From: "192.168.4.237:1902"\r
+            Host: "JVC_PROJECTOR-E0DADC152802"\r
+            Max-Age: 1800\r
+            Type: "JVCKENWOOD:Projector"\r
+            Primary-Proxy: "projector"\r
+            Proxies: "projector"\r
+            Manufacturer: "JVCKENWOOD"\r
+            Model: "DLA-RS3100_NZ8"\r
+            Driver: "projector_JVCKENWOOD_DLA-RS3100_NZ8.c4i"\r
             """;
 
     private @NonNullByDefault({}) NetworkAddressService networkAddressService;
@@ -110,7 +110,7 @@ public class SddpDiscoveryTests {
             assertEquals("DLA-RS3100_NZ8", device.model);
             assertEquals("projector_JVCKENWOOD_DLA-RS3100_NZ8.c4i", device.driver);
             assertEquals("192.168.4.237", device.ipAddress);
-            assertEquals("E0:DA:DC:15:28:02", device.macAddress);
+            assertEquals("E0-DA-DC-15-28-02", device.macAddress);
             assertEquals("1902", device.port);
         }
     }
@@ -151,7 +151,7 @@ public class SddpDiscoveryTests {
             assertEquals("DLA-RS3100_NZ8", device.model);
             assertEquals("projector_JVCKENWOOD_DLA-RS3100_NZ8.c4i", device.driver);
             assertEquals("192.168.4.237", device.ipAddress);
-            assertEquals("E0:DA:DC:15:28:02", device.macAddress);
+            assertEquals("E0-DA-DC-15-28-02", device.macAddress);
             assertEquals("1902", device.port);
         }
     }
