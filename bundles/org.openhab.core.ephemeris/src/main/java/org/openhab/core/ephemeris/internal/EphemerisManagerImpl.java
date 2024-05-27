@@ -107,6 +107,9 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
         this.localeProvider = localeProvider;
         bundle = bundleContext.getBundle();
 
+        // Default weekend dayset
+        addDayset(CONFIG_DAYSET_WEEKEND, List.of(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY));
+
         try (InputStream stream = bundle.getResource(JOLLYDAY_COUNTRY_DESCRIPTIONS).openStream()) {
             final Properties properties = new Properties();
             properties.load(stream);
