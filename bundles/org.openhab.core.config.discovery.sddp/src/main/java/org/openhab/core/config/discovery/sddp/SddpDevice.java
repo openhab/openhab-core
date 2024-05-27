@@ -62,7 +62,8 @@ public class SddpDevice {
         port = fromParts.length > 1 ? fromParts[1] : "";
 
         String[] hostParts = host.split("-|_");
-        macAddress = hostParts.length > 1 ? hostParts[hostParts.length - 1].replaceAll("(..)(?!$)", "$1-") : "";
+        macAddress = hostParts.length <= 1 ? ""
+                : hostParts[hostParts.length - 1].replaceAll("(..)(?!$)", "$1-").toLowerCase();
 
         expireInstant = Instant.now().plusSeconds(maxAge.isBlank() ? 0 : Integer.parseInt(maxAge));
     }
