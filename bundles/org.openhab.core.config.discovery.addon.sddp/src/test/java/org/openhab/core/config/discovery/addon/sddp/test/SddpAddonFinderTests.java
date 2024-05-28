@@ -51,10 +51,6 @@ public class SddpAddonFinderTests {
             "Driver", "\"projector_JVCKENWOOD_DLA-RS3100_NZ8.c4i\"");
    // @formatter:on
 
-    private SddpDevice createDevice() {
-        return new SddpDevice(DEVICE_FIELDS);
-    }
-
     private List<AddonInfo> createAddonInfos() {
         AddonDiscoveryMethod method = new AddonDiscoveryMethod().setServiceType(SddpAddonFinder.SERVICE_TYPE)
                 .setMatchProperties(List.of(new AddonMatchProperty("host", "JVC.*")));
@@ -66,7 +62,8 @@ public class SddpAddonFinderTests {
 
     @Test
     public void testFinder() {
-        SddpDevice device = createDevice();
+        SddpDevice device = new SddpDevice(DEVICE_FIELDS, false);
+
         List<AddonInfo> addonInfos = createAddonInfos();
         SddpAddonFinder finder = new SddpAddonFinder();
 

@@ -81,10 +81,11 @@ public class SddpDiscoveryService extends AbstractDiscoveryService
     private static final Duration SEARCH_LISTEN_DURATION = Duration.ofSeconds(5);
     private static final Duration CACHE_PURGE_INTERVAL = Duration.ofSeconds(300);
 
-    private static final String SEARCH_RESPONSE_HEADER = "SDDP/1.0 200 OK";
-    private static final String ALIVE_NOTIFICATION_HEADER = "NOTIFY ALIVE SDDP/1.0";
-
     private static final String SEARCH_REQUEST_BODY_FORMAT = "SEARCH * SDDP/1.0\r\nHost: \"%s:%d\"\r\n";
+    private static final String SEARCH_RESPONSE_HEADER = "SDDP/1.0 200 OK";
+
+    private static final String NOTIFY_ALIVE_HEADER = "NOTIFY ALIVE SDDP/1.0";
+    private static final String NOTIFY_OFFLINE_HEADER = "NOTIFY OFFLINE SDDP/1.0";
 
     private final Logger logger = LoggerFactory.getLogger(SddpDiscoveryService.class);
     private final Set<SddpDevice> foundDevicesCache = ConcurrentHashMap.newKeySet();
@@ -165,7 +166,9 @@ public class SddpDiscoveryService extends AbstractDiscoveryService
             List<String> lines = data.lines().toList();
             if (lines.size() > 1) {
                 String statement = lines.get(0).strip();
-                if (statement.startsWith(ALIVE_NOTIFICATION_HEADER) || statement.startsWith(SEARCH_RESPONSE_HEADER)) {
+                boolean offline = statement.startsWith(NOTIFY_OFFLINE_HEADER);
+                if (offline || statement.startsWith(NOTIFY_ALIVE_HEADER)
+                        || statement.startsWith(SEARCH_RESPONSE_HEADER)) {
                     Map<String, String> headers = new HashMap<>();
                     for (int i = 1; i < lines.size(); i++) {
                         String[] header = lines.get(i).split(":", 2);
@@ -173,7 +176,7 @@ public class SddpDiscoveryService extends AbstractDiscoveryService
                             headers.put(header[0].strip(), header[1].strip());
                         }
                     }
-                    return Optional.of(new SddpDevice(headers));
+                    return Optional.of(new SddpDevice(headers, offline));
                 }
             }
         }
@@ -361,19 +364,33 @@ public class SddpDiscoveryService extends AbstractDiscoveryService
         Optional<SddpDevice> deviceOptional = createSddpDevice(content);
         if (deviceOptional.isPresent()) {
             SddpDevice device = deviceOptional.get();
-            foundDevicesCache.remove(device); // force update fields that are not set-unique
-            foundDevicesCache.add(device);
+            foundDevicesCache.remove(device);
+
+            if (device.isExpired()) {
+                // device created from a NOTIFY OFFLINE announcement
+                discoveryParticipants.forEach(p -> {
+                    DiscoveryResult discoveryResult = p.createResult(device);
+                    if (discoveryResult != null) {
+                        thingRemoved(discoveryResult.getThingUID());
+                    }
+                });
+                deviceParticipants.forEach(f -> f.deviceRemoved(device));
+            } else {
+                // device created from a NOTIFY ALIVE announcement or SEARCH response
+                foundDevicesCache.add(device);
+                discoveryParticipants.forEach(p -> {
+                    DiscoveryResult discoveryResult = p.createResult(device);
+                    if (discoveryResult != null) {
+                        DiscoveryResult localizedResult = getLocalizedDiscoveryResult(discoveryResult,
+                                FrameworkUtil.getBundle(p.getClass()));
+                        thingDiscovered(localizedResult);
+                    }
+                });
+                deviceParticipants.forEach(f -> f.deviceAdded(device));
+            }
+
             logger.debug("processPacket() foundDevices={}, deviceParticipants={}, discoveryParticipants={}",
                     foundDevicesCache.size(), deviceParticipants.size(), discoveryParticipants.size());
-            discoveryParticipants.forEach(p -> {
-                DiscoveryResult result = p.createResult(device);
-                if (result != null) {
-                    DiscoveryResult localizedResult = getLocalizedDiscoveryResult(result,
-                            FrameworkUtil.getBundle(p.getClass()));
-                    thingDiscovered(localizedResult);
-                }
-            });
-            deviceParticipants.forEach(f -> f.deviceAdded(device));
         }
     }
 

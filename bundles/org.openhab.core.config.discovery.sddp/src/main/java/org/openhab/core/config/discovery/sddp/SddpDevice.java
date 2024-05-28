@@ -42,11 +42,12 @@ public class SddpDevice {
     public final Instant expireInstant;
 
     /**
-     * Constructor
+     * Constructor.
      * 
      * @param headers a map of parameter name / value pairs.
+     * @param offline indicates if the device is being created from a NOTIFY OFFLINE announcement.
      */
-    public SddpDevice(Map<String, String> headers) {
+    public SddpDevice(Map<String, String> headers, boolean offline) {
         from = headers.getOrDefault("From", "").replaceAll("^\"|\"$", "");
         host = headers.getOrDefault("Host", "").replaceAll("^\"|\"$", "");
         maxAge = headers.getOrDefault("Max-Age", "").replaceAll("^\"|\"$", "");
@@ -65,7 +66,8 @@ public class SddpDevice {
         macAddress = hostParts.length <= 1 ? ""
                 : hostParts[hostParts.length - 1].replaceAll("(..)(?!$)", "$1-").toLowerCase();
 
-        expireInstant = Instant.now().plusSeconds(maxAge.isBlank() ? 0 : Integer.parseInt(maxAge));
+        expireInstant = offline ? Instant.now().minusMillis(1)
+                : Instant.now().plusSeconds(maxAge.isBlank() ? 0 : Integer.parseInt(maxAge));
     }
 
     /**
