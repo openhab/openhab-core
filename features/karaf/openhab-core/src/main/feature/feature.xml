@@ -450,7 +450,6 @@
 		<feature>openhab-core-automation-module-script</feature>
 		<feature>openhab-core-automation-module-script-rulesupport</feature>
 		<feature>openhab-core-automation-module-media</feature>
-		<feature>openhab-core-config-discovery-sddp</feature>
 		<feature>openhab-core-io-console-karaf</feature>
 		<feature>openhab-core-io-http-auth</feature>
 		<feature>openhab-core-io-rest-audio</feature>
