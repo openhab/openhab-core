@@ -113,6 +113,7 @@
 	<feature name="openhab-core-config-discovery-addon-sddp" version="${project.version}">
 		<feature>openhab-core-base</feature>
 		<feature>openhab-core-config-discovery-addon</feature>
+		<feature requirement="true">openhab-core-config-discovery-sddp</feature>
 		<!-- Adding the following line causes a compiler error. I don't know why. Please help! -->
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery.addon.sddp/${project.version}</bundle>
 	</feature>
