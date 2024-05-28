@@ -68,9 +68,11 @@ import org.slf4j.LoggerFactory;
  * @author Andrew Fiddian-Green - Initial contribution
  */
 @NonNullByDefault
-@Component(immediate = true, service = DiscoveryService.class, configurationPid = "discovery.sddp")
+@Component(immediate = true, service = DiscoveryService.class, name = SddpDiscoveryService.SERVICE_NAME, configurationPid = "discovery.sddp")
 public class SddpDiscoveryService extends AbstractDiscoveryService
         implements AutoCloseable, NetworkAddressChangeListener {
+
+    public static final String SERVICE_NAME = "sddp-device-discovery-service";
 
     private static final int SDDP_PORT = 1902;
     private static final String SDDP_IP_ADDRESS = "239.255.255.250";
@@ -413,12 +415,12 @@ public class SddpDiscoveryService extends AbstractDiscoveryService
         foundDevicesCache.addAll(devices.stream().filter(d -> !d.isExpired()).collect(Collectors.toSet()));
     }
 
-    protected void removeSddpDeviceParticipant(SddpDeviceParticipant participant) {
+    public void removeSddpDeviceParticipant(SddpDeviceParticipant participant) {
         logger.trace("removeSddpDeviceListener()");
         deviceParticipants.remove(participant);
     }
 
-    protected void removeSddpDiscoveryParticipant(SddpDiscoveryParticipant participant) {
+    public void removeSddpDiscoveryParticipant(SddpDiscoveryParticipant participant) {
         logger.trace("removeSddpDiscoveryParticipant()");
         discoveryParticipants.remove(participant);
     }

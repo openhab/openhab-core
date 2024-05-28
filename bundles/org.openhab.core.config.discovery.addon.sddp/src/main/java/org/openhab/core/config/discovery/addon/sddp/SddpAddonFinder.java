@@ -20,17 +20,21 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.addon.AddonDiscoveryMethod;
 import org.openhab.core.addon.AddonInfo;
 import org.openhab.core.addon.AddonMatchProperty;
+import org.openhab.core.config.discovery.DiscoveryService;
 import org.openhab.core.config.discovery.addon.AddonFinder;
 import org.openhab.core.config.discovery.addon.AddonFinderConstants;
 import org.openhab.core.config.discovery.addon.BaseAddonFinder;
 import org.openhab.core.config.discovery.sddp.SddpDevice;
 import org.openhab.core.config.discovery.sddp.SddpDeviceParticipant;
+import org.openhab.core.config.discovery.sddp.SddpDiscoveryService;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,14 +80,28 @@ public class SddpAddonFinder extends BaseAddonFinder implements SddpDevicePartic
     private final Logger logger = LoggerFactory.getLogger(SddpAddonFinder.class);
     private final Set<SddpDevice> foundDevices = new HashSet<>();
 
+    private @Nullable SddpDiscoveryService sddpDiscoveryService = null;
+
     @Activate
-    public SddpAddonFinder() {
+    public SddpAddonFinder(
+            @Reference(service = DiscoveryService.class, name = SddpDiscoveryService.SERVICE_NAME) DiscoveryService discoveryService) {
         logger.trace("SddpAddonFinder()");
+        if (discoveryService instanceof SddpDiscoveryService sddpDiscoveryService) {
+            sddpDiscoveryService.addSddpDeviceParticipant(this);
+            this.sddpDiscoveryService = sddpDiscoveryService;
+        } else {
+            logger.warn("SddpAddonFinder() DiscoveryService is not an SddpDiscoveryService)");
+        }
     }
 
     @Deactivate
     public void deactivate() {
         logger.trace("deactivate()");
+        SddpDiscoveryService sddpDiscoveryService = this.sddpDiscoveryService;
+        if (sddpDiscoveryService != null) {
+            sddpDiscoveryService.removeSddpDeviceParticipant(this);
+            this.sddpDiscoveryService = null;
+        }
         unsetAddonCandidates();
         foundDevices.clear();
     }
