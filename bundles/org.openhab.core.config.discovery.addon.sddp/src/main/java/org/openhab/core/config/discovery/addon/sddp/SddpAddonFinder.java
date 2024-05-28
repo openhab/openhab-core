@@ -28,11 +28,9 @@ import org.openhab.core.config.discovery.addon.AddonFinderConstants;
 import org.openhab.core.config.discovery.addon.BaseAddonFinder;
 import org.openhab.core.config.discovery.sddp.SddpDevice;
 import org.openhab.core.config.discovery.sddp.SddpDeviceParticipant;
-import org.openhab.core.config.discovery.sddp.SddpDiscoveryService;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
-import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,13 +76,9 @@ public class SddpAddonFinder extends BaseAddonFinder implements SddpDevicePartic
     private final Logger logger = LoggerFactory.getLogger(SddpAddonFinder.class);
     private final Set<SddpDevice> foundDevices = new HashSet<>();
 
-    @SuppressWarnings("unused") // keep the {@link SddpDiscoveryService} loaded
-    private final SddpDiscoveryService sddpDiscoveryService;
-
     @Activate
-    public SddpAddonFinder(@Reference SddpDiscoveryService sddpDiscoveryService) {
+    public SddpAddonFinder() {
         logger.trace("SddpAddonFinder()");
-        this.sddpDiscoveryService = sddpDiscoveryService;
     }
 
     @Deactivate
