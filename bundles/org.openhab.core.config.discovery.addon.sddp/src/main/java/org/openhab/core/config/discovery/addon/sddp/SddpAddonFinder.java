@@ -84,13 +84,13 @@ public class SddpAddonFinder extends BaseAddonFinder implements SddpDevicePartic
 
     @Activate
     public SddpAddonFinder(
-            @Reference(service = DiscoveryService.class, name = SddpDiscoveryService.SERVICE_NAME) DiscoveryService discoveryService) {
+            @Reference(service = DiscoveryService.class, target = "(protocol=sddp)") DiscoveryService discoveryService) {
         logger.trace("SddpAddonFinder()");
         if (discoveryService instanceof SddpDiscoveryService sddpDiscoveryService) {
             sddpDiscoveryService.addSddpDeviceParticipant(this);
             this.sddpDiscoveryService = sddpDiscoveryService;
         } else {
-            logger.warn("SddpAddonFinder() DiscoveryService is not an SddpDiscoveryService)");
+            logger.warn("SddpAddonFinder() DiscoveryService is not an SddpDiscoveryService");
         }
     }
 
