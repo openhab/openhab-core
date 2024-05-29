@@ -28,6 +28,7 @@ import javax.measure.Unit;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.i18n.TimeZoneProvider;
+import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
 import org.openhab.core.library.items.NumberItem;
 import org.openhab.core.library.types.DecimalType;
@@ -1245,7 +1246,11 @@ public class PersistenceExtensions {
             // avoid division by zero
             if (count > 0) {
                 BigDecimal variance = sum.divide(BigDecimal.valueOf(count), MathContext.DECIMAL64);
-                if (item instanceof NumberItem numberItem) {
+                Item baseItem = item;
+                if (baseItem instanceof GroupItem groupItem) {
+                    baseItem = groupItem.getBaseItem();
+                }
+                if (baseItem instanceof NumberItem numberItem) {
                     Unit<?> unit = numberItem.getUnit();
                     if (unit != null) {
                         return new QuantityType<>(variance, unit.multiply(unit));
@@ -1385,7 +1390,11 @@ public class PersistenceExtensions {
             // avoid ArithmeticException if variance is less than zero
             if (dt != null && DecimalType.ZERO.compareTo(dt) <= 0) {
                 BigDecimal deviation = dt.toBigDecimal().sqrt(MathContext.DECIMAL64);
-                if (item instanceof NumberItem numberItem) {
+                Item baseItem = item;
+                if (baseItem instanceof GroupItem groupItem) {
+                    baseItem = groupItem.getBaseItem();
+                }
+                if (baseItem instanceof NumberItem numberItem) {
                     Unit<?> unit = numberItem.getUnit();
                     if (unit != null) {
                         return new QuantityType<>(deviation, unit);
@@ -1538,7 +1547,11 @@ public class PersistenceExtensions {
                 return null;
             }
             BigDecimal average = sum.divide(totalDuration, MathContext.DECIMAL64);
-            if (item instanceof NumberItem numberItem) {
+            Item baseItem = item;
+            if (baseItem instanceof GroupItem groupItem) {
+                baseItem = groupItem.getBaseItem();
+            }
+            if (baseItem instanceof NumberItem numberItem) {
                 Unit<?> unit = numberItem.getUnit();
                 if (unit != null) {
                     return new QuantityType<>(average, unit);
@@ -1655,7 +1668,11 @@ public class PersistenceExtensions {
                     sum = sum.add(value.toBigDecimal());
                 }
             }
-            if (item instanceof NumberItem numberItem) {
+            Item baseItem = item;
+            if (baseItem instanceof GroupItem groupItem) {
+                baseItem = groupItem.getBaseItem();
+            }
+            if (baseItem instanceof NumberItem numberItem) {
                 Unit<?> unit = numberItem.getUnit();
                 if (unit != null) {
                     return new QuantityType<>(sum, unit);
@@ -1779,7 +1796,11 @@ public class PersistenceExtensions {
 
         if (valueStart != null && valueStop != null) {
             BigDecimal delta = valueStop.toBigDecimal().subtract(valueStart.toBigDecimal());
-            if (item instanceof NumberItem numberItem) {
+            Item baseItem = item;
+            if (baseItem instanceof GroupItem groupItem) {
+                baseItem = groupItem.getBaseItem();
+            }
+            if (baseItem instanceof NumberItem numberItem) {
                 Unit<?> unit = numberItem.getUnit();
                 return (unit != null) ? new QuantityType<>(delta, unit) : new DecimalType(delta);
             }
@@ -2559,7 +2580,11 @@ public class PersistenceExtensions {
     }
 
     private static @Nullable DecimalType getItemValue(Item item) {
-        if (item instanceof NumberItem numberItem) {
+        Item baseItem = item;
+        if (baseItem instanceof GroupItem groupItem) {
+            baseItem = groupItem.getBaseItem();
+        }
+        if (baseItem instanceof NumberItem numberItem) {
             Unit<?> unit = numberItem.getUnit();
             if (unit != null) {
                 QuantityType<?> qt = item.getStateAs(QuantityType.class);
