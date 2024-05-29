@@ -123,7 +123,8 @@ import org.slf4j.LoggerFactory;
  * <td>{@code requestPlain}</td>
  * <td>description of request frame as plaintext string</td>
  * <td>dynamic replacement of variables $srcIp, $srcPort and $uuid, no others implemented yet;
- * there are five XML special characters which need to be escaped:
+ * standard backslash sequences will be translated, and in addition to {@code \}, there are five
+ * XML special characters which need to be escaped:
  *
  * <pre>{@code
  * & - &amp;
@@ -507,7 +508,7 @@ public class IpAddonFinder extends BaseAddonFinder implements NetworkAddressChan
 
         @Nullable
         String reqUnEscaped = StringUtils.unEscapeXml(req.toString());
-        return reqUnEscaped != null ? reqUnEscaped.getBytes() : new byte[0];
+        return reqUnEscaped != null ? reqUnEscaped.translateEscapes().getBytes() : new byte[0];
     }
 
     // build from hex string

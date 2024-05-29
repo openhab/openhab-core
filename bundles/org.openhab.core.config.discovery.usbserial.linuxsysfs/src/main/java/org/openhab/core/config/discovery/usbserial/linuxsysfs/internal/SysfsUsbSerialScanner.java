@@ -222,7 +222,10 @@ public class SysfsUsbSerialScanner implements UsbSerialScanner {
      * of a USB device.
      */
     private @Nullable Path getUsbInterfaceParentPath(Path sysfsPath) {
-        if (sysfsPath.getFileName() == null) {
+        if (sysfsPath.toString().indexOf('-') == -1) {
+            // a fast path to avoid pattern matching for dozens of not matching directories
+            return null;
+        } else if (sysfsPath.getFileName() == null) {
             return null;
         } else if (SYSFS_USB_INTERFACE_DIRECTORY_PATTERN.matcher(sysfsPath.getFileName().toString()).matches()) {
             return sysfsPath;

@@ -16,7 +16,6 @@
 package org.openhab.core.model.sitemap.validation
 
 import org.openhab.core.model.sitemap.sitemap.Button
-import org.openhab.core.model.sitemap.sitemap.ButtonDefinition
 import org.openhab.core.model.sitemap.sitemap.Buttongrid
 import org.openhab.core.model.sitemap.sitemap.Frame
 import org.openhab.core.model.sitemap.sitemap.LinkableWidget
@@ -112,13 +111,10 @@ class SitemapValidator extends AbstractSitemapValidator {
 
     @Check
     def void checkWidgetsInButtongrid(Buttongrid grid) {
-        var nb = 0
-        for (ButtonDefinition b : grid.getButtons) {
-            nb = nb + 1
-        }
+        val nb = grid.getButtons.size()
         if (nb > 0 && grid.item === null) {
             error("To use the \"buttons\" parameter in a Buttongrid, the \"item\" parameter is required",
-                SitemapPackage.Literals.BUTTONGRID.getEStructuralFeature(SitemapPackage.BUTTONGRID__CHILDREN));
+                SitemapPackage.Literals.BUTTONGRID.getEStructuralFeature(SitemapPackage.BUTTONGRID__ITEM));
         }
         for (Widget w : grid.children) {
             if (!(w instanceof Button)) {
