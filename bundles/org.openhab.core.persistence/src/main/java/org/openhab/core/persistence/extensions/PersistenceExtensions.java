@@ -33,6 +33,7 @@ import org.openhab.core.library.items.NumberItem;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.persistence.FilterCriteria;
+import org.openhab.core.persistence.FilterCriteria.Operator;
 import org.openhab.core.persistence.FilterCriteria.Ordering;
 import org.openhab.core.persistence.HistoricItem;
 import org.openhab.core.persistence.ModifiablePersistenceService;
@@ -334,6 +335,67 @@ public class PersistenceExtensions {
 
     private static @Nullable ZonedDateTime internalAdjacentUpdate(Item item, boolean forward,
             @Nullable String serviceId) {
+        return internalAdjacent(item, forward, true, serviceId);
+
+    }
+
+    /**
+     * Query the last historic change time of a given <code>item</code>. The default persistence service is used.
+     *
+     * @param item the item for which the last historic change time is to be returned
+     * @return point in time of the last historic change to <code>item</code>, or <code>null</code> if there are no
+     *         historic persisted changes or the default persistence service is not available or not a
+     *         {@link QueryablePersistenceService}
+     */
+    public static @Nullable ZonedDateTime lastChange(Item item) {
+        return internalAdjacentChange(item, false, null);
+    }
+
+    /**
+     * Query for the last historic change time of a given <code>item</code>.
+     *
+     * @param item the item for which the last historic change time is to be returned
+     * @param serviceId the name of the {@link PersistenceService} to use
+     * @return point in time of the last historic change to <code>item</code>, or <code>null</code> if there are no
+     *         historic persisted changes or if persistence service given by <code>serviceId</code> does not refer to an
+     *         available {@link QueryablePersistenceService}
+     */
+    public static @Nullable ZonedDateTime lastChange(Item item, @Nullable String serviceId) {
+        return internalAdjacentChange(item, false, serviceId);
+    }
+
+    /**
+     * Query the first future change time of a given <code>item</code>. The default persistence service is used.
+     *
+     * @param item the item for which the first future change time is to be returned
+     * @return point in time of the first future change to <code>item</code>, or <code>null</code> if there are no
+     *         future persisted changes or the default persistence service is not available or not a
+     *         {@link QueryablePersistenceService}
+     */
+    public static @Nullable ZonedDateTime nextChange(Item item) {
+        return internalAdjacentChange(item, true, null);
+    }
+
+    /**
+     * Query for the first future change time of a given <code>item</code>.
+     *
+     * @param item the item for which the first future change time is to be returned
+     * @param serviceId the name of the {@link PersistenceService} to use
+     * @return point in time of the first future change to <code>item</code>, or <code>null</code> if there are no
+     *         future persisted changes or if persistence service given by <code>serviceId</code> does not refer to an
+     *         available {@link QueryablePersistenceService}
+     */
+    public static @Nullable ZonedDateTime nextChange(Item item, @Nullable String serviceId) {
+        return internalAdjacentChange(item, true, serviceId);
+    }
+
+    private static @Nullable ZonedDateTime internalAdjacentChange(Item item, boolean forward,
+            @Nullable String serviceId) {
+        return internalAdjacent(item, forward, false, serviceId);
+    }
+
+    private static @Nullable ZonedDateTime internalAdjacent(Item item, boolean forward, boolean update,
+            @Nullable String serviceId) {
         String effectiveServiceId = serviceId == null ? getDefaultServiceId() : serviceId;
         if (effectiveServiceId == null) {
             return null;
@@ -349,6 +411,11 @@ public class PersistenceExtensions {
             }
             filter.setOrdering(forward ? Ordering.ASCENDING : Ordering.DESCENDING);
             filter.setPageSize(1);
+            if (!update) {
+                // Look for last state change
+                filter.setState(item.getState());
+                filter.setOperator(Operator.NEQ);
+            }
             Iterable<HistoricItem> result = qService.query(filter);
             if (result.iterator().hasNext()) {
                 return result.iterator().next().getTimestamp();

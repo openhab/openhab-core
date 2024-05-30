@@ -1533,6 +1533,28 @@ public class PersistenceExtensionsTest {
     }
 
     @Test
+    public void testLastChange() {
+        ZonedDateTime lastChange = PersistenceExtensions.lastChange(numberItem, SERVICE_ID);
+        assertNotNull(lastChange);
+        assertEquals(ZonedDateTime.of(HISTORIC_END, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()), lastChange);
+
+        // default persistence service
+        lastChange = PersistenceExtensions.lastChange(numberItem);
+        assertNull(lastChange);
+    }
+
+    @Test
+    public void testNextChange() {
+        ZonedDateTime nextChange = PersistenceExtensions.nextChange(numberItem, SERVICE_ID);
+        assertNotNull(nextChange);
+        assertEquals(ZonedDateTime.of(FUTURE_START, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()), nextChange);
+
+        // default persistence service
+        nextChange = PersistenceExtensions.nextChange(numberItem);
+        assertNull(nextChange);
+    }
+
+    @Test
     public void testDeltaSince() {
         State delta = PersistenceExtensions.deltaSince(numberItem,
                 ZonedDateTime.of(BEFORE_START, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()), SERVICE_ID);

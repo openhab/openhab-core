@@ -36,6 +36,7 @@ import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.persistence.FilterCriteria;
+import org.openhab.core.persistence.FilterCriteria.Operator;
 import org.openhab.core.persistence.FilterCriteria.Ordering;
 import org.openhab.core.persistence.HistoricItem;
 import org.openhab.core.persistence.PersistenceItemInfo;
@@ -145,6 +146,11 @@ public class TestPersistenceService implements QueryablePersistenceService {
             Stream<HistoricItem> stream = results.stream();
             if (filter.getPageNumber() > 0) {
                 stream = stream.skip(filter.getPageSize() * filter.getPageNumber());
+            }
+
+            State state = filter.getState();
+            if (state != null && Operator.NEQ.equals(filter.getOperator())) {
+                stream = stream.filter(hi -> !state.equals(hi.getState()));
             }
 
             if (filter.getPageSize() != Integer.MAX_VALUE) {
