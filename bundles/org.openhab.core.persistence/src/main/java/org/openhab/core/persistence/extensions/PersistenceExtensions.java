@@ -33,7 +33,6 @@ import org.openhab.core.library.items.NumberItem;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.persistence.FilterCriteria;
-import org.openhab.core.persistence.FilterCriteria.Operator;
 import org.openhab.core.persistence.FilterCriteria.Ordering;
 import org.openhab.core.persistence.HistoricItem;
 import org.openhab.core.persistence.ModifiablePersistenceService;
@@ -335,7 +334,7 @@ public class PersistenceExtensions {
 
     private static @Nullable ZonedDateTime internalAdjacentUpdate(Item item, boolean forward,
             @Nullable String serviceId) {
-        return internalAdjacent(item, forward, true, serviceId);
+        return internalAdjacent(item, forward, false, serviceId);
 
     }
 
@@ -391,10 +390,10 @@ public class PersistenceExtensions {
 
     private static @Nullable ZonedDateTime internalAdjacentChange(Item item, boolean forward,
             @Nullable String serviceId) {
-        return internalAdjacent(item, forward, false, serviceId);
+        return internalAdjacent(item, forward, true, serviceId);
     }
 
-    private static @Nullable ZonedDateTime internalAdjacent(Item item, boolean forward, boolean update,
+    private static @Nullable ZonedDateTime internalAdjacent(Item item, boolean forward, boolean skipEqual,
             @Nullable String serviceId) {
         String effectiveServiceId = serviceId == null ? getDefaultServiceId() : serviceId;
         if (effectiveServiceId == null) {
@@ -410,15 +409,42 @@ public class PersistenceExtensions {
                 filter.setEndDate(ZonedDateTime.now());
             }
             filter.setOrdering(forward ? Ordering.ASCENDING : Ordering.DESCENDING);
-            filter.setPageSize(1);
-            if (!update) {
-                // Look for last state change
-                filter.setState(item.getState());
-                filter.setOperator(Operator.NEQ);
-            }
-            Iterable<HistoricItem> result = qService.query(filter);
-            if (result.iterator().hasNext()) {
-                return result.iterator().next().getTimestamp();
+
+            filter.setPageSize(skipEqual ? 1000 : 1);
+            int startPage = 0;
+            filter.setPageNumber(startPage);
+
+            Iterable<HistoricItem> items = qService.query(filter);
+            Iterator<HistoricItem> itemIterator = items.iterator();
+            if (itemIterator.hasNext()) {
+                if (!skipEqual) {
+                    return itemIterator.next().getTimestamp();
+                } else {
+                    State state = item.getState();
+                    HistoricItem historicItem = itemIterator.next();
+                    int itemCount = 1;
+                    if (!historicItem.getState().equals(state)) {
+                        // Stored value different from current state, use now as timestamp when looking backward
+                        return forward ? historicItem.getTimestamp() : ZonedDateTime.now();
+                    }
+                    while (items != null) {
+                        while (historicItem.getState().equals(state) && itemIterator.hasNext()) {
+                            HistoricItem nextHistoricItem = itemIterator.next();
+                            itemCount++;
+                            if (!nextHistoricItem.getState().equals(state)) {
+                                return forward ? nextHistoricItem.getTimestamp() : historicItem.getTimestamp();
+                            }
+                            historicItem = nextHistoricItem;
+                        }
+                        if (itemCount == filter.getPageSize()) {
+                            filter.setPageNumber(++startPage);
+                            items = qService.query(filter);
+                            itemCount = 0;
+                        } else {
+                            items = null;
+                        }
+                    }
+                }
             }
         } else {
             LoggerFactory.getLogger(PersistenceExtensions.class)
