@@ -115,13 +115,10 @@ public class SddpDiscoveryService extends AbstractDiscoveryService
 
         purgeExpiredDevicesTask = scheduler.scheduleWithFixedDelay(() -> purgeExpiredDevices(),
                 CACHE_PURGE_INTERVAL.getSeconds(), CACHE_PURGE_INTERVAL.getSeconds(), TimeUnit.SECONDS);
-
-        logger.trace("SddpDiscoveryService() isBackgroundDiscoveryEnabled={}", isBackgroundDiscoveryEnabled());
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     public void addSddpDeviceParticipant(SddpDeviceParticipant participant) {
-        logger.trace("addSddpDeviceParticipant()");
         deviceParticipants.add(participant);
         foundDevicesCache.stream().filter(d -> !d.isExpired()).forEach(d -> participant.deviceAdded(d));
         startScan();
@@ -129,7 +126,6 @@ public class SddpDiscoveryService extends AbstractDiscoveryService
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
     protected void addSddpDiscoveryParticipant(SddpDiscoveryParticipant participant) {
-        logger.trace("addSddpDiscoveryParticipant()");
         discoveryParticipants.add(participant);
         foundDevicesCache.stream().filter(d -> !d.isExpired()).forEach(d -> {
             DiscoveryResult result = participant.createResult(d);
@@ -145,7 +141,6 @@ public class SddpDiscoveryService extends AbstractDiscoveryService
      * Cancel the given task.
      */
     private void cancelTask(@Nullable Future<?> task) {
-        logger.trace("cancelTask()");
         if (task != null) {
             task.cancel(true);
         }
@@ -153,7 +148,6 @@ public class SddpDiscoveryService extends AbstractDiscoveryService
 
     @Override
     public void close() {
-        logger.trace("close()");
         deactivate();
     }
 
@@ -161,7 +155,6 @@ public class SddpDiscoveryService extends AbstractDiscoveryService
      * Optionally create an {@link SddpDevice) object from UDP packet data if the data is good.
      */
     public Optional<SddpDevice> createSddpDevice(String data) {
-        logger.trace("createSddpDevice()");
         if (!data.isBlank()) {
             List<String> lines = data.lines().toList();
             if (lines.size() > 1) {
@@ -186,7 +179,6 @@ public class SddpDiscoveryService extends AbstractDiscoveryService
     @Deactivate
     @Override
     protected void deactivate() {
-        logger.trace("deactivate()");
         closing = true;
 
         foundDevicesCache.clear();
@@ -204,7 +196,6 @@ public class SddpDiscoveryService extends AbstractDiscoveryService
 
     @Override
     public Set<ThingTypeUID> getSupportedThingTypes() {
-        logger.trace("getSupportedThingTypes()");
         Set<ThingTypeUID> supportedThingTypes = new HashSet<>();
         discoveryParticipants.forEach(p -> supportedThingTypes.addAll(p.getSupportedThingTypeUIDs()));
         return supportedThingTypes;
@@ -298,7 +289,7 @@ public class SddpDiscoveryService extends AbstractDiscoveryService
             buffer = search.getBytes(StandardCharsets.UTF_8);
             packet = new DatagramPacket(buffer, buffer.length, new InetSocketAddress(SDDP_IP_ADDRESS, SDDP_PORT));
             socket.send(packet);
-            logger.debug("Packet sent to '{}:{}' content:\r\n{}", SDDP_IP_ADDRESS, SDDP_PORT, search);
+            logger.trace("Packet sent to '{}:{}' content:\r\n{}", SDDP_IP_ADDRESS, SDDP_PORT, search);
 
             final Instant listenDoneTime = Instant.now().plus(SEARCH_LISTEN_DURATION);
             buffer = new byte[READ_BUFFER_SIZE];
@@ -335,7 +326,6 @@ public class SddpDiscoveryService extends AbstractDiscoveryService
      */
     @Override
     public synchronized void onChanged(List<CidrAddress> added, List<CidrAddress> removed) {
-        logger.trace("onChanged() i.e. network interfaces");
         Future<?> multicastTask = listenBackgroundMulticastTask;
         if (multicastTask != null && !multicastTask.isDone()) {
             multicastTask.cancel(true);
@@ -355,10 +345,9 @@ public class SddpDiscoveryService extends AbstractDiscoveryService
      * @param packet a datagram packet that arrived over the network.
      */
     private synchronized void processPacket(DatagramPacket packet) {
-        logger.trace("processPacket()");
         String content = new String(packet.getData(), 0, packet.getLength(), StandardCharsets.UTF_8);
-        if (logger.isDebugEnabled()) {
-            logger.debug("Packet received from '{}:{}' content:\r\n{}", packet.getAddress().getHostAddress(),
+        if (logger.isTraceEnabled()) {
+            logger.trace("Packet received from '{}:{}' content:\r\n{}", packet.getAddress().getHostAddress(),
                     packet.getPort(), content);
         }
         Optional<SddpDevice> deviceOptional = createSddpDevice(content);
@@ -389,8 +378,10 @@ public class SddpDiscoveryService extends AbstractDiscoveryService
                 deviceParticipants.forEach(f -> f.deviceAdded(device));
             }
 
-            logger.debug("processPacket() foundDevices={}, deviceParticipants={}, discoveryParticipants={}",
-                    foundDevicesCache.size(), deviceParticipants.size(), discoveryParticipants.size());
+            if (logger.isDebugEnabled()) {
+                logger.debug("processPacket() foundDevices={}, deviceParticipants={}, discoveryParticipants={}",
+                        foundDevicesCache.size(), deviceParticipants.size(), discoveryParticipants.size());
+            }
         }
     }
 
@@ -398,7 +389,6 @@ public class SddpDiscoveryService extends AbstractDiscoveryService
      * Purge expired devices and notify all listeners.
      */
     private synchronized void purgeExpiredDevices() {
-        logger.trace("purgeExpiredDevices()");
         Set<SddpDevice> devices = new HashSet<>(foundDevicesCache);
         devices.stream().filter(d -> d.isExpired()).forEach(d -> {
             discoveryParticipants.forEach(p -> {
@@ -414,18 +404,15 @@ public class SddpDiscoveryService extends AbstractDiscoveryService
     }
 
     public void removeSddpDeviceParticipant(SddpDeviceParticipant participant) {
-        logger.trace("removeSddpDeviceListener()");
         deviceParticipants.remove(participant);
     }
 
     public void removeSddpDiscoveryParticipant(SddpDiscoveryParticipant participant) {
-        logger.trace("removeSddpDiscoveryParticipant()");
         discoveryParticipants.remove(participant);
     }
 
     @Override
     protected void startBackgroundDiscovery() {
-        logger.trace("startBackgroundDiscovery()");
         Future<?> task = listenBackgroundMulticastTask;
         if (task == null || task.isDone()) {
             listenBackgroundMulticastTask = scheduler.submit(() -> listenBackGroundMulticast());
@@ -437,7 +424,6 @@ public class SddpDiscoveryService extends AbstractDiscoveryService
      */
     @Override
     protected void startScan() {
-        logger.trace("startScan()");
         Future<?> task = listenActiveScanUnicastTask;
         if (task == null || task.isDone()) {
             listenActiveScanUnicastTask = scheduler.submit(() -> listenActiveScanUnicast());
@@ -446,7 +432,6 @@ public class SddpDiscoveryService extends AbstractDiscoveryService
 
     @Override
     protected void stopBackgroundDiscovery() {
-        logger.trace("stopBackgroundDiscovery()");
         cancelTask(listenBackgroundMulticastTask);
         listenBackgroundMulticastTask = null;
     }

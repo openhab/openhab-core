@@ -85,7 +85,6 @@ public class SddpAddonFinder extends BaseAddonFinder implements SddpDevicePartic
     @Activate
     public SddpAddonFinder(
             @Reference(service = DiscoveryService.class, target = "(protocol=sddp)") DiscoveryService discoveryService) {
-        logger.trace("SddpAddonFinder()");
         if (discoveryService instanceof SddpDiscoveryService sddpDiscoveryService) {
             sddpDiscoveryService.addSddpDeviceParticipant(this);
             this.sddpDiscoveryService = sddpDiscoveryService;
@@ -96,7 +95,6 @@ public class SddpAddonFinder extends BaseAddonFinder implements SddpDevicePartic
 
     @Deactivate
     public void deactivate() {
-        logger.trace("deactivate()");
         SddpDiscoveryService sddpDiscoveryService = this.sddpDiscoveryService;
         if (sddpDiscoveryService != null) {
             sddpDiscoveryService.removeSddpDeviceParticipant(this);
@@ -108,25 +106,21 @@ public class SddpAddonFinder extends BaseAddonFinder implements SddpDevicePartic
 
     @Override
     public void deviceAdded(SddpDevice device) {
-        logger.trace("deviceAdded()");
         foundDevices.add(device);
     }
 
     @Override
     public void deviceRemoved(SddpDevice device) {
-        logger.trace("deviceRemoved()");
         foundDevices.remove(device);
     }
 
     @Override
     public String getServiceName() {
-        logger.trace("getServiceName() is '{}'", SERVICE_NAME);
         return SERVICE_NAME;
     }
 
     @Override
     public Set<AddonInfo> getSuggestedAddons() {
-        logger.trace("getSuggestedAddons()");
         Set<AddonInfo> result = new HashSet<>();
         for (AddonInfo candidate : addonCandidates) {
             for (AddonDiscoveryMethod method : candidate.getDiscoveryMethods().stream()
