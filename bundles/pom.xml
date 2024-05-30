@@ -34,9 +34,11 @@
     <module>org.openhab.core.config.discovery.addon.ip</module>
     <module>org.openhab.core.config.discovery.addon.mdns</module>
     <module>org.openhab.core.config.discovery.addon.process</module>
+    <module>org.openhab.core.config.discovery.addon.sddp</module>
     <module>org.openhab.core.config.discovery.addon.upnp</module>
     <module>org.openhab.core.config.discovery.addon.usb</module>
     <module>org.openhab.core.config.discovery.mdns</module>
+    <module>org.openhab.core.config.discovery.sddp</module>
     <module>org.openhab.core.config.discovery.usbserial</module>
     <module>org.openhab.core.config.discovery.usbserial.linuxsysfs</module>
     <module>org.openhab.core.config.discovery.usbserial.ser2net</module>

@@ -105,6 +105,18 @@
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery.addon.usb/${project.version}</bundle>
 	</feature>
 
+	<feature name="openhab-core-config-discovery-addon-sddp" version="${project.version}">
+		<feature>openhab-core-base</feature>
+		<feature>openhab-core-config-discovery-addon</feature>
+		<feature>openhab-core-config-discovery-sddp</feature>
+		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery.addon.sddp/${project.version}</bundle>
+	</feature>
+
+	<feature name="openhab-core-config-discovery-sddp" version="${project.version}">
+		<feature>openhab-core-base</feature>
+		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery.sddp/${project.version}</bundle>
+	</feature>
+
 	<feature name="openhab-core-addon-marketplace" version="${project.version}">
 		<feature>kar</feature>
 		<feature>openhab-core-base</feature>
