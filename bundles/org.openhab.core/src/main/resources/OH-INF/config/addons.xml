@@ -33,6 +33,7 @@
 			<advanced>true</advanced>
 			<label>IP-based Suggestion Finder</label>
 			<description>Use IP network discovery broadcasts to suggest add-ons. Enabling/disabling may take up to 1 minute.</description>
+			<default>true</default>
 		</parameter>
 		<parameter name="suggestionFinderSddp" type="boolean">
 			<advanced>true</advanced>
