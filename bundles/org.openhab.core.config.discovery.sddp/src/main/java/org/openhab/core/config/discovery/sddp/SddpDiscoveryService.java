@@ -85,6 +85,7 @@ public class SddpDiscoveryService extends AbstractDiscoveryService
     private static final String SEARCH_RESPONSE_HEADER = "SDDP/1.0 200 OK";
 
     private static final String NOTIFY_ALIVE_HEADER = "NOTIFY ALIVE SDDP/1.0";
+    private static final String NOTIFY_IDENTIFY_HEADER = "NOTIFY IDENTIFY SDDP/1.0";
     private static final String NOTIFY_OFFLINE_HEADER = "NOTIFY OFFLINE SDDP/1.0";
 
     private final Logger logger = LoggerFactory.getLogger(SddpDiscoveryService.class);
@@ -160,7 +161,7 @@ public class SddpDiscoveryService extends AbstractDiscoveryService
             if (lines.size() > 1) {
                 String statement = lines.get(0).strip();
                 boolean offline = statement.startsWith(NOTIFY_OFFLINE_HEADER);
-                if (offline || statement.startsWith(NOTIFY_ALIVE_HEADER)
+                if (offline || statement.startsWith(NOTIFY_ALIVE_HEADER) || statement.startsWith(NOTIFY_IDENTIFY_HEADER)
                         || statement.startsWith(SEARCH_RESPONSE_HEADER)) {
                     Map<String, String> headers = new HashMap<>();
                     for (int i = 1; i < lines.size(); i++) {
