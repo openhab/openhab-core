@@ -335,7 +335,6 @@ public class PersistenceExtensions {
     private static @Nullable ZonedDateTime internalAdjacentUpdate(Item item, boolean forward,
             @Nullable String serviceId) {
         return internalAdjacent(item, forward, false, serviceId);
-
     }
 
     /**
