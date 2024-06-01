@@ -153,7 +153,7 @@ public class SddpDiscoveryService extends AbstractDiscoveryService
     }
 
     /**
-     * Optionally create an {@link SddpDevice) object from UDP packet data if the data is good.
+     * Optionally create an {@link SddpDevice} object from UDP packet data if the data is good.
      */
     public Optional<SddpDevice> createSddpDevice(String data) {
         if (!data.isBlank()) {
