@@ -404,7 +404,7 @@
 		<requirement>openhab.tp;filter:="(&amp;(feature=xtext-ide)(version&gt;=2.35.0)(!(version&gt;=2.36.0)))"</requirement>
 		<feature dependency="true">openhab.tp-xtext-ide</feature>
 
-		<requirement>openhab.tp;filter:="(&amp;(feature=lsp4j)(version&gt;=0.22.0)(!(version&gt;=0.23.0)))"</requirement>
+		<requirement>openhab.tp;filter:="(&amp;(feature=lsp4j)(version&gt;=0.23.1)(!(version&gt;=0.24.0)))"</requirement>
 		<feature dependency="true">openhab.tp-lsp4j</feature>
 
 		<feature>openhab-core-model-item-ide</feature>
