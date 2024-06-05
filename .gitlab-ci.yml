@@ -1,0 +1,15 @@
+image: circleci/openjdk:17-buster-node
+
+stages:
+  - install
+
+variables:
+  MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end --show-version"
+
+before_script:
+  - export MAVEN_OPTS="-Xmx512m"
+
+install_openhab_core:
+  stage: install
+  script:
+    - mvn $MAVEN_CLI_OPTS clean install -DskipChecks -DskipTests -Dmaven.test.skip=true -Dfeatures.verify.skip=true -Dspotless.check.skip=true
