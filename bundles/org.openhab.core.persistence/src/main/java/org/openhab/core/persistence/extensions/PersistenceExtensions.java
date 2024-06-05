@@ -140,7 +140,7 @@ public class PersistenceExtensions {
         }
         PersistenceService service = getService(effectiveServiceId);
         if (service instanceof ModifiablePersistenceService modifiableService) {
-            modifiableService.store(item, timestamp, state, effectiveServiceId);
+            modifiableService.store(item, timestamp, state);
             return;
         }
         LoggerFactory.getLogger(PersistenceExtensions.class)
@@ -178,8 +178,8 @@ public class PersistenceExtensions {
         TimeZoneProvider tzProvider = timeZoneProvider;
         ZoneId timeZone = tzProvider != null ? tzProvider.getTimeZone() : ZoneId.systemDefault();
         if (service instanceof ModifiablePersistenceService modifiableService) {
-            timeSeries.getStates().forEach(
-                    s -> modifiableService.store(item, s.timestamp().atZone(timeZone), s.state(), effectiveServiceId));
+            timeSeries.getStates()
+                    .forEach(s -> modifiableService.store(item, s.timestamp().atZone(timeZone), s.state()));
             return;
         }
         LoggerFactory.getLogger(PersistenceExtensions.class)
