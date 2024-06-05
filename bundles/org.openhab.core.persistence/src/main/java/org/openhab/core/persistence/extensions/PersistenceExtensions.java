@@ -41,6 +41,7 @@ import org.openhab.core.persistence.PersistenceServiceRegistry;
 import org.openhab.core.persistence.QueryablePersistenceService;
 import org.openhab.core.types.State;
 import org.openhab.core.types.TimeSeries;
+import org.openhab.core.types.TypeParser;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -145,6 +146,42 @@ public class PersistenceExtensions {
         }
         LoggerFactory.getLogger(PersistenceExtensions.class)
                 .warn("There is no modifiable persistence service registered with the id '{}'", effectiveServiceId);
+    }
+
+    /**
+     * Persists a <code>state</code> at a given <code>timestamp</code> of an <code>item</code> through the default
+     * persistence service.
+     *
+     * @param item the item to store
+     * @param timestamp the date for the item state to be stored
+     * @param stateString the state to be stored
+     */
+    public static void persist(Item item, ZonedDateTime timestamp, String stateString) {
+        internalPersist(item, timestamp, stateString, null);
+    }
+
+    /**
+     * Persists a <code>state</code> at a given <code>timestamp</code> of an <code>item</code> through a
+     * {@link PersistenceService} identified by the <code>serviceId</code>.
+     *
+     * @param item the item
+     * @param timestamp the date for the item state to be stored
+     * @param stateString the state to be stored
+     * @param serviceId the name of the {@link PersistenceService} to use
+     */
+    public static void persist(Item item, ZonedDateTime timestamp, String stateString, @Nullable String serviceId) {
+        internalPersist(item, timestamp, stateString, serviceId);
+    }
+
+    private static void internalPersist(Item item, ZonedDateTime timestamp, String stateString,
+            @Nullable String serviceId) {
+        State state = TypeParser.parseState(item.getAcceptedDataTypes(), stateString);
+        if (state != null) {
+            internalPersist(item, timestamp, state, serviceId);
+        } else {
+            LoggerFactory.getLogger(PersistenceExtensions.class).warn("State '{}' cannot be parsed for item '{}'.",
+                    stateString, item.getName());
+        }
     }
 
     /**
