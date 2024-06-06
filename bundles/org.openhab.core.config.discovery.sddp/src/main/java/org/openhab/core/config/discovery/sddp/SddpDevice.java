@@ -27,18 +27,85 @@ import org.eclipse.jdt.annotation.Nullable;
 @NonNullByDefault
 public class SddpDevice {
 
+    /**
+     * The network address of the device.
+     * For example: 192.168.4.237:1902
+     */
     public final String from;
+
+    /**
+     * The host address of the device.
+     * For example: JVC_PROJECTOR-E0DADC152802
+     * Note: the last 12 characters represent the MAC address of the device.
+     */
     public final String host;
+
+    /**
+     * The number of seconds after which the device shall no longer considered to be alive on the network.
+     * For example: 1800 (a String value).
+     */
     public final String maxAge;
+
+    /**
+     * The type of the device. Usually a colon delimited combination of a manufacturer id and a device type id.
+     * For example: JVCKENWOOD:Projector
+     */
     public final String type;
+
+    /**
+     * The id of the primary proxy that provides device services.
+     * For example: projector
+     */
     public final String primaryProxy;
+
+    /**
+     * A comma delimited list of proxies.
+     * For example: projector,thingy,etc
+     * Normally the first entry is the primary proxy.
+     */
     public final String proxies;
+
+    /**
+     * The device manufacturer.
+     * For example: JVCKENWOOD
+     */
     public final String manufacturer;
+
+    /**
+     * The model number of the device.
+     * For example: DLA-RS3100_NZ8
+     */
     public final String model;
+
+    /**
+     * The driver id.
+     * For example: projector_JVCKENWOOD_DLA-RS3100_NZ8.c4i
+     */
     public final String driver;
+
+    /**
+     * The dotted IP address part of the 'from' field.
+     * For example: 192.168.4.237
+     */
     public final String ipAddress;
+
+    /**
+     * The port part of the 'from' field.
+     * For example: 1902 (a String value)
+     */
     public final String port;
+
+    /**
+     * The MAC address of the device as derived from the last 12 characters of the host field.
+     * It is presented in lower-case, dash delimited, format.
+     * For example: e0-da-dc-15-28-02
+     * Therefore it may be used as a (unique) sub- part of a Thing UID.
+     */
     public final String macAddress;
+
+    /**
+     * The instant after which the device shall be considered as having left the network.
+     */
     public final Instant expireInstant;
 
     /**
