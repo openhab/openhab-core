@@ -80,4 +80,30 @@ public class DateTimeTriggerHandlerTest {
 
         verify(mockScheduler).schedule(eq(handler), eq("0 0 0 11 8 * 2022"));
     }
+
+    @Test
+    public void testOffsetPositive() {
+        ZonedDateTime zdt = ZonedDateTime.of(2024, 6, 7, 0, 0, 0, 0, ZoneId.systemDefault());
+        item.setState(new DateTimeType(zdt));
+        when(mockTrigger.getConfiguration())
+                .thenReturn(new Configuration(Map.ofEntries(entry(DateTimeTriggerHandler.CONFIG_ITEM_NAME, ITEM_NAME),
+                        entry(DateTimeTriggerHandler.CONFIG_OFFSET, 10))));
+        DateTimeTriggerHandler handler = new DateTimeTriggerHandler(mockTrigger, mockScheduler, mockItemRegistry,
+                mockBundleContext);
+
+        verify(mockScheduler).schedule(eq(handler), eq("10 0 0 7 6 * 2024"));
+    }
+
+    @Test
+    public void testOffsetNegative() {
+        ZonedDateTime zdt = ZonedDateTime.of(2024, 6, 7, 0, 0, 0, 0, ZoneId.systemDefault());
+        item.setState(new DateTimeType(zdt));
+        when(mockTrigger.getConfiguration())
+                .thenReturn(new Configuration(Map.ofEntries(entry(DateTimeTriggerHandler.CONFIG_ITEM_NAME, ITEM_NAME),
+                        entry(DateTimeTriggerHandler.CONFIG_OFFSET, -10))));
+        DateTimeTriggerHandler handler = new DateTimeTriggerHandler(mockTrigger, mockScheduler, mockItemRegistry,
+                mockBundleContext);
+
+        verify(mockScheduler).schedule(eq(handler), eq("50 59 23 6 6 * 2024"));
+    }
 }
