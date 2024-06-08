@@ -415,11 +415,16 @@ public class PersistenceExtensions {
 
             Iterable<HistoricItem> items = qService.query(filter);
             Iterator<HistoricItem> itemIterator = items.iterator();
+            State state = item.getState();
             if (itemIterator.hasNext()) {
                 if (!skipEqual) {
-                    return itemIterator.next().getTimestamp();
+                    HistoricItem historicItem = itemIterator.next();
+                    if (!forward && !historicItem.getState().equals(state)) {
+                        // Past stored value different from current value, so it must have updated since last persist.
+                        return ZonedDateTime.now();
+                    }
+                    return historicItem.getTimestamp();
                 } else {
-                    State state = item.getState();
                     HistoricItem historicItem = itemIterator.next();
                     int itemCount = 1;
                     if (!historicItem.getState().equals(state)) {
