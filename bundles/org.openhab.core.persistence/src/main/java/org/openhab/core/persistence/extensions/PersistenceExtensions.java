@@ -59,6 +59,7 @@ import org.slf4j.LoggerFactory;
  * @author Jan N. Klug - Added interval methods and refactoring
  * @author Mark Herwege - Changed return types to State for some interval methods to also return unit
  * @author Mark Herwege - Extended for future dates
+ * @author Mark Herwege - lastChange and nextChange methods
  */
 @Component(immediate = true)
 @NonNullByDefault
@@ -286,9 +287,9 @@ public class PersistenceExtensions {
      * Query the last historic update time of a given <code>item</code>. The default persistence service is used.
      *
      * @param item the item for which the last historic update time is to be returned
-     * @return point in time of the last historic update to <code>item</code>, or <code>null</code> if there are no
-     *         historic persisted updates or the default persistence service is not available or not a
-     *         {@link QueryablePersistenceService}
+     * @return point in time of the last historic update to <code>item</code>, <code>null</code> if there are no
+     *         historic persisted updates, the state has changed since the last update or the default persistence
+     *         service is not available or not a {@link QueryablePersistenceService}
      */
     public static @Nullable ZonedDateTime lastUpdate(Item item) {
         return internalAdjacentUpdate(item, false, null);
@@ -299,9 +300,9 @@ public class PersistenceExtensions {
      *
      * @param item the item for which the last historic update time is to be returned
      * @param serviceId the name of the {@link PersistenceService} to use
-     * @return point in time of the last historic update to <code>item</code>, or <code>null</code> if there are no
-     *         historic persisted updates or if persistence service given by <code>serviceId</code> does not refer to an
-     *         available {@link QueryablePersistenceService}
+     * @return point in time of the last historic update to <code>item</code>, <code>null</code> if there are no
+     *         historic persisted updates, the state has changed since the last update or if persistence service given
+     *         by <code>serviceId</code> does not refer to an available {@link QueryablePersistenceService}
      */
     public static @Nullable ZonedDateTime lastUpdate(Item item, @Nullable String serviceId) {
         return internalAdjacentUpdate(item, false, serviceId);
@@ -341,9 +342,9 @@ public class PersistenceExtensions {
      * Query the last historic change time of a given <code>item</code>. The default persistence service is used.
      *
      * @param item the item for which the last historic change time is to be returned
-     * @return point in time of the last historic change to <code>item</code>, or <code>null</code> if there are no
-     *         historic persisted changes or the default persistence service is not available or not a
-     *         {@link QueryablePersistenceService}
+     * @return point in time of the last historic change to <code>item</code>, <code>null</code> if there are no
+     *         historic persisted changes, the state has changed since the last update or the default persistence
+     *         service is not available or not a {@link QueryablePersistenceService}
      */
     public static @Nullable ZonedDateTime lastChange(Item item) {
         return internalAdjacentChange(item, false, null);
@@ -354,9 +355,9 @@ public class PersistenceExtensions {
      *
      * @param item the item for which the last historic change time is to be returned
      * @param serviceId the name of the {@link PersistenceService} to use
-     * @return point in time of the last historic change to <code>item</code>, or <code>null</code> if there are no
-     *         historic persisted changes or if persistence service given by <code>serviceId</code> does not refer to an
-     *         available {@link QueryablePersistenceService}
+     * @return point in time of the last historic change to <code>item</code> <code>null</code> if there are no
+     *         historic persisted changes, the state has changed since the last update or if persistence service given
+     *         by <code>serviceId</code> does not refer to an available {@link QueryablePersistenceService}
      */
     public static @Nullable ZonedDateTime lastChange(Item item, @Nullable String serviceId) {
         return internalAdjacentChange(item, false, serviceId);
@@ -420,16 +421,18 @@ public class PersistenceExtensions {
                 if (!skipEqual) {
                     HistoricItem historicItem = itemIterator.next();
                     if (!forward && !historicItem.getState().equals(state)) {
-                        // Past stored value different from current value, so it must have updated since last persist.
-                        return ZonedDateTime.now();
+                        // Last persisted state value different from current state value, so it must have updated since
+                        // last persist. We do not know when.
+                        return null;
                     }
                     return historicItem.getTimestamp();
                 } else {
                     HistoricItem historicItem = itemIterator.next();
                     int itemCount = 1;
                     if (!historicItem.getState().equals(state)) {
-                        // Stored value different from current state, use now as timestamp when looking backward
-                        return forward ? historicItem.getTimestamp() : ZonedDateTime.now();
+                        // Persisted state value different from current state value, so it must have changed, but we do
+                        // not know when when looking backward.
+                        return forward ? historicItem.getTimestamp() : null;
                     }
                     while (items != null) {
                         while (historicItem.getState().equals(state) && itemIterator.hasNext()) {
