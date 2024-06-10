@@ -175,6 +175,38 @@ public class ThreadPoolManagerTest {
     }
 
     @Test
+    public void testSchedulingDoesSpawnNewThreads() throws InterruptedException {
+        ScheduledExecutorService serviceA = ThreadPoolManager
+                .getPoolBasedSequentialScheduledExecutorService("unit-test", "thread-7");
+        ScheduledExecutorService serviceB = ThreadPoolManager
+                .getPoolBasedSequentialScheduledExecutorService("unit-test", "thread-8");
+
+        for (int j = 0; j < 3; j++) {
+            CountDownLatch block = new CountDownLatch(1);
+            CountDownLatch check = new CountDownLatch(20);
+
+            for (int i = 0; i < 20; i++) {
+                serviceA.schedule(() -> {
+                    try {
+                        block.await();
+                    } catch (InterruptedException e) {
+
+                    }
+                    check.countDown();
+                }, 1, TimeUnit.MILLISECONDS);
+            }
+
+            Thread.sleep(80);
+
+            serviceB.schedule(() -> {
+                block.countDown();
+            }, 20, TimeUnit.MILLISECONDS);
+
+            assertTrue(check.await(80, TimeUnit.MILLISECONDS));
+        }
+    }
+
+    @Test
     public void testGetScheduledPool() {
         ThreadPoolExecutor result = ThreadPoolManager.getScheduledPoolUnwrapped("test1");
 

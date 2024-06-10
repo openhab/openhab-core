@@ -18,6 +18,7 @@ import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Set;
+import java.util.WeakHashMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -31,9 +32,11 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
@@ -50,10 +53,13 @@ import org.eclipse.jdt.annotation.Nullable;
  * @author Jörg Sautter - Initial contribution
  */
 @NonNullByDefault
-class PoolBasedSequentialScheduledExecutorService implements ScheduledExecutorService {
+final class PoolBasedSequentialScheduledExecutorService implements ScheduledExecutorService {
+
+    private static final WeakHashMap<ScheduledThreadPoolExecutor, @NonNull AtomicInteger> PENDING_BY_POOL = new WeakHashMap<>();
 
     private final WorkQueueEntry empty;
     private final ScheduledThreadPoolExecutor pool;
+    private final AtomicInteger pending;
     private final List<RunnableFuture<?>> scheduled;
     private final ScheduledFuture<?> cleaner;
     private @Nullable WorkQueueEntry tail;
@@ -74,6 +80,20 @@ class PoolBasedSequentialScheduledExecutorService implements ScheduledExecutorSe
         this.scheduled = new ArrayList<>();
 
         tail = empty;
+
+        // we need one pending counter per pool
+        synchronized (PENDING_BY_POOL) {
+            AtomicInteger fromCache = PENDING_BY_POOL.get(pool);
+
+            if (fromCache == null) {
+                // set to one does ensure at least one thread more than tasks running
+                fromCache = new AtomicInteger(1);
+
+                PENDING_BY_POOL.put(pool, fromCache);
+            }
+
+            pending = fromCache;
+        }
 
         // clean up to ensure we do not keep references to old tasks
         cleaner = this.scheduleWithFixedDelay(() -> {
@@ -100,22 +120,24 @@ class PoolBasedSequentialScheduledExecutorService implements ScheduledExecutorSe
                     tail = empty;
                 }
             }
-        }, 2, 4, TimeUnit.SECONDS);
+        },
+                // avoid cleaners of promptly created instances to run at the same time
+                (System.nanoTime() % 13), 8, TimeUnit.SECONDS);
     }
 
     @Override
     public ScheduledFuture<?> schedule(@Nullable Runnable command, long delay, @Nullable TimeUnit unit) {
         return schedule((origin) -> pool.schedule(() -> {
-            // we block the thread here, in worst case new threads are spawned
-            submitToWorkQueue(origin.join(), command).join();
+            // we might block the thread here, in worst case new threads are spawned
+            submitToWorkQueue(origin.join(), command, true).join();
         }, delay, unit));
     }
 
     @Override
     public <V> ScheduledFuture<V> schedule(@Nullable Callable<V> callable, long delay, @Nullable TimeUnit unit) {
         return schedule((origin) -> pool.schedule(() -> {
-            // we block the thread here, in worst case new threads are spawned
-            return submitToWorkQueue(origin.join(), callable).join();
+            // we might block the thread here, in worst case new threads are spawned
+            return submitToWorkQueue(origin.join(), callable, true).join();
         }, delay, unit));
     }
 
@@ -126,13 +148,13 @@ class PoolBasedSequentialScheduledExecutorService implements ScheduledExecutorSe
             CompletableFuture<?> submitted;
 
             try {
-                // we block the thread here, in worst case new threads are spawned
-                submitted = submitToWorkQueue(origin.join(), command);
+                submitted = submitToWorkQueue(origin.join(), command, true);
             } catch (RejectedExecutionException ex) {
                 // the pool has been shutdown, scheduled tasks should cancel
                 return;
             }
 
+            // we might block the thread here, in worst case new threads are spawned
             submitted.join();
         }, initialDelay, period, unit));
     }
@@ -144,13 +166,13 @@ class PoolBasedSequentialScheduledExecutorService implements ScheduledExecutorSe
             CompletableFuture<?> submitted;
 
             try {
-                // we block the thread here, in worst case new threads are spawned
-                submitted = submitToWorkQueue(origin.join(), command);
+                submitted = submitToWorkQueue(origin.join(), command, true);
             } catch (RejectedExecutionException ex) {
                 // the pool has been shutdown, scheduled tasks should cancel
                 return;
             }
 
+            // we might block the thread here, in worst case new threads are spawned
             submitted.join();
         }, initialDelay, delay, unit));
     }
@@ -255,20 +277,21 @@ class PoolBasedSequentialScheduledExecutorService implements ScheduledExecutorSe
 
     @Override
     public <T> Future<T> submit(@Nullable Callable<T> task) {
-        return submitToWorkQueue(null, task);
+        return submitToWorkQueue(null, task, false);
     }
 
-    private CompletableFuture<?> submitToWorkQueue(RunnableFuture<?> origin, @Nullable Runnable task) {
+    private CompletableFuture<?> submitToWorkQueue(RunnableFuture<?> origin, @Nullable Runnable task, boolean inPool) {
         Callable<?> callable = () -> {
             task.run();
 
             return null;
         };
 
-        return submitToWorkQueue(origin, callable);
+        return submitToWorkQueue(origin, callable, inPool);
     }
 
-    private <T> CompletableFuture<T> submitToWorkQueue(@Nullable RunnableFuture<?> origin, @Nullable Callable<T> task) {
+    private <T> CompletableFuture<T> submitToWorkQueue(@Nullable RunnableFuture<?> origin, @Nullable Callable<T> task,
+            boolean inPool) {
         BiFunction<? super Object, Throwable, T> action = (result, error) -> {
             // ignore result & error, they are from the previous task
             try {
@@ -278,22 +301,45 @@ class PoolBasedSequentialScheduledExecutorService implements ScheduledExecutorSe
             } catch (Exception ex) {
                 // a small hack to throw the Exception unchecked
                 throw PoolBasedSequentialScheduledExecutorService.unchecked(ex);
+            } finally {
+                pending.decrementAndGet();
             }
         };
+
+        RunnableCompletableFuture<T> cf;
+        boolean runNow;
 
         synchronized (this) {
             if (tail == null) {
                 throw new RejectedExecutionException("this scheduled executor has been shutdown before");
             }
 
-            RunnableCompletableFuture<T> cf = tail.future.handleAsync(action, pool);
+            // set the core pool size even if it does not change, this triggers idle threads to stop
+            pool.setCorePoolSize(pending.incrementAndGet());
 
-            cf.setCallable(task);
+            // avoid waiting for one pool thread to finish inside a pool thread
+            runNow = inPool && tail.future.isDone();
 
-            tail = new WorkQueueEntry(tail, origin, cf);
-
-            return cf;
+            if (runNow) {
+                cf = new RunnableCompletableFuture<>(task);
+                tail = new WorkQueueEntry(null, origin, cf);
+            } else {
+                cf = tail.future.handleAsync(action, pool);
+                cf.setCallable(task);
+                tail = new WorkQueueEntry(tail, origin, cf);
+            }
         }
+
+        if (runNow) {
+            // ensure we do not wait for one pool thread to finish inside another pool thread
+            try {
+                cf.run();
+            } finally {
+                pending.decrementAndGet();
+            }
+        }
+
+        return cf;
     }
 
     private static <E extends RuntimeException> E unchecked(Exception ex) throws E {
@@ -306,7 +352,7 @@ class PoolBasedSequentialScheduledExecutorService implements ScheduledExecutorSe
             task.run();
 
             return result;
-        });
+        }, false);
     }
 
     @Override
@@ -343,7 +389,7 @@ class PoolBasedSequentialScheduledExecutorService implements ScheduledExecutorSe
         List<Future<T>> futures = new ArrayList<>();
 
         for (Callable<T> task : tasks) {
-            futures.add(submitToWorkQueue(null, task).orTimeout(timeout, unit));
+            futures.add(submitToWorkQueue(null, task, false).orTimeout(timeout, unit));
         }
 
         // wait for all futures to complete
@@ -381,7 +427,7 @@ class PoolBasedSequentialScheduledExecutorService implements ScheduledExecutorSe
         List<CompletableFuture<T>> futures = new ArrayList<>();
 
         for (Callable<T> task : tasks) {
-            futures.add(submitToWorkQueue(null, task));
+            futures.add(submitToWorkQueue(null, task, false));
         }
 
         // wait for any future to complete
@@ -452,7 +498,11 @@ class PoolBasedSequentialScheduledExecutorService implements ScheduledExecutorSe
         private @Nullable Callable<V> callable;
 
         public RunnableCompletableFuture() {
-            callable = null;
+            this.callable = null;
+        }
+
+        public RunnableCompletableFuture(@Nullable Callable<V> callable) {
+            this.callable = callable;
         }
 
         public void setCallable(@Nullable Callable<V> callable) {
