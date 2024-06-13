@@ -76,7 +76,7 @@ TimerTrigger:
 ;
 
 DateTimeTrigger:
-    'Time' 'is' item=ItemName (timeOnly?='timeOnly')?
+    'Time' 'is' item=ItemName (timeOnly?='timeOnly')? ('offset' offset=INT)?
 ;
 
 SystemTrigger:
