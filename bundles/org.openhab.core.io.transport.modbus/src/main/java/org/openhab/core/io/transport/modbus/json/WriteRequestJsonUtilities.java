@@ -97,12 +97,12 @@ public final class WriteRequestJsonUtilities {
         }
         Deque<ModbusWriteRequestBlueprint> writes = new LinkedList<>();
         jsonArray.forEach(writeElem -> {
-            writes.add(constructBluerint(unitId, writeElem));
+            writes.add(constructBlueprint(unitId, writeElem));
         });
         return writes;
     }
 
-    private static ModbusWriteRequestBlueprint constructBluerint(int unitId, JsonElement arrayElement) {
+    private static ModbusWriteRequestBlueprint constructBlueprint(int unitId, JsonElement arrayElement) {
         final JsonObject writeObject;
         try {
             writeObject = arrayElement.getAsJsonObject();
@@ -123,11 +123,11 @@ public final class WriteRequestJsonUtilities {
         } catch (IllegalStateException e) {
             throw new IllegalStateException(String.format("JSON object '%s' is not an JSON array!", JSON_VALUE), e);
         }
-        return constructBluerint(unitId, functionCode, address, maxTries, valuesElem);
+        return constructBlueprint(unitId, functionCode, address, maxTries, valuesElem);
     }
 
-    private static ModbusWriteRequestBlueprint constructBluerint(int unitId, @Nullable JsonElement functionCodeElem,
-            @Nullable JsonElement addressElem, @Nullable JsonElement maxTriesElem, @Nullable JsonArray valuesElem) {
+    private static ModbusWriteRequestBlueprint constructBlueprint(int unitId, @Nullable JsonElement functionCodeElem,
+                                                                  @Nullable JsonElement addressElem, @Nullable JsonElement maxTriesElem, @Nullable JsonArray valuesElem) {
         int functionCodeNumeric;
         if (functionCodeElem == null || functionCodeElem.isJsonNull()) {
             throw new IllegalStateException(String.format("Value for '%s' is invalid", JSON_FUNCTION_CODE));
