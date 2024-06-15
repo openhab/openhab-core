@@ -131,6 +131,10 @@ class RulesJvmModelInferrer extends ScriptJvmModelInferrer {
                 rule.toMethod("_" + rule.name, ruleModel.newTypeRef(Void.TYPE)) [
                     static = true
                     if ((containsCommandTrigger(rule)) || (containsStateChangeTrigger(rule)) || (containsStateUpdateTrigger(rule))) {
+                        val groupTypeRef = ruleModel.newTypeRef(Item)
+                        parameters += rule.toParameter(VAR_TRIGGERING_GROUP, groupTypeRef)
+                        val groupNameRef = ruleModel.newTypeRef(String)
+                        parameters += rule.toParameter(VAR_TRIGGERING_GROUP_NAME, groupNameRef)
                         val itemTypeRef = ruleModel.newTypeRef(Item)
                         parameters += rule.toParameter(VAR_TRIGGERING_ITEM, itemTypeRef)
                         val itemNameRef = ruleModel.newTypeRef(String)
