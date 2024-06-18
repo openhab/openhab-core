@@ -44,7 +44,6 @@ import org.junit.jupiter.params.provider.ValueSource;
  * @author Erdoan Hadzhiyusein - Added ZonedDateTime tests
  * @author Laurent Garnier - Enhanced tests
  * @author Gaël L'hopital - added ability to use second and milliseconds unix time
- * @author Gaël L'hopital - added isToday, isTomorrow, isYesterday tests
  */
 @NonNullByDefault
 public class DateTimeTypeTest {
@@ -318,21 +317,6 @@ public class DateTimeTypeTest {
         assertThat(epochSecond, is(zdtEpoch));
         assertThat(epochMilliseconds, is(zdtEpoch));
         assertThat(epochStandard, is(zdtStandard));
-    }
-
-    @Test
-    public void relativeTest() {
-        DateTimeType dt1 = new DateTimeType("2019-06-12T17:30:00Z");
-        DateTimeType dt2 = new DateTimeType("2019-06-12T00:00:00+0000");
-
-        assertTrue(dt1.sameDay(dt2));
-        assertTrue(new DateTimeType().isToday());
-
-        DateTimeType now = new DateTimeType();
-        DateTimeType tomorrow = new DateTimeType(now.getZonedDateTime().plusHours(24));
-        DateTimeType yesterday = new DateTimeType(now.getZonedDateTime().minusHours(24));
-        assertTrue(tomorrow.isTomorrow());
-        assertTrue(yesterday.isYesterday());
     }
 
     @ParameterizedTest

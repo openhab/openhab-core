@@ -20,7 +20,6 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.time.temporal.ChronoUnit;
 import java.time.zone.ZoneRulesException;
 import java.util.Locale;
 import java.util.regex.Pattern;
@@ -40,10 +39,13 @@ import org.openhab.core.types.State;
  * @author Laurent Garnier - added methods toLocaleZone and toZone
  * @author Gaël L'hopital - added ability to use second and milliseconds unix time
 <<<<<<< Upstream, based on origin/main
+<<<<<<< Upstream, based on origin/main
  * @author Jimmy Tanagra - implement Comparable
 =======
  * @author Gaël L'hopital - added isToday, isTomorrow, isYesterday, sameDay
 >>>>>>> cdfceb1 Added some convenient methods for DateTimeType
+=======
+>>>>>>> 5d4ed15 Revert "Added some convenient methods for DateTimeType"
  */
 @NonNullByDefault
 public class DateTimeType implements PrimitiveType, State, Command, Comparable<DateTimeType> {
@@ -266,26 +268,5 @@ public class DateTimeType implements PrimitiveType, State, Command, Comparable<D
         }
 
         return date;
-    }
-
-    public boolean isToday() {
-        return sameDay(ZonedDateTime.now());
-    }
-
-    public boolean isTomorrow() {
-        return sameDay(ZonedDateTime.now().plusDays(1));
-    }
-
-    public boolean isYesterday() {
-        return sameDay(ZonedDateTime.now().minusDays(1));
-    }
-
-    public boolean sameDay(DateTimeType other) {
-        return sameDay(other.zonedDateTime);
-    }
-
-    public boolean sameDay(ZonedDateTime other) {
-        return zonedDateTime.truncatedTo(ChronoUnit.DAYS)
-                .isEqual(other.withZoneSameLocal(zonedDateTime.getZone()).truncatedTo(ChronoUnit.DAYS));
     }
 }
