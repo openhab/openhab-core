@@ -293,17 +293,42 @@ public class DateTimeTypeTest {
 
     @Test
     public void relativeTest() {
-        DateTimeType dt1 = new DateTimeType("2019-06-12T17:30:00Z");
-        DateTimeType dt2 = new DateTimeType("2019-06-12T00:00:00+0000");
+        DateTimeType dt1 = new DateTimeType("2019-06-13T01:10:00+02");
+        DateTimeType dt2 = new DateTimeType("2019-06-12T23:00:00Z");
+        assertTrue(dt1.isAfter(dt2));
+        assertTrue(dt2.isBefore(dt1));
 
         assertTrue(dt1.sameDay(dt2));
         assertTrue(new DateTimeType().isToday());
 
         DateTimeType now = new DateTimeType();
-        DateTimeType tomorrow = new DateTimeType(now.getZonedDateTime().plusHours(24));
-        DateTimeType yesterday = new DateTimeType(now.getZonedDateTime().minusHours(24));
+        DateTimeType tomorrow = new DateTimeType(now.getZonedDateTime().plusDays(1));
+        DateTimeType yesterday = new DateTimeType(now.getZonedDateTime().minusDays(1));
         assertTrue(tomorrow.isTomorrow());
         assertTrue(yesterday.isYesterday());
+
+        DateTimeType dt1ToToday = dt1.toToday();
+        assertTrue(dt1ToToday.sameDay(now));
+        assertEquals(dt1ToToday.getZonedDateTime().getHour(), dt1.getZonedDateTime().getHour());
+        assertEquals(dt1ToToday.getZonedDateTime().getMinute(), dt1.getZonedDateTime().getMinute());
+        assertEquals(dt1ToToday.getZonedDateTime().getSecond(), dt1.getZonedDateTime().getSecond());
+        assertEquals(dt1ToToday.getZonedDateTime().getNano(), dt1.getZonedDateTime().getNano());
+
+        DateTimeType dt1ToTomorrow = dt1.toTomorrow();
+        assertTrue(dt1ToTomorrow.isAfterDate(now));
+
+        DateTimeType dt1ToYesterday = dt1.toYesterday();
+        assertTrue(dt1ToYesterday.isBeforeDate(now));
+
+        DateTimeType dt3 = new DateTimeType("2019-06-11T23:10:00Z");
+        DateTimeType dt4 = new DateTimeType("2019-06-12T23:00:00Z");
+        assertFalse(dt3.sameDay(dt4));
+
+        assertTrue(dt3.isBeforeDate(dt4));
+        assertTrue(dt3.isAfterTime(dt4));
+
+        assertTrue(dt4.isAfter(dt3));
+        assertTrue(dt4.isBeforeTime(dt3));
     }
 
     @ParameterizedTest
