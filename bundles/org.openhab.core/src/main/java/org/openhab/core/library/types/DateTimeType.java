@@ -331,5 +331,4 @@ public class DateTimeType implements PrimitiveType, State, Command {
     public boolean isAfterDate(ZonedDateTime other) {
         return zonedDateTime.truncatedTo(ChronoUnit.DAYS).isAfter(other.truncatedTo(ChronoUnit.DAYS));
     }
-
 }

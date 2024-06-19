@@ -327,7 +327,7 @@ public class DateTimeTypeTest {
         assertTrue(dt3.isBeforeDate(dt4));
         assertTrue(dt3.isAfterTime(dt4));
 
-        assertTrue(dt4.isAfter(dt3));
+        assertTrue(dt4.isAfterDate(dt3));
         assertTrue(dt4.isBeforeTime(dt3));
     }
 
