@@ -101,7 +101,8 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
         return List.of(buildCommandUsage(SUBCMD_SAY + " <text>", "speaks a text"), buildCommandUsage(
                 SUBCMD_TRANSCRIBE + " [--source <source>]|[--file <file>] [--stt <stt>] [--locale <locale>]",
                 "transcribe audio from default source, optionally specify a different source/file, speech-to-text service or locale"),
-                buildCommandUsage(SUBCMD_INTERPRET + " <command>", "interprets a human language command"),
+                buildCommandUsage(SUBCMD_INTERPRET + " [--hlis <comma,separated,interpreters>] <command>",
+                        "interprets a human language command"),
                 buildCommandUsage(SUBCMD_VOICES, "lists available voices of the TTS services"),
                 buildCommandUsage(SUBCMD_DIALOGS, "lists the running dialog and their audio/voice services"),
                 buildCommandUsage(SUBCMD_DIALOG_REGS,
@@ -280,14 +281,31 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
     }
 
     private void interpret(String[] args, Console console) {
-        StringBuilder sb = new StringBuilder(args[0]);
-        for (int i = 1; i < args.length; i++) {
+        @Nullable
+        String hliIdList = null;
+        String[] arguments;
+        if (args.length > 0 && "--hlis".equals(args[0])) {
+            if (args.length == 1) {
+                console.println("No hli id list provided.");
+                return;
+            }
+            hliIdList = args[1];
+            arguments = Arrays.copyOfRange(args, 2, args.length);
+        } else {
+            arguments = args;
+        }
+        if (arguments.length == 0) {
+            console.println("No command provided.");
+            return;
+        }
+        StringBuilder sb = new StringBuilder(arguments[0]);
+        for (int i = 1; i < arguments.length; i++) {
             sb.append(" ");
-            sb.append(args[i]);
+            sb.append(arguments[i]);
         }
         String msg = sb.toString();
         try {
-            String result = voiceManager.interpret(msg);
+            String result = voiceManager.interpret(msg, hliIdList);
             console.println(result);
         } catch (InterpretationException ie) {
             console.println(Objects.requireNonNullElse(ie.getMessage(),
