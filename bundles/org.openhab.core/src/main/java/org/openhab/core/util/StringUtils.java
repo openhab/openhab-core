@@ -15,6 +15,7 @@ package org.openhab.core.util;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -188,7 +189,7 @@ public class StringUtils {
      * @return the padded String
      */
     public static String padLeft(@Nullable String str, int minSize, String padString) {
-        String paddedString = str == null ? "" : str;
+        String paddedString = Objects.requireNonNullElse(str, "");
         return String.format("%" + minSize + "s", paddedString).replace(" ", padString);
     }
 
@@ -207,7 +208,7 @@ public class StringUtils {
      * @return the padded String
      */
     public static String padRight(@Nullable String str, int minSize, String padString) {
-        String paddedString = str == null ? "" : str;
+        String paddedString = Objects.requireNonNullElse(str, "");
         return String.format("%-" + minSize + "s", paddedString).replace(" ", padString);
     }
 
