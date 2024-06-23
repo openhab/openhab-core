@@ -360,7 +360,7 @@ public class VoiceManagerImplTest extends JavaOSGiTest {
         assertFalse(sttService.isRecognized());
         assertThat(hliStub.getQuestion(), is(""));
         assertThat(hliStub.getAnswer(), is(""));
-        assertThat(ttsService.getSynthesized(), is("Encountered error while recognizing text, STT error"));
+        assertThat(ttsService.getSynthesized(), is("STT error"));
         assertTrue(sink.getIsStreamProcessed());
 
         voiceManager.stopDialog(source);
