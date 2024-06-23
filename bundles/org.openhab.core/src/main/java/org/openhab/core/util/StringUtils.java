@@ -193,6 +193,25 @@ public class StringUtils {
     }
 
     /**
+     * Pads the string from the right
+     *
+     * <pre>
+      * padRight("9", 4, "0")        => "9000"
+      * padRight("3112", 12, "*")    => "3112********"
+      * padRight("openHAB", 4, "*")  => "openHAB"
+     * </pre>
+     *
+     * @param str the String to pad, may be null
+     * @param minSize the minimum String size to return
+     * @param padString the String to add when padding
+     * @return the padded String
+     */
+    public static String padRight(@Nullable String str, int minSize, String padString) {
+        String paddedString = str == null ? "" : str;
+        return String.format("%-" + minSize + "s", paddedString).replace(" ", padString);
+    }
+
+    /**
      * Creates a random string
      *
      * @param length the length of the String to return

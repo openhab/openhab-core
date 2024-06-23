@@ -94,6 +94,16 @@ public class StringUtilsTest {
     }
 
     @Test
+    public void padRight() {
+        assertEquals("000000", StringUtils.padRight("", 6, "0"));
+        assertEquals("000000", StringUtils.padRight(null, 6, "0"));
+        assertEquals("teststr000", StringUtils.padRight("teststr", 10, "0"));
+        assertEquals("p3RF@CTAAAAAA", StringUtils.padRight("p3RF@CT", 13, "A"));
+        assertEquals("nopaddingshouldhappen", StringUtils.padRight("nopaddingshouldhappen", 21, "x"));
+        assertEquals("LongerStringThenMinSize", StringUtils.padRight("LongerStringThenMinSize", 10, "x"));
+    }
+
+    @Test
     public void splitByCharacterType() {
         assertArrayEquals(new String[0], StringUtils.splitByCharacterType(null));
         assertArrayEquals(new String[0], StringUtils.splitByCharacterType(""));
