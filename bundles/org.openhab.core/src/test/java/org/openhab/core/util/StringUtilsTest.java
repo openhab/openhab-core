@@ -91,6 +91,7 @@ public class StringUtilsTest {
         assertEquals("AAAAAAp3RF@CT", StringUtils.padLeft("p3RF@CT", 13, "A"));
         assertEquals("nopaddingshouldhappen", StringUtils.padLeft("nopaddingshouldhappen", 21, "x"));
         assertEquals("LongerStringThenMinSize", StringUtils.padLeft("LongerStringThenMinSize", 10, "x"));
+        assertEquals("xxxhas space", StringUtils.padLeft("has space", 12, "x"));
     }
 
     @Test
@@ -101,6 +102,7 @@ public class StringUtilsTest {
         assertEquals("p3RF@CTAAAAAA", StringUtils.padRight("p3RF@CT", 13, "A"));
         assertEquals("nopaddingshouldhappen", StringUtils.padRight("nopaddingshouldhappen", 21, "x"));
         assertEquals("LongerStringThenMinSize", StringUtils.padRight("LongerStringThenMinSize", 10, "x"));
+        assertEquals("has spacexxx", StringUtils.padRight("has space", 12, "x"));
     }
 
     @Test

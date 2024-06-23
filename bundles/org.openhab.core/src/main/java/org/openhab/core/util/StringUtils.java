@@ -190,7 +190,8 @@ public class StringUtils {
      */
     public static String padLeft(@Nullable String str, int minSize, String padString) {
         String paddedString = Objects.requireNonNullElse(str, "");
-        return String.format("%" + minSize + "s", paddedString).replace(" ", padString);
+        return paddedString.length() >= minSize ? paddedString
+                : padString.repeat(minSize - paddedString.length()) + paddedString;
     }
 
     /**
@@ -209,7 +210,8 @@ public class StringUtils {
      */
     public static String padRight(@Nullable String str, int minSize, String padString) {
         String paddedString = Objects.requireNonNullElse(str, "");
-        return String.format("%-" + minSize + "s", paddedString).replace(" ", padString);
+        return (paddedString.length() >= minSize) ? paddedString
+                : paddedString + padString.repeat(minSize - paddedString.length());
     }
 
     /**
