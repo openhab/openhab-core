@@ -60,6 +60,7 @@ import org.slf4j.LoggerFactory;
  * @author Jan N. Klug - Added interval methods and refactoring
  * @author Mark Herwege - Changed return types to State for some interval methods to also return unit
  * @author Mark Herwege - Extended for future dates
+ * @author Mark Herwege - lastChange and nextChange methods
  */
 @Component(immediate = true)
 @NonNullByDefault
@@ -323,9 +324,9 @@ public class PersistenceExtensions {
      * Query the last historic update time of a given <code>item</code>. The default persistence service is used.
      *
      * @param item the item for which the last historic update time is to be returned
-     * @return point in time of the last historic update to <code>item</code>, or <code>null</code> if there are no
-     *         historic persisted updates or the default persistence service is not available or not a
-     *         {@link QueryablePersistenceService}
+     * @return point in time of the last historic update to <code>item</code>, <code>null</code> if there are no
+     *         historic persisted updates, the state has changed since the last update or the default persistence
+     *         service is not available or not a {@link QueryablePersistenceService}
      */
     public static @Nullable ZonedDateTime lastUpdate(Item item) {
         return internalAdjacentUpdate(item, false, null);
@@ -336,9 +337,9 @@ public class PersistenceExtensions {
      *
      * @param item the item for which the last historic update time is to be returned
      * @param serviceId the name of the {@link PersistenceService} to use
-     * @return point in time of the last historic update to <code>item</code>, or <code>null</code> if there are no
-     *         historic persisted updates or if persistence service given by <code>serviceId</code> does not refer to an
-     *         available {@link QueryablePersistenceService}
+     * @return point in time of the last historic update to <code>item</code>, <code>null</code> if there are no
+     *         historic persisted updates, the state has changed since the last update or if persistence service given
+     *         by <code>serviceId</code> does not refer to an available {@link QueryablePersistenceService}
      */
     public static @Nullable ZonedDateTime lastUpdate(Item item, @Nullable String serviceId) {
         return internalAdjacentUpdate(item, false, serviceId);
@@ -371,6 +372,66 @@ public class PersistenceExtensions {
 
     private static @Nullable ZonedDateTime internalAdjacentUpdate(Item item, boolean forward,
             @Nullable String serviceId) {
+        return internalAdjacent(item, forward, false, serviceId);
+    }
+
+    /**
+     * Query the last historic change time of a given <code>item</code>. The default persistence service is used.
+     *
+     * @param item the item for which the last historic change time is to be returned
+     * @return point in time of the last historic change to <code>item</code>, <code>null</code> if there are no
+     *         historic persisted changes, the state has changed since the last update or the default persistence
+     *         service is not available or not a {@link QueryablePersistenceService}
+     */
+    public static @Nullable ZonedDateTime lastChange(Item item) {
+        return internalAdjacentChange(item, false, null);
+    }
+
+    /**
+     * Query for the last historic change time of a given <code>item</code>.
+     *
+     * @param item the item for which the last historic change time is to be returned
+     * @param serviceId the name of the {@link PersistenceService} to use
+     * @return point in time of the last historic change to <code>item</code> <code>null</code> if there are no
+     *         historic persisted changes, the state has changed since the last update or if persistence service given
+     *         by <code>serviceId</code> does not refer to an available {@link QueryablePersistenceService}
+     */
+    public static @Nullable ZonedDateTime lastChange(Item item, @Nullable String serviceId) {
+        return internalAdjacentChange(item, false, serviceId);
+    }
+
+    /**
+     * Query the first future change time of a given <code>item</code>. The default persistence service is used.
+     *
+     * @param item the item for which the first future change time is to be returned
+     * @return point in time of the first future change to <code>item</code>, or <code>null</code> if there are no
+     *         future persisted changes or the default persistence service is not available or not a
+     *         {@link QueryablePersistenceService}
+     */
+    public static @Nullable ZonedDateTime nextChange(Item item) {
+        return internalAdjacentChange(item, true, null);
+    }
+
+    /**
+     * Query for the first future change time of a given <code>item</code>.
+     *
+     * @param item the item for which the first future change time is to be returned
+     * @param serviceId the name of the {@link PersistenceService} to use
+     * @return point in time of the first future change to <code>item</code>, or <code>null</code> if there are no
+     *         future persisted changes or if persistence service given by <code>serviceId</code> does not refer to an
+     *         available {@link QueryablePersistenceService}
+     */
+    public static @Nullable ZonedDateTime nextChange(Item item, @Nullable String serviceId) {
+        return internalAdjacentChange(item, true, serviceId);
+    }
+
+    private static @Nullable ZonedDateTime internalAdjacentChange(Item item, boolean forward,
+            @Nullable String serviceId) {
+        return internalAdjacent(item, forward, true, serviceId);
+    }
+
+    private static @Nullable ZonedDateTime internalAdjacent(Item item, boolean forward, boolean skipEqual,
+            @Nullable String serviceId) {
         String effectiveServiceId = serviceId == null ? getDefaultServiceId() : serviceId;
         if (effectiveServiceId == null) {
             return null;
@@ -385,10 +446,49 @@ public class PersistenceExtensions {
                 filter.setEndDate(ZonedDateTime.now());
             }
             filter.setOrdering(forward ? Ordering.ASCENDING : Ordering.DESCENDING);
-            filter.setPageSize(1);
-            Iterable<HistoricItem> result = qService.query(filter);
-            if (result.iterator().hasNext()) {
-                return result.iterator().next().getTimestamp();
+
+            filter.setPageSize(skipEqual ? 1000 : 1);
+            int startPage = 0;
+            filter.setPageNumber(startPage);
+
+            Iterable<HistoricItem> items = qService.query(filter);
+            Iterator<HistoricItem> itemIterator = items.iterator();
+            State state = item.getState();
+            if (itemIterator.hasNext()) {
+                if (!skipEqual) {
+                    HistoricItem historicItem = itemIterator.next();
+                    if (!forward && !historicItem.getState().equals(state)) {
+                        // Last persisted state value different from current state value, so it must have updated since
+                        // last persist. We do not know when.
+                        return null;
+                    }
+                    return historicItem.getTimestamp();
+                } else {
+                    HistoricItem historicItem = itemIterator.next();
+                    int itemCount = 1;
+                    if (!historicItem.getState().equals(state)) {
+                        // Persisted state value different from current state value, so it must have changed, but we do
+                        // not know when when looking backward.
+                        return forward ? historicItem.getTimestamp() : null;
+                    }
+                    while (items != null) {
+                        while (historicItem.getState().equals(state) && itemIterator.hasNext()) {
+                            HistoricItem nextHistoricItem = itemIterator.next();
+                            itemCount++;
+                            if (!nextHistoricItem.getState().equals(state)) {
+                                return forward ? nextHistoricItem.getTimestamp() : historicItem.getTimestamp();
+                            }
+                            historicItem = nextHistoricItem;
+                        }
+                        if (itemCount == filter.getPageSize()) {
+                            filter.setPageNumber(++startPage);
+                            items = qService.query(filter);
+                            itemCount = 0;
+                        } else {
+                            items = null;
+                        }
+                    }
+                }
             }
         } else {
             LoggerFactory.getLogger(PersistenceExtensions.class)
