@@ -22,11 +22,13 @@ import org.openhab.core.thing.DefaultSystemChannelTypeProvider;
  * System profile constants.
  *
  * @author Simon Kaufmann - Initial contribution
+ * @author John Cocula - Added DIVIDE system state profile
  */
 @NonNullByDefault
 public interface SystemProfiles {
 
     ProfileTypeUID DEFAULT = new ProfileTypeUID(SYSTEM_SCOPE, "default");
+    ProfileTypeUID DIVIDE = new ProfileTypeUID(SYSTEM_SCOPE, "divide");
     ProfileTypeUID FOLLOW = new ProfileTypeUID(SYSTEM_SCOPE, "follow");
     ProfileTypeUID OFFSET = new ProfileTypeUID(SYSTEM_SCOPE, "offset");
     ProfileTypeUID HYSTERESIS = new ProfileTypeUID(SYSTEM_SCOPE, "hysteresis");
@@ -52,6 +54,10 @@ public interface SystemProfiles {
     ProfileTypeUID TIMESTAMP_UPDATE = new ProfileTypeUID(SYSTEM_SCOPE, "timestamp-update");
 
     ProfileType DEFAULT_TYPE = ProfileTypeBuilder.newState(DEFAULT, "Default").build();
+
+    ProfileType DIVIDE_TYPE = ProfileTypeBuilder.newState(DIVIDE, "Divide")
+            .withSupportedItemTypes(CoreItemFactory.NUMBER).withSupportedItemTypesOfChannel(CoreItemFactory.NUMBER)
+            .build();
 
     ProfileType FOLLOW_TYPE = ProfileTypeBuilder.newState(FOLLOW, "Follow").build();
 
