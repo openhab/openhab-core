@@ -30,6 +30,7 @@ import org.mockito.quality.Strictness;
 import org.openhab.core.io.rest.LocaleService;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.StringType;
 import org.openhab.core.service.StartLevelService;
 import org.openhab.core.transform.TransformationException;
@@ -55,16 +56,23 @@ public class SseItemStatesEventBuilderTest {
     private static final String ITEM_NAME = "test";
     private static final String ITEM_STATE_VALUE = "value";
     private static final String ITEM_STATE_VALUE2 = "other";
+    private static final int ITEM_STATE_VALUE3 = 16;
     private static final String ITEM_STATE_OPTION_LABEL = "The value";
 
     private static final String PATTERN = "__ %s __";
-    private static final String WRONG_PATTERN = "__ %d __";
+    private static final String PATTERN2 = "__ %d __";
 
     private static final String TRANSFORM_NAME = "TRANSFORM";
     private static final String TRANSFORM_PATTERN = "Pattern";
     private static final String TRANSFORM_FORMAT = "%s-1";
     private static final String TRANSFORM_INPUT = String.format(TRANSFORM_FORMAT, ITEM_STATE_VALUE);
-    private static final String TRANSFORM_RESULT = "Result";
+    private static final String TRANSFORM_INPUT2 = String.format(TRANSFORM_FORMAT, ITEM_STATE_VALUE2);
+    private static final String TRANSFORM_RESULT = "Result with string";
+    private static final String TRANSFORM_FORMAT_NUMBER = "_%d_";
+    private static final String TRANSFORM_INPUT3 = String.format(TRANSFORM_FORMAT_NUMBER, ITEM_STATE_VALUE3);
+    private static final String TRANSFORM_RESULT_NUMBER = "Result with number";
+    private static final String TRANSFORM_RESULT_NULL = "State is NULL";
+    private static final String TRANSFORM_RESULT_UNDEF = "State is UNDEF";
 
     private @Mock @NonNullByDefault({}) ItemRegistry itemRegistryMock;
     private @Mock @NonNullByDefault({}) LocaleService localeServiceMock;
@@ -85,6 +93,14 @@ public class SseItemStatesEventBuilderTest {
     public void init() throws TransformationException {
         Mockito.when(transformationServiceMock.transform(eq(TRANSFORM_PATTERN), eq(TRANSFORM_INPUT)))
                 .thenAnswer(answer -> TRANSFORM_RESULT);
+        Mockito.when(transformationServiceMock.transform(eq(TRANSFORM_PATTERN), eq(TRANSFORM_INPUT2)))
+                .thenAnswer(answer -> null);
+        Mockito.when(transformationServiceMock.transform(eq(TRANSFORM_PATTERN), eq(TRANSFORM_INPUT3)))
+                .thenAnswer(answer -> TRANSFORM_RESULT_NUMBER);
+        Mockito.when(transformationServiceMock.transform(eq(TRANSFORM_PATTERN), eq("NULL")))
+                .thenAnswer(answer -> TRANSFORM_RESULT_NULL);
+        Mockito.when(transformationServiceMock.transform(eq(TRANSFORM_PATTERN), eq("UNDEF")))
+                .thenAnswer(answer -> TRANSFORM_RESULT_UNDEF);
 
         Mockito.when(serviceRefMock.getProperty(any())).thenReturn(TRANSFORM_NAME);
 
@@ -139,7 +155,7 @@ public class SseItemStatesEventBuilderTest {
 
     @Test
     public void getDisplayStateWhenMatchingStateOptionAndWrongPattern() {
-        StateDescription stateDescription = StateDescriptionFragmentBuilder.create().withPattern(WRONG_PATTERN)
+        StateDescription stateDescription = StateDescriptionFragmentBuilder.create().withPattern(PATTERN2)
                 .withOption(new StateOption(ITEM_STATE_VALUE, ITEM_STATE_OPTION_LABEL)).build().toStateDescription();
         Mockito.when(itemMock.getStateDescription(eq(Locale.ENGLISH))).thenReturn(stateDescription);
 
@@ -168,6 +184,14 @@ public class SseItemStatesEventBuilderTest {
         Mockito.when(itemMock.getState()).thenReturn(new StringType(ITEM_STATE_VALUE));
         String result = sseItemStatesEventBuilder.getDisplayState(itemMock, Locale.ENGLISH);
         assertEquals(TRANSFORM_RESULT, result);
+
+        StateDescription stateDescription2 = StateDescriptionFragmentBuilder.create()
+                .withPattern(TRANSFORM_NAME + "(" + TRANSFORM_PATTERN + "):" + TRANSFORM_FORMAT_NUMBER).build()
+                .toStateDescription();
+        Mockito.when(itemMock.getStateDescription(eq(Locale.ENGLISH))).thenReturn(stateDescription2);
+        Mockito.when(itemMock.getState()).thenReturn(new DecimalType(ITEM_STATE_VALUE3));
+        result = sseItemStatesEventBuilder.getDisplayState(itemMock, Locale.ENGLISH);
+        assertEquals(TRANSFORM_RESULT_NUMBER, result);
     }
 
     @Test
@@ -179,6 +203,25 @@ public class SseItemStatesEventBuilderTest {
         Mockito.when(itemMock.getState()).thenReturn(new StringType(ITEM_STATE_VALUE));
         String result = sseItemStatesEventBuilder.getDisplayState(itemMock, Locale.ENGLISH);
         assertEquals(TRANSFORM_RESULT, result);
+
+        StateDescription stateDescription2 = StateDescriptionFragmentBuilder.create()
+                .withPattern(TRANSFORM_NAME + "(" + TRANSFORM_PATTERN + "):" + TRANSFORM_FORMAT_NUMBER).build()
+                .toStateDescription();
+        Mockito.when(itemMock.getStateDescription(eq(Locale.ENGLISH))).thenReturn(stateDescription2);
+        Mockito.when(itemMock.getState()).thenReturn(new DecimalType(ITEM_STATE_VALUE3));
+        result = sseItemStatesEventBuilder.getDisplayState(itemMock, Locale.ENGLISH);
+        assertEquals(TRANSFORM_RESULT_NUMBER, result);
+    }
+
+    @Test
+    public void getDisplayStateWhenTransformReturningNull() {
+        StateDescription stateDescription = StateDescriptionFragmentBuilder.create()
+                .withPattern(TRANSFORM_NAME + "(" + TRANSFORM_PATTERN + "):" + TRANSFORM_FORMAT).build()
+                .toStateDescription();
+        Mockito.when(itemMock.getStateDescription(eq(Locale.ENGLISH))).thenReturn(stateDescription);
+        Mockito.when(itemMock.getState()).thenReturn(new StringType(ITEM_STATE_VALUE2));
+        String result = sseItemStatesEventBuilder.getDisplayState(itemMock, Locale.ENGLISH);
+        assertEquals(ITEM_STATE_VALUE2, result);
     }
 
     @Test
@@ -202,6 +245,28 @@ public class SseItemStatesEventBuilderTest {
     }
 
     @Test
+    public void getDisplayStateWhenTransformAndStateUndef() {
+        StateDescription stateDescription = StateDescriptionFragmentBuilder.create().withPattern(PATTERN)
+                .withPattern(TRANSFORM_NAME + "(" + TRANSFORM_PATTERN + "):" + TRANSFORM_FORMAT_NUMBER).build()
+                .toStateDescription();
+        Mockito.when(itemMock.getStateDescription(eq(Locale.ENGLISH))).thenReturn(stateDescription);
+        Mockito.when(itemMock.getState()).thenReturn(UnDefType.UNDEF);
+        String result = sseItemStatesEventBuilder.getDisplayState(itemMock, Locale.ENGLISH);
+        assertEquals(TRANSFORM_RESULT_UNDEF, result);
+    }
+
+    @Test
+    public void getDisplayStateWhenTransformAndStateNull() {
+        StateDescription stateDescription = StateDescriptionFragmentBuilder.create().withPattern(PATTERN)
+                .withPattern(TRANSFORM_NAME + "(" + TRANSFORM_PATTERN + "):" + TRANSFORM_FORMAT_NUMBER).build()
+                .toStateDescription();
+        Mockito.when(itemMock.getStateDescription(eq(Locale.ENGLISH))).thenReturn(stateDescription);
+        Mockito.when(itemMock.getState()).thenReturn(UnDefType.NULL);
+        String result = sseItemStatesEventBuilder.getDisplayState(itemMock, Locale.ENGLISH);
+        assertEquals(TRANSFORM_RESULT_NULL, result);
+    }
+
+    @Test
     public void getDisplayStateWhenPatternProvided() {
         StateDescription stateDescription = StateDescriptionFragmentBuilder.create().withPattern(PATTERN).build()
                 .toStateDescription();
@@ -209,11 +274,18 @@ public class SseItemStatesEventBuilderTest {
         Mockito.when(itemMock.getState()).thenReturn(new StringType(ITEM_STATE_VALUE));
         String result = sseItemStatesEventBuilder.getDisplayState(itemMock, Locale.ENGLISH);
         assertEquals(String.format(PATTERN, ITEM_STATE_VALUE), result);
+
+        StateDescription stateDescription2 = StateDescriptionFragmentBuilder.create().withPattern(PATTERN2).build()
+                .toStateDescription();
+        Mockito.when(itemMock.getStateDescription(eq(Locale.ENGLISH))).thenReturn(stateDescription2);
+        Mockito.when(itemMock.getState()).thenReturn(new DecimalType(ITEM_STATE_VALUE3));
+        result = sseItemStatesEventBuilder.getDisplayState(itemMock, Locale.ENGLISH);
+        assertEquals(String.format(PATTERN2, ITEM_STATE_VALUE3), result);
     }
 
     @Test
     public void getDisplayStateWhenWrongPatternProvided() {
-        StateDescription stateDescription = StateDescriptionFragmentBuilder.create().withPattern(WRONG_PATTERN).build()
+        StateDescription stateDescription = StateDescriptionFragmentBuilder.create().withPattern(PATTERN2).build()
                 .toStateDescription();
         Mockito.when(itemMock.getStateDescription(eq(Locale.ENGLISH))).thenReturn(stateDescription);
         Mockito.when(itemMock.getState()).thenReturn(new StringType(ITEM_STATE_VALUE));
@@ -228,6 +300,10 @@ public class SseItemStatesEventBuilderTest {
         Mockito.when(itemMock.getState()).thenReturn(new StringType(ITEM_STATE_VALUE));
         String result = sseItemStatesEventBuilder.getDisplayState(itemMock, Locale.ENGLISH);
         assertEquals(ITEM_STATE_VALUE, result);
+
+        Mockito.when(itemMock.getState()).thenReturn(new DecimalType(ITEM_STATE_VALUE3));
+        result = sseItemStatesEventBuilder.getDisplayState(itemMock, Locale.ENGLISH);
+        assertEquals(String.format("%d", ITEM_STATE_VALUE3), result);
     }
 
     @Test
@@ -236,5 +312,9 @@ public class SseItemStatesEventBuilderTest {
         Mockito.when(itemMock.getState()).thenReturn(new StringType(ITEM_STATE_VALUE));
         String result = sseItemStatesEventBuilder.getDisplayState(itemMock, Locale.ENGLISH);
         assertEquals(ITEM_STATE_VALUE, result);
+
+        Mockito.when(itemMock.getState()).thenReturn(new DecimalType(ITEM_STATE_VALUE3));
+        result = sseItemStatesEventBuilder.getDisplayState(itemMock, Locale.ENGLISH);
+        assertEquals(String.format("%d", ITEM_STATE_VALUE3), result);
     }
 }
