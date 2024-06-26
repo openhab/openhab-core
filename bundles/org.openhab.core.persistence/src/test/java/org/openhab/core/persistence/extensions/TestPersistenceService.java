@@ -29,6 +29,7 @@ import javax.measure.Unit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.library.items.NumberItem;
@@ -183,7 +184,11 @@ public class TestPersistenceService implements QueryablePersistenceService {
                     @Override
                     public State getState() {
                         Item item = itemRegistry.get(Objects.requireNonNull(filter.getItemName()));
-                        Unit<?> unit = item instanceof NumberItem ni ? ni.getUnit() : null;
+                        Item baseItem = item;
+                        if (baseItem instanceof GroupItem groupItem) {
+                            baseItem = groupItem.getBaseItem();
+                        }
+                        Unit<?> unit = baseItem instanceof NumberItem ni ? ni.getUnit() : null;
                         return unit == null ? new DecimalType(year) : QuantityType.valueOf(year, unit);
                     }
 
