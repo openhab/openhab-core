@@ -1,4 +1,6 @@
 target/
+**/.classpath
+**/.project
 src-gen/
 xtend-gen/
 bin/
