@@ -2647,7 +2647,7 @@ public class PersistenceExtensions {
             } else {
                 LoggerFactory.getLogger(PersistenceExtensions.class).warn(
                         "Item {} is QuantityType but state {} at time {} retrieved from persistence has no unit",
-                        historicItem.getName(), historicItem.getTimestamp());
+                        historicItem.getName(), historicItem.getState(), historicItem.getTimestamp());
                 return null;
             }
         }
