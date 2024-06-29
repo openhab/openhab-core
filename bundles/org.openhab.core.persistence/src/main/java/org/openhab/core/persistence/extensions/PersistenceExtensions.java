@@ -991,19 +991,7 @@ public class PersistenceExtensions {
         DecimalType maximum = null;
         while (it.hasNext()) {
             HistoricItem historicItem = it.next();
-            State state = historicItem.getState();
-            if ((unit != null) && state instanceof QuantityType<?> qtState) {
-                qtState = qtState.toUnit(unit);
-                if (qtState != null) {
-                    state = qtState;
-                } else {
-                    LoggerFactory.getLogger(PersistenceExtensions.class).warn(
-                            "Unit of state {} at time {} retrieved from persistence not compatible with item unit {}",
-                            state, historicItem.getTimestamp(), unit);
-                    continue;
-                }
-            }
-            DecimalType value = state.as(DecimalType.class);
+            DecimalType value = getPersistedValue(historicItem, unit);
             if (value != null) {
                 if (maximum == null || value.compareTo(maximum) > 0) {
                     maximum = value;
@@ -1134,19 +1122,7 @@ public class PersistenceExtensions {
         DecimalType minimum = null;
         while (it.hasNext()) {
             HistoricItem historicItem = it.next();
-            State state = historicItem.getState();
-            if ((unit != null) && state instanceof QuantityType<?> qtState) {
-                qtState = qtState.toUnit(unit);
-                if (qtState != null) {
-                    state = qtState;
-                } else {
-                    LoggerFactory.getLogger(PersistenceExtensions.class).warn(
-                            "Unit of state {} at time {} retrieved from persistence not compatible with item unit {}",
-                            state, historicItem.getTimestamp(), unit);
-                    continue;
-                }
-            }
-            DecimalType value = state.as(DecimalType.class);
+            DecimalType value = getPersistedValue(historicItem, unit);
             if (value != null) {
                 if (minimum == null || value.compareTo(minimum) < 0) {
                     minimum = value;
@@ -1278,19 +1254,7 @@ public class PersistenceExtensions {
             Iterator<HistoricItem> it = result.iterator();
             while (it.hasNext()) {
                 HistoricItem historicItem = it.next();
-                State state = historicItem.getState();
-                if ((unit != null) && (state instanceof QuantityType<?> qtState)) {
-                    qtState = qtState.toUnit(unit);
-                    if (qtState != null) {
-                        state = qtState;
-                    } else {
-                        LoggerFactory.getLogger(PersistenceExtensions.class).warn(
-                                "Unit of state {} at time {} retrieved from persistence not compatible with item unit {}",
-                                state, historicItem.getTimestamp(), unit);
-                        continue;
-                    }
-                }
-                DecimalType value = state.as(DecimalType.class);
+                DecimalType value = getPersistedValue(historicItem, unit);
                 if (value != null) {
                     count++;
                     sum = sum.add(value.toBigDecimal().subtract(average, MathContext.DECIMAL64).pow(2,
@@ -1580,19 +1544,7 @@ public class PersistenceExtensions {
         while (it.hasNext()) {
             HistoricItem thisItem = it.next();
             if (lastItem != null) {
-                State state = lastItem.getState();
-                if ((unit != null) && (state instanceof QuantityType<?> qtState)) {
-                    qtState = qtState.toUnit(unit);
-                    if (qtState != null) {
-                        state = qtState;
-                    } else {
-                        LoggerFactory.getLogger(PersistenceExtensions.class).warn(
-                                "Unit of state {} at time {} retrieved from persistence not compatible with item unit {}",
-                                state, lastItem.getTimestamp(), unit);
-                        continue;
-                    }
-                }
-                DecimalType dtState = state.as(DecimalType.class);
+                DecimalType dtState = getPersistedValue(lastItem, unit);
                 if (dtState != null) {
                     BigDecimal value = dtState.toBigDecimal();
                     BigDecimal weight = BigDecimal
@@ -1728,19 +1680,7 @@ public class PersistenceExtensions {
             BigDecimal sum = BigDecimal.ZERO;
             while (it.hasNext()) {
                 HistoricItem historicItem = it.next();
-                State state = historicItem.getState();
-                if ((unit != null) && (state instanceof QuantityType<?> qtState)) {
-                    qtState = qtState.toUnit(unit);
-                    if (qtState != null) {
-                        state = qtState;
-                    } else {
-                        LoggerFactory.getLogger(PersistenceExtensions.class).warn(
-                                "Unit of state {} at time {} retrieved from persistence not compatible with item unit {}",
-                                state, historicItem.getTimestamp(), unit);
-                        continue;
-                    }
-                }
-                DecimalType value = state.as(DecimalType.class);
+                DecimalType value = getPersistedValue(historicItem, unit);
                 if (value != null) {
                     sum = sum.add(value.toBigDecimal());
                 }
@@ -1864,35 +1804,12 @@ public class PersistenceExtensions {
 
         DecimalType valueStart = null;
         if (itemStart != null) {
-            State state = itemStart.getState();
-            if ((unit != null) && (state instanceof QuantityType<?> qtState)) {
-                qtState = qtState.toUnit(unit);
-                if (qtState != null) {
-                    valueStart = qtState.as(DecimalType.class);
-                } else {
-                    LoggerFactory.getLogger(PersistenceExtensions.class).warn(
-                            "Unit of state {} at time {} retrieved from persistence not compatible with item unit {}",
-                            state, itemStart.getTimestamp(), unit);
-                }
-            } else {
-                valueStart = state.as(DecimalType.class);
-            }
+            valueStart = getPersistedValue(itemStart, unit);
         }
         DecimalType valueStop = null;
         if (itemStop != null) {
-            State state = itemStop.getState();
-            if ((unit != null) && (state instanceof QuantityType<?> qtState)) {
-                qtState = qtState.toUnit(unit);
-                if (qtState != null) {
-                    valueStop = qtState.as(DecimalType.class);
-                } else {
-                    LoggerFactory.getLogger(PersistenceExtensions.class).warn(
-                            "Unit of state {} at time {} retrieved from persistence not compatible with item unit {}",
-                            state, itemStop.getTimestamp(), unit);
-                }
-            } else {
-                valueStop = state.as(DecimalType.class);
-            }
+            valueStop = getPersistedValue(itemStop, unit);
+
         }
 
         if (begin == null && end != null && end.isAfter(ZonedDateTime.now())) {
@@ -2128,35 +2045,12 @@ public class PersistenceExtensions {
 
         DecimalType valueStart = null;
         if (itemStart != null) {
-            State state = itemStart.getState();
-            if ((unit != null) && (state instanceof QuantityType<?> qtState)) {
-                qtState = qtState.toUnit(unit);
-                if (qtState != null) {
-                    valueStart = qtState.as(DecimalType.class);
-                } else {
-                    LoggerFactory.getLogger(PersistenceExtensions.class).warn(
-                            "Unit of state {} at time {} retrieved from persistence not compatible with item unit {}",
-                            state, itemStart.getTimestamp(), unit);
-                }
-            } else {
-                valueStart = state.as(DecimalType.class);
-            }
+            valueStart = getPersistedValue(itemStart, unit);
         }
         DecimalType valueStop = null;
         if (itemStop != null) {
-            State state = itemStop.getState();
-            if ((unit != null) && (state instanceof QuantityType<?> qtState)) {
-                qtState = qtState.toUnit(unit);
-                if (qtState != null) {
-                    valueStop = qtState.as(DecimalType.class);
-                } else {
-                    LoggerFactory.getLogger(PersistenceExtensions.class).warn(
-                            "Unit of state {} at time {} retrieved from persistence not compatible with item unit {}",
-                            state, itemStop.getTimestamp(), unit);
-                }
-            } else {
-                valueStop = state.as(DecimalType.class);
-            }
+            valueStop = getPersistedValue(itemStop, unit);
+
         }
 
         if (begin == null && end != null && end.isAfter(ZonedDateTime.now())) {
@@ -2735,6 +2629,29 @@ public class PersistenceExtensions {
             }
         }
         return item.getStateAs(DecimalType.class);
+    }
+
+    private static @Nullable DecimalType getPersistedValue(HistoricItem historicItem, @Nullable Unit<?> unit) {
+        State state = historicItem.getState();
+        if (unit != null) {
+            if (state instanceof QuantityType<?> qtState) {
+                qtState = qtState.toUnit(unit);
+                if (qtState != null) {
+                    state = qtState;
+                } else {
+                    LoggerFactory.getLogger(PersistenceExtensions.class).warn(
+                            "Unit of state {} at time {} retrieved from persistence not compatible with item unit {} for item {}",
+                            state, historicItem.getTimestamp(), unit, historicItem.getName());
+                    return null;
+                }
+            } else {
+                LoggerFactory.getLogger(PersistenceExtensions.class).warn(
+                        "Item {} is QuantityType but state {} at time {} retrieved from persistence has no unit",
+                        historicItem.getName(), historicItem.getTimestamp());
+                return null;
+            }
+        }
+        return state.as(DecimalType.class);
     }
 
     private static @Nullable HistoricItem historicItemOrCurrentState(Item item, @Nullable HistoricItem historicItem) {
