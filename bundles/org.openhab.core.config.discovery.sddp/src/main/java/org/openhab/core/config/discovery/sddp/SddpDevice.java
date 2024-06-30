@@ -35,7 +35,7 @@ public class SddpDevice {
 
     /**
      * The host address of the device.
-     * For example: JVC_PROJECTOR-E0DADC152802
+     * For example: JVC_PROJECTOR-E0DADC152802 or JVC_PROJECTOR-E0:DA:DC:15:28:02
      * Note: the last 12 characters represent the MAC address of the device.
      */
     public final String host;
@@ -131,7 +131,7 @@ public class SddpDevice {
 
         String[] hostParts = host.split("-|_");
         macAddress = hostParts.length <= 1 ? ""
-                : hostParts[hostParts.length - 1].replaceAll("(..)(?!$)", "$1-").toLowerCase();
+                : hostParts[hostParts.length - 1].replaceAll(":", "").replaceAll("(..)(?!$)", "$1-").toLowerCase();
 
         expireInstant = offline ? Instant.now().minusMillis(1)
                 : Instant.now().plusSeconds(maxAge.isBlank() ? 0 : Integer.parseInt(maxAge));

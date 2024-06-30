@@ -57,7 +57,7 @@ public class SddpDiscoveryServiceTests {
     private static final String IDENTIFY_NOTIFICATION = """
             NOTIFY IDENTIFY SDDP/1.0
             From: "192.168.4.237:1902"
-            Host: "JVC_PROJECTOR-E0DADC152802"
+            Host: "JVC_PROJECTOR-E0:DA:DC:15:28:02"
             Type: "JVCKENWOOD:Projector"
             Primary-Proxy: "projector"
             Proxies: "projector"
@@ -136,7 +136,7 @@ public class SddpDiscoveryServiceTests {
             SddpDevice device = deviceOptional.orElse(null);
             assertNotNull(device);
             assertEquals("192.168.4.237:1902", device.from);
-            assertEquals("JVC_PROJECTOR-E0DADC152802", device.host);
+            assertEquals("JVC_PROJECTOR-E0:DA:DC:15:28:02", device.host);
             assertTrue(device.maxAge.isBlank());
             assertEquals("JVCKENWOOD:Projector", device.type);
             assertEquals("projector", device.primaryProxy);
