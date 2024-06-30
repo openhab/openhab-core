@@ -251,6 +251,15 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
         return findEngineFactory(scriptType) != null;
     }
 
+    @Override
+    public boolean isPreCompilationSupported(String scriptType) {
+        ScriptEngineFactory engineFactory = findEngineFactory(scriptType);
+        if (engineFactory != null) {
+            return engineFactory.supportsPreCompilation();
+        }
+        return false;
+    }
+
     private void addAttributeToScriptContext(ScriptEngine engine, String name, Object value) {
         ScriptContext scriptContext = engine.getContext();
 
