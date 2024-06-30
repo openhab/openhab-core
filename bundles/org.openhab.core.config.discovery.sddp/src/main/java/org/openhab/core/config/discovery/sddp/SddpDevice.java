@@ -110,7 +110,7 @@ public class SddpDevice {
 
     /**
      * Constructor.
-     *
+     * 
      * @param headers a map of parameter name / value pairs.
      * @param offline indicates if the device is being created from a NOTIFY OFFLINE announcement.
      */
