@@ -31,6 +31,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import org.openhab.core.common.PoolBasedSequentialScheduledExecutorService.BasePoolExecutor;
 import org.openhab.core.internal.common.WrappedScheduledExecutorService;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentConstants;
@@ -100,7 +101,10 @@ public class ThreadPoolManager {
                     Integer poolSize = Integer.valueOf(string);
                     configs.put(poolName, poolSize);
                     ThreadPoolExecutor pool = (ThreadPoolExecutor) pools.get(poolName);
-                    if (pool instanceof ScheduledThreadPoolExecutor) {
+                    if (pool instanceof BasePoolExecutor basePool) {
+                        basePool.setMinimumPoolSize(poolSize);
+                        LOGGER.debug("Updated scheduled thread pool '{}' to minimum size {}", poolName, poolSize);
+                    } else if (pool instanceof ScheduledThreadPoolExecutor) {
                         pool.setCorePoolSize(poolSize);
                         LOGGER.debug("Updated scheduled thread pool '{}' to size {}", poolName, poolSize);
                     } else if (pool instanceof QueueingThreadPoolExecutor) {
@@ -129,9 +133,22 @@ public class ThreadPoolManager {
     public static ScheduledExecutorService getPoolBasedSequentialScheduledExecutorService(String poolName,
             String threadName) {
         if (configs.getOrDefault(poolName, 0) > 0) {
-            ScheduledThreadPoolExecutor pool = getScheduledPoolUnwrapped(poolName);
+            ExecutorService pool = pools.computeIfAbsent(poolName, name -> {
+                int cfg = getConfig(name);
+                ScheduledThreadPoolExecutor executor = new BasePoolExecutor(name, cfg,
+                        new NamedThreadFactory(name, true, Thread.NORM_PRIORITY));
+                executor.setKeepAliveTime(THREAD_TIMEOUT, TimeUnit.SECONDS);
+                executor.allowCoreThreadTimeOut(true);
+                executor.setRemoveOnCancelPolicy(true);
+                LOGGER.debug("Created scheduled pool based thread pool '{}' of size {}", name, cfg);
+                return executor;
+            });
 
-            return new PoolBasedSequentialScheduledExecutorService((ScheduledThreadPoolExecutor) pool);
+            if (pool instanceof BasePoolExecutor service) {
+                return new PoolBasedSequentialScheduledExecutorService(service);
+            } else {
+                throw new IllegalArgumentException("Pool " + poolName + " is not a base pool!");
+            }
         } else {
             return Executors.newSingleThreadScheduledExecutor(new NamedThreadFactory(threadName));
         }
