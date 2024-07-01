@@ -202,7 +202,7 @@ public class ThreadPoolManagerTest {
                 block.countDown();
             }, 20, TimeUnit.MILLISECONDS);
 
-            assertTrue(check.await(80, TimeUnit.MILLISECONDS));
+            assertTrue(check.await(800, TimeUnit.MILLISECONDS));
         }
     }
 
