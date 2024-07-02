@@ -99,7 +99,8 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
 
         // read initial contents
         try (Stream<Path> files = Files.walk(watchPath)) {
-            files.filter(Files::isRegularFile).map(watchPath::relativize).forEach(f -> processWatchEvent(CREATE, f));
+            files.filter(f -> Files.isReadable(f) && Files.isRegularFile(f)).map(watchPath::relativize)
+                    .forEach(f -> processWatchEvent(CREATE, f));
         } catch (IOException e) {
             logger.warn("Could not list YAML files in '{}', models might be missing: {}", watchPath, e.getMessage());
         }
@@ -116,7 +117,8 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
     public synchronized void processWatchEvent(Kind kind, Path path) {
         Path fullPath = watchPath.resolve(path);
         String pathString = path.toString();
-        if (Files.isDirectory(fullPath) || fullPath.toFile().isHidden() || !pathString.endsWith(".yaml")) {
+        if (!Files.isReadable(fullPath) || Files.isDirectory(fullPath) || path.startsWith("automation")
+                || !pathString.endsWith(".yaml") || fullPath.toFile().isHidden()) {
             logger.trace("Ignored {}", fullPath);
             return;
         }
