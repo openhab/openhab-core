@@ -28,6 +28,7 @@ import javax.measure.Unit;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.i18n.TimeZoneProvider;
+import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
 import org.openhab.core.library.items.NumberItem;
 import org.openhab.core.library.types.DecimalType;
@@ -61,6 +62,7 @@ import org.slf4j.LoggerFactory;
  * @author Mark Herwege - Changed return types to State for some interval methods to also return unit
  * @author Mark Herwege - Extended for future dates
  * @author Mark Herwege - lastChange and nextChange methods
+ * @author mark Herwege - handle persisted GroupItem with QuantityType
  */
 @Component(immediate = true)
 @NonNullByDefault
@@ -980,10 +982,16 @@ public class PersistenceExtensions {
         Iterator<HistoricItem> it = result.iterator();
         HistoricItem maximumHistoricItem = null;
 
+        Item baseItem = item;
+        if (baseItem instanceof GroupItem groupItem) {
+            baseItem = groupItem.getBaseItem();
+        }
+        Unit<?> unit = (baseItem instanceof NumberItem numberItem) ? numberItem.getUnit() : null;
+
         DecimalType maximum = null;
         while (it.hasNext()) {
             HistoricItem historicItem = it.next();
-            DecimalType value = historicItem.getState().as(DecimalType.class);
+            DecimalType value = getPersistedValue(historicItem, unit);
             if (value != null) {
                 if (maximum == null || value.compareTo(maximum) > 0) {
                     maximum = value;
@@ -1105,10 +1113,16 @@ public class PersistenceExtensions {
         Iterator<HistoricItem> it = result.iterator();
         HistoricItem minimumHistoricItem = null;
 
+        Item baseItem = item;
+        if (baseItem instanceof GroupItem groupItem) {
+            baseItem = groupItem.getBaseItem();
+        }
+        Unit<?> unit = (baseItem instanceof NumberItem numberItem) ? numberItem.getUnit() : null;
+
         DecimalType minimum = null;
         while (it.hasNext()) {
             HistoricItem historicItem = it.next();
-            DecimalType value = historicItem.getState().as(DecimalType.class);
+            DecimalType value = getPersistedValue(historicItem, unit);
             if (value != null) {
                 if (minimum == null || value.compareTo(minimum) < 0) {
                     minimum = value;
@@ -1231,10 +1245,16 @@ public class PersistenceExtensions {
             BigDecimal average = dt != null ? dt.toBigDecimal() : BigDecimal.ZERO, sum = BigDecimal.ZERO;
             int count = 0;
 
+            Item baseItem = item;
+            if (baseItem instanceof GroupItem groupItem) {
+                baseItem = groupItem.getBaseItem();
+            }
+            Unit<?> unit = baseItem instanceof NumberItem numberItem ? numberItem.getUnit() : null;
+
             Iterator<HistoricItem> it = result.iterator();
             while (it.hasNext()) {
                 HistoricItem historicItem = it.next();
-                DecimalType value = historicItem.getState().as(DecimalType.class);
+                DecimalType value = getPersistedValue(historicItem, unit);
                 if (value != null) {
                     count++;
                     sum = sum.add(value.toBigDecimal().subtract(average, MathContext.DECIMAL64).pow(2,
@@ -1245,11 +1265,8 @@ public class PersistenceExtensions {
             // avoid division by zero
             if (count > 0) {
                 BigDecimal variance = sum.divide(BigDecimal.valueOf(count), MathContext.DECIMAL64);
-                if (item instanceof NumberItem numberItem) {
-                    Unit<?> unit = numberItem.getUnit();
-                    if (unit != null) {
-                        return new QuantityType<>(variance, unit.multiply(unit));
-                    }
+                if (unit != null) {
+                    return new QuantityType<>(variance, unit.multiply(unit));
                 }
                 return new DecimalType(variance);
             }
@@ -1385,7 +1402,11 @@ public class PersistenceExtensions {
             // avoid ArithmeticException if variance is less than zero
             if (dt != null && DecimalType.ZERO.compareTo(dt) <= 0) {
                 BigDecimal deviation = dt.toBigDecimal().sqrt(MathContext.DECIMAL64);
-                if (item instanceof NumberItem numberItem) {
+                Item baseItem = item;
+                if (baseItem instanceof GroupItem groupItem) {
+                    baseItem = groupItem.getBaseItem();
+                }
+                if (baseItem instanceof NumberItem numberItem) {
                     Unit<?> unit = numberItem.getUnit();
                     if (unit != null) {
                         return new QuantityType<>(deviation, unit);
@@ -1514,10 +1535,16 @@ public class PersistenceExtensions {
         HistoricItem lastItem = null;
         ZonedDateTime firstTimestamp = null;
 
+        Item baseItem = item;
+        if (baseItem instanceof GroupItem groupItem) {
+            baseItem = groupItem.getBaseItem();
+        }
+        Unit<?> unit = baseItem instanceof NumberItem numberItem ? numberItem.getUnit() : null;
+
         while (it.hasNext()) {
             HistoricItem thisItem = it.next();
             if (lastItem != null) {
-                DecimalType dtState = lastItem.getState().as(DecimalType.class);
+                DecimalType dtState = getPersistedValue(lastItem, unit);
                 if (dtState != null) {
                     BigDecimal value = dtState.toBigDecimal();
                     BigDecimal weight = BigDecimal
@@ -1538,11 +1565,8 @@ public class PersistenceExtensions {
                 return null;
             }
             BigDecimal average = sum.divide(totalDuration, MathContext.DECIMAL64);
-            if (item instanceof NumberItem numberItem) {
-                Unit<?> unit = numberItem.getUnit();
-                if (unit != null) {
-                    return new QuantityType<>(average, unit);
-                }
+            if (unit != null) {
+                return new QuantityType<>(average, unit);
             }
             return new DecimalType(average);
         }
@@ -1647,19 +1671,22 @@ public class PersistenceExtensions {
         if (result != null) {
             Iterator<HistoricItem> it = result.iterator();
 
+            Item baseItem = item;
+            if (baseItem instanceof GroupItem groupItem) {
+                baseItem = groupItem.getBaseItem();
+            }
+            Unit<?> unit = baseItem instanceof NumberItem numberItem ? numberItem.getUnit() : null;
+
             BigDecimal sum = BigDecimal.ZERO;
             while (it.hasNext()) {
                 HistoricItem historicItem = it.next();
-                DecimalType value = historicItem.getState().as(DecimalType.class);
+                DecimalType value = getPersistedValue(historicItem, unit);
                 if (value != null) {
                     sum = sum.add(value.toBigDecimal());
                 }
             }
-            if (item instanceof NumberItem numberItem) {
-                Unit<?> unit = numberItem.getUnit();
-                if (unit != null) {
-                    return new QuantityType<>(sum, unit);
-                }
+            if (unit != null) {
+                return new QuantityType<>(sum, unit);
             }
             return new DecimalType(sum);
         }
@@ -1768,8 +1795,23 @@ public class PersistenceExtensions {
         }
         HistoricItem itemStart = internalPersistedState(item, begin, effectiveServiceId);
         HistoricItem itemStop = internalPersistedState(item, end, effectiveServiceId);
-        DecimalType valueStart = itemStart != null ? itemStart.getState().as(DecimalType.class) : null;
-        DecimalType valueStop = itemStop != null ? itemStop.getState().as(DecimalType.class) : null;
+
+        Item baseItem = item;
+        if (baseItem instanceof GroupItem groupItem) {
+            baseItem = groupItem.getBaseItem();
+        }
+        Unit<?> unit = baseItem instanceof NumberItem numberItem ? numberItem.getUnit() : null;
+
+        DecimalType valueStart = null;
+        if (itemStart != null) {
+            valueStart = getPersistedValue(itemStart, unit);
+        }
+        DecimalType valueStop = null;
+        if (itemStop != null) {
+            valueStop = getPersistedValue(itemStop, unit);
+
+        }
+
         if (begin == null && end != null && end.isAfter(ZonedDateTime.now())) {
             valueStart = getItemValue(item);
         }
@@ -1779,10 +1821,7 @@ public class PersistenceExtensions {
 
         if (valueStart != null && valueStop != null) {
             BigDecimal delta = valueStop.toBigDecimal().subtract(valueStart.toBigDecimal());
-            if (item instanceof NumberItem numberItem) {
-                Unit<?> unit = numberItem.getUnit();
-                return (unit != null) ? new QuantityType<>(delta, unit) : new DecimalType(delta);
-            }
+            return (unit != null) ? new QuantityType<>(delta, unit) : new DecimalType(delta);
         }
         return null;
     }
@@ -1994,10 +2033,26 @@ public class PersistenceExtensions {
         if (effectiveServiceId == null) {
             return null;
         }
+
+        Item baseItem = item;
+        if (baseItem instanceof GroupItem groupItem) {
+            baseItem = groupItem.getBaseItem();
+        }
+        Unit<?> unit = baseItem instanceof NumberItem numberItem ? numberItem.getUnit() : null;
+
         HistoricItem itemStart = internalPersistedState(item, begin, effectiveServiceId);
         HistoricItem itemStop = internalPersistedState(item, end, effectiveServiceId);
-        DecimalType valueStart = itemStart != null ? itemStart.getState().as(DecimalType.class) : null;
-        DecimalType valueStop = itemStop != null ? itemStop.getState().as(DecimalType.class) : null;
+
+        DecimalType valueStart = null;
+        if (itemStart != null) {
+            valueStart = getPersistedValue(itemStart, unit);
+        }
+        DecimalType valueStop = null;
+        if (itemStop != null) {
+            valueStop = getPersistedValue(itemStop, unit);
+
+        }
+
         if (begin == null && end != null && end.isAfter(ZonedDateTime.now())) {
             valueStart = getItemValue(item);
         }
@@ -2559,7 +2614,11 @@ public class PersistenceExtensions {
     }
 
     private static @Nullable DecimalType getItemValue(Item item) {
-        if (item instanceof NumberItem numberItem) {
+        Item baseItem = item;
+        if (baseItem instanceof GroupItem groupItem) {
+            baseItem = groupItem.getBaseItem();
+        }
+        if (baseItem instanceof NumberItem numberItem) {
             Unit<?> unit = numberItem.getUnit();
             if (unit != null) {
                 QuantityType<?> qt = item.getStateAs(QuantityType.class);
@@ -2570,6 +2629,29 @@ public class PersistenceExtensions {
             }
         }
         return item.getStateAs(DecimalType.class);
+    }
+
+    private static @Nullable DecimalType getPersistedValue(HistoricItem historicItem, @Nullable Unit<?> unit) {
+        State state = historicItem.getState();
+        if (unit != null) {
+            if (state instanceof QuantityType<?> qtState) {
+                qtState = qtState.toUnit(unit);
+                if (qtState != null) {
+                    state = qtState;
+                } else {
+                    LoggerFactory.getLogger(PersistenceExtensions.class).warn(
+                            "Unit of state {} at time {} retrieved from persistence not compatible with item unit {} for item {}",
+                            state, historicItem.getTimestamp(), unit, historicItem.getName());
+                    return null;
+                }
+            } else {
+                LoggerFactory.getLogger(PersistenceExtensions.class).warn(
+                        "Item {} is QuantityType but state {} at time {} retrieved from persistence has no unit",
+                        historicItem.getName(), historicItem.getState(), historicItem.getTimestamp());
+                return null;
+            }
+        }
+        return state.as(DecimalType.class);
     }
 
     private static @Nullable HistoricItem historicItemOrCurrentState(Item item, @Nullable HistoricItem historicItem) {
