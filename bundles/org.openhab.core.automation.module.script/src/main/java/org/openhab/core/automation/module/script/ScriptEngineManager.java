@@ -62,6 +62,14 @@ public interface ScriptEngineManager {
     boolean isSupported(String scriptType);
 
     /**
+     * Checks if the supplied file extension or MimeType supports pre-compilation.
+     *
+     * @param scriptType a file extension (script) or MimeType (ScriptAction or ScriptCondition)
+     * @return true, if pre-compilation supported, else false
+     */
+    boolean isPreCompilationSupported(String scriptType);
+
+    /**
      * Add a listener that is notified when a ScriptEngineFactory is added or removed
      *
      * @param listener an object that implements {@link FactoryChangeListener}

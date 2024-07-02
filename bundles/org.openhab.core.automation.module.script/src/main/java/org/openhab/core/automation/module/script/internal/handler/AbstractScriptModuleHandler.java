@@ -18,10 +18,14 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.UUID;
 
+import javax.script.Compilable;
+import javax.script.CompiledScript;
 import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
+import javax.script.ScriptException;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.Module;
 import org.openhab.core.automation.handler.BaseModuleHandler;
 import org.openhab.core.automation.module.script.ScriptEngineContainer;
@@ -35,6 +39,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Simon Merschjohann - Initial contribution
+ * @author Florian Hotze - Add support for script pre-compilation
  *
  * @param <T> the type of module the concrete handler can handle
  */
@@ -54,6 +59,7 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
     private final String engineIdentifier;
 
     private Optional<ScriptEngine> scriptEngine = Optional.empty();
+    private Optional<CompiledScript> compiledScript = Optional.empty();
     private final String type;
     protected final String script;
 
@@ -77,6 +83,31 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
         } else {
             throw new IllegalStateException(String.format(
                     "Config parameter '%s' is missing in the configuration of module '%s'.", parameter, moduleId));
+        }
+    }
+
+    /**
+     * Compiles the script if the script engine supports pre-compilation.
+     */
+    protected void compileScriptIfSupported() throws ScriptException {
+        if (!scriptEngineManager.isPreCompilationSupported(type)) {
+            return;
+        }
+
+        if (compiledScript.isPresent()) {
+            return;
+        }
+        Optional<ScriptEngine> engine = getScriptEngine();
+        if (engine.isPresent()) {
+            ScriptEngine scriptEngine = engine.get();
+            if (scriptEngine instanceof Compilable) {
+                logger.debug("Pre-compiling script of rule with UID '{}'", ruleUID);
+                compiledScript = Optional.ofNullable(((Compilable) scriptEngine).compile(script));
+            } else {
+                logger.error(
+                        "Script engine of rule with UID '{}' does not implement Compilable but claims to support pre-compilation",
+                        module.getId());
+            }
         }
     }
 
@@ -167,6 +198,28 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
                 key = key.substring(dotIndex + 1);
             }
             executionContext.removeAttribute(key, ScriptContext.ENGINE_SCOPE);
+        }
+    }
+
+    /**
+     * Evaluates the passed script with the ScriptEngine.
+     *
+     * @param engine the script engine that is used
+     * @param script the script to evaluate
+     * @return the value returned from the execution of the script
+     */
+    protected @Nullable Object eval(ScriptEngine engine, String script) {
+        try {
+            if (compiledScript.isPresent()) {
+                logger.debug("Executing pre-compiled script of rule with UID '{}'", ruleUID);
+                return compiledScript.get().eval(engine.getContext());
+            }
+            logger.debug("Executing script of rule with UID '{}'", ruleUID);
+            return engine.eval(script);
+        } catch (ScriptException e) {
+            logger.error("Script execution of rule with UID '{}' failed: {}", ruleUID, e.getMessage(),
+                    logger.isDebugEnabled() ? e : null);
+            return null;
         }
     }
 }

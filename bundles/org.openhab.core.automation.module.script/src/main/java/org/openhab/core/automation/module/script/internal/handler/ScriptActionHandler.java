@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Simon Merschjohann - Initial contribution
+ * @author Florian Hotze - Add support for script pre-compilation
  */
 @NonNullByDefault
 public class ScriptActionHandler extends AbstractScriptModuleHandler<Action> implements ActionHandler {
@@ -62,6 +63,11 @@ public class ScriptActionHandler extends AbstractScriptModuleHandler<Action> imp
     }
 
     @Override
+    public void compile() throws ScriptException {
+        super.compileScriptIfSupported();
+    }
+
+    @Override
     public @Nullable Map<String, Object> execute(final Map<String, Object> context) {
         Map<String, Object> resultMap = new HashMap<>();
 
@@ -71,13 +77,8 @@ public class ScriptActionHandler extends AbstractScriptModuleHandler<Action> imp
 
         getScriptEngine().ifPresent(scriptEngine -> {
             setExecutionContext(scriptEngine, context);
-            try {
-                Object result = scriptEngine.eval(script);
-                resultMap.put("result", result);
-            } catch (ScriptException e) {
-                logger.error("Script execution of rule with UID '{}' failed: {}", ruleUID, e.getMessage(),
-                        logger.isDebugEnabled() ? e : null);
-            }
+            Object result = eval(scriptEngine, script);
+            resultMap.put("result", result);
             resetExecutionContext(scriptEngine, context);
         });
 

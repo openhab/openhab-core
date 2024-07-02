@@ -29,6 +29,14 @@ import org.openhab.core.automation.Trigger;
  */
 @NonNullByDefault
 public interface ConditionHandler extends ModuleHandler {
+    /**
+     * Called to compile the {@link Condition} when the {@link Rule} is initialized.
+     *
+     * @throws Exception if the compilation fails
+     */
+    default void compile() throws Exception {
+        // Do nothing by default
+    }
 
     /**
      * Checks if the Condition is satisfied in the given {@code context}.
