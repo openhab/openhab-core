@@ -393,6 +393,7 @@ public class DSLRuleProvider
             Configuration cfg = new Configuration();
             cfg.put("itemName", tt.getItem());
             cfg.put("timeOnly", tt.isTimeOnly());
+            cfg.put("offset", tt.getOffset());
             return TriggerBuilder.create().withId(Integer.toString((triggerId++))).withTypeUID("timer.DateTimeTrigger")
                     .withConfiguration(cfg).build();
         } else if (t instanceof EventEmittedTrigger eeTrigger) {
