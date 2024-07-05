@@ -218,6 +218,10 @@ public class PersistenceExtensions {
         TimeZoneProvider tzProvider = timeZoneProvider;
         ZoneId timeZone = tzProvider != null ? tzProvider.getTimeZone() : ZoneId.systemDefault();
         if (service instanceof ModifiablePersistenceService modifiableService) {
+            if (timeSeries.getPolicy() == TimeSeries.Policy.REPLACE) {
+                internalRemoveAllStatesBetween(item, timeSeries.getBegin().atZone(timeZone),
+                        timeSeries.getEnd().atZone(timeZone), serviceId);
+            }
             timeSeries.getStates()
                     .forEach(s -> modifiableService.store(item, s.timestamp().atZone(timeZone), s.state()));
             return;
