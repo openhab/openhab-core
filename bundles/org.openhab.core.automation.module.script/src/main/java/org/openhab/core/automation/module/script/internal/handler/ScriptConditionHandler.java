@@ -45,7 +45,7 @@ public class ScriptConditionHandler extends AbstractScriptModuleHandler<Conditio
 
     @Override
     public void compile() throws ScriptException {
-        super.compileScriptIfSupported();
+        super.compileScript();
     }
 
     @Override

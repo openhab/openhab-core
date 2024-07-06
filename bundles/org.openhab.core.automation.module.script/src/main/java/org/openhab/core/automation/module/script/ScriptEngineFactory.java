@@ -59,15 +59,6 @@ public interface ScriptEngineFactory {
     List<String> getScriptTypes();
 
     /**
-     * This method returns whether the ScriptEngine supports pre-compilation of scripts.
-     *
-     * @return true if pre-compilation is supported, else false
-     */
-    default boolean supportsPreCompilation() {
-        return false;
-    }
-
-    /**
      * This method "scopes" new values into the given ScriptEngine.
      *
      * @param scriptEngine

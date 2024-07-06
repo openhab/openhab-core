@@ -87,13 +87,9 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
     }
 
     /**
-     * Compiles the script if the script engine supports pre-compilation.
+     * Creates the {@link ScriptEngine} and compiles the script if the {@link ScriptEngine} implements {@link Compilable}.
      */
-    protected void compileScriptIfSupported() throws ScriptException {
-        if (!scriptEngineManager.isPreCompilationSupported(type)) {
-            return;
-        }
-
+    protected void compileScript() throws ScriptException {
         if (compiledScript.isPresent()) {
             return;
         }

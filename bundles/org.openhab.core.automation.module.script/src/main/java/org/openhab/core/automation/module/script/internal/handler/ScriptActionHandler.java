@@ -64,7 +64,7 @@ public class ScriptActionHandler extends AbstractScriptModuleHandler<Action> imp
 
     @Override
     public void compile() throws ScriptException {
-        super.compileScriptIfSupported();
+        super.compileScript();
     }
 
     @Override
