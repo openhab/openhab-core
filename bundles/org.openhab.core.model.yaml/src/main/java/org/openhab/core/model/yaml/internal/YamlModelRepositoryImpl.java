@@ -15,8 +15,11 @@ package org.openhab.core.model.yaml.internal;
 import static org.openhab.core.service.WatchService.Kind.CREATE;
 
 import java.io.IOException;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -26,7 +29,6 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -98,9 +100,25 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
         watchPath = watchService.getWatchPath();
 
         // read initial contents
-        try (Stream<Path> files = Files.walk(watchPath)) {
-            files.filter(f -> Files.isReadable(f) && Files.isRegularFile(f)).map(watchPath::relativize)
-                    .forEach(f -> processWatchEvent(CREATE, f));
+        try {
+            Files.walkFileTree(watchPath, new SimpleFileVisitor<>() {
+                @Override
+                public FileVisitResult visitFile(@NonNullByDefault({}) Path file,
+                        @NonNullByDefault({}) BasicFileAttributes attrs) throws IOException {
+                    if (attrs.isRegularFile()) {
+                        Path relativePath = watchPath.relativize(file);
+                        processWatchEvent(CREATE, relativePath);
+                    }
+                    return FileVisitResult.CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult visitFileFailed(@NonNullByDefault({}) Path file,
+                        @NonNullByDefault({}) IOException exc) throws IOException {
+                    logger.warn("Failed to process {}: {}", file.toAbsolutePath(), exc.getClass().getSimpleName());
+                    return FileVisitResult.CONTINUE;
+                }
+            });
         } catch (IOException e) {
             logger.warn("Could not list YAML files in '{}', models might be missing: {}", watchPath, e.getMessage());
         }
