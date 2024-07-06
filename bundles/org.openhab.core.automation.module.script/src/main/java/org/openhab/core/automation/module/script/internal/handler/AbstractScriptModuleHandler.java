@@ -87,10 +87,17 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
     }
 
     /**
-     * Creates the {@link ScriptEngine} and compiles the script if the {@link ScriptEngine} implements {@link Compilable}.
+     * Creates the {@link ScriptEngine} and compiles the script if the {@link ScriptEngine} implements
+     * {@link Compilable}.
      */
     protected void compileScript() throws ScriptException {
         if (compiledScript.isPresent()) {
+            return;
+        }
+        if (!scriptEngineManager.isSupported(this.type)) {
+            logger.debug(
+                    "ScriptEngine for language '{}' could not be found, skipping compilation of script for identifier: {}",
+                    type, engineIdentifier);
             return;
         }
         Optional<ScriptEngine> engine = getScriptEngine();
