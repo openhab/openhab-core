@@ -211,7 +211,7 @@ public class PersistenceExtensions {
 
     private static void internalPersist(Item item, TimeSeries timeSeries, @Nullable String serviceId) {
         String effectiveServiceId = serviceId == null ? getDefaultServiceId() : serviceId;
-        if (effectiveServiceId == null) {
+        if (effectiveServiceId == null || timeSeries.size() == 0) {
             return;
         }
         PersistenceService service = getService(effectiveServiceId);
