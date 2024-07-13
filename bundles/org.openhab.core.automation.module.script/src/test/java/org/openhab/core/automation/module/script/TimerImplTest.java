@@ -111,6 +111,12 @@ public class TimerImplTest {
         assertThat(subject.isRunning(), is(false));
         assertThat(subject.hasTerminated(), is(true));
         assertThat(subject.isCancelled(), is(false));
+
+        subject.reschedule(ZonedDateTime.now().plusSeconds(DEFAULT_TIMEOUT_SECONDS));
+        assertThat(subject.isRunning(), is(false));
+
+        Thread.sleep(TimeUnit.SECONDS.toMillis(DEFAULT_TIMEOUT_SECONDS) + 500);
+        assertThat(subject.isRunning(), is(true));
     }
 
     private Timer createTimer(ZonedDateTime instant, SchedulerRunnable runnable) {
