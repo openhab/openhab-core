@@ -106,10 +106,6 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
             if (scriptEngine instanceof Compilable) {
                 logger.debug("Pre-compiling script of rule with UID '{}'", ruleUID);
                 compiledScript = Optional.ofNullable(((Compilable) scriptEngine).compile(script));
-            } else {
-                logger.error(
-                        "Script engine of rule with UID '{}' does not implement Compilable but claims to support pre-compilation",
-                        module.getId());
             }
         }
     }
