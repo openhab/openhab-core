@@ -48,14 +48,15 @@ public class AbstractStorageBasedTypeProviderTest {
 
     @Test
     public void testStateChannelTypeProperlyMappedToEntityAndBack() {
-        ChannelTypeUID channelTypeUID = new ChannelTypeUID("TestBinding:testChannelType");
+        ChannelTypeUID channelTypeUID = new ChannelTypeUID("TestBinding:testQuantityChannelType");
 
-        ChannelType expected = ChannelTypeBuilder.state(channelTypeUID, "testLabel", "Switch")
+        ChannelType expected = ChannelTypeBuilder.state(channelTypeUID, "testLabel", "Number:Length")
                 .withDescription("testDescription").withCategory("testCategory")
                 .withConfigDescriptionURI(URI.create("testBinding:testConfig"))
                 .withAutoUpdatePolicy(AutoUpdatePolicy.VETO).isAdvanced(true).withTag("testTag")
                 .withCommandDescription(CommandDescriptionBuilder.create().build())
-                .withStateDescriptionFragment(StateDescriptionFragmentBuilder.create().build()).build();
+                .withStateDescriptionFragment(StateDescriptionFragmentBuilder.create().build()).withUnitHint("km")
+                .build();
         AbstractStorageBasedTypeProvider.ChannelTypeEntity entity = AbstractStorageBasedTypeProvider
                 .mapToEntity(expected);
         ChannelType actual = AbstractStorageBasedTypeProvider.mapFromEntity(entity);
@@ -73,6 +74,7 @@ public class AbstractStorageBasedTypeProviderTest {
         assertThat(actual.getState(), is(expected.getState()));
         assertThat(actual.getItemType(), is(expected.getItemType()));
         assertThat(actual.getTags(), hasItems(expected.getTags().toArray(String[]::new)));
+        assertThat(actual.getUnitHint(), is(expected.getUnitHint()));
     }
 
     @Test
