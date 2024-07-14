@@ -93,9 +93,11 @@ public class GenericItemChannelLinkProvider extends AbstractProvider<ItemChannel
         // Fix the configuration in case a profile is defined without any scope
         if (configuration.containsKey("profile") && configuration.get("profile") instanceof String profile
                 && profile.indexOf(":") == -1) {
-            configuration.put("profile", ProfileTypeUID.SYSTEM_SCOPE + ":" + profile);
-            logger.debug("Profile for channel {} updated from {} to {}", channelUID, profile,
-                    configuration.get("profile"));
+            String fullProfile = ProfileTypeUID.SYSTEM_SCOPE + ":" + profile;
+            configuration.put("profile", fullProfile);
+            logger.info(
+                    "Profile '{}' for channel '{}' is missing the scope prefix, assuming the correct UID is '{}'. Check your configuration.",
+                    profile, channelUID, fullProfile);
         }
 
         ItemChannelLink itemChannelLink = new ItemChannelLink(itemName, channelUIDObject, configuration);
