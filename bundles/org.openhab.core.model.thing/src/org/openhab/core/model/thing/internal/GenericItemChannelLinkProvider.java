@@ -30,6 +30,7 @@ import org.openhab.core.model.item.BindingConfigReader;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.link.ItemChannelLink;
 import org.openhab.core.thing.link.ItemChannelLinkProvider;
+import org.openhab.core.thing.profiles.ProfileTypeUID;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -88,6 +89,17 @@ public class GenericItemChannelLinkProvider extends AbstractProvider<ItemChannel
         } catch (IllegalArgumentException e) {
             throw new BindingConfigParseException(e.getMessage());
         }
+
+        // Fix the configuration in case a profile is defined without any scope
+        if (configuration.containsKey("profile") && configuration.get("profile") instanceof String profile
+                && profile.indexOf(":") == -1) {
+            String fullProfile = ProfileTypeUID.SYSTEM_SCOPE + ":" + profile;
+            configuration.put("profile", fullProfile);
+            logger.info(
+                    "Profile '{}' for channel '{}' is missing the scope prefix, assuming the correct UID is '{}'. Check your configuration.",
+                    profile, channelUID, fullProfile);
+        }
+
         ItemChannelLink itemChannelLink = new ItemChannelLink(itemName, channelUIDObject, configuration);
 
         Set<String> itemNames = Objects.requireNonNull(contextMap.computeIfAbsent(context, k -> new HashSet<>()));
