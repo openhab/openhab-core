@@ -26,6 +26,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.openhab.core.internal.types.StateDescriptionFragmentImpl;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.type.AutoUpdatePolicy;
 import org.openhab.core.thing.type.ChannelDefinition;
@@ -40,7 +41,6 @@ import org.openhab.core.thing.type.ChannelTypeUID;
 import org.openhab.core.thing.type.ThingType;
 import org.openhab.core.thing.type.ThingTypeBuilder;
 import org.openhab.core.types.CommandDescriptionBuilder;
-import org.openhab.core.types.StateDescriptionFragment;
 import org.openhab.core.types.StateDescriptionFragmentBuilder;
 
 /**
@@ -190,7 +190,7 @@ public class AbstractStorageBasedTypeProviderTest {
                 Arguments.of(ChannelGroupType.class, AbstractStorageBasedTypeProvider.ChannelGroupTypeEntity.class, -1),
                 Arguments.of(ChannelGroupDefinition.class,
                         AbstractStorageBasedTypeProvider.ChannelGroupDefinitionEntity.class, 0),
-                Arguments.of(StateDescriptionFragment.class,
+                Arguments.of(StateDescriptionFragmentImpl.class,
                         AbstractStorageBasedTypeProvider.StateDescriptionFragmentEntity.class, 0));
     }
 
