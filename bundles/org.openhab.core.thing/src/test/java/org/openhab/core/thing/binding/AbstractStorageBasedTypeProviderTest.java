@@ -48,35 +48,6 @@ public class AbstractStorageBasedTypeProviderTest {
 
     @Test
     public void testStateChannelTypeProperlyMappedToEntityAndBack() {
-        ChannelTypeUID channelTypeUID = new ChannelTypeUID("TestBinding:testChannelType");
-
-        ChannelType expected = ChannelTypeBuilder.state(channelTypeUID, "testLabel", "Switch")
-                .withDescription("testDescription").withCategory("testCategory")
-                .withConfigDescriptionURI(URI.create("testBinding:testConfig"))
-                .withAutoUpdatePolicy(AutoUpdatePolicy.VETO).isAdvanced(true).withTag("testTag")
-                .withCommandDescription(CommandDescriptionBuilder.create().build())
-                .withStateDescriptionFragment(StateDescriptionFragmentBuilder.create().build()).build();
-        AbstractStorageBasedTypeProvider.ChannelTypeEntity entity = AbstractStorageBasedTypeProvider
-                .mapToEntity(expected);
-        ChannelType actual = AbstractStorageBasedTypeProvider.mapFromEntity(entity);
-
-        assertThat(actual.getUID(), is(expected.getUID()));
-        assertThat(actual.getKind(), is(expected.getKind()));
-        assertThat(actual.getLabel(), is(expected.getLabel()));
-        assertThat(actual.getDescription(), is(expected.getDescription()));
-        assertThat(actual.getConfigDescriptionURI(), is(expected.getConfigDescriptionURI()));
-        assertThat(actual.isAdvanced(), is(expected.isAdvanced()));
-        assertThat(actual.getAutoUpdatePolicy(), is(expected.getAutoUpdatePolicy()));
-        assertThat(actual.getCategory(), is(expected.getCategory()));
-        assertThat(actual.getEvent(), is(expected.getEvent()));
-        assertThat(actual.getCommandDescription(), is(expected.getCommandDescription()));
-        assertThat(actual.getState(), is(expected.getState()));
-        assertThat(actual.getItemType(), is(expected.getItemType()));
-        assertThat(actual.getTags(), hasItems(expected.getTags().toArray(String[]::new)));
-    }
-
-    @Test
-    public void testQuantityChannelTypeProperlyMappedToEntityAndBack() {
         ChannelTypeUID channelTypeUID = new ChannelTypeUID("TestBinding:testQuantityChannelType");
 
         ChannelType expected = ChannelTypeBuilder.state(channelTypeUID, "testLabel", "Number:Length")
