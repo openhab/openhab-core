@@ -127,6 +127,9 @@ public final class ConfigParser {
             try {
                 value = valueAs(value, type);
                 if (value == null) {
+                    LOGGER.warn(
+                            "Could not set value for field '{}' because conversion failed. Check your configuration value.",
+                            fieldName);
                     continue;
                 }
                 LOGGER.trace("Setting value ({}) {} to field '{}' in configuration class {}", type.getSimpleName(),
