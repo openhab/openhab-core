@@ -48,17 +48,16 @@ public abstract class AbstractThingHandlerDiscoveryService<T extends ThingHandle
             int timeout, boolean backgroundDiscoveryEnabledByDefault) throws IllegalArgumentException {
         super(supportedThingTypes, timeout, backgroundDiscoveryEnabledByDefault);
         this.thingClazz = thingClazz;
+        this.backgroundDiscoveryEnabled = backgroundDiscoveryEnabledByDefault;
     }
 
     protected AbstractThingHandlerDiscoveryService(Class<T> thingClazz, @Nullable Set<ThingTypeUID> supportedThingTypes,
             int timeout) throws IllegalArgumentException {
-        super(supportedThingTypes, timeout);
-        this.thingClazz = thingClazz;
+        this(thingClazz, supportedThingTypes, timeout, true);
     }
 
     protected AbstractThingHandlerDiscoveryService(Class<T> thingClazz, int timeout) throws IllegalArgumentException {
-        super(timeout);
-        this.thingClazz = thingClazz;
+        this(thingClazz, null, timeout);
     }
 
     @Override
@@ -86,7 +85,8 @@ public abstract class AbstractThingHandlerDiscoveryService<T extends ThingHandle
         // thing handler is set. This is correctly handled in initialize
         if (config != null) {
             backgroundDiscoveryEnabled = ConfigParser.valueAsOrElse(
-                    config.get(DiscoveryService.CONFIG_PROPERTY_BACKGROUND_DISCOVERY), Boolean.class, false);
+                    config.get(DiscoveryService.CONFIG_PROPERTY_BACKGROUND_DISCOVERY), Boolean.class,
+                    backgroundDiscoveryEnabled);
         }
     }
 
@@ -94,7 +94,8 @@ public abstract class AbstractThingHandlerDiscoveryService<T extends ThingHandle
     public void modified(@Nullable Map<String, Object> config) {
         if (config != null) {
             boolean enabled = ConfigParser.valueAsOrElse(
-                    config.get(DiscoveryService.CONFIG_PROPERTY_BACKGROUND_DISCOVERY), Boolean.class, false);
+                    config.get(DiscoveryService.CONFIG_PROPERTY_BACKGROUND_DISCOVERY), Boolean.class,
+                    backgroundDiscoveryEnabled);
 
             if (backgroundDiscoveryEnabled && !enabled) {
                 stopBackgroundDiscovery();
