@@ -12,6 +12,7 @@
  */
 package org.openhab.core.model.thing.internal;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -78,6 +79,18 @@ public class GenericItemChannelLinkProvider extends AbstractProvider<ItemChannel
         }
         for (String uid : uids) {
             createItemChannelLink(context, itemName, uid.trim(), configuration);
+        }
+        // clean up removed links
+        Map<ChannelUID, ItemChannelLink> links = itemChannelLinkMap.get(itemName);
+        if (links != null) {
+            links.keySet().removeIf(channelUID -> {
+                if (Arrays.stream(uids).anyMatch(channelUID.toString()::equals)) {
+                    return false;
+                }
+                ItemChannelLink removedLink = links.get(channelUID);
+                notifyListenersAboutRemovedElement(removedLink);
+                return true;
+            });
         }
     }
 
