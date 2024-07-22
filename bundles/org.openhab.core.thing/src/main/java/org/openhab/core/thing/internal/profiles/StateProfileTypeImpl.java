@@ -18,6 +18,7 @@ import java.util.Collections;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.thing.profiles.ProfileTypeUID;
 import org.openhab.core.thing.profiles.StateProfileType;
+import org.openhab.core.thing.type.ChannelTypeUID;
 
 /**
  * Default implementation of a {@link StateProfileType}.
@@ -31,18 +32,25 @@ public class StateProfileTypeImpl implements StateProfileType {
     private final String label;
     private final Collection<String> supportedItemTypes;
     private final Collection<String> supportedItemTypesOfChannel;
+    private final Collection<ChannelTypeUID> supportedChannelTypeUIDs;
 
     public StateProfileTypeImpl(ProfileTypeUID profileTypeUID, String label, Collection<String> supportedItemTypes,
-            Collection<String> supportedItemTypesOfChannel) {
+            Collection<String> supportedItemTypesOfChannel, Collection<ChannelTypeUID> supportedChannelTypeUIDs) {
         this.profileTypeUID = profileTypeUID;
         this.label = label;
         this.supportedItemTypes = Collections.unmodifiableCollection(supportedItemTypes);
         this.supportedItemTypesOfChannel = Collections.unmodifiableCollection(supportedItemTypesOfChannel);
+        this.supportedChannelTypeUIDs = Collections.unmodifiableCollection(supportedChannelTypeUIDs);
     }
 
     @Override
     public ProfileTypeUID getUID() {
         return profileTypeUID;
+    }
+
+    @Override
+    public Collection<ChannelTypeUID> getSupportedChannelTypeUIDs() {
+        return supportedChannelTypeUIDs;
     }
 
     @Override
