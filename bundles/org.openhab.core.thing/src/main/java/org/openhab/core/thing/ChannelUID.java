@@ -14,6 +14,7 @@ package org.openhab.core.thing;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -30,7 +31,7 @@ import org.eclipse.jdt.annotation.Nullable;
 @NonNullByDefault
 public class ChannelUID extends UID {
 
-    public static final String CHANNEL_SEGMENT_PATTERN = "[\\w-]*|[\\w-]*#[\\w-]*";
+    public static final Pattern CHANNEL_SEGMENT_PATTERN = Pattern.compile("[\\w-]*(?:#[\\w-]*)?");
     public static final String CHANNEL_GROUP_SEPARATOR = "#";
 
     /**
@@ -132,7 +133,7 @@ public class ChannelUID extends UID {
         if (index < length - 1) {
             super.validateSegment(segment, index, length);
         } else {
-            if (!segment.matches(CHANNEL_SEGMENT_PATTERN)) {
+            if (!CHANNEL_SEGMENT_PATTERN.matcher(segment).matches()) {
                 throw new IllegalArgumentException(String.format(
                         "UID segment '%s' contains invalid characters. The last segment of the channel UID must match the pattern '%s'.",
                         segment, CHANNEL_SEGMENT_PATTERN));
