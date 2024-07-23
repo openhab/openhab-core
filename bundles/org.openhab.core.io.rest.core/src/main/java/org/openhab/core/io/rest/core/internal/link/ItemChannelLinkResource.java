@@ -236,9 +236,10 @@ public class ItemChannelLinkResource implements RESTResource {
             }
             if (!(profileType.getSupportedItemTypes().isEmpty()
                     || profileType.getSupportedItemTypes().contains(itemType))
-                    || !(((TriggerProfileType) profileType).getSupportedChannelTypeUIDs().isEmpty()
-                            || ((TriggerProfileType) profileType).getSupportedChannelTypeUIDs()
-                                    .contains(channel.getChannelTypeUID()))) {
+                    || !(profileType.getSupportedChannelTypeUIDs().isEmpty()
+                            || profileType.getSupportedChannelTypeUIDs().contains(channel.getChannelTypeUID()))
+                    || !(profileType.getSupportedItemTypesOfChannel().isEmpty()
+                            || profileType.getSupportedItemTypesOfChannel().contains(itemType))) {
                 // item or channel type not matching
                 return Response.status(Status.BAD_REQUEST).build();
             }
