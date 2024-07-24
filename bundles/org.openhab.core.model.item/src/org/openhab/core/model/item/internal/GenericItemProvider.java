@@ -349,7 +349,15 @@ public class GenericItemProvider extends AbstractProvider<Item>
             String config = binding.getConfiguration();
 
             Configuration configuration = new Configuration();
-            binding.getProperties().forEach(p -> configuration.put(p.getKey(), p.getValue()));
+            binding.getProperties().forEach(p -> {
+                Object value = p.getValue();
+                // Single valued lists get unwrapped to just their one value for
+                // backwards compatibility
+                if (value instanceof List listValue && listValue.size() == 1) {
+                    value = listValue.get(0);
+                }
+                configuration.put(p.getKey(), value);
+            });
 
             BindingConfigReader localReader = reader;
             if (reader == null) {

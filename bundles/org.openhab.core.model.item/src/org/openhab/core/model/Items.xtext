@@ -49,7 +49,7 @@ ModelBinding:
 ;
 
 ModelProperty:
-    key=ID '=' value=ValueType
+    key=ID '=' value+=ValueType (',' value+=ValueType)*
 ;
 
 ValueType returns ecore::EJavaObject:

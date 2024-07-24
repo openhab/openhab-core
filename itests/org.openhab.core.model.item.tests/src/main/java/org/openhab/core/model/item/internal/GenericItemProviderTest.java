@@ -624,6 +624,41 @@ public class GenericItemProviderTest extends JavaOSGiTest {
     }
 
     @Test
+    public void testMetadataPropertyTypes() {
+        String model = "Switch simple { namespace=\"value\"[string=\"string\", bool=false, int=2, stringList=\"string1\",\"string2\", boolList=false,true] } ";
+
+        modelRepository.addOrRefreshModel(TESTMODEL_NAME, new ByteArrayInputStream(model.getBytes()));
+        Item item = itemRegistry.get("simple");
+        assertThat(item, is(notNullValue()));
+
+        Metadata res = metadataRegistry.get(new MetadataKey("namespace", "simple"));
+        assertThat(res, is(notNullValue()));
+        assertThat(res.getValue(), is("value"));
+        assertThat(res.getConfiguration(), is(notNullValue()));
+        var config = res.getConfiguration();
+        assertThat(config.size(), is(5));
+        assertThat(config.get("string"), is("string"));
+        assertThat(config.get("bool"), is(false));
+        assertThat(config.get("int"), is(new BigDecimal("2")));
+
+        var list = config.get("stringList");
+        assertThat(list, is(notNullValue()));
+        assertThat(list, instanceOf(List.class));
+        List<Object> values = (List<Object>) list;
+        assertThat(values.size(), is(2));
+        assertThat(values.get(0), is("string1"));
+        assertThat(values.get(1), is("string2"));
+
+        list = config.get("boolList");
+        assertThat(list, is(notNullValue()));
+        assertThat(list, instanceOf(List.class));
+        values = (List<Object>) list;
+        assertThat(values.size(), is(2));
+        assertThat(values.get(0), is(false));
+        assertThat(values.get(1), is(true));
+    }
+
+    @Test
     public void testTagUpdate() {
         modelRepository.addOrRefreshModel(TESTMODEL_NAME, new ByteArrayInputStream("Switch s [foo]".getBytes()));
         Item item1 = itemRegistry.get("s");
