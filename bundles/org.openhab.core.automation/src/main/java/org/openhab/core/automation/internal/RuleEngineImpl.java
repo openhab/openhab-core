@@ -1555,15 +1555,16 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
     }
 
     /**
-     * This method compiles the conditions and actions of all rules. It is called when the rule engine is started.
+     * This method compiles the conditions and actions of all enabled rules.
+     * It is called when the rule engine is started.
      * By compiling when the rule engine is started, we make sure all conditions and actions are compiled, even if their
      * handlers weren't available when the rule was added to the rule engine.
      */
     private void compileRules() {
         getScheduledExecutor().submit(() -> {
-            ruleRegistry.getAll().forEach(r -> {
-                compileRule(r.getUID());
-            });
+            ruleRegistry.getAll().stream() //
+                    .filter(r -> isEnabled(r.getUID())) //
+                    .forEach(r -> compileRule(r.getUID()));
             executeRulesWithStartLevel();
         });
     }
