@@ -151,7 +151,7 @@ public class GenericItemChannelLinkProvider extends AbstractProvider<ItemChannel
         Optional.ofNullable(contextMap.get(context)).ifPresent(ctx -> ctx.removeAll(previousItemNames));
 
         addedItemChannels.forEach((itemName, addedChannelUIDs) -> {
-            Map<ChannelUID, ItemChannelLink> links = Objects.requireNonNull(itemChannelLinkMap.get(itemName));
+            Map<ChannelUID, ItemChannelLink> links = itemChannelLinkMap.getOrDefault(itemName, Map.of());
             Set<ChannelUID> removedChannelUIDs = new HashSet<>(links.keySet());
             removedChannelUIDs.removeAll(addedChannelUIDs);
             removedChannelUIDs.forEach(removedChannelUID -> {
