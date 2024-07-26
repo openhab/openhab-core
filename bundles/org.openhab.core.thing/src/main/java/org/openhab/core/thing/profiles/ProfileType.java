@@ -15,7 +15,9 @@ package org.openhab.core.thing.profiles;
 import java.util.Collection;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.registry.Identifiable;
+import org.openhab.core.thing.type.ChannelKind;
 import org.openhab.core.thing.type.ChannelTypeUID;
 
 /**
@@ -44,6 +46,12 @@ public interface ProfileType extends Identifiable<ProfileTypeUID> {
      * @return a collection of ChannelTypeUIDs (may be empty if all are supported).
      */
     Collection<ChannelTypeUID> getSupportedChannelTypeUIDs();
+
+    /**
+     * @return The supported ChannelKind for this profile type. If null then all channel kinds are supported
+     */
+    @Nullable
+    ChannelKind getSupportedChannelKind();
 
     /**
      * Get a human readable description.

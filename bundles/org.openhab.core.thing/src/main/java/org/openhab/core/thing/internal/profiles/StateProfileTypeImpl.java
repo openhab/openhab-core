@@ -16,8 +16,10 @@ import java.util.Collection;
 import java.util.Collections;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.thing.profiles.ProfileTypeUID;
 import org.openhab.core.thing.profiles.StateProfileType;
+import org.openhab.core.thing.type.ChannelKind;
 import org.openhab.core.thing.type.ChannelTypeUID;
 
 /**
@@ -56,6 +58,12 @@ public class StateProfileTypeImpl implements StateProfileType {
     @Override
     public Collection<String> getSupportedItemTypes() {
         return supportedItemTypes;
+    }
+
+    @Override
+    @Nullable
+    public ChannelKind getSupportedChannelKind() {
+        return ChannelKind.STATE;
     }
 
     @Override

@@ -16,8 +16,10 @@ import java.util.Collection;
 import java.util.Collections;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.thing.profiles.ProfileTypeUID;
 import org.openhab.core.thing.profiles.TriggerProfileType;
+import org.openhab.core.thing.type.ChannelKind;
 import org.openhab.core.thing.type.ChannelTypeUID;
 
 /**
@@ -66,5 +68,11 @@ public class TriggerProfileTypeImpl implements TriggerProfileType {
     @Override
     public Collection<String> getSupportedItemTypesOfChannel() {
         return supportedItemTypesOfChannel;
+    }
+
+    @Override
+    @Nullable
+    public ChannelKind getSupportedChannelKind() {
+        return ChannelKind.TRIGGER;
     }
 }
