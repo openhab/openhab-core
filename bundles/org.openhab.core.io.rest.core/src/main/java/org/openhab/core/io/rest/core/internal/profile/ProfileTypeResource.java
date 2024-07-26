@@ -150,18 +150,20 @@ public class ProfileTypeResource implements RESTResource {
         if (supportedChannelKind != null && supportedChannelKind != channelType.getKind())
             return false;
 
-        if (profileType.getSupportedChannelTypeUIDs().isEmpty()
-                && profileType.getSupportedItemTypesOfChannel().isEmpty()) {
-            return true;
-        }
-
-        if (profileType.getSupportedChannelTypeUIDs().contains(channelType.getUID())) {
-            return true;
+        Collection<ChannelTypeUID> supportedChannelTypeUIDsOnProfileType = profileType.getSupportedChannelTypeUIDs();
+        if (!supportedChannelTypeUIDsOnProfileType.isEmpty()
+                && !supportedChannelTypeUIDsOnProfileType.contains(channelType.getUID())) {
+            return false;
         }
 
         Collection<String> supportedItemTypesOfChannelOnProfileType = profileType.getSupportedItemTypesOfChannel();
-        String itemType = channelType.getItemType();
-        return itemType != null
-                && supportedItemTypesOfChannelOnProfileType.contains(ItemUtil.getMainItemType(itemType));
+        if (supportedItemTypesOfChannelOnProfileType.isEmpty()) {
+            return true;
+        } else {
+            @Nullable
+            String itemType = channelType.getItemType();
+            return itemType != null
+                    && supportedItemTypesOfChannelOnProfileType.contains(ItemUtil.getMainItemType(itemType));
+        }
     }
 }
