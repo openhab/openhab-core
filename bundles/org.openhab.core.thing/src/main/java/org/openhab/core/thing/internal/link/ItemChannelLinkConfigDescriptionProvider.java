@@ -37,13 +37,15 @@ import org.openhab.core.thing.link.ItemChannelLink;
 import org.openhab.core.thing.link.ItemChannelLinkRegistry;
 import org.openhab.core.thing.profiles.ProfileType;
 import org.openhab.core.thing.profiles.ProfileTypeRegistry;
-import org.openhab.core.thing.profiles.StateProfileType;
-import org.openhab.core.thing.profiles.TriggerProfileType;
+import org.openhab.core.thing.type.ChannelKind;
 import org.openhab.core.thing.type.ChannelType;
 import org.openhab.core.thing.type.ChannelTypeRegistry;
+import org.openhab.core.thing.type.ChannelTypeUID;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Provider for framework config parameters on {@link ItemChannelLink}s.
@@ -53,6 +55,8 @@ import org.osgi.service.component.annotations.Reference;
 @Component
 @NonNullByDefault
 public class ItemChannelLinkConfigDescriptionProvider implements ConfigDescriptionProvider {
+
+    private final Logger logger = LoggerFactory.getLogger(ItemChannelLinkConfigDescriptionProvider.class);
 
     private static final String SCHEME = "link";
     public static final String PARAM_PROFILE = "profile";
@@ -112,16 +116,7 @@ public class ItemChannelLinkConfigDescriptionProvider implements ConfigDescripti
             @Nullable Locale locale) {
         Collection<ProfileType> profileTypes = profileTypeRegistry.getProfileTypes(locale);
         return profileTypes.stream().filter(profileType -> {
-            switch (channel.getKind()) {
-                case STATE:
-                    return profileType instanceof StateProfileType && isSupportedItemType(profileType, item)
-                            && isSupportedChannelType(profileType, channel, locale);
-                case TRIGGER:
-                    return profileType instanceof TriggerProfileType && isSupportedItemType(profileType, item)
-                            && isSupportedChannelType(profileType, channel, locale);
-                default:
-                    throw new IllegalArgumentException("Unknown channel kind: " + channel.getKind());
-            }
+            return isSupportedItemType(profileType, item) && isSupportedChannelType(profileType, channel, locale);
         }).map(profileType -> new ParameterOption(profileType.getUID().toString(), profileType.getLabel())).toList();
     }
 
@@ -131,24 +126,34 @@ public class ItemChannelLinkConfigDescriptionProvider implements ConfigDescripti
     }
 
     private boolean isSupportedChannelType(ProfileType profileType, Channel channel, @Nullable Locale locale) {
-        if (profileType.getSupportedChannelTypeUIDs().isEmpty()
-                && profileType.getSupportedItemTypesOfChannel().isEmpty()) {
-            return true;
-        }
+        @Nullable
+        ChannelKind supportedChannelKind = profileType.getSupportedChannelKind();
+        if (supportedChannelKind != null && supportedChannelKind != channel.getKind())
+            return false;
 
-        ChannelType channelType = channelTypeRegistry.getChannelType(channel.getChannelTypeUID(), locale);
-        if (channelType == null) {
-            // requested to filter against an unknown channel type
+        ChannelTypeUID channelTypeUID = channel.getChannelTypeUID();
+
+        Collection<ChannelTypeUID> supportedChannelTypeUIDsOnProfileType = profileType.getSupportedChannelTypeUIDs();
+        if (!supportedChannelTypeUIDsOnProfileType.isEmpty()
+                && !supportedChannelTypeUIDsOnProfileType.contains(channelTypeUID)) {
             return false;
         }
 
-        if (profileType.getSupportedChannelTypeUIDs().contains(channelType.getUID())) {
-            return true;
-        }
-
         Collection<String> supportedItemTypesOfChannelOnProfileType = profileType.getSupportedItemTypesOfChannel();
-        String itemType = channelType.getItemType();
-        return itemType != null
-                && supportedItemTypesOfChannelOnProfileType.contains(ItemUtil.getMainItemType(itemType));
+        if (supportedItemTypesOfChannelOnProfileType.isEmpty()) {
+            return true;
+        } else {
+            ChannelType channelType = channelTypeRegistry.getChannelType(channelTypeUID, locale);
+            if (channelType == null) {
+                logger.error("Requested to filter against an unknown channel type: {} is not known to the registry",
+                        channelTypeUID.toString());
+                return false;
+            }
+
+            @Nullable
+            String itemType = channelType.getItemType();
+            return itemType != null
+                    && supportedItemTypesOfChannelOnProfileType.contains(ItemUtil.getMainItemType(itemType));
+        }
     }
 }
