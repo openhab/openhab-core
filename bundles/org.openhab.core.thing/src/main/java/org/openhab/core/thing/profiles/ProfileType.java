@@ -29,6 +29,7 @@ import org.openhab.core.thing.type.ChannelTypeUID;
 public interface ProfileType extends Identifiable<ProfileTypeUID> {
 
     /**
+     * Get a collection of ItemType names that this profile type supports
      *
      * @return a collection of item types (may be empty if all are supported)
      */
@@ -42,12 +43,15 @@ public interface ProfileType extends Identifiable<ProfileTypeUID> {
     Collection<String> getSupportedItemTypesOfChannel();
 
     /**
+     * Get a collection of ChannelType UIDs that this profile type supports
      *
      * @return a collection of ChannelTypeUIDs (may be empty if all are supported).
      */
     Collection<ChannelTypeUID> getSupportedChannelTypeUIDs();
 
     /**
+     * Get the ChannelKind this profile type supports.
+     *
      * @return The supported ChannelKind for this profile type. If null then all channel kinds are supported
      */
     @Nullable
