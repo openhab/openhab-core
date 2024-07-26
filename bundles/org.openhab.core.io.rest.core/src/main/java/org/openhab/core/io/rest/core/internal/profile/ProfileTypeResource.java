@@ -40,6 +40,7 @@ import org.openhab.core.thing.profiles.ProfileType;
 import org.openhab.core.thing.profiles.ProfileTypeRegistry;
 import org.openhab.core.thing.profiles.dto.ProfileTypeDTO;
 import org.openhab.core.thing.profiles.dto.ProfileTypeDTOMapper;
+import org.openhab.core.thing.type.ChannelKind;
 import org.openhab.core.thing.type.ChannelType;
 import org.openhab.core.thing.type.ChannelTypeRegistry;
 import org.openhab.core.thing.type.ChannelTypeUID;
@@ -144,6 +145,11 @@ public class ProfileTypeResource implements RESTResource {
     }
 
     private boolean profileTypeMatchesChannelType(ProfileType profileType, ChannelType channelType) {
+        @Nullable
+        ChannelKind supportedChannelKind = profileType.getSupportedChannelKind();
+        if (supportedChannelKind != null && supportedChannelKind != channelType.getKind())
+            return false;
+
         if (profileType.getSupportedChannelTypeUIDs().isEmpty()
                 && profileType.getSupportedItemTypesOfChannel().isEmpty()) {
             return true;
