@@ -50,6 +50,8 @@ public class GenericItemChannelLinkProvider extends AbstractProvider<ItemChannel
     /** caches binding configurations. maps itemNames to {@link ItemChannelLink}s */
     protected Map<String, Map<ChannelUID, ItemChannelLink>> itemChannelLinkMap = new ConcurrentHashMap<>();
 
+    private Map<String, Set<ChannelUID>> addedItemChannels = new ConcurrentHashMap<>();
+
     /**
      * stores information about the context of items. The map has this content
      * structure: context -> Set of Item names
@@ -120,6 +122,7 @@ public class GenericItemChannelLinkProvider extends AbstractProvider<ItemChannel
         } else {
             notifyListenersAboutUpdatedElement(oldLink, itemChannelLink);
         }
+        addedItemChannels.computeIfAbsent(itemName, k -> new HashSet<>(2)).add(channelUIDObject);
     }
 
     @Override
@@ -146,6 +149,17 @@ public class GenericItemChannelLinkProvider extends AbstractProvider<ItemChannel
             }
         }
         Optional.ofNullable(contextMap.get(context)).ifPresent(ctx -> ctx.removeAll(previousItemNames));
+
+        addedItemChannels.forEach((itemName, addedChannelUIDs) -> {
+            Map<ChannelUID, ItemChannelLink> links = itemChannelLinkMap.getOrDefault(itemName, Map.of());
+            Set<ChannelUID> removedChannelUIDs = new HashSet<>(links.keySet());
+            removedChannelUIDs.removeAll(addedChannelUIDs);
+            removedChannelUIDs.forEach(removedChannelUID -> {
+                ItemChannelLink link = links.remove(removedChannelUID);
+                notifyListenersAboutRemovedElement(link);
+            });
+        });
+        addedItemChannels.clear();
     }
 
     @Override
