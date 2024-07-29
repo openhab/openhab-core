@@ -145,7 +145,6 @@ public class ProfileTypeResource implements RESTResource {
     }
 
     private boolean profileTypeMatchesChannelType(ProfileType profileType, ChannelType channelType) {
-        @Nullable
         ChannelKind supportedChannelKind = profileType.getSupportedChannelKind();
         if (supportedChannelKind != null && supportedChannelKind != channelType.getKind())
             return false;
@@ -160,7 +159,6 @@ public class ProfileTypeResource implements RESTResource {
         if (supportedItemTypesOfChannelOnProfileType.isEmpty()) {
             return true;
         } else {
-            @Nullable
             String itemType = channelType.getItemType();
             return itemType != null
                     && supportedItemTypesOfChannelOnProfileType.contains(ItemUtil.getMainItemType(itemType));

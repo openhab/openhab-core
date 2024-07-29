@@ -126,7 +126,6 @@ public class ItemChannelLinkConfigDescriptionProvider implements ConfigDescripti
     }
 
     private boolean isSupportedChannelType(ProfileType profileType, Channel channel, @Nullable Locale locale) {
-        @Nullable
         ChannelKind supportedChannelKind = profileType.getSupportedChannelKind();
         if (supportedChannelKind != null && supportedChannelKind != channel.getKind())
             return false;
@@ -150,7 +149,6 @@ public class ItemChannelLinkConfigDescriptionProvider implements ConfigDescripti
                 return false;
             }
 
-            @Nullable
             String itemType = channelType.getItemType();
             return itemType != null
                     && supportedItemTypesOfChannelOnProfileType.contains(ItemUtil.getMainItemType(itemType));
