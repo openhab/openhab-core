@@ -14,7 +14,6 @@ package org.openhab.core.ui.icon.internal;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -63,8 +62,6 @@ public class IconServlet extends HttpServlet {
     static final String PARAM_ANY_FORMAT = "anyFormat";
     static final String PARAM_STATE = "state";
 
-    private long startupTime;
-
     protected String defaultIconSetId = "classic";
 
     private final List<IconProvider> iconProvider = new ArrayList<>();
@@ -80,7 +77,6 @@ public class IconServlet extends HttpServlet {
 
     @Activate
     protected void activate(Map<String, Object> config) {
-        startupTime = System.currentTimeMillis();
         modified(config);
     }
 
@@ -94,11 +90,6 @@ public class IconServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        if (req.getDateHeader("If-Modified-Since") > startupTime) {
-            resp.setStatus(304);
-            return;
-        }
-
         String category = getCategory(req);
         if (category.isEmpty()) {
             logger.debug("URI must start with '{}' but is '{}'", SERVLET_PATH, req.getRequestURI());
@@ -148,7 +139,7 @@ public class IconServlet extends HttpServlet {
             }
 
             resp.setContentType(Format.SVG.equals(format) ? "image/svg+xml" : "image/png");
-            resp.setDateHeader("Last-Modified", Instant.now().toEpochMilli());
+            resp.setHeader("Cache-Control", "max-age=31536000");
             is.transferTo(resp.getOutputStream());
             resp.flushBuffer();
         } catch (IOException e) {
