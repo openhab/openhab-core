@@ -20,6 +20,7 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoUnit;
 import java.time.zone.ZoneRulesException;
 import java.util.Locale;
 
@@ -37,6 +38,7 @@ import org.openhab.core.types.State;
  * @author Wouter Born - increase parsing and formatting precision
  * @author Laurent Garnier - added methods toLocaleZone and toZone
  * @author Gaël L'hopital - added ability to use second and milliseconds unix time
+ * @author Gaël L'hopital - added isToday, isTomorrow, isYesterday, sameDay
  */
 @NonNullByDefault
 public class DateTimeType implements PrimitiveType, State, Command {
@@ -247,5 +249,86 @@ public class DateTimeType implements PrimitiveType, State, Command {
         }
 
         return date;
+    }
+
+    public boolean isToday() {
+        return sameDay(ZonedDateTime.now());
+    }
+
+    public boolean isTomorrow() {
+        return sameDay(ZonedDateTime.now().plusDays(1));
+    }
+
+    public boolean isYesterday() {
+        return sameDay(ZonedDateTime.now().minusDays(1));
+    }
+
+    public boolean sameDay(DateTimeType other) {
+        return sameDay(other.zonedDateTime);
+    }
+
+    public boolean sameDay(ZonedDateTime other) {
+        return zonedDateTime.truncatedTo(ChronoUnit.DAYS)
+                .isEqual(other.withZoneSameInstant(zonedDateTime.getZone()).truncatedTo(ChronoUnit.DAYS));
+    }
+
+    public DateTimeType toToday() {
+        return shiftDaysFromToday(0);
+    }
+
+    public DateTimeType toTomorrow() {
+        return shiftDaysFromToday(1);
+    }
+
+    public DateTimeType toYesterday() {
+        return shiftDaysFromToday(-1);
+    }
+
+    private DateTimeType shiftDaysFromToday(int days) {
+        ZonedDateTime now = ZonedDateTime.now().plusDays(days);
+        return new DateTimeType(zonedDateTime.withYear(now.getYear()).withMonth(now.getMonthValue())
+                .withDayOfMonth(now.getDayOfMonth()));
+    }
+
+    public boolean isBefore(DateTimeType other) {
+        return zonedDateTime.isBefore(other.zonedDateTime);
+    }
+
+    public boolean isAfter(DateTimeType other) {
+        return zonedDateTime.isAfter(other.zonedDateTime);
+    }
+
+    public boolean isBeforeDate(DateTimeType other) {
+        return isBeforeDate(other.zonedDateTime);
+    }
+
+    public boolean isBeforeDate(ZonedDateTime other) {
+        return zonedDateTime.truncatedTo(ChronoUnit.DAYS).isBefore(other.truncatedTo(ChronoUnit.DAYS));
+    }
+
+    public boolean isBeforeTime(DateTimeType other) {
+        return isBeforeTime(other.zonedDateTime);
+    }
+
+    public boolean isBeforeTime(ZonedDateTime other) {
+        return zonedDateTime.withYear(other.getYear()).withMonth(other.getMonthValue())
+                .withDayOfMonth(other.getDayOfMonth()).isBefore(other);
+    }
+
+    public boolean isAfterTime(DateTimeType other) {
+        return isAfterTime(other.zonedDateTime);
+    }
+
+    public boolean isAfterTime(ZonedDateTime other) {
+        return zonedDateTime.withYear(other.getYear()).withMonth(other.getMonthValue())
+                .withDayOfMonth(other.getDayOfMonth()).isAfter(other);
+    }
+
+    public boolean isAfterDate(DateTimeType other) {
+        return isAfterDate(other.zonedDateTime);
+    }
+
+    public boolean isAfterDate(ZonedDateTime other) {
+        return zonedDateTime.truncatedTo(ChronoUnit.DAYS).isAfter(other.truncatedTo(ChronoUnit.DAYS));
     }
 }
