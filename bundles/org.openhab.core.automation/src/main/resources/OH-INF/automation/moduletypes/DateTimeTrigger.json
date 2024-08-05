@@ -29,6 +29,12 @@
 							"value": "false"
 						}
 					]
+				},
+				{
+					"name": "offset",
+					"type": "INTEGER",
+					"label": "Offset",
+					"description": "The offset in seconds to add to the time of the item."
 				}
 			]
 		}
