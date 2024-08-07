@@ -95,7 +95,7 @@ public class CurrencyConverter extends AbstractConverter {
      */
     static {
         // call to ensure map is initialized
-        Map<Class<? extends AbstractConverter>, Integer> normalFormOrder = (Map<Class<? extends AbstractConverter>, Integer>) Calculus
+        Map<Class<? extends AbstractConverter>, Integer> unused = (Map<Class<? extends AbstractConverter>, Integer>) Calculus
                 .getNormalFormOrder();
         try {
             Field field = Calculus.class.getDeclaredField("normalFormOrder");

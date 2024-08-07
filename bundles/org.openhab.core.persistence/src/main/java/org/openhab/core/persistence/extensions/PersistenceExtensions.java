@@ -1813,7 +1813,6 @@ public class PersistenceExtensions {
         DecimalType valueStop = null;
         if (itemStop != null) {
             valueStop = getPersistedValue(itemStop, unit);
-
         }
 
         if (begin == null && end != null && end.isAfter(ZonedDateTime.now())) {
@@ -2054,7 +2053,6 @@ public class PersistenceExtensions {
         DecimalType valueStop = null;
         if (itemStop != null) {
             valueStop = getPersistedValue(itemStop, unit);
-
         }
 
         if (begin == null && end != null && end.isAfter(ZonedDateTime.now())) {

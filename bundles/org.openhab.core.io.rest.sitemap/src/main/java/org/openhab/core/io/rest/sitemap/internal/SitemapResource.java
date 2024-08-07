@@ -397,7 +397,6 @@ public class SitemapResource
     public void getSitemapEvents(@Context final SseEventSink sseEventSink, @Context final HttpServletResponse response,
             @PathParam("subscriptionid") @Parameter(description = "subscription id") String subscriptionId,
             @QueryParam("sitemap") @Parameter(description = "sitemap name") @Nullable String sitemapname) {
-
         getSitemapEvents(sseEventSink, response, subscriptionId, sitemapname, null, true);
     }
 
