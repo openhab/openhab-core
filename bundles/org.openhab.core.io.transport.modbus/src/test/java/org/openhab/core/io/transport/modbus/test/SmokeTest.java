@@ -813,7 +813,7 @@ public class SmokeTest extends IntegrationTestSupport {
 
         EndpointPoolConfiguration newConfig = new EndpointPoolConfiguration();
         newConfig.setConnectMaxTries(5);
-        try (ModbusCommunicationInterface comms = modbusManager.newModbusCommunicationInterface(getEndpoint(),
+        try (ModbusCommunicationInterface unused = modbusManager.newModbusCommunicationInterface(getEndpoint(),
                 newConfig)) {
             // Sets configuration for the endpoint implicitly
         }
@@ -822,7 +822,8 @@ public class SmokeTest extends IntegrationTestSupport {
         assertThat(modbusManager.getEndpointPoolConfiguration(getEndpoint()), is(not(equalTo(defaultConfig))));
 
         // Reset config
-        try (ModbusCommunicationInterface comms = modbusManager.newModbusCommunicationInterface(getEndpoint(), null)) {
+        try (ModbusCommunicationInterface ignored = modbusManager.newModbusCommunicationInterface(getEndpoint(),
+                null)) {
             // Sets configuration for the endpoint implicitly
         }
         // Should match the default
@@ -863,7 +864,7 @@ public class SmokeTest extends IntegrationTestSupport {
                 long openSocketsAfter = getNumberOfOpenClients(SOCKET_SPY);
                 assertThat(openSocketsAfter, is(equalTo(1L)));
             });
-            try (ModbusCommunicationInterface comms2 = modbusManager.newModbusCommunicationInterface(endpoint,
+            try (ModbusCommunicationInterface ignored = modbusManager.newModbusCommunicationInterface(endpoint,
                     config)) {
                 {
                     CountDownLatch latch = new CountDownLatch(1);

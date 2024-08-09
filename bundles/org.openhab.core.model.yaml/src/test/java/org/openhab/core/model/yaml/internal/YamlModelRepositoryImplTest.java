@@ -135,7 +135,7 @@ public class YamlModelRepositoryImplTest {
         assertThat(firstTypeElements,
                 containsInAnyOrder(new FirstTypeDTO("First1", "Description1"), new FirstTypeDTO("First2", null)));
         assertThat(secondTypeElements1, contains(new SecondTypeDTO("Second1", "Label1")));
-        assertThat(secondTypeElements1, contains(new SecondTypeDTO("Second1", "Label1")));
+        assertThat(secondTypeElements2, contains(new SecondTypeDTO("Second1", "Label1")));
     }
 
     @Test

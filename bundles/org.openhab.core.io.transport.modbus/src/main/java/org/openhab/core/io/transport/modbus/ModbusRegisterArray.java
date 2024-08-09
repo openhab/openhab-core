@@ -130,9 +130,6 @@ public class ModbusRegisterArray {
             return false;
         }
         ModbusRegisterArray other = (ModbusRegisterArray) obj;
-        if (!Arrays.equals(bytes, other.bytes)) {
-            return false;
-        }
-        return true;
+        return Arrays.equals(bytes, other.bytes);
     }
 }

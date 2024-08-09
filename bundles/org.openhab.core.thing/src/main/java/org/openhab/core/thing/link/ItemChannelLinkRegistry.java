@@ -224,13 +224,6 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
         // it is not needed to send an event, because links can not be updated
     }
 
-    private boolean isEditable(String linkId) {
-        if (getManagedProvider().isPresent()) {
-            return getManagedProvider().get().get(linkId) != null;
-        }
-        return false;
-    }
-
     public enum ItemChannelLinkProblem {
         THING_CHANNEL_MISSING,
         ITEM_MISSING,

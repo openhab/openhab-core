@@ -44,8 +44,6 @@ import com.google.gson.stream.JsonWriter;
  */
 public class JSONResponse {
 
-    private final Logger logger = LoggerFactory.getLogger(JSONResponse.class);
-
     private static final JSONResponse INSTANCE = new JSONResponse();
     private final Gson gson = new GsonBuilder().setDateFormat(DateTimeType.DATE_PATTERN_WITH_TZ_AND_MS).create();
 

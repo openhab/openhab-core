@@ -190,7 +190,6 @@ public class ThreadPoolManagerTest {
                     try {
                         block.await();
                     } catch (InterruptedException e) {
-
                     }
                     check.countDown();
                 }, 1, TimeUnit.MILLISECONDS);

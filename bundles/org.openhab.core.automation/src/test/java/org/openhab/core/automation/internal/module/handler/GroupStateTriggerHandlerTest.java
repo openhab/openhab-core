@@ -45,7 +45,7 @@ class GroupStateTriggerHandlerTest extends JavaTest {
         when(moduleMock.getId()).thenReturn("triggerId");
         setupInterceptedLogger(GroupStateTriggerHandler.class, LogLevel.WARN);
 
-        GroupStateTriggerHandler handler = new GroupStateTriggerHandler(moduleMock, "ruleId", contextMock,
+        GroupStateTriggerHandler unused = new GroupStateTriggerHandler(moduleMock, "ruleId", contextMock,
                 itemRegistryMock);
 
         stopInterceptedLogger(GroupStateTriggerHandler.class);
@@ -61,7 +61,7 @@ class GroupStateTriggerHandlerTest extends JavaTest {
         when(moduleMock.getId()).thenReturn("triggerId");
         setupInterceptedLogger(GroupStateTriggerHandler.class, LogLevel.WARN);
 
-        GroupStateTriggerHandler handler = new GroupStateTriggerHandler(moduleMock, "ruleId", contextMock,
+        GroupStateTriggerHandler unused = new GroupStateTriggerHandler(moduleMock, "ruleId", contextMock,
                 itemRegistryMock);
 
         stopInterceptedLogger(GroupStateTriggerHandler.class);
