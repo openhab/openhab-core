@@ -139,7 +139,7 @@ public class Audio {
         if (newVolume - volume < .01) {
             // the getMasterVolume() may only returns integers, so we have to make sure that we
             // increase the volume level at least by 1%.
-            newVolume += .01;
+            newVolume += .01f;
         }
         if (newVolume > 1) {
             newVolume = 1;

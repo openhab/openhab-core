@@ -145,7 +145,7 @@ public class JavaTest {
      * @return true on success, false on timeout
      */
     protected boolean waitFor(BooleanSupplier condition, long timeout, long sleepTime) {
-        int waitingTime = 0;
+        long waitingTime = 0;
         boolean rv;
         while (!(rv = condition.getAsBoolean()) && waitingTime < timeout) {
             waitingTime += sleepTime;
