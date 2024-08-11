@@ -102,8 +102,6 @@ Fragment-Host: org.openhab.core.model.rule.runtime
 	org.ops4j.pax.web.pax-web-runtime;version='[8.0.27,8.0.28)',\
 	org.ops4j.pax.web.pax-web-spi;version='[8.0.27,8.0.28)',\
 	org.ops4j.pax.web.pax-web-tomcat-common;version='[8.0.27,8.0.28)',\
-	de.focus_shift.jollyday-core;version='[0.28.1,0.28.2)',\
-	de.focus_shift.jollyday-jackson;version='[0.28.1,0.28.2)',\
 	org.openhab.core;version='[4.3.0,4.3.1)',\
 	org.openhab.core.addon;version='[4.3.0,4.3.1)',\
 	org.openhab.core.audio;version='[4.3.0,4.3.1)',\
@@ -116,7 +114,6 @@ Fragment-Host: org.openhab.core.model.rule.runtime
 	org.openhab.core.io.net;version='[4.3.0,4.3.1)',\
 	org.openhab.core.model.core;version='[4.3.0,4.3.1)',\
 	org.openhab.core.model.item;version='[4.3.0,4.3.1)',\
-	org.openhab.core.model.item.runtime;version='[4.3.0,4.3.1)',\
 	org.openhab.core.model.persistence;version='[4.3.0,4.3.1)',\
 	org.openhab.core.model.rule;version='[4.3.0,4.3.1)',\
 	org.openhab.core.model.rule.runtime;version='[4.3.0,4.3.1)',\
@@ -131,4 +128,6 @@ Fragment-Host: org.openhab.core.model.rule.runtime
 	org.openhab.core.thing;version='[4.3.0,4.3.1)',\
 	org.openhab.core.transform;version='[4.3.0,4.3.1)',\
 	org.openhab.core.voice;version='[4.3.0,4.3.1)',\
-	stax2-api;version='[4.2.2,4.2.3)'
+	stax2-api;version='[4.2.2,4.2.3)',\
+	de.focus_shift.jollyday-core;version='[0.30.0,0.30.1)',\
+	de.focus_shift.jollyday-jackson;version='[0.30.0,0.30.1)'
