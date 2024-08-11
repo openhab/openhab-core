@@ -14,9 +14,12 @@ package org.openhab.core.library.types;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
+import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -235,6 +238,47 @@ public interface ArithmeticGroupFunction extends GroupFunction {
             } else {
                 return UnDefType.UNDEF;
             }
+        }
+
+        @Override
+        public @Nullable <T extends State> T getStateAs(@Nullable Set<Item> items, Class<T> stateClass) {
+            State state = calculate(items);
+            if (stateClass.isInstance(state)) {
+                return stateClass.cast(state);
+            } else {
+                return null;
+            }
+        }
+
+        @Override
+        public State[] getParameters() {
+            return new State[0];
+        }
+    }
+
+    /**
+     * This calculates the numeric median over all item states of decimal type.
+     */
+    class Median implements GroupFunction {
+
+        public Median() {
+        }
+
+        @Override
+        public State calculate(@Nullable Set<Item> items) {
+            if (items != null) {
+                List<DecimalType> states = items.stream().map(item -> item.getStateAs(DecimalType.class))
+                        .filter(Objects::nonNull).sorted((s1, s2) -> s1.compareTo(s2)).collect(Collectors.toList());
+                int size = states.size();
+                if (size % 2 == 1) {
+                    return states.get(size / 2);
+                } else if (size > 0) {
+                    return new DecimalType(
+                            states.get(size / 2 - 1).toBigDecimal().add(states.get(size / 2).toBigDecimal())
+                                    .divide(BigDecimal.valueOf(2), MathContext.DECIMAL128));
+                }
+            }
+            return UnDefType.UNDEF;
         }
 
         @Override

@@ -14,7 +14,10 @@ package org.openhab.core.library.types;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
+import java.util.List;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.measure.Quantity;
 
@@ -107,6 +110,37 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
                 return new QuantityType(result, sum.getUnit());
             }
 
+            return UnDefType.UNDEF;
+        }
+    }
+
+    /**
+     * This calculates the numeric median over all item states of {@link QuantityType}.
+     */
+    class Median extends DimensionalGroupFunction {
+
+        public Median(Class<? extends Quantity<?>> dimension) {
+            super(dimension);
+        }
+
+        @Override
+        @SuppressWarnings({ "unchecked", "rawtypes" })
+        public State calculate(@Nullable Set<Item> items) {
+            if (items != null) {
+                List<QuantityType> states = items.stream().filter(item -> isSameDimension(item))
+                        .map(item -> item.getStateAs(QuantityType.class)).filter(Objects::nonNull)
+                        .sorted((s1, s2) -> s1.compareTo(s2)).collect(Collectors.toList());
+                int size = states.size();
+                if (size % 2 == 1) {
+                    return states.get(size / 2);
+                } else if (size > 0) {
+                    QuantityType state1 = states.get(size / 2 - 1);
+                    QuantityType state2 = states.get(size / 2).toInvertibleUnit(state1.getUnit());
+                    BigDecimal result = state1.add(state2).toBigDecimal().divide(BigDecimal.valueOf(2),
+                            MathContext.DECIMAL128);
+                    return new QuantityType(result, state1.getUnit());
+                }
+            }
             return UnDefType.UNDEF;
         }
     }
