@@ -410,7 +410,6 @@ public class QuantityType<T extends Quantity<T>> extends Number
         // Wile time is representing a duration (Scale.RELATIVE), formatting patterns mimic String format patterns for
         // DateTime to not break backward compatibility and to avoid introducing specific duration formatting.
         if (quantity.getUnit().isCompatible(Units.SECOND) && !unitPlaceholder) {
-
             QuantityType<T> millis = toUnit(MetricPrefix.MILLI(Units.SECOND));
             if (millis != null) {
                 Duration duration = Duration.ofMillis(millis.longValue());
