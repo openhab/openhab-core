@@ -1520,11 +1520,6 @@ public class PersistenceExtensions {
         if (effectiveServiceId == null) {
             return null;
         }
-        Iterable<HistoricItem> result = getAllStatesBetweenWithBoundaries(item, begin, end, effectiveServiceId);
-        if (result == null) {
-            return null;
-        }
-        Iterator<HistoricItem> it = result.iterator();
         ZonedDateTime now = ZonedDateTime.now();
         ZonedDateTime beginTime = begin == null ? now : begin;
         ZonedDateTime endTime = end == null ? now : end;
@@ -1533,6 +1528,12 @@ public class PersistenceExtensions {
             HistoricItem historicItem = internalPersistedState(item, beginTime, effectiveServiceId);
             return historicItem != null ? historicItem.getState() : null;
         }
+
+        Iterable<HistoricItem> result = getAllStatesBetweenWithBoundaries(item, begin, end, effectiveServiceId);
+        if (result == null) {
+            return null;
+        }
+        Iterator<HistoricItem> it = result.iterator();
 
         BigDecimal sum = BigDecimal.ZERO;
 
@@ -1576,6 +1577,214 @@ public class PersistenceExtensions {
         }
 
         return null;
+    }
+
+    /**
+     * Gets the median value of the state of a given {@link Item} since a certain point in time.
+     * The default {@link PersistenceService} is used.
+     *
+     * @param item the {@link Item} to get the median value for
+     * @param timestamp the point in time from which to search for the median value
+     * @return the median value since <code>timestamp</code> or <code>null</code> if no
+     *         previous states could be found or if the default persistence service does not refer to an available
+     *         {@link QueryablePersistenceService}. The current state is included in the calculation.
+     */
+    public static @Nullable State medianSince(Item item, ZonedDateTime timestamp) {
+        return internalMedianBetween(item, timestamp, null, null);
+    }
+
+    /**
+     * Gets the median value of the state of a given {@link Item} until a certain point in time.
+     * The default {@link PersistenceService} is used.
+     *
+     * @param item the {@link Item} to get the median value for
+     * @param timestamp the point in time to which to search for the median value
+     * @return the median value until <code>timestamp</code> or <code>null</code> if no
+     *         future states could be found or if the default persistence service does not refer to an available
+     *         {@link QueryablePersistenceService}. The current state is included in the calculation.
+     */
+    public static @Nullable State medianUntil(Item item, ZonedDateTime timestamp) {
+        return internalMedianBetween(item, null, timestamp, null);
+    }
+
+    /**
+     * Gets the median value of the state of a given {@link Item} between two certain points in time.
+     * The default {@link PersistenceService} is used.
+     *
+     * @param item the {@link Item} to get the median value for
+     * @param begin the point in time from which to start the summation
+     * @param end the point in time to which to start the summation
+     * @return the median value between <code>begin</code> and <code>end</code> or <code>null</code> if no
+     *         states could be found or if the default persistence service does not refer to an available
+     *         {@link QueryablePersistenceService}.
+     */
+    public static @Nullable State medianBetween(Item item, ZonedDateTime begin, ZonedDateTime end) {
+        return internalMedianBetween(item, begin, end, null);
+    }
+
+    /**
+     * Gets the median value of the state of a given {@link Item} since a certain point in time.
+     * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
+     *
+     * @param item the {@link Item} to get the median value for
+     * @param timestamp the point in time from which to search for the median value
+     * @param serviceId the name of the {@link PersistenceService} to use
+     * @return the median value since <code>timestamp</code>, or <code>null</code> if no
+     *         previous states could be found or if the persistence service given by <code>serviceId</code> does not
+     *         refer to an available {@link QueryablePersistenceService}. The current state is included in the
+     *         calculation.
+     */
+    public static @Nullable State medianSince(Item item, ZonedDateTime timestamp, @Nullable String serviceId) {
+        return internalMedianBetween(item, timestamp, null, serviceId);
+    }
+
+    /**
+     * Gets the median value of the state of a given {@link Item} until a certain point in time.
+     * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
+     *
+     * @param item the {@link Item} to get the median value for
+     * @param timestamp the point in time to which to search for the median value
+     * @param serviceId the name of the {@link PersistenceService} to use
+     * @return the median value until <code>timestamp</code>, or <code>null</code> if no
+     *         future states could be found or if the persistence service given by <code>serviceId</code> does not
+     *         refer to an available {@link QueryablePersistenceService}. The current state is included in the
+     *         calculation.
+     */
+    public static @Nullable State medianUntil(Item item, ZonedDateTime timestamp, @Nullable String serviceId) {
+        return internalMedianBetween(item, null, timestamp, serviceId);
+    }
+
+    /**
+     * Gets the median value of the state of a given {@link Item} between two certain points in time.
+     * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
+     *
+     * @param item the {@link Item} to get the median value for
+     * @param begin the point in time from which to start the summation
+     * @param end the point in time to which to start the summation
+     * @param serviceId the name of the {@link PersistenceService} to use
+     * @return the median value between <code>begin</code> and <code>end</code>, or <code>null</code> if no
+     *         states could be found or if the persistence service given by <code>serviceId</code> does not
+     *         refer to an available {@link QueryablePersistenceService}
+     */
+    public static @Nullable State medianBetween(Item item, ZonedDateTime begin, ZonedDateTime end,
+            @Nullable String serviceId) {
+        return internalMedianBetween(item, begin, end, serviceId);
+    }
+
+    private static @Nullable State internalMedianBetween(Item item, @Nullable ZonedDateTime begin,
+            @Nullable ZonedDateTime end, @Nullable String serviceId) {
+        String effectiveServiceId = serviceId == null ? getDefaultServiceId() : serviceId;
+        if (effectiveServiceId == null) {
+            return null;
+        }
+        ZonedDateTime now = ZonedDateTime.now();
+        ZonedDateTime beginTime = begin == null ? now : begin;
+        ZonedDateTime endTime = end == null ? now : end;
+
+        if (beginTime.isEqual(endTime)) {
+            HistoricItem historicItem = internalPersistedState(item, beginTime, effectiveServiceId);
+            return historicItem != null ? historicItem.getState() : null;
+        }
+
+        Iterable<HistoricItem> result = getAllStatesBetween(item, beginTime, endTime, effectiveServiceId);
+        if (result == null) {
+            return null;
+        }
+
+        Item baseItem = item;
+        if (baseItem instanceof GroupItem groupItem) {
+            baseItem = groupItem.getBaseItem();
+        }
+        Unit<?> unit = baseItem instanceof NumberItem numberItem ? numberItem.getUnit() : null;
+
+        ArrayList<BigDecimal> resultList = new ArrayList<>();
+        result.forEach(hi -> {
+            DecimalType dtState = getPersistedValue(hi, unit);
+            if (dtState != null) {
+                resultList.add(dtState.toBigDecimal());
+            }
+        });
+
+        int size = resultList.size();
+        if (size >= 0) {
+            int k = size / 2;
+            BigDecimal median = QuickSelect.quickSelect(resultList, k);
+            if (size % 2 == 0) {
+                BigDecimal median2 = QuickSelect.quickSelect(resultList, k - 1);
+                if ((median != null) && (median2 != null)) {
+                    median = median.add(median2).divide(new BigDecimal(2));
+                }
+            }
+
+            if (median != null) {
+                if (unit != null) {
+                    return new QuantityType<>(median, unit);
+                } else {
+                    return new DecimalType(median);
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Class implementing the quickSelect algorithm.
+     * See https://en.wikipedia.org/wiki/Quickselect and https://gist.github.com/unnikked/14c19ba13f6a4bfd00a3
+     */
+    private static class QuickSelect {
+        /**
+         * Find the k-smallest element in a list.
+         *
+         * @param bdList, list elements will be reordered in place
+         * @param k
+         * @return
+         */
+        static @Nullable BigDecimal quickSelect(ArrayList<BigDecimal> bdList, int k) {
+            int left = 0;
+            int right = bdList.size() - 1;
+            if (right < 0) {
+                return null;
+            } else if (right == 0) {
+                return bdList.get(right);
+            }
+
+            for (;;) {
+                int pivotIndex = randomPivot(left, right);
+                pivotIndex = partition(bdList, left, right, pivotIndex);
+
+                if (k == pivotIndex) {
+                    return bdList.get(k);
+                } else if (k < pivotIndex) {
+                    right = pivotIndex - 1;
+                } else {
+                    left = pivotIndex + 1;
+                }
+            }
+        }
+
+        private static int partition(ArrayList<BigDecimal> bdList, int left, int right, int pivotIndex) {
+            BigDecimal pivotValue = bdList.get(pivotIndex);
+            swap(bdList, pivotIndex, right); // move pivot to end
+            int storeIndex = left;
+            for (int i = left; i < right; i++) {
+                if (bdList.get(i).compareTo(pivotValue) < 0) {
+                    swap(bdList, storeIndex, i);
+                    storeIndex++;
+                }
+            }
+            swap(bdList, right, storeIndex); // Move pivot to its final place
+            return storeIndex;
+        }
+
+        private static void swap(ArrayList<BigDecimal> bdList, int a, int b) {
+            BigDecimal tmp = bdList.get(a);
+            bdList.set(a, bdList.get(b));
+            bdList.set(b, tmp);
+        }
+
+        private static int randomPivot(int left, int right) {
+            return left + (int) Math.floor(Math.random() * (right - left + 1));
+        }
     }
 
     /**
