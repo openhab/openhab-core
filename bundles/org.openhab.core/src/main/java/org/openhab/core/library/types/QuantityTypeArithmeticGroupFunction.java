@@ -17,7 +17,6 @@ import java.math.MathContext;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.measure.Quantity;
 
@@ -129,7 +128,7 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
             if (items != null) {
                 List<QuantityType> states = items.stream().filter(item -> isSameDimension(item))
                         .map(item -> item.getStateAs(QuantityType.class)).filter(Objects::nonNull)
-                        .sorted((s1, s2) -> s1.compareTo(s2)).collect(Collectors.toList());
+                        .sorted((s1, s2) -> s1.compareTo(s2)).toList();
                 int size = states.size();
                 if (size % 2 == 1) {
                     return states.get(size / 2);

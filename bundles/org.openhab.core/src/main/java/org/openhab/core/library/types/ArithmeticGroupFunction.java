@@ -19,7 +19,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -268,7 +267,7 @@ public interface ArithmeticGroupFunction extends GroupFunction {
         public State calculate(@Nullable Set<Item> items) {
             if (items != null) {
                 List<DecimalType> states = items.stream().map(item -> item.getStateAs(DecimalType.class))
-                        .filter(Objects::nonNull).sorted((s1, s2) -> s1.compareTo(s2)).collect(Collectors.toList());
+                        .filter(Objects::nonNull).sorted((s1, s2) -> s1.compareTo(s2)).toList();
                 int size = states.size();
                 if (size % 2 == 1) {
                     return states.get(size / 2);
