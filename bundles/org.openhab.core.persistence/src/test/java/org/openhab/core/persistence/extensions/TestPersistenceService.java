@@ -283,6 +283,5 @@ public class TestPersistenceService implements QueryablePersistenceService {
         } else {
             return 0.5 * (values[values.length / 2] + values[values.length / 2 - 1]);
         }
-
     }
 }

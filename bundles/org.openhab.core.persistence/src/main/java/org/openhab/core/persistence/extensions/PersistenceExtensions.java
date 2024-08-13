@@ -1708,9 +1708,11 @@ public class PersistenceExtensions {
         int size = resultList.size();
         if (size >= 0) {
             int k = size / 2;
-            BigDecimal median = QuickSelect.quickSelect(resultList, k);
+            BigDecimal median = QuickSelect.quickSelect(resultList, 0, size - 1, k);
             if (size % 2 == 0) {
-                BigDecimal median2 = QuickSelect.quickSelect(resultList, k - 1);
+                // As resultList got reordered (all values less than median on the left) the second value to use is in
+                // the lower part of the list
+                BigDecimal median2 = QuickSelect.quickSelect(resultList, 0, k - 1, k - 1);
                 if ((median != null) && (median2 != null)) {
                     median = median.add(median2).divide(new BigDecimal(2));
                 }
@@ -1733,21 +1735,23 @@ public class PersistenceExtensions {
      */
     private static class QuickSelect {
         /**
-         * Find the k-smallest element in a list.
+         * Find the k-smallest element between indexes l and r in a list.
          *
          * @param bdList, list elements will be reordered in place
+         * @param l index of left most element in list to consider
+         * @param r index of right most element in list to consider
          * @param k
          * @return
          */
-        static @Nullable BigDecimal quickSelect(ArrayList<BigDecimal> bdList, int k) {
-            int left = 0;
-            int right = bdList.size() - 1;
-            if (right < 0) {
+        static @Nullable BigDecimal quickSelect(ArrayList<BigDecimal> bdList, int l, int r, int k) {
+            if (r < 0) {
                 return null;
-            } else if (right == 0) {
-                return bdList.get(right);
+            } else if (r == 0) {
+                return bdList.get(r);
             }
 
+            int left = l;
+            int right = r;
             for (;;) {
                 int pivotIndex = randomPivot(left, right);
                 pivotIndex = partition(bdList, left, right, pivotIndex);
@@ -1764,7 +1768,7 @@ public class PersistenceExtensions {
 
         private static int partition(ArrayList<BigDecimal> bdList, int left, int right, int pivotIndex) {
             BigDecimal pivotValue = bdList.get(pivotIndex);
-            swap(bdList, pivotIndex, right); // move pivot to end
+            swap(bdList, pivotIndex, right); // Move pivot to end
             int storeIndex = left;
             for (int i = left; i < right; i++) {
                 if (bdList.get(i).compareTo(pivotValue) < 0) {
@@ -1776,10 +1780,12 @@ public class PersistenceExtensions {
             return storeIndex;
         }
 
-        private static void swap(ArrayList<BigDecimal> bdList, int a, int b) {
-            BigDecimal tmp = bdList.get(a);
-            bdList.set(a, bdList.get(b));
-            bdList.set(b, tmp);
+        private static void swap(ArrayList<BigDecimal> bdList, int i, int j) {
+            if (i != j) {
+                BigDecimal tmp = bdList.get(i);
+                bdList.set(i, bdList.get(j));
+                bdList.set(j, tmp);
+            }
         }
 
         private static int randomPivot(int left, int right) {
