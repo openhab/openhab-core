@@ -31,7 +31,8 @@ public class StatisticsTest {
 
     @Test
     public void testQuickSelect() {
-        List<BigDecimal> baseList = List.of(10, 11, 9, 7, 24, 18, 33, 18).stream().map(v -> new BigDecimal(v)).toList();
+        List<BigDecimal> baseList = List.of(10, 11, 9, 7, 24, 18, 33, 18).stream().map(v -> BigDecimal.valueOf(v))
+                .toList();
         int repeats = 20; // quickSelect depends on a random pivot index. To make sure the random index does not
                           // influence test results, repeat the test several times.
 

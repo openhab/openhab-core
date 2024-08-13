@@ -49,7 +49,7 @@ public class Statistics {
                 median = Statistics.quickSelect(bdList, 0, size - 1, k, true);
                 if (median != null) {
                     // quickSelect has forced the k-1 element to be in the right place
-                    median = median.add(bdList.get(k - 1)).divide(new BigDecimal(2));
+                    median = median.add(bdList.get(k - 1)).divide(BigDecimal.valueOf(2));
                 }
             }
             return median;
