@@ -19,12 +19,9 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 import static org.openhab.core.persistence.extensions.TestPersistenceService.*;
 
-import java.math.BigDecimal;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
@@ -55,7 +52,6 @@ import org.openhab.core.library.unit.Units;
 import org.openhab.core.persistence.HistoricItem;
 import org.openhab.core.persistence.PersistenceService;
 import org.openhab.core.persistence.PersistenceServiceRegistry;
-import org.openhab.core.persistence.extensions.PersistenceExtensions.QuickSelect;
 import org.openhab.core.types.State;
 
 /**
@@ -65,6 +61,9 @@ import org.openhab.core.types.State;
  * @author Jan N. Klug - Interval method tests and refactoring
  * @author Mark Herwege - Changed return types to State for some interval methods to also return unit
  * @author Mark Herwege - Extended for future dates
+ * @author Mark Herwege - lastChange and nextChange methods
+ * @author Mark Herwege - handle persisted GroupItem with QuantityType
+ * @author Mark Herwege - add median methods
  */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -1877,33 +1876,6 @@ public class PersistenceExtensionsTest {
         assertNotNull(qt);
         assertEquals(HISTORIC_END, qt.doubleValue(), 0.01);
         assertEquals(SIUnits.CELSIUS, qt.getUnit());
-    }
-
-    @Test
-    public void testQuickSelect() {
-        int repeats = 20; // quickSelect depends on a random pivot index. To make sure the random index does not
-                          // influence test results, repeat the test several times.
-
-        List<BigDecimal> baseList = List.of(10, 11, 9, 7, 24, 18, 33, 18).stream().map(v -> new BigDecimal(v)).toList();
-        int expected = 18;
-        int prevExpected = 11;
-        int size = baseList.size();
-        int k = size / 2; // median
-
-        for (int pivotIndex = 0; pivotIndex < repeats; pivotIndex++) {
-            ArrayList<BigDecimal> bdList = new ArrayList<>(baseList);
-            BigDecimal qs = QuickSelect.quickSelect(bdList, 0, size - 1, k);
-            assertNotNull(qs);
-            int result = qs.intValue();
-            assertEquals(expected, result);
-
-            bdList = new ArrayList<>(baseList); // recreate as order may have changed
-            qs = QuickSelect.quickSelectForcePrevious(bdList, 0, size - 1, k);
-            assertNotNull(qs);
-            result = qs.intValue();
-            assertEquals(expected, result);
-            assertEquals(prevExpected, bdList.get(k - 1).intValue());
-        }
     }
 
     @Test
