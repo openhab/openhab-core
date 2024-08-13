@@ -1708,13 +1708,14 @@ public class PersistenceExtensions {
         int size = resultList.size();
         if (size >= 0) {
             int k = size / 2;
-            BigDecimal median = QuickSelect.quickSelect(resultList, 0, size - 1, k);
-            if (size % 2 == 0) {
-                // As resultList got reordered (all values less than median on the left) the second value to use is in
-                // the lower part of the list
-                BigDecimal median2 = QuickSelect.quickSelect(resultList, 0, k - 1, k - 1);
-                if ((median != null) && (median2 != null)) {
-                    median = median.add(median2).divide(new BigDecimal(2));
+            BigDecimal median = null;
+            if (size % 2 == 1) {
+                median = QuickSelect.quickSelect(resultList, 0, size - 1, k);
+            } else {
+                median = QuickSelect.quickSelectForcePrevious(resultList, 0, size - 1, k);
+                if (median != null) {
+                    // quickSelect has forced the k-1 element to be in the right place
+                    median = median.add(resultList.get(k - 1)).divide(new BigDecimal(2));
                 }
             }
 
@@ -1733,7 +1734,7 @@ public class PersistenceExtensions {
      * Class implementing the quickSelect algorithm.
      * See https://en.wikipedia.org/wiki/Quickselect and https://gist.github.com/unnikked/14c19ba13f6a4bfd00a3
      */
-    private static class QuickSelect {
+    public static class QuickSelect {
         /**
          * Find the k-smallest element between indexes l and r in a list.
          *
@@ -1743,7 +1744,38 @@ public class PersistenceExtensions {
          * @param k
          * @return
          */
-        static @Nullable BigDecimal quickSelect(ArrayList<BigDecimal> bdList, int l, int r, int k) {
+        public static @Nullable BigDecimal quickSelect(ArrayList<BigDecimal> bdList, int l, int r, int k) {
+            return quickSelectInternal(bdList, l, r, k, false);
+        }
+
+        /**
+         * Find the k-smallest element between indexes l and r in a list. At the same time, put the element before the
+         * k-smallest element at position k-1 in bdList. This is useful to calculate the median on a list with an uneven
+         * number of elements. The median will then be the sum of the returned value and the element at position k-1
+         * divided by 2.
+         *
+         * @param bdList, list elements will be reordered in place
+         * @param l index of left most element in list to consider
+         * @param r index of right most element in list to consider
+         * @param k
+         * @return
+         */
+        public static @Nullable BigDecimal quickSelectForcePrevious(ArrayList<BigDecimal> bdList, int l, int r, int k) {
+            return quickSelectInternal(bdList, l, r, k, true);
+        }
+
+        /**
+         * Find the k-smallest element between indexes l and r in a list.
+         *
+         * @param bdList, list elements will be reordered in place
+         * @param l index of left most element in list to consider
+         * @param r index of right most element in list to consider
+         * @param k
+         * @param forcePreviousOrder positions the k-1 element in the right place if true
+         * @return
+         */
+        private static @Nullable BigDecimal quickSelectInternal(ArrayList<BigDecimal> bdList, int l, int r, int k,
+                boolean forcePreviousOrder) {
             if (r < 0) {
                 return null;
             } else if (r == 0) {
@@ -1754,7 +1786,7 @@ public class PersistenceExtensions {
             int right = r;
             for (;;) {
                 int pivotIndex = randomPivot(left, right);
-                pivotIndex = partition(bdList, left, right, pivotIndex);
+                pivotIndex = partition(bdList, left, right, pivotIndex, forcePreviousOrder);
 
                 if (k == pivotIndex) {
                     return bdList.get(k);
@@ -1766,17 +1798,25 @@ public class PersistenceExtensions {
             }
         }
 
-        private static int partition(ArrayList<BigDecimal> bdList, int left, int right, int pivotIndex) {
+        private static int partition(ArrayList<BigDecimal> bdList, int left, int right, int pivotIndex,
+                boolean forcePreviousOrder) {
             BigDecimal pivotValue = bdList.get(pivotIndex);
             swap(bdList, pivotIndex, right); // Move pivot to end
+            int beforePivotIndex = left;
             int storeIndex = left;
             for (int i = left; i < right; i++) {
                 if (bdList.get(i).compareTo(pivotValue) < 0) {
+                    if (forcePreviousOrder && (bdList.get(i).compareTo(bdList.get(beforePivotIndex)) > 0)) {
+                        beforePivotIndex = storeIndex;
+                    }
                     swap(bdList, storeIndex, i);
                     storeIndex++;
                 }
             }
             swap(bdList, right, storeIndex); // Move pivot to its final place
+            if (forcePreviousOrder && (storeIndex > beforePivotIndex)) {
+                swap(bdList, beforePivotIndex, storeIndex - 1);
+            }
             return storeIndex;
         }
 
