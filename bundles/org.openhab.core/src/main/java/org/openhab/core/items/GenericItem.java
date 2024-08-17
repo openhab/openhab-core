@@ -12,6 +12,7 @@
  */
 package org.openhab.core.items;
 
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -77,6 +78,10 @@ public abstract class GenericItem implements ActiveItem {
     protected final String type;
 
     protected State state = UnDefType.NULL;
+    protected @Nullable State previousState;
+
+    protected @Nullable ZonedDateTime lastUpdate;
+    protected @Nullable ZonedDateTime lastChange;
 
     protected @Nullable String label;
 
@@ -101,6 +106,21 @@ public abstract class GenericItem implements ActiveItem {
     @Override
     public <T extends State> @Nullable T getStateAs(Class<T> typeClass) {
         return state.as(typeClass);
+    }
+
+    @Override
+    public @Nullable State getPreviousState() {
+        return previousState;
+    }
+
+    @Override
+    public @Nullable ZonedDateTime getLastUpdate() {
+        return lastUpdate;
+    }
+
+    @Override
+    public @Nullable ZonedDateTime getLastChange() {
+        return lastChange;
     }
 
     @Override
@@ -218,13 +238,20 @@ public abstract class GenericItem implements ActiveItem {
      * @param state new state of this item
      */
     protected final void applyState(State state) {
+        ZonedDateTime now = ZonedDateTime.now();
         State oldState = this.state;
+        boolean stateChanged = !oldState.equals(state);
         this.state = state;
+        if (stateChanged) {
+            previousState = oldState; // update before we notify listeners
+        }
         notifyListeners(oldState, state);
         sendStateUpdatedEvent(state);
-        if (!oldState.equals(state)) {
+        if (stateChanged) {
             sendStateChangedEvent(state, oldState);
+            lastChange = now; // update after we've notified listeners
         }
+        lastUpdate = now;
     }
 
     /**

@@ -12,6 +12,7 @@
  */
 package org.openhab.core.items;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -55,6 +56,30 @@ public interface Item extends Identifiable<String> {
      *         null, if state cannot be provided as the requested type
      */
     <T extends State> @Nullable T getStateAs(Class<T> typeClass);
+
+    /**
+     * Returns the previous state of the item.
+     * 
+     * @return the previous state of the item, or null if the item has never been changed.
+     */
+    @Nullable
+    State getPreviousState();
+
+    /**
+     * Returns the time the item was last updated.
+     * 
+     * @return the time the item was last updated, or null if the item has never been updated.
+     */
+    @Nullable
+    ZonedDateTime getLastUpdate();
+
+    /**
+     * Returns the time the item was last changed.
+     * 
+     * @return the time the item was last changed, or null if the item has never been changed.
+     */
+    @Nullable
+    ZonedDateTime getLastChange();
 
     /**
      * returns the name of the item
