@@ -15,6 +15,8 @@ package org.openhab.core.thing.binding.generic;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.transform.TransformationException;
@@ -61,18 +63,27 @@ public class ChannelTransformation {
     }
 
     private static class TransformationStep {
+        private static final List<Pattern> TRANSFORMATION_PATTERNS = List.of( //
+                Pattern.compile("(?<service>[a-zA-Z0-9]+)\\s*\\((?<function>.*)\\)$"), //
+                Pattern.compile("(?<service>[a-zA-Z0-9]+)\\s*:(?<function>.*)") //
+        );
+
         private final Logger logger = LoggerFactory.getLogger(TransformationStep.class);
         private final String serviceName;
         private final String function;
 
         public TransformationStep(String pattern) throws IllegalArgumentException {
-            int index = pattern.indexOf(":");
-            if (index == -1) {
-                throw new IllegalArgumentException(
-                        "The transformation pattern must consist of the type and the pattern separated by a colon");
+            pattern = pattern.trim();
+            for (Pattern p : TRANSFORMATION_PATTERNS) {
+                Matcher matcher = p.matcher(pattern);
+                if (matcher.matches()) {
+                    this.serviceName = matcher.group("service").trim().toUpperCase();
+                    this.function = matcher.group("function").trim();
+                    return;
+                }
             }
-            this.serviceName = pattern.substring(0, index).toUpperCase().trim();
-            this.function = pattern.substring(index + 1).trim();
+            throw new IllegalArgumentException(
+                    "The transformation pattern must be in the syntax of TYPE:PATTERN or TYPE(PATTERN)");
         }
 
         public Optional<String> apply(String value) {

@@ -52,6 +52,11 @@ public class ChannelTransformationTest {
     private static final String T2_INPUT = T1_RESULT;
     private static final String T2_RESULT = "T2Result";
 
+    private static final String T3_NAME = T2_NAME;
+    private static final String T3_PATTERN = "a()b()))";
+    private static final String T3_INPUT = T2_INPUT;
+    private static final String T3_RESULT = T2_RESULT;
+
     private @Mock @NonNullByDefault({}) TransformationService transformationService1Mock;
     private @Mock @NonNullByDefault({}) TransformationService transformationService2Mock;
 
@@ -69,6 +74,8 @@ public class ChannelTransformationTest {
                 .thenAnswer(answer -> T2_RESULT);
         Mockito.when(transformationService2Mock.transform(eq(T2_PATTERN), eq(T2_INPUT)))
                 .thenAnswer(answer -> T2_RESULT);
+        Mockito.when(transformationService2Mock.transform(eq(T3_PATTERN), eq(T3_INPUT)))
+                .thenAnswer(answer -> T3_RESULT);
 
         Mockito.when(serviceRef1Mock.getProperty(any())).thenReturn("TRANSFORM1");
         Mockito.when(serviceRef2Mock.getProperty(any())).thenReturn("TRANSFORM2");
@@ -97,13 +104,33 @@ public class ChannelTransformationTest {
     }
 
     @Test
-    public void testSingleTransformation() {
+    public void testSingleTransformationWithColon() {
         String pattern = T1_NAME + ":" + T1_PATTERN;
 
         ChannelTransformation transformation = new ChannelTransformation(pattern);
         String result = transformation.apply(T1_INPUT).orElse(null);
 
         assertEquals(T1_RESULT, result);
+    }
+
+    @Test
+    public void testSingleTransformationWithParens() {
+        String pattern = T1_NAME + "(" + T1_PATTERN + ")";
+
+        ChannelTransformation transformation = new ChannelTransformation(pattern);
+        String result = transformation.apply(T1_INPUT).orElse(null);
+
+        assertEquals(T1_RESULT, result);
+    }
+
+    @Test
+    public void testParensTransformationWithNestedParensInPattern() {
+        String pattern = T3_NAME + "(" + T3_PATTERN + ")";
+
+        ChannelTransformation transformation = new ChannelTransformation(pattern);
+        String result = transformation.apply(T3_INPUT).orElse(null);
+
+        assertEquals(T3_RESULT, result);
     }
 
     @Test
@@ -127,7 +154,7 @@ public class ChannelTransformationTest {
     }
 
     @Test
-    public void testDoubleTransformationWithoutSpaces() {
+    public void testColonDoubleTransformationWithoutSpaces() {
         String pattern = T1_NAME + ":" + T1_PATTERN + "∩" + T2_NAME + ":" + T2_PATTERN;
 
         ChannelTransformation transformation = new ChannelTransformation(pattern);
@@ -137,8 +164,68 @@ public class ChannelTransformationTest {
     }
 
     @Test
-    public void testDoubleTransformationWithSpaces() {
+    public void testParensDoubleTransformationWithoutSpaces() {
+        String pattern = T1_NAME + "(" + T1_PATTERN + ")∩" + T2_NAME + "(" + T2_PATTERN + ")";
+
+        ChannelTransformation transformation = new ChannelTransformation(pattern);
+        String result = transformation.apply(T1_INPUT).orElse(null);
+
+        assertEquals(T2_RESULT, result);
+    }
+
+    @Test
+    public void testMixedDoubleTransformationWithoutSpaces1() {
+        String pattern = T1_NAME + ":" + T1_PATTERN + "∩" + T2_NAME + "(" + T2_PATTERN + ")";
+
+        ChannelTransformation transformation = new ChannelTransformation(pattern);
+        String result = transformation.apply(T1_INPUT).orElse(null);
+
+        assertEquals(T2_RESULT, result);
+    }
+
+    @Test
+    public void testMixedDoubleTransformationWithoutSpaces2() {
+        String pattern = T1_NAME + "(" + T1_PATTERN + ")∩" + T2_NAME + ":" + T2_PATTERN;
+
+        ChannelTransformation transformation = new ChannelTransformation(pattern);
+        String result = transformation.apply(T1_INPUT).orElse(null);
+
+        assertEquals(T2_RESULT, result);
+    }
+
+    @Test
+    public void testColonDoubleTransformationWithSpaces() {
         String pattern = " " + T1_NAME + " : " + T1_PATTERN + " ∩ " + T2_NAME + " : " + T2_PATTERN + " ";
+
+        ChannelTransformation transformation = new ChannelTransformation(pattern);
+        String result = transformation.apply(T1_INPUT).orElse(null);
+
+        assertEquals(T2_RESULT, result);
+    }
+
+    @Test
+    public void testParensDoubleTransformationWithSpaces() {
+        String pattern = " " + T1_NAME + " ( " + T1_PATTERN + " ) ∩ " + T2_NAME + " ( " + T2_PATTERN + " ) ";
+
+        ChannelTransformation transformation = new ChannelTransformation(pattern);
+        String result = transformation.apply(T1_INPUT).orElse(null);
+
+        assertEquals(T2_RESULT, result);
+    }
+
+    @Test
+    public void testMixedDoubleTransformationWithSpaces1() {
+        String pattern = " " + T1_NAME + " : " + T1_PATTERN + " ∩ " + T2_NAME + " ( " + T2_PATTERN + " ) ";
+
+        ChannelTransformation transformation = new ChannelTransformation(pattern);
+        String result = transformation.apply(T1_INPUT).orElse(null);
+
+        assertEquals(T2_RESULT, result);
+    }
+
+    @Test
+    public void testMixedDoubleTransformationWithSpaces2() {
+        String pattern = " " + T1_NAME + " ( " + T1_PATTERN + " ) ∩ " + T2_NAME + " : " + T2_PATTERN + " ";
 
         ChannelTransformation transformation = new ChannelTransformation(pattern);
         String result = transformation.apply(T1_INPUT).orElse(null);
