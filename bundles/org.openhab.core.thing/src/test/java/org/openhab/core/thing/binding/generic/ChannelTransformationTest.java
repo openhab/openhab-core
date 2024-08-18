@@ -97,8 +97,18 @@ public class ChannelTransformationTest {
     }
 
     @Test
-    public void testSingleTransformation() {
+    public void testSingleTransformationWithColon() {
         String pattern = T1_NAME + ":" + T1_PATTERN;
+
+        ChannelTransformation transformation = new ChannelTransformation(pattern);
+        String result = transformation.apply(T1_INPUT).orElse(null);
+
+        assertEquals(T1_RESULT, result);
+    }
+
+    @Test
+    public void testSingleTransformationWithParens() {
+        String pattern = T1_NAME + "(" + T1_PATTERN + ")";
 
         ChannelTransformation transformation = new ChannelTransformation(pattern);
         String result = transformation.apply(T1_INPUT).orElse(null);
@@ -127,7 +137,7 @@ public class ChannelTransformationTest {
     }
 
     @Test
-    public void testDoubleTransformationWithoutSpaces() {
+    public void testColonDoubleTransformationWithoutSpaces() {
         String pattern = T1_NAME + ":" + T1_PATTERN + "∩" + T2_NAME + ":" + T2_PATTERN;
 
         ChannelTransformation transformation = new ChannelTransformation(pattern);
@@ -137,8 +147,28 @@ public class ChannelTransformationTest {
     }
 
     @Test
-    public void testDoubleTransformationWithSpaces() {
+    public void testParensDoubleTransformationWithoutSpaces() {
+        String pattern = T1_NAME + "(" + T1_PATTERN + ")∩" + T2_NAME + "(" + T2_PATTERN + ")";
+
+        ChannelTransformation transformation = new ChannelTransformation(pattern);
+        String result = transformation.apply(T1_INPUT).orElse(null);
+
+        assertEquals(T2_RESULT, result);
+    }
+
+    @Test
+    public void testColonDoubleTransformationWithSpaces() {
         String pattern = " " + T1_NAME + " : " + T1_PATTERN + " ∩ " + T2_NAME + " : " + T2_PATTERN + " ";
+
+        ChannelTransformation transformation = new ChannelTransformation(pattern);
+        String result = transformation.apply(T1_INPUT).orElse(null);
+
+        assertEquals(T2_RESULT, result);
+    }
+
+    @Test
+    public void testParensDoubleTransformationWithSpaces() {
+        String pattern = " " + T1_NAME + " ( " + T1_PATTERN + " ) ∩ " + T2_NAME + " ( " + T2_PATTERN + " ) ";
 
         ChannelTransformation transformation = new ChannelTransformation(pattern);
         String result = transformation.apply(T1_INPUT).orElse(null);
