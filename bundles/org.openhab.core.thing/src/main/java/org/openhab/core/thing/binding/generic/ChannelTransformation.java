@@ -17,7 +17,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.transform.TransformationException;
 import org.openhab.core.transform.TransformationHelper;
@@ -33,6 +35,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Jan N. Klug - Initial contribution
  */
+@NonNullByDefault
 public class ChannelTransformation {
     private final Logger logger = LoggerFactory.getLogger(ChannelTransformation.class);
     private List<TransformationStep> transformationSteps;
@@ -40,14 +43,32 @@ public class ChannelTransformation {
     public ChannelTransformation(@Nullable String transformationString) {
         if (transformationString != null) {
             try {
-                transformationSteps = Arrays.stream(transformationString.split("∩")).filter(s -> !s.isBlank())
-                        .map(TransformationStep::new).toList();
+                transformationSteps = splitTransformationString(transformationString).map(TransformationStep::new)
+                        .toList();
                 return;
             } catch (IllegalArgumentException e) {
                 logger.warn("Transformation ignored, failed to parse {}: {}", transformationString, e.getMessage());
             }
         }
         transformationSteps = List.of();
+    }
+
+    public ChannelTransformation(@Nullable List<String> transformationStrings) {
+        if (transformationStrings != null) {
+            try {
+                transformationSteps = transformationStrings.stream()
+                        .flatMap(ChannelTransformation::splitTransformationString).map(TransformationStep::new)
+                        .toList();
+                return;
+            } catch (IllegalArgumentException e) {
+                logger.warn("Transformation ignored, failed to parse {}: {}", transformationStrings, e.getMessage());
+            }
+        }
+        transformationSteps = List.of();
+    }
+
+    private static Stream<String> splitTransformationString(String transformationString) {
+        return Arrays.stream(transformationString.split("∩")).filter(s -> !s.isBlank());
     }
 
     public Optional<String> apply(String value) {

@@ -17,6 +17,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 
+import java.util.List;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -54,8 +56,8 @@ public class ChannelTransformationTest {
 
     private static final String T3_NAME = T2_NAME;
     private static final String T3_PATTERN = "a()b()))";
-    private static final String T3_INPUT = T2_INPUT;
-    private static final String T3_RESULT = T2_RESULT;
+    private static final String T3_INPUT = T2_RESULT;
+    private static final String T3_RESULT = "T3Result";
 
     private @Mock @NonNullByDefault({}) TransformationService transformationService1Mock;
     private @Mock @NonNullByDefault({}) TransformationService transformationService2Mock;
@@ -161,6 +163,38 @@ public class ChannelTransformationTest {
         String result = transformation.apply(T1_INPUT).orElse(null);
 
         assertEquals(T2_RESULT, result);
+    }
+
+    @Test
+    public void testTransformationsInAList() {
+        List<String> patterns = List.of(T1_NAME + ":" + T1_PATTERN, T2_NAME + ":" + T2_PATTERN);
+
+        ChannelTransformation transformation = new ChannelTransformation(patterns);
+        String result = transformation.apply(T1_INPUT).orElse(null);
+
+        assertEquals(T2_RESULT, result);
+    }
+
+    @Test
+    public void testMixedTransformationsInAList1() {
+        List<String> patterns = List.of(T1_NAME + ":" + T1_PATTERN + "∩" + T2_NAME + ":" + T2_PATTERN,
+                T3_NAME + ":" + T3_PATTERN);
+
+        ChannelTransformation transformation = new ChannelTransformation(patterns);
+        String result = transformation.apply(T1_INPUT).orElse(null);
+
+        assertEquals(T3_RESULT, result);
+    }
+
+    @Test
+    public void testMixedTransformationsInAList2() {
+        List<String> patterns = List.of(T1_NAME + ":" + T1_PATTERN,
+                T2_NAME + ":" + T2_PATTERN + "∩" + T3_NAME + ":" + T3_PATTERN);
+
+        ChannelTransformation transformation = new ChannelTransformation(patterns);
+        String result = transformation.apply(T1_INPUT).orElse(null);
+
+        assertEquals(T3_RESULT, result);
     }
 
     @Test
