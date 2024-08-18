@@ -174,6 +174,26 @@ public class ChannelTransformationTest {
     }
 
     @Test
+    public void testMixedDoubleTransformationWithoutSpaces1() {
+        String pattern = T1_NAME + ":" + T1_PATTERN + "∩" + T2_NAME + "(" + T2_PATTERN + ")";
+
+        ChannelTransformation transformation = new ChannelTransformation(pattern);
+        String result = transformation.apply(T1_INPUT).orElse(null);
+
+        assertEquals(T2_RESULT, result);
+    }
+
+    @Test
+    public void testMixedDoubleTransformationWithoutSpaces2() {
+        String pattern = T1_NAME + "(" + T1_PATTERN + ")∩" + T2_NAME + ":" + T2_PATTERN;
+
+        ChannelTransformation transformation = new ChannelTransformation(pattern);
+        String result = transformation.apply(T1_INPUT).orElse(null);
+
+        assertEquals(T2_RESULT, result);
+    }
+
+    @Test
     public void testColonDoubleTransformationWithSpaces() {
         String pattern = " " + T1_NAME + " : " + T1_PATTERN + " ∩ " + T2_NAME + " : " + T2_PATTERN + " ";
 
@@ -186,6 +206,26 @@ public class ChannelTransformationTest {
     @Test
     public void testParensDoubleTransformationWithSpaces() {
         String pattern = " " + T1_NAME + " ( " + T1_PATTERN + " ) ∩ " + T2_NAME + " ( " + T2_PATTERN + " ) ";
+
+        ChannelTransformation transformation = new ChannelTransformation(pattern);
+        String result = transformation.apply(T1_INPUT).orElse(null);
+
+        assertEquals(T2_RESULT, result);
+    }
+
+    @Test
+    public void testMixedDoubleTransformationWithSpaces1() {
+        String pattern = " " + T1_NAME + " : " + T1_PATTERN + " ∩ " + T2_NAME + " ( " + T2_PATTERN + " ) ";
+
+        ChannelTransformation transformation = new ChannelTransformation(pattern);
+        String result = transformation.apply(T1_INPUT).orElse(null);
+
+        assertEquals(T2_RESULT, result);
+    }
+
+    @Test
+    public void testMixedDoubleTransformationWithSpaces2() {
+        String pattern = " " + T1_NAME + " ( " + T1_PATTERN + " ) ∩ " + T2_NAME + " : " + T2_PATTERN + " ";
 
         ChannelTransformation transformation = new ChannelTransformation(pattern);
         String result = transformation.apply(T1_INPUT).orElse(null);
