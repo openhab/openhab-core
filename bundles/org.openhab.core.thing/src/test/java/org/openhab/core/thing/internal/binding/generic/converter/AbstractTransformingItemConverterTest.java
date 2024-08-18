@@ -59,10 +59,10 @@ public class AbstractTransformingItemConverterTest {
     private @NonNullByDefault({}) AutoCloseable closeable;
 
     @Spy
-    private ChannelTransformation stateChannelTransformation = new ChannelTransformation(null);
+    private ChannelTransformation stateChannelTransformation = new ChannelTransformation((String) null);
 
     @Spy
-    private ChannelTransformation commandChannelTransformation = new ChannelTransformation(null);
+    private ChannelTransformation commandChannelTransformation = new ChannelTransformation((String) null);
 
     @BeforeEach
     public void init() {
