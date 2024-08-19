@@ -16,7 +16,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
@@ -31,46 +33,30 @@ public class StatisticsTest {
 
     @Test
     public void testQuickSelect() {
-        List<BigDecimal> baseList = List.of(10, 11, 9, 7, 24, 18, 33, 18).stream().map(v -> BigDecimal.valueOf(v))
+        List<BigDecimal> baseList = new Random().doubles(100, 0, 100).mapToObj(v -> BigDecimal.valueOf(v)).sorted()
                 .toList();
-        int repeats = 20; // quickSelect depends on a random pivot index. To make sure the random index does not
-                          // influence test results, repeat the test several times.
 
-        int expected = 18;
-        int prevExpected = 11;
         int size = baseList.size();
         int k = size / 2; // median
+        int expected = baseList.get(k).intValue();
+        int prevExpected = baseList.get(k - 1).intValue();
 
-        // First test without randomQuickSelectSeed (default value)
-        ArrayList<BigDecimal> bdList = new ArrayList<>(baseList);
-        BigDecimal qs = Statistics.quickSelect(bdList, 0, size - 1, k, false);
-        assertNotNull(qs);
-        int result = qs.intValue();
-        assertEquals(expected, result);
-
-        bdList = new ArrayList<>(baseList); // recreate as order may have changed
-        qs = Statistics.quickSelect(bdList, 0, size - 1, k, true);
-        assertNotNull(qs);
-        result = qs.intValue();
-        assertEquals(expected, result);
-        assertEquals(prevExpected, bdList.get(k - 1).intValue());
-
-        // Test with randomQuickSelectSeed
-        Statistics.randomQuickSelectSeed = true;
-        for (int pivotIndex = 0; pivotIndex < repeats; pivotIndex++) {
-            bdList = new ArrayList<>(baseList);
-            qs = Statistics.quickSelect(bdList, 0, size - 1, k, false);
-            assertNotNull(qs);
-            result = qs.intValue();
+        // Iterate a few times with reshuffled list to exclude impact of initial ordering
+        for (int i = 0; i < 10; i++) {
+            ArrayList<BigDecimal> bdList = new ArrayList<>(baseList);
+            Collections.shuffle(bdList);
+            BigDecimal bd = Statistics.quickSelect(bdList, 0, size - 1, k, false);
+            assertNotNull(bd);
+            int result = bd.intValue();
             assertEquals(expected, result);
 
             bdList = new ArrayList<>(baseList); // recreate as order may have changed
-            qs = Statistics.quickSelect(bdList, 0, size - 1, k, true);
-            assertNotNull(qs);
-            result = qs.intValue();
+            Collections.shuffle(bdList);
+            bd = Statistics.quickSelect(bdList, 0, size - 1, k, true);
+            assertNotNull(bd);
+            result = bd.intValue();
             assertEquals(expected, result);
             assertEquals(prevExpected, bdList.get(k - 1).intValue());
         }
-        Statistics.randomQuickSelectSeed = false;
     }
 }

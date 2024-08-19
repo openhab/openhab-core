@@ -27,10 +27,6 @@ import org.eclipse.jdt.annotation.Nullable;
 @NonNullByDefault
 public class Statistics {
 
-    public static boolean randomQuickSelectSeed = false; // Can be enabled to always create a random pivot index for the
-                                                         // quickSelect algorithm, false will start from first value in
-                                                         // list as pivot and avoid random number generation
-
     /**
      * Find the median in a list of values
      *
@@ -84,7 +80,9 @@ public class Statistics {
         int left = l;
         int right = r;
         for (;;) {
-            int pivotIndex = randomPivot(left, right);
+            int pivotIndex = left; // Textbook quickselect algorithm uses a random pivot index in the left to right
+                                   // range. The random generation adds time and does not change the algorithm result,
+                                   // so just pick left.
             pivotIndex = partition(bdList, left, right, pivotIndex, forcePreviousOrder);
 
             if (k == pivotIndex) {
@@ -125,14 +123,5 @@ public class Statistics {
             bdList.set(i, bdList.get(j));
             bdList.set(j, tmp);
         }
-    }
-
-    private static int randomPivot(int left, int right) {
-        if (!randomQuickSelectSeed) {
-            // The overhead of random may reduce algorithm performance, therefore just start with the first value as
-            // pivot
-            return left;
-        }
-        return left + (int) Math.floor(Math.random() * (right - left + 1));
     }
 }

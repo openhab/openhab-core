@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.StreamSupport;
 
 import javax.measure.Unit;
@@ -988,10 +989,7 @@ public class PersistenceExtensions {
         Iterator<HistoricItem> it = result.iterator();
         HistoricItem maximumHistoricItem = null;
 
-        Item baseItem = item;
-        if (baseItem instanceof GroupItem groupItem) {
-            baseItem = groupItem.getBaseItem();
-        }
+        Item baseItem = item instanceof GroupItem groupItem ? groupItem.getBaseItem() : item;
         Unit<?> unit = (baseItem instanceof NumberItem numberItem) ? numberItem.getUnit() : null;
 
         DecimalType maximum = null;
@@ -1119,10 +1117,7 @@ public class PersistenceExtensions {
         Iterator<HistoricItem> it = result.iterator();
         HistoricItem minimumHistoricItem = null;
 
-        Item baseItem = item;
-        if (baseItem instanceof GroupItem groupItem) {
-            baseItem = groupItem.getBaseItem();
-        }
+        Item baseItem = item instanceof GroupItem groupItem ? groupItem.getBaseItem() : item;
         Unit<?> unit = (baseItem instanceof NumberItem numberItem) ? numberItem.getUnit() : null;
 
         DecimalType minimum = null;
@@ -1251,10 +1246,7 @@ public class PersistenceExtensions {
             BigDecimal average = dt != null ? dt.toBigDecimal() : BigDecimal.ZERO, sum = BigDecimal.ZERO;
             int count = 0;
 
-            Item baseItem = item;
-            if (baseItem instanceof GroupItem groupItem) {
-                baseItem = groupItem.getBaseItem();
-            }
+            Item baseItem = item instanceof GroupItem groupItem ? groupItem.getBaseItem() : item;
             Unit<?> unit = baseItem instanceof NumberItem numberItem ? numberItem.getUnit() : null;
 
             Iterator<HistoricItem> it = result.iterator();
@@ -1408,10 +1400,7 @@ public class PersistenceExtensions {
             // avoid ArithmeticException if variance is less than zero
             if (dt != null && DecimalType.ZERO.compareTo(dt) <= 0) {
                 BigDecimal deviation = dt.toBigDecimal().sqrt(MathContext.DECIMAL64);
-                Item baseItem = item;
-                if (baseItem instanceof GroupItem groupItem) {
-                    baseItem = groupItem.getBaseItem();
-                }
+                Item baseItem = item instanceof GroupItem groupItem ? groupItem.getBaseItem() : item;
                 if (baseItem instanceof NumberItem numberItem) {
                     Unit<?> unit = numberItem.getUnit();
                     if (unit != null) {
@@ -1523,8 +1512,8 @@ public class PersistenceExtensions {
             return null;
         }
         ZonedDateTime now = ZonedDateTime.now();
-        ZonedDateTime beginTime = begin == null ? now : begin;
-        ZonedDateTime endTime = end == null ? now : end;
+        ZonedDateTime beginTime = Objects.requireNonNullElse(begin, now);
+        ZonedDateTime endTime = Objects.requireNonNullElse(end, now);
 
         if (beginTime.isEqual(endTime)) {
             HistoricItem historicItem = internalPersistedState(item, beginTime, effectiveServiceId);
@@ -1542,10 +1531,7 @@ public class PersistenceExtensions {
         HistoricItem lastItem = null;
         ZonedDateTime firstTimestamp = null;
 
-        Item baseItem = item;
-        if (baseItem instanceof GroupItem groupItem) {
-            baseItem = groupItem.getBaseItem();
-        }
+        Item baseItem = item instanceof GroupItem groupItem ? groupItem.getBaseItem() : item;
         Unit<?> unit = baseItem instanceof NumberItem numberItem ? numberItem.getUnit() : null;
 
         while (it.hasNext()) {
@@ -1680,8 +1666,8 @@ public class PersistenceExtensions {
             return null;
         }
         ZonedDateTime now = ZonedDateTime.now();
-        ZonedDateTime beginTime = begin == null ? now : begin;
-        ZonedDateTime endTime = end == null ? now : end;
+        ZonedDateTime beginTime = Objects.requireNonNullElse(begin, now);
+        ZonedDateTime endTime = Objects.requireNonNullElse(end, now);
 
         if (beginTime.isEqual(endTime)) {
             HistoricItem historicItem = internalPersistedState(item, beginTime, effectiveServiceId);
@@ -1693,10 +1679,7 @@ public class PersistenceExtensions {
             return null;
         }
 
-        Item baseItem = item;
-        if (baseItem instanceof GroupItem groupItem) {
-            baseItem = groupItem.getBaseItem();
-        }
+        Item baseItem = item instanceof GroupItem groupItem ? groupItem.getBaseItem() : item;
         Unit<?> unit = baseItem instanceof NumberItem numberItem ? numberItem.getUnit() : null;
 
         List<BigDecimal> resultList = new ArrayList<>();
@@ -1815,10 +1798,7 @@ public class PersistenceExtensions {
         if (result != null) {
             Iterator<HistoricItem> it = result.iterator();
 
-            Item baseItem = item;
-            if (baseItem instanceof GroupItem groupItem) {
-                baseItem = groupItem.getBaseItem();
-            }
+            Item baseItem = item instanceof GroupItem groupItem ? groupItem.getBaseItem() : item;
             Unit<?> unit = baseItem instanceof NumberItem numberItem ? numberItem.getUnit() : null;
 
             BigDecimal sum = BigDecimal.ZERO;
@@ -1940,10 +1920,7 @@ public class PersistenceExtensions {
         HistoricItem itemStart = internalPersistedState(item, begin, effectiveServiceId);
         HistoricItem itemStop = internalPersistedState(item, end, effectiveServiceId);
 
-        Item baseItem = item;
-        if (baseItem instanceof GroupItem groupItem) {
-            baseItem = groupItem.getBaseItem();
-        }
+        Item baseItem = item instanceof GroupItem groupItem ? groupItem.getBaseItem() : item;
         Unit<?> unit = baseItem instanceof NumberItem numberItem ? numberItem.getUnit() : null;
 
         DecimalType valueStart = null;
@@ -2177,10 +2154,7 @@ public class PersistenceExtensions {
             return null;
         }
 
-        Item baseItem = item;
-        if (baseItem instanceof GroupItem groupItem) {
-            baseItem = groupItem.getBaseItem();
-        }
+        Item baseItem = item instanceof GroupItem groupItem ? groupItem.getBaseItem() : item;
         Unit<?> unit = baseItem instanceof NumberItem numberItem ? numberItem.getUnit() : null;
 
         HistoricItem itemStart = internalPersistedState(item, begin, effectiveServiceId);
@@ -2696,8 +2670,8 @@ public class PersistenceExtensions {
             return null;
         }
 
-        ZonedDateTime beginTime = (begin == null) ? now : begin;
-        ZonedDateTime endTime = (end == null) ? now : end;
+        ZonedDateTime beginTime = Objects.requireNonNullElse(begin, now);
+        ZonedDateTime endTime = Objects.requireNonNullElse(end, now);
 
         List<HistoricItem> betweenItemsList = new ArrayList<>();
         if (betweenItems != null) {
@@ -2756,10 +2730,7 @@ public class PersistenceExtensions {
     }
 
     private static @Nullable DecimalType getItemValue(Item item) {
-        Item baseItem = item;
-        if (baseItem instanceof GroupItem groupItem) {
-            baseItem = groupItem.getBaseItem();
-        }
+        Item baseItem = item instanceof GroupItem groupItem ? groupItem.getBaseItem() : item;
         if (baseItem instanceof NumberItem numberItem) {
             Unit<?> unit = numberItem.getUnit();
             if (unit != null) {
