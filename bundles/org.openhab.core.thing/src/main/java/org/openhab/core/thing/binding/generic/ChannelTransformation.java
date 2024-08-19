@@ -71,15 +71,28 @@ public class ChannelTransformation {
         return Arrays.stream(transformationString.split("∩")).filter(s -> !s.isBlank());
     }
 
+    public boolean isEmpty() {
+        return transformationSteps.isEmpty();
+    }
+
+    public boolean isPresent() {
+        return !isEmpty();
+    }
+
     public Optional<String> apply(String value) {
         Optional<String> valueOptional = Optional.of(value);
 
         // process all transformations
         for (TransformationStep transformationStep : transformationSteps) {
-            valueOptional = valueOptional.flatMap(transformationStep::apply);
+            valueOptional = valueOptional.flatMap(v -> {
+                Optional<String> result = transformationStep.apply(v);
+                if (logger.isTraceEnabled()) {
+                    logger.trace("Transformed '{}' to '{}' using '{}'", v, result.orElse(null), transformationStep);
+                }
+                return result;
+            });
         }
 
-        logger.trace("Transformed '{}' to '{}' using '{}'", value, valueOptional, transformationSteps);
         return valueOptional;
     }
 
