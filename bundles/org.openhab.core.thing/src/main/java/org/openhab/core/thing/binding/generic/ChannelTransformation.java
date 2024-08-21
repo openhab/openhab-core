@@ -71,6 +71,25 @@ public class ChannelTransformation {
         return Arrays.stream(transformationString.split("∩")).filter(s -> !s.isBlank());
     }
 
+    /**
+     * Checks whether the given string contains valid transformations.
+     * 
+     * Valid single and chained transformations will return true.
+     * 
+     * @param value the transformation string to check.
+     * @return <code>true</code> if the string contains valid transformations, <code>false</code> otherwise.
+     */
+    public static boolean isTransform(@Nullable String value) {
+        if (value == null || value.isBlank()) {
+            return false;
+        }
+        try {
+            return splitTransformationString(value).map(TransformationStep::new).count() > 0;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+    }
+
     public boolean isEmpty() {
         return transformationSteps.isEmpty();
     }
