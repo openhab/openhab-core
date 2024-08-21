@@ -242,7 +242,9 @@ public class ScriptTransformationService implements TransformationService, Confi
             return null;
         }
 
-        if (ScriptProfile.CONFIG_TO_HANDLER_SCRIPT.equals(param) || ScriptProfile.CONFIG_TO_ITEM_SCRIPT.equals(param)) {
+        if (ScriptProfile.CONFIG_TO_HANDLER_SCRIPT.equals(param) || ScriptProfile.CONFIG_TO_ITEM_SCRIPT.equals(param)
+                || ScriptProfile.CONFIG_COMMAND_FROM_ITEM_SCRIPT.equals(param)
+                || ScriptProfile.CONFIG_STATE_FROM_ITEM_SCRIPT.equals(param)) {
             return transformationRegistry.getTransformations(List.of(scriptType.toLowerCase())).stream()
                     .map(c -> new ParameterOption(c.getUID(), c.getLabel())).toList();
         }
