@@ -26,6 +26,7 @@ import org.openhab.core.items.GroupFunction;
 import org.openhab.core.items.Item;
 import org.openhab.core.types.State;
 import org.openhab.core.types.UnDefType;
+import org.openhab.core.util.Statistics;
 
 /**
  * This interface is only a container for functions that require the core type library
@@ -266,15 +267,11 @@ public interface ArithmeticGroupFunction extends GroupFunction {
         @Override
         public State calculate(@Nullable Set<Item> items) {
             if (items != null) {
-                List<DecimalType> states = items.stream().map(item -> item.getStateAs(DecimalType.class))
-                        .filter(Objects::nonNull).sorted((s1, s2) -> s1.compareTo(s2)).toList();
-                int size = states.size();
-                if (size % 2 == 1) {
-                    return states.get(size / 2);
-                } else if (size > 0) {
-                    return new DecimalType(
-                            states.get(size / 2 - 1).toBigDecimal().add(states.get(size / 2).toBigDecimal())
-                                    .divide(BigDecimal.valueOf(2), MathContext.DECIMAL128));
+                List<BigDecimal> states = items.stream().map(item -> item.getStateAs(DecimalType.class))
+                        .filter(Objects::nonNull).map(DecimalType::toBigDecimal).toList();
+                BigDecimal median = Statistics.median(states);
+                if (median != null) {
+                    return new DecimalType(median);
                 }
             }
             return UnDefType.UNDEF;

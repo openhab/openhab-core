@@ -14,11 +14,12 @@ package org.openhab.core.library.types;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
 import javax.measure.Quantity;
+import javax.measure.Unit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -28,6 +29,7 @@ import org.openhab.core.items.Item;
 import org.openhab.core.library.items.NumberItem;
 import org.openhab.core.types.State;
 import org.openhab.core.types.UnDefType;
+import org.openhab.core.util.Statistics;
 
 /**
  * This interface is a container for dimension based functions that require {@link QuantityType}s for its calculations.
@@ -118,26 +120,42 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
      */
     class Median extends DimensionalGroupFunction {
 
-        public Median(Class<? extends Quantity<?>> dimension) {
+        private @Nullable Item baseItem;
+
+        public Median(Class<? extends Quantity<?>> dimension, @Nullable Item baseItem) {
             super(dimension);
+            this.baseItem = baseItem;
         }
 
         @Override
         @SuppressWarnings({ "unchecked", "rawtypes" })
         public State calculate(@Nullable Set<Item> items) {
             if (items != null) {
-                List<QuantityType> states = items.stream().filter(item -> isSameDimension(item))
-                        .map(item -> item.getStateAs(QuantityType.class)).filter(Objects::nonNull)
-                        .sorted((s1, s2) -> s1.compareTo(s2)).toList();
-                int size = states.size();
-                if (size % 2 == 1) {
-                    return states.get(size / 2);
-                } else if (size > 0) {
-                    QuantityType state1 = states.get(size / 2 - 1);
-                    QuantityType state2 = states.get(size / 2).toInvertibleUnit(state1.getUnit());
-                    BigDecimal result = state1.add(state2).toBigDecimal().divide(BigDecimal.valueOf(2),
-                            MathContext.DECIMAL128);
-                    return new QuantityType(result, state1.getUnit());
+                List<BigDecimal> values = new ArrayList<>();
+                Unit<?> unit = null;
+                if (baseItem instanceof NumberItem numberItem) {
+                    unit = numberItem.getUnit();
+                }
+                for (Item item : items) {
+                    if (!isSameDimension(item)) {
+                        continue;
+                    }
+                    QuantityType itemState = item.getStateAs(QuantityType.class);
+                    if (itemState == null) {
+                        continue;
+                    }
+                    if (unit == null) {
+                        unit = itemState.getUnit(); // set it to the first item's unit
+                    }
+                    values.add(itemState.toInvertibleUnit(unit).toBigDecimal());
+                }
+
+                if (!values.isEmpty()) {
+                    BigDecimal median = Statistics.median(values);
+                    if (median != null) {
+                        return new QuantityType<>(median, unit);
+                    }
+
                 }
             }
             return UnDefType.UNDEF;

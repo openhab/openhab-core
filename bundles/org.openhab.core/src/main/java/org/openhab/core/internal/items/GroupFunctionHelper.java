@@ -92,7 +92,7 @@ public class GroupFunctionHelper {
             case "AVG":
                 return new QuantityTypeArithmeticGroupFunction.Avg(dimension);
             case "MEDIAN":
-                return new QuantityTypeArithmeticGroupFunction.Median(dimension);
+                return new QuantityTypeArithmeticGroupFunction.Median(dimension, baseItem);
             case "SUM":
                 return new QuantityTypeArithmeticGroupFunction.Sum(dimension);
             case "MIN":

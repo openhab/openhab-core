@@ -191,6 +191,11 @@ public class QuantityTypeArithmeticGroupFunctionTest {
                         List.of(new QuantityType("100 °C"), UnDefType.NULL, new QuantityType("200 °C"), UnDefType.UNDEF,
                                 new QuantityType("300 °C"), new QuantityType("400 °C")), //
                         new QuantityType("250 °C")), //
+                // mixed units. 200 °C = 392 °F
+                arguments( //
+                        List.of(new QuantityType("100 °C"), UnDefType.NULL, new QuantityType("392 °F"), UnDefType.UNDEF,
+                                new QuantityType("300 °C"), new QuantityType("400 °C")), //
+                        new QuantityType("250 °C")), //
                 arguments( //
                         List.of(new QuantityType("100 °C"), UnDefType.NULL, new QuantityType("200 °C"), UnDefType.UNDEF,
                                 new QuantityType("300 °C")), //
@@ -215,13 +220,13 @@ public class QuantityTypeArithmeticGroupFunctionTest {
                 .map(state -> createNumberItem("TestItem" + index.getAndIncrement(), Temperature.class, state))
                 .collect(Collectors.toSet());
 
-        GroupFunction function = new QuantityTypeArithmeticGroupFunction.Median(Temperature.class);
+        GroupFunction function = new QuantityTypeArithmeticGroupFunction.Median(Temperature.class, null);
         State state = function.calculate(items);
 
         assertEquals(state.getClass(), expected.getClass());
         if (expected instanceof QuantityType expectedQuantityType) {
-            assertEquals(((QuantityType) state).getUnit(), expectedQuantityType.getUnit());
-            assertThat(((QuantityType) state).doubleValue(), is(closeTo(expectedQuantityType.doubleValue(), 0.01d)));
+            QuantityType stateQuantityType = ((QuantityType) state).toInvertibleUnit(expectedQuantityType.getUnit());
+            assertThat(stateQuantityType.doubleValue(), is(closeTo(expectedQuantityType.doubleValue(), 0.01d)));
         }
     }
 
