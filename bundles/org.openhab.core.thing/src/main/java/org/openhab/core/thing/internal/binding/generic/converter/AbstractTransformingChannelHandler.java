@@ -74,9 +74,9 @@ public abstract class AbstractTransformingChannelHandler implements ChannelHandl
 
     @Override
     public void send(Command command) {
-        Consumer<String> sendHttpValue = this.sendValue;
-        if (sendHttpValue != null && channelConfig.mode != ChannelMode.READONLY) {
-            commandTransformations.apply(toString(command)).ifPresent(sendHttpValue);
+        Consumer<String> sendValue = this.sendValue;
+        if (sendValue != null && channelConfig.mode != ChannelMode.READONLY) {
+            commandTransformations.apply(toString(command)).ifPresent(sendValue);
         } else {
             throw new IllegalStateException("Read-only channel");
         }

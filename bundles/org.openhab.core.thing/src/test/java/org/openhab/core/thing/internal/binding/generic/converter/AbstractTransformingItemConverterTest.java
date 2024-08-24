@@ -48,7 +48,7 @@ import org.openhab.core.types.UnDefType;
 public class AbstractTransformingItemConverterTest {
 
     @Mock
-    private @NonNullByDefault({}) Consumer<String> sendHttpValue;
+    private @NonNullByDefault({}) Consumer<String> sendValue;
 
     @Mock
     private @NonNullByDefault({}) Consumer<State> updateState;
@@ -76,7 +76,7 @@ public class AbstractTransformingItemConverterTest {
 
     @Test
     public void undefOnNullContentTest() {
-        TestChannelHandler realConverter = new TestChannelHandler(updateState, postCommand, sendHttpValue,
+        TestChannelHandler realConverter = new TestChannelHandler(updateState, postCommand, sendValue,
                 stateChannelTransformation, commandChannelTransformation, false);
         TestChannelHandler converter = spy(realConverter);
 
@@ -84,7 +84,7 @@ public class AbstractTransformingItemConverterTest {
         // make sure UNDEF is send as state update
         verify(updateState, only()).accept(UnDefType.UNDEF);
         verify(postCommand, never()).accept(any());
-        verify(sendHttpValue, never()).accept(any());
+        verify(sendValue, never()).accept(any());
 
         // make sure no other processing applies
         verify(converter, never()).toState(any());
@@ -94,7 +94,7 @@ public class AbstractTransformingItemConverterTest {
 
     @Test
     public void commandIsPostedAsCommand() {
-        TestChannelHandler converter = new TestChannelHandler(updateState, postCommand, sendHttpValue,
+        TestChannelHandler converter = new TestChannelHandler(updateState, postCommand, sendValue,
                 stateChannelTransformation, commandChannelTransformation, true);
 
         converter.process(new ChannelHandlerContent("TEST".getBytes(StandardCharsets.UTF_8), "", null));
@@ -106,12 +106,12 @@ public class AbstractTransformingItemConverterTest {
         // check only postCommand is applied
         verify(updateState, never()).accept(any());
         verify(postCommand, only()).accept(new StringType("TEST"));
-        verify(sendHttpValue, never()).accept(any());
+        verify(sendValue, never()).accept(any());
     }
 
     @Test
     public void updateIsPostedAsUpdate() {
-        TestChannelHandler converter = new TestChannelHandler(updateState, postCommand, sendHttpValue,
+        TestChannelHandler converter = new TestChannelHandler(updateState, postCommand, sendValue,
                 stateChannelTransformation, commandChannelTransformation, false);
 
         converter.process(new ChannelHandlerContent("TEST".getBytes(StandardCharsets.UTF_8), "", null));
@@ -123,12 +123,12 @@ public class AbstractTransformingItemConverterTest {
         // check only updateState is called
         verify(updateState, only()).accept(new StringType("TEST"));
         verify(postCommand, never()).accept(any());
-        verify(sendHttpValue, never()).accept(any());
+        verify(sendValue, never()).accept(any());
     }
 
     @Test
     public void sendCommandSendsCommand() {
-        TestChannelHandler converter = new TestChannelHandler(updateState, postCommand, sendHttpValue,
+        TestChannelHandler converter = new TestChannelHandler(updateState, postCommand, sendValue,
                 stateChannelTransformation, commandChannelTransformation, false);
 
         converter.send(new StringType("TEST"));
@@ -137,10 +137,10 @@ public class AbstractTransformingItemConverterTest {
         verify(stateChannelTransformation, never()).apply(any());
         verify(commandChannelTransformation).apply(any());
 
-        // check only sendHttpValue is applied
+        // check only sendValue is applied
         verify(updateState, never()).accept(any());
         verify(postCommand, never()).accept(any());
-        verify(sendHttpValue, only()).accept("TEST");
+        verify(sendValue, only()).accept("TEST");
     }
 
     private static class TestChannelHandler extends AbstractTransformingChannelHandler {

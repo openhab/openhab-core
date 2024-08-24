@@ -47,7 +47,7 @@ public interface ChannelHandler {
     @FunctionalInterface
     interface Factory {
         ChannelHandler create(Consumer<State> updateState, Consumer<Command> postCommand,
-                @Nullable Consumer<String> sendHttpValue, ChannelTransformation stateTransformations,
+                @Nullable Consumer<String> sendValue, ChannelTransformation stateTransformations,
                 ChannelTransformation commandTransformations, ChannelValueConverterConfig channelConfig);
     }
 }
