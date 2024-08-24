@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.StreamSupport;
 
 import javax.measure.Unit;
@@ -43,6 +44,7 @@ import org.openhab.core.persistence.QueryablePersistenceService;
 import org.openhab.core.types.State;
 import org.openhab.core.types.TimeSeries;
 import org.openhab.core.types.TypeParser;
+import org.openhab.core.util.Statistics;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -62,7 +64,8 @@ import org.slf4j.LoggerFactory;
  * @author Mark Herwege - Changed return types to State for some interval methods to also return unit
  * @author Mark Herwege - Extended for future dates
  * @author Mark Herwege - lastChange and nextChange methods
- * @author mark Herwege - handle persisted GroupItem with QuantityType
+ * @author Mark Herwege - handle persisted GroupItem with QuantityType
+ * @author Mark Herwege - add median methods
  */
 @Component(immediate = true)
 @NonNullByDefault
@@ -986,10 +989,7 @@ public class PersistenceExtensions {
         Iterator<HistoricItem> it = result.iterator();
         HistoricItem maximumHistoricItem = null;
 
-        Item baseItem = item;
-        if (baseItem instanceof GroupItem groupItem) {
-            baseItem = groupItem.getBaseItem();
-        }
+        Item baseItem = item instanceof GroupItem groupItem ? groupItem.getBaseItem() : item;
         Unit<?> unit = (baseItem instanceof NumberItem numberItem) ? numberItem.getUnit() : null;
 
         DecimalType maximum = null;
@@ -1117,10 +1117,7 @@ public class PersistenceExtensions {
         Iterator<HistoricItem> it = result.iterator();
         HistoricItem minimumHistoricItem = null;
 
-        Item baseItem = item;
-        if (baseItem instanceof GroupItem groupItem) {
-            baseItem = groupItem.getBaseItem();
-        }
+        Item baseItem = item instanceof GroupItem groupItem ? groupItem.getBaseItem() : item;
         Unit<?> unit = (baseItem instanceof NumberItem numberItem) ? numberItem.getUnit() : null;
 
         DecimalType minimum = null;
@@ -1249,10 +1246,7 @@ public class PersistenceExtensions {
             BigDecimal average = dt != null ? dt.toBigDecimal() : BigDecimal.ZERO, sum = BigDecimal.ZERO;
             int count = 0;
 
-            Item baseItem = item;
-            if (baseItem instanceof GroupItem groupItem) {
-                baseItem = groupItem.getBaseItem();
-            }
+            Item baseItem = item instanceof GroupItem groupItem ? groupItem.getBaseItem() : item;
             Unit<?> unit = baseItem instanceof NumberItem numberItem ? numberItem.getUnit() : null;
 
             Iterator<HistoricItem> it = result.iterator();
@@ -1406,10 +1400,7 @@ public class PersistenceExtensions {
             // avoid ArithmeticException if variance is less than zero
             if (dt != null && DecimalType.ZERO.compareTo(dt) <= 0) {
                 BigDecimal deviation = dt.toBigDecimal().sqrt(MathContext.DECIMAL64);
-                Item baseItem = item;
-                if (baseItem instanceof GroupItem groupItem) {
-                    baseItem = groupItem.getBaseItem();
-                }
+                Item baseItem = item instanceof GroupItem groupItem ? groupItem.getBaseItem() : item;
                 if (baseItem instanceof NumberItem numberItem) {
                     Unit<?> unit = numberItem.getUnit();
                     if (unit != null) {
@@ -1520,29 +1511,27 @@ public class PersistenceExtensions {
         if (effectiveServiceId == null) {
             return null;
         }
-        Iterable<HistoricItem> result = getAllStatesBetweenWithBoundaries(item, begin, end, effectiveServiceId);
-        if (result == null) {
-            return null;
-        }
-        Iterator<HistoricItem> it = result.iterator();
         ZonedDateTime now = ZonedDateTime.now();
-        ZonedDateTime beginTime = begin == null ? now : begin;
-        ZonedDateTime endTime = end == null ? now : end;
+        ZonedDateTime beginTime = Objects.requireNonNullElse(begin, now);
+        ZonedDateTime endTime = Objects.requireNonNullElse(end, now);
 
         if (beginTime.isEqual(endTime)) {
             HistoricItem historicItem = internalPersistedState(item, beginTime, effectiveServiceId);
             return historicItem != null ? historicItem.getState() : null;
         }
 
+        Iterable<HistoricItem> result = getAllStatesBetweenWithBoundaries(item, begin, end, effectiveServiceId);
+        if (result == null) {
+            return null;
+        }
+        Iterator<HistoricItem> it = result.iterator();
+
         BigDecimal sum = BigDecimal.ZERO;
 
         HistoricItem lastItem = null;
         ZonedDateTime firstTimestamp = null;
 
-        Item baseItem = item;
-        if (baseItem instanceof GroupItem groupItem) {
-            baseItem = groupItem.getBaseItem();
-        }
+        Item baseItem = item instanceof GroupItem groupItem ? groupItem.getBaseItem() : item;
         Unit<?> unit = baseItem instanceof NumberItem numberItem ? numberItem.getUnit() : null;
 
         while (it.hasNext()) {
@@ -1575,6 +1564,140 @@ public class PersistenceExtensions {
             return new DecimalType(average);
         }
 
+        return null;
+    }
+
+    /**
+     * Gets the median value of the state of a given {@link Item} since a certain point in time.
+     * The default {@link PersistenceService} is used.
+     *
+     * @param item the {@link Item} to get the median value for
+     * @param timestamp the point in time from which to search for the median value
+     * @return the median value since <code>timestamp</code> or <code>null</code> if no
+     *         previous states could be found or if the default persistence service does not refer to an available
+     *         {@link QueryablePersistenceService}. The current state is included in the calculation.
+     */
+    public static @Nullable State medianSince(Item item, ZonedDateTime timestamp) {
+        return internalMedianBetween(item, timestamp, null, null);
+    }
+
+    /**
+     * Gets the median value of the state of a given {@link Item} until a certain point in time.
+     * The default {@link PersistenceService} is used.
+     *
+     * @param item the {@link Item} to get the median value for
+     * @param timestamp the point in time to which to search for the median value
+     * @return the median value until <code>timestamp</code> or <code>null</code> if no
+     *         future states could be found or if the default persistence service does not refer to an available
+     *         {@link QueryablePersistenceService}. The current state is included in the calculation.
+     */
+    public static @Nullable State medianUntil(Item item, ZonedDateTime timestamp) {
+        return internalMedianBetween(item, null, timestamp, null);
+    }
+
+    /**
+     * Gets the median value of the state of a given {@link Item} between two certain points in time.
+     * The default {@link PersistenceService} is used.
+     *
+     * @param item the {@link Item} to get the median value for
+     * @param begin the point in time from which to start the summation
+     * @param end the point in time to which to start the summation
+     * @return the median value between <code>begin</code> and <code>end</code> or <code>null</code> if no
+     *         states could be found or if the default persistence service does not refer to an available
+     *         {@link QueryablePersistenceService}.
+     */
+    public static @Nullable State medianBetween(Item item, ZonedDateTime begin, ZonedDateTime end) {
+        return internalMedianBetween(item, begin, end, null);
+    }
+
+    /**
+     * Gets the median value of the state of a given {@link Item} since a certain point in time.
+     * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
+     *
+     * @param item the {@link Item} to get the median value for
+     * @param timestamp the point in time from which to search for the median value
+     * @param serviceId the name of the {@link PersistenceService} to use
+     * @return the median value since <code>timestamp</code>, or <code>null</code> if no
+     *         previous states could be found or if the persistence service given by <code>serviceId</code> does not
+     *         refer to an available {@link QueryablePersistenceService}. The current state is included in the
+     *         calculation.
+     */
+    public static @Nullable State medianSince(Item item, ZonedDateTime timestamp, @Nullable String serviceId) {
+        return internalMedianBetween(item, timestamp, null, serviceId);
+    }
+
+    /**
+     * Gets the median value of the state of a given {@link Item} until a certain point in time.
+     * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
+     *
+     * @param item the {@link Item} to get the median value for
+     * @param timestamp the point in time to which to search for the median value
+     * @param serviceId the name of the {@link PersistenceService} to use
+     * @return the median value until <code>timestamp</code>, or <code>null</code> if no
+     *         future states could be found or if the persistence service given by <code>serviceId</code> does not
+     *         refer to an available {@link QueryablePersistenceService}. The current state is included in the
+     *         calculation.
+     */
+    public static @Nullable State medianUntil(Item item, ZonedDateTime timestamp, @Nullable String serviceId) {
+        return internalMedianBetween(item, null, timestamp, serviceId);
+    }
+
+    /**
+     * Gets the median value of the state of a given {@link Item} between two certain points in time.
+     * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
+     *
+     * @param item the {@link Item} to get the median value for
+     * @param begin the point in time from which to start the summation
+     * @param end the point in time to which to start the summation
+     * @param serviceId the name of the {@link PersistenceService} to use
+     * @return the median value between <code>begin</code> and <code>end</code>, or <code>null</code> if no
+     *         states could be found or if the persistence service given by <code>serviceId</code> does not
+     *         refer to an available {@link QueryablePersistenceService}
+     */
+    public static @Nullable State medianBetween(Item item, ZonedDateTime begin, ZonedDateTime end,
+            @Nullable String serviceId) {
+        return internalMedianBetween(item, begin, end, serviceId);
+    }
+
+    private static @Nullable State internalMedianBetween(Item item, @Nullable ZonedDateTime begin,
+            @Nullable ZonedDateTime end, @Nullable String serviceId) {
+        String effectiveServiceId = serviceId == null ? getDefaultServiceId() : serviceId;
+        if (effectiveServiceId == null) {
+            return null;
+        }
+        ZonedDateTime now = ZonedDateTime.now();
+        ZonedDateTime beginTime = Objects.requireNonNullElse(begin, now);
+        ZonedDateTime endTime = Objects.requireNonNullElse(end, now);
+
+        if (beginTime.isEqual(endTime)) {
+            HistoricItem historicItem = internalPersistedState(item, beginTime, effectiveServiceId);
+            return historicItem != null ? historicItem.getState() : null;
+        }
+
+        Iterable<HistoricItem> result = getAllStatesBetween(item, beginTime, endTime, effectiveServiceId);
+        if (result == null) {
+            return null;
+        }
+
+        Item baseItem = item instanceof GroupItem groupItem ? groupItem.getBaseItem() : item;
+        Unit<?> unit = baseItem instanceof NumberItem numberItem ? numberItem.getUnit() : null;
+
+        List<BigDecimal> resultList = new ArrayList<>();
+        result.forEach(hi -> {
+            DecimalType dtState = getPersistedValue(hi, unit);
+            if (dtState != null) {
+                resultList.add(dtState.toBigDecimal());
+            }
+        });
+
+        BigDecimal median = Statistics.median(resultList);
+        if (median != null) {
+            if (unit != null) {
+                return new QuantityType<>(median, unit);
+            } else {
+                return new DecimalType(median);
+            }
+        }
         return null;
     }
 
@@ -1675,10 +1798,7 @@ public class PersistenceExtensions {
         if (result != null) {
             Iterator<HistoricItem> it = result.iterator();
 
-            Item baseItem = item;
-            if (baseItem instanceof GroupItem groupItem) {
-                baseItem = groupItem.getBaseItem();
-            }
+            Item baseItem = item instanceof GroupItem groupItem ? groupItem.getBaseItem() : item;
             Unit<?> unit = baseItem instanceof NumberItem numberItem ? numberItem.getUnit() : null;
 
             BigDecimal sum = BigDecimal.ZERO;
@@ -1800,10 +1920,7 @@ public class PersistenceExtensions {
         HistoricItem itemStart = internalPersistedState(item, begin, effectiveServiceId);
         HistoricItem itemStop = internalPersistedState(item, end, effectiveServiceId);
 
-        Item baseItem = item;
-        if (baseItem instanceof GroupItem groupItem) {
-            baseItem = groupItem.getBaseItem();
-        }
+        Item baseItem = item instanceof GroupItem groupItem ? groupItem.getBaseItem() : item;
         Unit<?> unit = baseItem instanceof NumberItem numberItem ? numberItem.getUnit() : null;
 
         DecimalType valueStart = null;
@@ -2037,10 +2154,7 @@ public class PersistenceExtensions {
             return null;
         }
 
-        Item baseItem = item;
-        if (baseItem instanceof GroupItem groupItem) {
-            baseItem = groupItem.getBaseItem();
-        }
+        Item baseItem = item instanceof GroupItem groupItem ? groupItem.getBaseItem() : item;
         Unit<?> unit = baseItem instanceof NumberItem numberItem ? numberItem.getUnit() : null;
 
         HistoricItem itemStart = internalPersistedState(item, begin, effectiveServiceId);
@@ -2556,8 +2670,8 @@ public class PersistenceExtensions {
             return null;
         }
 
-        ZonedDateTime beginTime = (begin == null) ? now : begin;
-        ZonedDateTime endTime = (end == null) ? now : end;
+        ZonedDateTime beginTime = Objects.requireNonNullElse(begin, now);
+        ZonedDateTime endTime = Objects.requireNonNullElse(end, now);
 
         List<HistoricItem> betweenItemsList = new ArrayList<>();
         if (betweenItems != null) {
@@ -2616,10 +2730,7 @@ public class PersistenceExtensions {
     }
 
     private static @Nullable DecimalType getItemValue(Item item) {
-        Item baseItem = item;
-        if (baseItem instanceof GroupItem groupItem) {
-            baseItem = groupItem.getBaseItem();
-        }
+        Item baseItem = item instanceof GroupItem groupItem ? groupItem.getBaseItem() : item;
         if (baseItem instanceof NumberItem numberItem) {
             Unit<?> unit = numberItem.getUnit();
             if (unit != null) {

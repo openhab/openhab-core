@@ -61,6 +61,9 @@ import org.openhab.core.types.State;
  * @author Jan N. Klug - Interval method tests and refactoring
  * @author Mark Herwege - Changed return types to State for some interval methods to also return unit
  * @author Mark Herwege - Extended for future dates
+ * @author Mark Herwege - lastChange and nextChange methods
+ * @author Mark Herwege - handle persisted GroupItem with QuantityType
+ * @author Mark Herwege - add median methods
  */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -1868,6 +1871,260 @@ public class PersistenceExtensionsTest {
     public void testAverageBetweenZeroDuration() {
         ZonedDateTime now = ZonedDateTime.now();
         State state = PersistenceExtensions.averageBetween(quantityItem, now, now, SERVICE_ID);
+        assertNotNull(state);
+        QuantityType<?> qt = state.as(QuantityType.class);
+        assertNotNull(qt);
+        assertEquals(HISTORIC_END, qt.doubleValue(), 0.01);
+        assertEquals(SIUnits.CELSIUS, qt.getUnit());
+    }
+
+    @Test
+    public void testMedianSinceDecimalType() {
+        ZonedDateTime start = ZonedDateTime.of(BEFORE_START, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
+        double expected = median(BEFORE_START, null);
+        State median = PersistenceExtensions.medianSince(numberItem, start, SERVICE_ID);
+        assertNotNull(median);
+        DecimalType dt = median.as(DecimalType.class);
+        assertNotNull(dt);
+        assertEquals(expected, dt.doubleValue(), 0.01);
+
+        start = ZonedDateTime.of(HISTORIC_INTERMEDIATE_VALUE_1, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
+        expected = median(HISTORIC_INTERMEDIATE_VALUE_1, null);
+        median = PersistenceExtensions.medianSince(numberItem, start, SERVICE_ID);
+        assertNotNull(median);
+        dt = median.as(DecimalType.class);
+        assertNotNull(dt);
+        assertEquals(expected, dt.doubleValue(), 0.01);
+
+        // default persistence service
+        median = PersistenceExtensions.medianSince(numberItem, start);
+        assertNull(median);
+    }
+
+    @Test
+    public void testMedianUntilDecimalType() {
+        ZonedDateTime end = ZonedDateTime.of(FUTURE_INTERMEDIATE_VALUE_3, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
+        double expected = median(null, FUTURE_INTERMEDIATE_VALUE_3);
+        State median = PersistenceExtensions.medianUntil(numberItem, end, SERVICE_ID);
+        assertNotNull(median);
+        DecimalType dt = median.as(DecimalType.class);
+        assertNotNull(dt);
+        assertEquals(expected, dt.doubleValue(), 0.01);
+
+        // default persistence service
+        median = PersistenceExtensions.medianUntil(numberItem, end);
+        assertNull(median);
+    }
+
+    @Test
+    public void testMedianBetweenDecimalType() {
+        ZonedDateTime beginStored = ZonedDateTime.of(HISTORIC_INTERMEDIATE_VALUE_1, 1, 1, 0, 0, 0, 0,
+                ZoneId.systemDefault());
+        ZonedDateTime endStored = ZonedDateTime.of(HISTORIC_INTERMEDIATE_VALUE_2, 1, 1, 0, 0, 0, 0,
+                ZoneId.systemDefault());
+
+        double expected = median(HISTORIC_INTERMEDIATE_VALUE_1, HISTORIC_INTERMEDIATE_VALUE_2);
+        State median = PersistenceExtensions.medianBetween(numberItem, beginStored, endStored, SERVICE_ID);
+        assertNotNull(median);
+        DecimalType dt = median.as(DecimalType.class);
+        assertNotNull(dt);
+        assertEquals(expected, dt.doubleValue(), 0.01);
+
+        beginStored = ZonedDateTime.of(FUTURE_INTERMEDIATE_VALUE_3, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
+        endStored = ZonedDateTime.of(FUTURE_INTERMEDIATE_VALUE_4, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
+        expected = median(FUTURE_INTERMEDIATE_VALUE_3, FUTURE_INTERMEDIATE_VALUE_4);
+
+        median = PersistenceExtensions.medianBetween(numberItem, beginStored, endStored, SERVICE_ID);
+        assertNotNull(median);
+        dt = median.as(DecimalType.class);
+        assertNotNull(dt);
+        assertThat(dt.doubleValue(), is(closeTo(expected, 0.01)));
+
+        beginStored = ZonedDateTime.of(HISTORIC_INTERMEDIATE_VALUE_1, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
+        endStored = ZonedDateTime.of(FUTURE_INTERMEDIATE_VALUE_3, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
+        expected = median(HISTORIC_INTERMEDIATE_VALUE_1, FUTURE_INTERMEDIATE_VALUE_3);
+
+        median = PersistenceExtensions.medianBetween(numberItem, beginStored, endStored, SERVICE_ID);
+        assertNotNull(median);
+        dt = median.as(DecimalType.class);
+        assertNotNull(dt);
+        assertThat(dt.doubleValue(), is(closeTo(expected, 0.01)));
+
+        // default persistence service
+        median = PersistenceExtensions.medianBetween(quantityItem, beginStored, endStored);
+        assertNull(median);
+    }
+
+    @Test
+    public void testMedianSinceQuantityType() {
+        ZonedDateTime start = ZonedDateTime.of(BEFORE_START, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
+        double expected = median(BEFORE_START, null);
+        State median = PersistenceExtensions.medianSince(quantityItem, start, SERVICE_ID);
+        assertNotNull(median);
+        QuantityType<?> qt = median.as(QuantityType.class);
+        assertNotNull(qt);
+        assertEquals(expected, qt.doubleValue(), 0.01);
+        assertEquals(SIUnits.CELSIUS, qt.getUnit());
+
+        start = ZonedDateTime.of(HISTORIC_INTERMEDIATE_VALUE_1, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
+        expected = median(HISTORIC_INTERMEDIATE_VALUE_1, null);
+        median = PersistenceExtensions.medianSince(quantityItem, start, SERVICE_ID);
+        assertNotNull(median);
+        qt = median.as(QuantityType.class);
+        assertNotNull(qt);
+        assertEquals(expected, qt.doubleValue(), 0.01);
+        assertEquals(SIUnits.CELSIUS, qt.getUnit());
+
+        // default persistence service
+        median = PersistenceExtensions.medianSince(quantityItem, start);
+        assertNull(median);
+    }
+
+    @Test
+    public void testMedianUntilQuantityType() {
+        ZonedDateTime end = ZonedDateTime.of(FUTURE_INTERMEDIATE_VALUE_3, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
+        double expected = median(null, FUTURE_INTERMEDIATE_VALUE_3);
+        State median = PersistenceExtensions.medianUntil(quantityItem, end, SERVICE_ID);
+        assertNotNull(median);
+        QuantityType<?> qt = median.as(QuantityType.class);
+        assertNotNull(qt);
+        assertEquals(expected, qt.doubleValue(), 0.01);
+        assertEquals(SIUnits.CELSIUS, qt.getUnit());
+
+        // default persistence service
+        median = PersistenceExtensions.medianUntil(quantityItem, end);
+        assertNull(median);
+    }
+
+    @Test
+    public void testMedianBetweenQuantityType() {
+        ZonedDateTime beginStored = ZonedDateTime.of(HISTORIC_INTERMEDIATE_VALUE_1, 1, 1, 0, 0, 0, 0,
+                ZoneId.systemDefault());
+        ZonedDateTime endStored = ZonedDateTime.of(HISTORIC_INTERMEDIATE_VALUE_2, 1, 1, 0, 0, 0, 0,
+                ZoneId.systemDefault());
+        double expected = median(HISTORIC_INTERMEDIATE_VALUE_1, HISTORIC_INTERMEDIATE_VALUE_2);
+        State median = PersistenceExtensions.medianBetween(quantityItem, beginStored, endStored, SERVICE_ID);
+
+        assertNotNull(median);
+        QuantityType<?> qt = median.as(QuantityType.class);
+        assertNotNull(qt);
+        assertThat(qt.doubleValue(), is(closeTo(expected, 0.01)));
+        assertEquals(SIUnits.CELSIUS, qt.getUnit());
+
+        beginStored = ZonedDateTime.of(FUTURE_INTERMEDIATE_VALUE_3, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
+        endStored = ZonedDateTime.of(FUTURE_INTERMEDIATE_VALUE_4, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
+        expected = median(FUTURE_INTERMEDIATE_VALUE_3, FUTURE_INTERMEDIATE_VALUE_4);
+
+        median = PersistenceExtensions.medianBetween(quantityItem, beginStored, endStored, SERVICE_ID);
+        assertNotNull(median);
+        qt = median.as(QuantityType.class);
+        assertNotNull(qt);
+        assertThat(qt.doubleValue(), is(closeTo(expected, 0.01)));
+        assertEquals(SIUnits.CELSIUS, qt.getUnit());
+
+        beginStored = ZonedDateTime.of(HISTORIC_INTERMEDIATE_VALUE_1, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
+        endStored = ZonedDateTime.of(FUTURE_INTERMEDIATE_VALUE_3, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
+        expected = median(HISTORIC_INTERMEDIATE_VALUE_1, FUTURE_INTERMEDIATE_VALUE_3);
+
+        median = PersistenceExtensions.medianBetween(quantityItem, beginStored, endStored, SERVICE_ID);
+        assertNotNull(median);
+        qt = median.as(QuantityType.class);
+        assertNotNull(qt);
+        assertThat(qt.doubleValue(), is(closeTo(expected, 0.01)));
+        assertEquals(SIUnits.CELSIUS, qt.getUnit());
+
+        // default persistence service
+        median = PersistenceExtensions.medianBetween(quantityItem, beginStored, endStored);
+        assertNull(median);
+    }
+
+    @Test
+    public void testMedianSinceGroupQuantityType() {
+        ZonedDateTime start = ZonedDateTime.of(BEFORE_START, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
+        double expected = median(BEFORE_START, null);
+        State median = PersistenceExtensions.medianSince(groupQuantityItem, start, SERVICE_ID);
+        assertNotNull(median);
+        QuantityType<?> qt = median.as(QuantityType.class);
+        assertNotNull(qt);
+        assertEquals(expected, qt.doubleValue(), 0.01);
+        assertEquals(SIUnits.CELSIUS, qt.getUnit());
+
+        start = ZonedDateTime.of(HISTORIC_INTERMEDIATE_VALUE_1, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
+        expected = median(HISTORIC_INTERMEDIATE_VALUE_1, null);
+        median = PersistenceExtensions.medianSince(groupQuantityItem, start, SERVICE_ID);
+        assertNotNull(median);
+        qt = median.as(QuantityType.class);
+        assertNotNull(qt);
+        assertEquals(expected, qt.doubleValue(), 0.01);
+        assertEquals(SIUnits.CELSIUS, qt.getUnit());
+
+        // default persistence service
+        median = PersistenceExtensions.medianSince(groupQuantityItem, start);
+        assertNull(median);
+    }
+
+    @Test
+    public void testMedianUntilGroupQuantityType() {
+        ZonedDateTime end = ZonedDateTime.of(FUTURE_INTERMEDIATE_VALUE_3, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
+        double expected = median(null, FUTURE_INTERMEDIATE_VALUE_3);
+        State median = PersistenceExtensions.medianUntil(groupQuantityItem, end, SERVICE_ID);
+        assertNotNull(median);
+        QuantityType<?> qt = median.as(QuantityType.class);
+        assertNotNull(qt);
+        assertEquals(expected, qt.doubleValue(), 0.01);
+        assertEquals(SIUnits.CELSIUS, qt.getUnit());
+
+        // default persistence service
+        median = PersistenceExtensions.medianUntil(groupQuantityItem, end);
+        assertNull(median);
+    }
+
+    @Test
+    public void testMedianBetweenGroupQuantityType() {
+        ZonedDateTime beginStored = ZonedDateTime.of(HISTORIC_INTERMEDIATE_VALUE_1, 1, 1, 0, 0, 0, 0,
+                ZoneId.systemDefault());
+        ZonedDateTime endStored = ZonedDateTime.of(HISTORIC_INTERMEDIATE_VALUE_2, 1, 1, 0, 0, 0, 0,
+                ZoneId.systemDefault());
+        double expected = median(HISTORIC_INTERMEDIATE_VALUE_1, HISTORIC_INTERMEDIATE_VALUE_2);
+        State median = PersistenceExtensions.medianBetween(groupQuantityItem, beginStored, endStored, SERVICE_ID);
+
+        assertNotNull(median);
+        QuantityType<?> qt = median.as(QuantityType.class);
+        assertNotNull(qt);
+        assertThat(qt.doubleValue(), is(closeTo(expected, 0.01)));
+        assertEquals(SIUnits.CELSIUS, qt.getUnit());
+
+        beginStored = ZonedDateTime.of(FUTURE_INTERMEDIATE_VALUE_3, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
+        endStored = ZonedDateTime.of(FUTURE_INTERMEDIATE_VALUE_4, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
+        expected = median(FUTURE_INTERMEDIATE_VALUE_3, FUTURE_INTERMEDIATE_VALUE_4);
+
+        median = PersistenceExtensions.medianBetween(groupQuantityItem, beginStored, endStored, SERVICE_ID);
+        assertNotNull(median);
+        qt = median.as(QuantityType.class);
+        assertNotNull(qt);
+        assertThat(qt.doubleValue(), is(closeTo(expected, 0.01)));
+        assertEquals(SIUnits.CELSIUS, qt.getUnit());
+
+        beginStored = ZonedDateTime.of(HISTORIC_INTERMEDIATE_VALUE_1, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
+        endStored = ZonedDateTime.of(FUTURE_INTERMEDIATE_VALUE_3, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
+        expected = median(HISTORIC_INTERMEDIATE_VALUE_1, FUTURE_INTERMEDIATE_VALUE_3);
+
+        median = PersistenceExtensions.medianBetween(groupQuantityItem, beginStored, endStored, SERVICE_ID);
+        assertNotNull(median);
+        qt = median.as(QuantityType.class);
+        assertNotNull(qt);
+        assertThat(qt.doubleValue(), is(closeTo(expected, 0.01)));
+        assertEquals(SIUnits.CELSIUS, qt.getUnit());
+
+        // default persistence service
+        median = PersistenceExtensions.medianBetween(groupQuantityItem, beginStored, endStored);
+        assertNull(median);
+    }
+
+    @Test
+    public void testMedianBetweenZeroDuration() {
+        ZonedDateTime now = ZonedDateTime.now();
+        State state = PersistenceExtensions.medianBetween(quantityItem, now, now, SERVICE_ID);
         assertNotNull(state);
         QuantityType<?> qt = state.as(QuantityType.class);
         assertNotNull(qt);

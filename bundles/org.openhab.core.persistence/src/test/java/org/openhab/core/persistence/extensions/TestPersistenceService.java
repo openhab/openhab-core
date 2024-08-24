@@ -269,4 +269,19 @@ public class TestPersistenceService implements QueryablePersistenceService {
         long duration = Duration.between(beginDate, endDate).toMillis();
         return 1.0 * sum / duration;
     }
+
+    static double median(@Nullable Integer beginYear, @Nullable Integer endYear) {
+        ZonedDateTime now = ZonedDateTime.now();
+        int begin = beginYear != null ? beginYear : now.getYear() + 1;
+        int end = endYear != null ? endYear : now.getYear();
+        long[] values = LongStream.range(begin, end + 1)
+                .filter(v -> ((v >= HISTORIC_START && v <= HISTORIC_END) || (v >= FUTURE_START && v <= FUTURE_END)))
+                .sorted().toArray();
+        int length = values.length;
+        if (length % 2 == 1) {
+            return values[values.length / 2];
+        } else {
+            return 0.5 * (values[values.length / 2] + values[values.length / 2 - 1]);
+        }
+    }
 }
