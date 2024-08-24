@@ -91,6 +91,8 @@ public class GroupFunctionHelper {
         switch (functionName.toUpperCase()) {
             case "AVG":
                 return new QuantityTypeArithmeticGroupFunction.Avg(dimension);
+            case "MEDIAN":
+                return new QuantityTypeArithmeticGroupFunction.Median(dimension, baseItem);
             case "SUM":
                 return new QuantityTypeArithmeticGroupFunction.Sum(dimension);
             case "MIN":
@@ -148,6 +150,8 @@ public class GroupFunctionHelper {
                 break;
             case "AVG":
                 return new ArithmeticGroupFunction.Avg();
+            case "MEDIAN":
+                return new ArithmeticGroupFunction.Median();
             case "SUM":
                 return new ArithmeticGroupFunction.Sum();
             case "MIN":

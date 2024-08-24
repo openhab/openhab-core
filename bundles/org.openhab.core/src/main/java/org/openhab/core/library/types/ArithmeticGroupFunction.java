@@ -14,6 +14,8 @@ package org.openhab.core.library.types;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
+import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -24,6 +26,7 @@ import org.openhab.core.items.GroupFunction;
 import org.openhab.core.items.Item;
 import org.openhab.core.types.State;
 import org.openhab.core.types.UnDefType;
+import org.openhab.core.util.Statistics;
 
 /**
  * This interface is only a container for functions that require the core type library
@@ -235,6 +238,43 @@ public interface ArithmeticGroupFunction extends GroupFunction {
             } else {
                 return UnDefType.UNDEF;
             }
+        }
+
+        @Override
+        public @Nullable <T extends State> T getStateAs(@Nullable Set<Item> items, Class<T> stateClass) {
+            State state = calculate(items);
+            if (stateClass.isInstance(state)) {
+                return stateClass.cast(state);
+            } else {
+                return null;
+            }
+        }
+
+        @Override
+        public State[] getParameters() {
+            return new State[0];
+        }
+    }
+
+    /**
+     * This calculates the numeric median over all item states of decimal type.
+     */
+    class Median implements GroupFunction {
+
+        public Median() {
+        }
+
+        @Override
+        public State calculate(@Nullable Set<Item> items) {
+            if (items != null) {
+                List<BigDecimal> states = items.stream().map(item -> item.getStateAs(DecimalType.class))
+                        .filter(Objects::nonNull).map(DecimalType::toBigDecimal).toList();
+                BigDecimal median = Statistics.median(states);
+                if (median != null) {
+                    return new DecimalType(median);
+                }
+            }
+            return UnDefType.UNDEF;
         }
 
         @Override

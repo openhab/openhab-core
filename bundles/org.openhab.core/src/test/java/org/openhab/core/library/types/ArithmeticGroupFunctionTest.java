@@ -16,13 +16,20 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.number.IsCloseTo.closeTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.openhab.core.items.GenericItem;
 import org.openhab.core.items.GroupFunction;
 import org.openhab.core.items.Item;
@@ -213,6 +220,44 @@ public class ArithmeticGroupFunctionTest {
 
         assertThat(state, instanceOf(DecimalType.class));
         assertThat(((DecimalType) state).doubleValue(), is(closeTo(78.32, 0.01d)));
+    }
+
+    static Stream<Arguments> testMedianFunction() {
+        return Stream.of( //
+                arguments( //
+                        List.of(new DecimalType("23.54"), UnDefType.NULL, new DecimalType("22"), UnDefType.UNDEF,
+                                new DecimalType("122.41"), new DecimalType("89")), //
+                        new DecimalType("56.27")), //
+                arguments( //
+                        List.of(new DecimalType("23.54"), UnDefType.NULL, new DecimalType("89"), UnDefType.UNDEF,
+                                new DecimalType("122.41")), //
+                        new DecimalType("89.0")), //
+                arguments( //
+                        List.of(new DecimalType("23.54"), UnDefType.NULL, new DecimalType("89"), UnDefType.UNDEF), //
+                        new DecimalType("56.27")), //
+                arguments( //
+                        List.of(new DecimalType("23.54")), //
+                        new DecimalType("23.54")), //
+                arguments( //
+                        List.of(), //
+                        UnDefType.UNDEF) //
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource
+    public void testMedianFunction(List<State> states, State expected) {
+        AtomicInteger index = new AtomicInteger(1);
+        Set<Item> items = states.stream().map(state -> new TestItem("TestItem" + index.getAndIncrement(), state))
+                .collect(Collectors.toSet());
+
+        GroupFunction function = new ArithmeticGroupFunction.Median();
+        State state = function.calculate(items);
+
+        assertEquals(state.getClass(), expected.getClass());
+        if (expected instanceof DecimalType expectedDecimalType) {
+            assertThat(((DecimalType) state).doubleValue(), is(closeTo(expectedDecimalType.doubleValue(), 0.01d)));
+        }
     }
 
     @Test
