@@ -43,6 +43,7 @@ import org.junit.jupiter.params.provider.MethodSource;
  * @author Erdoan Hadzhiyusein - Added ZonedDateTime tests
  * @author Laurent Garnier - Enhanced tests
  * @author Gaël L'hopital - added ability to use second and milliseconds unix time
+ * @author Gaël L'hopital - added isToday, isTomorrow, isYesterday tests
  */
 @NonNullByDefault
 public class DateTimeTypeTest {
@@ -288,6 +289,46 @@ public class DateTimeTypeTest {
         assertThat(epochSecond, is(zdtEpoch));
         assertThat(epochMilliseconds, is(zdtEpoch));
         assertThat(epochStandard, is(zdtStandard));
+    }
+
+    @Test
+    public void relativeTest() {
+        DateTimeType dt1 = new DateTimeType("2019-06-13T01:10:00+02");
+        DateTimeType dt2 = new DateTimeType("2019-06-12T23:00:00Z");
+        assertTrue(dt1.isAfter(dt2));
+        assertTrue(dt2.isBefore(dt1));
+
+        assertTrue(dt1.sameDay(dt2));
+        assertTrue(new DateTimeType().isToday());
+
+        DateTimeType now = new DateTimeType();
+        DateTimeType tomorrow = new DateTimeType(now.getZonedDateTime().plusDays(1));
+        DateTimeType yesterday = new DateTimeType(now.getZonedDateTime().minusDays(1));
+        assertTrue(tomorrow.isTomorrow());
+        assertTrue(yesterday.isYesterday());
+
+        DateTimeType dt1ToToday = dt1.toToday();
+        assertTrue(dt1ToToday.sameDay(now));
+        assertEquals(dt1ToToday.getZonedDateTime().getHour(), dt1.getZonedDateTime().getHour());
+        assertEquals(dt1ToToday.getZonedDateTime().getMinute(), dt1.getZonedDateTime().getMinute());
+        assertEquals(dt1ToToday.getZonedDateTime().getSecond(), dt1.getZonedDateTime().getSecond());
+        assertEquals(dt1ToToday.getZonedDateTime().getNano(), dt1.getZonedDateTime().getNano());
+
+        DateTimeType dt1ToTomorrow = dt1.toTomorrow();
+        assertTrue(dt1ToTomorrow.isAfterDate(now));
+
+        DateTimeType dt1ToYesterday = dt1.toYesterday();
+        assertTrue(dt1ToYesterday.isBeforeDate(now));
+
+        DateTimeType dt3 = new DateTimeType("2019-06-11T23:10:00Z");
+        DateTimeType dt4 = new DateTimeType("2019-06-12T23:00:00Z");
+        assertFalse(dt3.sameDay(dt4));
+
+        assertTrue(dt3.isBeforeDate(dt4));
+        assertTrue(dt3.isAfterTime(dt4));
+
+        assertTrue(dt4.isAfterDate(dt3));
+        assertTrue(dt4.isBeforeTime(dt3));
     }
 
     @ParameterizedTest
