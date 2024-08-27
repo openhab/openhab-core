@@ -70,10 +70,29 @@ public interface ModifiablePersistenceService extends QueryablePersistenceServic
      * Removes data associated with an item from a persistence service.
      * If all data is removed for the specified item, the persistence service should free any resources associated with
      * the item (e.g. remove any tables or delete files from the storage).
+     * If the persistence service implementing this method supports aliases for item names, the default implementation
+     * of {@link #remove(FilterCriteria, String)} should be overriden as well.
      *
      * @param filter the filter to apply to the data removal. ItemName can not be null.
      * @return true if the query executed successfully
      * @throws IllegalArgumentException if item name is null.
      */
     boolean remove(FilterCriteria filter) throws IllegalArgumentException;
+
+    /**
+     * Removes data associated with an item from a persistence service.
+     * If all data is removed for the specified item, the persistence service should free any resources associated with
+     * the item (e.g. remove any tables or delete files from the storage).
+     * Persistence services supporting aliases should override the default implementation from this interface that
+     * ignores aliases when querying.
+     *
+     * @param filter the filter to apply to the data removal. ItemName can not be null.
+     * @param alias for item name in database
+     * @return true if the query executed successfully
+     * @throws IllegalArgumentException if item name is null.
+     */
+    default boolean remove(FilterCriteria filter, @Nullable String alias) throws IllegalArgumentException {
+        // Default implementation ignores alias
+        return remove(filter);
+    }
 }

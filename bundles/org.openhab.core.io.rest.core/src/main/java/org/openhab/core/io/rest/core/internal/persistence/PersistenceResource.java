@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.Consumes;
@@ -181,9 +182,10 @@ public class PersistenceResource implements RESTResource {
             PersistenceService service = persistenceServiceRegistry.get(serviceId);
             if (service != null) {
                 List<PersistenceStrategy> strategies = service.getDefaultStrategies();
-                List<PersistenceItemConfiguration> configs = List.of(
-                        new PersistenceItemConfiguration(List.of(new PersistenceAllConfig()), null, strategies, null));
-                configuration = new PersistenceServiceConfiguration(serviceId, configs, strategies, strategies,
+                List<PersistenceItemConfiguration> configs = List
+                        .of(new PersistenceItemConfiguration(List.of(new PersistenceAllConfig()), strategies, null));
+                Map<String, String> aliases = Map.of();
+                configuration = new PersistenceServiceConfiguration(serviceId, configs, aliases, strategies, strategies,
                         List.of());
                 editable = true;
             }
@@ -368,6 +370,9 @@ public class PersistenceResource implements RESTResource {
         // If serviceId is null, then use the default service
         PersistenceService service;
         String effectiveServiceId = serviceId != null ? serviceId : persistenceServiceRegistry.getDefaultId();
+        if (effectiveServiceId == null) {
+            return null;
+        }
         service = persistenceServiceRegistry.get(effectiveServiceId);
 
         if (service == null) {
@@ -416,6 +421,8 @@ public class PersistenceResource implements RESTResource {
 
         ItemHistoryDTO dto = new ItemHistoryDTO();
         dto.name = itemName;
+        PersistenceServiceConfiguration config = persistenceServiceConfigurationRegistry.get(effectiveServiceId);
+        String alias = config != null ? config.getAliases().get(itemName) : null;
 
         // If "boundary" is true then we want to get one value before and after the requested period
         // This is necessary for values that don't change often otherwise data will start after the start of the graph
@@ -427,7 +434,7 @@ public class PersistenceResource implements RESTResource {
             filterBeforeStart.setEndDate(dateTimeBegin);
             filterBeforeStart.setPageSize(1);
             filterBeforeStart.setOrdering(Ordering.DESCENDING);
-            result = qService.query(filterBeforeStart);
+            result = qService.query(filterBeforeStart, alias);
             if (result.iterator().hasNext()) {
                 dto.addData(dateTimeBegin.toInstant().toEpochMilli(), result.iterator().next().getState());
                 quantity++;
@@ -446,7 +453,7 @@ public class PersistenceResource implements RESTResource {
         filter.setBeginDate(dateTimeBegin);
         filter.setEndDate(dateTimeEnd);
         filter.setOrdering(Ordering.ASCENDING);
-        result = qService.query(filter);
+        result = qService.query(filter, alias);
         Iterator<HistoricItem> it = result.iterator();
 
         // Iterate through the data
@@ -478,7 +485,7 @@ public class PersistenceResource implements RESTResource {
             filterAfterEnd.setBeginDate(dateTimeEnd);
             filterAfterEnd.setPageSize(1);
             filterAfterEnd.setOrdering(Ordering.ASCENDING);
-            result = qService.query(filterAfterEnd);
+            result = qService.query(filterAfterEnd, alias);
             if (result.iterator().hasNext()) {
                 dto.addData(dateTimeEnd.toInstant().toEpochMilli(), result.iterator().next().getState());
                 quantity++;
@@ -601,13 +608,15 @@ public class PersistenceResource implements RESTResource {
         // This is necessary for values that don't change often otherwise data will start after the start of the graph
         // (or not at all if there's no change during the graph period)
         FilterCriteria filter = new FilterCriteria();
+        PersistenceServiceConfiguration config = persistenceServiceConfigurationRegistry.get(serviceId);
+        String alias = config != null ? config.getAliases().get(itemName) : null;
         filter.setItemName(itemName);
         filter.setBeginDate(dateTimeBegin);
         filter.setEndDate(dateTimeEnd);
 
         ModifiablePersistenceService mService = (ModifiablePersistenceService) service;
         try {
-            mService.remove(filter);
+            mService.remove(filter, alias);
         } catch (IllegalArgumentException e) {
             return JSONResponse.createErrorResponse(Status.BAD_REQUEST, "Invalid filter parameters.");
         }
@@ -620,7 +629,7 @@ public class PersistenceResource implements RESTResource {
         String effectiveServiceId = serviceId != null ? serviceId : persistenceServiceRegistry.getDefaultId();
 
         PersistenceService service = persistenceServiceRegistry.get(effectiveServiceId);
-        if (service == null) {
+        if (effectiveServiceId == null || service == null) {
             logger.warn("Persistence service not found '{}'.", effectiveServiceId);
             return JSONResponse.createErrorResponse(Status.BAD_REQUEST,
                     "Persistence service not found: " + effectiveServiceId);
@@ -658,7 +667,9 @@ public class PersistenceResource implements RESTResource {
         }
 
         ModifiablePersistenceService mService = (ModifiablePersistenceService) service;
-        mService.store(item, dateTime, state);
+        PersistenceServiceConfiguration config = persistenceServiceConfigurationRegistry.get(effectiveServiceId);
+        String alias = config != null ? config.getAliases().get(itemName) : null;
+        mService.store(item, dateTime, state, alias);
 
         persistenceManager.handleExternalPersistenceDataChange(mService, item);
 
