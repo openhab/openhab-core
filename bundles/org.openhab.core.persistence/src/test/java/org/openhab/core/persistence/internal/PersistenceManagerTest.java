@@ -153,7 +153,7 @@ public class PersistenceManagerTest {
         when(itemRegistryMock.getItems()).thenReturn(List.of(TEST_ITEM, TEST_ITEM2, TEST_ITEM3, TEST_GROUP_ITEM));
         when(persistenceServiceMock.getId()).thenReturn(TEST_PERSISTENCE_SERVICE_ID);
         when(queryablePersistenceServiceMock.getId()).thenReturn(TEST_QUERYABLE_PERSISTENCE_SERVICE_ID);
-        when(queryablePersistenceServiceMock.query(any())).thenReturn(List.of(TEST_HISTORIC_ITEM));
+        when(queryablePersistenceServiceMock.query(any(), any())).thenReturn(List.of(TEST_HISTORIC_ITEM));
         when(modifiablePersistenceServiceMock.getId()).thenReturn(TEST_MODIFIABLE_PERSISTENCE_SERVICE_ID);
 
         manager = new PersistenceManagerImpl(cronSchedulerMock, schedulerMock, itemRegistryMock, safeCallerMock,
@@ -289,7 +289,7 @@ public class PersistenceManagerTest {
         assertThat(TEST_ITEM.getState(), is(TEST_STATE));
         assertThat(TEST_GROUP_ITEM.getState(), is(TEST_STATE));
 
-        verify(queryablePersistenceServiceMock, times(3)).query(any());
+        verify(queryablePersistenceServiceMock, times(3)).query(any(), any());
 
         verifyNoMoreInteractions(queryablePersistenceServiceMock);
         verifyNoMoreInteractions(persistenceServiceMock);
@@ -310,7 +310,7 @@ public class PersistenceManagerTest {
         assertThat(TEST_ITEM2.getState(), is(TEST_STATE));
         assertThat(TEST_GROUP_ITEM.getState(), is(TEST_STATE));
 
-        verify(queryablePersistenceServiceMock, times(2)).query(any());
+        verify(queryablePersistenceServiceMock, times(2)).query(any(), any());
 
         verifyNoMoreInteractions(queryablePersistenceServiceMock);
         verifyNoMoreInteractions(persistenceServiceMock);
@@ -482,7 +482,7 @@ public class PersistenceManagerTest {
             PersistenceStrategy strategy, @Nullable PersistenceFilter filter) {
         List<PersistenceFilter> filters = filter != null ? List.of(filter) : List.of();
 
-        PersistenceItemConfiguration itemConfiguration = new PersistenceItemConfiguration(List.of(itemConfig), null,
+        PersistenceItemConfiguration itemConfiguration = new PersistenceItemConfiguration(List.of(itemConfig),
                 List.of(strategy), filters);
 
         List<PersistenceStrategy> strategies = PersistenceStrategy.Globals.STRATEGIES.containsValue(strategy)
@@ -490,7 +490,7 @@ public class PersistenceManagerTest {
                 : List.of(strategy);
 
         PersistenceServiceConfiguration serviceConfiguration = new PersistenceServiceConfiguration(serviceId,
-                List.of(itemConfiguration), List.of(), strategies, filters);
+                List.of(itemConfiguration), Map.of(), List.of(), strategies, filters);
         manager.added(serviceConfiguration);
 
         return serviceConfiguration;

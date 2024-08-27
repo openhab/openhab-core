@@ -13,6 +13,7 @@
 package org.openhab.core.model.persistence.internal;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +25,7 @@ import org.openhab.core.common.registry.AbstractProvider;
 import org.openhab.core.model.core.EventType;
 import org.openhab.core.model.core.ModelRepository;
 import org.openhab.core.model.core.ModelRepositoryChangeListener;
+import org.openhab.core.model.persistence.persistence.AliasConfiguration;
 import org.openhab.core.model.persistence.persistence.AllConfig;
 import org.openhab.core.model.persistence.persistence.CronStrategy;
 import org.openhab.core.model.persistence.persistence.EqualsFilter;
@@ -67,6 +69,7 @@ import org.slf4j.LoggerFactory;
  * @author Kai Kreuzer - Initial contribution
  * @author Markus Rathgeb - Move non-model logic to core.persistence
  * @author Jan N. Klug - Refactored to {@link PersistenceServiceConfigurationProvider}
+ * @author Mark Herwege - Separate alias handling
  */
 @Component(immediate = true, service = PersistenceServiceConfigurationProvider.class)
 @NonNullByDefault
@@ -98,14 +101,17 @@ public class PersistenceModelManager extends AbstractProvider<PersistenceService
             String serviceName = serviceName(modelName);
             if (type == EventType.REMOVED) {
                 PersistenceServiceConfiguration removed = configurations.remove(serviceName);
-                notifyListenersAboutRemovedElement(removed);
+                if (removed != null) {
+                    notifyListenersAboutRemovedElement(removed);
+                }
             } else {
                 final PersistenceModel model = (PersistenceModel) modelRepository.getModel(modelName);
 
                 if (model != null) {
                     PersistenceServiceConfiguration newConfiguration = new PersistenceServiceConfiguration(serviceName,
-                            mapConfigs(model.getConfigs()), mapStrategies(model.getDefaults()),
-                            mapStrategies(model.getStrategies()), mapFilters(model.getFilters()));
+                            mapConfigs(model.getConfigs()), mapAliases(model.getAliases()),
+                            mapStrategies(model.getDefaults()), mapStrategies(model.getStrategies()),
+                            mapFilters(model.getFilters()));
                     PersistenceServiceConfiguration oldConfiguration = configurations.put(serviceName,
                             newConfiguration);
                     if (oldConfiguration == null) {
@@ -155,8 +161,16 @@ public class PersistenceModelManager extends AbstractProvider<PersistenceService
                 items.add(new PersistenceItemConfig(itemConfig.getItem()));
             }
         }
-        return new PersistenceItemConfiguration(items, config.getAlias(), mapStrategies(config.getStrategies()),
+        return new PersistenceItemConfiguration(items, mapStrategies(config.getStrategies()),
                 mapFilters(config.getFilters()));
+    }
+
+    private Map<String, String> mapAliases(List<AliasConfiguration> aliases) {
+        final Map<String, String> map = new HashMap<>();
+        for (final AliasConfiguration alias : aliases) {
+            map.put(alias.getItem(), alias.getAlias());
+        }
+        return map;
     }
 
     private List<PersistenceStrategy> mapStrategies(List<Strategy> strategies) {

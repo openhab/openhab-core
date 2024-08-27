@@ -16,7 +16,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import java.time.ZoneId;
@@ -108,7 +108,7 @@ public class PersistenceResourceTest {
             });
         }
 
-        when(pServiceMock.query(any())).thenReturn(items);
+        when(pServiceMock.query(any(), any())).thenReturn(items);
 
         when(persistenceServiceRegistryMock.get(PERSISTENCE_SERVICE_ID)).thenReturn(pServiceMock);
         when(timeZoneProviderMock.getTimeZone()).thenReturn(ZoneId.systemDefault());
