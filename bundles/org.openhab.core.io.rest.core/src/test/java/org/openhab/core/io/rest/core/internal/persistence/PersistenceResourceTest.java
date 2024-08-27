@@ -17,7 +17,7 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import java.time.ZoneId;
@@ -58,6 +58,7 @@ import org.openhab.core.types.UnDefType;
  * Tests for PersistenceItem Restresource
  *
  * @author Stefan Triller - Initial contribution
+ * @author Mark Herwege - Implement aliases
  */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -112,7 +113,7 @@ public class PersistenceResourceTest {
             });
         }
 
-        when(pServiceMock.query(any())).thenReturn(items);
+        when(pServiceMock.query(any(), any())).thenReturn(items);
 
         when(persistenceServiceRegistryMock.get(PERSISTENCE_SERVICE_ID)).thenReturn(pServiceMock);
         when(timeZoneProviderMock.getTimeZone()).thenReturn(ZoneId.systemDefault());
