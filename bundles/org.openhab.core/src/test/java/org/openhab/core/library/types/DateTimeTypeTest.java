@@ -249,6 +249,18 @@ public class DateTimeTypeTest {
     }
 
     @Test
+    public void comparabilityTest() {
+        ZonedDateTime zoned = ZonedDateTime.now();
+        DateTimeType dt1 = new DateTimeType(zoned);
+        DateTimeType dt2 = new DateTimeType(zoned.plusSeconds(1));
+        DateTimeType dt3 = new DateTimeType(zoned.minusSeconds(1));
+
+        assertTrue(dt1.compareTo(dt2) < 0);
+        assertTrue(dt1.compareTo(dt3) > 0);
+        assertTrue(dt1.compareTo(dt1) == 0);
+    }
+
+    @Test
     public void zonedParsingTest() {
         DateTimeType dt1 = new DateTimeType("2019-06-12T17:30:00Z");
         DateTimeType dt2 = new DateTimeType("2019-06-12T17:30:00+0000");
