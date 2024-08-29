@@ -12,10 +12,14 @@
  */
 package org.openhab.core.persistence;
 
+import java.time.ZonedDateTime;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.types.State;
 
 /**
  * A queryable persistence service which can be used to store and retrieve
@@ -39,15 +43,39 @@ public interface QueryablePersistenceService extends PersistenceService {
 
     /**
      * Queries the {@link PersistenceService} for historic data with a given {@link FilterCriteria}.
-     * If the persistence service implementing this interface supports aliases, the default implementation should be
-     * overriden to query the database with the aliased name.
+     * If the persistence service implementing this interface supports aliases and relies on item registry lookups, the
+     * default implementation should be overriden to query the database with the aliased name.
      *
      * @param filter the filter to apply to the query
      * @param alias for item name in database
      * @return a time series of items
      */
     default Iterable<HistoricItem> query(FilterCriteria filter, @Nullable String alias) {
-        // Default implementation ignores alias
+        // Default implementation changes the filter to have the alias as itemName and sets it back in the returned
+        // result.
+        // This gives correct results as long as the persistence service does not rely on a lookup in the item registry
+        // (in which case the item will not be found).
+        String itemName = filter.getItemName();
+        if (itemName != null && alias != null) {
+            FilterCriteria aliasFilter = new FilterCriteria(filter).setItemName(alias);
+            return StreamSupport.stream(query(aliasFilter).spliterator(), false).map(hi -> new HistoricItem() {
+
+                @Override
+                public ZonedDateTime getTimestamp() {
+                    return hi.getTimestamp();
+                }
+
+                @Override
+                public State getState() {
+                    return hi.getState();
+                }
+
+                @Override
+                public String getName() {
+                    return itemName;
+                }
+            }).collect(Collectors.toList());
+        }
         return query(filter);
     }
 

@@ -91,6 +91,20 @@ public class FilterCriteria {
     /** Filter result to only contain entries that evaluate to true with the given operator and state */
     private @Nullable State state;
 
+    public FilterCriteria() {
+    }
+
+    public FilterCriteria(FilterCriteria filter) {
+        this.itemName = filter.itemName;
+        this.beginDate = filter.beginDate;
+        this.endDate = filter.endDate;
+        this.pageNumber = filter.pageNumber;
+        this.pageSize = filter.pageSize;
+        this.operator = filter.operator;
+        this.ordering = filter.ordering;
+        this.state = filter.state;
+    }
+
     public @Nullable String getItemName() {
         return itemName;
     }
