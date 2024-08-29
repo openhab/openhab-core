@@ -78,7 +78,7 @@ GroupConfig:
 
 
 AliasConfiguration:
-    item=ID '->' alias=STRING
+    item=ID '->' alias=(ID|STRING)
 ;
 
 DECIMAL returns ecore::EBigDecimal :
