@@ -25,7 +25,7 @@ import org.openhab.core.persistence.strategy.PersistenceStrategy;
  * This class holds the configuration of a persistence strategy for specific items.
  *
  * @author Markus Rathgeb - Initial contribution
- * @author Mark Herwege - extract alias configuration
+ * @author Mark Herwege - Extract alias configuration
  */
 @NonNullByDefault
 public record PersistenceItemConfiguration(List<PersistenceConfig> items, List<PersistenceStrategy> strategies,

@@ -46,6 +46,7 @@ import org.openhab.core.persistence.strategy.PersistenceStrategy;
  * The {@link PersistenceServiceConfigurationDTOMapper} is a utility class to map persistence configurations for storage
  *
  * @author Jan N. Klug - Initial contribution
+ * @author Mark Herwege - Implement aliases
  */
 @NonNullByDefault
 public class PersistenceServiceConfigurationDTOMapper {

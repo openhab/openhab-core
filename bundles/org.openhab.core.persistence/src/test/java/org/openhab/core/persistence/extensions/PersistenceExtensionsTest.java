@@ -66,6 +66,7 @@ import org.openhab.core.types.State;
  * @author Mark Herwege - lastChange and nextChange methods
  * @author Mark Herwege - handle persisted GroupItem with QuantityType
  * @author Mark Herwege - add median methods
+ * @author Mark Herwege - Implement aliases
  */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)

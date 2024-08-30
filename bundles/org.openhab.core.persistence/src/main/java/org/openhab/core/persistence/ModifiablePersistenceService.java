@@ -25,6 +25,7 @@ import org.openhab.core.types.State;
  * and then periodically provide it to the server to be accommodated.
  *
  * @author Chris Jackson - Initial contribution
+ * @author Mark Herwege - Implement aliases
  */
 @NonNullByDefault
 public interface ModifiablePersistenceService extends QueryablePersistenceService {

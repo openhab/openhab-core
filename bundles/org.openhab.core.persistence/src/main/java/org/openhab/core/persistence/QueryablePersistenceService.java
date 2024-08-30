@@ -27,6 +27,7 @@ import org.openhab.core.types.State;
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Chris Jackson - Added getItems method
+ * @author Mark Herwege - Implement aliases
  */
 @NonNullByDefault
 public interface QueryablePersistenceService extends PersistenceService {
@@ -85,8 +86,9 @@ public interface QueryablePersistenceService extends PersistenceService {
      * {@link org.openhab.core.items.Item} in openHAB. If it is not possible to retrieve the information an empty set
      * should be returned.
      *
-     * Note that implementations of this method may return an alias for an existing item if the database does not store
-     * the mapping between item name and alias.
+     * Note that implementations for method callers that this method may return an alias for an existing item if the
+     * database does not store the mapping between item name and alias or the reverse mapping is not implemented in the
+     * persistence service.
      *
      * @return a set of information about the persisted items
      */
