@@ -72,32 +72,30 @@ public class ChannelTransformation {
     }
 
     /**
-     * Checks whether the given string contains valid transformations.
+     * Checks whether this object contains no transformation steps.
      * 
-     * Valid single and chained transformations will return true.
-     * 
-     * @param value the transformation string to check.
-     * @return <code>true</code> if the string contains valid transformations, <code>false</code> otherwise.
+     * @return <code>true</code> if the transformation is empty, <code>false</code> otherwise.
      */
-    public static boolean isTransform(@Nullable String value) {
-        if (value == null || value.isBlank()) {
-            return false;
-        }
-        try {
-            return splitTransformationString(value).map(TransformationStep::new).count() > 0;
-        } catch (IllegalArgumentException e) {
-            return false;
-        }
-    }
-
     public boolean isEmpty() {
         return transformationSteps.isEmpty();
     }
 
+    /**
+     * Checks whether this object contains at least one transformation step.
+     * 
+     * @return <code>true</code> if the transformation is present, <code>false</code> otherwise.
+     */
     public boolean isPresent() {
         return !isEmpty();
     }
 
+    /**
+     * Applies all transformations to the given value.
+     * 
+     * @param value the value to transform.
+     * @return the transformed value or an empty optional if the transformation failed.
+     *         If the transformation is empty, the original value is returned.
+     */
     public Optional<String> apply(String value) {
         Optional<String> valueOptional = Optional.of(value);
 
@@ -113,6 +111,25 @@ public class ChannelTransformation {
         }
 
         return valueOptional;
+    }
+
+    /**
+     * Checks whether the given string contains valid transformations.
+     * 
+     * Valid single and chained transformations will return true.
+     * 
+     * @param value the transformation string to check.
+     * @return <code>true</code> if the string contains valid transformations, <code>false</code> otherwise.
+     */
+    public static boolean isValidTransformation(@Nullable String value) {
+        if (value == null || value.isBlank()) {
+            return false;
+        }
+        try {
+            return splitTransformationString(value).map(TransformationStep::new).count() > 0;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
     }
 
     private static class TransformationStep {
