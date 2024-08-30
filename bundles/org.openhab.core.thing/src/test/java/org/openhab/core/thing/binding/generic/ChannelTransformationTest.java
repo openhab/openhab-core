@@ -13,6 +13,7 @@
 package org.openhab.core.thing.binding.generic;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -305,5 +306,47 @@ public class ChannelTransformationTest {
         String result = transformation.apply(T1_INPUT).orElse(null);
 
         assertEquals(T2_RESULT, result);
+    }
+
+    @Test
+    public void testIsValidTransform() {
+        // single with colon
+        assertTrue(ChannelTransformation.isValidTransformation("FOO:BAR"));
+        assertTrue(ChannelTransformation.isValidTransformation(" FOO : BAR "));
+
+        // single with parens
+        assertTrue(ChannelTransformation.isValidTransformation("FOO(BAR())"));
+        assertTrue(ChannelTransformation.isValidTransformation(" FOO ( BAR) )")); // deliberate extra closing parens
+
+        // chained with colon
+        assertTrue(ChannelTransformation.isValidTransformation("FOO:BAR∩BAZ:QUX"));
+        assertTrue(ChannelTransformation.isValidTransformation("FOO:BAR∩BAZ:QUX()"));
+        assertTrue(ChannelTransformation.isValidTransformation(" FOO : BAR ∩ BAZ : QUX() "));
+
+        // chained with parens
+        assertTrue(ChannelTransformation.isValidTransformation("FOO(BAR)∩BAZ(QUX)"));
+        assertTrue(ChannelTransformation.isValidTransformation("FOO(BAR)∩BAZ(QUX())"));
+        assertTrue(ChannelTransformation.isValidTransformation("FOO(BAR)∩BAZ(QUX))")); // deliberate extra parens
+        assertTrue(ChannelTransformation.isValidTransformation(" FOO ( BAR ) ∩ BAZ ( QUX )"));
+        assertTrue(ChannelTransformation.isValidTransformation(" FOO ( BAR ) ∩ BAZ ( QUX() )"));
+
+        // mixed chains
+        assertTrue(ChannelTransformation.isValidTransformation("FOO:BAR∩BAZ(QUX)"));
+        assertTrue(ChannelTransformation.isValidTransformation("FOO(BAR)∩BAZ:QUX"));
+        assertTrue(ChannelTransformation.isValidTransformation("FOO:BAR()∩BAZ(QUX())"));
+        assertTrue(ChannelTransformation.isValidTransformation(" FOO : BAR ∩ BAZ ( QUX ) "));
+        assertTrue(ChannelTransformation.isValidTransformation(" FOO ( BAR ) ∩ BAZ : QUX "));
+
+        // invalid syntaxes
+        assertFalse(ChannelTransformation.isValidTransformation(null));
+        assertFalse(ChannelTransformation.isValidTransformation(""));
+        assertFalse(ChannelTransformation.isValidTransformation(" "));
+        assertFalse(ChannelTransformation.isValidTransformation("FOOBAR"));
+        assertFalse(ChannelTransformation.isValidTransformation("(FOO)BAR"));
+        assertFalse(ChannelTransformation.isValidTransformation("FOO∩BAR"));
+        assertFalse(ChannelTransformation.isValidTransformation("FOO:BAR∩BAZ"));
+        assertFalse(ChannelTransformation.isValidTransformation("FOO(BAR)∩BAZ"));
+        assertFalse(ChannelTransformation.isValidTransformation("FOO∩BAZ:BAR"));
+        assertFalse(ChannelTransformation.isValidTransformation("FOO∩BAZ(BAR)"));
     }
 }
