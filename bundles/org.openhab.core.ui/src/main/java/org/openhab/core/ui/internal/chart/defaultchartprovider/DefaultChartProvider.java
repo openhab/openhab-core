@@ -70,6 +70,7 @@ import org.slf4j.LoggerFactory;
  * @author Holger Reichert - Support for themes, DPI, legend hiding
  * @author Christoph Weitkamp - Consider default persistence service
  * @author Jan N. Klug - Add y-axis label formatter
+ * @author Mark Herwege - Implement aliases
  */
 @NonNullByDefault
 @Component(immediate = true)

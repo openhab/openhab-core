@@ -35,8 +35,8 @@ import org.openhab.core.types.State;
  * a filter.
  *
  * @author Kai Kreuzer - Initial contribution
- * @author Lyubomir Papazov - Deprecate methods using java.util and add methods
- *         that use Java8's ZonedDateTime
+ * @author Lyubomir Papazov - Deprecate methods using java.util and add methods that use Java8's ZonedDateTime
+ * @author Mark Herwege - Copy constructor
  */
 @NonNullByDefault
 public class FilterCriteria {

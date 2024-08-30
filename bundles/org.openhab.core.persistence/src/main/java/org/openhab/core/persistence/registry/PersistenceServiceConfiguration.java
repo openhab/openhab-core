@@ -26,6 +26,7 @@ import org.openhab.core.persistence.strategy.PersistenceStrategy;
  * The {@link PersistenceServiceConfiguration} represents the configuration for a persistence service.
  *
  * @author Jan N. Klug - Initial contribution
+ * @author Mark Herwege - Implement aliases
  */
 @NonNullByDefault
 public class PersistenceServiceConfiguration implements Identifiable<String> {

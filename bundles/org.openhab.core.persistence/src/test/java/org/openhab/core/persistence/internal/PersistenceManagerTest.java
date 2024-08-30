@@ -82,6 +82,7 @@ import org.openhab.core.types.UnDefType;
  * The {@link PersistenceManagerTest} contains tests for the {@link PersistenceManagerImpl}
  *
  * @author Jan N. Klug - Initial contribution
+ * @author Mark Herwege - Implement aliases
  */
 @NonNullByDefault
 @ExtendWith(MockitoExtension.class)

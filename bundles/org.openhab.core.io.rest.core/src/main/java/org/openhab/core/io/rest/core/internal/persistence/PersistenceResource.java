@@ -15,10 +15,13 @@ package org.openhab.core.io.rest.core.internal.persistence;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.Consumes;
@@ -103,6 +106,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * @author Lyubomir Papazov - Change java.util.Date references to be of type java.time.ZonedDateTime
  * @author Markus Rathgeb - Migrated to JAX-RS Whiteboard Specification
  * @author Wouter Born - Migrated to OpenAPI annotations
+ * @author Mark Herwege - Implement aliases
  */
 @Component
 @JaxrsResource
@@ -520,26 +524,60 @@ public class PersistenceResource implements RESTResource {
     private Response getServiceItemList(@Nullable String serviceId) {
         // If serviceId is null, then use the default service
         PersistenceService service;
-        if (serviceId == null) {
-            service = persistenceServiceRegistry.getDefault();
-        } else {
-            service = persistenceServiceRegistry.get(serviceId);
+        String effectiveServiceId = serviceId != null ? serviceId : persistenceServiceRegistry.getDefaultId();
+        if (effectiveServiceId == null) {
+            logger.debug("Persistence service not found '{}'.", effectiveServiceId);
+            return JSONResponse.createErrorResponse(Status.BAD_REQUEST,
+                    "Persistence service not found: " + effectiveServiceId);
         }
+        service = persistenceServiceRegistry.get(effectiveServiceId);
 
         if (service == null) {
-            logger.debug("Persistence service not found '{}'.", serviceId);
-            return JSONResponse.createErrorResponse(Status.BAD_REQUEST, "Persistence service not found: " + serviceId);
+            logger.debug("Persistence service not found '{}'.", effectiveServiceId);
+            return JSONResponse.createErrorResponse(Status.BAD_REQUEST,
+                    "Persistence service not found: " + effectiveServiceId);
         }
 
         if (!(service instanceof QueryablePersistenceService)) {
-            logger.debug("Persistence service not queryable '{}'.", serviceId);
+            logger.debug("Persistence service not queryable '{}'.", effectiveServiceId);
             return JSONResponse.createErrorResponse(Status.BAD_REQUEST,
-                    "Persistence service not queryable: " + serviceId);
+                    "Persistence service not queryable: " + effectiveServiceId);
         }
 
         QueryablePersistenceService qService = (QueryablePersistenceService) service;
 
-        return JSONResponse.createResponse(Status.OK, qService.getItemInfo(), "");
+        PersistenceServiceConfiguration config = persistenceServiceConfigurationRegistry.get(effectiveServiceId);
+        Map<String, String> aliases = config != null ? config.getAliases() : Map.of();
+        Set<PersistenceItemInfo> itemInfo = qService.getItemInfo().stream().map(info -> {
+            String alias = aliases.get(info.getName());
+            if (alias != null) {
+                return new PersistenceItemInfo() {
+
+                    @Override
+                    public String getName() {
+                        return alias;
+                    }
+
+                    @Override
+                    public @Nullable Integer getCount() {
+                        return info.getCount();
+                    }
+
+                    @Override
+                    public @Nullable Date getEarliest() {
+                        return info.getEarliest();
+                    }
+
+                    @Override
+                    public @Nullable Date getLatest() {
+                        return info.getLatest();
+                    }
+                };
+            } else {
+                return info;
+            }
+        }).collect(Collectors.toSet());
+        return JSONResponse.createResponse(Status.OK, itemInfo, "");
     }
 
     private Response deletePersistenceItemData(@Nullable String serviceId, String itemName, @Nullable String timeBegin,

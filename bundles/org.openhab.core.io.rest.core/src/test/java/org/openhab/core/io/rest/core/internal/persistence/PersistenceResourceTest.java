@@ -55,6 +55,7 @@ import org.openhab.core.types.State;
  * Tests for PersistenceItem Restresource
  *
  * @author Stefan Triller - Initial contribution
+ * @author Mark Herwege - Implement aliases
  */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
