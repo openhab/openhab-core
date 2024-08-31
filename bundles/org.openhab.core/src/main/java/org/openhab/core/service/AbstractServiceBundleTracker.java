@@ -28,7 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The {@link AbstractServiceBundleTracker} tracks bundles a set of bundles (selected {@link #isRelevantBundle(Bundle)}
+ * The {@link AbstractServiceBundleTracker} tracks a set of bundles (selected {@link #isRelevantBundle(Bundle)}
  * and sets the
  * {@link #readyMarker} when all registered bundles are active
  *
