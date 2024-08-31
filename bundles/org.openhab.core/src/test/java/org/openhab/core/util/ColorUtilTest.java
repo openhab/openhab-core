@@ -641,4 +641,16 @@ public class ColorUtilTest {
                             rgbw2[3].doubleValue() / 100, e.getMessage()));
         }
     }
+
+    /**
+     * Test round trips KELVIN => XY = KELVIN
+     */
+    @Test
+    void testKelvinXyRoundTrip() {
+        assertThrows(IndexOutOfBoundsException.class, () -> ColorUtil.kelvinToXY(1999));
+        assertThrows(IndexOutOfBoundsException.class, () -> ColorUtil.kelvinToXY(6501));
+        for (double kelvin = 2000; kelvin <= 6500; kelvin += 5) {
+            assertEquals(kelvin, ColorUtil.xyToKelvin(ColorUtil.kelvinToXY(kelvin)), 15);
+        }
+    }
 }
