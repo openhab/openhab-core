@@ -13,6 +13,7 @@
 package org.openhab.core.automation.module.script.profile;
 
 import java.util.List;
+import java.util.Optional;
 
 import javax.script.ScriptException;
 
@@ -22,11 +23,12 @@ import org.openhab.core.config.core.ConfigParser;
 import org.openhab.core.thing.profiles.ProfileCallback;
 import org.openhab.core.thing.profiles.ProfileContext;
 import org.openhab.core.thing.profiles.ProfileTypeUID;
-import org.openhab.core.thing.profiles.StateProfile;
+import org.openhab.core.thing.profiles.TimeSeriesProfile;
 import org.openhab.core.transform.TransformationException;
 import org.openhab.core.transform.TransformationService;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
+import org.openhab.core.types.TimeSeries;
 import org.openhab.core.types.Type;
 import org.openhab.core.types.TypeParser;
 import org.openhab.core.types.UnDefType;
@@ -39,7 +41,7 @@ import org.slf4j.LoggerFactory;
  * @author Jan N. Klug - Initial contribution
  */
 @NonNullByDefault
-public class ScriptProfile implements StateProfile {
+public class ScriptProfile implements TimeSeriesProfile {
 
     public static final String CONFIG_TO_ITEM_SCRIPT = "toItemScript";
     public static final String CONFIG_TO_HANDLER_SCRIPT = "toHandlerScript";
@@ -148,19 +150,33 @@ public class ScriptProfile implements StateProfile {
     @Override
     public void onStateUpdateFromHandler(State state) {
         if (isConfigured) {
-            String returnValue = executeScript(toItemScript, state);
-            // special handling for UnDefType, it's not available in the TypeParser
-            if ("UNDEF".equals(returnValue)) {
-                callback.sendUpdate(UnDefType.UNDEF);
-            } else if ("NULL".equals(returnValue)) {
-                callback.sendUpdate(UnDefType.NULL);
-            } else if (returnValue != null) {
-                State newState = TypeParser.parseState(acceptedDataTypes, returnValue);
-                if (newState != null) {
-                    callback.sendUpdate(newState);
-                }
+            transformState(state).ifPresent(callback::sendUpdate);
+        }
+    }
+
+    @Override
+    public void onTimeSeriesFromHandler(TimeSeries timeSeries) {
+        if (isConfigured) {
+            TimeSeries transformedTimeSeries = new TimeSeries(timeSeries.getPolicy());
+            timeSeries.getStates().forEach(entry -> {
+                transformState(entry.state()).ifPresent(transformedState -> {
+                    transformedTimeSeries.add(entry.timestamp(), transformedState);
+                });
+            });
+            if (transformedTimeSeries.size() > 0) {
+                callback.sendTimeSeries(transformedTimeSeries);
             }
         }
+    }
+
+    private Optional<State> transformState(State state) {
+        return Optional.ofNullable(executeScript(toItemScript, state)).map(output -> {
+            return switch (output) {
+                case "UNDEF" -> UnDefType.UNDEF;
+                case "NULL" -> UnDefType.NULL;
+                default -> TypeParser.parseState(acceptedDataTypes, output);
+            };
+        });
     }
 
     private @Nullable String executeScript(String script, Type input) {

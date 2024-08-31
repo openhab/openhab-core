@@ -12,7 +12,9 @@
  */
 package org.openhab.core.automation.module.script.profile;
 
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -23,6 +25,7 @@ import static org.openhab.core.automation.module.script.profile.ScriptProfile.CO
 import static org.openhab.core.automation.module.script.profile.ScriptProfile.CONFIG_TO_HANDLER_SCRIPT;
 import static org.openhab.core.automation.module.script.profile.ScriptProfile.CONFIG_TO_ITEM_SCRIPT;
 
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,6 +54,7 @@ import org.openhab.core.transform.TransformationException;
 import org.openhab.core.transform.TransformationService;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
+import org.openhab.core.types.TimeSeries;
 
 /**
  * The {@link ScriptProfileTest} contains tests for the {@link ScriptProfile}
@@ -84,10 +88,12 @@ public class ScriptProfileTest extends JavaTest {
 
         scriptProfile.onCommandFromHandler(OnOffType.ON);
         scriptProfile.onStateUpdateFromHandler(OnOffType.ON);
+        scriptProfile.onTimeSeriesFromHandler(createTimeSeries(OnOffType.ON));
         scriptProfile.onCommandFromItem(OnOffType.ON);
 
         verify(transformationServiceMock, never()).transform(any(), any());
         verify(profileCallback, never()).handleCommand(any());
+        verify(profileCallback, never()).sendTimeSeries(any());
         verify(profileCallback, never()).sendUpdate(any());
         verify(profileCallback, never()).sendCommand(any());
 
@@ -142,11 +148,13 @@ public class ScriptProfileTest extends JavaTest {
         scriptProfile.onStateUpdateFromHandler(OnOffType.ON);
         scriptProfile.onCommandFromItem(OnOffType.ON);
         scriptProfile.onStateUpdateFromItem(OnOffType.ON);
+        scriptProfile.onTimeSeriesFromHandler(createTimeSeries(OnOffType.ON));
 
-        verify(transformationServiceMock, times(4)).transform(any(), any());
+        verify(transformationServiceMock, times(5)).transform(any(), any());
         verify(profileCallback, never()).handleCommand(any());
         verify(profileCallback, never()).sendUpdate(any());
         verify(profileCallback, never()).sendCommand(any());
+        verify(profileCallback, never()).sendTimeSeries(any());
     }
 
     @Test
@@ -163,11 +171,13 @@ public class ScriptProfileTest extends JavaTest {
         scriptProfile.onStateUpdateFromHandler(OnOffType.ON);
         scriptProfile.onCommandFromItem(OnOffType.ON);
         scriptProfile.onStateUpdateFromItem(OnOffType.ON);
+        scriptProfile.onTimeSeriesFromHandler(createTimeSeries(OnOffType.ON));
 
-        verify(transformationServiceMock, times(4)).transform(any(), any());
+        verify(transformationServiceMock, times(5)).transform(any(), any());
         verify(profileCallback, never()).handleCommand(any());
         verify(profileCallback, never()).sendUpdate(any());
         verify(profileCallback, never()).sendCommand(any());
+        verify(profileCallback, never()).sendTimeSeries(any());
     }
 
     @Test
@@ -187,10 +197,14 @@ public class ScriptProfileTest extends JavaTest {
         scriptProfile.onCommandFromItem(DecimalType.ZERO);
         scriptProfile.onStateUpdateFromItem(DecimalType.ZERO);
 
-        verify(transformationServiceMock, times(4)).transform(any(), any());
+        TimeSeries timeSeries = createTimeSeries(DecimalType.ZERO);
+        scriptProfile.onTimeSeriesFromHandler(timeSeries);
+
+        verify(transformationServiceMock, times(5)).transform(any(), any());
         verify(profileCallback, times(2)).handleCommand(OnOffType.OFF);
         verify(profileCallback).sendUpdate(OnOffType.OFF);
         verify(profileCallback).sendCommand(OnOffType.OFF);
+        verify(profileCallback).sendTimeSeries(replaceTimeSeries(timeSeries, OnOffType.OFF));
     }
 
     @Test
@@ -209,10 +223,14 @@ public class ScriptProfileTest extends JavaTest {
         scriptProfile.onCommandFromItem(DecimalType.ZERO);
         scriptProfile.onStateUpdateFromItem(DecimalType.ZERO);
 
-        verify(transformationServiceMock, times(2)).transform(any(), any());
+        TimeSeries timeSeries = createTimeSeries(DecimalType.ZERO);
+        scriptProfile.onTimeSeriesFromHandler(timeSeries);
+
+        verify(transformationServiceMock, times(3)).transform(any(), any());
         verify(profileCallback, never()).handleCommand(any());
         verify(profileCallback).sendUpdate(OnOffType.OFF);
         verify(profileCallback).sendCommand(OnOffType.OFF);
+        verify(profileCallback).sendTimeSeries(replaceTimeSeries(timeSeries, OnOffType.OFF));
     }
 
     @Test
@@ -230,11 +248,13 @@ public class ScriptProfileTest extends JavaTest {
         scriptProfile.onStateUpdateFromHandler(DecimalType.ZERO);
         scriptProfile.onCommandFromItem(DecimalType.ZERO);
         scriptProfile.onStateUpdateFromItem(DecimalType.ZERO);
+        scriptProfile.onTimeSeriesFromHandler(createTimeSeries(DecimalType.ZERO));
 
         verify(transformationServiceMock, times(1)).transform(any(), any());
         verify(profileCallback, times(1)).handleCommand(OnOffType.OFF);
         verify(profileCallback, never()).sendUpdate(any());
         verify(profileCallback, never()).sendCommand(any());
+        verify(profileCallback, never()).sendTimeSeries(any());
     }
 
     @Test
@@ -252,11 +272,13 @@ public class ScriptProfileTest extends JavaTest {
         scriptProfile.onStateUpdateFromHandler(DecimalType.ZERO);
         scriptProfile.onCommandFromItem(DecimalType.ZERO);
         scriptProfile.onStateUpdateFromItem(DecimalType.ZERO);
+        scriptProfile.onTimeSeriesFromHandler(createTimeSeries(DecimalType.ZERO));
 
         verify(transformationServiceMock, times(1)).transform(any(), any());
         verify(profileCallback, times(1)).handleCommand(OnOffType.OFF);
         verify(profileCallback, never()).sendUpdate(any());
         verify(profileCallback, never()).sendCommand(any());
+        verify(profileCallback, never()).sendTimeSeries(any());
     }
 
     @Test
@@ -275,11 +297,13 @@ public class ScriptProfileTest extends JavaTest {
         scriptProfile.onStateUpdateFromHandler(DecimalType.ZERO);
         scriptProfile.onCommandFromItem(DecimalType.ZERO);
         scriptProfile.onStateUpdateFromItem(DecimalType.ZERO);
+        scriptProfile.onTimeSeriesFromHandler(createTimeSeries(DecimalType.ZERO));
 
-        verify(transformationServiceMock, times(4)).transform(any(), any());
+        verify(transformationServiceMock, times(5)).transform(any(), any());
         verify(profileCallback, never()).handleCommand(any());
         verify(profileCallback, never()).sendUpdate(any());
         verify(profileCallback, never()).sendCommand(any());
+        verify(profileCallback, never()).sendTimeSeries(any());
     }
 
     @Test
@@ -297,11 +321,53 @@ public class ScriptProfileTest extends JavaTest {
         scriptProfile.onStateUpdateFromHandler(DecimalType.ZERO);
         scriptProfile.onCommandFromItem(DecimalType.ZERO);
         scriptProfile.onStateUpdateFromItem(DecimalType.ZERO);
+        scriptProfile.onTimeSeriesFromHandler(createTimeSeries(DecimalType.ZERO));
 
         verify(transformationServiceMock, times(1)).transform(any(), any());
         verify(profileCallback, times(1)).handleCommand(OnOffType.OFF);
         verify(profileCallback, never()).sendUpdate(any());
         verify(profileCallback, never()).sendCommand(any());
+        verify(profileCallback, never()).sendTimeSeries(any());
+    }
+
+    @Test
+    public void filteredTimeSeriesTest() throws TransformationException {
+        ProfileContext profileContext = ProfileContextBuilder.create().withToItemScript("inScript")
+                .withAcceptedCommandTypes(List.of(OnOffType.class)).withAcceptedDataTypes(List.of(OnOffType.class))
+                .withHandlerAcceptedCommandTypes(List.of(DecimalType.class)).build();
+
+        when(transformationServiceMock.transform(any(), eq("0"))).thenReturn(OnOffType.OFF.toString());
+        when(transformationServiceMock.transform(any(), eq("1"))).thenReturn(null);
+
+        ScriptProfile scriptProfile = new ScriptProfile(mock(ProfileTypeUID.class), profileCallback, profileContext,
+                transformationServiceMock);
+
+        TimeSeries timeSeries = createTimeSeries(DecimalType.ZERO, DecimalType.valueOf("1"), DecimalType.ZERO);
+        scriptProfile.onTimeSeriesFromHandler(timeSeries);
+
+        verify(transformationServiceMock, times(3)).transform(any(), any());
+
+        TimeSeries transformedTimeSeries = new TimeSeries(timeSeries.getPolicy());
+        timeSeries.getStates().forEach(entry -> {
+            if (entry.state().equals(DecimalType.ZERO)) {
+                transformedTimeSeries.add(entry.timestamp(), OnOffType.OFF);
+            }
+        });
+        verify(profileCallback).sendTimeSeries(transformedTimeSeries);
+    }
+
+    private TimeSeries createTimeSeries(State... states) {
+        TimeSeries timeSeries = new TimeSeries(TimeSeries.Policy.ADD);
+        for (State state : states) {
+            timeSeries.add(Instant.now(), state);
+        }
+        return timeSeries;
+    }
+
+    private TimeSeries replaceTimeSeries(TimeSeries timeSeries, State state) {
+        TimeSeries newTimeSeries = new TimeSeries(timeSeries.getPolicy());
+        timeSeries.getStates().forEach(entry -> newTimeSeries.add(entry.timestamp(), state));
+        return newTimeSeries;
     }
 
     private static class ProfileContextBuilder {
