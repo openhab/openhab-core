@@ -1107,7 +1107,11 @@ public class ColorUtil {
         { 6470, 0.31399542095165, 0.324084544795669 },
         { 6480, 0.313838033755984, 0.323931609136792 },
         { 6490, 0.313681210770667, 0.323779079256713 },
-        { 6500, 0.313524949311538, 0.323626953980771 }
+        { 6500, 0.313524949311538, 0.323626953980771 },
+        { 6510, 0.313369246709745, 0.323475232135805 },
+        { 6520, 0.313214100311644, 0.323323912550187 },
+        { 6530, 0.313059507478705, 0.323172994053855 },
+        { 6540, 0.312905465587415, 0.323022475478352 },
         //@formatter:on
     };
 
@@ -1146,10 +1150,14 @@ public class ColorUtil {
      * @throws IndexOutOfBoundsException if the colour temperature is out of range 2000K .. 6500K
      */
     public static double[] kelvinToXY(double kelvin) throws IndexOutOfBoundsException {
-        if (kelvin < 2000 || kelvin > 6500) {
-            throw new IndexOutOfBoundsException("kelvinToXY() colour temperature out of range 2000K .. 6500K");
+        int indexMax = KELVIN_TO_XY_LOOKUP_TABLE.length - 1;
+        double kelvinMin = KELVIN_TO_XY_LOOKUP_TABLE[0][0];
+        double kelvinMax = KELVIN_TO_XY_LOOKUP_TABLE[indexMax][0];
+        if (kelvin < kelvinMin || kelvin > kelvinMax) {
+            throw new IndexOutOfBoundsException(
+                    String.format("kelvinToXY() %.0f K out of range %.0f K .. %.0f K", kelvin, kelvinMin, kelvinMax));
         }
-        return kelvinToXY(kelvin, 0, KELVIN_TO_XY_LOOKUP_TABLE.length - 1);
+        return kelvinToXY(kelvin, 0, indexMax);
     }
 
     /**

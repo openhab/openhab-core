@@ -16,6 +16,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -643,13 +644,19 @@ public class ColorUtilTest {
     }
 
     /**
-     * Test round trips KELVIN => XY = KELVIN
+     * Test conversion between colour temperature in Kelvin and points on the colour
+     * temperature locus in the CIE XY colour space
      */
     @Test
-    void testKelvinXyRoundTrip() {
-        assertThrows(IndexOutOfBoundsException.class, () -> ColorUtil.kelvinToXY(1999));
-        assertThrows(IndexOutOfBoundsException.class, () -> ColorUtil.kelvinToXY(6501));
-        for (double kelvin = 2000; kelvin <= 6500; kelvin += 5) {
+    void testKelvinXyConversion() {
+        // test minimum and maximum limits 500..153 Mirek i.e. 2000..6536 Kelvin
+        assertThrows(IndexOutOfBoundsException.class, () -> ColorUtil.kelvinToXY(1000000 / 501));
+        assertDoesNotThrow(() -> ColorUtil.kelvinToXY(1000000 / 500));
+        assertDoesNotThrow(() -> ColorUtil.kelvinToXY(1000000 / 153));
+        assertThrows(IndexOutOfBoundsException.class, () -> ColorUtil.kelvinToXY(1000000 / 152));
+
+        // test round trips K => XY => KN
+        for (double kelvin = 2000; kelvin <= 6536; kelvin += 5) {
             assertEquals(kelvin, ColorUtil.xyToKelvin(ColorUtil.kelvinToXY(kelvin)), 15);
         }
     }
