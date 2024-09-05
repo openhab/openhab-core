@@ -22,6 +22,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.zone.ZoneRulesException;
 import java.util.Locale;
+import java.util.regex.Pattern;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -63,6 +64,9 @@ public class DateTimeType implements PrimitiveType, State, Command, Comparable<D
     private static final DateTimeFormatter PARSER_TZ = DateTimeFormatter.ofPattern(DATE_PARSE_PATTERN_WITH_TZ);
     private static final DateTimeFormatter PARSER_TZ_RFC = DateTimeFormatter.ofPattern(DATE_PARSE_PATTERN_WITH_TZ_RFC);
     private static final DateTimeFormatter PARSER_TZ_ISO = DateTimeFormatter.ofPattern(DATE_PARSE_PATTERN_WITH_TZ_ISO);
+
+    private static final Pattern DATE_PARSE_PATTERN_WITH_SPACE = Pattern
+            .compile("\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}.*");
 
     // internal patterns for formatting
     private static final String DATE_FORMAT_PATTERN_WITH_TZ_RFC = "yyyy-MM-dd'T'HH:mm[:ss[.SSSSSSSSS]]Z";
@@ -246,8 +250,17 @@ public class DateTimeType implements PrimitiveType, State, Command, Comparable<D
                 try {
                     date = ZonedDateTime.parse(value, PARSER_TZ);
                 } catch (DateTimeParseException tzException) {
-                    LocalDateTime localDateTime = LocalDateTime.parse(value, PARSER);
-                    date = ZonedDateTime.of(localDateTime, ZoneId.systemDefault());
+                    try {
+                        LocalDateTime localDateTime = LocalDateTime.parse(value, PARSER);
+                        date = ZonedDateTime.of(localDateTime, ZoneId.systemDefault());
+                    } catch (DateTimeParseException noTzException) {
+                        if (DATE_PARSE_PATTERN_WITH_SPACE.matcher(value).matches()) {
+                            value = value.substring(0, 10) + "T" + value.substring(11);
+                            date = parse(value);
+                        } else {
+                            throw noTzException;
+                        }
+                    }
                 }
             }
         }

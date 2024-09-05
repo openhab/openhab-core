@@ -36,6 +36,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 /**
  * @author Thomas Eichstaedt-Engelen - Initial contribution
@@ -258,6 +259,22 @@ public class DateTimeTypeTest {
         assertTrue(dt1.compareTo(dt2) < 0);
         assertTrue(dt1.compareTo(dt3) > 0);
         assertTrue(dt1.compareTo(dt1) == 0);
+    }
+
+    // This can only test explicit time zones, as we cannot mock the system default time zone
+    @ParameterizedTest
+    @ValueSource(strings = { //
+            "2024-09-05T15:30:00Z", //
+            "2024-09-05 15:30Z", //
+            "2024-09-05 16:30+0100", //
+            "2024-09-05T17:30:00.000+0200", //
+            "2024-09-05T17:30:00.000+02:00" //
+    })
+    public void parserTest(String input) {
+        ZonedDateTime zdtReference = ZonedDateTime.parse("2024-09-05T15:30:00Z");
+
+        ZonedDateTime zdt = new DateTimeType(input).getZonedDateTime().withZoneSameInstant(zdtReference.getZone());
+        assertThat(zdt, is(zdtReference));
     }
 
     @Test
