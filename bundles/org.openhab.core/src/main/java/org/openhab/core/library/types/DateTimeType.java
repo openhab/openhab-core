@@ -88,7 +88,11 @@ public class DateTimeType implements PrimitiveType, State, Command, Comparable<D
         try {
             // direct parsing (date and time)
             try {
-                date = parse(zonedValue);
+                if (DATE_PARSE_PATTERN_WITH_SPACE.matcher(zonedValue).matches()) {
+                    date = parse(zonedValue.substring(0, 10) + "T" + zonedValue.substring(11));
+                } else {
+                    date = parse(zonedValue);
+                }
             } catch (DateTimeParseException fullDtException) {
                 // time only
                 try {
@@ -250,17 +254,8 @@ public class DateTimeType implements PrimitiveType, State, Command, Comparable<D
                 try {
                     date = ZonedDateTime.parse(value, PARSER_TZ);
                 } catch (DateTimeParseException tzException) {
-                    try {
-                        LocalDateTime localDateTime = LocalDateTime.parse(value, PARSER);
-                        date = ZonedDateTime.of(localDateTime, ZoneId.systemDefault());
-                    } catch (DateTimeParseException noTzException) {
-                        if (DATE_PARSE_PATTERN_WITH_SPACE.matcher(value).matches()) {
-                            value = value.substring(0, 10) + "T" + value.substring(11);
-                            date = parse(value);
-                        } else {
-                            throw noTzException;
-                        }
-                    }
+                    LocalDateTime localDateTime = LocalDateTime.parse(value, PARSER);
+                    date = ZonedDateTime.of(localDateTime, ZoneId.systemDefault());
                 }
             }
         }
