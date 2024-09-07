@@ -349,4 +349,15 @@ public class ChannelTransformationTest {
         assertFalse(ChannelTransformation.isValidTransformation("FOO∩BAZ:BAR"));
         assertFalse(ChannelTransformation.isValidTransformation("FOO∩BAZ(BAR)"));
     }
+
+    @Test
+    public void testBlanksAndCommentsAreDiscarded() {
+        List<String> pattern = List.of("#hash comment", "//double slashes", "  # preceded by spaces",
+                "  // ditto for slashes", "     ", "\t", "\t\t\t", "\t# preceded by a tab",
+                "\t // preceded by tab and space");
+
+        ChannelTransformation transformation = new ChannelTransformation(pattern);
+
+        assertTrue(transformation.isEmpty());
+    }
 }

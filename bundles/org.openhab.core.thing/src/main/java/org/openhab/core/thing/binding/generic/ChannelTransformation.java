@@ -56,8 +56,13 @@ public class ChannelTransformation {
     public ChannelTransformation(@Nullable List<String> transformationStrings) {
         if (transformationStrings != null) {
             try {
-                transformationSteps = transformationStrings.stream()
-                        .flatMap(ChannelTransformation::splitTransformationString).map(TransformationStep::new)
+                transformationSteps = transformationStrings.stream() //
+                        .map(String::trim) //
+                        .filter(line -> !line.isBlank()) //
+                        .filter(line -> !line.startsWith("#")) //
+                        .filter(line -> !line.startsWith("//")) //
+                        .flatMap(ChannelTransformation::splitTransformationString) //
+                        .map(TransformationStep::new) //
                         .toList();
                 return;
             } catch (IllegalArgumentException e) {
