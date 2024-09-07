@@ -656,7 +656,6 @@ public class SitemapResource
             bean.inputHint = inputWidget.getInputHint();
         }
         if (widget instanceof Slider sliderWidget) {
-            bean.sendFrequency = sliderWidget.getFrequency();
             bean.switchSupport = sliderWidget.isSwitchEnabled();
             bean.releaseOnly = sliderWidget.isReleaseOnly();
             bean.minValue = sliderWidget.getMinValue();

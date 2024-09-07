@@ -243,8 +243,6 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
                         SitemapPackage.SLIDER__SWITCH_ENABLED);
                 setWidgetPropertyFromComponentConfig(widget, component, "releaseOnly",
                         SitemapPackage.SLIDER__RELEASE_ONLY);
-                setWidgetPropertyFromComponentConfig(widget, component, "sendFrequency",
-                        SitemapPackage.SLIDER__FREQUENCY);
                 break;
             case "Selection":
                 SelectionImpl selectionWidget = (SelectionImpl) SitemapFactory.eINSTANCE.createSelection();
@@ -266,8 +264,6 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
             case "Colorpicker":
                 ColorpickerImpl colorpickerWidget = (ColorpickerImpl) SitemapFactory.eINSTANCE.createColorpicker();
                 widget = colorpickerWidget;
-                setWidgetPropertyFromComponentConfig(widget, component, "frequency",
-                        SitemapPackage.COLORPICKER__FREQUENCY);
                 break;
             case "Buttongrid":
                 ButtongridImpl buttongridWidget = (ButtongridImpl) SitemapFactory.eINSTANCE.createButtongrid();

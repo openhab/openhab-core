@@ -126,9 +126,8 @@ Slider:
     (('icon=' icon=Icon) |
         ('icon=[' (IconRules+=IconRule (',' IconRules+=IconRule)*) ']') |
         ('staticIcon=' staticIcon=Icon))? &
-    ('sendFrequency=' frequency=INT)? & (switchEnabled?='switchSupport')? &
-    (releaseOnly?='releaseOnly')? & ('minValue=' minValue=Number)? &
-    ('maxValue=' maxValue=Number)? & ('step=' step=Number)? &
+    (switchEnabled?='switchSupport')? & (releaseOnly?='releaseOnly')? &
+    ('minValue=' minValue=Number)? & ('maxValue=' maxValue=Number)? & ('step=' step=Number)? &
     ('labelcolor=[' (LabelColor+=ColorArray (',' LabelColor+=ColorArray)*) ']')? &
     ('valuecolor=[' (ValueColor+=ColorArray (',' ValueColor+=ColorArray)*) ']')? &
     ('iconcolor=[' (IconColor+=ColorArray (',' IconColor+=ColorArray)*) ']')? &
@@ -161,7 +160,6 @@ Colorpicker:
     (('icon=' icon=Icon) |
         ('icon=[' (IconRules+=IconRule (',' IconRules+=IconRule)*) ']') |
         ('staticIcon=' staticIcon=Icon))? &
-    ('sendFrequency=' frequency=INT)? &
     ('labelcolor=[' (LabelColor+=ColorArray (',' LabelColor+=ColorArray)*) ']')? &
     ('valuecolor=[' (ValueColor+=ColorArray (',' ValueColor+=ColorArray)*) ']')? &
     ('iconcolor=[' (IconColor+=ColorArray (',' IconColor+=ColorArray)*) ']')? &
