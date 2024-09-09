@@ -10,12 +10,12 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.automation.module.script.internal;
+package org.openhab.core.persistence.internal;
 
 import java.util.Dictionary;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.core.automation.module.script.ScriptEngineFactory;
+import org.openhab.core.persistence.PersistenceService;
 import org.openhab.core.service.AbstractServiceBundleTracker;
 import org.openhab.core.service.ReadyMarker;
 import org.openhab.core.service.ReadyService;
@@ -26,18 +26,18 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 /**
- * The {@link ScriptEngineFactoryBundleTracker} tracks bundles that provide {@link ScriptEngineFactory} and sets the
+ * The {@link PersistenceServiceBundleTracker} tracks bundles that provide {@link PersistenceService} and sets the
  * {@link #READY_MARKER} when all registered bundles are active
  *
  * @author Jan N. Klug - Initial contribution
  */
 @NonNullByDefault
 @Component(immediate = true)
-public class ScriptEngineFactoryBundleTracker extends AbstractServiceBundleTracker {
-    public static final ReadyMarker READY_MARKER = new ReadyMarker("automation", "scriptEngineFactories");
+public class PersistenceServiceBundleTracker extends AbstractServiceBundleTracker {
+    public static final ReadyMarker READY_MARKER = new ReadyMarker("persistence", "services");
 
     @Activate
-    public ScriptEngineFactoryBundleTracker(final @Reference ReadyService readyService, BundleContext bc) {
+    public PersistenceServiceBundleTracker(final @Reference ReadyService readyService, BundleContext bc) {
         super(readyService, bc, READY_MARKER);
     }
 
@@ -45,6 +45,6 @@ public class ScriptEngineFactoryBundleTracker extends AbstractServiceBundleTrack
     protected boolean isRelevantBundle(Bundle bundle) {
         Dictionary<String, String> headers = bundle.getHeaders();
         String provideCapability = headers.get("Provide-Capability");
-        return provideCapability != null && provideCapability.contains(ScriptEngineFactory.class.getName());
+        return provideCapability != null && provideCapability.contains(PersistenceService.class.getName());
     }
 }

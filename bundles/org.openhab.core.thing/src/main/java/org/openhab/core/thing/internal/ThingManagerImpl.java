@@ -210,7 +210,7 @@ public class ThingManagerImpl implements ReadyTracker, ThingManager, ThingTracke
 
         this.thingRegistry.addThingTracker(this);
         readyService.registerTracker(this, new ReadyMarkerFilter().withType(StartLevelService.STARTLEVEL_MARKER_TYPE)
-                .withIdentifier(Integer.toString(StartLevelService.STARTLEVEL_MODEL)));
+                .withIdentifier(Integer.toString(StartLevelService.STARTLEVEL_STATES)));
     }
 
     @Deactivate
