@@ -105,7 +105,6 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
             ScriptEngine scriptEngine = engine.get();
             if (scriptEngine instanceof Compilable) {
                 logger.debug("Pre-compiling script of rule with UID '{}'", ruleUID);
-                setExecutionContext(scriptEngine, Map.of()); // JRuby script engine needs this before compiling
                 compiledScript = Optional.ofNullable(((Compilable) scriptEngine).compile(script));
             }
         }
@@ -212,7 +211,7 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
         try {
             if (compiledScript.isPresent()) {
                 logger.debug("Executing pre-compiled script of rule with UID '{}'", ruleUID);
-                return compiledScript.get().eval();
+                return compiledScript.get().eval(engine.getContext());
             }
             logger.debug("Executing script of rule with UID '{}'", ruleUID);
             return engine.eval(script);
