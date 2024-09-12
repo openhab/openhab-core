@@ -123,7 +123,8 @@ public class DateTimeTriggerHandler extends BaseTriggerModuleHandler
         ModuleHandlerCallback callback = this.callback;
         if (callback instanceof TriggerHandlerCallback triggerHandlerCallback) {
             TimerEvent event = AutomationEventFactory.createTimerEvent(module.getTypeUID(),
-                    Objects.requireNonNullElse(module.getLabel(), module.getId()), Map.of(CONFIG_ITEM_NAME, itemName));
+                    Objects.requireNonNullElse(module.getLabel(), module.getId()),
+                    Map.of(CONFIG_ITEM_NAME, itemName, CONFIG_TIME_ONLY, timeOnly, CONFIG_OFFSET, offset));
             triggerHandlerCallback.triggered(module, Map.of("event", event));
         } else {
             logger.debug("Tried to trigger, but callback isn't available!");
