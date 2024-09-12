@@ -87,6 +87,7 @@ import org.slf4j.LoggerFactory;
  * @author Laurent Garnier - Added support for new element Buttongrid
  * @author Laurent Garnier - Added icon field for mappings
  * @author Mark Herwege - Make UI provided sitemaps compatible with enhanced syntax in conditions
+ * @author Mark Herwege - Add support for Button element
  */
 @NonNullByDefault
 @Component(service = SitemapProvider.class)
