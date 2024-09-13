@@ -12,7 +12,10 @@
  */
 package org.openhab.core.io.rest.transform.internal;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Objects;
 import java.util.stream.Stream;
 
@@ -26,12 +29,14 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.auth.Role;
+import org.openhab.core.common.registry.RegistryChangedRunnableListener;
 import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
 import org.openhab.core.io.rest.Stream2JSONInputStream;
@@ -45,6 +50,7 @@ import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.jaxrs.whiteboard.JaxrsWhiteboardConstants;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JSONRequired;
@@ -85,8 +91,11 @@ public class TransformationResource implements RESTResource {
     private final TransformationRegistry transformationRegistry;
     private final ManagedTransformationProvider managedTransformationProvider;
     private final BundleContext bundleContext;
+    private final RegistryChangedRunnableListener<Transformation> resetLastModifiedChangeListener = new RegistryChangedRunnableListener<>(
+            () -> lastModified = null);
 
     private @Context @NonNullByDefault({}) UriInfo uriInfo;
+    private @Nullable Date lastModified = null;
 
     @Activate
     public TransformationResource(final @Reference TransformationRegistry transformationRegistry,
@@ -95,17 +104,35 @@ public class TransformationResource implements RESTResource {
         this.transformationRegistry = transformationRegistry;
         this.managedTransformationProvider = managedTransformationProvider;
         this.bundleContext = bundleContext;
+
+        this.transformationRegistry.addRegistryChangeListener(resetLastModifiedChangeListener);
+    }
+
+    @Deactivate
+    void deactivate() {
+        this.transformationRegistry.removeRegistryChangeListener(resetLastModifiedChangeListener);
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "getTransformations", summary = "Get a list of all transformations", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = TransformationDTO.class)))) })
-    public Response getTransformations() {
+    public Response getTransformations(@Context Request request) {
         logger.debug("Received HTTP GET request at '{}'", uriInfo.getPath());
+
+        if (lastModified != null) {
+            Response.ResponseBuilder responseBuilder = request.evaluatePreconditions(lastModified);
+            if (responseBuilder != null) {
+                // send 304 Not Modified
+                return responseBuilder.build();
+            }
+        } else {
+            lastModified = Date.from(Instant.now().truncatedTo(ChronoUnit.SECONDS));
+        }
         Stream<TransformationDTO> stream = transformationRegistry.stream().map(TransformationDTO::new)
                 .peek(c -> c.editable = isEditable(c.uid));
-        return Response.ok(new Stream2JSONInputStream(stream)).build();
+        return Response.ok(new Stream2JSONInputStream(stream)).lastModified(lastModified)
+                .cacheControl(RESTConstants.CACHE_CONTROL).build();
     }
 
     @GET
