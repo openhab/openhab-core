@@ -1123,7 +1123,7 @@ public class ColorUtil {
      * @param min the first index in the lookup table
      * @param max the last index in the lookup table
      * @return an array with the found CIE colour XY values
-     * @throws IndexOutOfBoundsException
+     * @throws IndexOutOfBoundsException if the colour temperature is out of range 'min' .. 'max'
      */
     private static double[] kelvinToXY(double kelvin, int min, int max) throws IndexOutOfBoundsException {
         if (min < 0 || max < min || max >= KELVIN_TO_XY_LOOKUP_TABLE.length) {
