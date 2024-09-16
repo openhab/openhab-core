@@ -89,4 +89,9 @@ public class BridgeImpl extends ThingImpl implements Bridge {
         }
         return bridgeHandler;
     }
+
+    @Override
+    public String toString() {
+        return super.toString().replace("Bridge=False", "Bridge=True");
+    }
 }
