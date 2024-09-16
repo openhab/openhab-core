@@ -655,7 +655,7 @@ public class ColorUtilTest {
         assertDoesNotThrow(() -> ColorUtil.kelvinToXY(1000000 / 153));
         assertThrows(IndexOutOfBoundsException.class, () -> ColorUtil.kelvinToXY(1000000 / 152));
 
-        // test round trips K => XY => KN
+        // test round trips K => XY => K
         for (double kelvin = 2000; kelvin <= 6536; kelvin += 5) {
             assertEquals(kelvin, ColorUtil.xyToKelvin(ColorUtil.kelvinToXY(kelvin)), 15);
         }
