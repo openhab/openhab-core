@@ -239,6 +239,7 @@ public class ThingImpl implements Thing {
 
     @Override
     public String toString() {
+        // Configuration is deliberately excluded because it might include sensitive data like passwords.
         StringBuilder sb = new StringBuilder(getUID().toString());
         sb.append(" (ThingTypeUID=");
         sb.append(getThingTypeUID());
