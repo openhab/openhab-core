@@ -238,6 +238,31 @@ public class ThingImpl implements Thing {
     }
 
     @Override
+    public String toString() {
+        // Configuration is deliberately excluded because it might include sensitive data like passwords.
+        StringBuilder sb = new StringBuilder(getUID().toString());
+        sb.append(" (ThingTypeUID=");
+        sb.append(getThingTypeUID());
+        sb.append(", Bridge=False");
+        if (getBridgeUID() != null) {
+            sb.append(", BridgeUID=");
+            sb.append(getBridgeUID());
+        }
+        sb.append(", Label=");
+        sb.append(getLabel());
+        if (getLocation() != null) {
+            sb.append(", Location=");
+            sb.append(getLocation());
+        }
+        sb.append(", Status=");
+        sb.append(getStatus());
+        sb.append(", StatusInfo=");
+        sb.append(getStatusInfo());
+        sb.append(")");
+        return sb.toString();
+    }
+
+    @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
