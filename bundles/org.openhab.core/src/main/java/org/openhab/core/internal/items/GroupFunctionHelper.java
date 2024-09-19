@@ -140,6 +140,14 @@ public class GroupFunctionHelper {
                     logger.error("Group function 'NOT OR' requires two arguments. Using Equality instead.");
                 }
                 break;
+            case "XOR":
+                args = parseStates(baseItem, function.params);
+                if (args.size() == 2) {
+                    return new ArithmeticGroupFunction.Xor(args.get(0), args.get(1));
+                } else {
+                    logger.error("Group function 'XOR' requires two arguments. Using Equality instead.");
+                }
+                break;
             case "COUNT":
                 if (function.params != null && function.params.length == 1) {
                     State countParam = new StringType(function.params[0]);
