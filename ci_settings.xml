@@ -1,0 +1,29 @@
+<settings xmlns="http://maven.apache.org/SETTINGS/1.1.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.1.0 http://maven.apache.org/xsd/settings-1.1.0.xsd">
+
+    <servers>
+        <server>
+            <id>tvision360-releases</id>
+            <configuration>
+                <httpHeaders>
+                    <property>
+                        <name>Authorization</name>
+                        <value>token ${env.PACKAGE_TOKEN}</value>
+                    </property>
+                </httpHeaders>
+            </configuration>
+        </server>
+        <server>
+            <id>tvision360-snapshots</id>
+            <configuration>
+                <httpHeaders>
+                    <property>
+                        <name>Authorization</name>
+                        <value>token ${env.PACKAGE_TOKEN}</value>
+                    </property>
+                </httpHeaders>
+            </configuration>
+        </server>
+    </servers>
+</settings>
