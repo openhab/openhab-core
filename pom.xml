@@ -1,4 +1,6 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
@@ -9,7 +11,7 @@
 
   <groupId>org.openhab.core</groupId>
   <artifactId>org.openhab.core.reactor</artifactId>
-  <version>4.1.3-SNAPSHOT</version>
+  <version>4.2.0-SNAPSHOT</version>
 
   <packaging>pom</packaging>
 
@@ -17,8 +19,8 @@
   <description>This project contains the core components of openHAB</description>
 
   <organization>
-    <name>openHAB.org</name>
-    <url>https://www.openhab.org</url>
+    <name>TVision360</name>
+    <url>https://www.tvision360.io</url>
   </organization>
 
   <licenses>
@@ -35,27 +37,28 @@
     <module>tools</module>
     <module>itests</module>
   </modules>
-
   <scm>
-    <connection>scm:git:https://github.com/openhab/openhab-core.git</connection>
-    <developerConnection>scm:git:https://github.com/openhab/openhab-core.git</developerConnection>
+    <connection>scm:git:https://repo.tvision360.io/TVision360/openhab-core.git</connection>
+    <developerConnection>scm:git:https://repo.tvision360.io/TVision360/openhab-core.git</developerConnection>
     <tag>HEAD</tag>
-    <url>https://github.com/openhab/openhab-core</url>
+    <url>https://repo.tvision360.io/TVision360/openhab-core</url>
   </scm>
 
   <issueManagement>
-    <system>GitHub</system>
-    <url>https://github.com/openhab/openhab-core/issues</url>
+    <system>gitea</system>
+    <url>https://repo.tvision360.io/TVision360/openhab-core/issues</url>
   </issueManagement>
 
   <distributionManagement>
     <repository>
-      <id>jfrog-release</id>
-      <url>${oh.repo.distBaseUrl}/libs-release-local</url>
+      <id>tvision360-releases</id>
+      <name>TVision360 Maven Release Repository</name>
+      <url>${tvision360.repo.url}</url>
     </repository>
     <snapshotRepository>
-      <id>jfrog</id>
-      <url>${oh.repo.snapshotBaseUrl}/libs-snapshot-local</url>
+      <id>tvision360-snapshots</id>
+      <name>TVision360 Maven Snapshot Repository</name>
+      <url>${tvision360.repo.url}</url>
     </snapshotRepository>
   </distributionManagement>
 
@@ -70,11 +73,11 @@
     <bnd.version>7.0.0</bnd.version>
     <commons.net.version>3.7.2</commons.net.version>
     <eea.version>2.3.0</eea.version>
-    <karaf.compile.version>4.4.4</karaf.compile.version>
-    <karaf.tooling.version>4.4.4</karaf.tooling.version>
+    <karaf.compile.version>4.4.5</karaf.compile.version>
+    <karaf.tooling.version>4.4.5</karaf.tooling.version>
     <sat.version>0.15.0</sat.version>
-    <slf4j.version>2.0.6</slf4j.version>
-    <xtext.version>2.32.0</xtext.version>
+    <slf4j.version>2.0.7</slf4j.version>
+    <xtext.version>2.34.0</xtext.version>
     <spotless.version>2.38.0</spotless.version>
     <!-- Eclipse Java formatter version 4.26+ does not check test files -->
     <spotless.eclipse.version>4.25</spotless.eclipse.version>
@@ -298,7 +301,7 @@ Import-Package: \\
             <dependency>
               <groupId>org.eclipse.jdt</groupId>
               <artifactId>ecj</artifactId>
-              <version>3.30.0</version>
+              <version>3.36.0</version>
             </dependency>
           </dependencies>
         </plugin>
@@ -306,7 +309,7 @@ Import-Package: \\
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-enforcer-plugin</artifactId>
-          <version>3.4.0</version>
+          <version>3.4.1</version>
         </plugin>
 
         <plugin>
@@ -343,6 +346,18 @@ Import-Package: \\
                 </script>
               ]]>
             </bottom>
+            <tags>
+              <tag>
+                <name>apiNote</name>
+                <placement>a</placement>
+                <head>API note:</head>
+              </tag>
+              <tag>
+                <name>implNote</name>
+                <placement>a</placement>
+                <head>Implementation note:</head>
+              </tag>
+            </tags>
           </configuration>
           <dependencies>
             <!-- This newer version fixes issues with resolving tech.units:indriya packages -->
@@ -357,7 +372,7 @@ Import-Package: \\
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-plugin-plugin</artifactId>
-          <version>3.9.0</version>
+          <version>3.11.0</version>
         </plugin>
 
         <plugin>
@@ -447,7 +462,7 @@ Import-Package: \\
             </mapping>
             <useDefaultExcludes>true</useDefaultExcludes>
             <properties>
-              <year>2023</year>
+              <year>2024</year>
             </properties>
             <encoding>UTF-8</encoding>
             <licenseSets>
@@ -458,6 +473,7 @@ Import-Package: \\
                 </headerDefinitions>
                 <includes>
                   <include>**/archetype/**/*.groovy</include>
+                  <include>**/com/acme/**/*.java</include>
                   <include>**/org/openhab/core/**/*.java</include>
                   <include>**/org/openhab/core/**/*.mwe2</include>
                   <include>**/org/openhab/core/**/*.xtend</include>
