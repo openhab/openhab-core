@@ -32,11 +32,10 @@ jobs:
       run: mvn spotless:check
 
     - name: Run tests
-      run: mvn test
+      run: mvn test -DskipChecks -Dspotless.check.skip=true -Dfeatures.verify.skip=true
 
     - name: Verify Karaf features
-      run: mvn verify -Dfeatures.verify.skip=false
-
+      run: mvn verify -Dfeatures.verify.skip=false -Dspotless.check.skip=true
     - name: Deploy to Maven repository
       run: |
         echo "PACKAGE_TOKEN: $(echo ${{ secrets.PACKAGE_TOKEN }} | cut -c1-8)..."
