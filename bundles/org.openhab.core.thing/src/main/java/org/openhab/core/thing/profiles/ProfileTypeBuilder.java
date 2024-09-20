@@ -31,7 +31,7 @@ import org.openhab.core.thing.type.ChannelTypeUID;
  * @param <T> the concrete {@link ProfileType} sub-interface.
  */
 @NonNullByDefault
-public final class ProfileTypeBuilder<T extends ProfileType> {
+public final class ProfileTypeBuilder<T extends @NonNull ProfileType> {
 
     @FunctionalInterface
     private interface ProfileTypeFactory<T extends ProfileType> {
@@ -46,7 +46,7 @@ public final class ProfileTypeBuilder<T extends ProfileType> {
     private final Collection<ChannelTypeUID> supportedChannelTypeUIDs = new HashSet<>();
     private final String label;
 
-    private ProfileTypeBuilder(ProfileTypeUID profileTypeUID, String label, ProfileTypeFactory<T> profileTypeFactory) {
+    private ProfileTypeBuilder(Class<T> clazz, ProfileTypeUID profileTypeUID, String label) {
         this.profileTypeFactory = profileTypeFactory;
         this.profileTypeUID = profileTypeUID;
         this.label = label;
