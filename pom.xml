@@ -1,6 +1,5 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
@@ -117,6 +116,35 @@
     </dependencies>
   </dependencyManagement>
 
+  <repositories>
+    <repository>
+      <releases>
+        <enabled>true</enabled>
+        <updatePolicy>never</updatePolicy>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+        <updatePolicy>daily</updatePolicy>
+      </snapshots>
+      <id>tvision360-repo</id>
+      <name>TVision360 Repository</name>
+      <url>${tvision360.repo.url}</url>
+    </repository>
+    <repository>
+      <releases>
+        <enabled>true</enabled>
+        <updatePolicy>never</updatePolicy>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+        <updatePolicy>daily</updatePolicy>
+      </snapshots>
+      <!-- openhab Core needs the jfrog packages-->
+      <id>jfrog-release</id>
+      <url>https://openhab.jfrog.io/openhab/libs-release-local</url>
+    </repository>
+  </repositories>
+
   <build>
     <pluginManagement>
       <plugins>
@@ -206,7 +234,7 @@ Import-Package: \\
           <version>${bnd.version}</version>
           <configuration>
             <failOnChanges>false</failOnChanges>
-            <bndruns/>
+            <bndruns></bndruns>
           </configuration>
           <executions>
             <execution>
@@ -337,15 +365,13 @@ Import-Package: \\
             <!-- The search function is broken without the workaround below -->
             <!-- See: https://stackoverflow.com/questions/52326318/maven-javadoc-search-redirects-to-undefined-url -->
             <additionalJOption>--allow-script-in-comments</additionalJOption>
-            <bottom>
-              <![CDATA[
+            <bottom><![CDATA[
                 <script>
                 if (typeof useModuleDirectories !== 'undefined') {
                   useModuleDirectories = false;
                 }
                 </script>
-              ]]>
-            </bottom>
+              ]]></bottom>
             <tags>
               <tag>
                 <name>apiNote</name>
@@ -407,10 +433,8 @@ Import-Package: \\
           <artifactId>maven-surefire-plugin</artifactId>
           <version>3.1.2</version>
           <configuration>
-            <argLine>
-              --add-opens java.base/java.net=ALL-UNNAMED
-              --add-opens java.base/java.util=ALL-UNNAMED
-            </argLine>
+            <argLine>--add-opens java.base/java.net=ALL-UNNAMED
+              --add-opens java.base/java.util=ALL-UNNAMED</argLine>
             <systemPropertyVariables>
               <junit.jupiter.execution.timeout.default>15 m</junit.jupiter.execution.timeout.default>
             </systemPropertyVariables>
@@ -563,11 +587,11 @@ Import-Package: \\
                 <file>openhab_codestyle.xml</file>
                 <version>${spotless.eclipse.version}</version>
               </eclipse>
-              <removeUnusedImports/>
+              <removeUnusedImports></removeUnusedImports>
               <importOrder>
                 <file>openhab.importorder</file>
               </importOrder>
-              <endWithNewline/>
+              <endWithNewline></endWithNewline>
             </java>
             <formats>
               <format>
@@ -586,8 +610,8 @@ Import-Package: \\
                   </files>
                   <version>${spotless.eclipse.wtp.version}</version>
                 </eclipseWtp>
-                <trimTrailingWhitespace/>
-                <endWithNewline/>
+                <trimTrailingWhitespace></trimTrailingWhitespace>
+                <endWithNewline></endWithNewline>
               </format>
               <format>
                 <!-- feature.xml -->
@@ -601,8 +625,8 @@ Import-Package: \\
                   </files>
                   <version>${spotless.eclipse.wtp.version}</version>
                 </eclipseWtp>
-                <trimTrailingWhitespace/>
-                <endWithNewline/>
+                <trimTrailingWhitespace></trimTrailingWhitespace>
+                <endWithNewline></endWithNewline>
               </format>
               <format>
                 <!-- pom.xml -->
@@ -616,8 +640,8 @@ Import-Package: \\
                   </files>
                   <version>${spotless.eclipse.wtp.version}</version>
                 </eclipseWtp>
-                <trimTrailingWhitespace/>
-                <endWithNewline/>
+                <trimTrailingWhitespace></trimTrailingWhitespace>
+                <endWithNewline></endWithNewline>
               </format>
             </formats>
           </configuration>
@@ -727,7 +751,7 @@ Import-Package: \\
                         </goals>
                       </pluginExecutionFilter>
                       <action>
-                        <ignore/>
+                        <ignore></ignore>
                       </action>
                     </pluginExecution>
                     <pluginExecution>
@@ -740,7 +764,7 @@ Import-Package: \\
                         </goals>
                       </pluginExecutionFilter>
                       <action>
-                        <ignore/>
+                        <ignore></ignore>
                       </action>
                     </pluginExecution>
                     <pluginExecution>
@@ -754,7 +778,7 @@ Import-Package: \\
                         </goals>
                       </pluginExecutionFilter>
                       <action>
-                        <ignore/>
+                        <ignore></ignore>
                       </action>
                     </pluginExecution>
                     <pluginExecution>
@@ -767,7 +791,7 @@ Import-Package: \\
                         </goals>
                       </pluginExecutionFilter>
                       <action>
-                        <ignore/>
+                        <ignore></ignore>
                       </action>
                     </pluginExecution>
                   </pluginExecutions>
