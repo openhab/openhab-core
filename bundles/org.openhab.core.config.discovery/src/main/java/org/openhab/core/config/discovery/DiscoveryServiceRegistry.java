@@ -13,6 +13,7 @@
 package org.openhab.core.config.discovery;
 
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -29,6 +30,7 @@ import org.openhab.core.thing.ThingTypeUID;
  *
  * @author Michael Grammling - Initial contribution
  * @author Ivaylo Ivanov - Added getMaxScanTimeout
+ * @author Laurent Garnier - Added discovery with an optional input parameter
  *
  * @see DiscoveryService
  * @see DiscoveryListener
@@ -44,6 +46,7 @@ public interface DiscoveryServiceRegistry {
      *
      * @param thingTypeUID the Thing type UID pointing to collection of discovery
      *            services to be forced to start a discovery
+     * @param input an optional input parameter to be used during discovery scan, can be null.
      * @param listener a callback to inform about errors or termination, can be null.
      *            If more than one discovery service is started, the {@link ScanListener#onFinished()} callback is
      *            called after all
@@ -54,7 +57,7 @@ public interface DiscoveryServiceRegistry {
      * @return true if a t least one discovery service could be found and forced
      *         to start a discovery, otherwise false
      */
-    boolean startScan(ThingTypeUID thingTypeUID, @Nullable ScanListener listener);
+    boolean startScan(ThingTypeUID thingTypeUID, @Nullable String input, @Nullable ScanListener listener);
 
     /**
      * Forces the associated {@link DiscoveryService}s to start a discovery for
@@ -65,6 +68,7 @@ public interface DiscoveryServiceRegistry {
      *
      * @param bindingId the binding id pointing to one or more discovery services to
      *            be forced to start a discovery
+     * @param input an optional input parameter to be used during discovery scan, can be null.
      * @param listener a callback to inform about errors or termination, can be null.
      *            If more than one discovery service is started, the {@link ScanListener#onFinished()} callback is
      *            called after all
@@ -75,7 +79,7 @@ public interface DiscoveryServiceRegistry {
      * @return true if a t least one discovery service could be found and forced
      *         to start a discovery, otherwise false
      */
-    boolean startScan(String bindingId, @Nullable ScanListener listener);
+    boolean startScan(String bindingId, @Nullable String input, @Nullable ScanListener listener);
 
     /**
      * Aborts a started discovery on all {@link DiscoveryService}s for the given
@@ -162,6 +166,13 @@ public interface DiscoveryServiceRegistry {
      * @return list of bindings, that support discovery
      */
     List<String> getSupportedBindings();
+
+    /**
+     * Returns the list of all {@link DiscoveryService}s, that discover thing types of the given binding id.
+     *
+     * @return list of discovery services, that discover thing types of the given binding id
+     */
+    Set<DiscoveryService> getDiscoveryServices(String bindingId) throws IllegalStateException;
 
     /**
      * Returns the maximum discovery timeout from all discovery services registered for the specified thingTypeUID

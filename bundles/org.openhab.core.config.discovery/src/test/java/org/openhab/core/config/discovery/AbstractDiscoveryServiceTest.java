@@ -15,7 +15,7 @@ package org.openhab.core.config.discovery;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsMapContaining.hasEntry;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Collection;
 import java.util.Locale;
@@ -35,6 +35,7 @@ import org.osgi.framework.Bundle;
  * Tests the {@link DiscoveryResultBuilder}.
  *
  * @author Laurent Garnier - Initial contribution
+ * @author Laurent Garnier - Added test for discovery with an input parameter
  */
 @NonNullByDefault
 public class AbstractDiscoveryServiceTest implements DiscoveryListener {
@@ -46,6 +47,7 @@ public class AbstractDiscoveryServiceTest implements DiscoveryListener {
     private static final ThingUID THING_UID2 = new ThingUID(THING_TYPE_UID, "thingId2");
     private static final ThingUID THING_UID3 = new ThingUID(THING_TYPE_UID, BRIDGE_UID, "thingId3");
     private static final ThingUID THING_UID4 = new ThingUID(THING_TYPE_UID, "thingId4");
+    private static final ThingUID THING_UID5 = new ThingUID(THING_TYPE_UID, BRIDGE_UID, "thingId5");
     private static final String KEY1 = "key1";
     private static final String KEY2 = "key2";
     private static final String VALUE1 = "value1";
@@ -58,9 +60,12 @@ public class AbstractDiscoveryServiceTest implements DiscoveryListener {
     private static final String DISCOVERY_LABEL = "Result Test";
     private static final String DISCOVERY_LABEL_KEY1 = "@text/test";
     private static final String DISCOVERY_LABEL_KEY2 = "@text/test2 [ \"50\", \"number\" ]";
+    private static final String DISCOVERY_LABEL_CODE = "Result Test with pairing code";
     private static final String PROPERTY_LABEL1 = "Label from property (text key)";
     private static final String PROPERTY_LABEL2 = "Label from property (infered key)";
     private static final String PROPERTY_LABEL3 = "Label from property (parameters 50 and number)";
+    private static final String PAIRING_CODE_LABEL = "Pairing Code";
+    private static final String PAIRING_CODE_DESCR = "The pairing code";
 
     private TranslationProvider i18nProvider = new TranslationProvider() {
         @Override
@@ -134,6 +139,28 @@ public class AbstractDiscoveryServiceTest implements DiscoveryListener {
         }
     }
 
+    class TestDiscoveryServiceWithRequiredCode extends AbstractDiscoveryService {
+
+        public TestDiscoveryServiceWithRequiredCode(TranslationProvider i18nProvider, LocaleProvider localeProvider)
+                throws IllegalArgumentException {
+            super(Set.of(THING_TYPE_UID), 1, false, PAIRING_CODE_LABEL, PAIRING_CODE_DESCR);
+            this.i18nProvider = i18nProvider;
+            this.localeProvider = localeProvider;
+        }
+
+        @Override
+        protected void startScan() {
+        }
+
+        @Override
+        protected void startScan(String input) {
+            DiscoveryResult discoveryResult = DiscoveryResultBuilder.create(THING_UID5).withThingType(THING_TYPE_UID)
+                    .withProperties(properties).withRepresentationProperty(KEY1).withBridge(BRIDGE_UID)
+                    .withLabel(DISCOVERY_LABEL_CODE).build();
+            thingDiscovered(discoveryResult);
+        }
+    }
+
     @Override
     public void thingDiscovered(DiscoveryService source, DiscoveryResult result) {
         assertThat(result.getThingTypeUID(), is(THING_TYPE_UID));
@@ -156,6 +183,9 @@ public class AbstractDiscoveryServiceTest implements DiscoveryListener {
         } else if (THING_UID4.equals(result.getThingUID())) {
             assertNull(result.getBridgeUID());
             assertThat(result.getLabel(), is(PROPERTY_LABEL3));
+        } else if (THING_UID5.equals(result.getThingUID())) {
+            assertThat(result.getBridgeUID(), is(BRIDGE_UID));
+            assertThat(result.getLabel(), is(DISCOVERY_LABEL_CODE));
         }
     }
 
@@ -172,7 +202,21 @@ public class AbstractDiscoveryServiceTest implements DiscoveryListener {
     @Test
     public void testDiscoveryResults() {
         TestDiscoveryService discoveryService = new TestDiscoveryService(i18nProvider, localeProvider);
+        assertFalse(discoveryService.isScanInputSupported());
+        assertNull(discoveryService.getScanInputLabel());
+        assertNull(discoveryService.getScanInputDescription());
         discoveryService.addDiscoveryListener(this);
         discoveryService.startScan();
+    }
+
+    @Test
+    public void testDiscoveryResultsWhenCodeRequired() {
+        TestDiscoveryServiceWithRequiredCode discoveryService = new TestDiscoveryServiceWithRequiredCode(i18nProvider,
+                localeProvider);
+        assertTrue(discoveryService.isScanInputSupported());
+        assertThat(discoveryService.getScanInputLabel(), is(PAIRING_CODE_LABEL));
+        assertThat(discoveryService.getScanInputDescription(), is(PAIRING_CODE_DESCR));
+        discoveryService.addDiscoveryListener(this);
+        discoveryService.startScan("code");
     }
 }
