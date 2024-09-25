@@ -35,7 +35,7 @@ import org.openhab.core.util.Statistics;
  * @author Kai Kreuzer - Initial contribution
  * @author Thomas Eichstädt-Engelen - Added "N" functions
  * @author Gaël L'hopital - Added count function
- * @author Fabian Vollmann - Added ONE function
+ * @author Fabian Vollmann - Added XOR function
  */
 @NonNullByDefault
 public interface ArithmeticGroupFunction extends GroupFunction {
@@ -214,8 +214,8 @@ public interface ArithmeticGroupFunction extends GroupFunction {
     }
 
     /**
-     * This does a logical 'xor' operation. Only if items are of opposing 'activeState' and
-     * 'passiveState', 'activeState' is returned. For more than 2 states, this is '1 of n'.
+     * This does a logical 'xor' operation. If exactly one item is of 'activeState' this
+     * is returned, otherwise the 'passiveState' is returned.
      *
      * Through the getStateAs() method, it can be determined, how many
      * items actually are in the 'activeState'.
