@@ -207,6 +207,58 @@ public class ArithmeticGroupFunctionTest {
     }
 
     @Test
+    public void testXorFunction() {
+        Set<Item> items = new HashSet<>();
+        items.add(new TestItem("TestItem1", OpenClosedType.OPEN));
+        items.add(new TestItem("TestItem2", OpenClosedType.CLOSED));
+
+        GroupFunction function = new ArithmeticGroupFunction.Xor(OpenClosedType.OPEN, OpenClosedType.CLOSED);
+        State state = function.calculate(items);
+
+        assertEquals(OpenClosedType.OPEN, state);
+    }
+
+    @Test
+    public void testXorFunctionMultiple() {
+        Set<Item> items = new HashSet<>();
+        items.add(new TestItem("TestItem1", OpenClosedType.CLOSED));
+        items.add(new TestItem("TestItem2", OpenClosedType.CLOSED));
+        items.add(new TestItem("TestItem3", OpenClosedType.OPEN));
+        items.add(new TestItem("TestItem4", OpenClosedType.CLOSED));
+
+        GroupFunction function = new ArithmeticGroupFunction.Xor(OpenClosedType.OPEN, OpenClosedType.CLOSED);
+        State state = function.calculate(items);
+
+        assertEquals(OpenClosedType.OPEN, state);
+    }
+
+    @Test
+    public void testXorFunctionNegative() {
+        Set<Item> items = new HashSet<>();
+        items.add(new TestItem("TestItem1", OpenClosedType.OPEN));
+        items.add(new TestItem("TestItem2", OpenClosedType.OPEN));
+
+        GroupFunction function = new ArithmeticGroupFunction.Xor(OpenClosedType.OPEN, OpenClosedType.CLOSED);
+        State state = function.calculate(items);
+
+        assertEquals(OpenClosedType.CLOSED, state);
+    }
+
+    @Test
+    public void testXorFunctionNegativeMultiple() {
+        Set<Item> items = new HashSet<>();
+        items.add(new TestItem("TestItem1", OpenClosedType.CLOSED));
+        items.add(new TestItem("TestItem2", OpenClosedType.OPEN));
+        items.add(new TestItem("TestItem3", OpenClosedType.OPEN));
+        items.add(new TestItem("TestItem4", OpenClosedType.CLOSED));
+
+        GroupFunction function = new ArithmeticGroupFunction.Xor(OpenClosedType.OPEN, OpenClosedType.CLOSED);
+        State state = function.calculate(items);
+
+        assertEquals(OpenClosedType.CLOSED, state);
+    }
+
+    @Test
     public void testAvgFunction() {
         Set<Item> items = new HashSet<>();
         items.add(new TestItem("TestItem1", new DecimalType("23.54")));

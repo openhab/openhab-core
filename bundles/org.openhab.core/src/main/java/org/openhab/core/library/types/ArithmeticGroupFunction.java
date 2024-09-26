@@ -35,6 +35,7 @@ import org.openhab.core.util.Statistics;
  * @author Kai Kreuzer - Initial contribution
  * @author Thomas Eichstädt-Engelen - Added "N" functions
  * @author Gaël L'hopital - Added count function
+ * @author Fabian Vollmann - Added XOR function
  */
 @NonNullByDefault
 public interface ArithmeticGroupFunction extends GroupFunction {
@@ -209,6 +210,82 @@ public interface ArithmeticGroupFunction extends GroupFunction {
         public State calculate(@Nullable Set<Item> items) {
             State result = super.calculate(items);
             return activeState.equals(result) ? passiveState : activeState;
+        }
+    }
+
+    /**
+     * This does a logical 'xor' operation. If exactly one item is of 'activeState' this
+     * is returned, otherwise the 'passiveState' is returned.
+     *
+     * Through the getStateAs() method, it can be determined, how many
+     * items actually are in the 'activeState'.
+     */
+    class Xor implements GroupFunction {
+
+        protected final State activeState;
+        protected final State passiveState;
+
+        public Xor(@Nullable State activeValue, @Nullable State passiveValue) {
+            if (activeValue == null || passiveValue == null) {
+                throw new IllegalArgumentException("Parameters must not be null!");
+            }
+            this.activeState = activeValue;
+            this.passiveState = passiveValue;
+        }
+
+        @Override
+        public State calculate(@Nullable Set<Item> items) {
+            if (items != null) {
+                boolean foundOne = false;
+
+                for (Item item : items) {
+                    if (activeState.equals(item.getStateAs(activeState.getClass()))) {
+                        if (foundOne) {
+                            return passiveState;
+                        } else {
+                            foundOne = true;
+                        }
+                    }
+                }
+                if (foundOne) {
+                    return activeState;
+                }
+            }
+
+            return passiveState;
+        }
+
+        @Override
+        public @Nullable <T extends State> T getStateAs(@Nullable Set<Item> items, Class<T> stateClass) {
+            State state = calculate(items);
+            if (stateClass.isInstance(state)) {
+                return stateClass.cast(state);
+            } else {
+                if (stateClass == DecimalType.class) {
+                    if (items != null) {
+                        return stateClass.cast(new DecimalType(count(items, activeState)));
+                    } else {
+                        return stateClass.cast(DecimalType.ZERO);
+                    }
+                } else {
+                    return null;
+                }
+            }
+        }
+
+        private int count(Set<Item> items, State state) {
+            int count = 0;
+            for (Item item : items) {
+                if (state.equals(item.getStateAs(state.getClass()))) {
+                    count++;
+                }
+            }
+            return count;
+        }
+
+        @Override
+        public State[] getParameters() {
+            return new State[] { activeState, passiveState };
         }
     }
 
