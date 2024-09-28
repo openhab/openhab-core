@@ -37,6 +37,7 @@ import com.google.gson.annotations.SerializedName;
  * @author Christoph Knauf - Added default constructor, changed Boolean
  *         getter to return primitive types
  * @author Thomas Höfer - Added unit
+ * @author Laurent Garnier - Added restrictedUnit boolean
  */
 public class ConfigDescriptionParameter {
 
@@ -86,6 +87,7 @@ public class ConfigDescriptionParameter {
     private boolean multiple = false;
     private Integer multipleLimit;
     private String unit;
+    private boolean restrictedUnit = true;
     private String unitLabel;
 
     private String context;
@@ -151,6 +153,8 @@ public class ConfigDescriptionParameter {
      * @param multipleLimit specifies the maximum number of options that can be selected
      *            when multiple is true
      * @param unit specifies the unit of measurements for the configuration parameter (nullable)
+     * @param restrictedUnit true if the unit can only take a value amongst a list of predefined values, false if no
+     *            restriction
      * @param unitLabel specifies the unit label for the configuration parameter. This attribute can also be used to
      *            provide
      *            natural language units as iterations, runs, etc.
@@ -169,7 +173,7 @@ public class ConfigDescriptionParameter {
             String pattern, Boolean required, Boolean readOnly, Boolean multiple, String context, String defaultValue,
             String label, String description, List<ParameterOption> options, List<FilterCriteria> filterCriteria,
             String groupName, Boolean advanced, Boolean limitToOptions, Integer multipleLimit, String unit,
-            String unitLabel, Boolean verify) throws IllegalArgumentException {
+            boolean restrictedUnit, String unitLabel, Boolean verify) throws IllegalArgumentException {
         if ((name == null) || (name.isEmpty())) {
             throw new IllegalArgumentException("The name must neither be null nor empty!");
         }
@@ -182,7 +186,7 @@ public class ConfigDescriptionParameter {
             throw new IllegalArgumentException(
                     "Unit or unit label must only be set for integer or decimal configuration parameters");
         }
-        if (unit != null && !UNITS.contains(unit)) {
+        if (unit != null && restrictedUnit && !UNITS.contains(unit)) {
             throw new IllegalArgumentException("The given unit is invalid.");
         }
 
@@ -199,6 +203,7 @@ public class ConfigDescriptionParameter {
         this.description = description;
         this.multipleLimit = multipleLimit;
         this.unit = unit;
+        this.restrictedUnit = restrictedUnit;
         this.unitLabel = unitLabel;
 
         if (verify != null) {
@@ -440,6 +445,15 @@ public class ConfigDescriptionParameter {
      */
     public String getUnit() {
         return unit;
+    }
+
+    /**
+     * Returns whether the unit of measurements of this parameter is amongst a list of predefined units.
+     *
+     * @return true if the unit of measurements of this parameter is amongst a list of predefined values or false if not
+     */
+    public boolean isUnitRestricted() {
+        return restrictedUnit;
     }
 
     /**
