@@ -9,7 +9,7 @@
 
   <groupId>org.openhab.core</groupId>
   <artifactId>org.openhab.core.reactor</artifactId>
-  <version>4.2.2-SNAPSHOT</version>
+  <version>4.2.2</version>
 
   <packaging>pom</packaging>
 
@@ -39,7 +39,7 @@
   <scm>
     <connection>scm:git:https://github.com/openhab/openhab-core.git</connection>
     <developerConnection>scm:git:https://github.com/openhab/openhab-core.git</developerConnection>
-    <tag>4.2.0</tag>
+    <tag>4.2.2</tag>
     <url>https://github.com/openhab/openhab-core</url>
   </scm>
 
