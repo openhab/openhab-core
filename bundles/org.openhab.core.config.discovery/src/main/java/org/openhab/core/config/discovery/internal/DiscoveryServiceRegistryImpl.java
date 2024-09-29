@@ -190,7 +190,8 @@ public final class DiscoveryServiceRegistryImpl implements DiscoveryServiceRegis
     }
 
     @Override
-    public boolean startScan(ThingTypeUID thingTypeUID, @Nullable String input, @Nullable ScanListener listener) {
+    public boolean startScan(ThingTypeUID thingTypeUID, @Nullable String input, @Nullable ScanListener listener)
+            throws IllegalStateException {
         Set<DiscoveryService> discoveryServicesForThingType = getDiscoveryServices(thingTypeUID);
 
         if (discoveryServicesForThingType.isEmpty()) {
@@ -202,7 +203,8 @@ public final class DiscoveryServiceRegistryImpl implements DiscoveryServiceRegis
     }
 
     @Override
-    public boolean startScan(String bindingId, @Nullable String input, @Nullable ScanListener listener) {
+    public boolean startScan(String bindingId, @Nullable String input, @Nullable ScanListener listener)
+            throws IllegalStateException {
         final Set<DiscoveryService> discoveryServicesForBinding = getDiscoveryServices(bindingId);
 
         if (discoveryServicesForBinding.isEmpty()) {
