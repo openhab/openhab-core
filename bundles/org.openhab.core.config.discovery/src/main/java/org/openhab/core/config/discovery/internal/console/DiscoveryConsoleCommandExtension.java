@@ -18,6 +18,7 @@ import java.util.Hashtable;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.discovery.DiscoveryService;
 import org.openhab.core.config.discovery.DiscoveryServiceRegistry;
 import org.openhab.core.io.console.Console;
@@ -37,6 +38,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Dennis Nobel - Added background discovery commands
+ * @author Laurent Garnier - Updated command to start discovery with a new optional input parameter
  */
 @Component(immediate = true, service = ConsoleCommandExtension.class)
 @NonNullByDefault
@@ -69,9 +71,9 @@ public class DiscoveryConsoleCommandExtension extends AbstractConsoleCommandExte
                         String arg1 = args[1];
                         if (arg1.contains(":")) {
                             ThingTypeUID thingTypeUID = new ThingTypeUID(arg1);
-                            runDiscoveryForThingType(console, thingTypeUID);
+                            runDiscoveryForThingType(console, thingTypeUID, args.length > 2 ? args[2] : null);
                         } else {
-                            runDiscoveryForBinding(console, arg1);
+                            runDiscoveryForBinding(console, arg1, args.length > 2 ? args[2] : null);
                         }
                     } else {
                         console.println("Specify thing type id or binding id to discover: discovery "
@@ -123,18 +125,18 @@ public class DiscoveryConsoleCommandExtension extends AbstractConsoleCommandExte
         }
     }
 
-    private void runDiscoveryForThingType(Console console, ThingTypeUID thingTypeUID) {
-        discoveryServiceRegistry.startScan(thingTypeUID, null);
+    private void runDiscoveryForThingType(Console console, ThingTypeUID thingTypeUID, @Nullable String input) {
+        discoveryServiceRegistry.startScan(thingTypeUID, input, null);
     }
 
-    private void runDiscoveryForBinding(Console console, String bindingId) {
-        discoveryServiceRegistry.startScan(bindingId, null);
+    private void runDiscoveryForBinding(Console console, String bindingId, @Nullable String input) {
+        discoveryServiceRegistry.startScan(bindingId, input, null);
     }
 
     @Override
     public List<String> getUsages() {
         return List.of(
-                buildCommandUsage(SUBCMD_START + " <thingTypeUID|bindingID>",
+                buildCommandUsage(SUBCMD_START + " <thingTypeUID|bindingID> [<code>]",
                         "runs a discovery on a given thing type or binding"),
                 buildCommandUsage(SUBCMD_BACKGROUND_DISCOVERY_ENABLE + " <PID>",
                         "enables background discovery for the discovery service with the given PID"),

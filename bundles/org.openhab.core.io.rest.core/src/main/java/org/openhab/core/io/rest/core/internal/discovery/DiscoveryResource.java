@@ -14,23 +14,37 @@ package org.openhab.core.io.rest.core.internal.discovery;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;
+import java.util.Locale;
+import java.util.Set;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.auth.Role;
+import org.openhab.core.config.discovery.DiscoveryService;
 import org.openhab.core.config.discovery.DiscoveryServiceRegistry;
 import org.openhab.core.config.discovery.ScanListener;
+import org.openhab.core.i18n.I18nUtil;
+import org.openhab.core.i18n.TranslationProvider;
+import org.openhab.core.io.rest.JSONResponse;
+import org.openhab.core.io.rest.LocaleService;
 import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
+import org.openhab.core.io.rest.core.discovery.DiscoveryInfoDTO;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -62,6 +76,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * @author Franck Dechavanne - Added DTOs to ApiResponses
  * @author Markus Rathgeb - Migrated to JAX-RS Whiteboard Specification
  * @author Wouter Born - Migrated to OpenAPI annotations
+ * @author Laurent Garnier - Added discovery with an optional input parameter
  */
 @Component(service = { RESTResource.class, DiscoveryResource.class })
 @JaxrsResource
@@ -81,10 +96,15 @@ public class DiscoveryResource implements RESTResource {
     private final Logger logger = LoggerFactory.getLogger(DiscoveryResource.class);
 
     private final DiscoveryServiceRegistry discoveryServiceRegistry;
+    private final LocaleService localeService;
+    private final TranslationProvider i18nProvider;
 
     @Activate
-    public DiscoveryResource(final @Reference DiscoveryServiceRegistry discoveryServiceRegistry) {
+    public DiscoveryResource(final @Reference DiscoveryServiceRegistry discoveryServiceRegistry,
+            final @Reference TranslationProvider translationProvider, final @Reference LocaleService localeService) {
         this.discoveryServiceRegistry = discoveryServiceRegistry;
+        this.i18nProvider = translationProvider;
+        this.localeService = localeService;
     }
 
     @GET
@@ -96,13 +116,59 @@ public class DiscoveryResource implements RESTResource {
         return Response.ok(new LinkedHashSet<>(supportedBindings)).build();
     }
 
+    @GET
+    @Path("/bindings/{bindingId}/info")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(operationId = "getDiscoveryServicesInfo", summary = "Gets information about the discovery services for a binding.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = DiscoveryInfoDTO.class))),
+            @ApiResponse(responseCode = "404", description = "Discovery service not found") })
+    public Response getDiscoveryServicesInfo(
+            @PathParam("bindingId") @Parameter(description = "binding Id") final String bindingId,
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language) {
+        final Locale locale = localeService.getLocale(language);
+        String label = null;
+        String description = null;
+        boolean supported = false;
+        Set<DiscoveryService> discoveryServices = discoveryServiceRegistry.getDiscoveryServices(bindingId);
+
+        if (discoveryServices.isEmpty()) {
+            return JSONResponse.createResponse(Status.NOT_FOUND, null,
+                    "No discovery service found for binding " + bindingId);
+        }
+
+        for (DiscoveryService discoveryService : discoveryServices) {
+            if (discoveryService.isScanInputSupported()) {
+                Bundle bundle = FrameworkUtil.getBundle(discoveryService.getClass());
+                label = discoveryService.getScanInputLabel();
+                if (label != null) {
+                    label = i18nProvider.getText(bundle, I18nUtil.stripConstant(label), label, locale);
+                }
+                description = discoveryService.getScanInputDescription();
+                if (description != null) {
+                    description = i18nProvider.getText(bundle, I18nUtil.stripConstant(description), description,
+                            locale);
+                }
+                supported = true;
+                break;
+            }
+        }
+        return Response.ok(new DiscoveryInfoDTO(supported, label, description)).build();
+    }
+
     @POST
     @Path("/bindings/{bindingId}/scan")
     @Produces(MediaType.TEXT_PLAIN)
     @Operation(operationId = "scan", summary = "Starts asynchronous discovery process for a binding and returns the timeout in seconds of the discovery operation.", responses = {
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = Integer.class))) })
-    public Response scan(@PathParam("bindingId") @Parameter(description = "bindingId") final String bindingId) {
-        discoveryServiceRegistry.startScan(bindingId, new ScanListener() {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = Integer.class))),
+            @ApiResponse(responseCode = "404", description = "Discovery service not found") })
+    public Response scan(@PathParam("bindingId") @Parameter(description = "binding Id") final String bindingId,
+            @QueryParam("input") @Parameter(description = "input parameter to start the discovery") @Nullable String input) {
+        if (discoveryServiceRegistry.getDiscoveryServices(bindingId).isEmpty()) {
+            return JSONResponse.createResponse(Status.NOT_FOUND, null,
+                    "No discovery service found for binding " + bindingId);
+        }
+
+        discoveryServiceRegistry.startScan(bindingId, input, new ScanListener() {
             @Override
             public void onErrorOccurred(@Nullable Exception exception) {
                 logger.error("Error occurred while scanning for binding '{}'", bindingId, exception);
