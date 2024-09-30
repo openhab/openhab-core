@@ -13,6 +13,7 @@
 package org.openhab.core.persistence.dto;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import org.openhab.core.library.types.DecimalType;
@@ -55,6 +56,13 @@ public class ItemHistoryDTO {
             newVal.state = state.toString();
         }
         data.add(newVal);
+    }
+
+    /**
+     * Sort the data history by time.
+     */
+    public void sortData() {
+        data.sort(Comparator.comparingLong(o -> o.time));
     }
 
     public static class HistoryDataBean {

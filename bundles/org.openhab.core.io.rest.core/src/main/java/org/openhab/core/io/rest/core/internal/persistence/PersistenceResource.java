@@ -12,6 +12,7 @@
  */
 package org.openhab.core.io.rest.core.internal.persistence;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -71,6 +72,7 @@ import org.openhab.core.persistence.registry.PersistenceServiceConfigurationRegi
 import org.openhab.core.persistence.strategy.PersistenceStrategy;
 import org.openhab.core.types.State;
 import org.openhab.core.types.TypeParser;
+import org.openhab.core.types.UnDefType;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -294,8 +296,9 @@ public class PersistenceResource implements RESTResource {
                     + DateTimeType.DATE_PATTERN_WITH_TZ_AND_MS + "]") @QueryParam("endtime") @Nullable String endTime,
             @Parameter(description = "Page number of data to return. This parameter will enable paging.") @QueryParam("page") int pageNumber,
             @Parameter(description = "The length of each page.") @QueryParam("pagelength") int pageLength,
-            @Parameter(description = "Gets one value before and after the requested period.") @QueryParam("boundary") boolean boundary) {
-        return getItemHistoryDTO(serviceId, itemName, startTime, endTime, pageNumber, pageLength, boundary);
+            @Parameter(description = "Gets one value before and after the requested period.") @QueryParam("boundary") boolean boundary,
+            @Parameter(description = "Adds the current Item state into the requested period (the item state will be before or at the endtime)") @QueryParam("itemState") boolean itemState) {
+        return getItemHistoryDTO(serviceId, itemName, startTime, endTime, pageNumber, pageLength, boundary, itemState);
     }
 
     @DELETE
@@ -341,12 +344,13 @@ public class PersistenceResource implements RESTResource {
     }
 
     private Response getItemHistoryDTO(@Nullable String serviceId, String itemName, @Nullable String timeBegin,
-            @Nullable String timeEnd, int pageNumber, int pageLength, boolean boundary) {
+            @Nullable String timeEnd, int pageNumber, int pageLength, boolean boundary, boolean itemState) {
         // Benchmarking timer...
         long timerStart = System.currentTimeMillis();
 
         @Nullable
-        ItemHistoryDTO dto = createDTO(serviceId, itemName, timeBegin, timeEnd, pageNumber, pageLength, boundary);
+        ItemHistoryDTO dto = createDTO(serviceId, itemName, timeBegin, timeEnd, pageNumber, pageLength, boundary,
+                itemState);
 
         if (dto == null) {
             return JSONResponse.createErrorResponse(Status.BAD_REQUEST,
@@ -359,7 +363,8 @@ public class PersistenceResource implements RESTResource {
     }
 
     protected @Nullable ItemHistoryDTO createDTO(@Nullable String serviceId, String itemName,
-            @Nullable String timeBegin, @Nullable String timeEnd, int pageNumber, int pageLength, boolean boundary) {
+            @Nullable String timeBegin, @Nullable String timeEnd, int pageNumber, int pageLength, boolean boundary,
+            boolean itemState) {
         // If serviceId is null, then use the default service
         PersistenceService service;
         String effectiveServiceId = serviceId != null ? serviceId : persistenceServiceRegistry.getDefaultId();
@@ -465,6 +470,7 @@ public class PersistenceResource implements RESTResource {
             lastState = state;
         }
 
+        boolean addedBoundaryEnd = false;
         if (boundary) {
             // Get the value after the end time.
             FilterCriteria filterAfterEnd = new FilterCriteria();
@@ -476,6 +482,31 @@ public class PersistenceResource implements RESTResource {
             if (result.iterator().hasNext()) {
                 dto.addData(dateTimeEnd.toInstant().toEpochMilli(), result.iterator().next().getState());
                 quantity++;
+                addedBoundaryEnd = true;
+            }
+        }
+
+        // only add the item state if it was requested and the boundary end was not added
+        // if the boundary end was added, there is no need to add the item state moved to the end time
+        if (itemState && !addedBoundaryEnd) {
+            try {
+                long time = Instant.now().toEpochMilli();
+                // if the current time is after the requested end time, move the item state to the end time
+                if (time > dateTimeEnd.toInstant().toEpochMilli()) {
+                    time = dateTimeEnd.toInstant().toEpochMilli();
+                }
+                State state = itemRegistry.getItem(itemName).getState();
+                if (state instanceof UnDefType) {
+                    logger.debug("State of item '{}' is undefined, not adding it to the response.", itemName);
+                } else {
+                    logger.debug("Adding state of item '{}' to the response: {} - {}", itemName, time, state);
+                    dto.addData(time, state);
+                    quantity++;
+                    dto.sortData();
+                }
+            } catch (ItemNotFoundException e) {
+                logger.debug("Item '{}' not found, not adding the state to the response.", itemName);
+                return null;
             }
         }
 
