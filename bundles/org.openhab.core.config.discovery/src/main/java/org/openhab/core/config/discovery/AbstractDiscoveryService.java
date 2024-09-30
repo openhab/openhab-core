@@ -164,7 +164,7 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
 
     @Override
     public boolean isScanInputSupported() {
-        return scanInputLabel != null && scanInputDescription != null;
+        return getScanInputLabel() != null && getScanInputDescription() != null;
     }
 
     @Override
