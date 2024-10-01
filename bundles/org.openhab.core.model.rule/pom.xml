@@ -89,6 +89,9 @@
       <plugin>
         <groupId>org.eclipse.xtend</groupId>
         <artifactId>xtend-maven-plugin</artifactId>
+        <configuration>
+          <useXbaseGenerated>false</useXbaseGenerated>
+        </configuration>
       </plugin>
     </plugins>
     <sourceDirectory>src</sourceDirectory>
