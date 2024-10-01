@@ -358,8 +358,10 @@ public class ScriptProfileTest extends JavaTest {
 
     private TimeSeries createTimeSeries(State... states) {
         TimeSeries timeSeries = new TimeSeries(TimeSeries.Policy.ADD);
+        Instant instant = Instant.now();
         for (State state : states) {
-            timeSeries.add(Instant.now(), state);
+            timeSeries.add(instant, state);
+            instant = instant.plusMillis(100);
         }
         return timeSeries;
     }
