@@ -539,24 +539,24 @@ public class ColorUtil {
      * Duv describes the distance of a color point from the black body curve. It's useful for calculating
      * if a color is near to "white", at any color temperature.
      * 
-     * @param xy array of double with CIE 1931 x,y[,Y] in the range 0.0000 to 1.0000 <code>Y</code> value is optional.
+     * @param xy array of double with CIE 1931 x,y in the range 0.0000 to 1.0000
      * @return the calculated Duv metric
      * @throws IllegalArgumentException when input array has wrong size or exceeds allowed value range.
      */
-    public static double xyToDuv(double[] xyY) throws IllegalArgumentException {
-        if (xyY.length < 2 || xyY.length > 4) {
-            throw new IllegalArgumentException("xyToHsb() requires 2, 3 or 4 arguments");
+    public static double xyToDuv(double[] xy) throws IllegalArgumentException {
+        if (xy.length != 2) {
+            throw new IllegalArgumentException("xyToDuv() requires 2 arguments");
         }
 
-        for (int i = 0; i < xyY.length; i++) {
-            if (xyY[i] < 0 || xyY[i] > 1) {
+        for (int i = 0; i < xy.length; i++) {
+            if (xy[i] < 0 || xy[i] > 1) {
                 throw new IllegalArgumentException(
-                        String.format("xyToHsb() argument %d value '%f' out of range [0..1.0]", i, xyY[i]));
+                        String.format("xyToDuv() argument %d value '%f' out of range [0..1.0]", i, xy[i]));
             }
         }
 
-        var x = BigDecimal.valueOf(xyY[0]);
-        var y = BigDecimal.valueOf(xyY[1]);
+        var x = BigDecimal.valueOf(xy[0]);
+        var y = BigDecimal.valueOf(xy[1]);
         var u = BIG_DECIMAL_4.multiply(x).divide(
                 BIG_DECIMAL_2.multiply(x).negate().add(BIG_DECIMAL_12.multiply(y).add(BIG_DECIMAL_3)),
                 MathContext.DECIMAL128);
