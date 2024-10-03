@@ -13,6 +13,7 @@
 package org.openhab.core.io.rest.core.internal.persistence;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.junit.jupiter.api.Assertions.*;
@@ -165,6 +166,7 @@ public class PersistenceResourceTest {
 
         assertThat(Integer.parseInt(dto.datapoints), is(6));
         assertThat(dto.data, hasSize(6));
+        assertThat(dto.data.get(dto.data.size() - 1).state, is("0"));
     }
 
     @Test
@@ -176,6 +178,30 @@ public class PersistenceResourceTest {
 
         assertThat(Integer.parseInt(dto.datapoints), is(5));
         assertThat(dto.data, hasSize(5));
+    }
+
+    @Test
+    public void testGetPersistenceItemDataWithItemStateNull() throws ItemNotFoundException {
+        when(itemRegistryMock.getItem("testItem")).thenReturn(itemMock);
+        when(itemMock.getState()).thenReturn(UnDefType.NULL);
+
+        ItemHistoryDTO dto = pResource.createDTO(PERSISTENCE_SERVICE_ID, "testItem", null, null, 1, 10, false, true);
+
+        assertThat(Integer.parseInt(dto.datapoints), is(5));
+        assertThat(dto.data, hasSize(5));
+    }
+
+    @Test
+    public void testGetPersistenceItemDataWithBoundaryAndItemStateButNoItemStateRequired()
+            throws ItemNotFoundException {
+        when(itemRegistryMock.getItem("testItem")).thenReturn(itemMock);
+        when(itemMock.getState()).thenReturn(DecimalType.ZERO);
+
+        ItemHistoryDTO dto = pResource.createDTO(PERSISTENCE_SERVICE_ID, "testItem", null, null, 1, 10, true, true);
+
+        assertThat(Integer.parseInt(dto.datapoints), is(7));
+        assertThat(dto.data, hasSize(7));
+        assertThat(dto.data.get(dto.data.size() - 1).state, not("0"));
     }
 
     @Test
