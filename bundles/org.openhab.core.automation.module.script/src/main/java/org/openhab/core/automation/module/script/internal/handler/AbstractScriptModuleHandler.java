@@ -218,7 +218,8 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
                 Object result;
                 try {
                     result = compiledScript.get().eval(engine.getContext());
-                } finally {
+                } finally { // Make sure that Lock is unlocked regardless of an exception being thrown or not to avoid
+                            // deadlocks
                     if (engine instanceof Lock lock) {
                         lock.unlock();
                     }
