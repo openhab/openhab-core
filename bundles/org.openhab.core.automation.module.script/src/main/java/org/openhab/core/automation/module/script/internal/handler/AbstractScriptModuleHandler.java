@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.locks.Lock;
 
 import javax.script.Compilable;
 import javax.script.CompiledScript;
@@ -210,8 +211,19 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
     protected @Nullable Object eval(ScriptEngine engine, String script) {
         try {
             if (compiledScript.isPresent()) {
+                if (engine instanceof Lock lock) {
+                    lock.lock();
+                }
                 logger.debug("Executing pre-compiled script of rule with UID '{}'", ruleUID);
-                return compiledScript.get().eval(engine.getContext());
+                Object result;
+                try {
+                    result = compiledScript.get().eval(engine.getContext());
+                } finally {
+                    if (engine instanceof Lock lock) {
+                        lock.unlock();
+                    }
+                }
+                return result;
             }
             logger.debug("Executing script of rule with UID '{}'", ruleUID);
             return engine.eval(script);
