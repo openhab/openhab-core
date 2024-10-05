@@ -18,8 +18,8 @@
 
   <properties>
     <californium.version>2.7.4</californium.version>
-    <jetty.version>9.4.54.v20240208</jetty.version>
-    <pax.web.version>8.0.27</pax.web.version>
+    <jetty.version>9.4.57.v20241219</jetty.version>
+    <pax.web.version>8.0.30</pax.web.version>
     <swagger.version>2.2.15</swagger.version>
   </properties>
 
@@ -84,7 +84,7 @@
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
-      <version>3.14.0</version>
+      <version>3.17.0</version>
       <scope>compile</scope>
     </dependency>
 
@@ -418,13 +418,13 @@
     <dependency>
       <groupId>net.java.dev.jna</groupId>
       <artifactId>jna</artifactId>
-      <version>5.14.0</version>
+      <version>5.16.0</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>net.java.dev.jna</groupId>
       <artifactId>jna-platform</artifactId>
-      <version>5.14.0</version>
+      <version>5.16.0</version>
       <scope>compile</scope>
     </dependency>
   </dependencies>
