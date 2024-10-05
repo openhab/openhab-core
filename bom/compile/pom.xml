@@ -84,7 +84,7 @@
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
-      <version>3.14.0</version>
+      <version>3.17.0</version>
       <scope>compile</scope>
     </dependency>
 
@@ -418,13 +418,13 @@
     <dependency>
       <groupId>net.java.dev.jna</groupId>
       <artifactId>jna</artifactId>
-      <version>5.14.0</version>
+      <version>5.15.0</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>net.java.dev.jna</groupId>
       <artifactId>jna-platform</artifactId>
-      <version>5.14.0</version>
+      <version>5.15.0</version>
       <scope>compile</scope>
     </dependency>
 
