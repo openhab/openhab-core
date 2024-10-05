@@ -365,7 +365,7 @@
     <dependency>
       <groupId>de.focus-shift</groupId>
       <artifactId>jollyday-jackson</artifactId>
-      <version>0.30.0</version>
+      <version>0.32.0</version>
       <scope>compile</scope>
     </dependency>
 
