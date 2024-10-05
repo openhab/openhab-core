@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 
 import javax.script.Compilable;
@@ -212,7 +213,11 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
         try {
             if (compiledScript.isPresent()) {
                 if (engine instanceof Lock lock) {
-                    lock.lock();
+                    if (!lock.tryLock(1, TimeUnit.MINUTES)) {
+                        logger.error("Failed to acquire lock within one minute for script module of rule with UID '{}'",
+                                ruleUID);
+                        return null;
+                    }
                 }
                 logger.debug("Executing pre-compiled script of rule with UID '{}'", ruleUID);
                 Object result;
@@ -232,6 +237,8 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
             logger.error("Script execution of rule with UID '{}' failed: {}", ruleUID, e.getMessage(),
                     logger.isDebugEnabled() ? e : null);
             return null;
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 }
