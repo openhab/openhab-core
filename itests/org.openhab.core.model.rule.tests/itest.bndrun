@@ -62,7 +62,6 @@ Fragment-Host: org.openhab.core.model.rule.runtime
 	com.fasterxml.jackson.core.jackson-core;version='[2.17.1,2.17.2)',\
 	com.fasterxml.jackson.core.jackson-databind;version='[2.17.1,2.17.2)',\
 	com.fasterxml.jackson.dataformat.jackson-dataformat-xml;version='[2.17.1,2.17.2)',\
-	com.google.guava;version='[33.3.0,33.4.1)',\
 	com.google.guava.failureaccess;version='[1.0.2,1.0.3)',\
 	com.sun.jna;version='[5.14.0,5.14.1)',\
 	io.github.classgraph.classgraph;version='[4.8.174,4.8.175)',\
@@ -129,5 +128,7 @@ Fragment-Host: org.openhab.core.model.rule.runtime
 	org.openhab.core.transform;version='[4.3.0,4.3.1)',\
 	org.openhab.core.voice;version='[4.3.0,4.3.1)',\
 	stax2-api;version='[4.2.2,4.2.3)',\
-	de.focus_shift.jollyday-core;version='[0.30.0,0.30.1)',\
-	de.focus_shift.jollyday-jackson;version='[0.30.0,0.30.1)'
+	com.google.guava;version='[33.3.0,33.3.1)',\
+	de.focus_shift.jollyday-core;version='[0.32.0,0.32.1)',\
+	de.focus_shift.jollyday-jackson;version='[0.32.0,0.32.1)',\
+	org.openhab.core.model.persistence.runtime;version='[4.3.0,4.3.1)'
