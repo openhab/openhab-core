@@ -610,7 +610,7 @@ public class NetUtil implements NetworkAddressService {
                 .filter(a -> a.getAddress() instanceof Inet4Address).collect(Collectors.toList());
 
         for (CidrAddress i : ipV4InterfaceAddresses) {
-            addressesToScan.addAll(getAddressesRangeByCidrAddress(i, 24));
+            addressesToScan.addAll(getAddressesRangeByCidrAddress(i, i.getPrefix()));
         }
         return addressesToScan;
     }
