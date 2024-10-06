@@ -56,7 +56,7 @@ import org.slf4j.LoggerFactory;
  * @author Stefan Triller - Converted to OSGi service with primary ipv4 conf
  * @author Gary Tse - Network address change listener
  * @author Tim Roberts - Added primary address change to network address change listener
- * @author Leo Siepel - Added methods to imrpove support for network scanning
+ * @author Leo Siepel - Added methods to improve support for network scanning
  */
 @Component(configurationPid = "org.openhab.network", property = { "service.pid=org.openhab.network",
         "service.config.description.uri=system:network", "service.config.label=Network Settings",
