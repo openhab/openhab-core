@@ -12,7 +12,9 @@
  */
 package org.openhab.core.io.rest.core.internal.link;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -20,12 +22,14 @@ import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -35,6 +39,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.auth.Role;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.io.rest.JSONResponse;
+import org.openhab.core.io.rest.LocaleService;
 import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
 import org.openhab.core.io.rest.Stream2JSONInputStream;
@@ -58,9 +63,10 @@ import org.openhab.core.thing.link.ManagedItemChannelLinkProvider;
 import org.openhab.core.thing.link.dto.ItemChannelLinkDTO;
 import org.openhab.core.thing.profiles.ProfileType;
 import org.openhab.core.thing.profiles.ProfileTypeRegistry;
-import org.openhab.core.thing.profiles.TriggerProfileType;
 import org.openhab.core.thing.type.ChannelKind;
+import org.openhab.core.thing.type.ChannelType;
 import org.openhab.core.thing.type.ChannelTypeRegistry;
+import org.openhab.core.thing.type.ChannelTypeUID;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -69,6 +75,8 @@ import org.osgi.service.jaxrs.whiteboard.propertytypes.JSONRequired;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsName;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -103,6 +111,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @NonNullByDefault
 public class ItemChannelLinkResource implements RESTResource {
 
+    private final Logger logger = LoggerFactory.getLogger(ItemChannelLinkResource.class);
+
     /** The URI path to this resource */
     public static final String PATH_LINKS = "links";
 
@@ -111,18 +121,23 @@ public class ItemChannelLinkResource implements RESTResource {
     private final ThingRegistry thingRegistry;
     private final ItemRegistry itemRegistry;
     private final ProfileTypeRegistry profileTypeRegistry;
+    private final ChannelTypeRegistry channelTypeRegistry;
+    private final LocaleService localeService;
 
     @Activate
     public ItemChannelLinkResource(final @Reference ItemRegistry itemRegistry,
             final @Reference ThingRegistry thingRegistry, final @Reference ChannelTypeRegistry channelTypeRegistry,
             final @Reference ProfileTypeRegistry profileTypeRegistry,
             final @Reference ItemChannelLinkRegistry itemChannelLinkRegistry,
-            final @Reference ManagedItemChannelLinkProvider managedItemChannelLinkProvider) {
+            final @Reference ManagedItemChannelLinkProvider managedItemChannelLinkProvider,
+            final @Reference LocaleService localeService) {
         this.itemChannelLinkRegistry = itemChannelLinkRegistry;
         this.managedItemChannelLinkProvider = managedItemChannelLinkProvider;
         this.thingRegistry = thingRegistry;
         this.itemRegistry = itemRegistry;
         this.profileTypeRegistry = profileTypeRegistry;
+        this.channelTypeRegistry = channelTypeRegistry;
+        this.localeService = localeService;
     }
 
     @GET
@@ -194,9 +209,14 @@ public class ItemChannelLinkResource implements RESTResource {
                     @ApiResponse(responseCode = "200", description = "OK"),
                     @ApiResponse(responseCode = "400", description = "Content does not match the path"),
                     @ApiResponse(responseCode = "405", description = "Link is not editable") })
-    public Response link(@PathParam("itemName") @Parameter(description = "itemName") String itemName,
+    public Response link(
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
+            @PathParam("itemName") @Parameter(description = "itemName") String itemName,
             @PathParam("channelUID") @Parameter(description = "channelUID") String channelUid,
             @Parameter(description = "link data") @Nullable ItemChannelLinkDTO bean) {
+
+        Locale locale = localeService.getLocale(language);
+
         Item item;
         try {
             item = itemRegistry.getItem(itemName);
@@ -230,17 +250,44 @@ public class ItemChannelLinkResource implements RESTResource {
             }
             ProfileType profileType = profileTypeRegistry.getProfileTypes().stream()
                     .filter(p -> profileUid.equals(p.getUID().getAsString())).findFirst().orElse(null);
-            if (!(profileType instanceof TriggerProfileType)) {
+
+            Collection<String> supportedItemTypesOnProfileType = profileType.getSupportedItemTypes();
+            if (!supportedItemTypesOnProfileType.isEmpty() && !supportedItemTypesOnProfileType.contains(itemType)) {
+                // item type not matching
+                return Response.status(Status.BAD_REQUEST).build();
+            }
+
+            ChannelKind supportedChannelKind = profileType.getSupportedChannelKind();
+            if (supportedChannelKind != null && supportedChannelKind != channelKind) {
                 // only trigger profiles are allowed
                 return Response.status(Status.BAD_REQUEST).build();
             }
-            if (!(profileType.getSupportedItemTypes().isEmpty()
-                    || profileType.getSupportedItemTypes().contains(itemType))
-                    || !(((TriggerProfileType) profileType).getSupportedChannelTypeUIDs().isEmpty()
-                            || ((TriggerProfileType) profileType).getSupportedChannelTypeUIDs()
-                                    .contains(channel.getChannelTypeUID()))) {
-                // item or channel type not matching
+
+            ChannelTypeUID channelTypeUID = channel.getChannelTypeUID();
+
+            Collection<ChannelTypeUID> supportedChannelTypeUIDsOnProfileType = profileType
+                    .getSupportedChannelTypeUIDs();
+            if (!supportedChannelTypeUIDsOnProfileType.isEmpty()
+                    && !supportedChannelTypeUIDsOnProfileType.contains(channelTypeUID)) {
+                // channel type not matching
                 return Response.status(Status.BAD_REQUEST).build();
+            }
+
+            Collection<String> supportedItemTypesOfChannelOnProfileType = profileType.getSupportedItemTypesOfChannel();
+            if (!supportedItemTypesOfChannelOnProfileType.isEmpty()) {
+                ChannelType channelType = channelTypeRegistry.getChannelType(channelTypeUID, locale);
+                if (channelType == null) {
+                    logger.error("Requested to filter against an unknown channel type: {} is not known to the registry",
+                            channelTypeUID.toString());
+                    return Response.status(Status.BAD_REQUEST).build();
+                }
+
+                String channelTypeItemType = channelType.getItemType();
+                if (channelTypeItemType == null || !supportedItemTypesOfChannelOnProfileType
+                        .contains(ItemUtil.getMainItemType(channelTypeItemType))) {
+                    // channel item type not allowed
+                    return Response.status(Status.BAD_REQUEST).build();
+                }
             }
         }
 
