@@ -1225,11 +1225,20 @@ public class ColorUtil {
         return (437 * Math.pow(n, 3)) + (3601 * Math.pow(n, 2)) + (6861 * n) + 5517;
     }
 
+    /**
+     * Calculates a polynomial regression.
+     *
+     * This calculates the equation K[4]*x^0 + K[3]*x^1 + K[2]*x^2 + K[1]*x^3 + K[0]*x^4
+     *
+     * @param x The independent variable distributed through each term of the polynomial
+     * @param coefficients The coefficients of the polynomial. Note that the terms are in
+     *            order from largest exponent to smallest exponent, which is the reverse order
+     *            of the usual way of writing it in academic papers
+     * @return the result of substituting x into the regression polynomial
+     */
     private static BigDecimal polynomialFit(BigDecimal x, BigDecimal[] coefficients) {
         var result = BigDecimal.ZERO;
         var xAccumulator = BigDecimal.ONE;
-        // forms K[4]*x^0 + K[3]*x^1 + K[2]*x^2 + K[1]*x^3 + K[0]*x^4
-        // (or reverse the order of terms for the usual way of writing it in academic papers)
         for (int i = coefficients.length - 1; i >= 0; i--) {
             result = result.add(coefficients[i].multiply(xAccumulator));
             xAccumulator = xAccumulator.multiply(x);
