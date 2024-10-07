@@ -1651,9 +1651,9 @@ public class ColorUtil {
      * 
      * @param xy an array with the CIE colour XY values to be converted
      * @return the colour temperature in K
-     * @throws IndexOutOfBoundsException if the wrong number of arguments is provided
+     * @throws IllegalArgumentException if the wrong number of arguments is provided
      */
-    public static double xyToKelvin(double[] xy) {
+    public static double xyToKelvin(double[] xy) throws IllegalArgumentException {
         if (xy.length != 2) {
             throw new IllegalArgumentException("xyToKelvin() requires 2 arguments");
         }
