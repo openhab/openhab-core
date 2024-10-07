@@ -46,19 +46,12 @@ public class ColorUtil {
     private static final BigDecimal BIG_DECIMAL_120 = BigDecimal.valueOf(120);
     private static final BigDecimal BIG_DECIMAL_100 = BigDecimal.valueOf(100);
     private static final BigDecimal BIG_DECIMAL_60 = BigDecimal.valueOf(60);
-    private static final BigDecimal BIG_DECIMAL_50 = BigDecimal.valueOf(50);
-    private static final BigDecimal BIG_DECIMAL_12 = BigDecimal.valueOf(12);
-    private static final BigDecimal BIG_DECIMAL_6 = BigDecimal.valueOf(6);
     private static final BigDecimal BIG_DECIMAL_5 = BigDecimal.valueOf(5);
-    private static final BigDecimal BIG_DECIMAL_4 = BigDecimal.valueOf(4);
     private static final BigDecimal BIG_DECIMAL_3 = BigDecimal.valueOf(3);
     private static final BigDecimal BIG_DECIMAL_2 = BigDecimal.valueOf(2);
     private static final BigDecimal BIG_DECIMAL_2_POINT_55 = new BigDecimal("2.55");
-    private static final BigDecimal BIG_DECIMAL_0_POINT_292 = new BigDecimal("0.292");
-    private static final BigDecimal BIG_DECIMAL_0_POINT_24 = new BigDecimal("0.24");
-    private static final BigDecimal[] CORM_COEFFICIENTS = { new BigDecimal("-0.00616793"), new BigDecimal("0.0893944"),
-            new BigDecimal("-0.5179722"), new BigDecimal("1.5317403"), new BigDecimal("-2.4243787"),
-            new BigDecimal("1.925865"), new BigDecimal("-0.471106") };
+    private static final double[] CORM_COEFFICIENTS = { -0.00616793, 0.0893944, -0.5179722, 1.5317403, -2.4243787,
+            1.925865, -0.471106 };
 
     public static final Gamut DEFAULT_GAMUT = new Gamut(new double[] { 0.9961, 0.0001 }, new double[] { 0, 0.9961 },
             new double[] { 0, 0.0001 });
@@ -555,20 +548,14 @@ public class ColorUtil {
             }
         }
 
-        var x = BigDecimal.valueOf(xy[0]);
-        var y = BigDecimal.valueOf(xy[1]);
-        var u = BIG_DECIMAL_4.multiply(x).divide(
-                BIG_DECIMAL_2.multiply(x).negate().add(BIG_DECIMAL_12.multiply(y).add(BIG_DECIMAL_3)),
-                MathContext.DECIMAL128);
-        var v = BIG_DECIMAL_6.multiply(y).divide(
-                BIG_DECIMAL_2.multiply(x).negate().add(BIG_DECIMAL_12.multiply(y).add(BIG_DECIMAL_3)),
-                MathContext.DECIMAL128);
-        var Lfp = u.subtract(BIG_DECIMAL_0_POINT_292).pow(2).add(v.subtract(BIG_DECIMAL_0_POINT_24).pow(2))
-                .sqrt(MathContext.DECIMAL128);
-        var a = new BigDecimal(
-                Math.acos(u.subtract(BIG_DECIMAL_0_POINT_292).divide(Lfp, MathContext.DECIMAL128).doubleValue()));
-        BigDecimal Lbb = polynomialFit(a, CORM_COEFFICIENTS);
-        return Lfp.subtract(Lbb).doubleValue();
+        double x = xy[0];
+        double y = xy[1];
+        double u = 4.0 * x / (-2.0 * x + 12 * y + 3.0);
+        double v = 6.0 * y / (-2.0 * x + 12 * y + 3.0);
+        double Lfp = Math.sqrt(Math.pow(u - 0.292, 2) + Math.pow(v - 0.24, 2));
+        double a = Math.acos((u - 0.292) / Lfp);
+        double Lbb = polynomialFit(a, CORM_COEFFICIENTS);
+        return Lfp - Lbb;
     }
 
     /**
@@ -1236,12 +1223,12 @@ public class ColorUtil {
      *            of the usual way of writing it in academic papers
      * @return the result of substituting x into the regression polynomial
      */
-    private static BigDecimal polynomialFit(BigDecimal x, BigDecimal[] coefficients) {
-        var result = BigDecimal.ZERO;
-        var xAccumulator = BigDecimal.ONE;
+    private static double polynomialFit(double x, double[] coefficients) {
+        double result = 0.0;
+        double xAccumulator = 1.0;
         for (int i = coefficients.length - 1; i >= 0; i--) {
-            result = result.add(coefficients[i].multiply(xAccumulator));
-            xAccumulator = xAccumulator.multiply(x);
+            result += coefficients[i] * xAccumulator;
+            xAccumulator *= x;
         }
         return result;
     }
