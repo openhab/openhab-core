@@ -388,7 +388,7 @@ public class NetUtil implements NetworkAddressService {
     /**
      * Get the network address a specific ip address is in
      *
-     * @param ipAddressString ipv4 address of the device (i.e. 192.168.5.1)
+     * @param ipAddressString IPv4 address of the device (i.e. 192.168.5.1)
      * @param netMask netmask in bits (i.e. 24)
      * @return network a device is in (i.e. 192.168.5.0)
      * @throws IllegalArgumentException if parameters are wrong
@@ -424,7 +424,7 @@ public class NetUtil implements NetworkAddressService {
     /**
      * Get the network broadcast address of the subnet a specific ip address is in
      *
-     * @param ipAddressString ipv4 address of the device (i.e. 192.168.5.1)
+     * @param ipAddressString IPv4 address of the device (i.e. 192.168.5.1)
      * @param prefix network prefix in bits (i.e. 24)
      * @return network broadcast address of the network the device is in (i.e. 192.168.5.255)
      * @throws IllegalArgumentException if parameters are wrong
@@ -599,7 +599,7 @@ public class NetUtil implements NetworkAddressService {
     }
 
     /**
-     * For all network interfaces (except loopback) all Ipv4 addresses are returned.
+     * For all network interfaces (except loopback) all IPv4 addresses are returned.
      * This list can for example, be used to scan the network for available devices.
      * 
      * @return A full list of IP {@link InetAddress} (except network and broadcast)
@@ -616,15 +616,17 @@ public class NetUtil implements NetworkAddressService {
     }
 
     /**
-     * For the given {@link CidrAddress} all Ipv4 addresses are returned.
-     * This list can for example, be used to scan the network for available devices.
+     * For the given {@link CidrAddress} all IPv4 addresses are returned.
+     * This list can, for example, be used to scan the network for available devices.
      * 
      * @param iFaceAddress The {@link CidrAddress} of the network interface
-     * @param maxPrefixLength Control the prefix length of the network (e.g. 24 for class C)
+     * @param maxAllowedPrefixLength Control the maximum allowed prefix length of the network (e.g. 24 for class C).
+     *            iFaceAddress's with a larger prefix are ignored and return an empty result.
      * @return A full list of IP {@link InetAddress} (except network and broadcast)
      */
-    public static List<InetAddress> getAddressesRangeByCidrAddress(CidrAddress iFaceAddress, int maxPrefixLength) {
-        if (!(iFaceAddress.getAddress() instanceof Inet4Address) || iFaceAddress.getPrefix() < maxPrefixLength) {
+    public static List<InetAddress> getAddressesRangeByCidrAddress(CidrAddress iFaceAddress,
+            int maxAllowedPrefixLength) {
+        if (!(iFaceAddress.getAddress() instanceof Inet4Address) || iFaceAddress.getPrefix() < maxAllowedPrefixLength) {
             return List.of();
         }
 
