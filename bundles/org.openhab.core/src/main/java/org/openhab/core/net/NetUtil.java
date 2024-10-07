@@ -662,6 +662,7 @@ public class NetUtil implements NetworkAddressService {
      * 
      * @param address IPv4 address in byte array form (i.e. 127.0.0.1 = 01111111 00000000 00000000 00000001)
      * @param maskLength Network mask length (i.e. the number after the forward-slash, '/', in CIDR notation)
+     * @return A list of all possible IP addresses in byte array form
      */
     private static List<byte[]> getAddressesInSubnet(byte[] address, int maskLength) {
         byte[] lowestAddress = address.clone();
