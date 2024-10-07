@@ -19,6 +19,7 @@ import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -630,8 +631,7 @@ public class NetUtil implements NetworkAddressService {
             return List.of();
         }
 
-        List<byte[]> addresses = getAddressesInSubnet(iFaceAddress.getAddress().getAddress(), iFaceAddress.getPrefix(),
-                true);
+        List<byte[]> addresses = getAddressesInSubnet(iFaceAddress.getAddress().getAddress(), iFaceAddress.getPrefix());
         if (addresses.size() > 2) {
             addresses.remove(0); // remove network address
             addresses.remove(addresses.size() - 1); // remove broadcast address
@@ -658,57 +658,31 @@ public class NetUtil implements NetworkAddressService {
     }
 
     /**
-     * Recursively calculate each IP address within a subnet
+     * Calculate each IP address within a subnet
      * 
-     * @param address IP address in byte array form (i.e. 127.0.0.1 = 01111111 00000000 00000000 00000001)
+     * @param address IPv4 address in byte array form (i.e. 127.0.0.1 = 01111111 00000000 00000000 00000001)
      * @param maskLength Network mask length (i.e. the number after the forward-slash, '/', in CIDR notation)
-     * @param scrub Whether or not to scrub the unmasked bits of the address
-     * @return All possible IP addresses
-     * 
-     * @author: https://gist.github.com/ssttevee/b0e2b431f4b23d289537
      */
-    private static List<byte[]> getAddressesInSubnet(byte[] address, int maskLength, boolean scrub) {
-        if (scrub) {
-            scrubAddress(address, maskLength);
+    private static List<byte[]> getAddressesInSubnet(byte[] address, int maskLength) {
+        byte[] lowestAddress = address.clone();
+        for (int bit = maskLength; bit < 32; bit++) {
+            lowestAddress[bit / 8] &= ~(1 << (bit % 8));
         }
+        int lowestAddressAsLong = ByteBuffer.wrap(lowestAddress).getInt(); // big-endian by default
 
-        if (maskLength >= address.length * 8) {
-            return Collections.singletonList(address);
+        byte[] highestAddress = address.clone();
+        for (int bit = maskLength; bit < 32; bit++) {
+            highestAddress[bit / 8] |= ~(1 << (bit % 8));
         }
+        int highestAddressAsLong = ByteBuffer.wrap(highestAddress).getInt();
 
         List<byte[]> addresses = new ArrayList<byte[]>();
-
-        int set = maskLength / 8;
-        int pos = maskLength % 8;
-
-        byte[] addressLeft = address.clone();
-        addressLeft[set] |= 1 << pos;
-        addresses.addAll(getAddressesInSubnet(addressLeft, maskLength + 1, false));
-
-        byte[] addressRight = address.clone();
-        addressRight[set] &= ~(1 << pos);
-        addresses.addAll(getAddressesInSubnet(addressRight, maskLength + 1, false));
-
-        return addresses;
-    }
-
-    /**
-     * Set the unmasked bits of the IP address to 0
-     * 
-     * @param address IP address in byte array form (i.e. 127.0.0.1 = 01111111 00000000 00000000 00000001)
-     * @param maskLength Network mask length (i.e. the number after the forward-slash, '/', in CIDR notation)
-     * @return The scrubbed IP address
-     * 
-     * @author: https://gist.github.com/ssttevee/b0e2b431f4b23d289537
-     */
-    private static byte[] scrubAddress(byte[] address, int maskLength) {
-        for (int i = 0; i < address.length * 8; i++) {
-            if (i < maskLength)
-                continue;
-
-            address[i / 8] &= ~(1 << (i % 8));
+        for (int i = lowestAddressAsLong; i <= highestAddressAsLong; i++) {
+            ByteBuffer dbuf = ByteBuffer.allocate(4);
+            dbuf.putInt(i);
+            addresses.add(dbuf.array());
         }
 
-        return address;
+        return addresses;
     }
 }

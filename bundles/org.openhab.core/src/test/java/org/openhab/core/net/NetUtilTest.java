@@ -124,7 +124,7 @@ public class NetUtilTest {
 
     @Test
     public void checkValidRangeCount() throws UnknownHostException {
-        InetAddress testableAddress = InetAddress.getByName("192.168.1.0");
+        InetAddress testableAddress = InetAddress.getByName("192.168.1.4");
         List<InetAddress> addresses = NetUtil
                 .getAddressesRangeByCidrAddress(new CidrAddress(testableAddress, (short) 24), 24);
 
@@ -135,7 +135,7 @@ public class NetUtilTest {
 
     @Test
     public void checkValidLargeRangeCount() throws UnknownHostException {
-        InetAddress testableAddress = InetAddress.getByName("127.0.0.0");
+        InetAddress testableAddress = InetAddress.getByName("127.0.1.12");
         List<InetAddress> addresses = NetUtil
                 .getAddressesRangeByCidrAddress(new CidrAddress(testableAddress, (short) 16), 16);
 
