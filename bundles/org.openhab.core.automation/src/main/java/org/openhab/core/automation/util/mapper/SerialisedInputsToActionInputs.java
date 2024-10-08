@@ -81,6 +81,7 @@ public class SerialisedInputsToActionInputs {
      */
     public static @Nullable Object map(ActionType actionType, Input input, @Nullable Object argument,
             @Nullable UnitProvider unitProvider) {
+        boolean failed = false;
         if (argument == null) {
             return null;
         }
@@ -88,15 +89,14 @@ public class SerialisedInputsToActionInputs {
         if (argument instanceof Double valueDouble) {
             // When an integer value is provided as input value, the value type in the Map is Double.
             // We have to convert Double type into the target type.
-            if (matcher.matches() && unitProvider != null) {
+            if (matcher.matches()) {
                 try {
-                    return new QuantityType<>(valueDouble, ActionInputsToConfigDescriptionParameters
-                            .getDefaultUnit(matcher.group("dimension"), unitProvider));
+                    if (unitProvider != null) {
+                        return new QuantityType<>(valueDouble, ActionInputsToConfigDescriptionParameters
+                                .getDefaultUnit(matcher.group("dimension"), unitProvider));
+                    }
                 } catch (IllegalArgumentException e) {
-                    LOGGER.warn(
-                            "Action {} input parameter '{}': converting value {} into type {} failed! Input parameter is ignored.",
-                            actionType.getUID(), input.getName(), argument, input.getType());
-                    return null;
+                    failed = true;
                 }
             } else {
                 try {
@@ -110,29 +110,25 @@ public class SerialisedInputsToActionInputs {
                         default -> argument;
                     };
                 } catch (NumberFormatException e) {
-                    LOGGER.warn(
-                            "Action {} input parameter '{}': converting value {} into type {} failed! Input parameter is ignored.",
-                            actionType.getUID(), input.getName(), argument, input.getType());
-                    return null;
+                    failed = true;
                 }
             }
         } else if (argument instanceof String valueString) {
             // String value is accepted to instantiate few target types
-            if (matcher.matches() && unitProvider != null) {
+            if (matcher.matches()) {
                 try {
                     // The string can contain either a simple decimal value without unit or a decimal value with unit
                     try {
                         BigDecimal bigDecimal = new BigDecimal(valueString);
-                        return new QuantityType<>(bigDecimal, ActionInputsToConfigDescriptionParameters
-                                .getDefaultUnit(matcher.group("dimension"), unitProvider));
+                        if (unitProvider != null) {
+                            return new QuantityType<>(bigDecimal, ActionInputsToConfigDescriptionParameters
+                                    .getDefaultUnit(matcher.group("dimension"), unitProvider));
+                        }
                     } catch (NumberFormatException e) {
                         return new QuantityType<>(valueString);
                     }
                 } catch (IllegalArgumentException e) {
-                    LOGGER.warn(
-                            "Action {} input parameter '{}': converting value '{}' into type {} failed! Input parameter is ignored.",
-                            actionType.getUID(), input.getName(), argument, input.getType());
-                    return null;
+                    failed = true;
                 }
             } else {
                 try {
@@ -169,13 +165,15 @@ public class SerialisedInputsToActionInputs {
                         default -> argument;
                     };
                 } catch (NumberFormatException | DateTimeParseException | ParseException e) {
-                    LOGGER.warn(
-                            "Action {} input parameter '{}': converting value '{}' into type {} failed! Input parameter is ignored.",
-                            actionType.getUID(), input.getName(), argument, input.getType());
-                    return null;
+                    failed = true;
                 }
             }
         }
-        return argument;
+        if (failed) {
+            LOGGER.warn(
+                    "Action {} input parameter '{}': converting value '{}' into type {} failed! Input parameter is ignored.",
+                    actionType.getUID(), input.getName(), argument, input.getType());
+        }
+        return failed ? null : argument;
     }
 }
