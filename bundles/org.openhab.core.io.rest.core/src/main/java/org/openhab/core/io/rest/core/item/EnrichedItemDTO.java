@@ -32,13 +32,17 @@ public class EnrichedItemDTO extends ItemDTO {
     public String state;
     public String transformedState;
     public StateDescription stateDescription;
-    public String unitSymbol;
     public CommandDescription commandDescription;
+    public String previousState;
+    public Long lastUpdate;
+    public Long lastChange;
+    public String unitSymbol;
     public Map<String, Object> metadata;
     public Boolean editable;
 
-    public EnrichedItemDTO(ItemDTO itemDTO, String link, String state, String transformedState,
-            StateDescription stateDescription, CommandDescription commandDescription, String unitSymbol) {
+    public EnrichedItemDTO(ItemDTO itemDTO, String link, String state, String previousState, Long lastUpdate,
+            Long lastChange, String transformedState, StateDescription stateDescription,
+            CommandDescription commandDescription, String unitSymbol) {
         this.type = itemDTO.type;
         this.name = itemDTO.name;
         this.label = itemDTO.label;
@@ -50,6 +54,9 @@ public class EnrichedItemDTO extends ItemDTO {
         this.transformedState = transformedState;
         this.stateDescription = stateDescription;
         this.commandDescription = commandDescription;
+        this.previousState = previousState;
+        this.lastUpdate = lastUpdate;
+        this.lastChange = lastChange;
         this.unitSymbol = unitSymbol;
     }
 }

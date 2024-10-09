@@ -17,6 +17,7 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -91,6 +92,12 @@ public class EnrichedItemDTOMapper {
         }
         StateDescription stateDescription = considerTransformation(item.getStateDescription(locale));
 
+        String previousState = Optional.ofNullable(item.getPreviousState()).map(State::toFullString).orElse(null);
+        Long lastUpdate = Optional.ofNullable(item.getLastUpdate()).map(zdt -> zdt.toInstant().toEpochMilli())
+                .orElse(null);
+        Long lastChange = Optional.ofNullable(item.getLastChange()).map(zdt -> zdt.toInstant().toEpochMilli())
+                .orElse(null);
+
         final String link;
         if (uriBuilder != null) {
             link = uriBuilder.build(itemDTO.name).toASCIIString();
@@ -124,11 +131,11 @@ public class EnrichedItemDTOMapper {
             } else {
                 memberDTOs = new EnrichedItemDTO[0];
             }
-            enrichedItemDTO = new EnrichedGroupItemDTO(itemDTO, memberDTOs, link, state, transformedState,
-                    stateDescription, unitSymbol);
+            enrichedItemDTO = new EnrichedGroupItemDTO(itemDTO, memberDTOs, link, state, previousState, lastUpdate,
+                    lastChange, transformedState, stateDescription, unitSymbol);
         } else {
-            enrichedItemDTO = new EnrichedItemDTO(itemDTO, link, state, transformedState, stateDescription,
-                    item.getCommandDescription(locale), unitSymbol);
+            enrichedItemDTO = new EnrichedItemDTO(itemDTO, link, state, previousState, lastUpdate, lastChange,
+                    transformedState, stateDescription, item.getCommandDescription(locale), unitSymbol);
         }
 
         return enrichedItemDTO;
