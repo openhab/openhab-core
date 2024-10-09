@@ -13,6 +13,7 @@
 package org.openhab.core.io.rest.core.internal.persistence;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.junit.jupiter.api.Assertions.*;
@@ -40,6 +41,7 @@ import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.library.items.NumberItem;
+import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.persistence.HistoricItem;
 import org.openhab.core.persistence.ModifiablePersistenceService;
@@ -50,6 +52,7 @@ import org.openhab.core.persistence.internal.PersistenceManagerImpl;
 import org.openhab.core.persistence.registry.ManagedPersistenceServiceConfigurationProvider;
 import org.openhab.core.persistence.registry.PersistenceServiceConfigurationRegistry;
 import org.openhab.core.types.State;
+import org.openhab.core.types.UnDefType;
 
 /**
  * Tests for PersistenceItem Restresource
@@ -74,6 +77,7 @@ public class PersistenceResourceTest {
     private @Mock @NonNullByDefault({}) PersistenceServiceConfigurationRegistry persistenceServiceConfigurationRegistryMock;
     private @Mock @NonNullByDefault({}) ManagedPersistenceServiceConfigurationProvider managedPersistenceServiceConfigurationProviderMock;
     private @Mock @NonNullByDefault({}) TimeZoneProvider timeZoneProviderMock;
+    private @Mock @NonNullByDefault({}) Item itemMock;
 
     @BeforeEach
     public void beforeEach() {
@@ -116,7 +120,7 @@ public class PersistenceResourceTest {
 
     @Test
     public void testGetPersistenceItemData() {
-        ItemHistoryDTO dto = pResource.createDTO(PERSISTENCE_SERVICE_ID, "testItem", null, null, 1, 10, false);
+        ItemHistoryDTO dto = pResource.createDTO(PERSISTENCE_SERVICE_ID, "testItem", null, null, 1, 10, false, false);
 
         assertThat(Integer.parseInt(dto.datapoints), is(5));
         assertThat(dto.data, hasSize(5));
@@ -147,10 +151,57 @@ public class PersistenceResourceTest {
 
     @Test
     public void testGetPersistenceItemDataWithBoundery() {
-        ItemHistoryDTO dto = pResource.createDTO(PERSISTENCE_SERVICE_ID, "testItem", null, null, 1, 10, true);
+        ItemHistoryDTO dto = pResource.createDTO(PERSISTENCE_SERVICE_ID, "testItem", null, null, 1, 10, true, false);
 
         assertThat(Integer.parseInt(dto.datapoints), is(7));
         assertThat(dto.data, hasSize(7));
+    }
+
+    @Test
+    public void testGetPersistenceItemDataWithItemState() throws ItemNotFoundException {
+        when(itemRegistryMock.getItem("testItem")).thenReturn(itemMock);
+        when(itemMock.getState()).thenReturn(DecimalType.ZERO);
+
+        ItemHistoryDTO dto = pResource.createDTO(PERSISTENCE_SERVICE_ID, "testItem", null, null, 1, 10, false, true);
+
+        assertThat(Integer.parseInt(dto.datapoints), is(6));
+        assertThat(dto.data, hasSize(6));
+        assertThat(dto.data.get(dto.data.size() - 1).state, is("0"));
+    }
+
+    @Test
+    public void testGetPersistenceItemDataWithItemStateUndefined() throws ItemNotFoundException {
+        when(itemRegistryMock.getItem("testItem")).thenReturn(itemMock);
+        when(itemMock.getState()).thenReturn(UnDefType.UNDEF);
+
+        ItemHistoryDTO dto = pResource.createDTO(PERSISTENCE_SERVICE_ID, "testItem", null, null, 1, 10, false, true);
+
+        assertThat(Integer.parseInt(dto.datapoints), is(5));
+        assertThat(dto.data, hasSize(5));
+    }
+
+    @Test
+    public void testGetPersistenceItemDataWithItemStateNull() throws ItemNotFoundException {
+        when(itemRegistryMock.getItem("testItem")).thenReturn(itemMock);
+        when(itemMock.getState()).thenReturn(UnDefType.NULL);
+
+        ItemHistoryDTO dto = pResource.createDTO(PERSISTENCE_SERVICE_ID, "testItem", null, null, 1, 10, false, true);
+
+        assertThat(Integer.parseInt(dto.datapoints), is(5));
+        assertThat(dto.data, hasSize(5));
+    }
+
+    @Test
+    public void testGetPersistenceItemDataWithBoundaryAndItemStateButNoItemStateRequired()
+            throws ItemNotFoundException {
+        when(itemRegistryMock.getItem("testItem")).thenReturn(itemMock);
+        when(itemMock.getState()).thenReturn(DecimalType.ZERO);
+
+        ItemHistoryDTO dto = pResource.createDTO(PERSISTENCE_SERVICE_ID, "testItem", null, null, 1, 10, true, true);
+
+        assertThat(Integer.parseInt(dto.datapoints), is(7));
+        assertThat(dto.data, hasSize(7));
+        assertThat(dto.data.get(dto.data.size() - 1).state, not("0"));
     }
 
     @Test
