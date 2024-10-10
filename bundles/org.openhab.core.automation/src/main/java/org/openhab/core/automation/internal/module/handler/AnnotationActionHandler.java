@@ -29,6 +29,7 @@ import org.openhab.core.automation.handler.BaseActionModuleHandler;
 import org.openhab.core.automation.type.ActionType;
 import org.openhab.core.automation.type.Input;
 import org.openhab.core.automation.type.Output;
+import org.openhab.core.automation.util.mapper.SerialisedInputsToActionInputs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,7 +70,13 @@ public class AnnotationActionHandler extends BaseActionModuleHandler {
                 if (annotationsOnParam[0] instanceof ActionInput inputAnnotation) {
                     // check if the moduleType has a configdescription with this input
                     if (hasInput(moduleType, inputAnnotation.name())) {
-                        args.add(i, context.get(inputAnnotation.name()));
+                        Object value = context.get(inputAnnotation.name());
+                        // fallback to configuration as this is where the UI stores the input values
+                        if (value == null) {
+                            value = SerialisedInputsToActionInputs.map(moduleType, moduleType.getInputs().get(i),
+                                    module.getConfiguration().get(inputAnnotation.name()), null);
+                        }
+                        args.add(i, value);
                     } else {
                         logger.error(
                                 "Annotated method defines input '{}' but the module type '{}' does not specify an input with this name.",
@@ -84,8 +91,20 @@ public class AnnotationActionHandler extends BaseActionModuleHandler {
         }
 
         Object result = null;
+        Object @Nullable [] arguments = args.toArray();
+        if (arguments.length > 0 && logger.isDebugEnabled()) {
+            logger.debug("Calling action method {} with the following arguments:", method.getName());
+            for (int i = 0; i < arguments.length; i++) {
+                if (arguments[i] == null) {
+                    logger.debug("  - Argument {}: null", i + 1);
+                } else {
+                    logger.debug("  - Argument {}: type {} value {}", i + 1, arguments[i].getClass().getCanonicalName(),
+                            arguments[i]);
+                }
+            }
+        }
         try {
-            result = method.invoke(this.actionProvider, args.toArray());
+            result = method.invoke(this.actionProvider, arguments);
         } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
             logger.error("Could not call method '{}' from module type '{}'.", method, moduleType.getUID(), e);
         }

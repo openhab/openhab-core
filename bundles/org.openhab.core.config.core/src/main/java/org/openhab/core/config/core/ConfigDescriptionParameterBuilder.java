@@ -24,6 +24,7 @@ import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
  *
  * @author Chris Jackson - Initial contribution
  * @author Thomas Höfer - Added unit
+ * @author Laurent Garnier - Added restrictedUnit boolean
  */
 public class ConfigDescriptionParameterBuilder {
 
@@ -41,6 +42,7 @@ public class ConfigDescriptionParameterBuilder {
     private Boolean multiple;
     private Integer multipleLimit;
     private String unit;
+    private boolean restrictedUnit = true;
     private String unitLabel;
 
     private String context;
@@ -280,6 +282,20 @@ public class ConfigDescriptionParameterBuilder {
     }
 
     /**
+     * Sets the unit of the configuration parameter.
+     *
+     * @param unit the unit to be set
+     * @param restricted true if the unit can only take a value amongst a list of predefined values, false if no
+     *            restriction
+     * @return the updated builder instance
+     */
+    public ConfigDescriptionParameterBuilder withUnit(String unit, boolean restricted) {
+        this.unit = unit;
+        this.restrictedUnit = restricted;
+        return this;
+    }
+
+    /**
      * Sets the unit label of the configuration parameter.
      *
      * @param unitLabel the unit label to be set
@@ -299,6 +315,6 @@ public class ConfigDescriptionParameterBuilder {
     public ConfigDescriptionParameter build() throws IllegalArgumentException {
         return new ConfigDescriptionParameter(name, type, min, max, step, pattern, required, readOnly, multiple,
                 context, defaultValue, label, description, options, filterCriteria, groupName, advanced, limitToOptions,
-                multipleLimit, unit, unitLabel, verify);
+                multipleLimit, unit, restrictedUnit, unitLabel, verify);
     }
 }

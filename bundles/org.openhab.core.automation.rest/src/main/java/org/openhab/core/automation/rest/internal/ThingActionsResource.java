@@ -45,7 +45,12 @@ import org.openhab.core.automation.type.Input;
 import org.openhab.core.automation.type.ModuleTypeRegistry;
 import org.openhab.core.automation.type.Output;
 import org.openhab.core.automation.util.ModuleBuilder;
+import org.openhab.core.automation.util.mapper.SerialisedInputsToActionInputs;
+import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.Configuration;
+import org.openhab.core.config.core.dto.ConfigDescriptionDTOMapper;
+import org.openhab.core.config.core.dto.ConfigDescriptionParameterDTO;
+import org.openhab.core.i18n.UnitProvider;
 import org.openhab.core.io.rest.LocaleService;
 import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
@@ -77,6 +82,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * The {@link ThingActionsResource} allows retrieving and executing thing actions via REST API
  *
  * @author Jan N. Klug - Initial contribution
+ * @author Laurent Garnier - API enhanced to be able to run thing actions in Main UI
  */
 @Component
 @JaxrsResource
@@ -90,15 +96,17 @@ public class ThingActionsResource implements RESTResource {
     public static final String PATH_THINGS = "actions";
 
     private final LocaleService localeService;
+    private final UnitProvider unitProvider;
     private final ModuleTypeRegistry moduleTypeRegistry;
 
     Map<ThingUID, Map<String, ThingActions>> thingActionsMap = new ConcurrentHashMap<>();
     private List<ModuleHandlerFactory> moduleHandlerFactories = new ArrayList<>();
 
     @Activate
-    public ThingActionsResource(@Reference LocaleService localeService,
+    public ThingActionsResource(@Reference LocaleService localeService, @Reference UnitProvider unitProvider,
             @Reference ModuleTypeRegistry moduleTypeRegistry) {
         this.localeService = localeService;
+        this.unitProvider = unitProvider;
         this.moduleTypeRegistry = moduleTypeRegistry;
     }
 
@@ -171,11 +179,27 @@ public class ThingActionsResource implements RESTResource {
                     continue;
                 }
 
+                // Filter the configuration description parameters that correspond to inputs
+                List<ConfigDescriptionParameter> inputParameters = new ArrayList<>();
+                for (ConfigDescriptionParameter parameter : actionType.getConfigurationDescriptions()) {
+                    if (hasInput(actionType, parameter.getName())) {
+                        inputParameters.add(parameter);
+                    }
+                }
+                // If the resulting list of configuration description parameters is empty while the list of
+                // inputs is not empty, this is because the conversion of inputs into configuration description
+                // parameters failed for at least one input
+                if (inputParameters.isEmpty() && !actionType.getInputs().isEmpty()) {
+                    inputParameters = null;
+                }
+
                 ThingActionDTO actionDTO = new ThingActionDTO();
                 actionDTO.actionUid = actionType.getUID();
                 actionDTO.description = actionType.getDescription();
                 actionDTO.label = actionType.getLabel();
                 actionDTO.inputs = actionType.getInputs();
+                actionDTO.inputConfigDescriptions = inputParameters == null ? null
+                        : ConfigDescriptionDTOMapper.mapParameters(inputParameters);
                 actionDTO.outputs = actionType.getOutputs();
                 actions.add(actionDTO);
             }
@@ -221,7 +245,9 @@ public class ThingActionsResource implements RESTResource {
         }
 
         try {
-            Map<String, Object> returnValue = Objects.requireNonNullElse(handler.execute(actionInputs), Map.of());
+            Map<String, Object> returnValue = Objects.requireNonNullElse(
+                    handler.execute(SerialisedInputsToActionInputs.map(actionType, actionInputs, unitProvider)),
+                    Map.of());
             moduleHandlerFactory.ungetHandler(action, ruleUID, handler);
             return Response.ok(returnValue).build();
         } catch (Exception e) {
@@ -238,6 +264,15 @@ public class ThingActionsResource implements RESTResource {
         return scopeAnnotation.name();
     }
 
+    private boolean hasInput(ActionType actionType, String in) {
+        for (Input i : actionType.getInputs()) {
+            if (i.getName().equals(in)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private static class ThingActionDTO {
         public String actionUid = "";
 
@@ -245,6 +280,9 @@ public class ThingActionsResource implements RESTResource {
         public @Nullable String description;
 
         public List<Input> inputs = new ArrayList<>();
+
+        public @Nullable List<ConfigDescriptionParameterDTO> inputConfigDescriptions;
+
         public List<Output> outputs = new ArrayList<>();
     }
 }

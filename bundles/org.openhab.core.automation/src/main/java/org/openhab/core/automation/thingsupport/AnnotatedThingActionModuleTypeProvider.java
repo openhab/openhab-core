@@ -36,6 +36,7 @@ import org.openhab.core.automation.type.ActionType;
 import org.openhab.core.automation.type.ModuleType;
 import org.openhab.core.automation.type.ModuleTypeProvider;
 import org.openhab.core.common.registry.ProviderChangeListener;
+import org.openhab.core.i18n.UnitProvider;
 import org.openhab.core.thing.binding.ThingActions;
 import org.openhab.core.thing.binding.ThingActionsScope;
 import org.openhab.core.thing.binding.ThingHandler;
@@ -54,6 +55,7 @@ import org.slf4j.LoggerFactory;
  * ModuleTypeProvider that collects actions for {@link ThingHandler}s
  *
  * @author Stefan Triller - Initial contribution
+ * @author Laurent Garnier - Added unit provider used when calling buildModuleType
  */
 @NonNullByDefault
 @Component(service = { ModuleTypeProvider.class, ModuleHandlerFactory.class })
@@ -66,10 +68,13 @@ public class AnnotatedThingActionModuleTypeProvider extends BaseModuleHandlerFac
     private final AnnotationActionModuleTypeHelper helper = new AnnotationActionModuleTypeHelper();
 
     private final ModuleTypeI18nService moduleTypeI18nService;
+    private final UnitProvider unitProvider;
 
     @Activate
-    public AnnotatedThingActionModuleTypeProvider(final @Reference ModuleTypeI18nService moduleTypeI18nService) {
+    public AnnotatedThingActionModuleTypeProvider(final @Reference ModuleTypeI18nService moduleTypeI18nService,
+            final @Reference UnitProvider unitProvider) {
         this.moduleTypeI18nService = moduleTypeI18nService;
+        this.unitProvider = unitProvider;
     }
 
     @Override
@@ -92,7 +97,7 @@ public class AnnotatedThingActionModuleTypeProvider extends BaseModuleHandlerFac
     public Collection<ModuleType> getAll() {
         Collection<ModuleType> moduleTypes = new ArrayList<>();
         for (String moduleUID : moduleInformation.keySet()) {
-            ModuleType mt = helper.buildModuleType(moduleUID, moduleInformation);
+            ModuleType mt = helper.buildModuleType(moduleUID, moduleInformation, unitProvider);
             if (mt != null) {
                 moduleTypes.add(mt);
             }
@@ -125,7 +130,7 @@ public class AnnotatedThingActionModuleTypeProvider extends BaseModuleHandlerFac
             ModuleInformation mi = mis.iterator().next();
 
             Bundle bundle = FrameworkUtil.getBundle(mi.getActionProvider().getClass());
-            ModuleType mt = helper.buildModuleType(uid, moduleInformation);
+            ModuleType mt = helper.buildModuleType(uid, moduleInformation, unitProvider);
             return moduleTypeI18nService.getModuleTypePerLocale(mt, locale, bundle);
         }
         return null;
@@ -145,7 +150,7 @@ public class AnnotatedThingActionModuleTypeProvider extends BaseModuleHandlerFac
 
                 ModuleType oldType = null;
                 if (moduleInformation.containsKey(mi.getUID())) {
-                    oldType = helper.buildModuleType(mi.getUID(), moduleInformation);
+                    oldType = helper.buildModuleType(mi.getUID(), moduleInformation, unitProvider);
                     Set<ModuleInformation> availableModuleConfigs = moduleInformation.get(mi.getUID());
                     availableModuleConfigs.add(mi);
                 } else {
@@ -154,7 +159,7 @@ public class AnnotatedThingActionModuleTypeProvider extends BaseModuleHandlerFac
                     moduleInformation.put(mi.getUID(), configs);
                 }
 
-                ModuleType mt = helper.buildModuleType(mi.getUID(), moduleInformation);
+                ModuleType mt = helper.buildModuleType(mi.getUID(), moduleInformation, unitProvider);
                 if (mt != null) {
                     for (ProviderChangeListener<ModuleType> l : changeListeners) {
                         if (oldType != null) {
@@ -184,14 +189,14 @@ public class AnnotatedThingActionModuleTypeProvider extends BaseModuleHandlerFac
 
                 Set<ModuleInformation> availableModuleConfigs = moduleInformation.get(mi.getUID());
                 if (availableModuleConfigs != null) {
-                    ModuleType oldType = helper.buildModuleType(mi.getUID(), moduleInformation);
+                    ModuleType oldType = helper.buildModuleType(mi.getUID(), moduleInformation, unitProvider);
                     if (availableModuleConfigs.size() > 1) {
                         availableModuleConfigs.remove(mi);
                     } else {
                         moduleInformation.remove(mi.getUID());
                     }
 
-                    ModuleType mt = helper.buildModuleType(mi.getUID(), moduleInformation);
+                    ModuleType mt = helper.buildModuleType(mi.getUID(), moduleInformation, unitProvider);
                     // localize moduletype -> remove from map
                     if (oldType != null) {
                         for (ProviderChangeListener<ModuleType> l : changeListeners) {
@@ -231,7 +236,8 @@ public class AnnotatedThingActionModuleTypeProvider extends BaseModuleHandlerFac
                 ModuleInformation finalMI = helper.getModuleInformationForIdentifier(actionModule, moduleInformation,
                         true);
                 if (finalMI != null) {
-                    ActionType moduleType = helper.buildModuleType(module.getTypeUID(), moduleInformation);
+                    ActionType moduleType = helper.buildModuleType(module.getTypeUID(), moduleInformation,
+                            unitProvider);
                     if (moduleType == null) {
                         return null;
                     }
