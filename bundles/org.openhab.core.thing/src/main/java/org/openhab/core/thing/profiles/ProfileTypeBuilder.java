@@ -64,7 +64,7 @@ public final class ProfileTypeBuilder<@NonNull T extends ProfileType> {
         return new ProfileTypeBuilder<>(profileTypeUID, label,
                 (leProfileTypeUID, leLabel, leSupportedItemTypes, leSupportedItemTypesOfChannel,
                         leSupportedChannelTypeUIDs) -> new StateProfileTypeImpl(leProfileTypeUID, leLabel,
-                                leSupportedItemTypes, leSupportedItemTypesOfChannel));
+                                leSupportedItemTypes, leSupportedItemTypesOfChannel, leSupportedChannelTypeUIDs));
     }
 
     /**
@@ -78,7 +78,7 @@ public final class ProfileTypeBuilder<@NonNull T extends ProfileType> {
         return new ProfileTypeBuilder<>(profileTypeUID, label,
                 (leProfileTypeUID, leLabel, leSupportedItemTypes, leSupportedItemTypesOfChannel,
                         leSupportedChannelTypeUIDs) -> new TriggerProfileTypeImpl(leProfileTypeUID, leLabel,
-                                leSupportedItemTypes, leSupportedChannelTypeUIDs));
+                                leSupportedItemTypes, leSupportedItemTypesOfChannel, leSupportedChannelTypeUIDs));
     }
 
     /**
