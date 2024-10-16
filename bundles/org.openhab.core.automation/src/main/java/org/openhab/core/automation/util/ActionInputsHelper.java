@@ -188,7 +188,7 @@ public class ActionInputsHelper {
             builder = builder.withDefault(defaultValue);
         }
         if (unit != null) {
-            builder = builder.withUnit(unit.getSymbol(), false);
+            builder = builder.withUnit(unit.getSymbol());
         }
         return builder.build();
     }

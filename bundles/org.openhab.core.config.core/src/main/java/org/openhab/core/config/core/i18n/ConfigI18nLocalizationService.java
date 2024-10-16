@@ -144,8 +144,8 @@ public class ConfigI18nLocalizationService {
                 .withFilterCriteria(parameter.getFilterCriteria()).withGroupName(parameter.getGroupName())
                 .withAdvanced(parameter.isAdvanced()).withVerify(parameter.isVerifyable())
                 .withLimitToOptions(parameter.getLimitToOptions()).withMultipleLimit(parameter.getMultipleLimit())
-                .withUnit(parameter.getUnit(), parameter.isUnitRestricted())
-                .withUnitLabel(unitLabel == null ? parameter.getUnitLabel() : unitLabel).build();
+                .withUnit(parameter.getUnit()).withUnitLabel(unitLabel == null ? parameter.getUnitLabel() : unitLabel)
+                .build();
     }
 
     /**
