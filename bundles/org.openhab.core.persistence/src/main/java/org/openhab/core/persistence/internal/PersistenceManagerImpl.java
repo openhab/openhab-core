@@ -577,8 +577,9 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, State
                         .build().query(filter).iterator();
                 while (result.hasNext()) {
                     HistoricItem next = result.next();
-                    if (next.getTimestamp().isAfter(ZonedDateTime.now())) {
-                        scheduleNextForecastForItem(itemName, next.getTimestamp().toInstant(), next.getState());
+                    Instant timestamp = next.getInstant();
+                    if (timestamp.isAfter(Instant.now())) {
+                        scheduleNextForecastForItem(itemName, timestamp, next.getState());
                         break;
                     }
                 }

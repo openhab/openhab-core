@@ -43,6 +43,7 @@ import org.openhab.core.model.sitemap.sitemap.SitemapPackage;
 import org.openhab.core.model.sitemap.sitemap.VisibilityRule;
 import org.openhab.core.model.sitemap.sitemap.Widget;
 import org.openhab.core.model.sitemap.sitemap.impl.ButtonDefinitionImpl;
+import org.openhab.core.model.sitemap.sitemap.impl.ButtonImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.ButtongridImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.ChartImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.ColorArrayImpl;
@@ -86,6 +87,7 @@ import org.slf4j.LoggerFactory;
  * @author Laurent Garnier - Added support for new element Buttongrid
  * @author Laurent Garnier - Added icon field for mappings
  * @author Mark Herwege - Make UI provided sitemaps compatible with enhanced syntax in conditions
+ * @author Mark Herwege - Add support for Button element
  */
 @NonNullByDefault
 @Component(service = SitemapProvider.class)
@@ -269,6 +271,16 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
                 ButtongridImpl buttongridWidget = (ButtongridImpl) SitemapFactory.eINSTANCE.createButtongrid();
                 addWidgetButtons(buttongridWidget.getButtons(), component);
                 widget = buttongridWidget;
+                break;
+            case "Button":
+                ButtonImpl buttonWidget = (ButtonImpl) SitemapFactory.eINSTANCE.createButton();
+                widget = buttonWidget;
+                setWidgetPropertyFromComponentConfig(widget, component, "row", SitemapPackage.BUTTON__ROW);
+                setWidgetPropertyFromComponentConfig(widget, component, "column", SitemapPackage.BUTTON__COLUMN);
+                setWidgetPropertyFromComponentConfig(widget, component, "stateless", SitemapPackage.BUTTON__STATELESS);
+                setWidgetPropertyFromComponentConfig(widget, component, "cmd", SitemapPackage.BUTTON__CMD);
+                setWidgetPropertyFromComponentConfig(widget, component, "releaseCmd",
+                        SitemapPackage.BUTTON__RELEASE_CMD);
                 break;
             case "Default":
                 DefaultImpl defaultWidget = (DefaultImpl) SitemapFactory.eINSTANCE.createDefault();

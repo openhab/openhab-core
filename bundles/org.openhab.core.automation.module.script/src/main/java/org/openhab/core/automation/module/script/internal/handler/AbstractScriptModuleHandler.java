@@ -17,6 +17,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
 
 import javax.script.Compilable;
 import javax.script.CompiledScript;
@@ -210,15 +212,29 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
     protected @Nullable Object eval(ScriptEngine engine, String script) {
         try {
             if (compiledScript.isPresent()) {
+                if (engine instanceof Lock lock && !lock.tryLock(1, TimeUnit.MINUTES)) {
+                    logger.error("Failed to acquire lock within one minute for script module of rule with UID '{}'",
+                            ruleUID);
+                    return null;
+                }
                 logger.debug("Executing pre-compiled script of rule with UID '{}'", ruleUID);
-                return compiledScript.get().eval(engine.getContext());
+                try {
+                    return compiledScript.get().eval(engine.getContext());
+                } finally { // Make sure that Lock is unlocked regardless of an exception being thrown or not to avoid
+                            // deadlocks
+                    if (engine instanceof Lock lock) {
+                        lock.unlock();
+                    }
+                }
             }
             logger.debug("Executing script of rule with UID '{}'", ruleUID);
             return engine.eval(script);
         } catch (ScriptException e) {
             logger.error("Script execution of rule with UID '{}' failed: {}", ruleUID, e.getMessage(),
                     logger.isDebugEnabled() ? e : null);
-            return null;
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
+        return null;
     }
 }

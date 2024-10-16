@@ -794,7 +794,7 @@
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <version>33.2.0-jre</version>
+      <version>33.3.0-jre</version>
       <scope>compile</scope>
     </dependency>
 
@@ -808,7 +808,7 @@
     <dependency>
       <groupId>io.github.classgraph</groupId>
       <artifactId>classgraph</artifactId>
-      <version>4.8.172</version>
+      <version>4.8.174</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
@@ -950,7 +950,7 @@
     <dependency>
       <groupId>de.focus-shift</groupId>
       <artifactId>jollyday-jackson</artifactId>
-      <version>0.30.0</version>
+      <version>0.32.0</version>
       <scope>compile</scope>
     </dependency>
 

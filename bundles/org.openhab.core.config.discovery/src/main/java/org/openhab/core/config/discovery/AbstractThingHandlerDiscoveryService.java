@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
  * It handles the injection of the {@link ThingHandler}
  *
  * @author Jan N. Klug - Initial contribution
+ * @author Laurent Garnier - Added discovery with an optional input parameter
  */
 @NonNullByDefault
 public abstract class AbstractThingHandlerDiscoveryService<T extends ThingHandler> extends AbstractDiscoveryService
@@ -45,10 +46,16 @@ public abstract class AbstractThingHandlerDiscoveryService<T extends ThingHandle
     protected @NonNullByDefault({}) T thingHandler = (@NonNull T) null;
 
     protected AbstractThingHandlerDiscoveryService(Class<T> thingClazz, @Nullable Set<ThingTypeUID> supportedThingTypes,
-            int timeout, boolean backgroundDiscoveryEnabledByDefault) throws IllegalArgumentException {
-        super(supportedThingTypes, timeout, backgroundDiscoveryEnabledByDefault);
+            int timeout, boolean backgroundDiscoveryEnabledByDefault, @Nullable String scanInputLabel,
+            @Nullable String scanInputDescription) throws IllegalArgumentException {
+        super(supportedThingTypes, timeout, backgroundDiscoveryEnabledByDefault, scanInputLabel, scanInputDescription);
         this.thingClazz = thingClazz;
         this.backgroundDiscoveryEnabled = backgroundDiscoveryEnabledByDefault;
+    }
+
+    protected AbstractThingHandlerDiscoveryService(Class<T> thingClazz, @Nullable Set<ThingTypeUID> supportedThingTypes,
+            int timeout, boolean backgroundDiscoveryEnabledByDefault) throws IllegalArgumentException {
+        this(thingClazz, supportedThingTypes, timeout, backgroundDiscoveryEnabledByDefault, null, null);
     }
 
     protected AbstractThingHandlerDiscoveryService(Class<T> thingClazz, @Nullable Set<ThingTypeUID> supportedThingTypes,

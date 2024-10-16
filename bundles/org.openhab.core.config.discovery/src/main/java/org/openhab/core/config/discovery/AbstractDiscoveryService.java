@@ -49,6 +49,7 @@ import org.slf4j.LoggerFactory;
  * @author Kai Kreuzer - Refactored API
  * @author Dennis Nobel - Added background discovery configuration through Configuration Admin
  * @author Andre Fuechsel - Added removeOlderResults
+ * @author Laurent Garnier - Added discovery with an optional input parameter
  */
 @NonNullByDefault
 public abstract class AbstractDiscoveryService implements DiscoveryService {
@@ -63,6 +64,9 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
     protected @Nullable ScanListener scanListener = null;
 
     private boolean backgroundDiscoveryEnabled;
+
+    private @Nullable String scanInputLabel;
+    private @Nullable String scanInputDescription;
 
     private final Map<ThingUID, DiscoveryResult> cachedResults = new HashMap<>();
 
@@ -84,20 +88,44 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
      *            service automatically stops its forced discovery process (>= 0).
      * @param backgroundDiscoveryEnabledByDefault defines, whether the default for this discovery service is to
      *            enable background discovery or not.
+     * @param scanInputLabel the label of the optional input parameter to start the discovery or null if no input
+     *            parameter supported
+     * @param scanInputDescription the description of the optional input parameter to start the discovery or null if no
+     *            input parameter supported
      * @throws IllegalArgumentException if {@code timeout < 0}
      */
     protected AbstractDiscoveryService(@Nullable Set<ThingTypeUID> supportedThingTypes, int timeout,
-            boolean backgroundDiscoveryEnabledByDefault) throws IllegalArgumentException {
+            boolean backgroundDiscoveryEnabledByDefault, @Nullable String scanInputLabel,
+            @Nullable String scanInputDescription) throws IllegalArgumentException {
         if (timeout < 0) {
             throw new IllegalArgumentException("The timeout must be >= 0!");
         }
         this.supportedThingTypes = supportedThingTypes == null ? Set.of() : Set.copyOf(supportedThingTypes);
         this.timeout = timeout;
         this.backgroundDiscoveryEnabled = backgroundDiscoveryEnabledByDefault;
+        this.scanInputLabel = scanInputLabel;
+        this.scanInputDescription = scanInputDescription;
     }
 
     /**
-     * Creates a new instance of this class with the specified parameters and background discovery enabled.
+     * Creates a new instance of this class with the specified parameters and no input parameter supported to start the
+     * discovery.
+     *
+     * @param supportedThingTypes the list of Thing types which are supported (can be null)
+     * @param timeout the discovery timeout in seconds after which the discovery
+     *            service automatically stops its forced discovery process (>= 0).
+     * @param backgroundDiscoveryEnabledByDefault defines, whether the default for this discovery service is to
+     *            enable background discovery or not.
+     * @throws IllegalArgumentException if {@code timeout < 0}
+     */
+    protected AbstractDiscoveryService(@Nullable Set<ThingTypeUID> supportedThingTypes, int timeout,
+            boolean backgroundDiscoveryEnabledByDefault) throws IllegalArgumentException {
+        this(supportedThingTypes, timeout, backgroundDiscoveryEnabledByDefault, null, null);
+    }
+
+    /**
+     * Creates a new instance of this class with the specified parameters and background discovery enabled
+     * and no input parameter supported to start the discovery.
      *
      * @param supportedThingTypes the list of Thing types which are supported (can be null)
      * @param timeout the discovery timeout in seconds after which the discovery service
@@ -111,7 +139,8 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
     }
 
     /**
-     * Creates a new instance of this class with the specified parameters and background discovery enabled.
+     * Creates a new instance of this class with the specified parameters and background discovery enabled
+     * and no input parameter supported to start the discovery.
      *
      * @param timeout the discovery timeout in seconds after which the discovery service
      *            automatically stops its forced discovery process (>= 0).
@@ -131,6 +160,21 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
     @Override
     public Set<ThingTypeUID> getSupportedThingTypes() {
         return supportedThingTypes;
+    }
+
+    @Override
+    public boolean isScanInputSupported() {
+        return getScanInputLabel() != null && getScanInputDescription() != null;
+    }
+
+    @Override
+    public @Nullable String getScanInputLabel() {
+        return scanInputLabel;
+    }
+
+    @Override
+    public @Nullable String getScanInputDescription() {
+        return scanInputDescription;
     }
 
     /**
@@ -168,7 +212,16 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
     }
 
     @Override
-    public synchronized void startScan(@Nullable ScanListener listener) {
+    public void startScan(@Nullable ScanListener listener) {
+        startScanInternal(null, listener);
+    }
+
+    @Override
+    public void startScan(String input, @Nullable ScanListener listener) {
+        startScanInternal(input, listener);
+    }
+
+    private synchronized void startScanInternal(@Nullable String input, @Nullable ScanListener listener) {
         synchronized (this) {
             // we first stop any currently running scan and its scheduled stop
             // call
@@ -194,7 +247,11 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
             timestampOfLastScan = Instant.now();
 
             try {
-                startScan();
+                if (isScanInputSupported() && input != null) {
+                    startScan(input);
+                } else {
+                    startScan();
+                }
             } catch (Exception ex) {
                 scheduledStop = this.scheduledStop;
                 if (scheduledStop != null) {
@@ -231,6 +288,11 @@ public abstract class AbstractDiscoveryService implements DiscoveryService {
      * behavior is not appropriate, the {@link #startScan(ScanListener)} method should be overridden.
      */
     protected abstract void startScan();
+
+    // An abstract method would have required a change in all existing bindings implementing a DiscoveryService
+    protected void startScan(String input) {
+        logger.warn("Discovery with input parameter not implemented by service '{}'!", this.getClass().getName());
+    }
 
     /**
      * This method cleans up after a scan, i.e. it removes listeners and other required operations.

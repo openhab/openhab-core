@@ -274,6 +274,20 @@ public class ColorUtilTest {
         assertTrue(hsbType.closeTo(new HSBType(expected), 0.01));
     }
 
+    @Test
+    public void testXyToDuv() {
+        // Black
+        assertEquals(-0.0017d, ColorUtil.xyToDuv(new double[] { 0.3227d, 0.3290d }), 0.0001);
+        // 2700K
+        assertEquals(0.0000d, ColorUtil.xyToDuv(new double[] { 0.4599d, 0.4106d }), 0.0001);
+        // 3000K
+        assertEquals(0.0000d, ColorUtil.xyToDuv(new double[] { 0.4369d, 0.4041d }), 0.0001);
+        // Red
+        assertEquals(0.2727d, ColorUtil.xyToDuv(new double[] { 0.6987d, 0.2974d }), 0.0001);
+        // Yellow
+        assertEquals(0.0387d, ColorUtil.xyToDuv(new double[] { 0.4442d, 0.5166d }), 0.0001);
+    }
+
     private void xyToXY(double[] xy, Gamut gamut) {
         assertTrue(xy.length > 1);
         HSBType hsb = ColorUtil.xyToHsb(xy, gamut);

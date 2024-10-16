@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
  * @author Holger Friedrich - Transfer RGB color conversion from HSBType, improve RGB conversion, restructuring
  * @author Chris Jackson - Added fromRGB (moved from HSBType)
  * @author Andrew Fiddian-Green - Extensive revamp to fix bugs and improve accuracy
+ * @author Cody Cutrer - Added xyToDuv
  */
 @NonNullByDefault
 public class ColorUtil {
@@ -45,11 +46,12 @@ public class ColorUtil {
     private static final BigDecimal BIG_DECIMAL_120 = BigDecimal.valueOf(120);
     private static final BigDecimal BIG_DECIMAL_100 = BigDecimal.valueOf(100);
     private static final BigDecimal BIG_DECIMAL_60 = BigDecimal.valueOf(60);
-    private static final BigDecimal BIG_DECIMAL_50 = BigDecimal.valueOf(50);
     private static final BigDecimal BIG_DECIMAL_5 = BigDecimal.valueOf(5);
     private static final BigDecimal BIG_DECIMAL_3 = BigDecimal.valueOf(3);
     private static final BigDecimal BIG_DECIMAL_2 = BigDecimal.valueOf(2);
     private static final BigDecimal BIG_DECIMAL_2_POINT_55 = new BigDecimal("2.55");
+    private static final double[] CORM_COEFFICIENTS = { -0.00616793, 0.0893944, -0.5179722, 1.5317403, -2.4243787,
+            1.925865, -0.471106 };
 
     public static final Gamut DEFAULT_GAMUT = new Gamut(new double[] { 0.9961, 0.0001 }, new double[] { 0, 0.9961 },
             new double[] { 0, 0.0001 });
@@ -521,6 +523,39 @@ public class ColorUtil {
         }
 
         return hsb;
+    }
+
+    /**
+     * Calculate the Duv (Delta u,v) metric from a
+     * <a href="https://en.wikipedia.org/wiki/CIE_1931_color_space">CIE 1931</a> {@code xy} format color.
+     *
+     * Duv describes the distance of a color point from the black body curve. It's useful for calculating
+     * if a color is near to "white", at any color temperature.
+     * 
+     * @param xy array of double with CIE 1931 x,y in the range 0.0000 to 1.0000
+     * @return the calculated Duv metric
+     * @throws IllegalArgumentException when input array has wrong size or exceeds allowed value range.
+     */
+    public static double xyToDuv(double[] xy) throws IllegalArgumentException {
+        if (xy.length != 2) {
+            throw new IllegalArgumentException("xyToDuv() requires 2 arguments");
+        }
+
+        for (int i = 0; i < xy.length; i++) {
+            if (xy[i] < 0 || xy[i] > 1) {
+                throw new IllegalArgumentException(
+                        String.format("xyToDuv() argument %d value '%f' out of range [0..1.0]", i, xy[i]));
+            }
+        }
+
+        double x = xy[0];
+        double y = xy[1];
+        double u = 4.0 * x / (-2.0 * x + 12 * y + 3.0);
+        double v = 6.0 * y / (-2.0 * x + 12 * y + 3.0);
+        double Lfp = Math.sqrt(Math.pow(u - 0.292, 2) + Math.pow(v - 0.24, 2));
+        double a = Math.acos((u - 0.292) / Lfp);
+        double Lbb = polynomialFit(a, CORM_COEFFICIENTS);
+        return Lfp - Lbb;
     }
 
     /**
@@ -1175,5 +1210,26 @@ public class ColorUtil {
         }
         double n = (xy[0] - 0.3320) / (0.1858 - xy[1]);
         return (437 * Math.pow(n, 3)) + (3601 * Math.pow(n, 2)) + (6861 * n) + 5517;
+    }
+
+    /**
+     * Calculates a polynomial regression.
+     *
+     * This calculates the equation K[4]*x^0 + K[3]*x^1 + K[2]*x^2 + K[1]*x^3 + K[0]*x^4
+     *
+     * @param x The independent variable distributed through each term of the polynomial
+     * @param coefficients The coefficients of the polynomial. Note that the terms are in
+     *            order from largest exponent to smallest exponent, which is the reverse order
+     *            of the usual way of writing it in academic papers
+     * @return the result of substituting x into the regression polynomial
+     */
+    private static double polynomialFit(double x, double[] coefficients) {
+        double result = 0.0;
+        double xAccumulator = 1.0;
+        for (int i = coefficients.length - 1; i >= 0; i--) {
+            result += coefficients[i] * xAccumulator;
+            xAccumulator *= x;
+        }
+        return result;
     }
 }

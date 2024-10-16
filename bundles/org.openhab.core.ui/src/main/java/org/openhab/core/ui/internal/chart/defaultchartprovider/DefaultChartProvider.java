@@ -359,12 +359,12 @@ public class DefaultChartProvider implements ChartProvider {
             // For 'binary' states, we need to replicate the data
             // to avoid diagonal lines
             if (state instanceof OnOffType || state instanceof OpenClosedType) {
-                xData.add(Date.from(historicItem.getTimestamp().toInstant().minus(1, ChronoUnit.MILLIS)));
+                xData.add(Date.from(historicItem.getInstant().minus(1, ChronoUnit.MILLIS)));
                 yData.add(convertData(state));
             }
 
             state = historicItem.getState();
-            xData.add(Date.from(historicItem.getTimestamp().toInstant()));
+            xData.add(Date.from(historicItem.getInstant()));
             yData.add(convertData(state));
         }
 

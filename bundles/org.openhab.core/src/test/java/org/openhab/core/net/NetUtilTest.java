@@ -14,6 +14,11 @@ package org.openhab.core.net;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
@@ -115,5 +120,36 @@ public class NetUtilTest {
         } catch (IllegalArgumentException iae) {
             assertThat(iae.getMessage(), is("IP 'SOME_TEXT' is not a valid IPv4 address"));
         }
+    }
+
+    @Test
+    public void checkValidRangeCountAndSort() throws UnknownHostException {
+        InetAddress testableAddress = InetAddress.getByName("192.168.1.4");
+        List<InetAddress> addresses = NetUtil
+                .getAddressesRangeByCidrAddress(new CidrAddress(testableAddress, (short) 24), 24);
+
+        assertEquals(254, addresses.size());
+        assertEquals("192.168.1.1", addresses.get(0).getHostAddress());
+        assertEquals("192.168.1.254", addresses.get(253).getHostAddress());
+    }
+
+    @Test
+    public void checkValidLargeRangeCountAndSort() throws UnknownHostException {
+        InetAddress testableAddress = InetAddress.getByName("127.0.1.12");
+        List<InetAddress> addresses = NetUtil
+                .getAddressesRangeByCidrAddress(new CidrAddress(testableAddress, (short) 16), 16);
+
+        assertEquals(65534, addresses.size());
+        assertEquals("127.0.0.1", addresses.get(0).getHostAddress());
+        assertEquals("127.0.255.254", addresses.get(65533).getHostAddress());
+    }
+
+    @Test
+    public void checkNotAllowedPrefixLength() throws UnknownHostException {
+        InetAddress testableAddress = InetAddress.getByName("192.168.1.0");
+        List<InetAddress> addresses = NetUtil
+                .getAddressesRangeByCidrAddress(new CidrAddress(testableAddress, (short) 16), 24);
+
+        assertEquals(0, addresses.size());
     }
 }

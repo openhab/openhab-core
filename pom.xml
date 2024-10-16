@@ -73,7 +73,7 @@
     <karaf.tooling.version>4.4.6</karaf.tooling.version>
     <sat.version>0.16.0</sat.version>
     <slf4j.version>2.0.12</slf4j.version>
-    <xtext.version>2.35.0</xtext.version>
+    <xtext.version>2.36.0</xtext.version>
     <spotless.version>2.43.0</spotless.version>
     <!-- Eclipse Java formatter version 4.26+ does not check test files -->
     <spotless.eclipse.version>4.25</spotless.eclipse.version>

@@ -174,12 +174,12 @@
 	</feature>
 
 	<feature name="openhab.tp-jollyday" description="Jollyday library" version="${project.version}">
-		<capability>openhab.tp;feature=jollyday;version=0.30.0</capability>
+		<capability>openhab.tp;feature=jollyday;version=0.32.0</capability>
 		<feature dependency="true">openhab.tp-jackson</feature>
 		<feature dependency="true">spifly</feature>
 		<bundle>mvn:org.threeten/threeten-extra/1.8.0</bundle>
-		<bundle>mvn:de.focus-shift/jollyday-core/0.30.0</bundle>
-		<bundle>mvn:de.focus-shift/jollyday-jackson/0.30.0</bundle>
+		<bundle>mvn:de.focus-shift/jollyday-core/0.32.0</bundle>
+		<bundle>mvn:de.focus-shift/jollyday-jackson/0.32.0</bundle>
 	</feature>
 
 	<feature name="openhab.tp-jmdns" description="An implementation of multi-cast DNS in Java." version="${project.version}">
@@ -247,12 +247,12 @@
 		<bundle dependency="true">mvn:org.eclipse.xtend/org.eclipse.xtend.lib.macro/${xtext.version}</bundle>
 
 		<bundle dependency="true">mvn:com.google.guava/failureaccess/1.0.2</bundle>
-		<bundle dependency="true">mvn:com.google.guava/guava/33.2.0-jre</bundle>
+		<bundle dependency="true">mvn:com.google.guava/guava/33.3.0-jre</bundle>
 		<bundle dependency="true">mvn:com.google.inject/guice/7.0.0</bundle>
 		<bundle dependency="true">mvn:jakarta.inject/jakarta.inject-api/2.0.1</bundle>
 
 		<bundle dependency="true">mvn:org.eclipse.orbit.bundles/org.aopalliance/1.0.0.v201105210816</bundle>
-		<bundle dependency="true">mvn:io.github.classgraph/classgraph/4.8.172</bundle>
+		<bundle dependency="true">mvn:io.github.classgraph/classgraph/4.8.174</bundle>
 		<bundle dependency="true">mvn:org.eclipse.orbit.bundles/org.antlr.runtime/3.2.0.v201101311130</bundle>
 
 		<bundle dependency="true">mvn:org.eclipse.platform/org.eclipse.equinox.common/3.18.0</bundle>
