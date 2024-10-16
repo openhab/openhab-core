@@ -37,7 +37,7 @@ import org.openhab.core.automation.module.provider.i18n.ModuleTypeI18nService;
 import org.openhab.core.automation.type.ActionType;
 import org.openhab.core.automation.type.ModuleType;
 import org.openhab.core.automation.type.ModuleTypeProvider;
-import org.openhab.core.automation.util.mapper.ActionInputsHelper;
+import org.openhab.core.automation.util.ActionInputsHelper;
 import org.openhab.core.common.registry.ProviderChangeListener;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;

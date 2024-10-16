@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.automation.util.mapper;
+package org.openhab.core.automation.util;
 
 import java.math.BigDecimal;
 import java.text.ParseException;

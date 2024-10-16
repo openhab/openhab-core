@@ -41,7 +41,7 @@ import org.openhab.core.automation.type.ActionType;
 import org.openhab.core.automation.type.Input;
 import org.openhab.core.automation.type.ModuleType;
 import org.openhab.core.automation.type.Output;
-import org.openhab.core.automation.util.mapper.ActionInputsHelper;
+import org.openhab.core.automation.util.ActionInputsHelper;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ParameterOption;
 import org.openhab.core.test.java.JavaTest;

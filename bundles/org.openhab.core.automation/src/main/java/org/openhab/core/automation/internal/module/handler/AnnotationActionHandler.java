@@ -29,7 +29,7 @@ import org.openhab.core.automation.handler.BaseActionModuleHandler;
 import org.openhab.core.automation.type.ActionType;
 import org.openhab.core.automation.type.Input;
 import org.openhab.core.automation.type.Output;
-import org.openhab.core.automation.util.mapper.ActionInputsHelper;
+import org.openhab.core.automation.util.ActionInputsHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
