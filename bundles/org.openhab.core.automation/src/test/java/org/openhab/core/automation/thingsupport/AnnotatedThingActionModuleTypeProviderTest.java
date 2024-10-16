@@ -39,9 +39,9 @@ import org.openhab.core.automation.type.ActionType;
 import org.openhab.core.automation.type.Input;
 import org.openhab.core.automation.type.ModuleType;
 import org.openhab.core.automation.type.Output;
+import org.openhab.core.automation.util.mapper.ActionInputsHelper;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ParameterOption;
-import org.openhab.core.i18n.UnitProvider;
 import org.openhab.core.test.java.JavaTest;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.binding.ThingActions;
@@ -80,7 +80,7 @@ public class AnnotatedThingActionModuleTypeProviderTest extends JavaTest {
     private static final String ACTION_OUTPUT2_TYPE = "java.lang.String";
 
     private @Mock @NonNullByDefault({}) ModuleTypeI18nService moduleTypeI18nServiceMock;
-    private @Mock @NonNullByDefault({}) UnitProvider unitProviderMock;
+    private @Mock @NonNullByDefault({}) ActionInputsHelper actionInputsHelperMock;
     private @Mock @NonNullByDefault({}) ThingHandler handler1Mock;
     private @Mock @NonNullByDefault({}) ThingHandler handler2Mock;
 
@@ -106,7 +106,8 @@ public class AnnotatedThingActionModuleTypeProviderTest extends JavaTest {
     @Test
     public void testMultiServiceAnnotationActions() {
         AnnotatedThingActionModuleTypeProvider prov = new AnnotatedThingActionModuleTypeProvider(
-                moduleTypeI18nServiceMock, unitProviderMock);
+                moduleTypeI18nServiceMock, new AnnotationActionModuleTypeHelper(actionInputsHelperMock),
+                actionInputsHelperMock);
 
         prov.addAnnotatedThingActions(actionProviderConf1);
 

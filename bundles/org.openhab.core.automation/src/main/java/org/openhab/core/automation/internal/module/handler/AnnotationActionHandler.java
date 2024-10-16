@@ -29,7 +29,7 @@ import org.openhab.core.automation.handler.BaseActionModuleHandler;
 import org.openhab.core.automation.type.ActionType;
 import org.openhab.core.automation.type.Input;
 import org.openhab.core.automation.type.Output;
-import org.openhab.core.automation.util.mapper.SerialisedInputsToActionInputs;
+import org.openhab.core.automation.util.mapper.ActionInputsHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory;
  * ActionHandler which is dynamically created upon annotation on services
  *
  * @author Stefan Triller - Initial contribution
+ * @author Laurent Garnier - Added ActionInputsHelper
  */
 @NonNullByDefault
 public class AnnotationActionHandler extends BaseActionModuleHandler {
@@ -48,13 +49,16 @@ public class AnnotationActionHandler extends BaseActionModuleHandler {
     private final Method method;
     private final ActionType moduleType;
     private final Object actionProvider;
+    private final ActionInputsHelper actionInputsHelper;
 
-    public AnnotationActionHandler(Action module, ActionType mt, Method method, Object actionProvider) {
+    public AnnotationActionHandler(Action module, ActionType mt, Method method, Object actionProvider,
+            ActionInputsHelper actionInputsHelper) {
         super(module);
 
         this.method = method;
         this.moduleType = mt;
         this.actionProvider = actionProvider;
+        this.actionInputsHelper = actionInputsHelper;
     }
 
     @Override
@@ -73,8 +77,9 @@ public class AnnotationActionHandler extends BaseActionModuleHandler {
                         Object value = context.get(inputAnnotation.name());
                         // fallback to configuration as this is where the UI stores the input values
                         if (value == null) {
-                            value = SerialisedInputsToActionInputs.map(moduleType, moduleType.getInputs().get(i),
-                                    module.getConfiguration().get(inputAnnotation.name()), null);
+                            value = actionInputsHelper.mapSerializedInputToActionInput(moduleType,
+                                    moduleType.getInputs().get(i),
+                                    module.getConfiguration().get(inputAnnotation.name()));
                         }
                         args.add(i, value);
                     } else {
@@ -96,9 +101,9 @@ public class AnnotationActionHandler extends BaseActionModuleHandler {
             logger.debug("Calling action method {} with the following arguments:", method.getName());
             for (int i = 0; i < arguments.length; i++) {
                 if (arguments[i] == null) {
-                    logger.debug("  - Argument {}: null", i + 1);
+                    logger.debug("  - Argument {}: null", i);
                 } else {
-                    logger.debug("  - Argument {}: type {} value {}", i + 1, arguments[i].getClass().getCanonicalName(),
+                    logger.debug("  - Argument {}: type {} value {}", i, arguments[i].getClass().getCanonicalName(),
                             arguments[i]);
                 }
             }

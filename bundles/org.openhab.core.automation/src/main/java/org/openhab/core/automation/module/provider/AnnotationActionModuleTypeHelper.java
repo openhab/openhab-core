@@ -39,13 +39,15 @@ import org.openhab.core.automation.type.ActionType;
 import org.openhab.core.automation.type.Input;
 import org.openhab.core.automation.type.ModuleTypeProvider;
 import org.openhab.core.automation.type.Output;
-import org.openhab.core.automation.util.mapper.ActionInputsToConfigDescriptionParameters;
+import org.openhab.core.automation.util.mapper.ActionInputsHelper;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
 import org.openhab.core.config.core.ConfigDescriptionParameterBuilder;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.config.core.ParameterOption;
-import org.openhab.core.i18n.UnitProvider;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,8 +56,10 @@ import org.slf4j.LoggerFactory;
  *
  * @author Stefan Triller - Initial contribution
  * @author Florian Hotze - Added configuration description parameters for thing modules
+ * @author Laurent Garnier - Injected component ActionInputsHelper
  */
 @NonNullByDefault
+@Component
 public class AnnotationActionModuleTypeHelper {
 
     private final Logger logger = LoggerFactory.getLogger(AnnotationActionModuleTypeHelper.class);
@@ -63,6 +67,13 @@ public class AnnotationActionModuleTypeHelper {
     private static final String SELECT_SERVICE_LABEL = "Select Service Instance";
     private static final String SELECT_THING_LABEL = "Select Thing";
     public static final String CONFIG_PARAM = "config";
+
+    private final ActionInputsHelper actionInputsHelper;
+
+    @Activate
+    public AnnotationActionModuleTypeHelper(final @Reference ActionInputsHelper actionInputsHelper) {
+        this.actionInputsHelper = actionInputsHelper;
+    }
 
     public Collection<ModuleInformation> parseAnnotations(Object actionProvider) {
         Class<?> clazz = actionProvider.getClass();
@@ -148,11 +159,6 @@ public class AnnotationActionModuleTypeHelper {
     }
 
     public @Nullable ActionType buildModuleType(String uid, Map<String, Set<ModuleInformation>> moduleInformation) {
-        return buildModuleType(uid, moduleInformation, null);
-    }
-
-    public @Nullable ActionType buildModuleType(String uid, Map<String, Set<ModuleInformation>> moduleInformation,
-            @Nullable UnitProvider unitProvider) {
         Set<ModuleInformation> mis = moduleInformation.get(uid);
         List<ConfigDescriptionParameter> configDescriptions = new ArrayList<>();
 
@@ -180,8 +186,8 @@ public class AnnotationActionModuleTypeHelper {
 
             if (kind == ActionModuleKind.THING) {
                 // we have a Thing module, so we have to map the inputs to config description parameters for the UI
-                List<ConfigDescriptionParameter> inputConfigDescriptions = ActionInputsToConfigDescriptionParameters
-                        .map(mi.getInputs(), unitProvider);
+                List<ConfigDescriptionParameter> inputConfigDescriptions = actionInputsHelper
+                        .mapActionInputsToConfigDescriptionParameters(mi.getInputs());
                 if (inputConfigDescriptions != null) {
                     // all inputs have a supported type
                     configDescriptions.addAll(inputConfigDescriptions);

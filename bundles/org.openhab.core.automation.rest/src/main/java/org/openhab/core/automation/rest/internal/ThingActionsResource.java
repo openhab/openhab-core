@@ -45,12 +45,11 @@ import org.openhab.core.automation.type.Input;
 import org.openhab.core.automation.type.ModuleTypeRegistry;
 import org.openhab.core.automation.type.Output;
 import org.openhab.core.automation.util.ModuleBuilder;
-import org.openhab.core.automation.util.mapper.SerialisedInputsToActionInputs;
+import org.openhab.core.automation.util.mapper.ActionInputsHelper;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.config.core.dto.ConfigDescriptionDTOMapper;
 import org.openhab.core.config.core.dto.ConfigDescriptionParameterDTO;
-import org.openhab.core.i18n.UnitProvider;
 import org.openhab.core.io.rest.LocaleService;
 import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
@@ -96,18 +95,18 @@ public class ThingActionsResource implements RESTResource {
     public static final String PATH_THINGS = "actions";
 
     private final LocaleService localeService;
-    private final UnitProvider unitProvider;
     private final ModuleTypeRegistry moduleTypeRegistry;
+    private final ActionInputsHelper actionInputsHelper;
 
     Map<ThingUID, Map<String, ThingActions>> thingActionsMap = new ConcurrentHashMap<>();
     private List<ModuleHandlerFactory> moduleHandlerFactories = new ArrayList<>();
 
     @Activate
-    public ThingActionsResource(@Reference LocaleService localeService, @Reference UnitProvider unitProvider,
-            @Reference ModuleTypeRegistry moduleTypeRegistry) {
+    public ThingActionsResource(@Reference LocaleService localeService,
+            @Reference ModuleTypeRegistry moduleTypeRegistry, @Reference ActionInputsHelper actionInputsHelper) {
         this.localeService = localeService;
-        this.unitProvider = unitProvider;
         this.moduleTypeRegistry = moduleTypeRegistry;
+        this.actionInputsHelper = actionInputsHelper;
     }
 
     @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.MULTIPLE)
@@ -182,7 +181,7 @@ public class ThingActionsResource implements RESTResource {
                 // Filter the configuration description parameters that correspond to inputs
                 List<ConfigDescriptionParameter> inputParameters = new ArrayList<>();
                 for (ConfigDescriptionParameter parameter : actionType.getConfigurationDescriptions()) {
-                    if (hasInput(actionType, parameter.getName())) {
+                    if (actionType.getInputs().stream().anyMatch(i -> i.getName().equals(parameter.getName()))) {
                         inputParameters.add(parameter);
                     }
                 }
@@ -246,7 +245,7 @@ public class ThingActionsResource implements RESTResource {
 
         try {
             Map<String, Object> returnValue = Objects.requireNonNullElse(
-                    handler.execute(SerialisedInputsToActionInputs.map(actionType, actionInputs, unitProvider)),
+                    handler.execute(actionInputsHelper.mapSerializedInputsToActionInputs(actionType, actionInputs)),
                     Map.of());
             moduleHandlerFactory.ungetHandler(action, ruleUID, handler);
             return Response.ok(returnValue).build();
@@ -262,15 +261,6 @@ public class ThingActionsResource implements RESTResource {
             return null;
         }
         return scopeAnnotation.name();
-    }
-
-    private boolean hasInput(ActionType actionType, String in) {
-        for (Input i : actionType.getInputs()) {
-            if (i.getName().equals(in)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private static class ThingActionDTO {
