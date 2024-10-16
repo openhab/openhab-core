@@ -198,7 +198,8 @@ public class AnnotationActionModuleTypeHelper {
                 } catch (IllegalArgumentException e) {
                     // we have an input without a supported type, so hide the Thing action
                     visibility = Visibility.HIDDEN;
-                    logger.debug("Thing action {} has an input with an unsupported type, hiding it in the UI.", uid);
+                    logger.debug("{} Thing action {} has an input with an unsupported type, hiding it in the UI.",
+                            e.getMessage(), uid);
                 }
             }
 
