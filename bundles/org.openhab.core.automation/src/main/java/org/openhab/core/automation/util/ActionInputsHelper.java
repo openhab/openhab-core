@@ -79,19 +79,15 @@ public class ActionInputsHelper {
      * Maps a list of {@link Input}s to a list of {@link ConfigDescriptionParameter}s.
      *
      * @param inputs the list of inputs to map to config description parameters
-     * @return the list of config description parameters or null if an input parameter has an unsupported type
+     * @return the list of config description parameters
+     * @throws IllegalArgumentException if at least one of the input parameters has an unsupported type
      */
-    public @Nullable List<ConfigDescriptionParameter> mapActionInputsToConfigDescriptionParameters(List<Input> inputs) {
+    public List<ConfigDescriptionParameter> mapActionInputsToConfigDescriptionParameters(List<Input> inputs)
+            throws IllegalArgumentException {
         List<ConfigDescriptionParameter> configDescriptionParameters = new ArrayList<>();
 
         for (Input input : inputs) {
-            ConfigDescriptionParameter parameter = mapActionInputToConfigDescriptionParameter(input);
-            if (parameter != null) {
-                configDescriptionParameters.add(parameter);
-            } else {
-                configDescriptionParameters = null;
-                break;
-            }
+            configDescriptionParameters.add(mapActionInputToConfigDescriptionParameter(input));
         }
 
         return configDescriptionParameters;
@@ -101,9 +97,11 @@ public class ActionInputsHelper {
      * Maps an {@link Input} to a {@link ConfigDescriptionParameter}.
      *
      * @param input the input to map to a config description parameter
-     * @return the config description parameter or null if the input parameter has an unsupported type
+     * @return the config description parameter
+     * @throws IllegalArgumentException if the input parameter has an unsupported type
      */
-    public @Nullable ConfigDescriptionParameter mapActionInputToConfigDescriptionParameter(Input input) {
+    public ConfigDescriptionParameter mapActionInputToConfigDescriptionParameter(Input input)
+            throws IllegalArgumentException {
         boolean supported = true;
         ConfigDescriptionParameter.Type parameterType = ConfigDescriptionParameter.Type.TEXT;
         String defaultValue = null;
@@ -175,7 +173,8 @@ public class ActionInputsHelper {
         if (!supported) {
             logger.debug("Input parameter '{}' with type {} cannot be converted into a config description parameter!",
                     input.getName(), input.getType());
-            return null;
+            throw new IllegalArgumentException("Input parameter '" + input.getName() + "' with type " + input.getType()
+                    + "cannot be converted into a config description parameter!");
         }
 
         ConfigDescriptionParameterBuilder builder = ConfigDescriptionParameterBuilder
@@ -205,7 +204,11 @@ public class ActionInputsHelper {
         for (Input input : actionType.getInputs()) {
             String name = input.getName();
             Object value = arguments.get(name);
-            value = mapSerializedInputToActionInput(actionType, input, value);
+            try {
+                value = mapSerializedInputToActionInput(actionType, input, value);
+            } catch (IllegalArgumentException e) {
+                value = null;
+            }
             if (value == null) {
                 continue;
             }
@@ -220,10 +223,11 @@ public class ActionInputsHelper {
      * @param actionType the action type whose inputs to consider
      * @param input the input whose type to consider
      * @param argument the serialised argument
-     * @return the mapped argument or null if the input argument was null or mapping failed
+     * @return the mapped argument or null if the input argument was null
+     * @throws IllegalArgumentException if the mapping failed
      */
     public @Nullable Object mapSerializedInputToActionInput(ActionType actionType, Input input,
-            @Nullable Object argument) {
+            @Nullable Object argument) throws IllegalArgumentException {
         boolean failed = false;
         if (argument == null) {
             return null;
@@ -310,8 +314,10 @@ public class ActionInputsHelper {
             logger.warn(
                     "Action {} input parameter '{}': converting value '{}' into type {} failed! Input parameter is ignored.",
                     actionType.getUID(), input.getName(), argument, input.getType());
+            throw new IllegalArgumentException("Action " + actionType.getUID() + " input parameter '" + input.getName()
+                    + "': converting value '" + argument.toString() + "' into type " + input.getType() + " failed!");
         }
-        return failed ? null : argument;
+        return argument;
     }
 
     private Unit<?> getDefaultUnit(String dimensionName) throws IllegalArgumentException {

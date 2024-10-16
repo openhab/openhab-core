@@ -191,12 +191,11 @@ public class AnnotationActionModuleTypeHelper {
 
             if (kind == ActionModuleKind.THING) {
                 // we have a Thing module, so we have to map the inputs to config description parameters for the UI
-                List<ConfigDescriptionParameter> inputConfigDescriptions = actionInputsHelper
-                        .mapActionInputsToConfigDescriptionParameters(mi.getInputs());
-                if (inputConfigDescriptions != null) {
-                    // all inputs have a supported type
+                try {
+                    List<ConfigDescriptionParameter> inputConfigDescriptions = actionInputsHelper
+                            .mapActionInputsToConfigDescriptionParameters(mi.getInputs());
                     configDescriptions.addAll(inputConfigDescriptions);
-                } else {
+                } catch (IllegalArgumentException e) {
                     // we have an input without a supported type, so hide the Thing action
                     visibility = Visibility.HIDDEN;
                     logger.debug("Thing action {} has an input with an unsupported type, hiding it in the UI.", uid);
