@@ -82,6 +82,7 @@ public class AnnotationActionHandler extends BaseActionModuleHandler {
                                         moduleType.getInputs().get(i),
                                         module.getConfiguration().get(inputAnnotation.name()));
                             } catch (IllegalArgumentException e) {
+                                logger.debug("{} Input parameter is ignored.", e.getMessage());
                                 // Ignore it and keep null in value
                             }
                         }

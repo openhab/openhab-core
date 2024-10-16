@@ -172,8 +172,6 @@ public class ActionInputsHelper {
             }
         }
         if (!supported) {
-            logger.debug("Input parameter '{}' with type {} cannot be converted into a config description parameter!",
-                    input.getName(), input.getType());
             throw new IllegalArgumentException("Input parameter '" + input.getName() + "' with type " + input.getType()
                     + "cannot be converted into a config description parameter!");
         }
@@ -208,6 +206,7 @@ public class ActionInputsHelper {
             try {
                 value = mapSerializedInputToActionInput(actionType, input, value);
             } catch (IllegalArgumentException e) {
+                logger.warn("{} Input parameter is ignored.", e.getMessage());
                 value = null;
             }
             if (value == null) {
@@ -312,9 +311,6 @@ public class ActionInputsHelper {
             }
         }
         if (failed) {
-            logger.warn(
-                    "Action {} input parameter '{}': converting value '{}' into type {} failed! Input parameter is ignored.",
-                    actionType.getUID(), input.getName(), argument, input.getType());
             throw new IllegalArgumentException("Action " + actionType.getUID() + " input parameter '" + input.getName()
                     + "': converting value '" + argument.toString() + "' into type " + input.getType() + " failed!");
         }
