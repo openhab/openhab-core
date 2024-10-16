@@ -47,6 +47,7 @@ import org.openhab.core.config.core.Configuration;
 import org.openhab.core.config.core.ParameterOption;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,7 +60,7 @@ import org.slf4j.LoggerFactory;
  * @author Laurent Garnier - Injected component ActionInputsHelper
  */
 @NonNullByDefault
-@Component
+@Component(service = AnnotationActionModuleTypeHelper.class)
 public class AnnotationActionModuleTypeHelper {
 
     private final Logger logger = LoggerFactory.getLogger(AnnotationActionModuleTypeHelper.class);
@@ -73,6 +74,10 @@ public class AnnotationActionModuleTypeHelper {
     @Activate
     public AnnotationActionModuleTypeHelper(final @Reference ActionInputsHelper actionInputsHelper) {
         this.actionInputsHelper = actionInputsHelper;
+    }
+
+    @Deactivate
+    protected void deactivate() {
     }
 
     public Collection<ModuleInformation> parseAnnotations(Object actionProvider) {

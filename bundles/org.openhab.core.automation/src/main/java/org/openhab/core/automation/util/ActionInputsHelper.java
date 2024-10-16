@@ -45,6 +45,7 @@ import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.types.util.UnitUtils;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +57,7 @@ import org.slf4j.LoggerFactory;
  * @author Laurent Garnier & Florian Hotze - Initial contribution
  */
 @NonNullByDefault
-@Component
+@Component(service = ActionInputsHelper.class)
 public class ActionInputsHelper {
     private static final Pattern QUANTITY_TYPE_PATTERN = Pattern
             .compile("([a-z0-9]+\\.)*QuantityType<([a-z0-9]+\\.)*(?<dimension>[A-Z][a-zA-Z0-9]*)>");
@@ -68,6 +69,10 @@ public class ActionInputsHelper {
     @Activate
     public ActionInputsHelper(final @Reference UnitProvider unitProvider) {
         this.unitProvider = unitProvider;
+    }
+
+    @Deactivate
+    protected void deactivate() {
     }
 
     /**
