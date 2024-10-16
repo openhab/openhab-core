@@ -454,7 +454,7 @@ public class PersistenceResource implements RESTResource {
         while (it.hasNext()) {
             HistoricItem historicItem = it.next();
             State state = historicItem.getState();
-            long timestamp = historicItem.getTimestamp().toInstant().toEpochMilli();
+            long timestamp = historicItem.getInstant().toEpochMilli();
 
             // For 'binary' states, we need to replicate the data
             // to avoid diagonal lines
