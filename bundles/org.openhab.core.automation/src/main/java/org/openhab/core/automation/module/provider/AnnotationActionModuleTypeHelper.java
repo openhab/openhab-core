@@ -57,7 +57,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Stefan Triller - Initial contribution
  * @author Florian Hotze - Added configuration description parameters for thing modules
- * @author Laurent Garnier - Injected component ActionInputsHelper
+ * @author Laurent Garnier - Converted into a an OSGi component
  */
 @NonNullByDefault
 @Component(service = AnnotationActionModuleTypeHelper.class)

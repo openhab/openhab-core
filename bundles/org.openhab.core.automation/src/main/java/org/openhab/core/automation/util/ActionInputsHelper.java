@@ -51,8 +51,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This is a utility class to convert serialised inputs to the Java types required by the {@link Input}s of a
- * {@link ActionType}.
+ * This is an utility class to convert the {@link Input}s of a {@link ActionType} into a list of
+ * {@link ConfigDescriptionParameter}s and to convert serialised inputs to the Java types required by the
+ * {@link Input}s of a {@link ActionType}.
  *
  * @author Laurent Garnier & Florian Hotze - Initial contribution
  */
