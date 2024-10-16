@@ -205,7 +205,7 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
         // check if it is an installed add-on (cachedAddons also contains possibly incomplete results from the remote
         // side, we need to retrieve them from Discourse)
 
-        if (installedAddons.contains(queryId)) {
+        if (installedAddonIds.contains(queryId)) {
             return cachedAddons.stream().filter(e -> queryId.equals(e.getUid())).findAny().orElse(null);
         }
 
