@@ -191,11 +191,10 @@ public class ActionInputsHelper {
     public Map<String, Object> mapSerializedInputsToActionInputs(ActionType actionType, Map<String, Object> arguments) {
         Map<String, Object> newArguments = new HashMap<>();
         for (Input input : actionType.getInputs()) {
-            String name = input.getName();
-            Object value = arguments.get(name);
+            Object value = arguments.get(input.getName());
             if (value != null) {
                 try {
-                    newArguments.put(name, mapSerializedInputToActionInput(actionType, input, value));
+                    newArguments.put(input.getName(), mapSerializedInputToActionInput(actionType, input, value));
                 } catch (IllegalArgumentException e) {
                     logger.warn("{} Input parameter is ignored.", e.getMessage());
                 }
