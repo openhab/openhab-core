@@ -34,7 +34,6 @@ import javax.measure.Quantity;
 import javax.measure.Unit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.type.ActionType;
 import org.openhab.core.automation.type.Input;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
@@ -194,16 +193,13 @@ public class ActionInputsHelper {
         for (Input input : actionType.getInputs()) {
             String name = input.getName();
             Object value = arguments.get(name);
-            try {
-                value = mapSerializedInputToActionInput(actionType, input, value);
-            } catch (IllegalArgumentException e) {
-                logger.warn("{} Input parameter is ignored.", e.getMessage());
-                value = null;
+            if (value != null) {
+                try {
+                    newArguments.put(name, mapSerializedInputToActionInput(actionType, input, value));
+                } catch (IllegalArgumentException e) {
+                    logger.warn("{} Input parameter is ignored.", e.getMessage());
+                }
             }
-            if (value == null) {
-                continue;
-            }
-            newArguments.put(name, value);
         }
         return newArguments;
     }
@@ -214,15 +210,12 @@ public class ActionInputsHelper {
      * @param actionType the action type whose inputs to consider
      * @param input the input whose type to consider
      * @param argument the serialised argument
-     * @return the mapped argument or null if the input argument was null
+     * @return the mapped argument
      * @throws IllegalArgumentException if the mapping failed
      */
-    public @Nullable Object mapSerializedInputToActionInput(ActionType actionType, Input input,
-            @Nullable Object argument) throws IllegalArgumentException {
+    public Object mapSerializedInputToActionInput(ActionType actionType, Input input, Object argument)
+            throws IllegalArgumentException {
         boolean failed = false;
-        if (argument == null) {
-            return null;
-        }
         Matcher matcher = QUANTITY_TYPE_PATTERN.matcher(input.getType());
         if (argument instanceof Double valueDouble) {
             // When an integer value is provided as input value, the value type in the Map is Double.
