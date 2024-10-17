@@ -194,7 +194,7 @@ public class ActionInputsHelper {
             Object value = arguments.get(input.getName());
             if (value != null) {
                 try {
-                    newArguments.put(input.getName(), mapSerializedInputToActionInput(actionType, input, value));
+                    newArguments.put(input.getName(), mapSerializedInputToActionInput(input, value));
                 } catch (IllegalArgumentException e) {
                     logger.warn("{} Input parameter is ignored.", e.getMessage());
                 }
@@ -206,14 +206,12 @@ public class ActionInputsHelper {
     /**
      * Maps a serialised input to the Java type required by the given {@link Input}.
      *
-     * @param actionType the action type whose inputs to consider
      * @param input the input whose type to consider
      * @param argument the serialised argument
      * @return the mapped argument
      * @throws IllegalArgumentException if the mapping failed
      */
-    public Object mapSerializedInputToActionInput(ActionType actionType, Input input, Object argument)
-            throws IllegalArgumentException {
+    public Object mapSerializedInputToActionInput(Input input, Object argument) throws IllegalArgumentException {
         try {
             Matcher matcher = QUANTITY_TYPE_PATTERN.matcher(input.getType());
             if (argument instanceof Double valueDouble) {
@@ -280,8 +278,8 @@ public class ActionInputsHelper {
             }
             return argument;
         } catch (IllegalArgumentException | DateTimeParseException | ParseException e) {
-            throw new IllegalArgumentException("Action " + actionType.getUID() + " input parameter '" + input.getName()
-                    + "': converting value '" + argument.toString() + "' into type " + input.getType() + " failed!");
+            throw new IllegalArgumentException("Input parameter '" + input.getName() + "': converting value '"
+                    + argument.toString() + "' into type " + input.getType() + " failed!");
         }
     }
 

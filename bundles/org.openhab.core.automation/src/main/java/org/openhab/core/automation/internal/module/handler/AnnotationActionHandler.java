@@ -80,7 +80,7 @@ public class AnnotationActionHandler extends BaseActionModuleHandler {
                             Object configValue = module.getConfiguration().get(inputAnnotation.name());
                             if (configValue != null) {
                                 try {
-                                    value = actionInputsHelper.mapSerializedInputToActionInput(moduleType,
+                                    value = actionInputsHelper.mapSerializedInputToActionInput(
                                             moduleType.getInputs().get(i), configValue);
                                 } catch (IllegalArgumentException e) {
                                     logger.debug("{} Input parameter is ignored.", e.getMessage());
