@@ -170,7 +170,7 @@ public class ActionInputsHelper {
                 .create(input.getName(), parameterType).withLabel(input.getLabel())
                 .withDescription(input.getDescription()).withReadOnly(false)
                 .withRequired(required || input.isRequired()).withContext(context);
-        if (!input.getDefaultValue().isEmpty()) {
+        if (input.getDefaultValue() != null && !input.getDefaultValue().isEmpty()) {
             builder = builder.withDefault(input.getDefaultValue());
         } else if (defaultValue != null) {
             builder = builder.withDefault(defaultValue);
