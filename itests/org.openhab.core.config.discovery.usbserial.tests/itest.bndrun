@@ -33,9 +33,9 @@ Provide-Capability: \
 	org.apache.felix.http.servlet-api;version='[1.2.0,1.2.1)',\
 	org.osgi.service.component;version='[1.5.1,1.5.2)',\
 	xstream;version='[1.4.20,1.4.21)',\
-	net.bytebuddy.byte-buddy;version='[1.12.19,1.12.20)',\
-	net.bytebuddy.byte-buddy-agent;version='[1.12.19,1.12.20)',\
-	org.mockito.mockito-core;version='[4.11.0,4.11.1)',\
+	net.bytebuddy.byte-buddy;version='[1.15.0,1.15.1)',\
+	net.bytebuddy.byte-buddy-agent;version='[1.15.0,1.15.1)',\
+	org.mockito.mockito-core;version='[5.13.0,5.13.1)',\
 	org.objenesis;version='[3.3.0,3.3.1)',\
 	org.openhab.base-fixes;version='[1.0.0,1.0.1)',\
 	javax.measure.unit-api;version='[2.2.0,2.2.1)',\
