@@ -215,19 +215,14 @@ public class ActionInputsHelper {
      */
     public Object mapSerializedInputToActionInput(ActionType actionType, Input input, Object argument)
             throws IllegalArgumentException {
-        boolean failed = false;
-        Matcher matcher = QUANTITY_TYPE_PATTERN.matcher(input.getType());
-        if (argument instanceof Double valueDouble) {
-            // When an integer value is provided as input value, the value type in the Map is Double.
-            // We have to convert Double type into the target type.
-            if (matcher.matches()) {
-                try {
+        try {
+            Matcher matcher = QUANTITY_TYPE_PATTERN.matcher(input.getType());
+            if (argument instanceof Double valueDouble) {
+                // When an integer value is provided as input value, the value type in the Map is Double.
+                // We have to convert Double type into the target type.
+                if (matcher.matches()) {
                     return new QuantityType<>(valueDouble, getDefaultUnit(matcher.group("dimension")));
-                } catch (IllegalArgumentException e) {
-                    failed = true;
-                }
-            } else {
-                try {
+                } else {
                     return switch (input.getType()) {
                         case "byte", "java.lang.Byte" -> Byte.valueOf(valueDouble.byteValue());
                         case "short", "java.lang.Short" -> Short.valueOf(valueDouble.shortValue());
@@ -237,26 +232,19 @@ public class ActionInputsHelper {
                         case "org.openhab.core.library.types.DecimalType" -> new DecimalType(valueDouble);
                         default -> argument;
                     };
-                } catch (NumberFormatException e) {
-                    failed = true;
                 }
-            }
-        } else if (argument instanceof String valueString) {
-            // String value is accepted to instantiate few target types
-            if (matcher.matches()) {
-                try {
-                    // The string can contain either a simple decimal value without unit or a decimal value with unit
+            } else if (argument instanceof String valueString) {
+                // String value is accepted to instantiate few target types
+                if (matcher.matches()) {
+                    // The string can contain either a simple decimal value without unit or a decimal value with
+                    // unit
                     try {
                         BigDecimal bigDecimal = new BigDecimal(valueString);
                         return new QuantityType<>(bigDecimal, getDefaultUnit(matcher.group("dimension")));
                     } catch (NumberFormatException e) {
                         return new QuantityType<>(valueString);
                     }
-                } catch (IllegalArgumentException e) {
-                    failed = true;
-                }
-            } else {
-                try {
+                } else {
                     return switch (input.getType()) {
                         case "boolean", "java.lang.Boolean" -> Boolean.valueOf(valueString.toLowerCase());
                         case "byte", "java.lang.Byte" -> Byte.valueOf(valueString);
@@ -289,16 +277,13 @@ public class ActionInputsHelper {
                             Duration.parse(valueString);
                         default -> argument;
                     };
-                } catch (NumberFormatException | DateTimeParseException | ParseException e) {
-                    failed = true;
                 }
             }
-        }
-        if (failed) {
+            return argument;
+        } catch (IllegalArgumentException | DateTimeParseException | ParseException e) {
             throw new IllegalArgumentException("Action " + actionType.getUID() + " input parameter '" + input.getName()
                     + "': converting value '" + argument.toString() + "' into type " + input.getType() + " failed!");
         }
-        return argument;
     }
 
     private Unit<?> getDefaultUnit(String dimensionName) throws IllegalArgumentException {
