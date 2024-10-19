@@ -44,6 +44,7 @@ import org.openhab.core.persistence.strategy.PersistenceStrategy;
  * The {@link PersistenceServiceConfigurationDTOMapper} is a utility class to map persistence configurations for storage
  *
  * @author Jan N. Klug - Initial contribution
+ * @author Mark Herwege - Implement aliases
  */
 @NonNullByDefault
 public class PersistenceServiceConfigurationDTOMapper {
@@ -58,6 +59,7 @@ public class PersistenceServiceConfigurationDTOMapper {
         dto.serviceId = persistenceServiceConfiguration.getUID();
         dto.configs = persistenceServiceConfiguration.getConfigs().stream()
                 .map(PersistenceServiceConfigurationDTOMapper::mapPersistenceItemConfig).toList();
+        dto.aliases = Map.copyOf(persistenceServiceConfiguration.getAliases());
         dto.defaults = persistenceServiceConfiguration.getDefaults().stream().map(PersistenceStrategy::getName)
                 .toList();
         dto.cronStrategies = filterList(persistenceServiceConfiguration.getStrategies(), PersistenceCronStrategy.class,
@@ -98,10 +100,12 @@ public class PersistenceServiceConfigurationDTOMapper {
                     .map(str -> stringToPersistenceStrategy(str, strategyMap, dto.serviceId)).toList();
             List<PersistenceFilter> filters = config.filters.stream()
                     .map(str -> stringToPersistenceFilter(str, filterMap, dto.serviceId)).toList();
-            return new PersistenceItemConfiguration(items, config.alias, strategies, filters);
+            return new PersistenceItemConfiguration(items, strategies, filters);
         }).toList();
 
-        return new PersistenceServiceConfiguration(dto.serviceId, configs, defaults, strategyMap.values(),
+        Map<String, String> aliases = Map.copyOf(dto.aliases);
+
+        return new PersistenceServiceConfiguration(dto.serviceId, configs, aliases, defaults, strategyMap.values(),
                 filterMap.values());
     }
 
@@ -159,7 +163,6 @@ public class PersistenceServiceConfigurationDTOMapper {
                 .toList();
         itemDto.strategies = config.strategies().stream().map(PersistenceStrategy::getName).toList();
         itemDto.filters = config.filters().stream().map(PersistenceFilter::getName).toList();
-        itemDto.alias = config.alias();
         return itemDto;
     }
 

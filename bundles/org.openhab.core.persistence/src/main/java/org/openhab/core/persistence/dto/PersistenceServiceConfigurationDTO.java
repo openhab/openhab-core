@@ -14,6 +14,7 @@ package org.openhab.core.persistence.dto;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
@@ -26,6 +27,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 public class PersistenceServiceConfigurationDTO {
     public String serviceId = "";
     public Collection<PersistenceItemConfigurationDTO> configs = List.of();
+    public Map<String, String> aliases = Map.of();
     public Collection<String> defaults = List.of();
     public Collection<PersistenceCronStrategyDTO> cronStrategies = List.of();
     public Collection<PersistenceFilterDTO> thresholdFilters = List.of();
