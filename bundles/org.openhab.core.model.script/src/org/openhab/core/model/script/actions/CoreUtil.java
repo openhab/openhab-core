@@ -70,4 +70,16 @@ public class CoreUtil {
         Gamut gamut = new Gamut(gamutR, gamutG, gamutB);
         return ColorUtil.xyToHsb(xy, gamut);
     }
+
+    public static double xyToDuv(double[] xy) throws IllegalArgumentException {
+        return ColorUtil.xyToDuv(xy);
+    }
+
+    public static double[] kelvinToXY(double kelvin) throws IndexOutOfBoundsException {
+        return ColorUtil.kelvinToXY(kelvin);
+    }
+
+    public static double xyToKelvin(double[] xy) throws IllegalArgumentException {
+        return ColorUtil.xyToKelvin(xy);
+    }
 }
