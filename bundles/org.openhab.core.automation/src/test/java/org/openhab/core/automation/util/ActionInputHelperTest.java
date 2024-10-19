@@ -59,7 +59,7 @@ import org.openhab.core.library.unit.SIUnits;
 @NonNullByDefault
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
-public class ActionInputHelplerTest {
+public class ActionInputHelperTest {
     private static final String PARAM_NAME = "Param";
     private static final String PARAM_LABEL = "Label Parameter";
     private static final String PARAM_DESCRIPTION = "Description parameter";
