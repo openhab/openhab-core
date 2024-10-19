@@ -995,8 +995,8 @@ public class SmokeTest extends IntegrationTestSupport {
                 Method socketImplCreateMethod = socketImplClass.getDeclaredMethod("createPlatformSocketImpl",
                         boolean.class);
                 socketImplCreateMethod.setAccessible(true);
-                Object socketImpl = socketImplCreateMethod.invoke(/* null since we deal with static method */ null,
-                        /* server */false);
+                Object socketImpl = socketImplCreateMethod
+                        .invoke(/* null since we deal with static method */ giveNull(), /* server */false);
 
                 Constructor<?> socksSocketImplConstructor = socksSocketImplClass
                         .getDeclaredConstructor(socketImplClass);

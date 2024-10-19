@@ -263,8 +263,9 @@ public abstract class AbstractFileTransformationService<T> implements Transforma
      */
     protected String getLocalizedProposedFilename(String filename, final WatchService watchService) {
         final File file = new File(filename);
-        if (file.getParent() != null) {
-            watchSubDirectory(file.getParent(), watchService);
+        final String parent = file.getParent();
+        if (parent != null) {
+            watchSubDirectory(parent, watchService);
         }
 
         String sourcePath = getSourcePath();
