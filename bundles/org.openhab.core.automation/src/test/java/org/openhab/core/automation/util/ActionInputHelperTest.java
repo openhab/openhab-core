@@ -64,74 +64,74 @@ public class ActionInputHelperTest {
     private static final String PARAM_LABEL = "Label Parameter";
     private static final String PARAM_DESCRIPTION = "Description parameter";
 
-    private UnitProvider unitProvider = new TestUnitProvider();;
+    private UnitProvider unitProvider = new TestUnitProvider();
     private ActionInputsHelper helper = new ActionInputsHelper(unitProvider);
 
     @Test
     public void testMapActionInputToConfigDescriptionParameterWhenBoolean() {
-        checkParamter(helper.mapActionInputToConfigDescriptionParameter(buildInput("java.lang.Boolean")),
+        checkParameter(helper.mapActionInputToConfigDescriptionParameter(buildInput("java.lang.Boolean")),
                 ConfigDescriptionParameter.Type.BOOLEAN, false, null, null, null);
-        checkParamter(helper.mapActionInputToConfigDescriptionParameter(buildInput("boolean")),
+        checkParameter(helper.mapActionInputToConfigDescriptionParameter(buildInput("boolean")),
                 ConfigDescriptionParameter.Type.BOOLEAN, true, "false", null, null);
     }
 
     @Test
     public void testMapActionInputToConfigDescriptionParameterWhenByte() {
-        checkParamter(helper.mapActionInputToConfigDescriptionParameter(buildInput("java.lang.Byte")),
+        checkParameter(helper.mapActionInputToConfigDescriptionParameter(buildInput("java.lang.Byte")),
                 ConfigDescriptionParameter.Type.INTEGER, false, null, null, null);
-        checkParamter(helper.mapActionInputToConfigDescriptionParameter(buildInput("byte")),
+        checkParameter(helper.mapActionInputToConfigDescriptionParameter(buildInput("byte")),
                 ConfigDescriptionParameter.Type.INTEGER, true, "0", null, null);
     }
 
     @Test
     public void testMapActionInputToConfigDescriptionParameterWhenShort() {
-        checkParamter(helper.mapActionInputToConfigDescriptionParameter(buildInput("java.lang.Short")),
+        checkParameter(helper.mapActionInputToConfigDescriptionParameter(buildInput("java.lang.Short")),
                 ConfigDescriptionParameter.Type.INTEGER, false, null, null, null);
-        checkParamter(helper.mapActionInputToConfigDescriptionParameter(buildInput("short")),
+        checkParameter(helper.mapActionInputToConfigDescriptionParameter(buildInput("short")),
                 ConfigDescriptionParameter.Type.INTEGER, true, "0", null, null);
     }
 
     @Test
     public void testMapActionInputToConfigDescriptionParameterWhenInteger() {
-        checkParamter(helper.mapActionInputToConfigDescriptionParameter(buildInput("java.lang.Integer")),
+        checkParameter(helper.mapActionInputToConfigDescriptionParameter(buildInput("java.lang.Integer")),
                 ConfigDescriptionParameter.Type.INTEGER, false, null, null, null);
-        checkParamter(helper.mapActionInputToConfigDescriptionParameter(buildInput("int")),
+        checkParameter(helper.mapActionInputToConfigDescriptionParameter(buildInput("int")),
                 ConfigDescriptionParameter.Type.INTEGER, true, "0", null, null);
     }
 
     @Test
     public void testMapActionInputToConfigDescriptionParameterWhenLong() {
-        checkParamter(helper.mapActionInputToConfigDescriptionParameter(buildInput("java.lang.Long")),
+        checkParameter(helper.mapActionInputToConfigDescriptionParameter(buildInput("java.lang.Long")),
                 ConfigDescriptionParameter.Type.INTEGER, false, null, null, null);
-        checkParamter(helper.mapActionInputToConfigDescriptionParameter(buildInput("long")),
+        checkParameter(helper.mapActionInputToConfigDescriptionParameter(buildInput("long")),
                 ConfigDescriptionParameter.Type.INTEGER, true, "0", null, null);
     }
 
     @Test
     public void testMapActionInputToConfigDescriptionParameterWhenFloat() {
-        checkParamter(helper.mapActionInputToConfigDescriptionParameter(buildInput("java.lang.Float")),
+        checkParameter(helper.mapActionInputToConfigDescriptionParameter(buildInput("java.lang.Float")),
                 ConfigDescriptionParameter.Type.DECIMAL, false, null, null, null);
-        checkParamter(helper.mapActionInputToConfigDescriptionParameter(buildInput("float")),
+        checkParameter(helper.mapActionInputToConfigDescriptionParameter(buildInput("float")),
                 ConfigDescriptionParameter.Type.DECIMAL, true, "0", null, null);
     }
 
     @Test
     public void testMapActionInputToConfigDescriptionParameterWhenDouble() {
-        checkParamter(helper.mapActionInputToConfigDescriptionParameter(buildInput("java.lang.Double")),
+        checkParameter(helper.mapActionInputToConfigDescriptionParameter(buildInput("java.lang.Double")),
                 ConfigDescriptionParameter.Type.DECIMAL, false, null, null, null);
-        checkParamter(helper.mapActionInputToConfigDescriptionParameter(buildInput("double")),
+        checkParameter(helper.mapActionInputToConfigDescriptionParameter(buildInput("double")),
                 ConfigDescriptionParameter.Type.DECIMAL, true, "0", null, null);
     }
 
     @Test
     public void testMapActionInputToConfigDescriptionParameterWhenNumber() {
-        checkParamter(helper.mapActionInputToConfigDescriptionParameter(buildInput("java.lang.Number")),
+        checkParameter(helper.mapActionInputToConfigDescriptionParameter(buildInput("java.lang.Number")),
                 ConfigDescriptionParameter.Type.DECIMAL, false, null, null, null);
     }
 
     @Test
     public void testMapActionInputToConfigDescriptionParameterWhenDecimalType() {
-        checkParamter(
+        checkParameter(
                 helper.mapActionInputToConfigDescriptionParameter(
                         buildInput("org.openhab.core.library.types.DecimalType")),
                 ConfigDescriptionParameter.Type.DECIMAL, false, null, null, null);
@@ -139,63 +139,63 @@ public class ActionInputHelperTest {
 
     @Test
     public void testMapActionInputToConfigDescriptionParameterWhenQuantityType() {
-        checkParamter(helper.mapActionInputToConfigDescriptionParameter(buildInput("QuantityType<Temperature>")),
+        checkParameter(helper.mapActionInputToConfigDescriptionParameter(buildInput("QuantityType<Temperature>")),
                 ConfigDescriptionParameter.Type.DECIMAL, false, null, null, "°C");
     }
 
     @Test
     public void testMapActionInputToConfigDescriptionParameterWhenString() {
-        checkParamter(helper.mapActionInputToConfigDescriptionParameter(buildInput("java.lang.String")),
+        checkParameter(helper.mapActionInputToConfigDescriptionParameter(buildInput("java.lang.String")),
                 ConfigDescriptionParameter.Type.TEXT, false, null, null, null);
     }
 
     @Test
     public void testMapActionInputToConfigDescriptionParameterWhenLocalDate() {
-        checkParamter(helper.mapActionInputToConfigDescriptionParameter(buildInput("java.time.LocalDate")),
+        checkParameter(helper.mapActionInputToConfigDescriptionParameter(buildInput("java.time.LocalDate")),
                 ConfigDescriptionParameter.Type.TEXT, false, null, "date", null);
     }
 
     @Test
     public void testMapActionInputToConfigDescriptionParameterWhenLocalTime() {
-        checkParamter(helper.mapActionInputToConfigDescriptionParameter(buildInput("java.time.LocalTime")),
+        checkParameter(helper.mapActionInputToConfigDescriptionParameter(buildInput("java.time.LocalTime")),
                 ConfigDescriptionParameter.Type.TEXT, false, null, "time", null);
     }
 
     @Test
     public void testMapActionInputToConfigDescriptionParameterWhenLocalDateTime() {
-        checkParamter(helper.mapActionInputToConfigDescriptionParameter(buildInput("java.time.LocalDateTime")),
+        checkParameter(helper.mapActionInputToConfigDescriptionParameter(buildInput("java.time.LocalDateTime")),
                 ConfigDescriptionParameter.Type.TEXT, false, null, "datetime", null);
     }
 
     @Test
     public void testMapActionInputToConfigDescriptionParameterWhenDate() {
-        checkParamter(helper.mapActionInputToConfigDescriptionParameter(buildInput("java.util.Date")),
+        checkParameter(helper.mapActionInputToConfigDescriptionParameter(buildInput("java.util.Date")),
                 ConfigDescriptionParameter.Type.TEXT, false, null, "datetime", null);
     }
 
     @Test
     public void testMapActionInputToConfigDescriptionParameterWhenZonedDateTime() {
-        checkParamter(helper.mapActionInputToConfigDescriptionParameter(buildInput("java.time.ZonedDateTime")),
+        checkParameter(helper.mapActionInputToConfigDescriptionParameter(buildInput("java.time.ZonedDateTime")),
                 ConfigDescriptionParameter.Type.TEXT, false, null, null, null);
     }
 
     @Test
     public void testMapActionInputToConfigDescriptionParameterWhenInstant() {
-        checkParamter(helper.mapActionInputToConfigDescriptionParameter(buildInput("java.time.Instant")),
+        checkParameter(helper.mapActionInputToConfigDescriptionParameter(buildInput("java.time.Instant")),
                 ConfigDescriptionParameter.Type.TEXT, false, null, null, null);
     }
 
     @Test
     public void testMapActionInputToConfigDescriptionParameterWhenDuration() {
-        checkParamter(helper.mapActionInputToConfigDescriptionParameter(buildInput("java.time.Duration")),
+        checkParameter(helper.mapActionInputToConfigDescriptionParameter(buildInput("java.time.Duration")),
                 ConfigDescriptionParameter.Type.TEXT, false, null, null, null);
     }
 
     @Test
     public void testMapActionInputToConfigDescriptionParameterWhenDefaultValue() {
         Input input = new Input(PARAM_NAME, "int", PARAM_LABEL, PARAM_DESCRIPTION, null, false, null, "-1");
-        checkParamter(helper.mapActionInputToConfigDescriptionParameter(input), ConfigDescriptionParameter.Type.INTEGER,
-                true, "-1", null, null);
+        checkParameter(helper.mapActionInputToConfigDescriptionParameter(input),
+                ConfigDescriptionParameter.Type.INTEGER, true, "-1", null, null);
     }
 
     @Test
@@ -211,9 +211,9 @@ public class ActionInputHelperTest {
         List<ConfigDescriptionParameter> params = helper
                 .mapActionInputsToConfigDescriptionParameters(List.of(input1, input2));
         assertThat(params.size(), is(2));
-        checkParamter(params.get(0), "Boolean", ConfigDescriptionParameter.Type.BOOLEAN, PARAM_LABEL, PARAM_DESCRIPTION,
-                true, "false", null, null);
-        checkParamter(params.get(1), "String", ConfigDescriptionParameter.Type.TEXT, PARAM_LABEL, PARAM_DESCRIPTION,
+        checkParameter(params.get(0), "Boolean", ConfigDescriptionParameter.Type.BOOLEAN, PARAM_LABEL,
+                PARAM_DESCRIPTION, true, "false", null, null);
+        checkParameter(params.get(1), "String", ConfigDescriptionParameter.Type.TEXT, PARAM_LABEL, PARAM_DESCRIPTION,
                 false, null, null, null);
     }
 
@@ -506,12 +506,12 @@ public class ActionInputHelperTest {
         return new Input(name, type, PARAM_LABEL, PARAM_DESCRIPTION, null, false, null, null);
     }
 
-    private void checkParamter(ConfigDescriptionParameter param, ConfigDescriptionParameter.Type type, boolean required,
-            @Nullable String defaultValue, @Nullable String context, @Nullable String unit) {
-        checkParamter(param, PARAM_NAME, type, PARAM_LABEL, PARAM_DESCRIPTION, required, defaultValue, context, unit);
+    private void checkParameter(ConfigDescriptionParameter param, ConfigDescriptionParameter.Type type,
+            boolean required, @Nullable String defaultValue, @Nullable String context, @Nullable String unit) {
+        checkParameter(param, PARAM_NAME, type, PARAM_LABEL, PARAM_DESCRIPTION, required, defaultValue, context, unit);
     }
 
-    private void checkParamter(ConfigDescriptionParameter param, String name, ConfigDescriptionParameter.Type type,
+    private void checkParameter(ConfigDescriptionParameter param, String name, ConfigDescriptionParameter.Type type,
             String label, String description, boolean required, @Nullable String defaultValue, @Nullable String context,
             @Nullable String unit) {
         assertThat(param.getName(), is(name));
