@@ -13,6 +13,7 @@
 package org.openhab.core.library.types;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.ParsePosition;
@@ -57,6 +58,8 @@ public class DecimalType extends Number implements PrimitiveType, State, Command
             this.value = type.toBigDecimal();
         } else if (value instanceof BigDecimal decimal) {
             this.value = decimal;
+        } else if (value instanceof BigInteger integer) {
+            this.value = new BigDecimal(integer);
         } else {
             this.value = new BigDecimal(value.toString());
         }
