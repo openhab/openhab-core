@@ -58,7 +58,7 @@ public class DecimalType extends Number implements PrimitiveType, State, Command
             this.value = type.toBigDecimal();
         } else if (value instanceof BigDecimal decimal) {
             this.value = decimal;
-        }else if (value instanceof BigInteger integer) {
+        } else if (value instanceof BigInteger integer) {
             this.value = new BigDecimal(integer);
         } else {
             this.value = new BigDecimal(value.toString());
