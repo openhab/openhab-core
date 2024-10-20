@@ -87,6 +87,12 @@
       <version>3.14.0</version>
       <scope>compile</scope>
     </dependency>
+    <dependency>
+      <groupId>commons-codec</groupId>
+      <artifactId>commons-codec</artifactId>
+      <version>1.17.0</version>
+      <scope>compile</scope>
+    </dependency>
 
     <!-- Californium -->
     <dependency>

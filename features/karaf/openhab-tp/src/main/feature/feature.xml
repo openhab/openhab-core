@@ -54,6 +54,11 @@
 		<bundle dependency="true">mvn:commons-net/commons-net/3.9.0</bundle>
 	</feature>
 
+	<feature name="openhab.tp-commons-codec" description="The Apache Commons Codec library" version="${project.version}">
+		<capability>openhab.tp;feature=commons-codec;version=1.17.0</capability>
+		<bundle dependency="true">mvn:commons-codec/commons-codec/1.17.0</bundle>
+	</feature>
+
 	<feature name="openhab.tp-gson" description="Gson" version="${project.version}">
 		<capability>openhab.tp;feature=gson;version=2.10.1</capability>
 		<bundle>mvn:org.eclipse.orbit.bundles/com.google.gson/2.10.1.v20230109-0753</bundle>
