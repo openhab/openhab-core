@@ -37,6 +37,7 @@ import com.google.gson.annotations.SerializedName;
  * @author Christoph Knauf - Added default constructor, changed Boolean
  *         getter to return primitive types
  * @author Thomas Höfer - Added unit
+ * @author Laurent Garnier - Removed constraint on unit value
  */
 public class ConfigDescriptionParameter {
 
@@ -181,9 +182,6 @@ public class ConfigDescriptionParameter {
         if ((type == Type.TEXT || type == Type.BOOLEAN) && (unit != null || unitLabel != null)) {
             throw new IllegalArgumentException(
                     "Unit or unit label must only be set for integer or decimal configuration parameters");
-        }
-        if (unit != null && !UNITS.contains(unit)) {
-            throw new IllegalArgumentException("The given unit is invalid.");
         }
 
         this.name = name;

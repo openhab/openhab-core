@@ -41,6 +41,7 @@ import org.openhab.core.automation.type.ActionType;
 import org.openhab.core.automation.type.Input;
 import org.openhab.core.automation.type.ModuleType;
 import org.openhab.core.automation.type.Output;
+import org.openhab.core.automation.util.ActionInputsHelper;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ParameterOption;
 import org.openhab.core.test.java.JavaTest;
@@ -74,6 +75,7 @@ public class AnnotationActionModuleTypeProviderTest extends JavaTest {
     private static final String ACTION_OUTPUT2_TYPE = "java.lang.String";
 
     private @Mock @NonNullByDefault({}) ModuleTypeI18nService moduleTypeI18nServiceMock;
+    private @Mock @NonNullByDefault({}) ActionInputsHelper actionInputsHelperMock;
 
     private AnnotatedActions actionProviderConf1 = new TestActionProvider();
     private AnnotatedActions actionProviderConf2 = new TestActionProvider();
@@ -86,7 +88,8 @@ public class AnnotationActionModuleTypeProviderTest extends JavaTest {
 
     @Test
     public void testMultiServiceAnnotationActions() {
-        AnnotatedActionModuleTypeProvider prov = new AnnotatedActionModuleTypeProvider(moduleTypeI18nServiceMock);
+        AnnotatedActionModuleTypeProvider prov = new AnnotatedActionModuleTypeProvider(moduleTypeI18nServiceMock,
+                new AnnotationActionModuleTypeHelper(actionInputsHelperMock), actionInputsHelperMock);
 
         Map<String, Object> properties1 = Map.of(OpenHAB.SERVICE_CONTEXT, "conf1");
         prov.addActionProvider(actionProviderConf1, properties1);
