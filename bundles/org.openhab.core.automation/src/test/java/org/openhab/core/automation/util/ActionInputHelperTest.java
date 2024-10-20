@@ -40,10 +40,6 @@ import javax.measure.spi.SystemOfUnits;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.junit.jupiter.MockitoSettings;
-import org.mockito.quality.Strictness;
 import org.openhab.core.automation.type.ActionType;
 import org.openhab.core.automation.type.Input;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
@@ -57,8 +53,6 @@ import org.openhab.core.library.unit.SIUnits;
  * @author Laurent Garnier - Initial contribution
  */
 @NonNullByDefault
-@ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.LENIENT)
 public class ActionInputHelperTest {
     private static final String PARAM_NAME = "Param";
     private static final String PARAM_LABEL = "Label Parameter";
