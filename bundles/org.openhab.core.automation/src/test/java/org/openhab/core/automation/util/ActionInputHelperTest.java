@@ -510,6 +510,9 @@ public class ActionInputHelperTest {
             @Nullable String unit) {
         assertThat(param.getName(), is(name));
         assertThat(param.getLabel(), is(label));
+        if (unit != null) {
+            description += " (" + unit + ")";
+        }
         assertThat(param.getDescription(), is(description));
         assertThat(param.getType(), is(type));
         assertThat(param.isReadOnly(), is(false));
