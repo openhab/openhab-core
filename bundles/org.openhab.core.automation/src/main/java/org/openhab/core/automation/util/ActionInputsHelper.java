@@ -172,9 +172,8 @@ public class ActionInputsHelper {
         }
 
         ConfigDescriptionParameterBuilder builder = ConfigDescriptionParameterBuilder
-                .create(input.getName(), parameterType).withLabel(input.getLabel())
-                .withDescription(description).withReadOnly(false)
-                .withRequired(required || input.isRequired()).withContext(context);
+                .create(input.getName(), parameterType).withLabel(input.getLabel()).withDescription(description)
+                .withReadOnly(false).withRequired(required || input.isRequired()).withContext(context);
         if (input.getDefaultValue() != null && !input.getDefaultValue().isEmpty()) {
             builder = builder.withDefault(input.getDefaultValue());
         } else if (defaultValue != null) {
