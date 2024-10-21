@@ -98,6 +98,7 @@ public class ActionInputsHelper {
     public ConfigDescriptionParameter mapActionInputToConfigDescriptionParameter(Input input)
             throws IllegalArgumentException {
         ConfigDescriptionParameter.Type parameterType = ConfigDescriptionParameter.Type.TEXT;
+        String description = input.getDescription();
         String defaultValue = null;
         Unit<?> unit = null;
         boolean required = false;
@@ -107,6 +108,10 @@ public class ActionInputsHelper {
             parameterType = ConfigDescriptionParameter.Type.DECIMAL;
             try {
                 unit = getDefaultUnit(matcher.group("dimension"));
+                String symbol = unit.getSymbol();
+                if (symbol != null) {
+                    description += " (" + unit + ")";
+                }
             } catch (IllegalArgumentException e) {
                 throw new IllegalArgumentException("Input parameter '" + input.getName() + "' with type "
                         + input.getType() + "cannot be converted into a config description parameter!", e);
@@ -168,7 +173,7 @@ public class ActionInputsHelper {
 
         ConfigDescriptionParameterBuilder builder = ConfigDescriptionParameterBuilder
                 .create(input.getName(), parameterType).withLabel(input.getLabel())
-                .withDescription(input.getDescription()).withReadOnly(false)
+                .withDescription(description).withReadOnly(false)
                 .withRequired(required || input.isRequired()).withContext(context);
         if (input.getDefaultValue() != null && !input.getDefaultValue().isEmpty()) {
             builder = builder.withDefault(input.getDefaultValue());
