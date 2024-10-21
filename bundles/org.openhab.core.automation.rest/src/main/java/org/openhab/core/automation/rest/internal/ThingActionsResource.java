@@ -149,7 +149,7 @@ public class ThingActionsResource implements RESTResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "getAvailableActionsForThing", summary = "Get all available actions for provided thing UID", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ThingActionDTO.class), uniqueItems = true))),
-            @ApiResponse(responseCode = "204", description = "No actions found.") })
+            @ApiResponse(responseCode = "404", description = "No actions found.") })
     public Response getActions(@PathParam("thingUID") @Parameter(description = "thingUID") String thingUID,
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language) {
         Locale locale = localeService.getLocale(language);
