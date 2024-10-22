@@ -66,6 +66,7 @@ import org.openhab.core.library.types.PercentType;
 import org.openhab.core.library.types.PlayPauseType;
 import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.model.sitemap.sitemap.ColorArray;
+import org.openhab.core.model.sitemap.sitemap.Colortemperaturepicker;
 import org.openhab.core.model.sitemap.sitemap.Default;
 import org.openhab.core.model.sitemap.sitemap.Group;
 import org.openhab.core.model.sitemap.sitemap.IconRule;
@@ -112,6 +113,7 @@ import org.slf4j.LoggerFactory;
  * @author Laurent Garnier - Support added for multiple AND conditions in labelcolor/valuecolor/visibility
  * @author Laurent Garnier - new icon parameter based on conditional rules
  * @author Danny Baumann - widget label source support
+ * @author Laurent Garnier - Consider Colortemperaturepicker element as possible default widget
  */
 @NonNullByDefault
 @Component(immediate = true, configurationPid = "org.openhab.sitemap", //
@@ -302,6 +304,11 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
             }
             if (!isReadOnly && NumberItem.class.isAssignableFrom(itemType) && hasItemTag(itemName, "Setpoint")) {
                 return SitemapFactory.eINSTANCE.createSetpoint();
+            } else if (!isReadOnly && NumberItem.class.isAssignableFrom(itemType)
+                    && hasItemTag(itemName, "ColorTemperature")) {
+                Colortemperaturepicker colortemperaturepicker = SitemapFactory.eINSTANCE.createColortemperaturepicker();
+                colortemperaturepicker.setReleaseOnly(true);
+                return colortemperaturepicker;
             } else {
                 return SitemapFactory.eINSTANCE.createText();
             }

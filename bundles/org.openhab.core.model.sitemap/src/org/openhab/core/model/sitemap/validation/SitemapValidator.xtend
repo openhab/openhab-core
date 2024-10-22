@@ -17,6 +17,7 @@ package org.openhab.core.model.sitemap.validation
 
 import org.openhab.core.model.sitemap.sitemap.Button
 import org.openhab.core.model.sitemap.sitemap.Buttongrid
+import org.openhab.core.model.sitemap.sitemap.Colortemperaturepicker
 import org.openhab.core.model.sitemap.sitemap.Frame
 import org.openhab.core.model.sitemap.sitemap.LinkableWidget
 import org.openhab.core.model.sitemap.sitemap.Setpoint
@@ -140,6 +141,14 @@ class SitemapValidator extends AbstractSitemapValidator {
         if (sp.minValue !== null && sp.maxValue !== null && sp.minValue > sp.maxValue) {
             error("Setpoint on item '" + sp.item + "' has larger minValue than maxValue",
                 SitemapPackage.Literals.SETPOINT.getEStructuralFeature(SitemapPackage.SETPOINT__MIN_VALUE));
+        }
+    }
+
+    @Check
+    def void checkColortemperaturepicker(Colortemperaturepicker ctp) {
+        if (ctp.minValue !== null && ctp.maxValue !== null && ctp.minValue > ctp.maxValue) {
+            error("Colortemperaturepicker on item '" + ctp.item + "' has larger minValue than maxValue",
+                SitemapPackage.Literals.COLORTEMPERATUREPICKER.getEStructuralFeature(SitemapPackage.COLORTEMPERATUREPICKER__MIN_VALUE));
         }
     }
 
