@@ -83,6 +83,7 @@ import org.openhab.core.model.sitemap.sitemap.ButtonDefinition;
 import org.openhab.core.model.sitemap.sitemap.Buttongrid;
 import org.openhab.core.model.sitemap.sitemap.Chart;
 import org.openhab.core.model.sitemap.sitemap.ColorArray;
+import org.openhab.core.model.sitemap.sitemap.Colortemperaturepicker;
 import org.openhab.core.model.sitemap.sitemap.Condition;
 import org.openhab.core.model.sitemap.sitemap.Frame;
 import org.openhab.core.model.sitemap.sitemap.IconRule;
@@ -145,6 +146,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * @author Laurent Garnier - New widget icon parameter based on conditional rules
  * @author Laurent Garnier - Added releaseCmd field for mappings used for switch element
  * @author Laurent Garnier - Added support for Buttongrid as container for Button elements
+ * @author Laurent Garnier - Added support for new sitemap element Colortemperaturepicker
  */
 @Component(service = { RESTResource.class, EventSubscriber.class })
 @JaxrsResource
@@ -699,6 +701,10 @@ public class SitemapResource
             bean.minValue = setpointWidget.getMinValue();
             bean.maxValue = setpointWidget.getMaxValue();
             bean.step = setpointWidget.getStep();
+        }
+        if (widget instanceof Colortemperaturepicker colortemperaturepickerWidget) {
+            bean.minValue = colortemperaturepickerWidget.getMinValue();
+            bean.maxValue = colortemperaturepickerWidget.getMaxValue();
         }
         if (widget instanceof Buttongrid buttonGridWidget) {
             for (ButtonDefinition button : buttonGridWidget.getButtons()) {
