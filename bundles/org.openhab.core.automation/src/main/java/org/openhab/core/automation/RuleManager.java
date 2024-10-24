@@ -14,6 +14,7 @@ package org.openhab.core.automation;
 
 import java.time.ZonedDateTime;
 import java.util.Map;
+import java.util.concurrent.Future;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -98,6 +99,33 @@ public interface RuleManager {
      * @return a copy of the rule context, including possible return values
      */
     Map<String, Object> runNow(String uid, boolean considerConditions, @Nullable Map<String, Object> context);
+
+    /**
+     * The method skips the triggers and the conditions and schedules execution of the actions of the rule by respective
+     * scheduler. This should always be possible unless an action has a mandatory input that is linked to a trigger. In
+     * that case the action is skipped and the rule engine continues execution of rest actions.
+     * <p>
+     * This method allows simultaneous calls from different threads without triggering "Failed to execute rule ‘{}' with
+     * status '{}'" error execution path.
+     *
+     * @param uid id of the rule whose actions have to be executed.
+     * @return a future with a copy of the rule context, including possible return values
+     */
+    Future<Map<String, Object>> scheduleRun(String uid);
+
+    /**
+     * Same as {@link #scheduleRun(String)} with the additional option to enable/disable evaluation of conditions
+     * defined in the target rule. The context can be set here, too, but also might be {@code null}.
+     * <p>
+     * This method allows simultaneous calls from different threads without triggering "Failed to execute rule ‘{}' with
+     * status '{}'" error execution path.
+     *
+     * @param uid id of the rule whose actions have to be executed.
+     * @param considerConditions if {@code true} the conditions of the rule will be checked.
+     * @param context the context that is passed to the conditions and the actions of the rule.
+     * @return a future with a copy of the rule context, including possible return values
+     */
+    Future<Map<String, Object>> scheduleRun(String uid, boolean considerConditions, Map<String, Object> context);
 
     /**
      * Simulates the execution of all rules with tag 'Schedule' for the given time interval.
