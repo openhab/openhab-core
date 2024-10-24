@@ -32,7 +32,7 @@ import org.mockito.ArgumentMatchers;
 /**
  * Test cases for the <code>HttpRequestBuilder</code> to validate its behaviour
  *
- * @author Martin van Wingerden & Wouter Born - Initial contribution
+ * @author Martin van Wingerden and Wouter Born - Initial contribution
  */
 @NonNullByDefault
 public class HttpRequestBuilderTest extends BaseHttpUtilTest {
