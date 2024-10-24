@@ -29,8 +29,28 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 public @interface ActionOutput {
 
+    /**
+     * Name of the output parameter
+     * <p>
+     * There are some reserved names that make the UI render the output pretty and not just as a text field:
+     * <ul>
+     * <li>qrCode: Render the output as a QR code.</li>
+     * </ul>
+     *
+     * @return the name of the output parameter
+     */
     String name();
 
+    /**
+     * Type of the output parameter
+     * <p>
+     * There are some special types that make the UI render the output pretty and not just as a text field:
+     * <ul>
+     * <li>qrCode: Render the output as a QR code.</li>
+     * </ul>
+     *
+     * @return the type of the output parameter
+     */
     String type();
 
     String label() default "";
