@@ -53,7 +53,7 @@ import org.slf4j.LoggerFactory;
  * {@link ConfigDescriptionParameter}s and to convert serialised inputs to the Java types required by the
  * {@link Input}s of a {@link ActionType}.
  *
- * @author Laurent Garnier & Florian Hotze - Initial contribution
+ * @author Laurent Garnier and Florian Hotze - Initial contribution
  */
 @NonNullByDefault
 @Component(service = ActionInputsHelper.class)
