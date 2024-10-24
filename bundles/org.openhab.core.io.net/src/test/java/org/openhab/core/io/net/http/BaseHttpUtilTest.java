@@ -33,7 +33,7 @@ import org.mockito.quality.Strictness;
 /**
  * Base class for tests for the <code>HttpRequestBuilder</code> and <code>HttpUtil</code> to validate their behavior
  *
- * @author Martin van Wingerden & Wouter Born - Initial contribution
+ * @author Martin van Wingerden and Wouter Born - Initial contribution
  * @author Markus Rathgeb - Base test classes without tests needs to be abstract
  */
 @ExtendWith(MockitoExtension.class)
