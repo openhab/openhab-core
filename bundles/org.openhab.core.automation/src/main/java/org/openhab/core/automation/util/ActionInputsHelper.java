@@ -178,6 +178,9 @@ public class ActionInputsHelper {
         if (unit != null) {
             builder = builder.withUnit(unit.getSymbol());
         }
+        if (parameterType == ConfigDescriptionParameter.Type.DECIMAL) {
+            builder = builder.withStepSize(BigDecimal.ZERO);
+        }
         return builder.build();
     }
 
