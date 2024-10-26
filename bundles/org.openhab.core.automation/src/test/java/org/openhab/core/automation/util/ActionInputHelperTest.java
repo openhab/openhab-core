@@ -479,6 +479,29 @@ public class ActionInputHelperTest {
     }
 
     @Test
+    public void testMapSerializedInputsToActionInputsAppliesDefaults() {
+        Input inputBoolean = buildInput("BooleanParam", "boolean");
+        Input inputByte = buildInput("ByteParam", "byte");
+        Input inputShort = buildInput("ShortParam", "short");
+        Input inputInteger = buildInput("IntegerParam", "int");
+        Input inputLong = buildInput("LongParam", "long");
+        Input inputFloat = buildInput("FloatParam", "float");
+        Input inputDouble = buildInput("DoubleParam", "double");
+        ActionType action = new ActionType("action", null,
+                List.of(inputBoolean, inputByte, inputShort, inputInteger, inputLong, inputFloat, inputDouble));
+
+        Map<String, Object> result = helper.mapSerializedInputsToActionInputs(action, Map.of());
+        assertThat(result.size(), is(7));
+        assertThat(result.get("BooleanParam"), is(Boolean.FALSE));
+        assertThat(result.get("ByteParam"), is((byte) 0));
+        assertThat(result.get("ShortParam"), is((short) 0));
+        assertThat(result.get("IntegerParam"), is(0));
+        assertThat(result.get("LongParam"), is(0L));
+        assertThat(result.get("FloatParam"), is(0.0f));
+        assertThat(result.get("DoubleParam"), is(0.0));
+    }
+
+    @Test
     public void testMapSerializedInputsToActionInputs() {
         Input input1 = buildInput("BooleanParam", "java.lang.Boolean");
         Input input2 = buildInput("DoubleParam", "java.lang.Double");
