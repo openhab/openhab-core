@@ -24,7 +24,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -411,13 +410,13 @@ public class ActionInputHelperTest {
 
     @Test
     public void testMapSerializedInputToActionInputWhenLocalDateTime() {
-        String valAsString = "2024-07-01 20:30:45";
-        LocalDateTime val = LocalDateTime.parse(valAsString, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        String valAsString = "2024-07-01T20:30:45";
+        LocalDateTime val = LocalDateTime.parse(valAsString);
         Input input = buildInput("java.time.LocalDateTime");
         assertThat(helper.mapSerializedInputToActionInput(input, val), is(val));
         assertThat(helper.mapSerializedInputToActionInput(input, valAsString), is(val));
         assertThrows(IllegalArgumentException.class,
-                () -> helper.mapSerializedInputToActionInput(input, valAsString.replaceAll(" ", "T")));
+                () -> helper.mapSerializedInputToActionInput(input, valAsString.replaceAll("T", " ")));
     }
 
     @Test
@@ -433,10 +432,10 @@ public class ActionInputHelperTest {
 
     @Test
     public void testMapSerializedInputToActionInputWhenDate() {
-        String valAsString = "2024-11-05 09:45:12";
+        String valAsString = "2024-11-05T09:45:12";
         Date val;
         try {
-            val = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(valAsString);
+            val = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(valAsString);
         } catch (IllegalArgumentException | ParseException e) {
             val = null;
         }
@@ -445,7 +444,7 @@ public class ActionInputHelperTest {
         assertThat(helper.mapSerializedInputToActionInput(input, val), is(val));
         assertThat(helper.mapSerializedInputToActionInput(input, valAsString), is(val));
         assertThrows(IllegalArgumentException.class,
-                () -> helper.mapSerializedInputToActionInput(input, valAsString.replaceAll(" ", "T")));
+                () -> helper.mapSerializedInputToActionInput(input, valAsString.replaceAll("T", " ")));
     }
 
     @Test

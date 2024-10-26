@@ -21,7 +21,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -258,11 +257,11 @@ public class ActionInputsHelper {
                             // Accepted format is: 10:15:30
                             LocalTime.parse(valueString);
                         case "java.time.LocalDateTime" ->
-                            // Accepted format is: 2007-12-03 10:15:30
-                            LocalDateTime.parse(valueString, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+                            // Accepted format is: 2007-12-03T10:15:30
+                            LocalDateTime.parse(valueString);
                         case "java.util.Date" ->
-                            // Accepted format is: 2007-12-03 10:15:30
-                            new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(valueString);
+                            // Accepted format is: 2007-12-03T10:15:30
+                            new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(valueString);
                         case "java.time.ZonedDateTime" ->
                             // Accepted format is: 2007-12-03T10:15:30+01:00[Europe/Paris]
                             ZonedDateTime.parse(valueString);
