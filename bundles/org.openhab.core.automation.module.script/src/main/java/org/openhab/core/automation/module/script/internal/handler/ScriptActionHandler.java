@@ -14,6 +14,8 @@ package org.openhab.core.automation.module.script.internal.handler;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
 import java.util.function.Consumer;
 
 import javax.script.ScriptException;
@@ -31,7 +33,8 @@ import org.slf4j.LoggerFactory;
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Simon Merschjohann - Initial contribution
- * @author Florian Hotze - Add support for script pre-compilation
+ * @author Florian Hotze - Add support for script pre-compilation, Synchronize script context access if the ScriptEngine
+ *         implements locking
  */
 @NonNullByDefault
 public class ScriptActionHandler extends AbstractScriptModuleHandler<Action> implements ActionHandler {
@@ -76,10 +79,27 @@ public class ScriptActionHandler extends AbstractScriptModuleHandler<Action> imp
         }
 
         getScriptEngine().ifPresent(scriptEngine -> {
-            setExecutionContext(scriptEngine, context);
-            Object result = eval(scriptEngine, script);
-            resultMap.put("result", result);
-            resetExecutionContext(scriptEngine, context);
+            try {
+                if (scriptEngine instanceof Lock lock && !lock.tryLock(1, TimeUnit.MINUTES)) {
+                    logger.error(
+                            "Failed to acquire lock within one minute for script module '{}' of rule with UID '{}'",
+                            module.getId(), ruleUID);
+                    return;
+                }
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            try {
+                setExecutionContext(scriptEngine, context);
+                Object result = eval(scriptEngine, script);
+                resultMap.put("result", result);
+                resetExecutionContext(scriptEngine, context);
+            } finally { // Make sure that Lock is unlocked regardless of an exception being thrown or not to avoid
+                        // deadlocks
+                if (scriptEngine instanceof Lock lock) {
+                    lock.unlock();
+                }
+            }
         });
 
         return resultMap;
