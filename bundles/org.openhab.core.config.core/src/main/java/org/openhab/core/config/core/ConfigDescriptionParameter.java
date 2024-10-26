@@ -317,7 +317,8 @@ public class ConfigDescriptionParameter {
      * - color: This value represents an RGB color value like #000000 - #ffffff or 12,12,12.
      * - date: A date string in the format "YYYY-MM-DD"
      * - datetime: A date and time string in the format "YYYY-MM-DD'T'hh:mm:ss", e.g. "2019-12-31T23:59:59"
-     * - cronexpression: A cron expression like "* * * * *". A user interface would probably show a cron expression generator.
+     * - cronexpression: A cron expression like "* * * * *". A user interface would probably show a cron expression
+     * generator.
      * - email: The configuration value represents an email address, e.g. username@domain.com
      * - month: A month of year [1-12]
      * - week: A week of year [0-52]
@@ -330,14 +331,17 @@ public class ConfigDescriptionParameter {
      * - thing: A valid thing UID. A user-interface would probably show a thing selection widget.
      * - group: A valid group item "name". A user-interface would probably show an item selection widget.
      * - service: A valid service ID. A user-interface would probably show a service selection widget.
-     * - persistenceService: A valid persistence service ID. A user-interface would probably show a persistence service selection widget.
+     * - persistenceService: A valid persistence service ID. A user-interface would probably show a persistence service
+     * selection widget.
      * - channel: A valid channel UID. A user-interface would probably show a channel selection widget.
      * - channeltype: A valid channel type UID. A user-interface would probably show a channel type selection widget.
      * - rule: A valid rule uid. A user-interface would probably show a rule selection widget.
-     * - script: The configuration value represents a script (javascript, python etc). A user-interface would probably render a multi line editor.
+     * - script: The configuration value represents a script (javascript, python etc). A user-interface would probably
+     * render a multi line editor.
      * - page: A valid page UID. A user-interface would probably show a page selection widget.
      * - widget: A valid widget UID. A user-interface would probably show a widget selection widget.
-     * - location: A latitude,longitude[,altitude] GPS location. A user-interface would probably render a world map for selection.
+     * - location: A latitude,longitude[,altitude] GPS location. A user-interface would probably render a world map for
+     * selection.
      *
      * @return the context of the configuration parameter (could be null or
      *         empty)
