@@ -309,31 +309,35 @@ public class ConfigDescriptionParameter {
      * Any string can be used, but the following have a special meaning:
      * </p>
      *
-     * - network-address: The configuration value represents an IPv4 or IPv6 address.
-     * - password: A password value (a user-interface might obscure the visible value)
-     * - password-create: A passwort generator widget might be shown
-     * - color: This value represents an RGB color value like #ffffff or 12,12,12.
-     * - date: A date string
-     * - time: A time string
-     * - cronexpression: A cron expression like "* * * * *". A user interface would probably show a cron expression
-     * generator.
-     * - datetime: A date and time string
-     * - email: The configuration value represents an email address
-     * - month: A number [1-12]
-     * - week: A week [0-52]
-     * - tel: A tel no
+     * - network-address: The configuration value represents an IPv4 or IPv6 address or domain name.
+     * - network-interface: The configuration value represents a network interface name, e.g. eth0, wlan0.
+     * - serial-port: The configuration value represents a serial port name, e.g. COM1, /dev/ttyS0.
+     * - password: A alphanumeric password value (a user-interface might obscure the visible value)
+     * - password-create: A alphanumeric passwort generator widget might be shown
+     * - color: This value represents an RGB color value like #000000 - #ffffff or 12,12,12.
+     * - date: A date string in the format "YYYY-MM-DD"
+     * - datetime: A date and time string in the format "YYYY-MM-DD'T'hh:mm:ss", e.g. "2019-12-31T23:59:59"
+     * - cronexpression: A cron expression like "* * * * *". A user interface would probably show a cron expression generator.
+     * - email: The configuration value represents an email address, e.g. username@domain.com
+     * - month: A month of year [1-12]
+     * - week: A week of year [0-52]
+     * - dayOfWeek: A day of week [MON, TUE, WED, THU, FRI, SAT, SUN]
+     * - time: A time string in the format "hh:mm:ss" or as milliseconds since epoch
+     * - telephone: A tel no
      * - url: A web address
-     * - script: The configuration value represents a script (javascript, python etc). A user-interface would probably
-     * render a multi line editor.
-     * - location: A lat,long,alt GPS location. A user-interface would probably render a world map for selection.
      * - tag: One tag or multiple tags separated by comma.
      * - item: A valid item "name". A user-interface would probably show an item selection widget.
      * - thing: A valid thing UID. A user-interface would probably show a thing selection widget.
-     * - channel: A valid channel UID.
-     * - channeltype: A valid channel type UID. A user-interface would probably show a channel type selection widget.
      * - group: A valid group item "name". A user-interface would probably show an item selection widget.
      * - service: A valid service ID. A user-interface would probably show a service selection widget.
+     * - persistenceService: A valid persistence service ID. A user-interface would probably show a persistence service selection widget.
+     * - channel: A valid channel UID. A user-interface would probably show a channel selection widget.
+     * - channeltype: A valid channel type UID. A user-interface would probably show a channel type selection widget.
      * - rule: A valid rule uid. A user-interface would probably show a rule selection widget.
+     * - script: The configuration value represents a script (javascript, python etc). A user-interface would probably render a multi line editor.
+     * - page: A valid page UID. A user-interface would probably show a page selection widget.
+     * - widget: A valid widget UID. A user-interface would probably show a widget selection widget.
+     * - location: A latitude,longitude[,altitude] GPS location. A user-interface would probably render a world map for selection.
      *
      * @return the context of the configuration parameter (could be null or
      *         empty)
