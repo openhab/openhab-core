@@ -265,6 +265,10 @@ public class ConfigDescriptionParameter {
     }
 
     /**
+     * Returns the value granularity for a numeric value.
+     * <p>
+     * By setting the step size to <code>0</code>, any granularity is allowed, i.e. any number of decimals is accepted.
+     *
      * @return the value granularity for a numeric value (nullable)
      */
     public BigDecimal getStepSize() {
