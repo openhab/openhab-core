@@ -33,6 +33,7 @@ import javax.measure.Quantity;
 import javax.measure.Unit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.type.ActionType;
 import org.openhab.core.automation.type.Input;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
@@ -177,6 +178,9 @@ public class ActionInputsHelper {
         if (unit != null) {
             builder = builder.withUnit(unit.getSymbol());
         }
+        if (parameterType == ConfigDescriptionParameter.Type.DECIMAL) {
+            builder = builder.withStepSize(BigDecimal.ZERO);
+        }
         return builder.build();
     }
 
@@ -197,9 +201,27 @@ public class ActionInputsHelper {
                 } catch (IllegalArgumentException e) {
                     logger.warn("{} Input parameter is ignored.", e.getMessage());
                 }
+            } else {
+                value = getDefaultValueForActionInput(input);
+                if (value != null) {
+                    newArguments.put(input.getName(), value);
+                }
             }
         }
         return newArguments;
+    }
+
+    private @Nullable Object getDefaultValueForActionInput(Input input) {
+        return switch (input.getType()) {
+            case "boolean" -> false;
+            case "byte" -> (byte) 0;
+            case "short" -> (short) 0;
+            case "int" -> 0;
+            case "long" -> 0L;
+            case "float" -> 0.0f;
+            case "double" -> 0.0d;
+            default -> null;
+        };
     }
 
     /**
