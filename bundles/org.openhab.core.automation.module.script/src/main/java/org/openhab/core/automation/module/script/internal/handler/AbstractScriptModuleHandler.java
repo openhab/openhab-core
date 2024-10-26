@@ -17,8 +17,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Lock;
 
 import javax.script.Compilable;
 import javax.script.CompiledScript;
@@ -38,6 +36,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * This is an abstract class that can be used when implementing any module handler that handles scripts.
+ * <p>
+ * Remember to implement multi-thread synchronization in the concrete handler if the script engine is not thread-safe!
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Simon Merschjohann - Initial contribution
@@ -212,28 +212,14 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
     protected @Nullable Object eval(ScriptEngine engine, String script) {
         try {
             if (compiledScript.isPresent()) {
-                if (engine instanceof Lock lock && !lock.tryLock(1, TimeUnit.MINUTES)) {
-                    logger.error("Failed to acquire lock within one minute for script module of rule with UID '{}'",
-                            ruleUID);
-                    return null;
-                }
                 logger.debug("Executing pre-compiled script of rule with UID '{}'", ruleUID);
-                try {
-                    return compiledScript.get().eval(engine.getContext());
-                } finally { // Make sure that Lock is unlocked regardless of an exception being thrown or not to avoid
-                            // deadlocks
-                    if (engine instanceof Lock lock) {
-                        lock.unlock();
-                    }
-                }
+                return compiledScript.get().eval(engine.getContext());
             }
             logger.debug("Executing script of rule with UID '{}'", ruleUID);
             return engine.eval(script);
         } catch (ScriptException e) {
             logger.error("Script execution of rule with UID '{}' failed: {}", ruleUID, e.getMessage(),
                     logger.isDebugEnabled() ? e : null);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
         }
         return null;
     }
