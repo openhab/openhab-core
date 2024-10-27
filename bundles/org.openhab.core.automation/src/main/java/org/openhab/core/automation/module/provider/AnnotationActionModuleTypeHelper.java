@@ -12,6 +12,8 @@
  */
 package org.openhab.core.automation.module.provider;
 
+import static org.openhab.core.automation.internal.module.handler.AnnotationActionHandler.MODULE_RESULT;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -143,17 +145,36 @@ public class AnnotationActionModuleTypeHelper {
         return inputs;
     }
 
+    private Output getOutputFromActionOutputAnnotation(ActionOutput ruleActionOutput, @Nullable String nameOverride) {
+        return new Output((nameOverride != null ? nameOverride : ruleActionOutput.name()), ruleActionOutput.type(),
+                ruleActionOutput.label(), ruleActionOutput.description(),
+                Arrays.stream(ruleActionOutput.tags()).collect(Collectors.toSet()), ruleActionOutput.reference(),
+                ruleActionOutput.defaultValue());
+    }
+
     private List<Output> getOutputsFromAction(Method method) {
         List<Output> outputs = new ArrayList<>();
+        // ActionOutputs annotation
         if (method.isAnnotationPresent(ActionOutputs.class)) {
-            for (ActionOutput ruleActionOutput : method.getAnnotationsByType(ActionOutput.class)) {
-                Output output = new Output(ruleActionOutput.name(), ruleActionOutput.type(), ruleActionOutput.label(),
-                        ruleActionOutput.description(),
-                        Arrays.stream(ruleActionOutput.tags()).collect(Collectors.toSet()),
-                        ruleActionOutput.reference(), ruleActionOutput.defaultValue());
-
-                outputs.add(output);
+            for (ActionOutput ruleActionOutput : method.getAnnotation(ActionOutputs.class).value()) {
+                outputs.add(getOutputFromActionOutputAnnotation(ruleActionOutput, null));
             }
+            // no ActionOutputs annotation, but a Map<String, Object> return type
+        } else if (method.getAnnotatedReturnType().toString()
+                .equals("java.util.Map<java.lang.String, java.lang.Object>")) {
+            logger.warn(
+                    "Method {}::{} returns a Map<String, Object> but is not annotated with ActionOutputs. This should be fixed in the binding.",
+                    method.getDeclaringClass().getSimpleName(), method.getName());
+            return outputs;
+            // no ActionOutputs annotation and no Map<String, Object> return type, but a single ActionOutput annotation
+        } else if (method.isAnnotationPresent(ActionOutput.class)) {
+            ActionOutput ruleActionOutput = method.getAnnotation(ActionOutput.class);
+            if (!ruleActionOutput.name().equals(MODULE_RESULT)) {
+                logger.warn(
+                        "Method {}::{} has a single output but does not use the default output name in the ActionOutput annotation. This should be fixed in the binding.",
+                        method.getDeclaringClass().getSimpleName(), method.getName());
+            }
+            outputs.add(getOutputFromActionOutputAnnotation(ruleActionOutput, MODULE_RESULT));
         }
         return outputs;
     }

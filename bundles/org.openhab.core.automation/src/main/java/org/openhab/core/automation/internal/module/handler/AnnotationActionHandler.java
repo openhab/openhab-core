@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
 @NonNullByDefault
 public class AnnotationActionHandler extends BaseActionModuleHandler {
 
-    private static final String MODULE_RESULT = "result";
+    public static final String MODULE_RESULT = "result";
 
     private final Logger logger = LoggerFactory.getLogger(AnnotationActionHandler.class);
 
