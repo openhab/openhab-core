@@ -13,6 +13,7 @@
 package org.openhab.core.automation.annotation;
 
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static org.openhab.core.automation.internal.module.handler.AnnotationActionHandler.MODULE_RESULT;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Repeatable;
@@ -39,7 +40,7 @@ public @interface ActionOutput {
      *
      * @return the name of the output parameter
      */
-    String name();
+    String name() default MODULE_RESULT;
 
     /**
      * Type of the output parameter
