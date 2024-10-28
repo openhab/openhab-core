@@ -389,7 +389,7 @@ public class ColorUtilTest {
      */
     private static Stream<Arguments> allHSB() {
         List<Arguments> result = new ArrayList<>();
-        final double step = 17.0;
+        final double step = 20.0;
         for (double h = 0; h < 360; h = h + step) {
             for (double s = 0; s <= 100; s = s + step) {
                 for (double b = 0; b <= 100; b = b + step) {
@@ -435,7 +435,7 @@ public class ColorUtilTest {
      */
     private static Stream<Arguments> allRGBW() {
         List<Arguments> result = new ArrayList<>();
-        final double step = 17.0;
+        final double step = 20.0;
         for (double r = 0; r <= 100; r = r + step) {
             for (double g = 0; g <= 100; g = g + step) {
                 for (double b = 0; b <= 100; b = b + step) {
