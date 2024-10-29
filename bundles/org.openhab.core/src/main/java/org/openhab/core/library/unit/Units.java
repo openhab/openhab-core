@@ -319,6 +319,9 @@ public final class Units extends CustomUnits {
         SimpleUnitFormat.getInstance().alias(MONTH, "mo");
         SimpleUnitFormat.getInstance().alias(WEEK, "wk");
         SimpleUnitFormat.getInstance().alias(YEAR, "y");
+
+        // other aliases
+        SimpleUnitFormat.getInstance().alias(MIRED, "MK⁻¹");
     }
 
     private Units() {
