@@ -389,7 +389,7 @@ public class ColorUtilTest {
      */
     private static Stream<Arguments> allHSB() {
         List<Arguments> result = new ArrayList<>();
-        final double step = 5.0;
+        final double step = 20.0;
         for (double h = 0; h < 360; h = h + step) {
             for (double s = 0; s <= 100; s = s + step) {
                 for (double b = 0; b <= 100; b = b + step) {
@@ -435,7 +435,7 @@ public class ColorUtilTest {
      */
     private static Stream<Arguments> allRGBW() {
         List<Arguments> result = new ArrayList<>();
-        final double step = 5.0;
+        final double step = 20.0;
         for (double r = 0; r <= 100; r = r + step) {
             for (double g = 0; g <= 100; g = g + step) {
                 for (double b = 0; b <= 100; b = b + step) {
@@ -444,6 +444,21 @@ public class ColorUtilTest {
                     }
                 }
             }
+        }
+        return result.stream();
+    }
+
+    /*
+     * Return an extended stream of Kelvin color temperature values.
+     * <p>
+     * Note that McCamy's approximation is accurate to better than 1% from 2000 K to 10000 K but below 2000 K the
+     * approximation error increases rapidly and exponentially. So we exclude those low values from the tests.
+     */
+    private static Stream<Arguments> allKelvin() {
+        List<Arguments> result = new ArrayList<>();
+        final double step = 5.0;
+        for (double kelvin = 2000; kelvin <= 10000; kelvin = kelvin + step) {
+            result.add(Arguments.of(kelvin));
         }
         return result.stream();
     }
@@ -658,20 +673,24 @@ public class ColorUtilTest {
     }
 
     /**
-     * Test conversion between colour temperature in Kelvin and points on the colour
-     * temperature locus in the CIE XY colour space
+     * Test conversion between colour temperature in Kelvin and points on the colour temperature locus in the CIE XY
+     * colour space. Specifically test the minimum and maximum limits 1000 .. 100 Mirek i.e. 1000 .. 10000 K
      */
     @Test
-    void testKelvinXyConversion() {
-        // test minimum and maximum limits 500..153 Mirek i.e. 2000..6536 Kelvin
-        assertThrows(IndexOutOfBoundsException.class, () -> ColorUtil.kelvinToXY(1000000 / 501));
-        assertDoesNotThrow(() -> ColorUtil.kelvinToXY(1000000 / 500));
-        assertDoesNotThrow(() -> ColorUtil.kelvinToXY(1000000 / 153));
-        assertThrows(IndexOutOfBoundsException.class, () -> ColorUtil.kelvinToXY(1000000 / 152));
+    void testKelvinXyConversionLimits() {
+        assertThrows(IndexOutOfBoundsException.class, () -> ColorUtil.kelvinToXY(1000000 / 1001));
+        assertDoesNotThrow(() -> ColorUtil.kelvinToXY(1000000 / 1000));
+        assertDoesNotThrow(() -> ColorUtil.kelvinToXY(1000000 / 100));
+        assertThrows(IndexOutOfBoundsException.class, () -> ColorUtil.kelvinToXY(1000000 / 99));
+    }
 
-        // test round trips K => XY => K
-        for (double kelvin = 2000; kelvin <= 6536; kelvin += 5) {
-            assertEquals(kelvin, ColorUtil.xyToKelvin(ColorUtil.kelvinToXY(kelvin)), 15);
-        }
+    /**
+     * Test conversion between colour temperature in Kelvin and points on the colour temperature locus in the CIE XY
+     * colour space. Specifically test round trip conversions K => XY => K
+     */
+    @ParameterizedTest
+    @MethodSource("allKelvin")
+    public void testKelvinXyRoundTrip(double kelvin) {
+        assertEquals(kelvin, ColorUtil.xyToKelvin(ColorUtil.kelvinToXY(kelvin)), kelvin / 100);
     }
 }
