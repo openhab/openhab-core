@@ -15,7 +15,7 @@ Widget:
     (LinkableWidget | NonLinkableWidget);
 
 NonLinkableWidget:
-    Switch | Selection | Slider | Setpoint | Video | Chart | Webview | Colorpicker | Mapview | Input | Button | Default;
+    Switch | Selection | Slider | Setpoint | Video | Chart | Webview | Colorpicker | Colortemperaturepicker | Mapview | Input | Button | Default;
 
 LinkableWidget:
     (Text | Group | Image | Frame | Buttongrid)
@@ -160,6 +160,17 @@ Colorpicker:
     (('icon=' icon=Icon) |
         ('icon=[' (IconRules+=IconRule (',' IconRules+=IconRule)*) ']') |
         ('staticIcon=' staticIcon=Icon))? &
+    ('labelcolor=[' (LabelColor+=ColorArray (',' LabelColor+=ColorArray)*) ']')? &
+    ('valuecolor=[' (ValueColor+=ColorArray (',' ValueColor+=ColorArray)*) ']')? &
+    ('iconcolor=[' (IconColor+=ColorArray (',' IconColor+=ColorArray)*) ']')? &
+    ('visibility=[' (Visibility+=VisibilityRule (',' Visibility+=VisibilityRule)*) ']')?);
+
+Colortemperaturepicker:
+    'Colortemperaturepicker' (('item=' item=ItemRef) & ('label=' label=(ID | STRING))? &
+    (('icon=' icon=Icon) |
+        ('icon=[' (IconRules+=IconRule (',' IconRules+=IconRule)*) ']') |
+        ('staticIcon=' staticIcon=Icon))? &
+    ('minValue=' minValue=Number)? & ('maxValue=' maxValue=Number)? &
     ('labelcolor=[' (LabelColor+=ColorArray (',' LabelColor+=ColorArray)*) ']')? &
     ('valuecolor=[' (ValueColor+=ColorArray (',' ValueColor+=ColorArray)*) ']')? &
     ('iconcolor=[' (IconColor+=ColorArray (',' IconColor+=ColorArray)*) ']')? &

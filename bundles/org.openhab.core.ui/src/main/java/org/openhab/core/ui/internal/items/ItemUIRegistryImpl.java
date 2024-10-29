@@ -112,6 +112,7 @@ import org.slf4j.LoggerFactory;
  * @author Laurent Garnier - Support added for multiple AND conditions in labelcolor/valuecolor/visibility
  * @author Laurent Garnier - new icon parameter based on conditional rules
  * @author Danny Baumann - widget label source support
+ * @author Laurent Garnier - Consider Colortemperaturepicker element as possible default widget
  */
 @NonNullByDefault
 @Component(immediate = true, configurationPid = "org.openhab.sitemap", //
@@ -302,6 +303,9 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
             }
             if (!isReadOnly && NumberItem.class.isAssignableFrom(itemType) && hasItemTag(itemName, "Setpoint")) {
                 return SitemapFactory.eINSTANCE.createSetpoint();
+            } else if (!isReadOnly && NumberItem.class.isAssignableFrom(itemType)
+                    && hasItemTag(itemName, "ColorTemperature")) {
+                return SitemapFactory.eINSTANCE.createColortemperaturepicker();
             } else {
                 return SitemapFactory.eINSTANCE.createText();
             }
