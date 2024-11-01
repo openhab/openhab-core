@@ -431,6 +431,17 @@ public class UnitsTest {
         assertThat(converted2.doubleValue(), is(closeTo(12.0, DEFAULT_ERROR)));
     }
 
+    @Test
+    public void testColorTemperatureAliases() {
+        QuantityType<?> value;
+        value = QuantityType.valueOf("20 mired");
+        assertEquals(Units.MIRED, value.getUnit());
+        value = QuantityType.valueOf("20 mirek");
+        assertEquals(Units.MIRED, value.getUnit());
+        value = QuantityType.valueOf("20 MK⁻¹");
+        assertEquals(Units.MIRED, value.getUnit());
+    }
+
     private static class QuantityEquals extends IsEqual<Quantity<?>> {
         private Quantity<?> quantity;
 
