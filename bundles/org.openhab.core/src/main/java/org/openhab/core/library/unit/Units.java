@@ -294,6 +294,8 @@ public final class Units extends CustomUnits {
         SimpleUnitFormat.getInstance().label(MILLIBAR, "mbar");
         SimpleUnitFormat.getInstance().label(MILLIMETRE_OF_MERCURY, MILLIMETRE_OF_MERCURY.getSymbol());
         SimpleUnitFormat.getInstance().label(MIRED, "MK⁻¹");
+        SimpleUnitFormat.getInstance().alias(MIRED, "mired");
+        SimpleUnitFormat.getInstance().alias(MIRED, "mirek");
         SimpleUnitFormat.getInstance().label(PARTS_PER_BILLION, "ppb");
         SimpleUnitFormat.getInstance().label(PARTS_PER_MILLION, "ppm");
         SimpleUnitFormat.getInstance().label(PETABYTE, "PB");
@@ -319,10 +321,6 @@ public final class Units extends CustomUnits {
         SimpleUnitFormat.getInstance().alias(MONTH, "mo");
         SimpleUnitFormat.getInstance().alias(WEEK, "wk");
         SimpleUnitFormat.getInstance().alias(YEAR, "y");
-
-        // other aliases
-        SimpleUnitFormat.getInstance().alias(MIRED, "mired");
-        SimpleUnitFormat.getInstance().alias(MIRED, "mirek");
     }
 
     private Units() {
