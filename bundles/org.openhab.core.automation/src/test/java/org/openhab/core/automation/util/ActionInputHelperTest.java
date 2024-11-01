@@ -152,19 +152,19 @@ public class ActionInputHelperTest {
     @Test
     public void testMapActionInputToConfigDescriptionParameterWhenLocalTime() {
         checkParameter(helper.mapActionInputToConfigDescriptionParameter(buildInput("java.time.LocalTime")),
-                ConfigDescriptionParameter.Type.TEXT, false, null, "time", null, null);
+                ConfigDescriptionParameter.Type.TEXT, false, null, "time", null, BigDecimal.ONE);
     }
 
     @Test
     public void testMapActionInputToConfigDescriptionParameterWhenLocalDateTime() {
         checkParameter(helper.mapActionInputToConfigDescriptionParameter(buildInput("java.time.LocalDateTime")),
-                ConfigDescriptionParameter.Type.TEXT, false, null, "datetime", null, null);
+                ConfigDescriptionParameter.Type.TEXT, false, null, "datetime", null, BigDecimal.ONE);
     }
 
     @Test
     public void testMapActionInputToConfigDescriptionParameterWhenDate() {
         checkParameter(helper.mapActionInputToConfigDescriptionParameter(buildInput("java.util.Date")),
-                ConfigDescriptionParameter.Type.TEXT, false, null, "datetime", null, null);
+                ConfigDescriptionParameter.Type.TEXT, false, null, "datetime", null, BigDecimal.ONE);
     }
 
     @Test

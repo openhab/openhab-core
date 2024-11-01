@@ -102,9 +102,11 @@ public class ActionInputsHelper {
         Unit<?> unit = null;
         boolean required = false;
         String context = null;
+        BigDecimal step = null;
         Matcher matcher = QUANTITY_TYPE_PATTERN.matcher(input.getType());
         if (matcher.matches()) {
             parameterType = ConfigDescriptionParameter.Type.DECIMAL;
+            step = BigDecimal.ZERO;
             try {
                 unit = getDefaultUnit(matcher.group("dimension"));
             } catch (IllegalArgumentException e) {
@@ -140,6 +142,7 @@ public class ActionInputsHelper {
                 case "java.lang.Number":
                 case "org.openhab.core.library.types.DecimalType":
                     parameterType = ConfigDescriptionParameter.Type.DECIMAL;
+                    step = BigDecimal.ZERO;
                     break;
                 case "java.lang.String":
                     break;
@@ -148,10 +151,12 @@ public class ActionInputsHelper {
                     break;
                 case "java.time.LocalTime":
                     context = "time";
+                    step = BigDecimal.ONE;
                     break;
                 case "java.time.LocalDateTime":
                 case "java.util.Date":
                     context = "datetime";
+                    step = BigDecimal.ONE;
                     break;
                 case "java.time.ZonedDateTime":
                 case "java.time.Instant":
@@ -178,8 +183,8 @@ public class ActionInputsHelper {
         if (unit != null) {
             builder = builder.withUnit(unit.getSymbol());
         }
-        if (parameterType == ConfigDescriptionParameter.Type.DECIMAL) {
-            builder = builder.withStepSize(BigDecimal.ZERO);
+        if (step != null) {
+            builder = builder.withStepSize(step);
         }
         return builder.build();
     }
