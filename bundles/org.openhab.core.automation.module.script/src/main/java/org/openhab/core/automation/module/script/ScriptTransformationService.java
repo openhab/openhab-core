@@ -214,6 +214,18 @@ public class ScriptTransformationService implements TransformationService, Confi
                 return result == null ? null : result.toString();
             } catch (ScriptException e) {
                 throw new TransformationException("Failed to execute script.", e);
+            } catch (IllegalStateException e) {
+                String message = e.getMessage();
+                if (message != null && message.equals("The Context is already closed.")) {
+                    logger.warn(
+                            "Script engine context {} is already closed, this should not happen. Recreating script engine.",
+                            scriptUid);
+                    scriptCache.remove(scriptUid);
+                    return transform(function, source);
+                } else {
+                    // rethrow
+                    throw e;
+                }
             }
         } finally {
             scriptRecord.lock.unlock();
