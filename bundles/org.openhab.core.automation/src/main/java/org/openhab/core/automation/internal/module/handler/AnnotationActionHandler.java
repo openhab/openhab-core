@@ -144,16 +144,27 @@ public class AnnotationActionHandler extends BaseActionModuleHandler {
                             method, moduleType.getUID(), ex.getMessage());
                 }
                 // we allow simple data types as return values and put them under the context key "result".
-            } else if (result instanceof Boolean || result instanceof String || result instanceof Byte
-                    || result instanceof Short || result instanceof Integer || result instanceof Long
-                    || result instanceof Float || result instanceof Double) {
-                output.put(MODULE_RESULT, result);
+            } else if (result instanceof Boolean booleanValue) {
+                output.put(MODULE_RESULT, booleanValue);
+            } else if (result instanceof String stringValue) {
+                output.put(MODULE_RESULT, stringValue);
+            } else if (result instanceof Byte byteValue) {
+                output.put(MODULE_RESULT, byteValue);
+            } else if (result instanceof Short shortValue) {
+                output.put(MODULE_RESULT, shortValue);
+            } else if (result instanceof Integer integerValue) {
+                output.put(MODULE_RESULT, integerValue);
+            } else if (result instanceof Long longValue) {
+                output.put(MODULE_RESULT, longValue);
+            } else if (result instanceof Double doubleValue) {
+                output.put(MODULE_RESULT, doubleValue);
+            } else if (result instanceof Float floatValue) {
+                output.put(MODULE_RESULT, floatValue);
             } else if (result instanceof BigDecimal bigDecimalValue) {
                 output.put(MODULE_RESULT, bigDecimalValue.doubleValue());
-            } else if (result instanceof QuantityType<?> quantity) {
-                output.put(MODULE_RESULT, quantity.toString());
-            } else if (result instanceof LocalDate || result instanceof LocalTime || result instanceof LocalDateTime
-                    || result instanceof ZonedDateTime || result instanceof Instant || result instanceof Duration) {
+            } else if (result instanceof QuantityType<?> || result instanceof LocalDate || result instanceof LocalTime
+                    || result instanceof LocalDateTime || result instanceof ZonedDateTime || result instanceof Instant
+                    || result instanceof Duration) {
                 output.put(MODULE_RESULT, result.toString());
             } else {
                 logger.warn("Non compatible return type '{}' on action method.", result.getClass());
