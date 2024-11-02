@@ -107,6 +107,7 @@ public class ThingEventFactoryTest {
                     .withMinimum(BigDecimal.ZERO) //
                     .withMaximum(new BigDecimal(1000)) //
                     .withStep(new BigDecimal(100)) //
+                    .withRangeUnit("K") //
                     .withPattern("%.0f K") //
                     .build());
     private static final String CHANNEL_DESCRIPTION_OLD_STATE_DESCRIPTION_PAYLOAD = JSONCONVERTER
@@ -114,6 +115,7 @@ public class ThingEventFactoryTest {
                     .withMinimum(BigDecimal.ZERO) //
                     .withMaximum(new BigDecimal(6000)) //
                     .withStep(new BigDecimal(100)) //
+                    .withRangeUnit("K") //
                     .withPattern("%.0f K") //
                     .build());
     private static final String CHANNEL_DESCRIPTION_CHANGED_EVENT_PAYLOAD_NEW_AND_OLD_DESCRIPTION = JSONCONVERTER
@@ -340,12 +342,14 @@ public class ThingEventFactoryTest {
                 .withMinimum(BigDecimal.ZERO) //
                 .withMaximum(new BigDecimal(1000)) //
                 .withStep(new BigDecimal(100)) //
+                .withRangeUnit("K") //
                 .withPattern("%.0f K") //
                 .build();
         StateDescriptionFragment oldStateDescriptionFragment = StateDescriptionFragmentBuilder.create() //
                 .withMinimum(BigDecimal.ZERO) //
                 .withMaximum(new BigDecimal(6000)) //
                 .withStep(new BigDecimal(100)) //
+                .withRangeUnit("K") //
                 .withPattern("%.0f K") //
                 .build();
         ChannelDescriptionChangedEvent event = ThingEventFactory.createChannelDescriptionChangedEvent(CHANNEL_UID,

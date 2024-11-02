@@ -53,6 +53,11 @@ public class StateDescriptionFragmentBuilderTest {
     }
 
     @Test
+    public void builderWithRangeUnit() {
+        assertThat(builder.withRangeUnit("x").build().getRangeUnit(), is("x"));
+    }
+
+    @Test
     public void builderWithPattern() {
         assertThat(builder.withPattern("pattern").build().getPattern(), is("pattern"));
     }
@@ -82,14 +87,15 @@ public class StateDescriptionFragmentBuilderTest {
 
     @Test
     public void builderWithStateDescription() {
-        StateDescription source = new StateDescription(BigDecimal.ZERO, BigDecimal.TEN, BigDecimal.ONE, "pattern", true,
-                List.of(new StateOption("value", "label")));
+        StateDescription source = new StateDescription(BigDecimal.ZERO, BigDecimal.TEN, BigDecimal.ONE, "rangeUnit",
+                "pattern", true, List.of(new StateOption("value", "label")));
         StateDescriptionFragmentBuilder builder = StateDescriptionFragmentBuilder.create(source);
         StateDescriptionFragment fragment = builder.build();
 
         assertThat(fragment.getMinimum(), is(source.getMinimum()));
         assertThat(fragment.getMaximum(), is(source.getMaximum()));
         assertThat(fragment.getStep(), is(source.getStep()));
+        assertThat(fragment.getRangeUnit(), is(source.getRangeUnit()));
         assertThat(fragment.getPattern(), is(source.getPattern()));
         assertThat(fragment.isReadOnly(), is(source.isReadOnly()));
         assertThat(fragment.getOptions(), is(source.getOptions()));
@@ -100,15 +106,16 @@ public class StateDescriptionFragmentBuilderTest {
     @Test
     public void subsequentBuildsCreateIndependentFragments() {
         StateDescriptionFragment fragment1 = builder.withMinimum(BigDecimal.ZERO).withMaximum(BigDecimal.TEN)
-                .withStep(BigDecimal.ONE).withPattern("pattern").withReadOnly(Boolean.FALSE)
+                .withStep(BigDecimal.ONE).withRangeUnit("x").withPattern("pattern").withReadOnly(Boolean.FALSE)
                 .withOptions(List.of(new StateOption("value", "label"))).build();
         StateDescriptionFragment fragment2 = builder.withMinimum(BigDecimal.ONE).withMaximum(BigDecimal.ONE)
-                .withStep(BigDecimal.ZERO).withPattern("pattern_new").withReadOnly(Boolean.TRUE).withOptions(List.of())
-                .build();
+                .withStep(BigDecimal.ZERO).withRangeUnit("y").withPattern("pattern_new").withReadOnly(Boolean.TRUE)
+                .withOptions(List.of()).build();
 
         assertThat(fragment1.getMinimum(), is(not(fragment2.getMinimum())));
         assertThat(fragment1.getMaximum(), is(not(fragment2.getMaximum())));
         assertThat(fragment1.getStep(), is(not(fragment2.getStep())));
+        assertThat(fragment1.getRangeUnit(), is(not(fragment2.getRangeUnit())));
         assertThat(fragment1.getPattern(), is(not(fragment2.getPattern())));
         assertThat(fragment1.isReadOnly(), is(not(fragment2.isReadOnly())));
         assertThat(fragment1.getOptions(), is(not(fragment2.getOptions())));

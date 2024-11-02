@@ -52,6 +52,14 @@ public interface StateDescriptionFragment {
     BigDecimal getStep();
 
     /**
+     * Returns the unit that applies to the min, max and step
+     *
+     * @return range unit
+     */
+    @Nullable
+    String getRangeUnit();
+
+    /**
      * Returns the pattern to render the state to a string.
      *
      * @return pattern
