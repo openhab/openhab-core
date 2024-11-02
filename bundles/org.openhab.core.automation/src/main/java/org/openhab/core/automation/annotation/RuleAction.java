@@ -32,6 +32,8 @@ public @interface RuleAction {
 
     String description() default "";
 
+    String id() default "";
+
     String[] tags() default {};
 
     Visibility visibility() default Visibility.VISIBLE;

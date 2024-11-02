@@ -37,6 +37,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.auth.Role;
 import org.openhab.core.automation.Action;
+import org.openhab.core.automation.Visibility;
 import org.openhab.core.automation.annotation.RuleAction;
 import org.openhab.core.automation.handler.ActionHandler;
 import org.openhab.core.automation.handler.ModuleHandlerFactory;
@@ -172,7 +173,8 @@ public class ThingActionsResource implements RESTResource {
                     continue;
                 }
 
-                String actionUid = thingActionsEntry.getKey() + "." + method.getName();
+                String actionUid = thingActionsEntry.getKey() + "."
+                        + (!ruleAction.id().isEmpty() ? ruleAction.id() : method.getName());
                 ActionType actionType = (ActionType) moduleTypeRegistry.get(actionUid, locale);
                 if (actionType == null) {
                     continue;
@@ -200,6 +202,7 @@ public class ThingActionsResource implements RESTResource {
                 actionDTO.inputConfigDescriptions = inputParameters == null ? null
                         : ConfigDescriptionDTOMapper.mapParameters(inputParameters);
                 actionDTO.outputs = actionType.getOutputs();
+                actionDTO.visibility = actionType.getVisibility();
                 actions.add(actionDTO);
             }
         }
@@ -274,5 +277,7 @@ public class ThingActionsResource implements RESTResource {
         public @Nullable List<ConfigDescriptionParameterDTO> inputConfigDescriptions;
 
         public List<Output> outputs = new ArrayList<>();
+
+        public Visibility visibility = Visibility.VISIBLE;
     }
 }

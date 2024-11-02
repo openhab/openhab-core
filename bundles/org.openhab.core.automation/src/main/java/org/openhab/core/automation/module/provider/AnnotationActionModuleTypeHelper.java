@@ -96,7 +96,7 @@ public class AnnotationActionModuleTypeHelper {
                 List<Output> outputs = getOutputsFromAction(method);
 
                 RuleAction ruleAction = method.getAnnotation(RuleAction.class);
-                String uid = name + "." + method.getName();
+                String uid = name + "." + (!ruleAction.id().isEmpty() ? ruleAction.id() : method.getName());
                 Set<String> tags = new HashSet<>(Arrays.asList(ruleAction.tags()));
 
                 ModuleInformation mi = new ModuleInformation(uid, actionProvider, method);
