@@ -37,6 +37,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.openhab.core.config.core.ConfigDescriptionRegistry;
+import org.openhab.core.test.java.JavaTest;
 import org.openhab.core.transform.Transformation;
 import org.openhab.core.transform.TransformationException;
 import org.openhab.core.transform.TransformationRegistry;
@@ -49,7 +50,7 @@ import org.openhab.core.transform.TransformationRegistry;
 @NonNullByDefault
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
-public class ScriptTransformationServiceTest {
+public class ScriptTransformationServiceTest extends JavaTest {
     private static final String SCRIPT_LANGUAGE = "customDsl";
     private static final String SCRIPT_UID = "scriptUid." + SCRIPT_LANGUAGE;
     private static final String INVALID_SCRIPT_UID = "invalidScriptUid";
@@ -187,6 +188,21 @@ public class ScriptTransformationServiceTest {
         assertThat(e.getMessage(), is("Failed to execute script."));
         assertThat(e.getCause(), instanceOf(ScriptException.class));
         assertThat(e.getCause().getMessage(), is("exception"));
+    }
+
+    @Test
+    public void recoversFromClosedScriptContext() throws ScriptException, TransformationException {
+        when(scriptEngine.eval(SCRIPT)).thenThrow(new IllegalStateException("The Context is already closed."))
+                .thenReturn(SCRIPT_OUTPUT);
+        setupInterceptedLogger(ScriptTransformationService.class, LogLevel.WARN);
+
+        String returnValue = Objects.requireNonNull(service.transform(SCRIPT_UID, "input"));
+
+        assertThat(returnValue, is(SCRIPT_OUTPUT));
+
+        stopInterceptedLogger(ScriptTransformationService.class);
+        assertLogMessage(ScriptTransformationService.class, LogLevel.WARN, "Script engine context " + SCRIPT_UID
+                + " is already closed, this should not happen. Recreating script engine.");
     }
 
     @Test
