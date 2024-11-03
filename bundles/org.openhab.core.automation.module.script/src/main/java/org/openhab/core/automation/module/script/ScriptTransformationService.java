@@ -215,8 +215,7 @@ public class ScriptTransformationService implements TransformationService, Confi
             } catch (ScriptException e) {
                 throw new TransformationException("Failed to execute script.", e);
             } catch (IllegalStateException e) {
-                String message = e.getMessage();
-                if (message != null && message.equals("The Context is already closed.")) {
+                if ("The Context is already closed.".equals(e.getMessage())) {
                     logger.warn(
                             "Script engine context {} is already closed, this should not happen. Recreating script engine.",
                             scriptUid);
