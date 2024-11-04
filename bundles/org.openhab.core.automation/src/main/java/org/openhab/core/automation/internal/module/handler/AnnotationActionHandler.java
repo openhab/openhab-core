@@ -15,6 +15,13 @@ package org.openhab.core.automation.internal.module.handler;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,6 +37,7 @@ import org.openhab.core.automation.type.ActionType;
 import org.openhab.core.automation.type.Input;
 import org.openhab.core.automation.type.Output;
 import org.openhab.core.automation.util.ActionInputsHelper;
+import org.openhab.core.library.types.QuantityType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -138,14 +146,26 @@ public class AnnotationActionHandler extends BaseActionModuleHandler {
                 // we allow simple data types as return values and put them under the context key "result".
             } else if (result instanceof Boolean booleanValue) {
                 output.put(MODULE_RESULT, booleanValue);
-            } else if (result instanceof String) {
-                output.put(MODULE_RESULT, result);
-            } else if (result instanceof Integer) {
-                output.put(MODULE_RESULT, result);
+            } else if (result instanceof String stringValue) {
+                output.put(MODULE_RESULT, stringValue);
+            } else if (result instanceof Byte byteValue) {
+                output.put(MODULE_RESULT, byteValue);
+            } else if (result instanceof Short shortValue) {
+                output.put(MODULE_RESULT, shortValue);
+            } else if (result instanceof Integer integerValue) {
+                output.put(MODULE_RESULT, integerValue);
+            } else if (result instanceof Long longValue) {
+                output.put(MODULE_RESULT, longValue);
             } else if (result instanceof Double doubleValue) {
                 output.put(MODULE_RESULT, doubleValue);
             } else if (result instanceof Float floatValue) {
                 output.put(MODULE_RESULT, floatValue);
+            } else if (result instanceof BigDecimal bigDecimalValue) {
+                output.put(MODULE_RESULT, bigDecimalValue.doubleValue());
+            } else if (result instanceof QuantityType<?> || result instanceof LocalDate || result instanceof LocalTime
+                    || result instanceof LocalDateTime || result instanceof ZonedDateTime || result instanceof Instant
+                    || result instanceof Duration) {
+                output.put(MODULE_RESULT, result.toString());
             } else {
                 logger.warn("Non compatible return type '{}' on action method.", result.getClass());
             }
