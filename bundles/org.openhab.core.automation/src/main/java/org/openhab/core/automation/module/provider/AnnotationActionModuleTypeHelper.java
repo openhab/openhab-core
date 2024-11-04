@@ -20,6 +20,7 @@ import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -87,7 +88,7 @@ public class AnnotationActionModuleTypeHelper {
     }
 
     public Collection<ModuleInformation> parseAnnotations(String name, Object actionProvider) {
-        Collection<ModuleInformation> moduleInformation = new ArrayList<>();
+        Map<String, ModuleInformation> moduleInformation = new HashMap<>();
         Class<?> clazz = actionProvider.getClass();
         Method[] methods = clazz.getDeclaredMethods();
         for (Method method : methods) {
@@ -107,10 +108,15 @@ public class AnnotationActionModuleTypeHelper {
                 mi.setOutputs(outputs);
                 mi.setTags(tags);
 
-                moduleInformation.add(mi);
+                ModuleInformation existingMi = moduleInformation.get(uid);
+                if (existingMi != null) {
+                    logger.warn("Action with UID {} is declared multiple times. This should be fixed in the binding.",
+                            uid);
+                }
+                moduleInformation.put(uid, mi);
             }
         }
-        return moduleInformation;
+        return moduleInformation.values();
     }
 
     private List<Input> getInputsFromAction(Method method) {
