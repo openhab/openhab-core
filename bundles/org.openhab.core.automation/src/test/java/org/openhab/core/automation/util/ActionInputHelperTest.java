@@ -24,6 +24,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.Date;
@@ -43,6 +44,7 @@ import org.junit.jupiter.api.Test;
 import org.openhab.core.automation.type.ActionType;
 import org.openhab.core.automation.type.Input;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
+import org.openhab.core.i18n.TimeZoneProvider;
 import org.openhab.core.i18n.UnitProvider;
 import org.openhab.core.internal.i18n.I18nProviderImpl;
 import org.openhab.core.library.types.DecimalType;
@@ -58,8 +60,9 @@ public class ActionInputHelperTest {
     private static final String PARAM_LABEL = "Label Parameter";
     private static final String PARAM_DESCRIPTION = "Description parameter";
 
+    private TimeZoneProvider timeZoneProvider = new TestTimeZoneProvider();
     private UnitProvider unitProvider = new TestUnitProvider();
-    private ActionInputsHelper helper = new ActionInputsHelper(unitProvider);
+    private ActionInputsHelper helper = new ActionInputsHelper(timeZoneProvider, unitProvider);
 
     @Test
     public void testMapActionInputToConfigDescriptionParameterWhenBoolean() {
@@ -170,13 +173,13 @@ public class ActionInputHelperTest {
     @Test
     public void testMapActionInputToConfigDescriptionParameterWhenZonedDateTime() {
         checkParameter(helper.mapActionInputToConfigDescriptionParameter(buildInput("java.time.ZonedDateTime")),
-                ConfigDescriptionParameter.Type.TEXT, false, null, null, null, null);
+                ConfigDescriptionParameter.Type.TEXT, false, null, "datetime", null, BigDecimal.ONE);
     }
 
     @Test
     public void testMapActionInputToConfigDescriptionParameterWhenInstant() {
         checkParameter(helper.mapActionInputToConfigDescriptionParameter(buildInput("java.time.Instant")),
-                ConfigDescriptionParameter.Type.TEXT, false, null, null, null, null);
+                ConfigDescriptionParameter.Type.TEXT, false, null, "datetime", null, BigDecimal.ONE);
     }
 
     @Test
@@ -422,8 +425,8 @@ public class ActionInputHelperTest {
 
     @Test
     public void testMapSerializedInputToActionInputWhenZonedDateTime() {
-        String valAsString = "2007-12-03T10:15:30+01:00[Europe/Paris]";
-        ZonedDateTime val = ZonedDateTime.parse(valAsString);
+        String valAsString = "2007-12-03T10:15:30";
+        ZonedDateTime val = LocalDateTime.parse(valAsString).atZone(timeZoneProvider.getTimeZone());
         Input input = buildInput("java.time.ZonedDateTime");
         assertThat(helper.mapSerializedInputToActionInput(input, val), is(val));
         assertThat(helper.mapSerializedInputToActionInput(input, valAsString), is(val));
@@ -450,8 +453,8 @@ public class ActionInputHelperTest {
 
     @Test
     public void testMapSerializedInputToActionInputWhenInstant() {
-        String valAsString = "2017-12-09T20:15:30.00Z";
-        Instant val = Instant.parse(valAsString);
+        String valAsString = "2017-12-09T20:15:30.00";
+        Instant val = LocalDateTime.parse(valAsString).atZone(timeZoneProvider.getTimeZone()).toInstant();
         Input input = buildInput("java.time.Instant");
         assertThat(helper.mapSerializedInputToActionInput(input, val), is(val));
         assertThat(helper.mapSerializedInputToActionInput(input, valAsString), is(val));
@@ -558,6 +561,14 @@ public class ActionInputHelperTest {
             assertNull(param.getStepSize());
         } else {
             assertThat(param.getStepSize(), is(step));
+        }
+    }
+
+    public class TestTimeZoneProvider implements TimeZoneProvider {
+
+        @Override
+        public ZoneId getTimeZone() {
+            return ZoneId.of("Europe/Paris");
         }
     }
 

@@ -16,11 +16,9 @@ import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.ZonedDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -38,6 +36,7 @@ import org.openhab.core.automation.type.ActionType;
 import org.openhab.core.automation.type.Input;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionParameterBuilder;
+import org.openhab.core.i18n.TimeZoneProvider;
 import org.openhab.core.i18n.UnitProvider;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.QuantityType;
@@ -63,10 +62,13 @@ public class ActionInputsHelper {
 
     private final Logger logger = LoggerFactory.getLogger(ActionInputsHelper.class);
 
+    private final TimeZoneProvider timeZoneProvider;
     private final UnitProvider unitProvider;
 
     @Activate
-    public ActionInputsHelper(final @Reference UnitProvider unitProvider) {
+    public ActionInputsHelper(final @Reference TimeZoneProvider timeZoneProvider,
+            final @Reference UnitProvider unitProvider) {
+        this.timeZoneProvider = timeZoneProvider;
         this.unitProvider = unitProvider;
     }
 
@@ -155,11 +157,11 @@ public class ActionInputsHelper {
                     break;
                 case "java.time.LocalDateTime":
                 case "java.util.Date":
+                case "java.time.ZonedDateTime":
+                case "java.time.Instant":
                     context = "datetime";
                     step = BigDecimal.ONE;
                     break;
-                case "java.time.ZonedDateTime":
-                case "java.time.Instant":
                 case "java.time.Duration":
                     // There is no available configuration parameter context for these types.
                     // A text parameter is used. The expected value must respect a particular format specific
@@ -290,11 +292,11 @@ public class ActionInputsHelper {
                             // Accepted format is: 2007-12-03T10:15:30
                             new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(valueString);
                         case "java.time.ZonedDateTime" ->
-                            // Accepted format is: 2007-12-03T10:15:30+01:00[Europe/Paris]
-                            ZonedDateTime.parse(valueString);
+                            // Accepted format is: 2007-12-03T10:15:30
+                            LocalDateTime.parse(valueString).atZone(timeZoneProvider.getTimeZone());
                         case "java.time.Instant" ->
-                            // Accepted format is: 2007-12-03T10:15:30.00Z
-                            Instant.parse(valueString);
+                            // Accepted format is: 2007-12-03T10:15:30
+                            LocalDateTime.parse(valueString).atZone(timeZoneProvider.getTimeZone()).toInstant();
                         case "java.time.Duration" ->
                             // Accepted format is: P2DT17H25M30.5S
                             Duration.parse(valueString);
