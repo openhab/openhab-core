@@ -37,6 +37,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.auth.Role;
 import org.openhab.core.automation.Action;
+import org.openhab.core.automation.Visibility;
 import org.openhab.core.automation.annotation.RuleAction;
 import org.openhab.core.automation.handler.ActionHandler;
 import org.openhab.core.automation.handler.ModuleHandlerFactory;
@@ -203,6 +204,7 @@ public class ThingActionsResource implements RESTResource {
                 actionDTO.inputConfigDescriptions = inputParameters == null ? null
                         : ConfigDescriptionDTOMapper.mapParameters(inputParameters);
                 actionDTO.outputs = actionType.getOutputs();
+                actionDTO.visibility = actionType.getVisibility();
                 actions.add(actionDTO);
             }
         }
@@ -271,6 +273,7 @@ public class ThingActionsResource implements RESTResource {
 
         public @Nullable String label;
         public @Nullable String description;
+        public @Nullable Visibility visibility;
 
         public List<Input> inputs = new ArrayList<>();
 
