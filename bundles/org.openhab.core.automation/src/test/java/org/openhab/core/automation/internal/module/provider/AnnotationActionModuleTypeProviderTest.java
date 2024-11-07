@@ -16,6 +16,9 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -33,6 +36,7 @@ import org.openhab.core.automation.AnnotatedActions;
 import org.openhab.core.automation.Visibility;
 import org.openhab.core.automation.annotation.ActionInput;
 import org.openhab.core.automation.annotation.ActionOutput;
+import org.openhab.core.automation.annotation.ActionOutputs;
 import org.openhab.core.automation.annotation.ActionScope;
 import org.openhab.core.automation.annotation.RuleAction;
 import org.openhab.core.automation.module.provider.AnnotationActionModuleTypeHelper;
@@ -55,7 +59,20 @@ import org.openhab.core.test.java.JavaTest;
 @NonNullByDefault
 public class AnnotationActionModuleTypeProviderTest extends JavaTest {
 
-    private static final String TEST_ACTION_TYPE_ID = "binding.test.testMethod";
+    private static final String TEST_ACTION_SIGNATURE_HASH;
+    static {
+        MessageDigest md5 = null;
+        try {
+            md5 = MessageDigest.getInstance("MD5");
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+        for (Class<?> parameter : TestActionProvider.class.getDeclaredMethods()[0].getParameterTypes()) {
+            md5.update(parameter.getName().getBytes());
+        }
+        TEST_ACTION_SIGNATURE_HASH = String.format("%032x", new BigInteger(1, md5.digest()));
+    }
+    private static final String TEST_ACTION_TYPE_ID = "binding.test.testMethod#" + TEST_ACTION_SIGNATURE_HASH;
     private static final String ACTION_LABEL = "Test Label";
     private static final String ACTION_DESCRIPTION = "My Description";
 
@@ -195,9 +212,10 @@ public class AnnotationActionModuleTypeProviderTest extends JavaTest {
 
         @RuleAction(label = ACTION_LABEL, description = ACTION_DESCRIPTION, visibility = Visibility.HIDDEN, tags = {
                 "tag1", "tag2" })
-        public @ActionOutput(name = ACTION_OUTPUT1, type = ACTION_OUTPUT1_TYPE, description = ACTION_OUTPUT1_DESCRIPTION, label = ACTION_OUTPUT1_LABEL, defaultValue = ACTION_OUTPUT1_DEFAULT_VALUE, reference = ACTION_OUTPUT1_REFERENCE, tags = {
-                "tagOut11",
-                "tagOut12" }) @ActionOutput(name = ACTION_OUTPUT2, type = ACTION_OUTPUT2_TYPE) Map<String, Object> testMethod(
+        public @ActionOutputs({
+                @ActionOutput(name = ACTION_OUTPUT1, type = ACTION_OUTPUT1_TYPE, description = ACTION_OUTPUT1_DESCRIPTION, label = ACTION_OUTPUT1_LABEL, defaultValue = ACTION_OUTPUT1_DEFAULT_VALUE, reference = ACTION_OUTPUT1_REFERENCE, tags = {
+                        "tagOut11", "tagOut12" }),
+                @ActionOutput(name = ACTION_OUTPUT2, type = ACTION_OUTPUT2_TYPE) }) Map<String, Object> testMethod(
                         @ActionInput(name = ACTION_INPUT1, label = ACTION_INPUT1_LABEL, defaultValue = ACTION_INPUT1_DEFAULT_VALUE, description = ACTION_INPUT1_DESCRIPTION, reference = ACTION_INPUT1_REFERENCE, required = true, type = "Item", tags = {
                                 "tagIn11", "tagIn12" }) String input1,
                         @ActionInput(name = ACTION_INPUT2) String input2) {

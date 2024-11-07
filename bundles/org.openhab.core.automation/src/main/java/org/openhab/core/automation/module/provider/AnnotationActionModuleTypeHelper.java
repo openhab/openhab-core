@@ -17,6 +17,9 @@ import static org.openhab.core.automation.internal.module.handler.AnnotationActi
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -97,7 +100,7 @@ public class AnnotationActionModuleTypeHelper {
                 List<Output> outputs = getOutputsFromAction(method);
 
                 RuleAction ruleAction = method.getAnnotation(RuleAction.class);
-                String uid = getModuleIdFromMethod(name, clazz, method);
+                String uid = getModuleIdFromMethod(name, method);
                 Set<String> tags = new HashSet<>(Arrays.asList(ruleAction.tags()));
 
                 ModuleInformation mi = new ModuleInformation(uid, actionProvider, method);
@@ -114,19 +117,18 @@ public class AnnotationActionModuleTypeHelper {
         return moduleInformation;
     }
 
-    public String getModuleIdFromMethod(String actionScope, Class<?> clazz, Method method) {
-        boolean hasOverloads = Arrays.stream(clazz.getDeclaredMethods())
-                .filter(m -> m.isAnnotationPresent(RuleAction.class)).map(Method::getName)
-                .filter(name -> name.equals(method.getName())).count() > 1;
-        String uid = actionScope + "." + method.getName();
-        if (hasOverloads) {
-            logger.debug("@RuleAction method {}::{} has overloads. Appending signature hash to UID.",
-                    clazz.getSimpleName(), method.getName());
-            String signature = Arrays.stream(method.getParameterTypes()).map(Class::getName)
-                    .collect(Collectors.joining(","));
-            uid += "#" + signature.hashCode();
+    public String getModuleIdFromMethod(String actionScope, Method method) {
+        String uid = actionScope + "." + method.getName() + "#";
+        MessageDigest md5 = null;
+        try {
+            md5 = MessageDigest.getInstance("MD5");
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
         }
-        return uid;
+        for (Class<?> parameter : method.getParameterTypes()) {
+            md5.update(parameter.getName().getBytes());
+        }
+        return uid + String.format("%032x", new BigInteger(1, md5.digest()));
     }
 
     private List<Input> getInputsFromAction(Method method) {
