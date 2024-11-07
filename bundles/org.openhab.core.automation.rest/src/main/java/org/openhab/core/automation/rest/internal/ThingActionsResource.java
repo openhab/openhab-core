@@ -101,7 +101,7 @@ public class ThingActionsResource implements RESTResource {
     private final ActionInputsHelper actionInputsHelper;
     private final AnnotationActionModuleTypeHelper annotationActionModuleTypeHelper;
 
-    Map<ThingUID, Map<String, ThingActions>> thingActionsMap = new ConcurrentHashMap<>();
+    Map<ThingUID, Map<String, List<String>>> thingActionsMap = new ConcurrentHashMap<>();
     private List<ModuleHandlerFactory> moduleHandlerFactories = new ArrayList<>();
 
     @Activate
@@ -120,7 +120,18 @@ public class ThingActionsResource implements RESTResource {
         String scope = getScope(thingActions);
         if (handler != null && scope != null) {
             ThingUID thingUID = handler.getThing().getUID();
-            thingActionsMap.computeIfAbsent(thingUID, thingUid -> new ConcurrentHashMap<>()).put(scope, thingActions);
+            Method[] methods = thingActions.getClass().getDeclaredMethods();
+            List<String> actionUIDs = new ArrayList<>();
+            for (Method method : methods) {
+                if (!method.isAnnotationPresent(RuleAction.class)) {
+                    continue;
+                }
+                actionUIDs.add(annotationActionModuleTypeHelper.getModuleIdFromMethod(scope, method));
+            }
+            if (actionUIDs.isEmpty()) {
+                return;
+            }
+            thingActionsMap.computeIfAbsent(thingUID, thingUid -> new ConcurrentHashMap<>()).put(scope, actionUIDs);
         }
     }
 
@@ -129,7 +140,7 @@ public class ThingActionsResource implements RESTResource {
         String scope = getScope(thingActions);
         if (handler != null && scope != null) {
             ThingUID thingUID = handler.getThing().getUID();
-            Map<String, ThingActions> actionMap = thingActionsMap.get(thingUID);
+            Map<String, List<String>> actionMap = thingActionsMap.get(thingUID);
             if (actionMap != null) {
                 actionMap.remove(scope);
                 if (actionMap.isEmpty()) {
@@ -161,23 +172,15 @@ public class ThingActionsResource implements RESTResource {
         ThingUID aThingUID = new ThingUID(thingUID);
 
         List<ThingActionDTO> actions = new ArrayList<>();
-        Map<String, ThingActions> thingActionsMap = this.thingActionsMap.get(aThingUID);
+        Map<String, List<String>> thingActionsMap = this.thingActionsMap.get(aThingUID);
         if (thingActionsMap == null) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
 
         // inspect ThingActions
-        for (Map.Entry<String, ThingActions> thingActionsEntry : thingActionsMap.entrySet()) {
-            ThingActions thingActions = thingActionsEntry.getValue();
-            Method[] methods = thingActions.getClass().getDeclaredMethods();
-            for (Method method : methods) {
-                if (!method.isAnnotationPresent(RuleAction.class)) {
-                    continue;
-                }
-
-                String actionUid = annotationActionModuleTypeHelper.getModuleIdFromMethod(thingActionsEntry.getKey(),
-                        thingActions.getClass(), method);
-                ActionType actionType = (ActionType) moduleTypeRegistry.get(actionUid, locale);
+        for (Map.Entry<String, List<String>> thingActionsEntry : thingActionsMap.entrySet()) {
+            for (String actionUID : thingActionsEntry.getValue()) {
+                ActionType actionType = (ActionType) moduleTypeRegistry.get(actionUID, locale);
                 if (actionType == null) {
                     continue;
                 }

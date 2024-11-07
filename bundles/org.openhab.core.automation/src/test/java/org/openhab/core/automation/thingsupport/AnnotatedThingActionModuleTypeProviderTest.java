@@ -16,6 +16,9 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -60,7 +63,21 @@ public class AnnotatedThingActionModuleTypeProviderTest extends JavaTest {
 
     private static final ThingTypeUID TEST_THING_TYPE_UID = new ThingTypeUID("binding", "thing-type");
 
-    private static final String TEST_ACTION_TYPE_ID = "test.testMethod";
+    private static final String TEST_ACTION_SIGNATURE_HASH;
+    static {
+        MessageDigest md5 = null;
+        try {
+            md5 = MessageDigest.getInstance("MD5");
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+        for (Class<?> parameter : AnnotatedThingActionModuleTypeProviderTest.TestThingActionProvider.class
+                .getDeclaredMethods()[0].getParameterTypes()) {
+            md5.update(parameter.getName().getBytes());
+        }
+        TEST_ACTION_SIGNATURE_HASH = String.format("%032x", new BigInteger(1, md5.digest()));
+    }
+    private static final String TEST_ACTION_TYPE_ID = "test.testMethod#" + TEST_ACTION_SIGNATURE_HASH;
     private static final String ACTION_LABEL = "Test Label";
     private static final String ACTION_DESCRIPTION = "My Description";
 
