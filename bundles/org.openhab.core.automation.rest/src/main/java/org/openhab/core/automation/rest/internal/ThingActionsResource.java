@@ -40,6 +40,7 @@ import org.openhab.core.automation.Action;
 import org.openhab.core.automation.annotation.RuleAction;
 import org.openhab.core.automation.handler.ActionHandler;
 import org.openhab.core.automation.handler.ModuleHandlerFactory;
+import org.openhab.core.automation.module.provider.AnnotationActionModuleTypeHelper;
 import org.openhab.core.automation.type.ActionType;
 import org.openhab.core.automation.type.Input;
 import org.openhab.core.automation.type.ModuleTypeRegistry;
@@ -97,16 +98,19 @@ public class ThingActionsResource implements RESTResource {
     private final LocaleService localeService;
     private final ModuleTypeRegistry moduleTypeRegistry;
     private final ActionInputsHelper actionInputsHelper;
+    private final AnnotationActionModuleTypeHelper annotationActionModuleTypeHelper;
 
     Map<ThingUID, Map<String, ThingActions>> thingActionsMap = new ConcurrentHashMap<>();
     private List<ModuleHandlerFactory> moduleHandlerFactories = new ArrayList<>();
 
     @Activate
     public ThingActionsResource(@Reference LocaleService localeService,
-            @Reference ModuleTypeRegistry moduleTypeRegistry, @Reference ActionInputsHelper actionInputsHelper) {
+            @Reference ModuleTypeRegistry moduleTypeRegistry, @Reference ActionInputsHelper actionInputsHelper,
+            @Reference AnnotationActionModuleTypeHelper annotationActionModuleTypeHelper) {
         this.localeService = localeService;
         this.moduleTypeRegistry = moduleTypeRegistry;
         this.actionInputsHelper = actionInputsHelper;
+        this.annotationActionModuleTypeHelper = annotationActionModuleTypeHelper;
     }
 
     @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.MULTIPLE)
@@ -166,13 +170,12 @@ public class ThingActionsResource implements RESTResource {
             ThingActions thingActions = thingActionsEntry.getValue();
             Method[] methods = thingActions.getClass().getDeclaredMethods();
             for (Method method : methods) {
-                RuleAction ruleAction = method.getAnnotation(RuleAction.class);
-
-                if (ruleAction == null) {
+                if (!method.isAnnotationPresent(RuleAction.class)) {
                     continue;
                 }
 
-                String actionUid = thingActionsEntry.getKey() + "." + method.getName();
+                String actionUid = annotationActionModuleTypeHelper.getModuleIdFromMethod(thingActionsEntry.getKey(),
+                        thingActions.getClass(), method);
                 ActionType actionType = (ActionType) moduleTypeRegistry.get(actionUid, locale);
                 if (actionType == null) {
                     continue;

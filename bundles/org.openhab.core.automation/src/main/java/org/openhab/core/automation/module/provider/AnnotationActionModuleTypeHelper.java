@@ -57,7 +57,8 @@ import org.slf4j.LoggerFactory;
  * Helper methods for {@link AnnotatedActions} {@link ModuleTypeProvider}
  *
  * @author Stefan Triller - Initial contribution
- * @author Florian Hotze - Added configuration description parameters for thing modules
+ * @author Florian Hotze - Added configuration description parameters for thing modules, Added method signature hash to
+ *         module ID in case of method overloads
  * @author Laurent Garnier - Converted into a an OSGi component
  */
 @NonNullByDefault
@@ -96,7 +97,7 @@ public class AnnotationActionModuleTypeHelper {
                 List<Output> outputs = getOutputsFromAction(method);
 
                 RuleAction ruleAction = method.getAnnotation(RuleAction.class);
-                String uid = name + "." + method.getName();
+                String uid = getModuleIdFromMethod(name, clazz, method);
                 Set<String> tags = new HashSet<>(Arrays.asList(ruleAction.tags()));
 
                 ModuleInformation mi = new ModuleInformation(uid, actionProvider, method);
@@ -111,6 +112,21 @@ public class AnnotationActionModuleTypeHelper {
             }
         }
         return moduleInformation;
+    }
+
+    public String getModuleIdFromMethod(String actionScope, Class<?> clazz, Method method) {
+        boolean hasOverloads = Arrays.stream(clazz.getDeclaredMethods())
+                .filter(m -> m.isAnnotationPresent(RuleAction.class)).map(Method::getName)
+                .filter(name -> name.equals(method.getName())).count() > 1;
+        String uid = actionScope + "." + method.getName();
+        if (hasOverloads) {
+            logger.debug("@RuleAction method {}::{} has overloads. Appending signature hash to UID.",
+                    clazz.getSimpleName(), method.getName());
+            String signature = Arrays.stream(method.getParameterTypes()).map(Class::getName)
+                    .collect(Collectors.joining(","));
+            uid += "#" + signature.hashCode();
+        }
+        return uid;
     }
 
     private List<Input> getInputsFromAction(Method method) {
