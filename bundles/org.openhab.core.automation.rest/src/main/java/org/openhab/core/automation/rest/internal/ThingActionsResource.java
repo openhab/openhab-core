@@ -120,13 +120,14 @@ public class ThingActionsResource implements RESTResource {
         String scope = getScope(thingActions);
         if (handler != null && scope != null) {
             ThingUID thingUID = handler.getThing().getUID();
-            Method[] methods = thingActions.getClass().getDeclaredMethods();
+            Class<?> clazz = thingActions.getClass();
+            Method[] methods = clazz.getDeclaredMethods();
             List<String> actionUIDs = new ArrayList<>();
             for (Method method : methods) {
                 if (!method.isAnnotationPresent(RuleAction.class)) {
                     continue;
                 }
-                actionUIDs.add(annotationActionModuleTypeHelper.getModuleIdFromMethod(scope, method));
+                actionUIDs.add(annotationActionModuleTypeHelper.getModuleIdFromClassAndMethod(scope, clazz, method));
             }
             if (actionUIDs.isEmpty()) {
                 return;
