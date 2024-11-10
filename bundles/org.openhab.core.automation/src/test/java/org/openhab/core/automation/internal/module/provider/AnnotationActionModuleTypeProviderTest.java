@@ -67,9 +67,7 @@ public class AnnotationActionModuleTypeProviderTest extends JavaTest {
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
-        Class<?> clazz = AnnotationActionModuleTypeProviderTest.TestActionProvider.class;
-        md5.update(clazz.getName().getBytes());
-        for (Class<?> parameter : clazz.getDeclaredMethods()[0].getParameterTypes()) {
+        for (Class<?> parameter : TestActionProvider.class.getDeclaredMethods()[0].getParameterTypes()) {
             md5.update(parameter.getName().getBytes());
         }
         TEST_ACTION_SIGNATURE_HASH = String.format("%032x", new BigInteger(1, md5.digest()));

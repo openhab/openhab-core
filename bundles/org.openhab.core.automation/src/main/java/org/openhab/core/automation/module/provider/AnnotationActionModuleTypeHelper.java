@@ -100,7 +100,7 @@ public class AnnotationActionModuleTypeHelper {
                 List<Output> outputs = getOutputsFromAction(method);
 
                 RuleAction ruleAction = method.getAnnotation(RuleAction.class);
-                String uid = getModuleIdFromClassAndMethod(name, clazz, method);
+                String uid = getModuleIdFromMethod(name, method);
                 Set<String> tags = new HashSet<>(Arrays.asList(ruleAction.tags()));
 
                 ModuleInformation mi = new ModuleInformation(uid, actionProvider, method);
@@ -117,7 +117,7 @@ public class AnnotationActionModuleTypeHelper {
         return moduleInformation;
     }
 
-    public String getModuleIdFromClassAndMethod(String actionScope, Class<?> clazz, Method method) {
+    public String getModuleIdFromMethod(String actionScope, Method method) {
         String uid = actionScope + "." + method.getName() + "#";
         MessageDigest md5 = null;
         try {
@@ -125,7 +125,6 @@ public class AnnotationActionModuleTypeHelper {
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
-        md5.update(clazz.getName().getBytes());
         for (Class<?> parameter : method.getParameterTypes()) {
             md5.update(parameter.getName().getBytes());
         }
