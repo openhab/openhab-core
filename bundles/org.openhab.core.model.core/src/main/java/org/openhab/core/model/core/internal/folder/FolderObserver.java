@@ -96,6 +96,14 @@ public class FolderObserver implements WatchService.WatchEventListener {
         logger.debug("Adding parser for '{}' extension", extension);
         parsers.add(extension);
 
+        // check if the desired directory exists and create it if it's missing
+        try {
+            Path extensionPath = watchService.getWatchPath().resolve(extension);
+            Files.createDirectories(extensionPath);
+        } catch (IOException e) {
+            logger.error("Model path for extension '{}' is missing and creation failed: {}", extension, e.getMessage());
+        }
+
         if (activated) {
             processIgnoredPaths(extension);
             readyService.markReady(new ReadyMarker(READYMARKER_TYPE, extension));
