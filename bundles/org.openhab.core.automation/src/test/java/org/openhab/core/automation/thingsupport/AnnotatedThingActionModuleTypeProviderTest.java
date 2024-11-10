@@ -16,9 +16,11 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import java.lang.reflect.Method;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -71,8 +73,9 @@ public class AnnotatedThingActionModuleTypeProviderTest extends JavaTest {
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }
-        for (Class<?> parameter : AnnotatedThingActionModuleTypeProviderTest.TestThingActionProvider.class
-                .getDeclaredMethods()[0].getParameterTypes()) {
+        Method method = Arrays.stream(TestThingActionProvider.class.getDeclaredMethods())
+                .filter(m -> m.getName().equals("testMethod")).findFirst().orElseThrow();
+        for (Class<?> parameter : method.getParameterTypes()) {
             md5.update(parameter.getName().getBytes());
         }
         TEST_ACTION_SIGNATURE_HASH = String.format("%032x", new BigInteger(1, md5.digest()));
