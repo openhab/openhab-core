@@ -37,9 +37,11 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.auth.Role;
 import org.openhab.core.automation.Action;
+import org.openhab.core.automation.Visibility;
 import org.openhab.core.automation.annotation.RuleAction;
 import org.openhab.core.automation.handler.ActionHandler;
 import org.openhab.core.automation.handler.ModuleHandlerFactory;
+import org.openhab.core.automation.module.provider.AnnotationActionModuleTypeHelper;
 import org.openhab.core.automation.type.ActionType;
 import org.openhab.core.automation.type.Input;
 import org.openhab.core.automation.type.ModuleTypeRegistry;
@@ -97,16 +99,19 @@ public class ThingActionsResource implements RESTResource {
     private final LocaleService localeService;
     private final ModuleTypeRegistry moduleTypeRegistry;
     private final ActionInputsHelper actionInputsHelper;
+    private final AnnotationActionModuleTypeHelper annotationActionModuleTypeHelper;
 
-    Map<ThingUID, Map<String, ThingActions>> thingActionsMap = new ConcurrentHashMap<>();
+    Map<ThingUID, Map<String, List<String>>> thingActionsMap = new ConcurrentHashMap<>();
     private List<ModuleHandlerFactory> moduleHandlerFactories = new ArrayList<>();
 
     @Activate
     public ThingActionsResource(@Reference LocaleService localeService,
-            @Reference ModuleTypeRegistry moduleTypeRegistry, @Reference ActionInputsHelper actionInputsHelper) {
+            @Reference ModuleTypeRegistry moduleTypeRegistry, @Reference ActionInputsHelper actionInputsHelper,
+            @Reference AnnotationActionModuleTypeHelper annotationActionModuleTypeHelper) {
         this.localeService = localeService;
         this.moduleTypeRegistry = moduleTypeRegistry;
         this.actionInputsHelper = actionInputsHelper;
+        this.annotationActionModuleTypeHelper = annotationActionModuleTypeHelper;
     }
 
     @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.MULTIPLE)
@@ -115,7 +120,18 @@ public class ThingActionsResource implements RESTResource {
         String scope = getScope(thingActions);
         if (handler != null && scope != null) {
             ThingUID thingUID = handler.getThing().getUID();
-            thingActionsMap.computeIfAbsent(thingUID, thingUid -> new ConcurrentHashMap<>()).put(scope, thingActions);
+            Method[] methods = thingActions.getClass().getDeclaredMethods();
+            List<String> actionUIDs = new ArrayList<>();
+            for (Method method : methods) {
+                if (!method.isAnnotationPresent(RuleAction.class)) {
+                    continue;
+                }
+                actionUIDs.add(annotationActionModuleTypeHelper.getModuleIdFromMethod(scope, method));
+            }
+            if (actionUIDs.isEmpty()) {
+                return;
+            }
+            thingActionsMap.computeIfAbsent(thingUID, thingUid -> new ConcurrentHashMap<>()).put(scope, actionUIDs);
         }
     }
 
@@ -124,7 +140,7 @@ public class ThingActionsResource implements RESTResource {
         String scope = getScope(thingActions);
         if (handler != null && scope != null) {
             ThingUID thingUID = handler.getThing().getUID();
-            Map<String, ThingActions> actionMap = thingActionsMap.get(thingUID);
+            Map<String, List<String>> actionMap = thingActionsMap.get(thingUID);
             if (actionMap != null) {
                 actionMap.remove(scope);
                 if (actionMap.isEmpty()) {
@@ -156,24 +172,15 @@ public class ThingActionsResource implements RESTResource {
         ThingUID aThingUID = new ThingUID(thingUID);
 
         List<ThingActionDTO> actions = new ArrayList<>();
-        Map<String, ThingActions> thingActionsMap = this.thingActionsMap.get(aThingUID);
+        Map<String, List<String>> thingActionsMap = this.thingActionsMap.get(aThingUID);
         if (thingActionsMap == null) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
 
         // inspect ThingActions
-        for (Map.Entry<String, ThingActions> thingActionsEntry : thingActionsMap.entrySet()) {
-            ThingActions thingActions = thingActionsEntry.getValue();
-            Method[] methods = thingActions.getClass().getDeclaredMethods();
-            for (Method method : methods) {
-                RuleAction ruleAction = method.getAnnotation(RuleAction.class);
-
-                if (ruleAction == null) {
-                    continue;
-                }
-
-                String actionUid = thingActionsEntry.getKey() + "." + method.getName();
-                ActionType actionType = (ActionType) moduleTypeRegistry.get(actionUid, locale);
+        for (Map.Entry<String, List<String>> thingActionsEntry : thingActionsMap.entrySet()) {
+            for (String actionUID : thingActionsEntry.getValue()) {
+                ActionType actionType = (ActionType) moduleTypeRegistry.get(actionUID, locale);
                 if (actionType == null) {
                     continue;
                 }
@@ -200,6 +207,7 @@ public class ThingActionsResource implements RESTResource {
                 actionDTO.inputConfigDescriptions = inputParameters == null ? null
                         : ConfigDescriptionDTOMapper.mapParameters(inputParameters);
                 actionDTO.outputs = actionType.getOutputs();
+                actionDTO.visibility = actionType.getVisibility();
                 actions.add(actionDTO);
             }
         }
@@ -268,6 +276,7 @@ public class ThingActionsResource implements RESTResource {
 
         public @Nullable String label;
         public @Nullable String description;
+        public @Nullable Visibility visibility;
 
         public List<Input> inputs = new ArrayList<>();
 

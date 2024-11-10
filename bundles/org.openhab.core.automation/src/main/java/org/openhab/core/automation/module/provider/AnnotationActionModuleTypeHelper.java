@@ -17,6 +17,9 @@ import static org.openhab.core.automation.internal.module.handler.AnnotationActi
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -57,7 +60,8 @@ import org.slf4j.LoggerFactory;
  * Helper methods for {@link AnnotatedActions} {@link ModuleTypeProvider}
  *
  * @author Stefan Triller - Initial contribution
- * @author Florian Hotze - Added configuration description parameters for thing modules
+ * @author Florian Hotze - Added configuration description parameters for thing modules, Added method signature hash to
+ *         module ID in case of method overloads
  * @author Laurent Garnier - Converted into a an OSGi component
  */
 @NonNullByDefault
@@ -96,7 +100,7 @@ public class AnnotationActionModuleTypeHelper {
                 List<Output> outputs = getOutputsFromAction(method);
 
                 RuleAction ruleAction = method.getAnnotation(RuleAction.class);
-                String uid = name + "." + method.getName();
+                String uid = getModuleIdFromMethod(name, method);
                 Set<String> tags = new HashSet<>(Arrays.asList(ruleAction.tags()));
 
                 ModuleInformation mi = new ModuleInformation(uid, actionProvider, method);
@@ -111,6 +115,20 @@ public class AnnotationActionModuleTypeHelper {
             }
         }
         return moduleInformation;
+    }
+
+    public String getModuleIdFromMethod(String actionScope, Method method) {
+        String uid = actionScope + "." + method.getName() + "#";
+        MessageDigest md5 = null;
+        try {
+            md5 = MessageDigest.getInstance("MD5");
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+        for (Class<?> parameter : method.getParameterTypes()) {
+            md5.update(parameter.getName().getBytes());
+        }
+        return uid + String.format("%032x", new BigInteger(1, md5.digest()));
     }
 
     private List<Input> getInputsFromAction(Method method) {
