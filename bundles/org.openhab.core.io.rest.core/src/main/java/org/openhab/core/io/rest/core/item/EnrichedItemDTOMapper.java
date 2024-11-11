@@ -12,9 +12,7 @@
  */
 package org.openhab.core.io.rest.core.item;
 
-import java.time.Instant;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
@@ -56,10 +54,6 @@ public class EnrichedItemDTOMapper {
 
     private static final Pattern EXTRACT_TRANSFORM_FUNCTION_PATTERN = Pattern.compile("(.*?)\\((.*)\\):(.*)");
 
-    private static final String DATE_FORMAT_PATTERN_WITH_TZ_RFC = "yyyy-MM-dd'T'HH:mm[:ss[.SSSSSSSSS]]Z";
-    private static final DateTimeFormatter FORMATTER_TZ_RFC = DateTimeFormatter
-            .ofPattern(DATE_FORMAT_PATTERN_WITH_TZ_RFC);
-
     private static final Logger LOGGER = LoggerFactory.getLogger(EnrichedItemDTOMapper.class);
 
     /**
@@ -100,7 +94,7 @@ public class EnrichedItemDTOMapper {
             if (dateTime == null) {
                 state = item.getState().toFullString();
             } else {
-                state = formatDateTime(dateTime.getInstant(), zoneId);
+                state = dateTime.toFullString(zoneId);
             }
         } else {
             state = item.getState().toFullString();
@@ -153,24 +147,6 @@ public class EnrichedItemDTOMapper {
         }
 
         return enrichedItemDTO;
-    }
-
-    private static String formatDateTime(Instant instant, ZoneId zoneId) {
-        String formatted = instant.atZone(zoneId).format(FORMATTER_TZ_RFC);
-        if (formatted.contains(".")) {
-            String sign = "";
-            if (formatted.contains("+")) {
-                sign = "+";
-            } else if (formatted.contains("-")) {
-                sign = "-";
-            }
-            if (!sign.isEmpty()) {
-                // the formatted string contains 9 fraction-of-second digits
-                // truncate at most 2 trailing groups of 000s
-                return formatted.replace("000" + sign, sign).replace("000" + sign, sign);
-            }
-        }
-        return formatted;
     }
 
     private static @Nullable StateDescription considerTransformation(@Nullable StateDescription stateDescription) {

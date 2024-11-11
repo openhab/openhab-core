@@ -13,6 +13,7 @@
 package org.openhab.core.library.types;
 
 import static java.util.Map.entry;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -30,11 +31,13 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -399,5 +402,26 @@ public class DateTimeTypeTest {
         int durationInNano = (int) TimeUnit.NANOSECONDS.convert(milliseconds, TimeUnit.MILLISECONDS);
 
         return LocalDateTime.of(year, month + 1, dayOfMonth, hourOfDay, minute, second, durationInNano);
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideTestCasesForToFullStringWithZone")
+    void toFullStringWithZone(String instant, ZoneId zoneId, String expected) {
+        DateTimeType dt = new DateTimeType(Instant.parse(instant));
+        String actual = dt.toFullString(zoneId);
+        assertThat(actual, is(equalTo(expected)));
+    }
+
+    private static Stream<Arguments> provideTestCasesForToFullStringWithZone() {
+        return Stream.of( //
+                Arguments.of("2024-11-11T20:39:00Z", ZoneId.of("UTC"), "2024-11-11T20:39:00.000+0000"), //
+                Arguments.of("2024-11-11T20:39:00.000000000Z", ZoneId.of("UTC"), "2024-11-11T20:39:00.000+0000"), //
+                Arguments.of("2024-11-11T20:39:00.000000001Z", ZoneId.of("UTC"), "2024-11-11T20:39:00.000000001+0000"), //
+                Arguments.of("2024-11-11T20:39:00.123000000Z", ZoneId.of("UTC"), "2024-11-11T20:39:00.123+0000"), //
+                Arguments.of("2024-11-11T20:39:00.123456000Z", ZoneId.of("UTC"), "2024-11-11T20:39:00.123456+0000"), //
+                Arguments.of("2024-11-11T20:39:00.123456789Z", ZoneId.of("UTC"), "2024-11-11T20:39:00.123456789+0000"), //
+                Arguments.of("2024-11-11T20:39:00.123Z", ZoneId.of("Europe/Paris"), "2024-11-11T21:39:00.123+0100"), //
+                Arguments.of("2024-11-11T04:59:59.999Z", ZoneId.of("America/New_York"), "2024-11-10T23:59:59.999-0500") //
+        );
     }
 }

@@ -225,7 +225,11 @@ public class DateTimeType implements PrimitiveType, State, Command, Comparable<D
 
     @Override
     public String toFullString() {
-        String formatted = getZonedDateTime().format(FORMATTER_TZ_RFC);
+        return toFullString(ZoneId.systemDefault());
+    }
+
+    public String toFullString(ZoneId zoneId) {
+        String formatted = instant.atZone(zoneId).format(FORMATTER_TZ_RFC);
         if (formatted.contains(".")) {
             String sign = "";
             if (formatted.contains("+")) {
