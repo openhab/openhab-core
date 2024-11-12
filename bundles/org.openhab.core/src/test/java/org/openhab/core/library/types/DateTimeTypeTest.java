@@ -377,6 +377,24 @@ public class DateTimeTypeTest {
         }
     }
 
+    @ParameterizedTest
+    @MethodSource("provideTestCasesForFormatWithZone")
+    void formatWithZone(String instant, @Nullable String pattern, ZoneId zoneId, String expected) {
+        DateTimeType dt = new DateTimeType(Instant.parse(instant));
+        String actual = dt.format(pattern, zoneId);
+        assertThat(actual, is(equalTo(expected)));
+    }
+
+    private static Stream<Arguments> provideTestCasesForFormatWithZone() {
+        return Stream.of( //
+                Arguments.of("2024-11-11T20:39:01Z", null, ZoneId.of("UTC"), "2024-11-11T20:39:01"), //
+                Arguments.of("2024-11-11T20:39:01Z", "%1$td.%1$tm.%1$tY %1$tH:%1$tM", ZoneId.of("Europe/Paris"),
+                        "11.11.2024 21:39"), //
+                Arguments.of("2024-11-11T20:39:01Z", "%1$td.%1$tm.%1$tY %1$tH:%1$tM", ZoneId.of("US/Alaska"),
+                        "11.11.2024 11:39") //
+        );
+    }
+
     private DateTimeType createDateTimeType(ParameterSet parameterSet) throws DateTimeException {
         Map<String, Integer> inputTimeMap = parameterSet.inputTimeMap;
         TimeZone inputTimeZone = parameterSet.inputTimeZone;

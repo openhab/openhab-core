@@ -166,11 +166,16 @@ public class DateTimeType implements PrimitiveType, State, Command, Comparable<D
 
     @Override
     public String format(@Nullable String pattern) {
+        return format(pattern, ZoneId.systemDefault());
+    }
+
+    public String format(@Nullable String pattern, ZoneId zoneId) {
+        ZonedDateTime zonedDateTime = instant.atZone(zoneId);
         if (pattern == null) {
-            return DateTimeFormatter.ofPattern(DATE_PATTERN).format(getZonedDateTime());
+            return DateTimeFormatter.ofPattern(DATE_PATTERN).format(zonedDateTime);
         }
 
-        return String.format(pattern, getZonedDateTime());
+        return String.format(pattern, zonedDateTime);
     }
 
     public String format(Locale locale, String pattern) {
