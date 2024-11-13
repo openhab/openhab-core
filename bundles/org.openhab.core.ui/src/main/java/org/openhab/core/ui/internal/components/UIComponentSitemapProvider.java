@@ -102,7 +102,7 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
     private static final String SITEMAP_SUFFIX = ".sitemap";
 
     private static final Pattern CONDITION_PATTERN = Pattern
-            .compile("(?<item>[A-Za-z]\\w*)?\\s*(?<condition>==|!=|<=|>=|<|>)?\\s*(?<sign>\\+|-)?(?<state>.+)");
+            .compile("((?<item>[A-Za-z]\\w*)?\\s*(?<condition>==|!=|<=|>=|<|>))?\\s*(?<sign>\\+|-)?(?<state>.+)");
     private static final Pattern COMMANDS_PATTERN = Pattern.compile("^(?<cmd1>\"[^\"]*\"|[^\": ]*):(?<cmd2>.*)$");
 
     private Map<String, Sitemap> sitemaps = new HashMap<>();
