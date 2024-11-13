@@ -13,6 +13,7 @@
 package org.openhab.core.automation.internal.module.handler;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -158,9 +159,9 @@ public class ItemStateConditionHandler extends BaseConditionModuleHandler implem
         Item item = itemRegistry.getItem(itemName);
         State compareState = TypeParser.parseState(item.getAcceptedDataTypes(), state);
         State itemState = item.getState();
-        if (itemState instanceof DateTimeType type) {
-            ZonedDateTime itemTime = type.getZonedDateTime();
-            ZonedDateTime compareTime = getCompareTime(state);
+        if (itemState instanceof DateTimeType dateTimeState) {
+            Instant itemTime = dateTimeState.getInstant();
+            Instant compareTime = getCompareTime(state).toInstant();
             return itemTime.compareTo(compareTime) <= 0;
         } else if (itemState instanceof QuantityType qtState) {
             if (compareState instanceof DecimalType type) {
@@ -195,9 +196,9 @@ public class ItemStateConditionHandler extends BaseConditionModuleHandler implem
         Item item = itemRegistry.getItem(itemName);
         State compareState = TypeParser.parseState(item.getAcceptedDataTypes(), state);
         State itemState = item.getState();
-        if (itemState instanceof DateTimeType type) {
-            ZonedDateTime itemTime = type.getZonedDateTime();
-            ZonedDateTime compareTime = getCompareTime(state);
+        if (itemState instanceof DateTimeType dateTimeState) {
+            Instant itemTime = dateTimeState.getInstant();
+            Instant compareTime = getCompareTime(state).toInstant();
             return itemTime.compareTo(compareTime) >= 0;
         } else if (itemState instanceof QuantityType qtState) {
             if (compareState instanceof DecimalType type) {

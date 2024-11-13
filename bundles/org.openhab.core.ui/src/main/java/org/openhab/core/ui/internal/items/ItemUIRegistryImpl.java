@@ -12,7 +12,7 @@
  */
 package org.openhab.core.ui.internal.items;
 
-import java.time.ZonedDateTime;
+import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -1145,9 +1145,9 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
                 } catch (NumberFormatException e) {
                     logger.debug("matchStateToValue: Decimal format exception: ", e);
                 }
-            } else if (state instanceof DateTimeType type) {
-                ZonedDateTime val = type.getZonedDateTime();
-                ZonedDateTime now = ZonedDateTime.now();
+            } else if (state instanceof DateTimeType dateTimeState) {
+                Instant val = dateTimeState.getInstant();
+                Instant now = Instant.now();
                 long secsDif = ChronoUnit.SECONDS.between(val, now);
 
                 try {

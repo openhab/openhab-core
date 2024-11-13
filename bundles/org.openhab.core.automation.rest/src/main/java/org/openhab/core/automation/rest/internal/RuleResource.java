@@ -76,6 +76,7 @@ import org.openhab.core.common.registry.RegistryChangedRunnableListener;
 import org.openhab.core.config.core.ConfigUtil;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.events.Event;
+import org.openhab.core.i18n.TimeZoneProvider;
 import org.openhab.core.io.rest.DTOMapper;
 import org.openhab.core.io.rest.JSONResponse;
 import org.openhab.core.io.rest.RESTConstants;
@@ -133,6 +134,7 @@ public class RuleResource implements RESTResource {
     private final RuleManager ruleManager;
     private final RuleRegistry ruleRegistry;
     private final ManagedRuleProvider managedRuleProvider;
+    private final TimeZoneProvider timeZoneProvider;
     private final RegistryChangedRunnableListener<Rule> resetLastModifiedChangeListener = new RegistryChangedRunnableListener<>(
             () -> lastModified = null);
 
@@ -144,11 +146,13 @@ public class RuleResource implements RESTResource {
             final @Reference DTOMapper dtoMapper, //
             final @Reference RuleManager ruleManager, //
             final @Reference RuleRegistry ruleRegistry, //
-            final @Reference ManagedRuleProvider managedRuleProvider) {
+            final @Reference ManagedRuleProvider managedRuleProvider, //
+            final @Reference TimeZoneProvider timeZoneProvider) {
         this.dtoMapper = dtoMapper;
         this.ruleManager = ruleManager;
         this.ruleRegistry = ruleRegistry;
         this.managedRuleProvider = managedRuleProvider;
+        this.timeZoneProvider = timeZoneProvider;
 
         this.ruleRegistry.addRegistryChangeListener(resetLastModifiedChangeListener);
     }
@@ -431,9 +435,9 @@ public class RuleResource implements RESTResource {
         return Response.ok(ruleExecutions.toList()).build();
     }
 
-    private static ZonedDateTime parseTime(String sTime) {
+    private ZonedDateTime parseTime(String sTime) {
         final DateTimeType dateTime = new DateTimeType(sTime);
-        return dateTime.getZonedDateTime();
+        return dateTime.getInstant().atZone(timeZoneProvider.getTimeZone());
     }
 
     private static long daysBetween(ZonedDateTime d1, ZonedDateTime d2) {
