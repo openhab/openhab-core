@@ -65,6 +65,34 @@ public class ActionInputsHelper {
     private final TimeZoneProvider timeZoneProvider;
     private final UnitProvider unitProvider;
 
+    // Primitive types
+    private static final String BOOLEAN = "boolean";
+    private static final String BYTE = "byte";
+    private static final String SHORT = "short";
+    private static final String INT = "int";
+    private static final String LONG = "long";
+    private static final String FLOAT = "float";
+    private static final String DOUBLE = "double";
+
+    // Wrapper and specific Java classes
+    private static final String JAVA_BOOLEAN = "java.lang.Boolean";
+    private static final String JAVA_BYTE = "java.lang.Byte";
+    private static final String JAVA_SHORT = "java.lang.Short";
+    private static final String JAVA_INTEGER = "java.lang.Integer";
+    private static final String JAVA_LONG = "java.lang.Long";
+    private static final String JAVA_FLOAT = "java.lang.Float";
+    private static final String JAVA_DOUBLE = "java.lang.Double";
+    private static final String JAVA_NUMBER = "java.lang.Number";
+    private static final String JAVA_DECIMAL_TYPE = "org.openhab.core.library.types.DecimalType";
+    private static final String JAVA_STRING = "java.lang.String";
+    private static final String JAVA_LOCAL_DATE = "java.time.LocalDate";
+    private static final String JAVA_LOCAL_TIME = "java.time.LocalTime";
+    private static final String JAVA_LOCAL_DATE_TIME = "java.time.LocalDateTime";
+    private static final String JAVA_UTIL_DATE = "java.util.Date";
+    private static final String JAVA_ZONED_DATE_TIME = "java.time.ZonedDateTime";
+    private static final String JAVA_INSTANT = "java.time.Instant";
+    private static final String JAVA_DURATION = "java.time.Duration";
+
     @Activate
     public ActionInputsHelper(final @Reference TimeZoneProvider timeZoneProvider,
             final @Reference UnitProvider unitProvider) {
@@ -117,52 +145,52 @@ public class ActionInputsHelper {
             }
         } else {
             switch (input.getType()) {
-                case "boolean":
+                case BOOLEAN:
                     defaultValue = "false";
                     required = true;
-                case "java.lang.Boolean":
+                case JAVA_BOOLEAN:
                     parameterType = ConfigDescriptionParameter.Type.BOOLEAN;
                     break;
-                case "byte":
-                case "short":
-                case "int":
-                case "long":
+                case BYTE:
+                case SHORT:
+                case INT:
+                case LONG:
                     defaultValue = "0";
                     required = true;
-                case "java.lang.Byte":
-                case "java.lang.Short":
-                case "java.lang.Integer":
-                case "java.lang.Long":
+                case JAVA_BYTE:
+                case JAVA_SHORT:
+                case JAVA_INTEGER:
+                case JAVA_LONG:
                     parameterType = ConfigDescriptionParameter.Type.INTEGER;
                     break;
-                case "float":
-                case "double":
+                case FLOAT:
+                case DOUBLE:
                     defaultValue = "0";
                     required = true;
-                case "java.lang.Float":
-                case "java.lang.Double":
-                case "java.lang.Number":
-                case "org.openhab.core.library.types.DecimalType":
+                case JAVA_FLOAT:
+                case JAVA_DOUBLE:
+                case JAVA_NUMBER:
+                case JAVA_DECIMAL_TYPE:
                     parameterType = ConfigDescriptionParameter.Type.DECIMAL;
                     step = BigDecimal.ZERO;
                     break;
-                case "java.lang.String":
+                case JAVA_STRING:
                     break;
-                case "java.time.LocalDate":
+                case JAVA_LOCAL_DATE:
                     context = "date";
                     break;
-                case "java.time.LocalTime":
+                case JAVA_LOCAL_TIME:
                     context = "time";
                     step = BigDecimal.ONE;
                     break;
-                case "java.time.LocalDateTime":
-                case "java.util.Date":
-                case "java.time.ZonedDateTime":
-                case "java.time.Instant":
+                case JAVA_LOCAL_DATE_TIME:
+                case JAVA_UTIL_DATE:
+                case JAVA_ZONED_DATE_TIME:
+                case JAVA_INSTANT:
                     context = "datetime";
                     step = BigDecimal.ONE;
                     break;
-                case "java.time.Duration":
+                case JAVA_DURATION:
                     // There is no available configuration parameter context for these types.
                     // A text parameter is used. The expected value must respect a particular format specific
                     // to each of these types.
@@ -220,13 +248,13 @@ public class ActionInputsHelper {
 
     private @Nullable Object getDefaultValueForActionInput(Input input) {
         return switch (input.getType()) {
-            case "boolean" -> false;
-            case "byte" -> (byte) 0;
-            case "short" -> (short) 0;
-            case "int" -> 0;
-            case "long" -> 0L;
-            case "float" -> 0.0f;
-            case "double" -> 0.0d;
+            case BOOLEAN -> false;
+            case BYTE -> (byte) 0;
+            case SHORT -> (short) 0;
+            case INT -> 0;
+            case LONG -> 0L;
+            case FLOAT -> 0.0f;
+            case DOUBLE -> 0.0d;
             default -> null;
         };
     }
@@ -249,12 +277,12 @@ public class ActionInputsHelper {
                     return new QuantityType<>(valueDouble, getDefaultUnit(matcher.group("dimension")));
                 } else {
                     return switch (input.getType()) {
-                        case "byte", "java.lang.Byte" -> Byte.valueOf(valueDouble.byteValue());
-                        case "short", "java.lang.Short" -> Short.valueOf(valueDouble.shortValue());
-                        case "int", "java.lang.Integer" -> Integer.valueOf(valueDouble.intValue());
-                        case "long", "java.lang.Long" -> Long.valueOf(valueDouble.longValue());
-                        case "float", "java.lang.Float" -> Float.valueOf(valueDouble.floatValue());
-                        case "org.openhab.core.library.types.DecimalType" -> new DecimalType(valueDouble);
+                        case BYTE, JAVA_BYTE -> Byte.valueOf(valueDouble.byteValue());
+                        case SHORT, JAVA_SHORT -> Short.valueOf(valueDouble.shortValue());
+                        case INT, JAVA_INTEGER -> Integer.valueOf(valueDouble.intValue());
+                        case LONG, JAVA_LONG -> Long.valueOf(valueDouble.longValue());
+                        case FLOAT, JAVA_FLOAT -> Float.valueOf(valueDouble.floatValue());
+                        case JAVA_DECIMAL_TYPE -> new DecimalType(valueDouble);
                         default -> argument;
                     };
                 }
@@ -271,33 +299,33 @@ public class ActionInputsHelper {
                     }
                 } else {
                     return switch (input.getType()) {
-                        case "boolean", "java.lang.Boolean" -> Boolean.valueOf(valueString.toLowerCase());
-                        case "byte", "java.lang.Byte" -> Byte.valueOf(valueString);
-                        case "short", "java.lang.Short" -> Short.valueOf(valueString);
-                        case "int", "java.lang.Integer" -> Integer.valueOf(valueString);
-                        case "long", "java.lang.Long" -> Long.valueOf(valueString);
-                        case "float", "java.lang.Float" -> Float.valueOf(valueString);
-                        case "double", "java.lang.Double", "java.lang.Number" -> Double.valueOf(valueString);
-                        case "org.openhab.core.library.types.DecimalType" -> new DecimalType(valueString);
-                        case "java.time.LocalDate" ->
+                        case BOOLEAN, JAVA_BOOLEAN -> Boolean.valueOf(valueString.toLowerCase());
+                        case BYTE, JAVA_BYTE -> Byte.valueOf(valueString);
+                        case SHORT, JAVA_SHORT -> Short.valueOf(valueString);
+                        case INT, JAVA_INTEGER -> Integer.valueOf(valueString);
+                        case LONG, JAVA_LONG -> Long.valueOf(valueString);
+                        case FLOAT, JAVA_FLOAT -> Float.valueOf(valueString);
+                        case DOUBLE, JAVA_DOUBLE, JAVA_NUMBER -> Double.valueOf(valueString);
+                        case JAVA_DECIMAL_TYPE -> new DecimalType(valueString);
+                        case JAVA_LOCAL_DATE ->
                             // Accepted format is: 2007-12-03
                             LocalDate.parse(valueString);
-                        case "java.time.LocalTime" ->
+                        case JAVA_LOCAL_TIME ->
                             // Accepted format is: 10:15:30
                             LocalTime.parse(valueString);
-                        case "java.time.LocalDateTime" ->
+                        case JAVA_LOCAL_DATE_TIME ->
                             // Accepted format is: 2007-12-03T10:15:30
                             LocalDateTime.parse(valueString);
-                        case "java.util.Date" ->
+                        case JAVA_UTIL_DATE ->
                             // Accepted format is: 2007-12-03T10:15:30
                             new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(valueString);
-                        case "java.time.ZonedDateTime" ->
+                        case JAVA_ZONED_DATE_TIME ->
                             // Accepted format is: 2007-12-03T10:15:30
                             LocalDateTime.parse(valueString).atZone(timeZoneProvider.getTimeZone());
-                        case "java.time.Instant" ->
+                        case JAVA_INSTANT ->
                             // Accepted format is: 2007-12-03T10:15:30
                             LocalDateTime.parse(valueString).atZone(timeZoneProvider.getTimeZone()).toInstant();
-                        case "java.time.Duration" ->
+                        case JAVA_DURATION ->
                             // Accepted format is: P2DT17H25M30.5S
                             Duration.parse(valueString);
                         default -> argument;
