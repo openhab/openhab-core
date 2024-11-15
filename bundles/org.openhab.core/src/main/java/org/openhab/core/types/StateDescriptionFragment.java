@@ -60,6 +60,14 @@ public interface StateDescriptionFragment {
     String getPattern();
 
     /**
+     * Returns the unit of the states.
+     *
+     * @return rangeUnit
+     */
+    @Nullable
+    String getRangeUnit();
+
+    /**
      * Returns true, if the state can only be read but not written. Typically a
      * sensor can be read only.
      *

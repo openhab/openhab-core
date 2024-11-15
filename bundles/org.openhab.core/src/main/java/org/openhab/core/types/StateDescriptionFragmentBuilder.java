@@ -32,6 +32,7 @@ public class StateDescriptionFragmentBuilder {
     private @Nullable BigDecimal maximum;
     private @Nullable BigDecimal step;
     private @Nullable String pattern;
+    private @Nullable String rangeUnit;
     private @Nullable Boolean readOnly;
     private @Nullable List<StateOption> options;
 
@@ -44,6 +45,7 @@ public class StateDescriptionFragmentBuilder {
         this.maximum = fragment.getMaximum();
         this.step = fragment.getStep();
         this.pattern = fragment.getPattern();
+        this.rangeUnit = fragment.getRangeUnit();
         this.readOnly = fragment.isReadOnly();
         final List<StateOption> stateOptions = fragment.getOptions();
         if (stateOptions != null && !stateOptions.isEmpty()) {
@@ -56,6 +58,7 @@ public class StateDescriptionFragmentBuilder {
         this.maximum = legacy.getMaximum();
         this.step = legacy.getStep();
         this.pattern = legacy.getPattern();
+        this.rangeUnit = legacy.getRangeUnit();
         this.readOnly = Boolean.valueOf(legacy.isReadOnly());
         if (!legacy.getOptions().isEmpty()) {
             this.options = new ArrayList<>(legacy.getOptions());
@@ -100,7 +103,7 @@ public class StateDescriptionFragmentBuilder {
      */
     @SuppressWarnings("deprecation")
     public StateDescriptionFragment build() {
-        return new StateDescriptionFragmentImpl(minimum, maximum, step, pattern, readOnly, options);
+        return new StateDescriptionFragmentImpl(minimum, maximum, step, pattern, rangeUnit, readOnly, options);
     }
 
     /**
@@ -144,6 +147,17 @@ public class StateDescriptionFragmentBuilder {
      */
     public StateDescriptionFragmentBuilder withPattern(String pattern) {
         this.pattern = pattern;
+        return this;
+    }
+
+    /**
+     * Set the rangeUnit for the resulting {@link StateDescriptionFragment}.
+     *
+     * @param rangeUnit the rangeUnit for the resulting {@link StateDescriptionFragment}.
+     * @return this builder.
+     */
+    public StateDescriptionFragmentBuilder withRangeUnit(String rangeUnit) {
+        this.rangeUnit = rangeUnit;
         return this;
     }
 

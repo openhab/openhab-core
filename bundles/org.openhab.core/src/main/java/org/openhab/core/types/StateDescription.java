@@ -32,6 +32,7 @@ public class StateDescription {
     protected @Nullable final BigDecimal maximum;
     protected @Nullable final BigDecimal step;
     protected @Nullable final String pattern;
+    protected @Nullable final String rangeUnit;
     protected final boolean readOnly;
     protected final List<StateOption> options;
 
@@ -42,15 +43,17 @@ public class StateDescription {
      * @param maximum maximum value of the state
      * @param step step size
      * @param pattern pattern to render the state
+     * @param rangeUnit unit of the range
      * @param readOnly if the state can be changed by the system
      * @param options predefined list of options
      */
     protected StateDescription(@Nullable BigDecimal minimum, @Nullable BigDecimal maximum, @Nullable BigDecimal step,
-            @Nullable String pattern, boolean readOnly, @Nullable List<StateOption> options) {
+            @Nullable String pattern, @Nullable String rangeUnit, boolean readOnly, @Nullable List<StateOption> options) {
         this.minimum = minimum;
         this.maximum = maximum;
         this.step = step;
         this.pattern = pattern;
+        this.rangeUnit = rangeUnit;
         this.readOnly = readOnly;
         this.options = options == null ? List.of() : Collections.unmodifiableList(options);
     }
@@ -92,6 +95,15 @@ public class StateDescription {
     }
 
     /**
+     * Returns the unit of range
+     * 
+     * @return rangeUnit
+     */
+    public @Nullable String getRangeUnit() {
+        return rangeUnit;
+    }
+
+    /**
      *
      * Returns {@code true} if the state can only be read but not written or {@code false} if the state can also be
      * written.
@@ -120,6 +132,7 @@ public class StateDescription {
         result = prime * result + (maximum != null ? maximum.hashCode() : 0);
         result = prime * result + (step != null ? step.hashCode() : 0);
         result = prime * result + (pattern != null ? pattern.hashCode() : 0);
+        result - prime * result + (rangeUnit != null ? rangeUnit.hashCode() : 0);
         result = prime * result + (readOnly ? 1231 : 1237);
         result = prime * result + options.hashCode();
         return result;
@@ -139,6 +152,7 @@ public class StateDescription {
         StateDescription other = (StateDescription) obj;
         return Objects.equals(minimum, other.minimum) && Objects.equals(maximum, other.maximum)
                 && Objects.equals(step, other.step) && Objects.equals(pattern, other.pattern)
+                && Objects.equals(rangeUnit, other.rangeUnit)
                 && readOnly == other.readOnly //
                 && options.equals(other.options);
     }
@@ -146,6 +160,6 @@ public class StateDescription {
     @Override
     public String toString() {
         return "StateDescription [minimum=" + minimum + ", maximum=" + maximum + ", step=" + step + ", pattern="
-                + pattern + ", readOnly=" + readOnly + ", channelStateOptions=" + options + "]";
+                + pattern + ", rangeUnit=" + rangeUnit + ", readOnly=" + readOnly + ", channelStateOptions=" + options + "]";
     }
 }
