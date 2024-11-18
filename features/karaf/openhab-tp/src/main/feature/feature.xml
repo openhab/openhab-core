@@ -37,7 +37,7 @@
 		<bundle dependency="true">mvn:org.osgi/org.osgi.service.component.annotations/1.5.1</bundle>
 
 		<!-- TODO: Unbundled libraries -->
-		<bundle dependency="true">mvn:com.thoughtworks.xstream/xstream/1.4.20</bundle>
+		<bundle dependency="true">mvn:com.thoughtworks.xstream/xstream/1.4.21</bundle>
 	</feature>
 
 	<feature name="openhab.tp-coap" description="Californium CoAP library" version="${project.version}">
