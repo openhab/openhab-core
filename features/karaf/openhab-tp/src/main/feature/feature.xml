@@ -55,8 +55,8 @@
 	</feature>
 
 	<feature name="openhab.tp-gson" description="Gson" version="${project.version}">
-		<capability>openhab.tp;feature=gson;version=2.10.1</capability>
-		<bundle>mvn:org.eclipse.orbit.bundles/com.google.gson/2.10.1.v20230109-0753</bundle>
+		<capability>openhab.tp;feature=gson;version=2.11.0</capability>
+		<bundle>mvn:com.google.code.gson/gson/2.11.0</bundle>
 	</feature>
 
 	<feature name="openhab.tp-hivemqclient" description="MQTT Client" version="${project.version}">
@@ -244,12 +244,12 @@
 		<bundle dependency="true">mvn:org.eclipse.xtend/org.eclipse.xtend.lib.macro/${xtext.version}</bundle>
 
 		<bundle dependency="true">mvn:com.google.guava/failureaccess/1.0.2</bundle>
-		<bundle dependency="true">mvn:com.google.guava/guava/33.3.0-jre</bundle>
+		<bundle dependency="true">mvn:com.google.guava/guava/33.3.1-jre</bundle>
 		<bundle dependency="true">mvn:com.google.inject/guice/7.0.0</bundle>
 		<bundle dependency="true">mvn:jakarta.inject/jakarta.inject-api/2.0.1</bundle>
 
 		<bundle dependency="true">mvn:org.eclipse.orbit.bundles/org.aopalliance/1.0.0.v201105210816</bundle>
-		<bundle dependency="true">mvn:io.github.classgraph/classgraph/4.8.174</bundle>
+		<bundle dependency="true">mvn:io.github.classgraph/classgraph/4.8.176</bundle>
 		<bundle dependency="true">mvn:org.eclipse.orbit.bundles/org.antlr.runtime/3.2.0.v201101311130</bundle>
 
 		<bundle dependency="true">mvn:org.eclipse.platform/org.eclipse.equinox.common/3.18.0</bundle>
