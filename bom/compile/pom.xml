@@ -117,11 +117,10 @@
     </dependency>
 
     <!-- Gson -->
-    <!-- The Orbit bundle is used because LSP4J imports com.google.gson.internal -->
     <dependency>
-      <groupId>org.eclipse.orbit.bundles</groupId>
-      <artifactId>com.google.gson</artifactId>
-      <version>2.10.1.v20230109-0753</version>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
+      <version>2.11.0</version>
       <scope>compile</scope>
     </dependency>
 
