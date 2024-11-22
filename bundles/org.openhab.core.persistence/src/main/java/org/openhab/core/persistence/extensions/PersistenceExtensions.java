@@ -2269,7 +2269,6 @@ public class PersistenceExtensions {
         }
 
         return sum;
-
     }
 
     /**
