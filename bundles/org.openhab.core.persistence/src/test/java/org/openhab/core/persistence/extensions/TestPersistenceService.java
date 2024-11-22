@@ -44,6 +44,7 @@ import org.openhab.core.persistence.QueryablePersistenceService;
 import org.openhab.core.persistence.extensions.PersistenceExtensions.RiemannType;
 import org.openhab.core.persistence.strategy.PersistenceStrategy;
 import org.openhab.core.types.State;
+import org.slf4j.LoggerFactory;
 
 /**
  * A simple persistence service used for unit tests
@@ -258,6 +259,7 @@ public class TestPersistenceService implements QueryablePersistenceService {
         double sum = 0;
         int index = begin;
         long duration = 0;
+        long totalDuration = 0;
         switch (type) {
             case left:
                 if (beginYear == null) {
@@ -282,6 +284,7 @@ public class TestPersistenceService implements QueryablePersistenceService {
                                 .toSeconds();
                     }
                     sum += value * duration;
+                    totalDuration += duration;
                     duration = 0;
                 }
                 break;
@@ -308,6 +311,7 @@ public class TestPersistenceService implements QueryablePersistenceService {
                                 .toSeconds();
                     }
                     sum += value * duration;
+                    totalDuration += duration;
                     duration = 0;
                 }
                 break;
@@ -335,12 +339,15 @@ public class TestPersistenceService implements QueryablePersistenceService {
                                 .toSeconds();
                     }
                     sum += value * duration;
+                    totalDuration += duration;
                     duration = 0;
                 }
+                LoggerFactory.getLogger(TestPersistenceService.class).info("Test Riemann now {}", now);
+                LoggerFactory.getLogger(TestPersistenceService.class).info("Test Riemann trapezoidal total duration {}",
+                        totalDuration);
                 break;
             case midpoint:
                 int nextIndex = begin;
-                long nextDuration = 0;
                 if (beginYear == null) {
                     duration = Duration
                             .between(now, ZonedDateTime.of(now.getYear() + 1, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()))
@@ -364,19 +371,22 @@ public class TestPersistenceService implements QueryablePersistenceService {
                         nextIndex++;
                     }
                     nextIndex++;
-                    if (endYear == null && nextIndex == end) {
-                        nextDuration = Duration
-                                .between(ZonedDateTime.of(now.getYear(), 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()), now)
-                                .toSeconds();
-                    }
-                    nextDuration += Duration
+                    long nextDuration = Duration
                             .between(ZonedDateTime.of(bucketStart, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()),
                                     ZonedDateTime.of(nextIndex, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()))
                             .toSeconds();
+                    if (endYear == null && nextIndex == end) {
+                        nextDuration += Duration
+                                .between(ZonedDateTime.of(now.getYear(), 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()), now)
+                                .toSeconds();
+                    }
                     sum += value * (duration + nextDuration) / 2.0;
+                    totalDuration += (duration + nextDuration) / 2;
                     duration = 0;
-                    nextDuration = 0;
                 }
+                LoggerFactory.getLogger(TestPersistenceService.class).info("Test Riemann now {}", now);
+                LoggerFactory.getLogger(TestPersistenceService.class).info("Test Riemann midpoint total duration {}",
+                        totalDuration);
                 break;
         }
         return sum;

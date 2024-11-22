@@ -54,6 +54,7 @@ import org.openhab.core.persistence.PersistenceService;
 import org.openhab.core.persistence.PersistenceServiceRegistry;
 import org.openhab.core.persistence.extensions.PersistenceExtensions.RiemannType;
 import org.openhab.core.types.State;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Kai Kreuzer - Initial contribution
@@ -1495,8 +1496,10 @@ public class PersistenceExtensionsTest {
         assertNotNull(sum);
         DecimalType dt = sum.as(DecimalType.class);
         assertNotNull(dt);
+        LoggerFactory.getLogger(PersistenceExtensionsTest.class).info("Test Riemann since left expected {}, sum {}",
+                expected, sum);
         // Allow max 5s difference between method and test, required as both expected and method tested retrieve
-        // now
+        // now from system
         assertEquals(expected, dt.doubleValue(), HISTORIC_END * 5.0);
         start = ZonedDateTime.of(HISTORIC_INTERMEDIATE_VALUE_1, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
         expected = riemannSum(HISTORIC_INTERMEDIATE_VALUE_1, null, type);
@@ -1504,8 +1507,10 @@ public class PersistenceExtensionsTest {
         assertNotNull(sum);
         dt = sum.as(DecimalType.class);
         assertNotNull(dt);
+        LoggerFactory.getLogger(PersistenceExtensionsTest.class).info("Test Riemann since left expected {}, sum {}",
+                expected, sum);
         // Allow max 5s difference between method and test, required as both expected and method tested retrieve
-        // now
+        // now from system
         assertEquals(expected, dt.doubleValue(), HISTORIC_END * 5.0);
 
         // default persistence service
@@ -1520,8 +1525,10 @@ public class PersistenceExtensionsTest {
         assertNotNull(sum);
         dt = sum.as(DecimalType.class);
         assertNotNull(dt);
+        LoggerFactory.getLogger(PersistenceExtensionsTest.class).info("Test Riemann since right expected {}, sum {}",
+                expected, sum);
         // Allow max 5s difference between method and test, required as both expected and method tested retrieve
-        // now
+        // now from system
         assertEquals(expected, dt.doubleValue(), HISTORIC_END * 5.0);
         start = ZonedDateTime.of(HISTORIC_INTERMEDIATE_VALUE_1, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
         expected = riemannSum(HISTORIC_INTERMEDIATE_VALUE_1, null, type);
@@ -1529,8 +1536,10 @@ public class PersistenceExtensionsTest {
         assertNotNull(sum);
         dt = sum.as(DecimalType.class);
         assertNotNull(dt);
+        LoggerFactory.getLogger(PersistenceExtensionsTest.class).info("Test Riemann since right expected {}, sum {}",
+                expected, sum);
         // Allow max 5s difference between method and test, required as both expected and method tested retrieve
-        // now
+        // now from system
         assertEquals(expected, dt.doubleValue(), HISTORIC_END * 5.0);
 
         // default persistence service
@@ -1545,6 +1554,8 @@ public class PersistenceExtensionsTest {
         assertNotNull(sum);
         dt = sum.as(DecimalType.class);
         assertNotNull(dt);
+        LoggerFactory.getLogger(PersistenceExtensionsTest.class)
+                .info("Test Riemann since trapezoidal expected {}, sum {}", expected, sum);
         // Allow max 5s difference between method and test, required as both expected and method tested retrieve
         // now
         assertEquals(expected, dt.doubleValue(), HISTORIC_END * 5.0);
@@ -1554,8 +1565,10 @@ public class PersistenceExtensionsTest {
         assertNotNull(sum);
         dt = sum.as(DecimalType.class);
         assertNotNull(dt);
+        LoggerFactory.getLogger(PersistenceExtensionsTest.class)
+                .info("Test Riemann since trapezoidal expected {}, sum {}", expected, sum);
         // Allow max 5s difference between method and test, required as both expected and method tested retrieve
-        // now
+        // now from system
         assertEquals(expected, dt.doubleValue(), HISTORIC_END * 5.0);
 
         // default persistence service
@@ -1570,8 +1583,10 @@ public class PersistenceExtensionsTest {
         assertNotNull(sum);
         dt = sum.as(DecimalType.class);
         assertNotNull(dt);
+        LoggerFactory.getLogger(PersistenceExtensionsTest.class).info("Test Riemann since midpoint expected {}, sum {}",
+                expected, sum);
         // Allow max 5s difference between method and test, required as both expected and method tested retrieve
-        // now
+        // now from system
         assertEquals(expected, dt.doubleValue(), HISTORIC_END * 5.0);
         start = ZonedDateTime.of(HISTORIC_INTERMEDIATE_VALUE_1, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
         expected = riemannSum(HISTORIC_INTERMEDIATE_VALUE_1, null, type);
@@ -1579,8 +1594,10 @@ public class PersistenceExtensionsTest {
         assertNotNull(sum);
         dt = sum.as(DecimalType.class);
         assertNotNull(dt);
+        LoggerFactory.getLogger(PersistenceExtensionsTest.class).info("Test Riemann since midpoint expected {}, sum {}",
+                expected, sum);
         // Allow max 1 min difference between method and test, required as both expected and method tested retrieve
-        // now
+        // now from system
         assertEquals(expected, dt.doubleValue(), HISTORIC_END * 60.0);
 
         // default persistence service
@@ -1598,8 +1615,10 @@ public class PersistenceExtensionsTest {
         assertNotNull(sum);
         DecimalType dt = sum.as(DecimalType.class);
         assertNotNull(dt);
+        LoggerFactory.getLogger(PersistenceExtensionsTest.class).info("Test Riemann until left expected {}, sum {}",
+                expected, sum);
         // Allow max 5s difference between method and test, required as both expected and method tested retrieve
-        // now
+        // now from system
         assertEquals(expected, dt.doubleValue(), HISTORIC_END * 5.0);
         // default persistence service
         sum = PersistenceExtensions.riemannSumUntil(numberItem, end, type);
@@ -1613,8 +1632,10 @@ public class PersistenceExtensionsTest {
         assertNotNull(sum);
         dt = sum.as(DecimalType.class);
         assertNotNull(dt);
+        LoggerFactory.getLogger(PersistenceExtensionsTest.class).info("Test Riemann until right expected {}, sum {}",
+                expected, sum);
         // Allow max 5s difference between method and test, required as both expected and method tested retrieve
-        // now
+        // now from system
         assertEquals(expected, dt.doubleValue(), HISTORIC_END * 5.0);
         // default persistence service
         sum = PersistenceExtensions.riemannSumUntil(numberItem, end, type);
@@ -1628,8 +1649,10 @@ public class PersistenceExtensionsTest {
         assertNotNull(sum);
         dt = sum.as(DecimalType.class);
         assertNotNull(dt);
+        LoggerFactory.getLogger(PersistenceExtensionsTest.class)
+                .info("Test Riemann until trapezoidal expected {}, sum {}", expected, sum);
         // Allow max 5s difference between method and test, required as both expected and method tested retrieve
-        // now
+        // now from system
         assertEquals(expected, dt.doubleValue(), HISTORIC_END * 5.0);
         // default persistence service
         sum = PersistenceExtensions.riemannSumUntil(numberItem, end, type);
@@ -1643,8 +1666,10 @@ public class PersistenceExtensionsTest {
         assertNotNull(sum);
         dt = sum.as(DecimalType.class);
         assertNotNull(dt);
+        LoggerFactory.getLogger(PersistenceExtensionsTest.class).info("Test Riemann until midpoint expected {}, sum {}",
+                expected, sum);
         // Allow max 5s difference between method and test, required as both expected and method tested retrieve
-        // now
+        // now from system
         assertEquals(expected, dt.doubleValue(), HISTORIC_END * 5.0);
         // default persistence service
         sum = PersistenceExtensions.riemannSumUntil(numberItem, end, type);
