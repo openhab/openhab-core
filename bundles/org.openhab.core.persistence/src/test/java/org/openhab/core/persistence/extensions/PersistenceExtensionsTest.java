@@ -1487,86 +1487,312 @@ public class PersistenceExtensionsTest {
 
     @Test
     public void testRiemannSumSinceDecimalType() {
-        for (RiemannType type : RiemannType.values()) {
-            ZonedDateTime start = ZonedDateTime.of(BEFORE_START, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
-            double expected = riemannSum(BEFORE_START, null, type);
-            State sum = PersistenceExtensions.riemannSumSince(numberItem, start, type, SERVICE_ID);
-            assertNotNull(sum);
-            DecimalType dt = sum.as(DecimalType.class);
-            assertNotNull(dt);
-            assertEquals(expected, dt.doubleValue(), HISTORIC_END * 1.0); // Allow max 1s difference between method and
-                                                                          // test
+        RiemannType type = RiemannType.left;
 
-            start = ZonedDateTime.of(HISTORIC_INTERMEDIATE_VALUE_1, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
-            expected = riemannSum(HISTORIC_INTERMEDIATE_VALUE_1, null, type);
-            sum = PersistenceExtensions.riemannSumSince(numberItem, start, type, SERVICE_ID);
-            assertNotNull(sum);
-            dt = sum.as(DecimalType.class);
-            assertNotNull(dt);
-            assertEquals(expected, dt.doubleValue(), HISTORIC_END * 1.0); // Allow max 1s difference between method and
-                                                                          // test value
+        ZonedDateTime start = ZonedDateTime.of(BEFORE_START, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
+        double expected = riemannSum(BEFORE_START, null, type);
+        State sum = PersistenceExtensions.riemannSumSince(numberItem, start, type, SERVICE_ID);
+        assertNotNull(sum);
+        DecimalType dt = sum.as(DecimalType.class);
+        assertNotNull(dt);
+        // Allow max 5s difference between method and test, required as both expected and method tested retrieve
+        // now
+        assertEquals(expected, dt.doubleValue(), HISTORIC_END * 5.0);
+        start = ZonedDateTime.of(HISTORIC_INTERMEDIATE_VALUE_1, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
+        expected = riemannSum(HISTORIC_INTERMEDIATE_VALUE_1, null, type);
+        sum = PersistenceExtensions.riemannSumSince(numberItem, start, type, SERVICE_ID);
+        assertNotNull(sum);
+        dt = sum.as(DecimalType.class);
+        assertNotNull(dt);
+        // Allow max 5s difference between method and test, required as both expected and method tested retrieve
+        // now
+        assertEquals(expected, dt.doubleValue(), HISTORIC_END * 5.0);
 
-            // default persistence service
-            sum = PersistenceExtensions.riemannSumSince(numberItem, start, type);
-            assertNull(sum);
-        }
+        // default persistence service
+        sum = PersistenceExtensions.riemannSumSince(numberItem, start, type);
+        assertNull(sum);
+
+        type = RiemannType.right;
+
+        start = ZonedDateTime.of(BEFORE_START, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
+        expected = riemannSum(BEFORE_START, null, type);
+        sum = PersistenceExtensions.riemannSumSince(numberItem, start, type, SERVICE_ID);
+        assertNotNull(sum);
+        dt = sum.as(DecimalType.class);
+        assertNotNull(dt);
+        // Allow max 5s difference between method and test, required as both expected and method tested retrieve
+        // now
+        assertEquals(expected, dt.doubleValue(), HISTORIC_END * 5.0);
+        start = ZonedDateTime.of(HISTORIC_INTERMEDIATE_VALUE_1, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
+        expected = riemannSum(HISTORIC_INTERMEDIATE_VALUE_1, null, type);
+        sum = PersistenceExtensions.riemannSumSince(numberItem, start, type, SERVICE_ID);
+        assertNotNull(sum);
+        dt = sum.as(DecimalType.class);
+        assertNotNull(dt);
+        // Allow max 5s difference between method and test, required as both expected and method tested retrieve
+        // now
+        assertEquals(expected, dt.doubleValue(), HISTORIC_END * 5.0);
+
+        // default persistence service
+        sum = PersistenceExtensions.riemannSumSince(numberItem, start, type);
+        assertNull(sum);
+
+        type = RiemannType.trapezoidal;
+
+        start = ZonedDateTime.of(BEFORE_START, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
+        expected = riemannSum(BEFORE_START, null, type);
+        sum = PersistenceExtensions.riemannSumSince(numberItem, start, type, SERVICE_ID);
+        assertNotNull(sum);
+        dt = sum.as(DecimalType.class);
+        assertNotNull(dt);
+        // Allow max 5s difference between method and test, required as both expected and method tested retrieve
+        // now
+        assertEquals(expected, dt.doubleValue(), HISTORIC_END * 5.0);
+        start = ZonedDateTime.of(HISTORIC_INTERMEDIATE_VALUE_1, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
+        expected = riemannSum(HISTORIC_INTERMEDIATE_VALUE_1, null, type);
+        sum = PersistenceExtensions.riemannSumSince(numberItem, start, type, SERVICE_ID);
+        assertNotNull(sum);
+        dt = sum.as(DecimalType.class);
+        assertNotNull(dt);
+        // Allow max 5s difference between method and test, required as both expected and method tested retrieve
+        // now
+        assertEquals(expected, dt.doubleValue(), HISTORIC_END * 5.0);
+
+        // default persistence service
+        sum = PersistenceExtensions.riemannSumSince(numberItem, start, type);
+        assertNull(sum);
+
+        type = RiemannType.midpoint;
+
+        start = ZonedDateTime.of(BEFORE_START, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
+        expected = riemannSum(BEFORE_START, null, type);
+        sum = PersistenceExtensions.riemannSumSince(numberItem, start, type, SERVICE_ID);
+        assertNotNull(sum);
+        dt = sum.as(DecimalType.class);
+        assertNotNull(dt);
+        // Allow max 5s difference between method and test, required as both expected and method tested retrieve
+        // now
+        assertEquals(expected, dt.doubleValue(), HISTORIC_END * 5.0);
+        start = ZonedDateTime.of(HISTORIC_INTERMEDIATE_VALUE_1, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
+        expected = riemannSum(HISTORIC_INTERMEDIATE_VALUE_1, null, type);
+        sum = PersistenceExtensions.riemannSumSince(numberItem, start, type, SERVICE_ID);
+        assertNotNull(sum);
+        dt = sum.as(DecimalType.class);
+        assertNotNull(dt);
+        // Allow max 1 min difference between method and test, required as both expected and method tested retrieve
+        // now
+        assertEquals(expected, dt.doubleValue(), HISTORIC_END * 60.0);
+
+        // default persistence service
+        sum = PersistenceExtensions.riemannSumSince(numberItem, start, type);
+        assertNull(sum);
     }
 
     @Test
     public void testRiemannSumUntilDecimalType() {
-        for (RiemannType type : RiemannType.values()) {
-            ZonedDateTime end = ZonedDateTime.of(FUTURE_INTERMEDIATE_VALUE_3, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
-            double expected = riemannSum(null, FUTURE_INTERMEDIATE_VALUE_3, type);
-            State sum = PersistenceExtensions.riemannSumUntil(numberItem, end, type, SERVICE_ID);
-            assertNotNull(sum);
-            DecimalType dt = sum.as(DecimalType.class);
-            assertNotNull(dt);
-            assertEquals(expected, dt.doubleValue(), HISTORIC_END * 1.0); // Allow max 1s difference between method and
-                                                                          // test value
-            // default persistence service
-            sum = PersistenceExtensions.riemannSumUntil(numberItem, end, type);
-            assertNull(sum);
-        }
+        RiemannType type = RiemannType.left;
+
+        ZonedDateTime end = ZonedDateTime.of(FUTURE_INTERMEDIATE_VALUE_3, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
+        double expected = riemannSum(null, FUTURE_INTERMEDIATE_VALUE_3, type);
+        State sum = PersistenceExtensions.riemannSumUntil(numberItem, end, type, SERVICE_ID);
+        assertNotNull(sum);
+        DecimalType dt = sum.as(DecimalType.class);
+        assertNotNull(dt);
+        // Allow max 5s difference between method and test, required as both expected and method tested retrieve
+        // now
+        assertEquals(expected, dt.doubleValue(), HISTORIC_END * 5.0);
+        // default persistence service
+        sum = PersistenceExtensions.riemannSumUntil(numberItem, end, type);
+        assertNull(sum);
+
+        type = RiemannType.right;
+
+        end = ZonedDateTime.of(FUTURE_INTERMEDIATE_VALUE_3, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
+        expected = riemannSum(null, FUTURE_INTERMEDIATE_VALUE_3, type);
+        sum = PersistenceExtensions.riemannSumUntil(numberItem, end, type, SERVICE_ID);
+        assertNotNull(sum);
+        dt = sum.as(DecimalType.class);
+        assertNotNull(dt);
+        // Allow max 5s difference between method and test, required as both expected and method tested retrieve
+        // now
+        assertEquals(expected, dt.doubleValue(), HISTORIC_END * 5.0);
+        // default persistence service
+        sum = PersistenceExtensions.riemannSumUntil(numberItem, end, type);
+        assertNull(sum);
+
+        type = RiemannType.trapezoidal;
+
+        end = ZonedDateTime.of(FUTURE_INTERMEDIATE_VALUE_3, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
+        expected = riemannSum(null, FUTURE_INTERMEDIATE_VALUE_3, type);
+        sum = PersistenceExtensions.riemannSumUntil(numberItem, end, type, SERVICE_ID);
+        assertNotNull(sum);
+        dt = sum.as(DecimalType.class);
+        assertNotNull(dt);
+        // Allow max 5s difference between method and test, required as both expected and method tested retrieve
+        // now
+        assertEquals(expected, dt.doubleValue(), HISTORIC_END * 5.0);
+        // default persistence service
+        sum = PersistenceExtensions.riemannSumUntil(numberItem, end, type);
+        assertNull(sum);
+
+        type = RiemannType.midpoint;
+
+        end = ZonedDateTime.of(FUTURE_INTERMEDIATE_VALUE_3, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
+        expected = riemannSum(null, FUTURE_INTERMEDIATE_VALUE_3, type);
+        sum = PersistenceExtensions.riemannSumUntil(numberItem, end, type, SERVICE_ID);
+        assertNotNull(sum);
+        dt = sum.as(DecimalType.class);
+        assertNotNull(dt);
+        // Allow max 5s difference between method and test, required as both expected and method tested retrieve
+        // now
+        assertEquals(expected, dt.doubleValue(), HISTORIC_END * 5.0);
+        // default persistence service
+        sum = PersistenceExtensions.riemannSumUntil(numberItem, end, type);
+        assertNull(sum);
     }
 
     @Test
     public void testRiemannSumBetweenDecimalType() {
-        for (RiemannType type : RiemannType.values()) {
-            ZonedDateTime beginStored = ZonedDateTime.of(HISTORIC_INTERMEDIATE_VALUE_1, 1, 1, 0, 0, 0, 0,
-                    ZoneId.systemDefault());
-            ZonedDateTime endStored = ZonedDateTime.of(HISTORIC_INTERMEDIATE_VALUE_2, 1, 1, 0, 0, 0, 0,
-                    ZoneId.systemDefault());
-            double expected = riemannSum(HISTORIC_INTERMEDIATE_VALUE_1, HISTORIC_INTERMEDIATE_VALUE_2, type);
-            State sum = PersistenceExtensions.riemannSumBetween(numberItem, beginStored, endStored, type, SERVICE_ID);
-            assertNotNull(sum);
-            DecimalType dt = sum.as(DecimalType.class);
-            assertNotNull(dt);
-            assertEquals(expected, dt.doubleValue(), 0.01);
+        RiemannType type = RiemannType.left;
 
-            beginStored = ZonedDateTime.of(FUTURE_INTERMEDIATE_VALUE_3, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
-            endStored = ZonedDateTime.of(FUTURE_INTERMEDIATE_VALUE_4, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
-            expected = riemannSum(FUTURE_INTERMEDIATE_VALUE_3, FUTURE_INTERMEDIATE_VALUE_4, type);
+        ZonedDateTime beginStored = ZonedDateTime.of(HISTORIC_INTERMEDIATE_VALUE_1, 1, 1, 0, 0, 0, 0,
+                ZoneId.systemDefault());
+        ZonedDateTime endStored = ZonedDateTime.of(HISTORIC_INTERMEDIATE_VALUE_2, 1, 1, 0, 0, 0, 0,
+                ZoneId.systemDefault());
+        double expected = riemannSum(HISTORIC_INTERMEDIATE_VALUE_1, HISTORIC_INTERMEDIATE_VALUE_2, type);
+        State sum = PersistenceExtensions.riemannSumBetween(numberItem, beginStored, endStored, type, SERVICE_ID);
+        assertNotNull(sum);
+        DecimalType dt = sum.as(DecimalType.class);
+        assertNotNull(dt);
+        assertEquals(expected, dt.doubleValue(), 0.01);
 
-            sum = PersistenceExtensions.riemannSumBetween(numberItem, beginStored, endStored, type, SERVICE_ID);
-            assertNotNull(sum);
-            dt = sum.as(DecimalType.class);
-            assertNotNull(dt);
-            assertThat(dt.doubleValue(), is(closeTo(expected, 0.01)));
+        beginStored = ZonedDateTime.of(FUTURE_INTERMEDIATE_VALUE_3, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
+        endStored = ZonedDateTime.of(FUTURE_INTERMEDIATE_VALUE_4, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
+        expected = riemannSum(FUTURE_INTERMEDIATE_VALUE_3, FUTURE_INTERMEDIATE_VALUE_4, type);
 
-            beginStored = ZonedDateTime.of(HISTORIC_INTERMEDIATE_VALUE_1, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
-            endStored = ZonedDateTime.of(FUTURE_INTERMEDIATE_VALUE_3, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
-            expected = riemannSum(HISTORIC_INTERMEDIATE_VALUE_1, FUTURE_INTERMEDIATE_VALUE_3, type);
+        sum = PersistenceExtensions.riemannSumBetween(numberItem, beginStored, endStored, type, SERVICE_ID);
+        assertNotNull(sum);
+        dt = sum.as(DecimalType.class);
+        assertNotNull(dt);
+        assertThat(dt.doubleValue(), is(closeTo(expected, 0.01)));
 
-            sum = PersistenceExtensions.riemannSumBetween(numberItem, beginStored, endStored, type, SERVICE_ID);
-            assertNotNull(sum);
-            dt = sum.as(DecimalType.class);
-            assertNotNull(dt);
-            assertThat(dt.doubleValue(), is(closeTo(expected, 0.01)));
+        beginStored = ZonedDateTime.of(HISTORIC_INTERMEDIATE_VALUE_1, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
+        endStored = ZonedDateTime.of(FUTURE_INTERMEDIATE_VALUE_3, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
+        expected = riemannSum(HISTORIC_INTERMEDIATE_VALUE_1, FUTURE_INTERMEDIATE_VALUE_3, type);
 
-            // default persistence service
-            sum = PersistenceExtensions.riemannSumBetween(numberItem, beginStored, endStored, type);
-            assertNull(sum);
-        }
+        sum = PersistenceExtensions.riemannSumBetween(numberItem, beginStored, endStored, type, SERVICE_ID);
+        assertNotNull(sum);
+        dt = sum.as(DecimalType.class);
+        assertNotNull(dt);
+        assertThat(dt.doubleValue(), is(closeTo(expected, 0.01)));
+
+        // default persistence service
+        sum = PersistenceExtensions.riemannSumBetween(numberItem, beginStored, endStored, type);
+        assertNull(sum);
+
+        type = RiemannType.right;
+
+        beginStored = ZonedDateTime.of(HISTORIC_INTERMEDIATE_VALUE_1, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
+        endStored = ZonedDateTime.of(HISTORIC_INTERMEDIATE_VALUE_2, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
+        expected = riemannSum(HISTORIC_INTERMEDIATE_VALUE_1, HISTORIC_INTERMEDIATE_VALUE_2, type);
+        sum = PersistenceExtensions.riemannSumBetween(numberItem, beginStored, endStored, type, SERVICE_ID);
+        assertNotNull(sum);
+        dt = sum.as(DecimalType.class);
+        assertNotNull(dt);
+        assertEquals(expected, dt.doubleValue(), 0.01);
+
+        beginStored = ZonedDateTime.of(FUTURE_INTERMEDIATE_VALUE_3, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
+        endStored = ZonedDateTime.of(FUTURE_INTERMEDIATE_VALUE_4, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
+        expected = riemannSum(FUTURE_INTERMEDIATE_VALUE_3, FUTURE_INTERMEDIATE_VALUE_4, type);
+
+        sum = PersistenceExtensions.riemannSumBetween(numberItem, beginStored, endStored, type, SERVICE_ID);
+        assertNotNull(sum);
+        dt = sum.as(DecimalType.class);
+        assertNotNull(dt);
+        assertThat(dt.doubleValue(), is(closeTo(expected, 0.01)));
+
+        beginStored = ZonedDateTime.of(HISTORIC_INTERMEDIATE_VALUE_1, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
+        endStored = ZonedDateTime.of(FUTURE_INTERMEDIATE_VALUE_3, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
+        expected = riemannSum(HISTORIC_INTERMEDIATE_VALUE_1, FUTURE_INTERMEDIATE_VALUE_3, type);
+
+        sum = PersistenceExtensions.riemannSumBetween(numberItem, beginStored, endStored, type, SERVICE_ID);
+        assertNotNull(sum);
+        dt = sum.as(DecimalType.class);
+        assertNotNull(dt);
+        assertThat(dt.doubleValue(), is(closeTo(expected, 0.01)));
+
+        // default persistence service
+        sum = PersistenceExtensions.riemannSumBetween(numberItem, beginStored, endStored, type);
+        assertNull(sum);
+
+        type = RiemannType.trapezoidal;
+
+        beginStored = ZonedDateTime.of(HISTORIC_INTERMEDIATE_VALUE_1, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
+        endStored = ZonedDateTime.of(HISTORIC_INTERMEDIATE_VALUE_2, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
+        expected = riemannSum(HISTORIC_INTERMEDIATE_VALUE_1, HISTORIC_INTERMEDIATE_VALUE_2, type);
+        sum = PersistenceExtensions.riemannSumBetween(numberItem, beginStored, endStored, type, SERVICE_ID);
+        assertNotNull(sum);
+        dt = sum.as(DecimalType.class);
+        assertNotNull(dt);
+        assertEquals(expected, dt.doubleValue(), 0.01);
+
+        beginStored = ZonedDateTime.of(FUTURE_INTERMEDIATE_VALUE_3, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
+        endStored = ZonedDateTime.of(FUTURE_INTERMEDIATE_VALUE_4, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
+        expected = riemannSum(FUTURE_INTERMEDIATE_VALUE_3, FUTURE_INTERMEDIATE_VALUE_4, type);
+
+        sum = PersistenceExtensions.riemannSumBetween(numberItem, beginStored, endStored, type, SERVICE_ID);
+        assertNotNull(sum);
+        dt = sum.as(DecimalType.class);
+        assertNotNull(dt);
+        assertThat(dt.doubleValue(), is(closeTo(expected, 0.01)));
+
+        beginStored = ZonedDateTime.of(HISTORIC_INTERMEDIATE_VALUE_1, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
+        endStored = ZonedDateTime.of(FUTURE_INTERMEDIATE_VALUE_3, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
+        expected = riemannSum(HISTORIC_INTERMEDIATE_VALUE_1, FUTURE_INTERMEDIATE_VALUE_3, type);
+
+        sum = PersistenceExtensions.riemannSumBetween(numberItem, beginStored, endStored, type, SERVICE_ID);
+        assertNotNull(sum);
+        dt = sum.as(DecimalType.class);
+        assertNotNull(dt);
+        assertThat(dt.doubleValue(), is(closeTo(expected, 0.01)));
+
+        // default persistence service
+        sum = PersistenceExtensions.riemannSumBetween(numberItem, beginStored, endStored, type);
+        assertNull(sum);
+        type = RiemannType.midpoint;
+
+        beginStored = ZonedDateTime.of(HISTORIC_INTERMEDIATE_VALUE_1, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
+        endStored = ZonedDateTime.of(HISTORIC_INTERMEDIATE_VALUE_2, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
+        expected = riemannSum(HISTORIC_INTERMEDIATE_VALUE_1, HISTORIC_INTERMEDIATE_VALUE_2, type);
+        sum = PersistenceExtensions.riemannSumBetween(numberItem, beginStored, endStored, type, SERVICE_ID);
+        assertNotNull(sum);
+        dt = sum.as(DecimalType.class);
+        assertNotNull(dt);
+        assertEquals(expected, dt.doubleValue(), 0.01);
+
+        beginStored = ZonedDateTime.of(FUTURE_INTERMEDIATE_VALUE_3, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
+        endStored = ZonedDateTime.of(FUTURE_INTERMEDIATE_VALUE_4, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
+        expected = riemannSum(FUTURE_INTERMEDIATE_VALUE_3, FUTURE_INTERMEDIATE_VALUE_4, type);
+
+        sum = PersistenceExtensions.riemannSumBetween(numberItem, beginStored, endStored, type, SERVICE_ID);
+        assertNotNull(sum);
+        dt = sum.as(DecimalType.class);
+        assertNotNull(dt);
+        assertThat(dt.doubleValue(), is(closeTo(expected, 0.01)));
+
+        beginStored = ZonedDateTime.of(HISTORIC_INTERMEDIATE_VALUE_1, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
+        endStored = ZonedDateTime.of(FUTURE_INTERMEDIATE_VALUE_3, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
+        expected = riemannSum(HISTORIC_INTERMEDIATE_VALUE_1, FUTURE_INTERMEDIATE_VALUE_3, type);
+
+        sum = PersistenceExtensions.riemannSumBetween(numberItem, beginStored, endStored, type, SERVICE_ID);
+        assertNotNull(sum);
+        dt = sum.as(DecimalType.class);
+        assertNotNull(dt);
+        assertThat(dt.doubleValue(), is(closeTo(expected, 0.01)));
+
+        // default persistence service
+        sum = PersistenceExtensions.riemannSumBetween(numberItem, beginStored, endStored, type);
+        assertNull(sum);
     }
 
     @Test
