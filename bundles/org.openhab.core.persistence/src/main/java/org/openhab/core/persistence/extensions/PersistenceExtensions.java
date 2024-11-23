@@ -2180,6 +2180,8 @@ public class PersistenceExtensions {
         if (it.hasNext() && (type == RiemannType.midpoint)) {
             currentItem = it.next();
             prevDuration = Duration.between(begin, currentItem.getTimestamp());
+            LoggerFactory.getLogger(PersistenceExtensions.class).info("Riemann midpoint init, state = {}",
+                    getPersistedValue(currentItem, unit));
         }
 
         while (it.hasNext()) {
@@ -2239,6 +2241,8 @@ public class PersistenceExtensions {
                             if (!nextDuration.isZero()) {
                                 prevDuration = nextDuration;
                             }
+                            LoggerFactory.getLogger(PersistenceExtensions.class)
+                                    .info("Riemann midpoint, state = {}, weight = {}", currentState, weight);
                         }
                     }
                     prevItem = currentItem;
@@ -2246,6 +2250,9 @@ public class PersistenceExtensions {
                     break;
             }
             sum = sum.add(value.multiply(weight));
+            if (type == RiemannType.midpoint) {
+                LoggerFactory.getLogger(PersistenceExtensions.class).info("Riemann midpoint, sum = {}", sum);
+            }
         }
 
         if (prevItem != null && type == RiemannType.left) {
@@ -2261,10 +2268,14 @@ public class PersistenceExtensions {
             if (dtState != null && prevDuration != null && !prevDuration.isZero()) {
                 BigDecimal value = dtState.toBigDecimal();
                 Duration nextDuration = Duration.between(currentItem.getTimestamp(), end);
+                BigDecimal weight = BigDecimal.ZERO;
                 if (!nextDuration.isZero()) {
-                    BigDecimal weight = BigDecimal.valueOf(prevDuration.plus(nextDuration).dividedBy(2).toMillis());
+                    weight = BigDecimal.valueOf(prevDuration.plus(nextDuration).dividedBy(2).toMillis());
                     sum = sum.add(value.multiply(weight));
                 }
+                LoggerFactory.getLogger(PersistenceExtensions.class)
+                        .info("Riemann midpoint end, state = {}, weight = {}", dtState, weight);
+                LoggerFactory.getLogger(PersistenceExtensions.class).info("Riemann midpoint end, sum = {}", sum);
             }
         }
 
