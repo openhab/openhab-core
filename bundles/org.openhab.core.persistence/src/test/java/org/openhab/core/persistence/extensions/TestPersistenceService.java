@@ -44,7 +44,6 @@ import org.openhab.core.persistence.QueryablePersistenceService;
 import org.openhab.core.persistence.extensions.PersistenceExtensions.RiemannType;
 import org.openhab.core.persistence.strategy.PersistenceStrategy;
 import org.openhab.core.types.State;
-import org.slf4j.LoggerFactory;
 
 /**
  * A simple persistence service used for unit tests
@@ -361,8 +360,6 @@ public class TestPersistenceService implements QueryablePersistenceService {
                             .toSeconds();
                     if (startBucket) {
                         sum += startValue * duration / 2.0;
-                        LoggerFactory.getLogger(TestPersistenceService.class)
-                                .info("Start sum {},  value {}, duration {}", sum, startValue, duration / 2.0);
                         startBucket = false;
                     }
                     bucketStart = index;
@@ -382,15 +379,11 @@ public class TestPersistenceService implements QueryablePersistenceService {
                                 .toSeconds();
                     }
                     sum += value * (duration + nextDuration) / 2.0;
-                    LoggerFactory.getLogger(TestPersistenceService.class).info("... sum {},  value {}, duration {}",
-                            sum, value, (duration + nextDuration) / 2.0);
                     duration = 0;
                 }
                 double endValue = value(end).doubleValue();
                 long endDuration = nextDuration;
                 sum += endValue * endDuration / 2.0;
-                LoggerFactory.getLogger(TestPersistenceService.class).info("End sum {},  value {}, duration {}", sum,
-                        endValue, endDuration / 2.0);
                 break;
         }
         return sum;

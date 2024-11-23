@@ -2240,16 +2240,10 @@ public class PersistenceExtensions {
                                 sum = sum.add(prevState.toBigDecimal()
                                         .multiply(BigDecimal.valueOf(prevDuration.dividedBy(2).toMillis())));
                                 midpointStartBucket = false;
-                                LoggerFactory.getLogger(PersistenceExtensions.class).info(
-                                        "Start sum {},  value {}, duration {}", sum, prevState.doubleValue(),
-                                        prevDuration.dividedBy(2).toSeconds());
                             }
                             nextDuration = Duration.between(prevItem.getTimestamp(), nextItem.getTimestamp());
                             weight = prevDuration.isZero() || nextDuration.isZero() ? BigDecimal.ZERO
                                     : BigDecimal.valueOf(prevDuration.plus(nextDuration).dividedBy(2).toMillis());
-                            LoggerFactory.getLogger(PersistenceExtensions.class).info(
-                                    "... sum {},  value {}, duration {}", sum.add(value.multiply(weight)), value,
-                                    prevDuration.plus(nextDuration).dividedBy(2).toSeconds());
                             if (!nextDuration.isZero()) {
                                 prevDuration = nextDuration;
                             }
@@ -2269,8 +2263,6 @@ public class PersistenceExtensions {
                 BigDecimal value = dtState.toBigDecimal();
                 BigDecimal weight = BigDecimal.valueOf(prevDuration.dividedBy(2).toMillis());
                 sum = sum.add(value.multiply(weight));
-                LoggerFactory.getLogger(PersistenceExtensions.class).info("End sum {},  value {}, duration {}", sum,
-                        value, prevDuration.dividedBy(2).toSeconds());
             }
         }
 
