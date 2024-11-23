@@ -2174,20 +2174,24 @@ public class PersistenceExtensions {
             @Nullable Unit<?> unit, RiemannType type) {
         BigDecimal sum = BigDecimal.ZERO;
         HistoricItem prevItem = null;
-        Duration prevDuration = null;
+        HistoricItem nextItem = null;
+        DecimalType prevState = null;
+        DecimalType nextState = null;
+        Duration prevDuration = Duration.ZERO;
+        Duration nextDuration = Duration.ZERO;
 
-        if (it.hasNext() && (type == RiemannType.midpoint)) {
+        boolean midpointStartBucket = true; // The start and end buckets for the midpoint calculation should be
+                                            // considered for the full length, this flag is used to find the start
+                                            // bucket
+        if ((type == RiemannType.midpoint) && it.hasNext()) {
             prevItem = it.next();
-            prevDuration = Duration.between(begin, prevItem.getTimestamp());
+            prevState = getPersistedValue(prevItem, unit);
         }
 
         while (it.hasNext()) {
-            HistoricItem nextItem = it.next();
+            nextItem = it.next();
             BigDecimal weight = BigDecimal.ZERO;
             BigDecimal value = BigDecimal.ZERO;
-            DecimalType prevState;
-            DecimalType currentState;
-            DecimalType nextState;
             switch (type) {
                 case left:
                     if (prevItem != null) {
@@ -2228,15 +2232,28 @@ public class PersistenceExtensions {
                     break;
                 case midpoint:
                     if (prevItem != null) {
-                        currentState = getPersistedValue(prevItem, unit);
-                        if (currentState != null && prevDuration != null) {
+                        DecimalType currentState = getPersistedValue(prevItem, unit);
+                        if (currentState != null) {
                             value = currentState.toBigDecimal();
-                            Duration nextDuration = Duration.between(prevItem.getTimestamp(), nextItem.getTimestamp());
+                            if (midpointStartBucket && !prevDuration.isZero() && prevState != null) {
+                                // Add half of the start bucket with the start value (left approximation)
+                                sum = sum.add(prevState.toBigDecimal()
+                                        .multiply(BigDecimal.valueOf(prevDuration.dividedBy(2).toMillis())));
+                                midpointStartBucket = false;
+                                LoggerFactory.getLogger(PersistenceExtensions.class).info(
+                                        "Start sum {},  value {}, duration {}", sum, prevState.doubleValue(),
+                                        prevDuration.dividedBy(2).toSeconds());
+                            }
+                            nextDuration = Duration.between(prevItem.getTimestamp(), nextItem.getTimestamp());
                             weight = prevDuration.isZero() || nextDuration.isZero() ? BigDecimal.ZERO
                                     : BigDecimal.valueOf(prevDuration.plus(nextDuration).dividedBy(2).toMillis());
+                            LoggerFactory.getLogger(PersistenceExtensions.class).info(
+                                    "... sum {},  value {}, duration {}", sum.add(value.multiply(weight)), value,
+                                    prevDuration.plus(nextDuration).dividedBy(2).toSeconds());
                             if (!nextDuration.isZero()) {
                                 prevDuration = nextDuration;
                             }
+                            prevState = currentState;
                         }
                     }
                     prevItem = nextItem;
@@ -2245,12 +2262,15 @@ public class PersistenceExtensions {
             sum = sum.add(value.multiply(weight));
         }
 
-        if (prevItem != null && type == RiemannType.left) {
+        if ((type == RiemannType.midpoint) && (prevItem != null)) {
+            // Add half of the end bucket with the end value (right approximation)
             DecimalType dtState = getPersistedValue(prevItem, unit);
             if (dtState != null) {
                 BigDecimal value = dtState.toBigDecimal();
-                BigDecimal weight = BigDecimal.valueOf(Duration.between(prevItem.getTimestamp(), end).toMillis());
+                BigDecimal weight = BigDecimal.valueOf(prevDuration.dividedBy(2).toMillis());
                 sum = sum.add(value.multiply(weight));
+                LoggerFactory.getLogger(PersistenceExtensions.class).info("End sum {},  value {}, duration {}", sum,
+                        value, prevDuration.dividedBy(2).toSeconds());
             }
         }
 

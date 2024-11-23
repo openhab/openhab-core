@@ -1759,6 +1759,7 @@ public class PersistenceExtensionsTest {
         // default persistence service
         sum = PersistenceExtensions.riemannSumBetween(numberItem, beginStored, endStored, type);
         assertNull(sum);
+
         type = RiemannType.midpoint;
 
         beginStored = ZonedDateTime.of(HISTORIC_INTERMEDIATE_VALUE_1, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
