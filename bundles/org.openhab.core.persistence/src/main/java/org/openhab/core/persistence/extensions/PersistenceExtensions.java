@@ -2179,8 +2179,6 @@ public class PersistenceExtensions {
         if (it.hasNext() && (type == RiemannType.midpoint)) {
             prevItem = it.next();
             prevDuration = Duration.between(begin, prevItem.getTimestamp());
-            LoggerFactory.getLogger(PersistenceExtensions.class).info("Riemann midpoint init, state = {}",
-                    getPersistedValue(prevItem, unit));
         }
 
         while (it.hasNext()) {
@@ -2238,24 +2236,13 @@ public class PersistenceExtensions {
                                     : BigDecimal.valueOf(prevDuration.plus(nextDuration).dividedBy(2).toMillis());
                             if (!nextDuration.isZero()) {
                                 prevDuration = nextDuration;
-                                LoggerFactory.getLogger(PersistenceExtensions.class)
-                                        .info("Riemann midpoint nextDuration 0");
                             }
-                            LoggerFactory.getLogger(PersistenceExtensions.class)
-                                    .info("Riemann midpoint, state = {}, weight = {}", currentState, weight);
-                        } else {
-                            LoggerFactory.getLogger(PersistenceExtensions.class).info(
-                                    "Riemann midpoint skip, state = {}, prevDuration = {}", currentState, prevDuration);
-
                         }
                     }
                     prevItem = nextItem;
                     break;
             }
             sum = sum.add(value.multiply(weight));
-            if (type == RiemannType.midpoint) {
-                LoggerFactory.getLogger(PersistenceExtensions.class).info("Riemann midpoint, sum = {}", sum);
-            }
         }
 
         if (prevItem != null && type == RiemannType.left) {

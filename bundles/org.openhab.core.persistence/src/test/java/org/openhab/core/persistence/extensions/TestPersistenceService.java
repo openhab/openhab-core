@@ -44,7 +44,6 @@ import org.openhab.core.persistence.QueryablePersistenceService;
 import org.openhab.core.persistence.extensions.PersistenceExtensions.RiemannType;
 import org.openhab.core.persistence.strategy.PersistenceStrategy;
 import org.openhab.core.types.State;
-import org.slf4j.LoggerFactory;
 
 /**
  * A simple persistence service used for unit tests
@@ -342,9 +341,6 @@ public class TestPersistenceService implements QueryablePersistenceService {
                     totalDuration += duration;
                     duration = 0;
                 }
-                LoggerFactory.getLogger(TestPersistenceService.class).info("Test Riemann now {}", now);
-                LoggerFactory.getLogger(TestPersistenceService.class).info("Test Riemann trapezoidal total duration {}",
-                        totalDuration);
                 break;
             case midpoint:
                 int nextIndex = begin;
@@ -384,9 +380,6 @@ public class TestPersistenceService implements QueryablePersistenceService {
                     totalDuration += (duration + nextDuration) / 2;
                     duration = 0;
                 }
-                LoggerFactory.getLogger(TestPersistenceService.class).info("Test Riemann now {}", now);
-                LoggerFactory.getLogger(TestPersistenceService.class).info("Test Riemann midpoint total duration {}",
-                        totalDuration);
                 break;
         }
         return sum;
