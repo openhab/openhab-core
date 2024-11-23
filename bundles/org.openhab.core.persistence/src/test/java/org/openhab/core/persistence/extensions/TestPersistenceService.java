@@ -44,6 +44,7 @@ import org.openhab.core.persistence.QueryablePersistenceService;
 import org.openhab.core.persistence.extensions.PersistenceExtensions.RiemannType;
 import org.openhab.core.persistence.strategy.PersistenceStrategy;
 import org.openhab.core.types.State;
+import org.slf4j.LoggerFactory;
 
 /**
  * A simple persistence service used for unit tests
@@ -258,7 +259,7 @@ public class TestPersistenceService implements QueryablePersistenceService {
         double sum = 0;
         int index = begin;
         long duration = 0;
-        long totalDuration = 0;
+        long nextDuration = 0;
         switch (type) {
             case left:
                 if (beginYear == null) {
@@ -283,7 +284,6 @@ public class TestPersistenceService implements QueryablePersistenceService {
                                 .toSeconds();
                     }
                     sum += value * duration;
-                    totalDuration += duration;
                     duration = 0;
                 }
                 break;
@@ -310,7 +310,6 @@ public class TestPersistenceService implements QueryablePersistenceService {
                                 .toSeconds();
                     }
                     sum += value * duration;
-                    totalDuration += duration;
                     duration = 0;
                 }
                 break;
@@ -338,15 +337,15 @@ public class TestPersistenceService implements QueryablePersistenceService {
                                 .toSeconds();
                     }
                     sum += value * duration;
-                    totalDuration += duration;
                     duration = 0;
                 }
                 break;
             case midpoint:
                 int nextIndex = begin;
+                boolean startBucket = true;
+                double startValue = value(begin).doubleValue();
                 if (beginYear == null) {
-                    duration = Duration
-                            .between(now, ZonedDateTime.of(now.getYear() + 1, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()))
+                    duration = Duration.between(now, ZonedDateTime.of(begin, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()))
                             .toSeconds();
                 }
                 while (index < end - 1 && nextIndex < end) {
@@ -360,6 +359,12 @@ public class TestPersistenceService implements QueryablePersistenceService {
                             .between(ZonedDateTime.of(bucketStart, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()),
                                     ZonedDateTime.of(index, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()))
                             .toSeconds();
+                    if (startBucket) {
+                        sum += startValue * duration / 2.0;
+                        LoggerFactory.getLogger(TestPersistenceService.class)
+                                .info("Start sum {},  value {}, duration {}", sum, startValue, duration / 2.0);
+                        startBucket = false;
+                    }
                     bucketStart = index;
                     nextIndex = index;
                     while ((nextIndex < end - 1)
@@ -367,7 +372,7 @@ public class TestPersistenceService implements QueryablePersistenceService {
                         nextIndex++;
                     }
                     nextIndex++;
-                    long nextDuration = Duration
+                    nextDuration = Duration
                             .between(ZonedDateTime.of(bucketStart, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()),
                                     ZonedDateTime.of(nextIndex, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()))
                             .toSeconds();
@@ -377,9 +382,15 @@ public class TestPersistenceService implements QueryablePersistenceService {
                                 .toSeconds();
                     }
                     sum += value * (duration + nextDuration) / 2.0;
-                    totalDuration += (duration + nextDuration) / 2;
+                    LoggerFactory.getLogger(TestPersistenceService.class).info("... sum {},  value {}, duration {}",
+                            sum, value, (duration + nextDuration) / 2.0);
                     duration = 0;
                 }
+                double endValue = value(end).doubleValue();
+                long endDuration = nextDuration;
+                sum += endValue * endDuration / 2.0;
+                LoggerFactory.getLogger(TestPersistenceService.class).info("End sum {},  value {}, duration {}", sum,
+                        endValue, endDuration / 2.0);
                 break;
         }
         return sum;
