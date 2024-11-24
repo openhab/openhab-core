@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.openhab.core</groupId>
     <artifactId>org.openhab.core.reactor</artifactId>
-    <version>4.2.3-SNAPSHOT</version>
+    <version>4.2.3</version>
   </parent>
 
   <groupId>org.openhab.core.bundles</groupId>
