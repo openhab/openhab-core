@@ -260,7 +260,7 @@ public class TestPersistenceService implements QueryablePersistenceService {
         long duration = 0;
         long nextDuration = 0;
         switch (type) {
-            case left:
+            case LEFT:
                 if (beginYear == null) {
                     duration = Duration
                             .between(now, ZonedDateTime.of(now.getYear() + 1, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()))
@@ -286,7 +286,7 @@ public class TestPersistenceService implements QueryablePersistenceService {
                     duration = 0;
                 }
                 break;
-            case right:
+            case RIGHT:
                 if (beginYear == null) {
                     duration = Duration
                             .between(now, ZonedDateTime.of(now.getYear() + 1, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()))
@@ -312,7 +312,7 @@ public class TestPersistenceService implements QueryablePersistenceService {
                     duration = 0;
                 }
                 break;
-            case trapezoidal:
+            case TRAPEZOIDAL:
                 if (beginYear == null) {
                     duration = Duration
                             .between(now, ZonedDateTime.of(now.getYear() + 1, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()))
@@ -339,7 +339,7 @@ public class TestPersistenceService implements QueryablePersistenceService {
                     duration = 0;
                 }
                 break;
-            case midpoint:
+            case MIDPOINT:
                 int nextIndex = begin;
                 boolean startBucket = true;
                 double startValue = value(begin).doubleValue();
@@ -397,7 +397,7 @@ public class TestPersistenceService implements QueryablePersistenceService {
                 : now;
         ZonedDateTime endDate = endYear != null ? ZonedDateTime.of(endYear, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault())
                 : now;
-        double sum = riemannSum(beginYear, endYear, RiemannType.left);
+        double sum = riemannSum(beginYear, endYear, RiemannType.LEFT);
         long duration = Duration.between(beginDate, endDate).toSeconds();
         return 1.0 * sum / duration;
     }
