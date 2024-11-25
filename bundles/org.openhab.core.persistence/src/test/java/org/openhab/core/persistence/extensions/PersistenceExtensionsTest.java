@@ -1487,7 +1487,7 @@ public class PersistenceExtensionsTest {
 
     @Test
     public void testRiemannSumSinceDecimalType() {
-        RiemannType type = RiemannType.left;
+        RiemannType type = RiemannType.LEFT;
 
         ZonedDateTime start = ZonedDateTime.of(BEFORE_START, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
         double expected = riemannSum(BEFORE_START, null, type);
@@ -1512,7 +1512,7 @@ public class PersistenceExtensionsTest {
         sum = PersistenceExtensions.riemannSumSince(numberItem, start, type);
         assertNull(sum);
 
-        type = RiemannType.right;
+        type = RiemannType.RIGHT;
 
         start = ZonedDateTime.of(BEFORE_START, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
         expected = riemannSum(BEFORE_START, null, type);
@@ -1537,7 +1537,7 @@ public class PersistenceExtensionsTest {
         sum = PersistenceExtensions.riemannSumSince(numberItem, start, type);
         assertNull(sum);
 
-        type = RiemannType.trapezoidal;
+        type = RiemannType.TRAPEZOIDAL;
 
         start = ZonedDateTime.of(BEFORE_START, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
         expected = riemannSum(BEFORE_START, null, type);
@@ -1562,7 +1562,7 @@ public class PersistenceExtensionsTest {
         sum = PersistenceExtensions.riemannSumSince(numberItem, start, type);
         assertNull(sum);
 
-        type = RiemannType.midpoint;
+        type = RiemannType.MIDPOINT;
 
         start = ZonedDateTime.of(BEFORE_START, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
         expected = riemannSum(BEFORE_START, null, type);
@@ -1590,7 +1590,7 @@ public class PersistenceExtensionsTest {
 
     @Test
     public void testRiemannSumUntilDecimalType() {
-        RiemannType type = RiemannType.left;
+        RiemannType type = RiemannType.LEFT;
 
         ZonedDateTime end = ZonedDateTime.of(FUTURE_INTERMEDIATE_VALUE_3, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
         double expected = riemannSum(null, FUTURE_INTERMEDIATE_VALUE_3, type);
@@ -1605,7 +1605,7 @@ public class PersistenceExtensionsTest {
         sum = PersistenceExtensions.riemannSumUntil(numberItem, end, type);
         assertNull(sum);
 
-        type = RiemannType.right;
+        type = RiemannType.RIGHT;
 
         end = ZonedDateTime.of(FUTURE_INTERMEDIATE_VALUE_3, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
         expected = riemannSum(null, FUTURE_INTERMEDIATE_VALUE_3, type);
@@ -1620,7 +1620,7 @@ public class PersistenceExtensionsTest {
         sum = PersistenceExtensions.riemannSumUntil(numberItem, end, type);
         assertNull(sum);
 
-        type = RiemannType.trapezoidal;
+        type = RiemannType.TRAPEZOIDAL;
 
         end = ZonedDateTime.of(FUTURE_INTERMEDIATE_VALUE_3, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
         expected = riemannSum(null, FUTURE_INTERMEDIATE_VALUE_3, type);
@@ -1635,7 +1635,7 @@ public class PersistenceExtensionsTest {
         sum = PersistenceExtensions.riemannSumUntil(numberItem, end, type);
         assertNull(sum);
 
-        type = RiemannType.midpoint;
+        type = RiemannType.MIDPOINT;
 
         end = ZonedDateTime.of(FUTURE_INTERMEDIATE_VALUE_3, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
         expected = riemannSum(null, FUTURE_INTERMEDIATE_VALUE_3, type);
@@ -1653,7 +1653,7 @@ public class PersistenceExtensionsTest {
 
     @Test
     public void testRiemannSumBetweenDecimalType() {
-        RiemannType type = RiemannType.left;
+        RiemannType type = RiemannType.LEFT;
 
         ZonedDateTime beginStored = ZonedDateTime.of(HISTORIC_INTERMEDIATE_VALUE_1, 1, 1, 0, 0, 0, 0,
                 ZoneId.systemDefault());
@@ -1690,7 +1690,7 @@ public class PersistenceExtensionsTest {
         sum = PersistenceExtensions.riemannSumBetween(numberItem, beginStored, endStored, type);
         assertNull(sum);
 
-        type = RiemannType.right;
+        type = RiemannType.RIGHT;
 
         beginStored = ZonedDateTime.of(HISTORIC_INTERMEDIATE_VALUE_1, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
         endStored = ZonedDateTime.of(HISTORIC_INTERMEDIATE_VALUE_2, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
@@ -1725,7 +1725,7 @@ public class PersistenceExtensionsTest {
         sum = PersistenceExtensions.riemannSumBetween(numberItem, beginStored, endStored, type);
         assertNull(sum);
 
-        type = RiemannType.trapezoidal;
+        type = RiemannType.TRAPEZOIDAL;
 
         beginStored = ZonedDateTime.of(HISTORIC_INTERMEDIATE_VALUE_1, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
         endStored = ZonedDateTime.of(HISTORIC_INTERMEDIATE_VALUE_2, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
@@ -1760,7 +1760,7 @@ public class PersistenceExtensionsTest {
         sum = PersistenceExtensions.riemannSumBetween(numberItem, beginStored, endStored, type);
         assertNull(sum);
 
-        type = RiemannType.midpoint;
+        type = RiemannType.MIDPOINT;
 
         beginStored = ZonedDateTime.of(HISTORIC_INTERMEDIATE_VALUE_1, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
         endStored = ZonedDateTime.of(HISTORIC_INTERMEDIATE_VALUE_2, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
@@ -1845,7 +1845,7 @@ public class PersistenceExtensionsTest {
 
     @Test
     public void testRiemannSumSinceDecimalTypeIrregularTimespans() {
-        RiemannType type = RiemannType.left;
+        RiemannType type = RiemannType.LEFT;
 
         ZonedDateTime now = ZonedDateTime.now();
         int historicHours = 27;
@@ -1877,7 +1877,7 @@ public class PersistenceExtensionsTest {
 
     @Test
     public void testRiemannSumUntilDecimalTypeIrregularTimespans() {
-        RiemannType type = RiemannType.left;
+        RiemannType type = RiemannType.LEFT;
 
         ZonedDateTime now = ZonedDateTime.now();
         int historicHours = 0;
