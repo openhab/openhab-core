@@ -92,10 +92,10 @@ public class EnrichedItemDTOMapper {
         }
         StateDescription stateDescription = considerTransformation(item.getStateDescription(locale));
 
-        String previousState = Optional.ofNullable(item.getPreviousState()).map(State::toFullString).orElse(null);
-        Long lastUpdate = Optional.ofNullable(item.getLastUpdate()).map(zdt -> zdt.toInstant().toEpochMilli())
+        String lastState = Optional.ofNullable(item.getLastState()).map(State::toFullString).orElse(null);
+        Long lastStateUpdate = Optional.ofNullable(item.getLastStateUpdate()).map(zdt -> zdt.toInstant().toEpochMilli())
                 .orElse(null);
-        Long lastChange = Optional.ofNullable(item.getLastChange()).map(zdt -> zdt.toInstant().toEpochMilli())
+        Long lastStateChange = Optional.ofNullable(item.getLastStateChange()).map(zdt -> zdt.toInstant().toEpochMilli())
                 .orElse(null);
 
         final String link;
@@ -131,10 +131,10 @@ public class EnrichedItemDTOMapper {
             } else {
                 memberDTOs = new EnrichedItemDTO[0];
             }
-            enrichedItemDTO = new EnrichedGroupItemDTO(itemDTO, memberDTOs, link, state, previousState, lastUpdate,
-                    lastChange, transformedState, stateDescription, unitSymbol);
+            enrichedItemDTO = new EnrichedGroupItemDTO(itemDTO, memberDTOs, link, state, lastState, lastStateUpdate,
+                    lastStateChange, transformedState, stateDescription, unitSymbol);
         } else {
-            enrichedItemDTO = new EnrichedItemDTO(itemDTO, link, state, previousState, lastUpdate, lastChange,
+            enrichedItemDTO = new EnrichedItemDTO(itemDTO, link, state, lastState, lastStateUpdate, lastStateChange,
                     transformedState, stateDescription, item.getCommandDescription(locale), unitSymbol);
         }
 

@@ -63,7 +63,7 @@ public interface Item extends Identifiable<String> {
      * @return the previous state of the item, or null if the item has never been changed.
      */
     @Nullable
-    State getPreviousState();
+    State getLastState();
 
     /**
      * Returns the time the item was last updated.
@@ -71,7 +71,7 @@ public interface Item extends Identifiable<String> {
      * @return the time the item was last updated, or null if the item has never been updated.
      */
     @Nullable
-    ZonedDateTime getLastUpdate();
+    ZonedDateTime getLastStateUpdate();
 
     /**
      * Returns the time the item was last changed.
@@ -79,7 +79,7 @@ public interface Item extends Identifiable<String> {
      * @return the time the item was last changed, or null if the item has never been changed.
      */
     @Nullable
-    ZonedDateTime getLastChange();
+    ZonedDateTime getLastStateChange();
 
     /**
      * returns the name of the item

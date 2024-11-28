@@ -78,10 +78,10 @@ public abstract class GenericItem implements ActiveItem {
     protected final String type;
 
     protected State state = UnDefType.NULL;
-    protected @Nullable State previousState;
+    protected @Nullable State lastState;
 
-    protected @Nullable ZonedDateTime lastUpdate;
-    protected @Nullable ZonedDateTime lastChange;
+    protected @Nullable ZonedDateTime lastStateUpdate;
+    protected @Nullable ZonedDateTime lastStateChange;
 
     protected @Nullable String label;
 
@@ -109,18 +109,18 @@ public abstract class GenericItem implements ActiveItem {
     }
 
     @Override
-    public @Nullable State getPreviousState() {
-        return previousState;
+    public @Nullable State getLastState() {
+        return lastState;
     }
 
     @Override
-    public @Nullable ZonedDateTime getLastUpdate() {
-        return lastUpdate;
+    public @Nullable ZonedDateTime getLastStateUpdate() {
+        return lastStateUpdate;
     }
 
     @Override
-    public @Nullable ZonedDateTime getLastChange() {
-        return lastChange;
+    public @Nullable ZonedDateTime getLastStateChange() {
+        return lastStateChange;
     }
 
     @Override
@@ -243,15 +243,15 @@ public abstract class GenericItem implements ActiveItem {
         boolean stateChanged = !oldState.equals(state);
         this.state = state;
         if (stateChanged) {
-            previousState = oldState; // update before we notify listeners
+            lastState = oldState; // update before we notify listeners
         }
         notifyListeners(oldState, state);
         sendStateUpdatedEvent(state);
         if (stateChanged) {
             sendStateChangedEvent(state, oldState);
-            lastChange = now; // update after we've notified listeners
+            lastStateChange = now; // update after we've notified listeners
         }
-        lastUpdate = now;
+        lastStateUpdate = now;
     }
 
     /**

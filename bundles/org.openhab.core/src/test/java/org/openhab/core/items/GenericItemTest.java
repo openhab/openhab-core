@@ -138,44 +138,44 @@ public class GenericItemTest {
     }
 
     @Test
-    public void testGetLastUpdate() {
+    public void testGetLastStateUpdate() {
         TestItem item = new TestItem("member1");
-        assertNull(item.getLastUpdate());
+        assertNull(item.getLastStateUpdate());
         item.setState(PercentType.HUNDRED);
-        assertThat(item.getLastUpdate().toInstant().toEpochMilli() * 1.0,
+        assertThat(item.getLastStateUpdate().toInstant().toEpochMilli() * 1.0,
                 is(closeTo(ZonedDateTime.now().toInstant().toEpochMilli(), 5)));
     }
 
     @Test
-    public void testGetLastChange() throws InterruptedException {
+    public void testGetLastStateChange() throws InterruptedException {
         TestItem item = new TestItem("member1");
-        assertNull(item.getLastChange());
+        assertNull(item.getLastStateChange());
         item.setState(PercentType.HUNDRED);
         ZonedDateTime initialChangeTime = ZonedDateTime.now();
-        assertThat(item.getLastChange().toInstant().toEpochMilli() * 1.0,
+        assertThat(item.getLastStateChange().toInstant().toEpochMilli() * 1.0,
                 is(closeTo(initialChangeTime.toInstant().toEpochMilli(), 5)));
 
         Thread.sleep(50);
         item.setState(PercentType.HUNDRED);
-        assertThat(item.getLastChange().toInstant().toEpochMilli() * 1.0,
+        assertThat(item.getLastStateChange().toInstant().toEpochMilli() * 1.0,
                 is(closeTo(initialChangeTime.toInstant().toEpochMilli(), 5)));
 
         Thread.sleep(50);
         ZonedDateTime secondChangeTime = ZonedDateTime.now();
         item.setState(PercentType.ZERO);
-        assertThat(item.getLastChange().toInstant().toEpochMilli() * 1.0,
+        assertThat(item.getLastStateChange().toInstant().toEpochMilli() * 1.0,
                 is(closeTo(secondChangeTime.toInstant().toEpochMilli(), 5)));
     }
 
     @Test
-    public void testGetPreviousState() {
+    public void testGetLastState() {
         TestItem item = new TestItem("member1");
         assertEquals(UnDefType.NULL, item.getState());
-        assertNull(item.getPreviousState());
+        assertNull(item.getLastState());
         item.setState(PercentType.HUNDRED);
-        assertEquals(UnDefType.NULL, item.getPreviousState());
+        assertEquals(UnDefType.NULL, item.getLastState());
         item.setState(PercentType.ZERO);
-        assertEquals(PercentType.HUNDRED, item.getPreviousState());
+        assertEquals(PercentType.HUNDRED, item.getLastState());
     }
 
     @Test

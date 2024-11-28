@@ -24,11 +24,11 @@ import org.openhab.core.types.StateDescription;
  */
 public class EnrichedGroupItemDTO extends EnrichedItemDTO {
 
-    public EnrichedGroupItemDTO(ItemDTO itemDTO, EnrichedItemDTO[] members, String link, String state,
-            String previousState, Long lastUpdate, Long lastChange, String transformedState,
-            StateDescription stateDescription, String unitSymbol) {
-        super(itemDTO, link, state, previousState, lastUpdate, lastChange, transformedState, stateDescription, null,
-                unitSymbol);
+    public EnrichedGroupItemDTO(ItemDTO itemDTO, EnrichedItemDTO[] members, String link, String state, String lastState,
+            Long lastStateUpdate, Long lastStateChange, String transformedState, StateDescription stateDescription,
+            String unitSymbol) {
+        super(itemDTO, link, state, lastState, lastStateUpdate, lastStateChange, transformedState, stateDescription,
+                null, unitSymbol);
         this.members = members;
         this.groupType = ((GroupItemDTO) itemDTO).groupType;
         this.function = ((GroupItemDTO) itemDTO).function;
