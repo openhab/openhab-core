@@ -12,6 +12,7 @@
  */
 package org.openhab.core.items;
 
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -52,6 +53,7 @@ import org.slf4j.LoggerFactory;
  * @author Andre Fuechsel - Added tags
  * @author Stefan Bußweiler - Migration to new ESH event concept
  * @author Jan N. Klug - Added time series support
+ * @author Mark Herwege - Added setState override to restore all item state information
  */
 @NonNullByDefault
 public abstract class GenericItem implements ActiveItem {
@@ -77,6 +79,10 @@ public abstract class GenericItem implements ActiveItem {
     protected final String type;
 
     protected State state = UnDefType.NULL;
+    protected @Nullable State lastState;
+
+    protected @Nullable ZonedDateTime lastStateUpdate;
+    protected @Nullable ZonedDateTime lastStateChange;
 
     protected @Nullable String label;
 
@@ -101,6 +107,21 @@ public abstract class GenericItem implements ActiveItem {
     @Override
     public <T extends State> @Nullable T getStateAs(Class<T> typeClass) {
         return state.as(typeClass);
+    }
+
+    @Override
+    public @Nullable State getLastState() {
+        return lastState;
+    }
+
+    @Override
+    public @Nullable ZonedDateTime getLastStateUpdate() {
+        return lastStateUpdate;
+    }
+
+    @Override
+    public @Nullable ZonedDateTime getLastStateChange() {
+        return lastStateChange;
     }
 
     @Override
@@ -210,6 +231,32 @@ public abstract class GenericItem implements ActiveItem {
     }
 
     /**
+     * Set a new state, lastState, lastStateUpdate and lastStateChange. This method is intended to be used for restoring
+     * from persistence.
+     *
+     * @param state new state of this item
+     * @param lastState last state of this item
+     * @param lastStateUpdate last state update of this item
+     * @param lastStateChange last state change of this item
+     */
+    public void setState(State state, @Nullable State lastState, @Nullable ZonedDateTime lastStateUpdate,
+            @Nullable ZonedDateTime lastStateChange) {
+        State oldState = this.state;
+        ZonedDateTime oldStateUpdate = this.lastStateUpdate;
+        this.state = state;
+        this.lastState = lastState;
+        this.lastStateUpdate = lastStateUpdate;
+        this.lastStateChange = lastStateChange;
+        if (oldStateUpdate != null && lastStateUpdate != null && !oldStateUpdate.equals(lastStateUpdate)) {
+            notifyListeners(oldState, state);
+        }
+        sendStateUpdatedEvent(state);
+        if (!oldState.equals(state)) {
+            sendStateChangedEvent(state, oldState);
+        }
+    }
+
+    /**
      * Sets new state, notifies listeners and sends events.
      *
      * Classes overriding the {@link #setState(State)} method should call this method in order to actually set the
@@ -218,13 +265,20 @@ public abstract class GenericItem implements ActiveItem {
      * @param state new state of this item
      */
     protected final void applyState(State state) {
+        ZonedDateTime now = ZonedDateTime.now();
         State oldState = this.state;
+        boolean stateChanged = !oldState.equals(state);
         this.state = state;
+        if (stateChanged) {
+            lastState = oldState; // update before we notify listeners
+        }
         notifyListeners(oldState, state);
         sendStateUpdatedEvent(state);
-        if (!oldState.equals(state)) {
+        if (stateChanged) {
             sendStateChangedEvent(state, oldState);
+            lastStateChange = now; // update after we've notified listeners
         }
+        lastStateUpdate = now;
     }
 
     /**
