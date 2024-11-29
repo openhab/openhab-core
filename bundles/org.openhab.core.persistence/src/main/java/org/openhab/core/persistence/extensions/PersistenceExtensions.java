@@ -66,6 +66,7 @@ import org.slf4j.LoggerFactory;
  * @author Mark Herwege - lastChange and nextChange methods
  * @author Mark Herwege - handle persisted GroupItem with QuantityType
  * @author Mark Herwege - add median methods
+ * @author Mark Herwege - use item lastChange and lastUpdate methods if not in peristence
  */
 @Component(immediate = true)
 @NonNullByDefault
@@ -331,6 +332,7 @@ public class PersistenceExtensions {
 
     /**
      * Query the last historic update time of a given <code>item</code>. The default persistence service is used.
+     * Note the {@link Item.getLastStateUpdate()} is generally preferred to get the last update time of an item.
      *
      * @param item the item for which the last historic update time is to be returned
      * @return point in time of the last historic update to <code>item</code>, <code>null</code> if there are no
@@ -343,6 +345,7 @@ public class PersistenceExtensions {
 
     /**
      * Query for the last historic update time of a given <code>item</code>.
+     * Note the {@link Item.getLastStateUpdate()} is generally preferred to get the last update time of an item.
      *
      * @param item the item for which the last historic update time is to be returned
      * @param serviceId the name of the {@link PersistenceService} to use
@@ -386,6 +389,7 @@ public class PersistenceExtensions {
 
     /**
      * Query the last historic change time of a given <code>item</code>. The default persistence service is used.
+     * Note the {@link Item.getLastStateChange()} is generally preferred to get the last state change time of an item.
      *
      * @param item the item for which the last historic change time is to be returned
      * @return point in time of the last historic change to <code>item</code>, <code>null</code> if there are no
@@ -398,6 +402,7 @@ public class PersistenceExtensions {
 
     /**
      * Query for the last historic change time of a given <code>item</code>.
+     * Note the {@link Item.getLastStateChange()} is generally preferred to get the last state change time of an item.
      *
      * @param item the item for which the last historic change time is to be returned
      * @param serviceId the name of the {@link PersistenceService} to use
@@ -461,26 +466,26 @@ public class PersistenceExtensions {
             filter.setPageNumber(startPage);
 
             Iterable<HistoricItem> items = qService.query(filter);
-            Iterator<HistoricItem> itemIterator = items.iterator();
-            State state = item.getState();
-            if (itemIterator.hasNext()) {
-                if (!skipEqual) {
-                    HistoricItem historicItem = itemIterator.next();
-                    if (!forward && !historicItem.getState().equals(state)) {
-                        // Last persisted state value different from current state value, so it must have updated since
-                        // last persist. We do not know when.
-                        return null;
-                    }
-                    return historicItem.getTimestamp();
-                } else {
-                    HistoricItem historicItem = itemIterator.next();
-                    int itemCount = 1;
-                    if (!historicItem.getState().equals(state)) {
-                        // Persisted state value different from current state value, so it must have changed, but we do
-                        // not know when when looking backward.
-                        return forward ? historicItem.getTimestamp() : null;
-                    }
-                    while (items != null) {
+            while (items != null) {
+                Iterator<HistoricItem> itemIterator = items.iterator();
+                int itemCount = 0;
+                State state = item.getState();
+                if (itemIterator.hasNext()) {
+                    if (!skipEqual) {
+                        HistoricItem historicItem = itemIterator.next();
+                        if (!forward && !historicItem.getState().equals(state)) {
+                            // Last persisted state value different from current state value, so it must have updated
+                            // since last persist. We do not know when from persistence, so get it from the item.
+                            return item.getLastStateUpdate();
+                        }
+                        return historicItem.getTimestamp();
+                    } else {
+                        HistoricItem historicItem = itemIterator.next();
+                        if (!historicItem.getState().equals(state)) {
+                            // Persisted state value different from current state value, so it must have changed, but we
+                            // do not know when looking backward in persistence. Get it from the item.
+                            return forward ? historicItem.getTimestamp() : item.getLastStateChange();
+                        }
                         while (historicItem.getState().equals(state) && itemIterator.hasNext()) {
                             HistoricItem nextHistoricItem = itemIterator.next();
                             itemCount++;
@@ -492,7 +497,6 @@ public class PersistenceExtensions {
                         if (itemCount == filter.getPageSize()) {
                             filter.setPageNumber(++startPage);
                             items = qService.query(filter);
-                            itemCount = 0;
                         } else {
                             items = null;
                         }
@@ -508,6 +512,7 @@ public class PersistenceExtensions {
 
     /**
      * Returns the previous state of a given <code>item</code>.
+     * Note the {@link Item.getLastState()} is generally preferred to get the previous state of an item.
      *
      * @param item the item to get the previous state value for
      * @return the previous state or <code>null</code> if no previous state could be found, or if the default
@@ -519,6 +524,7 @@ public class PersistenceExtensions {
 
     /**
      * Returns the previous state of a given <code>item</code>.
+     * Note the {@link Item.getLastState()} is generally preferred to get the previous state of an item.
      *
      * @param item the item to get the previous state value for
      * @param skipEqual if true, skips equal state values and searches the first state not equal the current state
@@ -532,6 +538,7 @@ public class PersistenceExtensions {
     /**
      * Returns the previous state of a given <code>item</code>.
      * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
+     * Note the {@link Item.getLastState()} is generally preferred to get the previous state of an item.
      *
      * @param item the item to get the previous state value for
      * @param serviceId the name of the {@link PersistenceService} to use
@@ -545,6 +552,7 @@ public class PersistenceExtensions {
     /**
      * Returns the previous state of a given <code>item</code>.
      * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
+     * Note the {@link Item.getLastState()} is generally preferred to get the previous state of an item.
      *
      * @param item the item to get the previous state value for
      * @param skipEqual if <code>true</code>, skips equal state values and searches the first state not equal the
