@@ -41,6 +41,7 @@ import com.google.gson.annotations.SerializedName;
  *         getter to return primitive types
  * @author Thomas Höfer - Added unit
  * @author Laurent Garnier - Removed constraint on unit value
+ * @author Florian Hotze - Add null annotations
  */
 @NonNullByDefault
 public class ConfigDescriptionParameter {

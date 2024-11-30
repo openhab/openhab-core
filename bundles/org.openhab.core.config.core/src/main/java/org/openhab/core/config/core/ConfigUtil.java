@@ -68,7 +68,10 @@ public class ConfigUtil {
     }
 
     static @Nullable Object getDefaultValueAsCorrectType(String parameterName, Type parameterType,
-            String defaultValue) {
+            @Nullable String defaultValue) {
+        if (defaultValue == null) {
+            return null;
+        }
         try {
             switch (parameterType) {
                 case TEXT:

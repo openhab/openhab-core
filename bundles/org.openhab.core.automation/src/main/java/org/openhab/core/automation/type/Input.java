@@ -45,7 +45,7 @@ import org.openhab.core.automation.Rule;
  * </ul>
  *
  * @author Yordan Mihaylov - Initial contribution
- * @author Florian Hotze - Add null-annotations
+ * @author Florian Hotze - Add null annotations
  */
 @NonNullByDefault
 public class Input {
