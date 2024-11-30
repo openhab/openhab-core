@@ -55,7 +55,6 @@ Fragment-Host: org.openhab.core.io.rest.core
 	org.apache.cxf.cxf-rt-security;version='[3.6.2,3.6.3)',\
 	org.apache.cxf.cxf-rt-transports-http;version='[3.6.2,3.6.3)',\
 	org.apache.ws.xmlschema.core;version='[2.3.1,2.3.2)',\
-	biz.aQute.tester.junit-platform;version='[7.0.0,7.0.1)',\
 	junit-jupiter-api;version='[5.10.0,5.10.1)',\
 	junit-jupiter-engine;version='[5.10.0,5.10.1)',\
 	junit-jupiter-params;version='[5.10.0,5.10.1)',\
@@ -106,4 +105,6 @@ Fragment-Host: org.openhab.core.io.rest.core
 	org.openhab.core.test;version='[4.3.0,4.3.1)',\
 	org.openhab.core.thing;version='[4.3.0,4.3.1)',\
 	org.openhab.core.transform;version='[4.3.0,4.3.1)',\
-	stax2-api;version='[4.2.2,4.2.3)'
+	stax2-api;version='[4.2.2,4.2.3)',\
+	biz.aQute.tester.junit-platform;version='[7.1.0,7.1.1)',\
+	org.osgi.service.cm;version='[1.6.0,1.6.1)'
