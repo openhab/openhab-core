@@ -1155,7 +1155,7 @@ public class PersistenceExtensions {
      *         if there is no persisted state for the given <code>item</code> at the given <code>timestamp</code>
      */
     public static @Nullable State varianceSince(Item item, ZonedDateTime timestamp) {
-        return internalVarianceBetween(item, timestamp, null, RiemannType.LEFT, null);
+        return internalVarianceBetween(item, timestamp, null, null, null);
     }
 
     /**
@@ -1169,7 +1169,7 @@ public class PersistenceExtensions {
      *         there is no default persistence service available, or it is not a {@link QueryablePersistenceService}, or
      *         if there is no persisted state for the given <code>item</code> at the given <code>timestamp</code>
      */
-    public static @Nullable State varianceSince(Item item, ZonedDateTime timestamp, RiemannType type) {
+    public static @Nullable State varianceSince(Item item, ZonedDateTime timestamp, @Nullable RiemannType type) {
         return internalVarianceBetween(item, timestamp, null, type, null);
     }
 
@@ -1185,7 +1185,7 @@ public class PersistenceExtensions {
      *         if there is no persisted state for the given <code>item</code> at the given <code>timestamp</code>
      */
     public static @Nullable State varianceUntil(Item item, ZonedDateTime timestamp) {
-        return internalVarianceBetween(item, null, timestamp, RiemannType.LEFT, null);
+        return internalVarianceBetween(item, null, timestamp, null, null);
     }
 
     /**
@@ -1199,7 +1199,7 @@ public class PersistenceExtensions {
      *         there is no default persistence service available, or it is not a {@link QueryablePersistenceService}, or
      *         if there is no persisted state for the given <code>item</code> at the given <code>timestamp</code>
      */
-    public static @Nullable State varianceUntil(Item item, ZonedDateTime timestamp, RiemannType type) {
+    public static @Nullable State varianceUntil(Item item, ZonedDateTime timestamp, @Nullable RiemannType type) {
         return internalVarianceBetween(item, null, timestamp, type, null);
     }
 
@@ -1220,7 +1220,7 @@ public class PersistenceExtensions {
      */
     public static @Nullable State varianceBetween(Item item, ZonedDateTime begin, ZonedDateTime end,
             @Nullable String serviceId) {
-        return internalVarianceBetween(item, begin, end, RiemannType.LEFT, serviceId);
+        return internalVarianceBetween(item, begin, end, null, serviceId);
     }
 
     /**
@@ -1236,7 +1236,8 @@ public class PersistenceExtensions {
      *         {@link QueryablePersistenceService}, or if there is no persisted state for the
      *         given <code>item</code> between <code>begin</code> and <code>end</code>
      */
-    public static @Nullable State varianceBetween(Item item, ZonedDateTime begin, ZonedDateTime end, RiemannType type) {
+    public static @Nullable State varianceBetween(Item item, ZonedDateTime begin, ZonedDateTime end,
+            @Nullable RiemannType type) {
         return internalVarianceBetween(item, begin, end, type, null);
     }
 
@@ -1254,7 +1255,7 @@ public class PersistenceExtensions {
      *         the given <code>timestamp</code>
      */
     public static @Nullable State varianceSince(Item item, ZonedDateTime timestamp, @Nullable String serviceId) {
-        return internalVarianceBetween(item, timestamp, null, RiemannType.LEFT, serviceId);
+        return internalVarianceBetween(item, timestamp, null, null, serviceId);
     }
 
     /**
@@ -1270,7 +1271,7 @@ public class PersistenceExtensions {
      *         {@link QueryablePersistenceService}, or if there is no persisted state for the given <code>item</code> at
      *         the given <code>timestamp</code>
      */
-    public static @Nullable State varianceSince(Item item, ZonedDateTime timestamp, RiemannType type,
+    public static @Nullable State varianceSince(Item item, ZonedDateTime timestamp, @Nullable RiemannType type,
             @Nullable String serviceId) {
         return internalVarianceBetween(item, timestamp, null, type, serviceId);
     }
@@ -1289,7 +1290,7 @@ public class PersistenceExtensions {
      *         the given <code>timestamp</code>
      */
     public static @Nullable State varianceUntil(Item item, ZonedDateTime timestamp, @Nullable String serviceId) {
-        return internalVarianceBetween(item, null, timestamp, RiemannType.LEFT, serviceId);
+        return internalVarianceBetween(item, null, timestamp, null, serviceId);
     }
 
     /**
@@ -1305,7 +1306,7 @@ public class PersistenceExtensions {
      *         {@link QueryablePersistenceService}, or if there is no persisted state for the given <code>item</code> at
      *         the given <code>timestamp</code>
      */
-    public static @Nullable State varianceUntil(Item item, ZonedDateTime timestamp, RiemannType type,
+    public static @Nullable State varianceUntil(Item item, ZonedDateTime timestamp, @Nullable RiemannType type,
             @Nullable String serviceId) {
         return internalVarianceBetween(item, null, timestamp, type, serviceId);
     }
@@ -1324,7 +1325,7 @@ public class PersistenceExtensions {
      *         given <code>item</code> between <code>begin</code> and <code>end</code>
      */
     public static @Nullable State varianceBetween(Item item, ZonedDateTime begin, ZonedDateTime end) {
-        return internalVarianceBetween(item, begin, end, RiemannType.LEFT, null);
+        return internalVarianceBetween(item, begin, end, null, null);
     }
 
     /**
@@ -1342,13 +1343,13 @@ public class PersistenceExtensions {
      *         a {@link QueryablePersistenceService}, or if there is no persisted state for the
      *         given <code>item</code> between <code>begin</code> and <code>end</code>
      */
-    public static @Nullable State varianceBetween(Item item, ZonedDateTime begin, ZonedDateTime end, RiemannType type,
-            @Nullable String serviceId) {
+    public static @Nullable State varianceBetween(Item item, ZonedDateTime begin, ZonedDateTime end,
+            @Nullable RiemannType type, @Nullable String serviceId) {
         return internalVarianceBetween(item, begin, end, type, serviceId);
     }
 
     private static @Nullable State internalVarianceBetween(Item item, @Nullable ZonedDateTime begin,
-            @Nullable ZonedDateTime end, RiemannType type, @Nullable String serviceId) {
+            @Nullable ZonedDateTime end, @Nullable RiemannType type, @Nullable String serviceId) {
         String effectiveServiceId = serviceId == null ? getDefaultServiceId() : serviceId;
         if (effectiveServiceId == null) {
             return null;
@@ -1406,7 +1407,7 @@ public class PersistenceExtensions {
      *         the given <code>timestamp</code>
      */
     public static @Nullable State deviationSince(Item item, ZonedDateTime timestamp) {
-        return internalDeviationBetween(item, timestamp, null, RiemannType.LEFT, null);
+        return internalDeviationBetween(item, timestamp, null, null, null);
     }
 
     /**
@@ -1424,7 +1425,7 @@ public class PersistenceExtensions {
      *         {@link QueryablePersistenceService}, or if there is no persisted state for the given <code>item</code> at
      *         the given <code>timestamp</code>
      */
-    public static @Nullable State deviationSince(Item item, ZonedDateTime timestamp, RiemannType type) {
+    public static @Nullable State deviationSince(Item item, ZonedDateTime timestamp, @Nullable RiemannType type) {
         return internalDeviationBetween(item, timestamp, null, type, null);
     }
 
@@ -1444,7 +1445,7 @@ public class PersistenceExtensions {
      *         the given <code>timestamp</code>
      */
     public static @Nullable State deviationUntil(Item item, ZonedDateTime timestamp) {
-        return internalDeviationBetween(item, timestamp, null, RiemannType.LEFT, null);
+        return internalDeviationBetween(item, timestamp, null, null, null);
     }
 
     /**
@@ -1462,7 +1463,7 @@ public class PersistenceExtensions {
      *         {@link QueryablePersistenceService}, or if there is no persisted state for the given <code>item</code> at
      *         the given <code>timestamp</code>
      */
-    public static @Nullable State deviationUntil(Item item, ZonedDateTime timestamp, RiemannType type) {
+    public static @Nullable State deviationUntil(Item item, ZonedDateTime timestamp, @Nullable RiemannType type) {
         return internalDeviationBetween(item, timestamp, null, type, null);
     }
 
@@ -1483,7 +1484,7 @@ public class PersistenceExtensions {
      *         given <code>item</code> between <code>begin</code> and <code>end</code>
      */
     public static @Nullable State deviationBetween(Item item, ZonedDateTime begin, ZonedDateTime end) {
-        return internalDeviationBetween(item, begin, end, RiemannType.LEFT, null);
+        return internalDeviationBetween(item, begin, end, null, null);
     }
 
     /**
@@ -1503,7 +1504,7 @@ public class PersistenceExtensions {
      *         given <code>item</code> between <code>begin</code> and <code>end</code>
      */
     public static @Nullable State deviationBetween(Item item, ZonedDateTime begin, ZonedDateTime end,
-            RiemannType type) {
+            @Nullable RiemannType type) {
         return internalDeviationBetween(item, begin, end, type, null);
     }
 
@@ -1524,7 +1525,7 @@ public class PersistenceExtensions {
      *         the given <code>timestamp</code>
      */
     public static @Nullable State deviationSince(Item item, ZonedDateTime timestamp, @Nullable String serviceId) {
-        return internalDeviationBetween(item, timestamp, null, RiemannType.LEFT, serviceId);
+        return internalDeviationBetween(item, timestamp, null, null, serviceId);
     }
 
     /**
@@ -1543,7 +1544,7 @@ public class PersistenceExtensions {
      *         {@link QueryablePersistenceService}, or if there is no persisted state for the given <code>item</code> at
      *         the given <code>timestamp</code>
      */
-    public static @Nullable State deviationSince(Item item, ZonedDateTime timestamp, RiemannType type,
+    public static @Nullable State deviationSince(Item item, ZonedDateTime timestamp, @Nullable RiemannType type,
             @Nullable String serviceId) {
         return internalDeviationBetween(item, timestamp, null, type, serviceId);
     }
@@ -1565,7 +1566,7 @@ public class PersistenceExtensions {
      *         the given <code>timestamp</code>
      */
     public static @Nullable State deviationUntil(Item item, ZonedDateTime timestamp, @Nullable String serviceId) {
-        return internalDeviationBetween(item, null, timestamp, RiemannType.LEFT, serviceId);
+        return internalDeviationBetween(item, null, timestamp, null, serviceId);
     }
 
     /**
@@ -1584,7 +1585,7 @@ public class PersistenceExtensions {
      *         {@link QueryablePersistenceService}, or if there is no persisted state for the given <code>item</code> at
      *         the given <code>timestamp</code>
      */
-    public static @Nullable State deviationUntil(Item item, ZonedDateTime timestamp, RiemannType type,
+    public static @Nullable State deviationUntil(Item item, ZonedDateTime timestamp, @Nullable RiemannType type,
             @Nullable String serviceId) {
         return internalDeviationBetween(item, null, timestamp, type, serviceId);
     }
@@ -1609,7 +1610,7 @@ public class PersistenceExtensions {
      */
     public static @Nullable State deviationBetween(Item item, ZonedDateTime begin, ZonedDateTime end,
             @Nullable String serviceId) {
-        return internalDeviationBetween(item, begin, end, RiemannType.LEFT, serviceId);
+        return internalDeviationBetween(item, begin, end, null, serviceId);
     }
 
     /**
@@ -1630,13 +1631,13 @@ public class PersistenceExtensions {
      *         a {@link QueryablePersistenceService}, or if there is no persisted state for the
      *         given <code>item</code> between <code>begin</code> and <code>end</code>
      */
-    public static @Nullable State deviationBetween(Item item, ZonedDateTime begin, ZonedDateTime end, RiemannType type,
-            @Nullable String serviceId) {
+    public static @Nullable State deviationBetween(Item item, ZonedDateTime begin, ZonedDateTime end,
+            @Nullable RiemannType type, @Nullable String serviceId) {
         return internalDeviationBetween(item, begin, end, type, serviceId);
     }
 
     private static @Nullable State internalDeviationBetween(Item item, @Nullable ZonedDateTime begin,
-            @Nullable ZonedDateTime end, RiemannType type, @Nullable String serviceId) {
+            @Nullable ZonedDateTime end, @Nullable RiemannType type, @Nullable String serviceId) {
         String effectiveServiceId = serviceId == null ? getDefaultServiceId() : serviceId;
         if (effectiveServiceId == null) {
             return null;
@@ -1673,7 +1674,7 @@ public class PersistenceExtensions {
      *         {@link QueryablePersistenceService}. The current state is included in the calculation.
      */
     public static @Nullable State averageSince(Item item, ZonedDateTime timestamp) {
-        return internalAverageBetween(item, timestamp, null, RiemannType.LEFT, null);
+        return internalAverageBetween(item, timestamp, null, null, null);
     }
 
     /**
@@ -1687,7 +1688,7 @@ public class PersistenceExtensions {
      *         previous states could be found or if the default persistence service does not refer to an available
      *         {@link QueryablePersistenceService}. The current state is included in the calculation.
      */
-    public static @Nullable State averageSince(Item item, ZonedDateTime timestamp, RiemannType type) {
+    public static @Nullable State averageSince(Item item, ZonedDateTime timestamp, @Nullable RiemannType type) {
         return internalAverageBetween(item, timestamp, null, type, null);
     }
 
@@ -1703,7 +1704,7 @@ public class PersistenceExtensions {
      *         {@link QueryablePersistenceService}. The current state is included in the calculation.
      */
     public static @Nullable State averageUntil(Item item, ZonedDateTime timestamp) {
-        return internalAverageBetween(item, null, timestamp, RiemannType.LEFT, null);
+        return internalAverageBetween(item, null, timestamp, null, null);
     }
 
     /**
@@ -1717,7 +1718,7 @@ public class PersistenceExtensions {
      *         future states could be found or if the default persistence service does not refer to an available
      *         {@link QueryablePersistenceService}. The current state is included in the calculation.
      */
-    public static @Nullable State averageUntil(Item item, ZonedDateTime timestamp, RiemannType type) {
+    public static @Nullable State averageUntil(Item item, ZonedDateTime timestamp, @Nullable RiemannType type) {
         return internalAverageBetween(item, null, timestamp, type, null);
     }
 
@@ -1734,7 +1735,7 @@ public class PersistenceExtensions {
      *         {@link QueryablePersistenceService}.
      */
     public static @Nullable State averageBetween(Item item, ZonedDateTime begin, ZonedDateTime end) {
-        return internalAverageBetween(item, begin, end, RiemannType.LEFT, null);
+        return internalAverageBetween(item, begin, end, null, null);
     }
 
     /**
@@ -1749,7 +1750,8 @@ public class PersistenceExtensions {
      *         states could be found or if the default persistence service does not refer to an available
      *         {@link QueryablePersistenceService}.
      */
-    public static @Nullable State averageBetween(Item item, ZonedDateTime begin, ZonedDateTime end, RiemannType type) {
+    public static @Nullable State averageBetween(Item item, ZonedDateTime begin, ZonedDateTime end,
+            @Nullable RiemannType type) {
         return internalAverageBetween(item, begin, end, type, null);
     }
 
@@ -1767,7 +1769,7 @@ public class PersistenceExtensions {
      *         calculation.
      */
     public static @Nullable State averageSince(Item item, ZonedDateTime timestamp, @Nullable String serviceId) {
-        return internalAverageBetween(item, timestamp, null, RiemannType.LEFT, serviceId);
+        return internalAverageBetween(item, timestamp, null, null, serviceId);
     }
 
     /**
@@ -1783,7 +1785,7 @@ public class PersistenceExtensions {
      *         refer to an available {@link QueryablePersistenceService}. The current state is included in the
      *         calculation.
      */
-    public static @Nullable State averageSince(Item item, ZonedDateTime timestamp, RiemannType type,
+    public static @Nullable State averageSince(Item item, ZonedDateTime timestamp, @Nullable RiemannType type,
             @Nullable String serviceId) {
         return internalAverageBetween(item, timestamp, null, type, serviceId);
     }
@@ -1802,7 +1804,7 @@ public class PersistenceExtensions {
      *         calculation.
      */
     public static @Nullable State averageUntil(Item item, ZonedDateTime timestamp, @Nullable String serviceId) {
-        return internalAverageBetween(item, null, timestamp, RiemannType.LEFT, serviceId);
+        return internalAverageBetween(item, null, timestamp, null, serviceId);
     }
 
     /**
@@ -1818,7 +1820,7 @@ public class PersistenceExtensions {
      *         refer to an available {@link QueryablePersistenceService}. The current state is included in the
      *         calculation.
      */
-    public static @Nullable State averageUntil(Item item, ZonedDateTime timestamp, RiemannType type,
+    public static @Nullable State averageUntil(Item item, ZonedDateTime timestamp, @Nullable RiemannType type,
             @Nullable String serviceId) {
         return internalAverageBetween(item, null, timestamp, type, serviceId);
     }
@@ -1838,7 +1840,7 @@ public class PersistenceExtensions {
      */
     public static @Nullable State averageBetween(Item item, ZonedDateTime begin, ZonedDateTime end,
             @Nullable String serviceId) {
-        return internalAverageBetween(item, begin, end, RiemannType.LEFT, serviceId);
+        return internalAverageBetween(item, begin, end, null, serviceId);
     }
 
     /**
@@ -1854,13 +1856,13 @@ public class PersistenceExtensions {
      *         states could be found or if the persistence service given by <code>serviceId</code> does not
      *         refer to an available {@link QueryablePersistenceService}
      */
-    public static @Nullable State averageBetween(Item item, ZonedDateTime begin, ZonedDateTime end, RiemannType type,
-            @Nullable String serviceId) {
+    public static @Nullable State averageBetween(Item item, ZonedDateTime begin, ZonedDateTime end,
+            @Nullable RiemannType type, @Nullable String serviceId) {
         return internalAverageBetween(item, begin, end, type, serviceId);
     }
 
     private static @Nullable State internalAverageBetween(Item item, @Nullable ZonedDateTime begin,
-            @Nullable ZonedDateTime end, RiemannType type, @Nullable String serviceId) {
+            @Nullable ZonedDateTime end, @Nullable RiemannType type, @Nullable String serviceId) {
         String effectiveServiceId = serviceId == null ? getDefaultServiceId() : serviceId;
         if (effectiveServiceId == null) {
             return null;
@@ -1917,7 +1919,7 @@ public class PersistenceExtensions {
      *         {@link QueryablePersistenceService}. The current state is included in the calculation.
      */
     public static @Nullable State riemannSumSince(Item item, ZonedDateTime timestamp) {
-        return internalRiemannSumBetween(item, timestamp, null, RiemannType.LEFT, null);
+        return internalRiemannSumBetween(item, timestamp, null, null, null);
     }
 
     /**
@@ -1934,7 +1936,7 @@ public class PersistenceExtensions {
      *         previous states could be found or if the default persistence service does not refer to an available
      *         {@link QueryablePersistenceService}. The current state is included in the calculation.
      */
-    public static @Nullable State riemannSumSince(Item item, ZonedDateTime timestamp, RiemannType type) {
+    public static @Nullable State riemannSumSince(Item item, ZonedDateTime timestamp, @Nullable RiemannType type) {
         return internalRiemannSumBetween(item, timestamp, null, type, null);
     }
 
@@ -1953,7 +1955,7 @@ public class PersistenceExtensions {
      *         {@link QueryablePersistenceService}. The current state is included in the calculation.
      */
     public static @Nullable State riemannSumUntil(Item item, ZonedDateTime timestamp) {
-        return internalRiemannSumBetween(item, null, timestamp, RiemannType.LEFT, null);
+        return internalRiemannSumBetween(item, null, timestamp, null, null);
     }
 
     /**
@@ -1970,7 +1972,7 @@ public class PersistenceExtensions {
      *         future states could be found or if the default persistence service does not refer to an available
      *         {@link QueryablePersistenceService}. The current state is included in the calculation.
      */
-    public static @Nullable State riemannSumUntil(Item item, ZonedDateTime timestamp, RiemannType type) {
+    public static @Nullable State riemannSumUntil(Item item, ZonedDateTime timestamp, @Nullable RiemannType type) {
         return internalRiemannSumBetween(item, null, timestamp, type, null);
     }
 
@@ -1990,7 +1992,7 @@ public class PersistenceExtensions {
      *         {@link QueryablePersistenceService}.
      */
     public static @Nullable State riemannSumBetween(Item item, ZonedDateTime begin, ZonedDateTime end) {
-        return internalRiemannSumBetween(item, begin, end, RiemannType.LEFT, null);
+        return internalRiemannSumBetween(item, begin, end, null, null);
     }
 
     /**
@@ -2009,7 +2011,7 @@ public class PersistenceExtensions {
      *         {@link QueryablePersistenceService}.
      */
     public static @Nullable State riemannSumBetween(Item item, ZonedDateTime begin, ZonedDateTime end,
-            RiemannType type) {
+            @Nullable RiemannType type) {
         return internalRiemannSumBetween(item, begin, end, type, null);
     }
 
@@ -2030,7 +2032,7 @@ public class PersistenceExtensions {
      *         calculation.
      */
     public static @Nullable State riemannSumSince(Item item, ZonedDateTime timestamp, @Nullable String serviceId) {
-        return internalRiemannSumBetween(item, timestamp, null, RiemannType.LEFT, serviceId);
+        return internalRiemannSumBetween(item, timestamp, null, null, serviceId);
     }
 
     /**
@@ -2049,7 +2051,7 @@ public class PersistenceExtensions {
      *         refer to an available {@link QueryablePersistenceService}. The current state is included in the
      *         calculation.
      */
-    public static @Nullable State riemannSumSince(Item item, ZonedDateTime timestamp, RiemannType type,
+    public static @Nullable State riemannSumSince(Item item, ZonedDateTime timestamp, @Nullable RiemannType type,
             @Nullable String serviceId) {
         return internalRiemannSumBetween(item, timestamp, null, type, serviceId);
     }
@@ -2071,7 +2073,7 @@ public class PersistenceExtensions {
      *         calculation.
      */
     public static @Nullable State riemannSumUntil(Item item, ZonedDateTime timestamp, @Nullable String serviceId) {
-        return internalRiemannSumBetween(item, null, timestamp, RiemannType.LEFT, serviceId);
+        return internalRiemannSumBetween(item, null, timestamp, null, serviceId);
     }
 
     /**
@@ -2090,7 +2092,7 @@ public class PersistenceExtensions {
      *         refer to an available {@link QueryablePersistenceService}. The current state is included in the
      *         calculation.
      */
-    public static @Nullable State riemannSumUntil(Item item, ZonedDateTime timestamp, RiemannType type,
+    public static @Nullable State riemannSumUntil(Item item, ZonedDateTime timestamp, @Nullable RiemannType type,
             @Nullable String serviceId) {
         return internalRiemannSumBetween(item, null, timestamp, type, serviceId);
     }
@@ -2113,7 +2115,7 @@ public class PersistenceExtensions {
      */
     public static @Nullable State riemannSumBetween(Item item, ZonedDateTime begin, ZonedDateTime end,
             @Nullable String serviceId) {
-        return internalRiemannSumBetween(item, begin, end, RiemannType.LEFT, serviceId);
+        return internalRiemannSumBetween(item, begin, end, null, serviceId);
     }
 
     /**
@@ -2132,13 +2134,13 @@ public class PersistenceExtensions {
      *         states could be found or if the persistence service given by <code>serviceId</code> does not
      *         refer to an available {@link QueryablePersistenceService}
      */
-    public static @Nullable State riemannSumBetween(Item item, ZonedDateTime begin, ZonedDateTime end, RiemannType type,
-            @Nullable String serviceId) {
+    public static @Nullable State riemannSumBetween(Item item, ZonedDateTime begin, ZonedDateTime end,
+            @Nullable RiemannType type, @Nullable String serviceId) {
         return internalRiemannSumBetween(item, begin, end, type, serviceId);
     }
 
     private static @Nullable State internalRiemannSumBetween(Item item, @Nullable ZonedDateTime begin,
-            @Nullable ZonedDateTime end, RiemannType type, @Nullable String serviceId) {
+            @Nullable ZonedDateTime end, @Nullable RiemannType type, @Nullable String serviceId) {
         String effectiveServiceId = serviceId == null ? getDefaultServiceId() : serviceId;
         if (effectiveServiceId == null) {
             return null;
@@ -2171,7 +2173,9 @@ public class PersistenceExtensions {
     }
 
     private static BigDecimal riemannSum(ZonedDateTime begin, ZonedDateTime end, Iterator<HistoricItem> it,
-            @Nullable Unit<?> unit, RiemannType type) {
+            @Nullable Unit<?> unit, @Nullable RiemannType type) {
+        RiemannType riemannType = type == null ? RiemannType.LEFT : type;
+
         BigDecimal sum = BigDecimal.ZERO;
         HistoricItem prevItem = null;
         HistoricItem nextItem = null;
@@ -2183,7 +2187,7 @@ public class PersistenceExtensions {
         boolean midpointStartBucket = true; // The start and end buckets for the midpoint calculation should be
                                             // considered for the full length, this flag is used to find the start
                                             // bucket
-        if ((type == RiemannType.MIDPOINT) && it.hasNext()) {
+        if ((riemannType == RiemannType.MIDPOINT) && it.hasNext()) {
             prevItem = it.next();
             prevState = getPersistedValue(prevItem, unit);
         }
@@ -2192,7 +2196,7 @@ public class PersistenceExtensions {
             nextItem = it.next();
             BigDecimal weight = BigDecimal.ZERO;
             BigDecimal value = BigDecimal.ZERO;
-            switch (type) {
+            switch (riemannType) {
                 case LEFT:
                     if (prevItem != null) {
                         prevState = getPersistedValue(prevItem, unit);
@@ -2256,7 +2260,7 @@ public class PersistenceExtensions {
             sum = sum.add(value.multiply(weight));
         }
 
-        if ((type == RiemannType.MIDPOINT) && (prevItem != null)) {
+        if ((riemannType == RiemannType.MIDPOINT) && (prevItem != null)) {
             // Add half of the end bucket with the end value (right approximation)
             DecimalType dtState = getPersistedValue(prevItem, unit);
             if (dtState != null) {
