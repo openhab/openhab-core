@@ -121,29 +121,23 @@ public class ConfigDescriptionParameter {
     /**
      * Creates a new instance of this class with the specified parameters.
      *
-     * @param name the name of the configuration parameter (must neither be null
-     *            nor empty)
-     * @param type the data type of the configuration parameter (nullable)
+     * @param name the name of the configuration parameter (must not be empty)
+     * @param type the data type of the configuration parameter
      * @param minimum the minimal value for numeric types, or the minimal length of
-     *            strings, or the minimal number of selected options (nullable)
+     *            strings, or the minimal number of selected options
      * @param maximum the maximal value for numeric types, or the maximal length of
-     *            strings, or the maximal number of selected options (nullable)
-     * @param stepsize the value granularity for a numeric value (nullable)
-     * @param pattern the regular expression for a text type (nullable)
+     *            strings, or the maximal number of selected options
+     * @param stepsize the value granularity for a numeric value
+     * @param pattern the regular expression for a text type
      * @param required specifies whether the value is required
      * @param readOnly specifies whether the value is read-only
      * @param multiple specifies whether multiple selections of options are allowed
-     * @param context the context of the configuration parameter (can be null or
-     *            empty)
-     * @param defaultValue the default value of the configuration parameter (can be null)
-     * @param label a human-readable label for the configuration parameter (can be
-     *            null or empty)
-     * @param description a human-readable description for the configuration parameter
-     *            (can be null or empty)
-     * @param filterCriteria a list of filter criteria for values of a dynamic selection
-     *            list (nullable)
+     * @param context the context of the configuration parameter (can be empty)
+     * @param defaultValue the default value of the configuration parameter
+     * @param label a human-readable label for the configuration parameter (can be empty)
+     * @param description a human-readable description for the configuration parameter (can be empty)
+     * @param filterCriteria a list of filter criteria for values of a dynamic selection list
      * @param options a list of element definitions of a static selection list
-     *            (nullable)
      * @param groupName a string used to group parameters together into logical blocks
      *            so that the UI can display them together
      * @param advanced specifies if this is an advanced parameter. An advanced
@@ -156,7 +150,7 @@ public class ConfigDescriptionParameter {
      *            can enter values other than those in the list
      * @param multipleLimit specifies the maximum number of options that can be selected
      *            when multiple is true
-     * @param unit specifies the unit of measurements for the configuration parameter (nullable)
+     * @param unit specifies the unit of measurements for the configuration parameter
      * @param unitLabel specifies the unit label for the configuration parameter. This attribute can also be used to
      *            provide
      *            natural language units as iterations, runs, etc.
@@ -242,7 +236,7 @@ public class ConfigDescriptionParameter {
     /**
      * Returns the name of the configuration parameter.
      *
-     * @return the name of the configuration parameter (neither null, nor empty)
+     * @return the name of the configuration parameter (not empty)
      */
     public String getName() {
         return this.name;
@@ -251,7 +245,7 @@ public class ConfigDescriptionParameter {
     /**
      * Returns the data type of the configuration parameter.
      *
-     * @return the data type of the configuration parameter (not null)
+     * @return the data type of the configuration parameter
      */
     public Type getType() {
         return this.type;
@@ -259,7 +253,7 @@ public class ConfigDescriptionParameter {
 
     /**
      * @return the minimal value for numeric types, or the minimal length of
-     *         strings, or the minimal number of selected options (nullable)
+     *         strings, or the minimal number of selected options
      */
     public @Nullable BigDecimal getMinimum() {
         return min;
@@ -267,7 +261,7 @@ public class ConfigDescriptionParameter {
 
     /**
      * @return the maximal value for numeric types, or the maximal length of
-     *         strings, or the maximal number of selected options (nullable)
+     *         strings, or the maximal number of selected options
      */
     public @Nullable BigDecimal getMaximum() {
         return max;
@@ -278,14 +272,14 @@ public class ConfigDescriptionParameter {
      * <p>
      * By setting the step size to <code>0</code>, any granularity is allowed, i.e. any number of decimals is accepted.
      *
-     * @return the value granularity for a numeric value (nullable)
+     * @return the value granularity for a numeric value
      */
     public @Nullable BigDecimal getStepSize() {
         return step;
     }
 
     /**
-     * @return the regular expression for a text type (nullable)
+     * @return the regular expression for a text type
      */
     public @Nullable String getPattern() {
         return pattern;
@@ -356,8 +350,7 @@ public class ConfigDescriptionParameter {
      * - location: A latitude,longitude[,altitude] GPS location. A user-interface would probably render a world map for
      * selection.
      *
-     * @return the context of the configuration parameter (could be null or
-     *         empty)
+     * @return the context of the configuration parameter (could be empty)
      */
     public @Nullable String getContext() {
         return this.context;
@@ -377,7 +370,7 @@ public class ConfigDescriptionParameter {
     /**
      * Returns the default value of the configuration parameter.
      *
-     * @return the default value of the configuration parameter (could be null)
+     * @return the default value of the configuration parameter
      */
     public @Nullable String getDefault() {
         return defaultValue;
@@ -386,8 +379,7 @@ public class ConfigDescriptionParameter {
     /**
      * Returns a human-readable label for the configuration parameter.
      *
-     * @return a human-readable label for the configuration parameter (could be
-     *         null or empty)
+     * @return a human-readable label for the configuration parameter (could be empty)
      */
     public @Nullable String getLabel() {
         return label;
@@ -396,7 +388,7 @@ public class ConfigDescriptionParameter {
     /**
      * Returns the group for this configuration parameter.
      *
-     * @return a group for the configuration parameter (could be null or empty)
+     * @return a group for the configuration parameter (could be empty)
      */
     public @Nullable String getGroupName() {
         return groupName;
@@ -424,8 +416,7 @@ public class ConfigDescriptionParameter {
     /**
      * Returns a human-readable description for the configuration parameter.
      *
-     * @return a human-readable description for the configuration parameter
-     *         (could be null or empty)
+     * @return a human-readable description for the configuration parameter (could be empty)
      */
     public @Nullable String getDescription() {
         return description;
@@ -455,7 +446,7 @@ public class ConfigDescriptionParameter {
     /**
      * Returns the unit of measurements of this parameter.
      *
-     * @return the unit of measurements of this parameter (could be null)
+     * @return the unit of measurements of this parameter
      */
     public @Nullable String getUnit() {
         return unit;
@@ -464,7 +455,7 @@ public class ConfigDescriptionParameter {
     /**
      * Returns the unit label of this parameter.
      *
-     * @return the unit label of this parameter (could be null)
+     * @return the unit label of this parameter
      */
     public @Nullable String getUnitLabel() {
         return unitLabel;
