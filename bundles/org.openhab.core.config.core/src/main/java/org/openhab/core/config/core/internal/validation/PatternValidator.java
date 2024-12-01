@@ -29,11 +29,12 @@ final class PatternValidator implements ConfigDescriptionParameterValidator {
 
     @Override
     public @Nullable ConfigValidationMessage validate(ConfigDescriptionParameter parameter, @Nullable Object value) {
-        if (value == null || parameter.getType() != Type.TEXT || parameter.getPattern() == null) {
+        String pattern = parameter.getPattern();
+        if (value == null || parameter.getType() != Type.TEXT || pattern == null) {
             return null;
         }
 
-        if (!((String) value).matches(parameter.getPattern())) {
+        if (!((String) value).matches(pattern)) {
             MessageKey messageKey = MessageKey.PATTERN_VIOLATED;
             return new ConfigValidationMessage(parameter.getName(), messageKey.defaultMessage, messageKey.key,
                     String.valueOf(value), parameter.getPattern());
