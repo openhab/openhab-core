@@ -124,7 +124,7 @@ public class StateDescriptionConverter extends GenericUnmarshaller<StateDescript
             builder.withStep(step);
         }
 
-        String rangeUnit = attributes.get("pattern");
+        String rangeUnit = attributes.get("rangeUnit");
         if (rangeUnit != null) {
             builder.withRangeUnit(rangeUnit);
         }
