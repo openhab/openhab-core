@@ -340,7 +340,7 @@ public class PersistenceResource implements RESTResource {
 
     private ZonedDateTime convertTime(String sTime) {
         DateTimeType dateTime = new DateTimeType(sTime);
-        return dateTime.getInstant().atZone(timeZoneProvider.getTimeZone());
+        return dateTime.getZonedDateTime(timeZoneProvider.getTimeZone());
     }
 
     private Response getItemHistoryDTO(@Nullable String serviceId, String itemName, @Nullable String timeBegin,

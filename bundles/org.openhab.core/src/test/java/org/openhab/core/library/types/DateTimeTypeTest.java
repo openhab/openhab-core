@@ -285,15 +285,18 @@ public class DateTimeTypeTest {
         DateTimeType dt1 = new DateTimeType("2019-06-12T17:30:00Z");
         DateTimeType dt2 = new DateTimeType("2019-06-12T17:30:00+0000");
         DateTimeType dt3 = new DateTimeType("2019-06-12T19:30:00+0200");
+        DateTimeType dt4 = new DateTimeType("2019-06-12T19:30:00+0200");
         assertThat(dt1, is(dt2));
 
         ZonedDateTime zdt1 = dt1.getZonedDateTime();
         ZonedDateTime zdt2 = dt2.getZonedDateTime();
         ZonedDateTime zdt3 = dt3.getZonedDateTime();
+        ZonedDateTime zdt4 = dt4.getZonedDateTime(ZoneId.of("UTC"));
         assertThat(zdt1.getZone(), is(zdt2.getZone()));
         assertThat(zdt1, is(zdt2));
         assertThat(zdt1, is(zdt3.withZoneSameInstant(zdt1.getZone())));
         assertThat(zdt2, is(zdt3.withZoneSameInstant(zdt2.getZone())));
+        assertThat(zdt1, is(zdt4));
     }
 
     @Test

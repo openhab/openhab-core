@@ -441,7 +441,7 @@ public class RuleResource implements RESTResource {
             return defaultSupplier.get();
         }
         final DateTimeType dateTime = new DateTimeType(sTime);
-        return dateTime.getInstant().atZone(timeZoneProvider.getTimeZone());
+        return dateTime.getZonedDateTime(timeZoneProvider.getTimeZone());
     }
 
     @GET

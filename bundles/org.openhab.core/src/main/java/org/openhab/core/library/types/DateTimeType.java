@@ -142,13 +142,25 @@ public class DateTimeType implements PrimitiveType, State, Command, Comparable<D
     }
 
     /**
-     * Get object represented as a {@link ZonedDateTime} with system
-     * default time-zone applied
+     * @deprecated
+     *             Get object represented as a {@link ZonedDateTime} with system
+     *             default time-zone applied
      *
      * @return a {@link ZonedDateTime} representation of the object
      */
+    @Deprecated
     public ZonedDateTime getZonedDateTime() {
-        return instant.atZone(ZoneId.systemDefault());
+        return getZonedDateTime(ZoneId.systemDefault());
+    }
+
+    /**
+     * Get object represented as a {@link ZonedDateTime} with the
+     * the provided time-zone applied
+     *
+     * @return a {@link ZonedDateTime} representation of the object
+     */
+    public ZonedDateTime getZonedDateTime(ZoneId zoneId) {
+        return instant.atZone(zoneId);
     }
 
     /**
