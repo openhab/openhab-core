@@ -56,7 +56,8 @@ NotIncludeFilter:
 
 
 PersistenceConfiguration:
-	items+=(AllConfig | ItemConfig | GroupConfig) (',' items+=(AllConfig | ItemConfig | GroupConfig))* ('->' alias=STRING)? 
+	items+=(AllConfig | ItemConfig | GroupConfig | ItemExcludeConfig | GroupExcludeConfig)
+	   (',' items+=(AllConfig | ItemConfig | GroupConfig | ItemExcludeConfig | GroupExcludeConfig))* ('->' alias=STRING)? 
 	((':' ('strategy' '=' strategies+=[Strategy|ID] (',' strategies+=[Strategy|ID])*)? 
 		 ('filter' '=' filters+=[Filter|ID] (',' filters+=[Filter|ID])*)?) 
 		| ';')
@@ -73,6 +74,14 @@ ItemConfig:
 
 GroupConfig:
 	group=ID '*'
+;
+
+ItemExcludeConfig:
+    '!' itemExclude=ID
+;
+
+GroupExcludeConfig:
+    '!' groupExclude=ID '*'
 ;
 
 DECIMAL returns ecore::EBigDecimal :

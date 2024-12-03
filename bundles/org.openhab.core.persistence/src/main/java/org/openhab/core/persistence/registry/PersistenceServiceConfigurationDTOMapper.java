@@ -27,7 +27,9 @@ import org.openhab.core.persistence.PersistenceItemConfiguration;
 import org.openhab.core.persistence.config.PersistenceAllConfig;
 import org.openhab.core.persistence.config.PersistenceConfig;
 import org.openhab.core.persistence.config.PersistenceGroupConfig;
+import org.openhab.core.persistence.config.PersistenceGroupExcludeConfig;
 import org.openhab.core.persistence.config.PersistenceItemConfig;
+import org.openhab.core.persistence.config.PersistenceItemExcludeConfig;
 import org.openhab.core.persistence.dto.PersistenceCronStrategyDTO;
 import org.openhab.core.persistence.dto.PersistenceFilterDTO;
 import org.openhab.core.persistence.dto.PersistenceItemConfigurationDTO;
@@ -113,8 +115,14 @@ public class PersistenceServiceConfigurationDTOMapper {
         if ("*".equals(string)) {
             return new PersistenceAllConfig();
         } else if (string.endsWith("*")) {
+            if (string.startsWith("!")) {
+                return new PersistenceGroupExcludeConfig(string.substring(1, string.length() - 1));
+            }
             return new PersistenceGroupConfig(string.substring(0, string.length() - 1));
         } else {
+            if (string.startsWith("!")) {
+                return new PersistenceItemExcludeConfig(string.substring(1, string.length() - 1));
+            }
             return new PersistenceItemConfig(string);
         }
     }
@@ -149,6 +157,10 @@ public class PersistenceServiceConfigurationDTOMapper {
             return persistenceGroupConfig.getGroup() + "*";
         } else if (config instanceof PersistenceItemConfig persistenceItemConfig) {
             return persistenceItemConfig.getItem();
+        } else if (config instanceof PersistenceGroupExcludeConfig persistenceGroupExcludeConfig) {
+            return "!" + persistenceGroupExcludeConfig.getGroup() + "*";
+        } else if (config instanceof PersistenceItemExcludeConfig persistenceItemExcludeConfig) {
+            return "!" + persistenceItemExcludeConfig.getItem();
         }
         throw new IllegalArgumentException("Unknown persistence config class " + config.getClass());
     }

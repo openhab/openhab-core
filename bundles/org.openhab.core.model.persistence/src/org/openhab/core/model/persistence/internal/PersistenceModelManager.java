@@ -29,8 +29,10 @@ import org.openhab.core.model.persistence.persistence.CronStrategy;
 import org.openhab.core.model.persistence.persistence.EqualsFilter;
 import org.openhab.core.model.persistence.persistence.Filter;
 import org.openhab.core.model.persistence.persistence.GroupConfig;
+import org.openhab.core.model.persistence.persistence.GroupExcludeConfig;
 import org.openhab.core.model.persistence.persistence.IncludeFilter;
 import org.openhab.core.model.persistence.persistence.ItemConfig;
+import org.openhab.core.model.persistence.persistence.ItemExcludeConfig;
 import org.openhab.core.model.persistence.persistence.NotEqualsFilter;
 import org.openhab.core.model.persistence.persistence.NotIncludeFilter;
 import org.openhab.core.model.persistence.persistence.PersistenceConfiguration;
@@ -43,7 +45,9 @@ import org.openhab.core.persistence.PersistenceService;
 import org.openhab.core.persistence.config.PersistenceAllConfig;
 import org.openhab.core.persistence.config.PersistenceConfig;
 import org.openhab.core.persistence.config.PersistenceGroupConfig;
+import org.openhab.core.persistence.config.PersistenceGroupExcludeConfig;
 import org.openhab.core.persistence.config.PersistenceItemConfig;
+import org.openhab.core.persistence.config.PersistenceItemExcludeConfig;
 import org.openhab.core.persistence.filter.PersistenceEqualsFilter;
 import org.openhab.core.persistence.filter.PersistenceFilter;
 import org.openhab.core.persistence.filter.PersistenceIncludeFilter;
@@ -98,7 +102,11 @@ public class PersistenceModelManager extends AbstractProvider<PersistenceService
             String serviceName = serviceName(modelName);
             if (type == EventType.REMOVED) {
                 PersistenceServiceConfiguration removed = configurations.remove(serviceName);
-                notifyListenersAboutRemovedElement(removed);
+                if (removed == null) {
+                    logger.warn("Service for {} was already removed from registry, ignoring.", modelName);
+                } else {
+                    notifyListenersAboutRemovedElement(removed);
+                }
             } else {
                 final PersistenceModel model = (PersistenceModel) modelRepository.getModel(modelName);
 
@@ -153,6 +161,10 @@ public class PersistenceModelManager extends AbstractProvider<PersistenceService
                 items.add(new PersistenceGroupConfig(groupConfig.getGroup()));
             } else if (item instanceof ItemConfig itemConfig) {
                 items.add(new PersistenceItemConfig(itemConfig.getItem()));
+            } else if (item instanceof GroupExcludeConfig groupExcludeConfig) {
+                items.add(new PersistenceGroupExcludeConfig(groupExcludeConfig.getGroupExclude()));
+            } else if (item instanceof ItemExcludeConfig itemExcludeConfig) {
+                items.add(new PersistenceItemExcludeConfig(itemExcludeConfig.getItemExclude()));
             }
         }
         return new PersistenceItemConfiguration(items, config.getAlias(), mapStrategies(config.getStrategies()),

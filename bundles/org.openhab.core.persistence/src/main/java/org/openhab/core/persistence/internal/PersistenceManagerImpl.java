@@ -13,9 +13,7 @@
 package org.openhab.core.persistence.internal;
 
 import static org.openhab.core.persistence.FilterCriteria.Ordering.ASCENDING;
-import static org.openhab.core.persistence.strategy.PersistenceStrategy.Globals.FORECAST;
-import static org.openhab.core.persistence.strategy.PersistenceStrategy.Globals.RESTORE;
-import static org.openhab.core.persistence.strategy.PersistenceStrategy.Globals.UPDATE;
+import static org.openhab.core.persistence.strategy.PersistenceStrategy.Globals.*;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -57,7 +55,9 @@ import org.openhab.core.persistence.QueryablePersistenceService;
 import org.openhab.core.persistence.config.PersistenceAllConfig;
 import org.openhab.core.persistence.config.PersistenceConfig;
 import org.openhab.core.persistence.config.PersistenceGroupConfig;
+import org.openhab.core.persistence.config.PersistenceGroupExcludeConfig;
 import org.openhab.core.persistence.config.PersistenceItemConfig;
+import org.openhab.core.persistence.config.PersistenceItemExcludeConfig;
 import org.openhab.core.persistence.registry.PersistenceServiceConfiguration;
 import org.openhab.core.persistence.registry.PersistenceServiceConfigurationRegistry;
 import org.openhab.core.persistence.registry.PersistenceServiceConfigurationRegistryChangeListener;
@@ -198,25 +198,39 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, State
      * @return true, if the configuration applies to the item
      */
     private boolean appliesToItem(PersistenceItemConfiguration itemConfig, Item item) {
+        boolean applies = false;
         for (PersistenceConfig itemCfg : itemConfig.items()) {
             if (itemCfg instanceof PersistenceAllConfig) {
-                return true;
+                applies = true;
             } else if (itemCfg instanceof PersistenceItemConfig persistenceItemConfig) {
                 if (item.getName().equals(persistenceItemConfig.getItem())) {
-                    return true;
+                    applies = true;
+                }
+            } else if (itemCfg instanceof PersistenceItemExcludeConfig persistenceItemExcludeConfig) {
+                if (item.getName().equals(persistenceItemExcludeConfig.getItem())) {
+                    return false;
                 }
             } else if (itemCfg instanceof PersistenceGroupConfig persistenceGroupConfig) {
                 try {
                     Item gItem = itemRegistry.getItem(persistenceGroupConfig.getGroup());
                     if (gItem instanceof GroupItem gItem2 && gItem2.getAllMembers().contains(item)) {
-                        return true;
+                        applies = true;
+                    }
+                } catch (ItemNotFoundException e) {
+                    // do nothing
+                }
+            } else if (itemCfg instanceof PersistenceGroupExcludeConfig persistenceGroupExcludeConfig) {
+                try {
+                    Item gItem = itemRegistry.getItem(persistenceGroupExcludeConfig.getGroup());
+                    if (gItem instanceof GroupItem gItem2 && gItem2.getAllMembers().contains(item)) {
+                        return false;
                     }
                 } catch (ItemNotFoundException e) {
                     // do nothing
                 }
             }
         }
-        return false;
+        return applies;
     }
 
     /**
@@ -226,23 +240,19 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, State
      * @return all items that this configuration applies to
      */
     private Iterable<Item> getAllItems(PersistenceItemConfiguration config) {
-        // first check, if we should return them all
-        if (config.items().stream().anyMatch(PersistenceAllConfig.class::isInstance)) {
-            return itemRegistry.getItems();
-        }
-
-        // otherwise, go through the detailed definitions
         Set<Item> items = new HashSet<>();
+        Set<Item> excludeItems = new HashSet<>();
         for (Object itemCfg : config.items()) {
-            if (itemCfg instanceof PersistenceItemConfig persistenceItemConfig) {
+            if (itemCfg instanceof PersistenceAllConfig) {
+                items.addAll(itemRegistry.getItems());
+            } else if (itemCfg instanceof PersistenceItemConfig persistenceItemConfig) {
                 String itemName = persistenceItemConfig.getItem();
                 try {
                     items.add(itemRegistry.getItem(itemName));
                 } catch (ItemNotFoundException e) {
                     logger.debug("Item '{}' does not exist.", itemName);
                 }
-            }
-            if (itemCfg instanceof PersistenceGroupConfig persistenceGroupConfig) {
+            } else if (itemCfg instanceof PersistenceGroupConfig persistenceGroupConfig) {
                 String groupName = persistenceGroupConfig.getGroup();
                 try {
                     Item gItem = itemRegistry.getItem(groupName);
@@ -252,8 +262,26 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, State
                 } catch (ItemNotFoundException e) {
                     logger.debug("Item group '{}' does not exist.", groupName);
                 }
+            } else if (itemCfg instanceof PersistenceItemExcludeConfig persistenceItemConfig) {
+                String itemName = persistenceItemConfig.getItem();
+                try {
+                    excludeItems.add(itemRegistry.getItem(itemName));
+                } catch (ItemNotFoundException e) {
+                    logger.debug("Item '{}' does not exist.", itemName);
+                }
+            } else if (itemCfg instanceof PersistenceGroupExcludeConfig persistenceGroupConfig) {
+                String groupName = persistenceGroupConfig.getGroup();
+                try {
+                    Item gItem = itemRegistry.getItem(groupName);
+                    if (gItem instanceof GroupItem groupItem) {
+                        excludeItems.addAll(groupItem.getAllMembers());
+                    }
+                } catch (ItemNotFoundException e) {
+                    logger.debug("Item group '{}' does not exist.", groupName);
+                }
             }
         }
+        items.removeAll(excludeItems);
         return items;
     }
 
