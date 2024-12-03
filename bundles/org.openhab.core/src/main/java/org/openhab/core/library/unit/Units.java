@@ -56,6 +56,7 @@ import org.openhab.core.library.dimension.DataTransferRate;
 import org.openhab.core.library.dimension.Density;
 import org.openhab.core.library.dimension.ElectricConductivity;
 import org.openhab.core.library.dimension.EmissionIntensity;
+import org.openhab.core.library.dimension.EnergyDensity;
 import org.openhab.core.library.dimension.Intensity;
 import org.openhab.core.library.dimension.RadiationSpecificActivity;
 import org.openhab.core.library.dimension.VolumetricFlowRate;
@@ -134,6 +135,8 @@ public final class Units extends CustomUnits {
             new ProductUnit<>(tech.units.indriya.unit.Units.WATT.multiply(tech.units.indriya.unit.Units.HOUR)));
     public static final Unit<Energy> KILOWATT_HOUR = addUnit(MetricPrefix.KILO(WATT_HOUR));
     public static final Unit<Energy> MEGAWATT_HOUR = addUnit(MetricPrefix.MEGA(WATT_HOUR));
+    public static final Unit<EnergyDensity> WATT_HOUR_PER_SQUARE_METRE = addUnit(
+            new ProductUnit<>(WATT_HOUR.divide(tech.units.indriya.unit.Units.SQUARE_METRE)));
     public static final Unit<EmissionIntensity> GRAM_PER_KILOWATT_HOUR = addUnit(
             new ProductUnit<>(tech.units.indriya.unit.Units.GRAM.divide(KILOWATT_HOUR)));
     public static final Unit<Power> VAR = addUnit(new AlternateUnit<>(tech.units.indriya.unit.Units.WATT, "var"));
@@ -318,6 +321,7 @@ public final class Units extends CustomUnits {
         SimpleUnitFormat.getInstance().label(VOLT_AMPERE, "VA");
         SimpleUnitFormat.getInstance().label(VOLT_AMPERE_HOUR, "VAh");
         SimpleUnitFormat.getInstance().label(WATT_HOUR, "Wh");
+        SimpleUnitFormat.getInstance().label(WATT_HOUR_PER_SQUARE_METRE, "Wh/m²");
         SimpleUnitFormat.getInstance().label(WATT_SECOND, "Ws");
 
         // workarounds for https://github.com/unitsofmeasurement/indriya/issues/409
