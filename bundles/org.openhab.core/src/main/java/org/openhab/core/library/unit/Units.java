@@ -98,6 +98,8 @@ public final class Units extends CustomUnits {
     public static final Unit<ArealDensity> DOBSON_UNIT = addUnit(
             new ProductUnit<>(MetricPrefix.MILLI(tech.units.indriya.unit.Units.MOLE).multiply(0.4462)
                     .divide(tech.units.indriya.unit.Units.SQUARE_METRE)));
+    public static final Unit<ArealDensity> KILOGRAM_PER_SQUARE_METRE = addUnit(new ProductUnit<>(
+            tech.units.indriya.unit.Units.KILOGRAM.divide(tech.units.indriya.unit.Units.SQUARE_METRE)));
     public static final Unit<CatalyticActivity> KATAL = addUnit(tech.units.indriya.unit.Units.KATAL);
     public static final Unit<Density> KILOGRAM_PER_CUBICMETRE = addUnit(new ProductUnit<>(
             tech.units.indriya.unit.Units.KILOGRAM.divide(tech.units.indriya.unit.Units.CUBIC_METRE)));
@@ -276,6 +278,7 @@ public final class Units extends CustomUnits {
         SimpleUnitFormat.getInstance().alias(KIBIBYTE, "kio");
         SimpleUnitFormat.getInstance().label(KILOBIT, "kbit");
         SimpleUnitFormat.getInstance().label(KILOBIT_PER_SECOND, "kbit/s");
+        SimpleUnitFormat.getInstance().label(KILOGRAM_PER_SQUARE_METRE, "kg/m²");
         SimpleUnitFormat.getInstance().label(KILOVAR, "kvar");
         SimpleUnitFormat.getInstance().label(KILOVAR_HOUR, "kvarh");
         SimpleUnitFormat.getInstance().label(KILOVOLT_AMPERE, "kVA");

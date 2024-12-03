@@ -432,6 +432,7 @@ public class UnitsTest {
     }
 
     @Test
+<<<<<<< Upstream, based on origin/main
     public void testColorTemperatureAliases() {
         QuantityType<?> value;
         value = QuantityType.valueOf("20 mired");
@@ -440,6 +441,24 @@ public class UnitsTest {
         assertEquals(Units.MIRED, value.getUnit());
         value = QuantityType.valueOf("20 MK⁻¹");
         assertEquals(Units.MIRED, value.getUnit());
+=======
+    public void testGrains() {
+        assertThat(ImperialUnits.GRAIN.getSymbol(), is("gr"));
+        QuantityType<?> oneHundredGrains = QuantityType.valueOf("100 gr");
+        QuantityType<?> converted = oneHundredGrains.toUnit("g");
+        assertThat(converted.doubleValue(), is(closeTo(6.479891, DEFAULT_ERROR)));
+        assertThat(ImperialUnits.GRAIN_PER_CUBICFOOT.toString(), is("gr/ft³"));
+        QuantityType<?> grainDensity = QuantityType.valueOf("20 gr/ft³");
+        QuantityType<?> convertedDensity = grainDensity.toUnit(Units.MICROGRAM_PER_CUBICMETRE);
+        assertThat(convertedDensity.doubleValue(), is(closeTo(45767038.211314686, DEFAULT_ERROR)));
+    }
+
+    @Test
+    public void testArealDensity() {
+        QuantityType<?> newspaper = QuantityType.valueOf("72 g/m²");
+        QuantityType<?> converted = newspaper.toUnit(Units.KILOGRAM_PER_SQUARE_METRE);
+        assertEquals(converted.doubleValue(), 0.072);
+>>>>>>> df0bd5e Adding some units requested in open issues
     }
 
     private static class QuantityEquals extends IsEqual<Quantity<?>> {
