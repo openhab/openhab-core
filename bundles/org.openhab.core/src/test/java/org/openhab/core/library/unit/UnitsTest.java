@@ -15,7 +15,7 @@ package org.openhab.core.library.unit;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.number.IsCloseTo.closeTo;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.math.BigDecimal;
 
@@ -38,6 +38,7 @@ import org.openhab.core.library.dimension.ArealDensity;
 import org.openhab.core.library.dimension.Density;
 import org.openhab.core.library.dimension.Intensity;
 import org.openhab.core.library.types.QuantityType;
+import org.openhab.core.types.util.UnitUtils;
 
 import tech.units.indriya.quantity.Quantities;
 
@@ -458,6 +459,18 @@ public class UnitsTest {
         QuantityType<?> newspaper = QuantityType.valueOf("72 g/m²");
         QuantityType<?> converted = newspaper.toUnit(Units.KILOGRAM_PER_SQUARE_METRE);
         assertEquals(converted.doubleValue(), 0.072);
+    }
+
+    @Test
+    public void testAmountOfSubstance() {
+        QuantityType<?> mmolpl = QuantityType.valueOf("0.17833 mmol/l");
+        String mmolplDimension = UnitUtils.getDimensionName(mmolpl.getUnit());
+        QuantityType<?> dh = QuantityType.valueOf("1 °dH");
+        String hDimension = UnitUtils.getDimensionName(dh.getUnit());
+        assertTrue(hDimension.equals(mmolplDimension));
+        assertTrue("Dimensionless".equalsIgnoreCase(hDimension));
+        QuantityType<?> converted = dh.toUnit("mmol/l");
+        assertThat(converted.doubleValue(), is(closeTo(mmolpl.doubleValue(), DEFAULT_ERROR)));
     }
 
     private static class QuantityEquals extends IsEqual<Quantity<?>> {

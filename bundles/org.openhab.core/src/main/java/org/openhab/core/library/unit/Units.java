@@ -91,8 +91,8 @@ public final class Units extends CustomUnits {
     public static final Unit<AmountOfSubstance> MOLE = addUnit(tech.units.indriya.unit.Units.MOLE);
     public static final Unit<Volume> LITRE = addUnit(tech.units.indriya.unit.Units.LITRE);
     @SuppressWarnings("unchecked")
-    public static final Unit<AmountOfSubstance> DEUTSCHE_HAERTE = addUnit(new TransformedUnit<>("°dH",
-            (Unit<AmountOfSubstance>) MetricPrefix.MILLI(Units.MOLE).divide(Units.LITRE), MultiplyConverter.of(5.6)));
+    public static final Unit<Dimensionless> DEUTSCHE_HAERTE = addUnit((Unit<Dimensionless>) new TransformedUnit<>("°dH",
+            MetricPrefix.MILLI(Units.MOLE).divide(Units.LITRE), MultiplyConverter.of(0.17833)));
     public static final Unit<Angle> DEGREE_ANGLE = addUnit(NonSI.DEGREE_ANGLE);
     public static final Unit<Angle> RADIAN = addUnit(tech.units.indriya.unit.Units.RADIAN);
     public static final Unit<ArealDensity> DOBSON_UNIT = addUnit(
@@ -264,7 +264,7 @@ public final class Units extends CustomUnits {
         SimpleUnitFormat.getInstance().label(DECIBEL, "dB");
         SimpleUnitFormat.getInstance().label(DECIBEL_MILLIWATTS, "dBm");
         SimpleUnitFormat.getInstance().label(DEGREE_ANGLE, "°");
-        SimpleUnitFormat.getInstance().label(DEUTSCHE_HAERTE, "°dH");
+        SimpleUnitFormat.getInstance().label(DEUTSCHE_HAERTE, DEUTSCHE_HAERTE.getSymbol());
         SimpleUnitFormat.getInstance().label(DOBSON_UNIT, "DU");
         SimpleUnitFormat.getInstance().label(GRAM_PER_KILOWATT_HOUR, "g/kWh");
         SimpleUnitFormat.getInstance().label(GIGABYTE, "GB");
