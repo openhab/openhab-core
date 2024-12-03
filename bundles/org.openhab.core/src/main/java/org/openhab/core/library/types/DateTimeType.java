@@ -38,14 +38,7 @@ import org.openhab.core.types.State;
  * @author Wouter Born - increase parsing and formatting precision
  * @author Laurent Garnier - added methods toLocaleZone and toZone
  * @author Gaël L'hopital - added ability to use second and milliseconds unix time
-<<<<<<< Upstream, based on origin/main
-<<<<<<< Upstream, based on origin/main
  * @author Jimmy Tanagra - implement Comparable
-=======
- * @author Gaël L'hopital - added isToday, isTomorrow, isYesterday, sameDay
->>>>>>> cdfceb1 Added some convenient methods for DateTimeType
-=======
->>>>>>> 5d4ed15 Revert "Added some convenient methods for DateTimeType"
  */
 @NonNullByDefault
 public class DateTimeType implements PrimitiveType, State, Command, Comparable<DateTimeType> {
