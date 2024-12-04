@@ -17,10 +17,11 @@ import javax.measure.Quantity;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * The {@link EnergyDensity} defines the dimension for prices
+ * The {@link SurfaceEnergy} defines the dimension for surface energy
+ * https://en.wikipedia.org/wiki/Surface_energy
  *
  * @author Gaël L'hopital - Initial contribution
  */
 @NonNullByDefault
-public interface EnergyDensity extends Quantity<EnergyDensity> {
+public interface SurfaceEnergy extends Quantity<SurfaceEnergy> {
 }

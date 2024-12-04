@@ -56,9 +56,9 @@ import org.openhab.core.library.dimension.DataTransferRate;
 import org.openhab.core.library.dimension.Density;
 import org.openhab.core.library.dimension.ElectricConductivity;
 import org.openhab.core.library.dimension.EmissionIntensity;
-import org.openhab.core.library.dimension.EnergyDensity;
 import org.openhab.core.library.dimension.Intensity;
 import org.openhab.core.library.dimension.RadiationSpecificActivity;
+import org.openhab.core.library.dimension.SurfaceEnergy;
 import org.openhab.core.library.dimension.VolumetricFlowRate;
 
 import si.uom.NonSI;
@@ -91,8 +91,7 @@ public final class Units extends CustomUnits {
     public static final Unit<Acceleration> STANDARD_GRAVITY = addUnit(METRE_PER_SQUARE_SECOND.multiply(9.80665));
     public static final Unit<AmountOfSubstance> MOLE = addUnit(tech.units.indriya.unit.Units.MOLE);
     public static final Unit<Volume> LITRE = addUnit(tech.units.indriya.unit.Units.LITRE);
-    @SuppressWarnings("unchecked")
-    public static final Unit<Dimensionless> DEUTSCHE_HAERTE = addUnit((Unit<Dimensionless>) new TransformedUnit<>("°dH",
+    public static final Unit<?> DEUTSCHE_HAERTE = addUnit(new TransformedUnit<>("°dH",
             MetricPrefix.MILLI(Units.MOLE).divide(Units.LITRE), MultiplyConverter.of(0.17833)));
     public static final Unit<Angle> DEGREE_ANGLE = addUnit(NonSI.DEGREE_ANGLE);
     public static final Unit<Angle> RADIAN = addUnit(tech.units.indriya.unit.Units.RADIAN);
@@ -135,8 +134,6 @@ public final class Units extends CustomUnits {
             new ProductUnit<>(tech.units.indriya.unit.Units.WATT.multiply(tech.units.indriya.unit.Units.HOUR)));
     public static final Unit<Energy> KILOWATT_HOUR = addUnit(MetricPrefix.KILO(WATT_HOUR));
     public static final Unit<Energy> MEGAWATT_HOUR = addUnit(MetricPrefix.MEGA(WATT_HOUR));
-    public static final Unit<EnergyDensity> WATT_HOUR_PER_SQUARE_METRE = addUnit(
-            new ProductUnit<>(WATT_HOUR.divide(tech.units.indriya.unit.Units.SQUARE_METRE)));
     public static final Unit<EmissionIntensity> GRAM_PER_KILOWATT_HOUR = addUnit(
             new ProductUnit<>(tech.units.indriya.unit.Units.GRAM.divide(KILOWATT_HOUR)));
     public static final Unit<Power> VAR = addUnit(new AlternateUnit<>(tech.units.indriya.unit.Units.WATT, "var"));
@@ -192,6 +189,8 @@ public final class Units extends CustomUnits {
             new TransformedUnit<>("kn", tech.units.indriya.unit.Units.KILOMETRE_PER_HOUR,
                     MultiplyConverter.ofRational(BigInteger.valueOf(1852), BigInteger.valueOf(1000))));
     public static final Unit<SolidAngle> STERADIAN = addUnit(tech.units.indriya.unit.Units.STERADIAN);
+    public static final Unit<SurfaceEnergy> WATT_HOUR_PER_SQUARE_METRE = addUnit(
+            new ProductUnit<>(WATT_HOUR.divide(tech.units.indriya.unit.Units.SQUARE_METRE)));
     public static final Unit<Temperature> KELVIN = addUnit(tech.units.indriya.unit.Units.KELVIN);
     public static final Unit<?> MIRED = addUnit(MetricPrefix.MEGA(tech.units.indriya.unit.Units.KELVIN).inverse());
     public static final Unit<Time> SECOND = addUnit(tech.units.indriya.unit.Units.SECOND);
