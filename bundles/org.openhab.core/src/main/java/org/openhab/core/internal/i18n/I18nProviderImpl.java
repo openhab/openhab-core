@@ -434,7 +434,7 @@ public class I18nProviderImpl
         addDefaultUnit(dimensionMap, Radioactivity.class, Units.BECQUEREL);
         addDefaultUnit(dimensionMap, SolidAngle.class, Units.STERADIAN);
         addDefaultUnit(dimensionMap, Speed.class, SIUnits.KILOMETRE_PER_HOUR, ImperialUnits.MILES_PER_HOUR);
-        addDefaultUnit(dimensionMap, SurfaceEnergy.class, Units.WATT_HOUR_PER_SQUARE_METRE);
+        addDefaultUnit(dimensionMap, SurfaceEnergy.class, Units.JOULE_PER_SQUARE_METRE);
         addDefaultUnit(dimensionMap, Temperature.class, SIUnits.CELSIUS, ImperialUnits.FAHRENHEIT);
         addDefaultUnit(dimensionMap, Time.class, Units.SECOND);
         addDefaultUnit(dimensionMap, Volume.class, SIUnits.CUBIC_METRE, ImperialUnits.GALLON_LIQUID_US);

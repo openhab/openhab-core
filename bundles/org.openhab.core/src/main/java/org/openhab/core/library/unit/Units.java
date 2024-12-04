@@ -192,6 +192,8 @@ public final class Units extends CustomUnits {
     public static final Unit<SolidAngle> STERADIAN = addUnit(tech.units.indriya.unit.Units.STERADIAN);
     public static final Unit<SurfaceEnergy> WATT_HOUR_PER_SQUARE_METRE = addUnit(
             new ProductUnit<>(WATT_HOUR.divide(tech.units.indriya.unit.Units.SQUARE_METRE)));
+    public static final Unit<SurfaceEnergy> JOULE_PER_SQUARE_METRE = addUnit(
+            new ProductUnit<>(JOULE.divide(tech.units.indriya.unit.Units.SQUARE_METRE)));
     public static final Unit<Temperature> KELVIN = addUnit(tech.units.indriya.unit.Units.KELVIN);
     public static final Unit<?> MIRED = addUnit(MetricPrefix.MEGA(tech.units.indriya.unit.Units.KELVIN).inverse());
     public static final Unit<Time> SECOND = addUnit(tech.units.indriya.unit.Units.SECOND);
