@@ -17,11 +17,11 @@ import javax.measure.Quantity;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * The {@link SurfaceEnergy} defines the dimension for surface energy
+ * The {@link RadiantExposure} defines the dimension for surface energy
  * https://en.wikipedia.org/wiki/Surface_energy
  *
  * @author Gaël L'hopital - Initial contribution
  */
 @NonNullByDefault
-public interface SurfaceEnergy extends Quantity<SurfaceEnergy> {
+public interface RadiantExposure extends Quantity<RadiantExposure> {
 }

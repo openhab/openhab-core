@@ -58,7 +58,7 @@ import org.openhab.core.library.dimension.ElectricConductivity;
 import org.openhab.core.library.dimension.EmissionIntensity;
 import org.openhab.core.library.dimension.Intensity;
 import org.openhab.core.library.dimension.RadiationSpecificActivity;
-import org.openhab.core.library.dimension.SurfaceEnergy;
+import org.openhab.core.library.dimension.RadiantExposure;
 import org.openhab.core.library.dimension.VolumetricFlowRate;
 
 import si.uom.NonSI;
@@ -190,9 +190,9 @@ public final class Units extends CustomUnits {
             new TransformedUnit<>("kn", tech.units.indriya.unit.Units.KILOMETRE_PER_HOUR,
                     MultiplyConverter.ofRational(BigInteger.valueOf(1852), BigInteger.valueOf(1000))));
     public static final Unit<SolidAngle> STERADIAN = addUnit(tech.units.indriya.unit.Units.STERADIAN);
-    public static final Unit<SurfaceEnergy> WATT_HOUR_PER_SQUARE_METRE = addUnit(
+    public static final Unit<RadiantExposure> WATT_HOUR_PER_SQUARE_METRE = addUnit(
             new ProductUnit<>(WATT_HOUR.divide(tech.units.indriya.unit.Units.SQUARE_METRE)));
-    public static final Unit<SurfaceEnergy> JOULE_PER_SQUARE_METRE = addUnit(
+    public static final Unit<RadiantExposure> JOULE_PER_SQUARE_METRE = addUnit(
             new ProductUnit<>(JOULE.divide(tech.units.indriya.unit.Units.SQUARE_METRE)));
     public static final Unit<Temperature> KELVIN = addUnit(tech.units.indriya.unit.Units.KELVIN);
     public static final Unit<?> MIRED = addUnit(MetricPrefix.MEGA(tech.units.indriya.unit.Units.KELVIN).inverse());
