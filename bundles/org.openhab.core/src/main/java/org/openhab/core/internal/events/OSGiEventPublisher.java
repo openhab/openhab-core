@@ -68,17 +68,18 @@ public class OSGiEventPublisher implements EventPublisher {
 
     private void assertValidArgument(Event event) throws IllegalArgumentException {
         String errorMsg = "The %s of the 'event' argument must not be null or empty.";
+        String value;
 
         if (event == null) {
             throw new IllegalArgumentException("Argument 'event' must not be null.");
         }
-        if (event.getType().isEmpty()) {
+        if ((value = event.getType()) == null || value.isEmpty()) {
             throw new IllegalArgumentException(String.format(errorMsg, "type"));
         }
-        if (event.getPayload().isEmpty()) {
+        if ((value = event.getPayload()) == null || value.isEmpty()) {
             throw new IllegalArgumentException(String.format(errorMsg, "payload"));
         }
-        if (event.getTopic().isEmpty()) {
+        if ((value = event.getTopic()) == null || value.isEmpty()) {
             throw new IllegalArgumentException(String.format(errorMsg, "topic"));
         }
     }
