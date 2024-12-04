@@ -134,7 +134,6 @@ public class I18nProviderImpl
     public static final String REGION = "region";
     public static final String VARIANT = "variant";
     private @Nullable Locale locale;
-    private @Nullable String currencyCode;
 
     // TranslationProvider
     private final ResourceBundleTracker resourceBundleTracker;
@@ -301,7 +300,7 @@ public class I18nProviderImpl
 
         if (oldTimeZone != null && this.timeZone == null) {
             logger.info("Time zone is not set, falling back to the default time zone.");
-        } else if (this.timeZone != null && !this.timeZone.equals(oldTimeZone)) {
+        } else if (this.timeZone instanceof ZoneId zId && !zId.equals(oldTimeZone)) {
             logger.info("Time zone set to '{}'.", this.timeZone);
         }
     }

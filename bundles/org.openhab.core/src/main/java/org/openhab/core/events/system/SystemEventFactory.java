@@ -19,7 +19,6 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.events.AbstractEventFactory;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventFactory;
-import org.openhab.core.types.Type;
 import org.osgi.service.component.annotations.Component;
 
 /**

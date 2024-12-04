@@ -132,13 +132,11 @@ public class LRUMediaCache<V> {
             // 2 clean orphan (part of a pair (file + metadata) without a corresponding partner)
             // 2-a delete a file without its metadata
             for (Path path : filesInCacheFolder) {
-                if (path != null) {
-                    String fileName = path.getFileName().toString();
-                    // check corresponding metadata in storage
-                    V metadata = storage.get(fileName);
-                    if (metadata == null) {
-                        Files.delete(path);
-                    }
+                String fileName = path.getFileName().toString();
+                // check corresponding metadata in storage
+                V metadata = storage.get(fileName);
+                if (metadata == null) {
+                    Files.delete(path);
                 }
             }
             // 2-b delete metadata without corresponding file

@@ -117,8 +117,8 @@ abstract class AbstractInvocationHandler<T> {
         } else {
             logger.debug(MSG_TIMEOUT_Q, timeout, toString(invocation.getInvocationStack()));
         }
-        if (timeoutHandler != null) {
-            timeoutHandler.run();
+        if (timeoutHandler instanceof Runnable handler) {
+            handler.run();
         }
     }
 

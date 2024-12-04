@@ -67,6 +67,7 @@ public class ExpiringCache<V> {
      * Returns the value - possibly from the cache, if it is still valid.
      */
     public synchronized @Nullable V getValue() {
+        @Nullable
         V cachedValue = value.get();
         if (cachedValue == null || isExpired()) {
             return refreshValue();
@@ -98,6 +99,7 @@ public class ExpiringCache<V> {
      * @return the new value
      */
     public synchronized @Nullable V refreshValue() {
+        @Nullable
         V freshValue = action.get();
         value = new SoftReference<>(freshValue);
         expiresAt = calcExpiresAt();

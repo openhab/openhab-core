@@ -46,13 +46,6 @@ public class ItemDTOMapper {
      * @return the item object
      */
     public static @Nullable Item map(ItemDTO itemDTO, ItemBuilderFactory itemBuilderFactory) {
-        if (itemDTO == null) {
-            throw new IllegalArgumentException("The argument 'itemDTO' must no be null.");
-        }
-        if (itemBuilderFactory == null) {
-            throw new IllegalArgumentException("The argument 'itemBuilderFactory' must no be null.");
-        }
-
         if (!ItemUtil.isValidItemName(itemDTO.name)) {
             throw new IllegalArgumentException("The item name '" + itemDTO.name + "' is invalid.");
         }

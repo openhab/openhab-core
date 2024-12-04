@@ -61,9 +61,9 @@ public abstract class AbstractEvent implements Event {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((payload == null) ? 0 : payload.hashCode());
-        result = prime * result + ((source == null) ? 0 : source.hashCode());
-        result = prime * result + ((topic == null) ? 0 : topic.hashCode());
+        result = prime * result + payload.hashCode();
+        result = prime * result + (source instanceof String local ? local.hashCode() : 0);
+        result = prime * result + topic.hashCode();
         return result;
     }
 
@@ -79,11 +79,7 @@ public abstract class AbstractEvent implements Event {
             return false;
         }
         AbstractEvent other = (AbstractEvent) obj;
-        if (payload == null) {
-            if (other.payload != null) {
-                return false;
-            }
-        } else if (!payload.equals(other.payload)) {
+        if (!payload.equals(other.payload)) {
             return false;
         }
         if (source == null) {
@@ -93,11 +89,7 @@ public abstract class AbstractEvent implements Event {
         } else if (!source.equals(other.source)) {
             return false;
         }
-        if (topic == null) {
-            if (other.topic != null) {
-                return false;
-            }
-        } else if (!topic.equals(other.topic)) {
+        if (!topic.equals(other.topic)) {
             return false;
         }
         return true;

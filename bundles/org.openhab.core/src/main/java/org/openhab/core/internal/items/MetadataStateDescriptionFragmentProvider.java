@@ -125,34 +125,30 @@ public class MetadataStateDescriptionFragmentProvider implements StateDescriptio
 
     private BigDecimal getBigDecimal(Object value) {
         BigDecimal ret = null;
-        if (value != null) {
-            if (value instanceof BigDecimal decimal) {
-                ret = decimal;
-            } else if (value instanceof String string) {
-                ret = new BigDecimal(string);
-            } else if (value instanceof BigInteger integer) {
-                ret = new BigDecimal(integer);
-            } else if (value instanceof Number number) {
-                ret = new BigDecimal(number.doubleValue());
-            } else {
-                throw new ClassCastException("Not possible to coerce [" + value + "] from class " + value.getClass()
-                        + " into a BigDecimal.");
-            }
+        if (value instanceof BigDecimal decimal) {
+            ret = decimal;
+        } else if (value instanceof String string) {
+            ret = new BigDecimal(string);
+        } else if (value instanceof BigInteger integer) {
+            ret = new BigDecimal(integer);
+        } else if (value instanceof Number number) {
+            ret = new BigDecimal(number.doubleValue());
+        } else {
+            throw new ClassCastException(
+                    "Not possible to coerce [" + value + "] from class " + value.getClass() + " into a BigDecimal.");
         }
         return ret;
     }
 
     private Boolean getBoolean(Object value) {
         Boolean ret = null;
-        if (value != null) {
-            if (value instanceof Boolean boolean1) {
-                ret = boolean1;
-            } else if (value instanceof String string) {
-                ret = Boolean.parseBoolean(string);
-            } else {
-                throw new ClassCastException(
-                        "Not possible to coerce [" + value + "] from class " + value.getClass() + " into a Boolean.");
-            }
+        if (value instanceof Boolean boolean1) {
+            ret = boolean1;
+        } else if (value instanceof String string) {
+            ret = Boolean.parseBoolean(string);
+        } else {
+            throw new ClassCastException(
+                    "Not possible to coerce [" + value + "] from class " + value.getClass() + " into a Boolean.");
         }
         return ret;
     }

@@ -200,7 +200,6 @@ public class SchedulerImpl implements Scheduler {
      */
     private static class ScheduledCompletableFutureRecurring<T> extends ScheduledCompletableFutureOnce<T> {
         private @Nullable volatile ScheduledCompletableFuture<T> scheduledPromise;
-        private @Nullable String identifier;
 
         public ScheduledCompletableFutureRecurring(@Nullable String identifier, ZonedDateTime scheduledTime) {
             super(identifier, scheduledTime);
