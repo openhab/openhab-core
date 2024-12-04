@@ -17,8 +17,8 @@ import javax.measure.Quantity;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * The {@link RadiantExposure} defines the dimension for surface energy
- * https://en.wikipedia.org/wiki/Surface_energy
+ * The {@link RadiantExposure} defines the dimension for Radiant Exposure
+ * https://en.wikipedia.org/wiki/Radiant_exposure
  *
  * @author Gaël L'hopital - Initial contribution
  */
