@@ -76,10 +76,10 @@ import org.openhab.core.library.dimension.DataTransferRate;
 import org.openhab.core.library.dimension.Density;
 import org.openhab.core.library.dimension.ElectricConductivity;
 import org.openhab.core.library.dimension.EmissionIntensity;
-import org.openhab.core.library.dimension.SurfaceEnergy;
 import org.openhab.core.library.dimension.EnergyPrice;
 import org.openhab.core.library.dimension.Intensity;
 import org.openhab.core.library.dimension.RadiationSpecificActivity;
+import org.openhab.core.library.dimension.SurfaceEnergy;
 import org.openhab.core.library.dimension.VolumetricFlowRate;
 import org.openhab.core.library.types.PointType;
 import org.openhab.core.library.unit.CurrencyUnits;
@@ -415,7 +415,6 @@ public class I18nProviderImpl
         addDefaultUnit(dimensionMap, ElectricResistance.class, Units.OHM);
         addDefaultUnit(dimensionMap, EmissionIntensity.class, Units.GRAM_PER_KILOWATT_HOUR);
         addDefaultUnit(dimensionMap, Energy.class, Units.KILOWATT_HOUR);
-        addDefaultUnit(dimensionMap, SurfaceEnergy.class, Units.WATT_HOUR_PER_SQUARE_METRE);
         addDefaultUnit(dimensionMap, EnergyPrice.class, CurrencyUnits.BASE_ENERGY_PRICE);
         addDefaultUnit(dimensionMap, Force.class, Units.NEWTON);
         addDefaultUnit(dimensionMap, Frequency.class, Units.HERTZ);
@@ -435,6 +434,7 @@ public class I18nProviderImpl
         addDefaultUnit(dimensionMap, Radioactivity.class, Units.BECQUEREL);
         addDefaultUnit(dimensionMap, SolidAngle.class, Units.STERADIAN);
         addDefaultUnit(dimensionMap, Speed.class, SIUnits.KILOMETRE_PER_HOUR, ImperialUnits.MILES_PER_HOUR);
+        addDefaultUnit(dimensionMap, SurfaceEnergy.class, Units.WATT_HOUR_PER_SQUARE_METRE);
         addDefaultUnit(dimensionMap, Temperature.class, SIUnits.CELSIUS, ImperialUnits.FAHRENHEIT);
         addDefaultUnit(dimensionMap, Time.class, Units.SECOND);
         addDefaultUnit(dimensionMap, Volume.class, SIUnits.CUBIC_METRE, ImperialUnits.GALLON_LIQUID_US);
