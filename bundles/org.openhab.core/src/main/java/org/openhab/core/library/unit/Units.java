@@ -57,8 +57,8 @@ import org.openhab.core.library.dimension.Density;
 import org.openhab.core.library.dimension.ElectricConductivity;
 import org.openhab.core.library.dimension.EmissionIntensity;
 import org.openhab.core.library.dimension.Intensity;
-import org.openhab.core.library.dimension.RadiationSpecificActivity;
 import org.openhab.core.library.dimension.RadiantExposure;
+import org.openhab.core.library.dimension.RadiationSpecificActivity;
 import org.openhab.core.library.dimension.VolumetricFlowRate;
 
 import si.uom.NonSI;

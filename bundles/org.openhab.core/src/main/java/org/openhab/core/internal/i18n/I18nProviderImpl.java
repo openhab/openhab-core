@@ -428,10 +428,10 @@ public class I18nProviderImpl
         addDefaultUnit(dimensionMap, Mass.class, SIUnits.KILOGRAM, ImperialUnits.POUND);
         addDefaultUnit(dimensionMap, Power.class, Units.WATT);
         addDefaultUnit(dimensionMap, Pressure.class, HECTO(SIUnits.PASCAL), ImperialUnits.INCH_OF_MERCURY);
-        addDefaultUnit(dimensionMap, RadiantExposure.class, Units.JOULE_PER_SQUARE_METRE);
         addDefaultUnit(dimensionMap, RadiationDoseAbsorbed.class, Units.GRAY);
         addDefaultUnit(dimensionMap, RadiationDoseEffective.class, Units.SIEVERT);
         addDefaultUnit(dimensionMap, RadiationSpecificActivity.class, Units.BECQUEREL_PER_CUBIC_METRE);
+        addDefaultUnit(dimensionMap, RadiantExposure.class, Units.JOULE_PER_SQUARE_METRE);
         addDefaultUnit(dimensionMap, Radioactivity.class, Units.BECQUEREL);
         addDefaultUnit(dimensionMap, SolidAngle.class, Units.STERADIAN);
         addDefaultUnit(dimensionMap, Speed.class, SIUnits.KILOMETRE_PER_HOUR, ImperialUnits.MILES_PER_HOUR);
