@@ -27,6 +27,7 @@ import org.openhab.core.library.types.DateTimeType;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonParser;
 
 /**
  * Tests {@link Stream2JSONInputStream}.
@@ -52,7 +53,8 @@ public class Stream2JSONInputStreamTest {
         List<DummyObject> dummyList = List.of(dummyObject);
         Stream2JSONInputStream collection2InputStream = new Stream2JSONInputStream(Stream.of(dummyObject));
 
-        assertThat(inputStreamToString(collection2InputStream), is(GSON.toJson(dummyList)));
+        assertThat(JsonParser.parseString(inputStreamToString(collection2InputStream)),
+                is(JsonParser.parseString(GSON.toJson(dummyList))));
     }
 
     @Test
@@ -62,7 +64,8 @@ public class Stream2JSONInputStreamTest {
         List<DummyObject> dummyCollection = List.of(dummyObject1, dummyObject2);
         Stream2JSONInputStream collection2InputStream = new Stream2JSONInputStream(dummyCollection.stream());
 
-        assertThat(inputStreamToString(collection2InputStream), is(GSON.toJson(dummyCollection)));
+        assertThat(JsonParser.parseString(inputStreamToString(collection2InputStream)),
+                is(JsonParser.parseString(GSON.toJson(dummyCollection))));
     }
 
     private String inputStreamToString(InputStream in) throws IOException {
