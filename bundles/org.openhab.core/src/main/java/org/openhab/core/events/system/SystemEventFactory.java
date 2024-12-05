@@ -37,7 +37,7 @@ public class SystemEventFactory extends AbstractEventFactory {
     }
 
     /**
-     * Creates a trigger event from a {@link Type}.
+     * Creates a trigger event from a {@link org.openhab.core.types.Type}.
      *
      * @param startlevel Startlevel of system
      * @return Created start level event.

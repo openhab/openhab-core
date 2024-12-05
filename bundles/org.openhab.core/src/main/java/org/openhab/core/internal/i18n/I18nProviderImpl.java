@@ -22,7 +22,6 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
-import java.util.ResourceBundle;
 import java.util.Set;
 
 import javax.measure.Quantity;
@@ -100,7 +99,8 @@ import org.slf4j.LoggerFactory;
  * and {@link LocationProvider} service interfaces.
  *
  * <p>
- * This implementation uses the i18n mechanism of Java ({@link ResourceBundle}) to translate a given key into text. The
+ * This implementation uses the i18n mechanism of Java ({@link java.util.ResourceBundleResourceBundle}) to translate a
+ * given key into text. The
  * resources must be placed under the specific directory {@link LanguageResourceBundleManager#RESOURCE_DIRECTORY} within
  * the certain modules. Each module is tracked in the platform by using the {@link ResourceBundleTracker} and managed by
  * using one certain {@link LanguageResourceBundleManager} which is responsible for the translation.

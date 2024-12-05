@@ -22,7 +22,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.RunnableFuture;
@@ -43,7 +42,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * A ScheduledExecutorService that will sequentially perform the tasks like a
- * {@link Executors#newSingleThreadScheduledExecutor} backed by a thread pool.
+ * {@link java.util.concurrent.Executors#newSingleThreadScheduledExecutor} backed by a thread pool.
  * This is a drop in replacement to a ScheduledExecutorService with one thread to avoid a lot of threads created, idling
  * most of the time and wasting memory on low-end devices.
  *

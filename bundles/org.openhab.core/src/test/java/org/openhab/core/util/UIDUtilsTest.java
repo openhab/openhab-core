@@ -19,10 +19,9 @@ import java.util.function.Consumer;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.hamcrest.core.IsEqual;
 import org.junit.jupiter.api.Test;
-import org.openhab.core.common.AbstractUID;
 
 /**
- * Tests for {@link AbstractUID}.
+ * Tests for {@link org.openhab.core.common.AbstractUID}.
  *
  * @author Markus Rathgeb - Initial contribution
  */

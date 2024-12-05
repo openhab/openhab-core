@@ -12,8 +12,6 @@
  */
 package org.openhab.core.types;
 
-import java.util.Formatter;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
@@ -31,7 +29,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 public interface Type {
 
     /**
-     * Formats the value of this type according to a pattern (see {@link Formatter}).
+     * Formats the value of this type according to a pattern (see {@link java.util.Formatter}).
      *
      * @param pattern the pattern to use
      * @return the formatted string

@@ -13,7 +13,6 @@
 package org.openhab.core.net;
 
 import java.net.InetAddress;
-import java.net.InterfaceAddress;
 import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -26,7 +25,7 @@ import org.eclipse.jdt.annotation.Nullable;
  * The toString() method will return a CIRDR representation, but the individual
  * address and prefix length can be accessed as well.
  *
- * Java has a class that exactly provides this {@link InterfaceAddress}, but unfortunately
+ * Java has a class that exactly provides this {@link java.net.InterfaceAddress}, but unfortunately
  * no public constructor exists.
  *
  * @author David Graeff - Initial contribution
