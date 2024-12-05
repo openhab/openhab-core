@@ -99,7 +99,7 @@ import org.slf4j.LoggerFactory;
  * and {@link LocationProvider} service interfaces.
  *
  * <p>
- * This implementation uses the i18n mechanism of Java ({@link java.util.ResourceBundleResourceBundle}) to translate a
+ * This implementation uses the i18n mechanism of Java ({@link java.util.ResourceBundle}) to translate a
  * given key into text. The
  * resources must be placed under the specific directory {@link LanguageResourceBundleManager#RESOURCE_DIRECTORY} within
  * the certain modules. Each module is tracked in the platform by using the {@link ResourceBundleTracker} and managed by

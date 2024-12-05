@@ -129,9 +129,9 @@ public class NumberItem extends GenericItem implements MetadataAwareItem {
     }
 
     /**
-     * Returns the {@link javax.measure.DimensionDimension} associated with this {@link NumberItem}, may be null.
+     * Returns the {@link javax.measure.Dimension} associated with this {@link NumberItem}, may be null.
      *
-     * @return the {@link javax.measure.DimensionDimension} associated with this {@link NumberItem}, may be null.
+     * @return the {@link javax.measure.Dimension} associated with this {@link NumberItem}, may be null.
      */
     public @Nullable Class<? extends Quantity<?>> getDimension() {
         return dimension;
