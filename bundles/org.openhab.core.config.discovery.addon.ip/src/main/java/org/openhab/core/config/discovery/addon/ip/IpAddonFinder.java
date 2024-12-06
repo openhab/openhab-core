@@ -143,6 +143,11 @@ import org.slf4j.LoggerFactory;
  * <td>timeout to wait for a answers</td>
  * <td></td>
  * </tr>
+ * <tr>
+ * <td>{@code fmtMac}</td>
+ * <td>format specifier string for mac address</td>
+ * <td>e.g. '%02X', '%02X:', '%02x-'</td>
+ * </tr>
  * </table>
  * <p>
  * <table border="1">
@@ -163,9 +168,6 @@ import org.slf4j.LoggerFactory;
  * <td>source mac address</td>
  * </tr>
  * <tr>
- * <td>{@code $fmtMac}</td>
- * <td>format specifier string for mac address</td>
- * </tr>
  * <td>{@code $uuid}</td>
  * <td>String returned by {@code java.util.UUID.randomUUID()}</td>
  * </tr>
