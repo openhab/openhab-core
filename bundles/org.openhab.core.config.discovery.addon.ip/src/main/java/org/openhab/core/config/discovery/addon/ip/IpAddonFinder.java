@@ -12,7 +12,8 @@
  */
 package org.openhab.core.config.discovery.addon.ip;
 
-import static org.openhab.core.config.discovery.addon.AddonFinderConstants.*;
+import static org.openhab.core.config.discovery.addon.AddonFinderConstants.SERVICE_NAME_IP;
+import static org.openhab.core.config.discovery.addon.AddonFinderConstants.SERVICE_TYPE_IP;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -21,7 +22,9 @@ import java.net.DatagramSocket;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.NetworkInterface;
 import java.net.SocketAddress;
+import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.StandardProtocolFamily;
 import java.net.StandardSocketOptions;
@@ -154,6 +157,10 @@ import org.slf4j.LoggerFactory;
  * <td>{@code $srcPort}</td>
  * <td>source port</td>
  * </tr>
+ * <tr>
+ * <td>{@code $srcMac}</td>
+ * <td>source mac address</td>
+ * </tr>
  * <td>{@code $uuid}</td>
  * <td>String returned by {@code java.util.UUID.randomUUID()}</td>
  * </tr>
@@ -201,6 +208,7 @@ public class IpAddonFinder extends BaseAddonFinder implements NetworkAddressChan
     private static final String PARAMETER_REQUEST_PLAIN = "requestPlain";
     private static final String PARAMETER_SRC_IP = "srcIp";
     private static final String PARAMETER_SRC_PORT = "srcPort";
+    private static final String PARAMETER_SRC_MAC = "srcMac";
     private static final String PARAMETER_TIMEOUT_MS = "timeoutMs";
     private static final String REPLACEMENT_UUID = "uuid";
 
@@ -502,6 +510,9 @@ public class IpAddonFinder extends BaseAddonFinder implements NetworkAddressChan
         while ((p = req.indexOf("$" + PARAMETER_SRC_PORT)) != -1) {
             req.replace(p, p + PARAMETER_SRC_PORT.length() + 1, "" + sock.getPort());
         }
+        while ((p = req.indexOf("$" + PARAMETER_SRC_MAC)) != -1) {
+            req.replace(p, p + PARAMETER_SRC_MAC.length() + 1, macAddressFrom(sock));
+        }
         while ((p = req.indexOf("$" + REPLACEMENT_UUID)) != -1) {
             req.replace(p, p + REPLACEMENT_UUID.length() + 1, UUID.randomUUID().toString());
         }
@@ -530,6 +541,10 @@ public class IpAddonFinder extends BaseAddonFinder implements NetworkAddressChan
                         int dPort = sock.getPort();
                         requestFrame.write((byte) ((dPort >> 8) & 0xff));
                         requestFrame.write((byte) (dPort & 0xff));
+                        break;
+                    case "$" + PARAMETER_SRC_MAC:
+                        String mac = macAddressFrom(sock);
+                        requestFrame.write(mac.getBytes());
                         break;
                     case "$" + REPLACEMENT_UUID:
                         String uuid = UUID.randomUUID().toString();
@@ -566,5 +581,28 @@ public class IpAddonFinder extends BaseAddonFinder implements NetworkAddressChan
             }
         }
         return false;
+    }
+
+    /**
+     * Get mac address associated with given Internet socket address
+     * 
+     * @param inetSocketAddress the Internet address
+     * @return the mac address in colon delimited upper-case hex e.g. '01:02:03:04:A5:B6:C7:D8'
+     * @throws SocketException if address is not on this PC, or no mac address is associated
+     */
+    private String macAddressFrom(InetSocketAddress inetSocketAddress) throws SocketException {
+        NetworkInterface networkInterface = NetworkInterface.getByInetAddress(inetSocketAddress.getAddress());
+        if (networkInterface == null) {
+            throw new SocketException("No network interface");
+        }
+        byte[] macBytes = networkInterface.getHardwareAddress();
+        if (macBytes == null) {
+            throw new SocketException("No mac address");
+        }
+        StringBuilder resultBuilder = new StringBuilder();
+        for (byte macByte : macBytes) {
+            resultBuilder.append(String.format("%02X:", macByte));
+        }
+        return resultBuilder.substring(0, resultBuilder.length() - 1).toString();
     }
 }
