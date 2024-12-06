@@ -511,7 +511,7 @@ public class IpAddonFinder extends BaseAddonFinder implements NetworkAddressChan
             req.replace(p, p + PARAMETER_SRC_PORT.length() + 1, "" + sock.getPort());
         }
         while ((p = req.indexOf("$" + PARAMETER_SRC_MAC)) != -1) {
-            req.replace(p, p + PARAMETER_SRC_MAC.length() + 1, macAddressFrom(sock));
+            req.replace(p, p + PARAMETER_SRC_MAC.length() + 1, macFormat(macBytesFrom(sock)));
         }
         while ((p = req.indexOf("$" + REPLACEMENT_UUID)) != -1) {
             req.replace(p, p + REPLACEMENT_UUID.length() + 1, UUID.randomUUID().toString());
@@ -543,8 +543,8 @@ public class IpAddonFinder extends BaseAddonFinder implements NetworkAddressChan
                         requestFrame.write((byte) (dPort & 0xff));
                         break;
                     case "$" + PARAMETER_SRC_MAC:
-                        String mac = macAddressFrom(sock);
-                        requestFrame.write(mac.getBytes());
+                        byte[] mac = macBytesFrom(sock);
+                        requestFrame.write(mac);
                         break;
                     case "$" + REPLACEMENT_UUID:
                         String uuid = UUID.randomUUID().toString();
@@ -584,21 +584,27 @@ public class IpAddonFinder extends BaseAddonFinder implements NetworkAddressChan
     }
 
     /**
-     * Get mac address associated with given Internet socket address
+     * Get mac address bytes associated with the given Internet socket address
      * 
      * @param inetSocketAddress the Internet address
-     * @return the mac address in colon delimited upper-case hex e.g. '01:02:03:04:A5:B6:C7:D8'
+     * @return the mac address as an array of bytes
      * @throws SocketException if address is not on this PC, or no mac address is associated
      */
-    private String macAddressFrom(InetSocketAddress inetSocketAddress) throws SocketException {
+    private byte[] macBytesFrom(InetSocketAddress inetSocketAddress) throws SocketException {
         NetworkInterface networkInterface = NetworkInterface.getByInetAddress(inetSocketAddress.getAddress());
         if (networkInterface == null) {
             throw new SocketException("No network interface");
         }
-        byte[] macBytes = networkInterface.getHardwareAddress();
-        if (macBytes == null) {
-            throw new SocketException("No mac address");
-        }
+        return networkInterface.getHardwareAddress();
+    }
+
+    /**
+     * Format an array of mac address bytes as a colon delimited upper-case hex string
+     * 
+     * @param macBytes the mac address as an array of bytes
+     * @return e.g. '01:02:03:04:A5:B6:C7:D8'
+     */
+    private String macFormat(byte[] macBytes) {
         StringBuilder resultBuilder = new StringBuilder();
         for (byte macByte : macBytes) {
             resultBuilder.append(String.format("%02X:", macByte));
