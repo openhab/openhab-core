@@ -37,6 +37,7 @@ import java.text.ParseException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.HexFormat;
+import java.util.IllegalFormatException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -161,6 +162,10 @@ import org.slf4j.LoggerFactory;
  * <td>{@code $srcMac}</td>
  * <td>source mac address</td>
  * </tr>
+ * <tr>
+ * <td>{@code $fmtMac}</td>
+ * <td>format specifier string for mac address</td>
+ * </tr>
  * <td>{@code $uuid}</td>
  * <td>String returned by {@code java.util.UUID.randomUUID()}</td>
  * </tr>
@@ -209,6 +214,7 @@ public class IpAddonFinder extends BaseAddonFinder implements NetworkAddressChan
     private static final String PARAMETER_SRC_IP = "srcIp";
     private static final String PARAMETER_SRC_PORT = "srcPort";
     private static final String PARAMETER_SRC_MAC = "srcMac";
+    private static final String PARAMETER_MAC_FORMAT = "fmtMac";
     private static final String PARAMETER_TIMEOUT_MS = "timeoutMs";
     private static final String REPLACEMENT_UUID = "uuid";
 
@@ -354,16 +360,22 @@ public class IpAddonFinder extends BaseAddonFinder implements NetworkAddressChan
                         continue;
                     }
                 }
+                String macFormat = parameters.getOrDefault(PARAMETER_MAC_FORMAT, "%02X:");
+                try {
+                    String.format(macFormat, 123);
+                } catch (IllegalFormatException e) {
+                    logger.warn("{}: discovery-parameter '{}' invalid format specifier", candidate.getUID(), macFormat);
+                }
 
                 // handle known types
                 try {
                     switch (Objects.toString(type)) {
                         case TYPE_IP_BROADCAST:
-                            scanBroadcast(candidate, request, requestPlain, response, timeoutMs, destPort);
+                            scanBroadcast(candidate, request, requestPlain, response, timeoutMs, destPort, macFormat);
                             break;
                         case TYPE_IP_MULTICAST:
                             scanMulticast(candidate, request, requestPlain, response, timeoutMs, listenPort, destIp,
-                                    destPort);
+                                    destPort, macFormat);
                             break;
                         default:
                             logger.warn("{}: discovery-parameter type \"{}\" is unknown", candidate.getUID(), type);
@@ -377,7 +389,7 @@ public class IpAddonFinder extends BaseAddonFinder implements NetworkAddressChan
     }
 
     private void scanBroadcast(AddonInfo candidate, String request, String requestPlain, String response, int timeoutMs,
-            int destPort) throws ParseException {
+            int destPort, String macFormat) throws ParseException {
         if (request.isEmpty() && requestPlain.isEmpty()) {
             logger.warn("{}: match-property request and requestPlain \"{}\" is unknown", candidate.getUID(),
                     TYPE_IP_BROADCAST);
@@ -399,7 +411,7 @@ public class IpAddonFinder extends BaseAddonFinder implements NetworkAddressChan
             socket.setBroadcast(true);
             socket.setSoTimeout(timeoutMs);
             byte[] sendBuffer = requestPlain.isEmpty() ? buildRequestArray(socket.getLocalSocketAddress(), request)
-                    : buildRequestArrayPlain(socket.getLocalSocketAddress(), requestPlain);
+                    : buildRequestArrayPlain(socket.getLocalSocketAddress(), requestPlain, macFormat);
             DatagramPacket sendPacket = new DatagramPacket(sendBuffer, sendBuffer.length,
                     InetAddress.getByName(broadcastAddress), destPort);
             socket.send(sendPacket);
@@ -439,7 +451,7 @@ public class IpAddonFinder extends BaseAddonFinder implements NetworkAddressChan
     }
 
     private void scanMulticast(AddonInfo candidate, String request, String requestPlain, String response, int timeoutMs,
-            int listenPort, @Nullable InetAddress destIp, int destPort) throws ParseException {
+            int listenPort, @Nullable InetAddress destIp, int destPort, String macFormat) throws ParseException {
         List<String> ipAddresses = NetUtil.getAllInterfaceAddresses().stream()
                 .filter(a -> a.getAddress() instanceof Inet4Address).map(a -> a.getAddress().getHostAddress()).toList();
 
@@ -451,7 +463,7 @@ public class IpAddonFinder extends BaseAddonFinder implements NetworkAddressChan
                     Selector selector = Selector.open()) {
                 byte[] requestArray = "".equals(requestPlain)
                         ? buildRequestArray(channel.getLocalAddress(), Objects.toString(request))
-                        : buildRequestArrayPlain(channel.getLocalAddress(), Objects.toString(requestPlain));
+                        : buildRequestArrayPlain(channel.getLocalAddress(), Objects.toString(requestPlain), macFormat);
                 if (logger.isTraceEnabled()) {
                     InetSocketAddress sock = (InetSocketAddress) channel.getLocalAddress();
                     String id = candidate.getUID();
@@ -497,7 +509,7 @@ public class IpAddonFinder extends BaseAddonFinder implements NetworkAddressChan
     }
 
     // build from plaintext string
-    private byte[] buildRequestArrayPlain(SocketAddress address, String request)
+    private byte[] buildRequestArrayPlain(SocketAddress address, String request, String macFormat)
             throws java.io.IOException, ParseException {
         InetSocketAddress sock = (InetSocketAddress) address;
 
@@ -511,7 +523,7 @@ public class IpAddonFinder extends BaseAddonFinder implements NetworkAddressChan
             req.replace(p, p + PARAMETER_SRC_PORT.length() + 1, "" + sock.getPort());
         }
         while ((p = req.indexOf("$" + PARAMETER_SRC_MAC)) != -1) {
-            req.replace(p, p + PARAMETER_SRC_MAC.length() + 1, macFormat(macBytesFrom(sock)));
+            req.replace(p, p + PARAMETER_SRC_MAC.length() + 1, macFormat(macFormat, macBytesFrom(sock)));
         }
         while ((p = req.indexOf("$" + REPLACEMENT_UUID)) != -1) {
             req.replace(p, p + REPLACEMENT_UUID.length() + 1, UUID.randomUUID().toString());
@@ -599,16 +611,19 @@ public class IpAddonFinder extends BaseAddonFinder implements NetworkAddressChan
     }
 
     /**
-     * Format an array of mac address bytes as a colon delimited upper-case hex string
+     * Use the given format specifier to format an array of mac address bytes
      * 
-     * @param macBytes the mac address as an array of bytes
-     * @return e.g. '01:02:03:04:A5:B6:C7:D8'
+     * @param format a standard format specifier; optionally ends with a delimiter e.g. "%02x:" or "%02X"
+     * @param bytes the mac address as an array of bytes
+     * 
+     * @return e.g. '01:02:03:04:A5:B6:C7:D8', '01-02-03-04:a5:b6:c7:d8', or '01020304A5B6C7D8'
      */
-    private String macFormat(byte[] macBytes) {
-        StringBuilder resultBuilder = new StringBuilder();
-        for (byte macByte : macBytes) {
-            resultBuilder.append(String.format("%02X:", macByte));
+    private String macFormat(String format, byte[] bytes) {
+        StringBuilder result = new StringBuilder();
+        for (byte byt : bytes) {
+            result.append(String.format(format, byt));
         }
-        return resultBuilder.substring(0, resultBuilder.length() - 1).toString();
+        boolean isDelimited = Set.of(':', '-', '.').contains(format.charAt(format.length() - 1));
+        return (isDelimited ? result.substring(0, result.length() - 1) : result).toString();
     }
 }
