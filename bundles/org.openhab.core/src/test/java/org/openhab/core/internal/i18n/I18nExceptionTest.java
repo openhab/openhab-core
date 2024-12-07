@@ -24,13 +24,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.openhab.core.i18n.AbstractI18nException;
 import org.openhab.core.i18n.CommunicationException;
 import org.openhab.core.i18n.TranslationProvider;
 import org.osgi.framework.Bundle;
 
 /**
- * The {@link I18nExceptionTest} tests all the functionalities of the {@link AbstractI18nException} class.
+ * The {@link I18nExceptionTest} tests all the functionalities of the
+ * {@link org.openhab.core.i18n.AbstractI18nException} class.
  *
  * @author Laurent Garnier - Initial contribution
  */

@@ -17,7 +17,6 @@ import java.time.Instant;
 import java.time.temporal.TemporalAdjuster;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeoutException;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -79,7 +78,7 @@ public interface Scheduler {
     }
 
     /**
-     * Return a {@link ScheduledCompletableFuture} that fails with a {@link TimeoutException}
+     * Return a {@link ScheduledCompletableFuture} that fails with a {@link java.util.concurrent.TimeoutException}
      * when the given {@link CompletableFuture} is not resolved before the given timeout. If the
      * given {@link CompletableFuture} fails or is resolved before the timeout then the returned
      * {@link ScheduledCompletableFuture} will be treated accordingly. The cancellation does not influence

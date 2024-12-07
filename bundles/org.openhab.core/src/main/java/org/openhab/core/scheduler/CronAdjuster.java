@@ -16,7 +16,6 @@ import java.time.DayOfWeek;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.Temporal;
-import java.time.temporal.TemporalAdjuster;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -31,7 +30,8 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 /**
- * This class creates a {@link TemporalAdjuster} that takes a temporal and adjust it to the next deadline based on a
+ * This class creates a {@link java.time.temporal.TemporalAdjuster} that takes a temporal and adjust it to the next
+ * deadline based on a
  * cron specification.
  *
  * @See http://www.cronmaker.com/

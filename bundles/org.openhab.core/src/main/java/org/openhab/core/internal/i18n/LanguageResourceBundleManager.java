@@ -183,9 +183,7 @@ public class LanguageResourceBundleManager {
             ResourceBundle resourceBundle = ResourceBundle.getBundle(resourceName, locale, this.resourceClassLoader,
                     Control.getNoFallbackControl(Control.FORMAT_PROPERTIES));
 
-            if (resourceBundle != null) {
-                return resourceBundle.getString(key);
-            }
+            return resourceBundle.getString(key);
         } catch (Exception ex) {
             // nothing to do
         }

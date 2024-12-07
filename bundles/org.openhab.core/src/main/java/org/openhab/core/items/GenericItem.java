@@ -294,7 +294,7 @@ public abstract class GenericItem implements ActiveItem {
         Set<StateChangeListener> clonedListeners = new CopyOnWriteArraySet<>(listeners);
         ExecutorService pool = ThreadPoolManager.getPool(ITEM_THREADPOOLNAME);
         try {
-            final boolean stateChanged = newState != null && !newState.equals(oldState);
+            final boolean stateChanged = !newState.equals(oldState);
             clonedListeners.forEach(listener -> pool.execute(() -> {
                 try {
                     listener.stateUpdated(GenericItem.this, newState);
@@ -372,7 +372,7 @@ public abstract class GenericItem implements ActiveItem {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        result = prime * result + name.hashCode();
         return result;
     }
 
@@ -388,11 +388,7 @@ public abstract class GenericItem implements ActiveItem {
             return false;
         }
         GenericItem other = (GenericItem) obj;
-        if (name == null) {
-            if (other.name != null) {
-                return false;
-            }
-        } else if (!name.equals(other.name)) {
+        if (!name.equals(other.name)) {
             return false;
         }
         return true;

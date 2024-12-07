@@ -48,9 +48,7 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
                 unmatched = false;
                 try {
                     Authentication authentication = provider.authenticate(credentials);
-                    if (authentication != null) {
-                        return authentication;
-                    }
+                    return authentication;
                 } catch (AuthenticationException e) {
                     logger.info("Failed to authenticate credentials {} with provider {}", credentials.getClass(),
                             provider, e);

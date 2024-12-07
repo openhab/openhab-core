@@ -13,7 +13,6 @@
 package org.openhab.core.library.types;
 
 import java.util.Arrays;
-import java.util.Formatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -72,7 +71,7 @@ public class StringListType implements Command, State {
     /**
      * <p>
      * Formats the value of this type according to a pattern (@see
-     * {@link Formatter}). One single value of this type can be referenced
+     * {@link java.util.Formatter}). One single value of this type can be referenced
      * by the pattern using an index. The item order is defined by the natural
      * (alphabetical) order of their keys.
      *

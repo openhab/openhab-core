@@ -582,9 +582,6 @@ public class NetUtil implements NetworkAddressService {
     }
 
     private boolean getConfigParameter(Map<String, Object> parameters, String parameter, boolean defaultValue) {
-        if (parameters == null) {
-            return defaultValue;
-        }
         Object value = parameters.get(parameter);
         if (value == null) {
             return defaultValue;
@@ -602,7 +599,7 @@ public class NetUtil implements NetworkAddressService {
     /**
      * For all network interfaces (except loopback) all IPv4 addresses are returned.
      * This list can for example, be used to scan the network for available devices.
-     * 
+     *
      * @return A full list of IP {@link InetAddress} (except network and broadcast)
      */
     public static List<InetAddress> getFullRangeOfAddressesToScan() {
@@ -619,7 +616,7 @@ public class NetUtil implements NetworkAddressService {
     /**
      * For the given {@link CidrAddress} all IPv4 addresses are returned.
      * This list can, for example, be used to scan the network for available devices.
-     * 
+     *
      * @param iFaceAddress The {@link CidrAddress} of the network interface
      * @param maxAllowedPrefixLength Control the maximum allowed prefix length of the network (e.g. 24 for class C).
      *            iFaceAddress's with a larger prefix are ignored and return an empty result.
@@ -659,7 +656,7 @@ public class NetUtil implements NetworkAddressService {
 
     /**
      * Calculate each IP address within a subnet
-     * 
+     *
      * @param address IPv4 address in byte array form (i.e. 127.0.0.1 = 01111111 00000000 00000000 00000001)
      * @param maskLength Network mask length (i.e. the number after the forward-slash, '/', in CIDR notation)
      * @return A list of all possible IP addresses in byte array form

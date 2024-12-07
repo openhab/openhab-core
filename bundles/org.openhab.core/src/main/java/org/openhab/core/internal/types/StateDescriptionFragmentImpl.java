@@ -21,7 +21,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.types.StateDescription;
 import org.openhab.core.types.StateDescriptionFragment;
-import org.openhab.core.types.StateDescriptionFragmentBuilder;
 import org.openhab.core.types.StateOption;
 
 /**
@@ -62,7 +61,7 @@ public class StateDescriptionFragmentImpl implements StateDescriptionFragment {
      * @param pattern pattern to render the state
      * @param readOnly if the state can be changed by the system
      * @param options predefined list of options
-     * @deprecated use {@link StateDescriptionFragmentBuilder} instead.
+     * @deprecated use {@link org.openhab.core.types.StateDescriptionFragmentBuilder} instead.
      */
     @Deprecated
     public StateDescriptionFragmentImpl(@Nullable BigDecimal minimum, @Nullable BigDecimal maximum,
@@ -81,7 +80,7 @@ public class StateDescriptionFragmentImpl implements StateDescriptionFragment {
      * Note: State options will only be set if not empty.
      *
      * @param legacy the {@link StateDescription} to initialize from.
-     * @deprecated use {@link StateDescriptionFragmentBuilder} instead.
+     * @deprecated use {@link org.openhab.core.types.StateDescriptionFragmentBuilder} instead.
      */
     @Deprecated
     public StateDescriptionFragmentImpl(StateDescription legacy) {

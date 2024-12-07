@@ -14,12 +14,11 @@ package org.openhab.core.items;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.common.registry.ManagedProvider;
-import org.openhab.core.storage.StorageService;
 
 /**
  * {@link ManagedMetadataProvider} is an OSGi service interface that allows to add or remove
  * metadata for items at runtime. Persistence of added metadata is handled by
- * a {@link StorageService}.
+ * a {@link org.openhab.core.storage.StorageService}.
  *
  * @author Kai Kreuzer - Initial contribution
  */

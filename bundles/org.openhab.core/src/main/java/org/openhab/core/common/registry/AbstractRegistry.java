@@ -442,9 +442,9 @@ public abstract class AbstractRegistry<@NonNull E extends Identifiable<K>, @NonN
         }
         elementsAdded.forEach(this::notifyListenersAboutAddedElement);
 
-        if (provider instanceof ManagedProvider && providerClazz != null && readyService != null) {
-            readyService.markReady(
-                    new ReadyMarker("managed", providerClazz.getSimpleName().replace("Provider", "").toLowerCase()));
+        if (provider instanceof ManagedProvider && providerClazz instanceof Class clazz
+                && readyService instanceof ReadyService rs) {
+            rs.markReady(new ReadyMarker("managed", clazz.getSimpleName().replace("Provider", "").toLowerCase()));
         }
         logger.debug("Provider \"{}\" has been added.", provider.getClass().getName());
     }
@@ -688,9 +688,9 @@ public abstract class AbstractRegistry<@NonNull E extends Identifiable<K>, @NonN
      * @param event the event
      */
     protected void postEvent(Event event) {
-        if (eventPublisher != null) {
+        if (eventPublisher instanceof EventPublisher ep) {
             try {
-                eventPublisher.post(event);
+                ep.post(event);
             } catch (RuntimeException ex) {
                 logger.error("Cannot post event of type \"{}\".", event.getType(), ex);
             }

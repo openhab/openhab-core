@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
-import javax.measure.Dimension;
 import javax.measure.Quantity;
 import javax.measure.Unit;
 
@@ -130,9 +129,9 @@ public class NumberItem extends GenericItem implements MetadataAwareItem {
     }
 
     /**
-     * Returns the {@link Dimension} associated with this {@link NumberItem}, may be null.
+     * Returns the {@link javax.measure.Dimension} associated with this {@link NumberItem}, may be null.
      *
-     * @return the {@link Dimension} associated with this {@link NumberItem}, may be null.
+     * @return the {@link javax.measure.Dimension} associated with this {@link NumberItem}, may be null.
      */
     public @Nullable Class<? extends Quantity<?>> getDimension() {
         return dimension;

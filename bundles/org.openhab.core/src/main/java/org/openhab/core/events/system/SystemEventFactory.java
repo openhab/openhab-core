@@ -19,7 +19,6 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.events.AbstractEventFactory;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventFactory;
-import org.openhab.core.types.Type;
 import org.osgi.service.component.annotations.Component;
 
 /**
@@ -38,7 +37,7 @@ public class SystemEventFactory extends AbstractEventFactory {
     }
 
     /**
-     * Creates a trigger event from a {@link Type}.
+     * Creates a trigger event from a {@link org.openhab.core.types.Type}.
      *
      * @param startlevel Startlevel of system
      * @return Created start level event.

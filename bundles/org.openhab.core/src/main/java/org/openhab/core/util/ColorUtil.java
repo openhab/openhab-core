@@ -48,7 +48,6 @@ public class ColorUtil {
     private static final BigDecimal BIG_DECIMAL_60 = BigDecimal.valueOf(60);
     private static final BigDecimal BIG_DECIMAL_5 = BigDecimal.valueOf(5);
     private static final BigDecimal BIG_DECIMAL_3 = BigDecimal.valueOf(3);
-    private static final BigDecimal BIG_DECIMAL_2 = BigDecimal.valueOf(2);
     private static final BigDecimal BIG_DECIMAL_2_POINT_55 = new BigDecimal("2.55");
     private static final double[] CORM_COEFFICIENTS = { -0.00616793, 0.0893944, -0.5179722, 1.5317403, -2.4243787,
             1.925865, -0.471106 };
@@ -531,7 +530,7 @@ public class ColorUtil {
      *
      * Duv describes the distance of a color point from the black body curve. It's useful for calculating
      * if a color is near to "white", at any color temperature.
-     * 
+     *
      * @param xy array of double with CIE 1931 x,y in the range 0.0000 to 1.0000
      * @return the calculated Duv metric
      * @throws IllegalArgumentException when input array has wrong size or exceeds allowed value range.
@@ -1599,7 +1598,7 @@ public class ColorUtil {
     /**
      * Search the 'KELVIN_TO_XY_LOOKUP_TABLE' for the XY entry closest to the given colour temperature.
      * Uses a recursive 'QuickSearch' algorithm.
-     * 
+     *
      * @param kelvin the colour temperature in K to find
      * @param min the first index in the lookup table
      * @param max the last index in the lookup table
@@ -1625,7 +1624,7 @@ public class ColorUtil {
      * Convert a colour temperature in Kelvin to a point in the CIE XY colour space.
      * Uses a lookup table as described <a href=
      * "https://www.waveformlighting.com/tech/calculate-cie-1931-xy-coordinates-from-cct">here</a>.
-     * 
+     *
      * @param kelvin the colour temperature in K to be converted
      * @return an array with the found CIE colour XY values
      * @throws IndexOutOfBoundsException if the colour temperature is out of range 2000K .. 6500K
@@ -1648,7 +1647,7 @@ public class ColorUtil {
      * <p>
      * Note that McCamy's approximation is accurate to better than 1% from 2000 K to 10000 K
      * but below 2000 K the approximation error increases rapidly and exponentially.
-     * 
+     *
      * @param xy an array with the CIE colour XY values to be converted
      * @return the colour temperature in K
      * @throws IllegalArgumentException if the wrong number of arguments is provided

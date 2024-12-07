@@ -22,7 +22,6 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
-import java.util.ResourceBundle;
 import java.util.Set;
 
 import javax.measure.Quantity;
@@ -100,7 +99,8 @@ import org.slf4j.LoggerFactory;
  * and {@link LocationProvider} service interfaces.
  *
  * <p>
- * This implementation uses the i18n mechanism of Java ({@link ResourceBundle}) to translate a given key into text. The
+ * This implementation uses the i18n mechanism of Java ({@link java.util.ResourceBundle}) to translate a
+ * given key into text. The
  * resources must be placed under the specific directory {@link LanguageResourceBundleManager#RESOURCE_DIRECTORY} within
  * the certain modules. Each module is tracked in the platform by using the {@link ResourceBundleTracker} and managed by
  * using one certain {@link LanguageResourceBundleManager} which is responsible for the translation.
@@ -134,7 +134,6 @@ public class I18nProviderImpl
     public static final String REGION = "region";
     public static final String VARIANT = "variant";
     private @Nullable Locale locale;
-    private @Nullable String currencyCode;
 
     // TranslationProvider
     private final ResourceBundleTracker resourceBundleTracker;
@@ -301,7 +300,7 @@ public class I18nProviderImpl
 
         if (oldTimeZone != null && this.timeZone == null) {
             logger.info("Time zone is not set, falling back to the default time zone.");
-        } else if (this.timeZone != null && !this.timeZone.equals(oldTimeZone)) {
+        } else if (this.timeZone instanceof ZoneId zId && !zId.equals(oldTimeZone)) {
             logger.info("Time zone set to '{}'.", this.timeZone);
         }
     }

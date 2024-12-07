@@ -223,7 +223,6 @@ public class GroupItem extends GenericItem implements StateChangeListener, Metad
      * @return the accepted data types of this group item
      */
     @Override
-    @SuppressWarnings("unchecked")
     public List<Class<? extends State>> getAcceptedDataTypes() {
         if (baseItem != null) {
             return baseItem.getAcceptedDataTypes();
@@ -249,7 +248,6 @@ public class GroupItem extends GenericItem implements StateChangeListener, Metad
      * @return the accepted command types of this group item
      */
     @Override
-    @SuppressWarnings("unchecked")
     public List<Class<? extends Command>> getAcceptedCommandTypes() {
         if (baseItem != null) {
             return baseItem.getAcceptedCommandTypes();
@@ -315,9 +313,9 @@ public class GroupItem extends GenericItem implements StateChangeListener, Metad
         sb.append("Type=");
         sb.append(getClass().getSimpleName());
         sb.append(", ");
-        if (getBaseItem() != null) {
+        if (getBaseItem() instanceof Item item) {
             sb.append("BaseType=");
-            sb.append(baseItem.getClass().getSimpleName());
+            sb.append(item.getClass().getSimpleName());
             sb.append(", ");
         }
         sb.append("Members=");
