@@ -18,7 +18,7 @@ import org.openhab.core.common.registry.ManagedProvider;
 /**
  * {@link ManagedMetadataProvider} is an OSGi service interface that allows to add or remove
  * metadata for items at runtime. Persistence of added metadata is handled by
- * a {@link org.openhab.core.storage.StorageServiceStorageService}.
+ * a {@link org.openhab.core.storage.StorageService}.
  *
  * @author Kai Kreuzer - Initial contribution
  */
