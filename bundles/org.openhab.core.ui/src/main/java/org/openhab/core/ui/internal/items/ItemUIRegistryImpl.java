@@ -12,8 +12,7 @@
  */
 package org.openhab.core.ui.internal.items;
 
-import java.time.DateTimeException;
-import java.time.ZonedDateTime;
+import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -40,6 +39,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.config.core.ConfigurableService;
+import org.openhab.core.i18n.TimeZoneProvider;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
@@ -138,6 +138,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
     protected final Set<ItemUIProvider> itemUIProviders = new HashSet<>();
 
     private final ItemRegistry itemRegistry;
+    private final TimeZoneProvider timeZoneProvider;
 
     private final Map<Widget, Widget> defaultWidgets = Collections.synchronizedMap(new WeakHashMap<>());
 
@@ -154,8 +155,10 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
     }
 
     @Activate
-    public ItemUIRegistryImpl(@Reference ItemRegistry itemRegistry) {
+    public ItemUIRegistryImpl(final @Reference ItemRegistry itemRegistry,
+            final @Reference TimeZoneProvider timeZoneProvider) {
         this.itemRegistry = itemRegistry;
+        this.timeZoneProvider = timeZoneProvider;
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
@@ -455,12 +458,6 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
                             quantityState = convertStateToWidgetUnit(quantityState, w);
                             state = quantityState;
                         }
-                    } else if (state instanceof DateTimeType type) {
-                        // Translate a DateTimeType state to the local time zone
-                        try {
-                            state = type.toLocaleZone();
-                        } catch (DateTimeException ignored) {
-                        }
                     }
 
                     // The following exception handling has been added to work around a Java bug with formatting
@@ -474,10 +471,20 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
                             String type = matcher.group(1);
                             String function = matcher.group(2);
                             String value = matcher.group(3);
-                            formatPattern = type + "(" + function + "):" + state.format(value);
-                            transformFailbackValue = state.toString();
+                            formatPattern = type + "(" + function + "):";
+                            if (state instanceof DateTimeType dateTimeState) {
+                                formatPattern += dateTimeState.format(value, timeZoneProvider.getTimeZone());
+                                transformFailbackValue = dateTimeState.toFullString(timeZoneProvider.getTimeZone());
+                            } else {
+                                formatPattern += state.format(value);
+                                transformFailbackValue = state.toString();
+                            }
                         } else {
-                            formatPattern = state.format(formatPattern);
+                            if (state instanceof DateTimeType dateTimeState) {
+                                formatPattern = dateTimeState.format(formatPattern, timeZoneProvider.getTimeZone());
+                            } else {
+                                formatPattern = state.format(formatPattern);
+                            }
                         }
                     } catch (IllegalArgumentException e) {
                         logger.warn("Exception while formatting value '{}' of item {} with format '{}': {}", state,
@@ -1138,9 +1145,9 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
                 } catch (NumberFormatException e) {
                     logger.debug("matchStateToValue: Decimal format exception: ", e);
                 }
-            } else if (state instanceof DateTimeType type) {
-                ZonedDateTime val = type.getZonedDateTime();
-                ZonedDateTime now = ZonedDateTime.now();
+            } else if (state instanceof DateTimeType dateTimeState) {
+                Instant val = dateTimeState.getInstant();
+                Instant now = Instant.now();
                 long secsDif = ChronoUnit.SECONDS.between(val, now);
 
                 try {

@@ -12,7 +12,7 @@
  */
 package org.openhab.core.library.types;
 
-import java.time.ZonedDateTime;
+import java.time.Instant;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -41,12 +41,12 @@ public interface DateTimeGroupFunction extends GroupFunction {
         @Override
         public State calculate(@Nullable Set<Item> items) {
             if (items != null && !items.isEmpty()) {
-                ZonedDateTime max = null;
+                Instant max = null;
                 for (Item item : items) {
                     DateTimeType itemState = item.getStateAs(DateTimeType.class);
                     if (itemState != null) {
-                        if (max == null || max.isBefore(itemState.getZonedDateTime())) {
-                            max = itemState.getZonedDateTime();
+                        if (max == null || max.isBefore(itemState.getInstant())) {
+                            max = itemState.getInstant();
                         }
                     }
                 }
@@ -84,12 +84,12 @@ public interface DateTimeGroupFunction extends GroupFunction {
         @Override
         public State calculate(@Nullable Set<Item> items) {
             if (items != null && !items.isEmpty()) {
-                ZonedDateTime max = null;
+                Instant max = null;
                 for (Item item : items) {
                     DateTimeType itemState = item.getStateAs(DateTimeType.class);
                     if (itemState != null) {
-                        if (max == null || max.isAfter(itemState.getZonedDateTime())) {
-                            max = itemState.getZonedDateTime();
+                        if (max == null || max.isAfter(itemState.getInstant())) {
+                            max = itemState.getInstant();
                         }
                     }
                 }

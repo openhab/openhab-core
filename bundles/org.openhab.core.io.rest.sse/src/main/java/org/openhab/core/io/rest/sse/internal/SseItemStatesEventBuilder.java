@@ -12,7 +12,6 @@
  */
 package org.openhab.core.io.rest.sse.internal;
 
-import java.time.DateTimeException;
 import java.util.HashMap;
 import java.util.IllegalFormatException;
 import java.util.Locale;
@@ -28,6 +27,7 @@ import javax.ws.rs.sse.OutboundSseEvent.Builder;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.i18n.TimeZoneProvider;
 import org.openhab.core.io.rest.LocaleService;
 import org.openhab.core.io.rest.sse.internal.dto.StateDTO;
 import org.openhab.core.items.Item;
@@ -68,13 +68,16 @@ public class SseItemStatesEventBuilder {
 
     private final ItemRegistry itemRegistry;
     private final LocaleService localeService;
+    private final TimeZoneProvider timeZoneProvider;
     private final StartLevelService startLevelService;
 
     @Activate
     public SseItemStatesEventBuilder(final @Reference ItemRegistry itemRegistry,
-            final @Reference LocaleService localeService, final @Reference StartLevelService startLevelService) {
+            final @Reference LocaleService localeService, final @Reference TimeZoneProvider timeZoneProvider,
+            final @Reference StartLevelService startLevelService) {
         this.itemRegistry = itemRegistry;
         this.localeService = localeService;
+        this.timeZoneProvider = timeZoneProvider;
         this.startLevelService = startLevelService;
     }
 
@@ -187,12 +190,6 @@ public class SseItemStatesEventBuilder {
                         if (quantityState != null) {
                             state = quantityState;
                         }
-                    } else if (state instanceof DateTimeType type) {
-                        // Translate a DateTimeType state to the local time zone
-                        try {
-                            state = type.toLocaleZone();
-                        } catch (DateTimeException e) {
-                        }
                     }
 
                     // The following exception handling has been added to work around a Java bug with formatting
@@ -200,7 +197,11 @@ public class SseItemStatesEventBuilder {
                     // This also handles IllegalFormatConversionException, which is a subclass of
                     // IllegalArgument.
                     try {
-                        displayState = state.format(pattern);
+                        if (state instanceof DateTimeType dateTimeState) {
+                            displayState = dateTimeState.format(pattern, timeZoneProvider.getTimeZone());
+                        } else {
+                            displayState = state.format(pattern);
+                        }
                     } catch (IllegalArgumentException e) {
                         logger.debug(
                                 "Unable to format value '{}' of item {} using format pattern '{}': {}, displaying raw state",

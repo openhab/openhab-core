@@ -27,6 +27,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.openhab.core.i18n.TimeZoneProvider;
 import org.openhab.core.io.rest.LocaleService;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemRegistry;
@@ -76,6 +77,7 @@ public class SseItemStatesEventBuilderTest {
 
     private @Mock @NonNullByDefault({}) ItemRegistry itemRegistryMock;
     private @Mock @NonNullByDefault({}) LocaleService localeServiceMock;
+    private @Mock @NonNullByDefault({}) TimeZoneProvider timeZoneProviderMock;
     private @Mock @NonNullByDefault({}) StartLevelService startLevelServiceMock;
 
     private @Mock @NonNullByDefault({}) Item itemMock;
@@ -112,7 +114,7 @@ public class SseItemStatesEventBuilderTest {
         Mockito.when(itemMock.getName()).thenReturn(ITEM_NAME);
 
         sseItemStatesEventBuilder = new SseItemStatesEventBuilder(itemRegistryMock, localeServiceMock,
-                startLevelServiceMock);
+                timeZoneProviderMock, startLevelServiceMock);
     }
 
     @AfterEach

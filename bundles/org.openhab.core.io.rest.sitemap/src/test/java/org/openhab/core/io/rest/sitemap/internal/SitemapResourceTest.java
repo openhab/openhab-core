@@ -42,6 +42,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.openhab.core.i18n.TimeZoneProvider;
 import org.openhab.core.io.rest.LocaleService;
 import org.openhab.core.io.rest.sitemap.SitemapSubscriptionService;
 import org.openhab.core.items.GenericItem;
@@ -119,6 +120,7 @@ public class SitemapResourceTest extends JavaTest {
     private @Mock @NonNullByDefault({}) HttpHeaders headersMock;
     private @Mock @NonNullByDefault({}) Sitemap defaultSitemapMock;
     private @Mock @NonNullByDefault({}) ItemUIRegistry itemUIRegistryMock;
+    private @Mock @NonNullByDefault({}) TimeZoneProvider timeZoneProviderMock;
     private @Mock @NonNullByDefault({}) LocaleService localeServiceMock;
     private @Mock @NonNullByDefault({}) HttpServletRequest requestMock;
     private @Mock @NonNullByDefault({}) SitemapProvider sitemapProviderMock;
@@ -129,10 +131,12 @@ public class SitemapResourceTest extends JavaTest {
 
     @BeforeEach
     public void setup() throws Exception {
-        subscriptions = new SitemapSubscriptionService(Collections.emptyMap(), itemUIRegistryMock, bundleContextMock);
+        subscriptions = new SitemapSubscriptionService(Collections.emptyMap(), itemUIRegistryMock, timeZoneProviderMock,
+                bundleContextMock);
         subscriptions.addSitemapProvider(sitemapProviderMock);
 
-        sitemapResource = new SitemapResource(itemUIRegistryMock, localeServiceMock, subscriptions);
+        sitemapResource = new SitemapResource(itemUIRegistryMock, localeServiceMock, timeZoneProviderMock,
+                subscriptions);
 
         when(uriInfoMock.getAbsolutePathBuilder()).thenReturn(UriBuilder.fromPath(SITEMAP_PATH));
         when(uriInfoMock.getBaseUriBuilder()).thenReturn(UriBuilder.fromPath(SITEMAP_PATH));
