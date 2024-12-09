@@ -116,10 +116,10 @@ public class StateDescription {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + (minimum != null ? minimum.hashCode() : 0);
-        result = prime * result + (maximum != null ? maximum.hashCode() : 0);
-        result = prime * result + (step != null ? step.hashCode() : 0);
-        result = prime * result + (pattern != null ? pattern.hashCode() : 0);
+        result = prime * result + (minimum instanceof BigDecimal bigDecimal ? bigDecimal.hashCode() : 0);
+        result = prime * result + (maximum instanceof BigDecimal bigDecimal ? bigDecimal.hashCode() : 0);
+        result = prime * result + (step instanceof BigDecimal bigDecimal ? bigDecimal.hashCode() : 0);
+        result = prime * result + (pattern instanceof String string ? string.hashCode() : 0);
         result = prime * result + (readOnly ? 1231 : 1237);
         result = prime * result + options.hashCode();
         return result;

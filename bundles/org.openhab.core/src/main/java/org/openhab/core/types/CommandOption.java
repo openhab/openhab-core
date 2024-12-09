@@ -70,7 +70,7 @@ public class CommandOption {
         final int prime = 31;
         int result = 1;
         result = prime * result + command.hashCode();
-        result = prime * result + (label != null ? label.hashCode() : 0);
+        result = prime * result + (label instanceof String string ? string.hashCode() : 0);
         return result;
     }
 
