@@ -111,8 +111,8 @@ public class NetUtil implements NetworkAddressService {
         lastKnownInterfaceAddresses = List.of();
         networkAddressChangeListeners = ConcurrentHashMap.newKeySet();
 
-        if (networkInterfacePollFuture != null) {
-            networkInterfacePollFuture.cancel(true);
+        if (networkInterfacePollFuture instanceof ScheduledFuture<?> future) {
+            future.cancel(true);
             networkInterfacePollFuture = null;
         }
     }
@@ -159,13 +159,13 @@ public class NetUtil implements NetworkAddressService {
     public @Nullable String getPrimaryIpv4HostAddress() {
         String primaryIP;
 
-        if (primaryAddress != null) {
-            String[] addrString = primaryAddress.split("/");
+        if (primaryAddress instanceof String address) {
+            String[] addrString = address.split("/");
             if (addrString.length > 1) {
                 String ip = getIPv4inSubnet(addrString[0], addrString[1]);
                 if (ip == null) {
                     // an error has occurred, using first interface like nothing has been configured
-                    LOGGER.warn("Invalid address '{}', will use first interface instead.", primaryAddress);
+                    LOGGER.warn("Invalid address '{}', will use first interface instead.", address);
                     primaryIP = getFirstLocalIPv4Address();
                 } else {
                     primaryIP = ip;
@@ -513,8 +513,8 @@ public class NetUtil implements NetworkAddressService {
     }
 
     private void scheduleToPollNetworkInterface(int intervalInSeconds) {
-        if (networkInterfacePollFuture != null) {
-            networkInterfacePollFuture.cancel(true);
+        if (networkInterfacePollFuture instanceof ScheduledFuture<?> future) {
+            future.cancel(true);
             networkInterfacePollFuture = null;
         }
 

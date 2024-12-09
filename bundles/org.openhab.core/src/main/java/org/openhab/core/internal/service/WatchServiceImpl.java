@@ -230,7 +230,11 @@ public class WatchServiceImpl implements WatchService, DirectoryChangeListener {
                 future.cancel(true);
             }
             future = scheduler.schedule(() -> notifyListeners(path), PROCESSING_TIME, TimeUnit.MILLISECONDS);
-            scheduledEventKinds.computeIfAbsent(path, k -> new CopyOnWriteArrayList<>()).add(directoryChangeEvent);
+            List<DirectoryChangeEvent> list = scheduledEventKinds.computeIfAbsent(path,
+                    k -> new CopyOnWriteArrayList<>());
+            if (list != null) {
+                list.add(directoryChangeEvent);
+            }
             scheduledEvents.put(path, future);
         }
     }
