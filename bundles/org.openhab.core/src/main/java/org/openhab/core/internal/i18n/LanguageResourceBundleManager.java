@@ -21,6 +21,8 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.ResourceBundle.Control;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.osgi.ResourceBundleClassLoader;
 import org.openhab.core.i18n.LocaleProvider;
 import org.osgi.framework.Bundle;
@@ -37,6 +39,7 @@ import org.osgi.framework.Bundle;
  * @author Michael Grammling - Initial contribution
  * @author Markus Rathgeb - Add locale provider support
  */
+@NonNullByDefault
 public class LanguageResourceBundleManager {
 
     /** The directory within the bundle where the resource files are searched. */
@@ -50,7 +53,7 @@ public class LanguageResourceBundleManager {
     private ClassLoader resourceClassLoader;
     private List<String> resourceNames;
 
-    public LanguageResourceBundleManager(LocaleProvider localeProvider, Bundle bundle) {
+    public LanguageResourceBundleManager(LocaleProvider localeProvider, @Nullable Bundle bundle) {
         if (bundle == null) {
             throw new IllegalArgumentException("The Bundle must not be null!");
         }
@@ -80,7 +83,7 @@ public class LanguageResourceBundleManager {
      * @param resource the resource to check (could be null or empty)
      * @return true if the specified resource is managed by this instance, otherwise false
      */
-    public boolean containsResource(String resource) {
+    public boolean containsResource(@Nullable String resource) {
         if (resource != null) {
             return this.resourceNames.contains(resource);
         }
@@ -135,7 +138,7 @@ public class LanguageResourceBundleManager {
      *
      * @return the translated text, or null if the key could not be translated
      */
-    public String getText(String resource, String key, Locale locale) {
+    public @Nullable String getText(@Nullable String resource, @Nullable String key, @Nullable Locale locale) {
         if ((key != null) && (!key.isEmpty())) {
             Locale effectiveLocale = locale != null ? locale : localeProvider.getLocale();
 
@@ -167,11 +170,11 @@ public class LanguageResourceBundleManager {
      *
      * @return the translated text, or null if the key could not be translated
      */
-    public String getText(String key, Locale locale) {
+    public @Nullable String getText(@Nullable String key, @Nullable Locale locale) {
         return getText(null, key, locale);
     }
 
-    private String getTranslatedText(String resourceName, String key, Locale locale) {
+    private @Nullable String getTranslatedText(String resourceName, String key, Locale locale) {
         try {
             // Modify the search order so that the following applies:
             // 1.) baseName + "_" + language + "_" + country
