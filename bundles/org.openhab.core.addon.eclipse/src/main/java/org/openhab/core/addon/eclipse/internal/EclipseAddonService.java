@@ -131,7 +131,7 @@ public class EclipseAddonService implements AddonService {
         String[] segments = symbolicName.split("\\.");
 
         String type = Objects.requireNonNull(BUNDLE_ADDON_TYPE_MAP.get(segments[2]));
-        String name = segments[3];
+        String name = Objects.requireNonNull(segments[3]);
 
         String uid = type + Addon.ADDON_SEPARATOR + name;
 
@@ -147,11 +147,16 @@ public class EclipseAddonService implements AddonService {
             } else {
                 addon = addon.withLabel(name);
             }
-            addon = addon.withConnection(addonInfo.getConnection()).withCountries(addonInfo.getCountries())
-                    .withLink(getDefaultDocumentationLink(type, name))
+            if (addonInfo.getConnection() instanceof String connection) {
+                addon = addon.withConnection(connection);
+            }
+            addon = addon.withCountries(addonInfo.getCountries())
                     .withConfigDescriptionURI(addonInfo.getConfigDescriptionURI());
         } else {
-            addon = addon.withLabel(name).withLink(getDefaultDocumentationLink(type, name));
+            addon = addon.withLabel(name);
+        }
+        if (getDefaultDocumentationLink(type, name) instanceof String link) {
+            addon = addon.withLink(link);
         }
 
         addon.withLoggerPackages(List.of(symbolicName));
