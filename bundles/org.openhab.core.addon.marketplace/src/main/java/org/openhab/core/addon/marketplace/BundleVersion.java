@@ -140,15 +140,17 @@ public class BundleVersion {
         }
 
         // the release is always newer than a milestone or snapshot
-        if (qualifier == null) { // we are the release
+        Long localQualifier = qualifier;
+        if (localQualifier == null) { // we are the release
             return 1;
         }
-        if (other.qualifier == null) { // the other is the release
+        Long otherQualifier = other.qualifier;
+        if (otherQualifier == null) { // the other is the release
             return -1;
         }
 
         // both versions are milestones, we can compare them
-        return Long.compare(qualifier, other.qualifier);
+        return Long.compare(localQualifier, otherQualifier);
     }
 
     @Override
