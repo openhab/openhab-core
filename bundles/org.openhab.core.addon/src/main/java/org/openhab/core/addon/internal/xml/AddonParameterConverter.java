@@ -16,19 +16,18 @@ import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.addon.AddonMatchProperty;
 import org.openhab.core.addon.AddonParameter;
 import org.openhab.core.config.core.xml.util.GenericUnmarshaller;
 import org.openhab.core.config.core.xml.util.NodeIterator;
 
-import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 
 /**
- * The {@link AddonParameterConverter} is a concrete implementation of the {@code XStream} {@link Converter}
+ * The {@link AddonParameterConverter} is a concrete implementation of the {@code XStream}
+ * {@link com.thoughtworks.xstream.converters.Converter}
  * interface used to convert add-on discovery method parameter information within an XML document into a
- * {@link AddonMatchProperty} object.
+ * {@link org.openhab.core.addon.AddonMatchProperty} object.
  *
  * @author Mark Herwege - Initial contribution
  */

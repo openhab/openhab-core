@@ -26,12 +26,12 @@ import org.openhab.core.config.core.xml.util.ConverterAttributeMapValidator;
 import org.openhab.core.config.core.xml.util.GenericUnmarshaller;
 import org.openhab.core.config.core.xml.util.NodeIterator;
 
-import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 
 /**
- * The {@link AddonInfoConverter} is a concrete implementation of the {@code XStream} {@link Converter} interface used
+ * The {@link AddonInfoConverter} is a concrete implementation of the {@code XStream}
+ * {@link com.thoughtworks.xstream.converters.Converter} interface used
  * to convert add-on information within an XML document into a {@link AddonInfoXmlResult} object.
  * This converter converts {@code addon} XML tags.
  *

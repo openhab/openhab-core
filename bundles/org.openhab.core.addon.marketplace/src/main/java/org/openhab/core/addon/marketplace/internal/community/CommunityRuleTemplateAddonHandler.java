@@ -13,8 +13,7 @@
 package org.openhab.core.addon.marketplace.internal.community;
 
 import static org.openhab.core.addon.marketplace.MarketplaceConstants.*;
-import static org.openhab.core.addon.marketplace.internal.community.CommunityMarketplaceAddonService.JSON_CONTENT_PROPERTY;
-import static org.openhab.core.addon.marketplace.internal.community.CommunityMarketplaceAddonService.YAML_CONTENT_PROPERTY;
+import static org.openhab.core.addon.marketplace.internal.community.CommunityMarketplaceAddonService.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,8 +25,6 @@ import org.openhab.core.addon.Addon;
 import org.openhab.core.addon.marketplace.MarketplaceAddonHandler;
 import org.openhab.core.addon.marketplace.MarketplaceHandlerException;
 import org.openhab.core.addon.marketplace.internal.automation.MarketplaceRuleTemplateProvider;
-import org.openhab.core.automation.template.RuleTemplateProvider;
-import org.openhab.core.storage.Storage;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -36,8 +33,9 @@ import org.slf4j.LoggerFactory;
 
 /**
  * A {@link MarketplaceAddonHandler} implementation, which handles rule templates as JSON files and installs
- * them by adding them to a {@link Storage}. The templates are then served from this storage through a dedicated
- * {@link RuleTemplateProvider}.
+ * them by adding them to a {@link org.openhab.core.storage.Storage}. The templates are then served from this storage
+ * through a dedicated
+ * {@link org.openhab.core.automation.template.RuleTemplateProvider}.
  *
  * @author Kai Kreuzer - Initial contribution and API
  * @author Yannick Schaus - refactoring
