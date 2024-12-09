@@ -475,8 +475,10 @@ public class UnitsTest {
 
     @Test
     public void testSolarIrradiation() {
-        QuantityType<?> value = QuantityType.valueOf(10, Units.WATT_HOUR_PER_SQUARE_METRE);
-        assertThat(value.getUnit().toString(), is("Wh/m²"));
+        QuantityType<?> whpsm2 = QuantityType.valueOf(10, Units.WATT_HOUR_PER_SQUARE_METRE);
+        assertThat(whpsm2.getUnit().toString(), is("Wh/m²"));
+        QuantityType<?> jpsm2 = QuantityType.valueOf(10, Units.JOULE_PER_SQUARE_METRE);
+        assertThat(jpsm2.getUnit().toString(), is("J/m²"));
     }
 
     private static class QuantityEquals extends IsEqual<Quantity<?>> {
