@@ -48,18 +48,6 @@ public class AddonInfoXmlProvider implements XmlDocumentProvider<AddonInfoXmlRes
 
     public AddonInfoXmlProvider(Bundle bundle, XmlAddonInfoProvider addonInfoProvider,
             AbstractXmlConfigDescriptionProvider configDescriptionProvider) throws IllegalArgumentException {
-        if (bundle == null) {
-            throw new IllegalArgumentException("The Bundle must not be null!");
-        }
-
-        if (addonInfoProvider == null) {
-            throw new IllegalArgumentException("The XmlAddonInfoProvider must not be null!");
-        }
-
-        if (configDescriptionProvider == null) {
-            throw new IllegalArgumentException("The XmlConfigDescriptionProvider must not be null!");
-        }
-
         this.bundle = bundle;
         this.addonInfoProvider = addonInfoProvider;
         this.configDescriptionProvider = configDescriptionProvider;

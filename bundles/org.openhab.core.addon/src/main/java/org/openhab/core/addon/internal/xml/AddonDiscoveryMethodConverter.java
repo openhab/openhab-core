@@ -22,12 +22,12 @@ import org.openhab.core.addon.AddonParameter;
 import org.openhab.core.config.core.xml.util.GenericUnmarshaller;
 import org.openhab.core.config.core.xml.util.NodeIterator;
 
-import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 
 /**
- * The {@link AddonDiscoveryMethodConverter} is a concrete implementation of the {@code XStream} {@link Converter}
+ * The {@link AddonDiscoveryMethodConverter} is a concrete implementation of the {@code XStream}
+ * {@link com.thoughtworks.xstream.converters.Converter}
  * interface used to convert add-on discovery method information within an XML document into a
  * {@link AddonDiscoveryMethod} object.
  *

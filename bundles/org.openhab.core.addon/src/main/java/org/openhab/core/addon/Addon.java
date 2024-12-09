@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 /**
@@ -26,6 +27,7 @@ import org.eclipse.jdt.annotation.Nullable;
  * @author Kai Kreuzer - Initial contribution
  * @author Yannick Schaus - Add fields
  */
+@NonNullByDefault
 public class Addon {
     public static final Set<String> CODE_MATURITY_LEVELS = Set.of("alpha", "beta", "mature", "stable");
     public static final String ADDON_SEPARATOR = "-";
@@ -333,17 +335,17 @@ public class Addon {
 
     public static class Builder {
         private final String uid;
-        private String id;
-        private String label;
+        private @Nullable String id;
+        private @Nullable String label;
         private String version = "";
         private @Nullable String maturity;
         private boolean compatible = true;
-        private String contentType;
+        private @Nullable String contentType;
         private @Nullable String link;
         private String author = "";
         private boolean verifiedAuthor = false;
         private boolean installed = false;
-        private String type;
+        private @Nullable String type;
         private @Nullable String description;
         private @Nullable String detailedDescription;
         private String configDescriptionURI = "";
@@ -477,10 +479,18 @@ public class Addon {
         }
 
         public Addon build() {
-            return new Addon(uid, type, id, label, version, maturity, compatible, contentType, link, author,
-                    verifiedAuthor, installed, description, detailedDescription, configDescriptionURI, keywords,
-                    countries, license, connection, backgroundColor, imageLink,
-                    properties.isEmpty() ? null : properties, loggerPackages);
+            String localType = type;
+            String localId = id;
+            String localLabel = label;
+            String localContentType = contentType;
+            if (localType != null && localId != null && localLabel != null && localContentType != null) {
+                return new Addon(uid, localType, localId, localLabel, version, maturity, compatible, localContentType,
+                        link, author, verifiedAuthor, installed, description, detailedDescription, configDescriptionURI,
+                        keywords, countries, license, connection, backgroundColor, imageLink,
+                        properties.isEmpty() ? null : properties, loggerPackages);
+            } else {
+                throw new IllegalArgumentException("'type', 'id', 'label' and 'contentType' can not be null");
+            }
         }
     }
 }

@@ -28,6 +28,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.OpenHAB;
 import org.openhab.core.addon.AddonDiscoveryMethod;
 import org.openhab.core.addon.AddonInfo;
+import org.openhab.core.addon.AddonInfoList;
 import org.openhab.core.addon.AddonInfoProvider;
 import org.openhab.core.addon.AddonMatchProperty;
 import org.osgi.service.component.annotations.Activate;
@@ -94,8 +95,14 @@ public class AddonInfoAddonsXmlProvider implements AddonInfoProvider {
         try {
             String xml = Files.readString(file.toPath());
             if (xml != null && !xml.isBlank()) {
-                addonInfos.addAll(reader.readFromXML(xml).getAddons().stream()
-                        .map(a -> AddonInfo.builder(a).isMasterAddonInfo(false).build()).collect(Collectors.toSet()));
+                AddonInfoList addonInfoList = reader.readFromXML(xml);
+                if (addonInfoList != null) {
+                    addonInfos.addAll(addonInfoList.getAddons().stream()
+                            .map(a -> AddonInfo.builder(a).isMasterAddonInfo(false).build())
+                            .collect(Collectors.toSet()));
+                } else {
+                    logger.warn("File '{}' does not provide addon info list", file.getName());
+                }
             } else {
                 logger.warn("File '{}' contents are null or empty", file.getName());
             }

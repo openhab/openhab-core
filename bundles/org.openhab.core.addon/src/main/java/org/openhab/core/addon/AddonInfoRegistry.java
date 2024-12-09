@@ -28,8 +28,6 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The {@link AddonInfoRegistry} provides access to {@link AddonInfo} objects.
@@ -41,8 +39,6 @@ import org.slf4j.LoggerFactory;
 @Component(immediate = true, service = AddonInfoRegistry.class)
 @NonNullByDefault
 public class AddonInfoRegistry {
-
-    private final Logger logger = LoggerFactory.getLogger(AddonInfoRegistry.class);
 
     private final Collection<AddonInfoProvider> addonInfoProviders = new CopyOnWriteArrayList<>();
 
