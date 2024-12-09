@@ -12,6 +12,7 @@
  */
 package org.openhab.core.util;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.osgi.framework.Bundle;
 
 /**
@@ -19,6 +20,7 @@ import org.osgi.framework.Bundle;
  *
  * @author Henning Treu - Initial contribution
  */
+@NonNullByDefault
 public interface BundleResolver {
 
     /**
