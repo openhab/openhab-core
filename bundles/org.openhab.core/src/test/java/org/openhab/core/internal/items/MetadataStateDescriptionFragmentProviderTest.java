@@ -94,6 +94,7 @@ public class MetadataStateDescriptionFragmentProviderTest {
         metadataConfig.put("min", 18.5);
         metadataConfig.put("max", "34");
         metadataConfig.put("step", 3);
+        metadataConfig.put("rangeUnit", "°C");
         metadataConfig.put("readOnly", "true");
         metadataConfig.put("options", "OPTION1,OPTION2 , 3 =Option 3 ,\"4=4\"=\" Option=4 \" ");
         Metadata metadata = new Metadata(metadataKey, "N/A", metadataConfig);
@@ -106,6 +107,7 @@ public class MetadataStateDescriptionFragmentProviderTest {
         assertEquals(new BigDecimal(18.5), stateDescriptionFragment.getMinimum());
         assertEquals(new BigDecimal(34), stateDescriptionFragment.getMaximum());
         assertEquals(new BigDecimal(3), stateDescriptionFragment.getStep());
+        assertEquals("°C", stateDescriptionFragment.getRangeUnit());
         assertEquals(true, stateDescriptionFragment.isReadOnly());
         assertNotNull(stateDescriptionFragment.getOptions());
         Iterator<StateOption> it = stateDescriptionFragment.getOptions().iterator();
