@@ -172,8 +172,8 @@ public class CacheScriptExtension implements ScriptExtensionProvider {
         }
 
         @Override
-        public Object get(String key, Supplier<Object> supplier) {
-            return Objects.requireNonNull(cache.computeIfAbsent(key, k -> supplier.get()));
+        public @Nullable Object get(String key, Supplier<Object> supplier) {
+            return cache.computeIfAbsent(key, k -> supplier.get());
         }
 
         private Collection<Object> values() {
@@ -231,11 +231,11 @@ public class CacheScriptExtension implements ScriptExtensionProvider {
         }
 
         @Override
-        public Object get(String key, Supplier<Object> supplier) {
+        public @Nullable Object get(String key, Supplier<Object> supplier) {
             cacheLock.lock();
             try {
                 rememberAccessToKey(key);
-                Object value = Objects.requireNonNull(sharedCache.computeIfAbsent(key, k -> supplier.get()));
+                Object value = sharedCache.computeIfAbsent(key, k -> supplier.get());
 
                 logger.trace("GET with supplier to cache from '{}': '{}' -> '{}'", scriptIdentifier, key, value);
                 return value;
