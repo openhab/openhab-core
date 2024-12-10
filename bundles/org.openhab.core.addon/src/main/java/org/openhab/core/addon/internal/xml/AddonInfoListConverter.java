@@ -22,12 +22,12 @@ import org.openhab.core.addon.AddonInfoList;
 import org.openhab.core.config.core.xml.util.GenericUnmarshaller;
 import org.openhab.core.config.core.xml.util.NodeIterator;
 
-import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 
 /**
- * The {@link AddonInfoListConverter} is a concrete implementation of the {@code XStream} {@link Converter}
+ * The {@link AddonInfoListConverter} is a concrete implementation of the {@code XStream}
+ * {@link com.thoughtworks.xstream.converters.Converter}
  * interface used to convert a list of add-on information within an XML document into a list of {@link AddonInfo}
  * objects.
  *

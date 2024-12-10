@@ -20,12 +20,12 @@ import org.openhab.core.addon.AddonMatchProperty;
 import org.openhab.core.config.core.xml.util.GenericUnmarshaller;
 import org.openhab.core.config.core.xml.util.NodeIterator;
 
-import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 
 /**
- * The {@link AddonMatchPropertyConverter} is a concrete implementation of the {@code XStream} {@link Converter}
+ * The {@link AddonMatchPropertyConverter} is a concrete implementation of the {@code XStream}
+ * {@link com.thoughtworks.xstream.converters.Converter}
  * interface used to convert add-on discovery method match property information within an XML document into a
  * {@link AddonMatchProperty} object.
  *
