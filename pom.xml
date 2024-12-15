@@ -64,7 +64,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <maven.compiler.release>17</maven.compiler.release>
+    <maven.compiler.release>21</maven.compiler.release>
 
     <bnd.version>7.1.0</bnd.version>
     <commons.net.version>3.7.2</commons.net.version>
@@ -669,7 +669,7 @@ Import-Package: \\
                   <version>3.6.3</version>
                 </requireMavenVersion>
                 <requireJavaVersion>
-                  <version>[17.0,18.0),[21.0,22.0)</version>
+                  <version>[21.0,22.0)</version>
                 </requireJavaVersion>
               </rules>
             </configuration>
@@ -843,12 +843,6 @@ Import-Package: \\
           </plugins>
         </pluginManagement>
       </build>
-    </profile>
-    <profile>
-      <id>j21</id>
-      <properties>
-        <maven.compiler.release>21</maven.compiler.release>
-      </properties>
     </profile>
   </profiles>
 </project>
