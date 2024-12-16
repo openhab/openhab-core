@@ -13,14 +13,12 @@
 package org.openhab.core.audio;
 
 import java.io.IOException;
-import java.util.concurrent.CompletableFuture;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.core.audio.internal.AudioServlet;
 
 /**
- * This is an interface that is implemented by {@link AudioServlet} and which allows exposing audio streams through
- * HTTP.
+ * This is an interface that is implemented by {@link org.openhab.core.audio.internal.AudioServlet} and which allows
+ * exposing audio streams through HTTP.
  * Streams are only served a single time and then discarded.
  *
  * @author Kai Kreuzer - Initial contribution
@@ -67,7 +65,8 @@ public interface AudioHTTPServer {
      * to add the Clonable capability by storing it in a small memory buffer, e.g {@link ByteArrayAudioStream}, or in a
      * cached file if the stream reached the buffer capacity, or fails to render the sound completely if the stream is
      * too long.
-     * A {@link CompletableFuture} is used to inform the caller that the playback ends in order to clean
+     * A {@link java.util.concurrent.CompletableFuture} is used to inform the caller that the playback ends in order to
+     * clean
      * resources and run delayed task, such as restoring volume.
      * Streams are closed, once they expire.
      *
