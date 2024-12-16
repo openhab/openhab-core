@@ -390,12 +390,6 @@
     </dependency>
     <dependency>
       <groupId>org.openhab.core.bundles</groupId>
-      <artifactId>org.openhab.core.config.jupnp</artifactId>
-      <version>${project.version}</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.openhab.core.bundles</groupId>
       <artifactId>org.openhab.core.config.serial</artifactId>
       <version>${project.version}</version>
       <scope>compile</scope>
