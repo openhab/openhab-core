@@ -13,8 +13,7 @@
 package org.openhab.core.addon.marketplace.internal.community;
 
 import static org.openhab.core.addon.marketplace.MarketplaceConstants.*;
-import static org.openhab.core.addon.marketplace.internal.community.CommunityMarketplaceAddonService.JSON_CONTENT_PROPERTY;
-import static org.openhab.core.addon.marketplace.internal.community.CommunityMarketplaceAddonService.YAML_CONTENT_PROPERTY;
+import static org.openhab.core.addon.marketplace.internal.community.CommunityMarketplaceAddonService.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -151,7 +150,8 @@ public class CommunityTransformationAddonHandler implements MarketplaceAddonHand
 
     private PersistedTransformation addTransformationFromJSON(String id, String json) {
         try {
-            PersistedTransformation transformation = gson.fromJson(json, PersistedTransformation.class);
+            PersistedTransformation transformation = Objects
+                    .requireNonNull(gson.fromJson(json, PersistedTransformation.class));
             storage.put(id, transformation);
             return transformation;
         } catch (JsonParseException e) {
