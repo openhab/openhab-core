@@ -121,7 +121,7 @@ public class PersistenceServiceConfigurationDTOMapper {
             return new PersistenceGroupConfig(string.substring(0, string.length() - 1));
         } else {
             if (string.startsWith("!")) {
-                return new PersistenceItemExcludeConfig(string.substring(1, string.length() - 1));
+                return new PersistenceItemExcludeConfig(string.substring(1));
             }
             return new PersistenceItemConfig(string);
         }
