@@ -457,13 +457,13 @@ public class AudioFormat {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + (bigEndian instanceof Boolean localBigEndian ? localBigEndian.hashCode() : 0);
-        result = prime * result + (bitDepth instanceof Integer localBitDepth ? localBitDepth.hashCode() : 0);
-        result = prime * result + (bitRate instanceof Integer localBitRate ? localBitRate.hashCode() : 0);
-        result = prime * result + (codec instanceof String localCodec ? localCodec.hashCode() : 0);
-        result = prime * result + (container instanceof String localContainer ? localContainer.hashCode() : 0);
-        result = prime * result + (frequency instanceof Long localFrequency ? localFrequency.hashCode() : 0);
-        result = prime * result + (channels instanceof Integer localChannels ? localChannels.hashCode() : 0);
+        result = prime * result + (bigEndian instanceof Object localBigEndian ? localBigEndian.hashCode() : 0);
+        result = prime * result + (bitDepth instanceof Object localBitDepth ? localBitDepth.hashCode() : 0);
+        result = prime * result + (bitRate instanceof Object localBitRate ? localBitRate.hashCode() : 0);
+        result = prime * result + (codec instanceof Object localCodec ? localCodec.hashCode() : 0);
+        result = prime * result + (container instanceof Object localContainer ? localContainer.hashCode() : 0);
+        result = prime * result + (frequency instanceof Object localFrequency ? localFrequency.hashCode() : 0);
+        result = prime * result + (channels instanceof Object localChannels ? localChannels.hashCode() : 0);
         return result;
     }
 
