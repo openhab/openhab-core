@@ -176,8 +176,8 @@ public final class CurrencyUnit extends AbstractUnit<Currency> {
             return nameCompare;
         }
         String thatSymbol = that.getSymbol();
-        if (symbol != null && thatSymbol != null) {
-            return symbol.compareTo(thatSymbol);
+        if (symbol instanceof String localSymbol && thatSymbol != null) {
+            return localSymbol.compareTo(thatSymbol);
         } else if (symbol != null) {
             return 1;
         } else if (thatSymbol != null) {
