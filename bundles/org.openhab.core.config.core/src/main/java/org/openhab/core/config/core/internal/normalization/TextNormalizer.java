@@ -12,6 +12,7 @@
  */
 package org.openhab.core.config.core.internal.normalization;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 
 /**
@@ -21,16 +22,11 @@ import org.openhab.core.config.core.ConfigDescriptionParameter;
  * @author Simon Kaufmann - Initial contribution
  * @author Thomas Höfer - made class final and minor javadoc changes
  */
+@NonNullByDefault
 final class TextNormalizer extends AbstractNormalizer {
 
     @Override
     public Object doNormalize(Object value) {
-        if (value == null) {
-            return value;
-        }
-        if (value instanceof String) {
-            return value;
-        }
-        return value.toString();
+        return value instanceof String ? value : value.toString();
     }
 }
