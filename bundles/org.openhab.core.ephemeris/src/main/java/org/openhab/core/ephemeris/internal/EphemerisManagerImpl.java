@@ -81,6 +81,7 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
     public static final String CONFIG_COUNTRY = "country";
     public static final String CONFIG_REGION = "region";
     public static final String CONFIG_CITY = "city";
+    public static final String CONFIG_CACHE_FILES = "cache";
 
     private static final String RESOURCES_ROOT = "jollyday/";
     private static final String JOLLYDAY_COUNTRY_DESCRIPTIONS = RESOURCES_ROOT
@@ -88,11 +89,11 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
     private static final String PROPERTY_COUNTRY_DESCRIPTION_PREFIX = "country.description.";
     private static final String PROPERTY_COUNTRY_DESCRIPTION_DELIMITER = "\\.";
 
-    final List<ParameterOption> countries = new ArrayList<>();
-    final Map<String, List<ParameterOption>> regions = new HashMap<>();
-    final Map<String, List<ParameterOption>> cities = new HashMap<>();
+    private final List<ParameterOption> countries = new ArrayList<>();
+    private final Map<String, List<ParameterOption>> regions = new HashMap<>();
+    private final Map<String, List<ParameterOption>> cities = new HashMap<>();
 
-    final Map<String, Set<DayOfWeek>> daysets = new HashMap<>();
+    private final Map<String, Set<DayOfWeek>> daysets = new HashMap<>();
     private final Map<Object, HolidayManager> holidayManagers = new HashMap<>();
     private final List<String> countryParameters = new ArrayList<>();
 
@@ -101,6 +102,7 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
 
     private @NonNullByDefault({}) String country;
     private @Nullable String region;
+    private boolean cacheFiles = true;
 
     @Activate
     public EphemerisManagerImpl(final @Reference LocaleProvider localeProvider, final BundleContext bundleContext) {
@@ -141,8 +143,7 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
                 if (setNameParts.length > 1) {
                     String setName = setNameParts[1];
                     Object entry = e.getValue();
-                    if (entry instanceof String) {
-                        String value = entry.toString();
+                    if (entry instanceof String value) {
                         while (value.startsWith("[")) {
                             value = value.substring(1);
                         }
@@ -166,27 +167,26 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
             }
         });
 
-        Object configValue = config.get(CONFIG_COUNTRY);
-        if (configValue != null) {
-            country = configValue.toString().toLowerCase();
+        if (config.get(CONFIG_COUNTRY) instanceof String string) {
+            country = string.toLowerCase();
         } else {
             country = localeProvider.getLocale().getCountry().toLowerCase();
             logger.debug("Using system default country '{}' ", country);
         }
 
-        configValue = config.get(CONFIG_REGION);
-        if (configValue != null) {
-            String region = configValue.toString().toLowerCase();
+        if (config.get(CONFIG_REGION) instanceof String string) {
+            String region = string.toLowerCase();
             countryParameters.add(region);
             this.region = region;
         } else {
             this.region = null;
         }
 
-        configValue = config.get(CONFIG_CITY);
-        if (configValue != null) {
-            countryParameters.add(configValue.toString());
+        if (config.get(CONFIG_CITY) instanceof String city) {
+            countryParameters.add(city);
         }
+
+        cacheFiles = config.get(CONFIG_CACHE_FILES) instanceof String cache ? Boolean.getBoolean(cache) : true;
     }
 
     @Override
@@ -228,26 +228,31 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
             } catch (MalformedURLException e) {
                 throw new FileNotFoundException(e.getMessage());
             }
-        } else {
-            throw new FileNotFoundException(filename);
         }
+        throw new FileNotFoundException(filename);
     }
 
     private HolidayManager getHolidayManager(Object managerKey) {
         HolidayManager holidayManager = holidayManagers.get(managerKey);
         if (holidayManager == null) {
             final ManagerParameter parameters;
+            boolean cacheManager = true;
             if (managerKey instanceof String stringKey) {
                 URL urlOverride = bundle
                         .getResource(RESOURCES_ROOT + CalendarPartManagerParameter.getConfigurationFileName(stringKey));
                 parameters = urlOverride != null //
                         ? ManagerParameters.create(urlOverride)
                         : ManagerParameters.create(stringKey);
+            } else if (managerKey instanceof URL url) {
+                parameters = ManagerParameters.create(url);
+                cacheManager = cacheFiles;
             } else {
-                parameters = ManagerParameters.create((URL) managerKey);
+                throw new IllegalArgumentException("managerKey has to be either a country either an URL");
             }
             holidayManager = HolidayManager.getInstance(parameters);
-            holidayManagers.put(managerKey, holidayManager);
+            if (cacheManager) {
+                holidayManagers.put(managerKey, holidayManager);
+            }
         }
         return holidayManager;
     }
@@ -279,7 +284,8 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
         List<Holiday> sortedHolidays = getHolidays(from, 366, holidayManager);
         Optional<Holiday> result = sortedHolidays.stream()
                 .filter(holiday -> searchedHoliday.equalsIgnoreCase(holiday.getPropertiesKey())).findFirst();
-        return result.map(holiday -> from.toLocalDate().until(holiday.getDate(), ChronoUnit.DAYS)).orElse(-1L);
+        return result.get() instanceof Holiday holiday ? from.toLocalDate().until(holiday.getDate(), ChronoUnit.DAYS)
+                : -1L;
     }
 
     private @Nullable String getFirstBankHolidayKey(ZonedDateTime from, int span, HolidayManager holidayManager) {
@@ -351,10 +357,11 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
 
     private void addDayset(String setName, Iterable<?> values) {
         Set<DayOfWeek> dayset = new HashSet<>();
-        for (Object day : values) {
-            // fix illegal entries by stripping all non A-Z characters
-            String dayString = day.toString().toUpperCase().replaceAll("[^A-Z]", "");
-            dayset.add(DayOfWeek.valueOf(dayString));
+        for (Object value : values) {
+            if (value instanceof String day) {
+                // fix illegal entries by stripping all non A-Z characters
+                dayset.add(DayOfWeek.valueOf(day.toUpperCase().replaceAll("[^A-Z]", "")));
+            }
         }
         daysets.put(setName, dayset);
     }
