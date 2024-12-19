@@ -226,6 +226,7 @@
 		<xs:attribute name="min" type="xs:decimal" use="optional"/>
 		<xs:attribute name="max" type="xs:decimal" use="optional"/>
 		<xs:attribute name="step" type="xs:decimal" use="optional"/>
+		<xs:attribute name="rangeUnit" type="xs:string" use="optional"/>
 		<xs:attribute name="pattern" type="xs:string" use="optional"/>
 		<xs:attribute name="readOnly" type="xs:boolean" default="false" use="optional"/>
 	</xs:complexType>
