@@ -13,6 +13,7 @@
 package org.openhab.core.automation.internal.module.handler;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -158,9 +159,9 @@ public class ItemStateConditionHandler extends BaseConditionModuleHandler implem
         Item item = itemRegistry.getItem(itemName);
         State compareState = TypeParser.parseState(item.getAcceptedDataTypes(), state);
         State itemState = item.getState();
-        if (itemState instanceof DateTimeType type) {
-            ZonedDateTime itemTime = type.getZonedDateTime();
-            ZonedDateTime compareTime = getCompareTime(state);
+        if (itemState instanceof DateTimeType dateTimeState) {
+            Instant itemTime = dateTimeState.getInstant();
+            Instant compareTime = getCompareTime(state);
             return itemTime.compareTo(compareTime) <= 0;
         } else if (itemState instanceof QuantityType qtState) {
             if (compareState instanceof DecimalType type) {
@@ -195,9 +196,9 @@ public class ItemStateConditionHandler extends BaseConditionModuleHandler implem
         Item item = itemRegistry.getItem(itemName);
         State compareState = TypeParser.parseState(item.getAcceptedDataTypes(), state);
         State itemState = item.getState();
-        if (itemState instanceof DateTimeType type) {
-            ZonedDateTime itemTime = type.getZonedDateTime();
-            ZonedDateTime compareTime = getCompareTime(state);
+        if (itemState instanceof DateTimeType dateTimeState) {
+            Instant itemTime = dateTimeState.getInstant();
+            Instant compareTime = getCompareTime(state);
             return itemTime.compareTo(compareTime) >= 0;
         } else if (itemState instanceof QuantityType qtState) {
             if (compareState instanceof DecimalType type) {
@@ -252,36 +253,36 @@ public class ItemStateConditionHandler extends BaseConditionModuleHandler implem
         eventSubscriberRegistration.unregister();
     }
 
-    private ZonedDateTime getCompareTime(String input) {
+    private Instant getCompareTime(String input) {
         if (input.isBlank()) {
             // no parameter given, use now
-            return ZonedDateTime.now();
+            return Instant.now();
         }
         try {
-            return ZonedDateTime.parse(input);
+            return ZonedDateTime.parse(input).toInstant();
         } catch (DateTimeParseException ignored) {
         }
         try {
             return LocalDateTime.parse(input, DateTimeFormatter.ISO_LOCAL_DATE_TIME)
-                    .atZone(timeZoneProvider.getTimeZone());
+                    .atZone(timeZoneProvider.getTimeZone()).toInstant();
         } catch (DateTimeParseException ignored) {
         }
         try {
             int dayPosition = input.indexOf("D");
             if (dayPosition == -1) {
                 // no date in string, add period symbol and time separator
-                return ZonedDateTime.now().plus(Duration.parse("PT" + input));
+                return Instant.now().plus(Duration.parse("PT" + input));
             } else if (dayPosition == input.length() - 1) {
                 // day is the last symbol, only add the period symbol
-                return ZonedDateTime.now().plus(Duration.parse("P" + input));
+                return Instant.now().plus(Duration.parse("P" + input));
             } else {
                 // add period symbol and time separator
-                return ZonedDateTime.now().plus(Duration
+                return Instant.now().plus(Duration
                         .parse("P" + input.substring(0, dayPosition + 1) + "T" + input.substring(dayPosition + 1)));
             }
         } catch (DateTimeParseException e) {
             logger.warn("Couldn't get a comparable time from '{}', using now", input);
         }
-        return ZonedDateTime.now();
+        return Instant.now();
     }
 }

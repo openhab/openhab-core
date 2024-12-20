@@ -287,22 +287,22 @@ public class AudioFormat {
         if (audioFormat == null) {
             return false;
         }
-        if ((null != getContainer()) && (!getContainer().equals(audioFormat.getContainer()))) {
+        if (getContainer() instanceof String container && !container.equals(audioFormat.getContainer())) {
             return false;
         }
-        if ((null != getCodec()) && (!getCodec().equals(audioFormat.getCodec()))) {
+        if (getCodec() instanceof String codec && !codec.equals(audioFormat.getCodec())) {
             return false;
         }
-        if ((null != isBigEndian()) && (!isBigEndian().equals(audioFormat.isBigEndian()))) {
+        if (isBigEndian() instanceof Boolean bigEndian && !bigEndian.equals(audioFormat.isBigEndian())) {
             return false;
         }
-        if ((null != getBitDepth()) && (!getBitDepth().equals(audioFormat.getBitDepth()))) {
+        if (getBitDepth() instanceof Integer bitDepth && !bitDepth.equals(audioFormat.getBitDepth())) {
             return false;
         }
-        if ((null != getBitRate()) && (!getBitRate().equals(audioFormat.getBitRate()))) {
+        if (getBitRate() instanceof Integer bitRate && !bitRate.equals(audioFormat.getBitRate())) {
             return false;
         }
-        if ((null != getFrequency()) && (!getFrequency().equals(audioFormat.getFrequency()))) {
+        if (getFrequency() instanceof Long frequency && !frequency.equals(audioFormat.getFrequency())) {
             return false;
         }
         return true;
@@ -457,13 +457,13 @@ public class AudioFormat {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((bigEndian == null) ? 0 : bigEndian.hashCode());
-        result = prime * result + ((bitDepth == null) ? 0 : bitDepth.hashCode());
-        result = prime * result + ((bitRate == null) ? 0 : bitRate.hashCode());
-        result = prime * result + ((codec == null) ? 0 : codec.hashCode());
-        result = prime * result + ((container == null) ? 0 : container.hashCode());
-        result = prime * result + ((frequency == null) ? 0 : frequency.hashCode());
-        result = prime * result + ((channels == null) ? 0 : channels.hashCode());
+        result = prime * result + (bigEndian instanceof Object localBigEndian ? localBigEndian.hashCode() : 0);
+        result = prime * result + (bitDepth instanceof Object localBitDepth ? localBitDepth.hashCode() : 0);
+        result = prime * result + (bitRate instanceof Object localBitRate ? localBitRate.hashCode() : 0);
+        result = prime * result + (codec instanceof Object localCodec ? localCodec.hashCode() : 0);
+        result = prime * result + (container instanceof Object localContainer ? localContainer.hashCode() : 0);
+        result = prime * result + (frequency instanceof Object localFrequency ? localFrequency.hashCode() : 0);
+        result = prime * result + (channels instanceof Object localChannels ? localChannels.hashCode() : 0);
         return result;
     }
 

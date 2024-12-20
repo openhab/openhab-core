@@ -25,6 +25,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import javax.annotation.security.RolesAllowed;
@@ -76,6 +77,7 @@ import org.openhab.core.common.registry.RegistryChangedRunnableListener;
 import org.openhab.core.config.core.ConfigUtil;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.events.Event;
+import org.openhab.core.i18n.TimeZoneProvider;
 import org.openhab.core.io.rest.DTOMapper;
 import org.openhab.core.io.rest.JSONResponse;
 import org.openhab.core.io.rest.RESTConstants;
@@ -133,6 +135,7 @@ public class RuleResource implements RESTResource {
     private final RuleManager ruleManager;
     private final RuleRegistry ruleRegistry;
     private final ManagedRuleProvider managedRuleProvider;
+    private final TimeZoneProvider timeZoneProvider;
     private final RegistryChangedRunnableListener<Rule> resetLastModifiedChangeListener = new RegistryChangedRunnableListener<>(
             () -> lastModified = null);
 
@@ -144,11 +147,13 @@ public class RuleResource implements RESTResource {
             final @Reference DTOMapper dtoMapper, //
             final @Reference RuleManager ruleManager, //
             final @Reference RuleRegistry ruleRegistry, //
-            final @Reference ManagedRuleProvider managedRuleProvider) {
+            final @Reference ManagedRuleProvider managedRuleProvider, //
+            final @Reference TimeZoneProvider timeZoneProvider) {
         this.dtoMapper = dtoMapper;
         this.ruleManager = ruleManager;
         this.ruleRegistry = ruleRegistry;
         this.managedRuleProvider = managedRuleProvider;
+        this.timeZoneProvider = timeZoneProvider;
 
         this.ruleRegistry.addRegistryChangeListener(resetLastModifiedChangeListener);
     }
@@ -419,10 +424,10 @@ public class RuleResource implements RESTResource {
                     + DateTimeType.DATE_PATTERN_WITH_TZ_AND_MS + "]") @QueryParam("from") @Nullable String from,
             @Parameter(description = "End time of the simulated rule executions. Will default to 30 days after the start time. Must be less than 180 days after the given start time. ["
                     + DateTimeType.DATE_PATTERN_WITH_TZ_AND_MS + "]") @QueryParam("until") @Nullable String until) {
-        final ZonedDateTime fromDate = from == null || from.isEmpty() ? ZonedDateTime.now() : parseTime(from);
-        final ZonedDateTime untilDate = until == null || until.isEmpty() ? fromDate.plusDays(31) : parseTime(until);
+        final ZonedDateTime fromDate = parseTime(from, ZonedDateTime::now);
+        final ZonedDateTime untilDate = parseTime(until, () -> fromDate.plusDays(31));
 
-        if (daysBetween(fromDate, untilDate) >= 180) {
+        if (ChronoUnit.DAYS.between(fromDate, untilDate) >= 180) {
             return JSONResponse.createErrorResponse(Status.BAD_REQUEST,
                     "Simulated time span must be smaller than 180 days.");
         }
@@ -431,13 +436,12 @@ public class RuleResource implements RESTResource {
         return Response.ok(ruleExecutions.toList()).build();
     }
 
-    private static ZonedDateTime parseTime(String sTime) {
+    private ZonedDateTime parseTime(@Nullable String sTime, Supplier<ZonedDateTime> defaultSupplier) {
+        if (sTime == null || sTime.isEmpty()) {
+            return defaultSupplier.get();
+        }
         final DateTimeType dateTime = new DateTimeType(sTime);
-        return dateTime.getZonedDateTime();
-    }
-
-    private static long daysBetween(ZonedDateTime d1, ZonedDateTime d2) {
-        return ChronoUnit.DAYS.between(d1, d2);
+        return dateTime.getZonedDateTime(timeZoneProvider.getTimeZone());
     }
 
     @GET

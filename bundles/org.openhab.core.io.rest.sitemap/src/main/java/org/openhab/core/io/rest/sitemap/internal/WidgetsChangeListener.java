@@ -27,6 +27,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventSubscriber;
+import org.openhab.core.i18n.TimeZoneProvider;
 import org.openhab.core.io.rest.core.item.EnrichedItemDTOMapper;
 import org.openhab.core.io.rest.sitemap.SitemapSubscriptionService.SitemapSubscriptionCallback;
 import org.openhab.core.items.Item;
@@ -65,6 +66,7 @@ public class WidgetsChangeListener implements EventSubscriber {
     private final String sitemapName;
     private final String pageId;
     private final ItemUIRegistry itemUIRegistry;
+    private final TimeZoneProvider timeZoneProvider;
     private EList<Widget> widgets;
     private Set<Item> items;
     private final HashSet<String> filterItems = new HashSet<>();
@@ -79,11 +81,12 @@ public class WidgetsChangeListener implements EventSubscriber {
      * @param itemUIRegistry the ItemUIRegistry which is needed for the functionality
      * @param widgets the list of widgets that are part of the page.
      */
-    public WidgetsChangeListener(String sitemapName, String pageId, ItemUIRegistry itemUIRegistry,
-            EList<Widget> widgets) {
+    public WidgetsChangeListener(String sitemapName, String pageId, final ItemUIRegistry itemUIRegistry,
+            final TimeZoneProvider timeZoneProvider, EList<Widget> widgets) {
         this.sitemapName = sitemapName;
         this.pageId = pageId;
         this.itemUIRegistry = itemUIRegistry;
+        this.timeZoneProvider = timeZoneProvider;
 
         updateItemsAndWidgets(widgets);
     }
@@ -248,7 +251,8 @@ public class WidgetsChangeListener implements EventSubscriber {
                     .substring(widget.eClass().getInstanceTypeName().lastIndexOf(".") + 1);
             boolean drillDown = "mapview".equalsIgnoreCase(widgetTypeName);
             Predicate<Item> itemFilter = (i -> CoreItemFactory.LOCATION.equals(i.getType()));
-            event.item = EnrichedItemDTOMapper.map(itemToBeSent, drillDown, itemFilter, null, null);
+            event.item = EnrichedItemDTOMapper.map(itemToBeSent, drillDown, itemFilter, null, null,
+                    timeZoneProvider.getTimeZone());
 
             // event.state is an adjustment of the item state to the widget type.
             stateToBeSent = itemBelongsToWidget ? state : itemToBeSent.getState();

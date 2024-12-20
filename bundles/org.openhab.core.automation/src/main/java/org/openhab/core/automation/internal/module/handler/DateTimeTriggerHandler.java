@@ -178,8 +178,7 @@ public class DateTimeTriggerHandler extends BaseTriggerModuleHandler
             cronExpression = CronAdjuster.REBOOT;
         } else if (value instanceof DateTimeType dateTimeType) {
             boolean itemIsTimeOnly = dateTimeType.toString().startsWith("1970-01-01T");
-            cronExpression = dateTimeType.getZonedDateTime().withZoneSameInstant(ZoneId.systemDefault())
-                    .plusSeconds(offset.longValue())
+            cronExpression = dateTimeType.getZonedDateTime(ZoneId.systemDefault()).plusSeconds(offset.longValue())
                     .format(timeOnly || itemIsTimeOnly ? CRON_TIMEONLY_FORMATTER : CRON_FORMATTER);
             startScheduler();
         } else {

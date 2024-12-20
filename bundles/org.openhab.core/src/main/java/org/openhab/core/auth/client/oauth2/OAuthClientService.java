@@ -173,7 +173,7 @@ public interface OAuthClientService extends AutoCloseable {
      * @throws OAuthException Other exceptions
      * @throws OAuthResponseException Error codes given by authorization provider, as in RFC 6749 section 5.2 Error
      *             Response
-     * @see <a href="https://tools.ietf.org/html/rfc6749#section-4.3.2">rfc6749 section-4.3.2</>
+     * @see <a href="https://tools.ietf.org/html/rfc6749#section-4.3.2">rfc6749 section-4.3.2</a>
      */
     AccessTokenResponse getAccessTokenByResourceOwnerPasswordCredentials(String username, String password,
             @Nullable String scope) throws OAuthException, IOException, OAuthResponseException;

@@ -20,6 +20,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 import java.text.DecimalFormatSymbols;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TimeZone;
@@ -36,6 +37,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.openhab.core.i18n.TimeZoneProvider;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
@@ -99,22 +101,24 @@ public class ItemUIRegistryImplTest {
     // we need to get the decimal separator of the default locale for our tests
     private static final char SEP = (new DecimalFormatSymbols().getDecimalSeparator());
     private static final String ITEM_NAME = "Item";
+    private static final String DEFAULT_TIME_ZONE = "GMT-6";
 
     private @NonNullByDefault({}) ItemUIRegistryImpl uiRegistry;
 
     private @Mock @NonNullByDefault({}) ItemRegistry registryMock;
+    private @Mock @NonNullByDefault({}) TimeZoneProvider timeZoneProviderMock;
     private @Mock @NonNullByDefault({}) Widget widgetMock;
     private @Mock @NonNullByDefault({}) Item itemMock;
 
     @BeforeEach
     public void setup() throws Exception {
-        uiRegistry = new ItemUIRegistryImpl(registryMock);
+        uiRegistry = new ItemUIRegistryImpl(registryMock, timeZoneProviderMock);
 
         when(widgetMock.getItem()).thenReturn(ITEM_NAME);
         when(registryMock.getItem(ITEM_NAME)).thenReturn(itemMock);
+        when(timeZoneProviderMock.getTimeZone()).thenReturn(ZoneId.of(DEFAULT_TIME_ZONE));
 
-        // Set default time zone to GMT-6
-        TimeZone.setDefault(TimeZone.getTimeZone("GMT-6"));
+        TimeZone.setDefault(TimeZone.getTimeZone(DEFAULT_TIME_ZONE));
     }
 
     @Test

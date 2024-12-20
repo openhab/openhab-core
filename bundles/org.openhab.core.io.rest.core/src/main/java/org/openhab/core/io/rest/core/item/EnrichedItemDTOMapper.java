@@ -12,6 +12,7 @@
  */
 package org.openhab.core.io.rest.core.item;
 
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
@@ -29,7 +30,9 @@ import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.dto.ItemDTO;
 import org.openhab.core.items.dto.ItemDTOMapper;
+import org.openhab.core.library.items.DateTimeItem;
 import org.openhab.core.library.items.NumberItem;
+import org.openhab.core.library.types.DateTimeType;
 import org.openhab.core.transform.TransformationException;
 import org.openhab.core.transform.TransformationHelper;
 import org.openhab.core.transform.TransformationService;
@@ -63,28 +66,39 @@ public class EnrichedItemDTOMapper {
      * @param uriBuilder if present the URI builder contains one template that will be replaced by the specific item
      *            name
      * @param locale locale (can be null)
+     * @param zoneId time-zone id (can be null)
      * @return item DTO object
      */
     public static EnrichedItemDTO map(Item item, boolean drillDown, @Nullable Predicate<Item> itemFilter,
-            @Nullable UriBuilder uriBuilder, @Nullable Locale locale) {
+            @Nullable UriBuilder uriBuilder, @Nullable Locale locale, @Nullable ZoneId zoneId) {
         ItemDTO itemDTO = ItemDTOMapper.map(item);
-        return map(item, itemDTO, drillDown, itemFilter, uriBuilder, locale, new ArrayList<>());
+        return map(item, itemDTO, drillDown, itemFilter, uriBuilder, locale, zoneId, new ArrayList<>());
     }
 
     private static EnrichedItemDTO mapRecursive(Item item, @Nullable Predicate<Item> itemFilter,
-            @Nullable UriBuilder uriBuilder, @Nullable Locale locale, List<Item> parents) {
+            @Nullable UriBuilder uriBuilder, @Nullable Locale locale, @Nullable ZoneId zoneId, List<Item> parents) {
         ItemDTO itemDTO = ItemDTOMapper.map(item);
-        return map(item, itemDTO, true, itemFilter, uriBuilder, locale, parents);
+        return map(item, itemDTO, true, itemFilter, uriBuilder, locale, zoneId, parents);
     }
 
     private static EnrichedItemDTO map(Item item, ItemDTO itemDTO, boolean drillDown,
             @Nullable Predicate<Item> itemFilter, @Nullable UriBuilder uriBuilder, @Nullable Locale locale,
-            List<Item> parents) {
+            @Nullable ZoneId zoneId, List<Item> parents) {
         if (item instanceof GroupItem) {
             // only add as parent item if it is a group, otherwise duplicate memberships trigger false warnings
             parents.add(item);
         }
-        String state = item.getState().toFullString();
+        String state;
+        if (item instanceof DateTimeItem dateTimeItem && zoneId != null) {
+            DateTimeType dateTime = dateTimeItem.getStateAs(DateTimeType.class);
+            if (dateTime == null) {
+                state = item.getState().toFullString();
+            } else {
+                state = dateTime.toFullString(zoneId);
+            }
+        } else {
+            state = item.getState().toFullString();
+        }
         String transformedState = considerTransformation(item, locale);
         if (state.equals(transformedState)) {
             transformedState = null;
@@ -117,7 +131,8 @@ public class EnrichedItemDTOMapper {
                                 "Recursive group membership found: {} is a member of {}, but it is also one of its ancestors.",
                                 member.getName(), groupItem.getName());
                     } else if (itemFilter == null || itemFilter.test(member)) {
-                        members.add(mapRecursive(member, itemFilter, uriBuilder, locale, new ArrayList<>(parents)));
+                        members.add(
+                                mapRecursive(member, itemFilter, uriBuilder, locale, zoneId, new ArrayList<>(parents)));
                     }
                 }
                 memberDTOs = members.toArray(new EnrichedItemDTO[0]);

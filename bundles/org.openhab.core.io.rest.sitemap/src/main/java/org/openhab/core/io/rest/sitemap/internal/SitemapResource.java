@@ -62,6 +62,7 @@ import org.openhab.core.auth.Role;
 import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventSubscriber;
+import org.openhab.core.i18n.TimeZoneProvider;
 import org.openhab.core.io.rest.JSONResponse;
 import org.openhab.core.io.rest.LocaleService;
 import org.openhab.core.io.rest.RESTConstants;
@@ -189,6 +190,7 @@ public class SitemapResource
     private final ItemUIRegistry itemUIRegistry;
     private final SitemapSubscriptionService subscriptions;
     private final LocaleService localeService;
+    private final TimeZoneProvider timeZoneProvider;
 
     private final java.util.List<SitemapProvider> sitemapProviders = new ArrayList<>();
 
@@ -204,9 +206,11 @@ public class SitemapResource
     public SitemapResource( //
             final @Reference ItemUIRegistry itemUIRegistry, //
             final @Reference LocaleService localeService, //
+            final @Reference TimeZoneProvider timeZoneProvider, //
             final @Reference SitemapSubscriptionService subscriptions) {
         this.itemUIRegistry = itemUIRegistry;
         this.localeService = localeService;
+        this.timeZoneProvider = timeZoneProvider;
         this.subscriptions = subscriptions;
 
         broadcaster = new SseBroadcaster<>();
@@ -596,7 +600,7 @@ public class SitemapResource
                 boolean isMapview = "mapview".equalsIgnoreCase(widgetTypeName);
                 Predicate<Item> itemFilter = (i -> CoreItemFactory.LOCATION.equals(i.getType()));
                 bean.item = EnrichedItemDTOMapper.map(item, isMapview, itemFilter,
-                        UriBuilder.fromUri(uri).path("items/{itemName}"), locale);
+                        UriBuilder.fromUri(uri).path("items/{itemName}"), locale, timeZoneProvider.getTimeZone());
                 bean.state = itemUIRegistry.getState(widget).toFullString();
                 // In case the widget state is identical to the item state, its value is set to null.
                 if (bean.state != null && bean.state.equals(bean.item.state)) {
