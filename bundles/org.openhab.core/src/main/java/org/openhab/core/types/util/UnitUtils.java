@@ -130,7 +130,7 @@ public class UnitUtils {
                             } else if (systemUnit.equals(unit)) {
                                 return dimension;
                             } else if (compatibleDimension == null
-                                    && (systemUnit.isCompatible(unit) || systemUnit.inverse().isCompatible(unit))) {
+                                    && (systemUnit.isCompatible(unit) || systemUnit.isCompatible(unit.inverse()))) {
                                 compatibleDimension = dimension;
                             }
                         } catch (IllegalArgumentException | IllegalAccessException e) {

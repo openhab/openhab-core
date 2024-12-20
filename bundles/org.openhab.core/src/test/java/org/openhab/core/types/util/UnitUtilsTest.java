@@ -121,6 +121,9 @@ public class UnitUtilsTest {
         unit = Objects.requireNonNull(UnitUtils.parseUnit("m"));
         assertThat(UnitUtils.getDimensionName(unit), is(Length.class.getSimpleName()));
         assertThat(UnitUtils.getDimensionName(Units.MIRED), is(Temperature.class.getSimpleName()));
+        assertThat(UnitUtils.getDimensionName(Units.KELVIN), is(Temperature.class.getSimpleName()));
+        assertThat(UnitUtils.getDimensionName(SIUnits.CELSIUS), is(Temperature.class.getSimpleName()));
+        assertThat(UnitUtils.getDimensionName(ImperialUnits.FAHRENHEIT), is(Temperature.class.getSimpleName()));
     }
 
     @Test
