@@ -120,6 +120,7 @@ public class UnitUtilsTest {
 
         unit = Objects.requireNonNull(UnitUtils.parseUnit("m"));
         assertThat(UnitUtils.getDimensionName(unit), is(Length.class.getSimpleName()));
+        assertThat(UnitUtils.getDimensionName(Units.MIRED), is(Temperature.class.getSimpleName()));
     }
 
     @Test
