@@ -103,6 +103,8 @@ public final class ImperialUnits extends CustomUnits {
         SimpleUnitFormat.getInstance().label(MILES_PER_HOUR, MILES_PER_HOUR.getSymbol());
         SimpleUnitFormat.getInstance().label(INCH, INCH.getSymbol());
         SimpleUnitFormat.getInstance().label(FOOT, FOOT.getSymbol());
+        SimpleUnitFormat.getInstance().alias(INCH, "\""); // Alias for inches
+        SimpleUnitFormat.getInstance().alias(FOOT, "'"); // Alias for feet
         SimpleUnitFormat.getInstance().label(YARD, YARD.getSymbol());
         SimpleUnitFormat.getInstance().label(CHAIN, CHAIN.getSymbol());
         SimpleUnitFormat.getInstance().label(FURLONG, FURLONG.getSymbol());

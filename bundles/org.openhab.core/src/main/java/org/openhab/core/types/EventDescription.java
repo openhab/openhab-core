@@ -14,14 +14,11 @@ package org.openhab.core.types;
 
 import java.util.List;
 
-import org.eclipse.jdt.annotation.NonNullByDefault;
-
 /**
  * Describes event options and gives information how to interpret it.
  *
  * @author Moritz Kammerer - Initial contribution
  */
-@NonNullByDefault
 public class EventDescription {
     private final List<EventOption> options;
 

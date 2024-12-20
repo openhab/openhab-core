@@ -12,14 +12,11 @@
  */
 package org.openhab.core.types;
 
-import org.eclipse.jdt.annotation.NonNullByDefault;
-
 /**
  * Describes one possible value an event might have.
  *
  * @author Moritz Kammerer - Initial contribution
  */
-@NonNullByDefault
 public final class EventOption {
 
     private String value;

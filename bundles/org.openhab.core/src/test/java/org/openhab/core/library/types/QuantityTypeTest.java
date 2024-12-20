@@ -24,6 +24,7 @@ import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 import java.util.stream.Stream;
 
+import javax.measure.Unit;
 import javax.measure.quantity.Dimensionless;
 import javax.measure.quantity.Energy;
 import javax.measure.quantity.Length;
@@ -47,6 +48,7 @@ import org.openhab.core.library.unit.SIUnits;
 import org.openhab.core.library.unit.Units;
 import org.openhab.core.types.util.UnitUtils;
 
+import tech.units.indriya.format.SimpleUnitFormat;
 import tech.units.indriya.unit.UnitDimension;
 
 /**
@@ -663,5 +665,20 @@ public class QuantityTypeTest {
         QuantityType<Temperature> c = new QuantityType<>("1 °C");
         QuantityType<Temperature> f = c.toUnitRelative(ImperialUnits.FAHRENHEIT);
         assertEquals(1.8, f.doubleValue());
+    }
+
+    @Test
+    public void testUnitAliases() {
+        Unit<?> inchUnit = SimpleUnitFormat.getInstance().parse("\"");
+        assertEquals(ImperialUnits.INCH, inchUnit);
+
+        Unit<?> footUnit = SimpleUnitFormat.getInstance().parse("'");
+        assertEquals(ImperialUnits.FOOT, footUnit);
+    }
+
+    @Test
+    public void testFormattedUnits() {
+        assertEquals("\"", SimpleUnitFormat.getInstance().format(ImperialUnits.INCH));
+        assertEquals("'", SimpleUnitFormat.getInstance().format(ImperialUnits.FOOT));
     }
 }
