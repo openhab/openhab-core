@@ -48,7 +48,6 @@ public class ColorUtil {
     private static final BigDecimal BIG_DECIMAL_60 = BigDecimal.valueOf(60);
     private static final BigDecimal BIG_DECIMAL_5 = BigDecimal.valueOf(5);
     private static final BigDecimal BIG_DECIMAL_3 = BigDecimal.valueOf(3);
-    private static final BigDecimal BIG_DECIMAL_2 = BigDecimal.valueOf(2);
     private static final BigDecimal BIG_DECIMAL_2_POINT_55 = new BigDecimal("2.55");
     private static final double[] CORM_COEFFICIENTS = { -0.00616793, 0.0893944, -0.5179722, 1.5317403, -2.4243787,
             1.925865, -0.471106 };
