@@ -27,7 +27,6 @@ import javax.measure.Quantity;
 import javax.measure.Unit;
 import javax.measure.UnitConverter;
 import javax.measure.format.MeasurementParseException;
-import javax.measure.quantity.Temperature;
 import javax.measure.spi.SystemOfUnits;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -113,10 +112,6 @@ public class UnitUtils {
      * @return The Dimension string or null if the unit can not be found in any of the SystemOfUnits.
      */
     public static @Nullable String getDimensionName(Unit<?> unit) {
-        // Special cased, because the actual dimension is 1/Temperature
-        if (unit.equals(Units.MIRED)) {
-            return Temperature.class.getSimpleName();
-        }
         String compatibleDimension = null;
         for (Class<? extends SystemOfUnits> system : ALL_SYSTEM_OF_UNITS) {
             for (Field field : system.getDeclaredFields()) {
@@ -134,7 +129,8 @@ public class UnitUtils {
                                 LOGGER.warn("Unit field points to a null value: {}", field);
                             } else if (systemUnit.equals(unit)) {
                                 return dimension;
-                            } else if (compatibleDimension == null && systemUnit.isCompatible(unit)) {
+                            } else if (compatibleDimension == null
+                                    && (systemUnit.isCompatible(unit) || systemUnit.inverse().isCompatible(unit))) {
                                 compatibleDimension = dimension;
                             }
                         } catch (IllegalArgumentException | IllegalAccessException e) {
