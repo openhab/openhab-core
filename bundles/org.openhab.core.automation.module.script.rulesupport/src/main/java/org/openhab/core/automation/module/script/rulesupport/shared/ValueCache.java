@@ -58,8 +58,9 @@ public interface ValueCache {
      * Get a value from the cache or create a new key-value-pair from the given supplier
      *
      * @param key the key of the requested value
-     * @param supplier a supplier that returns a non-null value to be used if the key was not present
+     * @param supplier a supplier that returns a value to be used if the key was not present
      * @return the value associated with the key
      */
+    @Nullable
     Object get(String key, Supplier<Object> supplier);
 }
