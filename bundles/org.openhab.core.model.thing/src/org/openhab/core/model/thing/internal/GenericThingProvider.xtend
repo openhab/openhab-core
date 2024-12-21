@@ -63,15 +63,20 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 /**
- * {@link ThingProvider} implementation which computes *.things files.
+ * {@link ThingProvider} implementation which processes and manages Things defined in *.things files.
+ * This provider is responsible for:
+ * 
+ * 1. Loading Things configurations from model files
+ * 2. Managing Thing lifecycle (creation, updates, deletion)
+ * 3. Handling dynamic updates when model files change
+ * 4. Coordinating with ThingHandlerFactories for Thing creation
+ * 5. Managing lazy loading and retry mechanisms for Thing initialization
  * 
  * @author Oliver Libutzki - Initial contribution
  * @author niehues - Fix ESH Bug 450236
- *         https://bugs.eclipse.org/bugs/show_bug.cgi?id=450236 - Considering
- *         ThingType Description
- * @author Simon Kaufmann - Added asynchronous retry in case the handler 
- *         factory cannot load a thing yet (bug 470368), 
- *         added delay until ThingTypes are fully loaded
+ *         https://bugs.eclipse.org/bugs/show_bug.cgi?id=450236 - Considering ThingType Description
+ * @author Simon Kaufmann - Added asynchronous retry in case the handler factory cannot load a thing yet
+ *         (bug 470368), added delay until ThingTypes are fully loaded
  * @author Markus Rathgeb - Add locale provider support
  */
 @Component(immediate=true, service=ThingProvider)
@@ -113,6 +118,12 @@ class GenericThingProvider extends AbstractProviderLazyNullness<Thing> implement
         thingsMap.values.flatten.toList
     }
 
+    /**
+    * Creates Things from a given model file.
+    * 
+    * @param modelName The name of the model file to process
+    * @throws IllegalStateException if model processing fails
+    */
     def private void createThingsFromModel(String modelName) {
         logger.debug("Read things from model '{}'", modelName);
         if (thingsMap.get(modelName) === null) {
@@ -203,6 +214,17 @@ class GenericThingProvider extends AbstractProviderLazyNullness<Thing> implement
         return things + flattenModelThings(things.filter(typeof(ModelBridge)).map(b|b.things).flatten);
     }
 
+    /**
+    * Creates a Thing instance with proper configuration and channels.
+    * This method:
+    * 1. Validates the Thing configuration
+    * 2. Sets up channels based on Thing type
+    * 3. Applies any model-specific overrides
+    * 
+    * @param modelThing The Thing model to create from
+    * @param thingList Collection to add the created Thing to
+    * @param thingHandlerFactory Factory to create the Thing
+    */
     def private void createThing(ModelThing modelThing, Collection<Thing> thingList,
         ThingHandlerFactory thingHandlerFactory) {
         val ThingUID thingUID = getThingUID(modelThing, null)
@@ -357,6 +379,16 @@ class GenericThingProvider extends AbstractProviderLazyNullness<Thing> implement
         return bridgeIds
     }
 
+    /**
+    * Creates channels for a Thing based on its type and model configuration.
+    * Handles both manually defined channels and those from channel definitions.
+    * 
+    * @param thingTypeUID UID of the Thing type
+    * @param thingUID UID of the Thing
+    * @param modelChannels Channels defined in the model
+    * @param channelDefinitions Channel definitions from the Thing type
+    * @return List of created channels
+    */
     def private List<Channel> createChannels(ThingTypeUID thingTypeUID, ThingUID thingUID,
         List<ModelChannel> modelChannels, List<ChannelDefinition> channelDefinitions) {
         val Set<String> addedChannelIds = newHashSet
@@ -633,6 +665,11 @@ class GenericThingProvider extends AbstractProviderLazyNullness<Thing> implement
         ]
     }
 
+    /**
+    * Handles lazy initialization retry for Things that couldn't be created immediately.
+    * Implements a retry mechanism for Things that failed initial creation,
+    * typically due to missing dependencies or async loading issues.
+    */
     private val lazyRetryRunnable = new Runnable() {
         override run() {
             logger.debug("Starting lazy retry thread")
@@ -677,13 +714,23 @@ class GenericThingProvider extends AbstractProviderLazyNullness<Thing> implement
         }
     }
 
+    /**
+    * Stores information about Things that need to be initialized later.
+    * Used by the lazy retry mechanism when immediate Thing creation fails.
+    */
     @Data
     private static final class QueueContent {
+        /** The Thing type identifier */
         ThingTypeUID thingTypeUID
+        /** Human-readable label for the Thing */
         String label
+        /** Thing configuration parameters */
         Configuration configuration
+        /** Unique identifier for the Thing */
         ThingUID thingUID
+        /** Bridge this Thing belongs to (if any) */
         ThingUID bridgeUID
+        /** Factory responsible for creating this Thing */
         ThingHandlerFactory thingHandlerFactory
     }
 
