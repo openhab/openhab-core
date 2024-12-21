@@ -129,7 +129,8 @@ public class UnitUtils {
                                 LOGGER.warn("Unit field points to a null value: {}", field);
                             } else if (systemUnit.equals(unit)) {
                                 return dimension;
-                            } else if (compatibleDimension == null && systemUnit.isCompatible(unit)) {
+                            } else if (compatibleDimension == null
+                                    && (systemUnit.isCompatible(unit) || systemUnit.isCompatible(unit.inverse()))) {
                                 compatibleDimension = dimension;
                             }
                         } catch (IllegalArgumentException | IllegalAccessException e) {
