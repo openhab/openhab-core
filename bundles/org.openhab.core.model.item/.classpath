@@ -15,6 +15,7 @@
 	<classpathentry excluding="**" kind="src" output="target/classes" path="model">
 		<attributes>
 			<attribute name="maven.pomderived" value="true"/>
+			<attribute name="optional" value="true"/>
 		</attributes>
 	</classpathentry>
 	<classpathentry including="**/*.java" kind="src" output="target/classes" path="src-gen">
