@@ -302,8 +302,12 @@ public class DateTimeType implements PrimitiveType, State, Command, Comparable<D
                 try {
                     date = ZonedDateTime.parse(value, PARSER_TZ);
                 } catch (DateTimeParseException tzException) {
-                    LocalDateTime localDateTime = LocalDateTime.parse(value, PARSER);
-                    date = ZonedDateTime.of(localDateTime, ZoneId.systemDefault());
+                    try {
+                        date = ZonedDateTime.parse(value);
+                    } catch (DateTimeParseException e) {
+                        LocalDateTime localDateTime = LocalDateTime.parse(value, PARSER);
+                        date = ZonedDateTime.of(localDateTime, ZoneId.systemDefault());
+                    }
                 }
             }
         }

@@ -264,58 +264,22 @@ public class DateTimeTypeTest {
         assertTrue(dt1.compareTo(dt1) == 0);
     }
 
-    // This can only test explicit time zones, as we cannot mock the system default time zone
     @ParameterizedTest
     @ValueSource(strings = { //
             "2024-09-05T15:30:00Z", //
             "2024-09-05 15:30Z", //
+            "2024-09-05 15:30+0000", //
             "2024-09-05 16:30+0100", //
             "2024-09-05T17:30:00.000+0200", //
-            "2024-09-05T17:30:00.000+02:00" //
+            "2024-09-05T17:30:00.000+02:00", //
+            "2024-09-05T17:30+02:00", //
+            "2024-09-05T17:30+02:00[Europe/Berlin]" //
     })
     public void parserTest(String input) {
-        ZonedDateTime zdtReference = ZonedDateTime.parse("2024-09-05T15:30:00Z");
+        Instant instantReference = Instant.parse("2024-09-05T15:30:00Z");
 
-        ZonedDateTime zdt = new DateTimeType(input).getZonedDateTime().withZoneSameInstant(zdtReference.getZone());
-        assertThat(zdt, is(zdtReference));
-    }
-
-    @Test
-    public void zonedParsingTest() {
-        DateTimeType dt1 = new DateTimeType("2019-06-12T17:30:00Z");
-        DateTimeType dt2 = new DateTimeType("2019-06-12T17:30:00+0000");
-        DateTimeType dt3 = new DateTimeType("2019-06-12T19:30:00+0200");
-        DateTimeType dt4 = new DateTimeType("2019-06-12T19:30:00+0200");
-        assertThat(dt1, is(dt2));
-
-        ZonedDateTime zdt1 = dt1.getZonedDateTime();
-        ZonedDateTime zdt2 = dt2.getZonedDateTime();
-        ZonedDateTime zdt3 = dt3.getZonedDateTime();
-        ZonedDateTime zdt4 = dt4.getZonedDateTime(ZoneId.of("UTC"));
-        assertThat(zdt1.getZone(), is(zdt2.getZone()));
-        assertThat(zdt1, is(zdt2));
-        assertThat(zdt1, is(zdt3.withZoneSameInstant(zdt1.getZone())));
-        assertThat(zdt2, is(zdt3.withZoneSameInstant(zdt2.getZone())));
-        assertThat(zdt1, is(zdt4));
-    }
-
-    @Test
-    public void instantParsingTest() {
-        DateTimeType dt1 = new DateTimeType(Instant.parse("2019-06-12T17:30:00Z"));
-        DateTimeType dt2 = new DateTimeType("2019-06-12T17:30:00Z");
-        DateTimeType dt3 = new DateTimeType("2019-06-12T17:30:00+0000");
-        DateTimeType dt4 = new DateTimeType("2019-06-12T19:30:00+0200");
-        assertThat(dt1, is(dt2));
-        assertThat(dt2, is(dt3));
-        assertThat(dt3, is(dt4));
-
-        Instant i1 = dt1.getInstant();
-        Instant i2 = dt2.getInstant();
-        Instant i3 = dt3.getInstant();
-        Instant i4 = dt4.getInstant();
-        assertThat(i1, is(i2));
-        assertThat(i2, is(i3));
-        assertThat(i3, is(i4));
+        Instant instant = new DateTimeType(input).getInstant();
+        assertThat(instant, is(instantReference));
     }
 
     @Test
