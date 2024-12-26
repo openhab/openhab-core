@@ -12,14 +12,12 @@
  */
 package org.openhab.core.library.types;
 
-import java.time.DateTimeException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.time.zone.ZoneRulesException;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
@@ -192,47 +190,6 @@ public class DateTimeType implements PrimitiveType, State, Command, Comparable<D
 
     public String format(Locale locale, String pattern) {
         return String.format(locale, pattern, getZonedDateTime());
-    }
-
-    /**
-     * @deprecated
-     *             Create a {@link DateTimeType} being the translation of the current object to the locale time zone
-     *
-     * @return a {@link DateTimeType} translated to the locale time zone
-     * @throws DateTimeException if the converted zone ID has an invalid format or the result exceeds the supported date
-     *             range
-     * @throws ZoneRulesException if the converted zone region ID cannot be found
-     */
-    @Deprecated
-    public DateTimeType toLocaleZone() throws DateTimeException, ZoneRulesException {
-        return new DateTimeType(instant);
-    }
-
-    /**
-     * @deprecated
-     *             Create a {@link DateTimeType} being the translation of the current object to a given zone
-     *
-     * @param zone the target zone as a string
-     * @return a {@link DateTimeType} translated to the given zone
-     * @throws DateTimeException if the zone has an invalid format or the result exceeds the supported date range
-     * @throws ZoneRulesException if the zone is a region ID that cannot be found
-     */
-    @Deprecated
-    public DateTimeType toZone(String zone) throws DateTimeException, ZoneRulesException {
-        return new DateTimeType(instant);
-    }
-
-    /**
-     * @deprecated
-     *             Create a {@link DateTimeType} being the translation of the current object to a given zone
-     *
-     * @param zoneId the target {@link ZoneId}
-     * @return a {@link DateTimeType} translated to the given zone
-     * @throws DateTimeException if the result exceeds the supported date range
-     */
-    @Deprecated
-    public DateTimeType toZone(ZoneId zoneId) throws DateTimeException {
-        return new DateTimeType(instant);
     }
 
     @Override
