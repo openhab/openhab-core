@@ -219,9 +219,8 @@ public class ScriptTransformationService implements TransformationService, Confi
                     return result == null ? null : result.toString();
                 } finally {
                     if (injectedParams != null) {
-                        for (String param : injectedParams) {
-                            executionContext.removeAttribute(param, ScriptContext.ENGINE_SCOPE);
-                        }
+                        injectedParams
+                                .forEach(param -> executionContext.removeAttribute(param, ScriptContext.ENGINE_SCOPE));
                     }
                 }
             } catch (ScriptException e) {
