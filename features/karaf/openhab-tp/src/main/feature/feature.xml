@@ -15,12 +15,6 @@
 -->
 <features name="${project.artifactId}-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.4.0">
 
-	<!-- TODO: workaround for KARAF-7843, remove after upgrade to 4.4.7 or higher -->
-	<feature name="spifly">
-		<feature>asm</feature>
-		<bundle start-level="30">mvn:org.apache.aries.spifly/org.apache.aries.spifly.dynamic.bundle/1.3.7</bundle>
-	</feature>
-
 	<feature name="openhab.tp-base" description="openHAB Core Target Platform Base" version="${project.version}">
 		<capability>openhab.tp;feature=base;version=1.0.0</capability>
 
