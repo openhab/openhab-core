@@ -112,7 +112,6 @@ public class ScriptTransformationServiceTest extends JavaTest {
         verify(scriptContext).setAttribute(eq("input"), eq("input"), eq(ScriptContext.ENGINE_SCOPE));
         verify(scriptContext).setAttribute(eq("param1"), eq("value1"), eq(ScriptContext.ENGINE_SCOPE));
         verify(scriptContext).setAttribute(eq("param2"), eq("value2"), eq(ScriptContext.ENGINE_SCOPE));
-        verifyNoMoreInteractions(scriptContext);
     }
 
     @Test
@@ -122,7 +121,6 @@ public class ScriptTransformationServiceTest extends JavaTest {
         verify(scriptContext).setAttribute(eq("input"), eq("input"), eq(ScriptContext.ENGINE_SCOPE));
         verify(scriptContext).setAttribute(eq("param1"), eq("&amp;"), eq(ScriptContext.ENGINE_SCOPE));
         verify(scriptContext).setAttribute(eq("param2"), eq("=value"), eq(ScriptContext.ENGINE_SCOPE));
-        verifyNoMoreInteractions(scriptContext);
     }
 
     @Test
@@ -141,7 +139,23 @@ public class ScriptTransformationServiceTest extends JavaTest {
         inOrder.verify(scriptContext, times(2)).setAttribute(anyString(), anyString(), eq(ScriptContext.ENGINE_SCOPE));
         inOrder.verify((Compilable) scriptEngine).compile(SCRIPT);
         inOrder.verify(scriptEngine).eval(SCRIPT);
-        inOrder.verifyNoMoreInteractions();
+    }
+
+    @Test
+    public void scriptAttributesRemovedAfterExecution() throws TransformationException, ScriptException {
+        abstract class CompilableScriptEngine implements ScriptEngine, Compilable {
+        }
+        scriptEngine = mock(CompilableScriptEngine.class);
+
+        when(scriptEngineContainer.getScriptEngine()).thenReturn(scriptEngine);
+        when(scriptEngine.getContext()).thenReturn(scriptContext);
+
+        InOrder inOrder = inOrder(scriptContext, scriptEngine);
+
+        service.transform(SCRIPT_UID + "?param1=value1", "input");
+
+        inOrder.verify(scriptEngine).eval(SCRIPT);
+        inOrder.verify(scriptContext).removeAttribute(eq("param1"), eq(ScriptContext.ENGINE_SCOPE));
     }
 
     @Test
@@ -150,7 +164,7 @@ public class ScriptTransformationServiceTest extends JavaTest {
 
         verify(scriptContext).setAttribute(eq("input"), eq("input"), eq(ScriptContext.ENGINE_SCOPE));
         verify(scriptContext).setAttribute(eq("param1"), eq("value1"), eq(ScriptContext.ENGINE_SCOPE));
-        verifyNoMoreInteractions(scriptContext);
+        verify(scriptContext, times(0)).setAttribute(eq("invalid"), any(), eq(ScriptContext.ENGINE_SCOPE));
     }
 
     @Test
