@@ -112,6 +112,17 @@ public class UnitUtils {
      * @return The Dimension string or null if the unit can not be found in any of the SystemOfUnits.
      */
     public static @Nullable String getDimensionName(Unit<?> unit) {
+        String compatibleDimension = getDirectDimensionName(unit);
+        if (compatibleDimension == null) {
+            compatibleDimension = getDimensionName(unit.inverse());
+        }
+        return compatibleDimension;
+    }
+
+    /**
+     * Returns the name of a compatible dimension for the given unit, without checking for invertedness
+     */
+    private static @Nullable String getDirectDimensionName(Unit<?> unit) {
         String compatibleDimension = null;
         for (Class<? extends SystemOfUnits> system : ALL_SYSTEM_OF_UNITS) {
             for (Field field : system.getDeclaredFields()) {
@@ -129,8 +140,7 @@ public class UnitUtils {
                                 LOGGER.warn("Unit field points to a null value: {}", field);
                             } else if (systemUnit.equals(unit)) {
                                 return dimension;
-                            } else if (compatibleDimension == null
-                                    && (systemUnit.isCompatible(unit) || systemUnit.isCompatible(unit.inverse()))) {
+                            } else if (compatibleDimension == null && (systemUnit.isCompatible(unit))) {
                                 compatibleDimension = dimension;
                             }
                         } catch (IllegalArgumentException | IllegalAccessException e) {
@@ -143,7 +153,7 @@ public class UnitUtils {
                 }
             }
         }
-        return compatibleDimension == null ? null : compatibleDimension;
+        return compatibleDimension;
     }
 
     /**

@@ -25,6 +25,8 @@ import javax.measure.Quantity;
 import javax.measure.Unit;
 import javax.measure.quantity.Angle;
 import javax.measure.quantity.Dimensionless;
+import javax.measure.quantity.ElectricConductance;
+import javax.measure.quantity.ElectricResistance;
 import javax.measure.quantity.Energy;
 import javax.measure.quantity.Length;
 import javax.measure.quantity.Power;
@@ -124,6 +126,8 @@ public class UnitUtilsTest {
         assertThat(UnitUtils.getDimensionName(Units.KELVIN), is(Temperature.class.getSimpleName()));
         assertThat(UnitUtils.getDimensionName(SIUnits.CELSIUS), is(Temperature.class.getSimpleName()));
         assertThat(UnitUtils.getDimensionName(ImperialUnits.FAHRENHEIT), is(Temperature.class.getSimpleName()));
+        assertThat(UnitUtils.getDimensionName(Units.SIEMENS), is(ElectricConductance.class.getSimpleName()));
+        assertThat(UnitUtils.getDimensionName(Units.OHM), is(ElectricResistance.class.getSimpleName()));
     }
 
     @Test
