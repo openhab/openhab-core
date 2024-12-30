@@ -17,6 +17,7 @@ import static org.openhab.core.automation.module.script.profile.ScriptProfileFac
 import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
@@ -185,8 +186,10 @@ public class ScriptTransformationService implements TransformationService, Confi
                         : scriptEngineContainer.getScriptEngine();
                 ScriptContext executionContext = engine.getContext();
                 executionContext.setAttribute("input", source, ScriptContext.ENGINE_SCOPE);
+                ArrayList<String> injectedParams = null;
 
                 if (params != null) {
+                    injectedParams = new ArrayList<>();
                     for (String param : params.split("&")) {
                         String[] splitString = param.split("=");
                         if (splitString.length != 2) {
@@ -197,6 +200,7 @@ public class ScriptTransformationService implements TransformationService, Confi
                             param = URLDecoder.decode(splitString[0], StandardCharsets.UTF_8);
                             String value = URLDecoder.decode(splitString[1], StandardCharsets.UTF_8);
                             executionContext.setAttribute(param, value, ScriptContext.ENGINE_SCOPE);
+                            injectedParams.add(param);
                         }
                     }
                 }
@@ -210,8 +214,15 @@ public class ScriptTransformationService implements TransformationService, Confi
                     scriptRecord.compiledScript = compiledScript;
                 }
 
-                Object result = compiledScript != null ? compiledScript.eval() : engine.eval(scriptRecord.script);
-                return result == null ? null : result.toString();
+                try {
+                    Object result = compiledScript != null ? compiledScript.eval() : engine.eval(scriptRecord.script);
+                    return result == null ? null : result.toString();
+                } finally {
+                    if (injectedParams != null) {
+                        injectedParams
+                                .forEach(param -> executionContext.removeAttribute(param, ScriptContext.ENGINE_SCOPE));
+                    }
+                }
             } catch (ScriptException e) {
                 throw new TransformationException("Failed to execute script.", e);
             } catch (IllegalStateException e) {
