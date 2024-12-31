@@ -416,7 +416,7 @@ public class AddonResource implements RESTResource, EventSubscriber {
             }
             Configuration oldConfiguration = configurationService.get(addonInfo.getServiceId());
             configurationService.update(addonInfo.getServiceId(),
-                    new Configuration(normalizeConfiguration(configuration, addonId)));
+                    new Configuration(normalizeConfiguration(configuration, infoUid)));
             return oldConfiguration != null ? Response.ok(oldConfiguration.getProperties()).build()
                     : Response.noContent().build();
         } catch (IOException ex) {
