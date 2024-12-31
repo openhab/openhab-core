@@ -17,7 +17,7 @@
 					"name": "command",
 					"type": "TEXT",
 					"label": "Command",
-					"description": "the received command",
+					"description": "The received command. For anything other than exact matches, add a rule condition.",
 					"required": false,
 					"limitToOptions": false,
 					"options": [
@@ -84,7 +84,7 @@
 					"name": "state",
 					"type": "TEXT",
 					"label": "State",
-					"description": "the state of the item",
+					"description": "The state of the item. For anything other than exact matches, add a rule condition.",
 					"required": false,
 					"limitToOptions": false,
 					"options": [
@@ -151,7 +151,7 @@
 					"name": "previousState",
 					"type": "TEXT",
 					"label": "Previous State",
-					"description": "the required previous state of the item",
+					"description": "The required previous state of the item. For anything other than exact matches, add a rule condition.",
 					"required": false,
 					"limitToOptions": false,
 					"options": [
@@ -185,7 +185,7 @@
 					"name": "state",
 					"type": "TEXT",
 					"label": "State",
-					"description": "the state of the item",
+					"description": "The state of the item. For anything other than exact matches, add a rule condition.",
 					"required": false,
 					"limitToOptions": false,
 					"options": [
@@ -258,7 +258,7 @@
 					"name": "command",
 					"type": "TEXT",
 					"label": "Command",
-					"description": "the received command",
+					"description": "The received command. For anything other than exact matches, add a rule condition.",
 					"required": false,
 					"limitToOptions": false,
 					"options": [
@@ -343,7 +343,7 @@
 					"name": "state",
 					"type": "TEXT",
 					"label": "State",
-					"description": "the state of the item",
+					"description": "The state of the item. For anything other than exact matches, add a rule condition.",
 					"required": false,
 					"limitToOptions": false,
 					"options": [
@@ -428,7 +428,7 @@
 					"name": "previousState",
 					"type": "TEXT",
 					"label": "Previous State",
-					"description": "the required previous state of the item",
+					"description": "The required previous state of the item. For anything other than exact matches, add a rule condition.",
 					"required": false,
 					"limitToOptions": false,
 					"options": [
@@ -462,7 +462,7 @@
 					"name": "state",
 					"type": "TEXT",
 					"label": "State",
-					"description": "the state of the item",
+					"description": "The state of the item. For anything other than exact matches, add a rule condition.",
 					"required": false,
 					"limitToOptions": false,
 					"options": [
