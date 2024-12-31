@@ -121,7 +121,13 @@ public class CommonWebSocketServlet extends WebSocketServlet {
                 Matcher matcher = WEBSOCKET_ACCESS_TOKEN_PATTERN.matcher(secWebSocketProtocolHeader);
                 if (matcher.find() && matcher.group("base64") != null) {
                     String base64 = matcher.group("base64");
-                    accessToken = new String(Base64.getDecoder().decode(base64));
+                    try {
+                        accessToken = new String(Base64.getDecoder().decode(base64));
+                    } catch (IllegalArgumentException e) {
+                        logger.warn("Invalid base64 encoded access token in Sec-WebSocket-Protocol header from {}.",
+                                servletUpgradeRequest.getRemoteAddress());
+                        return null;
+                    }
                 } else {
                     logger.warn("Invalid use of Sec-WebSocket-Protocol header from {}.",
                             servletUpgradeRequest.getRemoteAddress());
