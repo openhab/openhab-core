@@ -248,6 +248,13 @@ public class AuthFilter implements ContainerRequestFilter {
         }
     }
 
+    public @Nullable SecurityContext getSecurityContext(@Nullable String bearerToken) throws AuthenticationException {
+        if (bearerToken == null) {
+            return null;
+        }
+        return authenticateBearerToken(bearerToken);
+    }
+
     public @Nullable SecurityContext getSecurityContext(HttpServletRequest request, boolean allowQueryToken)
             throws AuthenticationException, IOException {
         String altTokenHeader = request.getHeader(ALT_AUTH_HEADER);
