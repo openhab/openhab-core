@@ -31,6 +31,7 @@ Import-Package: \
  org.openhab.core.model.persistence.extensions,\
  org.openhab.core.model.script,\
  org.openhab.core.model.script.engine.action,\
+ org.openhab.core.automation.module.script.rulesupport.shared,\
  com.google.common.base;version="14",\
  javax.measure,\
  javax.measure.quantity,\
