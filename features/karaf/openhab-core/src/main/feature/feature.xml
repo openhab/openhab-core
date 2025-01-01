@@ -28,7 +28,7 @@
 
 		<feature dependency="true">openhab.tp-gson</feature>
 
-		<requirement>openhab.tp;filter:="(&amp;(feature=xtext)(version&gt;=2.36.0)(!(version&gt;=2.37.0)))"</requirement>
+		<requirement>openhab.tp;filter:="(&amp;(feature=xtext)(version&gt;=2.37.0)(!(version&gt;=2.38.0)))"</requirement>
 		<feature dependency="true">openhab.tp-xtext</feature>
 
 		<requirement>openhab.tp;filter:="(feature=jax-rs-whiteboard)"</requirement>
@@ -262,7 +262,7 @@
 		<feature>openhab-core-base</feature>
 		<feature>openhab-transport-serial</feature>
 
-		<bundle dependency="true">mvn:org.apache.commons/commons-pool2/2.11.1</bundle>
+		<bundle dependency="true">mvn:org.apache.commons/commons-pool2/2.12.0</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.transport.modbus/${project.version}</bundle>
 	</feature>
 
@@ -401,7 +401,7 @@
 
 	<feature name="openhab-core-model-lsp" version="${project.version}">
 
-		<requirement>openhab.tp;filter:="(&amp;(feature=xtext-ide)(version&gt;=2.36.0)(!(version&gt;=2.37.0)))"</requirement>
+		<requirement>openhab.tp;filter:="(&amp;(feature=xtext-ide)(version&gt;=2.37.0)(!(version&gt;=2.38.0)))"</requirement>
 		<feature dependency="true">openhab.tp-xtext-ide</feature>
 
 		<requirement>openhab.tp;filter:="(&amp;(feature=lsp4j)(version&gt;=0.23.1)(!(version&gt;=0.24.0)))"</requirement>
