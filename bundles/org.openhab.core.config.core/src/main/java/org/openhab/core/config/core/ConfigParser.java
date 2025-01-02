@@ -12,6 +12,7 @@
  */
 package org.openhab.core.config.core;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
@@ -21,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -77,67 +79,82 @@ public final class ConfigParser {
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public static <T> @Nullable T configurationAs(Map<String, @Nullable Object> properties,
             Class<T> configurationClass) {
-        T configuration;
+
+        Constructor<T> constructor;
+        T configuration = null;
         try {
-            configuration = configurationClass.getConstructor().newInstance();
-        } catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException
-                | IllegalArgumentException | InvocationTargetException e) {
+            if (!configurationClass.isRecord()) {
+                constructor = configurationClass.getConstructor();
+                configuration = constructor.newInstance();
+            } else {
+                Constructor<?>[] constructors = configurationClass.getConstructors();
+                constructor = (Constructor<T>) constructors[0];
+            }
+        } catch (NoSuchMethodException | InstantiationException | IllegalAccessException
+                | InvocationTargetException e) {
             return null;
         }
 
-        List<Field> fields = getAllFields(configurationClass);
-        for (Field field : fields) {
-            // Don't try to write to final fields and ignore transient fields
-            if (Modifier.isFinal(field.getModifiers()) || Modifier.isTransient(field.getModifiers())) {
+        Map<Field, Object> initArgs = new LinkedHashMap<>();
+        for (Field field : getAllFields(configurationClass)) {
+            // Don't try to write to final fields and ignore transient fields when it's a class
+            if (!configurationClass.isRecord()
+                    && (Modifier.isFinal(field.getModifiers()) || Modifier.isTransient(field.getModifiers()))) {
                 continue;
             }
-            String fieldName = field.getName();
-            Class<?> type = field.getType();
 
+            String fieldName = field.getName();
             Object value = properties.get(fieldName);
             // Consider RequiredField annotations
             if (value == null) {
-                LOGGER.trace("Skipping field '{}', because config has no entry for {}", fieldName, fieldName);
+                LOGGER.trace("Skipping field '{}', because config has no entry for it", fieldName);
                 continue;
             }
 
+            Class<?> type = field.getType();
             // Allows to have List<int>, List<Double>, List<String> etc (and the corresponding Set<?>)
-            if (value instanceof Collection collection1) {
-                Class<?> innerClass = (Class<?>) ((ParameterizedType) field.getGenericType())
-                        .getActualTypeArguments()[0];
-                Collection collection;
-                if (List.class.isAssignableFrom(type)) {
-                    collection = new ArrayList<>();
-                } else if (Set.class.isAssignableFrom(type)) {
-                    collection = new HashSet<>();
+            if (value instanceof Collection valueCollection) {
+                Collection collection = List.class.isAssignableFrom(type) ? new ArrayList<>()
+                        : Set.class.isAssignableFrom(type) ? new HashSet<>() : //
+                                null;
+
+                if (collection != null) {
+                    Class<?> innerClass = (Class<?>) ((ParameterizedType) field.getGenericType())
+                            .getActualTypeArguments()[0];
+                    valueCollection.stream().map(it -> valueAs(it, innerClass)).filter(Object.class::isInstance)
+                            .forEach(collection::add);
+                    initArgs.put(field, collection);
                 } else {
                     LOGGER.warn("Skipping field '{}', only List and Set is supported as target Collection", fieldName);
-                    continue;
                 }
-                for (final Object it : collection1) {
-                    final Object normalized = valueAs(it, innerClass);
-                    if (normalized == null) {
-                        continue;
-                    }
-                    collection.add(normalized);
-                }
-                value = collection;
-            }
-
-            try {
+            } else {
                 value = valueAs(value, type);
-                if (value == null) {
+                if (value != null) {
+                    initArgs.put(field, value);
+                } else {
                     LOGGER.warn(
                             "Could not set value for field '{}' because conversion failed. Check your configuration value.",
                             fieldName);
-                    continue;
                 }
-                LOGGER.trace("Setting value ({}) {} to field '{}' in configuration class {}", type.getSimpleName(),
-                        value, fieldName, configurationClass.getName());
-                field.setAccessible(true);
-                field.set(configuration, value);
-            } catch (SecurityException | IllegalArgumentException | IllegalAccessException ex) {
-                LOGGER.warn("Could not set field value for field '{}': {}", fieldName, ex.getMessage(), ex);
+            }
+        }
+
+        if (configuration instanceof T localConfiguration) {
+            initArgs.forEach((field, value) -> {
+                try {
+                    LOGGER.trace("Setting value ({}) {} to field '{}' in configuration class {}",
+                            field.getType().getSimpleName(), value, field.getName(), configurationClass.getName());
+                    field.setAccessible(true);
+                    field.set(localConfiguration, value);
+                } catch (IllegalAccessException e) {
+                    LOGGER.warn("Could not set field value for field '{}': {}", field.getName(), e.getMessage(), e);
+                }
+            });
+        } else {
+            try {
+                configuration = constructor.newInstance(initArgs.values().toArray());
+            } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+                LOGGER.warn("Could invoke default record constructor '{}'", e.getMessage(), e);
             }
         }
         return configuration;
@@ -224,7 +241,11 @@ public final class ConfigParser {
                 result = Boolean.valueOf(strValue);
             } else if (type.isEnum()) {
                 final Class<? extends Enum> enumType = (Class<? extends Enum>) typeClass;
-                result = Enum.valueOf(enumType, value.toString());
+                try {
+                    result = Enum.valueOf(enumType, value.toString());
+                } catch (IllegalArgumentException e) {
+                    result = null;
+                }
             } else if (Set.class.isAssignableFrom(typeClass)) {
                 result = Set.of(value);
             } else if (Collection.class.isAssignableFrom(typeClass)) {
