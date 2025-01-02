@@ -14,6 +14,7 @@ package org.openhab.core.config.core.internal.normalization;
 
 import java.math.BigDecimal;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 
 /**
@@ -23,41 +24,30 @@ import org.openhab.core.config.core.ConfigDescriptionParameter;
  * @author Simon Kaufmann - Initial contribution
  * @author Thomas Höfer - made class final and minor javadoc changes
  */
+@NonNullByDefault
 final class DecimalNormalizer extends AbstractNormalizer {
 
     @Override
     public Object doNormalize(Object value) {
         try {
-            if (value instanceof BigDecimal bigDecimalValue) {
-                return stripTrailingZeros(bigDecimalValue);
-            }
-            if (value instanceof String stringValue) {
-                return stripTrailingZeros(new BigDecimal(stringValue));
-            }
-            if (value instanceof Byte byteValue) {
-                return new BigDecimal(byteValue);
-            }
-            if (value instanceof Short shortValue) {
-                return new BigDecimal(shortValue);
-            }
-            if (value instanceof Integer integerValue) {
-                return new BigDecimal(integerValue);
-            }
-            if (value instanceof Long longValue) {
-                return new BigDecimal(longValue);
-            }
-            if (value instanceof Float floatValue) {
-                return new BigDecimal(floatValue.toString());
-            }
-            if (value instanceof Double doubleValue) {
-                return BigDecimal.valueOf(doubleValue);
-            }
+            return switch (value) {
+                case BigDecimal bigDecimalValue -> stripTrailingZeros(bigDecimalValue);
+                case String stringValue -> stripTrailingZeros(new BigDecimal(stringValue));
+                case Byte byteValue -> new BigDecimal(byteValue);
+                case Short shortValue -> new BigDecimal(shortValue);
+                case Integer integerValue -> new BigDecimal(integerValue);
+                case Long longValue -> new BigDecimal(longValue);
+                case Float floatValue -> new BigDecimal(floatValue.toString());
+                case Double doubleValue -> BigDecimal.valueOf(doubleValue);
+                default -> {
+                    logger.trace("Class \"{}\" cannot be converted to a decimal number.", value.getClass().getName());
+                    yield value;
+                }
+            };
         } catch (ArithmeticException | NumberFormatException e) {
             logger.trace("\"{}\" is not a valid decimal number.", value, e);
             return value;
         }
-        logger.trace("Class \"{}\" cannot be converted to a decimal number.", value.getClass().getName());
-        return value;
     }
 
     private BigDecimal stripTrailingZeros(BigDecimal value) {
