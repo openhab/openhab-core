@@ -32,3 +32,12 @@ public class ${bindingIdCamelCase}Configuration {
     public String password = "";
     public int refreshInterval = 600;
 }
+
+@Test
+public void testDefaultConfigurationValues() {
+    ${bindingIdCamelCase}Configuration config = new ${bindingIdCamelCase}Configuration();
+    assertEquals("", config.hostname);
+    assertEquals("", config.password);
+    assertEquals(600, config.refreshInterval);
+}
+

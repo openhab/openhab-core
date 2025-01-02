@@ -104,4 +104,9 @@ public class ${bindingIdCamelCase}Handler extends BaseThingHandler {
         // updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR,
         // "Can not access device as username and/or password are invalid");
     }
+
+    long startTime = System.currentTimeMillis();
+    initialize();
+    long endTime = System.currentTimeMillis();
+    logger.debug("Initialization completed in {} ms", (endTime - startTime));
 }
