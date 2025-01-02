@@ -32,9 +32,9 @@ import tech.units.indriya.function.Calculus;
  *
  * @author Jan N. Klug - Initial contribution
  */
-@SuppressWarnings("serial")
 @NonNullByDefault
 public class CurrencyConverter extends AbstractConverter {
+    private static final long serialVersionUID = 1L;
 
     private final BigDecimal factor;
 

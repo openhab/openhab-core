@@ -62,7 +62,7 @@ public final class StateOption {
         final int prime = 31;
         int result = 1;
         result = prime * result + value.hashCode();
-        result = prime * result + (label instanceof String string ? string.hashCode() : 0);
+        result = prime * result + Objects.hash(label);
         return result;
     }
 

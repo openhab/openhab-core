@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -508,7 +507,7 @@ public class CronAdjuster implements SchedulerTemporalAdjuster {
     public Temporal adjustInto(@Nullable final Temporal temporal) {
         // Never match the actual time, so since our basic
         // unit is seconds, we add one second.
-        Temporal ret = Objects.requireNonNull(temporal).plus(1, ChronoUnit.SECONDS);
+        Temporal ret = temporal.plus(1, ChronoUnit.SECONDS);
 
         // We loop through the fields until they all match. If
         // one of them does not match, its type is incremented

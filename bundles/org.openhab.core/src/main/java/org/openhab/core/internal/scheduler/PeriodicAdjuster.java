@@ -16,7 +16,6 @@ import java.time.Duration;
 import java.time.temporal.Temporal;
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -57,7 +56,7 @@ class PeriodicAdjuster implements SchedulerTemporalAdjuster {
         if (iterator.hasNext()) {
             current = iterator.next();
         }
-        Temporal nextTime = Objects.requireNonNull(timeDone).plus(current);
+        Temporal nextTime = timeDone.plus(current);
         timeDone = nextTime;
         return nextTime;
     }
