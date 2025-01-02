@@ -18,6 +18,8 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.OpenHAB;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,12 +31,14 @@ import org.slf4j.LoggerFactory;
  *
  * @author Kai Kreuzer - Initial contribution
  */
+@NonNullByDefault
 public class InstanceUUID {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InstanceUUID.class);
 
     static final String UUID_FILE_NAME = "uuid";
 
+    @Nullable
     static String uuid;
 
     /**
@@ -42,22 +46,21 @@ public class InstanceUUID {
      *
      * @return a UUID which identifies the instance or null, if uuid cannot be persisted
      */
-    public static synchronized String get() {
+    public static synchronized @Nullable String get() {
         if (uuid == null) {
             try {
                 File file = new File(OpenHAB.getUserDataFolder() + File.separator + UUID_FILE_NAME);
                 if (!file.exists()) {
-                    uuid = java.util.UUID.randomUUID().toString();
-                    writeFile(file, uuid);
+                    uuid = generateToFile(file);
                 } else {
-                    uuid = readFirstLine(file);
-                    if (uuid != null && !uuid.isEmpty()) {
+                    String valueInFile = readFirstLine(file);
+                    if (!valueInFile.isEmpty()) {
+                        uuid = valueInFile;
                         LOGGER.debug("UUID '{}' has been restored from file '{}'", file.getAbsolutePath(), uuid);
                     } else {
-                        uuid = java.util.UUID.randomUUID().toString();
+                        uuid = generateToFile(file);
                         LOGGER.warn("UUID file '{}' has no content, rewriting it now with '{}'", file.getAbsolutePath(),
                                 uuid);
-                        writeFile(file, uuid);
                     }
                 }
             } catch (IOException e) {
@@ -68,16 +71,19 @@ public class InstanceUUID {
         return uuid;
     }
 
-    private static void writeFile(File file, String content) throws IOException {
+    private static String generateToFile(File file) throws IOException {
         // create intermediary directories
-        file.getParentFile().mkdirs();
-        Files.writeString(file.toPath(), content, StandardCharsets.UTF_8);
+        if (file.getParentFile() instanceof File parentFile) {
+            parentFile.mkdirs();
+        }
+        String newUuid = java.util.UUID.randomUUID().toString();
+        Files.writeString(file.toPath(), newUuid, StandardCharsets.UTF_8);
+        return newUuid;
     }
 
     private static String readFirstLine(File file) {
         try (final BufferedReader reader = Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8)) {
-            String line;
-            return (line = reader.readLine()) == null ? "" : line;
+            return reader.readLine() instanceof String line ? line : "";
         } catch (IOException ioe) {
             LOGGER.warn("Failed reading the UUID file '{}': {}", file.getAbsolutePath(), ioe.getMessage());
             return "";
