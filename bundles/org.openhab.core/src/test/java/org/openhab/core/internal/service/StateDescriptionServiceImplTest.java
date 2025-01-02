@@ -43,6 +43,7 @@ public class StateDescriptionServiceImplTest {
     private static final BigDecimal STATE_DESCRIPTION_PROVIDER_DEFAULT_MIN_VALUE = BigDecimal.ZERO;
     private static final BigDecimal STATE_DESCRIPTION_PROVIDER_DEFAULT_MAX_VALUE = BigDecimal.ZERO;
     private static final BigDecimal STATE_DESCRIPTION_PROVIDER_DEFAULT_STEP = BigDecimal.ZERO;
+    private static final String STATE_DESCRIPTION_PROVIDER_DEFAULT_RANGE_UNIT = "x";
     private static final String STATE_DESCRIPTION_PROVIDER_DEFAULT_PATTERN = "pattern1";
     private static final Boolean STATE_DESCRIPTION_PROVIDER_DEFAULT_IS_READONLY = Boolean.FALSE;
     private static final List<StateOption> STATE_DESCRIPTION_PROVIDER_DEFAULT_OPTIONS = List.of();
@@ -64,6 +65,7 @@ public class StateDescriptionServiceImplTest {
                 .withMinimum(STATE_DESCRIPTION_PROVIDER_DEFAULT_MIN_VALUE)
                 .withMaximum(STATE_DESCRIPTION_PROVIDER_DEFAULT_MAX_VALUE)
                 .withStep(STATE_DESCRIPTION_PROVIDER_DEFAULT_STEP)
+                .withRangeUnit(STATE_DESCRIPTION_PROVIDER_DEFAULT_RANGE_UNIT)
                 .withPattern(STATE_DESCRIPTION_PROVIDER_DEFAULT_PATTERN)
                 .withReadOnly(STATE_DESCRIPTION_PROVIDER_DEFAULT_IS_READONLY)
                 .withOptions(STATE_DESCRIPTION_PROVIDER_DEFAULT_OPTIONS).build();
@@ -74,6 +76,7 @@ public class StateDescriptionServiceImplTest {
         assertThat(stateDescription.getMinimum(), is(STATE_DESCRIPTION_PROVIDER_DEFAULT_MIN_VALUE));
         assertThat(stateDescription.getMaximum(), is(STATE_DESCRIPTION_PROVIDER_DEFAULT_MAX_VALUE));
         assertThat(stateDescription.getStep(), is(STATE_DESCRIPTION_PROVIDER_DEFAULT_STEP));
+        assertThat(stateDescription.getRangeUnit(), is(STATE_DESCRIPTION_PROVIDER_DEFAULT_RANGE_UNIT));
         assertThat(stateDescription.getPattern(), is(STATE_DESCRIPTION_PROVIDER_DEFAULT_PATTERN));
         assertThat(stateDescription.isReadOnly(), is(STATE_DESCRIPTION_PROVIDER_DEFAULT_IS_READONLY));
         assertThat(stateDescription.getOptions(), is(STATE_DESCRIPTION_PROVIDER_DEFAULT_OPTIONS));
@@ -85,6 +88,7 @@ public class StateDescriptionServiceImplTest {
                 .withMinimum(new BigDecimal(-1)) //
                 .withMaximum(new BigDecimal(-1)) //
                 .withStep(new BigDecimal(-1)) //
+                .withRangeUnit("x") //
                 .withPattern("pattern1").build();
         registerStateDescriptionFragmentProvider(stateDescriptionFragment1, -1);
 
@@ -92,6 +96,7 @@ public class StateDescriptionServiceImplTest {
                 .withMinimum(new BigDecimal(-2)) //
                 .withMaximum(new BigDecimal(-2)) //
                 .withStep(new BigDecimal(-2)) //
+                .withRangeUnit("y") //
                 .withPattern("pattern2").build();
         registerStateDescriptionFragmentProvider(stateDescriptionFragment2, -2);
 
@@ -100,6 +105,7 @@ public class StateDescriptionServiceImplTest {
         assertThat(stateDescription.getMinimum(), is(stateDescriptionFragment1.getMinimum()));
         assertThat(stateDescription.getMaximum(), is(stateDescriptionFragment1.getMaximum()));
         assertThat(stateDescription.getStep(), is(stateDescriptionFragment1.getStep()));
+        assertThat(stateDescription.getRangeUnit(), is(stateDescriptionFragment1.getRangeUnit()));
         assertThat(stateDescription.getPattern(), is(stateDescriptionFragment1.getPattern()));
     }
 
@@ -188,6 +194,7 @@ public class StateDescriptionServiceImplTest {
                 .withMinimum(BigDecimal.ONE) //
                 .withMaximum(BigDecimal.ONE) //
                 .withStep(BigDecimal.ONE) //
+                .withRangeUnit("x") //
                 .withPattern("base_pattern") //
                 .withOptions(options).build();
         registerStateDescriptionFragmentProvider(stateDescriptionFragment2, -2);
@@ -197,6 +204,7 @@ public class StateDescriptionServiceImplTest {
         assertThat(stateDescription.getMinimum(), is(BigDecimal.ZERO));
         assertThat(stateDescription.getMaximum(), is(BigDecimal.TEN));
         assertThat(stateDescription.getStep(), is(BigDecimal.ONE));
+        assertThat(stateDescription.getRangeUnit(), is("x"));
         assertThat(stateDescription.getPattern(), is("pattern"));
         assertThat(stateDescription.isReadOnly(), is(true));
         assertThat(stateDescription.getOptions(), is(options));
