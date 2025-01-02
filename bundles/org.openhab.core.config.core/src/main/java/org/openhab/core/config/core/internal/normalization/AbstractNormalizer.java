@@ -30,9 +30,13 @@ abstract class AbstractNormalizer implements Normalizer {
 
     @Override
     public final @Nullable Object normalize(@Nullable Object value) {
-        return value == null ? null : //
-                "".equals(value) ? "" : //
-                        doNormalize(value);
+        if (value == null) {
+            return null;
+        }
+        if (value instanceof String && "".equals(value)) {
+            return "";
+        }
+        return doNormalize(value);
     }
 
     /**
