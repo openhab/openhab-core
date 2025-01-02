@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Andrew Fiddian-Green - Initial Contribution
  */
-@Component
+@Component(immediate = true)
 public class UpnpDeviceFinder implements RegistryListener {
 
     private static final String DEVICE_FINDER_THREADPOOL = "upnpDeviceFinder";
