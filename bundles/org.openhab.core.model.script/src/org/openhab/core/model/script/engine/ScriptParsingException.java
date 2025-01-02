@@ -12,6 +12,7 @@
  */
 package org.openhab.core.model.script.engine;
 
+import java.io.Serial;
 import java.util.List;
 
 import org.eclipse.emf.ecore.resource.Resource.Diagnostic;
@@ -26,6 +27,7 @@ import org.eclipse.xtext.validation.Issue;
  */
 public class ScriptParsingException extends ScriptException {
 
+    @Serial
     private static final long serialVersionUID = -3784970293118871807L;
 
     public ScriptParsingException(String message, String scriptAsString) {

@@ -67,7 +67,7 @@ public class EnrichedItemDTOMapperWithTransformOSGiTest extends JavaOSGiTest {
         assertThat(sd.getMaximum(), is(BigDecimal.valueOf(100)));
         assertThat(sd.getStep(), is(BigDecimal.valueOf(10)));
         assertThat(sd.getPattern(), is("%d °C"));
-        assertThat(sd.getOptions().get(0).getValue(), is("SOUND"));
-        assertThat(sd.getOptions().get(0).getLabel(), is("My great sound."));
+        assertThat(sd.getOptions().getFirst().getValue(), is("SOUND"));
+        assertThat(sd.getOptions().getFirst().getLabel(), is("My great sound."));
     }
 }

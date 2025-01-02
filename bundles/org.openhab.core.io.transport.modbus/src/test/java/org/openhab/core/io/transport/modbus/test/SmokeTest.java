@@ -440,7 +440,7 @@ public class SmokeTest extends IntegrationTestSupport {
                 assertThat(response.getFunctionCode(), is(equalTo(15)));
 
                 assertThat(modbustRequestCaptor.getAllReturnValues().size(), is(equalTo(1)));
-                ModbusRequest request = modbustRequestCaptor.getAllReturnValues().get(0);
+                ModbusRequest request = modbustRequestCaptor.getAllReturnValues().getFirst();
                 assertThat(request.getFunctionCode(), is(equalTo(15)));
                 assertThat(((WriteMultipleCoilsRequest) request).getReference(), is(equalTo(3)));
                 assertThat(((WriteMultipleCoilsRequest) request).getBitCount(), is(equalTo(bits.size())));
@@ -481,7 +481,7 @@ public class SmokeTest extends IntegrationTestSupport {
             assertInstanceOf(ModbusSlaveErrorResponseException.class, lastError.get(), lastError.toString());
 
             assertThat(modbustRequestCaptor.getAllReturnValues().size(), is(equalTo(1)));
-            ModbusRequest request = modbustRequestCaptor.getAllReturnValues().get(0);
+            ModbusRequest request = modbustRequestCaptor.getAllReturnValues().getFirst();
             assertThat(request.getFunctionCode(), is(equalTo(15)));
             assertThat(((WriteMultipleCoilsRequest) request).getReference(), is(equalTo(3)));
             assertThat(((WriteMultipleCoilsRequest) request).getBitCount(), is(equalTo(bits.size())));
@@ -520,7 +520,7 @@ public class SmokeTest extends IntegrationTestSupport {
             assertThat(response.getFunctionCode(), is(equalTo(5)));
 
             assertThat(modbustRequestCaptor.getAllReturnValues().size(), is(equalTo(1)));
-            ModbusRequest request = modbustRequestCaptor.getAllReturnValues().get(0);
+            ModbusRequest request = modbustRequestCaptor.getAllReturnValues().getFirst();
             assertThat(request.getFunctionCode(), is(equalTo(5)));
             assertThat(((WriteCoilRequest) request).getReference(), is(equalTo(3)));
             assertThat(((WriteCoilRequest) request).getCoil(), is(equalTo(true)));
@@ -558,7 +558,7 @@ public class SmokeTest extends IntegrationTestSupport {
             assertInstanceOf(ModbusSlaveErrorResponseException.class, lastError.get(), lastError.toString());
 
             assertThat(modbustRequestCaptor.getAllReturnValues().size(), is(equalTo(1)));
-            ModbusRequest request = modbustRequestCaptor.getAllReturnValues().get(0);
+            ModbusRequest request = modbustRequestCaptor.getAllReturnValues().getFirst();
             assertThat(request.getFunctionCode(), is(equalTo(5)));
             assertThat(((WriteCoilRequest) request).getReference(), is(equalTo(300)));
             assertThat(((WriteCoilRequest) request).getCoil(), is(equalTo(true)));

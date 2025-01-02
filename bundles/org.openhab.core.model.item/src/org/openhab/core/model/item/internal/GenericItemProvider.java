@@ -354,7 +354,7 @@ public class GenericItemProvider extends AbstractProvider<Item>
                 // Single valued lists get unwrapped to just their one value for
                 // backwards compatibility
                 if (value instanceof List listValue && listValue.size() == 1) {
-                    value = listValue.get(0);
+                    value = listValue.getFirst();
                 }
                 configuration.put(p.getKey(), value);
             });

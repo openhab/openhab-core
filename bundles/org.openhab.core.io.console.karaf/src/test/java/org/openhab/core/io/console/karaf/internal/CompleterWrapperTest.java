@@ -61,8 +61,8 @@ public class CompleterWrapperTest {
 
         completerWrapper.completeCandidates(session, commandLine, candidates);
         assertEquals(1, candidates.size());
-        assertEquals("command", candidates.get(0).value());
-        assertEquals("description", candidates.get(0).descr());
+        assertEquals("command", candidates.getFirst().value());
+        assertEquals("description", candidates.getFirst().descr());
     }
 
     @Test
@@ -75,8 +75,8 @@ public class CompleterWrapperTest {
 
         completerWrapper.completeCandidates(session, commandLine, candidates);
         assertEquals(2, candidates.size());
-        assertEquals("command", candidates.get(0).value());
-        assertEquals("description", candidates.get(0).descr());
+        assertEquals("command", candidates.getFirst().value());
+        assertEquals("description", candidates.getFirst().descr());
 
         assertEquals("openhab:command", candidates.get(1).value());
         assertEquals("description", candidates.get(1).descr());

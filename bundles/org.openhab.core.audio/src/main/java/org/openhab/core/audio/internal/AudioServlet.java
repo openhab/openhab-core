@@ -17,6 +17,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Serial;
 import java.nio.file.Files;
 import java.util.Collections;
 import java.util.List;
@@ -72,6 +73,7 @@ import org.slf4j.LoggerFactory;
 @NonNullByDefault
 public class AudioServlet extends HttpServlet implements AudioHTTPServer {
 
+    @Serial
     private static final long serialVersionUID = -3364664035854567854L;
 
     private static final List<String> WAV_MIME_TYPES = List.of("audio/wav", "audio/x-wav", "audio/vnd.wave");

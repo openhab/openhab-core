@@ -205,7 +205,7 @@ public class LRUMediaCacheEntryTest {
         if (possibleException != null) {
             throw possibleException;
         }
-        assertArrayEquals(randomData, bytesResultList.get(0));
+        assertArrayEquals(randomData, bytesResultList.getFirst());
         assertArrayEquals(randomData, bytesResultList.get(1));
 
         actualAudioStream1.close();

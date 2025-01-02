@@ -13,6 +13,7 @@
 package org.openhab.core.io.http.auth.internal;
 
 import java.io.IOException;
+import java.io.Serial;
 import java.util.Map;
 
 import javax.servlet.Servlet;
@@ -46,6 +47,7 @@ import org.osgi.service.http.whiteboard.propertytypes.HttpWhiteboardServletPatte
 @HttpWhiteboardServletPattern(CreateAPITokenPageServlet.SERVLET_PATH + "/*")
 public class CreateAPITokenPageServlet extends AbstractAuthPageServlet {
 
+    @Serial
     private static final long serialVersionUID = 5340598701104679843L;
     public static final String SERVLET_PATH = "/createApiToken";
 

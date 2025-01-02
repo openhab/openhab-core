@@ -12,6 +12,8 @@
  */
 package org.openhab.core.voice;
 
+import java.io.Serial;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
@@ -22,6 +24,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 @NonNullByDefault
 public class STTException extends Exception {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     /**

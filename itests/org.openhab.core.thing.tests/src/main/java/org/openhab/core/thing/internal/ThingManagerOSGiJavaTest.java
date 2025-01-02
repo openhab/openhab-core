@@ -353,8 +353,8 @@ public class ThingManagerOSGiJavaTest extends JavaOSGiTest {
         assertNotNull(channelBuilders);
         assertEquals(2, channelBuilders.size());
 
-        assertNotNull(channelBuilders.get(0));
-        validateChannel(channelBuilders.get(0).build());
+        assertNotNull(channelBuilders.getFirst());
+        validateChannel(channelBuilders.getFirst().build());
         assertNotNull(channelBuilders.get(1));
         validateChannelOverridden(channelBuilders.get(1).build());
     }

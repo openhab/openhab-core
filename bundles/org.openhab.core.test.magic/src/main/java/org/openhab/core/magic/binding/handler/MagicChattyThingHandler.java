@@ -17,6 +17,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -90,7 +91,7 @@ public class MagicChattyThingHandler extends BaseThingHandler {
             @Override
             public void run() {
                 for (ChannelUID channelUID : numberChannelUIDs) {
-                    double randomValue = Math.random() * 100;
+                    double randomValue = ThreadLocalRandom.current().nextDouble() * 100;
                     int intValue = (int) randomValue;
                     State cmd;
                     if (intValue % 2 == 0) {
@@ -102,7 +103,7 @@ public class MagicChattyThingHandler extends BaseThingHandler {
                 }
 
                 for (ChannelUID channelUID : textChannelUIDs) {
-                    int pos = (int) (Math.random() * (RANDOM_TEXTS.size() - 1));
+                    int pos = (int) (ThreadLocalRandom.current().nextDouble() * (RANDOM_TEXTS.size() - 1));
                     String randomValue = RANDOM_TEXTS.get(pos);
 
                     StringType cmd = new StringType(randomValue);

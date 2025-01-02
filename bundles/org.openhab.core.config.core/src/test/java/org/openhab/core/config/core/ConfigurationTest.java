@@ -119,7 +119,7 @@ public class ConfigurationTest {
         configuration.put("stringField", "someValue");
         configuration.put("additionalField", "");
         assertThat(props.get("stringField"), is(nullValue()));
-        assertThat(values.get(0), is(nullValue()));
+        assertThat(values.getFirst(), is(nullValue()));
         assertThat(values.get(1), is(nullValue()));
         assertThat(values.size(), is(2));
         assertThat(keys.size(), is(2));

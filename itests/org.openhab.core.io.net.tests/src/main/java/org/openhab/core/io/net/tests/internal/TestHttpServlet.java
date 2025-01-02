@@ -13,6 +13,7 @@
 package org.openhab.core.io.net.tests.internal;
 
 import java.io.IOException;
+import java.io.Serial;
 import java.nio.charset.StandardCharsets;
 
 import javax.servlet.ServletException;
@@ -31,6 +32,7 @@ import org.openhab.core.io.net.tests.ClientFactoryTest;
  */
 @NonNullByDefault
 public class TestHttpServlet extends HttpServlet {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     @Override

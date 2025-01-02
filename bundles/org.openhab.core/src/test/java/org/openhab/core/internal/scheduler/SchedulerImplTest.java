@@ -258,7 +258,7 @@ public class SchedulerImplTest extends JavaTest {
         assertEquals(0, temporalAdjuster.getCount(), "Scheduler should have run 0 time");
 
         assertEquals(1, listAppender.list.size());
-        ILoggingEvent loggingEvent = listAppender.list.get(0);
+        ILoggingEvent loggingEvent = listAppender.list.getFirst();
         assertEquals(Level.WARN, loggingEvent.getLevel());
         assertEquals("Scheduled job 'myScheduledJob' failed and stopped", loggingEvent.getFormattedMessage());
     }

@@ -325,9 +325,9 @@ public class Voice {
             String[] split = locale.split("-");
             Locale loc;
             if (split.length == 2) {
-                loc = new Locale(split[0], split[1]);
+                loc = Locale.of(split[0], split[1]);
             } else {
-                loc = new Locale(split[0]);
+                loc = Locale.of(split[0]);
             }
             dialogContextBuilder.withLocale(loc);
         }
@@ -453,9 +453,9 @@ public class Voice {
                 Locale loc;
                 String[] split = locale.split("-");
                 if (split.length == 2) {
-                    loc = new Locale(split[0], split[1]);
+                    loc = Locale.of(split[0], split[1]);
                 } else {
-                    loc = new Locale(split[0]);
+                    loc = Locale.of(split[0]);
                 }
                 dialogContextBuilder.withLocale(loc);
             }

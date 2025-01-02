@@ -105,9 +105,9 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
         Optional<ScriptEngine> engine = getScriptEngine();
         if (engine.isPresent()) {
             ScriptEngine scriptEngine = engine.get();
-            if (scriptEngine instanceof Compilable) {
+            if (scriptEngine instanceof Compilable compilable) {
                 logger.debug("Pre-compiling script of rule with UID '{}'", ruleUID);
-                compiledScript = Optional.ofNullable(((Compilable) scriptEngine).compile(script));
+                compiledScript = Optional.ofNullable(compilable.compile(script));
             }
         }
     }

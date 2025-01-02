@@ -12,6 +12,8 @@
  */
 package org.openhab.core.io.transport.modbus.exception;
 
+import java.io.Serial;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
@@ -24,6 +26,7 @@ import org.eclipse.jdt.annotation.Nullable;
 @NonNullByDefault
 public class ModbusUnexpectedTransactionIdException extends ModbusTransportException {
 
+    @Serial
     private static final long serialVersionUID = -2453232634024813933L;
     private int requestId;
     private int responseId;

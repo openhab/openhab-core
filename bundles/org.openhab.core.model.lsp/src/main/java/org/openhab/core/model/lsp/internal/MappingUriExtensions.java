@@ -16,7 +16,6 @@ import java.io.File;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -50,7 +49,7 @@ public class MappingUriExtensions extends UriExtensions {
     }
 
     protected String calcServerLocation(String configFolder) {
-        Path configPath = Paths.get(configFolder);
+        Path configPath = Path.of(configFolder);
         Path absoluteConfigPath = configPath.toAbsolutePath();
         java.net.URI configPathURI = absoluteConfigPath.toUri();
         return removeTrailingSlash(configPathURI.toString());

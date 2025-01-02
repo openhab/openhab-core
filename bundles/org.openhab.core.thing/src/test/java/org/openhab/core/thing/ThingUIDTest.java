@@ -53,6 +53,6 @@ public class ThingUIDTest {
 
         assertEquals("fake:type:bridge:thing", subject.getAsString());
         assertThat(subject.getBridgeIds(), hasSize(1));
-        assertEquals("bridge", subject.getBridgeIds().get(0));
+        assertEquals("bridge", subject.getBridgeIds().getFirst());
     }
 }

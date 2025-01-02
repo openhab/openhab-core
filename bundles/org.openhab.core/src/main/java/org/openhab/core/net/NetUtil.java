@@ -309,7 +309,7 @@ public class NetUtil implements NetworkAddressService {
     private static @Nullable String getFirstIpv4BroadcastAddress() {
         final List<String> broadcastAddresses = getAllBroadcastAddresses();
         if (!broadcastAddresses.isEmpty()) {
-            return broadcastAddresses.get(0);
+            return broadcastAddresses.getFirst();
         } else {
             return null;
         }
@@ -630,8 +630,8 @@ public class NetUtil implements NetworkAddressService {
 
         List<byte[]> addresses = getAddressesInSubnet(iFaceAddress.getAddress().getAddress(), iFaceAddress.getPrefix());
         if (addresses.size() > 2) {
-            addresses.remove(0); // remove network address
-            addresses.remove(addresses.size() - 1); // remove broadcast address
+            addresses.removeFirst(); // remove network address
+            addresses.removeLast(); // remove broadcast address
         }
 
         return addresses.stream().map(m -> {

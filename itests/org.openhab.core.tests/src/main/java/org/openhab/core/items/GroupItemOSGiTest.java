@@ -136,7 +136,7 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
         List<Event> stateChanges = events.stream().filter(ItemUpdatedEvent.class::isInstance).toList();
         assertThat(stateChanges.size(), is(1));
 
-        ItemUpdatedEvent change = (ItemUpdatedEvent) stateChanges.get(0);
+        ItemUpdatedEvent change = (ItemUpdatedEvent) stateChanges.getFirst();
 
         assertThat(change.getItem().label, is("secondLabel"));
     }
@@ -440,7 +440,7 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
         List<Event> updates = events.stream().filter(GroupStateUpdatedEvent.class::isInstance).toList();
         assertThat(updates.size(), is(1));
 
-        GroupStateUpdatedEvent update = (GroupStateUpdatedEvent) updates.get(0);
+        GroupStateUpdatedEvent update = (GroupStateUpdatedEvent) updates.getFirst();
         assertThat(update.getItemName(), is(groupItem.getName()));
         assertThat(update.getMemberName(), is(member.getName()));
         assertThat(update.getTopic(), is(groupitemStateUpdatedEventTopic.replace("{memberName}", member.getName())
@@ -450,7 +450,7 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
         List<Event> changes = events.stream().filter(GroupItemStateChangedEvent.class::isInstance).toList();
         assertThat(changes.size(), is(1));
 
-        GroupItemStateChangedEvent change = (GroupItemStateChangedEvent) changes.get(0);
+        GroupItemStateChangedEvent change = (GroupItemStateChangedEvent) changes.getFirst();
         assertThat(change.getItemName(), is(groupItem.getName()));
         assertThat(change.getMemberName(), is(member.getName()));
         assertThat(change.getTopic(), is(groupitemStateChangedEventTopic.replace("{memberName}", member.getName())
@@ -463,7 +463,7 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
         // State doesn't change -> only update event is posted
         member.setState(member.getState());
         waitForAssert(() -> assertThat(events.size(), is(1)));
-        assertThat(events.get(0), is(instanceOf(ItemStateUpdatedEvent.class)));
+        assertThat(events.getFirst(), is(instanceOf(ItemStateUpdatedEvent.class)));
     }
 
     @Test
@@ -489,7 +489,7 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
                 .toList();
         assertThat(groupItemStateChangedEvents, hasSize(1));
 
-        GroupItemStateChangedEvent change = (GroupItemStateChangedEvent) groupItemStateChangedEvents.get(0);
+        GroupItemStateChangedEvent change = (GroupItemStateChangedEvent) groupItemStateChangedEvents.getFirst();
         assertThat(change.getItemName(), is(groupItem.getName()));
 
         // we expect that the group should now have status "ON"
@@ -563,7 +563,7 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
         List<Event> updates = events.stream().filter(GroupStateUpdatedEvent.class::isInstance).toList();
         assertThat(updates, hasSize(1));
 
-        GroupItemStateChangedEvent change = (GroupItemStateChangedEvent) changes.get(0);
+        GroupItemStateChangedEvent change = (GroupItemStateChangedEvent) changes.getFirst();
         assertThat(change.getItemName(), is(groupItem.getName()));
 
         // we expect that the group should now have status "ON"
@@ -615,7 +615,7 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
         List<Event> changes = events.stream().filter(GroupItemStateChangedEvent.class::isInstance).toList();
         assertThat(changes, hasSize(1));
 
-        GroupItemStateChangedEvent change = (GroupItemStateChangedEvent) changes.get(0);
+        GroupItemStateChangedEvent change = (GroupItemStateChangedEvent) changes.getFirst();
         assertThat(change.getItemName(), is(groupItem.getName()));
 
         // we expect that the group should now have status "OFF"
@@ -634,7 +634,7 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
         changes = events.stream().filter(GroupItemStateChangedEvent.class::isInstance).toList();
         assertThat(changes, hasSize(1));
 
-        change = (GroupItemStateChangedEvent) changes.get(0);
+        change = (GroupItemStateChangedEvent) changes.getFirst();
         assertThat(change.getItemName(), is(groupItem.getName()));
 
         // we expect that the group should now have status "ON"
@@ -746,7 +746,7 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
         waitForAssert(() -> assertThat(events.size(), is(2)));
 
         List<Event> changes = events.stream().filter(GroupItemStateChangedEvent.class::isInstance).toList();
-        GroupItemStateChangedEvent change = (GroupItemStateChangedEvent) changes.get(0);
+        GroupItemStateChangedEvent change = (GroupItemStateChangedEvent) changes.getFirst();
         assertThat(change.getItemName(), is(groupItem.getName()));
 
         State newEventState = change.getItemState();
@@ -766,7 +766,7 @@ public class GroupItemOSGiTest extends JavaOSGiTest {
         changes = events.stream().filter(GroupItemStateChangedEvent.class::isInstance).toList();
         assertThat(changes.size(), is(1));
 
-        change = (GroupItemStateChangedEvent) changes.get(0);
+        change = (GroupItemStateChangedEvent) changes.getFirst();
         assertThat(change.getItemName(), is(groupItem.getName()));
 
         newEventState = change.getItemState();

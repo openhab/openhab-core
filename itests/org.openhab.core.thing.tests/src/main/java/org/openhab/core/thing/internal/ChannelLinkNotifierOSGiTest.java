@@ -162,7 +162,7 @@ public class ChannelLinkNotifierOSGiTest extends JavaOSGiTest {
 
         public @Nullable Boolean isLinkedBasedOnEvent(ChannelUID channelUID) {
             List<Boolean> events = getChannelLinkEvents(channelUID);
-            return events.isEmpty() ? null : events.get(events.size() - 1);
+            return events.isEmpty() ? null : events.getLast();
         }
 
         public void resetChannelLinkEvents() {
