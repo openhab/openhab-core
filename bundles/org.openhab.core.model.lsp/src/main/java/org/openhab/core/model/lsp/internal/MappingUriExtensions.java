@@ -183,6 +183,6 @@ public class MappingUriExtensions extends UriExtensions {
         // output new: file:///d/
 
         // We use this method now to keep the old behavior.
-        return Paths.get(uri).toUri().toString();
+        return Path.of(uri).toUri().toString();
     }
 }
