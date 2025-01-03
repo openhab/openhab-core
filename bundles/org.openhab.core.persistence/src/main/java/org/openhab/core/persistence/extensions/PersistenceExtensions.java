@@ -2681,20 +2681,19 @@ public class PersistenceExtensions {
         }
 
         // add HistoricItem at begin
-        if (betweenItemsList.isEmpty() || !betweenItemsList.get(0).getTimestamp().equals(begin)) {
+        if (betweenItemsList.isEmpty() || !betweenItemsList.getFirst().getTimestamp().equals(begin)) {
             HistoricItem first = beginTime.equals(now) ? historicItemOrCurrentState(item, null)
                     : internalPersistedState(item, beginTime, serviceId);
             if (first != null) {
                 first = new RetimedHistoricItem(first, beginTime);
             }
             if (first != null) {
-                betweenItemsList.add(0, first);
+                betweenItemsList.addFirst(first);
             }
         }
 
         // add HistoricItem at end
-        if (betweenItemsList.isEmpty()
-                || !betweenItemsList.get(betweenItemsList.size() - 1).getTimestamp().equals(end)) {
+        if (betweenItemsList.isEmpty() || !betweenItemsList.getLast().getTimestamp().equals(end)) {
             HistoricItem last = endTime.equals(now) ? historicItemOrCurrentState(item, null)
                     : internalPersistedState(item, endTime, serviceId);
             if (last != null) {

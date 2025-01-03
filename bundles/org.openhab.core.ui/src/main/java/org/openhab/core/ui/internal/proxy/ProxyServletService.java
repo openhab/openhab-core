@@ -13,6 +13,7 @@
 package org.openhab.core.ui.internal.proxy;
 
 import java.io.IOException;
+import java.io.Serial;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -86,6 +87,7 @@ public class ProxyServletService extends HttpServlet {
     /** the alias for this servlet */
     public static final String PROXY_ALIAS = "proxy";
 
+    @Serial
     private static final long serialVersionUID = -4716754591953017793L;
     private static final String CONFIG_MAX_THREADS = "maxThreads";
     private static final int DEFAULT_MAX_THREADS = 8;

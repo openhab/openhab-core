@@ -219,7 +219,7 @@ public class GenericThingProviderTest extends JavaOSGiTest {
         assertThat(bulb2, isA(Thing.class));
         // channels should be Color as defined in dsl and color_temperature from thingType
         assertThat(bulb2.getChannels().size(), is(2));
-        Channel firstChannel = bulb2.getChannels().get(0);
+        Channel firstChannel = bulb2.getChannels().getFirst();
         assertThat(firstChannel.getUID().toString(), is("hue:LCT001:bulb2:color"));
         assertThat(firstChannel.getAcceptedItemType(), is(CoreItemFactory.COLOR));
         assertThat(bulb2.getBridgeUID(), is(nullValue()));
@@ -523,7 +523,7 @@ public class GenericThingProviderTest extends JavaOSGiTest {
 
         waitForAssert(() -> {
             assertEquals(1, receivedEvents.size());
-            Event event = receivedEvents.get(0);
+            Event event = receivedEvents.getFirst();
             assertEquals(ThingUpdatedEvent.class, event.getClass());
             ThingUpdatedEvent thingUpdatedEvent = (ThingUpdatedEvent) event;
             assertEquals("hue:LCT001:my1234Bridge:myKitchenBulb1", thingUpdatedEvent.getThing().UID);

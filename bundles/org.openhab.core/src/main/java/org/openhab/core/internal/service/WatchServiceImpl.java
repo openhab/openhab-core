@@ -242,8 +242,8 @@ public class WatchServiceImpl implements WatchService, DirectoryChangeListener {
             return;
         }
 
-        DirectoryChangeEvent firstElement = events.get(0);
-        DirectoryChangeEvent lastElement = events.get(events.size() - 1);
+        DirectoryChangeEvent firstElement = events.getFirst();
+        DirectoryChangeEvent lastElement = events.getLast();
 
         // determine final event
         if (lastElement.eventType() == DirectoryChangeEvent.EventType.DELETE) {

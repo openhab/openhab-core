@@ -12,6 +12,7 @@
  */
 package org.openhab.core.io.transport.modbus.exception;
 
+import java.io.Serial;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -153,6 +154,7 @@ public abstract class ModbusSlaveErrorResponseException extends ModbusTransportE
     public static final int GATEWAY_TARGET_DEVICE_FAILED_TO_RESPOND = KnownExceptionCode.GATEWAY_TARGET_DEVICE_FAILED_TO_RESPOND
             .getExceptionCode();
 
+    @Serial
     private static final long serialVersionUID = -1435199498550990487L;
 
     /**

@@ -78,7 +78,7 @@ public class ChannelTypesI18nTest extends JavaOSGiTest {
             assertThat(channelType1, is(not(nullValue())));
             assertThat(channelType1.getLabel(), is(equalTo("Channel Label")));
             assertThat(channelType1.getDescription(), is(equalTo("Channel Description")));
-            assertThat(channelType1.getCommandDescription().getCommandOptions().get(0).getLabel(),
+            assertThat(channelType1.getCommandDescription().getCommandOptions().getFirst().getLabel(),
                     is(equalTo("Short Alarm")));
             assertThat(channelType1.getCommandDescription().getCommandOptions().get(1).getLabel(),
                     is(equalTo("Long Alarm")));

@@ -80,7 +80,7 @@ public class DefaultChartProvider implements ChartProvider {
             // If the start value is below the median, then count legend position down
             // Otherwise count up.
             // We use this to decide whether to put the legend in the top or bottom corner.
-            if (yData.iterator().next().floatValue() > ((series.getYMax() - series.getYMin()) / 2 + series.getYMin())) {
+            if (yData.getFirst().floatValue() > ((series.getYMax() - series.getYMin()) / 2 + series.getYMin())) {
                 counter++;
             } else {
                 counter--;
@@ -382,8 +382,8 @@ public class DefaultChartProvider implements ChartProvider {
 
         // If there's only 1 data point, plot it again!
         if (xData.size() == 1) {
-            xData.add(xData.iterator().next());
-            yData.add(yData.iterator().next());
+            xData.add(xData.getFirst());
+            yData.add(yData.getFirst());
         }
 
         XYSeries series = chart.addSeries(label, xData, yData);

@@ -113,7 +113,7 @@ public class TranslationProviderOSGiTest extends JavaOSGiTest {
         text = translationProvider.getText(bundle, KEY_BYE, "default", null);
         assertTextEquals(text, "default");
 
-        text = translationProvider.getText(bundle, KEY_BYE, "default", new Locale("de", "AT"));
+        text = translationProvider.getText(bundle, KEY_BYE, "default", Locale.of("de", "AT"));
         assertTextEquals(text, BYE_DE);
 
         text = translationProvider.getText(bundle, KEY_BYE, "default", Locale.ENGLISH);
@@ -148,7 +148,7 @@ public class TranslationProviderOSGiTest extends JavaOSGiTest {
         text = translationProvider.getText(bundle, KEY_BYE, "default", null, null, null);
         assertTextEquals(text, "default");
 
-        text = translationProvider.getText(bundle, KEY_BYE, "default", new Locale("de", "AT"), (Object[]) null);
+        text = translationProvider.getText(bundle, KEY_BYE, "default", Locale.of("de", "AT"), (Object[]) null);
         assertTextEquals(text, BYE_DE);
 
         text = translationProvider.getText(bundle, KEY_BYE, "default", Locale.ENGLISH, (Object[]) null);

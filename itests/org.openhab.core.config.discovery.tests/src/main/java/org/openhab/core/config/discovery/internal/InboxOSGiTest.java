@@ -160,10 +160,10 @@ public class InboxOSGiTest extends JavaOSGiTest {
             .withConfigDescriptionURI(testURI).build();
     private final ConfigDescription testConfigDescription = ConfigDescriptionBuilder.create(testURI)
             .withParameters(List.of(
-                    ConfigDescriptionParameterBuilder.create(discoveryResultPropertyKeys.get(0), Type.TEXT).build(),
+                    ConfigDescriptionParameterBuilder.create(discoveryResultPropertyKeys.getFirst(), Type.TEXT).build(),
                     ConfigDescriptionParameterBuilder.create(discoveryResultPropertyKeys.get(1), Type.INTEGER).build()))
             .build();
-    private final String[] keysInConfigDescription = new String[] { discoveryResultPropertyKeys.get(0),
+    private final String[] keysInConfigDescription = new String[] { discoveryResultPropertyKeys.getFirst(),
             discoveryResultPropertyKeys.get(1) };
     private final String[] keysNotInConfigDescription = new String[] { discoveryResultPropertyKeys.get(2),
             discoveryResultPropertyKeys.get(3), discoveryResultPropertyKeys.get(4) };
@@ -295,7 +295,7 @@ public class InboxOSGiTest extends JavaOSGiTest {
         allDiscoveryResults = inbox.getAll();
         assertThat(allDiscoveryResults.size(), is(1));
 
-        DiscoveryResult actualDiscoveryResult = allDiscoveryResults.get(0);
+        DiscoveryResult actualDiscoveryResult = allDiscoveryResults.getFirst();
         assertThat(actualDiscoveryResult.getThingUID(), is(thingUID));
         assertThat(actualDiscoveryResult.getThingTypeUID(), is(thingTypeUID));
         assertThat(actualDiscoveryResult.getBindingId(), is("dummyBindingId"));
@@ -338,7 +338,7 @@ public class InboxOSGiTest extends JavaOSGiTest {
         allDiscoveryResults = inbox.getAll();
         assertThat(allDiscoveryResults.size(), is(1));
 
-        DiscoveryResult actualDiscoveryResult = allDiscoveryResults.get(0);
+        DiscoveryResult actualDiscoveryResult = allDiscoveryResults.getFirst();
         assertThat(actualDiscoveryResult.getThingUID(), is(thingUID));
         assertThat(actualDiscoveryResult.getThingTypeUID(), is(thingTypeUID));
         assertThat(actualDiscoveryResult.getBindingId(), is("dummyBindingId"));

@@ -85,7 +85,7 @@ public class StandardInterpreter extends AbstractRuleBasedInterpreter {
 
     @Override
     public Set<Locale> getSupportedLocales() {
-        return Set.of(Locale.ENGLISH, Locale.GERMAN, Locale.FRENCH, new Locale("es"));
+        return Set.of(Locale.ENGLISH, Locale.GERMAN, Locale.FRENCH, Locale.of("es"));
     }
 
     @Override
@@ -306,7 +306,7 @@ public class StandardInterpreter extends AbstractRuleBasedInterpreter {
 
         /* ***************************** SPANISH ***************************** */
 
-        Locale localeES = new Locale("es");
+        Locale localeES = Locale.of("es");
         if (locale == null || Objects.equals(locale.getLanguage(), localeES.getLanguage())) {
             Expression encenderApagar = alt(cmd(alt("enciende", "encender"), OnOffType.ON),
                     cmd(alt("apaga", "apagar"), OnOffType.OFF));

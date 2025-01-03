@@ -540,7 +540,7 @@ public class CronAdjuster implements SchedulerTemporalAdjuster {
     private Checker or(final List<Checker> checkers) {
         return checkers.size() > 1 //
                 ? temporal -> checkers.stream().anyMatch(c -> c.matches(temporal))
-                : checkers.get(0);
+                : checkers.getFirst();
     }
 
     /**

@@ -14,6 +14,7 @@ package org.openhab.core.ui.icon.internal;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -52,6 +53,7 @@ import org.slf4j.LoggerFactory;
 @NonNullByDefault
 public class IconServlet extends HttpServlet {
 
+    @Serial
     private static final long serialVersionUID = 2880642275858634578L;
 
     private final Logger logger = LoggerFactory.getLogger(IconServlet.class);

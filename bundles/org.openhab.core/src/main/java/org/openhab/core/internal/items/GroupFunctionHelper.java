@@ -111,7 +111,7 @@ public class GroupFunctionHelper {
             case "AND":
                 args = parseStates(baseItem, function.params);
                 if (args.size() == 2) {
-                    return new ArithmeticGroupFunction.And(args.get(0), args.get(1));
+                    return new ArithmeticGroupFunction.And(args.getFirst(), args.get(1));
                 } else {
                     logger.error("Group function 'AND' requires two arguments. Using Equality instead.");
                 }
@@ -119,7 +119,7 @@ public class GroupFunctionHelper {
             case "OR":
                 args = parseStates(baseItem, function.params);
                 if (args.size() == 2) {
-                    return new ArithmeticGroupFunction.Or(args.get(0), args.get(1));
+                    return new ArithmeticGroupFunction.Or(args.getFirst(), args.get(1));
                 } else {
                     logger.error("Group function 'OR' requires two arguments. Using Equality instead.");
                 }
@@ -127,7 +127,7 @@ public class GroupFunctionHelper {
             case "NAND":
                 args = parseStates(baseItem, function.params);
                 if (args.size() == 2) {
-                    return new ArithmeticGroupFunction.NAnd(args.get(0), args.get(1));
+                    return new ArithmeticGroupFunction.NAnd(args.getFirst(), args.get(1));
                 } else {
                     logger.error("Group function 'NOT AND' requires two arguments. Using Equality instead.");
                 }
@@ -135,7 +135,7 @@ public class GroupFunctionHelper {
             case "NOR":
                 args = parseStates(baseItem, function.params);
                 if (args.size() == 2) {
-                    return new ArithmeticGroupFunction.NOr(args.get(0), args.get(1));
+                    return new ArithmeticGroupFunction.NOr(args.getFirst(), args.get(1));
                 } else {
                     logger.error("Group function 'NOT OR' requires two arguments. Using Equality instead.");
                 }
@@ -143,7 +143,7 @@ public class GroupFunctionHelper {
             case "XOR":
                 args = parseStates(baseItem, function.params);
                 if (args.size() == 2) {
-                    return new ArithmeticGroupFunction.Xor(args.get(0), args.get(1));
+                    return new ArithmeticGroupFunction.Xor(args.getFirst(), args.get(1));
                 } else {
                     logger.error("Group function 'XOR' requires two arguments. Using Equality instead.");
                 }

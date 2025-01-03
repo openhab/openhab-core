@@ -14,6 +14,7 @@ package org.openhab.core.ui.internal.chart;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.io.Serial;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.Period;
@@ -80,6 +81,7 @@ import org.slf4j.LoggerFactory;
 @NonNullByDefault
 public class ChartServlet extends HttpServlet {
 
+    @Serial
     private static final long serialVersionUID = 7700873790924746422L;
 
     protected static final String CONFIG_URI = "system:chart";

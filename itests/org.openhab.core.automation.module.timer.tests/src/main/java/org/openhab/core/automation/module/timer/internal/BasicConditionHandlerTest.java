@@ -200,8 +200,9 @@ public abstract class BasicConditionHandlerTest extends JavaOSGiTest {
         logger.info("item state is ON");
 
         // now make the condition fail
-        Rule rule2 = RuleBuilder.create(rule).withConditions(ModuleBuilder.createCondition(rule.getConditions().get(0))
-                .withConfiguration(getFailingConfiguration()).build()).build();
+        Rule rule2 = RuleBuilder.create(rule).withConditions(ModuleBuilder
+                .createCondition(rule.getConditions().getFirst()).withConfiguration(getFailingConfiguration()).build())
+                .build();
         ruleRegistry.update(rule2);
 
         // prepare the execution

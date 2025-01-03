@@ -799,7 +799,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
         } else if (items.size() > 1) {
             throw new InterpretationException(language.getString(MULTIPLE_OBJECTS));
         } else {
-            Item item = items.get(0);
+            Item item = items.getFirst();
             Command command = commandSupplier.getItemCommand(item);
             if (command == null) {
                 logger.warn("Failed resolving item command");
@@ -912,7 +912,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
                 List<String> lowercaseLabelFragments = Arrays.stream(labelFragments)
                         .map(lf -> lf.toLowerCase(language.getLocale())).toList();
                 List<String> unmatchedFragments = new ArrayList<>(lowercaseLabelFragments);
-                if (itemLabelFragmentsPath.get(itemLabelFragmentsPath.size() - 1).equals(lowercaseLabelFragments)) {
+                if (itemLabelFragmentsPath.getLast().equals(lowercaseLabelFragments)) {
                     exactMatch = true;
                     exactMatchOnTarget = true;
                     unmatchedFragments.clear();
@@ -1007,7 +1007,7 @@ public abstract class AbstractRuleBasedInterpreter implements HumanLanguageInter
             return null;
         }
         logger.trace("Unique match by location found in '{}', taking prevalence", locationContext);
-        return itemsFilteredByLocation.get(0).getKey();
+        return itemsFilteredByLocation.getFirst().getKey();
     }
 
     private static void insertDiscardingMembers(Map<Item, ItemInterpretationMetadata> items, Item item,

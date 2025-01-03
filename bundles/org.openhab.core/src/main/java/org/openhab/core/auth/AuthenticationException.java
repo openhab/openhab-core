@@ -12,6 +12,8 @@
  */
 package org.openhab.core.auth;
 
+import java.io.Serial;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
@@ -23,6 +25,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 @NonNullByDefault
 public class AuthenticationException extends SecurityException {
 
+    @Serial
     private static final long serialVersionUID = 8063538216812770858L;
 
     /**

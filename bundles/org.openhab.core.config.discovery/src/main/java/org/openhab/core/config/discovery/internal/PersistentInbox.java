@@ -192,7 +192,7 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
         if (newThingId != null && newThingId.contains(AbstractUID.SEPARATOR)) {
             throw new IllegalArgumentException("New Thing ID " + newThingId + " must not contain multiple segments");
         }
-        DiscoveryResult result = results.get(0);
+        DiscoveryResult result = results.getFirst();
         final Map<String, String> properties = new HashMap<>();
         final Map<String, Object> configParams = new HashMap<>();
         getPropsAndConfigParams(result, properties, configParams);

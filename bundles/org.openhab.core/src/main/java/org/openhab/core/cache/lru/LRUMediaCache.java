@@ -19,7 +19,6 @@ import java.net.URISyntaxException;
 import java.nio.file.FileStore;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -155,7 +154,7 @@ public class LRUMediaCache<V> {
 
     private long getFreeSpace() {
         try {
-            Path rootPath = Paths.get(new URI("file:///"));
+            Path rootPath = Path.of(new URI("file:///"));
             Path dirPath = rootPath.resolve(cacheFolder.getParent());
             FileStore dirFileStore = Files.getFileStore(dirPath);
             return dirFileStore.getUsableSpace();

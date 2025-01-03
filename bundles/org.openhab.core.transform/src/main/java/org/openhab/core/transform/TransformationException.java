@@ -12,6 +12,8 @@
  */
 package org.openhab.core.transform;
 
+import java.io.Serial;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
@@ -24,6 +26,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 public class TransformationException extends Exception {
 
     /** generated serial Version UID */
+    @Serial
     private static final long serialVersionUID = -535237375844795145L;
 
     public TransformationException(String message) {

@@ -157,7 +157,7 @@ public class YamlModelRepositoryImplTest {
         assertThat(arguments, hasSize(4));
 
         // added originally
-        assertThat(arguments.get(0), containsInAnyOrder(new FirstTypeDTO("First", "First original"),
+        assertThat(arguments.getFirst(), containsInAnyOrder(new FirstTypeDTO("First", "First original"),
                 new FirstTypeDTO("Second", "Second original"), new FirstTypeDTO("Third", "Third original")));
         // added by update
         assertThat(arguments.get(1), contains(new FirstTypeDTO("Fourth", "Fourth original")));
@@ -185,10 +185,10 @@ public class YamlModelRepositoryImplTest {
         assertThat(arguments, hasSize(2));
 
         // all are added
-        assertThat(arguments.get(0), containsInAnyOrder(new FirstTypeDTO("First", "First original"),
+        assertThat(arguments.getFirst(), containsInAnyOrder(new FirstTypeDTO("First", "First original"),
                 new FirstTypeDTO("Second", "Second original"), new FirstTypeDTO("Third", "Third original")));
         // all are removed
-        assertThat(arguments.get(0), containsInAnyOrder(new FirstTypeDTO("First", "First original"),
+        assertThat(arguments.getFirst(), containsInAnyOrder(new FirstTypeDTO("First", "First original"),
                 new FirstTypeDTO("Second", "Second original"), new FirstTypeDTO("Third", "Third original")));
     }
 

@@ -114,7 +114,7 @@ public class UpnpAddonFinderTests {
         assertNotNull(upnpService);
         List<RemoteDevice> result = new ArrayList<>(upnpService.getRegistry().getRemoteDevices());
         assertEquals(1, result.size());
-        RemoteDevice device = result.get(0);
+        RemoteDevice device = result.getFirst();
         assertEquals("manufacturer", device.getDetails().getManufacturerDetails().getManufacturer());
         assertEquals("serialNumber", device.getDetails().getSerialNumber());
     }

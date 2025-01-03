@@ -179,7 +179,7 @@ public class ItemChannelLinkResource implements RESTResource {
                 .toList();
 
         if (!links.isEmpty()) {
-            return JSONResponse.createResponse(Status.OK, links.get(0), null);
+            return JSONResponse.createResponse(Status.OK, links.getFirst(), null);
         }
         return JSONResponse.createErrorResponse(Status.NOT_FOUND,
                 "No link found for item '" + itemName + "' + and channelUID '" + channelUid + "'");

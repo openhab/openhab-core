@@ -68,7 +68,7 @@ public class ThingChannelsTest extends JavaOSGiTest {
 
     @Test
     public void testAutoUpdatePolicyNotSetOnNewChannels() {
-        Channel channel = ChannelBuilder.create(new ChannelUID(THING_UID, CHANNEL_IDS.get(0)), null).build();
+        Channel channel = ChannelBuilder.create(new ChannelUID(THING_UID, CHANNEL_IDS.getFirst()), null).build();
         assertNull(channel.getAutoUpdatePolicy());
     }
 }

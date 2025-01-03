@@ -19,7 +19,6 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
@@ -190,7 +189,7 @@ public abstract class AbstractFileTransformationService<T> implements Transforma
     private void watchSubDirectory(String subDirectory, final WatchService watchService) {
         if (!watchedDirectories.contains(subDirectory)) {
             String watchedDirectory = getSourcePath() + subDirectory;
-            Path transformFilePath = Paths.get(watchedDirectory);
+            Path transformFilePath = Path.of(watchedDirectory);
             try {
                 WatchKey registrationKey = transformFilePath.register(watchService, ENTRY_DELETE, ENTRY_MODIFY);
                 logger.debug("Watching directory {}", transformFilePath);

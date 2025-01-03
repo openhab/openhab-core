@@ -12,6 +12,8 @@
  */
 package org.openhab.core.storage.json.internal.migration;
 
+import java.io.Serial;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
@@ -21,6 +23,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  */
 @NonNullByDefault
 public class TypeMigrationException extends Exception {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     public TypeMigrationException(String message) {

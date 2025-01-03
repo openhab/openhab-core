@@ -285,11 +285,11 @@ public class ThingUpdateOSGiTest extends JavaOSGiTest {
 
         List<Channel> channels1 = updatedThing.getChannelsOfGroup("group1");
         assertThat(channels1, hasSize(1));
-        assertChannel(channels1.get(0), channelTypeUID, "Switch", "typeLabel", null);
+        assertChannel(channels1.getFirst(), channelTypeUID, "Switch", "typeLabel", null);
 
         List<Channel> channels2 = updatedThing.getChannelsOfGroup("group2");
         assertThat(channels2, hasSize(1));
-        assertChannel(channels2.get(0), channelTypeUID, "Switch", "typeLabel", null);
+        assertChannel(channels2.getFirst(), channelTypeUID, "Switch", "typeLabel", null);
     }
 
     @Test

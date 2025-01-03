@@ -211,7 +211,7 @@ public class AnnotatedThingActionModuleTypeProviderTest extends JavaTest {
                 List<ParameterOption> parameterOptions = cdp.getOptions();
                 assertEquals(1, parameterOptions.size());
 
-                ParameterOption po = parameterOptions.get(0);
+                ParameterOption po = parameterOptions.getFirst();
                 assertEquals("binding:thing-type:test2", po.getValue());
             }
         }

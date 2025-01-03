@@ -14,6 +14,7 @@ package org.openhab.core.ui.internal.proxy;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serial;
 import java.net.URI;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -43,6 +44,7 @@ public class BlockingProxyServlet extends HttpServlet {
 
     private final Logger logger = LoggerFactory.getLogger(BlockingProxyServlet.class);
 
+    @Serial
     private static final long serialVersionUID = -4716754591953017794L;
 
     private final ProxyServletService service;

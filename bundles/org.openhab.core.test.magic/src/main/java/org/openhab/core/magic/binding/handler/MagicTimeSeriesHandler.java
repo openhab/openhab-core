@@ -18,6 +18,7 @@ import static org.openhab.core.types.TimeSeries.Policy.ADD;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -73,7 +74,7 @@ public class MagicTimeSeriesHandler extends BaseThingHandler {
                 double range = configuration.max - configuration.min;
                 for (int i = 1; i <= configuration.count; i++) {
                     double value = switch (configuration.type) {
-                        case RND -> Math.random() * range + configuration.min;
+                        case RND -> ThreadLocalRandom.current().nextDouble() * range + configuration.min;
                         case ASC -> (range / configuration.count) * i + configuration.min;
                         case DESC -> configuration.max + (range / configuration.count) * i;
                     };

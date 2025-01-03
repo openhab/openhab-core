@@ -12,6 +12,8 @@
  */
 package org.openhab.core.audio;
 
+import java.io.Serial;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
@@ -24,6 +26,7 @@ import org.eclipse.jdt.annotation.Nullable;
 @NonNullByDefault
 public class UnsupportedAudioStreamException extends AudioException {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     /**

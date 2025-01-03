@@ -15,6 +15,7 @@ package org.openhab.core.library.unit;
 import static org.eclipse.jdt.annotation.DefaultLocation.*;
 import static org.openhab.core.library.unit.CurrencyUnits.BASE_CURRENCY;
 
+import java.io.Serial;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.Map;
@@ -46,6 +47,7 @@ import tech.units.indriya.unit.UnitDimension;
 @NonNullByDefault({ PARAMETER, RETURN_TYPE, FIELD, TYPE_BOUND })
 public final class CurrencyUnit extends AbstractUnit<Currency> {
 
+    @Serial
     private static final long serialVersionUID = -1L;
     private static final Dimension DIMENSION = UnitDimension.parse('$');
     private String name;

@@ -14,7 +14,6 @@ package org.openhab.core;
 
 import java.io.FileInputStream;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
@@ -84,7 +83,7 @@ public class OpenHAB {
      */
     public static String buildString() {
         Properties prop = new Properties();
-        Path versionFilePath = Paths.get(getUserDataFolder(), "etc", "version.properties");
+        Path versionFilePath = Path.of(getUserDataFolder(), "etc", "version.properties");
         try (FileInputStream fis = new FileInputStream(versionFilePath.toFile())) {
             prop.load(fis);
             String buildNo = prop.getProperty("build-no");

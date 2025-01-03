@@ -13,6 +13,7 @@
 package org.openhab.core.io.http.auth.internal;
 
 import java.io.IOException;
+import java.io.Serial;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -62,6 +63,7 @@ public class AuthorizePageServlet extends AbstractAuthPageServlet {
 
     public static final String SERVLET_PATH = "/auth";
 
+    @Serial
     private static final long serialVersionUID = 5340598701104679843L;
 
     private final Logger logger = LoggerFactory.getLogger(AuthorizePageServlet.class);

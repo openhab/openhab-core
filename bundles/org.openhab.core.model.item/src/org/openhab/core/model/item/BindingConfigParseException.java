@@ -12,6 +12,8 @@
  */
 package org.openhab.core.model.item;
 
+import java.io.Serial;
+
 /**
  * This exception is used by {@link BindingConfigReader} instances if parsing configurations fails
  *
@@ -19,6 +21,7 @@ package org.openhab.core.model.item;
  */
 public class BindingConfigParseException extends Exception {
 
+    @Serial
     private static final long serialVersionUID = 1434607160082879845L;
 
     public BindingConfigParseException(String msg) {

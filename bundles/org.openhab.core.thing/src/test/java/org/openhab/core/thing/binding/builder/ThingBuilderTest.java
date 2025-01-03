@@ -92,7 +92,7 @@ public class ThingBuilderTest {
         thingBuilder.withoutChannel(new ChannelUID(THING_UID, "channel1"));
         Thing thing = thingBuilder.build();
         assertThat(thing.getChannels(), hasSize(1));
-        assertThat(thing.getChannels().get(0).getUID().getId(), is(equalTo("channel2")));
+        assertThat(thing.getChannels().getFirst().getUID().getId(), is(equalTo("channel2")));
     }
 
     @Test

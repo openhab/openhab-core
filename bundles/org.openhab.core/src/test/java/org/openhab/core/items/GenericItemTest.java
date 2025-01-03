@@ -69,8 +69,8 @@ public class GenericItemTest {
         assertEquals(2, events.size());
 
         // first event should be updated event
-        assertInstanceOf(ItemStateUpdatedEvent.class, events.get(0));
-        ItemStateUpdatedEvent updated = (ItemStateUpdatedEvent) events.get(0);
+        assertInstanceOf(ItemStateUpdatedEvent.class, events.getFirst());
+        ItemStateUpdatedEvent updated = (ItemStateUpdatedEvent) events.getFirst();
         assertEquals(item.getName(), updated.getItemName());
         assertEquals("openhab/items/member1/stateupdated", updated.getTopic());
         assertEquals(item.getState(), updated.getItemState());
@@ -97,8 +97,8 @@ public class GenericItemTest {
         assertEquals(1, events.size()); // two before and one additional
 
         // event should be updated event
-        assertInstanceOf(ItemStateUpdatedEvent.class, events.get(0));
-        updated = (ItemStateUpdatedEvent) events.get(0);
+        assertInstanceOf(ItemStateUpdatedEvent.class, events.getFirst());
+        updated = (ItemStateUpdatedEvent) events.getFirst();
         assertEquals(item.getName(), updated.getItemName());
         assertEquals("openhab/items/member1/stateupdated", updated.getTopic());
         assertEquals(item.getState(), updated.getItemState());

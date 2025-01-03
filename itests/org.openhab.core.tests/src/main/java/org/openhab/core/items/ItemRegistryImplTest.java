@@ -118,14 +118,14 @@ public class ItemRegistryImplTest extends JavaTest {
     public void assertGetItemsReturnsItemFromRegisteredItemProvider() {
         List<Item> items = new ArrayList<>(itemRegistry.getItems());
         assertThat(items.size(), is(5));
-        assertThat(items.get(0).getName(), is(equalTo(ITEM_NAME)));
+        assertThat(items.getFirst().getName(), is(equalTo(ITEM_NAME)));
     }
 
     @Test
     public void assertGetItemsOfTypeReturnsItemFromRegisteredItemProvider() {
         List<Item> items = new ArrayList<>(itemRegistry.getItemsOfType(CoreItemFactory.SWITCH));
         assertThat(items.size(), is(3));
-        assertThat(items.get(0).getName(), is(equalTo(ITEM_NAME)));
+        assertThat(items.getFirst().getName(), is(equalTo(ITEM_NAME)));
     }
 
     @Test
@@ -166,7 +166,7 @@ public class ItemRegistryImplTest extends JavaTest {
     public void assertGetItemsByTagWithTwoTagsReturnsItemFromRegisteredItemProvider() {
         List<Item> items = new ArrayList<>(itemRegistry.getItemsByTag(CAMERA_TAG, SENSOR_TAG));
         assertThat(items.size(), is(1));
-        assertThat(items.get(0).getName(), is(equalTo(CAMERA_ITEM_NAME2)));
+        assertThat(items.getFirst().getName(), is(equalTo(CAMERA_ITEM_NAME2)));
     }
 
     @Test
@@ -239,7 +239,7 @@ public class ItemRegistryImplTest extends JavaTest {
 
         Item res = itemRegistry.get("item");
         assertEquals(1, res.getGroupNames().size());
-        assertEquals("group", res.getGroupNames().get(0));
+        assertEquals("group", res.getGroupNames().getFirst());
 
         GroupItem group = (GroupItem) itemRegistry.get("group");
         assertEquals(1, group.getMembers().size());

@@ -12,6 +12,7 @@
  */
 package org.openhab.core.thing.xml.internal;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -27,6 +28,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 @NonNullByDefault
 public class ThingDescriptionList extends ArrayList {
 
+    @Serial
     private static final long serialVersionUID = -1579556977347296301L;
 
     @SuppressWarnings("unchecked")

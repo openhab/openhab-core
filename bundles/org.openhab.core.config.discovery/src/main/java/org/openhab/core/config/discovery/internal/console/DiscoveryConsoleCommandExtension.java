@@ -102,7 +102,7 @@ public class DiscoveryConsoleCommandExtension extends AbstractConsoleCommandExte
                     break;
             }
         } else {
-            console.println(getUsages().get(0));
+            console.println(getUsages().getFirst());
         }
     }
 

@@ -126,7 +126,7 @@ public class AutomationCommandList extends AutomationCommand {
             }
             if (getLocale) {
                 String l = parameterValue;
-                locale = new Locale(l);
+                locale = Locale.of(l);
                 getLocale = false;
             }
             if (getId && getLocale) {

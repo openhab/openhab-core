@@ -19,7 +19,6 @@ import static org.mockito.Mockito.*;
 import java.io.File;
 import java.net.URL;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 
@@ -37,7 +36,7 @@ public class ResourceBundleClassLoaderTest {
     private @TempDir @NonNullByDefault({}) Path tempDir;
 
     static URL createTmpTestPropertiesFile(Path root, String relativeFile) throws Exception {
-        Path filePath = Paths.get(relativeFile);
+        Path filePath = Path.of(relativeFile);
         Path dirPath = filePath.getParent();
 
         new File(root.toFile(), dirPath.toString()).mkdirs();

@@ -94,7 +94,7 @@ public class ChannelUID extends UID {
      */
     public String getId() {
         List<String> segments = getAllSegments();
-        return segments.get(segments.size() - 1);
+        return segments.getLast();
     }
 
     /**

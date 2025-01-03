@@ -12,6 +12,8 @@
  */
 package org.openhab.core.items;
 
+import java.io.Serial;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
@@ -27,5 +29,6 @@ public class ItemNotFoundException extends ItemLookupException {
         super("Item '" + name + "' could not be found in the item registry");
     }
 
+    @Serial
     private static final long serialVersionUID = -3720784568250902711L;
 }

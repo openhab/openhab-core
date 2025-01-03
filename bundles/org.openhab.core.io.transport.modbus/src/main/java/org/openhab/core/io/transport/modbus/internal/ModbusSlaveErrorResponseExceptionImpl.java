@@ -12,6 +12,7 @@
  */
 package org.openhab.core.io.transport.modbus.internal;
 
+import java.io.Serial;
 import java.util.Optional;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -30,6 +31,7 @@ import net.wimpi.modbus.ModbusSlaveException;
 @NonNullByDefault
 public class ModbusSlaveErrorResponseExceptionImpl extends ModbusSlaveErrorResponseException {
 
+    @Serial
     private static final long serialVersionUID = 6334580162425192133L;
     private int rawCode;
     private Optional<KnownExceptionCode> exceptionCode;

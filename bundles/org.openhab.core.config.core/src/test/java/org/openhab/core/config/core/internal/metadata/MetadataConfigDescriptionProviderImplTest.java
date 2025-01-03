@@ -92,7 +92,7 @@ public class MetadataConfigDescriptionProviderImplTest extends JavaTest {
         assertEquals(URI_LIBERAL, desc.getUID());
         assertEquals(1, desc.getParameters().size());
 
-        ConfigDescriptionParameter param = desc.getParameters().get(0);
+        ConfigDescriptionParameter param = desc.getParameters().getFirst();
         assertEquals("value", param.getName());
         assertEquals("Liberal", param.getDescription());
         assertFalse(param.getLimitToOptions());
@@ -110,11 +110,11 @@ public class MetadataConfigDescriptionProviderImplTest extends JavaTest {
         assertEquals(URI_RESTRICTED, desc.getUID());
         assertEquals(1, desc.getParameters().size());
 
-        ConfigDescriptionParameter param = desc.getParameters().get(0);
+        ConfigDescriptionParameter param = desc.getParameters().getFirst();
         assertEquals("value", param.getName());
         assertEquals("Restricted", param.getDescription());
         assertTrue(param.getLimitToOptions());
-        assertEquals("dimmer", param.getOptions().get(0).getValue());
+        assertEquals("dimmer", param.getOptions().getFirst().getValue());
         assertEquals("switch", param.getOptions().get(1).getValue());
     }
 
@@ -136,7 +136,7 @@ public class MetadataConfigDescriptionProviderImplTest extends JavaTest {
         assertEquals(URI_LIBERAL, desc.getUID());
         assertEquals(1, desc.getParameters().size());
 
-        ConfigDescriptionParameter param = desc.getParameters().get(0);
+        ConfigDescriptionParameter param = desc.getParameters().getFirst();
         assertEquals("value", param.getName());
         assertEquals("Liberal", param.getDescription());
         assertFalse(param.getLimitToOptions());
@@ -161,7 +161,7 @@ public class MetadataConfigDescriptionProviderImplTest extends JavaTest {
         assertEquals(URI_RESTRICTED_DIMMER, desc.getUID());
         assertEquals(2, desc.getParameters().size());
 
-        ConfigDescriptionParameter paramWidth = desc.getParameters().get(0);
+        ConfigDescriptionParameter paramWidth = desc.getParameters().getFirst();
         assertEquals("width", paramWidth.getName());
 
         ConfigDescriptionParameter paramHeight = desc.getParameters().get(1);

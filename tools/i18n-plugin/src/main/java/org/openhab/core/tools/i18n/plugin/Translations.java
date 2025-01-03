@@ -72,7 +72,7 @@ public class Translations {
                 return 1;
             }
 
-            return entries.get(0).getKey().compareTo(other.entries.get(0).getKey());
+            return entries.getFirst().getKey().compareTo(other.entries.getFirst().getKey());
         }
 
         public boolean hasTranslations() {
