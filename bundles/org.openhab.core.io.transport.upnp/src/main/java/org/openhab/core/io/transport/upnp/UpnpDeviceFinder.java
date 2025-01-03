@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import org.jupnp.UpnpService;
@@ -45,10 +46,12 @@ public class UpnpDeviceFinder implements RegistryListener {
 
     private static final String DEVICE_FINDER_THREADPOOL = "upnpDeviceFinder";
     private static final int SEARCH_SCHEDULE_SECONDS = 60;
+    private static final int SEARCH_RETRY_MAX = 5;
+    private static final int SEARCH_RETRY_INTERVAL = 5000;
 
     private final Logger logger = LoggerFactory.getLogger(UpnpDeviceFinder.class);
     private final ScheduledExecutorService scheduler = ThreadPoolManager.getScheduledPool(DEVICE_FINDER_THREADPOOL);
-    private final Map<UDN, Future<?>> subscriptions = new ConcurrentHashMap<>();
+    private final Map<UDN, ScheduledFuture<?>> subscriptions = new ConcurrentHashMap<>();
 
     private final UpnpService upnpService;
 
@@ -73,27 +76,46 @@ public class UpnpDeviceFinder implements RegistryListener {
 
     /**
      * Cancel scheduled search (if any) for the given UDN.
+     * Interrupts the executeSearch() method below.
      */
     private void cancelSearch(UDN udn) {
         Future<?> task = subscriptions.get(udn);
         if (task != null) {
-            task.cancel(false);
+            task.cancel(true);
         }
+    }
+
+    /**
+     * Execute the search for SEARCH_RETRY_MAX attempts at SEARCH_RETRY_INTERVAL.
+     * Can be interrupted by the cancelSearch() method above.
+     */
+    private void executeSearch(UDN udn) {
+        logger.debug("Executing search for {}", udn);
+        for (int i = 0; i < SEARCH_RETRY_MAX; i++) {
+            upnpService.getControlPoint().search(new UDNHeader(udn));
+            try {
+                Thread.sleep(SEARCH_RETRY_INTERVAL);
+            } catch (InterruptedException e) {
+                break;
+            }
+        }
+    }
+
+    /**
+     * Schedule a search for the given device after the given delay.
+     */
+    private void scheduleSearch(UDN udn, int delaySeconds) {
+        cancelSearch(udn);
+        logger.debug("Scheduling search for {} in {} seconds", udn, delaySeconds);
+        subscriptions.put(udn, scheduler.schedule(() -> executeSearch(udn), delaySeconds, TimeUnit.SECONDS));
     }
 
     /**
      * Schedule a search for the given device at a future time based on its maxAge.
      */
     private void scheduleSearch(RemoteDevice device) {
-        UDN udn = device.getIdentity().getUdn();
-        int delaySeconds = Math.max(SEARCH_SCHEDULE_SECONDS,
-                device.getIdentity().getMaxAgeSeconds() - SEARCH_SCHEDULE_SECONDS);
-        logger.debug("Scheduling search for {} in {} seconds", udn, delaySeconds);
-        cancelSearch(udn);
-        subscriptions.put(udn, scheduler.schedule(() -> {
-            logger.debug("Executing search for {}", udn);
-            upnpService.getControlPoint().search(new UDNHeader(udn));
-        }, delaySeconds, TimeUnit.SECONDS));
+        scheduleSearch(device.getIdentity().getUdn(),
+                Math.max(SEARCH_SCHEDULE_SECONDS, device.getIdentity().getMaxAgeSeconds() - SEARCH_SCHEDULE_SECONDS));
     }
 
     /**
@@ -102,7 +124,7 @@ public class UpnpDeviceFinder implements RegistryListener {
     public void addUDN(UDN udn) {
         if (!subscriptions.containsKey(udn)) {
             logger.debug("Added subscription for {}", udn);
-            subscriptions.put(udn, scheduler.submit(() -> upnpService.getControlPoint().search(new UDNHeader(udn))));
+            scheduleSearch(udn, 0);
         }
     }
 
@@ -155,9 +177,8 @@ public class UpnpDeviceFinder implements RegistryListener {
     public void remoteDeviceRemoved(Registry registry, RemoteDevice device) {
         if (subscriptions.containsKey(device.getIdentity().getUdn())) {
             UDN udn = device.getIdentity().getUdn();
-            logger.warn("Device {} removed unexpectedly from registry; Executing search", udn);
-            cancelSearch(udn);
-            subscriptions.put(udn, scheduler.submit(() -> upnpService.getControlPoint().search(new UDNHeader(udn))));
+            logger.warn("Device {} removed unexpectedly from registry", udn);
+            scheduleSearch(udn, 0);
         }
     }
 
