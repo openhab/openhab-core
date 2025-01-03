@@ -147,12 +147,14 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
                     if (unit == null) {
                         unit = itemState.getUnit(); // set it to the first item's unit
                     }
-                    values.add(itemState.toInvertibleUnit(unit).toBigDecimal());
+                    if (itemState.toInvertibleUnit(unit) instanceof QuantityType<?> inverted) {
+                        values.add(inverted.toBigDecimal());
+                    }
                 }
 
                 if (!values.isEmpty()) {
                     BigDecimal median = Statistics.median(values);
-                    if (median != null) {
+                    if (median != null && unit != null) {
                         return new QuantityType<>(median, unit);
                     }
 
