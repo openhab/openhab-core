@@ -300,8 +300,8 @@ public class SitemapSubscriptionService implements ModelRepositoryChangeListener
                 LinkedList<Widget> childrenQueue = new LinkedList<>(widgets);
                 while (!childrenQueue.isEmpty()) {
                     Widget child = childrenQueue.removeFirst();
-                    if (child instanceof LinkableWidget) {
-                        List<Widget> subWidgets = itemUIRegistry.getChildren((LinkableWidget) child);
+                    if (child instanceof LinkableWidget widget) {
+                        List<Widget> subWidgets = itemUIRegistry.getChildren(widget);
                         widgets.addAll(subWidgets);
                         childrenQueue.addAll(subWidgets);
                     }
