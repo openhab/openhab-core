@@ -271,6 +271,7 @@ public abstract class AbstractStorageBasedTypeProvider
         entity.maximum = fragment.getMaximum();
         entity.minimum = fragment.getMinimum();
         entity.step = fragment.getStep();
+        entity.rangeUnit = fragment.getRangeUnit();
         entity.options = fragment.getOptions();
         entity.pattern = fragment.getPattern();
         entity.isReadOnly = fragment.isReadOnly();
@@ -371,6 +372,9 @@ public abstract class AbstractStorageBasedTypeProvider
         if (entity.step != null) {
             builder.withStep(Objects.requireNonNull(entity.step));
         }
+        if (entity.rangeUnit != null) {
+            builder.withRangeUnit(Objects.requireNonNull(entity.rangeUnit));
+        }
         if (entity.options != null) {
             builder.withOptions(Objects.requireNonNull(entity.options));
         }
@@ -444,6 +448,7 @@ public abstract class AbstractStorageBasedTypeProvider
         public @Nullable BigDecimal maximum;
         public @Nullable BigDecimal minimum;
         public @Nullable BigDecimal step;
+        public @Nullable String rangeUnit;
         public @Nullable List<StateOption> options;
         public @Nullable String pattern;
         public boolean isReadOnly = false;
