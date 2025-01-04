@@ -86,10 +86,11 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
-        <version>3.0.0</version>
+        <version>3.5.0</version>
         <configuration>
           <executable>java</executable>
           <classpathScope>compile</classpathScope>
+          <longModulepath>false</longModulepath>
           <arguments>
             <argument>-classpath</argument>
             <classpath/>
