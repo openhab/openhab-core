@@ -140,8 +140,8 @@ public class UpnpDeviceFinder implements RegistryListener {
      * Remove the given UPnP device UDN from the subscriptions list and cancel any pending search.
      */
     public void removeUDN(UDN udn) {
-        subscriptions.remove(udn);
         cancelSearch(udn);
+        subscriptions.remove(udn);
         logger.debug("Removed subscription for {}", udn);
     }
 
