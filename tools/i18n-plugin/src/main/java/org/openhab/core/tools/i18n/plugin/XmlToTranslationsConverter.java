@@ -191,8 +191,7 @@ public class XmlToTranslationsConverter {
                         .map(ThingType::getConfigDescriptionURI) //
                         .distinct() //
                         .map(bundleInfo::getConfigDescription) //
-                        .filter(Optional::isPresent) //
-                        .map(Optional::get));
+                        .flatMap(Optional::stream));
 
         Builder<TranslationsGroup> groupsBuilder = Stream.builder();
 
@@ -314,8 +313,7 @@ public class XmlToTranslationsConverter {
                         .map(ChannelType::getConfigDescriptionURI) //
                         .distinct() //
                         .map(bundleInfo::getConfigDescription) //
-                        .filter(Optional::isPresent) //
-                        .map(Optional::get));
+                        .flatMap(Optional::stream));
 
         Builder<TranslationsGroup> groupsBuilder = Stream.builder();
 

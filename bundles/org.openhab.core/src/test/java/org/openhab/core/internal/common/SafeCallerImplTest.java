@@ -569,7 +569,7 @@ public class SafeCallerImplTest extends JavaTest {
      */
     private void joinAll() throws InterruptedException {
         while (!threads.isEmpty()) {
-            AssertingThread t = threads.remove(0);
+            AssertingThread t = threads.removeFirst();
             t.join();
             if (t.assertionError != null) {
                 throw t.assertionError;

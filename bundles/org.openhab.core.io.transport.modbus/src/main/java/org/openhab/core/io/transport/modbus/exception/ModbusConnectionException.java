@@ -12,6 +12,8 @@
  */
 package org.openhab.core.io.transport.modbus.exception;
 
+import java.io.Serial;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.io.transport.modbus.endpoint.ModbusSlaveEndpoint;
@@ -25,6 +27,7 @@ import org.openhab.core.io.transport.modbus.endpoint.ModbusSlaveEndpoint;
 @NonNullByDefault
 public class ModbusConnectionException extends ModbusTransportException {
 
+    @Serial
     private static final long serialVersionUID = -6171226761518661925L;
     private ModbusSlaveEndpoint endpoint;
 

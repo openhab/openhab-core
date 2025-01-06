@@ -132,10 +132,10 @@ public class JsonStorageTest extends JavaTest {
         assertEquals(0, ((BigDecimal) dummy.configuration.get("testInt")).scale());
         assertEquals(0, ((BigDecimal) dummy.configuration.get("testLong")).scale());
         assertEquals(0, ((BigDecimal) dummy.configuration.get("testBigDecimal")).scale());
-        assertEquals(0, ((List<BigDecimal>) dummy.configuration.get("multiInt")).get(0).scale());
+        assertEquals(0, ((List<BigDecimal>) dummy.configuration.get("multiInt")).getFirst().scale());
         assertEquals(0, ((List<BigDecimal>) dummy.configuration.get("multiInt")).get(1).scale());
         assertEquals(0, ((List<BigDecimal>) dummy.configuration.get("multiInt")).get(2).scale());
-        assertEquals(0, ((BigDecimal) dummy.channels.get(0).configuration.get("testChildLong")).scale());
+        assertEquals(0, ((BigDecimal) dummy.channels.getFirst().configuration.get("testChildLong")).scale());
     }
 
     @Test

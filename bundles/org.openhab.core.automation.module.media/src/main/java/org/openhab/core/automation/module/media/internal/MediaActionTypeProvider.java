@@ -16,7 +16,7 @@ import static java.util.Comparator.comparing;
 
 import java.io.File;
 import java.math.BigDecimal;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -138,7 +138,7 @@ public class MediaActionTypeProvider implements ModuleTypeProvider {
      */
     private List<ParameterOption> getSoundOptions() {
         List<ParameterOption> options = new ArrayList<>();
-        File soundsDir = Paths.get(OpenHAB.getConfigFolder(), AudioManager.SOUND_DIR).toFile();
+        File soundsDir = Path.of(OpenHAB.getConfigFolder(), AudioManager.SOUND_DIR).toFile();
         if (soundsDir.isDirectory()) {
             for (String fileName : soundsDir.list()) {
                 if (fileName.contains(".") && !fileName.startsWith(".")) {

@@ -12,6 +12,8 @@
  */
 package org.openhab.core.items;
 
+import java.io.Serial;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
@@ -27,5 +29,6 @@ public abstract class ItemLookupException extends Exception {
         super(string);
     }
 
+    @Serial
     private static final long serialVersionUID = -4617708589675048859L;
 }

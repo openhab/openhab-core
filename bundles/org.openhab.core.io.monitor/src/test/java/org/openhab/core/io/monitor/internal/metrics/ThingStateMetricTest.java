@@ -69,7 +69,7 @@ public class ThingStateMetricTest {
 
         List<Meter> meters = meterRegistry.getMeters();
         assertEquals(1, meters.size());
-        assertEquals(strThingUid, meters.get(0).getId().getTag("thing"));
+        assertEquals(strThingUid, meters.getFirst().getId().getTag("thing"));
 
         // Still only one meter registered after receiving an event
         ThingStatusInfo thingStatusInfo = new ThingStatusInfo(ThingStatus.ONLINE, ThingStatusDetail.NONE, null);
@@ -77,7 +77,7 @@ public class ThingStateMetricTest {
 
         meters = meterRegistry.getMeters();
         assertEquals(1, meters.size());
-        assertEquals(strThingUid, meters.get(0).getId().getTag("thing"));
+        assertEquals(strThingUid, meters.getFirst().getId().getTag("thing"));
 
         // Now another one is added
         thingStateMetric.receive(ThingEventFactory.createStatusInfoEvent(thingUid2, thingStatusInfo));

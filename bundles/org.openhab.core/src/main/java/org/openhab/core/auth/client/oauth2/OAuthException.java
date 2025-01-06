@@ -12,6 +12,8 @@
  */
 package org.openhab.core.auth.client.oauth2;
 
+import java.io.Serial;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
@@ -22,6 +24,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 @NonNullByDefault
 public class OAuthException extends Exception {
 
+    @Serial
     private static final long serialVersionUID = -2548612391437480321L;
 
     public OAuthException() {

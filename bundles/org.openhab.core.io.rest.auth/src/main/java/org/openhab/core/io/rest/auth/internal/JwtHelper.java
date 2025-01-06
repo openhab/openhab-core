@@ -17,7 +17,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -84,7 +84,7 @@ public class JwtHelper {
     }
 
     private RsaJsonWebKey loadOrGenerateKey() throws JoseException, IOException {
-        try (final BufferedReader reader = Files.newBufferedReader(Paths.get(KEY_FILE_PATH))) {
+        try (final BufferedReader reader = Files.newBufferedReader(Path.of(KEY_FILE_PATH))) {
             return (RsaJsonWebKey) JsonWebKey.Factory.newJwk(reader.readLine());
         } catch (IOException | JoseException e) {
             RsaJsonWebKey key = generateNewKey();

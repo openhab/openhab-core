@@ -196,7 +196,7 @@ public class AnnotationActionModuleTypeProviderTest extends JavaTest {
                 List<ParameterOption> parameterOptions = cdp.getOptions();
                 assertEquals(1, parameterOptions.size());
 
-                ParameterOption po = parameterOptions.get(0);
+                ParameterOption po = parameterOptions.getFirst();
                 assertEquals("conf2", po.getValue());
             }
         }

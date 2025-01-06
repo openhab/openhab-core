@@ -12,6 +12,8 @@
  */
 package org.openhab.core.model.script.engine;
 
+import java.io.Serial;
+
 /**
  * Exception that is thrown on errors during script execution.
  *
@@ -19,6 +21,7 @@ package org.openhab.core.model.script.engine;
  */
 public class ScriptExecutionException extends ScriptException {
 
+    @Serial
     private static final long serialVersionUID = 149490362444673405L;
 
     public ScriptExecutionException(final String message, final int line, final int column, final int length) {

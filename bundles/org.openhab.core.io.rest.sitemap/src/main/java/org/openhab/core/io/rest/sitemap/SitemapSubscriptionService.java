@@ -299,9 +299,9 @@ public class SitemapSubscriptionService implements ModelRepositoryChangeListener
                 // subscribing to whole sitemap --> get items for all subpages as well
                 LinkedList<Widget> childrenQueue = new LinkedList<>(widgets);
                 while (!childrenQueue.isEmpty()) {
-                    Widget child = childrenQueue.remove(0);
-                    if (child instanceof LinkableWidget) {
-                        List<Widget> subWidgets = itemUIRegistry.getChildren((LinkableWidget) child);
+                    Widget child = childrenQueue.removeFirst();
+                    if (child instanceof LinkableWidget widget) {
+                        List<Widget> subWidgets = itemUIRegistry.getChildren(widget);
                         widgets.addAll(subWidgets);
                         childrenQueue.addAll(subWidgets);
                     }

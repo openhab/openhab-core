@@ -358,18 +358,18 @@ public class SitemapResourceTest extends JavaTest {
         assertThat(pageDTO.widgets, notNullValue());
         assertThat((Collection<?>) pageDTO.widgets, hasSize(3));
 
-        assertThat(pageDTO.widgets.get(0).widgetId, is(WIDGET1_ID));
-        assertThat(pageDTO.widgets.get(0).label, is(WIDGET1_LABEL));
-        assertThat(pageDTO.widgets.get(0).labelSource, is("SITEMAP_WIDGET"));
-        assertThat(pageDTO.widgets.get(0).labelcolor, is("GREEN"));
-        assertThat(pageDTO.widgets.get(0).valuecolor, is("BLUE"));
-        assertThat(pageDTO.widgets.get(0).iconcolor, is("ORANGE"));
-        assertThat(pageDTO.widgets.get(0).icon, is(WIDGET1_ICON));
-        assertThat(pageDTO.widgets.get(0).staticIcon, is(true));
-        assertThat(pageDTO.widgets.get(0).state, nullValue());
-        assertThat(pageDTO.widgets.get(0).item, notNullValue());
-        assertThat(pageDTO.widgets.get(0).item.name, is(ITEM_NAME));
-        assertThat(pageDTO.widgets.get(0).item.state, is("50"));
+        assertThat(pageDTO.widgets.getFirst().widgetId, is(WIDGET1_ID));
+        assertThat(pageDTO.widgets.getFirst().label, is(WIDGET1_LABEL));
+        assertThat(pageDTO.widgets.getFirst().labelSource, is("SITEMAP_WIDGET"));
+        assertThat(pageDTO.widgets.getFirst().labelcolor, is("GREEN"));
+        assertThat(pageDTO.widgets.getFirst().valuecolor, is("BLUE"));
+        assertThat(pageDTO.widgets.getFirst().iconcolor, is("ORANGE"));
+        assertThat(pageDTO.widgets.getFirst().icon, is(WIDGET1_ICON));
+        assertThat(pageDTO.widgets.getFirst().staticIcon, is(true));
+        assertThat(pageDTO.widgets.getFirst().state, nullValue());
+        assertThat(pageDTO.widgets.getFirst().item, notNullValue());
+        assertThat(pageDTO.widgets.getFirst().item.name, is(ITEM_NAME));
+        assertThat(pageDTO.widgets.getFirst().item.state, is("50"));
 
         assertThat(pageDTO.widgets.get(1).widgetId, is(WIDGET2_ID));
         assertThat(pageDTO.widgets.get(1).label, is(ITEM_LABEL));
@@ -399,7 +399,7 @@ public class SitemapResourceTest extends JavaTest {
 
     private void configureItemUIRegistryWithSubpages(State state1, State state2, State state3)
             throws ItemNotFoundException {
-        Group group1 = (Group) widgets.get(0);
+        Group group1 = (Group) widgets.getFirst();
         Group group2 = (Group) widgets.get(4);
 
         when(itemUIRegistryMock.getChildren(defaultSitemapMock)).thenReturn(new BasicEList<>(List.of(group1, group2)));
@@ -441,7 +441,7 @@ public class SitemapResourceTest extends JavaTest {
 
     private void configureWidgetStatesPage1(State state1, State state2) {
         EList<Widget> mainpageWidgets = new BasicEList<>(widgets.subList(1, 4));
-        Widget w1 = mainpageWidgets.get(0);
+        Widget w1 = mainpageWidgets.getFirst();
         configureItemUIRegistryForWidget(w1, WIDGET1_ID, WIDGET1_ICON, WIDGET1_LABEL, WidgetLabelSource.SITEMAP_WIDGET,
                 true, "GREEN", "BLUE", "ORANGE", state1);
 

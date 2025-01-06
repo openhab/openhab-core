@@ -79,7 +79,7 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
         }
         if (logger.isDebugEnabled()) {
             if (!scriptTypes.isEmpty()) {
-                ScriptEngine scriptEngine = engineFactory.createScriptEngine(scriptTypes.get(0));
+                ScriptEngine scriptEngine = engineFactory.createScriptEngine(scriptTypes.getFirst());
                 if (scriptEngine != null) {
                     javax.script.ScriptEngineFactory factory = scriptEngine.getFactory();
                     logger.debug(

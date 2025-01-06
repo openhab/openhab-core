@@ -262,7 +262,7 @@ public class ConfigUtil {
             for (final Object it : collection) {
                 final Object normalized = normalizeType(it, null);
                 lst.add(normalized);
-                if (normalized.getClass() != lst.get(0).getClass()) {
+                if (normalized.getClass() != lst.getFirst().getClass()) {
                     throw new IllegalArgumentException(
                             "Invalid configuration property. Heterogeneous collection value!");
                 }

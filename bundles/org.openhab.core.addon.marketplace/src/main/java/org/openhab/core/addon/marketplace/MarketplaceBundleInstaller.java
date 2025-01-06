@@ -86,7 +86,7 @@ public abstract class MarketplaceBundleInstaller {
                             "The local cache folder doesn't contain a single file: " + addonPath, null);
                 }
 
-                try (FileInputStream fileInputStream = new FileInputStream(bundleFiles.get(0).toFile())) {
+                try (FileInputStream fileInputStream = new FileInputStream(bundleFiles.getFirst().toFile())) {
                     Bundle bundle = bundleContext.installBundle(addonId, fileInputStream);
                     try {
                         bundle.start();

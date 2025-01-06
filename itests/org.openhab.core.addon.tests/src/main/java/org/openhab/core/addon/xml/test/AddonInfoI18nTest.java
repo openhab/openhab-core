@@ -65,7 +65,7 @@ public class AddonInfoI18nTest extends JavaOSGiTest {
     @Test
     public void assertAddonInfosWereLocalizedInDutch() throws Exception {
         addonInstaller.exec(TEST_BUNDLE_NAME, () -> {
-            Set<AddonInfo> bindingInfos = addonInfoRegistry.getAddonInfos(new Locale("nl"));
+            Set<AddonInfo> bindingInfos = addonInfoRegistry.getAddonInfos(Locale.of("nl"));
             AddonInfo bindingInfo = bindingInfos.iterator().next();
 
             assertThat(bindingInfo, is(notNullValue()));

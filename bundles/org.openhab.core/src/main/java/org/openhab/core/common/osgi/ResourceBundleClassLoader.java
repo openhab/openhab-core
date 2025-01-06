@@ -89,7 +89,7 @@ public class ResourceBundleClassLoader extends ClassLoader {
         }
 
         if (allResources.size() == 1) {
-            return allResources.get(0);
+            return allResources.getFirst();
         }
 
         // handle fragment resources. return first one.

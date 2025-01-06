@@ -14,6 +14,7 @@ package org.openhab.core.library.types;
 
 import static org.eclipse.jdt.annotation.DefaultLocation.*;
 
+import java.io.Serial;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -71,6 +72,7 @@ import tech.uom.lib.common.function.QuantityFunctions;
 public class QuantityType<T extends Quantity<T>> extends Number
         implements PrimitiveType, State, Command, Comparable<QuantityType<T>> {
 
+    @Serial
     private static final long serialVersionUID = 8828949721938234629L;
     private static final BigDecimal BIG_DECIMAL_HUNDRED = BigDecimal.valueOf(100);
 
