@@ -34,6 +34,7 @@ import tech.units.indriya.function.Calculus;
  */
 @NonNullByDefault
 public class CurrencyConverter extends AbstractConverter {
+    private static final long serialVersionUID = 1L;
 
     private final BigDecimal factor;
 
@@ -103,7 +104,7 @@ public class CurrencyConverter extends AbstractConverter {
             @SuppressWarnings("unchecked")
             Map<Class<? extends AbstractConverter>, Integer> original = (Map<Class<? extends AbstractConverter>, Integer>) field
                     .get(null);
-            original.put(CurrencyConverter.class, 1000);
+            Objects.requireNonNull(original).put(CurrencyConverter.class, 1000);
         } catch (NoSuchFieldException | IllegalAccessException e) {
             throw new IllegalStateException("Could not add currency converter", e);
         }

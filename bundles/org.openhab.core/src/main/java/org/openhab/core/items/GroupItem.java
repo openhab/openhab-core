@@ -224,8 +224,8 @@ public class GroupItem extends GenericItem implements StateChangeListener, Metad
      */
     @Override
     public List<Class<? extends State>> getAcceptedDataTypes() {
-        if (baseItem != null) {
-            return baseItem.getAcceptedDataTypes();
+        if (baseItem instanceof Item item) {
+            return item.getAcceptedDataTypes();
         } else {
             List<Class<? extends State>> acceptedDataTypes = null;
 
@@ -249,8 +249,8 @@ public class GroupItem extends GenericItem implements StateChangeListener, Metad
      */
     @Override
     public List<Class<? extends Command>> getAcceptedCommandTypes() {
-        if (baseItem != null) {
-            return baseItem.getAcceptedCommandTypes();
+        if (baseItem instanceof Item item) {
+            return item.getAcceptedCommandTypes();
         } else {
             List<Class<? extends Command>> acceptedCommandTypes = null;
 
@@ -289,8 +289,8 @@ public class GroupItem extends GenericItem implements StateChangeListener, Metad
         // if a group does not have a function it cannot have a state
         @Nullable
         T newState = null;
-        if (function != null) {
-            newState = function.getStateAs(getStateMembers(getMembers()), typeClass);
+        if (function instanceof GroupFunction groupFunction) {
+            newState = groupFunction.getStateAs(getStateMembers(getMembers()), typeClass);
         }
 
         Item baseItem = this.baseItem;
@@ -354,8 +354,8 @@ public class GroupItem extends GenericItem implements StateChangeListener, Metad
         State oldState = this.state;
         State newState = oldState;
         ItemStateConverter itemStateConverter = this.itemStateConverter;
-        if (function != null && baseItem != null && itemStateConverter != null) {
-            State calculatedState = function.calculate(getStateMembers(getMembers()));
+        if (function instanceof GroupFunction groupFunction && baseItem != null && itemStateConverter != null) {
+            State calculatedState = groupFunction.calculate(getStateMembers(getMembers()));
             newState = itemStateConverter.convertToAcceptedState(calculatedState, baseItem);
             setState(newState);
             sendGroupStateUpdatedEvent(item.getName(), newState);

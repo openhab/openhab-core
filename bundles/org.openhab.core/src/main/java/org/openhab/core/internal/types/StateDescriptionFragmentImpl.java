@@ -195,7 +195,8 @@ public class StateDescriptionFragmentImpl implements StateDescriptionFragment {
         if (readOnly == null) {
             readOnly = fragment.isReadOnly();
         }
-        if (options == null || options.isEmpty()) {
+        List<StateOption> localOptions = options;
+        if (localOptions == null || localOptions.isEmpty()) {
             options = fragment.getOptions();
         }
         return this;
@@ -205,12 +206,12 @@ public class StateDescriptionFragmentImpl implements StateDescriptionFragment {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + (minimum != null ? minimum.hashCode() : 0);
-        result = prime * result + (maximum != null ? maximum.hashCode() : 0);
-        result = prime * result + (step != null ? step.hashCode() : 0);
-        result = prime * result + (pattern != null ? pattern.hashCode() : 0);
+        result = prime * result + Objects.hashCode(minimum);
+        result = prime * result + Objects.hashCode(maximum);
+        result = prime * result + Objects.hashCode(step);
+        result = prime * result + Objects.hashCode(pattern);
         result = prime * result + (readOnly ? 1231 : 1237);
-        result = prime * result + (options != null ? options.hashCode() : 0);
+        result = prime * result + Objects.hashCode(options);
         return result;
     }
 
