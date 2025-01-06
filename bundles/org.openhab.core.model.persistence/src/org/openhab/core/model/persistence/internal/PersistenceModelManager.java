@@ -105,13 +105,9 @@ public class PersistenceModelManager extends AbstractProvider<PersistenceService
             String serviceName = serviceName(modelName);
             if (type == EventType.REMOVED) {
                 PersistenceServiceConfiguration removed = configurations.remove(serviceName);
-<<<<<<< Upstream, based on origin/main
                 if (removed == null) {
                     logger.warn("Service for {} was already removed from registry, ignoring.", modelName);
                 } else {
-=======
-                if (removed != null) {
->>>>>>> bc6d66a persistence aliases
                     notifyListenersAboutRemovedElement(removed);
                 }
             } else {
