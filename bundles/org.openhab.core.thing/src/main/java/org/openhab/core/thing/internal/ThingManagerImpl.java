@@ -933,8 +933,8 @@ public class ThingManagerImpl implements ReadyTracker, ThingManager, ThingTracke
                             thing.getThingTypeUID());
                 }
             } else {
-                setThingStatus(thing, buildStatusInfo(ThingStatus.UNINITIALIZED,
-                        ThingStatusDetail.HANDLER_MISSING_ERROR, "Handler factory not found"));
+                setThingStatus(thing,
+                        buildStatusInfo(ThingStatus.UNINITIALIZED, ThingStatusDetail.HANDLER_MISSING_ERROR));
                 logger.debug("Not registering a handler at this point. No handler factory for thing '{}' found.",
                         thing.getUID());
             }
