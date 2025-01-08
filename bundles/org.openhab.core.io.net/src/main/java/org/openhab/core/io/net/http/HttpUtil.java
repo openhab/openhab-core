@@ -209,7 +209,14 @@ public class HttpUtil {
 
         final HttpMethod method = HttpUtil.createHttpMethod(httpMethod);
 
-        final Request request = httpClient.newRequest(url).method(method).timeout(timeout, TimeUnit.MILLISECONDS);
+        URI uri = null;
+        try {
+            uri = new URI(url);
+        } catch (URISyntaxException e) {
+            LOGGER.debug("String {} can not be parsed as URI reference", url);
+            throw new IOException(e);
+        }
+        final Request request = httpClient.newRequest(uri).method(method).timeout(timeout, TimeUnit.MILLISECONDS);
 
         if (httpHeaders != null) {
             for (String httpHeaderKey : httpHeaders.stringPropertyNames()) {
@@ -222,20 +229,15 @@ public class HttpUtil {
         }
 
         // add basic auth header, if url contains user info
-        try {
-            URI uri = new URI(url);
-            if (uri.getUserInfo() != null) {
-                String[] userInfo = uri.getUserInfo().split(":");
+        if (uri.getUserInfo() != null) {
+            String[] userInfo = uri.getUserInfo().split(":");
 
-                String user = userInfo[0];
-                String password = userInfo[1];
+            String user = userInfo[0];
+            String password = userInfo[1];
 
-                String basicAuthentication = "Basic "
-                        + Base64.getEncoder().encodeToString((user + ":" + password).getBytes());
-                request.header(HttpHeader.AUTHORIZATION, basicAuthentication);
-            }
-        } catch (URISyntaxException e) {
-            LOGGER.debug("String {} can not be parsed as URI reference", url);
+            String basicAuthentication = "Basic "
+                    + Base64.getEncoder().encodeToString((user + ":" + password).getBytes());
+            request.header(HttpHeader.AUTHORIZATION, basicAuthentication);
         }
 
         // add content if a valid method is given ...
