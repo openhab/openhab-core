@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.io.websocket.pcm_audio;
+package org.openhab.core.io.websocket.audiopcm;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -144,7 +144,9 @@ public class PCMWebSocketConnection implements WebSocketListener {
         logger.trace("Received binary data of length {}", len);
         PCMWebSocketAudioSource audioSource = this.audioSource;
         if (payload != null && audioSource != null) {
-            audioSource.writeToStreams(payload);
+            var streamData = PCMWebSocketStreamIdUtil.parseAudioPacket(payload);
+            audioSource.writeToStreams(streamData.id(), streamData.sampleRate(), streamData.bitDepth(),
+                    streamData.channels(), streamData.audioData());
         }
     }
 
@@ -161,17 +163,14 @@ public class PCMWebSocketConnection implements WebSocketListener {
                         case INITIALIZE -> {
                             wsAdapter.onSpeakerConnected(this);
                             JsonNode argsNode = rootMessageNode.get("args");
-                            var initializeArgs = jsonMapper.treeToValue(argsNode,
-                                    WebSocketCommand.InitializeArgs.class);
+                            var clientOptions = jsonMapper.treeToValue(argsNode, ConnectionOptions.class);
                             var scheduledDisconnection = this.scheduledDisconnection;
                             if (scheduledDisconnection != null) {
                                 scheduledDisconnection.cancel(true);
                             }
                             // update connection settings
-                            id = initializeArgs.id;
-                            registerSpeakerComponents(id, initializeArgs.sourceSampleRate,
-                                    initializeArgs.prefSampleRate, initializeArgs.runDialog,
-                                    initializeArgs.listeningItem, initializeArgs.locationItem);
+                            id = clientOptions.id;
+                            registerSpeakerComponents(id, clientOptions);
                             sendClientCommand(new WebSocketCommand(WebSocketCommand.OutputCommands.INITIALIZED));
                         }
                         case ON_SPOT -> onRemoteSpot();
@@ -228,33 +227,33 @@ public class PCMWebSocketConnection implements WebSocketListener {
         return sess != null && sess.isOpen();
     }
 
-    private synchronized void registerSpeakerComponents(String id, int sourceSampleRate, int prefSampleRate,
-            boolean runDialog, String listeningItem, String locationItem) throws IOException {
+    private synchronized void registerSpeakerComponents(String id, ConnectionOptions clientOptions) throws IOException {
         if (id.isBlank()) {
             throw new IOException("Unable to register audio components");
         }
         String label = "UI (" + id + ")";
-        logger.debug("Registering dialog components for '{}' (source sample rate {})", id, sourceSampleRate);
+        logger.debug("Registering dialog components for '{}'", id);
         this.initialized = true;
         // register source
-        var audioSource = this.audioSource = new PCMWebSocketAudioSource(getSourceId(id), label, sourceSampleRate,
-                this);
+        var audioSource = this.audioSource = new PCMWebSocketAudioSource(getSourceId(id), label, this);
         logger.debug("Registering audio source {}", this.audioSource.getId());
         audioComponentRegistrations.put(this.audioSource.getId(), wsAdapter.bundleContext
                 .registerService(AudioSource.class.getName(), this.audioSource, new Hashtable<>()));
         // register sink
-        var audioSink = new PCMWebSocketAudioSink(getSinkId(id), label, this, prefSampleRate);
+        var audioSink = new PCMWebSocketAudioSink(getSinkId(id), label, this, clientOptions.forceSampleRate,
+                clientOptions.forceBitDepth, clientOptions.forceChannels);
         logger.debug("Registering audio sink {}", audioSink.getId());
         audioComponentRegistrations.put(audioSink.getId(),
                 wsAdapter.bundleContext.registerService(AudioSink.class.getName(), audioSink, new Hashtable<>()));
         // init dialog
-        if (runDialog) {
+        if (clientOptions.startDialog) {
             var dialogProvider = this.wsAdapter.dialogProvider;
             if (dialogProvider == null) {
                 throw new IOException("Voice functionality is not ready");
             }
             dialogTrigger = dialogProvider.startDialog(this, audioSink, audioSource,
-                    !locationItem.isBlank() ? locationItem : null, !listeningItem.isBlank() ? listeningItem : null);
+                    !clientOptions.locationItem.isBlank() ? clientOptions.locationItem : null,
+                    !clientOptions.listeningItem.isBlank() ? clientOptions.listeningItem : null);
         } else {
             dialogTrigger = null;
         }
@@ -331,36 +330,42 @@ public class PCMWebSocketConnection implements WebSocketListener {
             INITIALIZE,
             ON_SPOT,
         }
+    }
 
-        public static class InitializeArgs {
-            /**
-             * Identifier to concatenate to the audio source/sink id
-             */
-            public String id = "";
-            /**
-             * Sample rate of the source audio line, if this is not 16000 the audio will be resampled at
-             * {@link PCMWebSocketAudioSource}
-             */
-            public int sourceSampleRate;
-            /**
-             * Client preferred sample rate
-             */
-            public int prefSampleRate;
-            /**
-             * Start a dialog processor using the registered audio components
-             */
-            public boolean runDialog = false;
-            /**
-             * Listening item for the dialog
-             */
-            public String listeningItem = "";
-            /**
-             * Location item for the dialog
-             */
-            public String locationItem = "";
+    /**
+     * The {@link ConnectionOptions} represents the options provided by the ws client.
+     */
+    public static class ConnectionOptions {
+        /**
+         * Identifier to concatenate to related services (dialog, source and sick)
+         */
+        public String id = "";
+        /**
+         * Force sink audio sample rate (resample in server)
+         */
+        public @Nullable Integer forceSampleRate;
+        /**
+         * Force sink audio bit depth (resample in server)
+         */
+        public @Nullable Integer forceBitDepth;
+        /**
+         * Force sink audio channels (resample in server)
+         */
+        public @Nullable Integer forceChannels;
+        /**
+         * Start a dialog processor using the registered audio components
+         */
+        public boolean startDialog = false;
+        /**
+         * Listening item for the dialog
+         */
+        public String listeningItem = "";
+        /**
+         * Location item for the dialog
+         */
+        public String locationItem = "";
 
-            public InitializeArgs() {
-            }
+        public ConnectionOptions() {
         }
     }
 }

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.io.websocket.pcm_audio;
+package org.openhab.core.io.websocket.audiopcm;
 
 import static java.nio.ByteBuffer.wrap;
 
@@ -49,10 +49,10 @@ import org.slf4j.LoggerFactory;
 @NonNullByDefault
 @Component(immediate = true, service = { PCMWebSocketAdapter.class, WebSocketAdapter.class })
 public class PCMWebSocketAdapter implements WebSocketAdapter {
-    public static final String ADAPTER_ID = "pcm-audio";
+    public static final String ADAPTER_ID = "audio-pcm";
 
     private final Logger logger = LoggerFactory.getLogger(PCMWebSocketAdapter.class);
-    private final ScheduledExecutorService executor = ThreadPoolManager.getScheduledPool("pcm-audio-websocket");
+    private final ScheduledExecutorService executor = ThreadPoolManager.getScheduledPool("audio-pcm-websocket");
     protected final BundleContext bundleContext;
     protected final AudioManager audioManager;
     protected PCMWebSocketAdapter.@Nullable DialogProvider dialogProvider = null;
