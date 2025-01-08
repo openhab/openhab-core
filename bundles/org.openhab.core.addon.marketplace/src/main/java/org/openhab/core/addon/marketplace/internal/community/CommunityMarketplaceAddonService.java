@@ -39,7 +39,6 @@ import org.openhab.core.addon.AddonInfoRegistry;
 import org.openhab.core.addon.AddonService;
 import org.openhab.core.addon.AddonType;
 import org.openhab.core.addon.marketplace.AbstractRemoteAddonService;
-import org.openhab.core.addon.marketplace.BundleVersion;
 import org.openhab.core.addon.marketplace.MarketplaceAddonHandler;
 import org.openhab.core.addon.marketplace.internal.community.model.DiscourseCategoryResponseDTO;
 import org.openhab.core.addon.marketplace.internal.community.model.DiscourseCategoryResponseDTO.DiscoursePosterInfo;
@@ -47,6 +46,7 @@ import org.openhab.core.addon.marketplace.internal.community.model.DiscourseCate
 import org.openhab.core.addon.marketplace.internal.community.model.DiscourseCategoryResponseDTO.DiscourseUser;
 import org.openhab.core.addon.marketplace.internal.community.model.DiscourseTopicResponseDTO;
 import org.openhab.core.addon.marketplace.internal.community.model.DiscourseTopicResponseDTO.DiscoursePostLink;
+import org.openhab.core.common.VersionRange;
 import org.openhab.core.config.core.ConfigParser;
 import org.openhab.core.config.core.ConfigurableService;
 import org.openhab.core.events.EventPublisher;
@@ -94,7 +94,7 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
     private static final String ADDON_ID_PREFIX = SERVICE_ID + ":";
 
     private static final Pattern CODE_MARKUP_PATTERN = Pattern.compile(
-            "<pre(?: data-code-wrap=\"[a-z]+\")?><code class=\"lang-(?<lang>[a-z]+)\">(?<content>.*?)</code></pre>",
+            "<pre(?: data-code-wrap=\"[-a-zA-Z]+\")?><code class=\"lang-(?<lang>[-a-zA-Z]+)\">(?<content>.*?)</code></pre>\\n?",
             Pattern.DOTALL);
 
     private static final Integer BUNDLES_CATEGORY = 73;
@@ -225,6 +225,8 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
                 return convertTopicToAddon(parsed);
             }
         } catch (Exception e) {
+            logger.debug("An error occurred while creating add-on for '{}': {}", uid, e.getMessage());
+            logger.trace("", e);
             return null;
         }
     }
@@ -303,23 +305,19 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
             String title = topic.title;
             boolean compatible = true;
 
-            int compatibilityStart = topic.title.lastIndexOf("["); // version range always starts with [
-            if (topic.title.lastIndexOf(" ") < compatibilityStart) { // check includes [ not present
-                String potentialRange = topic.title.substring(compatibilityStart);
-                Matcher matcher = BundleVersion.RANGE_PATTERN.matcher(potentialRange);
-                if (matcher.matches()) {
-                    try {
-                        compatible = coreVersion.inRange(potentialRange);
-                        title = topic.title.substring(0, compatibilityStart).trim();
-                        logger.debug("{} is {}compatible with core version {}", topic.title, compatible ? "" : "NOT ",
-                                coreVersion);
-                    } catch (IllegalArgumentException e) {
-                        logger.debug("Failed to determine compatibility for addon {}: {}", topic.title, e.getMessage());
-                        compatible = true;
-                    }
-                } else {
-                    logger.debug("Range pattern does not match '{}'", potentialRange);
+            Matcher matcher = VersionRange.RANGE_PATTERN.matcher(title);
+            if (matcher.find()) {
+                try {
+                    compatible = VersionRange.valueOf(matcher.group().trim()).includes(coreVersion);
+                    title = title.substring(0, matcher.start());
+                    logger.debug("{} is {}compatible with core version {}", topic.title, compatible ? "" : "NOT ",
+                            coreVersion);
+                } catch (IllegalArgumentException e) {
+                    logger.debug("Failed to determine compatibility for add-on {}: {}", topic.title, e.getMessage());
+                    compatible = true;
                 }
+            } else {
+                logger.trace("No version range pattern found for add-on {}", topic.title);
             }
 
             String link = COMMUNITY_TOPIC_URL + topic.id.toString();
@@ -362,8 +360,8 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
      * @return the unescaped content
      */
     private String unescapeEntities(String content) {
-        return content.replace("&quot;", "\"").replace("&amp;", "&").replace("&apos;", "'").replace("&lt;", "<")
-                .replace("&gt;", ">");
+        return content.replace("&quot;", "\"").replace("&apos;", "'").replace("&lt;", "<").replace("&gt;", ">")
+                .replace("&amp;", "&");
     }
 
     /**
@@ -390,9 +388,15 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
         String maturity = tags.stream().filter(CODE_MATURITY_LEVELS::contains).findAny().orElse(null);
 
         Map<String, Object> properties = new HashMap<>(10);
-        properties.put("created_at", createdDate);
-        properties.put("updated_at", updatedDate);
-        properties.put("last_posted", lastPostedDate);
+        if (createdDate != null) {
+            properties.put("created_at", createdDate);
+        }
+        if (updatedDate != null) {
+            properties.put("updated_at", updatedDate);
+        }
+        if (lastPostedDate != null) {
+            properties.put("last_posted", lastPostedDate);
+        }
         properties.put("like_count", likeCount);
         properties.put("views", views);
         properties.put("posts_count", postsCount);
@@ -404,18 +408,18 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
         // try to extract contents or links
         if (topic.postStream.posts[0].linkCounts != null) {
             for (DiscoursePostLink postLink : topic.postStream.posts[0].linkCounts) {
-                if (postLink.url.endsWith(".jar")) {
+                if (postLink.url.toLowerCase(Locale.ROOT).endsWith(".jar")) {
                     properties.put(JAR_DOWNLOAD_URL_PROPERTY, postLink.url);
                     id = determineIdFromUrl(postLink.url);
                 }
-                if (postLink.url.endsWith(".kar")) {
+                if (postLink.url.toLowerCase(Locale.ROOT).endsWith(".kar")) {
                     properties.put(KAR_DOWNLOAD_URL_PROPERTY, postLink.url);
                     id = determineIdFromUrl(postLink.url);
                 }
-                if (postLink.url.endsWith(".json")) {
+                if (postLink.url.toLowerCase(Locale.ROOT).endsWith(".json")) {
                     properties.put(JSON_DOWNLOAD_URL_PROPERTY, postLink.url);
                 }
-                if (postLink.url.endsWith(".yaml")) {
+                if (postLink.url.toLowerCase(Locale.ROOT).endsWith(".yaml")) {
                     properties.put(YAML_DOWNLOAD_URL_PROPERTY, postLink.url);
                 }
             }
@@ -436,17 +440,16 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
                 .anyMatch(handler -> handler.supports(type, contentType) && handler.isInstalled(uid));
 
         String title = topic.title;
-        int compatibilityStart = topic.title.lastIndexOf("["); // version range always starts with [
-        if (topic.title.lastIndexOf(" ") < compatibilityStart) { // check includes [ not present
-            String potentialRange = topic.title.substring(compatibilityStart);
-            Matcher matcher = BundleVersion.RANGE_PATTERN.matcher(potentialRange);
-            if (matcher.matches()) {
-                title = topic.title.substring(0, compatibilityStart).trim();
-            }
+        boolean compatible = true;
+        Matcher matcher = VersionRange.RANGE_PATTERN.matcher(title);
+        if (matcher.find()) {
+            compatible = VersionRange.valueOf(matcher.group().trim()).includes(coreVersion);
+            title = matcher.replaceFirst("").trim();
         }
 
         Addon.Builder builder = Addon.create(uid).withType(type).withId(id).withContentType(contentType)
-                .withLabel(title).withImageLink(topic.imageUrl).withLink(COMMUNITY_TOPIC_URL + topic.id.toString())
+                .withCompatible(compatible).withLabel(title).withImageLink(topic.imageUrl)
+                .withLink(COMMUNITY_TOPIC_URL + topic.id.toString())
                 .withAuthor(topic.postStream.posts[0].displayUsername).withMaturity(maturity)
                 .withDetailedDescription(detailedDescription).withInstalled(installed).withProperties(properties);
 

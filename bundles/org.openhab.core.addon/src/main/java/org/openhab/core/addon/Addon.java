@@ -18,7 +18,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.common.Version;
 
 /**
  * This class defines an add-on.
@@ -34,14 +36,14 @@ public class Addon {
 
     private final String id;
     private final String label;
-    private final String version;
+    private final @Nullable Version version;
     private final @Nullable String maturity;
     private final boolean compatible;
     private final String contentType;
     private final @Nullable String link;
     private final String author;
     private final boolean verifiedAuthor;
-    private boolean installed;
+    private volatile boolean installed;
     private final String type;
     private final @Nullable String description;
     private final @Nullable String detailedDescription;
@@ -84,19 +86,19 @@ public class Addon {
      * @param loggerPackages a {@link List} containing the package names belonging to this add-on
      * @throws IllegalArgumentException when a mandatory parameter is invalid
      */
-    private Addon(String uid, String type, String id, String label, String version, @Nullable String maturity,
+    Addon(String uid, String type, String id, String label, @Nullable Version version, @Nullable String maturity,
             boolean compatible, String contentType, @Nullable String link, String author, boolean verifiedAuthor,
             boolean installed, @Nullable String description, @Nullable String detailedDescription,
             String configDescriptionURI, String keywords, List<String> countries, @Nullable String license,
             String connection, @Nullable String backgroundColor, @Nullable String imageLink,
             @Nullable Map<String, Object> properties, List<String> loggerPackages) {
-        if (uid.isBlank()) {
+        if (uid == null || uid.isBlank()) {
             throw new IllegalArgumentException("uid must not be empty");
         }
-        if (type.isBlank()) {
+        if (type == null || type.isBlank()) {
             throw new IllegalArgumentException("type must not be empty");
         }
-        if (id.isBlank()) {
+        if (id == null || id.isBlank()) {
             throw new IllegalArgumentException("id must not be empty");
         }
 
@@ -111,19 +113,20 @@ public class Addon {
         this.contentType = contentType;
         this.description = description;
         this.detailedDescription = detailedDescription;
-        this.configDescriptionURI = configDescriptionURI;
-        this.keywords = keywords;
-        this.countries = countries;
+        this.configDescriptionURI = configDescriptionURI == null || configDescriptionURI.isBlank() ? ""
+                : configDescriptionURI;
+        this.keywords = keywords == null || keywords.isBlank() ? "" : keywords;
+        this.countries = countries == null ? List.of() : List.copyOf(countries);
         this.license = license;
-        this.connection = connection;
+        this.connection = connection == null || connection.isBlank() ? "" : connection;
         this.backgroundColor = backgroundColor;
         this.link = link;
         this.imageLink = imageLink;
-        this.author = author;
+        this.author = author == null || author.isBlank() ? "" : author;
         this.verifiedAuthor = verifiedAuthor;
         this.installed = installed;
-        this.properties = properties == null ? Map.of() : properties;
-        this.loggerPackages = loggerPackages;
+        this.properties = properties == null ? Map.of() : Map.copyOf(properties);
+        this.loggerPackages = loggerPackages == null ? List.of() : List.copyOf(loggerPackages);
     }
 
     /**
@@ -178,7 +181,7 @@ public class Addon {
     /**
      * The version of the add-on
      */
-    public String getVersion() {
+    public @Nullable Version getVersion() {
         return version;
     }
 
@@ -305,59 +308,62 @@ public class Addon {
     }
 
     public static Builder create(Addon addon) {
-        Addon.Builder builder = new Builder(addon.uid);
-        builder.id = addon.id;
-        builder.label = addon.label;
-        builder.version = addon.version;
-        builder.maturity = addon.maturity;
-        builder.compatible = addon.compatible;
-        builder.contentType = addon.contentType;
-        builder.link = addon.link;
-        builder.author = addon.author;
-        builder.verifiedAuthor = addon.verifiedAuthor;
-        builder.installed = addon.installed;
-        builder.type = addon.type;
-        builder.description = addon.description;
-        builder.detailedDescription = addon.detailedDescription;
-        builder.configDescriptionURI = addon.configDescriptionURI;
-        builder.keywords = addon.keywords;
-        builder.countries = addon.countries;
-        builder.license = addon.license;
-        builder.connection = addon.connection;
-        builder.backgroundColor = addon.backgroundColor;
-        builder.imageLink = addon.imageLink;
-        builder.properties = addon.properties;
-        builder.loggerPackages = addon.loggerPackages;
-        return builder;
+        return new Builder(addon);
     }
 
     public static class Builder {
-        private final String uid;
-        private String id;
-        private String label;
-        private String version = "";
+        private final @NonNull String uid;
+        private @Nullable String id;
+        private @Nullable String label;
+        private @Nullable Version version;
         private @Nullable String maturity;
         private boolean compatible = true;
-        private String contentType;
+        private @Nullable String contentType;
         private @Nullable String link;
-        private String author = "";
+        private @Nullable String author;
         private boolean verifiedAuthor = false;
         private boolean installed = false;
-        private String type;
+        private @Nullable String type;
         private @Nullable String description;
         private @Nullable String detailedDescription;
-        private String configDescriptionURI = "";
-        private String keywords = "";
-        private List<String> countries = List.of();
+        private @Nullable String configDescriptionURI;
+        private @Nullable String keywords;
+        private @Nullable List<@NonNull String> countries = List.of();
         private @Nullable String license;
-        private String connection = "";
+        private @Nullable String connection;
         private @Nullable String backgroundColor;
         private @Nullable String imageLink;
-        private Map<String, Object> properties = new HashMap<>();
-        private List<String> loggerPackages = List.of();
+        private @Nullable Map<@NonNull String, @NonNull Object> properties;
+        private @Nullable List<@NonNull String> loggerPackages = List.of();
 
-        private Builder(String uid) {
+        private Builder(@NonNull String uid) {
             this.uid = uid;
+        }
+
+        private Builder(Addon addon) {
+            this.uid = addon.uid;
+            this.id = addon.id;
+            this.label = addon.label;
+            this.version = addon.version;
+            this.maturity = addon.maturity;
+            this.compatible = addon.compatible;
+            this.contentType = addon.contentType;
+            this.link = addon.link;
+            this.author = addon.author;
+            this.verifiedAuthor = addon.verifiedAuthor;
+            this.installed = addon.installed;
+            this.type = addon.type;
+            this.description = addon.description;
+            this.detailedDescription = addon.detailedDescription;
+            this.configDescriptionURI = addon.configDescriptionURI;
+            this.keywords = addon.keywords;
+            this.countries = addon.countries;
+            this.license = addon.license;
+            this.connection = addon.connection;
+            this.backgroundColor = addon.backgroundColor;
+            this.imageLink = addon.imageLink;
+            this.properties = addon.properties;
+            this.loggerPackages = addon.loggerPackages;
         }
 
         public Builder withType(String type) {
@@ -375,7 +381,7 @@ public class Addon {
             return this;
         }
 
-        public Builder withVersion(String version) {
+        public Builder withVersion(@Nullable Version version) {
             this.version = version;
             return this;
         }
@@ -436,7 +442,11 @@ public class Addon {
             return this;
         }
 
-        public Builder withCountries(List<String> countries) {
+        public @Nullable List<@NonNull String> getCountries() {
+            return countries;
+        }
+
+        public Builder withCountries(List<@NonNull String> countries) {
             this.countries = countries;
             return this;
         }
@@ -461,17 +471,26 @@ public class Addon {
             return this;
         }
 
-        public Builder withProperty(String key, Object value) {
-            this.properties.put(key, value);
+        public Builder withProperty(@NonNull String key, @NonNull Object value) {
+            Map<@NonNull String, @NonNull Object> props = this.properties;
+            if (props == null) {
+                props = new HashMap<>();
+            }
+            props.put(key, value);
+            this.properties = props;
             return this;
         }
 
-        public Builder withProperties(Map<String, Object> properties) {
-            this.properties.putAll(properties);
+        public Builder withProperties(@Nullable Map<@NonNull String, @NonNull Object> properties) {
+            this.properties = properties;
             return this;
         }
 
-        public Builder withLoggerPackages(List<String> loggerPackages) {
+        public @Nullable List<@NonNull String> getLoggerPackages() {
+            return loggerPackages;
+        }
+
+        public Builder withLoggerPackages(@Nullable List<@NonNull String> loggerPackages) {
             this.loggerPackages = loggerPackages;
             return this;
         }
@@ -479,8 +498,7 @@ public class Addon {
         public Addon build() {
             return new Addon(uid, type, id, label, version, maturity, compatible, contentType, link, author,
                     verifiedAuthor, installed, description, detailedDescription, configDescriptionURI, keywords,
-                    countries, license, connection, backgroundColor, imageLink,
-                    properties.isEmpty() ? null : properties, loggerPackages);
+                    countries, license, connection, backgroundColor, imageLink, properties, loggerPackages);
         }
     }
 }

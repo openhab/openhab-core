@@ -89,8 +89,9 @@ public class CommunityBundleAddonHandler extends MarketplaceBundleInstaller impl
         } catch (IllegalArgumentException | MalformedURLException | URISyntaxException e) {
             throw new MarketplaceHandlerException("Malformed source URL: " + e.getMessage(), e);
         }
-        addBundleToCache(addon.getUid(), sourceUrl);
-        installFromCache(bundleContext, addon.getUid());
+        String addonId = addon.getUid();
+        addBundleToCache(addonId, sourceUrl);
+        installFromCache(bundleContext, addonId);
     }
 
     @Override

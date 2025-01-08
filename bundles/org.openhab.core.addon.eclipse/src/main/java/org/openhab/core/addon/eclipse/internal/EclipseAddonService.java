@@ -32,6 +32,7 @@ import org.openhab.core.addon.AddonInfo;
 import org.openhab.core.addon.AddonInfoRegistry;
 import org.openhab.core.addon.AddonService;
 import org.openhab.core.addon.AddonType;
+import org.openhab.core.common.Version;
 import org.openhab.core.config.core.ConfigurableService;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -136,7 +137,7 @@ public class EclipseAddonService implements AddonService {
         String uid = type + Addon.ADDON_SEPARATOR + name;
 
         Addon.Builder addon = Addon.create(ADDON_ID_PREFIX + uid).withType(type).withId(name)
-                .withContentType(ADDONS_CONTENT_TYPE).withVersion(bundle.getVersion().toString())
+                .withContentType(ADDONS_CONTENT_TYPE).withVersion(Version.valueOf(bundle.getVersion()))
                 .withAuthor(ADDONS_AUTHOR, true).withInstalled(true);
 
         AddonInfo addonInfo = addonInfoRegistry.getAddonInfo(uid, locale);

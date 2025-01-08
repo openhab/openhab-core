@@ -118,7 +118,7 @@ public class CommunityUIWidgetAddonHandler implements MarketplaceAddonHandler {
             throw new MarketplaceHandlerException("Widget cannot be downloaded.", e);
         } catch (Exception e) {
             logger.error("Widget from marketplace is invalid: {}", e.getMessage());
-            throw new MarketplaceHandlerException("Widget is not valid.", e);
+            throw new MarketplaceHandlerException("Failed to install widget: " + e.getMessage(), e);
         }
     }
 
