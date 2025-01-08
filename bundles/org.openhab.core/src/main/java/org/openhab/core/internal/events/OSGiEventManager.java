@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,7 +17,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-import org.openhab.core.events.Event;
 import org.openhab.core.events.EventFactory;
 import org.openhab.core.events.EventSubscriber;
 import org.osgi.service.component.ComponentContext;
@@ -33,8 +32,8 @@ import org.osgi.service.event.EventHandler;
  * The {@link OSGiEventManager} provides an OSGi based default implementation of the openHAB event bus.
  *
  * The OSGiEventHandler tracks {@link EventSubscriber}s and {@link EventFactory}s, receives OSGi events (by
- * implementing the OSGi {@link EventHandler} interface) and dispatches the received OSGi events as OH {@link Event}s
- * to the {@link EventSubscriber}s if the provided filter applies.
+ * implementing the OSGi {@link EventHandler} interface) and dispatches the received OSGi events
+ * as OH {@link org.openhab.core.events.Event}s to the {@link EventSubscriber}s if the provided filter applies.
  *
  * @author Stefan Bußweiler - Initial contribution
  * @author Markus Rathgeb - Return on received events as fast as possible (handle event in another thread)

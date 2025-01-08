@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,6 +12,7 @@
  */
 package org.openhab.core.addon.marketplace.internal.community;
 
+import java.io.Serial;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -32,6 +33,7 @@ import com.google.gson.annotations.SerializedName;
  */
 @NonNullByDefault
 final class SerializedNameAnnotationIntrospector extends AnnotationIntrospector {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     @Override

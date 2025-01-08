@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -11,6 +11,8 @@
  * SPDX-License-Identifier: EPL-2.0
  */
 package org.openhab.core.addon.marketplace.internal.json;
+
+import static org.openhab.core.addon.marketplace.MarketplaceConstants.*;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -172,13 +174,13 @@ public class JsonAddonService extends AbstractRemoteAddonService {
 
         Map<String, Object> properties = new HashMap<>();
         if (addonEntry.url.endsWith(".jar")) {
-            properties.put("jar_download_url", addonEntry.url);
+            properties.put(JAR_DOWNLOAD_URL_PROPERTY, addonEntry.url);
         } else if (addonEntry.url.endsWith(".kar")) {
-            properties.put("kar_download_url", addonEntry.url);
+            properties.put(KAR_DOWNLOAD_URL_PROPERTY, addonEntry.url);
         } else if (addonEntry.url.endsWith(".json")) {
-            properties.put("json_download_url", addonEntry.url);
+            properties.put(JSON_DOWNLOAD_URL_PROPERTY, addonEntry.url);
         } else if (addonEntry.url.endsWith(".yaml")) {
-            properties.put("yaml_download_url", addonEntry.url);
+            properties.put(YAML_DOWNLOAD_URL_PROPERTY, addonEntry.url);
         }
 
         boolean compatible = true;

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -68,7 +68,10 @@ public class ConfigUtil {
     }
 
     static @Nullable Object getDefaultValueAsCorrectType(String parameterName, Type parameterType,
-            String defaultValue) {
+            @Nullable String defaultValue) {
+        if (defaultValue == null) {
+            return null;
+        }
         try {
             switch (parameterType) {
                 case TEXT:
@@ -177,10 +180,12 @@ public class ConfigUtil {
         if (configDescriptionParameter != null) {
             Normalizer normalizer = NormalizerFactory.getNormalizer(configDescriptionParameter);
             return normalizer.normalize(value);
-        } else if (value instanceof Boolean || value instanceof String || value instanceof BigDecimal) {
-            return value;
+        } else if (value instanceof Boolean) {
+            return NormalizerFactory.getNormalizer(Type.BOOLEAN).normalize(value);
+        } else if (value instanceof String) {
+            return NormalizerFactory.getNormalizer(Type.TEXT).normalize(value);
         } else if (value instanceof Number) {
-            return new BigDecimal(value.toString());
+            return NormalizerFactory.getNormalizer(Type.DECIMAL).normalize(value);
         } else if (value instanceof Collection collection) {
             return normalizeCollection(collection);
         }
@@ -257,7 +262,7 @@ public class ConfigUtil {
             for (final Object it : collection) {
                 final Object normalized = normalizeType(it, null);
                 lst.add(normalized);
-                if (normalized.getClass() != lst.get(0).getClass()) {
+                if (normalized.getClass() != lst.getFirst().getClass()) {
                     throw new IllegalArgumentException(
                             "Invalid configuration property. Heterogeneous collection value!");
                 }

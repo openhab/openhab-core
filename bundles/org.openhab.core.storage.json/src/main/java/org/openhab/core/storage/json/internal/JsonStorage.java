@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -37,6 +37,7 @@ import org.openhab.core.config.core.Configuration;
 import org.openhab.core.config.core.ConfigurationDeserializer;
 import org.openhab.core.config.core.OrderingMapSerializer;
 import org.openhab.core.config.core.OrderingSetSerializer;
+import org.openhab.core.library.types.DateTimeType;
 import org.openhab.core.storage.Storage;
 import org.openhab.core.storage.json.internal.migration.TypeMigrationException;
 import org.openhab.core.storage.json.internal.migration.TypeMigrator;
@@ -104,12 +105,14 @@ public class JsonStorage<T> implements Storage<T> {
         this.typeMigrators = typeMigrators.stream().collect(Collectors.toMap(TypeMigrator::getOldType, e -> e));
 
         this.internalMapper = new GsonBuilder() //
+                .setDateFormat(DateTimeType.DATE_PATTERN_JSON_COMPAT) //
                 .registerTypeHierarchyAdapter(Map.class, new OrderingMapSerializer())//
                 .registerTypeHierarchyAdapter(Set.class, new OrderingSetSerializer())//
                 .registerTypeHierarchyAdapter(Map.class, new StorageEntryMapDeserializer()) //
                 .setPrettyPrinting() //
                 .create();
         this.entityMapper = new GsonBuilder() //
+                .setDateFormat(DateTimeType.DATE_PATTERN_JSON_COMPAT) //
                 .registerTypeHierarchyAdapter(Map.class, new OrderingMapSerializer())//
                 .registerTypeHierarchyAdapter(Set.class, new OrderingSetSerializer())//
                 .registerTypeAdapter(Configuration.class, new ConfigurationDeserializer()) //

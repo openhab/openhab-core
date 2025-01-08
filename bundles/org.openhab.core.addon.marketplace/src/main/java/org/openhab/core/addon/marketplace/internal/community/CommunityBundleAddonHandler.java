@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,7 +12,8 @@
  */
 package org.openhab.core.addon.marketplace.internal.community;
 
-import static org.openhab.core.addon.marketplace.internal.community.CommunityMarketplaceAddonService.JAR_CONTENT_TYPE;
+import static org.openhab.core.addon.marketplace.MarketplaceConstants.JAR_CONTENT_TYPE;
+import static org.openhab.core.addon.marketplace.MarketplaceConstants.JAR_DOWNLOAD_URL_PROPERTY;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -44,7 +45,6 @@ import org.osgi.service.component.annotations.Component;
 public class CommunityBundleAddonHandler extends MarketplaceBundleInstaller implements MarketplaceAddonHandler {
     private static final List<String> SUPPORTED_EXT_TYPES = List.of("automation", "binding", "misc", "persistence",
             "transformation", "ui", "voice");
-    private static final String JAR_DOWNLOAD_URL_PROPERTY = "jar_download_url";
 
     private final ScheduledExecutorService scheduler = ThreadPoolManager
             .getScheduledPool(ThreadPoolManager.THREAD_POOL_NAME_COMMON);

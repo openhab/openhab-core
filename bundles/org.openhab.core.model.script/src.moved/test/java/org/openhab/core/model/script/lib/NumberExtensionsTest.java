@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -24,7 +24,11 @@ import javax.measure.quantity.Length;
 import javax.measure.quantity.Temperature;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.HSBType;
+import org.openhab.core.library.types.PercentType;
 import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.library.unit.Units;
 import org.openhab.core.types.Type;
@@ -858,5 +862,29 @@ public class NumberExtensionsTest {
         result = NumberExtensions.operator_lessEqualsThan((Type) type, x);
 
         assertTrue(result);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "0.2", "0.1111111111111111111111111111111111111111111111111111111", "1" })
+    public void testNumberToBigDecimal(String value) {
+        DecimalType dt = new DecimalType(value);
+        assertEquals(value, NumberExtensions.numberToBigDecimal(dt).toString());
+
+        PercentType pt = new PercentType(value);
+        assertEquals(value, NumberExtensions.numberToBigDecimal(pt).toString());
+
+        // HSBTye is a subclass of DecimalType, it converts part "V" to a BigDecimal
+        HSBType hsb = new HSBType(dt, pt, pt);
+        assertEquals(value, NumberExtensions.numberToBigDecimal(hsb).toString());
+
+        int integerTestValue = (int) (Double.valueOf(value).doubleValue() * 1000);
+        Integer intValue = Integer.valueOf(integerTestValue);
+        assertEquals("" + integerTestValue, NumberExtensions.numberToBigDecimal(intValue).toString());
+
+        Long longValue = Long.valueOf(integerTestValue);
+        assertEquals("" + integerTestValue, NumberExtensions.numberToBigDecimal(longValue).toString());
+
+        BigDecimal bd = new BigDecimal(value);
+        assertEquals(value, NumberExtensions.numberToBigDecimal(bd).toString());
     }
 }

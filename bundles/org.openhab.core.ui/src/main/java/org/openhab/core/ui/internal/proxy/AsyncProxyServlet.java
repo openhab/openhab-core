@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,6 +12,7 @@
  */
 package org.openhab.core.ui.internal.proxy;
 
+import java.io.Serial;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
@@ -30,6 +31,7 @@ import org.eclipse.jetty.util.ssl.SslContextFactory;
  */
 public class AsyncProxyServlet extends org.eclipse.jetty.proxy.AsyncProxyServlet {
 
+    @Serial
     private static final long serialVersionUID = -4716754591953017795L;
 
     private final ProxyServletService service;

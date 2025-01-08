@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -20,7 +20,11 @@ import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -31,7 +35,10 @@ import java.util.Set;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledForJreRange;
+import org.junit.jupiter.api.condition.JRE;
 import org.openhab.core.config.core.Configuration;
+import org.openhab.core.library.types.DateTimeType;
 import org.openhab.core.test.java.JavaTest;
 
 import com.google.gson.Gson;
@@ -125,10 +132,10 @@ public class JsonStorageTest extends JavaTest {
         assertEquals(0, ((BigDecimal) dummy.configuration.get("testInt")).scale());
         assertEquals(0, ((BigDecimal) dummy.configuration.get("testLong")).scale());
         assertEquals(0, ((BigDecimal) dummy.configuration.get("testBigDecimal")).scale());
-        assertEquals(0, ((List<BigDecimal>) dummy.configuration.get("multiInt")).get(0).scale());
+        assertEquals(0, ((List<BigDecimal>) dummy.configuration.get("multiInt")).getFirst().scale());
         assertEquals(0, ((List<BigDecimal>) dummy.configuration.get("multiInt")).get(1).scale());
         assertEquals(0, ((List<BigDecimal>) dummy.configuration.get("multiInt")).get(2).scale());
-        assertEquals(0, ((BigDecimal) dummy.channels.get(0).configuration.get("testChildLong")).scale());
+        assertEquals(0, ((BigDecimal) dummy.channels.getFirst().configuration.get("testChildLong")).scale());
     }
 
     @Test
@@ -171,7 +178,7 @@ public class JsonStorageTest extends JavaTest {
         }
         String storageStringReserialized = Files.readString(tmpFile.toPath());
         assertEquals(storageStringAB, storageStringReserialized);
-        Gson gson = new GsonBuilder().create();
+        Gson gson = new GsonBuilder().setDateFormat(DateTimeType.DATE_PATTERN_JSON_COMPAT).create();
 
         // Parse json. Gson preserves json object key ordering when we parse only JsonObject
         JsonObject orderedMap = gson.fromJson(storageStringAB, JsonObject.class);
@@ -210,6 +217,46 @@ public class JsonStorageTest extends JavaTest {
                                 .getAsJsonObject("innerMapWithComparableKeys"),
                         TypeToken.getParameterized(LinkedHashMap.class, Integer.class, Object.class).getType()))
                         .keySet().toArray());
+    }
+
+    @Test
+    @EnabledForJreRange(max = JRE.JAVA_19)
+    public void testDateSerialization17() {
+        // do NOT set format, setDateFormat(DateTimeType.DATE_PATTERN_JSON_COMPAT)!
+        Gson gson = new GsonBuilder().create();
+
+        // generate a Date instance for 1-Jan-1980 0:00, compensating local time zone
+        ZonedDateTime zdt = ZonedDateTime.of(1980, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
+        Date date = Date.from(Instant.ofEpochSecond(zdt.toEpochSecond()));
+        // \u20af will encode to 3 bytes, 0xe280af
+        assertEquals("\"Jan 1, 1980, 12:00:00 AM\"", gson.toJson(date));
+    }
+
+    // CLDR 42 introduced in Java 20 changes serialization of Date, adding a narrow non-breakable space
+    @Test
+    @EnabledForJreRange(min = JRE.JAVA_20)
+    public void testDateSerialization21() {
+        // do NOT set format, setDateFormat(DateTimeType.DATE_PATTERN_JSON_COMPAT)!
+        Gson gson = new GsonBuilder().create();
+
+        // generate a Date instance for 1-Jan-1980 0:00, compensating local time zone
+        ZonedDateTime zdt = ZonedDateTime.of(1980, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
+        Date date = Date.from(Instant.ofEpochSecond(zdt.toEpochSecond()));
+
+        // \u20af will encode to 3 bytes, 0xe280af
+        assertEquals("\"Jan 1, 1980, 12:00:00\u202fAM\"", gson.toJson(date));
+    }
+
+    // workaround, should work with Java 17 and 21
+    @Test
+    public void testDateSerialization() {
+        Gson gson = new GsonBuilder().setDateFormat(DateTimeType.DATE_PATTERN_JSON_COMPAT).create();
+
+        // generate a Date instance for 1-Jan-1980 0:00, compensating local time zone
+        ZonedDateTime zdt = ZonedDateTime.of(1980, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
+        Date date = Date.from(Instant.ofEpochSecond(zdt.toEpochSecond()));
+
+        assertEquals("\"Jan 1, 1980, 12:00:00 AM\"", gson.toJson(date));
     }
 
     private static class DummyObject {

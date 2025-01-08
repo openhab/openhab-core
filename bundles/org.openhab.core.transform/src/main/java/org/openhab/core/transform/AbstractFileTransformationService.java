@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -19,7 +19,6 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
@@ -190,7 +189,7 @@ public abstract class AbstractFileTransformationService<T> implements Transforma
     private void watchSubDirectory(String subDirectory, final WatchService watchService) {
         if (!watchedDirectories.contains(subDirectory)) {
             String watchedDirectory = getSourcePath() + subDirectory;
-            Path transformFilePath = Paths.get(watchedDirectory);
+            Path transformFilePath = Path.of(watchedDirectory);
             try {
                 WatchKey registrationKey = transformFilePath.register(watchService, ENTRY_DELETE, ENTRY_MODIFY);
                 logger.debug("Watching directory {}", transformFilePath);
@@ -263,8 +262,9 @@ public abstract class AbstractFileTransformationService<T> implements Transforma
      */
     protected String getLocalizedProposedFilename(String filename, final WatchService watchService) {
         final File file = new File(filename);
-        if (file.getParent() != null) {
-            watchSubDirectory(file.getParent(), watchService);
+        final String parent = file.getParent();
+        if (parent != null) {
+            watchSubDirectory(parent, watchService);
         }
 
         String sourcePath = getSourcePath();

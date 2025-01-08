@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -285,11 +285,11 @@ public class ThingUpdateOSGiTest extends JavaOSGiTest {
 
         List<Channel> channels1 = updatedThing.getChannelsOfGroup("group1");
         assertThat(channels1, hasSize(1));
-        assertChannel(channels1.get(0), channelTypeUID, "Switch", "typeLabel", null);
+        assertChannel(channels1.getFirst(), channelTypeUID, "Switch", "typeLabel", null);
 
         List<Channel> channels2 = updatedThing.getChannelsOfGroup("group2");
         assertThat(channels2, hasSize(1));
-        assertChannel(channels2.get(0), channelTypeUID, "Switch", "typeLabel", null);
+        assertChannel(channels2.getFirst(), channelTypeUID, "Switch", "typeLabel", null);
     }
 
     @Test

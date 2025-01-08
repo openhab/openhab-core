@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -76,6 +76,7 @@ import org.openhab.core.common.NamedThreadFactory;
 import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventPublisher;
+import org.openhab.core.events.system.SystemEventFactory;
 import org.openhab.core.service.ReadyMarker;
 import org.openhab.core.service.ReadyMarkerFilter;
 import org.openhab.core.service.ReadyService;
@@ -109,6 +110,7 @@ import org.slf4j.LoggerFactory;
  * @author Benedikt Niehues - change behavior for unregistering ModuleHandler
  * @author Markus Rathgeb - use a managed rule
  * @author Ana Dimova - new reference syntax: list[index], map["key"], bean.field
+ * @author Florian Hotze - add support for script condition/action compilation
  */
 @Component(immediate = true, service = { RuleManager.class })
 @NonNullByDefault
@@ -818,6 +820,8 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
      * <ul>
      * <li>Set the module handlers. If there are errors, set the rule status (handler error) and return with error
      * indication.
+     * <li>Compile the conditions and actions. If there are errors, set the rule status (handler error) and return with
+     * indication.
      * <li>Register the rule. Set the rule status and return with success indication.
      * </ul>
      *
@@ -844,6 +848,11 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
             return false;
         }
 
+        // Compile the conditions and actions and so check if they are valid.
+        if (!compileRule(rule)) {
+            return false;
+        }
+
         // Register the rule and set idle status.
         register(rule);
         setStatus(ruleUID, new RuleStatusInfo(RuleStatus.IDLE));
@@ -854,11 +863,63 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
         if (slTriggers.stream()
                 .anyMatch(t -> ((BigDecimal) t.getConfiguration().get(SystemTriggerHandler.CFG_STARTLEVEL))
                         .intValue() <= startLevelService.getStartLevel())) {
-            runNow(rule.getUID(), true,
-                    Map.of(SystemTriggerHandler.OUT_STARTLEVEL, StartLevelService.STARTLEVEL_RULES));
+            runNow(rule.getUID(), true, Map.of(SystemTriggerHandler.OUT_STARTLEVEL, StartLevelService.STARTLEVEL_RULES,
+                    "event", SystemEventFactory.createStartlevelEvent(StartLevelService.STARTLEVEL_RULES)));
         }
 
         return true;
+    }
+
+    /**
+     * Compile the conditions and actions of the given rule.
+     * If there are errors, set the rule status (handler error) and return with indication.
+     *
+     * @param rule the rule whose conditions and actions should be compiled
+     * @return true if compilation succeeded, otherwise false
+     */
+    private boolean compileRule(final WrappedRule rule) {
+        try {
+            compileConditions(rule);
+            compileActions(rule);
+            return true;
+        } catch (Throwable t) {
+            setStatus(rule.getUID(), new RuleStatusInfo(RuleStatus.UNINITIALIZED,
+                    RuleStatusDetail.HANDLER_INITIALIZING_ERROR, t.getMessage()));
+            unregister(rule);
+            return false;
+        }
+    }
+
+    /**
+     * Compile the conditions and actions of the given rule.
+     * If there are errors, set the rule status (handler error).
+     *
+     * @param ruleUID the UID of the rule whose conditions and actions should be compiled
+     */
+    private void compileRule(String ruleUID) {
+        final WrappedRule rule = getManagedRule(ruleUID);
+        if (rule == null) {
+            logger.warn("Failed to compile rule '{}': Invalid Rule UID", ruleUID);
+            return;
+        }
+        synchronized (this) {
+            final RuleStatus ruleStatus = getRuleStatus(ruleUID);
+            if (ruleStatus != null && ruleStatus != RuleStatus.IDLE) {
+                logger.error("Failed to compile rule ‘{}' with status '{}'", ruleUID, ruleStatus.name());
+                return;
+            }
+            // change state to INITIALIZING
+            setStatus(ruleUID, new RuleStatusInfo(RuleStatus.INITIALIZING));
+        }
+        if (!compileRule(rule)) {
+            return;
+        }
+        // change state to IDLE only if the rule has not been DISABLED.
+        synchronized (this) {
+            if (getRuleStatus(ruleUID) == RuleStatus.INITIALIZING) {
+                setStatus(ruleUID, new RuleStatusInfo(RuleStatus.IDLE));
+            }
+        }
     }
 
     @Override
@@ -1134,6 +1195,32 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
     }
 
     /**
+     * This method compiles conditions of the {@link Rule} when they exist.
+     * It is called when the rule is initialized.
+     *
+     * @param rule compiled rule.
+     */
+    private void compileConditions(WrappedRule rule) {
+        final Collection<WrappedCondition> conditions = rule.getConditions();
+        if (conditions.isEmpty()) {
+            return;
+        }
+        for (WrappedCondition wrappedCondition : conditions) {
+            final Condition condition = wrappedCondition.unwrap();
+            ConditionHandler cHandler = wrappedCondition.getModuleHandler();
+            if (cHandler != null) {
+                try {
+                    cHandler.compile();
+                } catch (Throwable t) {
+                    String errMessage = "Failed to pre-compile condition: " + condition.getId() + "(" + t.getMessage()
+                            + ")";
+                    throw new RuntimeException(errMessage, t);
+                }
+            }
+        }
+    }
+
+    /**
      * This method checks if all rule's condition are satisfied or not.
      *
      * @param rule the checked rule
@@ -1160,6 +1247,31 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
             }
         }
         return true;
+    }
+
+    /**
+     * This method compiles actions of the {@link Rule} when they exist.
+     * It is called when the rule is initialized.
+     *
+     * @param rule compiled rule.
+     */
+    private void compileActions(WrappedRule rule) {
+        final Collection<WrappedAction> actions = rule.getActions();
+        if (actions.isEmpty()) {
+            return;
+        }
+        for (WrappedAction wrappedAction : actions) {
+            final Action action = wrappedAction.unwrap();
+            ActionHandler aHandler = wrappedAction.getModuleHandler();
+            if (aHandler != null) {
+                try {
+                    aHandler.compile();
+                } catch (Throwable t) {
+                    String errMessage = "Failed to pre-compile action: " + action.getId() + "(" + t.getMessage() + ")";
+                    throw new RuntimeException(errMessage, t);
+                }
+            }
+        }
     }
 
     /**
@@ -1434,7 +1546,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
 
     @Override
     public void onReadyMarkerAdded(ReadyMarker readyMarker) {
-        executeRulesWithStartLevel();
+        compileRules();
     }
 
     @Override
@@ -1442,12 +1554,28 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
         started = false;
     }
 
+    /**
+     * This method compiles the conditions and actions of all enabled rules.
+     * It is called when the rule engine is started.
+     * By compiling when the rule engine is started, we make sure all conditions and actions are compiled, even if their
+     * handlers weren't available when the rule was added to the rule engine.
+     */
+    private void compileRules() {
+        getScheduledExecutor().submit(() -> {
+            ruleRegistry.getAll().stream() //
+                    .filter(r -> isEnabled(r.getUID())) //
+                    .forEach(r -> compileRule(r.getUID()));
+            executeRulesWithStartLevel();
+        });
+    }
+
     private void executeRulesWithStartLevel() {
         getScheduledExecutor().submit(() -> {
             ruleRegistry.getAll().stream() //
                     .filter(this::mustTrigger) //
                     .forEach(r -> runNow(r.getUID(), true,
-                            Map.of(SystemTriggerHandler.OUT_STARTLEVEL, StartLevelService.STARTLEVEL_RULES)));
+                            Map.of(SystemTriggerHandler.OUT_STARTLEVEL, StartLevelService.STARTLEVEL_RULES, "event",
+                                    SystemEventFactory.createStartlevelEvent(StartLevelService.STARTLEVEL_RULES))));
             started = true;
             readyService.markReady(MARKER);
             logger.info("Rule engine started.");

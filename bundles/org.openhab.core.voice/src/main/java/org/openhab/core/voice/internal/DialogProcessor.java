@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -362,12 +362,14 @@ public class DialogProcessor implements KSListener, STTListener {
             logger.debug("RecognitionStopEvent event received");
             toggleProcessing(false);
         } else if (sttEvent instanceof SpeechRecognitionErrorEvent sre) {
-            logger.debug("SpeechRecognitionErrorEvent event received");
+            String message = sre.getMessage();
+            logger.debug("SpeechRecognitionErrorEvent event received: {}", message);
             if (!isSTTServerAborting) {
                 abortSTT();
                 toggleProcessing(false);
-                String text = i18nProvider.getText(bundle, "error.stt-error", null, dialogContext.locale());
-                say(text == null ? sre.getMessage() : text.replace("{0}", sre.getMessage()));
+                if (!message.isEmpty()) {
+                    say(message);
+                }
             }
         }
     }

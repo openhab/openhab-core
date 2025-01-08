@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,7 +15,11 @@ package org.openhab.core.thing.binding.generic;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.transform.TransformationException;
 import org.openhab.core.transform.TransformationHelper;
@@ -31,6 +35,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Jan N. Klug - Initial contribution
  */
+@NonNullByDefault
 public class ChannelTransformation {
     private final Logger logger = LoggerFactory.getLogger(ChannelTransformation.class);
     private List<TransformationStep> transformationSteps;
@@ -38,8 +43,8 @@ public class ChannelTransformation {
     public ChannelTransformation(@Nullable String transformationString) {
         if (transformationString != null) {
             try {
-                transformationSteps = Arrays.stream(transformationString.split("∩")).filter(s -> !s.isBlank())
-                        .map(TransformationStep::new).toList();
+                transformationSteps = splitTransformationString(transformationString).map(TransformationStep::new)
+                        .toList();
                 return;
             } catch (IllegalArgumentException e) {
                 logger.warn("Transformation ignored, failed to parse {}: {}", transformationString, e.getMessage());
@@ -48,31 +53,112 @@ public class ChannelTransformation {
         transformationSteps = List.of();
     }
 
+    public ChannelTransformation(@Nullable List<String> transformationStrings) {
+        if (transformationStrings != null) {
+            try {
+                transformationSteps = transformationStrings.stream() //
+                        .map(String::trim) //
+                        .filter(line -> !line.isBlank()) //
+                        .filter(line -> !line.startsWith("#")) //
+                        .filter(line -> !line.startsWith("//")) //
+                        .flatMap(ChannelTransformation::splitTransformationString) //
+                        .map(TransformationStep::new) //
+                        .toList();
+                return;
+            } catch (IllegalArgumentException e) {
+                logger.warn("Transformation ignored, failed to parse {}: {}", transformationStrings, e.getMessage());
+            }
+        }
+        transformationSteps = List.of();
+    }
+
+    private static Stream<String> splitTransformationString(String transformationString) {
+        return Arrays.stream(transformationString.split("∩")).filter(s -> !s.isBlank());
+    }
+
+    /**
+     * Checks whether this object contains no transformation steps.
+     * 
+     * @return <code>true</code> if the transformation is empty, <code>false</code> otherwise.
+     */
+    public boolean isEmpty() {
+        return transformationSteps.isEmpty();
+    }
+
+    /**
+     * Checks whether this object contains at least one transformation step.
+     * 
+     * @return <code>true</code> if the transformation is present, <code>false</code> otherwise.
+     */
+    public boolean isPresent() {
+        return !isEmpty();
+    }
+
+    /**
+     * Applies all transformations to the given value.
+     * 
+     * @param value the value to transform.
+     * @return the transformed value or an empty optional if the transformation failed.
+     *         If the transformation is empty, the original value is returned.
+     */
     public Optional<String> apply(String value) {
         Optional<String> valueOptional = Optional.of(value);
 
         // process all transformations
         for (TransformationStep transformationStep : transformationSteps) {
-            valueOptional = valueOptional.flatMap(transformationStep::apply);
+            valueOptional = valueOptional.flatMap(v -> {
+                Optional<String> result = transformationStep.apply(v);
+                if (logger.isTraceEnabled()) {
+                    logger.trace("Transformed '{}' to '{}' using '{}'", v, result.orElse(null), transformationStep);
+                }
+                return result;
+            });
         }
 
-        logger.trace("Transformed '{}' to '{}' using '{}'", value, valueOptional, transformationSteps);
         return valueOptional;
     }
 
+    /**
+     * Checks whether the given string contains valid transformations.
+     * 
+     * Valid single and chained transformations will return true.
+     * 
+     * @param value the transformation string to check.
+     * @return <code>true</code> if the string contains valid transformations, <code>false</code> otherwise.
+     */
+    public static boolean isValidTransformation(@Nullable String value) {
+        if (value == null || value.isBlank()) {
+            return false;
+        }
+        try {
+            return splitTransformationString(value).map(TransformationStep::new).count() > 0;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+    }
+
     private static class TransformationStep {
+        private static final List<Pattern> TRANSFORMATION_PATTERNS = List.of( //
+                Pattern.compile("(?<service>[a-zA-Z0-9]+)\\s*\\((?<function>.*)\\)$"), //
+                Pattern.compile("(?<service>[a-zA-Z0-9]+)\\s*:(?<function>.*)") //
+        );
+
         private final Logger logger = LoggerFactory.getLogger(TransformationStep.class);
         private final String serviceName;
         private final String function;
 
         public TransformationStep(String pattern) throws IllegalArgumentException {
-            int index = pattern.indexOf(":");
-            if (index == -1) {
-                throw new IllegalArgumentException(
-                        "The transformation pattern must consist of the type and the pattern separated by a colon");
+            pattern = pattern.trim();
+            for (Pattern p : TRANSFORMATION_PATTERNS) {
+                Matcher matcher = p.matcher(pattern);
+                if (matcher.matches()) {
+                    this.serviceName = matcher.group("service").trim().toUpperCase();
+                    this.function = matcher.group("function").trim();
+                    return;
+                }
             }
-            this.serviceName = pattern.substring(0, index).toUpperCase().trim();
-            this.function = pattern.substring(index + 1).trim();
+            throw new IllegalArgumentException(
+                    "The transformation pattern must be in the syntax of TYPE:PATTERN or TYPE(PATTERN)");
         }
 
         public Optional<String> apply(String value) {

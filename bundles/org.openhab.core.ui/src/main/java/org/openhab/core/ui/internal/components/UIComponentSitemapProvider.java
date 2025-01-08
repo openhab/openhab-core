@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -32,7 +32,7 @@ import org.openhab.core.config.core.ConfigUtil;
 import org.openhab.core.model.core.EventType;
 import org.openhab.core.model.core.ModelRepositoryChangeListener;
 import org.openhab.core.model.sitemap.SitemapProvider;
-import org.openhab.core.model.sitemap.sitemap.Button;
+import org.openhab.core.model.sitemap.sitemap.ButtonDefinition;
 import org.openhab.core.model.sitemap.sitemap.ColorArray;
 import org.openhab.core.model.sitemap.sitemap.IconRule;
 import org.openhab.core.model.sitemap.sitemap.LinkableWidget;
@@ -42,11 +42,13 @@ import org.openhab.core.model.sitemap.sitemap.SitemapFactory;
 import org.openhab.core.model.sitemap.sitemap.SitemapPackage;
 import org.openhab.core.model.sitemap.sitemap.VisibilityRule;
 import org.openhab.core.model.sitemap.sitemap.Widget;
+import org.openhab.core.model.sitemap.sitemap.impl.ButtonDefinitionImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.ButtonImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.ButtongridImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.ChartImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.ColorArrayImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.ColorpickerImpl;
+import org.openhab.core.model.sitemap.sitemap.impl.ColortemperaturepickerImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.ConditionImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.DefaultImpl;
 import org.openhab.core.model.sitemap.sitemap.impl.FrameImpl;
@@ -86,6 +88,8 @@ import org.slf4j.LoggerFactory;
  * @author Laurent Garnier - Added support for new element Buttongrid
  * @author Laurent Garnier - Added icon field for mappings
  * @author Mark Herwege - Make UI provided sitemaps compatible with enhanced syntax in conditions
+ * @author Mark Herwege - Add support for Button element
+ * @author Laurent Garnier - Added support for new sitemap element Colortemperaturepicker
  */
 @NonNullByDefault
 @Component(service = SitemapProvider.class)
@@ -98,7 +102,8 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
     private static final String SITEMAP_SUFFIX = ".sitemap";
 
     private static final Pattern CONDITION_PATTERN = Pattern
-            .compile("(?<item>[A-Za-z]\\w*)?\\s*(?<condition>==|!=|<=|>=|<|>)?\\s*(?<sign>\\+|-)?(?<state>.+)");
+            .compile("((?<item>[A-Za-z]\\w*)?\\s*(?<condition>==|!=|<=|>=|<|>))?\\s*(?<sign>\\+|-)?(?<state>.+)");
+    private static final Pattern COMMANDS_PATTERN = Pattern.compile("^(?<cmd1>\"[^\"]*\"|[^\": ]*):(?<cmd2>.*)$");
 
     private Map<String, Sitemap> sitemaps = new HashMap<>();
     private @Nullable UIComponentRegistryFactory componentRegistryFactory;
@@ -240,8 +245,8 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
                 setWidgetPropertyFromComponentConfig(widget, component, "step", SitemapPackage.SLIDER__STEP);
                 setWidgetPropertyFromComponentConfig(widget, component, "switchEnabled",
                         SitemapPackage.SLIDER__SWITCH_ENABLED);
-                setWidgetPropertyFromComponentConfig(widget, component, "sendFrequency",
-                        SitemapPackage.SLIDER__FREQUENCY);
+                setWidgetPropertyFromComponentConfig(widget, component, "releaseOnly",
+                        SitemapPackage.SLIDER__RELEASE_ONLY);
                 break;
             case "Selection":
                 SelectionImpl selectionWidget = (SelectionImpl) SitemapFactory.eINSTANCE.createSelection();
@@ -263,13 +268,30 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
             case "Colorpicker":
                 ColorpickerImpl colorpickerWidget = (ColorpickerImpl) SitemapFactory.eINSTANCE.createColorpicker();
                 widget = colorpickerWidget;
-                setWidgetPropertyFromComponentConfig(widget, component, "frequency",
-                        SitemapPackage.COLORPICKER__FREQUENCY);
+                break;
+            case "Colortemperaturepicker":
+                ColortemperaturepickerImpl colortemperaturepickerWidget = (ColortemperaturepickerImpl) SitemapFactory.eINSTANCE
+                        .createColortemperaturepicker();
+                widget = colortemperaturepickerWidget;
+                setWidgetPropertyFromComponentConfig(widget, component, "minValue",
+                        SitemapPackage.COLORTEMPERATUREPICKER__MIN_VALUE);
+                setWidgetPropertyFromComponentConfig(widget, component, "maxValue",
+                        SitemapPackage.COLORTEMPERATUREPICKER__MAX_VALUE);
                 break;
             case "Buttongrid":
                 ButtongridImpl buttongridWidget = (ButtongridImpl) SitemapFactory.eINSTANCE.createButtongrid();
                 addWidgetButtons(buttongridWidget.getButtons(), component);
                 widget = buttongridWidget;
+                break;
+            case "Button":
+                ButtonImpl buttonWidget = (ButtonImpl) SitemapFactory.eINSTANCE.createButton();
+                widget = buttonWidget;
+                setWidgetPropertyFromComponentConfig(widget, component, "row", SitemapPackage.BUTTON__ROW);
+                setWidgetPropertyFromComponentConfig(widget, component, "column", SitemapPackage.BUTTON__COLUMN);
+                setWidgetPropertyFromComponentConfig(widget, component, "stateless", SitemapPackage.BUTTON__STATELESS);
+                setWidgetPropertyFromComponentConfig(widget, component, "cmd", SitemapPackage.BUTTON__CMD);
+                setWidgetPropertyFromComponentConfig(widget, component, "releaseCmd",
+                        SitemapPackage.BUTTON__RELEASE_CMD);
                 break;
             case "Default":
                 DefaultImpl defaultWidget = (DefaultImpl) SitemapFactory.eINSTANCE.createDefault();
@@ -350,18 +372,36 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
         setWidgetPropertyFromComponentConfig(widget, component, "icon", SitemapPackage.WIDGET__ICON);
     }
 
+    private @Nullable String stripQuotes(@Nullable String input) {
+        if ((input != null) && (input.length() >= 2) && (input.charAt(0) == '\"')
+                && (input.charAt(input.length() - 1) == '\"')) {
+            return input.substring(1, input.length() - 1);
+        } else {
+            return input;
+        }
+    }
+
     private void addWidgetMappings(EList<Mapping> mappings, UIComponent component) {
         if (component.getConfig() != null && component.getConfig().containsKey("mappings")) {
             Object sourceMappings = component.getConfig().get("mappings");
-            if (sourceMappings instanceof Collection<?>) {
-                for (Object sourceMapping : (Collection<?>) sourceMappings) {
+            if (sourceMappings instanceof Collection<?> sourceMappingsCollection) {
+                for (Object sourceMapping : sourceMappingsCollection) {
                     if (sourceMapping instanceof String) {
                         String[] splitMapping = sourceMapping.toString().split("=");
                         String cmd = splitMapping[0].trim();
-                        String label = splitMapping[1].trim();
-                        String icon = splitMapping.length < 3 ? null : splitMapping[2].trim();
+                        String releaseCmd = null;
+                        Matcher matcher = COMMANDS_PATTERN.matcher(cmd);
+                        if (matcher.matches()) {
+                            cmd = matcher.group("cmd1");
+                            releaseCmd = matcher.group("cmd2");
+                        }
+                        cmd = stripQuotes(cmd);
+                        releaseCmd = stripQuotes(releaseCmd);
+                        String label = stripQuotes(splitMapping[1].trim());
+                        String icon = splitMapping.length < 3 ? null : stripQuotes(splitMapping[2].trim());
                         MappingImpl mapping = (MappingImpl) SitemapFactory.eINSTANCE.createMapping();
                         mapping.setCmd(cmd);
+                        mapping.setReleaseCmd(releaseCmd);
                         mapping.setLabel(label);
                         mapping.setIcon(icon);
                         mappings.add(mapping);
@@ -371,20 +411,21 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
         }
     }
 
-    private void addWidgetButtons(EList<Button> buttons, UIComponent component) {
+    private void addWidgetButtons(EList<ButtonDefinition> buttons, UIComponent component) {
         if (component.getConfig() != null && component.getConfig().containsKey("buttons")) {
             Object sourceButtons = component.getConfig().get("buttons");
-            if (sourceButtons instanceof Collection<?>) {
-                for (Object sourceButton : (Collection<?>) sourceButtons) {
+            if (sourceButtons instanceof Collection<?> sourceButtonsCollection) {
+                for (Object sourceButton : sourceButtonsCollection) {
                     if (sourceButton instanceof String) {
                         String[] splitted1 = sourceButton.toString().split(":", 3);
                         int row = Integer.parseInt(splitted1[0].trim());
                         int column = Integer.parseInt(splitted1[1].trim());
                         String[] splitted2 = splitted1[2].trim().split("=");
-                        String cmd = splitted2[0].trim();
-                        String label = splitted2[1].trim();
-                        String icon = splitted2.length < 3 ? null : splitted2[2].trim();
-                        ButtonImpl button = (ButtonImpl) SitemapFactory.eINSTANCE.createButton();
+                        String cmd = stripQuotes(splitted2[0].trim());
+                        String label = stripQuotes(splitted2[1].trim());
+                        String icon = splitted2.length < 3 ? null : stripQuotes(splitted2[2].trim());
+                        ButtonDefinitionImpl button = (ButtonDefinitionImpl) SitemapFactory.eINSTANCE
+                                .createButtonDefinition();
                         button.setRow(row);
                         button.setColumn(column);
                         button.setCmd(cmd);
@@ -400,8 +441,8 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
     private void addWidgetVisibility(EList<VisibilityRule> visibility, UIComponent component) {
         if (component.getConfig() != null && component.getConfig().containsKey("visibility")) {
             Object sourceVisibilities = component.getConfig().get("visibility");
-            if (sourceVisibilities instanceof Collection<?>) {
-                for (Object sourceVisibility : (Collection<?>) sourceVisibilities) {
+            if (sourceVisibilities instanceof Collection<?> sourceVisibilitiesCollection) {
+                for (Object sourceVisibility : sourceVisibilitiesCollection) {
                     if (sourceVisibility instanceof String) {
                         List<String> conditionsString = getRuleConditions(sourceVisibility.toString(), null);
                         VisibilityRuleImpl visibilityRule = (VisibilityRuleImpl) SitemapFactory.eINSTANCE
@@ -430,8 +471,8 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
     private void addColor(EList<ColorArray> color, UIComponent component, String key) {
         if (component.getConfig() != null && component.getConfig().containsKey(key)) {
             Object sourceColors = component.getConfig().get(key);
-            if (sourceColors instanceof Collection<?>) {
-                for (Object sourceColor : (Collection<?>) sourceColors) {
+            if (sourceColors instanceof Collection<?> sourceColorsCollection) {
+                for (Object sourceColor : sourceColorsCollection) {
                     if (sourceColor instanceof String) {
                         String argument = getRuleArgument(sourceColor.toString());
                         List<String> conditionsString = getRuleConditions(sourceColor.toString(), argument);
@@ -449,8 +490,8 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
     private void addIconRules(EList<IconRule> icon, UIComponent component) {
         if (component.getConfig() != null && component.getConfig().containsKey("iconrules")) {
             Object sourceIcons = component.getConfig().get("iconrules");
-            if (sourceIcons instanceof Collection<?>) {
-                for (Object sourceIcon : (Collection<?>) sourceIcons) {
+            if (sourceIcons instanceof Collection<?> sourceIconsCollection) {
+                for (Object sourceIcon : sourceIconsCollection) {
                     if (sourceIcon instanceof String) {
                         String argument = getRuleArgument(sourceIcon.toString());
                         List<String> conditionsString = getRuleConditions(sourceIcon.toString(), argument);
@@ -474,7 +515,7 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
                 condition.setItem(matcher.group("item"));
                 condition.setCondition(matcher.group("condition"));
                 condition.setSign(matcher.group("sign"));
-                condition.setState(matcher.group("state"));
+                condition.setState(stripQuotes(matcher.group("state")));
                 conditions.add(condition);
             } else {
                 logger.warn("Syntax error in {} rule condition '{}' for widget {}", key, conditionString,
@@ -486,7 +527,8 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
 
     private String getRuleArgument(String rule) {
         int argIndex = rule.lastIndexOf("=") + 1;
-        return rule.substring(argIndex).trim();
+        String strippedRule = stripQuotes(rule.substring(argIndex).trim());
+        return strippedRule != null ? strippedRule : "";
     }
 
     private List<String> getRuleConditions(String rule, @Nullable String argument) {

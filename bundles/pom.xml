@@ -7,7 +7,7 @@
   <parent>
     <groupId>org.openhab.core</groupId>
     <artifactId>org.openhab.core.reactor</artifactId>
-    <version>4.2.0-SNAPSHOT</version>
+    <version>5.0.0-SNAPSHOT</version>
   </parent>
 
   <groupId>org.openhab.core.bundles</groupId>
@@ -34,9 +34,11 @@
     <module>org.openhab.core.config.discovery.addon.ip</module>
     <module>org.openhab.core.config.discovery.addon.mdns</module>
     <module>org.openhab.core.config.discovery.addon.process</module>
+    <module>org.openhab.core.config.discovery.addon.sddp</module>
     <module>org.openhab.core.config.discovery.addon.upnp</module>
     <module>org.openhab.core.config.discovery.addon.usb</module>
     <module>org.openhab.core.config.discovery.mdns</module>
+    <module>org.openhab.core.config.discovery.sddp</module>
     <module>org.openhab.core.config.discovery.usbserial</module>
     <module>org.openhab.core.config.discovery.usbserial.linuxsysfs</module>
     <module>org.openhab.core.config.discovery.usbserial.ser2net</module>
@@ -85,7 +87,6 @@
     <module>org.openhab.core.io.transport.upnp</module>
     <module>org.openhab.core.io.websocket</module>
     <module>org.openhab.core.io.jetty.certificate</module>
-    <module>org.openhab.core.model.lazygen</module>
     <module>org.openhab.core.model.core</module>
     <module>org.openhab.core.model.item</module>
     <module>org.openhab.core.model.item.ide</module>
@@ -167,7 +168,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
-        <version>3.6.0</version>
+        <version>3.8.1</version>
         <executions>
           <execution>
             <id>unpack-eea</id>
@@ -204,7 +205,7 @@
           <plugin>
             <groupId>org.jvnet.jaxb2.maven2</groupId>
             <artifactId>maven-jaxb2-plugin</artifactId>
-            <version>0.15.2</version>
+            <version>0.15.3</version>
             <configuration>
               <schemaDirectory>schema</schemaDirectory>
               <bindingDirectory>schema/binding</bindingDirectory>
@@ -235,7 +236,7 @@
                 <!-- Required for JDK 17 compatibility, see: https://github.com/highsource/maven-jaxb2-plugin/issues/207 -->
                 <groupId>org.glassfish.jaxb</groupId>
                 <artifactId>jaxb-runtime</artifactId>
-                <version>2.3.6</version>
+                <version>2.3.8</version>
               </dependency>
             </dependencies>
             <executions>

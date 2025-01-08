@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -223,10 +223,9 @@ public class GroupItem extends GenericItem implements StateChangeListener, Metad
      * @return the accepted data types of this group item
      */
     @Override
-    @SuppressWarnings("unchecked")
     public List<Class<? extends State>> getAcceptedDataTypes() {
-        if (baseItem != null) {
-            return baseItem.getAcceptedDataTypes();
+        if (baseItem instanceof Item item) {
+            return item.getAcceptedDataTypes();
         } else {
             List<Class<? extends State>> acceptedDataTypes = null;
 
@@ -249,10 +248,9 @@ public class GroupItem extends GenericItem implements StateChangeListener, Metad
      * @return the accepted command types of this group item
      */
     @Override
-    @SuppressWarnings("unchecked")
     public List<Class<? extends Command>> getAcceptedCommandTypes() {
-        if (baseItem != null) {
-            return baseItem.getAcceptedCommandTypes();
+        if (baseItem instanceof Item item) {
+            return item.getAcceptedCommandTypes();
         } else {
             List<Class<? extends Command>> acceptedCommandTypes = null;
 
@@ -291,8 +289,8 @@ public class GroupItem extends GenericItem implements StateChangeListener, Metad
         // if a group does not have a function it cannot have a state
         @Nullable
         T newState = null;
-        if (function != null) {
-            newState = function.getStateAs(getStateMembers(getMembers()), typeClass);
+        if (function instanceof GroupFunction groupFunction) {
+            newState = groupFunction.getStateAs(getStateMembers(getMembers()), typeClass);
         }
 
         Item baseItem = this.baseItem;
@@ -315,9 +313,9 @@ public class GroupItem extends GenericItem implements StateChangeListener, Metad
         sb.append("Type=");
         sb.append(getClass().getSimpleName());
         sb.append(", ");
-        if (getBaseItem() != null) {
+        if (getBaseItem() instanceof Item item) {
             sb.append("BaseType=");
-            sb.append(baseItem.getClass().getSimpleName());
+            sb.append(item.getClass().getSimpleName());
             sb.append(", ");
         }
         sb.append("Members=");
@@ -356,8 +354,8 @@ public class GroupItem extends GenericItem implements StateChangeListener, Metad
         State oldState = this.state;
         State newState = oldState;
         ItemStateConverter itemStateConverter = this.itemStateConverter;
-        if (function != null && baseItem != null && itemStateConverter != null) {
-            State calculatedState = function.calculate(getStateMembers(getMembers()));
+        if (function instanceof GroupFunction groupFunction && baseItem != null && itemStateConverter != null) {
+            State calculatedState = groupFunction.calculate(getStateMembers(getMembers()));
             newState = itemStateConverter.convertToAcceptedState(calculatedState, baseItem);
             setState(newState);
             sendGroupStateUpdatedEvent(item.getName(), newState);

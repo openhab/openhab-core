@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -239,8 +239,8 @@ public abstract class AbstractScriptFileWatcher implements WatchService.WatchEve
     }
 
     private CompletableFuture<Void> addFiles(Collection<Path> files) {
-        return CompletableFuture.allOf(files.stream().map(this::getScriptFileReference).filter(Optional::isPresent)
-                .map(Optional::get).sorted().map(this::addScriptFileReference).toArray(CompletableFuture<?>[]::new));
+        return CompletableFuture.allOf(files.stream().map(this::getScriptFileReference).flatMap(Optional::stream)
+                .sorted().map(this::addScriptFileReference).toArray(CompletableFuture<?>[]::new));
     }
 
     private CompletableFuture<Void> addScriptFileReference(ScriptFileReference newRef) {

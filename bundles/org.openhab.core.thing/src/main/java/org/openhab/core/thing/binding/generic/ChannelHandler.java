@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -47,7 +47,7 @@ public interface ChannelHandler {
     @FunctionalInterface
     interface Factory {
         ChannelHandler create(Consumer<State> updateState, Consumer<Command> postCommand,
-                @Nullable Consumer<String> sendHttpValue, ChannelTransformation stateTransformations,
+                @Nullable Consumer<String> sendValue, ChannelTransformation stateTransformations,
                 ChannelTransformation commandTransformations, ChannelValueConverterConfig channelConfig);
     }
 }

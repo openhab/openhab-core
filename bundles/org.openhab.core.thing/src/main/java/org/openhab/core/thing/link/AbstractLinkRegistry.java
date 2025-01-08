@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
@@ -73,18 +74,10 @@ public abstract class AbstractLinkRegistry<L extends AbstractLink, P extends Pro
         try {
             Set<L> set;
 
-            set = itemNameToLink.get(itemName);
-            if (set == null) {
-                set = new HashSet<>();
-                itemNameToLink.put(itemName, set);
-            }
+            set = Objects.requireNonNull(itemNameToLink.computeIfAbsent(itemName, k -> new HashSet<>()));
             set.add(element);
 
-            set = linkedUidToLink.get(linkedUid);
-            if (set == null) {
-                set = new HashSet<>();
-                linkedUidToLink.put(linkedUid, set);
-            }
+            set = Objects.requireNonNull(linkedUidToLink.computeIfAbsent(linkedUid, k -> new HashSet<>()));
             set.add(element);
         } finally {
             toLinkLock.writeLock().unlock();

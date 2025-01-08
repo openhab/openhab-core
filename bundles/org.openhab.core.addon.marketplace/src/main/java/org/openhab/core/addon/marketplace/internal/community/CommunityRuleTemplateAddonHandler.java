@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,6 +12,9 @@
  */
 package org.openhab.core.addon.marketplace.internal.community;
 
+import static org.openhab.core.addon.marketplace.MarketplaceConstants.*;
+import static org.openhab.core.addon.marketplace.internal.community.CommunityMarketplaceAddonService.*;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -22,8 +25,6 @@ import org.openhab.core.addon.Addon;
 import org.openhab.core.addon.marketplace.MarketplaceAddonHandler;
 import org.openhab.core.addon.marketplace.MarketplaceHandlerException;
 import org.openhab.core.addon.marketplace.internal.automation.MarketplaceRuleTemplateProvider;
-import org.openhab.core.automation.template.RuleTemplateProvider;
-import org.openhab.core.storage.Storage;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -32,8 +33,9 @@ import org.slf4j.LoggerFactory;
 
 /**
  * A {@link MarketplaceAddonHandler} implementation, which handles rule templates as JSON files and installs
- * them by adding them to a {@link Storage}. The templates are then served from this storage through a dedicated
- * {@link RuleTemplateProvider}.
+ * them by adding them to a {@link org.openhab.core.storage.Storage}. The templates are then served from this storage
+ * through a dedicated
+ * {@link org.openhab.core.automation.template.RuleTemplateProvider}.
  *
  * @author Kai Kreuzer - Initial contribution and API
  * @author Yannick Schaus - refactoring
@@ -42,12 +44,6 @@ import org.slf4j.LoggerFactory;
 @Component(immediate = true)
 @NonNullByDefault
 public class CommunityRuleTemplateAddonHandler implements MarketplaceAddonHandler {
-    private static final String JSON_DOWNLOAD_URL_PROPERTY = "json_download_url";
-    private static final String YAML_DOWNLOAD_URL_PROPERTY = "yaml_download_url";
-    private static final String JSON_CONTENT_PROPERTY = "json_content";
-    private static final String YAML_CONTENT_PROPERTY = "yaml_content";
-    private static final String RULETEMPLATES_CONTENT_TYPE = "application/vnd.openhab.ruletemplate";
-
     private final Logger logger = LoggerFactory.getLogger(CommunityRuleTemplateAddonHandler.class);
 
     private final MarketplaceRuleTemplateProvider marketplaceRuleTemplateProvider;

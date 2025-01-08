@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,6 +15,7 @@ package org.openhab.core.internal.common;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Queue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
@@ -86,11 +87,8 @@ public class SafeCallManagerImpl implements SafeCallManager {
     @Override
     public void enqueue(Invocation invocation) {
         synchronized (queues) {
-            Queue<Invocation> queue = queues.get(invocation.getIdentifier());
-            if (queue == null) {
-                queue = new LinkedList<>();
-                queues.put(invocation.getIdentifier(), queue);
-            }
+            Queue<Invocation> queue = Objects
+                    .requireNonNull(queues.computeIfAbsent(invocation.getIdentifier(), k -> new LinkedList<>()));
             queue.add(invocation);
         }
         trigger(invocation.getIdentifier());

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -11,6 +11,8 @@
  * SPDX-License-Identifier: EPL-2.0
  */
 package org.openhab.core.io.rest.auth.internal;
+
+import java.io.Serial;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.auth.AuthenticationException;
@@ -26,6 +28,7 @@ import org.openhab.core.auth.AuthenticationException;
  */
 @NonNullByDefault
 public class TokenEndpointException extends AuthenticationException {
+    @Serial
     private static final long serialVersionUID = 610324537843397832L;
 
     /**

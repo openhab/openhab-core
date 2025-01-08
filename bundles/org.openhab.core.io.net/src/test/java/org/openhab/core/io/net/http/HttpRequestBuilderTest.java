@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -32,7 +32,7 @@ import org.mockito.ArgumentMatchers;
 /**
  * Test cases for the <code>HttpRequestBuilder</code> to validate its behaviour
  *
- * @author Martin van Wingerden & Wouter Born - Initial contribution
+ * @author Martin van Wingerden and Wouter Born - Initial contribution
  */
 @NonNullByDefault
 public class HttpRequestBuilderTest extends BaseHttpUtilTest {

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -117,20 +117,20 @@ public class DSLRuleProviderTest extends JavaOSGiTest {
 
         assertThat(firstRule.getUID(), is("dslruletest-1"));
         assertThat(firstRule.getName(), is("RuleNumberOne"));
-        assertThat(firstRule.getTriggers().get(0).getTypeUID(), is(SystemTriggerHandler.STARTLEVEL_MODULE_TYPE_ID));
-        assertThat(firstRule.getActions().get(0).getTypeUID(), is(ScriptActionHandler.TYPE_ID));
-        assertThat(firstRule.getActions().get(0).getConfiguration().get(AbstractScriptModuleHandler.SCRIPT_TYPE),
+        assertThat(firstRule.getTriggers().getFirst().getTypeUID(), is(SystemTriggerHandler.STARTLEVEL_MODULE_TYPE_ID));
+        assertThat(firstRule.getActions().getFirst().getTypeUID(), is(ScriptActionHandler.TYPE_ID));
+        assertThat(firstRule.getActions().getFirst().getConfiguration().get(AbstractScriptModuleHandler.SCRIPT_TYPE),
                 is(DSLScriptEngine.MIMETYPE_OPENHAB_DSL_RULE));
 
         Rule secondRule = it.next();
 
         assertThat(secondRule.getUID(), is("dslruletest-2"));
         assertThat(secondRule.getName(), is("Rule Number Two"));
-        assertThat(secondRule.getTriggers().get(0).getTypeUID(), is(ItemStateTriggerHandler.CHANGE_MODULE_TYPE_ID));
-        assertThat(secondRule.getTriggers().get(0).getConfiguration().get(ItemStateTriggerHandler.CFG_ITEMNAME),
+        assertThat(secondRule.getTriggers().getFirst().getTypeUID(), is(ItemStateTriggerHandler.CHANGE_MODULE_TYPE_ID));
+        assertThat(secondRule.getTriggers().getFirst().getConfiguration().get(ItemStateTriggerHandler.CFG_ITEMNAME),
                 is("X"));
-        assertThat(secondRule.getActions().get(0).getTypeUID(), is(ScriptActionHandler.TYPE_ID));
-        assertThat(secondRule.getActions().get(0).getConfiguration().get(AbstractScriptModuleHandler.SCRIPT_TYPE),
+        assertThat(secondRule.getActions().getFirst().getTypeUID(), is(ScriptActionHandler.TYPE_ID));
+        assertThat(secondRule.getActions().getFirst().getConfiguration().get(AbstractScriptModuleHandler.SCRIPT_TYPE),
                 is(DSLScriptEngine.MIMETYPE_OPENHAB_DSL_RULE));
     }
 
@@ -172,8 +172,8 @@ public class DSLRuleProviderTest extends JavaOSGiTest {
         assertThat(rule.getName(), is("RuleWithAllTriggers"));
         assertThat(rule.getTriggers().size(), is(13));
 
-        assertThat(rule.getTriggers().get(0).getTypeUID(), is(SystemTriggerHandler.STARTLEVEL_MODULE_TYPE_ID));
-        assertThat(rule.getTriggers().get(0).getConfiguration().get(SystemTriggerHandler.CFG_STARTLEVEL),
+        assertThat(rule.getTriggers().getFirst().getTypeUID(), is(SystemTriggerHandler.STARTLEVEL_MODULE_TYPE_ID));
+        assertThat(rule.getTriggers().getFirst().getConfiguration().get(SystemTriggerHandler.CFG_STARTLEVEL),
                 is(new BigDecimal(40)));
         assertThat(rule.getTriggers().get(1).getTypeUID(), is(GenericCronTriggerHandler.MODULE_TYPE_ID));
         assertThat(rule.getTriggers().get(1).getConfiguration().get(GenericCronTriggerHandler.CFG_CRON_EXPRESSION),

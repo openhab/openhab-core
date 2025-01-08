@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -62,7 +62,8 @@ public class ConverterTest {
     @Test
     public void numberItemConverter() {
         NumberChannelHandler converter = new NumberChannelHandler(updateStateMock, postCommandMock, sendValueMock,
-                new ChannelTransformation(null), new ChannelTransformation(null), new ChannelValueConverterConfig());
+                new ChannelTransformation((String) null), new ChannelTransformation((String) null),
+                new ChannelValueConverterConfig());
 
         // without unit
         Assertions.assertEquals(Optional.of(new DecimalType(1234)), converter.toState("1234"));
@@ -80,7 +81,7 @@ public class ConverterTest {
         ChannelValueConverterConfig channelConfig = new ChannelValueConverterConfig();
         channelConfig.unit = "W";
         NumberChannelHandler converter = new NumberChannelHandler(updateStateMock, postCommandMock, sendValueMock,
-                new ChannelTransformation(null), new ChannelTransformation(null), channelConfig);
+                new ChannelTransformation((String) null), new ChannelTransformation((String) null), channelConfig);
 
         // without unit
         Assertions.assertEquals(Optional.of(new QuantityType<>(500, Units.WATT)), converter.toState("500"));
@@ -117,7 +118,7 @@ public class ConverterTest {
         ChannelHandlerContent content = new ChannelHandlerContent("PLAY".getBytes(StandardCharsets.UTF_8), "UTF-8",
                 null);
         PlayerChannelHandler converter = new PlayerChannelHandler(updateStateMock, postCommandMock, sendValueMock,
-                new ChannelTransformation(null), new ChannelTransformation(null), cfg);
+                new ChannelTransformation((String) null), new ChannelTransformation((String) null), cfg);
         converter.process(content);
         converter.process(content);
 
@@ -132,7 +133,7 @@ public class ConverterTest {
         ChannelHandlerContent content = new ChannelHandlerContent("123,34,47".getBytes(StandardCharsets.UTF_8), "UTF-8",
                 null);
         ColorChannelHandler converter = new ColorChannelHandler(updateStateMock, postCommandMock, sendValueMock,
-                new ChannelTransformation(null), new ChannelTransformation(null), cfg);
+                new ChannelTransformation((String) null), new ChannelTransformation((String) null), cfg);
 
         converter.process(content);
         Mockito.verify(updateStateMock).accept(HSBType.fromRGB(123, 34, 47));
@@ -145,7 +146,7 @@ public class ConverterTest {
         ChannelHandlerContent content = new ChannelHandlerContent("123,34,47".getBytes(StandardCharsets.UTF_8), "UTF-8",
                 null);
         ColorChannelHandler converter = new ColorChannelHandler(updateStateMock, postCommandMock, sendValueMock,
-                new ChannelTransformation(null), new ChannelTransformation(null), cfg);
+                new ChannelTransformation((String) null), new ChannelTransformation((String) null), cfg);
 
         converter.process(content);
         Mockito.verify(updateStateMock).accept(new HSBType("123,34,47"));
@@ -155,7 +156,7 @@ public class ConverterTest {
     public void rollerSHutterConverter() {
         ChannelValueConverterConfig cfg = new ChannelValueConverterConfig();
         RollershutterChannelHandler converter = new RollershutterChannelHandler(updateStateMock, postCommandMock,
-                sendValueMock, new ChannelTransformation(null), new ChannelTransformation(null), cfg);
+                sendValueMock, new ChannelTransformation((String) null), new ChannelTransformation((String) null), cfg);
 
         // test 0 and 100
         ChannelHandlerContent content = new ChannelHandlerContent("0".getBytes(StandardCharsets.UTF_8), "UTF-8", null);
@@ -181,6 +182,7 @@ public class ConverterTest {
 
     public GenericChannelHandler createConverter(Function<String, State> fcn) {
         return new GenericChannelHandler(fcn, updateStateMock, postCommandMock, sendValueMock,
-                new ChannelTransformation(null), new ChannelTransformation(null), new ChannelValueConverterConfig());
+                new ChannelTransformation((String) null), new ChannelTransformation((String) null),
+                new ChannelValueConverterConfig());
     }
 }

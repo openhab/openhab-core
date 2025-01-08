@@ -1,3 +1,4 @@
 *.java text=auto
 *.xml text=auto
 *.xml_gen text=auto
+*.xsd text=auto

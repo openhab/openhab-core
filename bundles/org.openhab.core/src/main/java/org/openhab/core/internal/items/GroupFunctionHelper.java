@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -79,8 +79,8 @@ public class GroupFunctionHelper {
     }
 
     private @Nullable Class<? extends Quantity<?>> getDimension(@Nullable Item baseItem) {
-        if (baseItem instanceof NumberItem) {
-            return ((NumberItem) baseItem).getDimension();
+        if (baseItem instanceof NumberItem numberItem) {
+            return numberItem.getDimension();
         }
         return null;
     }
@@ -91,6 +91,8 @@ public class GroupFunctionHelper {
         switch (functionName.toUpperCase()) {
             case "AVG":
                 return new QuantityTypeArithmeticGroupFunction.Avg(dimension);
+            case "MEDIAN":
+                return new QuantityTypeArithmeticGroupFunction.Median(dimension, baseItem);
             case "SUM":
                 return new QuantityTypeArithmeticGroupFunction.Sum(dimension);
             case "MIN":
@@ -109,7 +111,7 @@ public class GroupFunctionHelper {
             case "AND":
                 args = parseStates(baseItem, function.params);
                 if (args.size() == 2) {
-                    return new ArithmeticGroupFunction.And(args.get(0), args.get(1));
+                    return new ArithmeticGroupFunction.And(args.getFirst(), args.get(1));
                 } else {
                     logger.error("Group function 'AND' requires two arguments. Using Equality instead.");
                 }
@@ -117,7 +119,7 @@ public class GroupFunctionHelper {
             case "OR":
                 args = parseStates(baseItem, function.params);
                 if (args.size() == 2) {
-                    return new ArithmeticGroupFunction.Or(args.get(0), args.get(1));
+                    return new ArithmeticGroupFunction.Or(args.getFirst(), args.get(1));
                 } else {
                     logger.error("Group function 'OR' requires two arguments. Using Equality instead.");
                 }
@@ -125,7 +127,7 @@ public class GroupFunctionHelper {
             case "NAND":
                 args = parseStates(baseItem, function.params);
                 if (args.size() == 2) {
-                    return new ArithmeticGroupFunction.NAnd(args.get(0), args.get(1));
+                    return new ArithmeticGroupFunction.NAnd(args.getFirst(), args.get(1));
                 } else {
                     logger.error("Group function 'NOT AND' requires two arguments. Using Equality instead.");
                 }
@@ -133,9 +135,17 @@ public class GroupFunctionHelper {
             case "NOR":
                 args = parseStates(baseItem, function.params);
                 if (args.size() == 2) {
-                    return new ArithmeticGroupFunction.NOr(args.get(0), args.get(1));
+                    return new ArithmeticGroupFunction.NOr(args.getFirst(), args.get(1));
                 } else {
                     logger.error("Group function 'NOT OR' requires two arguments. Using Equality instead.");
+                }
+                break;
+            case "XOR":
+                args = parseStates(baseItem, function.params);
+                if (args.size() == 2) {
+                    return new ArithmeticGroupFunction.Xor(args.getFirst(), args.get(1));
+                } else {
+                    logger.error("Group function 'XOR' requires two arguments. Using Equality instead.");
                 }
                 break;
             case "COUNT":
@@ -148,6 +158,8 @@ public class GroupFunctionHelper {
                 break;
             case "AVG":
                 return new ArithmeticGroupFunction.Avg();
+            case "MEDIAN":
+                return new ArithmeticGroupFunction.Median();
             case "SUM":
                 return new ArithmeticGroupFunction.Sum();
             case "MIN":

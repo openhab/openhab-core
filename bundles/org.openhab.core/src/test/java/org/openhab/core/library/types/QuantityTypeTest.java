@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -250,11 +250,17 @@ public class QuantityTypeTest {
         assertThat(millis.format("%.1f " + UnitUtils.UNIT_PLACEHOLDER), is("80000" + ds + "0 ms"));
         assertThat(minutes.format("%.1f " + UnitUtils.UNIT_PLACEHOLDER), is("1" + ds + "3 min"));
 
+        assertThat(seconds.format("%s"), is("80 s"));
+        assertThat(millis.format("%s"), is("80000 ms"));
+
         assertThat(seconds.format("%.1f"), is("80" + ds + "0"));
         assertThat(minutes.format("%.1f"), is("1" + ds + "3"));
 
         assertThat(seconds.format("%1$tH:%1$tM:%1$tS"), is("00:01:20"));
         assertThat(millis.format("%1$tHh %1$tMm %1$tSs"), is("00h 01m 20s"));
+        assertThat(millis.format("%1$tT.%1$tL"), is("00:01:20.000"));
+        assertThat(seconds.format("%1$tss and %1$tSs"), is("80s and 80s"));
+        assertThat(seconds.format("%1$tSs and %1$tMm"), is("20s and 01m"));
     }
 
     @Test

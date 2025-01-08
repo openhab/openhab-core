@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -200,8 +200,9 @@ public abstract class BasicConditionHandlerTest extends JavaOSGiTest {
         logger.info("item state is ON");
 
         // now make the condition fail
-        Rule rule2 = RuleBuilder.create(rule).withConditions(ModuleBuilder.createCondition(rule.getConditions().get(0))
-                .withConfiguration(getFailingConfiguration()).build()).build();
+        Rule rule2 = RuleBuilder.create(rule).withConditions(ModuleBuilder
+                .createCondition(rule.getConditions().getFirst()).withConfiguration(getFailingConfiguration()).build())
+                .build();
         ruleRegistry.update(rule2);
 
         // prepare the execution

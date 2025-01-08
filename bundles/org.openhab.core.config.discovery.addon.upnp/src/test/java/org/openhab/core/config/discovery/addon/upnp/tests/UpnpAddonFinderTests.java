@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -114,7 +114,7 @@ public class UpnpAddonFinderTests {
         assertNotNull(upnpService);
         List<RemoteDevice> result = new ArrayList<>(upnpService.getRegistry().getRemoteDevices());
         assertEquals(1, result.size());
-        RemoteDevice device = result.get(0);
+        RemoteDevice device = result.getFirst();
         assertEquals("manufacturer", device.getDetails().getManufacturerDetails().getManufacturer());
         assertEquals("serialNumber", device.getDetails().getSerialNumber());
     }

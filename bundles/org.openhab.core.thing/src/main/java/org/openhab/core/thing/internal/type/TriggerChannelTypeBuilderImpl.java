@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -36,7 +36,7 @@ public class TriggerChannelTypeBuilderImpl extends AbstractChannelTypeBuilder<Tr
         TriggerChannelTypeImpl(ChannelTypeUID uid, boolean advanced, String label, @Nullable String description,
                 @Nullable String category, @Nullable Set<String> tags, @Nullable EventDescription event,
                 @Nullable URI configDescriptionURI) throws IllegalArgumentException {
-            super(uid, advanced, null, ChannelKind.TRIGGER, label, description, category, tags, null, null, event,
+            super(uid, advanced, null, null, ChannelKind.TRIGGER, label, description, category, tags, null, null, event,
                     configDescriptionURI, null);
         }
     }

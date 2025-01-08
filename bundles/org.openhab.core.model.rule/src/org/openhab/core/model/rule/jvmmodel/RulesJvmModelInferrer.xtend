@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -41,6 +41,7 @@ import org.slf4j.LoggerFactory
 import org.eclipse.xtext.common.types.JvmFormalParameter
 import org.eclipse.emf.common.util.EList
 import org.openhab.core.events.Event
+import org.openhab.core.automation.module.script.rulesupport.shared.ValueCache
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
@@ -130,7 +131,15 @@ class RulesJvmModelInferrer extends ScriptJvmModelInferrer {
             members += ruleModel.rules.map [ rule |
                 rule.toMethod("_" + rule.name, ruleModel.newTypeRef(Void.TYPE)) [
                     static = true
+                    val privateCacheTypeRef = ruleModel.newTypeRef(ValueCache)
+                    parameters += rule.toParameter(VAR_PRIVATE_CACHE, privateCacheTypeRef)
+                    val sharedCacheTypeRef = ruleModel.newTypeRef(ValueCache)
+                    parameters += rule.toParameter(VAR_SHARED_CACHE, sharedCacheTypeRef)
                     if ((containsCommandTrigger(rule)) || (containsStateChangeTrigger(rule)) || (containsStateUpdateTrigger(rule))) {
+                        val groupTypeRef = ruleModel.newTypeRef(Item)
+                        parameters += rule.toParameter(VAR_TRIGGERING_GROUP, groupTypeRef)
+                        val groupNameRef = ruleModel.newTypeRef(String)
+                        parameters += rule.toParameter(VAR_TRIGGERING_GROUP_NAME, groupNameRef)
                         val itemTypeRef = ruleModel.newTypeRef(Item)
                         parameters += rule.toParameter(VAR_TRIGGERING_ITEM, itemTypeRef)
                         val itemNameRef = ruleModel.newTypeRef(String)

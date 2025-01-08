@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -48,18 +48,6 @@ public class AddonInfoXmlProvider implements XmlDocumentProvider<AddonInfoXmlRes
 
     public AddonInfoXmlProvider(Bundle bundle, XmlAddonInfoProvider addonInfoProvider,
             AbstractXmlConfigDescriptionProvider configDescriptionProvider) throws IllegalArgumentException {
-        if (bundle == null) {
-            throw new IllegalArgumentException("The Bundle must not be null!");
-        }
-
-        if (addonInfoProvider == null) {
-            throw new IllegalArgumentException("The XmlAddonInfoProvider must not be null!");
-        }
-
-        if (configDescriptionProvider == null) {
-            throw new IllegalArgumentException("The XmlConfigDescriptionProvider must not be null!");
-        }
-
         this.bundle = bundle;
         this.addonInfoProvider = addonInfoProvider;
         this.configDescriptionProvider = configDescriptionProvider;

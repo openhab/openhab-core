@@ -15,10 +15,10 @@ Widget:
     (LinkableWidget | NonLinkableWidget);
 
 NonLinkableWidget:
-    Switch | Selection | Slider | Setpoint | Video | Chart | Webview | Colorpicker | Mapview | Input | Buttongrid | Default;
+    Switch | Selection | Slider | Setpoint | Video | Chart | Webview | Colorpicker | Colortemperaturepicker | Mapview | Input | Button | Default;
 
 LinkableWidget:
-    (Text | Group | Image | Frame)
+    (Text | Group | Image | Frame | Buttongrid)
     ('{'
     (children+=Widget)+
     '}')?;
@@ -80,7 +80,7 @@ Chart:
     (('icon=' icon=Icon) |
         ('icon=[' (IconRules+=IconRule (',' IconRules+=IconRule)*) ']') |
         ('staticIcon=' staticIcon=Icon))? &
-    ('service=' service=STRING)? & ('refresh=' refresh=INT)? & ('period=' period=ID) &
+    ('service=' service=STRING)? & ('refresh=' refresh=INT)? & ('period=' period=Period) &
     ('legend=' legend=BOOLEAN_OBJECT)? & ('forceasitem=' forceAsItem=BOOLEAN_OBJECT)? &
     ('labelcolor=[' (LabelColor+=ColorArray (',' LabelColor+=ColorArray)*) ']')? &
     ('valuecolor=[' (ValueColor+=ColorArray (',' ValueColor+=ColorArray)*) ']')? &
@@ -126,7 +126,7 @@ Slider:
     (('icon=' icon=Icon) |
         ('icon=[' (IconRules+=IconRule (',' IconRules+=IconRule)*) ']') |
         ('staticIcon=' staticIcon=Icon))? &
-    ('sendFrequency=' frequency=INT)? & (switchEnabled?='switchSupport')? &
+    (switchEnabled?='switchSupport')? & (releaseOnly?='releaseOnly')? &
     ('minValue=' minValue=Number)? & ('maxValue=' maxValue=Number)? & ('step=' step=Number)? &
     ('labelcolor=[' (LabelColor+=ColorArray (',' LabelColor+=ColorArray)*) ']')? &
     ('valuecolor=[' (ValueColor+=ColorArray (',' ValueColor+=ColorArray)*) ']')? &
@@ -160,7 +160,17 @@ Colorpicker:
     (('icon=' icon=Icon) |
         ('icon=[' (IconRules+=IconRule (',' IconRules+=IconRule)*) ']') |
         ('staticIcon=' staticIcon=Icon))? &
-    ('sendFrequency=' frequency=INT)? &
+    ('labelcolor=[' (LabelColor+=ColorArray (',' LabelColor+=ColorArray)*) ']')? &
+    ('valuecolor=[' (ValueColor+=ColorArray (',' ValueColor+=ColorArray)*) ']')? &
+    ('iconcolor=[' (IconColor+=ColorArray (',' IconColor+=ColorArray)*) ']')? &
+    ('visibility=[' (Visibility+=VisibilityRule (',' Visibility+=VisibilityRule)*) ']')?);
+
+Colortemperaturepicker:
+    'Colortemperaturepicker' (('item=' item=ItemRef) & ('label=' label=(ID | STRING))? &
+    (('icon=' icon=Icon) |
+        ('icon=[' (IconRules+=IconRule (',' IconRules+=IconRule)*) ']') |
+        ('staticIcon=' staticIcon=Icon))? &
+    ('minValue=' minValue=Number)? & ('maxValue=' maxValue=Number)? &
     ('labelcolor=[' (LabelColor+=ColorArray (',' LabelColor+=ColorArray)*) ']')? &
     ('valuecolor=[' (ValueColor+=ColorArray (',' ValueColor+=ColorArray)*) ']')? &
     ('iconcolor=[' (IconColor+=ColorArray (',' IconColor+=ColorArray)*) ']')? &
@@ -178,11 +188,23 @@ Input:
     ('visibility=[' (Visibility+=VisibilityRule (',' Visibility+=VisibilityRule)*) ']')?);
 
 Buttongrid:
-    'Buttongrid' (('item=' item=ItemRef) & ('label=' label=(ID | STRING))? &
+    {Buttongrid} 'Buttongrid' (('item=' item=ItemRef)? & ('label=' label=(ID | STRING))? &
     (('icon=' icon=Icon) |
         ('icon=[' (IconRules+=IconRule (',' IconRules+=IconRule)*) ']') |
         ('staticIcon=' staticIcon=Icon))? &
-    ('buttons=[' buttons+=Button (',' buttons+=Button)* ']') &
+    ('buttons=[' buttons+=ButtonDefinition (',' buttons+=ButtonDefinition)* ']')? &
+    ('labelcolor=[' (LabelColor+=ColorArray (',' LabelColor+=ColorArray)*) ']')? &
+    ('valuecolor=[' (ValueColor+=ColorArray (',' ValueColor+=ColorArray)*) ']')? &
+    ('iconcolor=[' (IconColor+=ColorArray (',' IconColor+=ColorArray)*) ']')? &
+    ('visibility=[' (Visibility+=VisibilityRule (',' Visibility+=VisibilityRule)*) ']')?);
+
+Button:
+    'Button' (('item=' item=ItemRef) & ('label=' label=(ID | STRING))? &
+    (('icon=' icon=Icon) |
+        ('icon=[' (IconRules+=IconRule (',' IconRules+=IconRule)*) ']') |
+        ('staticIcon=' staticIcon=Icon))? &
+    ('row=' row=INT) & ('column=' column=INT) & (stateless?='stateless')? &
+    ('click=' cmd=Command) & ('release=' releaseCmd=Command)? &
     ('labelcolor=[' (LabelColor+=ColorArray (',' LabelColor+=ColorArray)*) ']')? &
     ('valuecolor=[' (ValueColor+=ColorArray (',' ValueColor+=ColorArray)*) ']')? &
     ('iconcolor=[' (IconColor+=ColorArray (',' IconColor+=ColorArray)*) ']')? &
@@ -199,11 +221,11 @@ Default:
     ('iconcolor=[' (IconColor+=ColorArray (',' IconColor+=ColorArray)*) ']')? &
     ('visibility=[' (Visibility+=VisibilityRule (',' Visibility+=VisibilityRule)*) ']')?);
 
-Button:
+ButtonDefinition:
     row=INT ':' column=INT ':' cmd=Command '=' label=(ID | STRING) ('=' icon=Icon)?;
 
 Mapping:
-    cmd=Command '=' label=(ID | STRING) ('=' icon=Icon)?;
+    cmd=Command (':' releaseCmd=Command)? '=' label=(ID | STRING) ('=' icon=Icon)?;
 
 VisibilityRule:
     conditions+=Condition ('AND' conditions+=Condition)*;
@@ -220,6 +242,9 @@ Icon returns ecore::EString:
 // Allow hyphen inside an icon name
 IconName:
     (ID '-')* ID;
+
+Period:
+    (ID '-')? ID;
 
 ColorArray:
     ((conditions+=Condition ('AND' conditions+=Condition)*) '=')? (arg=STRING);

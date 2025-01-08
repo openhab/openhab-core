@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -139,7 +139,7 @@ public class Audio {
         if (newVolume - volume < .01) {
             // the getMasterVolume() may only returns integers, so we have to make sure that we
             // increase the volume level at least by 1%.
-            newVolume += .01;
+            newVolume += .01f;
         }
         if (newVolume > 1) {
             newVolume = 1;

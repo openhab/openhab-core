@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -246,6 +246,13 @@ public class AuthFilter implements ContainerRequestFilter {
                 requestContext.abortWith(JSONResponse.createErrorResponse(Status.UNAUTHORIZED, "Invalid credentials"));
             }
         }
+    }
+
+    public @Nullable SecurityContext getSecurityContext(@Nullable String bearerToken) throws AuthenticationException {
+        if (bearerToken == null) {
+            return null;
+        }
+        return authenticateBearerToken(bearerToken);
     }
 
     public @Nullable SecurityContext getSecurityContext(HttpServletRequest request, boolean allowQueryToken)

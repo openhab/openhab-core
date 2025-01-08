@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -72,7 +72,7 @@ public class Translations {
                 return 1;
             }
 
-            return entries.get(0).getKey().compareTo(other.entries.get(0).getKey());
+            return entries.getFirst().getKey().compareTo(other.entries.getFirst().getKey());
         }
 
         public boolean hasTranslations() {

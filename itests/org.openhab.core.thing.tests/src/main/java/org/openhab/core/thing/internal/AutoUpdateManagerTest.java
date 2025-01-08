@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -91,7 +91,7 @@ public class AutoUpdateManagerTest extends JavaTest {
         when(thingRegistry.get(any(ThingUID.class))).thenReturn(thing);
         when(thing.getStatus()).thenReturn(ThingStatus.ONLINE);
         when(thing.getHandler()).thenReturn(mock(ThingHandler.class));
-        when(thing.getChannel(any(String.class))).thenReturn(channel);
+        when(thing.getChannel(any(ChannelUID.class))).thenReturn(channel);
     }
 
     @Test

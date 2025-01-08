@@ -7,7 +7,7 @@
   <parent>
     <groupId>org.openhab.core.bom</groupId>
     <artifactId>org.openhab.core.reactor.bom</artifactId>
-    <version>4.2.0-SNAPSHOT</version>
+    <version>5.0.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>org.openhab.core.bom.compile-model</artifactId>
@@ -30,7 +30,7 @@
   <dependencies>
     <dependency>
       <groupId>org.eclipse.xtext</groupId>
-      <artifactId>org.eclipse.xtext.generator</artifactId>
+      <artifactId>org.eclipse.xtext.xtext.generator</artifactId>
       <version>${xtext.version}</version>
       <scope>compile</scope>
       <exclusions>
@@ -132,9 +132,9 @@
 
     <!-- Classgraph -->
     <dependency>
-      <groupId>org.eclipse.orbit.bundles</groupId>
-      <artifactId>io.github.classgraph</artifactId>
-      <version>4.8.149.v20220915-0556</version>
+      <groupId>io.github.classgraph</groupId>
+      <artifactId>classgraph</artifactId>
+      <version>4.8.172</version>
       <scope>compile</scope>
     </dependency>
 

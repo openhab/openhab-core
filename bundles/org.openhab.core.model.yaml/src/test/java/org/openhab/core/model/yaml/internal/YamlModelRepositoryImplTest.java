@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -51,7 +51,7 @@ import org.openhab.core.service.WatchService;
 @MockitoSettings(strictness = Strictness.LENIENT)
 @NonNullByDefault
 public class YamlModelRepositoryImplTest {
-    private static final Path SOURCE_PATH = Path.of("src/test/resources");
+    private static final Path SOURCE_PATH = Path.of("src/test/resources/model");
     private static final String MODEL_NAME = "model";
     private static final Path MODEL_PATH = Path.of(MODEL_NAME + ".yaml");
 
@@ -135,7 +135,7 @@ public class YamlModelRepositoryImplTest {
         assertThat(firstTypeElements,
                 containsInAnyOrder(new FirstTypeDTO("First1", "Description1"), new FirstTypeDTO("First2", null)));
         assertThat(secondTypeElements1, contains(new SecondTypeDTO("Second1", "Label1")));
-        assertThat(secondTypeElements1, contains(new SecondTypeDTO("Second1", "Label1")));
+        assertThat(secondTypeElements2, contains(new SecondTypeDTO("Second1", "Label1")));
     }
 
     @Test
@@ -157,7 +157,7 @@ public class YamlModelRepositoryImplTest {
         assertThat(arguments, hasSize(4));
 
         // added originally
-        assertThat(arguments.get(0), containsInAnyOrder(new FirstTypeDTO("First", "First original"),
+        assertThat(arguments.getFirst(), containsInAnyOrder(new FirstTypeDTO("First", "First original"),
                 new FirstTypeDTO("Second", "Second original"), new FirstTypeDTO("Third", "Third original")));
         // added by update
         assertThat(arguments.get(1), contains(new FirstTypeDTO("Fourth", "Fourth original")));
@@ -185,10 +185,10 @@ public class YamlModelRepositoryImplTest {
         assertThat(arguments, hasSize(2));
 
         // all are added
-        assertThat(arguments.get(0), containsInAnyOrder(new FirstTypeDTO("First", "First original"),
+        assertThat(arguments.getFirst(), containsInAnyOrder(new FirstTypeDTO("First", "First original"),
                 new FirstTypeDTO("Second", "Second original"), new FirstTypeDTO("Third", "Third original")));
         // all are removed
-        assertThat(arguments.get(0), containsInAnyOrder(new FirstTypeDTO("First", "First original"),
+        assertThat(arguments.getFirst(), containsInAnyOrder(new FirstTypeDTO("First", "First original"),
                 new FirstTypeDTO("Second", "Second original"), new FirstTypeDTO("Third", "Third original")));
     }
 
@@ -205,7 +205,7 @@ public class YamlModelRepositoryImplTest {
         String actualFileContent = Files.readString(fullModelPath);
         String expectedFileContent = Files.readString(SOURCE_PATH.resolve("addToModelExpectedContent.yaml"));
 
-        assertThat(actualFileContent, is(expectedFileContent));
+        assertThat(actualFileContent, is(expectedFileContent.replaceAll("\r\n", "\n")));
     }
 
     @Test
@@ -221,7 +221,7 @@ public class YamlModelRepositoryImplTest {
         String actualFileContent = Files.readString(fullModelPath);
         String expectedFileContent = Files.readString(SOURCE_PATH.resolve("updateInModelExpectedContent.yaml"));
 
-        assertThat(actualFileContent, is(expectedFileContent));
+        assertThat(actualFileContent, is(expectedFileContent.replaceAll("\r\n", "\n")));
     }
 
     @Test
@@ -237,7 +237,7 @@ public class YamlModelRepositoryImplTest {
         String actualFileContent = Files.readString(fullModelPath);
         String expectedFileContent = Files.readString(SOURCE_PATH.resolve("removeFromModelExpectedContent.yaml"));
 
-        assertThat(actualFileContent, is(expectedFileContent));
+        assertThat(actualFileContent, is(expectedFileContent.replaceAll("\r\n", "\n")));
     }
 
     @Test

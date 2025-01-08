@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,7 +15,7 @@ package org.openhab.core.library.unit;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.number.IsCloseTo.closeTo;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.math.BigDecimal;
 
@@ -38,6 +38,7 @@ import org.openhab.core.library.dimension.ArealDensity;
 import org.openhab.core.library.dimension.Density;
 import org.openhab.core.library.dimension.Intensity;
 import org.openhab.core.library.types.QuantityType;
+import org.openhab.core.types.util.UnitUtils;
 
 import tech.units.indriya.quantity.Quantities;
 
@@ -109,6 +110,11 @@ public class UnitsTest {
     public void testMmHgUnitSymbol() {
         assertThat(Units.MILLIMETRE_OF_MERCURY.getSymbol(), is("mmHg"));
         assertThat(Units.MILLIMETRE_OF_MERCURY.toString(), is("mmHg"));
+    }
+
+    @Test
+    public void testGramPerKiloWattHourUnitSymbol() {
+        assertThat(Units.GRAM_PER_KILOWATT_HOUR.toString(), is("g/kWh"));
     }
 
     @Test
@@ -424,6 +430,55 @@ public class UnitsTest {
         assertThat(converted.doubleValue(), is(closeTo(365.2425, DEFAULT_ERROR)));
         QuantityType<?> converted2 = year.toUnit("mo");
         assertThat(converted2.doubleValue(), is(closeTo(12.0, DEFAULT_ERROR)));
+    }
+
+    @Test
+    public void testColorTemperatureAliases() {
+        QuantityType<?> value;
+        value = QuantityType.valueOf("20 mired");
+        assertEquals(Units.MIRED, value.getUnit());
+        value = QuantityType.valueOf("20 mirek");
+        assertEquals(Units.MIRED, value.getUnit());
+        value = QuantityType.valueOf("20 MK⁻¹");
+        assertEquals(Units.MIRED, value.getUnit());
+    }
+
+    public void testGrains() {
+        assertThat(ImperialUnits.GRAIN.getSymbol(), is("gr"));
+        QuantityType<?> oneHundredGrains = QuantityType.valueOf("100 gr");
+        QuantityType<?> converted = oneHundredGrains.toUnit("g");
+        assertThat(converted.doubleValue(), is(closeTo(6.479891, DEFAULT_ERROR)));
+        assertThat(ImperialUnits.GRAIN_PER_CUBICFOOT.toString(), is("gr/ft³"));
+        QuantityType<?> grainDensity = QuantityType.valueOf("20 gr/ft³");
+        QuantityType<?> convertedDensity = grainDensity.toUnit(Units.MICROGRAM_PER_CUBICMETRE);
+        assertThat(convertedDensity.doubleValue(), is(closeTo(45767038.211314686, DEFAULT_ERROR)));
+    }
+
+    @Test
+    public void testArealDensity() {
+        QuantityType<?> newspaper = QuantityType.valueOf("72 g/m²");
+        QuantityType<?> converted = newspaper.toUnit(Units.KILOGRAM_PER_SQUARE_METRE);
+        assertEquals(converted.doubleValue(), 0.072);
+    }
+
+    @Test
+    public void testAmountOfSubstance() {
+        QuantityType<?> mmolpl = QuantityType.valueOf("0.17833 mmol/l");
+        String mmolplDimension = UnitUtils.getDimensionName(mmolpl.getUnit());
+        QuantityType<?> dh = QuantityType.valueOf("1 °dH");
+        String hDimension = UnitUtils.getDimensionName(dh.getUnit());
+        assertTrue(hDimension.equals(mmolplDimension));
+        assertTrue("Dimensionless".equalsIgnoreCase(hDimension));
+        QuantityType<?> converted = dh.toUnit("mmol/l");
+        assertThat(converted.doubleValue(), is(closeTo(mmolpl.doubleValue(), DEFAULT_ERROR)));
+    }
+
+    @Test
+    public void testSolarIrradiation() {
+        QuantityType<?> whpsm2 = QuantityType.valueOf(10, Units.WATT_HOUR_PER_SQUARE_METRE);
+        assertThat(whpsm2.getUnit().toString(), is("Wh/m²"));
+        QuantityType<?> jpsm2 = QuantityType.valueOf(10, Units.JOULE_PER_SQUARE_METRE);
+        assertThat(jpsm2.getUnit().toString(), is("J/m²"));
     }
 
     private static class QuantityEquals extends IsEqual<Quantity<?>> {

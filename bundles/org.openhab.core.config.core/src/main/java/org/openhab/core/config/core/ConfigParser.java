@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -127,6 +127,9 @@ public final class ConfigParser {
             try {
                 value = valueAs(value, type);
                 if (value == null) {
+                    LOGGER.warn(
+                            "Could not set value for field '{}' because conversion failed. Check your configuration value.",
+                            fieldName);
                     continue;
                 }
                 LOGGER.trace("Setting value ({}) {} to field '{}' in configuration class {}", type.getSimpleName(),

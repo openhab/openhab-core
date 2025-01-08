@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -20,6 +20,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -376,11 +377,8 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
      */
     private void updateRuleTemplateMapping(String templateUID, String ruleUID, boolean resolved) {
         synchronized (this) {
-            Set<String> ruleUIDs = mapTemplateToRules.get(templateUID);
-            if (ruleUIDs == null) {
-                ruleUIDs = new HashSet<>();
-                mapTemplateToRules.put(templateUID, ruleUIDs);
-            }
+            Set<String> ruleUIDs = Objects
+                    .requireNonNull(mapTemplateToRules.computeIfAbsent(templateUID, k -> new HashSet<>()));
             if (resolved) {
                 ruleUIDs.remove(ruleUID);
             } else {
@@ -591,7 +589,7 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
                 return configValue instanceof Boolean;
             case INTEGER:
                 return configValue instanceof BigDecimal || configValue instanceof Integer
-                        || configValue instanceof Double && ((Double) configValue).intValue() == (Double) configValue;
+                        || configValue instanceof Double doubleValue && doubleValue.intValue() == doubleValue;
             case DECIMAL:
                 return configValue instanceof BigDecimal || configValue instanceof Double;
         }

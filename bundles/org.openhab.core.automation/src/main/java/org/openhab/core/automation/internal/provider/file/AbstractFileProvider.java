@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -23,6 +23,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -252,11 +253,7 @@ public abstract class AbstractFileProvider<@NonNull E> implements Provider<E> {
             }
         } else {
             synchronized (urls) {
-                List<URL> value = urls.get(parserType);
-                if (value == null) {
-                    value = new ArrayList<>();
-                    urls.put(parserType, value);
-                }
+                List<URL> value = Objects.requireNonNull(urls.computeIfAbsent(parserType, k -> new ArrayList<>()));
                 value.add(url);
             }
             logger.debug("Parser {} not available", parserType, new Exception());

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -54,6 +54,7 @@ import org.openhab.core.io.rest.core.config.ConfigurationService;
 import org.openhab.core.io.rest.core.service.ConfigurableServiceDTO;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -173,7 +174,7 @@ public class ConfigurableServiceResource implements RESTResource {
                 + "=*))";
         List<ConfigurableServiceDTO> services = getServicesByFilter(filter, locale);
         if (services.size() == 1) {
-            return services.get(0);
+            return services.getFirst();
         }
         return null;
     }
@@ -307,7 +308,11 @@ public class ConfigurableServiceResource implements RESTResource {
                 String key = I18nUtil.stripConstantOr(defaultLabel,
                         () -> inferKey(configurableService.description_uri(), "label"));
 
-                String label = i18nProvider.getText(serviceReference.getBundle(), key, defaultLabel, locale);
+                // i18n file containing label for system:addons service is exceptionally located in bundle
+                // org.openhab.core (and not in bundle org.openhab.core.addon.eclipse)
+                String label = i18nProvider.getText("system:addons".equals(configurableService.description_uri())
+                        ? FrameworkUtil.getBundle(OpenHAB.class)
+                        : serviceReference.getBundle(), key, defaultLabel, locale);
 
                 String category = configurableService.category();
 
@@ -386,9 +391,9 @@ public class ConfigurableServiceResource implements RESTResource {
             case 0:
                 return "";
             case 1:
-                return pids.get(0);
+                return pids.getFirst();
             default: // multiple entries
-                final String first = pids.get(0);
+                final String first = pids.getFirst();
                 boolean differences = false;
                 for (int i = 1; i < pids.size(); ++i) {
                     if (!first.equals(pids.get(i))) {

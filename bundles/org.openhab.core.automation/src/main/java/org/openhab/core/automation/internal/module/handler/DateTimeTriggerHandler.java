@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -52,6 +52,7 @@ import org.slf4j.LoggerFactory;
  * based on a {@link org.openhab.core.library.types.DateTimeType} stored in an item
  *
  * @author Jan N. Klug - Initial contribution
+ * @author Jimmy Tanagra - Add offset support
  */
 @NonNullByDefault
 public class DateTimeTriggerHandler extends BaseTriggerModuleHandler
@@ -60,6 +61,7 @@ public class DateTimeTriggerHandler extends BaseTriggerModuleHandler
     public static final String MODULE_TYPE_ID = "timer.DateTimeTrigger";
     public static final String CONFIG_ITEM_NAME = "itemName";
     public static final String CONFIG_TIME_ONLY = "timeOnly";
+    public static final String CONFIG_OFFSET = "offset";
 
     private static final DateTimeFormatter CRON_FORMATTER = DateTimeFormatter.ofPattern("s m H d M * uuuu");
     private static final DateTimeFormatter CRON_TIMEONLY_FORMATTER = DateTimeFormatter.ofPattern("s m H * * * *");
@@ -71,6 +73,7 @@ public class DateTimeTriggerHandler extends BaseTriggerModuleHandler
     private final @Nullable EventFilter eventFilter;
     private String cronExpression = CronAdjuster.REBOOT;
     private Boolean timeOnly = false;
+    private Long offset = 0L;
 
     private @Nullable ScheduledCompletableFuture<?> schedule;
     private @Nullable ServiceRegistration<?> eventSubscriberRegistration;
@@ -88,6 +91,7 @@ public class DateTimeTriggerHandler extends BaseTriggerModuleHandler
         this.eventFilter = new TopicPrefixEventFilter("openhab/items/" + itemName + "/");
         this.timeOnly = ConfigParser.valueAsOrElse(module.getConfiguration().get(CONFIG_TIME_ONLY), Boolean.class,
                 false);
+        this.offset = ConfigParser.valueAsOrElse(module.getConfiguration().get(CONFIG_OFFSET), Long.class, 0L);
         eventSubscriberRegistration = bundleContext.registerService(EventSubscriber.class.getName(), this, null);
         try {
             process(itemRegistry.getItem(itemName).getState());
@@ -119,7 +123,8 @@ public class DateTimeTriggerHandler extends BaseTriggerModuleHandler
         ModuleHandlerCallback callback = this.callback;
         if (callback instanceof TriggerHandlerCallback triggerHandlerCallback) {
             TimerEvent event = AutomationEventFactory.createTimerEvent(module.getTypeUID(),
-                    Objects.requireNonNullElse(module.getLabel(), module.getId()), Map.of(CONFIG_ITEM_NAME, itemName));
+                    Objects.requireNonNullElse(module.getLabel(), module.getId()),
+                    Map.of(CONFIG_ITEM_NAME, itemName, CONFIG_TIME_ONLY, timeOnly, CONFIG_OFFSET, offset));
             triggerHandlerCallback.triggered(module, Map.of("event", event));
         } else {
             logger.debug("Tried to trigger, but callback isn't available!");
@@ -153,8 +158,8 @@ public class DateTimeTriggerHandler extends BaseTriggerModuleHandler
         cancelScheduler();
         if (!CronAdjuster.REBOOT.equals(cronExpression)) {
             schedule = scheduler.schedule(this, cronExpression);
-            logger.debug("Scheduled cron job '{}' for trigger '{}'.", module.getConfiguration().get(CONFIG_ITEM_NAME),
-                    module.getId());
+            logger.debug("Scheduled cron job '{}' from item '{}' for trigger '{}'.", cronExpression,
+                    module.getConfiguration().get(CONFIG_ITEM_NAME), module.getId());
         }
     }
 
@@ -173,7 +178,7 @@ public class DateTimeTriggerHandler extends BaseTriggerModuleHandler
             cronExpression = CronAdjuster.REBOOT;
         } else if (value instanceof DateTimeType dateTimeType) {
             boolean itemIsTimeOnly = dateTimeType.toString().startsWith("1970-01-01T");
-            cronExpression = dateTimeType.getZonedDateTime().withZoneSameInstant(ZoneId.systemDefault())
+            cronExpression = dateTimeType.getZonedDateTime(ZoneId.systemDefault()).plusSeconds(offset.longValue())
                     .format(timeOnly || itemIsTimeOnly ? CRON_TIMEONLY_FORMATTER : CRON_FORMATTER);
             startScheduler();
         } else {

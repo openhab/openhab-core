@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -99,18 +99,19 @@ public class NormalizerTest {
                 ConfigDescriptionParameterBuilder.create("test", ConfigDescriptionParameter.Type.DECIMAL).build());
 
         assertThat(normalizer.normalize(null), is(nullValue()));
-        assertThat(normalizer.normalize(42), is(equalTo(new BigDecimal("42.0"))));
-        assertThat(normalizer.normalize(42L), is(equalTo(new BigDecimal("42.0"))));
-        assertThat(normalizer.normalize((byte) 42), is(equalTo(new BigDecimal("42.0"))));
+        assertThat(normalizer.normalize(42), is(equalTo(new BigDecimal("42"))));
+        assertThat(normalizer.normalize(42L), is(equalTo(new BigDecimal("42"))));
+        assertThat(normalizer.normalize((byte) 42), is(equalTo(new BigDecimal("42"))));
         assertThat(normalizer.normalize(42.0), is(equalTo(new BigDecimal("42.0"))));
         assertThat(normalizer.normalize(42.0f), is(equalTo(new BigDecimal("42.0"))));
         assertThat(normalizer.normalize(42.0d), is(equalTo(new BigDecimal("42.0"))));
         assertThat(normalizer.normalize(42.1), is(equalTo(new BigDecimal("42.1"))));
         assertThat(normalizer.normalize(42.88f), is(equalTo(new BigDecimal("42.88"))));
         assertThat(normalizer.normalize(42.88d), is(equalTo(new BigDecimal("42.88"))));
-        assertThat(normalizer.normalize("42"), is(equalTo(new BigDecimal("42.0"))));
+        assertThat(normalizer.normalize("42"), is(equalTo(new BigDecimal("42"))));
         assertThat(normalizer.normalize("42.0"), is(equalTo(new BigDecimal("42.0"))));
         assertThat(normalizer.normalize("42.1"), is(equalTo(new BigDecimal("42.1"))));
+        assertThat(normalizer.normalize("42.10"), is(equalTo(new BigDecimal("42.1"))));
         assertThat(normalizer.normalize("42.11"), is(equalTo(new BigDecimal("42.11"))));
         assertThat(normalizer.normalize("42.00"), is(equalTo(new BigDecimal("42.0"))));
 

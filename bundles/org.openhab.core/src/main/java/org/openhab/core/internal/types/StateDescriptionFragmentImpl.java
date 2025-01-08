@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -21,7 +21,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.types.StateDescription;
 import org.openhab.core.types.StateDescriptionFragment;
-import org.openhab.core.types.StateDescriptionFragmentBuilder;
 import org.openhab.core.types.StateOption;
 
 /**
@@ -62,7 +61,7 @@ public class StateDescriptionFragmentImpl implements StateDescriptionFragment {
      * @param pattern pattern to render the state
      * @param readOnly if the state can be changed by the system
      * @param options predefined list of options
-     * @deprecated use {@link StateDescriptionFragmentBuilder} instead.
+     * @deprecated use {@link org.openhab.core.types.StateDescriptionFragmentBuilder} instead.
      */
     @Deprecated
     public StateDescriptionFragmentImpl(@Nullable BigDecimal minimum, @Nullable BigDecimal maximum,
@@ -81,7 +80,7 @@ public class StateDescriptionFragmentImpl implements StateDescriptionFragment {
      * Note: State options will only be set if not empty.
      *
      * @param legacy the {@link StateDescription} to initialize from.
-     * @deprecated use {@link StateDescriptionFragmentBuilder} instead.
+     * @deprecated use {@link org.openhab.core.types.StateDescriptionFragmentBuilder} instead.
      */
     @Deprecated
     public StateDescriptionFragmentImpl(StateDescription legacy) {
@@ -196,7 +195,8 @@ public class StateDescriptionFragmentImpl implements StateDescriptionFragment {
         if (readOnly == null) {
             readOnly = fragment.isReadOnly();
         }
-        if (options == null || options.isEmpty()) {
+        List<StateOption> localOptions = options;
+        if (localOptions == null || localOptions.isEmpty()) {
             options = fragment.getOptions();
         }
         return this;
@@ -206,12 +206,12 @@ public class StateDescriptionFragmentImpl implements StateDescriptionFragment {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + (minimum != null ? minimum.hashCode() : 0);
-        result = prime * result + (maximum != null ? maximum.hashCode() : 0);
-        result = prime * result + (step != null ? step.hashCode() : 0);
-        result = prime * result + (pattern != null ? pattern.hashCode() : 0);
+        result = prime * result + Objects.hashCode(minimum);
+        result = prime * result + Objects.hashCode(maximum);
+        result = prime * result + Objects.hashCode(step);
+        result = prime * result + Objects.hashCode(pattern);
         result = prime * result + (readOnly ? 1231 : 1237);
-        result = prime * result + (options != null ? options.hashCode() : 0);
+        result = prime * result + Objects.hashCode(options);
         return result;
     }
 

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -76,13 +76,13 @@ public class AddonInfoTest extends JavaOSGiTest {
             assertNotNull(discoveryMethods);
             assertEquals(2, discoveryMethods.size());
 
-            AddonDiscoveryMethod discoveryMethod = discoveryMethods.get(0);
+            AddonDiscoveryMethod discoveryMethod = discoveryMethods.getFirst();
             assertNotNull(discoveryMethod);
             assertEquals("mdns", discoveryMethod.getServiceType());
             List<AddonParameter> parameters = discoveryMethod.getParameters();
             assertNotNull(parameters);
             assertEquals(1, parameters.size());
-            AddonParameter parameter = parameters.get(0);
+            AddonParameter parameter = parameters.getFirst();
             assertNotNull(parameter);
             assertEquals(MDNS_SERVICE_TYPE, parameter.getName());
             assertEquals("_hue._tcp.local.", parameter.getValue());
@@ -99,7 +99,7 @@ public class AddonInfoTest extends JavaOSGiTest {
             properties = discoveryMethod.getMatchProperties();
             assertNotNull(properties);
             assertEquals(1, properties.size());
-            AddonMatchProperty property = properties.get(0);
+            AddonMatchProperty property = properties.getFirst();
             assertNotNull(property);
             assertEquals("modelName", property.getName());
             assertEquals("Philips hue bridge", property.getRegex());

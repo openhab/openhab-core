@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,7 +15,6 @@ package org.openhab.core.addon.marketplace;
 import static org.openhab.core.common.ThreadPoolManager.THREAD_POOL_NAME_COMMON;
 
 import java.io.IOException;
-import java.net.URI;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -95,7 +94,7 @@ public abstract class AbstractRemoteAddonService implements AddonService {
             this::getRemoteAddons);
     protected final AddonInfoRegistry addonInfoRegistry;
     protected List<Addon> cachedAddons = List.of();
-    protected List<String> installedAddons = List.of();
+    protected List<String> installedAddonIds = List.of();
 
     private final Logger logger = LoggerFactory.getLogger(AbstractRemoteAddonService.class);
     private final ScheduledExecutorService scheduler = ThreadPoolManager.getScheduledPool(THREAD_POOL_NAME_COMMON);
@@ -137,7 +136,10 @@ public abstract class AbstractRemoteAddonService implements AddonService {
         // this is safe, because the {@link AddonHandler}s only report ready when they installed everything from the
         // cache
         try {
-            installedAddonStorage.stream().map(this::convertFromStorage).peek(this::setInstalled).forEach(addons::add);
+            installedAddonStorage.stream().map(this::convertFromStorage).forEach(addon -> {
+                setInstalled(addon);
+                addons.add(addon);
+            });
         } catch (JsonSyntaxException e) {
             List.copyOf(installedAddonStorage.getKeys()).forEach(installedAddonStorage::remove);
             logger.error(
@@ -152,13 +154,15 @@ public abstract class AbstractRemoteAddonService implements AddonService {
         addons.removeIf(addon -> missingAddons.contains(addon.getUid()));
 
         // create lookup list to make sure installed addons take precedence
-        List<String> installedAddons = addons.stream().map(Addon::getUid).toList();
+        List<String> currentAddonIds = addons.stream().map(Addon::getUid).toList();
 
         // get the remote addons
         if (remoteEnabled()) {
             List<Addon> remoteAddons = Objects.requireNonNullElse(cachedRemoteAddons.getValue(), List.of());
-            remoteAddons.stream().filter(a -> !installedAddons.contains(a.getUid())).peek(this::setInstalled)
-                    .forEach(addons::add);
+            remoteAddons.stream().filter(a -> !currentAddonIds.contains(a.getUid())).forEach(addon -> {
+                setInstalled(addon);
+                addons.add(addon);
+            });
         }
 
         // remove incompatible add-ons if not enabled
@@ -175,7 +179,7 @@ public abstract class AbstractRemoteAddonService implements AddonService {
         }
 
         cachedAddons = addons;
-        this.installedAddons = installedAddons;
+        this.installedAddonIds = currentAddonIds;
 
         if (!missingAddons.isEmpty()) {
             logger.info("Re-installing missing add-ons from remote repository: {}", missingAddons);
@@ -223,9 +227,6 @@ public abstract class AbstractRemoteAddonService implements AddonService {
     }
 
     @Override
-    public abstract @Nullable Addon getAddon(String id, @Nullable Locale locale);
-
-    @Override
     public List<AddonType> getTypes(@Nullable Locale locale) {
         return AddonType.DEFAULT_TYPES;
     }
@@ -244,6 +245,7 @@ public abstract class AbstractRemoteAddonService implements AddonService {
                         handler.install(addon);
                         addon.setInstalled(true);
                         installedAddonStorage.put(id, gson.toJson(addon));
+                        cachedRemoteAddons.invalidateValue();
                         refreshSource();
                         postInstalledEvent(addon.getUid());
                     } catch (MarketplaceHandlerException e) {
@@ -271,6 +273,7 @@ public abstract class AbstractRemoteAddonService implements AddonService {
                     try {
                         handler.uninstall(addon);
                         installedAddonStorage.remove(id);
+                        cachedRemoteAddons.invalidateValue();
                         refreshSource();
                         postUninstalledEvent(addon.getUid());
                     } catch (MarketplaceHandlerException e) {
@@ -285,9 +288,6 @@ public abstract class AbstractRemoteAddonService implements AddonService {
         }
         postFailureEvent(id, "Add-on can't be uninstalled because there is no handler for it.");
     }
-
-    @Override
-    public abstract @Nullable String getAddonId(URI addonURI);
 
     /**
      * check if remote services are enabled
@@ -314,7 +314,7 @@ public abstract class AbstractRemoteAddonService implements AddonService {
             Dictionary<String, Object> properties = configuration.getProperties();
             if (properties == null) {
                 // if we can't determine a set property, we use false (default is show compatible only)
-                return true;
+                return false;
             }
             return ConfigParser.valueAsOrElse(properties.get(CONFIG_INCLUDE_INCOMPATIBLE), Boolean.class, false);
         } catch (IOException e) {

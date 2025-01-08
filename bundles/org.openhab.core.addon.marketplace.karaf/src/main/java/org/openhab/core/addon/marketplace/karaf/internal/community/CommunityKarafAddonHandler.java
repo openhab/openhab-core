@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,7 +12,8 @@
  */
 package org.openhab.core.addon.marketplace.karaf.internal.community;
 
-import static org.openhab.core.addon.marketplace.internal.community.CommunityMarketplaceAddonService.KAR_CONTENT_TYPE;
+import static org.openhab.core.addon.marketplace.MarketplaceConstants.KAR_CONTENT_TYPE;
+import static org.openhab.core.addon.marketplace.MarketplaceConstants.KAR_DOWNLOAD_URL_PROPERTY;
 
 import java.io.File;
 import java.io.IOException;
@@ -55,7 +56,6 @@ public class CommunityKarafAddonHandler implements MarketplaceAddonHandler {
     private static final Path KAR_CACHE_PATH = Path.of(OpenHAB.getUserDataFolder(), "marketplace", "kar");
     private static final List<String> SUPPORTED_EXT_TYPES = List.of("automation", "binding", "misc", "persistence",
             "transformation", "ui", "voice");
-    private static final String KAR_DOWNLOAD_URL_PROPERTY = "kar_download_url";
     private static final String KAR_EXTENSION = ".kar";
 
     private final Logger logger = LoggerFactory.getLogger(CommunityKarafAddonHandler.class);

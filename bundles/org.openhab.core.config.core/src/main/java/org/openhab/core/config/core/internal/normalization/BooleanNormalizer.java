@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -31,14 +31,14 @@ final class BooleanNormalizer extends AbstractNormalizer {
         if (value instanceof Boolean) {
             return value;
         }
-        if (value instanceof Byte) {
-            return handleNumeric(((Byte) value).longValue());
+        if (value instanceof Byte byteValue) {
+            return handleNumeric(byteValue.longValue());
         }
-        if (value instanceof Integer) {
-            return handleNumeric(((Integer) value).longValue());
+        if (value instanceof Integer integerValue) {
+            return handleNumeric(integerValue.longValue());
         }
-        if (value instanceof Long) {
-            return handleNumeric((Long) value);
+        if (value instanceof Long longValue) {
+            return handleNumeric(longValue);
         }
         String s = value.toString();
         if ("true".equalsIgnoreCase(s) || "yes".equalsIgnoreCase(s) || "on".equalsIgnoreCase(s)

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,9 +12,14 @@
  */
 package org.openhab.core.model.yaml.internal;
 
+import static org.openhab.core.service.WatchService.Kind.CREATE;
+
 import java.io.IOException;
+import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -52,6 +57,7 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
+import com.fasterxml.jackson.dataformat.yaml.YAMLParser;
 
 /**
  * The {@link YamlModelRepositoryImpl} is an OSGi service, that encapsulates all YAML file processing
@@ -82,7 +88,8 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
                 .disable(YAMLGenerator.Feature.SPLIT_LINES) // do not split long lines
                 .enable(YAMLGenerator.Feature.INDENT_ARRAYS_WITH_INDICATOR) // indent arrays
                 .enable(YAMLGenerator.Feature.MINIMIZE_QUOTES) // use quotes only where necessary
-                .build();
+                .enable(YAMLParser.Feature.PARSE_BOOLEAN_LIKE_WORDS_AS_STRINGS).build(); // do not parse ON/OFF/... as
+                                                                                         // booleans
         this.objectMapper = new ObjectMapper(yamlFactory);
         objectMapper.findAndRegisterModules();
         objectMapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE);
@@ -91,6 +98,30 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
         this.watchService = watchService;
         watchService.registerListener(this, Path.of(""));
         watchPath = watchService.getWatchPath();
+
+        // read initial contents
+        try {
+            Files.walkFileTree(watchPath, new SimpleFileVisitor<>() {
+                @Override
+                public FileVisitResult visitFile(@NonNullByDefault({}) Path file,
+                        @NonNullByDefault({}) BasicFileAttributes attrs) throws IOException {
+                    if (attrs.isRegularFile()) {
+                        Path relativePath = watchPath.relativize(file);
+                        processWatchEvent(CREATE, relativePath);
+                    }
+                    return FileVisitResult.CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult visitFileFailed(@NonNullByDefault({}) Path file,
+                        @NonNullByDefault({}) IOException exc) throws IOException {
+                    logger.warn("Failed to process {}: {}", file.toAbsolutePath(), exc.getClass().getSimpleName());
+                    return FileVisitResult.CONTINUE;
+                }
+            });
+        } catch (IOException e) {
+            logger.warn("Could not list YAML files in '{}', models might be missing: {}", watchPath, e.getMessage());
+        }
     }
 
     @Deactivate
@@ -104,7 +135,8 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
     public synchronized void processWatchEvent(Kind kind, Path path) {
         Path fullPath = watchPath.resolve(path);
         String pathString = path.toString();
-        if (Files.isDirectory(fullPath) || fullPath.toFile().isHidden() || !pathString.endsWith(".yaml")) {
+        if (!Files.isReadable(fullPath) || Files.isDirectory(fullPath) || path.startsWith("automation")
+                || !pathString.endsWith(".yaml") || fullPath.toFile().isHidden()) {
             logger.trace("Ignored {}", fullPath);
             return;
         }
@@ -413,7 +445,7 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
     }
 
     private <T extends YamlElement> List<T> parseJsonNodes(List<JsonNode> nodes, Class<T> elementClass) {
-        return nodes.stream().map(nE -> parseJsonNode(nE, elementClass)).filter(Optional::isPresent).map(Optional::get)
+        return nodes.stream().map(nE -> parseJsonNode(nE, elementClass)).flatMap(Optional::stream)
                 .filter(YamlElement::isValid).toList();
     }
 

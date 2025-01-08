@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -18,7 +18,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -89,7 +88,9 @@ public class FeatureInstaller implements ConfigurationListener {
     private static final String ADDONS_PID = "org.openhab.addons";
     private static final String PROPERTY_MVN_REPOS = "org.ops4j.pax.url.mvn.repositories";
 
-    public static final List<String> ADDON_TYPES = AddonType.DEFAULT_TYPES.stream().map(AddonType::getId).toList();
+    public static final String FINDER_ADDON_TYPE = "core-config-discovery-addon";
+    public static final List<String> ADDON_TYPES = Stream
+            .concat(AddonType.DEFAULT_TYPES.stream().map(AddonType::getId), Stream.of(FINDER_ADDON_TYPE)).toList();
 
     private final Logger logger = LoggerFactory.getLogger(FeatureInstaller.class);
 
@@ -193,8 +194,6 @@ public class FeatureInstaller implements ConfigurationListener {
             }
         }
 
-        processingConfigQueue.set(false);
-
         try {
             if (changed) {
                 featuresService.refreshFeatures(EnumSet.noneOf(FeaturesService.Option.class));
@@ -202,6 +201,8 @@ public class FeatureInstaller implements ConfigurationListener {
         } catch (Exception e) {
             logger.error("Failed to refresh bundles after processing config update", e);
         }
+
+        processingConfigQueue.set(false);
     }
 
     public void addAddon(String type, String id) {
@@ -281,7 +282,7 @@ public class FeatureInstaller implements ConfigurationListener {
     }
 
     private void setOnlineRepoUrl() {
-        Path versionFilePath = Paths.get(OpenHAB.getUserDataFolder(), "etc", "version.properties");
+        Path versionFilePath = Path.of(OpenHAB.getUserDataFolder(), "etc", "version.properties");
         try (BufferedReader reader = Files.newBufferedReader(versionFilePath)) {
             Properties prop = new Properties();
             prop.load(reader);

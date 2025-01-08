@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -276,7 +276,7 @@ public class ChannelStateDescriptionProviderOSGiTest extends JavaOSGiTest {
         assertTrue(state.isReadOnly());
         List<StateOption> opts = state.getOptions();
         assertEquals(1, opts.size());
-        final StateOption opt = opts.get(0);
+        final StateOption opt = opts.getFirst();
         assertEquals("SOUND", opt.getValue());
         assertEquals("My great sound.", opt.getLabel());
 
@@ -341,7 +341,7 @@ public class ChannelStateDescriptionProviderOSGiTest extends JavaOSGiTest {
         opts = state.getOptions();
         assertNotNull(opts);
         assertEquals(2, opts.size());
-        final StateOption opt0 = opts.get(0);
+        final StateOption opt0 = opts.getFirst();
         assertNotNull(opt0);
         assertEquals("value0", opt0.getValue());
         assertEquals("label0", opt0.getLabel());
@@ -365,7 +365,7 @@ public class ChannelStateDescriptionProviderOSGiTest extends JavaOSGiTest {
         opts = state.getOptions();
         assertNotNull(opts);
         assertEquals(1, opts.size());
-        final StateOption opt2 = opts.get(0);
+        final StateOption opt2 = opts.getFirst();
         assertEquals("NEW SOUND", opt2.getValue());
         assertEquals("My great new sound.", opt2.getLabel());
     }
@@ -406,7 +406,7 @@ public class ChannelStateDescriptionProviderOSGiTest extends JavaOSGiTest {
         List<StateOption> opts = state.getOptions();
         assertNotNull(opts);
         assertEquals(1, opts.size());
-        final StateOption opt2 = opts.get(0);
+        final StateOption opt2 = opts.getFirst();
         assertEquals("NEW SOUND", opt2.getValue());
         assertEquals("My great new sound.", opt2.getLabel());
     }

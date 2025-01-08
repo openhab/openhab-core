@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -48,6 +48,7 @@ import org.osgi.service.component.annotations.Reference;
  * @author Christoph Weitkamp - factored out from {@link org.openhab.core.thing.xml.internal.XmlChannelTypeProvider} and
  *         {@link org.openhab.core.thing.xml.internal.XmlChannelGroupTypeProvider}
  * @author Henning Treu - factored out from {@link ThingTypeI18nLocalizationService}
+ * @author Mark Herwege - added unit hint
  */
 @Component(service = ChannelTypeI18nLocalizationService.class)
 @NonNullByDefault
@@ -146,9 +147,10 @@ public class ChannelTypeI18nLocalizationService {
                 if (itemType == null || itemType.isBlank()) {
                     throw new IllegalArgumentException("If the kind is 'state', the item type must be set!");
                 }
+                String unitHint = channelType.getUnitHint();
 
                 builder = ChannelTypeBuilder.state(channelTypeUID, label == null ? defaultLabel : label, itemType)
-                        .withStateDescriptionFragment(stateDescriptionFragment)
+                        .withUnitHint(unitHint).withStateDescriptionFragment(stateDescriptionFragment)
                         .withAutoUpdatePolicy(channelType.getAutoUpdatePolicy()).withCommandDescription(command);
                 break;
             case TRIGGER:

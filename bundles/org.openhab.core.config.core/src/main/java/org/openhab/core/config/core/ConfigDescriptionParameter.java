@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,6 +17,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 import com.google.gson.annotations.SerializedName;
 
@@ -37,7 +40,10 @@ import com.google.gson.annotations.SerializedName;
  * @author Christoph Knauf - Added default constructor, changed Boolean
  *         getter to return primitive types
  * @author Thomas Höfer - Added unit
+ * @author Laurent Garnier - Removed constraint on unit value
+ * @author Florian Hotze - Add null annotations
  */
+@NonNullByDefault
 public class ConfigDescriptionParameter {
 
     /**
@@ -72,27 +78,27 @@ public class ConfigDescriptionParameter {
 
     }
 
-    private String name;
-    private Type type;
+    private @NonNullByDefault({}) String name;
+    private @NonNullByDefault({}) Type type;
 
-    private String groupName;
+    private @Nullable String groupName;
 
-    private BigDecimal min;
-    private BigDecimal max;
-    private BigDecimal step;
-    private String pattern;
+    private @Nullable BigDecimal min;
+    private @Nullable BigDecimal max;
+    private @Nullable BigDecimal step;
+    private @Nullable String pattern;
     private boolean required = false;
     private boolean readOnly = false;
     private boolean multiple = false;
-    private Integer multipleLimit;
-    private String unit;
-    private String unitLabel;
+    private @Nullable Integer multipleLimit;
+    private @Nullable String unit;
+    private @Nullable String unitLabel;
 
-    private String context;
+    private @Nullable String context;
     @SerializedName("default")
-    private String defaultValue;
-    private String label;
-    private String description;
+    private @Nullable String defaultValue;
+    private @Nullable String label;
+    private @Nullable String description;
 
     private List<ParameterOption> options = new ArrayList<>();
     private List<FilterCriteria> filterCriteria = new ArrayList<>();
@@ -115,29 +121,23 @@ public class ConfigDescriptionParameter {
     /**
      * Creates a new instance of this class with the specified parameters.
      *
-     * @param name the name of the configuration parameter (must neither be null
-     *            nor empty)
-     * @param type the data type of the configuration parameter (nullable)
+     * @param name the name of the configuration parameter (must not be empty)
+     * @param type the data type of the configuration parameter
      * @param minimum the minimal value for numeric types, or the minimal length of
-     *            strings, or the minimal number of selected options (nullable)
+     *            strings, or the minimal number of selected options
      * @param maximum the maximal value for numeric types, or the maximal length of
-     *            strings, or the maximal number of selected options (nullable)
-     * @param stepsize the value granularity for a numeric value (nullable)
-     * @param pattern the regular expression for a text type (nullable)
+     *            strings, or the maximal number of selected options
+     * @param stepsize the value granularity for a numeric value
+     * @param pattern the regular expression for a text type
      * @param required specifies whether the value is required
      * @param readOnly specifies whether the value is read-only
      * @param multiple specifies whether multiple selections of options are allowed
-     * @param context the context of the configuration parameter (can be null or
-     *            empty)
-     * @param defaultValue the default value of the configuration parameter (can be null)
-     * @param label a human readable label for the configuration parameter (can be
-     *            null or empty)
-     * @param description a human readable description for the configuration parameter
-     *            (can be null or empty)
-     * @param filterCriteria a list of filter criteria for values of a dynamic selection
-     *            list (nullable)
+     * @param context the context of the configuration parameter (can be empty)
+     * @param defaultValue the default value of the configuration parameter
+     * @param label a human-readable label for the configuration parameter (can be empty)
+     * @param description a human-readable description for the configuration parameter (can be empty)
+     * @param filterCriteria a list of filter criteria for values of a dynamic selection list
      * @param options a list of element definitions of a static selection list
-     *            (nullable)
      * @param groupName a string used to group parameters together into logical blocks
      *            so that the UI can display them together
      * @param advanced specifies if this is an advanced parameter. An advanced
@@ -150,10 +150,11 @@ public class ConfigDescriptionParameter {
      *            can enter values other than those in the list
      * @param multipleLimit specifies the maximum number of options that can be selected
      *            when multiple is true
-     * @param unit specifies the unit of measurements for the configuration parameter (nullable)
+     * @param unit specifies the unit of measurements for the configuration parameter
      * @param unitLabel specifies the unit label for the configuration parameter. This attribute can also be used to
      *            provide
      *            natural language units as iterations, runs, etc.
+     * @param verify specifies whether the parameter should be considered dangerous
      * @throws IllegalArgumentException
      *             <ul>
      *             <li>if the name is null or empty, or the type is null</li>
@@ -165,11 +166,14 @@ public class ConfigDescriptionParameter {
      * @deprecated Use {@link ConfigDescriptionParameterBuilder} instead.
      */
     @Deprecated
-    ConfigDescriptionParameter(String name, Type type, BigDecimal minimum, BigDecimal maximum, BigDecimal stepsize,
-            String pattern, Boolean required, Boolean readOnly, Boolean multiple, String context, String defaultValue,
-            String label, String description, List<ParameterOption> options, List<FilterCriteria> filterCriteria,
-            String groupName, Boolean advanced, Boolean limitToOptions, Integer multipleLimit, String unit,
-            String unitLabel, Boolean verify) throws IllegalArgumentException {
+    ConfigDescriptionParameter(String name, Type type, @Nullable BigDecimal minimum, @Nullable BigDecimal maximum,
+            @Nullable BigDecimal stepsize, @Nullable String pattern, @Nullable Boolean required,
+            @Nullable Boolean readOnly, @Nullable Boolean multiple, @Nullable String context,
+            @Nullable String defaultValue, @Nullable String label, @Nullable String description,
+            @Nullable List<ParameterOption> options, @Nullable List<FilterCriteria> filterCriteria,
+            @Nullable String groupName, @Nullable Boolean advanced, @Nullable Boolean limitToOptions,
+            @Nullable Integer multipleLimit, @Nullable String unit, @Nullable String unitLabel,
+            @Nullable Boolean verify) throws IllegalArgumentException {
         if ((name == null) || (name.isEmpty())) {
             throw new IllegalArgumentException("The name must neither be null nor empty!");
         }
@@ -181,9 +185,6 @@ public class ConfigDescriptionParameter {
         if ((type == Type.TEXT || type == Type.BOOLEAN) && (unit != null || unitLabel != null)) {
             throw new IllegalArgumentException(
                     "Unit or unit label must only be set for integer or decimal configuration parameters");
-        }
-        if (unit != null && !UNITS.contains(unit)) {
-            throw new IllegalArgumentException("The given unit is invalid.");
         }
 
         this.name = name;
@@ -235,7 +236,7 @@ public class ConfigDescriptionParameter {
     /**
      * Returns the name of the configuration parameter.
      *
-     * @return the name of the configuration parameter (neither null, nor empty)
+     * @return the name of the configuration parameter (not empty)
      */
     public String getName() {
         return this.name;
@@ -244,7 +245,7 @@ public class ConfigDescriptionParameter {
     /**
      * Returns the data type of the configuration parameter.
      *
-     * @return the data type of the configuration parameter (not null)
+     * @return the data type of the configuration parameter
      */
     public Type getType() {
         return this.type;
@@ -252,38 +253,42 @@ public class ConfigDescriptionParameter {
 
     /**
      * @return the minimal value for numeric types, or the minimal length of
-     *         strings, or the minimal number of selected options (nullable)
+     *         strings, or the minimal number of selected options
      */
-    public BigDecimal getMinimum() {
+    public @Nullable BigDecimal getMinimum() {
         return min;
     }
 
     /**
      * @return the maximal value for numeric types, or the maximal length of
-     *         strings, or the maximal number of selected options (nullable)
+     *         strings, or the maximal number of selected options
      */
-    public BigDecimal getMaximum() {
+    public @Nullable BigDecimal getMaximum() {
         return max;
     }
 
     /**
-     * @return the value granularity for a numeric value (nullable)
+     * Returns the value granularity for a numeric value.
+     * <p>
+     * By setting the step size to <code>0</code>, any granularity is allowed, i.e. any number of decimals is accepted.
+     *
+     * @return the value granularity for a numeric value
      */
-    public BigDecimal getStepSize() {
+    public @Nullable BigDecimal getStepSize() {
         return step;
     }
 
     /**
-     * @return the regular expression for a text type (nullable)
+     * @return the regular expression for a text type
      */
-    public String getPattern() {
+    public @Nullable String getPattern() {
         return pattern;
     }
 
     /**
      * @return true if the value is required, otherwise false.
      */
-    public Boolean isReadOnly() {
+    public boolean isReadOnly() {
         return readOnly;
     }
 
@@ -291,14 +296,14 @@ public class ConfigDescriptionParameter {
      * @return true if multiple selections of options are allowed, otherwise
      *         false.
      */
-    public Boolean isMultiple() {
+    public boolean isMultiple() {
         return multiple;
     }
 
     /**
      * @return the maximum number of options that can be selected from the options list
      */
-    public Integer getMultipleLimit() {
+    public @Nullable Integer getMultipleLimit() {
         return multipleLimit;
     }
 
@@ -311,36 +316,43 @@ public class ConfigDescriptionParameter {
      * Any string can be used, but the following have a special meaning:
      * </p>
      *
-     * - network-address: The configuration value represents an IPv4 or IPv6 address.
-     * - password: A password value (a user-interface might obscure the visible value)
-     * - password-create: A passwort generator widget might be shown
-     * - color: This value represents an RGB color value like #ffffff or 12,12,12.
-     * - date: A date string
-     * - time: A time string
+     * - network-address: The configuration value represents an IPv4 or IPv6 address or domain name.
+     * - network-interface: The configuration value represents a network interface name, e.g. eth0, wlan0.
+     * - serial-port: The configuration value represents a serial port name, e.g. COM1, /dev/ttyS0.
+     * - password: A alphanumeric password value (a user-interface might obscure the visible value)
+     * - password-create: A alphanumeric passwort generator widget might be shown
+     * - color: This value represents an RGB color value like #000000 - #ffffff or 12,12,12.
+     * - date: A date string in the format "YYYY-MM-DD"
+     * - datetime: A date and time string in the format "YYYY-MM-DD'T'hh:mm:ss", e.g. "2019-12-31T23:59:59"
      * - cronexpression: A cron expression like "* * * * *". A user interface would probably show a cron expression
      * generator.
-     * - datetime: A date and time string
-     * - email: The configuration value represents an email address
-     * - month: A number [1-12]
-     * - week: A week [0-52]
-     * - tel: A tel no
+     * - email: The configuration value represents an email address, e.g. username@domain.com
+     * - month: A month of year [1-12]
+     * - week: A week of year [0-52]
+     * - dayOfWeek: A day of week [MON, TUE, WED, THU, FRI, SAT, SUN]
+     * - time: A time string in the format "hh:mm:ss" or as milliseconds since epoch
+     * - telephone: A tel no
      * - url: A web address
-     * - script: The configuration value represents a script (javascript, python etc). A user-interface would probably
-     * render a multi line editor.
-     * - location: A lat,long,alt GPS location. A user-interface would probably render a world map for selection.
      * - tag: One tag or multiple tags separated by comma.
      * - item: A valid item "name". A user-interface would probably show an item selection widget.
      * - thing: A valid thing UID. A user-interface would probably show a thing selection widget.
-     * - channel: A valid channel UID.
-     * - channeltype: A valid channel type UID. A user-interface would probably show a channel type selection widget.
      * - group: A valid group item "name". A user-interface would probably show an item selection widget.
      * - service: A valid service ID. A user-interface would probably show a service selection widget.
+     * - persistenceService: A valid persistence service ID. A user-interface would probably show a persistence service
+     * selection widget.
+     * - channel: A valid channel UID. A user-interface would probably show a channel selection widget.
+     * - channeltype: A valid channel type UID. A user-interface would probably show a channel type selection widget.
      * - rule: A valid rule uid. A user-interface would probably show a rule selection widget.
+     * - script: The configuration value represents a script (javascript, python etc). A user-interface would probably
+     * render a multi line editor.
+     * - page: A valid page UID. A user-interface would probably show a page selection widget.
+     * - widget: A valid widget UID. A user-interface would probably show a widget selection widget.
+     * - location: A latitude,longitude[,altitude] GPS location. A user-interface would probably render a world map for
+     * selection.
      *
-     * @return the context of the configuration parameter (could be null or
-     *         empty)
+     * @return the context of the configuration parameter (could be empty)
      */
-    public String getContext() {
+    public @Nullable String getContext() {
         return this.context;
     }
 
@@ -352,35 +364,34 @@ public class ConfigDescriptionParameter {
      *         false
      */
     public boolean isRequired() {
-        return this.required;
+        return required;
     }
 
     /**
      * Returns the default value of the configuration parameter.
      *
-     * @return the default value of the configuration parameter (could be null)
+     * @return the default value of the configuration parameter
      */
-    public String getDefault() {
-        return this.defaultValue;
+    public @Nullable String getDefault() {
+        return defaultValue;
     }
 
     /**
-     * Returns a human readable label for the configuration parameter.
+     * Returns a human-readable label for the configuration parameter.
      *
-     * @return a human readable label for the configuration parameter (could be
-     *         null or empty)
+     * @return a human-readable label for the configuration parameter (could be empty)
      */
-    public String getLabel() {
-        return this.label;
+    public @Nullable String getLabel() {
+        return label;
     }
 
     /**
-     * Returns a the group for this configuration parameter.
+     * Returns the group for this configuration parameter.
      *
-     * @return a group for the configuration parameter (could be null or empty)
+     * @return a group for the configuration parameter (could be empty)
      */
-    public String getGroupName() {
-        return this.groupName;
+    public @Nullable String getGroupName() {
+        return groupName;
     }
 
     /**
@@ -390,7 +401,7 @@ public class ConfigDescriptionParameter {
      * @return true if the value is limited to the options list
      */
     public boolean getLimitToOptions() {
-        return this.limitToOptions;
+        return limitToOptions;
     }
 
     /**
@@ -399,17 +410,16 @@ public class ConfigDescriptionParameter {
      * @return true if the value is an advanced option
      */
     public boolean isAdvanced() {
-        return this.advanced;
+        return advanced;
     }
 
     /**
-     * Returns a human readable description for the configuration parameter.
+     * Returns a human-readable description for the configuration parameter.
      *
-     * @return a human readable description for the configuration parameter
-     *         (could be null or empty)
+     * @return a human-readable description for the configuration parameter (could be empty)
      */
-    public String getDescription() {
-        return this.description;
+    public @Nullable String getDescription() {
+        return description;
     }
 
     /**
@@ -418,7 +428,7 @@ public class ConfigDescriptionParameter {
      * @return static selection list for the value of this parameter
      */
     public List<ParameterOption> getOptions() {
-        return this.options;
+        return options;
     }
 
     /**
@@ -430,24 +440,24 @@ public class ConfigDescriptionParameter {
      * @return list of filter criteria for a dynamically created selection list
      */
     public List<FilterCriteria> getFilterCriteria() {
-        return this.filterCriteria;
+        return filterCriteria;
     }
 
     /**
      * Returns the unit of measurements of this parameter.
      *
-     * @return the unit of measurements of this parameter (could be null)
+     * @return the unit of measurements of this parameter
      */
-    public String getUnit() {
+    public @Nullable String getUnit() {
         return unit;
     }
 
     /**
      * Returns the unit label of this parameter.
      *
-     * @return the unit label of this parameter (could be null)
+     * @return the unit label of this parameter
      */
-    public String getUnitLabel() {
+    public @Nullable String getUnitLabel() {
         return unitLabel;
     }
 
@@ -457,7 +467,7 @@ public class ConfigDescriptionParameter {
      *
      * @return true if the parameter requires verification in the UI
      */
-    public Boolean isVerifyable() {
+    public boolean isVerifyable() {
         return verify;
     }
 

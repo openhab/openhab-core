@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -372,13 +372,26 @@ public class NumberExtensions {
      * @return the given number as BigDecimal or null if number is null
      */
     public static BigDecimal numberToBigDecimal(Number number) {
-        if (number instanceof QuantityType) {
-            QuantityType<?> state = ((QuantityType<?>) number)
-                    .toInvertibleUnit(((QuantityType<?>) number).getUnit().getSystemUnit());
+        if (number instanceof QuantityType quantity) {
+            QuantityType<?> state = quantity.toInvertibleUnit(quantity.getUnit().getSystemUnit());
             if (state != null) {
                 return state.toBigDecimal();
             }
             return null;
+        }
+        if (number instanceof DecimalType dtype) {
+            return dtype.toBigDecimal();
+        }
+        if (number instanceof BigDecimal decimal) {
+            return decimal;
+        }
+        if (number instanceof Long value) {
+            // use valueOf to hit the internal cache
+            return BigDecimal.valueOf(value);
+        }
+        if (number instanceof Integer value) {
+            // use valueOf to hit the internal cache
+            return BigDecimal.valueOf(value);
         }
         if (number != null) {
             return new BigDecimal(number.toString());
@@ -388,8 +401,8 @@ public class NumberExtensions {
     }
 
     private static boolean oneIsQuantity(Number left, Number right) {
-        return (left instanceof QuantityType && !isAbstractUnitOne((QuantityType<?>) left))
-                || (right instanceof QuantityType && !isAbstractUnitOne((QuantityType<?>) right));
+        return (left instanceof QuantityType leftQuantity && !isAbstractUnitOne(leftQuantity))
+                || (right instanceof QuantityType rightQuantity && !isAbstractUnitOne(rightQuantity));
     }
 
     private static boolean isAbstractUnitOne(QuantityType<?> left) {

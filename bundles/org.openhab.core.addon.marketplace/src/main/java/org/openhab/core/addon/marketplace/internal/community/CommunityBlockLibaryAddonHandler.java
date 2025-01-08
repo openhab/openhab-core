@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -11,6 +11,10 @@
  * SPDX-License-Identifier: EPL-2.0
  */
 package org.openhab.core.addon.marketplace.internal.community;
+
+import static org.openhab.core.addon.marketplace.MarketplaceConstants.BLOCKLIBRARIES_CONTENT_TYPE;
+import static org.openhab.core.addon.marketplace.MarketplaceConstants.YAML_DOWNLOAD_URL_PROPERTY;
+import static org.openhab.core.addon.marketplace.internal.community.CommunityMarketplaceAddonService.YAML_CONTENT_PROPERTY;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -45,10 +49,6 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 @Component(immediate = true)
 @NonNullByDefault
 public class CommunityBlockLibaryAddonHandler implements MarketplaceAddonHandler {
-    private static final String YAML_DOWNLOAD_URL_PROPERTY = "yaml_download_url";
-    private static final String YAML_CONTENT_PROPERTY = "yaml_content";
-    private static final String BLOCKLIBRARIES_CONTENT_TYPE = "application/vnd.openhab.uicomponent;type=blocks";
-
     private final Logger logger = LoggerFactory.getLogger(CommunityBlockLibaryAddonHandler.class);
     ObjectMapper yamlMapper;
 

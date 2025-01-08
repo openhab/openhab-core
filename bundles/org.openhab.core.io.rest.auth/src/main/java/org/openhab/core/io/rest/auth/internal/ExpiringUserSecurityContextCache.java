@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -33,7 +33,7 @@ public class ExpiringUserSecurityContextCache {
     static final int CLEANUP_FREQUENCY = 10;
 
     private final long keepPeriod;
-    private final Map<String, Entry> entryMap;
+    private final Map<String, MyEntry> entryMap;
 
     private int calls = 0;
 
@@ -42,7 +42,7 @@ public class ExpiringUserSecurityContextCache {
         entryMap = new LinkedHashMap<>() {
             private static final long serialVersionUID = -1220310861591070462L;
 
-            protected boolean removeEldestEntry(Map.@Nullable Entry<String, Entry> eldest) {
+            protected boolean removeEldestEntry(Map.@Nullable Entry<String, MyEntry> eldest) {
                 return size() > MAX_SIZE;
             }
         };
@@ -54,7 +54,7 @@ public class ExpiringUserSecurityContextCache {
             new HashSet<>(entryMap.keySet()).forEach(k -> getEntry(k));
             calls = 0;
         }
-        Entry entry = getEntry(key);
+        MyEntry entry = getEntry(key);
         if (entry != null) {
             return entry.value;
         }
@@ -62,15 +62,15 @@ public class ExpiringUserSecurityContextCache {
     }
 
     public synchronized void put(String key, UserSecurityContext value) {
-        entryMap.put(key, new Entry(System.currentTimeMillis(), value));
+        entryMap.put(key, new MyEntry(System.currentTimeMillis(), value));
     }
 
     public synchronized void clear() {
         entryMap.clear();
     }
 
-    private @Nullable Entry getEntry(String key) {
-        Entry entry = entryMap.get(key);
+    private @Nullable MyEntry getEntry(String key) {
+        MyEntry entry = entryMap.get(key);
         if (entry != null) {
             final long curTimeMillis = System.currentTimeMillis();
             long entryAge = curTimeMillis - entry.timestamp;
@@ -84,11 +84,11 @@ public class ExpiringUserSecurityContextCache {
         return entry;
     }
 
-    static class Entry {
+    static class MyEntry {
         public long timestamp;
         public final UserSecurityContext value;
 
-        Entry(long timestamp, UserSecurityContext value) {
+        MyEntry(long timestamp, UserSecurityContext value) {
             this.timestamp = timestamp;
             this.value = value;
         }

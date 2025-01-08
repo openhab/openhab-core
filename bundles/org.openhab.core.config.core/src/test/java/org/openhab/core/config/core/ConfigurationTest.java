@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -119,7 +119,7 @@ public class ConfigurationTest {
         configuration.put("stringField", "someValue");
         configuration.put("additionalField", "");
         assertThat(props.get("stringField"), is(nullValue()));
-        assertThat(values.get(0), is(nullValue()));
+        assertThat(values.getFirst(), is(nullValue()));
         assertThat(values.get(1), is(nullValue()));
         assertThat(values.size(), is(2));
         assertThat(keys.size(), is(2));
@@ -160,18 +160,42 @@ public class ConfigurationTest {
     @Test
     public void assertNormalizationInSetProperties() {
         Map<String, Object> properties = new HashMap<>();
+        properties.put("byteField", Byte.valueOf("1"));
+        properties.put("shortField", Short.valueOf("1"));
         properties.put("intField", 1);
+        properties.put("longField", Long.valueOf("1"));
+        properties.put("doubleField", Double.valueOf("1"));
+        properties.put("floatField", Float.valueOf("1"));
+        properties.put("bigDecimalField", BigDecimal.ONE);
 
         Configuration configuration = new Configuration();
         configuration.setProperties(properties);
+        assertThat(configuration.get("byteField"), is(equalTo(BigDecimal.ONE)));
+        assertThat(configuration.get("shortField"), is(equalTo(BigDecimal.ONE)));
         assertThat(configuration.get("intField"), is(equalTo(BigDecimal.ONE)));
+        assertThat(configuration.get("longField"), is(equalTo(BigDecimal.ONE)));
+        assertThat(configuration.get("doubleField"), is(equalTo(new BigDecimal("1.0"))));
+        assertThat(configuration.get("floatField"), is(equalTo(new BigDecimal("1.0"))));
+        assertThat(configuration.get("bigDecimalField"), is(equalTo(BigDecimal.ONE)));
     }
 
     @Test
     public void assertNormalizationInPut() {
         Configuration configuration = new Configuration();
+        configuration.put("byteField", Byte.valueOf("1"));
+        configuration.put("shortField", Short.valueOf("1"));
         configuration.put("intField", 1);
+        configuration.put("longField", Long.valueOf("1"));
+        configuration.put("doubleField", Double.valueOf("1"));
+        configuration.put("floatField", Float.valueOf("1"));
+        configuration.put("bigDecimalField", BigDecimal.ONE);
+        assertThat(configuration.get("byteField"), is(equalTo(BigDecimal.ONE)));
+        assertThat(configuration.get("shortField"), is(equalTo(BigDecimal.ONE)));
         assertThat(configuration.get("intField"), is(equalTo(BigDecimal.ONE)));
+        assertThat(configuration.get("longField"), is(equalTo(BigDecimal.ONE)));
+        assertThat(configuration.get("doubleField"), is(equalTo(new BigDecimal("1.0"))));
+        assertThat(configuration.get("floatField"), is(equalTo(new BigDecimal("1.0"))));
+        assertThat(configuration.get("bigDecimalField"), is(equalTo(BigDecimal.ONE)));
     }
 
     @Test

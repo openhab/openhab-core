@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -50,5 +50,15 @@ public final class NormalizerFactory {
 
         Normalizer ret = NORMALIZERS.get(configDescriptionParameter.getType());
         return configDescriptionParameter.isMultiple() ? new ListNormalizer(ret) : ret;
+    }
+
+    /**
+     * Returns the {@link Normalizer} for the given ConfigDescriptionParameter type.
+     *
+     * @param type the type
+     * @return the corresponding {@link Normalizer} (not null)
+     */
+    public static Normalizer getNormalizer(Type type) {
+        return NORMALIZERS.get(type);
     }
 }

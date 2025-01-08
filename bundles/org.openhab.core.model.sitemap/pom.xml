@@ -7,7 +7,7 @@
   <parent>
     <groupId>org.openhab.core.bundles</groupId>
     <artifactId>org.openhab.core.reactor.bundles</artifactId>
-    <version>4.2.0-SNAPSHOT</version>
+    <version>5.0.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>org.openhab.core.model.sitemap</artifactId>
@@ -45,10 +45,11 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
-        <version>3.0.0</version>
+        <version>3.5.0</version>
         <configuration>
           <executable>java</executable>
           <classpathScope>compile</classpathScope>
+          <longModulepath>false</longModulepath>
           <arguments>
             <argument>-classpath</argument>
             <classpath/>
@@ -62,12 +63,12 @@
           <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>1.7.36</version>
+            <version>${slf4j.version}</version>
           </dependency>
           <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
-            <version>1.7.36</version>
+            <version>${slf4j.version}</version>
           </dependency>
           <dependency>
             <groupId>org.antlr</groupId>

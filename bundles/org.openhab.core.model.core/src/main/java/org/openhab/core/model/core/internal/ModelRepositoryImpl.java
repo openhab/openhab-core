@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -81,7 +81,7 @@ public class ModelRepositoryImpl implements ModelRepository {
             Resource resource = getResource(name);
             if (resource != null) {
                 if (!resource.getContents().isEmpty()) {
-                    return resource.getContents().get(0);
+                    return resource.getContents().getFirst();
                 } else {
                     logger.warn("Configuration model '{}' is either empty or cannot be parsed correctly!", name);
                     resourceSet.getResources().remove(resource);
@@ -274,7 +274,7 @@ public class ModelRepositoryImpl implements ModelRepository {
                 // Check for validation errors, but log them only
                 try {
                     final org.eclipse.emf.common.util.Diagnostic diagnostic = safeEmf
-                            .call(() -> Diagnostician.INSTANCE.validate(resource.getContents().get(0)));
+                            .call(() -> Diagnostician.INSTANCE.validate(resource.getContents().getFirst()));
                     for (org.eclipse.emf.common.util.Diagnostic d : diagnostic.getChildren()) {
                         warnings.add(d.getMessage());
                     }

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -25,8 +26,8 @@ import org.openhab.core.items.Item;
 import org.openhab.core.persistence.FilterCriteria;
 import org.openhab.core.persistence.FilterCriteria.Ordering;
 import org.openhab.core.persistence.HistoricItem;
+import org.openhab.core.persistence.ModifiablePersistenceService;
 import org.openhab.core.persistence.PersistenceItemInfo;
-import org.openhab.core.persistence.QueryablePersistenceService;
 import org.openhab.core.persistence.strategy.PersistenceStrategy;
 import org.openhab.core.types.State;
 
@@ -36,17 +37,13 @@ import org.openhab.core.types.State;
  * @author Florian Binder - Initial contribution
  */
 @NonNullByDefault
-public class TestCachedValuesPersistenceService implements QueryablePersistenceService {
+public class TestCachedValuesPersistenceService implements ModifiablePersistenceService {
 
     public static final String ID = "testCachedHistoricItems";
 
     private final List<HistoricItem> historicItems = new ArrayList<>();
 
     public TestCachedValuesPersistenceService() {
-    }
-
-    public void addHistoricItem(ZonedDateTime timestamp, State state, String itemName) {
-        historicItems.add(new CachedHistoricItem(timestamp, state, itemName));
     }
 
     @Override
@@ -63,6 +60,20 @@ public class TestCachedValuesPersistenceService implements QueryablePersistenceS
     }
 
     @Override
+    public void store(Item item, ZonedDateTime date, State state) {
+        historicItems.add(new CachedHistoricItem(date, state, item.getName()));
+    }
+
+    @Override
+    public void store(Item item, ZonedDateTime date, State state, @Nullable String alias) {
+    }
+
+    @Override
+    public boolean remove(FilterCriteria filter) throws IllegalArgumentException {
+        return historicItems.removeAll(StreamSupport.stream(query(filter).spliterator(), false).toList());
+    }
+
+    @Override
     public Iterable<HistoricItem> query(FilterCriteria filter) {
         Stream<HistoricItem> stream = historicItems.stream();
 
@@ -70,16 +81,19 @@ public class TestCachedValuesPersistenceService implements QueryablePersistenceS
             throw new UnsupportedOperationException("state filtering is not supported yet");
         }
 
-        if (filter.getItemName() != null) {
-            stream = stream.filter(hi -> filter.getItemName().equals(hi.getName()));
+        String itemName = filter.getItemName();
+        if (itemName != null) {
+            stream = stream.filter(hi -> itemName.equals(hi.getName()));
         }
 
-        if (filter.getBeginDate() != null) {
-            stream = stream.filter(hi -> !filter.getBeginDate().isAfter(hi.getTimestamp()));
+        ZonedDateTime beginDate = filter.getBeginDate();
+        if (beginDate != null) {
+            stream = stream.filter(hi -> !beginDate.isAfter(hi.getTimestamp()));
         }
 
-        if (filter.getEndDate() != null) {
-            stream = stream.filter(hi -> !filter.getEndDate().isBefore(hi.getTimestamp()));
+        ZonedDateTime endDate = filter.getEndDate();
+        if (endDate != null) {
+            stream = stream.filter(hi -> !endDate.isBefore(hi.getTimestamp()));
         }
 
         if (filter.getOrdering() == Ordering.ASCENDING) {

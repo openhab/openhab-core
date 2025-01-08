@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -87,7 +87,7 @@ public class PipedAudioStream extends AudioStream {
         if (closed.getAndSet(true)) {
             return;
         }
-        if (this.onCloseChain.size() > 0) {
+        if (!this.onCloseChain.isEmpty()) {
             this.onCloseChain.forEach(Runnable::run);
             this.onCloseChain.clear();
         }

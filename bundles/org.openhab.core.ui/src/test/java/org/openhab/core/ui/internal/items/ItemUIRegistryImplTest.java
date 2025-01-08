@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -20,6 +20,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 import java.text.DecimalFormatSymbols;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TimeZone;
@@ -36,6 +37,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.openhab.core.i18n.TimeZoneProvider;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
@@ -99,22 +101,24 @@ public class ItemUIRegistryImplTest {
     // we need to get the decimal separator of the default locale for our tests
     private static final char SEP = (new DecimalFormatSymbols().getDecimalSeparator());
     private static final String ITEM_NAME = "Item";
+    private static final String DEFAULT_TIME_ZONE = "GMT-6";
 
     private @NonNullByDefault({}) ItemUIRegistryImpl uiRegistry;
 
     private @Mock @NonNullByDefault({}) ItemRegistry registryMock;
+    private @Mock @NonNullByDefault({}) TimeZoneProvider timeZoneProviderMock;
     private @Mock @NonNullByDefault({}) Widget widgetMock;
     private @Mock @NonNullByDefault({}) Item itemMock;
 
     @BeforeEach
     public void setup() throws Exception {
-        uiRegistry = new ItemUIRegistryImpl(registryMock);
+        uiRegistry = new ItemUIRegistryImpl(registryMock, timeZoneProviderMock);
 
         when(widgetMock.getItem()).thenReturn(ITEM_NAME);
         when(registryMock.getItem(ITEM_NAME)).thenReturn(itemMock);
+        when(timeZoneProviderMock.getTimeZone()).thenReturn(ZoneId.of(DEFAULT_TIME_ZONE));
 
-        // Set default time zone to GMT-6
-        TimeZone.setDefault(TimeZone.getTimeZone("GMT-6"));
+        TimeZone.setDefault(TimeZone.getTimeZone(DEFAULT_TIME_ZONE));
     }
 
     @Test
@@ -690,7 +694,7 @@ public class ItemUIRegistryImplTest {
     }
 
     @Test
-    public void getLabelLabelWithMappedOption() {
+    public void getLabelStringItemLabelWithMappedOption() {
         String testLabel = "Label";
 
         StateDescription stateDescription = mock(StateDescription.class);
@@ -707,7 +711,7 @@ public class ItemUIRegistryImplTest {
     }
 
     @Test
-    public void getLabelLabelWithUnmappedOption() {
+    public void getLabelStringItemLabelWithUnmappedOption() {
         String testLabel = "Label";
 
         StateDescription stateDescription = mock(StateDescription.class);
@@ -724,6 +728,78 @@ public class ItemUIRegistryImplTest {
     }
 
     @Test
+    public void getLabelStringItemLabelWithMappedOptionButInappropriatePattern() {
+        String testLabel = "Label";
+
+        StateDescription stateDescription = mock(StateDescription.class);
+        List<StateOption> options = new ArrayList<>();
+        options.add(new StateOption("State0", "This is the state 0"));
+        options.add(new StateOption("State1", "This is the state 1"));
+        when(widgetMock.getLabel()).thenReturn(testLabel);
+        when(itemMock.getStateDescription()).thenReturn(stateDescription);
+        when(stateDescription.getPattern()).thenReturn("Value: %f");
+        when(stateDescription.getOptions()).thenReturn(options);
+        when(itemMock.getState()).thenReturn(new StringType("State0"));
+        String label = uiRegistry.getLabel(widgetMock);
+        assertEquals("Label [This is the state 0]", label);
+    }
+
+    @Test
+    public void getLabelNumberItemLabelWithMappedOption() {
+        String testLabel = "Label";
+
+        StateDescription stateDescription = mock(StateDescription.class);
+        List<StateOption> options = new ArrayList<>();
+        options.add(new StateOption("0", "This is the state number 0"));
+        options.add(new StateOption("1", "This is the state number 1"));
+        when(widgetMock.getLabel()).thenReturn(testLabel);
+        when(itemMock.getStateDescription()).thenReturn(stateDescription);
+        when(stateDescription.getPattern()).thenReturn("%s");
+        when(stateDescription.getOptions()).thenReturn(options);
+        when(itemMock.getState()).thenReturn(new DecimalType(1));
+        String label = uiRegistry.getLabel(widgetMock);
+        assertEquals("Label [This is the state number 1]", label);
+    }
+
+    @Test
+    public void getLabelNumberItemLabelWithUnmappedOption() {
+        String testLabel = "Label";
+
+        StateDescription stateDescription = mock(StateDescription.class);
+        List<StateOption> options = new ArrayList<>();
+        options.add(new StateOption("0", "This is the state number 0"));
+        options.add(new StateOption("1", "This is the state number 1"));
+        when(widgetMock.getLabel()).thenReturn(testLabel);
+        when(itemMock.getStateDescription()).thenReturn(stateDescription);
+        when(stateDescription.getPattern()).thenReturn("%s");
+        when(stateDescription.getOptions()).thenReturn(options);
+        when(itemMock.getState()).thenReturn(new DecimalType(2));
+        String label = uiRegistry.getLabel(widgetMock);
+        assertEquals("Label [2]", label);
+    }
+
+    @Test
+    public void getLabelNumberItemLabelWithMappedOptionButInappropriatePattern() {
+        String testLabel = "Label";
+
+        StateDescription stateDescription = mock(StateDescription.class);
+        List<StateOption> options = new ArrayList<>();
+        options.add(new StateOption("0", "This is the state number 0"));
+        options.add(new StateOption("1", "This is the state number 1"));
+        when(widgetMock.getLabel()).thenReturn(testLabel);
+        when(itemMock.getStateDescription()).thenReturn(stateDescription);
+        when(stateDescription.getPattern()).thenReturn("Value: %f");
+        when(stateDescription.getOptions()).thenReturn(options);
+        when(itemMock.getState()).thenReturn(new DecimalType(0));
+        String label = uiRegistry.getLabel(widgetMock);
+        assertEquals("Label [This is the state number 0]", label);
+
+        when(stateDescription.getPattern()).thenReturn("Value: %d");
+        label = uiRegistry.getLabel(widgetMock);
+        assertEquals("Label [This is the state number 0]", label);
+    }
+
+    @Test
     public void getLabelTransformationContainingPercentS() throws ItemNotFoundException {
         // It doesn't matter that "FOO" doesn't exist - this is to assert it doesn't fail before because of the two "%s"
         String testLabel = "Memory [FOO(echo %s):%s]";
@@ -735,6 +811,45 @@ public class ItemUIRegistryImplTest {
         when(item.getState()).thenReturn(new StringType("State"));
         String label = uiRegistry.getLabel(w);
         assertEquals("Memory [State]", label);
+    }
+
+    @Test
+    public void getLabelFailingTransformation() throws ItemNotFoundException {
+        String testLabel = "Memory [FOO(echo %s):__%d__]";
+        Widget w = mock(Widget.class);
+        Item item = mock(Item.class);
+        when(w.getLabel()).thenReturn(testLabel);
+        when(w.getItem()).thenReturn(ITEM_NAME);
+        when(registryMock.getItem(ITEM_NAME)).thenReturn(item);
+        when(item.getState()).thenReturn(new DecimalType(11));
+        String label = uiRegistry.getLabel(w);
+        assertEquals("Memory [11]", label);
+    }
+
+    @Test
+    public void getLabelFailingTransformationWithNullState() throws ItemNotFoundException {
+        String testLabel = "Memory [FOO(echo %s):__%d__]";
+        Widget w = mock(Widget.class);
+        Item item = mock(Item.class);
+        when(w.getLabel()).thenReturn(testLabel);
+        when(w.getItem()).thenReturn(ITEM_NAME);
+        when(registryMock.getItem(ITEM_NAME)).thenReturn(item);
+        when(item.getState()).thenReturn(UnDefType.NULL);
+        String label = uiRegistry.getLabel(w);
+        assertEquals("Memory [-]", label);
+    }
+
+    @Test
+    public void getLabelFailingTransformationWithUndefState() throws ItemNotFoundException {
+        String testLabel = "Memory [FOO(echo %s):__%d__]";
+        Widget w = mock(Widget.class);
+        Item item = mock(Item.class);
+        when(w.getLabel()).thenReturn(testLabel);
+        when(w.getItem()).thenReturn(ITEM_NAME);
+        when(registryMock.getItem(ITEM_NAME)).thenReturn(item);
+        when(item.getState()).thenReturn(UnDefType.UNDEF);
+        String label = uiRegistry.getLabel(w);
+        assertEquals("Memory [-]", label);
     }
 
     @Test
@@ -815,6 +930,7 @@ public class ItemUIRegistryImplTest {
         defaultWidget = uiRegistry.getDefaultWidget(DimmerItem.class, ITEM_NAME);
         assertThat(defaultWidget, is(instanceOf(Slider.class)));
         assertThat(((Slider) defaultWidget).isSwitchEnabled(), is(true));
+        assertThat(((Slider) defaultWidget).isReleaseOnly(), is(true));
 
         defaultWidget = uiRegistry.getDefaultWidget(ImageItem.class, ITEM_NAME);
         assertThat(defaultWidget, is(instanceOf(Image.class)));

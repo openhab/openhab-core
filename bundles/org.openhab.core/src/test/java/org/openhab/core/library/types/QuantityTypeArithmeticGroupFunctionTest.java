@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,11 +12,18 @@
  */
 package org.openhab.core.library.types;
 
+import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.number.IsCloseTo.closeTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.measure.Quantity;
@@ -28,6 +35,7 @@ import javax.measure.quantity.Temperature;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -175,6 +183,51 @@ public class QuantityTypeArithmeticGroupFunctionTest {
         State state = function.calculate(items);
 
         assertEquals(new QuantityType<>("23.54 °C"), state);
+    }
+
+    static Stream<Arguments> medianTestSource() {
+        return Stream.of( //
+                arguments( //
+                        List.of(new QuantityType("100 °C"), UnDefType.NULL, new QuantityType("200 °C"), UnDefType.UNDEF,
+                                new QuantityType("300 °C"), new QuantityType("400 °C")), //
+                        new QuantityType("250 °C")), //
+                // mixed units. 200 °C = 392 °F
+                arguments( //
+                        List.of(new QuantityType("100 °C"), UnDefType.NULL, new QuantityType("392 °F"), UnDefType.UNDEF,
+                                new QuantityType("300 °C"), new QuantityType("400 °C")), //
+                        new QuantityType("250 °C")), //
+                arguments( //
+                        List.of(new QuantityType("100 °C"), UnDefType.NULL, new QuantityType("200 °C"), UnDefType.UNDEF,
+                                new QuantityType("300 °C")), //
+                        new QuantityType("200 °C")), //
+                arguments( //
+                        List.of(new QuantityType("100 °C"), UnDefType.NULL, new QuantityType("200 °C")), //
+                        new QuantityType("150 °C")), //
+                arguments( //
+                        List.of(new QuantityType("100 °C"), UnDefType.NULL), //
+                        new QuantityType("100 °C")), //
+                arguments( //
+                        List.of(), //
+                        UnDefType.UNDEF) //
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("medianTestSource")
+    public void testMedianFunctionQuantityType(List<State> states, State expected) {
+        AtomicInteger index = new AtomicInteger(1);
+        Set<Item> items = states.stream()
+                .map(state -> createNumberItem("TestItem" + index.getAndIncrement(), Temperature.class, state))
+                .collect(Collectors.toSet());
+
+        GroupFunction function = new QuantityTypeArithmeticGroupFunction.Median(Temperature.class, null);
+        State state = function.calculate(items);
+
+        assertEquals(state.getClass(), expected.getClass());
+        if (expected instanceof QuantityType expectedQuantityType) {
+            QuantityType stateQuantityType = ((QuantityType) state).toInvertibleUnit(expectedQuantityType.getUnit());
+            assertThat(stateQuantityType.doubleValue(), is(closeTo(expectedQuantityType.doubleValue(), 0.01d)));
+        }
     }
 
     @ParameterizedTest

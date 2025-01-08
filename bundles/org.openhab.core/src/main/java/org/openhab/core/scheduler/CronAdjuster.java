@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -16,7 +16,6 @@ import java.time.DayOfWeek;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.Temporal;
-import java.time.temporal.TemporalAdjuster;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -31,7 +30,8 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 /**
- * This class creates a {@link TemporalAdjuster} that takes a temporal and adjust it to the next deadline based on a
+ * This class creates a {@link java.time.temporal.TemporalAdjuster} that takes a temporal and adjust it to the next
+ * deadline based on a
  * cron specification.
  *
  * @See http://www.cronmaker.com/
@@ -540,7 +540,7 @@ public class CronAdjuster implements SchedulerTemporalAdjuster {
     private Checker or(final List<Checker> checkers) {
         return checkers.size() > 1 //
                 ? temporal -> checkers.stream().anyMatch(c -> c.matches(temporal))
-                : checkers.get(0);
+                : checkers.getFirst();
     }
 
     /**

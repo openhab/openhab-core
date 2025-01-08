@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -45,7 +45,7 @@ class GroupCommandTriggerHandlerTest extends JavaTest {
         when(moduleMock.getId()).thenReturn("triggerId");
         setupInterceptedLogger(GroupCommandTriggerHandler.class, LogLevel.WARN);
 
-        GroupCommandTriggerHandler handler = new GroupCommandTriggerHandler(moduleMock, "ruleId", contextMock,
+        GroupCommandTriggerHandler unused = new GroupCommandTriggerHandler(moduleMock, "ruleId", contextMock,
                 itemRegistryMock);
 
         stopInterceptedLogger(GroupCommandTriggerHandler.class);
@@ -61,7 +61,7 @@ class GroupCommandTriggerHandlerTest extends JavaTest {
         when(moduleMock.getId()).thenReturn("triggerId");
         setupInterceptedLogger(GroupCommandTriggerHandler.class, LogLevel.WARN);
 
-        GroupCommandTriggerHandler handler = new GroupCommandTriggerHandler(moduleMock, "ruleId", contextMock,
+        GroupCommandTriggerHandler unused = new GroupCommandTriggerHandler(moduleMock, "ruleId", contextMock,
                 itemRegistryMock);
 
         stopInterceptedLogger(GroupCommandTriggerHandler.class);

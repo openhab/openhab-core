@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -79,7 +79,7 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
         }
         if (logger.isDebugEnabled()) {
             if (!scriptTypes.isEmpty()) {
-                ScriptEngine scriptEngine = engineFactory.createScriptEngine(scriptTypes.get(0));
+                ScriptEngine scriptEngine = engineFactory.createScriptEngine(scriptTypes.getFirst());
                 if (scriptEngine != null) {
                     javax.script.ScriptEngineFactory factory = scriptEngine.getFactory();
                     logger.debug(
@@ -175,7 +175,13 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
                 return true;
             } catch (Exception ex) {
                 logger.error("Error during evaluation of script '{}': {}", engineIdentifier, ex.getMessage());
-                logger.debug("", ex);
+                // Only call logger if debug level is actually enabled, because OPS4J Pax Logging holds (at least for
+                // some time) a reference to the exception and its cause, which may hold a reference to the script
+                // engine.
+                // This prevents garbage collection (at least for some time) to remove the script engine from heap.
+                if (logger.isDebugEnabled()) {
+                    logger.debug("", ex);
+                }
             }
         }
         return false;

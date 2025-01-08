@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,8 +13,8 @@
 package org.openhab.core.events;
 
 import java.nio.file.FileSystems;
+import java.nio.file.Path;
 import java.nio.file.PathMatcher;
-import java.nio.file.Paths;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
@@ -23,7 +23,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * of events based on an event topic.
  * 
  * The syntax for the filter is the glob syntax documented at
- * https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/file/FileSystem.html#getPathMatcher(java.lang.String)
+ * https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/nio/file/FileSystem.html#getPathMatcher(java.lang.String)
  *
  * @author Cody Cutrer - Initial contribution
  */
@@ -37,7 +37,7 @@ public class TopicGlobEventFilter implements EventFilter {
      *
      * @param topicGlob the glob
      * @see <a href=
-     *      "https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/nio/file/FileSystem.html#getPathMatcher(java.lang.String)">Java
+     *      "https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/nio/file/FileSystem.html#getPathMatcher(java.lang.String)">Java
      *      Glob</a>
      */
     public TopicGlobEventFilter(String topicGlob) {
@@ -46,6 +46,6 @@ public class TopicGlobEventFilter implements EventFilter {
 
     @Override
     public boolean apply(Event event) {
-        return topicMatcher.matches(Paths.get(event.getTopic()));
+        return topicMatcher.matches(Path.of(event.getTopic()));
     }
 }

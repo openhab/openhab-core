@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -605,7 +605,8 @@ class GenericThingProvider extends AbstractProviderLazyNullness<Thing> implement
         if (!loadedXmlThingTypes.contains(factory.bundleName) || modelRepository == null) {
             return
         }
-        val oldThings = thingsMap.get(modelName).clone
+        val things = thingsMap.get(modelName)
+        val oldThings = things.clone
         val newThings = newArrayList()
 
         val model = modelRepository.getModel(modelName) as ThingModel
@@ -616,14 +617,16 @@ class GenericThingProvider extends AbstractProviderLazyNullness<Thing> implement
         }
 
         newThings.forEach [ newThing |
-            thingsMap.get(modelName).add(newThing)
             val oldThing = oldThings.findFirst[it.UID == newThing.UID]
             if (oldThing !== null) {
                 if (!ThingHelper.equals(oldThing, newThing)) {
+                    things.remove(oldThing)
+                    things.add(newThing)
                     logger.debug("Updating thing '{}' from model '{}'.", newThing.UID, modelName);
                     notifyListenersAboutUpdatedElement(oldThing, newThing)
                 }
             } else {
+                things.add(newThing)
                 logger.debug("Adding thing '{}' from model '{}'.", newThing.UID, modelName);
                 newThing.notifyListenersAboutAddedElement
             }

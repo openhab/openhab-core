@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -61,7 +61,9 @@ import org.openhab.core.persistence.QueryablePersistenceService;
 import org.openhab.core.persistence.config.PersistenceAllConfig;
 import org.openhab.core.persistence.config.PersistenceConfig;
 import org.openhab.core.persistence.config.PersistenceGroupConfig;
+import org.openhab.core.persistence.config.PersistenceGroupExcludeConfig;
 import org.openhab.core.persistence.config.PersistenceItemConfig;
+import org.openhab.core.persistence.config.PersistenceItemExcludeConfig;
 import org.openhab.core.persistence.filter.PersistenceFilter;
 import org.openhab.core.persistence.filter.PersistenceThresholdFilter;
 import org.openhab.core.persistence.registry.PersistenceServiceConfiguration;
@@ -79,7 +81,7 @@ import org.openhab.core.types.TimeSeries;
 import org.openhab.core.types.UnDefType;
 
 /**
- * The {@link PersistenceManagerTest} contains tests for the {@link PersistenceManager}
+ * The {@link PersistenceManagerTest} contains tests for the {@link PersistenceManagerImpl}
  *
  * @author Jan N. Klug - Initial contribution
  */
@@ -134,7 +136,7 @@ public class PersistenceManagerTest {
     private @NonNullByDefault({}) @Mock QueryablePersistenceService queryablePersistenceServiceMock;
     private @NonNullByDefault({}) @Mock ModifiablePersistenceService modifiablePersistenceServiceMock;
 
-    private @NonNullByDefault({}) PersistenceManager manager;
+    private @NonNullByDefault({}) PersistenceManagerImpl manager;
 
     @BeforeEach
     public void setUp() throws ItemNotFoundException {
@@ -156,7 +158,7 @@ public class PersistenceManagerTest {
         when(queryablePersistenceServiceMock.query(any())).thenReturn(List.of(TEST_HISTORIC_ITEM));
         when(modifiablePersistenceServiceMock.getId()).thenReturn(TEST_MODIFIABLE_PERSISTENCE_SERVICE_ID);
 
-        manager = new PersistenceManager(cronSchedulerMock, schedulerMock, itemRegistryMock, safeCallerMock,
+        manager = new PersistenceManagerImpl(cronSchedulerMock, schedulerMock, itemRegistryMock, safeCallerMock,
                 readyServiceMock, persistenceServiceConfigurationRegistryMock);
         manager.addPersistenceService(persistenceServiceMock);
         manager.addPersistenceService(queryablePersistenceServiceMock);
@@ -167,7 +169,7 @@ public class PersistenceManagerTest {
 
     @Test
     public void appliesToItemWithItemConfig() {
-        addConfiguration(TEST_PERSISTENCE_SERVICE_ID, new PersistenceItemConfig(TEST_ITEM_NAME),
+        addConfiguration(TEST_PERSISTENCE_SERVICE_ID, List.of(new PersistenceItemConfig(TEST_ITEM_NAME)),
                 PersistenceStrategy.Globals.UPDATE, null);
 
         manager.stateUpdated(TEST_ITEM, TEST_STATE);
@@ -178,7 +180,7 @@ public class PersistenceManagerTest {
 
     @Test
     public void doesNotApplyToItemWithItemConfig() {
-        addConfiguration(TEST_PERSISTENCE_SERVICE_ID, new PersistenceItemConfig(TEST_ITEM_NAME),
+        addConfiguration(TEST_PERSISTENCE_SERVICE_ID, List.of(new PersistenceItemConfig(TEST_ITEM_NAME)),
                 PersistenceStrategy.Globals.UPDATE, null);
 
         manager.stateUpdated(TEST_ITEM2, TEST_STATE);
@@ -188,7 +190,7 @@ public class PersistenceManagerTest {
 
     @Test
     public void appliesToGroupItemWithItemConfig() {
-        addConfiguration(TEST_PERSISTENCE_SERVICE_ID, new PersistenceItemConfig(TEST_GROUP_ITEM_NAME),
+        addConfiguration(TEST_PERSISTENCE_SERVICE_ID, List.of(new PersistenceItemConfig(TEST_GROUP_ITEM_NAME)),
                 PersistenceStrategy.Globals.UPDATE, null);
 
         manager.stateUpdated(TEST_GROUP_ITEM, TEST_STATE);
@@ -199,7 +201,7 @@ public class PersistenceManagerTest {
 
     @Test
     public void appliesToItemWithGroupConfig() {
-        addConfiguration(TEST_PERSISTENCE_SERVICE_ID, new PersistenceGroupConfig(TEST_GROUP_ITEM_NAME),
+        addConfiguration(TEST_PERSISTENCE_SERVICE_ID, List.of(new PersistenceGroupConfig(TEST_GROUP_ITEM_NAME)),
                 PersistenceStrategy.Globals.UPDATE, null);
 
         manager.stateUpdated(TEST_ITEM, TEST_STATE);
@@ -210,7 +212,7 @@ public class PersistenceManagerTest {
 
     @Test
     public void doesNotApplyToItemWithGroupConfig() {
-        addConfiguration(TEST_PERSISTENCE_SERVICE_ID, new PersistenceGroupConfig(TEST_GROUP_ITEM_NAME),
+        addConfiguration(TEST_PERSISTENCE_SERVICE_ID, List.of(new PersistenceGroupConfig(TEST_GROUP_ITEM_NAME)),
                 PersistenceStrategy.Globals.UPDATE, null);
 
         manager.stateUpdated(TEST_ITEM2, TEST_STATE);
@@ -221,8 +223,8 @@ public class PersistenceManagerTest {
 
     @Test
     public void appliesToItemWithAllConfig() {
-        addConfiguration(TEST_PERSISTENCE_SERVICE_ID, new PersistenceAllConfig(), PersistenceStrategy.Globals.UPDATE,
-                null);
+        addConfiguration(TEST_PERSISTENCE_SERVICE_ID, List.of(new PersistenceAllConfig()),
+                PersistenceStrategy.Globals.UPDATE, null);
 
         manager.stateUpdated(TEST_ITEM, TEST_STATE);
         manager.stateUpdated(TEST_ITEM2, TEST_STATE);
@@ -236,9 +238,51 @@ public class PersistenceManagerTest {
     }
 
     @Test
+    public void doesNotApplyToItemWithGroupConfigAndItemExclusion() {
+        addConfiguration(TEST_PERSISTENCE_SERVICE_ID, List.of(new PersistenceGroupConfig(TEST_GROUP_ITEM_NAME),
+                new PersistenceItemExcludeConfig(TEST_ITEM_NAME)), PersistenceStrategy.Globals.UPDATE, null);
+
+        manager.stateUpdated(TEST_ITEM, TEST_STATE);
+
+        verifyNoMoreInteractions(persistenceServiceMock);
+    }
+
+    @Test
+    public void doesNotApplyToItemWithAllConfigAndItemExclusion() {
+        addConfiguration(TEST_PERSISTENCE_SERVICE_ID,
+                List.of(new PersistenceAllConfig(), new PersistenceItemExcludeConfig(TEST_ITEM_NAME)),
+                PersistenceStrategy.Globals.UPDATE, null);
+
+        manager.stateUpdated(TEST_ITEM, TEST_STATE);
+        manager.stateUpdated(TEST_ITEM2, TEST_STATE);
+        manager.stateUpdated(TEST_GROUP_ITEM, TEST_STATE);
+
+        verify(persistenceServiceMock).store(TEST_ITEM2, null);
+        verify(persistenceServiceMock).store(TEST_GROUP_ITEM, null);
+
+        verifyNoMoreInteractions(persistenceServiceMock);
+    }
+
+    @Test
+    public void doesNotApplyToItemWithAllConfigAndGroupExclusion() {
+        addConfiguration(TEST_PERSISTENCE_SERVICE_ID,
+                List.of(new PersistenceAllConfig(), new PersistenceGroupExcludeConfig(TEST_GROUP_ITEM_NAME)),
+                PersistenceStrategy.Globals.UPDATE, null);
+
+        manager.stateUpdated(TEST_ITEM, TEST_STATE);
+        manager.stateUpdated(TEST_ITEM2, TEST_STATE);
+        manager.stateUpdated(TEST_GROUP_ITEM, TEST_STATE);
+
+        verify(persistenceServiceMock).store(TEST_ITEM2, null);
+        verify(persistenceServiceMock).store(TEST_GROUP_ITEM, null);
+
+        verifyNoMoreInteractions(persistenceServiceMock);
+    }
+
+    @Test
     public void updatedStatePersistsEveryUpdate() {
-        addConfiguration(TEST_PERSISTENCE_SERVICE_ID, new PersistenceAllConfig(), PersistenceStrategy.Globals.UPDATE,
-                null);
+        addConfiguration(TEST_PERSISTENCE_SERVICE_ID, List.of(new PersistenceAllConfig()),
+                PersistenceStrategy.Globals.UPDATE, null);
 
         manager.stateUpdated(TEST_ITEM, TEST_STATE);
         manager.stateUpdated(TEST_ITEM, TEST_STATE);
@@ -250,8 +294,8 @@ public class PersistenceManagerTest {
 
     @Test
     public void updatedStateDoesNotPersistWithChangeStrategy() {
-        addConfiguration(TEST_PERSISTENCE_SERVICE_ID, new PersistenceAllConfig(), PersistenceStrategy.Globals.CHANGE,
-                null);
+        addConfiguration(TEST_PERSISTENCE_SERVICE_ID, List.of(new PersistenceAllConfig()),
+                PersistenceStrategy.Globals.CHANGE, null);
 
         manager.stateUpdated(TEST_ITEM, TEST_STATE);
         verifyNoMoreInteractions(persistenceServiceMock);
@@ -259,8 +303,8 @@ public class PersistenceManagerTest {
 
     @Test
     public void changedStatePersistsWithChangeStrategy() {
-        addConfiguration(TEST_PERSISTENCE_SERVICE_ID, new PersistenceAllConfig(), PersistenceStrategy.Globals.CHANGE,
-                null);
+        addConfiguration(TEST_PERSISTENCE_SERVICE_ID, List.of(new PersistenceAllConfig()),
+                PersistenceStrategy.Globals.CHANGE, null);
 
         manager.stateChanged(TEST_ITEM, UnDefType.UNDEF, TEST_STATE);
 
@@ -270,8 +314,8 @@ public class PersistenceManagerTest {
 
     @Test
     public void changedStateDoesNotPersistWithUpdateStrategy() {
-        addConfiguration(TEST_PERSISTENCE_SERVICE_ID, new PersistenceAllConfig(), PersistenceStrategy.Globals.UPDATE,
-                null);
+        addConfiguration(TEST_PERSISTENCE_SERVICE_ID, List.of(new PersistenceAllConfig()),
+                PersistenceStrategy.Globals.UPDATE, null);
 
         manager.stateChanged(TEST_ITEM, UnDefType.UNDEF, TEST_STATE);
 
@@ -329,7 +373,7 @@ public class PersistenceManagerTest {
             return future;
         });
 
-        addConfiguration(TestModifiablePersistenceService.ID, new PersistenceAllConfig(),
+        addConfiguration(TestModifiablePersistenceService.ID, List.of(new PersistenceAllConfig()),
                 PersistenceStrategy.Globals.FORECAST, null);
 
         Instant time1 = Instant.now().minusSeconds(1000);
@@ -371,7 +415,7 @@ public class PersistenceManagerTest {
         assertThat(filterCriteria.getEndDate(), is(time4.atZone(ZoneId.systemDefault())));
 
         // verify restore future is not cancelled
-        verify(futures.get(0), never()).cancel(anyBoolean());
+        verify(futures.getFirst(), never()).cancel(anyBoolean());
 
         // verify new values are stored
         inOrder.verify(service, times(2)).store(any(Item.class), any(ZonedDateTime.class), any(State.class));
@@ -386,7 +430,7 @@ public class PersistenceManagerTest {
         manager.timeSeriesUpdated(TEST_ITEM, timeSeries3);
         // verify old restore future is cancelled
         inOrder.verify(service, times(1)).store(any(Item.class), any(ZonedDateTime.class), any(State.class));
-        verify(futures.get(0)).cancel(true);
+        verify(futures.getFirst()).cancel(true);
 
         // verify new restore future is properly created
         inOrder.verify(schedulerMock).at(any(SchedulerRunnable.class), eq(time5));
@@ -397,9 +441,9 @@ public class PersistenceManagerTest {
         ArgumentCaptor<SchedulerRunnable> runnableCaptor = ArgumentCaptor.forClass(SchedulerRunnable.class);
         when(cronSchedulerMock.schedule(runnableCaptor.capture(), any())).thenReturn(scheduledFutureMock);
 
-        addConfiguration(TEST_PERSISTENCE_SERVICE_ID, new PersistenceItemConfig(TEST_ITEM3_NAME),
+        addConfiguration(TEST_PERSISTENCE_SERVICE_ID, List.of(new PersistenceItemConfig(TEST_ITEM3_NAME)),
                 new PersistenceCronStrategy("withoutFilter", "0 0 * * * ?"), null);
-        addConfiguration(TEST_QUERYABLE_PERSISTENCE_SERVICE_ID, new PersistenceItemConfig(TEST_ITEM3_NAME),
+        addConfiguration(TEST_QUERYABLE_PERSISTENCE_SERVICE_ID, List.of(new PersistenceItemConfig(TEST_ITEM3_NAME)),
                 new PersistenceCronStrategy("withFilter", "0 * * * * ?"),
                 new PersistenceThresholdFilter("test", BigDecimal.TEN, "", false));
 
@@ -408,8 +452,8 @@ public class PersistenceManagerTest {
         verify(readyServiceMock, timeout(1000)).markReady(any());
         List<SchedulerRunnable> runnables = runnableCaptor.getAllValues();
         assertThat(runnables.size(), is(2));
-        runnables.get(0).run();
-        runnables.get(0).run();
+        runnables.getFirst().run();
+        runnables.getFirst().run();
         runnables.get(1).run();
         runnables.get(1).run();
 
@@ -428,8 +472,8 @@ public class PersistenceManagerTest {
         when(cronSchedulerMock.schedule(any(), any())).thenReturn(scheduledFutureMock);
 
         PersistenceServiceConfiguration configuration = addConfiguration(TEST_PERSISTENCE_SERVICE_ID,
-                new PersistenceItemConfig(TEST_ITEM_NAME), new PersistenceCronStrategy("everyHour", "0 0 * * * ?"),
-                null);
+                List.of(new PersistenceItemConfig(TEST_ITEM_NAME)),
+                new PersistenceCronStrategy("everyHour", "0 0 * * * ?"), null);
 
         manager.onReadyMarkerAdded(new ReadyMarker("", ""));
 
@@ -444,8 +488,8 @@ public class PersistenceManagerTest {
 
     @Test
     public void filterAppliesOnStateUpdate() {
-        addConfiguration(TEST_PERSISTENCE_SERVICE_ID, new PersistenceAllConfig(), PersistenceStrategy.Globals.UPDATE,
-                new PersistenceThresholdFilter("test", BigDecimal.TEN, "", false));
+        addConfiguration(TEST_PERSISTENCE_SERVICE_ID, List.of(new PersistenceAllConfig()),
+                PersistenceStrategy.Globals.UPDATE, new PersistenceThresholdFilter("test", BigDecimal.TEN, "", false));
 
         manager.stateUpdated(TEST_ITEM3, DecimalType.ZERO);
         manager.stateUpdated(TEST_ITEM3, DecimalType.ZERO);
@@ -459,8 +503,9 @@ public class PersistenceManagerTest {
      * Add a configuration for restoring TEST_ITEM and mock the SafeCaller
      */
     private void setupPersistence(PersistenceConfig itemConfig) {
-        addConfiguration(TEST_PERSISTENCE_SERVICE_ID, itemConfig, PersistenceStrategy.Globals.RESTORE, null);
-        addConfiguration(TEST_QUERYABLE_PERSISTENCE_SERVICE_ID, itemConfig, PersistenceStrategy.Globals.RESTORE, null);
+        addConfiguration(TEST_PERSISTENCE_SERVICE_ID, List.of(itemConfig), PersistenceStrategy.Globals.RESTORE, null);
+        addConfiguration(TEST_QUERYABLE_PERSISTENCE_SERVICE_ID, List.of(itemConfig),
+                PersistenceStrategy.Globals.RESTORE, null);
 
         when(safeCallerMock.create(queryablePersistenceServiceMock, QueryablePersistenceService.class))
                 .thenReturn(safeCallerBuilderMock);
@@ -473,16 +518,16 @@ public class PersistenceManagerTest {
      * Add a configuration to the manager
      *
      * @param serviceId the persistence service id
-     * @param itemConfig the item configuration
+     * @param itemConfigs list item configurations
      * @param strategy the strategy
      * @param filter a persistence filter
      * @return the added strategy
      */
-    private PersistenceServiceConfiguration addConfiguration(String serviceId, PersistenceConfig itemConfig,
+    private PersistenceServiceConfiguration addConfiguration(String serviceId, List<PersistenceConfig> itemConfigs,
             PersistenceStrategy strategy, @Nullable PersistenceFilter filter) {
         List<PersistenceFilter> filters = filter != null ? List.of(filter) : List.of();
 
-        PersistenceItemConfiguration itemConfiguration = new PersistenceItemConfiguration(List.of(itemConfig), null,
+        PersistenceItemConfiguration itemConfiguration = new PersistenceItemConfiguration(itemConfigs, null,
                 List.of(strategy), filters);
 
         List<PersistenceStrategy> strategies = PersistenceStrategy.Globals.STRATEGIES.containsValue(strategy)

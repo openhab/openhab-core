@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,7 +14,6 @@ package org.openhab.core;
 
 import java.io.FileInputStream;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
@@ -84,7 +83,7 @@ public class OpenHAB {
      */
     public static String buildString() {
         Properties prop = new Properties();
-        Path versionFilePath = Paths.get(getUserDataFolder(), "etc", "version.properties");
+        Path versionFilePath = Path.of(getUserDataFolder(), "etc", "version.properties");
         try (FileInputStream fis = new FileInputStream(versionFilePath.toFile())) {
             prop.load(fis);
             String buildNo = prop.getProperty("build-no");

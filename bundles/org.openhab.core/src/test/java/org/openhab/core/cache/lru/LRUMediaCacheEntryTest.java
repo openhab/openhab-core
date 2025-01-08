@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -205,7 +205,7 @@ public class LRUMediaCacheEntryTest {
         if (possibleException != null) {
             throw possibleException;
         }
-        assertArrayEquals(randomData, bytesResultList.get(0));
+        assertArrayEquals(randomData, bytesResultList.getFirst());
         assertArrayEquals(randomData, bytesResultList.get(1));
 
         actualAudioStream1.close();

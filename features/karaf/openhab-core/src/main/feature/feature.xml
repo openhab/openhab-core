@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-	Copyright (c) 2010-2024 Contributors to the openHAB project
+	Copyright (c) 2010-2025 Contributors to the openHAB project
 
 	See the NOTICE file(s) distributed with this work for additional
 	information.
@@ -28,7 +28,7 @@
 
 		<feature dependency="true">openhab.tp-gson</feature>
 
-		<requirement>openhab.tp;filter:="(&amp;(feature=xtext)(version&gt;=2.32.0)(!(version&gt;=2.33.0)))"</requirement>
+		<requirement>openhab.tp;filter:="(&amp;(feature=xtext)(version&gt;=2.36.0)(!(version&gt;=2.37.0)))"</requirement>
 		<feature dependency="true">openhab.tp-xtext</feature>
 
 		<requirement>openhab.tp;filter:="(feature=jax-rs-whiteboard)"</requirement>
@@ -103,6 +103,18 @@
 		<feature>openhab-core-config-discovery-addon</feature>
 		<feature dependency="true">openhab-transport-serial</feature>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery.addon.usb/${project.version}</bundle>
+	</feature>
+
+	<feature name="openhab-core-config-discovery-addon-sddp" version="${project.version}">
+		<feature>openhab-core-base</feature>
+		<feature>openhab-core-config-discovery-addon</feature>
+		<feature>openhab-core-config-discovery-sddp</feature>
+		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery.addon.sddp/${project.version}</bundle>
+	</feature>
+
+	<feature name="openhab-core-config-discovery-sddp" version="${project.version}">
+		<feature>openhab-core-base</feature>
+		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery.sddp/${project.version}</bundle>
 	</feature>
 
 	<feature name="openhab-core-addon-marketplace" version="${project.version}">
@@ -250,7 +262,7 @@
 		<feature>openhab-core-base</feature>
 		<feature>openhab-transport-serial</feature>
 
-		<bundle dependency="true">mvn:org.apache.commons/commons-pool2/2.8.1</bundle>
+		<bundle dependency="true">mvn:org.apache.commons/commons-pool2/2.11.1</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.transport.modbus/${project.version}</bundle>
 	</feature>
 
@@ -389,10 +401,10 @@
 
 	<feature name="openhab-core-model-lsp" version="${project.version}">
 
-		<requirement>openhab.tp;filter:="(&amp;(feature=xtext-ide)(version&gt;=2.32.0)(!(version&gt;=2.33.0)))"</requirement>
+		<requirement>openhab.tp;filter:="(&amp;(feature=xtext-ide)(version&gt;=2.36.0)(!(version&gt;=2.37.0)))"</requirement>
 		<feature dependency="true">openhab.tp-xtext-ide</feature>
 
-		<requirement>openhab.tp;filter:="(&amp;(feature=lsp4j)(version&gt;=0.21.0)(!(version&gt;=0.22.0)))"</requirement>
+		<requirement>openhab.tp;filter:="(&amp;(feature=lsp4j)(version&gt;=0.23.1)(!(version&gt;=0.24.0)))"</requirement>
 		<feature dependency="true">openhab.tp-lsp4j</feature>
 
 		<feature>openhab-core-model-item-ide</feature>
@@ -519,19 +531,9 @@
 
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.serial/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery.usbserial/${project.version}</bundle>
-
-		<conditional>
-			<condition>req:osgi.native;filter:="(osgi.native.osname=Linux)"</condition>
-			<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery.usbserial.linuxsysfs/${project.version}</bundle>
-		</conditional>
-
+		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery.usbserial.linuxsysfs/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery.usbserial.ser2net/${project.version}</bundle>
-
-		<conditional>
-			<condition>req:osgi.native;filter:="(osgi.native.osname=Windows*)"</condition>
-			<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery.usbserial.windowsregistry/${project.version}</bundle>
-		</conditional>
-
+		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.config.discovery.usbserial.windowsregistry/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.transport.serial/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.transport.serial.rxtx/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.transport.serial.rxtx.rfc2217/${project.version}</bundle>

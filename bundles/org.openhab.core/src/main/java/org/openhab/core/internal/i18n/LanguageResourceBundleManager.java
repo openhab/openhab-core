@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -183,9 +183,7 @@ public class LanguageResourceBundleManager {
             ResourceBundle resourceBundle = ResourceBundle.getBundle(resourceName, locale, this.resourceClassLoader,
                     Control.getNoFallbackControl(Control.FORMAT_PROPERTIES));
 
-            if (resourceBundle != null) {
-                return resourceBundle.getString(key);
-            }
+            return resourceBundle.getString(key);
         } catch (Exception ex) {
             // nothing to do
         }

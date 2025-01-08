@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -28,8 +28,6 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The {@link AddonInfoRegistry} provides access to {@link AddonInfo} objects.
@@ -41,8 +39,6 @@ import org.slf4j.LoggerFactory;
 @Component(immediate = true, service = AddonInfoRegistry.class)
 @NonNullByDefault
 public class AddonInfoRegistry {
-
-    private final Logger logger = LoggerFactory.getLogger(AddonInfoRegistry.class);
 
     private final Collection<AddonInfoProvider> addonInfoProviders = new CopyOnWriteArrayList<>();
 
@@ -106,8 +102,8 @@ public class AddonInfoRegistry {
             builder.withName(b.getName());
             builder.withDescription(b.getDescription());
         }
-        if (!(a.isMasterAddonInfo() || b.isMasterAddonInfo())) {
-            builder.isMasterAddonInfo(false);
+        if (!a.isMasterAddonInfo() && b.isMasterAddonInfo()) {
+            builder.isMasterAddonInfo(true);
         }
         if (a.getConnection() == null && b.getConnection() != null) {
             builder.withConnection(b.getConnection());

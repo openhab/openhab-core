@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -106,9 +106,9 @@ public class JavaSoundAudioSink extends AudioSinkAsync {
         } else {
             if (audioStream == null || audioStream instanceof URLAudioStream) {
                 // we are dealing with an infinite stream here
-                if (streamPlayer != null) {
+                if (streamPlayer instanceof Player player) {
                     // if we are already playing a stream, stop it first
-                    streamPlayer.close();
+                    player.close();
                     streamPlayer = null;
                 }
                 if (audioStream == null) {
@@ -153,9 +153,9 @@ public class JavaSoundAudioSink extends AudioSinkAsync {
     }
 
     protected synchronized void deactivate() {
-        if (streamPlayer != null) {
+        if (streamPlayer instanceof Player player) {
             // stop playing streams on shutdown
-            streamPlayer.close();
+            player.close();
             streamPlayer = null;
         }
     }

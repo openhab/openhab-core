@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -16,6 +16,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -29,6 +30,7 @@ import org.openhab.core.model.item.BindingConfigReader;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.link.ItemChannelLink;
 import org.openhab.core.thing.link.ItemChannelLinkProvider;
+import org.openhab.core.thing.profiles.ProfileTypeUID;
 import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,6 +49,8 @@ public class GenericItemChannelLinkProvider extends AbstractProvider<ItemChannel
     private final Logger logger = LoggerFactory.getLogger(GenericItemChannelLinkProvider.class);
     /** caches binding configurations. maps itemNames to {@link ItemChannelLink}s */
     protected Map<String, Map<ChannelUID, ItemChannelLink>> itemChannelLinkMap = new ConcurrentHashMap<>();
+
+    private Map<String, Set<ChannelUID>> addedItemChannels = new ConcurrentHashMap<>();
 
     /**
      * stores information about the context of items. The map has this content
@@ -87,26 +91,30 @@ public class GenericItemChannelLinkProvider extends AbstractProvider<ItemChannel
         } catch (IllegalArgumentException e) {
             throw new BindingConfigParseException(e.getMessage());
         }
+
+        // Fix the configuration in case a profile is defined without any scope
+        if (configuration.containsKey("profile") && configuration.get("profile") instanceof String profile
+                && profile.indexOf(":") == -1) {
+            String fullProfile = ProfileTypeUID.SYSTEM_SCOPE + ":" + profile;
+            configuration.put("profile", fullProfile);
+            logger.info(
+                    "Profile '{}' for channel '{}' is missing the scope prefix, assuming the correct UID is '{}'. Check your configuration.",
+                    profile, channelUID, fullProfile);
+        }
+
         ItemChannelLink itemChannelLink = new ItemChannelLink(itemName, channelUIDObject, configuration);
 
-        Set<String> itemNames = contextMap.get(context);
-        if (itemNames == null) {
-            itemNames = new HashSet<>();
-            contextMap.put(context, itemNames);
-        }
+        Set<String> itemNames = Objects.requireNonNull(contextMap.computeIfAbsent(context, k -> new HashSet<>()));
         itemNames.add(itemName);
         if (previousItemNames != null) {
             previousItemNames.remove(itemName);
         }
 
-        Map<ChannelUID, ItemChannelLink> links = itemChannelLinkMap.get(itemName);
-        if (links == null) {
-            // Create a HashMap with an initial capacity of 2 (the default is 16) to save memory
-            // because most items have only one channel. A capacity of 2 is enough to avoid
-            // resizing the HashMap in most cases, whereas 1 would trigger a resize as soon as
-            // one element is added.
-            itemChannelLinkMap.put(itemName, links = new HashMap<>(2));
-        }
+        // Create a HashMap with an initial capacity of 2 (the default is 16) to save memory because most items have
+        // only one channel. A capacity of 2 is enough to avoid resizing the HashMap in most cases, whereas 1 would
+        // trigger a resize as soon as one element is added.
+        Map<ChannelUID, ItemChannelLink> links = Objects
+                .requireNonNull(itemChannelLinkMap.computeIfAbsent(itemName, k -> new HashMap<>(2)));
 
         ItemChannelLink oldLink = links.put(channelUIDObject, itemChannelLink);
         if (oldLink == null) {
@@ -114,6 +122,7 @@ public class GenericItemChannelLinkProvider extends AbstractProvider<ItemChannel
         } else {
             notifyListenersAboutUpdatedElement(oldLink, itemChannelLink);
         }
+        addedItemChannels.computeIfAbsent(itemName, k -> new HashSet<>(2)).add(channelUIDObject);
     }
 
     @Override
@@ -140,6 +149,17 @@ public class GenericItemChannelLinkProvider extends AbstractProvider<ItemChannel
             }
         }
         Optional.ofNullable(contextMap.get(context)).ifPresent(ctx -> ctx.removeAll(previousItemNames));
+
+        addedItemChannels.forEach((itemName, addedChannelUIDs) -> {
+            Map<ChannelUID, ItemChannelLink> links = itemChannelLinkMap.getOrDefault(itemName, Map.of());
+            Set<ChannelUID> removedChannelUIDs = new HashSet<>(links.keySet());
+            removedChannelUIDs.removeAll(addedChannelUIDs);
+            removedChannelUIDs.forEach(removedChannelUID -> {
+                ItemChannelLink link = links.remove(removedChannelUID);
+                notifyListenersAboutRemovedElement(link);
+            });
+        });
+        addedItemChannels.clear();
     }
 
     @Override

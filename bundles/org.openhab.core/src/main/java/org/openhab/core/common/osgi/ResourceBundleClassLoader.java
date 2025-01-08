@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -89,7 +89,7 @@ public class ResourceBundleClassLoader extends ClassLoader {
         }
 
         if (allResources.size() == 1) {
-            return allResources.get(0);
+            return allResources.getFirst();
         }
 
         // handle fragment resources. return first one.

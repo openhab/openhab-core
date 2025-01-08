@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -82,10 +82,15 @@ public class UpgradeTool {
                         || LINK_UPGRADE_JS_PROFILE.equals(commandLine.getOptionValue(OPT_COMMAND))) {
                     upgrader.linkUpgradeJsProfile();
                 }
+                if (!commandLine.hasOption(OPT_COMMAND)
+                        || LINK_UPGRADE_SCRIPT_PROFILE.equals(commandLine.getOptionValue(OPT_COMMAND))) {
+                    upgrader.linkUpgradeScriptProfile();
+                }
             }
         } catch (ParseException e) {
             HelpFormatter formatter = new HelpFormatter();
-            String commands = Set.of(ITEM_COPY_UNIT_TO_METADATA, LINK_UPGRADE_JS_PROFILE).toString();
+            String commands = Set.of(ITEM_COPY_UNIT_TO_METADATA, LINK_UPGRADE_JS_PROFILE, LINK_UPGRADE_SCRIPT_PROFILE)
+                    .toString();
             formatter.printHelp("upgradetool", "", options, "Available commands: " + commands, true);
         }
 

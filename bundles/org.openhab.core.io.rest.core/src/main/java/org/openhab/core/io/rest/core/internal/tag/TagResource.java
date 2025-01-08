@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -29,7 +29,6 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -132,17 +131,13 @@ public class TagResource implements RESTResource {
             lastModified = Date.from(Instant.now().truncatedTo(ChronoUnit.SECONDS));
         }
 
-        CacheControl cc = new CacheControl();
-        cc.setNoCache(true);
-        cc.setMustRevalidate(true);
-        cc.setPrivate(true);
-
         final Locale locale = localeService.getLocale(language);
 
         Stream<EnrichedSemanticTagDTO> tagsStream = semanticTagRegistry.getAll().stream()
                 .sorted(Comparator.comparing(SemanticTag::getUID))
                 .map(t -> new EnrichedSemanticTagDTO(t.localized(locale), semanticTagRegistry.isEditable(t)));
-        return Response.ok(new Stream2JSONInputStream(tagsStream)).lastModified(lastModified).cacheControl(cc).build();
+        return Response.ok(new Stream2JSONInputStream(tagsStream)).lastModified(lastModified)
+                .cacheControl(RESTConstants.CACHE_CONTROL).build();
     }
 
     @GET
@@ -165,11 +160,6 @@ public class TagResource implements RESTResource {
             lastModified = Date.from(Instant.now().truncatedTo(ChronoUnit.SECONDS));
         }
 
-        CacheControl cc = new CacheControl();
-        cc.setNoCache(true);
-        cc.setMustRevalidate(true);
-        cc.setPrivate(true);
-
         final Locale locale = localeService.getLocale(language);
         String uid = tagId.trim();
 
@@ -178,8 +168,8 @@ public class TagResource implements RESTResource {
             Stream<EnrichedSemanticTagDTO> tagsStream = semanticTagRegistry.getSubTree(tag).stream()
                     .sorted(Comparator.comparing(SemanticTag::getUID))
                     .map(t -> new EnrichedSemanticTagDTO(t.localized(locale), semanticTagRegistry.isEditable(t)));
-            return Response.ok(new Stream2JSONInputStream(tagsStream)).lastModified(lastModified).cacheControl(cc)
-                    .build();
+            return Response.ok(new Stream2JSONInputStream(tagsStream)).lastModified(lastModified)
+                    .cacheControl(RESTConstants.CACHE_CONTROL).build();
         } else {
             return JSONResponse.createErrorResponse(Status.NOT_FOUND, "Tag " + uid + " does not exist!");
         }

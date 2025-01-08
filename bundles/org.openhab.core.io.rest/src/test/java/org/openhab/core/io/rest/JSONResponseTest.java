@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,16 +17,18 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.object.IsCompatibleType.typeCompatibleWith;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.StreamingOutput;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
@@ -92,12 +94,11 @@ public class JSONResponseTest {
         assertThat(response.getMediaType(), is(MediaType.APPLICATION_JSON_TYPE));
 
         Object entity = response.getEntity();
-        assertThat(entity.getClass(), is(typeCompatibleWith(InputStream.class)));
+        assertThat(entity.getClass(), is(typeCompatibleWith(StreamingOutput.class)));
 
-        try (InputStream entityInStream = (InputStream) entity) {
-            byte[] entityValue = new byte[ENTITY_JSON_VALUE.length()];
-            entityInStream.read(entityValue);
-            assertThat(new String(entityValue), is(ENTITY_JSON_VALUE));
+        try (ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
+            ((StreamingOutput) entity).write(buffer);
+            assertThat(new String(buffer.toByteArray(), StandardCharsets.UTF_8), is(ENTITY_JSON_VALUE));
         }
     }
 
@@ -120,10 +121,11 @@ public class JSONResponseTest {
         assertThat(response.getMediaType(), is(MediaType.APPLICATION_JSON_TYPE));
 
         Object entity = response.getEntity();
-        assertThat(entity.getClass(), is(typeCompatibleWith(InputStream.class)));
+        assertThat(entity.getClass(), is(typeCompatibleWith(StreamingOutput.class)));
 
-        try (InputStream entityInStream = (InputStream) entity) {
-            String largeEntityJSON = new String(entityInStream.readAllBytes(), StandardCharsets.UTF_8);
+        try (ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
+            ((StreamingOutput) entity).write(buffer);
+            String largeEntityJSON = new String(buffer.toByteArray(), StandardCharsets.UTF_8);
             assertThat(largeEntityJSON, is(notNullValue()));
             assertTrue(largeEntityJSON.startsWith("{"));
             assertTrue(largeEntityJSON.endsWith("}"));
@@ -138,7 +140,7 @@ public class JSONResponseTest {
         private List<BigDecimal> getRandoms() {
             List<BigDecimal> randoms = new ArrayList<>();
             for (int i = 0; i < 100000; i++) {
-                randoms.add(new BigDecimal(Math.random()));
+                randoms.add(new BigDecimal(ThreadLocalRandom.current().nextDouble()));
             }
 
             return randoms;

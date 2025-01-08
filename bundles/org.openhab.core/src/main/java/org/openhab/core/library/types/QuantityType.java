@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,20 +14,27 @@ package org.openhab.core.library.types;
 
 import static org.eclipse.jdt.annotation.DefaultLocation.*;
 
+import java.io.Serial;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.ParsePosition;
-import java.time.Instant;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.IllegalFormatConversionException;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.MissingFormatArgumentException;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import javax.measure.Dimension;
 import javax.measure.IncommensurableException;
+import javax.measure.MetricPrefix;
 import javax.measure.Quantity;
 import javax.measure.Quantity.Scale;
 import javax.measure.UnconvertibleException;
@@ -40,7 +47,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.internal.library.unit.UnitInitializer;
 import org.openhab.core.items.events.ItemStateEvent;
-import org.openhab.core.library.unit.MetricPrefix;
 import org.openhab.core.library.unit.Units;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.PrimitiveType;
@@ -66,8 +72,16 @@ import tech.uom.lib.common.function.QuantityFunctions;
 public class QuantityType<T extends Quantity<T>> extends Number
         implements PrimitiveType, State, Command, Comparable<QuantityType<T>> {
 
+    @Serial
     private static final long serialVersionUID = 8828949721938234629L;
     private static final BigDecimal BIG_DECIMAL_HUNDRED = BigDecimal.valueOf(100);
+
+    // Patterns to identify formatting strings to format Time, derived from Java String formatting for DateTime
+    private static final Pattern DAYS_PATTERN = Pattern.compile("%(?:1\\$)?[tT][de]");
+    private static final Pattern HOURS_PATTERN = Pattern.compile("%(?:1\\$)?[tT][HkIl]");
+    private static final Pattern MINUTES_PATTERN = Pattern.compile("%(?:1\\$)?[tT]M");
+    private static final Pattern SECONDS_PATTERN = Pattern.compile("%(?:1\\$)?[tT][Ss]");
+    private static final Pattern MILLIS_PATTERN = Pattern.compile("%(?:1\\$)?[tT][LQ]");
 
     public static final QuantityType<Dimensionless> ZERO = new QuantityType<>(0, AbstractUnit.ONE);
     public static final QuantityType<Dimensionless> ONE = new QuantityType<>(1, AbstractUnit.ONE);
@@ -169,7 +183,12 @@ public class QuantityType<T extends Quantity<T>> extends Number
      */
     public QuantityType(Number value, Unit<T> unit) {
         // Avoid scientific notation for double
-        BigDecimal bd = new BigDecimal(value.toString());
+        BigDecimal bd;
+        if (value instanceof BigDecimal decimal) {
+            bd = decimal;
+        } else {
+            bd = new BigDecimal(value.toString());
+        }
         quantity = (Quantity<T>) Quantities.getQuantity(bd, unit, Scale.RELATIVE);
     }
 
@@ -353,7 +372,12 @@ public class QuantityType<T extends Quantity<T>> extends Number
     }
 
     public BigDecimal toBigDecimal() {
-        return new BigDecimal(quantity.getValue().toString());
+        Number value = quantity.getValue();
+        if (value instanceof BigDecimal decimal) {
+            return decimal;
+        } else {
+            return new BigDecimal(value.toString());
+        }
     }
 
     @Override
@@ -366,6 +390,14 @@ public class QuantityType<T extends Quantity<T>> extends Number
 
     @Override
     public String format(String pattern) {
+        if (pattern.contains("%s") || pattern.contains("%S")) {
+            try {
+                return String.format(pattern, quantity);
+            } catch (IllegalFormatConversionException ifce) {
+                // The conversion is not valid. Fall through trying other formatting options.
+            }
+        }
+
         boolean unitPlaceholder = pattern.contains(UnitUtils.UNIT_PLACEHOLDER);
         final String formatPattern;
 
@@ -376,16 +408,82 @@ public class QuantityType<T extends Quantity<T>> extends Number
             formatPattern = pattern;
         }
 
-        // The dimension could be a time value thus we want to support patterns to format datetime
+        // The dimension could be a time value thus we want to support patterns to format.
+        // Wile time is representing a duration (Scale.RELATIVE), formatting patterns mimic String format patterns for
+        // DateTime to not break backward compatibility and to avoid introducing specific duration formatting.
         if (quantity.getUnit().isCompatible(Units.SECOND) && !unitPlaceholder) {
             QuantityType<T> millis = toUnit(MetricPrefix.MILLI(Units.SECOND));
             if (millis != null) {
+                Duration duration = Duration.ofMillis(millis.longValue());
+
+                String timeFormatPattern = formatPattern;
+                timeFormatPattern = timeFormatPattern.replaceAll("%(?:1\\$)?[tT]R", "%tH:%tM");
+                timeFormatPattern = timeFormatPattern.replaceAll("%(?:1\\$)?[tT]T", "%tH:%tM:%tS");
+
+                enum Type {
+                    DAYS,
+                    HOURS,
+                    MINUTES,
+                    SECONDS,
+                    MILLIS
+                }
+                Map<Integer, Type> patternIndex = new HashMap<>();
+                Matcher matcher = DAYS_PATTERN.matcher(timeFormatPattern);
+                while (matcher.find()) {
+                    patternIndex.put(matcher.start(), Type.DAYS);
+                }
+                matcher = HOURS_PATTERN.matcher(timeFormatPattern);
+                while (matcher.find()) {
+                    patternIndex.put(matcher.start(), Type.HOURS);
+                }
+                matcher = MINUTES_PATTERN.matcher(timeFormatPattern);
+                while (matcher.find()) {
+                    patternIndex.put(matcher.start(), Type.MINUTES);
+                }
+                matcher = SECONDS_PATTERN.matcher(timeFormatPattern);
+                while (matcher.find()) {
+                    patternIndex.put(matcher.start(), Type.SECONDS);
+                }
+                matcher = MILLIS_PATTERN.matcher(timeFormatPattern);
+                while (matcher.find()) {
+                    patternIndex.put(matcher.start(), Type.MILLIS);
+                }
+
+                long dd = duration.toDays();
+                long hh = (patternIndex.values().contains(Type.DAYS) ? 0 : dd * 24) + duration.toHoursPart();
+                long mm = (patternIndex.values().contains(Type.HOURS) ? 0 : hh * 60) + duration.toMinutesPart();
+                long ss = (patternIndex.values().contains(Type.MINUTES) ? 0 : mm * 60) + duration.toSecondsPart();
+                long mmm = (patternIndex.values().contains(Type.SECONDS) ? 0 : ss * 1000) + duration.toMillisPart();
+
+                List<Long> formatArgs = new ArrayList<>();
+                patternIndex.entrySet().stream().sorted(Comparator.comparingInt(e -> e.getKey())).forEach(p -> {
+                    switch (p.getValue()) {
+                        case DAYS:
+                            formatArgs.add(dd);
+                            break;
+                        case HOURS:
+                            formatArgs.add(hh);
+                            break;
+                        case MINUTES:
+                            formatArgs.add(mm);
+                            break;
+                        case SECONDS:
+                            formatArgs.add(ss);
+                            break;
+                        case MILLIS:
+                            formatArgs.add(mmm);
+                            break;
+                    }
+                });
+
+                timeFormatPattern = timeFormatPattern.replaceAll("%(?:1\\$)?[tT][eklsQ]", "%d");
+                timeFormatPattern = timeFormatPattern.replaceAll("%(?:1\\$)?[tT][dHIMS]", "%02d");
+                timeFormatPattern = timeFormatPattern.replaceAll("%(?:1\\$)?[tT]L", "%03d");
+
                 try {
-                    return String.format(formatPattern,
-                            ZonedDateTime.ofInstant(Instant.ofEpochMilli(millis.longValue()), ZoneOffset.UTC));
-                } catch (IllegalFormatConversionException ifce) {
-                    // The conversion is not valid for the type ZonedDateTime. This happens, if the format is like
-                    // "%.1f". Fall through to default behavior.
+                    return String.format(timeFormatPattern, formatArgs.toArray());
+                } catch (IllegalFormatConversionException | MissingFormatArgumentException ifce) {
+                    // The conversion is not valid. Fall through to default behavior.
                 }
             }
         }
@@ -429,11 +527,7 @@ public class QuantityType<T extends Quantity<T>> extends Number
 
     @Override
     public String toFullString() {
-        if (AbstractUnit.ONE.equals(quantity.getUnit())) {
-            return quantity.getValue().toString();
-        } else {
-            return quantity.toString();
-        }
+        return quantity.toString();
     }
 
     @Override

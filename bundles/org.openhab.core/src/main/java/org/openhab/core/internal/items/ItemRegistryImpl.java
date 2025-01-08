@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -59,6 +59,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Stefan Bußweiler - Migration to new event mechanism
+ * @author Laurent Garnier - handle new DefaultStateDescriptionFragmentProvider
  */
 @NonNullByDefault
 @Component(immediate = true)
@@ -71,13 +72,16 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
     private @Nullable StateDescriptionService stateDescriptionService;
     private @Nullable CommandDescriptionService commandDescriptionService;
     private final MetadataRegistry metadataRegistry;
+    private final DefaultStateDescriptionFragmentProvider defaultStateDescriptionFragmentProvider;
 
     private @Nullable ItemStateConverter itemStateConverter;
 
     @Activate
-    public ItemRegistryImpl(final @Reference MetadataRegistry metadataRegistry) {
+    public ItemRegistryImpl(final @Reference MetadataRegistry metadataRegistry,
+            final @Reference DefaultStateDescriptionFragmentProvider defaultStateDescriptionFragmentProvider) {
         super(ItemProvider.class);
         this.metadataRegistry = metadataRegistry;
+        this.defaultStateDescriptionFragmentProvider = defaultStateDescriptionFragmentProvider;
     }
 
     @Activate
@@ -152,28 +156,24 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
 
     private void addToGroupItems(Item item, List<String> groupItemNames) {
         for (String groupName : groupItemNames) {
-            if (groupName != null) {
-                try {
-                    if (getItem(groupName) instanceof GroupItem groupItem) {
-                        groupItem.addMember(item);
-                    }
-                } catch (ItemNotFoundException e) {
-                    // the group might not yet be registered, let's ignore this
+            try {
+                if (getItem(groupName) instanceof GroupItem groupItem) {
+                    groupItem.addMember(item);
                 }
+            } catch (ItemNotFoundException e) {
+                // the group might not yet be registered, let's ignore this
             }
         }
     }
 
     private void replaceInGroupItems(Item oldItem, Item newItem, List<String> groupItemNames) {
         for (String groupName : groupItemNames) {
-            if (groupName != null) {
-                try {
-                    if (getItem(groupName) instanceof GroupItem groupItem) {
-                        groupItem.replaceMember(oldItem, newItem);
-                    }
-                } catch (ItemNotFoundException e) {
-                    // the group might not yet be registered, let's ignore this
+            try {
+                if (getItem(groupName) instanceof GroupItem groupItem) {
+                    groupItem.replaceMember(oldItem, newItem);
                 }
+            } catch (ItemNotFoundException e) {
+                // the group might not yet be registered, let's ignore this
             }
         }
     }
@@ -198,6 +198,8 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
 
         // add the item to all relevant groups
         addToGroupItems(item, item.getGroupNames());
+
+        defaultStateDescriptionFragmentProvider.onItemAdded(item);
     }
 
     private void injectServices(Item item) {
@@ -223,14 +225,12 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
 
     private void removeFromGroupItems(Item item, List<String> groupItemNames) {
         for (String groupName : groupItemNames) {
-            if (groupName != null) {
-                try {
-                    if (getItem(groupName) instanceof GroupItem groupItem) {
-                        groupItem.removeMember(item);
-                    }
-                } catch (ItemNotFoundException e) {
-                    // the group might not yet be registered, let's ignore this
+            try {
+                if (getItem(groupName) instanceof GroupItem groupItem) {
+                    groupItem.removeMember(item);
                 }
+            } catch (ItemNotFoundException e) {
+                // the group might not yet be registered, let's ignore this
             }
         }
     }
@@ -246,6 +246,7 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
             genericItem.dispose();
         }
         removeFromGroupItems(element, element.getGroupNames());
+        defaultStateDescriptionFragmentProvider.onItemRemoved(element);
     }
 
     @Override
@@ -269,6 +270,9 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
             addMembersToGroupItem(groupItem);
         }
         injectServices(item);
+
+        defaultStateDescriptionFragmentProvider.onItemRemoved(oldItem);
+        defaultStateDescriptionFragmentProvider.onItemAdded(item);
     }
 
     @Override

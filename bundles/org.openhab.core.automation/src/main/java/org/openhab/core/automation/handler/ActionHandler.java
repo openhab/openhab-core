@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -31,6 +31,14 @@ import org.openhab.core.automation.Trigger;
  */
 @NonNullByDefault
 public interface ActionHandler extends ModuleHandler {
+    /**
+     * Called to compile an {@link Action} of the {@link Rule} when the rule is initialized.
+     *
+     * @throws Exception if the compilation fails
+     */
+    default void compile() throws Exception {
+        // Do nothing by default
+    }
 
     /**
      * Called to execute an {@link Action} of the {@link Rule} when it is needed.

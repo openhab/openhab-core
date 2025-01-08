@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -37,15 +37,21 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.auth.Role;
 import org.openhab.core.automation.Action;
+import org.openhab.core.automation.Visibility;
 import org.openhab.core.automation.annotation.RuleAction;
 import org.openhab.core.automation.handler.ActionHandler;
 import org.openhab.core.automation.handler.ModuleHandlerFactory;
+import org.openhab.core.automation.module.provider.AnnotationActionModuleTypeHelper;
 import org.openhab.core.automation.type.ActionType;
 import org.openhab.core.automation.type.Input;
 import org.openhab.core.automation.type.ModuleTypeRegistry;
 import org.openhab.core.automation.type.Output;
+import org.openhab.core.automation.util.ActionInputsHelper;
 import org.openhab.core.automation.util.ModuleBuilder;
+import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.Configuration;
+import org.openhab.core.config.core.dto.ConfigDescriptionDTOMapper;
+import org.openhab.core.config.core.dto.ConfigDescriptionParameterDTO;
 import org.openhab.core.io.rest.LocaleService;
 import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
@@ -77,6 +83,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * The {@link ThingActionsResource} allows retrieving and executing thing actions via REST API
  *
  * @author Jan N. Klug - Initial contribution
+ * @author Laurent Garnier - API enhanced to be able to run thing actions in Main UI
  */
 @Component
 @JaxrsResource
@@ -91,15 +98,20 @@ public class ThingActionsResource implements RESTResource {
 
     private final LocaleService localeService;
     private final ModuleTypeRegistry moduleTypeRegistry;
+    private final ActionInputsHelper actionInputsHelper;
+    private final AnnotationActionModuleTypeHelper annotationActionModuleTypeHelper;
 
-    Map<ThingUID, Map<String, ThingActions>> thingActionsMap = new ConcurrentHashMap<>();
+    Map<ThingUID, Map<String, List<String>>> thingActionsMap = new ConcurrentHashMap<>();
     private List<ModuleHandlerFactory> moduleHandlerFactories = new ArrayList<>();
 
     @Activate
     public ThingActionsResource(@Reference LocaleService localeService,
-            @Reference ModuleTypeRegistry moduleTypeRegistry) {
+            @Reference ModuleTypeRegistry moduleTypeRegistry, @Reference ActionInputsHelper actionInputsHelper,
+            @Reference AnnotationActionModuleTypeHelper annotationActionModuleTypeHelper) {
         this.localeService = localeService;
         this.moduleTypeRegistry = moduleTypeRegistry;
+        this.actionInputsHelper = actionInputsHelper;
+        this.annotationActionModuleTypeHelper = annotationActionModuleTypeHelper;
     }
 
     @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.MULTIPLE)
@@ -108,7 +120,18 @@ public class ThingActionsResource implements RESTResource {
         String scope = getScope(thingActions);
         if (handler != null && scope != null) {
             ThingUID thingUID = handler.getThing().getUID();
-            thingActionsMap.computeIfAbsent(thingUID, thingUid -> new ConcurrentHashMap<>()).put(scope, thingActions);
+            Method[] methods = thingActions.getClass().getDeclaredMethods();
+            List<String> actionUIDs = new ArrayList<>();
+            for (Method method : methods) {
+                if (!method.isAnnotationPresent(RuleAction.class)) {
+                    continue;
+                }
+                actionUIDs.add(annotationActionModuleTypeHelper.getModuleIdFromMethod(scope, method));
+            }
+            if (actionUIDs.isEmpty()) {
+                return;
+            }
+            thingActionsMap.computeIfAbsent(thingUID, thingUid -> new ConcurrentHashMap<>()).put(scope, actionUIDs);
         }
     }
 
@@ -117,7 +140,7 @@ public class ThingActionsResource implements RESTResource {
         String scope = getScope(thingActions);
         if (handler != null && scope != null) {
             ThingUID thingUID = handler.getThing().getUID();
-            Map<String, ThingActions> actionMap = thingActionsMap.get(thingUID);
+            Map<String, List<String>> actionMap = thingActionsMap.get(thingUID);
             if (actionMap != null) {
                 actionMap.remove(scope);
                 if (actionMap.isEmpty()) {
@@ -142,33 +165,38 @@ public class ThingActionsResource implements RESTResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "getAvailableActionsForThing", summary = "Get all available actions for provided thing UID", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ThingActionDTO.class), uniqueItems = true))),
-            @ApiResponse(responseCode = "204", description = "No actions found.") })
+            @ApiResponse(responseCode = "404", description = "No actions found.") })
     public Response getActions(@PathParam("thingUID") @Parameter(description = "thingUID") String thingUID,
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language) {
         Locale locale = localeService.getLocale(language);
         ThingUID aThingUID = new ThingUID(thingUID);
 
         List<ThingActionDTO> actions = new ArrayList<>();
-        Map<String, ThingActions> thingActionsMap = this.thingActionsMap.get(aThingUID);
+        Map<String, List<String>> thingActionsMap = this.thingActionsMap.get(aThingUID);
         if (thingActionsMap == null) {
             return Response.status(Response.Status.NOT_FOUND).build();
         }
 
         // inspect ThingActions
-        for (Map.Entry<String, ThingActions> thingActionsEntry : thingActionsMap.entrySet()) {
-            ThingActions thingActions = thingActionsEntry.getValue();
-            Method[] methods = thingActions.getClass().getDeclaredMethods();
-            for (Method method : methods) {
-                RuleAction ruleAction = method.getAnnotation(RuleAction.class);
-
-                if (ruleAction == null) {
+        for (Map.Entry<String, List<String>> thingActionsEntry : thingActionsMap.entrySet()) {
+            for (String actionUID : thingActionsEntry.getValue()) {
+                ActionType actionType = (ActionType) moduleTypeRegistry.get(actionUID, locale);
+                if (actionType == null) {
                     continue;
                 }
 
-                String actionUid = thingActionsEntry.getKey() + "." + method.getName();
-                ActionType actionType = (ActionType) moduleTypeRegistry.get(actionUid, locale);
-                if (actionType == null) {
-                    continue;
+                // Filter the configuration description parameters that correspond to inputs
+                List<ConfigDescriptionParameter> inputParameters = new ArrayList<>();
+                for (ConfigDescriptionParameter parameter : actionType.getConfigurationDescriptions()) {
+                    if (actionType.getInputs().stream().anyMatch(i -> i.getName().equals(parameter.getName()))) {
+                        inputParameters.add(parameter);
+                    }
+                }
+                // If the resulting list of configuration description parameters is empty while the list of
+                // inputs is not empty, this is because the conversion of inputs into configuration description
+                // parameters failed for at least one input
+                if (inputParameters.isEmpty() && !actionType.getInputs().isEmpty()) {
+                    inputParameters = null;
                 }
 
                 ThingActionDTO actionDTO = new ThingActionDTO();
@@ -176,7 +204,10 @@ public class ThingActionsResource implements RESTResource {
                 actionDTO.description = actionType.getDescription();
                 actionDTO.label = actionType.getLabel();
                 actionDTO.inputs = actionType.getInputs();
+                actionDTO.inputConfigDescriptions = inputParameters == null ? null
+                        : ConfigDescriptionDTOMapper.mapParameters(inputParameters);
                 actionDTO.outputs = actionType.getOutputs();
+                actionDTO.visibility = actionType.getVisibility();
                 actions.add(actionDTO);
             }
         }
@@ -186,7 +217,9 @@ public class ThingActionsResource implements RESTResource {
 
     @POST
     @RolesAllowed({ Role.USER, Role.ADMIN })
-    @Path("/{thingUID}/{actionUid: [a-zA-Z0-9]+\\.[a-zA-Z0-9]+}")
+    // accept actionUid in the form of "scope.actionTypeUid" or "scope.actionTypeUid#signatureHash"
+    // # is URL encoded as %23
+    @Path("/{thingUID}/{actionUid: [a-zA-Z0-9]+(\\-[a-zA-Z0-9]+)?\\.[a-zA-Z0-9]+(%23[A-Fa-f0-9]+)?}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "executeThingAction", summary = "Executes a thing action.", responses = {
@@ -221,7 +254,9 @@ public class ThingActionsResource implements RESTResource {
         }
 
         try {
-            Map<String, Object> returnValue = Objects.requireNonNullElse(handler.execute(actionInputs), Map.of());
+            Map<String, Object> returnValue = Objects.requireNonNullElse(
+                    handler.execute(actionInputsHelper.mapSerializedInputsToActionInputs(actionType, actionInputs)),
+                    Map.of());
             moduleHandlerFactory.ungetHandler(action, ruleUID, handler);
             return Response.ok(returnValue).build();
         } catch (Exception e) {
@@ -243,8 +278,12 @@ public class ThingActionsResource implements RESTResource {
 
         public @Nullable String label;
         public @Nullable String description;
+        public @Nullable Visibility visibility;
 
         public List<Input> inputs = new ArrayList<>();
+
+        public @Nullable List<ConfigDescriptionParameterDTO> inputConfigDescriptions;
+
         public List<Output> outputs = new ArrayList<>();
     }
 }

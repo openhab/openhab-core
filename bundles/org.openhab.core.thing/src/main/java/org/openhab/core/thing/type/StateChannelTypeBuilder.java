@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -22,6 +22,7 @@ import org.openhab.core.types.StateDescriptionFragment;
  * Interface for builders for {@link ChannelType}s of kind STATE
  *
  * @author Stefan Triller - Initial contribution
+ * @author Mark Herwege - added unit hint
  */
 @NonNullByDefault
 public interface StateChannelTypeBuilder extends ChannelTypeBuilder<StateChannelTypeBuilder> {
@@ -48,4 +49,12 @@ public interface StateChannelTypeBuilder extends ChannelTypeBuilder<StateChannel
      * @return this builder
      */
     StateChannelTypeBuilder withCommandDescription(@Nullable CommandDescription commandDescription);
+
+    /**
+     * Sets the unitHint for the {@link ChannelType}
+     *
+     * @param unitHint the unit hint
+     * @return this builder
+     */
+    StateChannelTypeBuilder withUnitHint(@Nullable String unitHint);
 }

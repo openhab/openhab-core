@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -19,7 +19,6 @@ import java.net.URISyntaxException;
 import java.nio.file.FileStore;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -132,13 +131,11 @@ public class LRUMediaCache<V> {
             // 2 clean orphan (part of a pair (file + metadata) without a corresponding partner)
             // 2-a delete a file without its metadata
             for (Path path : filesInCacheFolder) {
-                if (path != null) {
-                    String fileName = path.getFileName().toString();
-                    // check corresponding metadata in storage
-                    V metadata = storage.get(fileName);
-                    if (metadata == null) {
-                        Files.delete(path);
-                    }
+                String fileName = path.getFileName().toString();
+                // check corresponding metadata in storage
+                V metadata = storage.get(fileName);
+                if (metadata == null) {
+                    Files.delete(path);
                 }
             }
             // 2-b delete metadata without corresponding file
@@ -157,7 +154,7 @@ public class LRUMediaCache<V> {
 
     private long getFreeSpace() {
         try {
-            Path rootPath = Paths.get(new URI("file:///"));
+            Path rootPath = Path.of(new URI("file:///"));
             Path dirPath = rootPath.resolve(cacheFolder.getParent());
             FileStore dirFileStore = Files.getFileStore(dirPath);
             return dirFileStore.getUsableSpace();

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -33,7 +33,7 @@ public class StringsCompleterTest {
         // positive match
         assertTrue(sc.complete(new String[] { "a" }, 0, 1, candidates));
         assertEquals(1, candidates.size());
-        assertEquals("abc ", candidates.get(0));
+        assertEquals("abc ", candidates.getFirst());
         candidates.clear();
 
         // negative match
@@ -43,25 +43,25 @@ public class StringsCompleterTest {
         // case insensitive
         assertTrue(sc.complete(new String[] { "A" }, 0, 1, candidates));
         assertEquals(1, candidates.size());
-        assertEquals("abc ", candidates.get(0));
+        assertEquals("abc ", candidates.getFirst());
         candidates.clear();
 
         // second argument
         assertTrue(sc.complete(new String[] { "a", "d" }, 1, 1, candidates));
         assertEquals(1, candidates.size());
-        assertEquals("def ", candidates.get(0));
+        assertEquals("def ", candidates.getFirst());
         candidates.clear();
 
         // cursor not at end of word (truncates rest)
         assertTrue(sc.complete(new String[] { "a", "dg" }, 1, 1, candidates));
         assertEquals(1, candidates.size());
-        assertEquals("def ", candidates.get(0));
+        assertEquals("def ", candidates.getFirst());
         candidates.clear();
 
         // first argument when second is present
         assertTrue(sc.complete(new String[] { "a", "d" }, 0, 1, candidates));
         assertEquals(1, candidates.size());
-        assertEquals("abc ", candidates.get(0));
+        assertEquals("abc ", candidates.getFirst());
     }
 
     @Test
@@ -77,7 +77,7 @@ public class StringsCompleterTest {
 
         assertTrue(sc.complete(new String[] { "AB" }, 0, 1, candidates));
         assertEquals(1, candidates.size());
-        assertEquals("ABc ", candidates.get(0));
+        assertEquals("ABc ", candidates.getFirst());
     }
 
     @Test
@@ -87,7 +87,7 @@ public class StringsCompleterTest {
 
         assertTrue(sc.complete(new String[] { "abcd" }, 0, 4, candidates));
         assertEquals(5, candidates.size());
-        assertEquals("abcdd ", candidates.get(0));
+        assertEquals("abcdd ", candidates.getFirst());
         assertEquals("abcde ", candidates.get(1));
         assertEquals("abcdee ", candidates.get(2));
         assertEquals("abcdef ", candidates.get(3));
@@ -96,13 +96,13 @@ public class StringsCompleterTest {
 
         assertTrue(sc.complete(new String[] { "abcde" }, 0, 5, candidates));
         assertEquals(3, candidates.size());
-        assertEquals("abcde ", candidates.get(0));
+        assertEquals("abcde ", candidates.getFirst());
         assertEquals("abcdee ", candidates.get(1));
         assertEquals("abcdef ", candidates.get(2));
         candidates.clear();
 
         assertTrue(sc.complete(new String[] { "abcdee" }, 0, 6, candidates));
         assertEquals(1, candidates.size());
-        assertEquals("abcdee ", candidates.get(0));
+        assertEquals("abcdee ", candidates.getFirst());
     }
 }

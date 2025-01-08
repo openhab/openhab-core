@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,7 +13,6 @@
 package org.openhab.core.automation.internal.module.handler;
 
 import java.math.BigDecimal;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -87,7 +86,7 @@ public class SystemTriggerHandler extends BaseTriggerModuleHandler implements Ev
             if (startlevel <= sl && startlevel > StartLevelService.STARTLEVEL_RULEENGINE) {
                 // only execute rules if their start level is higher than the rule engine activation level, since
                 // otherwise the rule engine takes care of the execution already
-                trigger();
+                trigger(event);
             }
         }
     }
@@ -101,15 +100,14 @@ public class SystemTriggerHandler extends BaseTriggerModuleHandler implements Ev
         super.dispose();
     }
 
-    public void trigger() {
+    private void trigger(Event event) {
         final ModuleHandlerCallback callback = this.callback;
         if (!(callback instanceof TriggerHandlerCallback)) {
             return;
         }
 
         TriggerHandlerCallback thCallback = (TriggerHandlerCallback) callback;
-        Map<String, Object> values = new HashMap<>();
-        values.put(OUT_STARTLEVEL, startlevel);
+        Map<String, Object> values = Map.of(OUT_STARTLEVEL, startlevel, "event", event);
         thCallback.triggered(module, values);
         triggered = true;
     }

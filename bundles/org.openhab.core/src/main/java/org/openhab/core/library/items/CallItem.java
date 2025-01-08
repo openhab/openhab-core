@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,12 +13,15 @@
 package org.openhab.core.library.items;
 
 import java.util.List;
+import java.util.Locale;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.items.GenericItem;
 import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.library.types.StringListType;
 import org.openhab.core.types.Command;
+import org.openhab.core.types.CommandDescription;
 import org.openhab.core.types.RefreshType;
 import org.openhab.core.types.State;
 import org.openhab.core.types.TimeSeries;
@@ -67,5 +70,10 @@ public class CallItem extends GenericItem {
         } else {
             logSetTypeError(timeSeries);
         }
+    }
+
+    @Override
+    public @Nullable CommandDescription getCommandDescription(@Nullable Locale locale) {
+        return getCommandOptions(locale);
     }
 }

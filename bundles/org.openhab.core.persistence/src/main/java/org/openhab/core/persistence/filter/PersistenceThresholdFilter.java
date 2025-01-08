@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -83,9 +83,9 @@ public class PersistenceThresholdFilter extends PersistenceFilter {
             return true;
         }
 
-        if (state instanceof DecimalType) {
+        if (state instanceof DecimalType decimalState) {
             BigDecimal oldState = ((DecimalType) cachedState).toBigDecimal();
-            BigDecimal delta = oldState.subtract(((DecimalType) state).toBigDecimal());
+            BigDecimal delta = oldState.subtract(decimalState.toBigDecimal());
             if (relative && !BigDecimal.ZERO.equals(oldState)) {
                 delta = delta.multiply(HUNDRED).divide(oldState, 2, RoundingMode.HALF_UP);
             }

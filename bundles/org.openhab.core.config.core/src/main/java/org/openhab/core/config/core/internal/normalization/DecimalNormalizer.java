@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -28,26 +28,29 @@ final class DecimalNormalizer extends AbstractNormalizer {
     @Override
     public Object doNormalize(Object value) {
         try {
-            if (value instanceof BigDecimal) {
-                return stripTrailingZeros((BigDecimal) value);
+            if (value instanceof BigDecimal bigDecimalValue) {
+                return stripTrailingZeros(bigDecimalValue);
             }
-            if (value instanceof String) {
-                return stripTrailingZeros(new BigDecimal((String) value));
+            if (value instanceof String stringValue) {
+                return stripTrailingZeros(new BigDecimal(stringValue));
             }
-            if (value instanceof Byte) {
-                return new BigDecimal((Byte) value).setScale(1);
+            if (value instanceof Byte byteValue) {
+                return new BigDecimal(byteValue);
             }
-            if (value instanceof Integer) {
-                return new BigDecimal((Integer) value).setScale(1);
+            if (value instanceof Short shortValue) {
+                return new BigDecimal(shortValue);
             }
-            if (value instanceof Long) {
-                return new BigDecimal((Long) value).setScale(1);
+            if (value instanceof Integer integerValue) {
+                return new BigDecimal(integerValue);
             }
-            if (value instanceof Float) {
-                return new BigDecimal(((Float) value).toString());
+            if (value instanceof Long longValue) {
+                return new BigDecimal(longValue);
             }
-            if (value instanceof Double) {
-                return BigDecimal.valueOf((Double) value);
+            if (value instanceof Float floatValue) {
+                return new BigDecimal(floatValue.toString());
+            }
+            if (value instanceof Double doubleValue) {
+                return BigDecimal.valueOf(doubleValue);
             }
         } catch (ArithmeticException | NumberFormatException e) {
             logger.trace("\"{}\" is not a valid decimal number.", value, e);
@@ -58,9 +61,12 @@ final class DecimalNormalizer extends AbstractNormalizer {
     }
 
     private BigDecimal stripTrailingZeros(BigDecimal value) {
-        BigDecimal ret = new BigDecimal(value.stripTrailingZeros().toPlainString());
-        if (ret.scale() == 0) {
-            ret = ret.setScale(1);
+        BigDecimal ret = value;
+        if (ret.scale() > 1) {
+            ret = ret.stripTrailingZeros();
+            if (ret.scale() == 0) {
+                ret = ret.setScale(1);
+            }
         }
         return ret;
     }

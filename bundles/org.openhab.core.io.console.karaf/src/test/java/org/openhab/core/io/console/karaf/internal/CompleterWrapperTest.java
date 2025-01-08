@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -61,8 +61,8 @@ public class CompleterWrapperTest {
 
         completerWrapper.completeCandidates(session, commandLine, candidates);
         assertEquals(1, candidates.size());
-        assertEquals("command", candidates.get(0).value());
-        assertEquals("description", candidates.get(0).descr());
+        assertEquals("command", candidates.getFirst().value());
+        assertEquals("description", candidates.getFirst().descr());
     }
 
     @Test
@@ -75,8 +75,8 @@ public class CompleterWrapperTest {
 
         completerWrapper.completeCandidates(session, commandLine, candidates);
         assertEquals(2, candidates.size());
-        assertEquals("command", candidates.get(0).value());
-        assertEquals("description", candidates.get(0).descr());
+        assertEquals("command", candidates.getFirst().value());
+        assertEquals("description", candidates.getFirst().descr());
 
         assertEquals("openhab:command", candidates.get(1).value());
         assertEquals("description", candidates.get(1).descr());

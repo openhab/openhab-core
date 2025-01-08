@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -294,7 +294,7 @@ public class ConfigDispatcher {
 
         // configuration file contains a PID Marker
         List<String> lines = Files.readAllLines(configFile.toPath(), StandardCharsets.UTF_8);
-        String exclusivePID = !lines.isEmpty() ? getPIDFromLine(lines.get(0)) : null;
+        String exclusivePID = !lines.isEmpty() ? getPIDFromLine(lines.getFirst()) : null;
         if (exclusivePID != null) {
             if (exclusivePIDMap.contains(exclusivePID)) {
                 logger.warn(

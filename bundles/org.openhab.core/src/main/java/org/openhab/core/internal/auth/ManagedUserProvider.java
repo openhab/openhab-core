@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,17 +13,15 @@
 package org.openhab.core.internal.auth;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.core.auth.ManagedUser;
 import org.openhab.core.auth.User;
 import org.openhab.core.common.registry.DefaultAbstractManagedProvider;
-import org.openhab.core.common.registry.ManagedProvider;
 import org.openhab.core.storage.StorageService;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 /**
- * A {@link ManagedProvider} for {@link ManagedUser} entities
+ * A {@link org.openhab.core.common.registry.ManagedProvider} for {@link org.openhab.core.auth.ManagedUser} entities
  *
  * @author Yannick Schaus - initial contribution
  */
