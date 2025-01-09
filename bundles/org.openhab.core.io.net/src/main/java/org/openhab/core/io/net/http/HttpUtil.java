@@ -314,9 +314,9 @@ public class HttpUtil {
             String givenHost = urlString;
 
             try {
-                URL url = new URL(urlString);
+                URL url = (new URI(urlString)).toURL();
                 givenHost = url.getHost();
-            } catch (MalformedURLException e) {
+            } catch (MalformedURLException | URISyntaxException e) {
                 LOGGER.error("the given url {} is malformed", urlString);
             }
 
