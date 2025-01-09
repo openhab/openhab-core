@@ -56,7 +56,6 @@ public class PCMWebSocketAudioSink implements AudioSink {
      * Should try to be sent event on and error as the client should be aware that data transmission has ended.
      */
     private static final byte STREAM_TERMINATION_BYTE = (byte) 254;
-    private static final int DEFAULT_BUFFER_SIZE = 8192;
     private final Set<AudioFormat> supportedFormats = Set.of(AudioFormat.WAV, AudioFormat.PCM_SIGNED);
     private final Set<Class<? extends AudioStream>> supportedStreams = Set.of(FixedLengthAudioStream.class,
             PipedAudioStream.class);
@@ -145,7 +144,8 @@ public class PCMWebSocketAudioSink implements AudioSink {
             } else {
                 finalAudioStream = audioStream;
             }
-            transferAudio(finalAudioStream, outputStream, duration, transferenceAborted);
+            int bytesPer500ms = (targetSampleRate * (targetBitDepth / 8) * channels) / 2;
+            transferAudio(finalAudioStream, outputStream, bytesPer500ms, duration, transferenceAborted);
         } catch (InterruptedIOException ignored) {
         } catch (IOException e) {
             logger.warn("IOException: {}", e.getMessage());
@@ -167,14 +167,14 @@ public class PCMWebSocketAudioSink implements AudioSink {
         }
     }
 
-    private void transferAudio(InputStream inputStream, OutputStream outputStream, long duration, AtomicBoolean aborted)
-            throws IOException, InterruptedException {
+    private void transferAudio(InputStream inputStream, OutputStream outputStream, int chunkSize, long duration,
+            AtomicBoolean aborted) throws IOException, InterruptedException {
         Instant start = Instant.now();
         long transferred = 0;
         try {
-            byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
+            byte[] buffer = new byte[chunkSize];
             int read;
-            while (!aborted.get() && (read = inputStream.read(buffer, 0, DEFAULT_BUFFER_SIZE)) >= 0) {
+            while (!aborted.get() && (read = inputStream.read(buffer, 0, chunkSize)) >= 0) {
                 outputStream.write(buffer, 0, read);
                 transferred += read;
             }
