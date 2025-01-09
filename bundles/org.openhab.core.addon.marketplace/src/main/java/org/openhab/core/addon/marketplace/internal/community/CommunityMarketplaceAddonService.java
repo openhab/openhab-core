@@ -163,7 +163,7 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
         try {
             List<DiscourseCategoryResponseDTO> pages = new ArrayList<>();
 
-            URL url = new URL(COMMUNITY_MARKETPLACE_URL);
+            URL url = URI.create(COMMUNITY_MARKETPLACE_URL).toURL();
             int pageNb = 1;
             while (url != null) {
                 URLConnection connection = url.openConnection();
@@ -180,7 +180,7 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
 
                     if (parsed.topicList.moreTopicsUrl != null) {
                         // Discourse URL for next page is wrong
-                        url = new URL(COMMUNITY_MARKETPLACE_URL + "?page=" + pageNb++);
+                        url = URI.create(COMMUNITY_MARKETPLACE_URL + "?page=" + pageNb++).toURL();
                     } else {
                         url = null;
                     }
@@ -215,7 +215,7 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
 
         // retrieve from remote
         try {
-            URL url = new URL(String.format("%s%s", COMMUNITY_TOPIC_URL, uid.replace(ADDON_ID_PREFIX, "")));
+            URL url = URI.create(String.format("%s%s", COMMUNITY_TOPIC_URL, uid.replace(ADDON_ID_PREFIX, ""))).toURL();
             URLConnection connection = url.openConnection();
             connection.addRequestProperty("Accept", "application/json");
             if (this.apiKey != null) {

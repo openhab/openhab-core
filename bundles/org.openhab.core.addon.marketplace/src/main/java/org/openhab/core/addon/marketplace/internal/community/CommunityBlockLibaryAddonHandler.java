@@ -12,12 +12,14 @@
  */
 package org.openhab.core.addon.marketplace.internal.community;
 
-import static org.openhab.core.addon.marketplace.MarketplaceConstants.BLOCKLIBRARIES_CONTENT_TYPE;
-import static org.openhab.core.addon.marketplace.MarketplaceConstants.YAML_DOWNLOAD_URL_PROPERTY;
+import static org.openhab.core.addon.marketplace.MarketplaceConstants.*;
 import static org.openhab.core.addon.marketplace.internal.community.CommunityMarketplaceAddonService.YAML_CONTENT_PROPERTY;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
@@ -102,7 +104,12 @@ public class CommunityBlockLibaryAddonHandler implements MarketplaceAddonHandler
     }
 
     private String getWidgetFromURL(String urlString) throws IOException {
-        URL u = new URL(urlString);
+        URL u;
+        try {
+            u = (new URI(urlString)).toURL();
+        } catch (IllegalArgumentException | URISyntaxException | MalformedURLException e) {
+            throw new IOException(e);
+        }
         try (InputStream in = u.openStream()) {
             return new String(in.readAllBytes(), StandardCharsets.UTF_8);
         }
