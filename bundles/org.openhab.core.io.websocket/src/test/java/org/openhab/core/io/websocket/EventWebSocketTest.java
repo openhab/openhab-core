@@ -240,6 +240,31 @@ public class EventWebSocketTest {
         verify(remoteEndpoint, times(2)).sendString(any());
     }
 
+    @Test
+    public void eventFromBusFilterTopic() throws IOException {
+        EventDTO eventDTO = new EventDTO(WEBSOCKET_EVENT_TYPE, WEBSOCKET_TOPIC_PREFIX + "filter/topic",
+                "[\"openhab/items/*/command\", \"openhab/items/*/statechanged\"]", null, null);
+        EventDTO responseEventDTO = new EventDTO(WEBSOCKET_EVENT_TYPE, WEBSOCKET_TOPIC_PREFIX + "filter/topic",
+                eventDTO.payload, null, null);
+        eventWebSocket.onText(gson.toJson(eventDTO));
+        verify(remoteEndpoint).sendString(gson.toJson(responseEventDTO));
+
+        // subscribed topics are sent
+        Event event = ItemEventFactory.createCommandEvent(TEST_ITEM_NAME, DecimalType.ZERO,
+                REMOTE_WEBSOCKET_IMPLEMENTATION);
+        eventWebSocket.processEvent(event);
+        verify(remoteEndpoint).sendString(gson.toJson(new EventDTO(event)));
+
+        event = ItemEventFactory.createStateChangedEvent(TEST_ITEM_NAME, DecimalType.ZERO, DecimalType.ZERO);
+        eventWebSocket.processEvent(event);
+        verify(remoteEndpoint).sendString(gson.toJson(new EventDTO(event)));
+
+        // not subscribed event not sent
+        event = ItemEventFactory.createStateEvent(TEST_ITEM_NAME, DecimalType.ZERO, REMOTE_WEBSOCKET_IMPLEMENTATION);
+        eventWebSocket.processEvent(event);
+        verify(remoteEndpoint, times(3)).sendString(any());
+    }
+
     private void assertEventProcessing(EventDTO incoming, @Nullable Event expectedEvent,
             @Nullable EventDTO expectedResponse) throws IOException {
         eventWebSocket.onText(gson.toJson(incoming));
