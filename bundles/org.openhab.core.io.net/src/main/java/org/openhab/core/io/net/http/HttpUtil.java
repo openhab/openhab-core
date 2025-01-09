@@ -21,7 +21,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
@@ -152,10 +151,6 @@ public class HttpUtil {
     public static String executeUrl(String httpMethod, String url, Properties httpHeaders, InputStream content,
             String contentType, int timeout, String proxyHost, Integer proxyPort, String proxyUser,
             String proxyPassword, String nonProxyHosts) throws IOException {
-        if (url == null) {
-            LOGGER.debug("Execute url failed: no url provided");
-            return null;
-        }
         ContentResponse response = executeUrlAndGetReponse(httpMethod, url, httpHeaders, content, contentType, timeout,
                 proxyHost, proxyPort, proxyUser, proxyPassword, nonProxyHosts);
         String encoding = response.getEncoding() != null ? response.getEncoding().replace("\"", "").trim()
@@ -197,9 +192,17 @@ public class HttpUtil {
         // Get shared http client from factory "on-demand"
         final HttpClient httpClient = httpClientFactory.getCommonHttpClient();
 
+        URI uri = null;
+        try {
+            uri = new URI(url);
+        } catch (NullPointerException | URISyntaxException e) {
+            LOGGER.debug("String {} can not be parsed as URI reference", url);
+            throw new IOException(e);
+        }
+
         HttpProxy proxy = null;
         // Only configure a proxy if a host is provided
-        if (proxyHost != null && !proxyHost.isBlank() && proxyPort != null && shouldUseProxy(url, nonProxyHosts)) {
+        if (proxyHost != null && !proxyHost.isBlank() && proxyPort != null && shouldUseProxy(uri, nonProxyHosts)) {
             AuthenticationStore authStore = httpClient.getAuthenticationStore();
             ProxyConfiguration proxyConfig = httpClient.getProxyConfiguration();
             List<Proxy> proxies = proxyConfig.getProxies();
@@ -213,13 +216,6 @@ public class HttpUtil {
 
         final HttpMethod method = HttpUtil.createHttpMethod(httpMethod);
 
-        URI uri = null;
-        try {
-            uri = new URI(url);
-        } catch (URISyntaxException e) {
-            LOGGER.debug("String {} can not be parsed as URI reference", url);
-            throw new IOException(e);
-        }
         final Request request = httpClient.newRequest(uri).method(method).timeout(timeout, TimeUnit.MILLISECONDS);
 
         if (httpHeaders != null) {
@@ -302,22 +298,21 @@ public class HttpUtil {
 
     /**
      * Determines whether the list of <code>nonProxyHosts</code> contains the
-     * host (which is part of the given <code>urlString</code> or not.
+     * url host (which is part of the given <code>uri</code> or not.
      *
-     * @param urlString
+     * @param uri
      * @param nonProxyHosts
-     * @return <code>false</code> if the host of the given <code>urlString</code> is contained in
+     * @return <code>false</code> if the host of the given <code>uri</code> is contained in
      *         <code>nonProxyHosts</code>-list and <code>true</code> otherwise
      */
-    private static boolean shouldUseProxy(String urlString, String nonProxyHosts) {
+    private static boolean shouldUseProxy(URI uri, String nonProxyHosts) {
         if (nonProxyHosts != null && !nonProxyHosts.isBlank()) {
-            String givenHost = urlString;
+            String givenHost = uri.toString();
 
             try {
-                URL url = (new URI(urlString)).toURL();
-                givenHost = url.getHost();
-            } catch (MalformedURLException | URISyntaxException e) {
-                LOGGER.error("the given url {} is malformed", urlString);
+                givenHost = uri.toURL().getHost();
+            } catch (IllegalArgumentException | MalformedURLException e) {
+                LOGGER.error("the given url {} is malformed", uri.toString());
             }
 
             String[] hosts = nonProxyHosts.split("\\|");
@@ -442,11 +437,6 @@ public class HttpUtil {
      */
     public static RawType downloadData(String url, String contentTypeRegex, boolean scanTypeInContent,
             long maxContentLength, int timeout) {
-        if (url == null) {
-            LOGGER.debug("Media download failed: no url provided");
-            return null;
-        }
-
         final ProxyParams proxyParams = prepareProxyParams();
 
         RawType rawData = null;
