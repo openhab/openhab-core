@@ -152,6 +152,10 @@ public class HttpUtil {
     public static String executeUrl(String httpMethod, String url, Properties httpHeaders, InputStream content,
             String contentType, int timeout, String proxyHost, Integer proxyPort, String proxyUser,
             String proxyPassword, String nonProxyHosts) throws IOException {
+        if (url == null) {
+            LOGGER.debug("Execute url failed: no url provided");
+            return null;
+        }
         ContentResponse response = executeUrlAndGetReponse(httpMethod, url, httpHeaders, content, contentType, timeout,
                 proxyHost, proxyPort, proxyUser, proxyPassword, nonProxyHosts);
         String encoding = response.getEncoding() != null ? response.getEncoding().replace("\"", "").trim()
@@ -438,6 +442,11 @@ public class HttpUtil {
      */
     public static RawType downloadData(String url, String contentTypeRegex, boolean scanTypeInContent,
             long maxContentLength, int timeout) {
+        if (url == null) {
+            LOGGER.debug("Media download failed: no url provided");
+            return null;
+        }
+
         final ProxyParams proxyParams = prepareProxyParams();
 
         RawType rawData = null;
