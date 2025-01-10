@@ -52,7 +52,7 @@ public class EventWebSocket {
     public static final String WEBSOCKET_TOPIC_PREFIX = "openhab/websocket/";
 
     private static final Type STRING_LIST_TYPE = TypeToken.getParameterized(List.class, String.class).getType();
-    private static final Pattern TOPIC_VALIDATE_PATTERN = Pattern.compile("^(\\w*\\*?\\/?)+$");
+    private static final Pattern TOPIC_VALIDATE_PATTERN = Pattern.compile("^!?(\\w*\\*?\\/?)+$");
 
     private final Logger logger = LoggerFactory.getLogger(EventWebSocket.class);
 
@@ -67,7 +67,8 @@ public class EventWebSocket {
 
     private List<String> typeFilter = List.of();
     private List<String> sourceFilter = List.of();
-    private @Nullable TopicEventFilter topicFilter = null;
+    private @Nullable TopicEventFilter topicIncludeFilter = null;
+    private @Nullable TopicEventFilter topicExcludeFilter = null;
 
     public EventWebSocket(Gson gson, EventWebSocketAdapter wsAdapter, ItemEventUtility itemEventUtility,
             EventPublisher eventPublisher) {
@@ -162,11 +163,18 @@ public class EventWebSocket {
                                             "Invalid topic '" + topic + "' in topic filter WebSocketEvent");
                                 }
                             }
+                            List<String> includeTopics = topics.stream().filter(t -> !t.startsWith("!")).toList();
+                            List<String> excludeTopics = topics.stream().filter(t -> t.startsWith("!"))
+                                    .map(t -> t.substring(1)).toList();
                             // convert to regex: replace any wildcard (*) with the regex pattern (.*)
-                            topics = topics.stream().map(t -> t.trim().replace("*", ".*") + "$").toList();
+                            includeTopics = includeTopics.stream().map(t -> t.trim().replace("*", ".*") + "$").toList();
+                            excludeTopics = excludeTopics.stream().map(t -> t.trim().replace("*", ".*") + "$").toList();
                             // create topic filter if topic list not empty
-                            if (!topics.isEmpty()) {
-                                topicFilter = new TopicEventFilter(topics);
+                            if (!includeTopics.isEmpty()) {
+                                topicIncludeFilter = new TopicEventFilter(includeTopics);
+                            }
+                            if (!excludeTopics.isEmpty()) {
+                                topicExcludeFilter = new TopicEventFilter(excludeTopics);
                             }
                             logger.debug("Setting topic filter for connection to {}: {}",
                                     remoteEndpoint.getInetSocketAddress(), topics);
@@ -220,7 +228,8 @@ public class EventWebSocket {
             String source = event.getSource();
             if ((source == null || !sourceFilter.contains(event.getSource()))
                     && (typeFilter.isEmpty() || typeFilter.contains(event.getType()))
-                    && (topicFilter == null || topicFilter.apply(event))) {
+                    && (topicIncludeFilter == null || topicIncludeFilter.apply(event))
+                    && (topicExcludeFilter == null || !topicExcludeFilter.apply(event))) {
                 sendMessage(gson.toJson(new EventDTO(event)));
             }
         } catch (IOException e) {
