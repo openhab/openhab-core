@@ -16,6 +16,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
+import java.net.URI;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -55,7 +56,7 @@ public abstract class BaseHttpUtilTest {
         httpClientFactory.set(null, clientFactoryMock);
 
         when(clientFactoryMock.getCommonHttpClient()).thenReturn(httpClientMock);
-        when(httpClientMock.newRequest(URL)).thenReturn(requestMock);
+        when(httpClientMock.newRequest(URI.create(URL))).thenReturn(requestMock);
         when(requestMock.method(any(HttpMethod.class))).thenReturn(requestMock);
         when(requestMock.timeout(anyLong(), any(TimeUnit.class))).thenReturn(requestMock);
         when(requestMock.send()).thenReturn(contentResponseMock);
