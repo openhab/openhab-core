@@ -71,6 +71,7 @@ public class CronAdjuster implements SchedulerTemporalAdjuster {
             .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
 
     private final List<Field> fields = new ArrayList<>(7);
+    private String cronExpression;
     private final Map<String, String> environmentMap;
     private final boolean reboot;
 
@@ -82,6 +83,7 @@ public class CronAdjuster implements SchedulerTemporalAdjuster {
         environmentMap = parseEnvironment(entries);
 
         String cronExpression = entries[entries.length - 1].trim();
+        this.cronExpression = cronExpression;
 
         reboot = "@reboot".equals(cronExpression);
 
@@ -515,6 +517,7 @@ public class CronAdjuster implements SchedulerTemporalAdjuster {
         // we start over with this new time.
 
         int index = 0;
+        int restarts = 0;
         final int length = fields.size();
 
         while (index < length) {
@@ -525,6 +528,10 @@ public class CronAdjuster implements SchedulerTemporalAdjuster {
             if (out == null) {
                 index++;
             } else {
+                if (restarts++ > 1000) {
+                    throw new IllegalArgumentException(
+                            String.format("Cron expression '%s' is not valid, too many restarts", cronExpression));
+                }
                 ret = out;
                 index = 0;
             }
