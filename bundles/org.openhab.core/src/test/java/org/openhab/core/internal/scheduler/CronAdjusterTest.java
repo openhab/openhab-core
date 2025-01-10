@@ -14,6 +14,7 @@ package org.openhab.core.internal.scheduler;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.time.LocalDateTime;
 import java.time.temporal.Temporal;
@@ -25,6 +26,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.openhab.core.scheduler.CronAdjuster;
 
 /**
@@ -196,5 +198,14 @@ public class CronAdjusterTest {
             assertThat("CronAdjuster did return expected next cron string for expression: " + cron, ldt.toString(),
                     equalTo(out));
         }
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = { "0 0 0 31 2 *", "* * *", "80 * * * * *" })
+    public void testInvalidCronExpression(String cron) {
+        assertThrows(IllegalArgumentException.class, () -> {
+            final CronAdjuster cronAdjuster = new CronAdjuster(cron);
+            cronAdjuster.adjustInto(java.time.ZonedDateTime.now());
+        });
     }
 }
