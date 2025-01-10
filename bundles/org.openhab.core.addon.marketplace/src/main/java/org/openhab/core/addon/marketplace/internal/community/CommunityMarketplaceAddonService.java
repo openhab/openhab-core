@@ -215,7 +215,7 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
 
         // retrieve from remote
         try {
-            URL url = URI.create("%s%s".formatted(COMMUNITY_TOPIC_URL, uid.replace(ADDON_ID_PREFIX, ""))).toURL();
+            URL url = URI.create(COMMUNITY_TOPIC_URL + uid.replace(ADDON_ID_PREFIX, "")).toURL();
             URLConnection connection = url.openConnection();
             connection.addRequestProperty("Accept", "application/json");
             if (this.apiKey != null) {
