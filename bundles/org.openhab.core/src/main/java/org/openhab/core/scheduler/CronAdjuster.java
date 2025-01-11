@@ -12,6 +12,7 @@
  */
 package org.openhab.core.scheduler;
 
+import java.time.DateTimeException;
 import java.time.DayOfWeek;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
@@ -71,7 +72,6 @@ public class CronAdjuster implements SchedulerTemporalAdjuster {
             .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
 
     private final List<Field> fields = new ArrayList<>(7);
-    private String cronExpression;
     private final Map<String, String> environmentMap;
     private final boolean reboot;
 
@@ -83,7 +83,6 @@ public class CronAdjuster implements SchedulerTemporalAdjuster {
         environmentMap = parseEnvironment(entries);
 
         String cronExpression = entries[entries.length - 1].trim();
-        this.cronExpression = cronExpression;
 
         reboot = "@reboot".equals(cronExpression);
 
@@ -108,6 +107,14 @@ public class CronAdjuster implements SchedulerTemporalAdjuster {
         parseAndAdd(cronExpression, parts[2], ChronoField.HOUR_OF_DAY);
         parseAndAdd(cronExpression, parts[1], ChronoField.MINUTE_OF_HOUR);
         parseAndAdd(cronExpression, parts[0], ChronoField.SECOND_OF_MINUTE);
+
+        try {
+            // Test the cron expression in action to make sure it won't cause too many restarts
+            adjustInto(java.time.ZonedDateTime.now());
+        } catch (final DateTimeException e) {
+            throw new IllegalArgumentException(
+                    String.format("Invalid cron expression '%s': %s", cronExpression, e.getMessage()));
+        }
     }
 
     /**
@@ -529,8 +536,7 @@ public class CronAdjuster implements SchedulerTemporalAdjuster {
                 index++;
             } else {
                 if (restarts++ > 1000) {
-                    throw new IllegalArgumentException(
-                            String.format("Cron expression '%s' is not valid, too many restarts", cronExpression));
+                    throw new DateTimeException("Conditions not satisfied.");
                 }
                 ret = out;
                 index = 0;

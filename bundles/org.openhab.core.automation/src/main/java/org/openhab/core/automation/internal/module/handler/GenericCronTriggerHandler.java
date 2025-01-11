@@ -68,9 +68,13 @@ public class GenericCronTriggerHandler extends BaseTriggerModuleHandler
     }
 
     private void scheduleJob() {
-        schedule = scheduler.schedule(this, expression);
-        logger.debug("Scheduled cron job '{}' for trigger '{}'.", module.getConfiguration().get(CFG_CRON_EXPRESSION),
-                module.getId());
+        try {
+            schedule = scheduler.schedule(this, expression);
+            logger.debug("Scheduled cron job '{}' for trigger '{}'.",
+                    module.getConfiguration().get(CFG_CRON_EXPRESSION), module.getId());
+        } catch (IllegalArgumentException e) { // Catch exception from CronAdjuster
+            logger.warn("Failed to schedule job for trigger '{}'. {}", module.getId(), e.getMessage());
+        }
     }
 
     @Override
