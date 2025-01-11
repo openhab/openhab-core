@@ -203,9 +203,6 @@ public class CronAdjusterTest {
     @ParameterizedTest
     @ValueSource(strings = { "0 0 0 31 2 *", "* * *", "80 * * * * *" })
     public void testInvalidCronExpression(String cron) {
-        assertThrows(IllegalArgumentException.class, () -> {
-            final CronAdjuster cronAdjuster = new CronAdjuster(cron);
-            cronAdjuster.adjustInto(java.time.ZonedDateTime.now());
-        });
+        assertThrows(IllegalArgumentException.class, () -> new CronAdjuster(cron));
     }
 }
