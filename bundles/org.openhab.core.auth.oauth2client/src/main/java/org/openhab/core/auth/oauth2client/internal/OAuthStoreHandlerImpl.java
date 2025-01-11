@@ -221,11 +221,8 @@ public class OAuthStoreHandlerImpl implements OAuthStoreHandler {
     }
 
     private boolean isExpired(@Nullable Instant lastUsed) {
-        if (lastUsed == null) {
-            return false;
-        }
         // (last used + 183 days < now) then it is expired
-        return lastUsed.plus(EXPIRE_DAYS, ChronoUnit.DAYS).isBefore(Instant.now());
+        return (lastUsed != null) && lastUsed.plus(EXPIRE_DAYS, ChronoUnit.DAYS).isBefore(Instant.now());
     }
 
     /**

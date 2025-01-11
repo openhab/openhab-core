@@ -212,10 +212,7 @@ public final class FirmwareImpl implements Firmware {
 
     @Override
     public boolean isSuccessorVersion(@Nullable String firmwareVersion) {
-        if (firmwareVersion == null) {
-            return false;
-        }
-        return version.compare(new Version(firmwareVersion)) > 0;
+        return (firmwareVersion != null) && (version.compare(new Version(firmwareVersion)) > 0);
     }
 
     @Override

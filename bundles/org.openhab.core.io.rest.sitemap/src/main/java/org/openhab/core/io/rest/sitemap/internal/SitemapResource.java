@@ -794,10 +794,7 @@ public class SitemapResource
 
     private boolean blockUntilChangeOccurs(String sitemapname, @Nullable String pageId) {
         EList<Widget> widgets = subscriptions.collectWidgets(sitemapname, pageId);
-        if (widgets.isEmpty()) {
-            return false;
-        }
-        return waitForChanges(widgets);
+        return (!widgets.isEmpty()) && waitForChanges(widgets);
     }
 
     /**

@@ -106,9 +106,6 @@ public class ConfigDescriptionI18nUtil {
     }
 
     private boolean isValidPropertyKey(@Nullable String key) {
-        if (key != null) {
-            return !DELIMITER.matcher(key).find();
-        }
-        return false;
+        return (key != null) && !DELIMITER.matcher(key).find();
     }
 }

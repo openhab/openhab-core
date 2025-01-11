@@ -748,10 +748,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     }
 
     private boolean checkLocales(Set<Locale> supportedLocales, Locale locale) {
-        if (supportedLocales.isEmpty()) {
-            return true;
-        }
-        return supportedLocales.stream().anyMatch(sLocale -> {
+        return supportedLocales.isEmpty() || supportedLocales.stream().anyMatch(sLocale -> {
             var country = sLocale.getCountry();
             return Objects.equals(sLocale.getLanguage(), locale.getLanguage())
                     && (country == null || country.isBlank() || country.equals(locale.getCountry()));

@@ -193,10 +193,7 @@ final class TypeIntrospections {
 
         @Override
         boolean isAssignable(Object value) {
-            if (!super.isAssignable(value)) {
-                return isBigDecimalInstance(value);
-            }
-            return true;
+            return super.isAssignable(value) || isBigDecimalInstance(value);
         }
     }
 
@@ -208,10 +205,7 @@ final class TypeIntrospections {
 
         @Override
         boolean isAssignable(Object value) {
-            if (!super.isAssignable(value)) {
-                return isBigDecimalInstance(value);
-            }
-            return true;
+            return super.isAssignable(value) || isBigDecimalInstance(value);
         }
     }
 
@@ -223,18 +217,12 @@ final class TypeIntrospections {
 
         @Override
         boolean isMinViolated(Object value, BigDecimal min) {
-            if (min == null) {
-                return false;
-            }
-            return ((String) value).length() < min.intValueExact();
+            return (min != null) && (((String) value).length() < min.intValueExact());
         }
 
         @Override
         boolean isMaxViolated(Object value, BigDecimal max) {
-            if (max == null) {
-                return false;
-            }
-            return ((String) value).length() > max.intValueExact();
+            return (max != null) && (((String) value).length() > max.intValueExact());
         }
     }
 }

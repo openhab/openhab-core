@@ -81,11 +81,7 @@ public class LanguageResourceBundleManager {
      * @return true if the specified resource is managed by this instance, otherwise false
      */
     public boolean containsResource(String resource) {
-        if (resource != null) {
-            return this.resourceNames.contains(resource);
-        }
-
-        return false;
+        return (resource != null) && this.resourceNames.contains(resource);
     }
 
     /**

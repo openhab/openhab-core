@@ -142,10 +142,7 @@ public class SddpDevice {
      */
     @Override
     public boolean equals(@Nullable Object obj) {
-        if (obj instanceof SddpDevice other) {
-            return Objects.equals(from, other.from);
-        }
-        return false;
+        return (obj instanceof SddpDevice other) && Objects.equals(from, other.from);
     }
 
     /**

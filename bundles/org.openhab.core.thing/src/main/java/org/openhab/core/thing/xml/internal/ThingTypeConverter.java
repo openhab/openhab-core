@@ -126,10 +126,7 @@ public class ThingTypeConverter extends AbstractDescriptionTypeConverter<ThingTy
 
     protected boolean getListed(Map<String, String> attributes) {
         String listedFlag = attributes.get("listed");
-        if (listedFlag != null) {
-            return Boolean.parseBoolean(listedFlag);
-        }
-        return true;
+        return (listedFlag == null) || Boolean.parseBoolean(listedFlag);
     }
 
     protected @Nullable String getRepresentationProperty(NodeIterator nodeIterator) {

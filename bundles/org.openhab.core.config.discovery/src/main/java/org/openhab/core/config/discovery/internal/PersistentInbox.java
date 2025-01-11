@@ -123,10 +123,8 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
 
         private boolean isResultExpired(DiscoveryResult result, Instant now) {
             long ttl = result.getTimeToLive();
-            if (ttl == DiscoveryResult.TTL_UNLIMITED) {
-                return false;
-            }
-            return Instant.ofEpochMilli(result.getTimestamp()).plusSeconds(ttl).isBefore(now);
+            return (ttl != DiscoveryResult.TTL_UNLIMITED)
+                    && Instant.ofEpochMilli(result.getTimestamp()).plusSeconds(ttl).isBefore(now);
         }
     }
 

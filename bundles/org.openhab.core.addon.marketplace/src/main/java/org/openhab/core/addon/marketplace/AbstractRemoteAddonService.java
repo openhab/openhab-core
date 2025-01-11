@@ -298,11 +298,9 @@ public abstract class AbstractRemoteAddonService implements AddonService {
         try {
             Configuration configuration = configurationAdmin.getConfiguration("org.openhab.addons", null);
             Dictionary<String, Object> properties = configuration.getProperties();
-            if (properties == null) {
-                // if we can't determine a set property, we use true (default is remote enabled)
-                return true;
-            }
-            return ConfigParser.valueAsOrElse(properties.get(CONFIG_REMOTE_ENABLED), Boolean.class, true);
+            // if we can't determine a set property, we use true (default is remote enabled)
+            return (properties == null)
+                    || ConfigParser.valueAsOrElse(properties.get(CONFIG_REMOTE_ENABLED), Boolean.class, true);
         } catch (IOException e) {
             return true;
         }
@@ -312,11 +310,9 @@ public abstract class AbstractRemoteAddonService implements AddonService {
         try {
             Configuration configuration = configurationAdmin.getConfiguration("org.openhab.addons", null);
             Dictionary<String, Object> properties = configuration.getProperties();
-            if (properties == null) {
-                // if we can't determine a set property, we use false (default is show compatible only)
-                return false;
-            }
-            return ConfigParser.valueAsOrElse(properties.get(CONFIG_INCLUDE_INCOMPATIBLE), Boolean.class, false);
+            // if we can't determine a set property, we use false (default is show compatible only)
+            return (properties != null)
+                    && ConfigParser.valueAsOrElse(properties.get(CONFIG_INCLUDE_INCOMPATIBLE), Boolean.class, false);
         } catch (IOException e) {
             return false;
         }

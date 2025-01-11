@@ -50,10 +50,8 @@ public class AddonConsoleCommandExtension extends AbstractConsoleCommandExtensio
     private class AddonConsoleCommandCompleter implements ConsoleCommandCompleter {
         @Override
         public boolean complete(String[] args, int cursorArgumentIndex, int cursorPosition, List<String> candidates) {
-            if (cursorArgumentIndex <= 0) {
-                return SUBCMD_COMPLETER.complete(args, cursorArgumentIndex, cursorPosition, candidates);
-            }
-            return false;
+            return (cursorArgumentIndex <= 0)
+                    && SUBCMD_COMPLETER.complete(args, cursorArgumentIndex, cursorPosition, candidates);
         }
     }
 

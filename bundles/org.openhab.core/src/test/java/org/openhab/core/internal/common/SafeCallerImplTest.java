@@ -591,7 +591,7 @@ public class SafeCallerImplTest extends JavaTest {
         @Override
         public void run() {
             try {
-                super.run();
+                super.run(); // NOPMD
             } catch (AssertionError e) {
                 AssertingThread.this.assertionError = e;
             } catch (RuntimeException e) {

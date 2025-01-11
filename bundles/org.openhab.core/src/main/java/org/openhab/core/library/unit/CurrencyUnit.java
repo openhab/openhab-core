@@ -196,10 +196,7 @@ public final class CurrencyUnit extends AbstractUnit<Currency> {
 
     @Override
     public boolean equals(@Nullable Object obj) {
-        if (obj instanceof CurrencyUnit that) {
-            return (name.equals(that.name) && Objects.equals(symbol, that.symbol));
-        }
-        return false;
+        return (obj instanceof CurrencyUnit that) && (name.equals(that.name) && Objects.equals(symbol, that.symbol));
     }
 
     @Override
