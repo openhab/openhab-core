@@ -12,10 +12,11 @@
  */
 package org.openhab.core.addon.marketplace.internal.community;
 
-import static org.openhab.core.addon.marketplace.MarketplaceConstants.JAR_CONTENT_TYPE;
-import static org.openhab.core.addon.marketplace.MarketplaceConstants.JAR_DOWNLOAD_URL_PROPERTY;
+import static org.openhab.core.addon.marketplace.MarketplaceConstants.*;
 
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
@@ -73,13 +74,14 @@ public class CommunityBundleAddonHandler extends MarketplaceBundleInstaller impl
 
     @Override
     public void install(Addon addon) throws MarketplaceHandlerException {
+        URL sourceUrl;
         try {
-            URL sourceUrl = new URL((String) addon.getProperties().get(JAR_DOWNLOAD_URL_PROPERTY));
-            addBundleToCache(addon.getUid(), sourceUrl);
-            installFromCache(bundleContext, addon.getUid());
-        } catch (MalformedURLException e) {
+            sourceUrl = (new URI((String) addon.getProperties().get(JAR_DOWNLOAD_URL_PROPERTY))).toURL();
+        } catch (IllegalArgumentException | MalformedURLException | URISyntaxException e) {
             throw new MarketplaceHandlerException("Malformed source URL: " + e.getMessage(), e);
         }
+        addBundleToCache(addon.getUid(), sourceUrl);
+        installFromCache(bundleContext, addon.getUid());
     }
 
     @Override

@@ -18,7 +18,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.lang.reflect.Type;
+import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Arrays;
@@ -91,11 +93,21 @@ public class JsonAddonService extends AbstractRemoteAddonService {
     public void modified(@Nullable Map<String, Object> config) {
         if (config != null) {
             String urls = ConfigParser.valueAsOrElse(config.get(CONFIG_URLS), String.class, "");
-            addonServiceUrls = Arrays.asList(urls.split("\\|"));
+            addonServiceUrls = Arrays.asList(urls.split("\\|")).stream().filter(this::isValidUrl).toList();
             showUnstable = ConfigParser.valueAsOrElse(config.get(CONFIG_SHOW_UNSTABLE), Boolean.class, false);
             cachedRemoteAddons.invalidateValue();
             refreshSource();
         }
+    }
+
+    private boolean isValidUrl(String urlString) {
+        try {
+            (new URI(urlString)).toURL();
+        } catch (IllegalArgumentException | URISyntaxException | MalformedURLException e) {
+            logger.warn("JSON Addon Service invalid URL: {}", urlString);
+            return false;
+        }
+        return true;
     }
 
     @Override
@@ -124,7 +136,7 @@ public class JsonAddonService extends AbstractRemoteAddonService {
     protected List<Addon> getRemoteAddons() {
         return addonServiceUrls.stream().map(urlString -> {
             try {
-                URL url = new URL(urlString);
+                URL url = URI.create(urlString).toURL();
                 URLConnection connection = url.openConnection();
                 connection.addRequestProperty("Accept", "application/json");
                 try (Reader reader = new InputStreamReader(connection.getInputStream())) {
@@ -139,7 +151,7 @@ public class JsonAddonService extends AbstractRemoteAddonService {
     }
 
     /**
-     * Check if the addon UID is present and the entry is eitehr stable or unstable add-ons are requested
+     * Check if the addon UID is present and the entry is either stable or unstable add-ons are requested
      *
      * @param addonEntry the add-on entry to check
      * @return {@code true} if the add-on entry should be processed, {@code false otherwise}
