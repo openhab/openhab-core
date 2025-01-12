@@ -128,7 +128,7 @@ public class LogWebSocket implements LogListener {
             LogDTO logDTO = map(logEntry);
             sendMessage(gson.toJson(logDTO));
         } catch (IOException e) {
-            logger.debug("Failed to send log {} to {}: {}", logEntry, remoteIdentifier, e.getMessage());
+            // Fail silently!
         }
     }
 
