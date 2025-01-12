@@ -113,7 +113,6 @@ public class LogWebSocket implements LogListener {
     private synchronized void sendMessage(String message) throws IOException {
         RemoteEndpoint remoteEndpoint = this.remoteEndpoint;
         if (remoteEndpoint == null) {
-            logger.warn("Could not determine remote endpoint, failed to send '{}'.", message);
             return;
         }
         remoteEndpoint.sendString(message);
