@@ -174,23 +174,25 @@ public class LanguageResourceBundleManager {
         return getText(null, key, locale);
     }
 
-    private @Nullable String getTranslatedText(String resourceName, String key, Locale locale) {
-        try {
-            // Modify the search order so that the following applies:
-            // 1.) baseName + "_" + language + "_" + country
-            // 2.) baseName + "_" + language
-            // 3.) baseName
-            // 4.) null -> leads to a default text
-            // Not using the default fallback strategy helps that not the default locale
-            // search order is applied between 2.) and 3.).
-            ResourceBundle resourceBundle = ResourceBundle.getBundle(resourceName, locale, this.resourceClassLoader,
-                    Control.getNoFallbackControl(Control.FORMAT_PROPERTIES));
+    private @Nullable String getTranslatedText(@Nullable String resourceName, @Nullable String key,
+            @Nullable Locale locale) {
+        if (resourceName != null && locale != null && key != null && !key.isEmpty()) {
+            try {
+                // Modify the search order so that the following applies:
+                // 1.) baseName + "_" + language + "_" + country
+                // 2.) baseName + "_" + language
+                // 3.) baseName
+                // 4.) null -> leads to a default text
+                // Not using the default fallback strategy helps that not the default locale
+                // search order is applied between 2.) and 3.).
+                ResourceBundle resourceBundle = ResourceBundle.getBundle(resourceName, locale, this.resourceClassLoader,
+                        Control.getNoFallbackControl(Control.FORMAT_PROPERTIES));
 
-            return resourceBundle.getString(key);
-        } catch (Exception ex) {
-            // nothing to do
+                return resourceBundle.getString(key);
+            } catch (NullPointerException ex) {
+                // nothing to do
+            }
         }
-
         return null;
     }
 }
