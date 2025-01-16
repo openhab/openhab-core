@@ -13,6 +13,7 @@
 package org.openhab.core.util;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.osgi.framework.Bundle;
 
 /**
@@ -29,5 +30,6 @@ public interface BundleResolver {
      * @param clazz the {@link Class} to resolve the bundle for.
      * @return the bundle associated with the given {@link Class}.
      */
+    @Nullable
     Bundle resolveBundle(Class<?> clazz);
 }
