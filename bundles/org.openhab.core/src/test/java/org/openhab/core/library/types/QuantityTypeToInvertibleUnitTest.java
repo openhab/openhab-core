@@ -34,9 +34,18 @@ class QuantityTypeToInvertibleUnitTest {
     @Test
     void testConversionsToMirek() {
         // pass cases
-        assertNotNull(QuantityType.valueOf(2000, Units.KELVIN).toInvertibleUnit(Units.MIRED));
-        assertNotNull(QuantityType.valueOf(2000, SIUnits.CELSIUS).toInvertibleUnit(Units.MIRED));
-        assertNotNull(QuantityType.valueOf(3000, ImperialUnits.FAHRENHEIT).toInvertibleUnit(Units.MIRED));
+        QuantityType<?> v1 = QuantityType.valueOf(2000, Units.KELVIN).toInvertibleUnit(Units.MIRED);
+        QuantityType<?> v2 = QuantityType.valueOf(1726.85, SIUnits.CELSIUS).toInvertibleUnit(Units.MIRED);
+        QuantityType<?> v3 = QuantityType.valueOf(3140.33, ImperialUnits.FAHRENHEIT).toInvertibleUnit(Units.MIRED);
+
+        assertNotNull(v1);
+        assertNotNull(v2);
+        assertNotNull(v3);
+
+        assertEquals(500, v1.doubleValue(), 0.01);
+        assertEquals(500, v2.doubleValue(), 0.01);
+        assertEquals(500, v3.doubleValue(), 0.01);
+
         // fail case
         assertNull(QuantityType.valueOf(500, SIUnits.METRE).toInvertibleUnit(Units.MIRED));
     }
@@ -47,11 +56,22 @@ class QuantityTypeToInvertibleUnitTest {
     @Test
     void testConversionsFromMirek() {
         // pass cases
-        assertNotNull(QuantityType.valueOf(500, Units.MIRED).toInvertibleUnit(Units.KELVIN));
-        assertNotNull(QuantityType.valueOf(500, Units.MIRED).toInvertibleUnit(SIUnits.CELSIUS));
-        assertNotNull(QuantityType.valueOf(500, Units.MIRED).toInvertibleUnit(ImperialUnits.FAHRENHEIT));
+        QuantityType<?> m = QuantityType.valueOf(500, Units.MIRED);
+
+        QuantityType<?> v1 = m.toInvertibleUnit(Units.KELVIN);
+        QuantityType<?> v2 = m.toInvertibleUnit(SIUnits.CELSIUS);
+        QuantityType<?> v3 = m.toInvertibleUnit(ImperialUnits.FAHRENHEIT);
+
+        assertNotNull(v1);
+        assertNotNull(v2);
+        assertNotNull(v3);
+
+        assertEquals(2000, v1.doubleValue(), 0.01);
+        assertEquals(1726.85, v2.doubleValue(), 0.01);
+        assertEquals(3140.33, v3.doubleValue(), 0.01);
+
         // fail case
-        assertNull(QuantityType.valueOf(500, Units.MIRED).toInvertibleUnit(SIUnits.METRE));
+        assertNull(m.toInvertibleUnit(SIUnits.METRE));
     }
 
     /**
@@ -60,8 +80,14 @@ class QuantityTypeToInvertibleUnitTest {
     @Test
     void testConversionsToSelf() {
         // pass cases
-        assertNotNull(QuantityType.valueOf(500, Units.MIRED).toInvertibleUnit(Units.MIRED));
-        assertNotNull(QuantityType.valueOf(2000, Units.KELVIN).toInvertibleUnit(Units.KELVIN));
+        QuantityType<?> v1 = QuantityType.valueOf(500, Units.MIRED).toInvertibleUnit(Units.MIRED);
+        QuantityType<?> v2 = QuantityType.valueOf(2000, Units.KELVIN).toInvertibleUnit(Units.KELVIN);
+
+        assertNotNull(v1);
+        assertNotNull(v2);
+
+        assertEquals(500, v1.doubleValue(), 0.01);
+        assertEquals(2000, v2.doubleValue(), 0.01);
     }
 
     /**
@@ -70,11 +96,19 @@ class QuantityTypeToInvertibleUnitTest {
     @Test
     void testConversionsOhmAndSiemens() {
         // pass cases
-        assertNotNull(QuantityType.valueOf(500, Units.OHM).toInvertibleUnit(Units.SIEMENS));
-        assertNotNull(QuantityType.valueOf(500, Units.SIEMENS).toInvertibleUnit(Units.OHM));
+        QuantityType<?> v1 = QuantityType.valueOf(10, Units.OHM).toInvertibleUnit(Units.SIEMENS);
+        QuantityType<?> v2 = QuantityType.valueOf(0.1, Units.SIEMENS).toInvertibleUnit(Units.OHM);
+
+        assertNotNull(v1);
+        assertNotNull(v2);
+
+        assertEquals(0.1, v1.doubleValue(), 0.01);
+        assertEquals(10, v2.doubleValue(), 0.01);
+
         // fail cases
-        assertNull(QuantityType.valueOf(500, Units.OHM).toInvertibleUnit(SIUnits.METRE));
-        assertNull(QuantityType.valueOf(500, SIUnits.METRE).toInvertibleUnit(Units.OHM));
+        assertNull(v1.toInvertibleUnit(SIUnits.METRE));
+        assertNull(v2.toInvertibleUnit(SIUnits.METRE));
+        assertNull(QuantityType.valueOf(5, Units.OHM).toInvertibleUnit(SIUnits.METRE));
     }
 
     /**
