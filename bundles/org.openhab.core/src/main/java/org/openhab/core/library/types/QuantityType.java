@@ -324,7 +324,8 @@ public class QuantityType<T extends Quantity<T>> extends Number
         // only invert if unit is not equal and inverse is compatible and targetUnit is not ONE
         if (!targetUnit.equals(getUnit()) && !targetUnit.isCompatible(AbstractUnit.ONE)
                 && getUnit().inverse().isCompatible(targetUnit)) {
-            return inverse().toUnit(targetUnit);
+            QuantityType<?> systemQuantity = toUnit(getUnit().getSystemUnit());
+            return systemQuantity == null ? null : systemQuantity.inverse().toUnit(targetUnit);
         }
         return toUnit(targetUnit);
     }
@@ -334,7 +335,6 @@ public class QuantityType<T extends Quantity<T>> extends Number
         if (unit != null) {
             return toInvertibleUnit(unit);
         }
-
         return null;
     }
 
