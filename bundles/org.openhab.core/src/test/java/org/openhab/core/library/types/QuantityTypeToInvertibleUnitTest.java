@@ -94,7 +94,7 @@ class QuantityTypeToInvertibleUnitTest {
      * Test conversion Ohm to/from Siemens
      */
     @Test
-    void testConversionsOhmAndSiemens() {
+    void testOhmAndSiemensConversions() {
         // pass cases
         QuantityType<?> v1 = QuantityType.valueOf(10, Units.OHM).toInvertibleUnit(Units.SIEMENS);
         QuantityType<?> v2 = QuantityType.valueOf(0.1, Units.SIEMENS).toInvertibleUnit(Units.OHM);
@@ -112,10 +112,30 @@ class QuantityTypeToInvertibleUnitTest {
     }
 
     /**
-     * Test conversion for dimensionless
+     * Test dimensionless conversion
      */
     @Test
-    void testConversionsDimensionless() {
+    void testDimensionlessConversion() {
         assertNotNull(QuantityType.valueOf(100, Units.ONE).toInvertibleUnit(Units.ONE));
+    }
+
+    /**
+     * Some addons mistakenly call {@link QuantityType#toInvertibleUnit} instead of {@link QuantityType#toUnit}. The
+     * good news is that when the target unit is not an inversion then the former method falls through to the latter.
+     * However for good hygiene we should test that such calls do indeed also return the proper results.
+     */
+    @Test
+    void testNonInvertingConversions() {
+        QuantityType<?> v1 = QuantityType.valueOf(600, Units.SECOND).toInvertibleUnit(Units.MINUTE);
+        QuantityType<?> v2 = QuantityType.valueOf(100, ImperialUnits.FAHRENHEIT).toInvertibleUnit(SIUnits.CELSIUS);
+        QuantityType<?> v3 = QuantityType.valueOf(100, ImperialUnits.FOOT).toInvertibleUnit(SIUnits.METRE);
+
+        assertNotNull(v1);
+        assertNotNull(v2);
+        assertNotNull(v3);
+
+        assertEquals(10, v1.doubleValue(), 0.01);
+        assertEquals(37.78, v2.doubleValue(), 0.01);
+        assertEquals(30.48, v3.doubleValue(), 0.01);
     }
 }
