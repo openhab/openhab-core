@@ -314,8 +314,20 @@ public class QuantityType<T extends Quantity<T>> extends Number
     /**
      * Convert this QuantityType to a new {@link QuantityType} using the given target unit.
      *
-     * Implicit conversions using inverse units are allowed (i.e. {@code mired <=> Kelvin}). This may
-     * change the dimension.
+     * Implicit conversions using inverse units are allowed (i.e. {@code mired <=> Kelvin} / {@code Hertz <=> Second} /
+     * {@code Ohm <=> Siemens}). This may change the dimension.
+     * <p>
+     * This method converts the quantity from its actual unit to its respective system unit before converting to the
+     * inverse unit. This enables it to support not only conversions {@code mired <=> Kelvin} but also conversions
+     * {@code mired <=> Fahrenheit} and {@code mired <=> Celsius}.
+     * <p>
+     * Notes on units not yet implemented in openHAB:
+     * <li>The optics unit {@code Dioptre} ({@code dpt} / {@code D}) is the inverse of length ({@code m-1}); if it were
+     * added it would give correct results.</li>
+     * <li>The optics unit {@code Kaiser} for wave number is also the inverse of length ({@code cm-1}); it is old and
+     * not commonly used, but if it were added it would NOT give correct results.</li>
+     * <li>If you discover other units similar to {@code Kaiser} above: => Please inform openHAB maintainers.</li>
+     * <p>
      *
      * @param targetUnit the unit to which this {@link QuantityType} will be converted to.
      * @return the new {@link QuantityType} in the given {@link Unit} or {@code null} in case of an error.

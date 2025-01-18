@@ -112,6 +112,22 @@ class QuantityTypeToInvertibleUnitTest {
     }
 
     /**
+     * Test time and frequency conversion
+     */
+    @Test
+    void testHertzSecondConversions() {
+        // pass cases
+        QuantityType<?> v1 = QuantityType.valueOf(10, Units.HERTZ).toInvertibleUnit(Units.SECOND);
+        QuantityType<?> v2 = QuantityType.valueOf(0.1, Units.SECOND).toInvertibleUnit(Units.HERTZ);
+
+        assertNotNull(v1);
+        assertNotNull(v2);
+
+        assertEquals(0.1, v1.doubleValue(), 0.01);
+        assertEquals(10, v2.doubleValue(), 0.01);
+    }
+
+    /**
      * Test dimensionless conversion
      */
     @Test
