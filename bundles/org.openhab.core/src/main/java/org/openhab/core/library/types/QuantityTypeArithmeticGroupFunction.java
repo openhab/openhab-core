@@ -27,6 +27,7 @@ import org.openhab.core.items.GroupFunction;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
 import org.openhab.core.library.items.NumberItem;
+import org.openhab.core.library.unit.Units;
 import org.openhab.core.types.State;
 import org.openhab.core.types.UnDefType;
 import org.openhab.core.util.Statistics;
@@ -42,9 +43,11 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
     abstract class DimensionalGroupFunction implements GroupFunction {
 
         protected final Class<? extends Quantity<?>> dimension;
+        protected final @Nullable Item baseItem;
 
-        public DimensionalGroupFunction(Class<? extends Quantity<?>> dimension) {
+        public DimensionalGroupFunction(Class<? extends Quantity<?>> dimension, @Nullable Item baseItem) {
             this.dimension = dimension;
+            this.baseItem = baseItem;
         }
 
         @Override
@@ -68,6 +71,14 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
             }
             return item instanceof NumberItem ni && dimension.equals(ni.getDimension());
         }
+
+        protected Unit<?> getGroupItemUnitOrDefault(Item defaultSourceItem) {
+            Unit<?> unit = (baseItem instanceof NumberItem numberItem) ? numberItem.getUnit() : null;
+            if (unit == null) {
+                unit = (defaultSourceItem instanceof NumberItem numberItem) ? numberItem.getUnit() : null;
+            }
+            return unit != null ? unit : Units.ONE;
+        }
     }
 
     /**
@@ -75,8 +86,8 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
      */
     class Avg extends DimensionalGroupFunction {
 
-        public Avg(Class<? extends Quantity<?>> dimension) {
-            super(dimension);
+        public Avg(Class<? extends Quantity<?>> dimension, @Nullable Item baseItem) {
+            super(dimension, baseItem);
         }
 
         @Override
@@ -86,23 +97,27 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
                 return UnDefType.UNDEF;
             }
 
+            Unit<?> baseUnit = null;
             QuantityType<?> sum = null;
             int count = 0;
             for (Item item : items) {
-                if (isSameDimension(item)) {
-                    QuantityType itemState = item.getStateAs(QuantityType.class);
-                    if (itemState != null) {
-                        if (sum == null) {
-                            sum = itemState; // initialise the sum from the first item
-                            count++;
-                        } else {
-                            itemState = itemState.toInvertibleUnit(sum.getUnit());
-                            if (itemState != null) {
-                                sum = sum.add(itemState);
-                                count++;
-                            }
-                        }
-                    }
+                if (!isSameDimension(item)) {
+                    continue;
+                }
+                QuantityType itemState = item.getStateAs(QuantityType.class);
+                if (itemState == null) {
+                    continue;
+                }
+                if (baseUnit == null) {
+                    baseUnit = getGroupItemUnitOrDefault(item);
+                }
+                if (sum == null) {
+                    sum = QuantityType.valueOf(0, baseUnit);
+                }
+                itemState = itemState.toInvertibleUnit(baseUnit);
+                if (itemState != null) {
+                    sum = sum.add(itemState);
+                    count++;
                 }
             }
 
@@ -120,11 +135,8 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
      */
     class Median extends DimensionalGroupFunction {
 
-        private @Nullable Item baseItem;
-
         public Median(Class<? extends Quantity<?>> dimension, @Nullable Item baseItem) {
-            super(dimension);
-            this.baseItem = baseItem;
+            super(dimension, baseItem);
         }
 
         @Override
@@ -132,10 +144,8 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
         public State calculate(@Nullable Set<Item> items) {
             if (items != null) {
                 List<BigDecimal> values = new ArrayList<>();
-                Unit<?> unit = null;
-                if (baseItem instanceof NumberItem numberItem) {
-                    unit = numberItem.getUnit();
-                }
+
+                Unit<?> baseUnit = null;
                 for (Item item : items) {
                     if (!isSameDimension(item)) {
                         continue;
@@ -144,18 +154,18 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
                     if (itemState == null) {
                         continue;
                     }
-                    if (unit == null) {
-                        unit = itemState.getUnit(); // set it to the first item's unit
+                    if (baseUnit == null) {
+                        baseUnit = getGroupItemUnitOrDefault(item);
                     }
-                    if (itemState.toInvertibleUnit(unit) instanceof QuantityType<?> inverted) {
-                        values.add(inverted.toBigDecimal());
+                    if (itemState.toInvertibleUnit(baseUnit) instanceof QuantityType<?> value) {
+                        values.add(value.toBigDecimal());
                     }
                 }
 
                 if (!values.isEmpty()) {
                     BigDecimal median = Statistics.median(values);
-                    if (median != null && unit != null) {
-                        return new QuantityType<>(median, unit);
+                    if (median != null && baseUnit != null) {
+                        return new QuantityType<>(median, baseUnit);
                     }
 
                 }
@@ -169,8 +179,8 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
      */
     class Sum extends DimensionalGroupFunction {
 
-        public Sum(Class<? extends Quantity<?>> dimension) {
-            super(dimension);
+        public Sum(Class<? extends Quantity<?>> dimension, @Nullable Item baseItem) {
+            super(dimension, baseItem);
         }
 
         @Override
@@ -180,20 +190,25 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
                 return UnDefType.UNDEF;
             }
 
+            Unit<?> baseUnit = null;
             QuantityType<?> sum = null;
             for (Item item : items) {
-                if (isSameDimension(item)) {
-                    QuantityType itemState = item.getStateAs(QuantityType.class);
-                    if (itemState != null) {
-                        if (sum == null) {
-                            sum = itemState; // initialise the sum from the first item
-                        } else {
-                            itemState = itemState.toUnit(sum.getUnit());
-                            if (itemState != null) {
-                                sum = sum.add(itemState);
-                            }
-                        }
-                    }
+                if (!isSameDimension(item)) {
+                    continue;
+                }
+                QuantityType itemState = item.getStateAs(QuantityType.class);
+                if (itemState == null) {
+                    continue;
+                }
+                if (baseUnit == null) {
+                    baseUnit = getGroupItemUnitOrDefault(item);
+                }
+                if (sum == null) {
+                    sum = QuantityType.valueOf(0, baseUnit);
+                }
+                itemState = itemState.toInvertibleUnit(baseUnit);
+                if (itemState != null) {
+                    sum = sum.add(itemState);
                 }
             }
 
@@ -206,8 +221,8 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
      */
     class Min extends DimensionalGroupFunction {
 
-        public Min(Class<? extends Quantity<?>> dimension) {
-            super(dimension);
+        public Min(Class<? extends Quantity<?>> dimension, @Nullable Item baseItem) {
+            super(dimension, baseItem);
         }
 
         @Override
@@ -217,16 +232,22 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
                 return UnDefType.UNDEF;
             }
 
+            Unit<?> baseUnit = null;
             QuantityType<?> min = null;
             for (Item item : items) {
-                if (isSameDimension(item)) {
-                    QuantityType itemState = item.getStateAs(QuantityType.class);
-                    if (itemState != null) {
-                        if (min == null
-                                || (min.getUnit().isCompatible(itemState.getUnit()) && min.compareTo(itemState) > 0)) {
-                            min = itemState;
-                        }
-                    }
+                if (!isSameDimension(item)) {
+                    continue;
+                }
+                QuantityType itemState = item.getStateAs(QuantityType.class);
+                if (itemState == null) {
+                    continue;
+                }
+                if (baseUnit == null) {
+                    baseUnit = getGroupItemUnitOrDefault(item);
+                }
+                itemState = itemState.toInvertibleUnit(baseUnit);
+                if (itemState != null && (min == null || min.compareTo(itemState) > 0)) {
+                    min = itemState;
                 }
             }
 
@@ -239,8 +260,8 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
      */
     class Max extends DimensionalGroupFunction {
 
-        public Max(Class<? extends Quantity<?>> dimension) {
-            super(dimension);
+        public Max(Class<? extends Quantity<?>> dimension, @Nullable Item baseItem) {
+            super(dimension, baseItem);
         }
 
         @Override
@@ -250,16 +271,22 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
                 return UnDefType.UNDEF;
             }
 
+            Unit<?> baseUnit = null;
             QuantityType<?> max = null;
             for (Item item : items) {
-                if (isSameDimension(item)) {
-                    QuantityType itemState = item.getStateAs(QuantityType.class);
-                    if (itemState != null) {
-                        if (max == null
-                                || (max.getUnit().isCompatible(itemState.getUnit()) && max.compareTo(itemState) < 0)) {
-                            max = itemState;
-                        }
-                    }
+                if (!isSameDimension(item)) {
+                    continue;
+                }
+                QuantityType itemState = item.getStateAs(QuantityType.class);
+                if (itemState == null) {
+                    continue;
+                }
+                if (baseUnit == null) {
+                    baseUnit = getGroupItemUnitOrDefault(item);
+                }
+                itemState = itemState.toInvertibleUnit(baseUnit);
+                if (itemState != null && (max == null || max.compareTo(itemState) < 0)) {
+                    max = itemState;
                 }
             }
 

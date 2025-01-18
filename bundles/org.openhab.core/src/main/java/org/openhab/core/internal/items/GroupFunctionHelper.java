@@ -90,15 +90,15 @@ public class GroupFunctionHelper {
         final String functionName = function.name;
         switch (functionName.toUpperCase()) {
             case "AVG":
-                return new QuantityTypeArithmeticGroupFunction.Avg(dimension);
+                return new QuantityTypeArithmeticGroupFunction.Avg(dimension, baseItem);
             case "MEDIAN":
                 return new QuantityTypeArithmeticGroupFunction.Median(dimension, baseItem);
             case "SUM":
-                return new QuantityTypeArithmeticGroupFunction.Sum(dimension);
+                return new QuantityTypeArithmeticGroupFunction.Sum(dimension, baseItem);
             case "MIN":
-                return new QuantityTypeArithmeticGroupFunction.Min(dimension);
+                return new QuantityTypeArithmeticGroupFunction.Min(dimension, baseItem);
             case "MAX":
-                return new QuantityTypeArithmeticGroupFunction.Max(dimension);
+                return new QuantityTypeArithmeticGroupFunction.Max(dimension, baseItem);
             default:
                 return createDefaultGroupFunction(function, baseItem);
         }

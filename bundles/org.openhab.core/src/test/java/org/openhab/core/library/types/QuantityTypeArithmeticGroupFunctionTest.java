@@ -12,7 +12,7 @@
  */
 package org.openhab.core.library.types;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.number.IsCloseTo.closeTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -85,7 +85,7 @@ public class QuantityTypeArithmeticGroupFunctionTest {
         items.add(createNumberItem("TestItem4", Temperature.class, UnDefType.UNDEF));
         items.add(createNumberItem("TestItem5", Temperature.class, new QuantityType<>("122.41 °C")));
 
-        GroupFunction function = new QuantityTypeArithmeticGroupFunction.Sum(Temperature.class);
+        GroupFunction function = new QuantityTypeArithmeticGroupFunction.Sum(Temperature.class, null);
         State state = function.calculate(items);
 
         assertEquals(new QuantityType<>("234.95 °C"), state);
@@ -103,7 +103,7 @@ public class QuantityTypeArithmeticGroupFunctionTest {
         items.add(createNumberItem("TestItem4", Temperature.class, UnDefType.UNDEF));
         items.add(createNumberItem("TestItem5", Temperature.class, new QuantityType<>("395.56 K")));
 
-        GroupFunction function = new QuantityTypeArithmeticGroupFunction.Sum(Temperature.class);
+        GroupFunction function = new QuantityTypeArithmeticGroupFunction.Sum(Temperature.class, null);
         State state = function.calculate(items);
 
         assertEquals(new QuantityType<>("234.95 °C"), state);
@@ -119,7 +119,7 @@ public class QuantityTypeArithmeticGroupFunctionTest {
         items.add(createNumberItem("TestItem2", Temperature.class, UnDefType.NULL));
         items.add(createNumberItem("TestItem3", Pressure.class, new QuantityType<>("192.2 hPa")));
 
-        GroupFunction function = new QuantityTypeArithmeticGroupFunction.Sum(Temperature.class);
+        GroupFunction function = new QuantityTypeArithmeticGroupFunction.Sum(Temperature.class, null);
         State state = function.calculate(items);
 
         assertEquals(new QuantityType<>("23.54 °C"), state);
@@ -137,7 +137,7 @@ public class QuantityTypeArithmeticGroupFunctionTest {
         items.add(createNumberItem("TestItem4", Temperature.class, UnDefType.UNDEF));
         items.add(createNumberItem("TestItem5", Temperature.class, new QuantityType<>("300 °C")));
 
-        GroupFunction function = new QuantityTypeArithmeticGroupFunction.Avg(Temperature.class);
+        GroupFunction function = new QuantityTypeArithmeticGroupFunction.Avg(Temperature.class, null);
         State state = function.calculate(items);
 
         assertEquals(new QuantityType<>("200 °C"), state);
@@ -163,7 +163,7 @@ public class QuantityTypeArithmeticGroupFunctionTest {
         items.add(createNumberItem("TestItem4", Temperature.class, UnDefType.UNDEF));
         items.add(createNumberItem("TestItem5", Temperature.class, new QuantityType<>("294.15 K")));
 
-        GroupFunction function = new QuantityTypeArithmeticGroupFunction.Avg(Temperature.class);
+        GroupFunction function = new QuantityTypeArithmeticGroupFunction.Avg(Temperature.class, null);
         State state = function.calculate(items);
 
         assertEquals(new QuantityType<>("55.33333333333333333333333333333334 °C"), state);
@@ -179,7 +179,7 @@ public class QuantityTypeArithmeticGroupFunctionTest {
         items.add(createNumberItem("TestItem2", Temperature.class, UnDefType.NULL));
         items.add(createNumberItem("TestItem3", Pressure.class, new QuantityType<>("192.2 hPa")));
 
-        GroupFunction function = new QuantityTypeArithmeticGroupFunction.Avg(Temperature.class);
+        GroupFunction function = new QuantityTypeArithmeticGroupFunction.Avg(Temperature.class, null);
         State state = function.calculate(items);
 
         assertEquals(new QuantityType<>("23.54 °C"), state);
@@ -242,7 +242,7 @@ public class QuantityTypeArithmeticGroupFunctionTest {
         items.add(createNumberItem("TestItem4", Temperature.class, UnDefType.UNDEF));
         items.add(createNumberItem("TestItem5", Temperature.class, new QuantityType<>("300 °C")));
 
-        GroupFunction function = new QuantityTypeArithmeticGroupFunction.Max(Temperature.class);
+        GroupFunction function = new QuantityTypeArithmeticGroupFunction.Max(Temperature.class, null);
         State state = function.calculate(items);
 
         assertEquals(new QuantityType<>("300 °C"), state);
@@ -260,7 +260,7 @@ public class QuantityTypeArithmeticGroupFunctionTest {
         items.add(createNumberItem("TestItem4", Temperature.class, UnDefType.UNDEF));
         items.add(createNumberItem("TestItem5", Temperature.class, new QuantityType<>("294.15 K")));
 
-        GroupFunction function = new QuantityTypeArithmeticGroupFunction.Max(Temperature.class);
+        GroupFunction function = new QuantityTypeArithmeticGroupFunction.Max(Temperature.class, null);
         State state = function.calculate(items);
 
         assertEquals(new QuantityType<>("100 °C"), state);
@@ -276,7 +276,7 @@ public class QuantityTypeArithmeticGroupFunctionTest {
         items.add(createNumberItem("TestItem2", Temperature.class, UnDefType.NULL));
         items.add(createNumberItem("TestItem3", Pressure.class, new QuantityType<>("192.2 hPa")));
 
-        GroupFunction function = new QuantityTypeArithmeticGroupFunction.Max(Temperature.class);
+        GroupFunction function = new QuantityTypeArithmeticGroupFunction.Max(Temperature.class, null);
         State state = function.calculate(items);
 
         assertEquals(new QuantityType<>("23.54 °C"), state);
@@ -294,7 +294,7 @@ public class QuantityTypeArithmeticGroupFunctionTest {
         items.add(createNumberItem("TestItem4", Temperature.class, UnDefType.UNDEF));
         items.add(createNumberItem("TestItem5", Temperature.class, new QuantityType<>("300 °C")));
 
-        GroupFunction function = new QuantityTypeArithmeticGroupFunction.Min(Temperature.class);
+        GroupFunction function = new QuantityTypeArithmeticGroupFunction.Min(Temperature.class, null);
         State state = function.calculate(items);
 
         assertEquals(new QuantityType<>("100 °C"), state);
@@ -313,7 +313,7 @@ public class QuantityTypeArithmeticGroupFunctionTest {
         items.add(createNumberItem("TestItem5", Dimensionless.class, new QuantityType<>("0 %")));
         items.add(createNumberItem("TestItem6", Dimensionless.class, new QuantityType<>("0 %")));
 
-        GroupFunction function = new QuantityTypeArithmeticGroupFunction.Max(Dimensionless.class);
+        GroupFunction function = new QuantityTypeArithmeticGroupFunction.Max(Dimensionless.class, null);
         State state = function.calculate(items);
 
         assertEquals(new QuantityType<>("48 %"), state);
@@ -331,7 +331,7 @@ public class QuantityTypeArithmeticGroupFunctionTest {
         items.add(createNumberItem("TestItem4", Temperature.class, UnDefType.UNDEF));
         items.add(createNumberItem("TestItem5", Temperature.class, new QuantityType<>("294.15 K")));
 
-        GroupFunction function = new QuantityTypeArithmeticGroupFunction.Min(Temperature.class);
+        GroupFunction function = new QuantityTypeArithmeticGroupFunction.Min(Temperature.class, null);
         State state = function.calculate(items);
 
         assertEquals(new QuantityType<>("294.15 K"), state);
@@ -347,7 +347,7 @@ public class QuantityTypeArithmeticGroupFunctionTest {
         items.add(createNumberItem("TestItem2", Temperature.class, UnDefType.NULL));
         items.add(createNumberItem("TestItem3", Pressure.class, new QuantityType<>("192.2 hPa")));
 
-        GroupFunction function = new QuantityTypeArithmeticGroupFunction.Min(Temperature.class);
+        GroupFunction function = new QuantityTypeArithmeticGroupFunction.Min(Temperature.class, null);
         State state = function.calculate(items);
 
         assertEquals(new QuantityType<>("23.54 °C"), state);
@@ -362,7 +362,7 @@ public class QuantityTypeArithmeticGroupFunctionTest {
         items.add(createNumberItem("TestItem1", Power.class, new QuantityType<>("5 W")));
         items.add(createGroupItem("TestGroup1", Power.class, new QuantityType<>("5 W")));
 
-        GroupFunction function = new QuantityTypeArithmeticGroupFunction.Sum(Power.class);
+        GroupFunction function = new QuantityTypeArithmeticGroupFunction.Sum(Power.class, null);
         State state = function.calculate(items);
 
         assertEquals(new QuantityType<>("10 W"), state);
