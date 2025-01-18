@@ -125,6 +125,11 @@ class QuantityTypeToInvertibleUnitTest {
 
         assertEquals(0.1, v1.doubleValue(), 0.01);
         assertEquals(10, v2.doubleValue(), 0.01);
+
+        // fail cases
+        assertNull(v1.toInvertibleUnit(SIUnits.METRE));
+        assertNull(v2.toInvertibleUnit(SIUnits.METRE));
+        assertNull(QuantityType.valueOf(5, Units.HERTZ).toInvertibleUnit(SIUnits.METRE));
     }
 
     /**
