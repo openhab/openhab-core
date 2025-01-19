@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.internal.i18n;
+package org.openhab.core.library.types;
 
 import java.util.Collection;
 import java.util.Set;
@@ -24,18 +24,18 @@ import org.openhab.core.i18n.UnitProvider;
 import org.openhab.core.library.unit.Units;
 
 /**
- * The {@link TestKelvinProvider} implements a {@link UnitProvider} for testing purposes
- * that only returns {@link Units.KELVIN}
+ * The {@link TestMirekProvider} implements a {@link UnitProvider} for testing purposes
+ * that only returns {@link Units.MIRED}
  *
  * @author Andrew Fiddian-Green - Initial contribution
  */
 @NonNullByDefault
-public class TestKelvinProvider implements UnitProvider {
+public class TestMirekProvider implements UnitProvider {
 
     @Override
     @SuppressWarnings("unchecked")
     public <T extends Quantity<T>> Unit<T> getUnit(Class<T> dimension) {
-        return (Unit<T>) Units.KELVIN;
+        return (Unit<T>) Units.MIRED;
     }
 
     @Override

@@ -15,8 +15,6 @@ package org.openhab.core.internal.items;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.measure.Quantity;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.items.GroupFunction;
@@ -48,13 +46,12 @@ public class GroupFunctionHelper {
      * arithmetic group function will take unit conversion into account.
      *
      * @param function the {@link GroupFunctionDTO} describing the group function.
-     * @param baseItem an optional {@link Item} defining the dimension for unit conversion.
+     * @param baseItem an optional {@link Item} defining the dimension/unit for unit conversion.
      * @return a {@link GroupFunction} according to the given parameters.
      */
     public GroupFunction createGroupFunction(GroupFunctionDTO function, @Nullable Item baseItem) {
-        Class<? extends Quantity<?>> dimension = getDimension(baseItem);
-        if (dimension != null) {
-            return createDimensionGroupFunction(function, baseItem, dimension);
+        if (baseItem instanceof NumberItem baseNumberItem && baseNumberItem.getDimension() != null) {
+            return createDimensionGroupFunction(function, baseNumberItem);
         }
         return createDefaultGroupFunction(function, baseItem);
     }
@@ -78,27 +75,19 @@ public class GroupFunctionHelper {
         return states;
     }
 
-    private @Nullable Class<? extends Quantity<?>> getDimension(@Nullable Item baseItem) {
-        if (baseItem instanceof NumberItem numberItem) {
-            return numberItem.getDimension();
-        }
-        return null;
-    }
-
-    private GroupFunction createDimensionGroupFunction(GroupFunctionDTO function, @Nullable Item baseItem,
-            Class<? extends Quantity<?>> dimension) {
+    private GroupFunction createDimensionGroupFunction(GroupFunctionDTO function, NumberItem baseItem) {
         final String functionName = function.name;
         switch (functionName.toUpperCase()) {
             case "AVG":
-                return new QuantityTypeArithmeticGroupFunction.Avg(dimension, baseItem);
+                return new QuantityTypeArithmeticGroupFunction.Avg(baseItem);
             case "MEDIAN":
-                return new QuantityTypeArithmeticGroupFunction.Median(dimension, baseItem);
+                return new QuantityTypeArithmeticGroupFunction.Median(baseItem);
             case "SUM":
-                return new QuantityTypeArithmeticGroupFunction.Sum(dimension, baseItem);
+                return new QuantityTypeArithmeticGroupFunction.Sum(baseItem);
             case "MIN":
-                return new QuantityTypeArithmeticGroupFunction.Min(dimension, baseItem);
+                return new QuantityTypeArithmeticGroupFunction.Min(baseItem);
             case "MAX":
-                return new QuantityTypeArithmeticGroupFunction.Max(dimension, baseItem);
+                return new QuantityTypeArithmeticGroupFunction.Max(baseItem);
             default:
                 return createDefaultGroupFunction(function, baseItem);
         }
