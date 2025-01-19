@@ -80,9 +80,9 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
         }
 
         protected Unit<?> getBaseUnitOrDefault(Item defaultItem) {
-            Unit<?> unit = baseItem instanceof NumberItem bi ? bi.getUnit() : null;
+            Unit<?> unit = baseItem instanceof NumberItem baseNI ? baseNI.getUnit() : null;
             if (unit == null) {
-                unit = defaultItem instanceof NumberItem di ? di.getUnit() : null;
+                unit = defaultItem instanceof NumberItem defaultNI ? defaultNI.getUnit() : null;
             }
             return unit != null ? unit : Units.ONE;
         }
