@@ -17,13 +17,16 @@ Import-Package: org.apache.log4j,\
  org.openhab.core.common.registry,\
  org.openhab.core.i18n,\
  org.openhab.core.items,\
+ org.openhab.core.model.items,\
  org.openhab.core.service,\
  org.openhab.core.thing,\
  org.openhab.core.thing.binding,\
  org.openhab.core.thing.binding.builder,\
  org.openhab.core.thing.link,\
+ org.openhab.core.thing.syntaxgenerator,\
  org.openhab.core.thing.type,\
  org.openhab.core.thing.util,\
+ org.openhab.core.types,\
  org.openhab.core.types.util,\
  org.openhab.core.util,\
  org.openhab.core.model.core,\

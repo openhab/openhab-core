@@ -26,6 +26,7 @@ import org.eclipse.jdt.annotation.Nullable;
  * come from.
  *
  * @author Kai Kreuzer - Initial contribution
+ * @author Laurent Garnier - Added method generateSyntaxFromModelContent
  */
 @NonNullByDefault
 public interface ModelRepository {
@@ -92,4 +93,13 @@ public interface ModelRepository {
      * @param listener the listener to remove
      */
     void removeModelRepositoryChangeListener(ModelRepositoryChangeListener listener);
+
+    /**
+     * Generate the syntax from a provided model content.
+     *
+     * @param extension the kind of model ("items", "things", ...)
+     * @param content the content of the model
+     * @return the corresponding syntax
+     */
+    String generateSyntaxFromModelContent(String extension, EObject content);
 }
