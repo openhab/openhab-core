@@ -12,6 +12,7 @@
  */
 package org.openhab.core.items;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.common.registry.Identifiable;
 
 /**
@@ -19,6 +20,7 @@ import org.openhab.core.common.registry.Identifiable;
  *
  * @author Simon Kaufmann - Initial contribution
  */
+@NonNullByDefault
 public interface RegistryHook<E extends Identifiable<?>> {
 
     /**
