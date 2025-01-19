@@ -75,21 +75,21 @@ public class GroupFunctionHelper {
         return states;
     }
 
-    private GroupFunction createDimensionGroupFunction(GroupFunctionDTO function, NumberItem baseItem) {
+    private GroupFunction createDimensionGroupFunction(GroupFunctionDTO function, NumberItem baseNumberItem) {
         final String functionName = function.name;
         switch (functionName.toUpperCase()) {
             case "AVG":
-                return new QuantityTypeArithmeticGroupFunction.Avg(baseItem);
+                return new QuantityTypeArithmeticGroupFunction.Avg(baseNumberItem);
             case "MEDIAN":
-                return new QuantityTypeArithmeticGroupFunction.Median(baseItem);
+                return new QuantityTypeArithmeticGroupFunction.Median(baseNumberItem);
             case "SUM":
-                return new QuantityTypeArithmeticGroupFunction.Sum(baseItem);
+                return new QuantityTypeArithmeticGroupFunction.Sum(baseNumberItem);
             case "MIN":
-                return new QuantityTypeArithmeticGroupFunction.Min(baseItem);
+                return new QuantityTypeArithmeticGroupFunction.Min(baseNumberItem);
             case "MAX":
-                return new QuantityTypeArithmeticGroupFunction.Max(baseItem);
+                return new QuantityTypeArithmeticGroupFunction.Max(baseNumberItem);
             default:
-                return createDefaultGroupFunction(function, baseItem);
+                return createDefaultGroupFunction(function, baseNumberItem);
         }
     }
 

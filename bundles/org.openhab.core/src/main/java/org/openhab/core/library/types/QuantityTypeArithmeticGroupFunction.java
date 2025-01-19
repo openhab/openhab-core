@@ -82,8 +82,8 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
      */
     class Avg extends DimensionalGroupFunction {
 
-        public Avg(NumberItem baseItem) {
-            super(baseItem);
+        public Avg(NumberItem baseNumberItem) {
+            super(baseNumberItem);
         }
 
         @Override
@@ -131,8 +131,8 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
      */
     class Median extends DimensionalGroupFunction {
 
-        public Median(NumberItem baseItem) {
-            super(baseItem);
+        public Median(NumberItem baseNumberItem) {
+            super(baseNumberItem);
         }
 
         @Override
@@ -174,8 +174,8 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
      */
     class Sum extends DimensionalGroupFunction {
 
-        public Sum(NumberItem baseItem) {
-            super(baseItem);
+        public Sum(NumberItem baseNumberItem) {
+            super(baseNumberItem);
         }
 
         @Override
@@ -216,8 +216,8 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
      */
     class Min extends DimensionalGroupFunction {
 
-        public Min(NumberItem baseItem) {
-            super(baseItem);
+        public Min(NumberItem baseNumberItem) {
+            super(baseNumberItem);
         }
 
         @Override
@@ -255,8 +255,8 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
      */
     class Max extends DimensionalGroupFunction {
 
-        public Max(NumberItem baseItem) {
-            super(baseItem);
+        public Max(NumberItem baseNumberItem) {
+            super(baseNumberItem);
         }
 
         @Override
