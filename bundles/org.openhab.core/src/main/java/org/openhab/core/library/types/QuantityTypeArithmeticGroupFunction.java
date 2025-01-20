@@ -67,8 +67,8 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
             }
             if (memberItem instanceof NumberItem memberNumberItem) {
                 Unit<?> memberUnit = memberNumberItem.getUnit();
-                return memberUnit != null && targetUnit.isCompatible(memberUnit)
-                        || targetUnit.isCompatible(memberUnit.inverse());
+                return (memberUnit != null)
+                        && (targetUnit.isCompatible(memberUnit) || targetUnit.isCompatible(memberUnit.inverse()));
             }
             return false;
         }
