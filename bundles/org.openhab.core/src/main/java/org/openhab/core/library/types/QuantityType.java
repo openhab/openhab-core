@@ -268,7 +268,7 @@ public class QuantityType<T extends Quantity<T>> extends Number
             QuantityType<T> v1 = this.toUnit(getUnit().getSystemUnit());
             QuantityType<?> v2 = o.toUnit(o.getUnit().getSystemUnit());
             if (v1 != null && v2 != null) {
-                return Double.compare(v1.doubleValue(), v2.doubleValue());
+                return v1.toBigDecimal().compareTo(v2.toBigDecimal());
             } else {
                 throw new IllegalArgumentException("Unable to convert to system unit during compare.");
             }
