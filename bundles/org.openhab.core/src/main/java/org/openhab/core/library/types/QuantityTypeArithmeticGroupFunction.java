@@ -23,9 +23,7 @@ import javax.measure.Unit;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.items.GroupFunction;
-import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
-import org.openhab.core.library.items.NumberItem;
 import org.openhab.core.types.State;
 import org.openhab.core.types.UnDefType;
 import org.openhab.core.util.Statistics;
@@ -61,18 +59,15 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
             return new State[0];
         }
 
-        protected boolean isCompatible(@Nullable Item memberItem) { // allow Nullable arg for recursive call below
-            if (memberItem instanceof GroupItem groupItem) {
-                return isCompatible(groupItem.getBaseItem());
-            }
-            if (memberItem instanceof NumberItem memberNumberItem) {
-                Unit<?> memberUnit = memberNumberItem.getUnit();
-                return (memberUnit != null)
-                        && (targetUnit.isCompatible(memberUnit) || targetUnit.isCompatible(memberUnit.inverse()));
-            }
-            return false;
-        }
-
+        /**
+         * Convert the given item {@link State} to a {@link QuantityType} based on 'targetUnit'. Returns false if the
+         * {@link State} is not a {@link QuantityType} or if the {@link QuantityType} could not be converted to the
+         * 'targetUnit'. The conversion can be made to both inverted and non-inverted units, so invertible type
+         * conversions (e.g. Mirek <=> Kelvin) will succeed.
+         *
+         * @param state the State of the group member item
+         * @return a QuantityType or null
+         */
         protected @Nullable QuantityType<?> normalizedQuantityType(@Nullable State state) {
             return state instanceof QuantityType<?> quantity ? quantity.toInvertibleUnit(targetUnit) : null;
         }
@@ -98,18 +93,14 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
             int count = 0;
 
             for (Item item : items) {
-                if (!isCompatible(item)) {
-                    continue;
-                }
                 QuantityType itemState = normalizedQuantityType(item.getStateAs(QuantityType.class));
-                if (itemState == null) {
-                    continue;
+                if (itemState != null) {
+                    if (sum == null) {
+                        sum = QuantityType.valueOf(0, targetUnit);
+                    }
+                    sum = sum.add(itemState);
+                    count++;
                 }
-                if (sum == null) {
-                    sum = QuantityType.valueOf(0, targetUnit);
-                }
-                sum = sum.add(itemState);
-                count++;
             }
 
             if (sum != null && count > 0) {
@@ -133,27 +124,26 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
         @Override
         @SuppressWarnings({ "unchecked", "rawtypes" })
         public State calculate(@Nullable Set<Item> items) {
-            if (items != null) {
-                List<BigDecimal> values = new ArrayList<>();
+            if (items == null || items.isEmpty()) {
+                return UnDefType.UNDEF;
+            }
 
-                for (Item item : items) {
-                    if (!isCompatible(item)) {
-                        continue;
-                    }
-                    QuantityType itemState = normalizedQuantityType(item.getStateAs(QuantityType.class));
-                    if (itemState == null) {
-                        continue;
-                    }
+            List<BigDecimal> values = new ArrayList<>();
+
+            for (Item item : items) {
+                QuantityType itemState = normalizedQuantityType(item.getStateAs(QuantityType.class));
+                if (itemState != null) {
                     values.add(itemState.toBigDecimal());
                 }
+            }
 
-                if (!values.isEmpty()) {
-                    BigDecimal median = Statistics.median(values);
-                    if (median != null) {
-                        return new QuantityType<>(median, targetUnit);
-                    }
+            if (!values.isEmpty()) {
+                BigDecimal median = Statistics.median(values);
+                if (median != null) {
+                    return new QuantityType<>(median, targetUnit);
                 }
             }
+
             return UnDefType.UNDEF;
         }
     }
@@ -175,18 +165,15 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
             }
 
             QuantityType<?> sum = null;
+
             for (Item item : items) {
-                if (!isCompatible(item)) {
-                    continue;
-                }
                 QuantityType itemState = normalizedQuantityType(item.getStateAs(QuantityType.class));
-                if (itemState == null) {
-                    continue;
+                if (itemState != null) {
+                    if (sum == null) {
+                        sum = QuantityType.valueOf(0, targetUnit);
+                    }
+                    sum = sum.add(itemState);
                 }
-                if (sum == null) {
-                    sum = QuantityType.valueOf(0, targetUnit);
-                }
-                sum = sum.add(itemState);
             }
 
             return sum != null ? sum : UnDefType.UNDEF;
@@ -210,15 +197,10 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
             }
 
             QuantityType<?> min = null;
+
             for (Item item : items) {
-                if (!isCompatible(item)) {
-                    continue;
-                }
                 QuantityType itemState = normalizedQuantityType(item.getStateAs(QuantityType.class));
-                if (itemState == null) {
-                    continue;
-                }
-                if (min == null || min.compareTo(itemState) > 0) {
+                if (itemState != null && (min == null || min.compareTo(itemState) > 0)) {
                     min = itemState;
                 }
             }
@@ -244,15 +226,10 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
             }
 
             QuantityType<?> max = null;
+
             for (Item item : items) {
-                if (!isCompatible(item)) {
-                    continue;
-                }
                 QuantityType itemState = normalizedQuantityType(item.getStateAs(QuantityType.class));
-                if (itemState == null) {
-                    continue;
-                }
-                if (max == null || max.compareTo(itemState) < 0) {
+                if (itemState != null && (max == null || max.compareTo(itemState) < 0)) {
                     max = itemState;
                 }
             }
