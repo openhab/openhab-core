@@ -250,6 +250,14 @@ public class QuantityType<T extends Quantity<T>> extends Number
         return true;
     }
 
+    /**
+     * This method overrides {@link Comparable.compareTo}
+     *
+     * Warning: This method will also compare {@link QuantityType<?>} where the arguments are of the inverted dimension.
+     * Contrary to what is stated as a requirements for overriding {@link Comparable.compareTo}, this implementation is
+     * not transitive when the arguments are of an inverted dimension. When the dimensions are inverted, a > b and b > a
+     * may also be true at the same time.
+     */
     @Override
     public int compareTo(QuantityType<T> o) {
         return internalCompareTo(o);
@@ -265,7 +273,7 @@ public class QuantityType<T extends Quantity<T>> extends Number
                 throw new IllegalArgumentException("Unable to convert to system unit during compare.");
             }
         } else if (quantity.getUnit().inverse().isCompatible(o.quantity.getUnit())) {
-            return inverse().internalCompareTo(o);
+            return internalCompareTo(o.inverse());
         } else {
             throw new IllegalArgumentException("Can not compare incompatible units.");
         }
