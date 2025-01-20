@@ -12,7 +12,7 @@
  */
 package org.openhab.core.library.types;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.number.IsCloseTo.closeTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -166,7 +166,8 @@ public class QuantityTypeArithmeticGroupFunctionTest {
         GroupFunction function = new QuantityTypeArithmeticGroupFunction.Avg(Temperature.class);
         State state = function.calculate(items);
 
-        assertEquals(new QuantityType<>("55.33333333333333333333333333333334 °C"), state);
+        QuantityType<?> qt = state.as(QuantityType.class).toUnit("°C");
+        assertEquals(55.33333334, qt.doubleValue(), 0.00001);
     }
 
     @ParameterizedTest

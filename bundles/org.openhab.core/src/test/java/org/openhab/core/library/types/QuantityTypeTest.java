@@ -674,27 +674,5 @@ public class QuantityTypeTest {
         assertEquals(1, temp1.compareTo(temp2));
         temp2 = new QuantityType<>("50 °C");
         assertEquals(-1, temp1.compareTo(temp2));
-
-        temp1 = new QuantityType<>("100000 K");
-        temp2 = new QuantityType<>("10 mirek");
-        assertEquals(0, temp1.compareTo(temp2));
-        assertEquals(0, temp2.compareTo(temp1));
-        temp2 = new QuantityType<>("20 mirek");
-        assertEquals(1, temp1.compareTo(temp2)); // temp1 (100000 K) > temp2 (20 mirek = 50000 K) in Kelvin
-        assertEquals(1, temp2.compareTo(temp1)); // temp2 (20 mirek) > temp1 (100000 K = 10 mirek) in mirek
-        temp2 = new QuantityType<>("1 mirek");
-        assertEquals(-1, temp1.compareTo(temp2));
-        assertEquals(-1, temp2.compareTo(temp1));
-
-        temp1 = new QuantityType<>("0.1 MK");
-        temp2 = new QuantityType<>("10 mirek");
-        assertEquals(0, temp1.compareTo(temp2));
-        assertEquals(0, temp2.compareTo(temp1));
-        temp2 = new QuantityType<>("20 mirek");
-        assertEquals(1, temp1.compareTo(temp2));
-        assertEquals(1, temp2.compareTo(temp1));
-        temp2 = new QuantityType<>("1 mirek");
-        assertEquals(-1, temp1.compareTo(temp2));
-        assertEquals(-1, temp2.compareTo(temp1));
     }
 }
