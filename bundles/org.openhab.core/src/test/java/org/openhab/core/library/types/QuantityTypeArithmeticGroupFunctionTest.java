@@ -62,8 +62,6 @@ public class QuantityTypeArithmeticGroupFunctionTest {
 
     private @Mock @NonNullByDefault({}) ComponentContext componentContext;
     private final UnitProvider unitProvider = new TestUnitProvider();
-    private final UnitProvider kelvinProvider = new TestKelvinProvider();
-    private final UnitProvider mirekProvider = new TestMirekProvider();
 
     /**
      * Locales having a different decimal and grouping separators to test string parsing and generation.
