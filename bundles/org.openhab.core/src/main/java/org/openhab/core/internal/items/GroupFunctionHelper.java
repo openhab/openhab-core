@@ -15,6 +15,8 @@ package org.openhab.core.internal.items;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.measure.Unit;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.items.GroupFunction;
@@ -77,20 +79,23 @@ public class GroupFunctionHelper {
 
     private GroupFunction createDimensionGroupFunction(GroupFunctionDTO function, NumberItem baseNumberItem) {
         final String functionName = function.name;
-        switch (functionName.toUpperCase()) {
-            case "AVG":
-                return new QuantityTypeArithmeticGroupFunction.Avg(baseNumberItem);
-            case "MEDIAN":
-                return new QuantityTypeArithmeticGroupFunction.Median(baseNumberItem);
-            case "SUM":
-                return new QuantityTypeArithmeticGroupFunction.Sum(baseNumberItem);
-            case "MIN":
-                return new QuantityTypeArithmeticGroupFunction.Min(baseNumberItem);
-            case "MAX":
-                return new QuantityTypeArithmeticGroupFunction.Max(baseNumberItem);
-            default:
-                return createDefaultGroupFunction(function, baseNumberItem);
+        Unit<?> targetUnit = baseNumberItem.getUnit();
+        if (targetUnit != null) {
+            switch (functionName.toUpperCase()) {
+                case "AVG":
+                    return new QuantityTypeArithmeticGroupFunction.Avg(targetUnit);
+                case "MEDIAN":
+                    return new QuantityTypeArithmeticGroupFunction.Median(targetUnit);
+                case "SUM":
+                    return new QuantityTypeArithmeticGroupFunction.Sum(targetUnit);
+                case "MIN":
+                    return new QuantityTypeArithmeticGroupFunction.Min(targetUnit);
+                case "MAX":
+                    return new QuantityTypeArithmeticGroupFunction.Max(targetUnit);
+                default:
+            }
         }
+        return createDefaultGroupFunction(function, baseNumberItem);
     }
 
     private GroupFunction createDefaultGroupFunction(GroupFunctionDTO function, @Nullable Item baseItem) {

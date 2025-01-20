@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import javax.measure.Quantity;
 import javax.measure.Unit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -41,10 +40,10 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
 
     abstract class DimensionalGroupFunction implements GroupFunction {
 
-        protected final NumberItem baseNumberItem;
+        protected final Unit<?> targetUnit;
 
-        public DimensionalGroupFunction(NumberItem baseNumberItem) {
-            this.baseNumberItem = baseNumberItem;
+        public DimensionalGroupFunction(Unit<?> targetUnit) {
+            this.targetUnit = targetUnit;
         }
 
         @Override
@@ -67,11 +66,9 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
                 return isCompatible(groupItem.getBaseItem());
             }
             if (memberItem instanceof NumberItem memberNumberItem) {
-                Unit<? extends Quantity<?>> baseUnit = baseNumberItem.getUnit();
-                Unit<? extends Quantity<?>> memberUnit = memberNumberItem.getUnit();
-                if (baseUnit != null && memberUnit != null) {
-                    return baseUnit.isCompatible(memberUnit) || baseUnit.isCompatible(memberUnit.inverse());
-                }
+                Unit<?> memberUnit = memberNumberItem.getUnit();
+                return memberUnit != null && targetUnit.isCompatible(memberUnit)
+                        || targetUnit.isCompatible(memberUnit.inverse());
             }
             return false;
         }
@@ -82,8 +79,8 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
      */
     class Avg extends DimensionalGroupFunction {
 
-        public Avg(NumberItem baseNumberItem) {
-            super(baseNumberItem);
+        public Avg(Unit<?> targetUnit) {
+            super(targetUnit);
         }
 
         @Override
@@ -96,30 +93,27 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
             QuantityType<?> sum = null;
             int count = 0;
 
-            Unit<?> unit = baseNumberItem.getUnit();
-            if (unit != null) {
-                for (Item item : items) {
-                    if (!isCompatible(item)) {
-                        continue;
-                    }
-                    QuantityType itemState = item.getStateAs(QuantityType.class);
-                    if (itemState == null) {
-                        continue;
-                    }
-                    if (sum == null) {
-                        sum = QuantityType.valueOf(0, unit);
-                    }
-                    itemState = itemState.toInvertibleUnit(unit);
-                    if (itemState != null) {
-                        sum = sum.add(itemState);
-                        count++;
-                    }
+            for (Item item : items) {
+                if (!isCompatible(item)) {
+                    continue;
+                }
+                QuantityType itemState = item.getStateAs(QuantityType.class);
+                if (itemState == null) {
+                    continue;
+                }
+                if (sum == null) {
+                    sum = QuantityType.valueOf(0, targetUnit);
+                }
+                itemState = itemState.toInvertibleUnit(targetUnit);
+                if (itemState != null) {
+                    sum = sum.add(itemState);
+                    count++;
                 }
             }
 
             if (sum != null && count > 0) {
                 BigDecimal result = sum.toBigDecimal().divide(BigDecimal.valueOf(count), MathContext.DECIMAL128);
-                return new QuantityType(result, sum.getUnit());
+                return new QuantityType(result, targetUnit);
             }
 
             return UnDefType.UNDEF;
@@ -131,8 +125,8 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
      */
     class Median extends DimensionalGroupFunction {
 
-        public Median(NumberItem baseNumberItem) {
-            super(baseNumberItem);
+        public Median(Unit<?> targetUnit) {
+            super(targetUnit);
         }
 
         @Override
@@ -141,28 +135,24 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
             if (items != null) {
                 List<BigDecimal> values = new ArrayList<>();
 
-                Unit<?> unit = baseNumberItem.getUnit();
-                if (unit != null) {
-                    for (Item item : items) {
-                        if (!isCompatible(item)) {
-                            continue;
-                        }
-                        QuantityType itemState = item.getStateAs(QuantityType.class);
-                        if (itemState == null) {
-                            continue;
-                        }
-                        if (itemState.toInvertibleUnit(unit) instanceof QuantityType<?> value) {
-                            values.add(value.toBigDecimal());
-                        }
+                for (Item item : items) {
+                    if (!isCompatible(item)) {
+                        continue;
+                    }
+                    QuantityType itemState = item.getStateAs(QuantityType.class);
+                    if (itemState == null) {
+                        continue;
+                    }
+                    if (itemState.toInvertibleUnit(targetUnit) instanceof QuantityType<?> value) {
+                        values.add(value.toBigDecimal());
                     }
                 }
 
                 if (!values.isEmpty()) {
                     BigDecimal median = Statistics.median(values);
-                    if (median != null && unit != null) {
-                        return new QuantityType<>(median, unit);
+                    if (median != null) {
+                        return new QuantityType<>(median, targetUnit);
                     }
-
                 }
             }
             return UnDefType.UNDEF;
@@ -174,8 +164,8 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
      */
     class Sum extends DimensionalGroupFunction {
 
-        public Sum(NumberItem baseNumberItem) {
-            super(baseNumberItem);
+        public Sum(Unit<?> targetUnit) {
+            super(targetUnit);
         }
 
         @Override
@@ -186,24 +176,20 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
             }
 
             QuantityType<?> sum = null;
-
-            Unit<?> unit = baseNumberItem.getUnit();
-            if (unit != null) {
-                for (Item item : items) {
-                    if (!isCompatible(item)) {
-                        continue;
-                    }
-                    QuantityType itemState = item.getStateAs(QuantityType.class);
-                    if (itemState == null) {
-                        continue;
-                    }
-                    if (sum == null) {
-                        sum = QuantityType.valueOf(0, unit);
-                    }
-                    itemState = itemState.toInvertibleUnit(unit);
-                    if (itemState != null) {
-                        sum = sum.add(itemState);
-                    }
+            for (Item item : items) {
+                if (!isCompatible(item)) {
+                    continue;
+                }
+                QuantityType itemState = item.getStateAs(QuantityType.class);
+                if (itemState == null) {
+                    continue;
+                }
+                if (sum == null) {
+                    sum = QuantityType.valueOf(0, targetUnit);
+                }
+                itemState = itemState.toInvertibleUnit(targetUnit);
+                if (itemState != null) {
+                    sum = sum.add(itemState);
                 }
             }
 
@@ -216,8 +202,8 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
      */
     class Min extends DimensionalGroupFunction {
 
-        public Min(NumberItem baseNumberItem) {
-            super(baseNumberItem);
+        public Min(Unit<?> targetUnit) {
+            super(targetUnit);
         }
 
         @Override
@@ -228,21 +214,17 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
             }
 
             QuantityType<?> min = null;
-
-            Unit<?> unit = baseNumberItem.getUnit();
-            if (unit != null) {
-                for (Item item : items) {
-                    if (!isCompatible(item)) {
-                        continue;
-                    }
-                    QuantityType itemState = item.getStateAs(QuantityType.class);
-                    if (itemState == null) {
-                        continue;
-                    }
-                    itemState = itemState.toInvertibleUnit(unit);
-                    if (itemState != null && (min == null || min.compareTo(itemState) > 0)) {
-                        min = itemState;
-                    }
+            for (Item item : items) {
+                if (!isCompatible(item)) {
+                    continue;
+                }
+                QuantityType itemState = item.getStateAs(QuantityType.class);
+                if (itemState == null) {
+                    continue;
+                }
+                itemState = itemState.toInvertibleUnit(targetUnit);
+                if (itemState != null && (min == null || min.compareTo(itemState) > 0)) {
+                    min = itemState;
                 }
             }
 
@@ -255,8 +237,8 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
      */
     class Max extends DimensionalGroupFunction {
 
-        public Max(NumberItem baseNumberItem) {
-            super(baseNumberItem);
+        public Max(Unit<?> targetUnit) {
+            super(targetUnit);
         }
 
         @Override
@@ -267,21 +249,17 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
             }
 
             QuantityType<?> max = null;
-
-            Unit<?> unit = baseNumberItem.getUnit();
-            if (unit != null) {
-                for (Item item : items) {
-                    if (!isCompatible(item)) {
-                        continue;
-                    }
-                    QuantityType itemState = item.getStateAs(QuantityType.class);
-                    if (itemState == null) {
-                        continue;
-                    }
-                    itemState = itemState.toInvertibleUnit(unit);
-                    if (itemState != null && (max == null || max.compareTo(itemState) < 0)) {
-                        max = itemState;
-                    }
+            for (Item item : items) {
+                if (!isCompatible(item)) {
+                    continue;
+                }
+                QuantityType itemState = item.getStateAs(QuantityType.class);
+                if (itemState == null) {
+                    continue;
+                }
+                itemState = itemState.toInvertibleUnit(targetUnit);
+                if (itemState != null && (max == null || max.compareTo(itemState) < 0)) {
+                    max = itemState;
                 }
             }
 
