@@ -33,8 +33,6 @@ import org.openhab.core.common.registry.Identifiable;
 @NonNullByDefault
 public class AddonInfo implements Identifiable<String> {
 
-    public static final String NA = "n/a";
-
     private static final Set<String> SUPPORTED_ADDON_TYPES = Set.of("automation", "binding", "misc", "persistence",
             "transformation", "ui", "voice");
 
