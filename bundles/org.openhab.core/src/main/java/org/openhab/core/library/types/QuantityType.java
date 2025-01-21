@@ -70,7 +70,7 @@ import tech.uom.lib.common.function.QuantityFunctions;
                                                                     // javax.measure.quantity.* interfaces are not
                                                                     // annotated.
 public class QuantityType<T extends Quantity<T>> extends Number
-        implements PrimitiveType, State, Command, Comparable<QuantityType<T>> {
+        implements PrimitiveType, State, Command, Comparable<QuantityType<?>> {
 
     @Serial
     private static final long serialVersionUID = 8828949721938234629L;
@@ -241,11 +241,11 @@ public class QuantityType<T extends Quantity<T>> extends Number
             return false;
         }
         if (quantity.getUnit().isCompatible(other.quantity.getUnit())) {
-            if (internalCompareTo(other) != 0) {
+            if (compareTo(other) != 0) {
                 return false;
             }
         } else if (quantity.getUnit().isCompatible(other.quantity.getUnit().inverse())) {
-            if (internalCompareTo(other.inverse()) != 0) {
+            if (compareTo(other.inverse()) != 0) {
                 return false;
             }
         } else {
@@ -256,11 +256,7 @@ public class QuantityType<T extends Quantity<T>> extends Number
     }
 
     @Override
-    public int compareTo(QuantityType<T> o) {
-        return internalCompareTo(o);
-    }
-
-    private int internalCompareTo(QuantityType<?> o) {
+    public int compareTo(QuantityType<?> o) {
         if (quantity.getUnit().isCompatible(o.quantity.getUnit())) {
             QuantityType<T> v1 = this.toUnit(getUnit().getSystemUnit());
             QuantityType<?> v2 = o.toUnit(o.getUnit().getSystemUnit());
