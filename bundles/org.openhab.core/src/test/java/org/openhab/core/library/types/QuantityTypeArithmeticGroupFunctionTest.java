@@ -166,8 +166,7 @@ public class QuantityTypeArithmeticGroupFunctionTest {
         GroupFunction function = new QuantityTypeArithmeticGroupFunction.Avg(Temperature.class);
         State state = function.calculate(items);
 
-        QuantityType<?> qt = state.as(QuantityType.class).toUnit("°C");
-        assertEquals(55.33333334, qt.doubleValue(), 0.00001);
+        assertEquals(new QuantityType<>("55.33333333333333333333333333333334 °C"), state);
     }
 
     @ParameterizedTest
