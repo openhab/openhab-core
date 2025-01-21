@@ -23,6 +23,7 @@ import javax.measure.Unit;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.items.GroupFunction;
+import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
 import org.openhab.core.types.State;
 import org.openhab.core.types.UnDefType;
@@ -32,13 +33,14 @@ import org.openhab.core.util.Statistics;
  * This interface is a container for dimension based functions that require {@link QuantityType}s for its calculations.
  *
  * @author Henning Treu - Initial contribution
+ * @author Andrew Fiddian-Green - Normalise calculations based on the Unit of the GroupItem
  */
 @NonNullByDefault
 public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
 
     abstract class DimensionalGroupFunction implements GroupFunction {
 
-        protected final Unit<?> targetUnit;
+        protected final Unit<?> targetUnit; // the base reference unit for all group calculations
 
         public DimensionalGroupFunction(Unit<?> targetUnit) {
             this.targetUnit = targetUnit;
@@ -60,12 +62,12 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
         }
 
         /**
-         * Convert the given item {@link State} to a {@link QuantityType} based on 'targetUnit'. Returns false if the
-         * {@link State} is not a {@link QuantityType} or if the {@link QuantityType} could not be converted to the
-         * 'targetUnit'. The conversion can be made to both inverted and non-inverted units, so invertible type
-         * conversions (e.g. Mirek <=> Kelvin) will succeed.
+         * Convert the given item {@link State} to a {@link QuantityType} based on the {@link Unit} of the
+         * {@link GroupItem} i.e. the 'targetUnit'. Returns false if the {@link State} is not a {@link QuantityType} or
+         * if the {@link QuantityType} could not be converted to the 'targetUnit'. The conversion can be made to both
+         * inverted and non-inverted units, so invertible type conversions (e.g. Mirek <=> Kelvin) will succeed.
          *
-         * @param state the State of the group member item
+         * @param state the State of any given group member item
          * @return a QuantityType or null
          */
         protected @Nullable QuantityType<?> normalizedQuantityType(@Nullable State state) {
