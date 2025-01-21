@@ -33,6 +33,8 @@ import org.openhab.core.common.registry.Identifiable;
 @NonNullByDefault
 public class AddonInfo implements Identifiable<String> {
 
+    public static final String NA = "n/a";
+
     private static final Set<String> SUPPORTED_ADDON_TYPES = Set.of("automation", "binding", "misc", "persistence",
             "transformation", "ui", "voice");
 
@@ -48,13 +50,10 @@ public class AddonInfo implements Identifiable<String> {
     private @Nullable String sourceBundle;
     private @Nullable List<AddonDiscoveryMethod> discoveryMethods;
 
-    private boolean masterAddonInfo = true;
-
     private AddonInfo(String id, String type, @Nullable String uid, String name, String description,
             @Nullable String connection, List<String> countries, @Nullable String configDescriptionURI,
             @Nullable String serviceId, @Nullable String sourceBundle,
-            @Nullable List<AddonDiscoveryMethod> discoveryMethods, boolean isMasterAddonInfo)
-            throws IllegalArgumentException {
+            @Nullable List<AddonDiscoveryMethod> discoveryMethods) throws IllegalArgumentException {
         // mandatory fields
         if (id.isBlank()) {
             throw new IllegalArgumentException("The ID must neither be null nor empty!");
@@ -82,8 +81,6 @@ public class AddonInfo implements Identifiable<String> {
         this.serviceId = Objects.requireNonNullElse(serviceId, type + "." + id);
         this.sourceBundle = sourceBundle;
         this.discoveryMethods = discoveryMethods;
-
-        this.masterAddonInfo = isMasterAddonInfo;
     }
 
     /**
@@ -158,10 +155,6 @@ public class AddonInfo implements Identifiable<String> {
         return discoveryMethods != null ? discoveryMethods : List.of();
     }
 
-    public boolean isMasterAddonInfo() {
-        return masterAddonInfo;
-    }
-
     public static Builder builder(String id, String type) {
         return new Builder(id, type);
     }
@@ -184,8 +177,6 @@ public class AddonInfo implements Identifiable<String> {
         private @Nullable String sourceBundle;
         private @Nullable List<AddonDiscoveryMethod> discoveryMethods;
 
-        private boolean masterAddonInfo = true;
-
         private Builder(String id, String type) {
             this.id = id;
             this.type = type;
@@ -203,7 +194,6 @@ public class AddonInfo implements Identifiable<String> {
             this.serviceId = addonInfo.serviceId;
             this.sourceBundle = addonInfo.sourceBundle;
             this.discoveryMethods = addonInfo.discoveryMethods;
-            this.masterAddonInfo = addonInfo.masterAddonInfo;
         }
 
         public Builder withUID(@Nullable String uid) {
@@ -256,11 +246,6 @@ public class AddonInfo implements Identifiable<String> {
             return this;
         }
 
-        public Builder isMasterAddonInfo(boolean masterAddonInfo) {
-            this.masterAddonInfo = masterAddonInfo;
-            return this;
-        }
-
         /**
          * Build an {@link AddonInfo} from this builder
          *
@@ -269,7 +254,7 @@ public class AddonInfo implements Identifiable<String> {
          */
         public AddonInfo build() throws IllegalArgumentException {
             return new AddonInfo(id, type, uid, name, description, connection, countries, configDescriptionURI,
-                    serviceId, sourceBundle, discoveryMethods, masterAddonInfo);
+                    serviceId, sourceBundle, discoveryMethods);
         }
     }
 }
