@@ -108,7 +108,7 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
                 List<QuantityType> referenceUnitQuantities = referenceUnitQuantityTypes(items);
                 if (!referenceUnitQuantities.isEmpty()) {
                     return referenceUnitQuantities.stream()
-                            .reduce(new QuantityType(0, referenceUnit), QuantityType::add)
+                            .reduce(new QuantityType<>(0, referenceUnit), QuantityType::add)
                             .divide(BigDecimal.valueOf(referenceUnitQuantities.size()));
                 }
             }
@@ -159,7 +159,7 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
             if (items != null) {
                 List<QuantityType> referenceUnitQuantities = referenceUnitQuantityTypes(items);
                 if (!referenceUnitQuantities.isEmpty()) {
-                    return referenceUnitQuantities.stream().reduce(new QuantityType(0, referenceUnit),
+                    return referenceUnitQuantities.stream().reduce(new QuantityType<>(0, referenceUnit),
                             QuantityType::add);
                 }
             }
