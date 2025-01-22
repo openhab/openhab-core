@@ -665,4 +665,26 @@ public class QuantityTypeTest {
         QuantityType<Temperature> f = c.toUnitRelative(ImperialUnits.FAHRENHEIT);
         assertEquals(1.8, f.doubleValue());
     }
+
+    @Test
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public void testIncrementalAdd() {
+        assertEquals(new QuantityType("50 °C"), new QuantityType("20 °C").add(new QuantityType("30 °C")));
+        assertEquals(new QuantityType("50 °C"), new QuantityType("20 °C").add(new QuantityType("30 K")));
+        assertEquals(new QuantityType("50 °C"), new QuantityType("20 °C").add(new QuantityType("54 °F")));
+        assertEquals(new QuantityType("50 K"), new QuantityType("20 K").add(new QuantityType("30 °C")));
+        assertEquals(new QuantityType("50 K"), new QuantityType("20 K").add(new QuantityType("30 K")));
+        assertEquals(new QuantityType("50 K"), new QuantityType("20 K").add(new QuantityType("54 °F")));
+    }
+
+    @Test
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public void testIncrementalSubtract() {
+        assertEquals(new QuantityType("20 °C"), new QuantityType("50 °C").subtract(new QuantityType("30 °C")));
+        assertEquals(new QuantityType("20 °C"), new QuantityType("50 °C").subtract(new QuantityType("30 K")));
+        assertEquals(new QuantityType("20 °C"), new QuantityType("50 °C").subtract(new QuantityType("54 °F")));
+        assertEquals(new QuantityType("20 K"), new QuantityType("50 K").subtract(new QuantityType("30 °C")));
+        assertEquals(new QuantityType("20 K"), new QuantityType("50 K").subtract(new QuantityType("30 K")));
+        assertEquals(new QuantityType("20 K"), new QuantityType("50 K").subtract(new QuantityType("54 °F")));
+    }
 }
