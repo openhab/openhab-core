@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.measure.Unit;
 
@@ -87,7 +88,7 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
         @SuppressWarnings({ "rawtypes" })
         protected List<QuantityType> referenceUnitQuantityTypes(Set<Item> items) {
             return items.stream().map(i -> i.getStateAs(QuantityType.class)).map(s -> referenceUnitQuantityType(s))
-                    .filter(Objects::nonNull).map(s -> (QuantityType) s).toList();
+                    .filter(Objects::nonNull).collect(Collectors.toList());
         }
     }
 
