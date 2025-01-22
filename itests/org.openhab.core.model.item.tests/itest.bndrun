@@ -126,6 +126,6 @@ Fragment-Host: org.openhab.core.model.item
 	com.google.guava;version='[33.3.0,33.3.1)',\
 	biz.aQute.tester.junit-platform;version='[7.1.0,7.1.1)',\
 	org.osgi.service.cm;version='[1.6.0,1.6.1)',\
-	de.focus_shift.jollyday-core;version='[0.35.1,0.35.2)',\
-	de.focus_shift.jollyday-jackson;version='[0.35.1,0.35.2)',\
-	org.openhab.core.model.rule.runtime;version='[5.0.0,5.0.1)'
+	org.openhab.core.model.rule.runtime;version='[5.0.0,5.0.1)',\
+	de.focus_shift.jollyday-core;version='[1.4.0,1.4.1)',\
+	de.focus_shift.jollyday-jackson;version='[1.4.0,1.4.1)'
