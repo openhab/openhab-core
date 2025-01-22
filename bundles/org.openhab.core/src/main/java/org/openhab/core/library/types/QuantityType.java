@@ -590,6 +590,13 @@ public class QuantityType<T extends Quantity<T>> extends Number
 
     /**
      * Returns the sum of the given {@link QuantityType} with this QuantityType.
+     * <p>
+     * The result is an incremental addition based on the unit of this instance, where the operand is interpreted as
+     * an amount to be added based on the difference between its value and the zero point of the unit of this instance.
+     * So for example:
+     * <li>The code {@code new QuantityType("20 °C").add(new QuantityType("30 °C")} gives {@code 50 °C}, or</li>
+     * <li>The code {@code new QuantityType("20 K").add(new QuantityType("30 °C")} gives {@code 50 K}</li>
+     * <p>
      *
      * @param state the {@link QuantityType} to add to this QuantityType.
      * @return the sum of the given {@link QuantityType} with this QuantityType.
@@ -611,6 +618,15 @@ public class QuantityType<T extends Quantity<T>> extends Number
 
     /**
      * Subtract the given {@link QuantityType} from this QuantityType.
+     *
+     * <p>
+     * The result is an incremental subtraction based on the unit of this instance, where the operand is interpreted as
+     * an amount to be subtracted based on the difference between its value and the zero point of the unit of this
+     * instance.
+     * So for example:
+     * <li>The code {@code new QuantityType("50 °C").subtract(new QuantityType("30 °C")} gives {@code 20 °C}, or</li>
+     * <li>The code {@code new QuantityType("50 K").subtract(new QuantityType("30 °C")} gives {@code 20 K}</li>
+     * <p>
      *
      * @param state the {@link QuantityType} to subtract from this QuantityType.
      * @return the difference by subtracting the given {@link QuantityType} from this QuantityType.
