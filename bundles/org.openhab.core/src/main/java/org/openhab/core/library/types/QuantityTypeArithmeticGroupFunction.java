@@ -87,8 +87,8 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
          */
         @SuppressWarnings({ "rawtypes" })
         protected List<QuantityType> referenceUnitQuantityTypes(Set<Item> items) {
-            return items.stream().map(i -> i.getStateAs(QuantityType.class)).map(s -> referenceUnitQuantityType(s))
-                    .filter(Objects::nonNull).collect(Collectors.toList());
+            return items.stream().map(i -> i.getState()).map(s -> referenceUnitQuantityType(s)).filter(Objects::nonNull)
+                    .collect(Collectors.toList());
         }
     }
 
