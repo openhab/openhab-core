@@ -13,9 +13,9 @@
 package org.openhab.core.library.types;
 
 import java.math.BigDecimal;
-import java.math.MathContext;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.measure.Unit;
@@ -40,10 +40,10 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
 
     abstract class DimensionalGroupFunction implements GroupFunction {
 
-        protected final Unit<?> targetUnit; // the base reference unit for all group calculations
+        protected final Unit<?> referenceUnit; // the reference unit for all group member calculations
 
-        public DimensionalGroupFunction(Unit<?> targetUnit) {
-            this.targetUnit = targetUnit;
+        public DimensionalGroupFunction(Unit<?> referenceUnit) {
+            this.referenceUnit = referenceUnit;
         }
 
         @Override
@@ -63,20 +63,36 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
 
         /**
          * Convert the given item {@link State} to a {@link QuantityType} based on the {@link Unit} of the
-         * {@link GroupItem} i.e. the 'targetUnit'. Returns false if the {@link State} is not a {@link QuantityType} or
-         * if the {@link QuantityType} could not be converted to the 'targetUnit'. The conversion can be made to both
-         * inverted and non-inverted units, so invertible type conversions (e.g. Mirek <=> Kelvin) will succeed.
+         * {@link GroupItem} i.e. 'referenceUnit'. Returns null if the {@link State} is not a {@link QuantityType} or
+         * if the {@link QuantityType} could not be converted to 'referenceUnit'.
+         *
+         * The conversion can be made to both inverted and non-inverted units, so invertible type conversions (e.g.
+         * Mirek <=> Kelvin) are supported.
          *
          * @param state the State of any given group member item
          * @return a QuantityType or null
          */
-        protected @Nullable QuantityType<?> normalizedQuantityType(@Nullable State state) {
-            return state instanceof QuantityType<?> quantity ? quantity.toInvertibleUnit(targetUnit) : null;
+        private @Nullable QuantityType<?> referenceUnitQuantityType(@Nullable State state) {
+            return state instanceof QuantityType<?> quantity ? quantity.toInvertibleUnit(referenceUnit) : null;
+        }
+
+        /**
+         * Convert a set of {@link Item} to a respective list of {@link QuantityType}. Exclude any {@link Item}s whose
+         * current {@link State} is not a {@link QuantityType}. Convert any remaining {@link QuantityType} to the
+         * 'referenceUnit' and exclude any values that did not convert.
+         *
+         * @param items a list of {@link Item}
+         * @return a list of {@link QuantityType} converted to the 'referenceUnit'
+         */
+        @SuppressWarnings({ "rawtypes" })
+        protected List<QuantityType> referenceUnitQuantityTypes(Set<Item> items) {
+            return items.stream().map(i -> i.getStateAs(QuantityType.class)).map(s -> referenceUnitQuantityType(s))
+                    .filter(Objects::nonNull).map(s -> (QuantityType) s).toList();
         }
     }
 
     /**
-     * This calculates the numeric average over all item states of {@link QuantityType}.
+     * Calculates the average of a set of item states whose value could be converted to the 'referenceUnit'.
      */
     class Avg extends DimensionalGroupFunction {
 
@@ -87,35 +103,20 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
         @Override
         @SuppressWarnings({ "unchecked", "rawtypes" })
         public State calculate(@Nullable Set<Item> items) {
-            if (items == null || items.isEmpty()) {
-                return UnDefType.UNDEF;
-            }
-
-            QuantityType<?> sum = null;
-            int count = 0;
-
-            for (Item item : items) {
-                QuantityType itemState = normalizedQuantityType(item.getStateAs(QuantityType.class));
-                if (itemState != null) {
-                    if (sum == null) {
-                        sum = QuantityType.valueOf(0, targetUnit);
-                    }
-                    sum = sum.add(itemState);
-                    count++;
+            if (items != null) {
+                List<QuantityType> referenceUnitQuantities = referenceUnitQuantityTypes(items);
+                if (!referenceUnitQuantities.isEmpty()) {
+                    return referenceUnitQuantities.stream()
+                            .reduce(new QuantityType(0, referenceUnit), QuantityType::add)
+                            .divide(BigDecimal.valueOf(referenceUnitQuantities.size()));
                 }
             }
-
-            if (sum != null && count > 0) {
-                BigDecimal result = sum.toBigDecimal().divide(BigDecimal.valueOf(count), MathContext.DECIMAL128);
-                return new QuantityType(result, targetUnit);
-            }
-
             return UnDefType.UNDEF;
         }
     }
 
     /**
-     * This calculates the numeric median over all item states of {@link QuantityType}.
+     * Calculates the median of a set of item states whose value could be converted to the 'referenceUnit'.
      */
     class Median extends DimensionalGroupFunction {
 
@@ -124,34 +125,26 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
         }
 
         @Override
-        @SuppressWarnings({ "unchecked", "rawtypes" })
         public State calculate(@Nullable Set<Item> items) {
-            if (items == null || items.isEmpty()) {
-                return UnDefType.UNDEF;
-            }
-
-            List<BigDecimal> values = new ArrayList<>();
-
-            for (Item item : items) {
-                QuantityType itemState = normalizedQuantityType(item.getStateAs(QuantityType.class));
-                if (itemState != null) {
-                    values.add(itemState.toBigDecimal());
-                }
-            }
-
-            if (!values.isEmpty()) {
-                BigDecimal median = Statistics.median(values);
+            if (items != null) {
+                BigDecimal median = Statistics
+                        .median(referenceUnitQuantityTypes(items).stream().map(q -> q.toBigDecimal()).toList());
                 if (median != null) {
-                    return new QuantityType<>(median, targetUnit);
+                    return new QuantityType<>(median, referenceUnit);
                 }
             }
-
             return UnDefType.UNDEF;
         }
     }
 
     /**
-     * This calculates the numeric sum over all item states of {@link QuantityType}.
+     * Calculates the sum of a set of item states whose value could be converted to the 'referenceUnit'.
+     *
+     * Uses the {@link QuanitityType.add()} method so the result is an incremental sum based on the 'referenceUnit'. As
+     * a general rule this class is instantiated with a 'referenceUnit' that is a "system unit" (which are zero based)
+     * so such incremental sum is in fact also an absolute sum. However the class COULD be instantiated with a "non-
+     * system unit" (e.g. °C, °F) in which case the result would be an incremental sum based on that unit.
+     *
      */
     class Sum extends DimensionalGroupFunction {
 
@@ -162,28 +155,19 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
         @Override
         @SuppressWarnings({ "unchecked", "rawtypes" })
         public State calculate(@Nullable Set<Item> items) {
-            if (items == null || items.isEmpty()) {
-                return UnDefType.UNDEF;
-            }
-
-            QuantityType<?> sum = null;
-
-            for (Item item : items) {
-                QuantityType itemState = normalizedQuantityType(item.getStateAs(QuantityType.class));
-                if (itemState != null) {
-                    if (sum == null) {
-                        sum = QuantityType.valueOf(0, targetUnit);
-                    }
-                    sum = sum.add(itemState);
+            if (items != null) {
+                List<QuantityType> referenceUnitQuantities = referenceUnitQuantityTypes(items);
+                if (!referenceUnitQuantities.isEmpty()) {
+                    return referenceUnitQuantities.stream().reduce(new QuantityType(0, referenceUnit),
+                            QuantityType::add);
                 }
             }
-
-            return sum != null ? sum : UnDefType.UNDEF;
+            return UnDefType.UNDEF;
         }
     }
 
     /**
-     * This calculates the minimum value of all item states of {@link QuantityType}.
+     * Calculates the minimum of a set of item states whose value could be converted to the 'referenceUnit'.
      */
     class Min extends DimensionalGroupFunction {
 
@@ -194,25 +178,19 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
         @Override
         @SuppressWarnings({ "unchecked", "rawtypes" })
         public State calculate(@Nullable Set<Item> items) {
-            if (items == null || items.isEmpty()) {
-                return UnDefType.UNDEF;
-            }
-
-            QuantityType<?> min = null;
-
-            for (Item item : items) {
-                QuantityType itemState = normalizedQuantityType(item.getStateAs(QuantityType.class));
-                if (itemState != null && (min == null || min.compareTo(itemState) > 0)) {
-                    min = itemState;
+            if (items != null) {
+                List<QuantityType> referenceUnitQuantities = referenceUnitQuantityTypes(items);
+                if (!referenceUnitQuantities.isEmpty()) {
+                    Optional<QuantityType> min = referenceUnitQuantities.stream().min(QuantityType::compareTo);
+                    return min.isPresent() ? min.get() : UnDefType.UNDEF;
                 }
             }
-
-            return min != null ? min : UnDefType.UNDEF;
+            return UnDefType.UNDEF;
         }
     }
 
     /**
-     * This calculates the maximum value of all item states of {@link QuantityType}.
+     * Calculates the maximum of a set of item states whose value could be converted to the 'referenceUnit'.
      */
     class Max extends DimensionalGroupFunction {
 
@@ -223,20 +201,14 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
         @Override
         @SuppressWarnings({ "unchecked", "rawtypes" })
         public State calculate(@Nullable Set<Item> items) {
-            if (items == null || items.isEmpty()) {
-                return UnDefType.UNDEF;
-            }
-
-            QuantityType<?> max = null;
-
-            for (Item item : items) {
-                QuantityType itemState = normalizedQuantityType(item.getStateAs(QuantityType.class));
-                if (itemState != null && (max == null || max.compareTo(itemState) < 0)) {
-                    max = itemState;
+            if (items != null) {
+                List<QuantityType> referenceUnitQuantities = referenceUnitQuantityTypes(items);
+                if (!referenceUnitQuantities.isEmpty()) {
+                    Optional<QuantityType> max = referenceUnitQuantities.stream().max(QuantityType::compareTo);
+                    return max.isPresent() ? max.get() : UnDefType.UNDEF;
                 }
             }
-
-            return max != null ? max : UnDefType.UNDEF;
+            return UnDefType.UNDEF;
         }
     }
 }

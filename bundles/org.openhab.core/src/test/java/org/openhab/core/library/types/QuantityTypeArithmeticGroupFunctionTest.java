@@ -140,7 +140,7 @@ public class QuantityTypeArithmeticGroupFunctionTest {
         items.add(createNumberItem("TestItem4", Temperature.class, UnDefType.UNDEF));
         items.add(createNumberItem("TestItem5", Temperature.class, new QuantityType<>("300 °C")));
 
-        GroupFunction function = new QuantityTypeArithmeticGroupFunction.Avg(SIUnits.CELSIUS);
+        GroupFunction function = new QuantityTypeArithmeticGroupFunction.Avg(Units.KELVIN);
         State state = function.calculate(items);
 
         assertEquals(new QuantityType<>("200 °C"), state);
@@ -166,11 +166,11 @@ public class QuantityTypeArithmeticGroupFunctionTest {
         items.add(createNumberItem("TestItem4", Temperature.class, UnDefType.UNDEF));
         items.add(createNumberItem("TestItem5", Temperature.class, new QuantityType<>("294.15 K")));
 
-        GroupFunction function = new QuantityTypeArithmeticGroupFunction.Avg(SIUnits.CELSIUS);
+        GroupFunction function = new QuantityTypeArithmeticGroupFunction.Avg(Units.KELVIN);
         State state = function.calculate(items);
 
         assertTrue(state instanceof QuantityType<?>);
-        assertEquals(55.33, ((QuantityType<?>) state).doubleValue(), 0.01);
+        assertEquals(328.48, ((QuantityType<?>) state).doubleValue(), 0.01);
     }
 
     @ParameterizedTest
@@ -219,6 +219,7 @@ public class QuantityTypeArithmeticGroupFunctionTest {
 
     @ParameterizedTest
     @MethodSource("medianTestSource")
+    @SuppressWarnings({ "null", "rawtypes", "unchecked" })
     public void testMedianFunctionQuantityType(List<State> states, State expected) {
         AtomicInteger index = new AtomicInteger(1);
         Set<Item> items = states.stream()
@@ -552,5 +553,23 @@ public class QuantityTypeArithmeticGroupFunctionTest {
         State state = function.calculate(items);
 
         assertEquals(new QuantityType<>("2001 K"), state);
+    }
+
+    @ParameterizedTest
+    @MethodSource("locales")
+    public void testSumFunctionQuantityTypeDifferentUnitsBaseWatt(Locale locale) {
+        Locale.setDefault(locale);
+
+        Set<Item> items = new LinkedHashSet<>();
+        items.add(createNumberItem("TestItem1", Power.class, new QuantityType<>("1 W")));
+        items.add(createNumberItem("TestItem2", Temperature.class, UnDefType.NULL));
+        items.add(createNumberItem("TestItem3", Temperature.class, new QuantityType<>("192.2 °F")));
+        items.add(createNumberItem("TestItem4", Temperature.class, UnDefType.UNDEF));
+        items.add(createNumberItem("TestItem5", Power.class, new QuantityType<>("3000 mW")));
+
+        GroupFunction function = new QuantityTypeArithmeticGroupFunction.Sum(Units.WATT);
+        State state = function.calculate(items);
+
+        assertEquals(new QuantityType<>("4 W"), state);
     }
 }

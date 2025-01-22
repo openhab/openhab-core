@@ -81,6 +81,7 @@ public class GroupFunctionHelper {
         final String functionName = function.name;
         Unit<?> targetUnit = baseNumberItem.getUnit();
         if (targetUnit != null) {
+            targetUnit = targetUnit.getSystemUnit(); // use system unit so 'Sum' becomes zero based (absolute)
             switch (functionName.toUpperCase()) {
                 case "AVG":
                     return new QuantityTypeArithmeticGroupFunction.Avg(targetUnit);
