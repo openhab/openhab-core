@@ -179,11 +179,8 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
         @SuppressWarnings({ "unchecked", "rawtypes" })
         public State calculate(@Nullable Set<Item> items) {
             if (items != null) {
-                List<QuantityType> referenceUnitQuantities = referenceUnitQuantityTypes(items);
-                if (!referenceUnitQuantities.isEmpty()) {
-                    Optional<QuantityType> min = referenceUnitQuantities.stream().min(QuantityType::compareTo);
-                    return min.isPresent() ? min.get() : UnDefType.UNDEF;
-                }
+                Optional<QuantityType> min = referenceUnitQuantityTypes(items).stream().min(QuantityType::compareTo);
+                return min.isPresent() ? min.get() : UnDefType.UNDEF;
             }
             return UnDefType.UNDEF;
         }
@@ -202,11 +199,8 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
         @SuppressWarnings({ "unchecked", "rawtypes" })
         public State calculate(@Nullable Set<Item> items) {
             if (items != null) {
-                List<QuantityType> referenceUnitQuantities = referenceUnitQuantityTypes(items);
-                if (!referenceUnitQuantities.isEmpty()) {
-                    Optional<QuantityType> max = referenceUnitQuantities.stream().max(QuantityType::compareTo);
-                    return max.isPresent() ? max.get() : UnDefType.UNDEF;
-                }
+                Optional<QuantityType> max = referenceUnitQuantityTypes(items).stream().max(QuantityType::compareTo);
+                return max.isPresent() ? max.get() : UnDefType.UNDEF;
             }
             return UnDefType.UNDEF;
         }
