@@ -1799,7 +1799,8 @@ public class PersistenceExtensions {
             Iterator<HistoricItem> it = result.iterator();
 
             Item baseItem = item instanceof GroupItem groupItem ? groupItem.getBaseItem() : item;
-            Unit<?> unit = baseItem instanceof NumberItem numberItem ? numberItem.getUnit() : null;
+            Unit<?> baseUnit = baseItem instanceof NumberItem numberItem ? numberItem.getUnit() : null;
+            Unit<?> unit = baseUnit != null ? baseUnit.getSystemUnit() : null;
 
             BigDecimal sum = BigDecimal.ZERO;
             while (it.hasNext()) {

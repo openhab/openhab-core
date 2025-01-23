@@ -75,6 +75,8 @@ public class PersistenceExtensionsTest {
     public static final String TEST_GROUP_QUANTITY_NUMBER = "testGroupQuantityNumber";
     public static final String TEST_SWITCH = "testSwitch";
 
+    public static final double KELVIN_OFFSET = 273.15;
+
     private @Mock @NonNullByDefault({}) ItemRegistry itemRegistryMock;
     private @Mock @NonNullByDefault({}) UnitProvider unitProviderMock;
     private @Mock @NonNullByDefault({}) TimeZoneProvider timeZoneProviderMock;
@@ -2214,16 +2216,18 @@ public class PersistenceExtensionsTest {
         assertNotNull(sum);
         QuantityType<?> qt = sum.as(QuantityType.class);
         assertNotNull(qt);
-        assertEquals(IntStream.rangeClosed(HISTORIC_START, HISTORIC_END).sum(), qt.doubleValue(), 0.001);
-        assertEquals(SIUnits.CELSIUS, qt.getUnit());
+        assertEquals(IntStream.rangeClosed(HISTORIC_START, HISTORIC_END).sum()
+                + (HISTORIC_END - HISTORIC_START + 1) * KELVIN_OFFSET, qt.doubleValue(), 0.001);
+        assertEquals(Units.KELVIN, qt.getUnit());
 
         sum = PersistenceExtensions.sumSince(quantityItem,
                 ZonedDateTime.of(HISTORIC_INTERMEDIATE_VALUE_1, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()), SERVICE_ID);
         assertNotNull(sum);
         qt = sum.as(QuantityType.class);
         assertNotNull(qt);
-        assertEquals(IntStream.rangeClosed(HISTORIC_INTERMEDIATE_VALUE_1, HISTORIC_END).sum(), qt.doubleValue(), 0.001);
-        assertEquals(SIUnits.CELSIUS, qt.getUnit());
+        assertEquals(IntStream.rangeClosed(HISTORIC_INTERMEDIATE_VALUE_1, HISTORIC_END).sum()
+                + (HISTORIC_END - HISTORIC_INTERMEDIATE_VALUE_1 + 1) * KELVIN_OFFSET, qt.doubleValue(), 0.001);
+        assertEquals(Units.KELVIN, qt.getUnit());
 
         // default persistence service
         sum = PersistenceExtensions.sumSince(quantityItem,
@@ -2238,8 +2242,9 @@ public class PersistenceExtensionsTest {
         assertNotNull(sum);
         QuantityType<?> qt = sum.as(QuantityType.class);
         assertNotNull(qt);
-        assertEquals(IntStream.rangeClosed(FUTURE_START, FUTURE_INTERMEDIATE_VALUE_3).sum(), qt.doubleValue(), 0.001);
-        assertEquals(SIUnits.CELSIUS, qt.getUnit());
+        assertEquals(IntStream.rangeClosed(FUTURE_START, FUTURE_INTERMEDIATE_VALUE_3).sum()
+                + (FUTURE_INTERMEDIATE_VALUE_3 - FUTURE_START + 1) * KELVIN_OFFSET, qt.doubleValue(), 0.001);
+        assertEquals(Units.KELVIN, qt.getUnit());
 
         // default persistence service
         sum = PersistenceExtensions.sumSince(quantityItem,
@@ -2255,9 +2260,11 @@ public class PersistenceExtensionsTest {
         assertNotNull(sum);
         QuantityType<?> qt = sum.as(QuantityType.class);
         assertNotNull(qt);
-        assertEquals(IntStream.rangeClosed(HISTORIC_INTERMEDIATE_VALUE_1, HISTORIC_INTERMEDIATE_VALUE_2).sum(),
+        assertEquals(
+                IntStream.rangeClosed(HISTORIC_INTERMEDIATE_VALUE_1, HISTORIC_INTERMEDIATE_VALUE_2).sum()
+                        + (HISTORIC_INTERMEDIATE_VALUE_2 - HISTORIC_INTERMEDIATE_VALUE_1 + 1) * KELVIN_OFFSET,
                 qt.doubleValue(), 0.001);
-        assertEquals(SIUnits.CELSIUS, qt.getUnit());
+        assertEquals(Units.KELVIN, qt.getUnit());
 
         sum = PersistenceExtensions.sumBetween(groupQuantityItem,
                 ZonedDateTime.of(FUTURE_INTERMEDIATE_VALUE_3, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()),
@@ -2265,7 +2272,9 @@ public class PersistenceExtensionsTest {
         assertNotNull(sum);
         qt = sum.as(QuantityType.class);
         assertNotNull(qt);
-        assertEquals(IntStream.rangeClosed(FUTURE_INTERMEDIATE_VALUE_3, FUTURE_INTERMEDIATE_VALUE_4).sum(),
+        assertEquals(
+                IntStream.rangeClosed(FUTURE_INTERMEDIATE_VALUE_3, FUTURE_INTERMEDIATE_VALUE_4).sum()
+                        + (FUTURE_INTERMEDIATE_VALUE_4 - FUTURE_INTERMEDIATE_VALUE_3 + 1) * KELVIN_OFFSET,
                 qt.doubleValue(), 0.001);
 
         sum = PersistenceExtensions.sumBetween(groupQuantityItem,
@@ -2274,9 +2283,12 @@ public class PersistenceExtensionsTest {
         assertNotNull(sum);
         qt = sum.as(QuantityType.class);
         assertNotNull(qt);
-        assertEquals(
-                IntStream.concat(IntStream.rangeClosed(HISTORIC_INTERMEDIATE_VALUE_1, HISTORIC_END),
-                        IntStream.rangeClosed(FUTURE_START, FUTURE_INTERMEDIATE_VALUE_3)).sum(),
+        assertEquals(IntStream
+                .concat(IntStream.rangeClosed(HISTORIC_INTERMEDIATE_VALUE_1, HISTORIC_END),
+                        IntStream.rangeClosed(FUTURE_START, FUTURE_INTERMEDIATE_VALUE_3))
+                .sum()
+                + (HISTORIC_END - HISTORIC_INTERMEDIATE_VALUE_1 + FUTURE_INTERMEDIATE_VALUE_3 - FUTURE_START + 2)
+                        * KELVIN_OFFSET,
                 qt.doubleValue(), 0.001);
 
         // default persistence service
@@ -2294,16 +2306,18 @@ public class PersistenceExtensionsTest {
         assertNotNull(sum);
         QuantityType<?> qt = sum.as(QuantityType.class);
         assertNotNull(qt);
-        assertEquals(IntStream.rangeClosed(HISTORIC_START, HISTORIC_END).sum(), qt.doubleValue(), 0.001);
-        assertEquals(SIUnits.CELSIUS, qt.getUnit());
+        assertEquals(IntStream.rangeClosed(HISTORIC_START, HISTORIC_END).sum()
+                + (HISTORIC_END - HISTORIC_START + 1) * KELVIN_OFFSET, qt.doubleValue(), 0.001);
+        assertEquals(Units.KELVIN, qt.getUnit());
 
         sum = PersistenceExtensions.sumSince(groupQuantityItem,
                 ZonedDateTime.of(HISTORIC_INTERMEDIATE_VALUE_1, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()), SERVICE_ID);
         assertNotNull(sum);
         qt = sum.as(QuantityType.class);
         assertNotNull(qt);
-        assertEquals(IntStream.rangeClosed(HISTORIC_INTERMEDIATE_VALUE_1, HISTORIC_END).sum(), qt.doubleValue(), 0.001);
-        assertEquals(SIUnits.CELSIUS, qt.getUnit());
+        assertEquals(IntStream.rangeClosed(HISTORIC_INTERMEDIATE_VALUE_1, HISTORIC_END).sum()
+                + (HISTORIC_END - HISTORIC_INTERMEDIATE_VALUE_1 + 1) * KELVIN_OFFSET, qt.doubleValue(), 0.001);
+        assertEquals(Units.KELVIN, qt.getUnit());
 
         // default persistence service
         sum = PersistenceExtensions.sumSince(groupQuantityItem,
@@ -2318,8 +2332,9 @@ public class PersistenceExtensionsTest {
         assertNotNull(sum);
         QuantityType<?> qt = sum.as(QuantityType.class);
         assertNotNull(qt);
-        assertEquals(IntStream.rangeClosed(FUTURE_START, FUTURE_INTERMEDIATE_VALUE_3).sum(), qt.doubleValue(), 0.001);
-        assertEquals(SIUnits.CELSIUS, qt.getUnit());
+        assertEquals(IntStream.rangeClosed(FUTURE_START, FUTURE_INTERMEDIATE_VALUE_3).sum()
+                + (FUTURE_INTERMEDIATE_VALUE_3 - FUTURE_START + 1) * KELVIN_OFFSET, qt.doubleValue(), 0.001);
+        assertEquals(Units.KELVIN, qt.getUnit());
 
         // default persistence service
         sum = PersistenceExtensions.sumSince(groupQuantityItem,
@@ -2335,9 +2350,11 @@ public class PersistenceExtensionsTest {
         assertNotNull(sum);
         QuantityType<?> qt = sum.as(QuantityType.class);
         assertNotNull(qt);
-        assertEquals(IntStream.rangeClosed(HISTORIC_INTERMEDIATE_VALUE_1, HISTORIC_INTERMEDIATE_VALUE_2).sum(),
+        assertEquals(
+                IntStream.rangeClosed(HISTORIC_INTERMEDIATE_VALUE_1, HISTORIC_INTERMEDIATE_VALUE_2).sum()
+                        + (HISTORIC_INTERMEDIATE_VALUE_2 - HISTORIC_INTERMEDIATE_VALUE_1 + 1) * KELVIN_OFFSET,
                 qt.doubleValue(), 0.001);
-        assertEquals(SIUnits.CELSIUS, qt.getUnit());
+        assertEquals(Units.KELVIN, qt.getUnit());
 
         sum = PersistenceExtensions.sumBetween(groupQuantityItem,
                 ZonedDateTime.of(FUTURE_INTERMEDIATE_VALUE_3, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()),
@@ -2345,7 +2362,9 @@ public class PersistenceExtensionsTest {
         assertNotNull(sum);
         qt = sum.as(QuantityType.class);
         assertNotNull(qt);
-        assertEquals(IntStream.rangeClosed(FUTURE_INTERMEDIATE_VALUE_3, FUTURE_INTERMEDIATE_VALUE_4).sum(),
+        assertEquals(
+                IntStream.rangeClosed(FUTURE_INTERMEDIATE_VALUE_3, FUTURE_INTERMEDIATE_VALUE_4).sum()
+                        + (FUTURE_INTERMEDIATE_VALUE_4 - FUTURE_INTERMEDIATE_VALUE_3 + 1) * KELVIN_OFFSET,
                 qt.doubleValue(), 0.001);
 
         sum = PersistenceExtensions.sumBetween(groupQuantityItem,
@@ -2354,9 +2373,12 @@ public class PersistenceExtensionsTest {
         assertNotNull(sum);
         qt = sum.as(QuantityType.class);
         assertNotNull(qt);
-        assertEquals(
-                IntStream.concat(IntStream.rangeClosed(HISTORIC_INTERMEDIATE_VALUE_1, HISTORIC_END),
-                        IntStream.rangeClosed(FUTURE_START, FUTURE_INTERMEDIATE_VALUE_3)).sum(),
+        assertEquals(IntStream
+                .concat(IntStream.rangeClosed(HISTORIC_INTERMEDIATE_VALUE_1, HISTORIC_END),
+                        IntStream.rangeClosed(FUTURE_START, FUTURE_INTERMEDIATE_VALUE_3))
+                .sum()
+                + (HISTORIC_END - HISTORIC_INTERMEDIATE_VALUE_1 + FUTURE_INTERMEDIATE_VALUE_3 - FUTURE_START + 2)
+                        * KELVIN_OFFSET,
                 qt.doubleValue(), 0.001);
 
         // default persistence service
