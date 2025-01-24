@@ -994,7 +994,7 @@ public class PersistenceExtensionsTest {
         QuantityType<?> qt = variance.as(QuantityType.class);
         assertNotNull(qt);
         assertEquals(expected, qt.doubleValue(), 0.01);
-        assertEquals(SIUnits.CELSIUS.multiply(SIUnits.CELSIUS), qt.getUnit());
+        assertEquals(Units.KELVIN.multiply(Units.KELVIN), qt.getUnit());
 
         // default persistence service
         variance = PersistenceExtensions.varianceSince(quantityItem, startStored);
@@ -1018,7 +1018,7 @@ public class PersistenceExtensionsTest {
         QuantityType<?> qt = variance.as(QuantityType.class);
         assertNotNull(qt);
         assertEquals(expected, qt.doubleValue(), 0.01);
-        assertEquals(SIUnits.CELSIUS.multiply(SIUnits.CELSIUS), qt.getUnit());
+        assertEquals(Units.KELVIN.multiply(Units.KELVIN), qt.getUnit());
 
         // default persistence service
         variance = PersistenceExtensions.varianceUntil(quantityItem, endStored);
@@ -1042,7 +1042,7 @@ public class PersistenceExtensionsTest {
         QuantityType<?> qt = variance.as(QuantityType.class);
         assertNotNull(qt);
         assertThat(qt.doubleValue(), is(closeTo(expected, 0.01)));
-        assertEquals(SIUnits.CELSIUS.multiply(SIUnits.CELSIUS), qt.getUnit());
+        assertEquals(Units.KELVIN.multiply(Units.KELVIN), qt.getUnit());
 
         startStored = ZonedDateTime.of(FUTURE_INTERMEDIATE_VALUE_3, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
         endStored = ZonedDateTime.of(FUTURE_INTERMEDIATE_VALUE_4, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
@@ -1057,7 +1057,7 @@ public class PersistenceExtensionsTest {
         qt = variance.as(QuantityType.class);
         assertNotNull(qt);
         assertThat(qt.doubleValue(), is(closeTo(expected, 0.01)));
-        assertEquals(SIUnits.CELSIUS.multiply(SIUnits.CELSIUS), qt.getUnit());
+        assertEquals(Units.KELVIN.multiply(Units.KELVIN), qt.getUnit());
 
         startStored = ZonedDateTime.of(HISTORIC_INTERMEDIATE_VALUE_1, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
         endStored = ZonedDateTime.of(FUTURE_INTERMEDIATE_VALUE_3, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
@@ -1074,7 +1074,7 @@ public class PersistenceExtensionsTest {
         qt = variance.as(QuantityType.class);
         assertNotNull(qt);
         assertThat(qt.doubleValue(), is(closeTo(expected, 0.01)));
-        assertEquals(SIUnits.CELSIUS.multiply(SIUnits.CELSIUS), qt.getUnit());
+        assertEquals(Units.KELVIN.multiply(Units.KELVIN), qt.getUnit());
 
         // default persistence service
         variance = PersistenceExtensions.varianceBetween(quantityItem, startStored, endStored);
@@ -1097,7 +1097,7 @@ public class PersistenceExtensionsTest {
         QuantityType<?> qt = variance.as(QuantityType.class);
         assertNotNull(qt);
         assertEquals(expected, qt.doubleValue(), 0.01);
-        assertEquals(SIUnits.CELSIUS.multiply(SIUnits.CELSIUS), qt.getUnit());
+        assertEquals(Units.KELVIN.multiply(Units.KELVIN), qt.getUnit());
 
         // default persistence service
         variance = PersistenceExtensions.varianceSince(groupQuantityItem, startStored);
@@ -1121,7 +1121,7 @@ public class PersistenceExtensionsTest {
         QuantityType<?> qt = variance.as(QuantityType.class);
         assertNotNull(qt);
         assertEquals(expected, qt.doubleValue(), 0.01);
-        assertEquals(SIUnits.CELSIUS.multiply(SIUnits.CELSIUS), qt.getUnit());
+        assertEquals(Units.KELVIN.multiply(Units.KELVIN), qt.getUnit());
 
         // default persistence service
         variance = PersistenceExtensions.varianceUntil(groupQuantityItem, endStored);
@@ -1145,7 +1145,7 @@ public class PersistenceExtensionsTest {
         QuantityType<?> qt = variance.as(QuantityType.class);
         assertNotNull(qt);
         assertThat(qt.doubleValue(), is(closeTo(expected, 0.01)));
-        assertEquals(SIUnits.CELSIUS.multiply(SIUnits.CELSIUS), qt.getUnit());
+        assertEquals(Units.KELVIN.multiply(Units.KELVIN), qt.getUnit());
 
         startStored = ZonedDateTime.of(FUTURE_INTERMEDIATE_VALUE_3, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
         endStored = ZonedDateTime.of(FUTURE_INTERMEDIATE_VALUE_4, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
@@ -1160,7 +1160,7 @@ public class PersistenceExtensionsTest {
         qt = variance.as(QuantityType.class);
         assertNotNull(qt);
         assertThat(qt.doubleValue(), is(closeTo(expected, 0.01)));
-        assertEquals(SIUnits.CELSIUS.multiply(SIUnits.CELSIUS), qt.getUnit());
+        assertEquals(Units.KELVIN.multiply(Units.KELVIN), qt.getUnit());
 
         startStored = ZonedDateTime.of(HISTORIC_INTERMEDIATE_VALUE_1, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
         endStored = ZonedDateTime.of(FUTURE_INTERMEDIATE_VALUE_3, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
@@ -1177,7 +1177,7 @@ public class PersistenceExtensionsTest {
         qt = variance.as(QuantityType.class);
         assertNotNull(qt);
         assertThat(qt.doubleValue(), is(closeTo(expected, 0.01)));
-        assertEquals(SIUnits.CELSIUS.multiply(SIUnits.CELSIUS), qt.getUnit());
+        assertEquals(Units.KELVIN.multiply(Units.KELVIN), qt.getUnit());
 
         // default persistence service
         variance = PersistenceExtensions.varianceBetween(groupQuantityItem, startStored, endStored);
@@ -1297,7 +1297,7 @@ public class PersistenceExtensionsTest {
         QuantityType<?> qt = deviation.as(QuantityType.class);
         assertNotNull(qt);
         assertEquals(expected, qt.doubleValue(), 0.01);
-        assertEquals(SIUnits.CELSIUS, qt.getUnit());
+        assertEquals(Units.KELVIN, qt.getUnit());
 
         // default persistence service
         deviation = PersistenceExtensions.deviationSince(quantityItem, startStored);
@@ -1321,7 +1321,7 @@ public class PersistenceExtensionsTest {
         QuantityType<?> qt = deviation.as(QuantityType.class);
         assertNotNull(qt);
         assertEquals(expected, qt.doubleValue(), 0.01);
-        assertEquals(SIUnits.CELSIUS, qt.getUnit());
+        assertEquals(Units.KELVIN, qt.getUnit());
 
         // default persistence service
         deviation = PersistenceExtensions.deviationUntil(quantityItem, endStored);
@@ -1344,7 +1344,7 @@ public class PersistenceExtensionsTest {
         QuantityType<?> qt = deviation.as(QuantityType.class);
         assertNotNull(qt);
         assertEquals(expected, qt.doubleValue(), 0.01);
-        assertEquals(SIUnits.CELSIUS, qt.getUnit());
+        assertEquals(Units.KELVIN, qt.getUnit());
 
         startStored = ZonedDateTime.of(FUTURE_INTERMEDIATE_VALUE_3, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
         endStored = ZonedDateTime.of(FUTURE_INTERMEDIATE_VALUE_4, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
@@ -1359,7 +1359,7 @@ public class PersistenceExtensionsTest {
         qt = deviation.as(QuantityType.class);
         assertNotNull(qt);
         assertEquals(expected, qt.doubleValue(), 0.01);
-        assertEquals(SIUnits.CELSIUS, qt.getUnit());
+        assertEquals(Units.KELVIN, qt.getUnit());
 
         startStored = ZonedDateTime.of(HISTORIC_INTERMEDIATE_VALUE_1, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
         endStored = ZonedDateTime.of(FUTURE_INTERMEDIATE_VALUE_3, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
@@ -1376,7 +1376,7 @@ public class PersistenceExtensionsTest {
         qt = deviation.as(QuantityType.class);
         assertNotNull(qt);
         assertEquals(expected, qt.doubleValue(), 0.01);
-        assertEquals(SIUnits.CELSIUS, qt.getUnit());
+        assertEquals(Units.KELVIN, qt.getUnit());
 
         // default persistence service
         deviation = PersistenceExtensions.deviationBetween(quantityItem, startStored, endStored);
@@ -1399,7 +1399,7 @@ public class PersistenceExtensionsTest {
         QuantityType<?> qt = deviation.as(QuantityType.class);
         assertNotNull(qt);
         assertEquals(expected, qt.doubleValue(), 0.01);
-        assertEquals(SIUnits.CELSIUS, qt.getUnit());
+        assertEquals(Units.KELVIN, qt.getUnit());
 
         // default persistence service
         deviation = PersistenceExtensions.deviationSince(groupQuantityItem, startStored);
@@ -1423,7 +1423,7 @@ public class PersistenceExtensionsTest {
         QuantityType<?> qt = deviation.as(QuantityType.class);
         assertNotNull(qt);
         assertEquals(expected, qt.doubleValue(), 0.01);
-        assertEquals(SIUnits.CELSIUS, qt.getUnit());
+        assertEquals(Units.KELVIN, qt.getUnit());
 
         // default persistence service
         deviation = PersistenceExtensions.deviationUntil(groupQuantityItem, endStored);
@@ -1446,7 +1446,7 @@ public class PersistenceExtensionsTest {
         QuantityType<?> qt = deviation.as(QuantityType.class);
         assertNotNull(qt);
         assertEquals(expected, qt.doubleValue(), 0.01);
-        assertEquals(SIUnits.CELSIUS, qt.getUnit());
+        assertEquals(Units.KELVIN, qt.getUnit());
 
         startStored = ZonedDateTime.of(FUTURE_INTERMEDIATE_VALUE_3, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
         endStored = ZonedDateTime.of(FUTURE_INTERMEDIATE_VALUE_4, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
@@ -1461,7 +1461,7 @@ public class PersistenceExtensionsTest {
         qt = deviation.as(QuantityType.class);
         assertNotNull(qt);
         assertEquals(expected, qt.doubleValue(), 0.01);
-        assertEquals(SIUnits.CELSIUS, qt.getUnit());
+        assertEquals(Units.KELVIN, qt.getUnit());
 
         startStored = ZonedDateTime.of(HISTORIC_INTERMEDIATE_VALUE_1, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
         endStored = ZonedDateTime.of(FUTURE_INTERMEDIATE_VALUE_3, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
@@ -1478,7 +1478,7 @@ public class PersistenceExtensionsTest {
         qt = deviation.as(QuantityType.class);
         assertNotNull(qt);
         assertEquals(expected, qt.doubleValue(), 0.01);
-        assertEquals(SIUnits.CELSIUS, qt.getUnit());
+        assertEquals(Units.KELVIN, qt.getUnit());
 
         // default persistence service
         deviation = PersistenceExtensions.deviationBetween(groupQuantityItem, startStored, endStored);

@@ -1242,12 +1242,19 @@ public class PersistenceExtensions {
         State averageState = internalAverageBetween(item, begin, end, effectiveServiceId);
 
         if (averageState != null) {
-            DecimalType dt = averageState.as(DecimalType.class);
+            Item baseItem = item instanceof GroupItem groupItem ? groupItem.getBaseItem() : item;
+            Unit<?> baseUnit = baseItem instanceof NumberItem numberItem ? numberItem.getUnit() : null;
+            Unit<?> unit = baseUnit != null ? baseUnit.getSystemUnit() : null;
+
+            DecimalType dt;
+            if (unit != null && averageState instanceof QuantityType<?> averageQuantity) {
+                averageQuantity = averageQuantity.toUnit(unit);
+                dt = averageQuantity != null ? averageQuantity.as(DecimalType.class) : null;
+            } else {
+                dt = averageState.as(DecimalType.class);
+            }
             BigDecimal average = dt != null ? dt.toBigDecimal() : BigDecimal.ZERO, sum = BigDecimal.ZERO;
             int count = 0;
-
-            Item baseItem = item instanceof GroupItem groupItem ? groupItem.getBaseItem() : item;
-            Unit<?> unit = baseItem instanceof NumberItem numberItem ? numberItem.getUnit() : null;
 
             Iterator<HistoricItem> it = result.iterator();
             while (it.hasNext()) {
@@ -1402,7 +1409,8 @@ public class PersistenceExtensions {
                 BigDecimal deviation = dt.toBigDecimal().sqrt(MathContext.DECIMAL64);
                 Item baseItem = item instanceof GroupItem groupItem ? groupItem.getBaseItem() : item;
                 if (baseItem instanceof NumberItem numberItem) {
-                    Unit<?> unit = numberItem.getUnit();
+                    Unit<?> baseUnit = numberItem.getUnit();
+                    Unit<?> unit = baseUnit != null ? baseUnit.getSystemUnit() : null;
                     if (unit != null) {
                         return new QuantityType<>(deviation, unit);
                     }
