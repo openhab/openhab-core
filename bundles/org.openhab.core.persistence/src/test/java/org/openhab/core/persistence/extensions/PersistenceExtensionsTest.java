@@ -1803,43 +1803,40 @@ public class PersistenceExtensionsTest {
                     ZoneId.systemDefault());
             ZonedDateTime endStored = ZonedDateTime.of(HISTORIC_INTERMEDIATE_VALUE_2, 1, 1, 0, 0, 0, 0,
                     ZoneId.systemDefault());
-            double expected = riemannSum(HISTORIC_INTERMEDIATE_VALUE_1, HISTORIC_INTERMEDIATE_VALUE_2, type);
-            State RiemannSum = PersistenceExtensions.riemannSumBetween(quantityItem, beginStored, endStored, type,
-                    SERVICE_ID);
+            double expected = riemannSumCelsius(HISTORIC_INTERMEDIATE_VALUE_1, HISTORIC_INTERMEDIATE_VALUE_2, type);
+            State sum = PersistenceExtensions.riemannSumBetween(quantityItem, beginStored, endStored, type, SERVICE_ID);
 
-            assertNotNull(RiemannSum);
-            QuantityType<?> qt = RiemannSum.as(QuantityType.class);
+            assertNotNull(sum);
+            QuantityType<?> qt = sum.as(QuantityType.class);
             assertNotNull(qt);
             assertThat(qt.doubleValue(), is(closeTo(expected, 0.01)));
-            assertEquals(SIUnits.CELSIUS.multiply(Units.SECOND), qt.getUnit());
+            assertEquals(Units.KELVIN.multiply(Units.SECOND), qt.getUnit());
 
             beginStored = ZonedDateTime.of(FUTURE_INTERMEDIATE_VALUE_3, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
             endStored = ZonedDateTime.of(FUTURE_INTERMEDIATE_VALUE_4, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
-            expected = riemannSum(FUTURE_INTERMEDIATE_VALUE_3, FUTURE_INTERMEDIATE_VALUE_4, type);
+            expected = riemannSumCelsius(FUTURE_INTERMEDIATE_VALUE_3, FUTURE_INTERMEDIATE_VALUE_4, type);
 
-            RiemannSum = PersistenceExtensions.riemannSumBetween(quantityItem, beginStored, endStored, type,
-                    SERVICE_ID);
-            assertNotNull(RiemannSum);
-            qt = RiemannSum.as(QuantityType.class);
+            sum = PersistenceExtensions.riemannSumBetween(quantityItem, beginStored, endStored, type, SERVICE_ID);
+            assertNotNull(sum);
+            qt = sum.as(QuantityType.class);
             assertNotNull(qt);
             assertThat(qt.doubleValue(), is(closeTo(expected, 0.01)));
-            assertEquals(SIUnits.CELSIUS.multiply(Units.SECOND), qt.getUnit());
+            assertEquals(Units.KELVIN.multiply(Units.SECOND), qt.getUnit());
 
             beginStored = ZonedDateTime.of(HISTORIC_INTERMEDIATE_VALUE_1, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
             endStored = ZonedDateTime.of(FUTURE_INTERMEDIATE_VALUE_3, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
-            expected = riemannSum(HISTORIC_INTERMEDIATE_VALUE_1, FUTURE_INTERMEDIATE_VALUE_3, type);
+            expected = riemannSumCelsius(HISTORIC_INTERMEDIATE_VALUE_1, FUTURE_INTERMEDIATE_VALUE_3, type);
 
-            RiemannSum = PersistenceExtensions.riemannSumBetween(quantityItem, beginStored, endStored, type,
-                    SERVICE_ID);
-            assertNotNull(RiemannSum);
-            qt = RiemannSum.as(QuantityType.class);
+            sum = PersistenceExtensions.riemannSumBetween(quantityItem, beginStored, endStored, type, SERVICE_ID);
+            assertNotNull(sum);
+            qt = sum.as(QuantityType.class);
             assertNotNull(qt);
             assertThat(qt.doubleValue(), is(closeTo(expected, 0.01)));
-            assertEquals(SIUnits.CELSIUS.multiply(Units.SECOND), qt.getUnit());
+            assertEquals(Units.KELVIN.multiply(Units.SECOND), qt.getUnit());
 
             // default persistence service
-            RiemannSum = PersistenceExtensions.riemannSumBetween(quantityItem, beginStored, endStored, type);
-            assertNull(RiemannSum);
+            sum = PersistenceExtensions.riemannSumBetween(quantityItem, beginStored, endStored, type);
+            assertNull(sum);
         }
     }
 
