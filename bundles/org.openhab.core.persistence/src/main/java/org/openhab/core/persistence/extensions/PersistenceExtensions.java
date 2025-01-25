@@ -1243,9 +1243,8 @@ public class PersistenceExtensions {
 
         if (averageState != null) {
             Item baseItem = item instanceof GroupItem groupItem ? groupItem.getBaseItem() : item;
-            Unit<?> baseUnit = baseItem instanceof NumberItem numberItem ? numberItem.getUnit() : null;
-            Unit<?> unit = baseUnit != null ? baseUnit.getSystemUnit() : null;
-
+            Unit<?> unit = (baseItem instanceof NumberItem numberItem)
+                    && (numberItem.getUnit() instanceof Unit<?> numberItemUnit) ? numberItemUnit.getSystemUnit() : null;
             DecimalType dt;
             if (unit != null && averageState instanceof QuantityType<?> averageQuantity) {
                 averageQuantity = averageQuantity.toUnit(unit);
@@ -1408,14 +1407,14 @@ public class PersistenceExtensions {
             if (dt != null && DecimalType.ZERO.compareTo(dt) <= 0) {
                 BigDecimal deviation = dt.toBigDecimal().sqrt(MathContext.DECIMAL64);
                 Item baseItem = item instanceof GroupItem groupItem ? groupItem.getBaseItem() : item;
-                if (baseItem instanceof NumberItem numberItem) {
-                    Unit<?> baseUnit = numberItem.getUnit();
-                    Unit<?> unit = baseUnit != null ? baseUnit.getSystemUnit() : null;
-                    if (unit != null) {
-                        return new QuantityType<>(deviation, unit);
-                    }
+                Unit<?> unit = (baseItem instanceof NumberItem numberItem)
+                        && (numberItem.getUnit() instanceof Unit<?> numberItemUnit) ? numberItemUnit.getSystemUnit()
+                                : null;
+                if (unit != null) {
+                    return new QuantityType<>(deviation, unit);
+                } else {
+                    return new DecimalType(deviation);
                 }
-                return new DecimalType(deviation);
             }
         }
         return null;
@@ -1807,9 +1806,8 @@ public class PersistenceExtensions {
             Iterator<HistoricItem> it = result.iterator();
 
             Item baseItem = item instanceof GroupItem groupItem ? groupItem.getBaseItem() : item;
-            Unit<?> baseUnit = baseItem instanceof NumberItem numberItem ? numberItem.getUnit() : null;
-            Unit<?> unit = baseUnit != null ? baseUnit.getSystemUnit() : null;
-
+            Unit<?> unit = (baseItem instanceof NumberItem numberItem)
+                    && (numberItem.getUnit() instanceof Unit<?> numberItemUnit) ? numberItemUnit.getSystemUnit() : null;
             BigDecimal sum = BigDecimal.ZERO;
             while (it.hasNext()) {
                 HistoricItem historicItem = it.next();
