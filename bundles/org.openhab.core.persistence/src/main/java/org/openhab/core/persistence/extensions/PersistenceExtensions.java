@@ -2163,9 +2163,8 @@ public class PersistenceExtensions {
         }
 
         Item baseItem = item instanceof GroupItem groupItem ? groupItem.getBaseItem() : item;
-        Unit<?> baseUnit = baseItem instanceof NumberItem numberItem ? numberItem.getUnit() : null;
-        Unit<?> unit = baseUnit != null ? baseUnit.getSystemUnit() : null;
-
+        Unit<?> unit = (baseItem instanceof NumberItem numberItem)
+                && (numberItem.getUnit() instanceof Unit<?> numberItemUnit) ? numberItemUnit.getSystemUnit() : null;
         BigDecimal sum = riemannSum(beginTime, endTime, it, unit, type).scaleByPowerOfTen(-3);
         if (unit != null) {
             return new QuantityType<>(sum, unit.multiply(Units.SECOND));
