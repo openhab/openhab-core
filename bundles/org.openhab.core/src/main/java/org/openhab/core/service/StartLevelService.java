@@ -13,12 +13,14 @@
 package org.openhab.core.service;
 
 import java.util.AbstractMap;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.SequencedMap;
 import java.util.Set;
-import java.util.TreeSet;
+import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -98,7 +100,7 @@ public class StartLevelService {
 
     private int openHABStartLevel = 0;
 
-    private Map<Integer, Set<ReadyMarker>> startlevels = Map.of();
+    private SequencedMap<Integer, Set<ReadyMarker>> startlevels = Collections.emptySortedMap();
 
     @Activate
     public StartLevelService(BundleContext bundleContext, @Reference ReadyService readyService,
@@ -116,9 +118,11 @@ public class StartLevelService {
             handleOSGiStartlevel();
 
             if (openHABStartLevel >= 10) {
-                for (Integer level : new TreeSet<>(startlevels.keySet())) {
+                for (Entry<Integer, Set<ReadyMarker>> entry : startlevels.entrySet()) {
+                    Integer level = entry.getKey();
                     if (openHABStartLevel < level) {
-                        boolean reached = isStartLevelReached(startlevels.get(level));
+                        Set<ReadyMarker> markerSet = entry.getValue();
+                        boolean reached = isStartLevelReached(level, markerSet);
                         if (reached) {
                             setStartLevel(level);
                         } else {
@@ -142,12 +146,13 @@ public class StartLevelService {
         return openHABStartLevel;
     }
 
-    private boolean isStartLevelReached(@Nullable Set<ReadyMarker> markerSet) {
+    private boolean isStartLevelReached(Integer level, @Nullable Set<ReadyMarker> markerSet) {
         if (markerSet == null) {
             return true;
         }
         for (ReadyMarker m : markerSet) {
             if (!markers.contains(m)) {
+                logger.debug("Missing marker {} for start level {}", m, level);
                 return false;
             }
         }
@@ -173,7 +178,7 @@ public class StartLevelService {
         trackers.clear();
 
         // set up trackers and markers
-        startlevels = parseConfig(configuration);
+        startlevels = Collections.unmodifiableSequencedMap(new TreeMap<>(parseConfig(configuration)));
         startlevels.keySet()
                 .forEach(sl -> slmarker.put(sl, new ReadyMarker(STARTLEVEL_MARKER_TYPE, Integer.toString(sl))));
         slmarker.put(STARTLEVEL_COMPLETE,
