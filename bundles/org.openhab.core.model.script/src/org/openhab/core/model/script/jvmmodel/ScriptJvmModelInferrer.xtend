@@ -25,7 +25,6 @@ import org.slf4j.LoggerFactory
 import org.openhab.core.items.Item
 import org.openhab.core.types.Command
 import org.openhab.core.types.State
-import org.openhab.core.events.Event
 import org.openhab.core.automation.module.script.rulesupport.shared.ValueCache
 
 /**
@@ -39,7 +38,7 @@ import org.openhab.core.automation.module.script.rulesupport.shared.ValueCache
  */
 class ScriptJvmModelInferrer extends AbstractModelInferrer {
 
-    static private final Logger logger = LoggerFactory.getLogger(ScriptJvmModelInferrer)
+    static final Logger logger = LoggerFactory.getLogger(ScriptJvmModelInferrer)
 
     /** Variable name for the input string in a "script transformation" or "script profile" */
     public static final String VAR_INPUT = "input";
@@ -85,7 +84,7 @@ class ScriptJvmModelInferrer extends AbstractModelInferrer {
     public static final String VAR_SHARED_CACHE = "sharedCache";
 
     /**
-     * conveninence API to build and initialize JvmTypes and their members.
+     * convenience API to build and initialize JvmTypes and their members.
      */
     @Inject extension JvmTypesBuilder
 
