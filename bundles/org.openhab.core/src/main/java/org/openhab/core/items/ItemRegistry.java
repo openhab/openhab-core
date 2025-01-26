@@ -105,18 +105,4 @@ public interface ItemRegistry extends Registry<Item, String> {
      */
     @Nullable
     Item remove(String itemName, boolean recursive);
-
-    /**
-     * Add a hook to be informed before adding/after removing items.
-     *
-     * @param hook
-     */
-    void addRegistryHook(RegistryHook<Item> hook);
-
-    /**
-     * Remove the hook again.
-     *
-     * @param hook
-     */
-    void removeRegistryHook(RegistryHook<Item> hook);
 }
