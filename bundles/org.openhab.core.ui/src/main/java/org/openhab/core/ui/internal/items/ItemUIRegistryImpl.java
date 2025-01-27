@@ -45,7 +45,6 @@ import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemNotUniqueException;
 import org.openhab.core.items.ItemRegistry;
-import org.openhab.core.items.RegistryHook;
 import org.openhab.core.library.items.CallItem;
 import org.openhab.core.library.items.ColorItem;
 import org.openhab.core.library.items.ContactItem;
@@ -1426,16 +1425,6 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
     @Override
     public @Nullable Item remove(String itemName, boolean recursive) {
         return itemRegistry.remove(itemName, recursive);
-    }
-
-    @Override
-    public void addRegistryHook(RegistryHook<Item> hook) {
-        itemRegistry.addRegistryHook(hook);
-    }
-
-    @Override
-    public void removeRegistryHook(RegistryHook<Item> hook) {
-        itemRegistry.removeRegistryHook(hook);
     }
 
     @Override

@@ -15,8 +15,8 @@
   <name>openHAB Core :: Features :: Karaf :: Target Platform</name>
 
   <properties>
-    <jetty.version>9.4.54.v20240208</jetty.version>
-    <jna.version>5.14.0</jna.version>
+    <jetty.version>9.4.57.v20241219</jetty.version>
+    <jna.version>5.16.0</jna.version>
   </properties>
 
   <build>
