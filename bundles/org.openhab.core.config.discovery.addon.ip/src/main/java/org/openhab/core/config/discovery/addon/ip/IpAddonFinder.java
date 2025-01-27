@@ -12,8 +12,7 @@
  */
 package org.openhab.core.config.discovery.addon.ip;
 
-import static org.openhab.core.config.discovery.addon.AddonFinderConstants.SERVICE_NAME_IP;
-import static org.openhab.core.config.discovery.addon.AddonFinderConstants.SERVICE_TYPE_IP;
+import static org.openhab.core.config.discovery.addon.AddonFinderConstants.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -614,10 +613,9 @@ public class IpAddonFinder extends BaseAddonFinder implements NetworkAddressChan
     /**
      * Use the given format specifier to format an array of mac address bytes
      *
-     * @param format a standard format specifier; optionally ends with a delimiter e.g. "%02x:" or "%02X"
+     * @param format a standard format specifier; optionally ends with a delimiter e.g. {@code %02x:} or {@code %02X}
      * @param bytes the mac address as an array of bytes
-     *
-     * @return e.g. '01:02:03:04:A5:B6:C7:D8', '01-02-03-04:a5:b6:c7:d8', or '01020304A5B6C7D8'
+     * @return e.g. '{@code 01:02:03:04:A5:B6:C7:D8}' or '{@code 01-02-03-04-a5-b6-c7-d8}' or '{@code 01020304A5B6C7D8}'
      */
     private String macFormat(String format, byte[] bytes) {
         StringBuilder result = new StringBuilder();
@@ -629,14 +627,26 @@ public class IpAddonFinder extends BaseAddonFinder implements NetworkAddressChan
     }
 
     /**
-     * Check if the given mac format specifier string is valid
+     * Check if the given mac format specifier is valid. A valid specifier comprises two parts -- namely
+     * 1) a numeric format specifier acceptable to the {@code String.format()} method, plus 2) a single
+     * [optional] delimiter (i.e. a non alphanumeric) character. Examples are as follows:
+     * <p>
+     * <li>{@code %02X} produces {@code 01020304A5B6C7D8}</li>
+     * <li>{@code %02x:} produces {@code 01:02:03:04:a5:b6:c7:d8} (lower case hex)</li>
+     * <li>{@code %02X-} produces {@code 01-02-03-04-A5-B6-C7-D8} (upper case hex)</li>
+     * <li>{@code %02X,} produces {@code 01,02,03,04,A5,B6,C7,D8}</li>
+     * <p>
+     *
+     * @return true if the format specifier is valid
      */
     private boolean macFormatValid(String format) {
+        // use String.format() to check first part validity
         try {
             String.format(format, (byte) 123);
         } catch (IllegalFormatException e) {
             return false;
         }
+        // get position of numeric format letter e.g. the 'X' in '%02X-'
         int last = format.length() - 1;
         int index = 0;
         while (index <= last) {
@@ -645,10 +655,12 @@ public class IpAddonFinder extends BaseAddonFinder implements NetworkAddressChan
             }
             index++;
         }
+        // check for zero or one character(s) after numeric format letter
         switch (last - index) {
             case 0:
                 return true;
             case 1:
+                // check this character is non alphanumeric i.e. a delimiter
                 return !Character.isLetterOrDigit(format.charAt(last));
         }
         return false;
