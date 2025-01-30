@@ -33,12 +33,14 @@ class ThingFormatter extends AbstractDeclarativeFormatter {
 	@Inject extension ThingGrammarAccess
 
 	override protected void configureFormatting(FormattingConfig c) {
-		c.setLinewrap(1, 1, 2).before("Bridge")
+		c.setLinewrap(1, 1, 2).before("Bridge", "Things:", "Channels:")
 		c.setLinewrap(1, 1, 2).before(modelThingRule)
 		c.setLinewrap(1, 1, 2).before(modelChannelRule)
 
 		c.setIndentationIncrement.after("{")
 		c.setIndentationDecrement.before("}")
+		c.setIndentationIncrement.before(modelChannelRule)
+		c.setIndentationDecrement.after(modelChannelRule)
 		c.setLinewrap().before("}")
 
 		c.setNoSpace().withinKeywordPairs("(", ")")

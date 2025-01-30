@@ -120,6 +120,7 @@ public class ThingDslSyntaxGenerator extends AbstractThingSyntaxGenerator {
         }
 
         if (preferPresentationAsTree && modelBridge != null) {
+            modelBridge.setThingsHeader(false);
             for (Thing child : getChildThings(thing)) {
                 if (onlyThings.contains(child) && !handledThings.contains(child)) {
                     modelBridge.getThings().add(buildModelThing(child, true, false, onlyThings, handledThings));
@@ -127,7 +128,9 @@ public class ThingDslSyntaxGenerator extends AbstractThingSyntaxGenerator {
             }
         }
 
-        for (Channel channel : getNonDefaultChannels(thing)) {
+        List<Channel> channels = getNonDefaultChannels(thing);
+        model.setChannelsHeader(!channels.isEmpty());
+        for (Channel channel : channels) {
             model.getChannels().add(buildModelChannel(channel));
         }
 
