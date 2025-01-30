@@ -146,7 +146,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * @author Dimitar Ivanov - replaced Firmware UID with thing UID and firmware version
  * @author Markus Rathgeb - Migrated to JAX-RS Whiteboard Specification
  * @author Wouter Born - Migrated to OpenAPI annotations
- * @author Laurent Garnier - Added API to generate file syntax
+ * @author Laurent Garnier - Added API to generate syntax
  */
 @Component
 @JaxrsResource
@@ -739,9 +739,9 @@ public class ThingResource implements RESTResource {
 
     @GET
     @RolesAllowed({ Role.ADMIN })
-    @Path("/filesyntax")
+    @Path("/syntax/generate")
     @Produces(MediaType.TEXT_PLAIN)
-    @Operation(operationId = "generateSyntaxForAllThings", summary = "Generate file syntax for all things.", security = {
+    @Operation(operationId = "generateSyntaxForAllThings", summary = "Generate syntax for all things.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
                     @ApiResponse(responseCode = "400", description = "Unsupported syntax format.") })
@@ -760,9 +760,9 @@ public class ThingResource implements RESTResource {
 
     @GET
     @RolesAllowed({ Role.ADMIN })
-    @Path("/{thingUID}/filesyntax")
+    @Path("/{thingUID}/syntax/generate")
     @Produces(MediaType.TEXT_PLAIN)
-    @Operation(operationId = "generateSyntaxForThing", summary = "Generate file syntax for a thing.", security = {
+    @Operation(operationId = "generateSyntaxForThing", summary = "Generate syntax for a thing.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
                     @ApiResponse(responseCode = "400", description = "Unsupported syntax format."),

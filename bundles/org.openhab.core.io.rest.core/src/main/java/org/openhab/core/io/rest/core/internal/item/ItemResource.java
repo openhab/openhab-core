@@ -143,7 +143,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * @author Stefan Triller - Added bulk item add method
  * @author Markus Rathgeb - Migrated to JAX-RS Whiteboard Specification
  * @author Wouter Born - Migrated to OpenAPI annotations
- * @author Laurent Garnier - Added API to generate file syntax
+ * @author Laurent Garnier - Added API to generate syntax
  */
 @Component
 @JaxrsResource
@@ -923,9 +923,9 @@ public class ItemResource implements RESTResource {
 
     @GET
     @RolesAllowed({ Role.ADMIN })
-    @Path("/filesyntax")
+    @Path("/syntax/generate")
     @Produces(MediaType.TEXT_PLAIN)
-    @Operation(operationId = "generateSyntaxForAllItems", summary = "Generate file syntax for all items.", security = {
+    @Operation(operationId = "generateSyntaxForAllItems", summary = "Generate syntax for all items.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
                     @ApiResponse(responseCode = "400", description = "Unsupported syntax format.") })
@@ -943,9 +943,9 @@ public class ItemResource implements RESTResource {
 
     @GET
     @RolesAllowed({ Role.ADMIN })
-    @Path("/{itemname: [a-zA-Z_0-9]+}/filesyntax")
+    @Path("/{itemname: [a-zA-Z_0-9]+}/syntax/generate")
     @Produces(MediaType.TEXT_PLAIN)
-    @Operation(operationId = "generateSyntaxForItem", summary = "Generate file syntax for an item.", security = {
+    @Operation(operationId = "generateSyntaxForItem", summary = "Generate syntax for an item.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
                     @ApiResponse(responseCode = "400", description = "Unsupported syntax format."),

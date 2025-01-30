@@ -96,7 +96,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * @author Markus Rathgeb - Migrated to JAX-RS Whiteboard Specification
  * @author Wouter Born - Migrated to OpenAPI annotations
  * @author Laurent Garnier - Added optional parameter newThingId to approve API
- * @author Laurent Garnier - Added API to generate file syntax
+ * @author Laurent Garnier - Added API to generate syntax
  */
 @Component(service = { RESTResource.class, InboxResource.class })
 @JaxrsResource
@@ -218,9 +218,9 @@ public class InboxResource implements RESTResource {
     }
 
     @GET
-    @Path("/{thingUID}/filesyntax")
+    @Path("/{thingUID}/syntax/generate")
     @Produces(MediaType.TEXT_PLAIN)
-    @Operation(operationId = "generateSyntaxForDiscoveryResult", summary = "Generate file syntax for the thing associated to the discovery result.", responses = {
+    @Operation(operationId = "generateSyntaxForDiscoveryResult", summary = "Generate syntax for the thing associated to the discovery result.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "400", description = "Unsupported syntax format."),
             @ApiResponse(responseCode = "404", description = "Discovery result not found in the inbox or thing type not found.") })
