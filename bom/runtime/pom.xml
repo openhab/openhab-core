@@ -175,6 +175,12 @@
       <artifactId>cxf-rt-rs-sse</artifactId>
       <version>${cxf.version}</version>
     </dependency>
+    <!-- needed as long as cxf3 requires wstx 6.x -->
+    <dependency>
+      <groupId>com.fasterxml.woodstox</groupId>
+      <artifactId>woodstox-core</artifactId>
+      <version>6.6.2</version>
+    </dependency>
 
     <!-- JAX-RS 2.1 API with contract -->
     <dependency>

@@ -117,7 +117,7 @@
 	<feature name="openhab.tp-cxf" description="Apache CXF" version="${project.version}">
 		<capability>openhab.tp;feature=cxf;version=3.6.4</capability>
 		<feature dependency="true">openhab.tp-jaxws</feature>
-		<bundle dependency="true">mvn:com.fasterxml.woodstox/woodstox-core/6.5.1</bundle>
+		<bundle dependency="true">mvn:com.fasterxml.woodstox/woodstox-core/6.6.2</bundle>
 		<bundle dependency="true">mvn:jakarta.jws/jakarta.jws-api/2.1.0</bundle>
 		<bundle dependency="true">mvn:jakarta.xml.ws/jakarta.xml.ws-api/2.3.3</bundle>
 		<bundle dependency="true">mvn:javax.servlet/javax.servlet-api/3.1.0</bundle>
