@@ -105,7 +105,7 @@ class ScriptJvmModelInferrer extends AbstractModelInferrer {
      */
     def dispatch void infer(Script script, IJvmDeclaredTypeAcceptor acceptor, boolean isPreIndexingPhase) {
         val className = script.eResource.URI.lastSegment.split("\\.").head.toFirstUpper + "Script"
-        acceptor.accept(script.toClass(className)).initializeLater [
+        acceptor.accept(script.toClass(className), [
 
             val Set<String> fieldNames = newHashSet()
 
@@ -166,6 +166,6 @@ class ScriptJvmModelInferrer extends AbstractModelInferrer {
                 parameters += script.toParameter(VAR_SHARED_CACHE, sharedCacheTypeRef)
                 body = script
             ]
-        ]
+        ])
     }
 }

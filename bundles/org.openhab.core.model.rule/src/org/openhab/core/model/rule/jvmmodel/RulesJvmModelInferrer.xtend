@@ -78,7 +78,7 @@ class RulesJvmModelInferrer extends ScriptJvmModelInferrer {
      */
     def dispatch void infer(RuleModel ruleModel, IJvmDeclaredTypeAcceptor acceptor, boolean isPreIndexingPhase) {
         val className = ruleModel.eResource.URI.lastSegment.split("\\.").head.toFirstUpper + "Rules"
-        acceptor.accept(ruleModel.toClass(className)).initializeLater [
+        acceptor.accept(ruleModel.toClass(className), [
             members += ruleModel.variables.map [
                 toField(name, type?.cloneWithProxies) => [ field |
                     field.static = true
@@ -171,7 +171,7 @@ class RulesJvmModelInferrer extends ScriptJvmModelInferrer {
                     body = rule.script
                 ]
             ]
-        ]
+        ])
     }
 
     def private boolean containsParam(EList<JvmFormalParameter> params, String param) {
