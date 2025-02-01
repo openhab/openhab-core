@@ -111,6 +111,9 @@ public abstract class AbstractThingSyntaxGenerator implements ThingSyntaxGenerat
         Set<String> handledNames = new HashSet<>();
         for (ConfigDescriptionParameter param : configDescriptionParameter) {
             String paramName = param.getName();
+            if (handledNames.contains(paramName)) {
+                continue;
+            }
             Object value = configParameters.get(paramName);
             Object defaultValue = ConfigUtil.getDefaultValueAsCorrectType(param);
             if (value != null && !value.equals(defaultValue)) {
@@ -119,10 +122,14 @@ public abstract class AbstractThingSyntaxGenerator implements ThingSyntaxGenerat
             handledNames.add(paramName);
         }
         for (String paramName : configParameters.keySet().stream().sorted().collect(Collectors.toList())) {
+            if (handledNames.contains(paramName)) {
+                continue;
+            }
             Object value = configParameters.get(paramName);
-            if (!handledNames.contains(paramName) && value != null) {
+            if (value != null) {
                 parameters.add(new ConfigParameter(paramName, value));
             }
+            handledNames.add(paramName);
         }
         return parameters;
     }

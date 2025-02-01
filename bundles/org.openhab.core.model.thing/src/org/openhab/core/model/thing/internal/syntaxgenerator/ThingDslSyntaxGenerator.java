@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.ConfigDescriptionRegistry;
 import org.openhab.core.model.core.ModelRepository;
 import org.openhab.core.model.thing.thing.ModelBridge;
@@ -90,7 +91,7 @@ public class ThingDslSyntaxGenerator extends AbstractThingSyntaxGenerator {
             List<Thing> onlyThings, Set<Thing> handledThings) {
         ModelThing model;
         ModelBridge modelBridge;
-        if (preferPresentationAsTree && thing instanceof Bridge) {
+        if (preferPresentationAsTree && thing instanceof Bridge bridge && !bridge.getThings().isEmpty()) {
             modelBridge = ThingFactory.eINSTANCE.createModelBridge();
             modelBridge.setBridge(true);
             model = modelBridge;
@@ -116,7 +117,10 @@ public class ThingDslSyntaxGenerator extends AbstractThingSyntaxGenerator {
         }
 
         for (ConfigParameter param : getConfigurationParameters(thing)) {
-            model.getProperties().add(buildModelProperty(param.name(), param.value()));
+            ModelProperty property = buildModelProperty(param.name(), param.value());
+            if (property != null) {
+                model.getProperties().add(property);
+            }
         }
 
         if (preferPresentationAsTree && modelBridge != null) {
@@ -153,16 +157,23 @@ public class ThingDslSyntaxGenerator extends AbstractThingSyntaxGenerator {
             modelChannel.setLabel(channel.getLabel());
         }
         for (ConfigParameter param : getConfigurationParameters(channel)) {
-            modelChannel.getProperties().add(buildModelProperty(param.name(), param.value()));
+            ModelProperty property = buildModelProperty(param.name(), param.value());
+            if (property != null) {
+                modelChannel.getProperties().add(property);
+            }
         }
         return modelChannel;
     }
 
-    private ModelProperty buildModelProperty(String key, Object value) {
+    private @Nullable ModelProperty buildModelProperty(String key, Object value) {
         ModelProperty property = ThingFactory.eINSTANCE.createModelProperty();
         property.setKey(key);
         if (value instanceof List<?> list) {
-            property.getValue().addAll(list);
+            if (!list.isEmpty()) {
+                property.getValue().addAll(list);
+            } else {
+                property = null;
+            }
         } else {
             property.getValue().add(value);
         }

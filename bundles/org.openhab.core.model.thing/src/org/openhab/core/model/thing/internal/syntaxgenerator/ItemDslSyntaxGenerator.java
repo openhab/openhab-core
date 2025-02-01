@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.ConfigDescriptionRegistry;
 import org.openhab.core.items.GroupFunction;
 import org.openhab.core.items.GroupItem;
@@ -136,7 +137,10 @@ public class ItemDslSyntaxGenerator extends AbstractItemSyntaxGenerator {
             binding.setType("channel");
             binding.setConfiguration(channelLink.getLinkedUID().getAsString());
             for (ConfigParameter param : getConfigurationParameters(channelLink)) {
-                binding.getProperties().add(buildModelProperty(param.name(), param.value()));
+                ModelProperty property = buildModelProperty(param.name(), param.value());
+                if (property != null) {
+                    binding.getProperties().add(property);
+                }
             }
             model.getBindings().add(binding);
         }
@@ -148,7 +152,10 @@ public class ItemDslSyntaxGenerator extends AbstractItemSyntaxGenerator {
             binding.setConfiguration(md.getValue());
             String statePattern = null;
             for (ConfigParameter param : getConfigurationParameters(md)) {
-                binding.getProperties().add(buildModelProperty(param.name(), param.value()));
+                ModelProperty property = buildModelProperty(param.name(), param.value());
+                if (property != null) {
+                    binding.getProperties().add(property);
+                }
                 if ("stateDescription".equals(namespace) && "pattern".equals(param.name())) {
                     statePattern = param.value().toString();
                 }
@@ -164,11 +171,15 @@ public class ItemDslSyntaxGenerator extends AbstractItemSyntaxGenerator {
         return model;
     }
 
-    private ModelProperty buildModelProperty(String key, Object value) {
+    private @Nullable ModelProperty buildModelProperty(String key, Object value) {
         ModelProperty property = ItemsFactory.eINSTANCE.createModelProperty();
         property.setKey(key);
         if (value instanceof List<?> list) {
-            property.getValue().addAll(list);
+            if (!list.isEmpty()) {
+                property.getValue().addAll(list);
+            } else {
+                property = null;
+            }
         } else {
             property.getValue().add(value);
         }
