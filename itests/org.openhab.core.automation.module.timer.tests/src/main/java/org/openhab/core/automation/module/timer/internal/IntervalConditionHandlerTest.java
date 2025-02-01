@@ -12,12 +12,12 @@
  */
 package org.openhab.core.automation.module.timer.internal;
 
-import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
-import java.util.Collection;
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,107 +26,84 @@ import java.util.Random;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.Rule;
 import org.openhab.core.automation.RuleManager;
-import org.openhab.core.automation.RuleRegistry;
 import org.openhab.core.automation.RuleStatus;
 import org.openhab.core.automation.RuleStatusInfo;
 import org.openhab.core.automation.Trigger;
 import org.openhab.core.automation.internal.RuleEngineImpl;
-import org.openhab.core.automation.internal.module.factory.CoreModuleHandlerFactory;
+import org.openhab.core.automation.internal.module.handler.IntervalConditionHandler;
 import org.openhab.core.automation.internal.module.handler.ItemCommandActionHandler;
 import org.openhab.core.automation.internal.module.handler.ItemStateTriggerHandler;
+import org.openhab.core.automation.type.ModuleTypeRegistry;
 import org.openhab.core.automation.util.ModuleBuilder;
 import org.openhab.core.automation.util.RuleBuilder;
-import org.openhab.core.common.registry.ProviderChangeListener;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.events.EventSubscriber;
-import org.openhab.core.i18n.TimeZoneProvider;
-import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
-import org.openhab.core.items.ItemProvider;
-import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.events.ItemCommandEvent;
 import org.openhab.core.items.events.ItemEventFactory;
-import org.openhab.core.library.items.SwitchItem;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.service.ReadyMarker;
-import org.openhab.core.service.StartLevelService;
-import org.openhab.core.test.java.JavaOSGiTest;
-import org.openhab.core.test.storage.VolatileStorageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This provides common functionality for all condition tests.
+ * This tests the Interval Condition.
  *
- * @author Dominik Schlierf - Initial contribution
- * @author Kai Kreuzer - Initial contribution of TimeOfDayConditionHandlerTest
+ * @author Jimmy Tanagra - Initial contribution
  */
 @NonNullByDefault
-public abstract class BasicConditionHandlerTest extends JavaOSGiTest {
-    private final Logger logger = LoggerFactory.getLogger(BasicConditionHandlerTest.class);
-    private VolatileStorageService volatileStorageService = new VolatileStorageService();
-    protected @NonNullByDefault({}) RuleRegistry ruleRegistry;
-    protected @NonNullByDefault({}) RuleManager ruleEngine;
-    protected @Nullable Event itemEvent;
-    private @NonNullByDefault({}) StartLevelService startLevelService;
+public class IntervalConditionHandlerTest extends BasicConditionHandlerTest {
+    private final Logger logger = LoggerFactory.getLogger(IntervalConditionHandlerTest.class);
 
     /**
-     * This executes before every test and before the
-     *
-     * @Before-annotated methods in sub-classes.
+     * This checks if the condition on its own works properly.
      */
-    @BeforeEach
-    public void beforeBase() {
-        startLevelService = mock(StartLevelService.class);
-        when(startLevelService.getStartLevel()).thenReturn(100);
-        registerService(startLevelService, StartLevelService.class.getName());
-        EventPublisher eventPublisher = Objects.requireNonNull(getService(EventPublisher.class));
-        ItemRegistry itemRegistry = Objects.requireNonNull(getService(ItemRegistry.class));
-        CoreModuleHandlerFactory coreModuleHandlerFactory = new CoreModuleHandlerFactory(getBundleContext(),
-                eventPublisher, itemRegistry, mock(TimeZoneProvider.class), mock(StartLevelService.class));
-        mock(CoreModuleHandlerFactory.class);
-        registerService(coreModuleHandlerFactory);
-
-        ItemProvider itemProvider = new ItemProvider() {
-            @Override
-            public void addProviderChangeListener(ProviderChangeListener<Item> listener) {
-            }
-
-            @Override
-            public Collection<Item> getAll() {
-                return List.of(new SwitchItem("TriggeredItem"), new SwitchItem("SwitchedItem"));
-            }
-
-            @Override
-            public void removeProviderChangeListener(ProviderChangeListener<Item> listener) {
-            }
-        };
-        registerService(itemProvider);
-        registerService(volatileStorageService);
-        waitForAssert(() -> {
-            ruleRegistry = getService(RuleRegistry.class);
-            assertThat(ruleRegistry, is(notNullValue()));
-        }, 3000, 100);
-        waitForAssert(() -> {
-            ruleEngine = getService(RuleManager.class);
-            assertThat(ruleEngine, is(notNullValue()));
-        }, 3000, 100);
-
-        // start rule engine
-        RuleEngineImpl ruleEngine = Objects.requireNonNull((RuleEngineImpl) getService(RuleManager.class));
-        ruleEngine.onReadyMarkerAdded(new ReadyMarker("", ""));
-        waitForAssert(() -> assertTrue(ruleEngine.isStarted()));
+    @Test
+    public void assertThatConditionWorks() throws InterruptedException {
+        // The minimum interval is 10ms
+        IntervalConditionHandler handler = getIntervalConditionHandler(BigDecimal.valueOf(100));
+        // First execution -> should return true
+        assertThat(handler.isSatisfied(Map.of()), is(true));
+        // Subsequent immediate execution -> should return false
+        assertThat(handler.isSatisfied(Map.of()), is(false));
+        Thread.sleep(200);
+        // Execute after 200ms -> should return true
+        assertThat(handler.isSatisfied(Map.of()), is(true));
     }
 
+    private IntervalConditionHandler getIntervalConditionHandler(BigDecimal minInterval) {
+        return new IntervalConditionHandler(getIntervalCondition(minInterval));
+    }
+
+    private Condition getIntervalCondition(BigDecimal minInterval) {
+        Configuration config = getIntervalConfiguration(minInterval);
+        return ModuleBuilder.createCondition().withId("testIntervalCondition")
+                .withTypeUID(IntervalConditionHandler.MODULE_TYPE_ID).withConfiguration(config).build();
+    }
+
+    private Configuration getIntervalConfiguration(BigDecimal minInterval) {
+        return new Configuration(Map.of(IntervalConditionHandler.CFG_MIN_INTERVAL, minInterval));
+    }
+
+    @Override
+    public Condition getPassingCondition() {
+        return getIntervalCondition(BigDecimal.valueOf(100));
+    }
+
+    @Override
+    public Configuration getFailingConfiguration() {
+        return getIntervalConfiguration(BigDecimal.valueOf(10000));
+    }
+
+    // This is copied from BasicConditionHandlerTest with some modifications
+    @Override
     @Test
     public void assertThatConditionWorksInRule() throws ItemNotFoundException, InterruptedException {
         String testItemName1 = "TriggeredItem";
@@ -168,7 +145,7 @@ public abstract class BasicConditionHandlerTest extends JavaOSGiTest {
             public void receive(Event event) {
                 logger.info("Event: {}", event.getTopic());
                 if (event.getTopic().contains(testItemName2)) {
-                    BasicConditionHandlerTest.this.itemEvent = event;
+                    IntervalConditionHandlerTest.this.itemEvent = event;
                 }
             }
         };
@@ -193,6 +170,20 @@ public abstract class BasicConditionHandlerTest extends JavaOSGiTest {
         logger.info("Send and wait for item state is ON");
         eventPublisher.post(ItemEventFactory.createStateUpdatedEvent(testItemName1, OnOffType.ON));
 
+        // the first event is always processed
+        waitForAssert(() -> {
+            assertThat(itemEvent, is(notNullValue()));
+            assertThat(((ItemCommandEvent) itemEvent).getItemCommand(), is(OnOffType.ON));
+        });
+
+        long minInterval = ((BigDecimal) conditions.getFirst().getConfiguration()
+                .get(IntervalConditionHandler.CFG_MIN_INTERVAL)).longValue();
+        Thread.sleep(minInterval + 50);
+
+        // Send a second event to check if the condition is still satisfied
+        itemEvent = null; // reset it
+        eventPublisher.post(ItemEventFactory.createStateUpdatedEvent(testItemName1, OnOffType.ON));
+
         waitForAssert(() -> {
             assertThat(itemEvent, is(notNullValue()));
             assertThat(((ItemCommandEvent) itemEvent).getItemCommand(), is(OnOffType.ON));
@@ -208,23 +199,27 @@ public abstract class BasicConditionHandlerTest extends JavaOSGiTest {
         // prepare the execution
         itemEvent = null;
         eventPublisher.post(ItemEventFactory.createStateUpdatedEvent(testItemName1, OnOffType.ON));
+
+        // the first event is always allowed
+        waitForAssert(() -> {
+            assertThat(itemEvent, is(notNullValue()));
+        });
+
+        Thread.sleep(200); // some time is passing but less than the failing condition's minInterval
+
+        // the second event is not allowed
+        itemEvent = null;
+        eventPublisher.post(ItemEventFactory.createStateUpdatedEvent(testItemName1, OnOffType.ON));
         Thread.sleep(200); // without this, the assertion will be immediately fulfilled regardless of event processing
         assertThat(itemEvent, is(nullValue()));
     }
 
-    /**
-     * This returns a Condition of the tested type, which is always evaluating as true.
-     *
-     * @return a Condition of the tested type, which is always evaluating as true.
-     */
-    protected abstract Condition getPassingCondition();
-
-    /**
-     * This returns a Configuration for the tested type of condition,
-     * which makes the condition always evaluate as false.
-     *
-     * @return a Configuration for the tested type of condition,
-     *         which makes the condition always evaluate as false.
-     */
-    protected abstract Configuration getFailingConfiguration();
+    @SuppressWarnings("null")
+    @Test
+    public void checkIfModuleTypeIsRegistered() {
+        ModuleTypeRegistry mtr = getService(ModuleTypeRegistry.class);
+        waitForAssert(() -> {
+            assertThat(mtr.get(IntervalConditionHandler.MODULE_TYPE_ID), is(notNullValue()));
+        }, 3000, 100);
+    }
 }
