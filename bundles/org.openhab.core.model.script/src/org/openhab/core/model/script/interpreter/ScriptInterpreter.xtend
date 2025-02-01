@@ -46,7 +46,7 @@ import org.eclipse.xtext.xbase.typesystem.IBatchTypeResolver
  * 
  */
 @SuppressWarnings("restriction")
-public class ScriptInterpreter extends XbaseInterpreter {
+class ScriptInterpreter extends XbaseInterpreter {
 
     @Inject
     ItemRegistry itemRegistry
@@ -55,7 +55,7 @@ public class ScriptInterpreter extends XbaseInterpreter {
     StateAndCommandProvider stateAndCommandProvider
     
     @Inject
-    private IBatchTypeResolver typeResolver;
+    IBatchTypeResolver typeResolver;
 
     @Inject
     extension IJvmModelAssociations
@@ -130,7 +130,7 @@ public class ScriptInterpreter extends XbaseInterpreter {
 
         // Check if the JvmField is inferred
         val sourceElement = jvmField.sourceElements.head
-        if (sourceElement != null) {
+        if (sourceElement !== null) {
             context.assignValue(QualifiedName.create(jvmField.simpleName), value)
             value
         } else {
@@ -142,7 +142,7 @@ public class ScriptInterpreter extends XbaseInterpreter {
         if (expression === null) {
             return null
         } else if (expression instanceof QuantityLiteral) {
-            return doEvaluate(expression as QuantityLiteral, context, indicator)
+            return doEvaluate(expression, context, indicator)
         } else {
             return super.doEvaluate(expression, context, indicator)
         }

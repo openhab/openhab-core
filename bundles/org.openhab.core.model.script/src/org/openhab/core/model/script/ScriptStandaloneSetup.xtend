@@ -27,8 +27,8 @@ class ScriptStandaloneSetup extends ScriptStandaloneSetupGenerated {
     
     static Injector injector
 
-    private ScriptServiceUtil scriptServiceUtil;
-    private ScriptEngine scriptEngine;
+    ScriptServiceUtil scriptServiceUtil;
+    ScriptEngine scriptEngine;
     
     def ScriptStandaloneSetup setScriptServiceUtil(ScriptServiceUtil scriptServiceUtil) {
         this.scriptServiceUtil = scriptServiceUtil;
