@@ -38,10 +38,9 @@ import org.openhab.core.io.rest.Stream2JSONInputStream;
 import org.openhab.core.items.ItemUtil;
 import org.openhab.core.thing.profiles.ProfileType;
 import org.openhab.core.thing.profiles.ProfileTypeRegistry;
-import org.openhab.core.thing.profiles.StateProfileType;
-import org.openhab.core.thing.profiles.TriggerProfileType;
 import org.openhab.core.thing.profiles.dto.ProfileTypeDTO;
 import org.openhab.core.thing.profiles.dto.ProfileTypeDTOMapper;
+import org.openhab.core.thing.type.ChannelKind;
 import org.openhab.core.thing.type.ChannelType;
 import org.openhab.core.thing.type.ChannelTypeRegistry;
 import org.openhab.core.thing.type.ChannelTypeUID;
@@ -128,13 +127,7 @@ public class ProfileTypeResource implements RESTResource {
             // requested to filter against an unknown channel type -> do not return a ProfileType
             return t -> false;
         }
-        switch (channelType.getKind()) {
-            case STATE:
-                return t -> stateProfileMatchesProfileType(t, channelType);
-            case TRIGGER:
-                return t -> triggerProfileMatchesProfileType(t, channelType);
-        }
-        return t -> false;
+        return t -> profileTypeMatchesChannelType(t, channelType);
     }
 
     private Predicate<ProfileType> matchesItemType(@Nullable String itemType) {
@@ -151,31 +144,24 @@ public class ProfileTypeResource implements RESTResource {
                 || supportedItemTypesOnProfileType.contains(itemType);
     }
 
-    private boolean triggerProfileMatchesProfileType(ProfileType profileType, ChannelType channelType) {
-        if (profileType instanceof TriggerProfileType triggerProfileType) {
-            if (triggerProfileType.getSupportedChannelTypeUIDs().isEmpty()) {
-                return true;
-            }
+    private boolean profileTypeMatchesChannelType(ProfileType profileType, ChannelType channelType) {
+        ChannelKind supportedChannelKind = profileType.getSupportedChannelKind();
+        if (supportedChannelKind != null && supportedChannelKind != channelType.getKind())
+            return false;
 
-            if (triggerProfileType.getSupportedChannelTypeUIDs().contains(channelType.getUID())) {
-                return true;
-            }
+        Collection<ChannelTypeUID> supportedChannelTypeUIDsOnProfileType = profileType.getSupportedChannelTypeUIDs();
+        if (!supportedChannelTypeUIDsOnProfileType.isEmpty()
+                && !supportedChannelTypeUIDsOnProfileType.contains(channelType.getUID())) {
+            return false;
         }
-        return false;
-    }
 
-    private boolean stateProfileMatchesProfileType(ProfileType profileType, ChannelType channelType) {
-        if (profileType instanceof StateProfileType stateProfileType) {
-            if (stateProfileType.getSupportedItemTypesOfChannel().isEmpty()) {
-                return true;
-            }
-
-            Collection<String> supportedItemTypesOfChannelOnProfileType = stateProfileType
-                    .getSupportedItemTypesOfChannel();
+        Collection<String> supportedItemTypesOfChannelOnProfileType = profileType.getSupportedItemTypesOfChannel();
+        if (supportedItemTypesOfChannelOnProfileType.isEmpty()) {
+            return true;
+        } else {
             String itemType = channelType.getItemType();
             return itemType != null
                     && supportedItemTypesOfChannelOnProfileType.contains(ItemUtil.getMainItemType(itemType));
         }
-        return false;
     }
 }

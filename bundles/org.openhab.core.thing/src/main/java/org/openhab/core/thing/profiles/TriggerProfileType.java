@@ -12,10 +12,7 @@
  */
 package org.openhab.core.thing.profiles;
 
-import java.util.Collection;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.core.thing.type.ChannelTypeUID;
 
 /**
  * Describes a {@link TriggerProfile} type.
@@ -24,10 +21,4 @@ import org.openhab.core.thing.type.ChannelTypeUID;
  */
 @NonNullByDefault
 public interface TriggerProfileType extends ProfileType {
-
-    /**
-     *
-     * @return a collection of ChannelTypeUIDs (may be empty if all are supported).
-     */
-    Collection<ChannelTypeUID> getSupportedChannelTypeUIDs();
 }

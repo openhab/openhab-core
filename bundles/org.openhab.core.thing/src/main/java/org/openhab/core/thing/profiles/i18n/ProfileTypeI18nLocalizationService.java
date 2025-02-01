@@ -52,10 +52,12 @@ public class ProfileTypeI18nLocalizationService {
         if (profileType instanceof StateProfileType type) {
             return ProfileTypeBuilder.newState(profileTypeUID, label != null ? label : defaultLabel)
                     .withSupportedItemTypes(profileType.getSupportedItemTypes())
-                    .withSupportedItemTypesOfChannel(type.getSupportedItemTypesOfChannel()).build();
+                    .withSupportedItemTypesOfChannel(type.getSupportedItemTypesOfChannel())
+                    .withSupportedChannelTypeUIDs(type.getSupportedChannelTypeUIDs()).build();
         } else if (profileType instanceof TriggerProfileType type) {
             return ProfileTypeBuilder.newTrigger(profileTypeUID, label != null ? label : defaultLabel)
                     .withSupportedItemTypes(profileType.getSupportedItemTypes())
+                    .withSupportedItemTypesOfChannel(type.getSupportedItemTypesOfChannel())
                     .withSupportedChannelTypeUIDs(type.getSupportedChannelTypeUIDs()).build();
         } else {
             return profileType;

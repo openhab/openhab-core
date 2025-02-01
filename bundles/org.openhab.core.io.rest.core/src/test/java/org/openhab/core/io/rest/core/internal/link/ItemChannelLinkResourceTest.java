@@ -32,6 +32,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.openhab.core.io.rest.LocaleService;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.thing.ThingRegistry;
 import org.openhab.core.thing.ThingUID;
@@ -58,13 +59,14 @@ public class ItemChannelLinkResourceTest {
     private @Mock @NonNullByDefault({}) ProfileTypeRegistry profileTypeRegistryMock;
     private @Mock @NonNullByDefault({}) ItemChannelLinkRegistry itemChannelLinkRegistryMock;
     private @Mock @NonNullByDefault({}) ManagedItemChannelLinkProvider managedItemChannelLinkProviderMock;
+    private @Mock @NonNullByDefault({}) LocaleService localeServiceMock;
     private @NonNullByDefault({}) ItemChannelLinkResource itemChannelLinkResource;
 
     @BeforeEach
     public void setup() {
         itemChannelLinkResource = new ItemChannelLinkResource(itemRegistryMock, thingRegistryMock,
                 channelTypeRegistryMock, profileTypeRegistryMock, itemChannelLinkRegistryMock,
-                managedItemChannelLinkProviderMock);
+                managedItemChannelLinkProviderMock, localeServiceMock);
         when(itemChannelLinkRegistryMock.removeLinksForItem(any())).thenReturn(EXPECTED_REMOVED_LINKS);
         when(itemChannelLinkRegistryMock.removeLinksForThing(any())).thenReturn(EXPECTED_REMOVED_LINKS);
     }

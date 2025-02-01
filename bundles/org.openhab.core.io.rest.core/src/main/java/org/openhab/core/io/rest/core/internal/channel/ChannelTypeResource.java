@@ -48,7 +48,6 @@ import org.openhab.core.io.rest.Stream2JSONInputStream;
 import org.openhab.core.thing.dto.ChannelTypeDTO;
 import org.openhab.core.thing.profiles.ProfileType;
 import org.openhab.core.thing.profiles.ProfileTypeRegistry;
-import org.openhab.core.thing.profiles.TriggerProfileType;
 import org.openhab.core.thing.type.ChannelKind;
 import org.openhab.core.thing.type.ChannelType;
 import org.openhab.core.thing.type.ChannelTypeRegistry;
@@ -174,10 +173,8 @@ public class ChannelTypeResource implements RESTResource {
 
         Set<String> result = new HashSet<>();
         for (ProfileType profileType : profileTypeRegistry.getProfileTypes()) {
-            if (profileType instanceof TriggerProfileType type) {
-                if (type.getSupportedChannelTypeUIDs().contains(ctUID)) {
-                    result.addAll(profileType.getSupportedItemTypes());
-                }
+            if (profileType.getSupportedChannelTypeUIDs().contains(ctUID)) {
+                result.addAll(profileType.getSupportedItemTypes());
             }
         }
         if (result.isEmpty()) {
