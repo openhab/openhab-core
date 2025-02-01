@@ -49,6 +49,8 @@ import org.openhab.core.persistence.HistoricItem;
 import org.openhab.core.persistence.PersistenceService;
 import org.openhab.core.persistence.PersistenceServiceRegistry;
 import org.openhab.core.persistence.QueryablePersistenceService;
+import org.openhab.core.persistence.registry.PersistenceServiceConfiguration;
+import org.openhab.core.persistence.registry.PersistenceServiceConfigurationRegistry;
 import org.openhab.core.types.State;
 import org.openhab.core.ui.chart.ChartProvider;
 import org.openhab.core.ui.internal.chart.ChartServlet;
@@ -68,6 +70,7 @@ import org.slf4j.LoggerFactory;
  * @author Holger Reichert - Support for themes, DPI, legend hiding
  * @author Christoph Weitkamp - Consider default persistence service
  * @author Jan N. Klug - Add y-axis label formatter
+ * @author Mark Herwege - Implement aliases
  */
 @NonNullByDefault
 @Component(immediate = true)
@@ -110,12 +113,15 @@ public class DefaultChartProvider implements ChartProvider {
 
     private final ItemUIRegistry itemUIRegistry;
     private final PersistenceServiceRegistry persistenceServiceRegistry;
+    private final PersistenceServiceConfigurationRegistry persistenceServiceConfigurationRegistry;
 
     @Activate
     public DefaultChartProvider(final @Reference ItemUIRegistry itemUIRegistry,
-            final @Reference PersistenceServiceRegistry persistenceServiceRegistry) {
+            final @Reference PersistenceServiceRegistry persistenceServiceRegistry,
+            final @Reference PersistenceServiceConfigurationRegistry persistenceServiceConfigurationRegistry) {
         this.itemUIRegistry = itemUIRegistry;
         this.persistenceServiceRegistry = persistenceServiceRegistry;
+        this.persistenceServiceConfigurationRegistry = persistenceServiceConfigurationRegistry;
 
         if (logger.isDebugEnabled()) {
             logger.debug("Available themes for default chart provider: {}", String.join(", ", CHART_THEMES.keySet()));
@@ -188,8 +194,8 @@ public class DefaultChartProvider implements ChartProvider {
         // axis
         styler.setAxisTickLabelsFont(chartTheme.getAxisTickLabelsFont(dpi));
         styler.setAxisTickLabelsColor(chartTheme.getAxisTickLabelsColor());
-        styler.setXAxisMin((double) startTime.toInstant().toEpochMilli());
-        styler.setXAxisMax((double) endTime.toInstant().toEpochMilli());
+        styler.setXAxisMin(startTime.toInstant().toEpochMilli());
+        styler.setXAxisMax(endTime.toInstant().toEpochMilli());
         int yAxisSpacing = Math.max(height / 10, chartTheme.getAxisTickLabelsFont(dpi).getSize());
         if (yAxisDecimalPattern != null) {
             styler.setYAxisDecimalPattern(yAxisDecimalPattern);
@@ -333,10 +339,13 @@ public class DefaultChartProvider implements ChartProvider {
         // after the start of the graph (or not at all if there's no change during the graph period)
         filter = new FilterCriteria();
         filter.setEndDate(timeBegin);
-        filter.setItemName(item.getName());
+        String itemName = item.getName();
+        PersistenceServiceConfiguration config = persistenceServiceConfigurationRegistry.get(service.getId());
+        String alias = config != null ? config.getAliases().get(itemName) : null;
+        filter.setItemName(itemName);
         filter.setPageSize(1);
         filter.setOrdering(Ordering.DESCENDING);
-        result = service.query(filter);
+        result = service.query(filter, alias);
         if (result.iterator().hasNext()) {
             HistoricItem historicItem = result.iterator().next();
 
@@ -352,7 +361,7 @@ public class DefaultChartProvider implements ChartProvider {
         filter.setOrdering(Ordering.ASCENDING);
 
         // Get the data from the persistence store
-        result = service.query(filter);
+        result = service.query(filter, alias);
 
         // Iterate through the data
         for (HistoricItem historicItem : result) {
