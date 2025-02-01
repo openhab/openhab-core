@@ -85,10 +85,12 @@ public abstract class AbstractThingSyntaxGenerator implements ThingSyntaxGenerat
      * If not, the parameters are provided sorted by natural order of their names.
      *
      * @param thing the thing
+     * @param hideDefaultParameters true to hide the configuration parameters having the default value
      * @return the sorted list of configuration parameters for the thing
      */
-    protected List<ConfigParameter> getConfigurationParameters(Thing thing) {
-        return getConfigurationParameters(getConfigDescriptionParameters(thing), thing.getConfiguration());
+    protected List<ConfigParameter> getConfigurationParameters(Thing thing, boolean hideDefaultParameters) {
+        return getConfigurationParameters(getConfigDescriptionParameters(thing), thing.getConfiguration(),
+                hideDefaultParameters);
     }
 
     /**
@@ -99,14 +101,17 @@ public abstract class AbstractThingSyntaxGenerator implements ThingSyntaxGenerat
      * If not, the parameters are provided sorted by natural order of their names.
      *
      * @param thing the channel
+     * @param hideDefaultParameters true to hide the configuration parameters having the default value
      * @return the sorted list of configuration parameters for the channel
      */
-    protected List<ConfigParameter> getConfigurationParameters(Channel channel) {
-        return getConfigurationParameters(getConfigDescriptionParameters(channel), channel.getConfiguration());
+    protected List<ConfigParameter> getConfigurationParameters(Channel channel, boolean hideDefaultParameters) {
+        return getConfigurationParameters(getConfigDescriptionParameters(channel), channel.getConfiguration(),
+                hideDefaultParameters);
     }
 
     private List<ConfigParameter> getConfigurationParameters(
-            List<ConfigDescriptionParameter> configDescriptionParameter, Configuration configParameters) {
+            List<ConfigDescriptionParameter> configDescriptionParameter, Configuration configParameters,
+            boolean hideDefaultParameters) {
         List<ConfigParameter> parameters = new ArrayList<>();
         Set<String> handledNames = new HashSet<>();
         for (ConfigDescriptionParameter param : configDescriptionParameter) {
@@ -116,7 +121,7 @@ public abstract class AbstractThingSyntaxGenerator implements ThingSyntaxGenerat
             }
             Object value = configParameters.get(paramName);
             Object defaultValue = ConfigUtil.getDefaultValueAsCorrectType(param);
-            if (value != null && !value.equals(defaultValue)) {
+            if (value != null && (!hideDefaultParameters || !value.equals(defaultValue))) {
                 parameters.add(new ConfigParameter(paramName, value));
             }
             handledNames.add(paramName);

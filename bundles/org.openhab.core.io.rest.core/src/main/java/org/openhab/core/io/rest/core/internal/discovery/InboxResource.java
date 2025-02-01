@@ -227,7 +227,8 @@ public class InboxResource implements RESTResource {
     public Response generateSyntaxForDiscoveryResult(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @PathParam("thingUID") @Parameter(description = "thingUID") String thingUID,
-            @DefaultValue("DSL") @QueryParam("format") @Parameter(description = "syntax format") String format) {
+            @DefaultValue("DSL") @QueryParam("format") @Parameter(description = "syntax format") String format,
+            @DefaultValue("true") @QueryParam("hideDefaultParameters") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters) {
         ThingSyntaxGenerator generator = thingSyntaxGenerators.get(format);
         if (generator == null) {
             String message = "No syntax available for format " + format + "!";
@@ -246,7 +247,9 @@ public class InboxResource implements RESTResource {
             return Response.status(Response.Status.NOT_FOUND).entity(message).build();
         }
 
-        return Response.ok(generator.generateSyntax(List.of(simulateThing(result, thingType)), false)).build();
+        return Response
+                .ok(generator.generateSyntax(List.of(simulateThing(result, thingType)), hideDefaultParameters, false))
+                .build();
     }
 
     /*

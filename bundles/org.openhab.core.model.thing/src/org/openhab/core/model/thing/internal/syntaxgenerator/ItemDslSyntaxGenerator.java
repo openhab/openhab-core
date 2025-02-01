@@ -69,18 +69,19 @@ public class ItemDslSyntaxGenerator extends AbstractItemSyntaxGenerator {
 
     @Override
     public synchronized String generateSyntax(List<Item> items, Collection<ItemChannelLink> channelLinks,
-            Collection<Metadata> metadata) {
+            Collection<Metadata> metadata, boolean hideDefaultParameters) {
         ItemModel model = ItemsFactory.eINSTANCE.createItemModel();
         for (Item item : items) {
             model.getItems().add(buildModelItem(item, getChannelLinks(channelLinks, item.getName()),
-                    getMetadata(metadata, item.getName())));
+                    getMetadata(metadata, item.getName()), hideDefaultParameters));
         }
         String syntax = modelRepository.generateSyntaxFromModelContent("items", model);
         logger.debug("Generated syntax:\n{}", syntax);
         return syntax;
     }
 
-    private ModelItem buildModelItem(Item item, List<ItemChannelLink> channelLinks, List<Metadata> metadata) {
+    private ModelItem buildModelItem(Item item, List<ItemChannelLink> channelLinks, List<Metadata> metadata,
+            boolean hideDefaultParameters) {
         ModelItem model;
         if (item instanceof GroupItem groupItem) {
             ModelGroupItem modelGroup = ItemsFactory.eINSTANCE.createModelGroupItem();
@@ -136,7 +137,7 @@ public class ItemDslSyntaxGenerator extends AbstractItemSyntaxGenerator {
             ModelBinding binding = ItemsFactory.eINSTANCE.createModelBinding();
             binding.setType("channel");
             binding.setConfiguration(channelLink.getLinkedUID().getAsString());
-            for (ConfigParameter param : getConfigurationParameters(channelLink)) {
+            for (ConfigParameter param : getConfigurationParameters(channelLink, hideDefaultParameters)) {
                 ModelProperty property = buildModelProperty(param.name(), param.value());
                 if (property != null) {
                     binding.getProperties().add(property);

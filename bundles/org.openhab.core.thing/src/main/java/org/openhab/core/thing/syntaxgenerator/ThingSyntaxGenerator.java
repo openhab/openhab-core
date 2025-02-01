@@ -36,8 +36,9 @@ public interface ThingSyntaxGenerator {
      * Generate the syntax for a sorted list of things.
      *
      * @param things the things
+     * @param hideDefaultParameters true to hide the configuration parameters having the default value
      * @param preferPresentationAsTree true if presentation as a tree is preferred (support by generators is optional)
      * @return the syntax for the things
      */
-    String generateSyntax(List<Thing> things, boolean preferPresentationAsTree);
+    String generateSyntax(List<Thing> things, boolean hideDefaultParameters, boolean preferPresentationAsTree);
 }

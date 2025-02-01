@@ -748,14 +748,15 @@ public class ThingResource implements RESTResource {
     public Response generateSyntaxForAllThings(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @DefaultValue("DSL") @QueryParam("format") @Parameter(description = "syntax format") String format,
+            @DefaultValue("true") @QueryParam("hideDefaultParameters") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters,
             @DefaultValue("true") @QueryParam("preferPresentationAsTree") @Parameter(description = "prefer a presentation as a tree if supported by the generator") boolean preferPresentationAsTree) {
         ThingSyntaxGenerator generator = thingSyntaxGenerators.get(format);
         if (generator == null) {
             String message = "No syntax available for format " + format + "!";
             return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
         }
-        return Response.ok(generator.generateSyntax(sortThings(thingRegistry.getAll()), preferPresentationAsTree))
-                .build();
+        return Response.ok(generator.generateSyntax(sortThings(thingRegistry.getAll()), hideDefaultParameters,
+                preferPresentationAsTree)).build();
     }
 
     @GET
@@ -770,7 +771,8 @@ public class ThingResource implements RESTResource {
     public Response generateSyntaxForThing(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @PathParam("thingUID") @Parameter(description = "thingUID") String thingUID,
-            @DefaultValue("DSL") @QueryParam("format") @Parameter(description = "syntax format") String format) {
+            @DefaultValue("DSL") @QueryParam("format") @Parameter(description = "syntax format") String format,
+            @DefaultValue("true") @QueryParam("hideDefaultParameters") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters) {
         ThingSyntaxGenerator generator = thingSyntaxGenerators.get(format);
         if (generator == null) {
             String message = "No syntax available for format " + format + "!";
@@ -784,7 +786,7 @@ public class ThingResource implements RESTResource {
             return Response.status(Response.Status.NOT_FOUND).entity(message).build();
         }
 
-        return Response.ok(generator.generateSyntax(List.of(thing), false)).build();
+        return Response.ok(generator.generateSyntax(List.of(thing), hideDefaultParameters, false)).build();
     }
 
     private FirmwareDTO convertToFirmwareDTO(Firmware firmware) {

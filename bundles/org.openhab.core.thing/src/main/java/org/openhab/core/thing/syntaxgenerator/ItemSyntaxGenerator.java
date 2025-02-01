@@ -41,7 +41,9 @@ public interface ItemSyntaxGenerator {
      * @param items the items
      * @param channelLinks the provided collection of channel links for these items
      * @param metadata the provided collection of metadata for these items
+     * @param hideDefaultParameters true to hide the configuration parameters having the default value
      * @return the syntax for the items
      */
-    String generateSyntax(List<Item> items, Collection<ItemChannelLink> channelLinks, Collection<Metadata> metadata);
+    String generateSyntax(List<Item> items, Collection<ItemChannelLink> channelLinks, Collection<Metadata> metadata,
+            boolean hideDefaultParameters);
 }

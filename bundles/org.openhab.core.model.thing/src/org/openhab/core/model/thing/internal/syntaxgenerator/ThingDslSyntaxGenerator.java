@@ -70,14 +70,16 @@ public class ThingDslSyntaxGenerator extends AbstractThingSyntaxGenerator {
     }
 
     @Override
-    public synchronized String generateSyntax(List<Thing> things, boolean preferPresentationAsTree) {
+    public synchronized String generateSyntax(List<Thing> things, boolean hideDefaultParameters,
+            boolean preferPresentationAsTree) {
         ThingModel model = ThingFactory.eINSTANCE.createThingModel();
         Set<Thing> handledThings = new HashSet<>();
         for (Thing thing : things) {
             if (handledThings.contains(thing)) {
                 continue;
             }
-            model.getThings().add(buildModelThing(thing, preferPresentationAsTree, true, things, handledThings));
+            model.getThings().add(buildModelThing(thing, hideDefaultParameters, preferPresentationAsTree, true, things,
+                    handledThings));
         }
         // Double quotes are unexpectedly generated in thing UID when the segment contains a -.
         // Fix that by removing these double quotes.
@@ -87,8 +89,8 @@ public class ThingDslSyntaxGenerator extends AbstractThingSyntaxGenerator {
         return syntax;
     }
 
-    private ModelThing buildModelThing(Thing thing, boolean preferPresentationAsTree, boolean topLevel,
-            List<Thing> onlyThings, Set<Thing> handledThings) {
+    private ModelThing buildModelThing(Thing thing, boolean hideDefaultParameters, boolean preferPresentationAsTree,
+            boolean topLevel, List<Thing> onlyThings, Set<Thing> handledThings) {
         ModelThing model;
         ModelBridge modelBridge;
         if (preferPresentationAsTree && thing instanceof Bridge bridge && !bridge.getThings().isEmpty()) {
@@ -116,7 +118,7 @@ public class ThingDslSyntaxGenerator extends AbstractThingSyntaxGenerator {
             model.setLocation(thing.getLocation());
         }
 
-        for (ConfigParameter param : getConfigurationParameters(thing)) {
+        for (ConfigParameter param : getConfigurationParameters(thing, hideDefaultParameters)) {
             ModelProperty property = buildModelProperty(param.name(), param.value());
             if (property != null) {
                 model.getProperties().add(property);
@@ -127,7 +129,8 @@ public class ThingDslSyntaxGenerator extends AbstractThingSyntaxGenerator {
             modelBridge.setThingsHeader(false);
             for (Thing child : getChildThings(thing)) {
                 if (onlyThings.contains(child) && !handledThings.contains(child)) {
-                    modelBridge.getThings().add(buildModelThing(child, true, false, onlyThings, handledThings));
+                    modelBridge.getThings()
+                            .add(buildModelThing(child, hideDefaultParameters, true, false, onlyThings, handledThings));
                 }
             }
         }
@@ -135,7 +138,7 @@ public class ThingDslSyntaxGenerator extends AbstractThingSyntaxGenerator {
         List<Channel> channels = getNonDefaultChannels(thing);
         model.setChannelsHeader(!channels.isEmpty());
         for (Channel channel : channels) {
-            model.getChannels().add(buildModelChannel(channel));
+            model.getChannels().add(buildModelChannel(channel, hideDefaultParameters));
         }
 
         handledThings.add(thing);
@@ -143,7 +146,7 @@ public class ThingDslSyntaxGenerator extends AbstractThingSyntaxGenerator {
         return model;
     }
 
-    private ModelChannel buildModelChannel(Channel channel) {
+    private ModelChannel buildModelChannel(Channel channel, boolean hideDefaultParameters) {
         ModelChannel modelChannel = ThingFactory.eINSTANCE.createModelChannel();
         ChannelTypeUID channelTypeUID = channel.getChannelTypeUID();
         if (channelTypeUID != null) {
@@ -156,7 +159,7 @@ public class ThingDslSyntaxGenerator extends AbstractThingSyntaxGenerator {
         if (channel.getLabel() != null) {
             modelChannel.setLabel(channel.getLabel());
         }
-        for (ConfigParameter param : getConfigurationParameters(channel)) {
+        for (ConfigParameter param : getConfigurationParameters(channel, hideDefaultParameters)) {
             ModelProperty property = buildModelProperty(param.name(), param.value());
             if (property != null) {
                 modelChannel.getProperties().add(property);

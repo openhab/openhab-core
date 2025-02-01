@@ -75,9 +75,11 @@ public abstract class AbstractItemSyntaxGenerator implements ItemSyntaxGenerator
      * If no profile is set, the parameters are provided sorted by natural order of their names.
      *
      * @param channelLink the channel link
+     * @param hideDefaultParameters true to hide the configuration parameters having the default value
      * @return a sorted list of configuration parameters for the channel link
      */
-    protected List<ConfigParameter> getConfigurationParameters(ItemChannelLink channelLink) {
+    protected List<ConfigParameter> getConfigurationParameters(ItemChannelLink channelLink,
+            boolean hideDefaultParameters) {
         List<ConfigParameter> parameters = new ArrayList<>();
         Map<String, Object> configParameters = channelLink.getConfiguration().getProperties();
         Set<String> handledNames = new HashSet<>();
@@ -103,7 +105,7 @@ public abstract class AbstractItemSyntaxGenerator implements ItemSyntaxGenerator
             }
             Object value = configParameters.get(paramName);
             Object defaultValue = ConfigUtil.getDefaultValueAsCorrectType(param);
-            if (value != null && !value.equals(defaultValue)) {
+            if (value != null && (!hideDefaultParameters || !value.equals(defaultValue))) {
                 parameters.add(new ConfigParameter(paramName, value));
             }
             handledNames.add(paramName);

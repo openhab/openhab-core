@@ -931,14 +931,15 @@ public class ItemResource implements RESTResource {
                     @ApiResponse(responseCode = "400", description = "Unsupported syntax format.") })
     public Response generateSyntaxForAllItems(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
-            @DefaultValue("DSL") @QueryParam("format") @Parameter(description = "syntax format") String format) {
+            @DefaultValue("DSL") @QueryParam("format") @Parameter(description = "syntax format") String format,
+            @DefaultValue("true") @QueryParam("hideDefaultParameters") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters) {
         ItemSyntaxGenerator generator = itemSyntaxGenerators.get(format);
         if (generator == null) {
             String message = "No syntax available for format " + format + "!";
             return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
         }
         return Response.ok(generator.generateSyntax(sortItems(itemRegistry.getAll()), itemChannelLinkRegistry.getAll(),
-                metadataRegistry.getAll())).build();
+                metadataRegistry.getAll(), hideDefaultParameters)).build();
     }
 
     @GET
@@ -953,7 +954,8 @@ public class ItemResource implements RESTResource {
     public Response generateSyntaxForItem(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @PathParam("itemname") @Parameter(description = "item name") String itemname,
-            @DefaultValue("DSL") @QueryParam("format") @Parameter(description = "syntax format") String format) {
+            @DefaultValue("DSL") @QueryParam("format") @Parameter(description = "syntax format") String format,
+            @DefaultValue("true") @QueryParam("hideDefaultParameters") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters) {
         ItemSyntaxGenerator generator = itemSyntaxGenerators.get(format);
         if (generator == null) {
             String message = "No syntax available for format " + format + "!";
@@ -970,7 +972,8 @@ public class ItemResource implements RESTResource {
         Set<Metadata> metadata = metadataRegistry.getAll().stream()
                 .filter(md -> md.getUID().getItemName().equals(itemname)).collect(Collectors.toSet());
 
-        return Response.ok(generator.generateSyntax(List.of(item), channelLinks, metadata)).build();
+        return Response.ok(generator.generateSyntax(List.of(item), channelLinks, metadata, hideDefaultParameters))
+                .build();
     }
 
     private JsonObject buildStatusObject(String itemName, String status, @Nullable String message) {
