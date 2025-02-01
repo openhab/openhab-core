@@ -15,7 +15,6 @@ package org.openhab.core.internal.items;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -36,7 +35,6 @@ import org.openhab.core.items.ManagedItemProvider;
 import org.openhab.core.items.Metadata;
 import org.openhab.core.items.MetadataAwareItem;
 import org.openhab.core.items.MetadataRegistry;
-import org.openhab.core.items.RegistryHook;
 import org.openhab.core.items.events.ItemEventFactory;
 import org.openhab.core.service.CommandDescriptionService;
 import org.openhab.core.service.ReadyService;
@@ -68,7 +66,6 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
 
     private final Logger logger = LoggerFactory.getLogger(ItemRegistryImpl.class);
 
-    private final List<RegistryHook<Item>> registryHooks = new CopyOnWriteArrayList<>();
     private @Nullable StateDescriptionService stateDescriptionService;
     private @Nullable CommandDescriptionService commandDescriptionService;
     private final MetadataRegistry metadataRegistry;
@@ -389,54 +386,13 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
     }
 
     @Override
-    public void added(Provider<Item> provider, Item element) {
-        for (RegistryHook<Item> registryHook : registryHooks) {
-            registryHook.beforeAdding(element);
-        }
-        super.added(provider, element);
-    }
-
-    @Override
-    protected void addProvider(Provider<Item> provider) {
-        for (Item element : provider.getAll()) {
-            for (RegistryHook<Item> registryHook : registryHooks) {
-                registryHook.beforeAdding(element);
-            }
-        }
-        super.addProvider(provider);
-    }
-
-    @Override
     public void removed(Provider<Item> provider, Item element) {
         super.removed(provider, element);
-        for (RegistryHook<Item> registryHook : registryHooks) {
-            registryHook.afterRemoving(element);
-        }
         if (provider instanceof ManagedItemProvider) {
             // remove our metadata for that item
             logger.debug("Item {} was removed, trying to clean up corresponding metadata", element.getUID());
             metadataRegistry.removeItemMetadata(element.getName());
         }
-    }
-
-    @Override
-    protected void removeProvider(Provider<Item> provider) {
-        super.removeProvider(provider);
-        for (Item element : provider.getAll()) {
-            for (RegistryHook<Item> registryHook : registryHooks) {
-                registryHook.afterRemoving(element);
-            }
-        }
-    }
-
-    @Override
-    public void addRegistryHook(RegistryHook<Item> hook) {
-        registryHooks.add(hook);
-    }
-
-    @Override
-    public void removeRegistryHook(RegistryHook<Item> hook) {
-        registryHooks.remove(hook);
     }
 
     @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)
