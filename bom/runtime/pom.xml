@@ -16,7 +16,7 @@
   <name>openHAB Core :: BOM :: Runtime</name>
 
   <properties>
-    <californium.version>2.7.4</californium.version>
+    <californium.version>4.0.0-M2</californium.version>
     <!-- cxf can be updated independently of karaf, only used in karaf tests -->
     <cxf.version>3.6.5</cxf.version>
     <jackson.version>2.18.2</jackson.version>
@@ -441,17 +441,21 @@
       <groupId>org.eclipse.californium</groupId>
       <artifactId>element-connector</artifactId>
       <version>${californium.version}</version>
-      <exclusions>
-        <exclusion>
-          <groupId>net.i2p.crypto</groupId>
-          <artifactId>eddsa</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
     <dependency>
-      <groupId>org.eclipse.orbit.bundles</groupId>
-      <artifactId>net.i2p.crypto.eddsa</artifactId>
-      <version>0.3.0.v20220506-1020</version>
+      <groupId>org.eclipse.californium</groupId>
+      <artifactId>californium-osgi</artifactId>
+      <version>${californium.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>jul-to-slf4j</artifactId>
+      <version>${slf4j.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.bouncycastle</groupId>
+      <artifactId>bcprov-jdk18on</artifactId>
+      <version>1.78.1</version>
     </dependency>
 
     <!-- Gson -->
