@@ -17,7 +17,8 @@
 
   <properties>
     <californium.version>2.7.4</californium.version>
-    <cxf.version>3.6.4</cxf.version>
+    <!-- cxf can be updated independently of karaf, only used in karaf tests -->
+    <cxf.version>3.6.5</cxf.version>
     <jackson.version>2.18.2</jackson.version>
     <jetty.version>9.4.57.v20241219</jetty.version>
     <pax.logging.version>2.2.8</pax.logging.version>

@@ -16,7 +16,8 @@
   <name>openHAB Core :: BOM :: Test</name>
 
   <properties>
-    <cxf.version>3.6.4</cxf.version>
+    <!-- cxf can be updated independently, karaf only uses it in tests -->
+    <cxf.version>3.6.5</cxf.version>
     <junit.version>5.10.0</junit.version>
     <mockito.version>4.11.0</mockito.version>
   </properties>
