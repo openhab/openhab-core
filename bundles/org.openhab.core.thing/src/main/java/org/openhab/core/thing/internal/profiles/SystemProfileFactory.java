@@ -83,7 +83,7 @@ public class SystemProfileFactory implements ProfileFactory, ProfileAdvisor, Pro
     private final Map<LocalizedKey, ProfileType> localizedProfileTypeCache = new ConcurrentHashMap<>();
 
     private final ProfileTypeI18nLocalizationService profileTypeI18nLocalizationService;
-    private final Bundle bundle;
+    private final @Nullable Bundle bundle;
 
     @Activate
     public SystemProfileFactory(final @Reference ChannelTypeRegistry channelTypeRegistry,
@@ -236,13 +236,12 @@ public class SystemProfileFactory implements ProfileFactory, ProfileAdvisor, Pro
             return cachedEntry;
         }
 
-        ProfileType localizedProfileType = profileTypeI18nLocalizationService.createLocalizedProfileType(bundle,
-                profileType, locale);
-        if (localizedProfileType != null) {
+        if (bundle != null) {
+            ProfileType localizedProfileType = profileTypeI18nLocalizationService.createLocalizedProfileType(bundle,
+                    profileType, locale);
             localizedProfileTypeCache.put(localizedKey, localizedProfileType);
             return localizedProfileType;
-        } else {
-            return profileType;
         }
+        return profileType;
     }
 }
