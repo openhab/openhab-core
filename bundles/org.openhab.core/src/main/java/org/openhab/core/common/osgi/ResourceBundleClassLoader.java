@@ -66,8 +66,8 @@ public class ResourceBundleClassLoader extends ClassLoader {
         }
 
         this.bundle = bundle;
-        this.path = (path != null) ? path : "/";
-        this.filePattern = (filePattern != null) ? filePattern : "*";
+        this.path = path != null ? path : "/";
+        this.filePattern = filePattern != null ? filePattern : "*";
     }
 
     @Override
