@@ -236,9 +236,9 @@ public class SystemProfileFactory implements ProfileFactory, ProfileAdvisor, Pro
             return cachedEntry;
         }
 
-        if (bundle != null) {
-            ProfileType localizedProfileType = profileTypeI18nLocalizationService.createLocalizedProfileType(bundle,
-                    profileType, locale);
+        if (bundle instanceof Bundle localBundle) {
+            ProfileType localizedProfileType = profileTypeI18nLocalizationService
+                    .createLocalizedProfileType(localBundle, profileType, locale);
             localizedProfileTypeCache.put(localizedKey, localizedProfileType);
             return localizedProfileType;
         }
