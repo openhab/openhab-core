@@ -97,9 +97,9 @@ public interface ModelRepository {
     /**
      * Generate the syntax from a provided model content.
      *
-     * @param extension the kind of model ("items", "things", ...)
-     * @param content the content of the model
+     * @param modelType the model type
+     * @param modelContent the content of the model
      * @return the corresponding syntax
      */
-    String generateSyntaxFromModelContent(String extension, EObject content);
+    String generateSyntaxFromModel(String modelType, EObject modelContent);
 }

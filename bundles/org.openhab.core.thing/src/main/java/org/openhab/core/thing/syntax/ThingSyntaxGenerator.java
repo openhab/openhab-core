@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.thing.syntaxgenerator;
+package org.openhab.core.thing.syntax;
 
 import java.util.List;
 
@@ -30,7 +30,7 @@ public interface ThingSyntaxGenerator {
      *
      * @return the syntax format
      */
-    String getFormat();
+    String getGeneratorFormat();
 
     /**
      * Generate the syntax for a sorted list of things.

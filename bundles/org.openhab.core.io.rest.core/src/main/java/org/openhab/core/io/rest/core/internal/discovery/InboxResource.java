@@ -57,7 +57,7 @@ import org.openhab.core.io.rest.Stream2JSONInputStream;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingUID;
 import org.openhab.core.thing.binding.ThingFactory;
-import org.openhab.core.thing.syntaxgenerator.ThingSyntaxGenerator;
+import org.openhab.core.thing.syntax.ThingSyntaxGenerator;
 import org.openhab.core.thing.type.ThingType;
 import org.openhab.core.thing.type.ThingTypeRegistry;
 import org.osgi.service.component.annotations.Activate;
@@ -129,11 +129,11 @@ public class InboxResource implements RESTResource {
 
     @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.MULTIPLE)
     protected void addThingSyntaxGenerator(ThingSyntaxGenerator thingSyntaxGenerator) {
-        thingSyntaxGenerators.put(thingSyntaxGenerator.getFormat(), thingSyntaxGenerator);
+        thingSyntaxGenerators.put(thingSyntaxGenerator.getGeneratorFormat(), thingSyntaxGenerator);
     }
 
     protected void removeThingSyntaxGenerator(ThingSyntaxGenerator thingSyntaxGenerator) {
-        thingSyntaxGenerators.remove(thingSyntaxGenerator.getFormat());
+        thingSyntaxGenerators.remove(thingSyntaxGenerator.getGeneratorFormat());
     }
 
     @POST

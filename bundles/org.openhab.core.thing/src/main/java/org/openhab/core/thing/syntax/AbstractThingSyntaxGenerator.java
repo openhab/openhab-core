@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.thing.syntaxgenerator;
+package org.openhab.core.thing.syntax;
 
 import java.net.URI;
 import java.util.ArrayList;

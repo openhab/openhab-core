@@ -98,7 +98,7 @@ import org.openhab.core.thing.firmware.dto.FirmwareStatusDTO;
 import org.openhab.core.thing.i18n.ThingStatusInfoI18nLocalizationService;
 import org.openhab.core.thing.link.ItemChannelLinkRegistry;
 import org.openhab.core.thing.link.ManagedItemChannelLinkProvider;
-import org.openhab.core.thing.syntaxgenerator.ThingSyntaxGenerator;
+import org.openhab.core.thing.syntax.ThingSyntaxGenerator;
 import org.openhab.core.thing.type.BridgeType;
 import org.openhab.core.thing.type.ChannelType;
 import org.openhab.core.thing.type.ChannelTypeRegistry;
@@ -225,11 +225,11 @@ public class ThingResource implements RESTResource {
 
     @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.MULTIPLE)
     protected void addThingSyntaxGenerator(ThingSyntaxGenerator thingSyntaxGenerator) {
-        thingSyntaxGenerators.put(thingSyntaxGenerator.getFormat(), thingSyntaxGenerator);
+        thingSyntaxGenerators.put(thingSyntaxGenerator.getGeneratorFormat(), thingSyntaxGenerator);
     }
 
     protected void removeThingSyntaxGenerator(ThingSyntaxGenerator thingSyntaxGenerator) {
-        thingSyntaxGenerators.remove(thingSyntaxGenerator.getFormat());
+        thingSyntaxGenerators.remove(thingSyntaxGenerator.getGeneratorFormat());
     }
 
     /**

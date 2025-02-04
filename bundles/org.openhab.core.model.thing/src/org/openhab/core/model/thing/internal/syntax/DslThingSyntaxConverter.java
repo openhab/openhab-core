@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.model.thing.internal.syntaxgenerator;
+package org.openhab.core.model.thing.internal.syntax;
 
 import java.util.HashSet;
 import java.util.List;
@@ -30,8 +30,8 @@ import org.openhab.core.thing.Bridge;
 import org.openhab.core.thing.Channel;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingUID;
-import org.openhab.core.thing.syntaxgenerator.AbstractThingSyntaxGenerator;
-import org.openhab.core.thing.syntaxgenerator.ThingSyntaxGenerator;
+import org.openhab.core.thing.syntax.AbstractThingSyntaxGenerator;
+import org.openhab.core.thing.syntax.ThingSyntaxGenerator;
 import org.openhab.core.thing.type.ChannelKind;
 import org.openhab.core.thing.type.ChannelTypeRegistry;
 import org.openhab.core.thing.type.ChannelTypeUID;
@@ -43,20 +43,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * {@link ThingDslSyntaxGenerator} is the DSL syntax generator for {@link Thing} object.
+ * {@link DslThingSyntaxConverter} is the DSL syntax generator for {@link Thing} object.
  *
  * @author Laurent Garnier - Initial contribution
  */
 @NonNullByDefault
 @Component(immediate = true, service = ThingSyntaxGenerator.class)
-public class ThingDslSyntaxGenerator extends AbstractThingSyntaxGenerator {
+public class DslThingSyntaxConverter extends AbstractThingSyntaxGenerator {
 
-    private final Logger logger = LoggerFactory.getLogger(ThingDslSyntaxGenerator.class);
+    private final Logger logger = LoggerFactory.getLogger(DslThingSyntaxConverter.class);
 
     private final ModelRepository modelRepository;
 
     @Activate
-    public ThingDslSyntaxGenerator(final @Reference ModelRepository modelRepository,
+    public DslThingSyntaxConverter(final @Reference ModelRepository modelRepository,
             final @Reference ThingTypeRegistry thingTypeRegistry,
             final @Reference ChannelTypeRegistry channelTypeRegistry,
             final @Reference ConfigDescriptionRegistry configDescRegistry) {
@@ -65,7 +65,7 @@ public class ThingDslSyntaxGenerator extends AbstractThingSyntaxGenerator {
     }
 
     @Override
-    public String getFormat() {
+    public String getGeneratorFormat() {
         return "DSL";
     }
 
@@ -83,7 +83,7 @@ public class ThingDslSyntaxGenerator extends AbstractThingSyntaxGenerator {
         }
         // Double quotes are unexpectedly generated in thing UID when the segment contains a -.
         // Fix that by removing these double quotes.
-        String syntax = modelRepository.generateSyntaxFromModelContent("things", model)
+        String syntax = modelRepository.generateSyntaxFromModel("things", model)
                 .replaceAll(":\"([a-zA-Z0-9_][a-zA-Z0-9_-]*)\"", ":$1");
         logger.debug("Generated syntax:\n{}", syntax);
         return syntax;

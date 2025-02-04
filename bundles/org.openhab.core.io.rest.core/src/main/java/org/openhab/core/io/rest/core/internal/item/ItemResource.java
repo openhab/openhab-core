@@ -92,7 +92,7 @@ import org.openhab.core.semantics.SemanticTagRegistry;
 import org.openhab.core.semantics.SemanticsPredicates;
 import org.openhab.core.thing.link.ItemChannelLink;
 import org.openhab.core.thing.link.ItemChannelLinkRegistry;
-import org.openhab.core.thing.syntaxgenerator.ItemSyntaxGenerator;
+import org.openhab.core.thing.syntax.ItemSyntaxGenerator;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
 import org.openhab.core.types.TypeParser;
@@ -237,11 +237,11 @@ public class ItemResource implements RESTResource {
 
     @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.MULTIPLE)
     protected void addItemSyntaxGenerator(ItemSyntaxGenerator itemSyntaxGenerator) {
-        itemSyntaxGenerators.put(itemSyntaxGenerator.getFormat(), itemSyntaxGenerator);
+        itemSyntaxGenerators.put(itemSyntaxGenerator.getGeneratorFormat(), itemSyntaxGenerator);
     }
 
     protected void removeItemSyntaxGenerator(ItemSyntaxGenerator itemSyntaxGenerator) {
-        itemSyntaxGenerators.remove(itemSyntaxGenerator.getFormat());
+        itemSyntaxGenerators.remove(itemSyntaxGenerator.getGeneratorFormat());
     }
 
     private UriBuilder uriBuilder(final UriInfo uriInfo, final HttpHeaders httpHeaders) {

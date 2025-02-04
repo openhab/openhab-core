@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.model.thing.internal.syntaxgenerator;
+package org.openhab.core.model.thing.internal.syntax;
 
 import java.util.Collection;
 import java.util.List;
@@ -32,8 +32,8 @@ import org.openhab.core.model.items.ModelGroupItem;
 import org.openhab.core.model.items.ModelItem;
 import org.openhab.core.model.items.ModelProperty;
 import org.openhab.core.thing.link.ItemChannelLink;
-import org.openhab.core.thing.syntaxgenerator.AbstractItemSyntaxGenerator;
-import org.openhab.core.thing.syntaxgenerator.ItemSyntaxGenerator;
+import org.openhab.core.thing.syntax.AbstractItemSyntaxGenerator;
+import org.openhab.core.thing.syntax.ItemSyntaxGenerator;
 import org.openhab.core.types.State;
 import org.openhab.core.types.StateDescription;
 import org.osgi.service.component.annotations.Activate;
@@ -43,27 +43,27 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * {@link ItemDslSyntaxGenerator} is the DSL syntax generator for {@link Item} object.
+ * {@link DslItemSyntaxConverter} is the DSL syntax generator for {@link Item} object.
  *
  * @author Laurent Garnier - Initial contribution
  */
 @NonNullByDefault
 @Component(immediate = true, service = ItemSyntaxGenerator.class)
-public class ItemDslSyntaxGenerator extends AbstractItemSyntaxGenerator {
+public class DslItemSyntaxConverter extends AbstractItemSyntaxGenerator {
 
-    private final Logger logger = LoggerFactory.getLogger(ItemDslSyntaxGenerator.class);
+    private final Logger logger = LoggerFactory.getLogger(DslItemSyntaxConverter.class);
 
     private final ModelRepository modelRepository;
 
     @Activate
-    public ItemDslSyntaxGenerator(final @Reference ModelRepository modelRepository,
+    public DslItemSyntaxConverter(final @Reference ModelRepository modelRepository,
             final @Reference ConfigDescriptionRegistry configDescRegistry) {
         super(configDescRegistry);
         this.modelRepository = modelRepository;
     }
 
     @Override
-    public String getFormat() {
+    public String getGeneratorFormat() {
         return "DSL";
     }
 
@@ -75,7 +75,7 @@ public class ItemDslSyntaxGenerator extends AbstractItemSyntaxGenerator {
             model.getItems().add(buildModelItem(item, getChannelLinks(channelLinks, item.getName()),
                     getMetadata(metadata, item.getName()), hideDefaultParameters));
         }
-        String syntax = modelRepository.generateSyntaxFromModelContent("items", model);
+        String syntax = modelRepository.generateSyntaxFromModel("items", model);
         logger.debug("Generated syntax:\n{}", syntax);
         return syntax;
     }

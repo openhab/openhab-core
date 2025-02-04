@@ -230,12 +230,12 @@ public class ModelRepositoryImpl implements ModelRepository {
     }
 
     @Override
-    public String generateSyntaxFromModelContent(String extension, EObject content) {
+    public String generateSyntaxFromModel(String modelType, EObject modelContent) {
         String result = "";
         synchronized (resourceSet) {
-            Resource resource = resourceSet.createResource(URI.createURI("tmp_generated_syntax." + extension));
+            Resource resource = resourceSet.createResource(URI.createURI("tmp_generated_syntax." + modelType));
             try {
-                resource.getContents().add(content);
+                resource.getContents().add(modelContent);
                 ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
                 resource.save(outputStream, Map.of(XtextResource.OPTION_ENCODING, StandardCharsets.UTF_8.name()));
                 result = new String(outputStream.toByteArray());
