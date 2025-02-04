@@ -12,6 +12,13 @@
  */
 package org.openhab.core.io.rest.core.internal.discovery;
 
+import static org.openhab.core.config.discovery.inbox.InboxPredicates.forThingUID;
+
+import java.net.URI;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 import javax.annotation.security.RolesAllowed;
@@ -33,6 +40,11 @@ import javax.ws.rs.core.Response.Status;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.auth.Role;
+import org.openhab.core.config.core.ConfigDescription;
+import org.openhab.core.config.core.ConfigDescriptionParameter;
+import org.openhab.core.config.core.ConfigDescriptionRegistry;
+import org.openhab.core.config.core.ConfigUtil;
+import org.openhab.core.config.core.Configuration;
 import org.openhab.core.config.discovery.DiscoveryResult;
 import org.openhab.core.config.discovery.DiscoveryResultFlag;
 import org.openhab.core.config.discovery.dto.DiscoveryResultDTO;
@@ -44,9 +56,15 @@ import org.openhab.core.io.rest.RESTResource;
 import org.openhab.core.io.rest.Stream2JSONInputStream;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingUID;
+import org.openhab.core.thing.binding.ThingFactory;
+import org.openhab.core.thing.syntaxgenerator.ThingSyntaxGenerator;
+import org.openhab.core.thing.type.ThingType;
+import org.openhab.core.thing.type.ThingTypeRegistry;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.jaxrs.whiteboard.JaxrsWhiteboardConstants;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JSONRequired;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
@@ -78,6 +96,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * @author Markus Rathgeb - Migrated to JAX-RS Whiteboard Specification
  * @author Wouter Born - Migrated to OpenAPI annotations
  * @author Laurent Garnier - Added optional parameter newThingId to approve API
+ * @author Laurent Garnier - Added API to generate syntax
  */
 @Component(service = { RESTResource.class, InboxResource.class })
 @JaxrsResource
@@ -96,10 +115,25 @@ public class InboxResource implements RESTResource {
     public static final String PATH_INBOX = "inbox";
 
     private final Inbox inbox;
+    private final ThingTypeRegistry thingTypeRegistry;
+    private final ConfigDescriptionRegistry configDescRegistry;
+    private final Map<String, ThingSyntaxGenerator> thingSyntaxGenerators = new ConcurrentHashMap<>();
 
     @Activate
-    public InboxResource(final @Reference Inbox inbox) {
+    public InboxResource(final @Reference Inbox inbox, final @Reference ThingTypeRegistry thingTypeRegistry,
+            final @Reference ConfigDescriptionRegistry configDescRegistry) {
         this.inbox = inbox;
+        this.thingTypeRegistry = thingTypeRegistry;
+        this.configDescRegistry = configDescRegistry;
+    }
+
+    @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.MULTIPLE)
+    protected void addThingSyntaxGenerator(ThingSyntaxGenerator thingSyntaxGenerator) {
+        thingSyntaxGenerators.put(thingSyntaxGenerator.getFormat(), thingSyntaxGenerator);
+    }
+
+    protected void removeThingSyntaxGenerator(ThingSyntaxGenerator thingSyntaxGenerator) {
+        thingSyntaxGenerators.remove(thingSyntaxGenerator.getFormat());
     }
 
     @POST
@@ -181,5 +215,64 @@ public class InboxResource implements RESTResource {
     public Response unignore(@PathParam("thingUID") @Parameter(description = "thingUID") String thingUID) {
         inbox.setFlag(new ThingUID(thingUID), DiscoveryResultFlag.NEW);
         return Response.ok(null, MediaType.TEXT_PLAIN).build();
+    }
+
+    @GET
+    @Path("/{thingUID}/syntax/generate")
+    @Produces(MediaType.TEXT_PLAIN)
+    @Operation(operationId = "generateSyntaxForDiscoveryResult", summary = "Generate syntax for the thing associated to the discovery result.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "400", description = "Unsupported syntax format."),
+            @ApiResponse(responseCode = "404", description = "Discovery result not found in the inbox or thing type not found.") })
+    public Response generateSyntaxForDiscoveryResult(
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
+            @PathParam("thingUID") @Parameter(description = "thingUID") String thingUID,
+            @DefaultValue("DSL") @QueryParam("format") @Parameter(description = "syntax format") String format,
+            @DefaultValue("true") @QueryParam("hideDefaultParameters") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters) {
+        ThingSyntaxGenerator generator = thingSyntaxGenerators.get(format);
+        if (generator == null) {
+            String message = "No syntax available for format " + format + "!";
+            return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
+        }
+
+        List<DiscoveryResult> results = inbox.getAll().stream().filter(forThingUID(new ThingUID(thingUID))).toList();
+        if (results.isEmpty()) {
+            String message = "Discovery result for thing with UID " + thingUID + " not found in the inbox!";
+            return Response.status(Response.Status.NOT_FOUND).entity(message).build();
+        }
+        DiscoveryResult result = results.get(0);
+        ThingType thingType = thingTypeRegistry.getThingType(result.getThingTypeUID());
+        if (thingType == null) {
+            String message = "Thing type with UID " + result.getThingTypeUID() + " does not exist!";
+            return Response.status(Response.Status.NOT_FOUND).entity(message).build();
+        }
+
+        return Response
+                .ok(generator.generateSyntax(List.of(simulateThing(result, thingType)), hideDefaultParameters, false))
+                .build();
+    }
+
+    /*
+     * Create a thing from a discovery result without inserting it in the thing registry
+     */
+    private Thing simulateThing(DiscoveryResult result, ThingType thingType) {
+        Map<String, Object> configParams = new HashMap<>();
+        List<ConfigDescriptionParameter> configDescriptionParameters = List.of();
+        URI descURI = thingType.getConfigDescriptionURI();
+        if (descURI != null) {
+            ConfigDescription desc = configDescRegistry.getConfigDescription(descURI);
+            if (desc != null) {
+                configDescriptionParameters = desc.getParameters();
+            }
+        }
+        for (ConfigDescriptionParameter param : configDescriptionParameters) {
+            Object value = result.getProperties().get(param.getName());
+            if (value != null) {
+                configParams.put(param.getName(), ConfigUtil.normalizeType(value, param));
+            }
+        }
+        Configuration config = new Configuration(configParams);
+        return ThingFactory.createThing(thingType, result.getThingUID(), config, result.getBridgeUID(),
+                configDescRegistry);
     }
 }

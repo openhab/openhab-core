@@ -26,6 +26,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.annotation.security.RolesAllowed;
@@ -72,6 +74,7 @@ import org.openhab.core.io.rest.core.thing.EnrichedThingDTOMapper;
 import org.openhab.core.items.ItemFactory;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.ManagedItemProvider;
+import org.openhab.core.thing.Bridge;
 import org.openhab.core.thing.Channel;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.ManagedThingProvider;
@@ -95,6 +98,7 @@ import org.openhab.core.thing.firmware.dto.FirmwareStatusDTO;
 import org.openhab.core.thing.i18n.ThingStatusInfoI18nLocalizationService;
 import org.openhab.core.thing.link.ItemChannelLinkRegistry;
 import org.openhab.core.thing.link.ManagedItemChannelLinkProvider;
+import org.openhab.core.thing.syntaxgenerator.ThingSyntaxGenerator;
 import org.openhab.core.thing.type.BridgeType;
 import org.openhab.core.thing.type.ChannelType;
 import org.openhab.core.thing.type.ChannelTypeRegistry;
@@ -106,6 +110,8 @@ import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.jaxrs.whiteboard.JaxrsWhiteboardConstants;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JSONRequired;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
@@ -140,6 +146,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * @author Dimitar Ivanov - replaced Firmware UID with thing UID and firmware version
  * @author Markus Rathgeb - Migrated to JAX-RS Whiteboard Specification
  * @author Wouter Born - Migrated to OpenAPI annotations
+ * @author Laurent Garnier - Added API to generate syntax
  */
 @Component
 @JaxrsResource
@@ -171,6 +178,7 @@ public class ThingResource implements RESTResource {
     private final ThingTypeRegistry thingTypeRegistry;
     private final RegistryChangedRunnableListener<Thing> resetLastModifiedChangeListener = new RegistryChangedRunnableListener<>(
             () -> lastModified = null);
+    private final Map<String, ThingSyntaxGenerator> thingSyntaxGenerators = new ConcurrentHashMap<>();
 
     private @Context @NonNullByDefault({}) UriInfo uriInfo;
     private @Nullable Date lastModified = null;
@@ -213,6 +221,15 @@ public class ThingResource implements RESTResource {
     @Deactivate
     void deactivate() {
         this.thingRegistry.removeRegistryChangeListener(resetLastModifiedChangeListener);
+    }
+
+    @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.MULTIPLE)
+    protected void addThingSyntaxGenerator(ThingSyntaxGenerator thingSyntaxGenerator) {
+        thingSyntaxGenerators.put(thingSyntaxGenerator.getFormat(), thingSyntaxGenerator);
+    }
+
+    protected void removeThingSyntaxGenerator(ThingSyntaxGenerator thingSyntaxGenerator) {
+        thingSyntaxGenerators.remove(thingSyntaxGenerator.getFormat());
     }
 
     /**
@@ -720,6 +737,58 @@ public class ThingResource implements RESTResource {
         return Response.ok().entity(new Stream2JSONInputStream(firmwareStream)).build();
     }
 
+    @GET
+    @RolesAllowed({ Role.ADMIN })
+    @Path("/syntax/generate")
+    @Produces(MediaType.TEXT_PLAIN)
+    @Operation(operationId = "generateSyntaxForAllThings", summary = "Generate syntax for all things.", security = {
+            @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
+                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode = "400", description = "Unsupported syntax format.") })
+    public Response generateSyntaxForAllThings(
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
+            @DefaultValue("DSL") @QueryParam("format") @Parameter(description = "syntax format") String format,
+            @DefaultValue("true") @QueryParam("hideDefaultParameters") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters,
+            @DefaultValue("true") @QueryParam("preferPresentationAsTree") @Parameter(description = "prefer a presentation as a tree if supported by the generator") boolean preferPresentationAsTree) {
+        ThingSyntaxGenerator generator = thingSyntaxGenerators.get(format);
+        if (generator == null) {
+            String message = "No syntax available for format " + format + "!";
+            return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
+        }
+        return Response.ok(generator.generateSyntax(sortThings(thingRegistry.getAll()), hideDefaultParameters,
+                preferPresentationAsTree)).build();
+    }
+
+    @GET
+    @RolesAllowed({ Role.ADMIN })
+    @Path("/{thingUID}/syntax/generate")
+    @Produces(MediaType.TEXT_PLAIN)
+    @Operation(operationId = "generateSyntaxForThing", summary = "Generate syntax for a thing.", security = {
+            @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
+                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode = "400", description = "Unsupported syntax format."),
+                    @ApiResponse(responseCode = "404", description = "Thing not found.") })
+    public Response generateSyntaxForThing(
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
+            @PathParam("thingUID") @Parameter(description = "thingUID") String thingUID,
+            @DefaultValue("DSL") @QueryParam("format") @Parameter(description = "syntax format") String format,
+            @DefaultValue("true") @QueryParam("hideDefaultParameters") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters) {
+        ThingSyntaxGenerator generator = thingSyntaxGenerators.get(format);
+        if (generator == null) {
+            String message = "No syntax available for format " + format + "!";
+            return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
+        }
+
+        ThingUID aThingUID = new ThingUID(thingUID);
+        Thing thing = thingRegistry.get(aThingUID);
+        if (thing == null) {
+            String message = "Thing " + thingUID + " does not exist!";
+            return Response.status(Response.Status.NOT_FOUND).entity(message).build();
+        }
+
+        return Response.ok(generator.generateSyntax(List.of(thing), hideDefaultParameters, false)).build();
+    }
+
     private FirmwareDTO convertToFirmwareDTO(Firmware firmware) {
         return new FirmwareDTO(firmware.getThingTypeUID().getAsString(), firmware.getVendor(), firmware.getModel(),
                 firmware.isModelRestricted(), firmware.getDescription(), firmware.getVersion(),
@@ -884,6 +953,42 @@ public class ThingResource implements RESTResource {
             return new URI(uriString);
         } catch (URISyntaxException e) {
             throw new BadRequestException("Invalid URI syntax: " + uriString);
+        }
+    }
+
+    /*
+     * Sort the things in such a way:
+     * - things are grouped by binding, sorted by natural order of binding name
+     * - all things of a binding are sorted to follow the tree, that is bridge thing is before its sub-things
+     * - all things of a binding at a certain tree depth are sorted by thing UID
+     */
+    private List<Thing> sortThings(Collection<Thing> things) {
+        List<Thing> thingTree = new ArrayList<>();
+        Set<String> bindings = things.stream().map(thing -> thing.getUID().getBindingId()).collect(Collectors.toSet());
+        for (String binding : bindings.stream().sorted().collect(Collectors.toList())) {
+            List<Thing> topThings = things.stream()
+                    .filter(thing -> thing.getUID().getBindingId().equals(binding) && thing.getBridgeUID() == null)
+                    .sorted((thing1, thing2) -> {
+                        return thing1.getUID().getAsString().compareTo(thing2.getUID().getAsString());
+                    }).collect(Collectors.toList());
+            for (Thing thing : topThings) {
+                fillThingTree(thingTree, thing);
+            }
+        }
+        return thingTree;
+    }
+
+    private void fillThingTree(List<Thing> things, Thing thing) {
+        if (!things.contains(thing)) {
+            things.add(thing);
+            if (thing instanceof Bridge bridge) {
+                List<Thing> subThings = bridge.getThings().stream().sorted((thing1, thing2) -> {
+                    return thing1.getUID().getAsString().compareTo(thing2.getUID().getAsString());
+                }).collect(Collectors.toList());
+                for (Thing subThing : subThings) {
+                    fillThingTree(things, subThing);
+                }
+            }
         }
     }
 }
