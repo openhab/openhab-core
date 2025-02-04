@@ -43,20 +43,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * {@link ItemDslSyntaxGenerator} is the DSL syntax generator for {@link Item} object.
+ * {@link DslItemSyntaxGenerator} is the DSL syntax generator for {@link Item} object.
  *
  * @author Laurent Garnier - Initial contribution
  */
 @NonNullByDefault
 @Component(immediate = true, service = ItemSyntaxGenerator.class)
-public class ItemDslSyntaxGenerator extends AbstractItemSyntaxGenerator {
+public class DslItemSyntaxGenerator extends AbstractItemSyntaxGenerator {
 
-    private final Logger logger = LoggerFactory.getLogger(ItemDslSyntaxGenerator.class);
+    private final Logger logger = LoggerFactory.getLogger(DslItemSyntaxGenerator.class);
 
     private final ModelRepository modelRepository;
 
     @Activate
-    public ItemDslSyntaxGenerator(final @Reference ModelRepository modelRepository,
+    public DslItemSyntaxGenerator(final @Reference ModelRepository modelRepository,
             final @Reference ConfigDescriptionRegistry configDescRegistry) {
         super(configDescRegistry);
         this.modelRepository = modelRepository;
@@ -75,7 +75,7 @@ public class ItemDslSyntaxGenerator extends AbstractItemSyntaxGenerator {
             model.getItems().add(buildModelItem(item, getChannelLinks(channelLinks, item.getName()),
                     getMetadata(metadata, item.getName()), hideDefaultParameters));
         }
-        String syntax = modelRepository.generateSyntaxFromModelContent("items", model);
+        String syntax = modelRepository.generateSyntaxFromModel("items", model);
         logger.debug("Generated syntax:\n{}", syntax);
         return syntax;
     }

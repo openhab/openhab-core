@@ -43,20 +43,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * {@link ThingDslSyntaxGenerator} is the DSL syntax generator for {@link Thing} object.
+ * {@link DslThingSyntaxGenerator} is the DSL syntax generator for {@link Thing} object.
  *
  * @author Laurent Garnier - Initial contribution
  */
 @NonNullByDefault
 @Component(immediate = true, service = ThingSyntaxGenerator.class)
-public class ThingDslSyntaxGenerator extends AbstractThingSyntaxGenerator {
+public class DslThingSyntaxGenerator extends AbstractThingSyntaxGenerator {
 
-    private final Logger logger = LoggerFactory.getLogger(ThingDslSyntaxGenerator.class);
+    private final Logger logger = LoggerFactory.getLogger(DslThingSyntaxGenerator.class);
 
     private final ModelRepository modelRepository;
 
     @Activate
-    public ThingDslSyntaxGenerator(final @Reference ModelRepository modelRepository,
+    public DslThingSyntaxGenerator(final @Reference ModelRepository modelRepository,
             final @Reference ThingTypeRegistry thingTypeRegistry,
             final @Reference ChannelTypeRegistry channelTypeRegistry,
             final @Reference ConfigDescriptionRegistry configDescRegistry) {
@@ -83,7 +83,7 @@ public class ThingDslSyntaxGenerator extends AbstractThingSyntaxGenerator {
         }
         // Double quotes are unexpectedly generated in thing UID when the segment contains a -.
         // Fix that by removing these double quotes.
-        String syntax = modelRepository.generateSyntaxFromModelContent("things", model)
+        String syntax = modelRepository.generateSyntaxFromModel("things", model)
                 .replaceAll(":\"([a-zA-Z0-9_][a-zA-Z0-9_-]*)\"", ":$1");
         logger.debug("Generated syntax:\n{}", syntax);
         return syntax;
