@@ -664,4 +664,45 @@ public class QuantityTypeTest {
         QuantityType<Temperature> f = c.toUnitRelative(ImperialUnits.FAHRENHEIT);
         assertEquals(1.8, f.doubleValue());
     }
+
+    @Test
+    public void testEquals() {
+        QuantityType<Temperature> temp1 = new QuantityType<>("293.15 K");
+        QuantityType<Temperature> temp2 = new QuantityType<>("20 °C");
+        assertTrue(temp1.equals(temp2));
+        assertTrue(temp2.equals(temp1));
+        temp2 = new QuantityType<>("-5 °C");
+        assertFalse(temp1.equals(temp2));
+
+        temp1 = new QuantityType<>("100000 K");
+        temp2 = new QuantityType<>("10 mirek");
+        assertTrue(temp1.equals(temp2));
+        assertTrue(temp2.equals(temp1));
+        temp2 = new QuantityType<>("20 mirek");
+        assertFalse(temp1.equals(temp2));
+
+        temp1 = new QuantityType<>("0.1 MK");
+        temp2 = new QuantityType<>("10 mirek");
+        assertTrue(temp1.equals(temp2));
+        assertTrue(temp2.equals(temp1));
+        temp2 = new QuantityType<>("20 mirek");
+        assertFalse(temp1.equals(temp2));
+    }
+
+    @Test
+    public void testCompareTo() {
+        QuantityType<Temperature> temp1 = new QuantityType<>("293.15 K");
+        QuantityType<Temperature> temp2 = new QuantityType<>("20 °C");
+        assertEquals(0, temp1.compareTo(temp2));
+        temp2 = new QuantityType<>("-5 °C");
+        assertEquals(1, temp1.compareTo(temp2));
+        temp2 = new QuantityType<>("50 °C");
+        assertEquals(-1, temp1.compareTo(temp2));
+
+        QuantityType<Temperature> temp3 = new QuantityType<>("100000 K");
+        QuantityType<Temperature> temp4 = new QuantityType<>("10 mirek");
+        assertThrows(IllegalArgumentException.class, () -> {
+            temp3.compareTo(temp4);
+        });
+    }
 }
