@@ -12,6 +12,8 @@
  */
 package org.openhab.core.internal.service;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.util.BundleResolver;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.FrameworkUtil;
@@ -23,9 +25,11 @@ import org.osgi.service.component.annotations.Component;
  * @author Henning Treu - Initial contribution
  */
 @Component(service = BundleResolver.class)
+@NonNullByDefault
 public class BundleResolverImpl implements BundleResolver {
 
     @Override
+    @Nullable
     public Bundle resolveBundle(Class<?> clazz) {
         return FrameworkUtil.getBundle(clazz);
     }
