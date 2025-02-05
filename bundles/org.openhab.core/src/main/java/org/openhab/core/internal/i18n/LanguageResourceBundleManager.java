@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Locale;
+import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.ResourceBundle.Control;
 
@@ -189,7 +190,7 @@ public class LanguageResourceBundleManager {
                         Control.getNoFallbackControl(Control.FORMAT_PROPERTIES));
 
                 return resourceBundle.getString(key);
-            } catch (NullPointerException ex) {
+            } catch (NullPointerException | IllegalArgumentException | MissingResourceException ex) {
                 // nothing to do
             }
         }
