@@ -247,8 +247,7 @@ public class InboxResource implements RESTResource {
             return Response.status(Response.Status.NOT_FOUND).entity(message).build();
         }
 
-        return Response
-                .ok(generator.generateSyntax(List.of(simulateThing(result, thingType)), hideDefaultParameters, false))
+        return Response.ok(generator.generateSyntax(List.of(simulateThing(result, thingType)), hideDefaultParameters))
                 .build();
     }
 

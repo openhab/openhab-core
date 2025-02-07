@@ -70,16 +70,15 @@ public class DslThingSyntaxConverter extends AbstractThingSyntaxGenerator {
     }
 
     @Override
-    public synchronized String generateSyntax(List<Thing> things, boolean hideDefaultParameters,
-            boolean preferPresentationAsTree) {
+    public synchronized String generateSyntax(List<Thing> things, boolean hideDefaultParameters) {
         ThingModel model = ThingFactory.eINSTANCE.createThingModel();
         Set<Thing> handledThings = new HashSet<>();
         for (Thing thing : things) {
             if (handledThings.contains(thing)) {
                 continue;
             }
-            model.getThings().add(buildModelThing(thing, hideDefaultParameters, preferPresentationAsTree, true, things,
-                    handledThings));
+            model.getThings()
+                    .add(buildModelThing(thing, hideDefaultParameters, things.size() > 1, true, things, handledThings));
         }
         // Double quotes are unexpectedly generated in thing UID when the segment contains a -.
         // Fix that by removing these double quotes.
