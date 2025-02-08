@@ -24,6 +24,7 @@ import org.openhab.core.thing.link.ItemChannelLink;
 import org.openhab.core.thing.link.dto.ItemChannelLinkDTO;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonParser;
 
 /**
  * {@link LinkEventFactoryTest} tests the {@link LinkEventFactory}.
@@ -52,7 +53,7 @@ public class LinkEventFactoryTest {
 
         assertEquals(ItemChannelLinkAddedEvent.TYPE, event.getType());
         assertEquals(LINK_ADDED_EVENT_TOPIC, event.getTopic());
-        assertEquals(LINK_EVENT_PAYLOAD, event.getPayload());
+        assertEquals(JsonParser.parseString(LINK_EVENT_PAYLOAD), JsonParser.parseString(event.getPayload()));
     }
 
     @Test
@@ -73,7 +74,7 @@ public class LinkEventFactoryTest {
 
         assertEquals(ItemChannelLinkRemovedEvent.TYPE, event.getType());
         assertEquals(LINK_REMOVED_EVENT_TOPIC, event.getTopic());
-        assertEquals(LINK_EVENT_PAYLOAD, event.getPayload());
+        assertEquals(JsonParser.parseString(LINK_EVENT_PAYLOAD), JsonParser.parseString(event.getPayload()));
     }
 
     @Test
