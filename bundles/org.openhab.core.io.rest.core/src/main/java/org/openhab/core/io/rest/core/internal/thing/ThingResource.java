@@ -824,7 +824,7 @@ public class ThingResource implements RESTResource {
             @PathParam("thingUID") @Parameter(description = "thingUID") String thingUID,
             @DefaultValue("DSL") @QueryParam("format") @Parameter(description = "syntax format") String format,
             @DefaultValue("true") @QueryParam("hideDefaultParameters") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters,
-            @Parameter(description = "thing data", required = false) @Nullable ThingDTO thingBean) {
+            @Parameter(description = "thing data", required = false) @Nullable ThingDTO thingData) {
         ThingSyntaxGenerator generator = thingSyntaxGenerators.get(format);
         if (generator == null) {
             String message = "No syntax generator available for format " + format + "!";
@@ -838,19 +838,19 @@ public class ThingResource implements RESTResource {
             return Response.status(Response.Status.NOT_FOUND).entity(message).build();
         }
 
-        if (thingBean != null) {
-            String uid = thingBean.UID;
+        if (thingData != null) {
+            String uid = thingData.UID;
             if (uid != null && !uid.isEmpty() && !uid.equals(thingUID)) {
                 String message = "UID " + uid + " in the thing data is not consistent with UID " + thingUID
                         + " in the API URL!";
                 return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
             }
 
-            thingBean.configuration = normalizeConfiguration(thingBean.configuration, thing.getThingTypeUID(),
+            thingData.configuration = normalizeConfiguration(thingData.configuration, thing.getThingTypeUID(),
                     thing.getUID());
-            normalizeChannels(thingBean, thing.getUID());
+            normalizeChannels(thingData, thing.getUID());
 
-            thing = ThingHelper.merge(thing, thingBean);
+            thing = ThingHelper.merge(thing, thingData);
         }
 
         return Response.ok(generator.generateSyntax(List.of(thing), hideDefaultParameters)).build();

@@ -66,7 +66,7 @@ public class ModelRepositoryImpl implements ModelRepository {
 
     private final SafeEMF safeEmf;
 
-    private int standaloneCounter;
+    private int counter;
 
     @Activate
     public ModelRepositoryImpl(final @Reference SafeEMF safeEmf) {
@@ -189,7 +189,8 @@ public class ModelRepositoryImpl implements ModelRepository {
 
             return resourceListCopy.stream()
                     .filter(input -> input.getURI().lastSegment().contains(".") && input.isLoaded()
-                            && modelType.equalsIgnoreCase(input.getURI().fileExtension()))
+                            && modelType.equalsIgnoreCase(input.getURI().fileExtension())
+                            && !input.getURI().lastSegment().startsWith("tmp_"))
                     .map(from -> from.getURI().path()).toList();
         }
     }
@@ -247,7 +248,7 @@ public class ModelRepositoryImpl implements ModelRepository {
 
     @Override
     public @Nullable String addStandaloneModel(String modelType, InputStream inputStream) {
-        String name = "standalone_%d.%s".formatted(++standaloneCounter, modelType);
+        String name = "tmp_syntax_%d.%s".formatted(++counter, modelType);
         return addOrRefreshModel(name, inputStream, true) ? name : null;
     }
 
@@ -260,7 +261,8 @@ public class ModelRepositoryImpl implements ModelRepository {
     public String generateSyntaxFromModel(String modelType, EObject modelContent) {
         String result = "";
         synchronized (resourceSet) {
-            Resource resource = resourceSet.createResource(URI.createURI("tmp_generated_syntax." + modelType));
+            String name = "tmp_generated_syntax_%d.%s".formatted(++counter, modelType);
+            Resource resource = resourceSet.createResource(URI.createURI(name));
             try {
                 resource.getContents().add(modelContent);
                 ByteArrayOutputStream outputStream = new ByteArrayOutputStream();

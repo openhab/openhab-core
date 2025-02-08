@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.model.thing.internal;
+package org.openhab.core.model.thing;
 
 import java.util.Collection;
 
@@ -33,5 +33,5 @@ public interface StandaloneThingProvider {
      * @param modelName the model name
      * @return the collection of corresponding {@link Thing}
      */
-    Collection<Thing> createThingsFromStandaloneModel(String modelName);
+    Collection<Thing> getThingsFromStandaloneModel(String modelName);
 }

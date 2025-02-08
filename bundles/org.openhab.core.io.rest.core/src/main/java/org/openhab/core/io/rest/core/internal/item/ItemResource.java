@@ -93,6 +93,7 @@ import org.openhab.core.semantics.SemanticsPredicates;
 import org.openhab.core.thing.link.ItemChannelLink;
 import org.openhab.core.thing.link.ItemChannelLinkRegistry;
 import org.openhab.core.thing.syntax.ItemSyntaxGenerator;
+import org.openhab.core.thing.syntax.ItemSyntaxParser;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
 import org.openhab.core.types.TypeParser;
@@ -192,6 +193,7 @@ public class ItemResource implements RESTResource {
     private final ItemChannelLinkRegistry itemChannelLinkRegistry;
     private final TimeZoneProvider timeZoneProvider;
     private final Map<String, ItemSyntaxGenerator> itemSyntaxGenerators = new ConcurrentHashMap<>();
+    private final Map<String, ItemSyntaxParser> itemSyntaxParsers = new ConcurrentHashMap<>();
 
     private final RegistryChangedRunnableListener<Item> resetLastModifiedItemChangeListener = new RegistryChangedRunnableListener<>(
             () -> lastModified = null);
@@ -242,6 +244,15 @@ public class ItemResource implements RESTResource {
 
     protected void removeItemSyntaxGenerator(ItemSyntaxGenerator itemSyntaxGenerator) {
         itemSyntaxGenerators.remove(itemSyntaxGenerator.getGeneratorFormat());
+    }
+
+    @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.MULTIPLE)
+    protected void addItemSyntaxParser(ItemSyntaxParser itemSyntaxParser) {
+        itemSyntaxParsers.put(itemSyntaxParser.getParserFormat(), itemSyntaxParser);
+    }
+
+    protected void removeItemSyntaxParser(ItemSyntaxParser itemSyntaxGenerator) {
+        itemSyntaxParsers.remove(itemSyntaxGenerator.getParserFormat());
     }
 
     private UriBuilder uriBuilder(final UriInfo uriInfo, final HttpHeaders httpHeaders) {
@@ -942,9 +953,61 @@ public class ItemResource implements RESTResource {
                 metadataRegistry.getAll(), hideDefaultParameters)).build();
     }
 
-    @GET
+    @POST
+    @RolesAllowed({ Role.ADMIN })
+    @Path("/{itemname: [a-zA-Z_0-9]+}/syntax/parse")
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(operationId = "parseSyntaxForItem", summary = "Parse syntax for an item.", security = {
+            @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
+                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = EnrichedItemDTO.class))),
+                    @ApiResponse(responseCode = "400", description = "Unsupported syntax parser."),
+                    @ApiResponse(responseCode = "400", description = "Invalid syntax.") })
+    public Response parseSyntaxForItem(final @Context UriInfo uriInfo, final @Context HttpHeaders httpHeaders,
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
+            @PathParam("itemname") @Parameter(description = "item name") String itemname,
+            @DefaultValue("DSL") @QueryParam("format") @Parameter(description = "syntax format") String format,
+            @Parameter(description = "item syntax", required = true) String syntax) {
+        final Locale locale = localeService.getLocale(language);
+        final ZoneId zoneId = timeZoneProvider.getTimeZone();
+
+        ItemSyntaxParser parser = itemSyntaxParsers.get(format);
+        if (parser == null) {
+            String message = "No syntax parser available for format " + format + "!";
+            return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
+        }
+
+        Collection<Item> items = parser.parseSyntax(syntax);
+        if (items.size() != 1) {
+            String message = items.size() == 0 ? "Invalid syntax!"
+                    : "Only one item expected while several are provided!";
+            return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
+        }
+
+        Item item = items.iterator().next();
+        String name = item.getName();
+        if (!name.equals(itemname)) {
+            String message = "Name " + name + " in the parsed syntax is not consistent with name " + itemname
+                    + " in the API URL!";
+            return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
+        }
+
+        EnrichedItemDTO dto = EnrichedItemDTOMapper.map(item, false, null, uriBuilder(uriInfo, httpHeaders), locale,
+                zoneId);
+        // addMetadata(dto, namespaces, null);
+        dto.editable = isEditable(dto.name);
+        // if (dto instanceof EnrichedGroupItemDTO enrichedGroupItemDTO) {
+        // for (EnrichedItemDTO member : enrichedGroupItemDTO.members) {
+        // member.editable = isEditable(member.name);
+        // }
+        // }
+        return JSONResponse.createResponse(Status.OK, dto, null);
+    }
+
+    @POST
     @RolesAllowed({ Role.ADMIN })
     @Path("/{itemname: [a-zA-Z_0-9]+}/syntax/generate")
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
     @Operation(operationId = "generateSyntaxForItem", summary = "Generate syntax for an item.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
@@ -955,7 +1018,8 @@ public class ItemResource implements RESTResource {
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @PathParam("itemname") @Parameter(description = "item name") String itemname,
             @DefaultValue("DSL") @QueryParam("format") @Parameter(description = "syntax format") String format,
-            @DefaultValue("true") @QueryParam("hideDefaultParameters") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters) {
+            @DefaultValue("true") @QueryParam("hideDefaultParameters") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters,
+            @Parameter(description = "item data", required = false) @Nullable GroupItemDTO itemData) {
         ItemSyntaxGenerator generator = itemSyntaxGenerators.get(format);
         if (generator == null) {
             String message = "No syntax generator available for format " + format + "!";
@@ -966,6 +1030,26 @@ public class ItemResource implements RESTResource {
         if (item == null) {
             String message = "Item " + itemname + " does not exist!";
             return Response.status(Response.Status.NOT_FOUND).entity(message).build();
+        }
+
+        if (itemData != null) {
+            String name = itemData.name;
+            if (name == null || !name.equals(itemname)) {
+                String message = "Name " + name + " in the item data is not consistent with name " + itemname
+                        + " in the API URL!";
+                return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
+            }
+
+            try {
+                item = ItemDTOMapper.map(itemData, itemBuilderFactory);
+                if (item == null) {
+                    String message = "Invalid item type in item data!";
+                    return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
+                }
+            } catch (IllegalArgumentException e) {
+                String message = "Invalid item name in item data!";
+                return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
+            }
         }
 
         Set<ItemChannelLink> channelLinks = itemChannelLinkRegistry.getLinks(itemname);

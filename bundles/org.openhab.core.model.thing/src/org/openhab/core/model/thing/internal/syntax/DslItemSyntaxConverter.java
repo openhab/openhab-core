@@ -12,7 +12,9 @@
  */
 package org.openhab.core.model.thing.internal.syntax;
 
+import java.io.ByteArrayInputStream;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,6 +26,7 @@ import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.Metadata;
 import org.openhab.core.model.core.ModelRepository;
+import org.openhab.core.model.item.StandaloneItemProvider;
 import org.openhab.core.model.items.ItemModel;
 import org.openhab.core.model.items.ItemsFactory;
 import org.openhab.core.model.items.ModelBinding;
@@ -34,6 +37,7 @@ import org.openhab.core.model.items.ModelProperty;
 import org.openhab.core.thing.link.ItemChannelLink;
 import org.openhab.core.thing.syntax.AbstractItemSyntaxGenerator;
 import org.openhab.core.thing.syntax.ItemSyntaxGenerator;
+import org.openhab.core.thing.syntax.ItemSyntaxParser;
 import org.openhab.core.types.State;
 import org.openhab.core.types.StateDescription;
 import org.osgi.service.component.annotations.Activate;
@@ -43,23 +47,27 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * {@link DslItemSyntaxConverter} is the DSL syntax generator for {@link Item} object.
+ * {@link DslItemSyntaxConverter} is the DSL syntax converter for {@link Item} object
+ * with the capabilities of parsing syntax and generating syntax.
  *
  * @author Laurent Garnier - Initial contribution
  */
 @NonNullByDefault
-@Component(immediate = true, service = ItemSyntaxGenerator.class)
-public class DslItemSyntaxConverter extends AbstractItemSyntaxGenerator {
+@Component(immediate = true, service = { ItemSyntaxGenerator.class, ItemSyntaxParser.class })
+public class DslItemSyntaxConverter extends AbstractItemSyntaxGenerator implements ItemSyntaxParser {
 
     private final Logger logger = LoggerFactory.getLogger(DslItemSyntaxConverter.class);
 
     private final ModelRepository modelRepository;
+    private final StandaloneItemProvider standaloneItemProvider;
 
     @Activate
     public DslItemSyntaxConverter(final @Reference ModelRepository modelRepository,
+            final @Reference StandaloneItemProvider standaloneItemProvider,
             final @Reference ConfigDescriptionRegistry configDescRegistry) {
         super(configDescRegistry);
         this.modelRepository = modelRepository;
+        this.standaloneItemProvider = standaloneItemProvider;
     }
 
     @Override
@@ -185,5 +193,22 @@ public class DslItemSyntaxConverter extends AbstractItemSyntaxGenerator {
             property.getValue().add(value);
         }
         return property;
+    }
+
+    @Override
+    public String getParserFormat() {
+        return "DSL";
+    }
+
+    @Override
+    public Collection<Item> parseSyntax(String syntax) {
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(syntax.getBytes());
+        String modelName = modelRepository.addStandaloneModel("items", inputStream);
+        if (modelName != null) {
+            Collection<Item> items = standaloneItemProvider.getItemsFromStandaloneModel(modelName);
+            modelRepository.removeStandaloneModel(modelName);
+            return items;
+        }
+        return Collections.emptyList();
     }
 }
