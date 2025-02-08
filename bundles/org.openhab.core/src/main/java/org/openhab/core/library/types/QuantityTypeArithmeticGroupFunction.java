@@ -29,6 +29,8 @@ import org.openhab.core.types.State;
 import org.openhab.core.types.UnDefType;
 import org.openhab.core.util.Statistics;
 
+import tech.units.indriya.AbstractUnit;
+
 /**
  * This interface is a container for dimension based functions that require {@link QuantityType}s for its calculations.
  *
@@ -73,7 +75,30 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
          * @return a QuantityType or null
          */
         private @Nullable QuantityType<?> referenceUnitQuantityType(@Nullable State state) {
-            return state instanceof QuantityType<?> quantity ? quantity.toInvertibleUnit(referenceUnit) : null;
+            return state instanceof QuantityType<?> quantity ? toInvertibleUnit(quantity, referenceUnit) : null;
+        }
+
+        /**
+         * Convert the given {@link QuantityType} to an equivalent based on the 'systemUnit'. The conversion can be made
+         * to both inverted and non-inverted units, so invertible type conversions (e.g. Mirek <=> Kelvin) are
+         * supported.
+         * <p>
+         * Note: we can use {@link QuantityType.toInvertibleUnit()} if OH Core PR #4561 is merged.
+         *
+         * @param sourceQtyType the {@link QuantityType} to be converted.
+         * @param targetUnit the {@link Unit} to convert to.
+         *
+         * @return a new {@link QuantityType} based on 'systemUnit' or null.
+         */
+        public @Nullable QuantityType<?> toInvertibleUnit(QuantityType<?> sourceQtyType, Unit<?> targetUnit) {
+            Unit<?> sourceSystemUnit = sourceQtyType.getUnit().getSystemUnit();
+            if (!targetUnit.equals(sourceSystemUnit) && !targetUnit.isCompatible(AbstractUnit.ONE)
+                    && sourceSystemUnit.inverse().isCompatible(targetUnit)) {
+                return sourceQtyType.toUnit(sourceSystemUnit) instanceof QuantityType<?> systemQtyType //
+                        ? systemQtyType.inverse().toUnit(targetUnit)
+                        : null;
+            }
+            return sourceQtyType.toUnit(targetUnit);
         }
 
         /**
