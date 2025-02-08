@@ -99,6 +99,7 @@ import org.openhab.core.thing.i18n.ThingStatusInfoI18nLocalizationService;
 import org.openhab.core.thing.link.ItemChannelLinkRegistry;
 import org.openhab.core.thing.link.ManagedItemChannelLinkProvider;
 import org.openhab.core.thing.syntax.ThingSyntaxGenerator;
+import org.openhab.core.thing.syntax.ThingSyntaxParser;
 import org.openhab.core.thing.type.BridgeType;
 import org.openhab.core.thing.type.ChannelType;
 import org.openhab.core.thing.type.ChannelTypeRegistry;
@@ -146,7 +147,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * @author Dimitar Ivanov - replaced Firmware UID with thing UID and firmware version
  * @author Markus Rathgeb - Migrated to JAX-RS Whiteboard Specification
  * @author Wouter Born - Migrated to OpenAPI annotations
- * @author Laurent Garnier - Added API to generate syntax
+ * @author Laurent Garnier - Added API to parse and generate syntax for thing
  */
 @Component
 @JaxrsResource
@@ -179,6 +180,7 @@ public class ThingResource implements RESTResource {
     private final RegistryChangedRunnableListener<Thing> resetLastModifiedChangeListener = new RegistryChangedRunnableListener<>(
             () -> lastModified = null);
     private final Map<String, ThingSyntaxGenerator> thingSyntaxGenerators = new ConcurrentHashMap<>();
+    private final Map<String, ThingSyntaxParser> thingSyntaxParsers = new ConcurrentHashMap<>();
 
     private @Context @NonNullByDefault({}) UriInfo uriInfo;
     private @Nullable Date lastModified = null;
@@ -230,6 +232,15 @@ public class ThingResource implements RESTResource {
 
     protected void removeThingSyntaxGenerator(ThingSyntaxGenerator thingSyntaxGenerator) {
         thingSyntaxGenerators.remove(thingSyntaxGenerator.getGeneratorFormat());
+    }
+
+    @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.MULTIPLE)
+    protected void addThingSyntaxParser(ThingSyntaxParser thingSyntaxParser) {
+        thingSyntaxParsers.put(thingSyntaxParser.getParserFormat(), thingSyntaxParser);
+    }
+
+    protected void removeThingSyntaxParser(ThingSyntaxParser thingSyntaxParser) {
+        thingSyntaxParsers.remove(thingSyntaxParser.getParserFormat());
     }
 
     /**
@@ -744,36 +755,79 @@ public class ThingResource implements RESTResource {
     @Operation(operationId = "generateSyntaxForAllThings", summary = "Generate syntax for all things.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
-                    @ApiResponse(responseCode = "400", description = "Unsupported syntax format.") })
+                    @ApiResponse(responseCode = "400", description = "Unsupported syntax generator.") })
     public Response generateSyntaxForAllThings(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @DefaultValue("DSL") @QueryParam("format") @Parameter(description = "syntax format") String format,
             @DefaultValue("true") @QueryParam("hideDefaultParameters") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters) {
         ThingSyntaxGenerator generator = thingSyntaxGenerators.get(format);
         if (generator == null) {
-            String message = "No syntax available for format " + format + "!";
+            String message = "No syntax generator available for format " + format + "!";
             return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
         }
         return Response.ok(generator.generateSyntax(sortThings(thingRegistry.getAll()), hideDefaultParameters)).build();
     }
 
-    @GET
+    @POST
+    @RolesAllowed({ Role.ADMIN })
+    @Path("/{thingUID}/syntax/parse")
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(operationId = "parseSyntaxForThing", summary = "Parse syntax for a thing.", security = {
+            @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
+                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = EnrichedThingDTO.class))),
+                    @ApiResponse(responseCode = "400", description = "Unsupported syntax parser."),
+                    @ApiResponse(responseCode = "400", description = "Invalid syntax.") })
+    public Response parseSyntaxForThing(
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
+            @PathParam("thingUID") @Parameter(description = "thingUID") String thingUID,
+            @DefaultValue("DSL") @QueryParam("format") @Parameter(description = "syntax format") String format,
+            @Parameter(description = "thing syntax", required = true) String syntax) {
+        final Locale locale = localeService.getLocale(language);
+
+        ThingSyntaxParser parser = thingSyntaxParsers.get(format);
+        if (parser == null) {
+            String message = "No syntax parser available for format " + format + "!";
+            return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
+        }
+
+        Collection<Thing> things = parser.parseSyntax(syntax);
+        if (things.size() != 1) {
+            String message = things.size() == 0 ? "Invalid syntax!"
+                    : "Only one thing expected while several are provided!";
+            return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
+        }
+
+        Thing thing = things.iterator().next();
+        String uid = thing.getUID().getAsString();
+        if (!uid.equals(thingUID)) {
+            String message = "UID " + uid + " in the parsed syntax is not consistent with UID " + thingUID
+                    + " in the API URL!";
+            return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
+        }
+
+        return getThingResponse(Status.OK, thing, locale, null);
+    }
+
+    @POST
     @RolesAllowed({ Role.ADMIN })
     @Path("/{thingUID}/syntax/generate")
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
     @Operation(operationId = "generateSyntaxForThing", summary = "Generate syntax for a thing.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
-                    @ApiResponse(responseCode = "400", description = "Unsupported syntax format."),
+                    @ApiResponse(responseCode = "400", description = "Unsupported syntax generator."),
                     @ApiResponse(responseCode = "404", description = "Thing not found.") })
     public Response generateSyntaxForThing(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @PathParam("thingUID") @Parameter(description = "thingUID") String thingUID,
             @DefaultValue("DSL") @QueryParam("format") @Parameter(description = "syntax format") String format,
-            @DefaultValue("true") @QueryParam("hideDefaultParameters") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters) {
+            @DefaultValue("true") @QueryParam("hideDefaultParameters") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters,
+            @Parameter(description = "thing data", required = false) @Nullable ThingDTO thingBean) {
         ThingSyntaxGenerator generator = thingSyntaxGenerators.get(format);
         if (generator == null) {
-            String message = "No syntax available for format " + format + "!";
+            String message = "No syntax generator available for format " + format + "!";
             return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
         }
 
@@ -782,6 +836,21 @@ public class ThingResource implements RESTResource {
         if (thing == null) {
             String message = "Thing " + thingUID + " does not exist!";
             return Response.status(Response.Status.NOT_FOUND).entity(message).build();
+        }
+
+        if (thingBean != null) {
+            String uid = thingBean.UID;
+            if (uid != null && !uid.isEmpty() && !uid.equals(thingUID)) {
+                String message = "UID " + uid + " in the thing data is not consistent with UID " + thingUID
+                        + " in the API URL!";
+                return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
+            }
+
+            thingBean.configuration = normalizeConfiguration(thingBean.configuration, thing.getThingTypeUID(),
+                    thing.getUID());
+            normalizeChannels(thingBean, thing.getUID());
+
+            thing = ThingHelper.merge(thing, thingBean);
         }
 
         return Response.ok(generator.generateSyntax(List.of(thing), hideDefaultParameters)).build();

@@ -96,7 +96,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * @author Markus Rathgeb - Migrated to JAX-RS Whiteboard Specification
  * @author Wouter Born - Migrated to OpenAPI annotations
  * @author Laurent Garnier - Added optional parameter newThingId to approve API
- * @author Laurent Garnier - Added API to generate syntax
+ * @author Laurent Garnier - Added API to generate syntax for inbox entry
  */
 @Component(service = { RESTResource.class, InboxResource.class })
 @JaxrsResource
@@ -222,7 +222,7 @@ public class InboxResource implements RESTResource {
     @Produces(MediaType.TEXT_PLAIN)
     @Operation(operationId = "generateSyntaxForDiscoveryResult", summary = "Generate syntax for the thing associated to the discovery result.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
-            @ApiResponse(responseCode = "400", description = "Unsupported syntax format."),
+            @ApiResponse(responseCode = "400", description = "Unsupported syntax generator."),
             @ApiResponse(responseCode = "404", description = "Discovery result not found in the inbox or thing type not found.") })
     public Response generateSyntaxForDiscoveryResult(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
@@ -231,7 +231,7 @@ public class InboxResource implements RESTResource {
             @DefaultValue("true") @QueryParam("hideDefaultParameters") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters) {
         ThingSyntaxGenerator generator = thingSyntaxGenerators.get(format);
         if (generator == null) {
-            String message = "No syntax available for format " + format + "!";
+            String message = "No syntax generator available for format " + format + "!";
             return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
         }
 

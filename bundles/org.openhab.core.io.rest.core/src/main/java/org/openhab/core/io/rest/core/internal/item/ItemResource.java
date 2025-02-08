@@ -143,7 +143,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * @author Stefan Triller - Added bulk item add method
  * @author Markus Rathgeb - Migrated to JAX-RS Whiteboard Specification
  * @author Wouter Born - Migrated to OpenAPI annotations
- * @author Laurent Garnier - Added API to generate syntax
+ * @author Laurent Garnier - Added API to generate syntax for item
  */
 @Component
 @JaxrsResource
@@ -928,14 +928,14 @@ public class ItemResource implements RESTResource {
     @Operation(operationId = "generateSyntaxForAllItems", summary = "Generate syntax for all items.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
-                    @ApiResponse(responseCode = "400", description = "Unsupported syntax format.") })
+                    @ApiResponse(responseCode = "400", description = "Unsupported syntax generator.") })
     public Response generateSyntaxForAllItems(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @DefaultValue("DSL") @QueryParam("format") @Parameter(description = "syntax format") String format,
             @DefaultValue("true") @QueryParam("hideDefaultParameters") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters) {
         ItemSyntaxGenerator generator = itemSyntaxGenerators.get(format);
         if (generator == null) {
-            String message = "No syntax available for format " + format + "!";
+            String message = "No syntax generator available for format " + format + "!";
             return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
         }
         return Response.ok(generator.generateSyntax(sortItems(itemRegistry.getAll()), itemChannelLinkRegistry.getAll(),
@@ -949,7 +949,7 @@ public class ItemResource implements RESTResource {
     @Operation(operationId = "generateSyntaxForItem", summary = "Generate syntax for an item.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
-                    @ApiResponse(responseCode = "400", description = "Unsupported syntax format."),
+                    @ApiResponse(responseCode = "400", description = "Unsupported syntax generator."),
                     @ApiResponse(responseCode = "404", description = "Item not found.") })
     public Response generateSyntaxForItem(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
@@ -958,7 +958,7 @@ public class ItemResource implements RESTResource {
             @DefaultValue("true") @QueryParam("hideDefaultParameters") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters) {
         ItemSyntaxGenerator generator = itemSyntaxGenerators.get(format);
         if (generator == null) {
-            String message = "No syntax available for format " + format + "!";
+            String message = "No syntax generator available for format " + format + "!";
             return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
         }
 

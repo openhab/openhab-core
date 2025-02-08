@@ -12,6 +12,9 @@
  */
 package org.openhab.core.model.thing.internal.syntax;
 
+import java.io.ByteArrayInputStream;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -20,6 +23,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.ConfigDescriptionRegistry;
 import org.openhab.core.model.core.ModelRepository;
+import org.openhab.core.model.thing.internal.StandaloneThingProvider;
 import org.openhab.core.model.thing.thing.ModelBridge;
 import org.openhab.core.model.thing.thing.ModelChannel;
 import org.openhab.core.model.thing.thing.ModelProperty;
@@ -32,6 +36,7 @@ import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingUID;
 import org.openhab.core.thing.syntax.AbstractThingSyntaxGenerator;
 import org.openhab.core.thing.syntax.ThingSyntaxGenerator;
+import org.openhab.core.thing.syntax.ThingSyntaxParser;
 import org.openhab.core.thing.type.ChannelKind;
 import org.openhab.core.thing.type.ChannelTypeRegistry;
 import org.openhab.core.thing.type.ChannelTypeUID;
@@ -43,25 +48,29 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * {@link DslThingSyntaxConverter} is the DSL syntax generator for {@link Thing} object.
+ * {@link DslThingSyntaxConverter} is the DSL syntax converter for {@link Thing} object
+ * with the capabilities of parsing syntax and generating syntax.
  *
  * @author Laurent Garnier - Initial contribution
  */
 @NonNullByDefault
-@Component(immediate = true, service = ThingSyntaxGenerator.class)
-public class DslThingSyntaxConverter extends AbstractThingSyntaxGenerator {
+@Component(immediate = true, service = { ThingSyntaxGenerator.class, ThingSyntaxParser.class })
+public class DslThingSyntaxConverter extends AbstractThingSyntaxGenerator implements ThingSyntaxParser {
 
     private final Logger logger = LoggerFactory.getLogger(DslThingSyntaxConverter.class);
 
     private final ModelRepository modelRepository;
+    private final StandaloneThingProvider standaloneThingProvider;
 
     @Activate
     public DslThingSyntaxConverter(final @Reference ModelRepository modelRepository,
+            final @Reference StandaloneThingProvider standaloneThingProvider,
             final @Reference ThingTypeRegistry thingTypeRegistry,
             final @Reference ChannelTypeRegistry channelTypeRegistry,
             final @Reference ConfigDescriptionRegistry configDescRegistry) {
         super(thingTypeRegistry, channelTypeRegistry, configDescRegistry);
         this.modelRepository = modelRepository;
+        this.standaloneThingProvider = standaloneThingProvider;
     }
 
     @Override
@@ -180,5 +189,22 @@ public class DslThingSyntaxConverter extends AbstractThingSyntaxGenerator {
             property.getValue().add(value);
         }
         return property;
+    }
+
+    @Override
+    public String getParserFormat() {
+        return "DSL";
+    }
+
+    @Override
+    public Collection<Thing> parseSyntax(String syntax) {
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(syntax.getBytes());
+        String modelName = modelRepository.addStandaloneModel("things", inputStream);
+        if (modelName != null) {
+            Collection<Thing> things = standaloneThingProvider.createThingsFromStandaloneModel(modelName);
+            modelRepository.removeStandaloneModel(modelName);
+            return things;
+        }
+        return Collections.emptyList();
     }
 }

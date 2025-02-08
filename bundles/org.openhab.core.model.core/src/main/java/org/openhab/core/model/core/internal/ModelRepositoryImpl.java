@@ -51,7 +51,7 @@ import org.slf4j.LoggerFactory;
  * @author Kai Kreuzer - Initial contribution
  * @author Oliver Libutzki - Added reloadAllModelsOfType method
  * @author Simon Kaufmann - added validation of models before loading them
- * @author Laurent Garnier - Added method generateSyntaxFromModelContent
+ * @author Laurent Garnier - Added methods addStandaloneModel, removeStandaloneModel and generateSyntaxFromModel
  */
 @Component(immediate = true)
 @NonNullByDefault
@@ -65,6 +65,8 @@ public class ModelRepositoryImpl implements ModelRepository {
     private final List<ModelRepositoryChangeListener> listeners = new CopyOnWriteArrayList<>();
 
     private final SafeEMF safeEmf;
+
+    private int standaloneCounter;
 
     @Activate
     public ModelRepositoryImpl(final @Reference SafeEMF safeEmf) {
@@ -98,6 +100,10 @@ public class ModelRepositoryImpl implements ModelRepository {
 
     @Override
     public boolean addOrRefreshModel(String name, final InputStream originalInputStream) {
+        return addOrRefreshModel(name, originalInputStream, false);
+    }
+
+    public boolean addOrRefreshModel(String name, final InputStream originalInputStream, boolean standalone) {
         logger.info("Loading model '{}'", name);
         Resource resource = null;
         byte[] bytes;
@@ -126,7 +132,9 @@ public class ModelRepositoryImpl implements ModelRepository {
                         resource = resourceSet.createResource(URI.createURI(name));
                         if (resource != null) {
                             resource.load(inputStream, resourceOptions);
-                            notifyListeners(name, EventType.ADDED);
+                            if (!standalone) {
+                                notifyListeners(name, EventType.ADDED);
+                            }
                             return true;
                         } else {
                             logger.warn("Ignoring file '{}' as we do not have a parser for it.", name);
@@ -137,7 +145,9 @@ public class ModelRepositoryImpl implements ModelRepository {
                 synchronized (resourceSet) {
                     resource.unload();
                     resource.load(inputStream, resourceOptions);
-                    notifyListeners(name, EventType.MODIFIED);
+                    if (!standalone) {
+                        notifyListeners(name, EventType.MODIFIED);
+                    }
                     return true;
                 }
             }
@@ -152,11 +162,17 @@ public class ModelRepositoryImpl implements ModelRepository {
 
     @Override
     public boolean removeModel(String name) {
+        return removeModel(name, false);
+    }
+
+    private boolean removeModel(String name, boolean standalone) {
         Resource resource = getResource(name);
         if (resource != null) {
             synchronized (resourceSet) {
                 // do not physically delete it, but remove it from the resource set
-                notifyListeners(name, EventType.REMOVED);
+                if (!standalone) {
+                    notifyListeners(name, EventType.REMOVED);
+                }
                 resourceSet.getResources().remove(resource);
                 return true;
             }
@@ -227,6 +243,17 @@ public class ModelRepositoryImpl implements ModelRepository {
     @Override
     public void removeModelRepositoryChangeListener(ModelRepositoryChangeListener listener) {
         listeners.remove(listener);
+    }
+
+    @Override
+    public @Nullable String addStandaloneModel(String modelType, InputStream inputStream) {
+        String name = "standalone_%d.%s".formatted(++standaloneCounter, modelType);
+        return addOrRefreshModel(name, inputStream, true) ? name : null;
+    }
+
+    @Override
+    public boolean removeStandaloneModel(String name) {
+        return removeModel(name, true);
     }
 
     @Override
