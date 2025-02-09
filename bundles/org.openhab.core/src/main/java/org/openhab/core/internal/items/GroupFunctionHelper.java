@@ -79,20 +79,19 @@ public class GroupFunctionHelper {
 
     private GroupFunction createDimensionGroupFunction(GroupFunctionDTO function, NumberItem baseNumberItem) {
         final String functionName = function.name;
-        Unit<?> targetUnit = baseNumberItem.getUnit();
-        if (targetUnit != null) {
-            targetUnit = targetUnit.getSystemUnit(); // use system unit so 'Sum' becomes zero based (absolute)
+        Unit<?> baseItemUnit = baseNumberItem.getUnit();
+        if (baseItemUnit != null) {
             switch (functionName.toUpperCase()) {
                 case "AVG":
-                    return new QuantityTypeArithmeticGroupFunction.Avg(targetUnit);
+                    return new QuantityTypeArithmeticGroupFunction.Avg(baseItemUnit);
                 case "MEDIAN":
-                    return new QuantityTypeArithmeticGroupFunction.Median(targetUnit);
+                    return new QuantityTypeArithmeticGroupFunction.Median(baseItemUnit);
                 case "SUM":
-                    return new QuantityTypeArithmeticGroupFunction.Sum(targetUnit);
+                    return new QuantityTypeArithmeticGroupFunction.Sum(baseItemUnit);
                 case "MIN":
-                    return new QuantityTypeArithmeticGroupFunction.Min(targetUnit);
+                    return new QuantityTypeArithmeticGroupFunction.Min(baseItemUnit);
                 case "MAX":
-                    return new QuantityTypeArithmeticGroupFunction.Max(targetUnit);
+                    return new QuantityTypeArithmeticGroupFunction.Max(baseItemUnit);
                 default:
             }
         }

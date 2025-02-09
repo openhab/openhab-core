@@ -42,16 +42,21 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
 
     abstract class DimensionalGroupFunction implements GroupFunction {
 
-        protected final Unit<?> referenceUnit; // the reference unit for all group member calculations
+        protected final Unit<?> baseItemUnit; // the actual unit of the owning group item
+        protected final Unit<?> systemUnit; // the reference unit for group member calculations
 
-        public DimensionalGroupFunction(Unit<?> referenceUnit) {
-            this.referenceUnit = referenceUnit;
+        public DimensionalGroupFunction(Unit<?> baseItemUnit) {
+            this.baseItemUnit = baseItemUnit;
+            this.systemUnit = baseItemUnit.getSystemUnit();
         }
 
         @Override
         public @Nullable <T extends State> T getStateAs(@Nullable Set<Item> items, Class<T> stateClass) {
             State state = calculate(items);
             if (stateClass.isInstance(state)) {
+                if (state instanceof QuantityType<?> quantity) {
+                    state = toInvertibleUnit(quantity, baseItemUnit);
+                }
                 return stateClass.cast(state);
             } else {
                 return null;
@@ -61,6 +66,28 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
         @Override
         public State[] getParameters() {
             return new State[0];
+        }
+
+        /**
+         * Convert the given {@link QuantityType} to an equivalent based on the given {@link Unit}. The conversion can
+         * be made to both inverted and non-inverted units, so invertible type conversions (e.g. Mirek <=> Kelvin) are
+         * supported.
+         * <p>
+         * Note: we can use {@link QuantityType.toInvertibleUnit()} if OH Core PR #4561 is merged.
+         *
+         * @param source the {@link QuantityType} to be converted.
+         * @param targetUnit the {@link Unit} to convert to.
+         *
+         * @return a new {@link QuantityType} based on 'targetUnit' or null.
+         */
+        private @Nullable QuantityType<?> toInvertibleUnit(QuantityType<?> source, Unit<?> targetUnit) {
+            Unit<?> sourceSystemUnit = source.getUnit().getSystemUnit();
+            if (!targetUnit.equals(sourceSystemUnit) && !targetUnit.isCompatible(AbstractUnit.ONE)
+                    && sourceSystemUnit.inverse().isCompatible(targetUnit)) {
+                QuantityType<?> sourceInItsSystemUnit = source.toUnit(sourceSystemUnit);
+                return sourceInItsSystemUnit != null ? sourceInItsSystemUnit.inverse().toUnit(targetUnit) : null;
+            }
+            return source.toUnit(targetUnit);
         }
 
         /**
@@ -74,31 +101,10 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
          * @param state the State of any given group member item
          * @return a QuantityType or null
          */
-        private @Nullable QuantityType<?> referenceUnitQuantityType(@Nullable State state) {
-            return state instanceof QuantityType<?> quantity ? toInvertibleUnit(quantity, referenceUnit) : null;
-        }
-
-        /**
-         * Convert the given {@link QuantityType} to an equivalent based on the 'systemUnit'. The conversion can be made
-         * to both inverted and non-inverted units, so invertible type conversions (e.g. Mirek <=> Kelvin) are
-         * supported.
-         * <p>
-         * Note: we can use {@link QuantityType.toInvertibleUnit()} if OH Core PR #4561 is merged.
-         *
-         * @param sourceQtyType the {@link QuantityType} to be converted.
-         * @param targetUnit the {@link Unit} to convert to.
-         *
-         * @return a new {@link QuantityType} based on 'systemUnit' or null.
-         */
-        public @Nullable QuantityType<?> toInvertibleUnit(QuantityType<?> sourceQtyType, Unit<?> targetUnit) {
-            Unit<?> sourceSystemUnit = sourceQtyType.getUnit().getSystemUnit();
-            if (!targetUnit.equals(sourceSystemUnit) && !targetUnit.isCompatible(AbstractUnit.ONE)
-                    && sourceSystemUnit.inverse().isCompatible(targetUnit)) {
-                return sourceQtyType.toUnit(sourceSystemUnit) instanceof QuantityType<?> systemQtyType //
-                        ? systemQtyType.inverse().toUnit(targetUnit)
-                        : null;
-            }
-            return sourceQtyType.toUnit(targetUnit);
+        private @Nullable QuantityType<?> toQuantityTypeOfUnit(@Nullable State state, Unit<?> unit) {
+            return state instanceof QuantityType<?> quantity //
+                    ? toInvertibleUnit(quantity, unit)
+                    : null;
         }
 
         /**
@@ -110,9 +116,9 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
          * @return a list of {@link QuantityType} converted to the 'referenceUnit'
          */
         @SuppressWarnings({ "rawtypes" })
-        protected List<QuantityType> referenceUnitQuantityTypes(Set<Item> items) {
-            return items.stream().map(i -> i.getState()).map(s -> referenceUnitQuantityType(s)).filter(Objects::nonNull)
-                    .map(s -> (QuantityType) s).toList();
+        protected List<QuantityType> toQuantityTypesOfUnit(Set<Item> items, Unit<?> unit) {
+            return items.stream().map(i -> i.getState()).map(s -> toQuantityTypeOfUnit(s, unit))
+                    .filter(Objects::nonNull).map(s -> (QuantityType) s).toList();
         }
     }
 
@@ -121,19 +127,18 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
      */
     class Avg extends DimensionalGroupFunction {
 
-        public Avg(Unit<?> targetUnit) {
-            super(targetUnit);
+        public Avg(Unit<?> baseItemUnit) {
+            super(baseItemUnit);
         }
 
         @Override
         @SuppressWarnings({ "unchecked", "rawtypes" })
         public State calculate(@Nullable Set<Item> items) {
             if (items != null) {
-                List<QuantityType> referenceUnitQuantities = referenceUnitQuantityTypes(items);
-                if (!referenceUnitQuantities.isEmpty()) {
-                    return referenceUnitQuantities.stream()
-                            .reduce(new QuantityType<>(0, referenceUnit), QuantityType::add)
-                            .divide(BigDecimal.valueOf(referenceUnitQuantities.size()));
+                List<QuantityType> systemUnitQuantities = toQuantityTypesOfUnit(items, systemUnit);
+                if (!systemUnitQuantities.isEmpty()) {
+                    return systemUnitQuantities.stream().reduce(new QuantityType<>(0, systemUnit), QuantityType::add)
+                            .divide(BigDecimal.valueOf(systemUnitQuantities.size()));
                 }
             }
             return UnDefType.UNDEF;
@@ -145,17 +150,17 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
      */
     class Median extends DimensionalGroupFunction {
 
-        public Median(Unit<?> targetUnit) {
-            super(targetUnit);
+        public Median(Unit<?> baseItemUnit) {
+            super(baseItemUnit);
         }
 
         @Override
         public State calculate(@Nullable Set<Item> items) {
             if (items != null) {
                 BigDecimal median = Statistics
-                        .median(referenceUnitQuantityTypes(items).stream().map(q -> q.toBigDecimal()).toList());
+                        .median(toQuantityTypesOfUnit(items, systemUnit).stream().map(q -> q.toBigDecimal()).toList());
                 if (median != null) {
-                    return new QuantityType<>(median, referenceUnit);
+                    return new QuantityType<>(median, systemUnit);
                 }
             }
             return UnDefType.UNDEF;
@@ -173,18 +178,18 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
      */
     class Sum extends DimensionalGroupFunction {
 
-        public Sum(Unit<?> targetUnit) {
-            super(targetUnit);
+        public Sum(Unit<?> baseItemUnit) {
+            super(baseItemUnit);
         }
 
         @Override
-        @SuppressWarnings({ "unchecked", "rawtypes" })
+        @SuppressWarnings("unchecked")
         public State calculate(@Nullable Set<Item> items) {
             if (items != null) {
-                List<QuantityType> referenceUnitQuantities = referenceUnitQuantityTypes(items);
-                if (!referenceUnitQuantities.isEmpty()) {
-                    return referenceUnitQuantities.stream().reduce(new QuantityType<>(0, referenceUnit),
-                            QuantityType::add);
+                @SuppressWarnings("rawtypes")
+                List<QuantityType> systemUnitQuantities = toQuantityTypesOfUnit(items, baseItemUnit);
+                if (!systemUnitQuantities.isEmpty()) {
+                    return systemUnitQuantities.stream().reduce(new QuantityType<>(0, baseItemUnit), QuantityType::add);
                 }
             }
             return UnDefType.UNDEF;
@@ -196,16 +201,19 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
      */
     class Min extends DimensionalGroupFunction {
 
-        public Min(Unit<?> targetUnit) {
-            super(targetUnit);
+        public Min(Unit<?> baseItemUnit) {
+            super(baseItemUnit);
         }
 
         @Override
-        @SuppressWarnings({ "unchecked", "rawtypes" })
         public State calculate(@Nullable Set<Item> items) {
             if (items != null) {
-                Optional<QuantityType> min = referenceUnitQuantityTypes(items).stream().min(QuantityType::compareTo);
-                return min.isPresent() ? min.get() : UnDefType.UNDEF;
+                @SuppressWarnings({ "unchecked", "rawtypes" })
+                Optional<QuantityType> min = toQuantityTypesOfUnit(items, systemUnit).stream()
+                        .min(QuantityType::compareTo);
+                if (min.isPresent()) {
+                    return min.get();
+                }
             }
             return UnDefType.UNDEF;
         }
@@ -221,11 +229,14 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
         }
 
         @Override
-        @SuppressWarnings({ "unchecked", "rawtypes" })
         public State calculate(@Nullable Set<Item> items) {
             if (items != null) {
-                Optional<QuantityType> max = referenceUnitQuantityTypes(items).stream().max(QuantityType::compareTo);
-                return max.isPresent() ? max.get() : UnDefType.UNDEF;
+                @SuppressWarnings({ "unchecked", "rawtypes" })
+                Optional<QuantityType> max = toQuantityTypesOfUnit(items, systemUnit).stream()
+                        .max(QuantityType::compareTo);
+                if (max.isPresent()) {
+                    return max.get();
+                }
             }
             return UnDefType.UNDEF;
         }
