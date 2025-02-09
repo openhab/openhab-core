@@ -17,7 +17,6 @@ Import-Package: org.apache.log4j,\
  org.openhab.core.common.registry,\
  org.openhab.core.i18n,\
  org.openhab.core.items,\
- org.openhab.core.model.items,\
  org.openhab.core.service,\
  org.openhab.core.thing,\
  org.openhab.core.thing.binding,\

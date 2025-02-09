@@ -10,28 +10,28 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.model.thing;
+package org.openhab.core.model.item.internal;
 
 import java.util.Collection;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.core.thing.Thing;
+import org.openhab.core.items.Item;
 
 /**
- * {@link StandaloneThingProvider} is the interface to implement by a {@link Thing} provider that is able
- * to create a list of things from a model without impacting the thing registry.
+ * {@link StandaloneItemProvider} is the interface to implement by an {@link Item} provider that is able
+ * to create a list of items from a model without impacting the item registry.
  *
  * @author Laurent Garnier - Initial contribution
  */
 @NonNullByDefault
-public interface StandaloneThingProvider {
+public interface StandaloneItemProvider {
 
     /**
-     * Parse the provided syntax and return the corresponding {@link Thing} objects without impacting
-     * the thing registry.
+     * Parse the provided syntax and return the corresponding {@link Item} objects without impacting
+     * the item registry.
      *
      * @param modelName the model name
-     * @return the collection of corresponding {@link Thing}
+     * @return the collection of corresponding {@link Item}
      */
-    Collection<Thing> getThingsFromStandaloneModel(String modelName);
+    Collection<Item> getItemsFromStandaloneModel(String modelName);
 }

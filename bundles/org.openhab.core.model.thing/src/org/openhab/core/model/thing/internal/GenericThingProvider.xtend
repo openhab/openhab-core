@@ -51,7 +51,6 @@ import org.openhab.core.thing.util.ThingHelper
 import org.openhab.core.util.BundleResolver
 import org.openhab.core.model.core.ModelRepository
 import org.openhab.core.model.core.ModelRepositoryChangeListener
-import org.openhab.core.model.thing.StandaloneThingProvider
 import org.openhab.core.model.thing.thing.ModelBridge
 import org.openhab.core.model.thing.thing.ModelChannel
 import org.openhab.core.model.thing.thing.ModelPropertyContainer

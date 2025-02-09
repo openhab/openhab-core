@@ -10,29 +10,20 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.thing.syntax;
+package org.openhab.core.items.syntax;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.config.core.ConfigDescription;
-import org.openhab.core.config.core.ConfigDescriptionParameter;
-import org.openhab.core.config.core.ConfigDescriptionRegistry;
-import org.openhab.core.config.core.ConfigUtil;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.Metadata;
 import org.openhab.core.library.CoreItemFactory;
-import org.openhab.core.thing.link.ItemChannelLink;
 
 /**
  * {@link AbstractItemSyntaxGenerator} is the base class for any {@link Item} syntax generator.
@@ -42,98 +33,42 @@ import org.openhab.core.thing.link.ItemChannelLink;
 @NonNullByDefault
 public abstract class AbstractItemSyntaxGenerator implements ItemSyntaxGenerator {
 
-    private final ConfigDescriptionRegistry configDescRegistry;
-
-    public AbstractItemSyntaxGenerator(ConfigDescriptionRegistry configDescRegistry) {
-        this.configDescRegistry = configDescRegistry;
+    public AbstractItemSyntaxGenerator() {
     }
 
     /**
      * {@link ConfigParameter} is a container for any configuration parameter defined by a name and a value.
      */
-    protected record ConfigParameter(String name, Object value) {
+    public record ConfigParameter(String name, Object value) {
     }
 
     /**
-     * Get the list of available channel links for an item, sorted by natural order of their UID.
+     * Get the list of available channel links for an item, sorted by natural order of their channel UID.
      *
-     * @param channelLinks a collection of channel links
+     * @param metadata a collection of metadata
      * @param itemName the item name
-     * @return the sorted list of channel links for this item
+     * @return the sorted list of metadata representing the channel links for this item
      */
-    protected List<ItemChannelLink> getChannelLinks(Collection<ItemChannelLink> channelLinks, String itemName) {
-        return channelLinks.stream().filter(link -> link.getItemName().equals(itemName)).sorted((link1, link2) -> {
-            return link1.getLinkedUID().getAsString().compareTo(link2.getLinkedUID().getAsString());
-        }).collect(Collectors.toList());
-    }
-
-    /**
-     * Get the list of configuration parameters for a channel link.
-     *
-     * If a profile is set and a configuration description is found for this profile, the parameters are provided
-     * in the same order as in this configuration description, and any parameter having the default value is ignored.
-     * If no profile is set, the parameters are provided sorted by natural order of their names.
-     *
-     * @param channelLink the channel link
-     * @param hideDefaultParameters true to hide the configuration parameters having the default value
-     * @return a sorted list of configuration parameters for the channel link
-     */
-    protected List<ConfigParameter> getConfigurationParameters(ItemChannelLink channelLink,
-            boolean hideDefaultParameters) {
-        List<ConfigParameter> parameters = new ArrayList<>();
-        Map<String, Object> configParameters = channelLink.getConfiguration().getProperties();
-        Set<String> handledNames = new HashSet<>();
-        Object profile = configParameters.get("profile");
-        List<ConfigDescriptionParameter> configDescriptionParameter = List.of();
-        if (profile instanceof String profileStr) {
-            parameters.add(new ConfigParameter("profile", profileStr));
-            handledNames.add("profile");
-            try {
-                ConfigDescription configDesc = configDescRegistry
-                        .getConfigDescription(new URI("profile:" + profileStr));
-                if (configDesc != null) {
-                    configDescriptionParameter = configDesc.getParameters();
-                }
-            } catch (URISyntaxException e) {
-                // Ignored; in practice this will never be thrown
-            }
-        }
-        for (ConfigDescriptionParameter param : configDescriptionParameter) {
-            String paramName = param.getName();
-            if (handledNames.contains(paramName)) {
-                continue;
-            }
-            Object value = configParameters.get(paramName);
-            Object defaultValue = ConfigUtil.getDefaultValueAsCorrectType(param);
-            if (value != null && (!hideDefaultParameters || !value.equals(defaultValue))) {
-                parameters.add(new ConfigParameter(paramName, value));
-            }
-            handledNames.add(paramName);
-        }
-        for (String paramName : configParameters.keySet().stream().sorted().collect(Collectors.toList())) {
-            if (handledNames.contains(paramName)) {
-                continue;
-            }
-            Object value = configParameters.get(paramName);
-            if (value != null) {
-                parameters.add(new ConfigParameter(paramName, value));
-            }
-            handledNames.add(paramName);
-        }
-        return parameters;
+    protected List<Metadata> getChannelLinks(Collection<Metadata> metadata, String itemName) {
+        return metadata.stream().filter(
+                md -> "channel".equals(md.getUID().getNamespace()) && md.getUID().getItemName().equals(itemName))
+                .sorted((md1, md2) -> {
+                    return md1.getValue().compareTo(md2.getValue());
+                }).collect(Collectors.toList());
     }
 
     /**
      * Get the list of available metadata for an item, sorted by natural order of their namespaces.
-     * The "semantics" namespace is ignored.
+     * The "semantics" and "channel" namespaces are ignored.
      *
      * @param metadata a collection of metadata
      * @param itemName the item name
      * @return the sorted list of metadata for this item
      */
     protected List<Metadata> getMetadata(Collection<Metadata> metadata, String itemName) {
-        return metadata.stream().filter(
-                md -> !"semantics".equals(md.getUID().getNamespace()) && md.getUID().getItemName().equals(itemName))
+        return metadata.stream()
+                .filter(md -> !"semantics".equals(md.getUID().getNamespace())
+                        && !"channel".equals(md.getUID().getNamespace()) && md.getUID().getItemName().equals(itemName))
                 .sorted((md1, md2) -> {
                     return md1.getUID().getNamespace().compareTo(md2.getUID().getNamespace());
                 }).collect(Collectors.toList());

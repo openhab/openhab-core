@@ -23,7 +23,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.ConfigDescriptionRegistry;
 import org.openhab.core.model.core.ModelRepository;
-import org.openhab.core.model.thing.StandaloneThingProvider;
+import org.openhab.core.model.thing.internal.StandaloneThingProvider;
 import org.openhab.core.model.thing.thing.ModelBridge;
 import org.openhab.core.model.thing.thing.ModelChannel;
 import org.openhab.core.model.thing.thing.ModelProperty;

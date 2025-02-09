@@ -44,7 +44,6 @@ import org.openhab.core.model.core.ModelRepository;
 import org.openhab.core.model.core.ModelRepositoryChangeListener;
 import org.openhab.core.model.item.BindingConfigParseException;
 import org.openhab.core.model.item.BindingConfigReader;
-import org.openhab.core.model.item.StandaloneItemProvider;
 import org.openhab.core.model.items.ItemModel;
 import org.openhab.core.model.items.ModelBinding;
 import org.openhab.core.model.items.ModelGroupFunction;

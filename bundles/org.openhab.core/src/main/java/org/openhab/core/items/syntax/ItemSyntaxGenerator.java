@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.thing.syntax;
+package org.openhab.core.items.syntax;
 
 import java.util.Collection;
 import java.util.List;
@@ -18,7 +18,6 @@ import java.util.List;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.Metadata;
-import org.openhab.core.thing.link.ItemChannelLink;
 
 /**
  * {@link ItemSyntaxGenerator} is the interface to implement by any syntax generator for {@link Item} object.
@@ -39,11 +38,9 @@ public interface ItemSyntaxGenerator {
      * Generate the syntax for a sorted list of items.
      *
      * @param items the items
-     * @param channelLinks the provided collection of channel links for these items
-     * @param metadata the provided collection of metadata for these items
+     * @param metadata the provided collection of metadata for these items (including channel links)
      * @param hideDefaultParameters true to hide the configuration parameters having the default value
      * @return the syntax for the items
      */
-    String generateSyntax(List<Item> items, Collection<ItemChannelLink> channelLinks, Collection<Metadata> metadata,
-            boolean hideDefaultParameters);
+    String generateSyntax(List<Item> items, Collection<Metadata> metadata, boolean hideDefaultParameters);
 }

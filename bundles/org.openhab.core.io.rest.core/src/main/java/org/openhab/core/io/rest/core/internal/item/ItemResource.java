@@ -83,6 +83,8 @@ import org.openhab.core.items.dto.GroupItemDTO;
 import org.openhab.core.items.dto.ItemDTOMapper;
 import org.openhab.core.items.dto.MetadataDTO;
 import org.openhab.core.items.events.ItemEventFactory;
+import org.openhab.core.items.syntax.ItemSyntaxGenerator;
+import org.openhab.core.items.syntax.ItemSyntaxParser;
 import org.openhab.core.library.items.RollershutterItem;
 import org.openhab.core.library.items.SwitchItem;
 import org.openhab.core.library.types.OnOffType;
@@ -92,8 +94,6 @@ import org.openhab.core.semantics.SemanticTagRegistry;
 import org.openhab.core.semantics.SemanticsPredicates;
 import org.openhab.core.thing.link.ItemChannelLink;
 import org.openhab.core.thing.link.ItemChannelLinkRegistry;
-import org.openhab.core.thing.syntax.ItemSyntaxGenerator;
-import org.openhab.core.thing.syntax.ItemSyntaxParser;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
 import org.openhab.core.types.TypeParser;
@@ -144,7 +144,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * @author Stefan Triller - Added bulk item add method
  * @author Markus Rathgeb - Migrated to JAX-RS Whiteboard Specification
  * @author Wouter Born - Migrated to OpenAPI annotations
- * @author Laurent Garnier - Added API to generate syntax for item
+ * @author Laurent Garnier - Added API to parse and generate syntax for item
  */
 @Component
 @JaxrsResource
@@ -949,8 +949,9 @@ public class ItemResource implements RESTResource {
             String message = "No syntax generator available for format " + format + "!";
             return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
         }
-        return Response.ok(generator.generateSyntax(sortItems(itemRegistry.getAll()), itemChannelLinkRegistry.getAll(),
-                metadataRegistry.getAll(), hideDefaultParameters)).build();
+        Collection<Item> items = itemRegistry.getAll();
+        return Response.ok(generator.generateSyntax(sortItems(items), getMetadata(items), hideDefaultParameters))
+                .build();
     }
 
     @POST
@@ -977,7 +978,9 @@ public class ItemResource implements RESTResource {
             return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
         }
 
-        Collection<Item> items = parser.parseSyntax(syntax);
+        Collection<Item> items = new ArrayList<>();
+        Collection<Metadata> metadata = new ArrayList<>();
+        parser.parseSyntax(syntax, items, metadata);
         if (items.size() != 1) {
             String message = items.size() == 0 ? "Invalid syntax!"
                     : "Only one item expected while several are provided!";
@@ -1052,12 +1055,8 @@ public class ItemResource implements RESTResource {
             }
         }
 
-        Set<ItemChannelLink> channelLinks = itemChannelLinkRegistry.getLinks(itemname);
-        Set<Metadata> metadata = metadataRegistry.getAll().stream()
-                .filter(md -> md.getUID().getItemName().equals(itemname)).collect(Collectors.toSet());
-
-        return Response.ok(generator.generateSyntax(List.of(item), channelLinks, metadata, hideDefaultParameters))
-                .build();
+        List<Item> items = List.of(item);
+        return Response.ok(generator.generateSyntax(items, getMetadata(items), hideDefaultParameters)).build();
     }
 
     private JsonObject buildStatusObject(String itemName, String status, @Nullable String message) {
@@ -1164,6 +1163,26 @@ public class ItemResource implements RESTResource {
 
     private boolean isEditable(String itemName) {
         return managedItemProvider.get(itemName) != null;
+    }
+
+    /*
+     * Get all the metadata for a list of items including channel links mapped to metadata in the namespace "channel"
+     */
+    private Collection<Metadata> getMetadata(Collection<Item> items) {
+        Collection<Metadata> metadata = new ArrayList<>();
+        for (Item item : items) {
+            String itemName = item.getName();
+            metadataRegistry.getAll().stream().filter(md -> md.getUID().getItemName().equals(itemName)).forEach(md -> {
+                metadata.add(md);
+            });
+            itemChannelLinkRegistry.getLinks(itemName).forEach(link -> {
+                MetadataKey key = new MetadataKey("channel", itemName);
+                Metadata md = new Metadata(key, link.getLinkedUID().getAsString(),
+                        link.getConfiguration().getProperties());
+                metadata.add(md);
+            });
+        }
+        return metadata;
     }
 
     /*

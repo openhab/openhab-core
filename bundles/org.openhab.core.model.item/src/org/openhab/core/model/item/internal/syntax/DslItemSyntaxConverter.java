@@ -10,23 +10,34 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.model.thing.internal.syntax;
+package org.openhab.core.model.item.internal.syntax;
 
 import java.io.ByteArrayInputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.config.core.ConfigDescription;
+import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionRegistry;
+import org.openhab.core.config.core.ConfigUtil;
 import org.openhab.core.items.GroupFunction;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.Metadata;
+import org.openhab.core.items.syntax.AbstractItemSyntaxGenerator;
+import org.openhab.core.items.syntax.ItemSyntaxGenerator;
+import org.openhab.core.items.syntax.ItemSyntaxParser;
 import org.openhab.core.model.core.ModelRepository;
-import org.openhab.core.model.item.StandaloneItemProvider;
+import org.openhab.core.model.item.internal.StandaloneItemProvider;
 import org.openhab.core.model.items.ItemModel;
 import org.openhab.core.model.items.ItemsFactory;
 import org.openhab.core.model.items.ModelBinding;
@@ -34,10 +45,6 @@ import org.openhab.core.model.items.ModelGroupFunction;
 import org.openhab.core.model.items.ModelGroupItem;
 import org.openhab.core.model.items.ModelItem;
 import org.openhab.core.model.items.ModelProperty;
-import org.openhab.core.thing.link.ItemChannelLink;
-import org.openhab.core.thing.syntax.AbstractItemSyntaxGenerator;
-import org.openhab.core.thing.syntax.ItemSyntaxGenerator;
-import org.openhab.core.thing.syntax.ItemSyntaxParser;
 import org.openhab.core.types.State;
 import org.openhab.core.types.StateDescription;
 import org.osgi.service.component.annotations.Activate;
@@ -60,14 +67,15 @@ public class DslItemSyntaxConverter extends AbstractItemSyntaxGenerator implemen
 
     private final ModelRepository modelRepository;
     private final StandaloneItemProvider standaloneItemProvider;
+    private final ConfigDescriptionRegistry configDescriptionRegistry;
 
     @Activate
     public DslItemSyntaxConverter(final @Reference ModelRepository modelRepository,
             final @Reference StandaloneItemProvider standaloneItemProvider,
-            final @Reference ConfigDescriptionRegistry configDescRegistry) {
-        super(configDescRegistry);
+            final @Reference ConfigDescriptionRegistry configDescriptionRegistry) {
         this.modelRepository = modelRepository;
         this.standaloneItemProvider = standaloneItemProvider;
+        this.configDescriptionRegistry = configDescriptionRegistry;
     }
 
     @Override
@@ -76,11 +84,11 @@ public class DslItemSyntaxConverter extends AbstractItemSyntaxGenerator implemen
     }
 
     @Override
-    public synchronized String generateSyntax(List<Item> items, Collection<ItemChannelLink> channelLinks,
-            Collection<Metadata> metadata, boolean hideDefaultParameters) {
+    public synchronized String generateSyntax(List<Item> items, Collection<Metadata> metadata,
+            boolean hideDefaultParameters) {
         ItemModel model = ItemsFactory.eINSTANCE.createItemModel();
         for (Item item : items) {
-            model.getItems().add(buildModelItem(item, getChannelLinks(channelLinks, item.getName()),
+            model.getItems().add(buildModelItem(item, getChannelLinks(metadata, item.getName()),
                     getMetadata(metadata, item.getName()), hideDefaultParameters));
         }
         String syntax = modelRepository.generateSyntaxFromModel("items", model);
@@ -88,7 +96,7 @@ public class DslItemSyntaxConverter extends AbstractItemSyntaxGenerator implemen
         return syntax;
     }
 
-    private ModelItem buildModelItem(Item item, List<ItemChannelLink> channelLinks, List<Metadata> metadata,
+    private ModelItem buildModelItem(Item item, List<Metadata> channelLinks, List<Metadata> metadata,
             boolean hideDefaultParameters) {
         ModelItem model;
         if (item instanceof GroupItem groupItem) {
@@ -141,11 +149,12 @@ public class DslItemSyntaxConverter extends AbstractItemSyntaxGenerator implemen
             model.getTags().add(tag);
         }
 
-        for (ItemChannelLink channelLink : channelLinks) {
+        for (Metadata md : channelLinks) {
+            String namespace = md.getUID().getNamespace();
             ModelBinding binding = ItemsFactory.eINSTANCE.createModelBinding();
-            binding.setType("channel");
-            binding.setConfiguration(channelLink.getLinkedUID().getAsString());
-            for (ConfigParameter param : getConfigurationParameters(channelLink, hideDefaultParameters)) {
+            binding.setType(namespace);
+            binding.setConfiguration(md.getValue());
+            for (ConfigParameter param : getConfigurationParameters(md, hideDefaultParameters)) {
                 ModelProperty property = buildModelProperty(param.name(), param.value());
                 if (property != null) {
                     binding.getProperties().add(property);
@@ -195,20 +204,69 @@ public class DslItemSyntaxConverter extends AbstractItemSyntaxGenerator implemen
         return property;
     }
 
+    /*
+     * Get the list of configuration parameters for a channel link.
+     *
+     * If a profile is set and a configuration description is found for this profile, the parameters are provided
+     * in the same order as in this configuration description, and any parameter having the default value is ignored.
+     * If no profile is set, the parameters are provided sorted by natural order of their names.
+     */
+    private List<ConfigParameter> getConfigurationParameters(Metadata metadata, boolean hideDefaultParameters) {
+        List<ConfigParameter> parameters = new ArrayList<>();
+        Set<String> handledNames = new HashSet<>();
+        Map<String, Object> configParameters = metadata.getConfiguration();
+        Object profile = configParameters.get("profile");
+        List<ConfigDescriptionParameter> configDescriptionParameter = List.of();
+        if (profile instanceof String profileStr) {
+            parameters.add(new ConfigParameter("profile", profileStr));
+            handledNames.add("profile");
+            try {
+                ConfigDescription configDesc = configDescriptionRegistry
+                        .getConfigDescription(new URI("profile:" + profileStr));
+                if (configDesc != null) {
+                    configDescriptionParameter = configDesc.getParameters();
+                }
+            } catch (URISyntaxException e) {
+                // Ignored; in practice this will never be thrown
+            }
+        }
+        for (ConfigDescriptionParameter param : configDescriptionParameter) {
+            String paramName = param.getName();
+            if (handledNames.contains(paramName)) {
+                continue;
+            }
+            Object value = configParameters.get(paramName);
+            Object defaultValue = ConfigUtil.getDefaultValueAsCorrectType(param);
+            if (value != null && (!hideDefaultParameters || !value.equals(defaultValue))) {
+                parameters.add(new ConfigParameter(paramName, value));
+            }
+            handledNames.add(paramName);
+        }
+        for (String paramName : configParameters.keySet().stream().sorted().collect(Collectors.toList())) {
+            if (handledNames.contains(paramName)) {
+                continue;
+            }
+            Object value = configParameters.get(paramName);
+            if (value != null) {
+                parameters.add(new ConfigParameter(paramName, value));
+            }
+            handledNames.add(paramName);
+        }
+        return parameters;
+    }
+
     @Override
     public String getParserFormat() {
         return "DSL";
     }
 
     @Override
-    public Collection<Item> parseSyntax(String syntax) {
+    public void parseSyntax(String syntax, Collection<Item> items, Collection<Metadata> metadata) {
         ByteArrayInputStream inputStream = new ByteArrayInputStream(syntax.getBytes());
         String modelName = modelRepository.addStandaloneModel("items", inputStream);
         if (modelName != null) {
-            Collection<Item> items = standaloneItemProvider.getItemsFromStandaloneModel(modelName);
+            items.addAll(standaloneItemProvider.getItemsFromStandaloneModel(modelName));
             modelRepository.removeStandaloneModel(modelName);
-            return items;
         }
-        return Collections.emptyList();
     }
 }

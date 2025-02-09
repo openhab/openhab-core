@@ -10,12 +10,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.thing.syntax;
+package org.openhab.core.items.syntax;
 
 import java.util.Collection;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.items.Item;
+import org.openhab.core.items.Metadata;
 
 /**
  * {@link ItemSyntaxParser} is the interface to implement by any syntax parser for {@link Item} object.
@@ -33,11 +34,12 @@ public interface ItemSyntaxParser {
     String getParserFormat();
 
     /**
-     * Parse the provided syntax and return the corresponding {@link Item} objects without impacting
-     * the item registry.
+     * Parse the provided syntax and return the corresponding {@link Item} and {@link Metadata} objects
+     * without impacting the item and metadata registries.
      *
      * @param syntax the syntax
-     * @return the collection of corresponding {@link Item}
+     * @param items a collection of items that is filled by the run of this method
+     * @param metadata a collection of metadata that is filled by the run of this method
      */
-    Collection<Item> parseSyntax(String syntax);
+    void parseSyntax(String syntax, Collection<Item> items, Collection<Metadata> metadata);
 }
