@@ -81,11 +81,10 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
          * @return a new {@link QuantityType} based on 'targetUnit' or null.
          */
         private @Nullable QuantityType<?> toInvertibleUnit(QuantityType<?> source, Unit<?> targetUnit) {
-            Unit<?> sourceSystemUnit = source.getUnit().getSystemUnit();
-            if (!targetUnit.equals(sourceSystemUnit) && !targetUnit.isCompatible(AbstractUnit.ONE)
-                    && sourceSystemUnit.inverse().isCompatible(targetUnit)) {
-                QuantityType<?> sourceInItsSystemUnit = source.toUnit(sourceSystemUnit);
-                return sourceInItsSystemUnit != null ? sourceInItsSystemUnit.inverse().toUnit(targetUnit) : null;
+            if (!targetUnit.equals(source.getUnit()) && !targetUnit.isCompatible(AbstractUnit.ONE)
+                    && source.getUnit().inverse().isCompatible(targetUnit)) {
+                QuantityType<?> sourceInSystemUnit = source.toUnit(source.getUnit().getSystemUnit());
+                return sourceInSystemUnit != null ? sourceInSystemUnit.inverse().toUnit(targetUnit) : null;
             }
             return source.toUnit(targetUnit);
         }
