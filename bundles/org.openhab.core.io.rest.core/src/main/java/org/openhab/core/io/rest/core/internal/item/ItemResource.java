@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -82,6 +83,8 @@ import org.openhab.core.items.dto.GroupItemDTO;
 import org.openhab.core.items.dto.ItemDTOMapper;
 import org.openhab.core.items.dto.MetadataDTO;
 import org.openhab.core.items.events.ItemEventFactory;
+import org.openhab.core.items.syntax.ItemSyntaxGenerator;
+import org.openhab.core.items.syntax.ItemSyntaxParser;
 import org.openhab.core.library.items.RollershutterItem;
 import org.openhab.core.library.items.SwitchItem;
 import org.openhab.core.library.types.OnOffType;
@@ -89,6 +92,8 @@ import org.openhab.core.library.types.RawType;
 import org.openhab.core.library.types.UpDownType;
 import org.openhab.core.semantics.SemanticTagRegistry;
 import org.openhab.core.semantics.SemanticsPredicates;
+import org.openhab.core.thing.link.ItemChannelLink;
+import org.openhab.core.thing.link.ItemChannelLinkRegistry;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
 import org.openhab.core.types.TypeParser;
@@ -96,6 +101,8 @@ import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.component.annotations.ReferenceCardinality;
+import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.jaxrs.whiteboard.JaxrsWhiteboardConstants;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JSONRequired;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
@@ -137,6 +144,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * @author Stefan Triller - Added bulk item add method
  * @author Markus Rathgeb - Migrated to JAX-RS Whiteboard Specification
  * @author Wouter Born - Migrated to OpenAPI annotations
+ * @author Laurent Garnier - Added API to parse and generate syntax for item
  */
 @Component
 @JaxrsResource
@@ -182,7 +190,10 @@ public class ItemResource implements RESTResource {
     private final MetadataRegistry metadataRegistry;
     private final MetadataSelectorMatcher metadataSelectorMatcher;
     private final SemanticTagRegistry semanticTagRegistry;
+    private final ItemChannelLinkRegistry itemChannelLinkRegistry;
     private final TimeZoneProvider timeZoneProvider;
+    private final Map<String, ItemSyntaxGenerator> itemSyntaxGenerators = new ConcurrentHashMap<>();
+    private final Map<String, ItemSyntaxParser> itemSyntaxParsers = new ConcurrentHashMap<>();
 
     private final RegistryChangedRunnableListener<Item> resetLastModifiedItemChangeListener = new RegistryChangedRunnableListener<>(
             () -> lastModified = null);
@@ -202,6 +213,7 @@ public class ItemResource implements RESTResource {
             final @Reference MetadataRegistry metadataRegistry,
             final @Reference MetadataSelectorMatcher metadataSelectorMatcher,
             final @Reference SemanticTagRegistry semanticTagRegistry,
+            final @Reference ItemChannelLinkRegistry itemChannelLinkRegistry,
             final @Reference TimeZoneProvider timeZoneProvider) {
         this.dtoMapper = dtoMapper;
         this.eventPublisher = eventPublisher;
@@ -212,6 +224,7 @@ public class ItemResource implements RESTResource {
         this.metadataRegistry = metadataRegistry;
         this.metadataSelectorMatcher = metadataSelectorMatcher;
         this.semanticTagRegistry = semanticTagRegistry;
+        this.itemChannelLinkRegistry = itemChannelLinkRegistry;
         this.timeZoneProvider = timeZoneProvider;
 
         this.itemRegistry.addRegistryChangeListener(resetLastModifiedItemChangeListener);
@@ -222,6 +235,24 @@ public class ItemResource implements RESTResource {
     void deactivate() {
         this.itemRegistry.removeRegistryChangeListener(resetLastModifiedItemChangeListener);
         this.metadataRegistry.removeRegistryChangeListener(resetLastModifiedMetadataChangeListener);
+    }
+
+    @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.MULTIPLE)
+    protected void addItemSyntaxGenerator(ItemSyntaxGenerator itemSyntaxGenerator) {
+        itemSyntaxGenerators.put(itemSyntaxGenerator.getGeneratorFormat(), itemSyntaxGenerator);
+    }
+
+    protected void removeItemSyntaxGenerator(ItemSyntaxGenerator itemSyntaxGenerator) {
+        itemSyntaxGenerators.remove(itemSyntaxGenerator.getGeneratorFormat());
+    }
+
+    @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.MULTIPLE)
+    protected void addItemSyntaxParser(ItemSyntaxParser itemSyntaxParser) {
+        itemSyntaxParsers.put(itemSyntaxParser.getParserFormat(), itemSyntaxParser);
+    }
+
+    protected void removeItemSyntaxParser(ItemSyntaxParser itemSyntaxGenerator) {
+        itemSyntaxParsers.remove(itemSyntaxGenerator.getParserFormat());
     }
 
     private UriBuilder uriBuilder(final UriInfo uriInfo, final HttpHeaders httpHeaders) {
@@ -901,6 +932,133 @@ public class ItemResource implements RESTResource {
         return JSONResponse.createResponse(Status.OK, dto, null);
     }
 
+    @GET
+    @RolesAllowed({ Role.ADMIN })
+    @Path("/syntax/generate")
+    @Produces(MediaType.TEXT_PLAIN)
+    @Operation(operationId = "generateSyntaxForAllItems", summary = "Generate syntax for all items.", security = {
+            @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
+                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode = "400", description = "Unsupported syntax generator.") })
+    public Response generateSyntaxForAllItems(
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
+            @DefaultValue("DSL") @QueryParam("format") @Parameter(description = "syntax format") String format,
+            @DefaultValue("true") @QueryParam("hideDefaultParameters") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters) {
+        ItemSyntaxGenerator generator = itemSyntaxGenerators.get(format);
+        if (generator == null) {
+            String message = "No syntax generator available for format " + format + "!";
+            return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
+        }
+        Collection<Item> items = itemRegistry.getAll();
+        return Response.ok(generator.generateSyntax(sortItems(items), getMetadata(items), hideDefaultParameters))
+                .build();
+    }
+
+    @POST
+    @RolesAllowed({ Role.ADMIN })
+    @Path("/{itemname: [a-zA-Z_0-9]+}/syntax/parse")
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(operationId = "parseSyntaxForItem", summary = "Parse syntax for an item.", security = {
+            @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
+                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = EnrichedItemDTO.class))),
+                    @ApiResponse(responseCode = "400", description = "Unsupported syntax parser."),
+                    @ApiResponse(responseCode = "400", description = "Invalid syntax.") })
+    public Response parseSyntaxForItem(final @Context UriInfo uriInfo, final @Context HttpHeaders httpHeaders,
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
+            @PathParam("itemname") @Parameter(description = "item name") String itemname,
+            @DefaultValue("DSL") @QueryParam("format") @Parameter(description = "syntax format") String format,
+            @Parameter(description = "item syntax", required = true) String syntax) {
+        final Locale locale = localeService.getLocale(language);
+        final ZoneId zoneId = timeZoneProvider.getTimeZone();
+
+        ItemSyntaxParser parser = itemSyntaxParsers.get(format);
+        if (parser == null) {
+            String message = "No syntax parser available for format " + format + "!";
+            return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
+        }
+
+        Collection<Item> items = new ArrayList<>();
+        Collection<Metadata> metadata = new ArrayList<>();
+        parser.parseSyntax(syntax, items, metadata);
+        if (items.size() != 1) {
+            String message = items.size() == 0 ? "Invalid syntax!"
+                    : "Only one item expected while several are provided!";
+            return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
+        }
+
+        Item item = items.iterator().next();
+        String name = item.getName();
+        if (!name.equals(itemname)) {
+            String message = "Name " + name + " in the parsed syntax is not consistent with name " + itemname
+                    + " in the API URL!";
+            return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
+        }
+
+        EnrichedItemDTO dto = EnrichedItemDTOMapper.map(item, false, null, uriBuilder(uriInfo, httpHeaders), locale,
+                zoneId);
+        // addMetadata(dto, namespaces, null);
+        dto.editable = isEditable(dto.name);
+        // if (dto instanceof EnrichedGroupItemDTO enrichedGroupItemDTO) {
+        // for (EnrichedItemDTO member : enrichedGroupItemDTO.members) {
+        // member.editable = isEditable(member.name);
+        // }
+        // }
+        return JSONResponse.createResponse(Status.OK, dto, null);
+    }
+
+    @POST
+    @RolesAllowed({ Role.ADMIN })
+    @Path("/{itemname: [a-zA-Z_0-9]+}/syntax/generate")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.TEXT_PLAIN)
+    @Operation(operationId = "generateSyntaxForItem", summary = "Generate syntax for an item.", security = {
+            @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
+                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode = "400", description = "Unsupported syntax generator."),
+                    @ApiResponse(responseCode = "404", description = "Item not found.") })
+    public Response generateSyntaxForItem(
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
+            @PathParam("itemname") @Parameter(description = "item name") String itemname,
+            @DefaultValue("DSL") @QueryParam("format") @Parameter(description = "syntax format") String format,
+            @DefaultValue("true") @QueryParam("hideDefaultParameters") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters,
+            @Parameter(description = "item data", required = false) @Nullable GroupItemDTO itemData) {
+        ItemSyntaxGenerator generator = itemSyntaxGenerators.get(format);
+        if (generator == null) {
+            String message = "No syntax generator available for format " + format + "!";
+            return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
+        }
+
+        Item item = getItem(itemname);
+        if (item == null) {
+            String message = "Item " + itemname + " does not exist!";
+            return Response.status(Response.Status.NOT_FOUND).entity(message).build();
+        }
+
+        if (itemData != null) {
+            String name = itemData.name;
+            if (name == null || !name.equals(itemname)) {
+                String message = "Name " + name + " in the item data is not consistent with name " + itemname
+                        + " in the API URL!";
+                return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
+            }
+
+            try {
+                item = ItemDTOMapper.map(itemData, itemBuilderFactory);
+                if (item == null) {
+                    String message = "Invalid item type in item data!";
+                    return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
+                }
+            } catch (IllegalArgumentException e) {
+                String message = "Invalid item name in item data!";
+                return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
+            }
+        }
+
+        List<Item> items = List.of(item);
+        return Response.ok(generator.generateSyntax(items, getMetadata(items), hideDefaultParameters)).build();
+    }
+
     private JsonObject buildStatusObject(String itemName, String status, @Nullable String message) {
         JsonObject jo = new JsonObject();
         jo.addProperty("name", itemName);
@@ -1005,5 +1163,86 @@ public class ItemResource implements RESTResource {
 
     private boolean isEditable(String itemName) {
         return managedItemProvider.get(itemName) != null;
+    }
+
+    /*
+     * Get all the metadata for a list of items including channel links mapped to metadata in the namespace "channel"
+     */
+    private Collection<Metadata> getMetadata(Collection<Item> items) {
+        Collection<Metadata> metadata = new ArrayList<>();
+        for (Item item : items) {
+            String itemName = item.getName();
+            metadataRegistry.getAll().stream().filter(md -> md.getUID().getItemName().equals(itemName)).forEach(md -> {
+                metadata.add(md);
+            });
+            itemChannelLinkRegistry.getLinks(itemName).forEach(link -> {
+                MetadataKey key = new MetadataKey("channel", itemName);
+                Metadata md = new Metadata(key, link.getLinkedUID().getAsString(),
+                        link.getConfiguration().getProperties());
+                metadata.add(md);
+            });
+        }
+        return metadata;
+    }
+
+    /*
+     * Sort the items in such a way:
+     * - group items are before non group items
+     * - group items are sorted to have as much as possible ancestors before their children
+     * - items not linked to a channel are before items linked to a channel
+     * - items linked to a channel are grouped by thing UID
+     * - items linked to the same thing UID are sorted by item name
+     */
+    private List<Item> sortItems(Collection<Item> items) {
+        List<Item> groups = items.stream().filter(item -> item instanceof GroupItem).sorted((item1, item2) -> {
+            return item1.getName().compareTo(item2.getName());
+        }).collect(Collectors.toList());
+
+        List<Item> topGroups = groups.stream().filter(group -> group.getGroupNames().isEmpty())
+                .sorted((group1, group2) -> {
+                    return group1.getName().compareTo(group2.getName());
+                }).collect(Collectors.toList());
+
+        List<Item> groupTree = new ArrayList<>();
+        for (Item group : topGroups) {
+            fillGroupTree(groupTree, group);
+        }
+
+        if (groupTree.size() != groups.size()) {
+            logger.warn("Something want wrong when sorting groups; failback to a sort by name.");
+            groupTree = groups;
+        }
+
+        List<Item> nonGroups = items.stream().filter(item -> !(item instanceof GroupItem)).sorted((item1, item2) -> {
+            Set<ItemChannelLink> channelLinks1 = itemChannelLinkRegistry.getLinks(item1.getName());
+            String thingUID1 = channelLinks1.isEmpty() ? null
+                    : channelLinks1.iterator().next().getLinkedUID().getThingUID().getAsString();
+            Set<ItemChannelLink> channelLinks2 = itemChannelLinkRegistry.getLinks(item2.getName());
+            String thingUID2 = channelLinks2.isEmpty() ? null
+                    : channelLinks2.iterator().next().getLinkedUID().getThingUID().getAsString();
+
+            if (thingUID1 == null && thingUID2 != null) {
+                return -1;
+            } else if (thingUID1 != null && thingUID2 == null) {
+                return 1;
+            } else if (thingUID1 != null && thingUID2 != null && !thingUID1.equals(thingUID2)) {
+                return thingUID1.compareTo(thingUID2);
+            }
+            return item1.getName().compareTo(item2.getName());
+        }).collect(Collectors.toList());
+
+        return Stream.of(groupTree, nonGroups).flatMap(List::stream).collect(Collectors.toList());
+    }
+
+    private void fillGroupTree(List<Item> groups, Item item) {
+        if (item instanceof GroupItem group && !groups.contains(group)) {
+            groups.add(group);
+            List<Item> members = group.getMembers().stream().sorted((member1, member2) -> {
+                return member1.getName().compareTo(member2.getName());
+            }).collect(Collectors.toList());
+            for (Item member : members) {
+                fillGroupTree(groups, member);
+            }
+        }
     }
 }

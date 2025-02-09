@@ -17,8 +17,8 @@ package org.openhab.core.model.thing.formatting
 
 import org.eclipse.xtext.formatting.impl.AbstractDeclarativeFormatter
 import org.eclipse.xtext.formatting.impl.FormattingConfig
-// import com.google.inject.Inject;
-// import org.openhab.core.model.thing.services.ThingGrammarAccess
+import com.google.inject.Inject;
+import org.openhab.core.model.thing.services.ThingGrammarAccess
 
 /**
  * This class contains custom formatting description.
@@ -30,13 +30,53 @@ import org.eclipse.xtext.formatting.impl.FormattingConfig
  */
 class ThingFormatter extends AbstractDeclarativeFormatter {
 
-//	@Inject extension ThingGrammarAccess
-	
+	@Inject extension ThingGrammarAccess
+
 	override protected void configureFormatting(FormattingConfig c) {
-// It's usually a good idea to activate the following three statements.
-// They will add and preserve newlines around comments
-//		c.setLinewrap(0, 1, 2).before(SL_COMMENTRule)
-//		c.setLinewrap(0, 1, 2).before(ML_COMMENTRule)
-//		c.setLinewrap(0, 1, 1).after(ML_COMMENTRule)
+		c.setLinewrap(1, 1, 2).before("Bridge", "Things:", "Channels:")
+		c.setLinewrap(1, 1, 2).before(modelThingRule)
+		c.setLinewrap(1, 1, 2).before(modelChannelRule)
+
+		c.setIndentationIncrement.after("{")
+		c.setIndentationDecrement.before("}")
+		c.setIndentationIncrement.before(modelChannelRule)
+		c.setIndentationDecrement.after(modelChannelRule)
+		c.setLinewrap().before("}")
+
+		c.setNoSpace().withinKeywordPairs("(", ")")
+		c.setNoSpace().withinKeywordPairs("[", "]")
+		c.setNoSpace().around("=")
+		c.setNoSpace().before(",")
+
+		c.autoLinewrap = 400
+
+		c.setLinewrap(0, 1, 2).before(SL_COMMENTRule)
+		c.setLinewrap(0, 1, 2).before(ML_COMMENTRule)
+		c.setLinewrap(0, 1, 1).after(ML_COMMENTRule)
+	}
+
+	def withinKeywordPairs(FormattingConfig.NoSpaceLocator locator, String leftKW, String rightKW) {
+		for (pair : findKeywordPairs(leftKW, rightKW)) {
+			locator.after(pair.first)
+			locator.before(pair.second)
+		}
+	}
+
+	def around(FormattingConfig.ElementLocator locator, String ... listKW) {
+		for (keyword : findKeywords(listKW)) {
+			locator.around(keyword)
+		}
+	}
+
+	def after(FormattingConfig.ElementLocator locator, String ... listKW) {
+		for (keyword : findKeywords(listKW)) {
+			locator.after(keyword)
+		}
+	}
+
+	def before(FormattingConfig.ElementLocator locator, String ... listKW) {
+		for (keyword : findKeywords(listKW)) {
+			locator.before(keyword)
+		}
 	}
 }

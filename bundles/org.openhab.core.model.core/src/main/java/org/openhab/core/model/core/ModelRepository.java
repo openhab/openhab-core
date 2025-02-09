@@ -26,6 +26,7 @@ import org.eclipse.jdt.annotation.Nullable;
  * come from.
  *
  * @author Kai Kreuzer - Initial contribution
+ * @author Laurent Garnier - Added methods addStandaloneModel, removeStandaloneModel and generateSyntaxFromModel
  */
 @NonNullByDefault
 public interface ModelRepository {
@@ -92,4 +93,32 @@ public interface ModelRepository {
      * @param listener the listener to remove
      */
     void removeModelRepositoryChangeListener(ModelRepositoryChangeListener listener);
+
+    /**
+     * Adds a standalone model to the repository
+     * A standalone model will be loaded without triggering any listener.
+     *
+     * @param modelType the model type
+     * @param inputStream an input stream with the model's content
+     * @return the created model name if it was successfully processed, null otherwise
+     */
+    @Nullable
+    String addStandaloneModel(String modelType, InputStream inputStream);
+
+    /**
+     * Removes a standalone model from the repository
+     *
+     * @param name the name of the model to remove
+     * @return true, if model was removed, false, if it did not exist
+     */
+    boolean removeStandaloneModel(String name);
+
+    /**
+     * Generate the syntax from a provided model content.
+     *
+     * @param modelType the model type
+     * @param modelContent the content of the model
+     * @return the corresponding syntax
+     */
+    String generateSyntaxFromModel(String modelType, EObject modelContent);
 }

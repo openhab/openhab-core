@@ -13,6 +13,7 @@
 package org.openhab.core.model.core.internal;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -50,6 +51,7 @@ import org.slf4j.LoggerFactory;
  * @author Kai Kreuzer - Initial contribution
  * @author Oliver Libutzki - Added reloadAllModelsOfType method
  * @author Simon Kaufmann - added validation of models before loading them
+ * @author Laurent Garnier - Added methods addStandaloneModel, removeStandaloneModel and generateSyntaxFromModel
  */
 @Component(immediate = true)
 @NonNullByDefault
@@ -63,6 +65,8 @@ public class ModelRepositoryImpl implements ModelRepository {
     private final List<ModelRepositoryChangeListener> listeners = new CopyOnWriteArrayList<>();
 
     private final SafeEMF safeEmf;
+
+    private int counter;
 
     @Activate
     public ModelRepositoryImpl(final @Reference SafeEMF safeEmf) {
@@ -96,6 +100,10 @@ public class ModelRepositoryImpl implements ModelRepository {
 
     @Override
     public boolean addOrRefreshModel(String name, final InputStream originalInputStream) {
+        return addOrRefreshModel(name, originalInputStream, false);
+    }
+
+    public boolean addOrRefreshModel(String name, final InputStream originalInputStream, boolean standalone) {
         logger.info("Loading model '{}'", name);
         Resource resource = null;
         byte[] bytes;
@@ -124,7 +132,9 @@ public class ModelRepositoryImpl implements ModelRepository {
                         resource = resourceSet.createResource(URI.createURI(name));
                         if (resource != null) {
                             resource.load(inputStream, resourceOptions);
-                            notifyListeners(name, EventType.ADDED);
+                            if (!standalone) {
+                                notifyListeners(name, EventType.ADDED);
+                            }
                             return true;
                         } else {
                             logger.warn("Ignoring file '{}' as we do not have a parser for it.", name);
@@ -135,7 +145,9 @@ public class ModelRepositoryImpl implements ModelRepository {
                 synchronized (resourceSet) {
                     resource.unload();
                     resource.load(inputStream, resourceOptions);
-                    notifyListeners(name, EventType.MODIFIED);
+                    if (!standalone) {
+                        notifyListeners(name, EventType.MODIFIED);
+                    }
                     return true;
                 }
             }
@@ -150,11 +162,17 @@ public class ModelRepositoryImpl implements ModelRepository {
 
     @Override
     public boolean removeModel(String name) {
+        return removeModel(name, false);
+    }
+
+    private boolean removeModel(String name, boolean standalone) {
         Resource resource = getResource(name);
         if (resource != null) {
             synchronized (resourceSet) {
                 // do not physically delete it, but remove it from the resource set
-                notifyListeners(name, EventType.REMOVED);
+                if (!standalone) {
+                    notifyListeners(name, EventType.REMOVED);
+                }
                 resourceSet.getResources().remove(resource);
                 return true;
             }
@@ -171,7 +189,8 @@ public class ModelRepositoryImpl implements ModelRepository {
 
             return resourceListCopy.stream()
                     .filter(input -> input.getURI().lastSegment().contains(".") && input.isLoaded()
-                            && modelType.equalsIgnoreCase(input.getURI().fileExtension()))
+                            && modelType.equalsIgnoreCase(input.getURI().fileExtension())
+                            && !input.getURI().lastSegment().startsWith("tmp_"))
                     .map(from -> from.getURI().path()).toList();
         }
     }
@@ -225,6 +244,37 @@ public class ModelRepositoryImpl implements ModelRepository {
     @Override
     public void removeModelRepositoryChangeListener(ModelRepositoryChangeListener listener) {
         listeners.remove(listener);
+    }
+
+    @Override
+    public @Nullable String addStandaloneModel(String modelType, InputStream inputStream) {
+        String name = "tmp_syntax_%d.%s".formatted(++counter, modelType);
+        return addOrRefreshModel(name, inputStream, true) ? name : null;
+    }
+
+    @Override
+    public boolean removeStandaloneModel(String name) {
+        return removeModel(name, true);
+    }
+
+    @Override
+    public String generateSyntaxFromModel(String modelType, EObject modelContent) {
+        String result = "";
+        synchronized (resourceSet) {
+            String name = "tmp_generated_syntax_%d.%s".formatted(++counter, modelType);
+            Resource resource = resourceSet.createResource(URI.createURI(name));
+            try {
+                resource.getContents().add(modelContent);
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                resource.save(outputStream, Map.of(XtextResource.OPTION_ENCODING, StandardCharsets.UTF_8.name()));
+                result = new String(outputStream.toByteArray());
+            } catch (IOException e) {
+                logger.warn("Exception when saving the model {}", resource.getURI().lastSegment());
+            } finally {
+                resourceSet.getResources().remove(resource);
+            }
+        }
+        return result;
     }
 
     private @Nullable Resource getResource(String name) {
