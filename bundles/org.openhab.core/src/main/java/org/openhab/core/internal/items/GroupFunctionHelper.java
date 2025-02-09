@@ -77,9 +77,9 @@ public class GroupFunctionHelper {
         return states;
     }
 
-    private GroupFunction createDimensionGroupFunction(GroupFunctionDTO function, NumberItem baseNumberItem) {
+    private GroupFunction createDimensionGroupFunction(GroupFunctionDTO function, NumberItem baseItem) {
         final String functionName = function.name;
-        Unit<?> baseItemUnit = baseNumberItem.getUnit();
+        Unit<?> baseItemUnit = baseItem.getUnit();
         if (baseItemUnit != null) {
             switch (functionName.toUpperCase()) {
                 case "AVG":
@@ -95,7 +95,7 @@ public class GroupFunctionHelper {
                 default:
             }
         }
-        return createDefaultGroupFunction(function, baseNumberItem);
+        return createDefaultGroupFunction(function, baseItem);
     }
 
     private GroupFunction createDefaultGroupFunction(GroupFunctionDTO function, @Nullable Item baseItem) {
