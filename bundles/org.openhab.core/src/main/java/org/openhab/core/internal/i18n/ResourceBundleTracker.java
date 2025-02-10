@@ -19,6 +19,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.i18n.LocaleProvider;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -38,6 +40,7 @@ import org.osgi.util.tracker.BundleTracker;
  * @author Ana Dimova - fragments support
  */
 @SuppressWarnings({ "deprecation", "rawtypes" })
+@NonNullByDefault
 public class ResourceBundleTracker extends BundleTracker {
 
     private LocaleProvider localeProvider;
@@ -65,7 +68,7 @@ public class ResourceBundleTracker extends BundleTracker {
     }
 
     @Override
-    public synchronized Object addingBundle(Bundle bundle, BundleEvent event) {
+    public synchronized @Nullable Object addingBundle(@Nullable Bundle bundle, @Nullable BundleEvent event) {
         if (isFragmentBundle(bundle)) {
             List<Bundle> hosts = returnHostBundles(bundle);
             for (Bundle host : hosts) {
@@ -78,7 +81,8 @@ public class ResourceBundleTracker extends BundleTracker {
     }
 
     @Override
-    public synchronized void removedBundle(Bundle bundle, BundleEvent event, Object object) {
+    public synchronized void removedBundle(@Nullable Bundle bundle, @Nullable BundleEvent event,
+            @Nullable Object object) {
         LanguageResourceBundleManager languageResource = this.bundleLanguageResourceMap.remove(bundle);
         if (languageResource != null) {
             languageResource.clearCache();
@@ -101,7 +105,7 @@ public class ResourceBundleTracker extends BundleTracker {
      * @param bundle the bundle which points to the specific resource manager (could be null)
      * @return the specific resource manager (could be null)
      */
-    public LanguageResourceBundleManager getLanguageResource(Bundle bundle) {
+    public @Nullable LanguageResourceBundleManager getLanguageResource(@Nullable Bundle bundle) {
         if (bundle != null) {
             return this.bundleLanguageResourceMap.get(bundle);
         }
@@ -124,7 +128,7 @@ public class ResourceBundleTracker extends BundleTracker {
      * @param fragment an OSGi fragment bundle.
      * @return a list with the hosts of the <code>fragment</code> parameter.
      */
-    private List<Bundle> returnHostBundles(Bundle fragment) {
+    private List<Bundle> returnHostBundles(@Nullable Bundle fragment) {
         List<Bundle> hosts = new ArrayList<>();
         Bundle[] bundles = pkgAdmin.getHosts(fragment);
         if (bundles != null) {
@@ -139,7 +143,7 @@ public class ResourceBundleTracker extends BundleTracker {
      * @param bundle the <i>OSGi</i> bundle that should be checked is it a fragment bundle.
      * @return <code>true</code> if the bundle is a fragment and <code>false</code> if it is a host.
      */
-    private boolean isFragmentBundle(Bundle bundle) {
+    private boolean isFragmentBundle(@Nullable Bundle bundle) {
         return pkgAdmin.getBundleType(bundle) == PackageAdmin.BUNDLE_TYPE_FRAGMENT;
     }
 
@@ -149,8 +153,8 @@ public class ResourceBundleTracker extends BundleTracker {
      *
      * @param bundle the <i>OSGi</i> bundle that was detected
      */
-    private void addResourceBundle(Bundle bundle) {
-        if (bundle.getState() != Bundle.UNINSTALLED) {
+    private void addResourceBundle(@Nullable Bundle bundle) {
+        if (bundle != null && bundle.getState() != Bundle.UNINSTALLED) {
             LanguageResourceBundleManager languageResource = new LanguageResourceBundleManager(localeProvider, bundle);
             if (languageResource.containsResources()) {
                 this.bundleLanguageResourceMap.put(bundle, languageResource);
