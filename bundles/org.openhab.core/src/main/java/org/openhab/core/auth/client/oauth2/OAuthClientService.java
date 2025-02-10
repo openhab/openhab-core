@@ -127,7 +127,7 @@ public interface OAuthClientService extends AutoCloseable {
      *            HTTP/1.1 302 Found
      *            Location: https://client.example.com/cb?code=SplxlOBeZQQYbYS6WxSbIA&state=xyz
      *            }</pre>
-     * 
+     *
      * @return AuthorizationCode This authorizationCode can be used in the call {#getOAuthTokenByAuthCode(String)}
      * @throws OAuthException If the state from redirectURLwithParams does not exactly match the expectedState, or
      *             exceptions arise while parsing redirectURLwithParams.

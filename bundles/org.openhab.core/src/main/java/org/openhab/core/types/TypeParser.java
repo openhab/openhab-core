@@ -27,13 +27,14 @@ import org.eclipse.jdt.annotation.Nullable;
 @NonNullByDefault
 public final class TypeParser {
 
+    private static final String CORE_LIBRARY_PACKAGE = "org.openhab.core.library.types.";
+    private static final String VALUE_OF = "valueOf";
+
     /**
      * No instances allowed.
      */
     private TypeParser() {
     }
-
-    private static final String CORE_LIBRARY_PACKAGE = "org.openhab.core.library.types.";
 
     /**
      * Parses a string into a type.
@@ -45,7 +46,7 @@ public final class TypeParser {
     public static @Nullable Type parseType(String typeName, String input) {
         try {
             Class<?> stateClass = Class.forName(CORE_LIBRARY_PACKAGE + typeName);
-            Method valueOfMethod = stateClass.getMethod("valueOf", String.class);
+            Method valueOfMethod = stateClass.getMethod(VALUE_OF, String.class);
             return (Type) valueOfMethod.invoke(stateClass, input);
         } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException
                 | InvocationTargetException e) {
@@ -69,9 +70,8 @@ public final class TypeParser {
     public static @Nullable State parseState(List<Class<? extends State>> types, String s) {
         for (Class<? extends State> type : types) {
             try {
-                Method valueOf = type.getMethod("valueOf", String.class);
-                State state = (State) valueOf.invoke(type, s);
-                if (state != null) {
+                Method valueOf = type.getMethod(VALUE_OF, String.class);
+                if (valueOf.invoke(type, s) instanceof State state) {
                     return state;
                 }
             } catch (NoSuchMethodException | IllegalArgumentException | IllegalAccessException
@@ -97,9 +97,8 @@ public final class TypeParser {
     public static @Nullable Command parseCommand(List<Class<? extends Command>> types, String s) {
         for (Class<? extends Command> type : types) {
             try {
-                Method valueOf = type.getMethod("valueOf", String.class);
-                Command value = (Command) valueOf.invoke(type, s);
-                if (value != null) {
+                Method valueOf = type.getMethod(VALUE_OF, String.class);
+                if (valueOf.invoke(type, s) instanceof Command value) {
                     return value;
                 }
             } catch (NoSuchMethodException | IllegalArgumentException | IllegalAccessException

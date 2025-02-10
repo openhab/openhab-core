@@ -12,9 +12,11 @@
  */
 package org.openhab.core.auth;
 
-import java.util.Arrays;
-import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
+
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * Definition of authentication given to username after verification of credentials by authentication provider.
@@ -26,18 +28,19 @@ import java.util.Set;
  * @author Kai Kreuzer - Added JavaDoc and switched from array to Set
  * @author Yannick Schaus - Add scope
  */
+@NonNullByDefault
 public class Authentication {
 
-    private String username;
+    private @Nullable String username;
     private Set<String> roles;
-    private String scope;
+    private @Nullable String scope;
 
     /**
      * no-args constructor required by gson
      */
     protected Authentication() {
         this.username = null;
-        this.roles = null;
+        this.roles = Set.of();
         this.scope = null;
     }
 
@@ -49,7 +52,7 @@ public class Authentication {
      */
     public Authentication(String username, String... roles) {
         this.username = username;
-        this.roles = new HashSet<>(Arrays.asList(roles));
+        this.roles = Set.of(roles);
     }
 
     /**
@@ -70,7 +73,7 @@ public class Authentication {
      * @return user name
      */
     public String getUsername() {
-        return username;
+        return Objects.requireNonNull(username);
     }
 
     /**
@@ -87,7 +90,7 @@ public class Authentication {
      *
      * @return a scope
      */
-    public String getScope() {
+    public @Nullable String getScope() {
         return scope;
     }
 }

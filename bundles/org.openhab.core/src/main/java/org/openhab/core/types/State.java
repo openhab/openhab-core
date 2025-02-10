@@ -31,10 +31,6 @@ public interface State extends Type {
      *         not possible
      */
     default <T extends @Nullable State> @Nullable T as(@Nullable Class<T> target) {
-        if (target != null && target.isInstance(this)) {
-            return target.cast(this);
-        } else {
-            return null;
-        }
+        return target != null && target.isInstance(this) ? target.cast(this) : null;
     }
 }
