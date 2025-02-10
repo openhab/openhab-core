@@ -15,6 +15,8 @@ package org.openhab.core.internal.events;
 import java.util.Dictionary;
 import java.util.Hashtable;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventPublisher;
 import org.osgi.service.component.annotations.Activate;
@@ -32,32 +34,38 @@ import org.osgi.service.event.EventAdmin;
  * @author Simon Kaufmann - separated from OSGiEventManager
  */
 @Component
+@NonNullByDefault
 public class OSGiEventPublisher implements EventPublisher {
+    protected static final String SOURCE = "source";
+    protected static final String TOPIC = "topic";
+    protected static final String PAYLOAD = "payload";
+    protected static final String TYPE = "type";
 
     private final EventAdmin osgiEventAdmin;
 
     @Activate
-    public OSGiEventPublisher(final @Reference EventAdmin eventAdmin) {
+    public OSGiEventPublisher(final @Reference @Nullable EventAdmin eventAdmin) {
+        if (eventAdmin == null) {
+            throw new IllegalStateException("The event bus module is not available!");
+        }
         this.osgiEventAdmin = eventAdmin;
     }
 
     @Override
     public void post(final Event event) throws IllegalArgumentException, IllegalStateException {
-        EventAdmin eventAdmin = this.osgiEventAdmin;
         assertValidArgument(event);
-        assertValidState(eventAdmin);
-        postAsOSGiEvent(eventAdmin, event);
+        postAsOSGiEvent(osgiEventAdmin, event);
     }
 
     private void postAsOSGiEvent(final EventAdmin eventAdmin, final Event event) throws IllegalStateException {
         try {
             Dictionary<String, Object> properties = new Hashtable<>(3);
-            properties.put("type", event.getType());
-            properties.put("payload", event.getPayload());
-            properties.put("topic", event.getTopic());
+            properties.put(TYPE, event.getType());
+            properties.put(PAYLOAD, event.getPayload());
+            properties.put(TOPIC, event.getTopic());
             String source = event.getSource();
             if (source != null) {
-                properties.put("source", source);
+                properties.put(SOURCE, source);
             }
             eventAdmin.postEvent(new org.osgi.service.event.Event("openhab", properties));
         } catch (Exception e) {
@@ -68,25 +76,13 @@ public class OSGiEventPublisher implements EventPublisher {
 
     private void assertValidArgument(Event event) throws IllegalArgumentException {
         String errorMsg = "The %s of the 'event' argument must not be null or empty.";
-        String value;
 
-        if (event == null) {
-            throw new IllegalArgumentException("Argument 'event' must not be null.");
-        }
-        if ((value = event.getType()) == null || value.isEmpty()) {
-            throw new IllegalArgumentException(String.format(errorMsg, "type"));
-        }
-        if ((value = event.getPayload()) == null || value.isEmpty()) {
-            throw new IllegalArgumentException(String.format(errorMsg, "payload"));
-        }
-        if ((value = event.getTopic()) == null || value.isEmpty()) {
-            throw new IllegalArgumentException(String.format(errorMsg, "topic"));
-        }
-    }
-
-    private void assertValidState(EventAdmin eventAdmin) throws IllegalStateException {
-        if (eventAdmin == null) {
-            throw new IllegalStateException("The event bus module is not available!");
+        if (event.getType().isEmpty()) {
+            throw new IllegalArgumentException(errorMsg.formatted(TYPE));
+        } else if (event.getPayload().isEmpty()) {
+            throw new IllegalArgumentException(errorMsg.formatted(PAYLOAD));
+        } else if (event.getTopic().isEmpty()) {
+            throw new IllegalArgumentException(errorMsg.formatted(TOPIC));
         }
     }
 }
