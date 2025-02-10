@@ -48,7 +48,7 @@ public class ParsingNestedException extends Exception {
      * @param msg is the additional message with additional information about the parsing process.
      * @param t is the exception thrown during the parsing.
      */
-    public ParsingNestedException(int type, @Nullable String id, String msg, Throwable t) {
+    public ParsingNestedException(int type, @Nullable String id, String msg, @Nullable Throwable t) {
         super(msg, t);
         this.id = id;
         this.type = type;
@@ -62,7 +62,7 @@ public class ParsingNestedException extends Exception {
      * @param id is the UID of the automation object for parsing.
      * @param t is the exception thrown during the parsing.
      */
-    public ParsingNestedException(int type, @Nullable String id, Throwable t) {
+    public ParsingNestedException(int type, @Nullable String id, @Nullable Throwable t) {
         super(t);
         this.id = id;
         this.type = type;
