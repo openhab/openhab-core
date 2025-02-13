@@ -14,7 +14,7 @@ package org.openhab.core.automation.internal.parser.gson;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -46,7 +46,7 @@ public class TemplateGSONParser extends AbstractGSONParser<Template> {
         try {
             if (jr.hasNext()) {
                 JsonToken token = jr.peek();
-                Set<Template> templates = new HashSet<>();
+                Set<Template> templates = new LinkedHashSet<>();
                 if (JsonToken.BEGIN_ARRAY.equals(token)) {
                     List<RuleTemplateDTO> templateDtos = gson.fromJson(jr, new TypeToken<List<RuleTemplateDTO>>() {
                     }.getType());

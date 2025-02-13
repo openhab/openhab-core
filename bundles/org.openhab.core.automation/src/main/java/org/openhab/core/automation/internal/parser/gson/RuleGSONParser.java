@@ -14,7 +14,7 @@ package org.openhab.core.automation.internal.parser.gson;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -44,7 +44,7 @@ public class RuleGSONParser extends AbstractGSONParser<Rule> {
     public Set<Rule> parse(InputStreamReader reader) throws ParsingException {
         JsonReader jr = new JsonReader(reader);
         try {
-            Set<Rule> rules = new HashSet<>();
+            Set<Rule> rules = new LinkedHashSet<>();
             if (jr.hasNext()) {
                 JsonToken token = jr.peek();
                 if (JsonToken.BEGIN_ARRAY.equals(token)) {
