@@ -62,7 +62,7 @@ public interface Item extends Identifiable<String> {
 
     /**
      * Returns the time the item was last updated.
-     * 
+     *
      * @return the time the item was last updated, or null if the item has never been updated.
      */
     @Nullable

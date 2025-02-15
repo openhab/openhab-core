@@ -48,6 +48,7 @@ import org.openhab.core.items.TimeSeriesListener;
 import org.openhab.core.persistence.FilterCriteria;
 import org.openhab.core.persistence.HistoricItem;
 import org.openhab.core.persistence.ModifiablePersistenceService;
+import org.openhab.core.persistence.PersistedItem;
 import org.openhab.core.persistence.PersistenceItemConfiguration;
 import org.openhab.core.persistence.PersistenceManager;
 import org.openhab.core.persistence.PersistenceService;
@@ -90,6 +91,7 @@ import org.slf4j.LoggerFactory;
  * @author Markus Rathgeb - Separation of persistence core and model, drop Quartz usage.
  * @author Jan N. Klug - Refactored to use service configuration registry
  * @author Jan N. Klug - Added time series support
+ * @author Mark Herwege - Added restoring lastState, lastStateChange and lastStateUpdate
  */
 @Component(immediate = true, service = PersistenceManager.class)
 @NonNullByDefault
@@ -549,36 +551,30 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, State
         private void restoreItemStateIfPossible(Item item) {
             QueryablePersistenceService queryService = (QueryablePersistenceService) persistenceService;
 
-            FilterCriteria filter = new FilterCriteria().setItemName(item.getName()).setEndDate(ZonedDateTime.now())
-                    .setPageSize(1);
-            Iterable<HistoricItem> result = safeCaller.create(queryService, QueryablePersistenceService.class)
+            PersistedItem persistedItem = safeCaller.create(queryService, QueryablePersistenceService.class)
                     .onTimeout(
                             () -> logger.warn("Querying persistence service '{}' to restore '{}' takes more than {}ms.",
                                     queryService.getId(), item.getName(), SafeCaller.DEFAULT_TIMEOUT))
                     .onException(e -> logger.error(
                             "Exception occurred while querying persistence service '{}' to restore '{}': {}",
                             queryService.getId(), item.getName(), e.getMessage(), e))
-                    .build().query(filter);
-            if (result == null) {
-                // in case of an exception or timeout, the safe caller returns null
+                    .build().persistedItem(item.getName());
+            if (persistedItem == null) {
                 return;
             }
-            Iterator<HistoricItem> it = result.iterator();
-            if (it.hasNext()) {
-                HistoricItem historicItem = it.next();
-                GenericItem genericItem = (GenericItem) item;
-                if (!UnDefType.NULL.equals(item.getState())) {
-                    // someone else already restored the state or a new state was set
-                    return;
-                }
-                genericItem.removeStateChangeListener(PersistenceManagerImpl.this);
-                genericItem.setState(historicItem.getState());
-                genericItem.addStateChangeListener(PersistenceManagerImpl.this);
-                if (logger.isDebugEnabled()) {
-                    logger.debug("Restored item state from '{}' for item '{}' -> '{}'",
-                            DateTimeFormatter.ISO_ZONED_DATE_TIME.format(historicItem.getTimestamp()), item.getName(),
-                            historicItem.getState());
-                }
+            GenericItem genericItem = (GenericItem) item;
+            if (!UnDefType.NULL.equals(item.getState())) {
+                // someone else already restored the state or a new state was set
+                return;
+            }
+            genericItem.removeStateChangeListener(PersistenceManagerImpl.this);
+            genericItem.setState(persistedItem.getState(), persistedItem.getLastState(), persistedItem.getTimestamp(),
+                    persistedItem.getLastStateChange());
+            genericItem.addStateChangeListener(PersistenceManagerImpl.this);
+            if (logger.isDebugEnabled()) {
+                logger.debug("Restored item state from '{}' for item '{}' -> '{}'",
+                        DateTimeFormatter.ISO_ZONED_DATE_TIME.format(persistedItem.getTimestamp()), item.getName(),
+                        persistedItem.getState());
             }
         }
 

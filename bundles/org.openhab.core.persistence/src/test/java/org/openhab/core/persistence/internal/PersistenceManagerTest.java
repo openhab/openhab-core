@@ -14,6 +14,7 @@ package org.openhab.core.persistence.internal;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
@@ -54,6 +55,7 @@ import org.openhab.core.library.types.StringType;
 import org.openhab.core.persistence.FilterCriteria;
 import org.openhab.core.persistence.HistoricItem;
 import org.openhab.core.persistence.ModifiablePersistenceService;
+import org.openhab.core.persistence.PersistedItem;
 import org.openhab.core.persistence.PersistenceItemConfiguration;
 import org.openhab.core.persistence.PersistenceItemInfo;
 import org.openhab.core.persistence.PersistenceService;
@@ -100,6 +102,7 @@ public class PersistenceManagerTest {
     private static final GroupItem TEST_GROUP_ITEM = new GroupItem(TEST_GROUP_ITEM_NAME);
 
     private static final State TEST_STATE = new StringType("testState1");
+    private static final State TEST_LAST_STATE = new StringType("testState2");
 
     private static final HistoricItem TEST_HISTORIC_ITEM = new HistoricItem() {
         @Override
@@ -115,6 +118,33 @@ public class PersistenceManagerTest {
         @Override
         public String getName() {
             return TEST_ITEM_NAME;
+        }
+    };
+
+    private static final PersistedItem TEST_PERSISTED_ITEM = new PersistedItem() {
+        @Override
+        public ZonedDateTime getTimestamp() {
+            return ZonedDateTime.now().minusDays(1);
+        }
+
+        @Override
+        public State getState() {
+            return TEST_STATE;
+        }
+
+        @Override
+        public String getName() {
+            return TEST_ITEM_NAME;
+        }
+
+        @Override
+        public @Nullable ZonedDateTime getLastStateChange() {
+            return ZonedDateTime.now().minusDays(2);
+        }
+
+        @Override
+        public @Nullable State getLastState() {
+            return TEST_LAST_STATE;
         }
     };
 
@@ -156,6 +186,7 @@ public class PersistenceManagerTest {
         when(persistenceServiceMock.getId()).thenReturn(TEST_PERSISTENCE_SERVICE_ID);
         when(queryablePersistenceServiceMock.getId()).thenReturn(TEST_QUERYABLE_PERSISTENCE_SERVICE_ID);
         when(queryablePersistenceServiceMock.query(any())).thenReturn(List.of(TEST_HISTORIC_ITEM));
+        when(queryablePersistenceServiceMock.persistedItem(any())).thenReturn(TEST_PERSISTED_ITEM);
         when(modifiablePersistenceServiceMock.getId()).thenReturn(TEST_MODIFIABLE_PERSISTENCE_SERVICE_ID);
 
         manager = new PersistenceManagerImpl(cronSchedulerMock, schedulerMock, itemRegistryMock, safeCallerMock,
@@ -329,11 +360,21 @@ public class PersistenceManagerTest {
         manager.onReadyMarkerAdded(new ReadyMarker("", ""));
         verify(readyServiceMock, timeout(1000)).markReady(any());
 
-        assertThat(TEST_ITEM2.getState(), is(TEST_STATE));
         assertThat(TEST_ITEM.getState(), is(TEST_STATE));
+        assertThat(TEST_ITEM.getLastState(), is(TEST_LAST_STATE));
+        assertThat(TEST_ITEM2.getState(), is(TEST_STATE));
+        assertThat(TEST_ITEM2.getLastState(), is(TEST_LAST_STATE));
         assertThat(TEST_GROUP_ITEM.getState(), is(TEST_STATE));
+        assertThat(TEST_GROUP_ITEM.getLastState(), is(TEST_LAST_STATE));
 
-        verify(queryablePersistenceServiceMock, times(3)).query(any());
+        verify(queryablePersistenceServiceMock, times(3)).persistedItem(any());
+
+        ZonedDateTime lastStateUpdate = TEST_ITEM.getLastStateUpdate();
+        assertNotNull(lastStateUpdate);
+        assertTrue(lastStateUpdate.isAfter(ZonedDateTime.now().minusDays(2)));
+        ZonedDateTime lastStateChange = TEST_ITEM.getLastStateChange();
+        assertNotNull(lastStateChange);
+        assertTrue(lastStateChange.isBefore(ZonedDateTime.now().minusDays(2)));
 
         verifyNoMoreInteractions(queryablePersistenceServiceMock);
         verifyNoMoreInteractions(persistenceServiceMock);
@@ -351,10 +392,20 @@ public class PersistenceManagerTest {
         verify(readyServiceMock, timeout(1000)).markReady(any());
 
         assertThat(TEST_ITEM.getState(), is(initialValue));
+        assertThat(TEST_ITEM.getLastState(), is(UnDefType.NULL));
         assertThat(TEST_ITEM2.getState(), is(TEST_STATE));
+        assertThat(TEST_ITEM2.getLastState(), is(TEST_LAST_STATE));
         assertThat(TEST_GROUP_ITEM.getState(), is(TEST_STATE));
+        assertThat(TEST_GROUP_ITEM.getLastState(), is(TEST_LAST_STATE));
 
-        verify(queryablePersistenceServiceMock, times(2)).query(any());
+        verify(queryablePersistenceServiceMock, times(2)).persistedItem(any());
+
+        ZonedDateTime lastStateUpdate = TEST_ITEM.getLastStateUpdate();
+        assertNotNull(lastStateUpdate);
+        assertTrue(lastStateUpdate.isAfter(ZonedDateTime.now().minusDays(1)));
+        ZonedDateTime lastStateChange = TEST_ITEM.getLastStateChange();
+        assertNotNull(lastStateChange);
+        assertTrue(lastStateChange.isAfter(ZonedDateTime.now().minusDays(1)));
 
         verifyNoMoreInteractions(queryablePersistenceServiceMock);
         verifyNoMoreInteractions(persistenceServiceMock);
