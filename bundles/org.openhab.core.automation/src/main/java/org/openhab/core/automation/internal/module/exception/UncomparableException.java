@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -12,6 +12,8 @@
  */
 package org.openhab.core.automation.internal.module.exception;
 
+import java.io.Serial;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
@@ -22,5 +24,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 @NonNullByDefault
 public class UncomparableException extends Exception {
 
+    @Serial
     private static final long serialVersionUID = 4891205711357448390L;
 }

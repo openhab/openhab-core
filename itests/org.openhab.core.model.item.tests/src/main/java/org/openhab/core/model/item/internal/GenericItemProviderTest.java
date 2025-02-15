@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -646,7 +646,7 @@ public class GenericItemProviderTest extends JavaOSGiTest {
         assertThat(list, instanceOf(List.class));
         List<Object> values = (List<Object>) list;
         assertThat(values.size(), is(2));
-        assertThat(values.get(0), is("string1"));
+        assertThat(values.getFirst(), is("string1"));
         assertThat(values.get(1), is("string2"));
 
         list = config.get("boolList");
@@ -654,7 +654,7 @@ public class GenericItemProviderTest extends JavaOSGiTest {
         assertThat(list, instanceOf(List.class));
         values = (List<Object>) list;
         assertThat(values.size(), is(2));
-        assertThat(values.get(0), is(false));
+        assertThat(values.getFirst(), is(false));
         assertThat(values.get(1), is(true));
     }
 

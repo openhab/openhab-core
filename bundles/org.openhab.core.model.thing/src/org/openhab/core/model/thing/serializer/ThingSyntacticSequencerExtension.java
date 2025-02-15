@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -30,8 +30,8 @@ public class ThingSyntacticSequencerExtension extends ThingSyntacticSequencer {
     @Override
     protected void emit_ModelThing_ThingKeyword_0_q(EObject semanticObject, ISynNavigable transition,
             List<INode> nodes) {
-        ILeafNode node = nodes != null && nodes.size() == 1 && nodes.get(0) instanceof ILeafNode
-                ? (ILeafNode) nodes.get(0)
+        ILeafNode node = nodes != null && nodes.size() == 1 && nodes.getFirst() instanceof ILeafNode
+                ? (ILeafNode) nodes.getFirst()
                 : null;
         Keyword keyword = grammarAccess.getModelThingAccess().getThingKeyword_0();
         acceptUnassignedKeyword(keyword, keyword.getValue(), node);

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -569,7 +569,7 @@ public class SafeCallerImplTest extends JavaTest {
      */
     private void joinAll() throws InterruptedException {
         while (!threads.isEmpty()) {
-            AssertingThread t = threads.remove(0);
+            AssertingThread t = threads.removeFirst();
             t.join();
             if (t.assertionError != null) {
                 throw t.assertionError;
@@ -591,7 +591,7 @@ public class SafeCallerImplTest extends JavaTest {
         @Override
         public void run() {
             try {
-                super.run();
+                super.run(); // NOPMD
             } catch (AssertionError e) {
                 AssertingThread.this.assertionError = e;
             } catch (RuntimeException e) {

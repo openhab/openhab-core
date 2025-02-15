@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -70,7 +70,7 @@ public class CommandOption {
         final int prime = 31;
         int result = 1;
         result = prime * result + command.hashCode();
-        result = prime * result + (label != null ? label.hashCode() : 0);
+        result = prime * result + Objects.hashCode(label);
         return result;
     }
 

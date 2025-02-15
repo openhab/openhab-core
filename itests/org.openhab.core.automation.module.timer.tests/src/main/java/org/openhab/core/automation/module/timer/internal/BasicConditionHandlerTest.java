@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -74,9 +74,9 @@ import org.slf4j.LoggerFactory;
 public abstract class BasicConditionHandlerTest extends JavaOSGiTest {
     private final Logger logger = LoggerFactory.getLogger(BasicConditionHandlerTest.class);
     private VolatileStorageService volatileStorageService = new VolatileStorageService();
-    private @NonNullByDefault({}) RuleRegistry ruleRegistry;
-    private @NonNullByDefault({}) RuleManager ruleEngine;
-    private @Nullable Event itemEvent;
+    protected @NonNullByDefault({}) RuleRegistry ruleRegistry;
+    protected @NonNullByDefault({}) RuleManager ruleEngine;
+    protected @Nullable Event itemEvent;
     private @NonNullByDefault({}) StartLevelService startLevelService;
 
     /**
@@ -128,7 +128,7 @@ public abstract class BasicConditionHandlerTest extends JavaOSGiTest {
     }
 
     @Test
-    public void assertThatConditionWorksInRule() throws ItemNotFoundException {
+    public void assertThatConditionWorksInRule() throws ItemNotFoundException, InterruptedException {
         String testItemName1 = "TriggeredItem";
         String testItemName2 = "SwitchedItem";
 
@@ -200,16 +200,16 @@ public abstract class BasicConditionHandlerTest extends JavaOSGiTest {
         logger.info("item state is ON");
 
         // now make the condition fail
-        Rule rule2 = RuleBuilder.create(rule).withConditions(ModuleBuilder.createCondition(rule.getConditions().get(0))
-                .withConfiguration(getFailingConfiguration()).build()).build();
+        Rule rule2 = RuleBuilder.create(rule).withConditions(ModuleBuilder
+                .createCondition(rule.getConditions().getFirst()).withConfiguration(getFailingConfiguration()).build())
+                .build();
         ruleRegistry.update(rule2);
 
         // prepare the execution
         itemEvent = null;
         eventPublisher.post(ItemEventFactory.createStateUpdatedEvent(testItemName1, OnOffType.ON));
-        waitForAssert(() -> {
-            assertThat(itemEvent, is(nullValue()));
-        });
+        Thread.sleep(200); // without this, the assertion will be immediately fulfilled regardless of event processing
+        assertThat(itemEvent, is(nullValue()));
     }
 
     /**

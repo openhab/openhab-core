@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -23,6 +23,7 @@ import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -139,7 +140,7 @@ public class JSONResponseTest {
         private List<BigDecimal> getRandoms() {
             List<BigDecimal> randoms = new ArrayList<>();
             for (int i = 0; i < 100000; i++) {
-                randoms.add(new BigDecimal(Math.random()));
+                randoms.add(new BigDecimal(ThreadLocalRandom.current().nextDouble()));
             }
 
             return randoms;

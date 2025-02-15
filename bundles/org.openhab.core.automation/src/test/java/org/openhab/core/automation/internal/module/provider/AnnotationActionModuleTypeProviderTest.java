@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -196,7 +196,7 @@ public class AnnotationActionModuleTypeProviderTest extends JavaTest {
                 List<ParameterOption> parameterOptions = cdp.getOptions();
                 assertEquals(1, parameterOptions.size());
 
-                ParameterOption po = parameterOptions.get(0);
+                ParameterOption po = parameterOptions.getFirst();
                 assertEquals("conf2", po.getValue());
             }
         }

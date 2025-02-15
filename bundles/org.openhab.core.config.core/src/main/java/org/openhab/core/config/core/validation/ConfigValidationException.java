@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -12,6 +12,7 @@
  */
 package org.openhab.core.config.core.validation;
 
+import java.io.Serial;
 import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.Collections;
@@ -35,6 +36,7 @@ import org.slf4j.LoggerFactory;
  */
 public final class ConfigValidationException extends RuntimeException {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private final Logger logger = LoggerFactory.getLogger(ConfigValidationException.class);

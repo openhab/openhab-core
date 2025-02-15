@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -18,6 +18,8 @@ import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.time.Instant;
@@ -132,10 +134,10 @@ public class JsonStorageTest extends JavaTest {
         assertEquals(0, ((BigDecimal) dummy.configuration.get("testInt")).scale());
         assertEquals(0, ((BigDecimal) dummy.configuration.get("testLong")).scale());
         assertEquals(0, ((BigDecimal) dummy.configuration.get("testBigDecimal")).scale());
-        assertEquals(0, ((List<BigDecimal>) dummy.configuration.get("multiInt")).get(0).scale());
+        assertEquals(0, ((List<BigDecimal>) dummy.configuration.get("multiInt")).getFirst().scale());
         assertEquals(0, ((List<BigDecimal>) dummy.configuration.get("multiInt")).get(1).scale());
         assertEquals(0, ((List<BigDecimal>) dummy.configuration.get("multiInt")).get(2).scale());
-        assertEquals(0, ((BigDecimal) dummy.channels.get(0).configuration.get("testChildLong")).scale());
+        assertEquals(0, ((BigDecimal) dummy.channels.getFirst().configuration.get("testChildLong")).scale());
     }
 
     @Test
@@ -306,8 +308,8 @@ public class JsonStorageTest extends JavaTest {
 
     private static URL newURL(String url) {
         try {
-            return new URL(url);
-        } catch (MalformedURLException e) {
+            return (new URI(url)).toURL();
+        } catch (MalformedURLException | URISyntaxException e) {
             throw new IllegalArgumentException(e);
         }
     }

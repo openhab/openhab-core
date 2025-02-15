@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -12,6 +12,7 @@
  */
 package org.openhab.core.io.websocket.log;
 
+import java.util.Enumeration;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
@@ -23,6 +24,7 @@ import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.log.LogEntry;
 import org.osgi.service.log.LogReaderService;
 
 import com.google.gson.Gson;
@@ -50,14 +52,14 @@ public class LogWebSocketAdapter implements WebSocketAdapter {
         webSockets.forEach(logReaderService::removeLogListener);
     }
 
-    public void registerListener(LogWebSocket eventWebSocket) {
-        webSockets.add(eventWebSocket);
-        logReaderService.addLogListener(eventWebSocket);
+    public void registerListener(LogWebSocket logWebSocket) {
+        webSockets.add(logWebSocket);
+        logReaderService.addLogListener(logWebSocket);
     }
 
-    public void unregisterListener(LogWebSocket eventWebSocket) {
-        logReaderService.removeLogListener(eventWebSocket);
-        webSockets.remove(eventWebSocket);
+    public void unregisterListener(LogWebSocket logWebSocket) {
+        logReaderService.removeLogListener(logWebSocket);
+        webSockets.remove(logWebSocket);
     }
 
     @Override
@@ -69,5 +71,9 @@ public class LogWebSocketAdapter implements WebSocketAdapter {
     public Object createWebSocket(ServletUpgradeRequest servletUpgradeRequest,
             ServletUpgradeResponse servletUpgradeResponse) {
         return new LogWebSocket(gson, LogWebSocketAdapter.this);
+    }
+
+    public Enumeration<LogEntry> getLog() {
+        return logReaderService.getLog();
     }
 }

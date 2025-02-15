@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -58,9 +58,14 @@ public interface Parser<T> {
     String FORMAT = "format";
 
     /**
-     * Defines the possible value of property {@link #FORMAT}. It means that the parser supports json format.
+     * Defines a possible value of property {@link #FORMAT}. It means that the parser supports {@code JSON} format.
      */
     String FORMAT_JSON = "json";
+
+    /**
+     * Defines a possible value of property {@link #FORMAT}. It means that the parser supports {@code YAML} format.
+     */
+    String FORMAT_YAML = "yaml";
 
     /**
      * Loads a file with some particular format and parse it to the corresponding automation objects.

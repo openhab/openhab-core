@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -102,7 +102,7 @@ public class DiscoveryConsoleCommandExtension extends AbstractConsoleCommandExte
                     break;
             }
         } else {
-            console.println(getUsages().get(0));
+            console.println(getUsages().getFirst());
         }
     }
 

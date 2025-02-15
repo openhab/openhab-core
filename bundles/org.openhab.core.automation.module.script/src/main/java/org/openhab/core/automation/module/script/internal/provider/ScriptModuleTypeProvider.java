@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -161,7 +161,7 @@ public class ScriptModuleTypeProvider extends AbstractProvider<ModuleType> imple
     public void unsetScriptEngineFactory(ScriptEngineFactory engineFactory) {
         List<String> scriptTypes = engineFactory.getScriptTypes();
         if (!scriptTypes.isEmpty()) {
-            ScriptEngine scriptEngine = engineFactory.createScriptEngine(scriptTypes.get(0));
+            ScriptEngine scriptEngine = engineFactory.createScriptEngine(scriptTypes.getFirst());
             if (scriptEngine != null) {
                 parameterOptions.remove(ScriptEngineFactoryHelper.getPreferredMimeType(engineFactory));
                 logger.trace("ParameterOptions: {}", parameterOptions);

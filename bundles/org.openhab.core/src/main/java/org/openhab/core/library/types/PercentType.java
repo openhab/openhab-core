@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -12,6 +12,7 @@
  */
 package org.openhab.core.library.types;
 
+import java.io.Serial;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Locale;
@@ -29,6 +30,7 @@ import org.openhab.core.types.State;
 @NonNullByDefault
 public class PercentType extends DecimalType {
 
+    @Serial
     private static final long serialVersionUID = -9066279845951780879L;
 
     public static final PercentType ZERO = new PercentType(0);

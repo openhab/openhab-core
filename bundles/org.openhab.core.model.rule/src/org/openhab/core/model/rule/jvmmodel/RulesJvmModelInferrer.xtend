@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -17,7 +17,6 @@ import java.util.Set
 import org.openhab.core.items.Item
 import org.openhab.core.items.ItemRegistry
 import org.openhab.core.thing.ThingRegistry
-import org.openhab.core.thing.events.ChannelTriggeredEvent
 import org.openhab.core.types.Command
 import org.openhab.core.types.State
 import org.openhab.core.model.rule.rules.ChangedEventTrigger
@@ -33,14 +32,12 @@ import org.openhab.core.model.rule.rules.ThingStateChangedEventTrigger
 import org.openhab.core.model.rule.rules.UpdateEventTrigger
 import org.openhab.core.model.script.jvmmodel.ScriptJvmModelInferrer
 import org.openhab.core.model.script.scoping.StateAndCommandProvider
-import org.eclipse.xtext.naming.IQualifiedNameProvider
 import org.eclipse.xtext.xbase.jvmmodel.IJvmDeclaredTypeAcceptor
 import org.eclipse.xtext.xbase.jvmmodel.JvmTypesBuilder
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.eclipse.xtext.common.types.JvmFormalParameter
 import org.eclipse.emf.common.util.EList
-import org.openhab.core.events.Event
 import org.openhab.core.automation.module.script.rulesupport.shared.ValueCache
 
 /**
@@ -54,13 +51,12 @@ import org.openhab.core.automation.module.script.rulesupport.shared.ValueCache
  */
 class RulesJvmModelInferrer extends ScriptJvmModelInferrer {
 
-    private final Logger logger = LoggerFactory.getLogger(RulesJvmModelInferrer)
+    final Logger logger = LoggerFactory.getLogger(RulesJvmModelInferrer)
 
     /**
-     * conveninence API to build and initialize JvmTypes and their members.
+     * convenience API to build and initialize JvmTypes and their members.
      */
     @Inject extension JvmTypesBuilder
-    @Inject extension IQualifiedNameProvider
 
     @Inject
     ItemRegistry itemRegistry
@@ -82,7 +78,7 @@ class RulesJvmModelInferrer extends ScriptJvmModelInferrer {
      */
     def dispatch void infer(RuleModel ruleModel, IJvmDeclaredTypeAcceptor acceptor, boolean isPreIndexingPhase) {
         val className = ruleModel.eResource.URI.lastSegment.split("\\.").head.toFirstUpper + "Rules"
-        acceptor.accept(ruleModel.toClass(className)).initializeLater [
+        acceptor.accept(ruleModel.toClass(className), [
             members += ruleModel.variables.map [
                 toField(name, type?.cloneWithProxies) => [ field |
                     field.static = true
@@ -175,7 +171,7 @@ class RulesJvmModelInferrer extends ScriptJvmModelInferrer {
                     body = rule.script
                 ]
             ]
-        ]
+        ])
     }
 
     def private boolean containsParam(EList<JvmFormalParameter> params, String param) {

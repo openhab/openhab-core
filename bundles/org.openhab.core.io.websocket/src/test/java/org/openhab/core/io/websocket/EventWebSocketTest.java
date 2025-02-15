@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -14,6 +14,7 @@ package org.openhab.core.io.websocket;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -55,6 +56,7 @@ import com.google.gson.Gson;
  * The {@link EventWebSocketTest} contains tests for the {@link EventWebSocket}
  *
  * @author Jan N. Klug - Initial contribution
+ * @author Florian Hotze - Add topic filter tests
  */
 @NonNullByDefault
 @ExtendWith(MockitoExtension.class)
@@ -236,6 +238,87 @@ public class EventWebSocketTest {
 
         // matching is not sent
         event = ItemEventFactory.createStateEvent(TEST_ITEM_NAME, DecimalType.ZERO, REMOTE_WEBSOCKET_IMPLEMENTATION);
+        eventWebSocket.processEvent(event);
+        verify(remoteEndpoint, times(2)).sendString(any());
+    }
+
+    @Test
+    public void eventFromBusFilterIncludeTopic() throws IOException {
+        EventDTO eventDTO = new EventDTO(WEBSOCKET_EVENT_TYPE, WEBSOCKET_TOPIC_PREFIX + "filter/topic",
+                "[\"openhab/items/*/command\", \"openhab/items/*/statechanged\"]", null, null);
+        EventDTO responseEventDTO = new EventDTO(WEBSOCKET_EVENT_TYPE, WEBSOCKET_TOPIC_PREFIX + "filter/topic",
+                eventDTO.payload, null, null);
+        eventWebSocket.onText(gson.toJson(eventDTO));
+        verify(remoteEndpoint).sendString(gson.toJson(responseEventDTO));
+        clearInvocations(remoteEndpoint);
+
+        // subscribed topics are sent
+        Event event = ItemEventFactory.createCommandEvent(TEST_ITEM_NAME, DecimalType.ZERO,
+                REMOTE_WEBSOCKET_IMPLEMENTATION);
+        eventWebSocket.processEvent(event);
+        verify(remoteEndpoint).sendString(gson.toJson(new EventDTO(event)));
+
+        event = ItemEventFactory.createStateChangedEvent(TEST_ITEM_NAME, DecimalType.ZERO, DecimalType.ZERO);
+        eventWebSocket.processEvent(event);
+        verify(remoteEndpoint).sendString(gson.toJson(new EventDTO(event)));
+
+        // not subscribed topics are not sent
+        event = ItemEventFactory.createStateEvent(TEST_ITEM_NAME, DecimalType.ZERO, REMOTE_WEBSOCKET_IMPLEMENTATION);
+        eventWebSocket.processEvent(event);
+        verify(remoteEndpoint, times(2)).sendString(any());
+    }
+
+    @Test
+    public void eventFromBusFilterExcludeTopic() throws IOException {
+        EventDTO eventDTO = new EventDTO(WEBSOCKET_EVENT_TYPE, WEBSOCKET_TOPIC_PREFIX + "filter/topic",
+                "[\"!openhab/items/" + TEST_ITEM_NAME + "/command\"]", null, null);
+        EventDTO responseEventDTO = new EventDTO(WEBSOCKET_EVENT_TYPE, WEBSOCKET_TOPIC_PREFIX + "filter/topic",
+                eventDTO.payload, null, null);
+        eventWebSocket.onText(gson.toJson(eventDTO));
+        verify(remoteEndpoint).sendString(gson.toJson(responseEventDTO));
+        clearInvocations(remoteEndpoint);
+
+        // excluded topics are not sent
+        Event event = ItemEventFactory.createCommandEvent(TEST_ITEM_NAME, DecimalType.ZERO,
+                REMOTE_WEBSOCKET_IMPLEMENTATION);
+        eventWebSocket.processEvent(event);
+        verify(remoteEndpoint, times(0)).sendString(any());
+
+        // not excluded topics are sent
+        event = ItemEventFactory.createStateChangedEvent(TEST_ITEM_NAME, DecimalType.ZERO, DecimalType.ZERO);
+        eventWebSocket.processEvent(event);
+        verify(remoteEndpoint).sendString(gson.toJson(new EventDTO(event)));
+
+        event = ItemEventFactory.createStateEvent(TEST_ITEM_NAME, DecimalType.ZERO, REMOTE_WEBSOCKET_IMPLEMENTATION);
+        eventWebSocket.processEvent(event);
+        verify(remoteEndpoint).sendString(gson.toJson(new EventDTO(event)));
+
+        event = ItemEventFactory.createStateEvent("anotherItem", DecimalType.ZERO, REMOTE_WEBSOCKET_IMPLEMENTATION);
+        eventWebSocket.processEvent(event);
+        verify(remoteEndpoint).sendString(gson.toJson(new EventDTO(event)));
+    }
+
+    @Test
+    public void eventFromBusFilterIncludeAndExcludeTopic() throws IOException {
+        EventDTO eventDTO = new EventDTO(WEBSOCKET_EVENT_TYPE, WEBSOCKET_TOPIC_PREFIX + "filter/topic",
+                "[\"openhab/items/*/*\", \"!openhab/items/*/command\"]", null, null);
+        EventDTO responseEventDTO = new EventDTO(WEBSOCKET_EVENT_TYPE, WEBSOCKET_TOPIC_PREFIX + "filter/topic",
+                eventDTO.payload, null, null);
+        eventWebSocket.onText(gson.toJson(eventDTO));
+        verify(remoteEndpoint).sendString(gson.toJson(responseEventDTO));
+        clearInvocations(remoteEndpoint);
+
+        // included topics are sent
+        Event event = ItemEventFactory.createStateChangedEvent(TEST_ITEM_NAME, DecimalType.ZERO, DecimalType.ZERO);
+        eventWebSocket.processEvent(event);
+        verify(remoteEndpoint).sendString(gson.toJson(new EventDTO(event)));
+
+        event = ItemEventFactory.createStateEvent(TEST_ITEM_NAME, DecimalType.ZERO, REMOTE_WEBSOCKET_IMPLEMENTATION);
+        eventWebSocket.processEvent(event);
+        verify(remoteEndpoint).sendString(gson.toJson(new EventDTO(event)));
+
+        // excluded sub-topics are not sent
+        event = ItemEventFactory.createCommandEvent(TEST_ITEM_NAME, DecimalType.ZERO, REMOTE_WEBSOCKET_IMPLEMENTATION);
         eventWebSocket.processEvent(event);
         verify(remoteEndpoint, times(2)).sendString(any());
     }

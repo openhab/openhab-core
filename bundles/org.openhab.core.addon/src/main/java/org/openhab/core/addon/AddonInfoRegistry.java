@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -95,15 +95,8 @@ public class AddonInfoRegistry {
             return a;
         }
         AddonInfo.Builder builder = AddonInfo.builder(a);
-        if (a.isMasterAddonInfo()) {
-            builder.withName(a.getName());
-            builder.withDescription(a.getDescription());
-        } else {
-            builder.withName(b.getName());
+        if (a.getDescription().isBlank()) {
             builder.withDescription(b.getDescription());
-        }
-        if (!a.isMasterAddonInfo() && b.isMasterAddonInfo()) {
-            builder.isMasterAddonInfo(true);
         }
         if (a.getConnection() == null && b.getConnection() != null) {
             builder.withConnection(b.getConnection());

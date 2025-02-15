@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -79,7 +79,7 @@ public class ScriptEngineManagerImpl implements ScriptEngineManager {
         }
         if (logger.isDebugEnabled()) {
             if (!scriptTypes.isEmpty()) {
-                ScriptEngine scriptEngine = engineFactory.createScriptEngine(scriptTypes.get(0));
+                ScriptEngine scriptEngine = engineFactory.createScriptEngine(scriptTypes.getFirst());
                 if (scriptEngine != null) {
                     javax.script.ScriptEngineFactory factory = scriptEngine.getFactory();
                     logger.debug(

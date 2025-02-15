@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -262,7 +262,7 @@ public class ItemResourceOSGiTest extends JavaOSGiTest {
 
         // expect 2x created
         assertThat(statusCodes.size(), is(2));
-        assertThat(statusCodes.get(0), is("created"));
+        assertThat(statusCodes.getFirst(), is("created"));
         assertThat(statusCodes.get(1), is("created"));
 
         itemList.clear();
@@ -280,7 +280,7 @@ public class ItemResourceOSGiTest extends JavaOSGiTest {
 
         // expect error and updated
         assertThat(statusCodes.size(), is(2));
-        assertThat(statusCodes.get(0), is("error"));
+        assertThat(statusCodes.getFirst(), is("error"));
         assertThat(statusCodes.get(1), is("updated"));
     }
 

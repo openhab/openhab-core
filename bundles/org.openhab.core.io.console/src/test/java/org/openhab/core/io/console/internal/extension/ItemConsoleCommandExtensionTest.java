@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -52,7 +52,7 @@ public class ItemConsoleCommandExtensionTest {
 
         assertTrue(completer.complete(new String[] { "" }, 0, 0, candidates));
         assertEquals(5, candidates.size());
-        assertEquals("addTag ", candidates.get(0));
+        assertEquals("addTag ", candidates.getFirst());
         assertEquals("clear ", candidates.get(1));
         assertEquals("list ", candidates.get(2));
         assertEquals("remove ", candidates.get(3));
@@ -61,7 +61,7 @@ public class ItemConsoleCommandExtensionTest {
 
         assertTrue(completer.complete(new String[] { "A", "Item1" }, 0, 1, candidates));
         assertEquals(1, candidates.size());
-        assertEquals("addTag ", candidates.get(0));
+        assertEquals("addTag ", candidates.getFirst());
     }
 
     @Test
@@ -75,17 +75,17 @@ public class ItemConsoleCommandExtensionTest {
 
         assertTrue(completer.complete(new String[] { "addTag", "I" }, 0, 6, candidates));
         assertEquals(1, candidates.size());
-        assertEquals("addTag ", candidates.get(0));
+        assertEquals("addTag ", candidates.getFirst());
         candidates.clear();
 
         assertTrue(completer.complete(new String[] { "addTag", "I" }, 1, 1, candidates));
         assertEquals(1, candidates.size());
-        assertEquals("Item1 ", candidates.get(0));
+        assertEquals("Item1 ", candidates.getFirst());
         candidates.clear();
 
         assertTrue(completer.complete(new String[] { "rmTag", "I" }, 1, 1, candidates));
         assertEquals(1, candidates.size());
-        assertEquals("Item1 ", candidates.get(0));
+        assertEquals("Item1 ", candidates.getFirst());
     }
 
     @Test
@@ -96,12 +96,12 @@ public class ItemConsoleCommandExtensionTest {
 
         assertTrue(completer.complete(new String[] { "remove", "I" }, 0, 6, candidates));
         assertEquals(1, candidates.size());
-        assertEquals("remove ", candidates.get(0));
+        assertEquals("remove ", candidates.getFirst());
         candidates.clear();
 
         assertTrue(completer.complete(new String[] { "remove", "I" }, 1, 1, candidates));
         assertEquals(1, candidates.size());
-        assertEquals("Item2 ", candidates.get(0));
+        assertEquals("Item2 ", candidates.getFirst());
     }
 
     @Test
@@ -135,6 +135,6 @@ public class ItemConsoleCommandExtensionTest {
 
         assertTrue(completer.complete(new String[] { "rmTag", "Item3", "" }, 2, 0, candidates));
         assertEquals(1, candidates.size());
-        assertEquals("Tag1 ", candidates.get(0));
+        assertEquals("Tag1 ", candidates.getFirst());
     }
 }

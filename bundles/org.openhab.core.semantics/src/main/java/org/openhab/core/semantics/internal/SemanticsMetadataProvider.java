@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -164,7 +164,7 @@ public class SemanticsMetadataProvider extends AbstractProvider<Metadata>
             return;
         }
         for (Entry<List<Class<? extends Tag>>, String> relation : propertyRelations.entrySet()) {
-            Class<? extends Tag> entityClass = relation.getKey().get(0);
+            Class<? extends Tag> entityClass = relation.getKey().getFirst();
             if (entityClass.isAssignableFrom(type)) {
                 Class<? extends Property> p = SemanticTags.getProperty(item);
                 if (p != null) {
@@ -211,7 +211,7 @@ public class SemanticsMetadataProvider extends AbstractProvider<Metadata>
         }
         for (Entry<List<Class<? extends Tag>>, String> relation : parentRelations.entrySet()) {
             List<Class<? extends Tag>> relClasses = relation.getKey();
-            Class<? extends Tag> entityClass = relClasses.get(0);
+            Class<? extends Tag> entityClass = relClasses.getFirst();
             Class<? extends Tag> parentClass = relClasses.get(1);
             // process relations of locations
             if (entityClass.isAssignableFrom(type)) {
@@ -236,7 +236,7 @@ public class SemanticsMetadataProvider extends AbstractProvider<Metadata>
         }
         for (Entry<List<Class<? extends Tag>>, String> relation : memberRelations.entrySet()) {
             List<Class<? extends Tag>> relClasses = relation.getKey();
-            Class<? extends Tag> entityClass = relClasses.get(0);
+            Class<? extends Tag> entityClass = relClasses.getFirst();
             Class<? extends Tag> parentClass = relClasses.get(1);
             // process relations of locations
             if (entityClass.isAssignableFrom(type)) {

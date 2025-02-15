@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -157,7 +157,7 @@ public class CorsFilter implements ContainerResponseFilter {
         if (values == null || values.isEmpty()) {
             return null;
         }
-        return values.get(0);
+        return values.getFirst();
     }
 
     /**

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -12,8 +12,7 @@
  */
 package org.openhab.core.config.discovery.addon.ip;
 
-import static org.openhab.core.config.discovery.addon.AddonFinderConstants.SERVICE_NAME_IP;
-import static org.openhab.core.config.discovery.addon.AddonFinderConstants.SERVICE_TYPE_IP;
+import static org.openhab.core.config.discovery.addon.AddonFinderConstants.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -79,7 +78,7 @@ import org.slf4j.LoggerFactory;
 /**
  * This is a {@link IpAddonFinder} for finding suggested add-ons by sending IP packets to the
  * network and collecting responses.
- * 
+ *
  * This finder is intended to detect devices on the network which do not announce via UPnP
  * or mDNS. Some devices respond to queries to defined multicast addresses and ports and thus
  * can be detected by sending a single frame on the IP network.
@@ -363,10 +362,9 @@ public class IpAddonFinder extends BaseAddonFinder implements NetworkAddressChan
                     }
                 }
                 String macFormat = parameters.getOrDefault(PARAMETER_MAC_FORMAT, "%02X:");
-                try {
-                    String.format(macFormat, 123);
-                } catch (IllegalFormatException e) {
+                if (!macFormatValid(macFormat)) {
                     logger.warn("{}: discovery-parameter '{}' invalid format specifier", candidate.getUID(), macFormat);
+                    continue;
                 }
 
                 // handle known types
@@ -599,7 +597,7 @@ public class IpAddonFinder extends BaseAddonFinder implements NetworkAddressChan
 
     /**
      * Get mac address bytes associated with the given Internet socket address
-     * 
+     *
      * @param inetSocketAddress the Internet address
      * @return the mac address as an array of bytes
      * @throws SocketException if address is not on this PC, or no mac address is associated
@@ -614,18 +612,57 @@ public class IpAddonFinder extends BaseAddonFinder implements NetworkAddressChan
 
     /**
      * Use the given format specifier to format an array of mac address bytes
-     * 
-     * @param format a standard format specifier; optionally ends with a delimiter e.g. "%02x:" or "%02X"
+     *
+     * @param format a standard format specifier; optionally ends with a delimiter e.g. {@code %02x:} or {@code %02X}
      * @param bytes the mac address as an array of bytes
-     * 
-     * @return e.g. '01:02:03:04:A5:B6:C7:D8', '01-02-03-04:a5:b6:c7:d8', or '01020304A5B6C7D8'
+     * @return e.g. '{@code 01:02:03:04:A5:B6:C7:D8}' or '{@code 01-02-03-04-a5-b6-c7-d8}' or '{@code 01020304A5B6C7D8}'
      */
     private String macFormat(String format, byte[] bytes) {
         StringBuilder result = new StringBuilder();
         for (byte byt : bytes) {
             result.append(String.format(format, byt));
         }
-        boolean isDelimited = Set.of(':', '-', '.').contains(format.charAt(format.length() - 1));
+        boolean isDelimited = !Character.isLetterOrDigit(format.charAt(format.length() - 1));
         return (isDelimited ? result.substring(0, result.length() - 1) : result).toString();
+    }
+
+    /**
+     * Check if the given mac format specifier is valid. A valid specifier comprises two parts -- namely
+     * 1) a numeric format specifier acceptable to the {@code String.format()} method, plus 2) a single
+     * [optional] delimiter (i.e. a non alphanumeric) character. Examples are as follows:
+     * <p>
+     * <li>{@code %02X} produces {@code 01020304A5B6C7D8}</li>
+     * <li>{@code %02x:} produces {@code 01:02:03:04:a5:b6:c7:d8} (lower case hex)</li>
+     * <li>{@code %02X-} produces {@code 01-02-03-04-A5-B6-C7-D8} (upper case hex)</li>
+     * <li>{@code %02X,} produces {@code 01,02,03,04,A5,B6,C7,D8}</li>
+     * <p>
+     *
+     * @return true if the format specifier is valid
+     */
+    private boolean macFormatValid(String format) {
+        // use String.format() to check first part validity
+        try {
+            String.format(format, (byte) 123);
+        } catch (IllegalFormatException e) {
+            return false;
+        }
+        // get position of numeric format letter e.g. the 'X' in '%02X-'
+        int last = format.length() - 1;
+        int index = 0;
+        while (index <= last) {
+            if (Character.isLetter(format.charAt(index))) {
+                break;
+            }
+            index++;
+        }
+        // check for zero or one character(s) after numeric format letter
+        switch (last - index) {
+            case 0:
+                return true;
+            case 1:
+                // check this character is non alphanumeric i.e. a delimiter
+                return !Character.isLetterOrDigit(format.charAt(last));
+        }
+        return false;
     }
 }

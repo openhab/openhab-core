@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -32,13 +32,17 @@ public class EnrichedItemDTO extends ItemDTO {
     public String state;
     public String transformedState;
     public StateDescription stateDescription;
-    public String unitSymbol;
     public CommandDescription commandDescription;
+    public String lastState;
+    public Long lastStateUpdate;
+    public Long lastStateChange;
+    public String unitSymbol;
     public Map<String, Object> metadata;
     public Boolean editable;
 
-    public EnrichedItemDTO(ItemDTO itemDTO, String link, String state, String transformedState,
-            StateDescription stateDescription, CommandDescription commandDescription, String unitSymbol) {
+    public EnrichedItemDTO(ItemDTO itemDTO, String link, String state, String lastState, Long lastStateUpdate,
+            Long lastStateChange, String transformedState, StateDescription stateDescription,
+            CommandDescription commandDescription, String unitSymbol) {
         this.type = itemDTO.type;
         this.name = itemDTO.name;
         this.label = itemDTO.label;
@@ -50,6 +54,9 @@ public class EnrichedItemDTO extends ItemDTO {
         this.transformedState = transformedState;
         this.stateDescription = stateDescription;
         this.commandDescription = commandDescription;
+        this.lastState = lastState;
+        this.lastStateUpdate = lastStateUpdate;
+        this.lastStateChange = lastStateChange;
         this.unitSymbol = unitSymbol;
     }
 }

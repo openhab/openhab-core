@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -162,7 +162,7 @@ public class ChannelLinkNotifierOSGiTest extends JavaOSGiTest {
 
         public @Nullable Boolean isLinkedBasedOnEvent(ChannelUID channelUID) {
             List<Boolean> events = getChannelLinkEvents(channelUID);
-            return events.isEmpty() ? null : events.get(events.size() - 1);
+            return events.isEmpty() ? null : events.getLast();
         }
 
         public void resetChannelLinkEvents() {

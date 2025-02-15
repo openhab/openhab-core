@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -129,6 +129,6 @@ public class ProxyFilter implements ContainerRequestFilter {
             return null;
         }
 
-        return values.get(0);
+        return values.getFirst();
     }
 }

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -81,7 +81,7 @@ public class InboxPredicatesTest {
         assertThat(RESULTS.stream().filter(forBinding(BINDING_ID1)).toList().size(), is(3));
 
         assertThat(RESULTS.stream().filter(forBinding(BINDING_ID2)).toList().size(), is(1));
-        assertThat(RESULTS.stream().filter(forBinding(BINDING_ID2)).toList().get(0), is(equalTo(RESULTS.get(3))));
+        assertThat(RESULTS.stream().filter(forBinding(BINDING_ID2)).toList().getFirst(), is(equalTo(RESULTS.get(3))));
 
         assertThat(RESULTS.stream().filter(forBinding(BINDING_ID2)).filter(withFlag(DiscoveryResultFlag.NEW)).toList()
                 .size(), is(0));
@@ -89,7 +89,7 @@ public class InboxPredicatesTest {
         assertThat(RESULTS.stream().filter(forBinding(BINDING_ID2)).filter(withFlag(DiscoveryResultFlag.IGNORED))
                 .toList().size(), is(1));
         assertThat(RESULTS.stream().filter(forBinding(BINDING_ID2)).filter(withFlag(DiscoveryResultFlag.IGNORED))
-                .toList().get(0), is(equalTo(RESULTS.get(3))));
+                .toList().getFirst(), is(equalTo(RESULTS.get(3))));
     }
 
     @Test
@@ -97,27 +97,28 @@ public class InboxPredicatesTest {
         assertThat(RESULTS.stream().filter(forThingTypeUID(THING_TYPE_UID11)).toList().size(), is(2));
 
         assertThat(RESULTS.stream().filter(forThingTypeUID(THING_TYPE_UID12)).toList().size(), is(1));
-        assertThat(RESULTS.stream().filter(forThingTypeUID(THING_TYPE_UID12)).toList().get(0),
+        assertThat(RESULTS.stream().filter(forThingTypeUID(THING_TYPE_UID12)).toList().getFirst(),
                 is(equalTo(RESULTS.get(2))));
     }
 
     @Test
     public void testForThingUID() {
         assertThat(RESULTS.stream().filter(forThingUID(THING_UID11)).toList().size(), is(1));
-        assertThat(RESULTS.stream().filter(forThingUID(THING_UID11)).toList().get(0), is(equalTo(RESULTS.get(0))));
+        assertThat(RESULTS.stream().filter(forThingUID(THING_UID11)).toList().getFirst(),
+                is(equalTo(RESULTS.getFirst())));
 
         assertThat(RESULTS.stream().filter(forThingUID(THING_UID12)).toList().size(), is(2));
         assertThat(RESULTS.stream().filter(forThingUID(THING_UID12)).filter(forThingTypeUID(THING_TYPE_UID12)).toList()
                 .size(), is(1));
         assertThat(RESULTS.stream().filter(forThingUID(THING_UID12)).filter(forThingTypeUID(THING_TYPE_UID12)).toList()
-                .get(0), is(equalTo(RESULTS.get(2))));
+                .getFirst(), is(equalTo(RESULTS.get(2))));
     }
 
     @Test
     public void testWithFlag() {
         assertThat(RESULTS.stream().filter(withFlag(DiscoveryResultFlag.NEW)).toList().size(), is(3));
         assertThat(RESULTS.stream().filter(withFlag(DiscoveryResultFlag.IGNORED)).toList().size(), is(1));
-        assertThat(RESULTS.stream().filter(withFlag(DiscoveryResultFlag.IGNORED)).toList().get(0),
+        assertThat(RESULTS.stream().filter(withFlag(DiscoveryResultFlag.IGNORED)).toList().getFirst(),
                 is(equalTo(RESULTS.get(3))));
     }
 
@@ -133,20 +134,20 @@ public class InboxPredicatesTest {
     @Test
     public void testWithRepresentationProperty() {
         assertThat(RESULTS.stream().filter(withRepresentationProperty(PROP1)).toList().size(), is(1));
-        assertThat(RESULTS.stream().filter(withRepresentationProperty(PROP1)).toList().get(0),
-                is(equalTo(RESULTS.get(0))));
+        assertThat(RESULTS.stream().filter(withRepresentationProperty(PROP1)).toList().getFirst(),
+                is(equalTo(RESULTS.getFirst())));
         assertThat(RESULTS.stream().filter(withRepresentationProperty(PROP2)).toList().size(), is(1));
-        assertThat(RESULTS.stream().filter(withRepresentationProperty(PROP2)).toList().get(0),
+        assertThat(RESULTS.stream().filter(withRepresentationProperty(PROP2)).toList().getFirst(),
                 is(equalTo(RESULTS.get(2))));
     }
 
     @Test
     public void testWithRepresentationPropertyValue() {
         assertThat(RESULTS.stream().filter(withRepresentationPropertyValue(PROP_VAL1)).toList().size(), is(1));
-        assertThat(RESULTS.stream().filter(withRepresentationPropertyValue(PROP_VAL1)).toList().get(0),
-                is(equalTo(RESULTS.get(0))));
+        assertThat(RESULTS.stream().filter(withRepresentationPropertyValue(PROP_VAL1)).toList().getFirst(),
+                is(equalTo(RESULTS.getFirst())));
         assertThat(RESULTS.stream().filter(withRepresentationPropertyValue(PROP_VAL2)).toList().size(), is(1));
-        assertThat(RESULTS.stream().filter(withRepresentationPropertyValue(PROP_VAL2)).toList().get(0),
+        assertThat(RESULTS.stream().filter(withRepresentationPropertyValue(PROP_VAL2)).toList().getFirst(),
                 is(equalTo(RESULTS.get(2))));
     }
 }

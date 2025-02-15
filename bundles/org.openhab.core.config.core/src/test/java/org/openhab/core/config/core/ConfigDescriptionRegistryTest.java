@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -121,9 +121,9 @@ public class ConfigDescriptionRegistryTest extends JavaTest {
         assertThat(configDescriptionRegistry.getConfigDescriptions().size(), is(1));
 
         List<ConfigDescription> configDescriptions = new ArrayList<>(configDescriptionRegistry.getConfigDescriptions());
-        assertThat(configDescriptions.get(0).getUID(), is(equalTo(uriDummy)));
-        assertThat(configDescriptions.get(0).toParametersMap().size(), is(1));
-        assertThat(configDescriptions.get(0).toParametersMap().get("param1"), notNullValue());
+        assertThat(configDescriptions.getFirst().getUID(), is(equalTo(uriDummy)));
+        assertThat(configDescriptions.getFirst().toParametersMap().size(), is(1));
+        assertThat(configDescriptions.getFirst().toParametersMap().get("param1"), notNullValue());
 
         configDescriptionRegistry.addConfigDescriptionProvider(configDescriptionProviderMock1);
         assertThat(configDescriptionRegistry.getConfigDescriptions().size(), is(2));
@@ -146,11 +146,11 @@ public class ConfigDescriptionRegistryTest extends JavaTest {
         assertThat(configDescriptionRegistry.getConfigDescriptions().size(), is(1));
 
         List<ConfigDescription> configDescriptions = new ArrayList<>(configDescriptionRegistry.getConfigDescriptions());
-        assertThat(configDescriptions.get(0).getUID(), is(equalTo(uriDummy)));
+        assertThat(configDescriptions.getFirst().getUID(), is(equalTo(uriDummy)));
 
-        assertThat(configDescriptions.get(0).getParameters().size(), is(2));
-        assertThat(configDescriptions.get(0).getParameters().get(0).getName(), is(equalTo("param1")));
-        assertThat(configDescriptions.get(0).getParameters().get(1).getName(), is(equalTo("param2")));
+        assertThat(configDescriptions.getFirst().getParameters().size(), is(2));
+        assertThat(configDescriptions.getFirst().getParameters().getFirst().getName(), is(equalTo("param1")));
+        assertThat(configDescriptions.getFirst().getParameters().get(1).getName(), is(equalTo("param2")));
 
         configDescriptionRegistry.removeConfigDescriptionProvider(configDescriptionProviderMock);
         assertThat(configDescriptionRegistry.getConfigDescriptions().size(), is(1));
@@ -168,8 +168,8 @@ public class ConfigDescriptionRegistryTest extends JavaTest {
         configDescriptionRegistry.addConfigOptionProvider(configOptionsProviderMockAliased);
 
         ConfigDescription res = requireNonNull(configDescriptionRegistry.getConfigDescription(uriAliases));
-        assertThat(res.getParameters().get(0).getOptions().size(), is(1));
-        assertThat(res.getParameters().get(0).getOptions().get(0).getLabel(), is("Aliased"));
+        assertThat(res.getParameters().getFirst().getOptions().size(), is(1));
+        assertThat(res.getParameters().getFirst().getOptions().getFirst().getLabel(), is("Aliased"));
         assertThat(res.getUID(), is(uriAliases));
 
         configDescriptionRegistry.removeConfigDescriptionProvider(configDescriptionProviderMock);
@@ -186,8 +186,8 @@ public class ConfigDescriptionRegistryTest extends JavaTest {
         configDescriptionRegistry.addConfigOptionProvider(configOptionsProviderMockAliased);
 
         ConfigDescription res = requireNonNull(configDescriptionRegistry.getConfigDescription(uriAliases));
-        assertThat(res.getParameters().get(0).getOptions().size(), is(1));
-        assertThat(res.getParameters().get(0).getOptions().get(0).getLabel(), is("Aliased"));
+        assertThat(res.getParameters().getFirst().getOptions().size(), is(1));
+        assertThat(res.getParameters().getFirst().getOptions().getFirst().getLabel(), is("Aliased"));
         assertThat(res.getUID(), is(uriAliases));
 
         configDescriptionRegistry.removeConfigDescriptionProvider(configDescriptionProviderMock);
@@ -203,8 +203,8 @@ public class ConfigDescriptionRegistryTest extends JavaTest {
         configDescriptionRegistry.addConfigOptionProvider(configOptionsProviderMock);
 
         ConfigDescription res = requireNonNull(configDescriptionRegistry.getConfigDescription(uriAliases));
-        assertThat(res.getParameters().get(0).getOptions().size(), is(1));
-        assertThat(res.getParameters().get(0).getOptions().get(0).getLabel(), is("Original"));
+        assertThat(res.getParameters().getFirst().getOptions().size(), is(1));
+        assertThat(res.getParameters().getFirst().getOptions().getFirst().getLabel(), is("Original"));
         assertThat(res.getUID(), is(uriAliases));
 
         configDescriptionRegistry.removeConfigDescriptionProvider(configDescriptionProviderMock);

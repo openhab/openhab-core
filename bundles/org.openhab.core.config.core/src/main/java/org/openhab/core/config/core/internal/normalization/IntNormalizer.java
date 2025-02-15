@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -29,32 +29,22 @@ final class IntNormalizer extends AbstractNormalizer {
     @Override
     public Object doNormalize(Object value) {
         try {
-            if (value instanceof BigDecimal bigDecimalValue) {
-                return bigDecimalValue.setScale(0, RoundingMode.UNNECESSARY);
-            }
-            if (value instanceof Byte byteValue) {
-                return new BigDecimal(byteValue);
-            }
-            if (value instanceof Integer integerValue) {
-                return new BigDecimal(integerValue);
-            }
-            if (value instanceof Long longValue) {
-                return BigDecimal.valueOf(longValue);
-            }
-            if (value instanceof String stringValue) {
-                return new BigDecimal(stringValue).setScale(0, RoundingMode.UNNECESSARY);
-            }
-            if (value instanceof Float floatValue) {
-                return new BigDecimal(floatValue.toString()).setScale(0, RoundingMode.UNNECESSARY);
-            }
-            if (value instanceof Double doubleValue) {
-                return BigDecimal.valueOf(doubleValue).setScale(0, RoundingMode.UNNECESSARY);
-            }
+            return switch (value) {
+                case BigDecimal bigDecimalValue -> bigDecimalValue.setScale(0, RoundingMode.UNNECESSARY);
+                case Byte byteValue -> new BigDecimal(byteValue);
+                case Integer integerValue -> new BigDecimal(integerValue);
+                case Long longValue -> BigDecimal.valueOf(longValue);
+                case String stringValue -> new BigDecimal(stringValue).setScale(0, RoundingMode.UNNECESSARY);
+                case Float floatValue -> new BigDecimal(floatValue.toString()).setScale(0, RoundingMode.UNNECESSARY);
+                case Double doubleValue -> BigDecimal.valueOf(doubleValue).setScale(0, RoundingMode.UNNECESSARY);
+                default -> {
+                    logger.trace("Class \"{}\" cannot be converted to an integer number.", value.getClass().getName());
+                    yield value;
+                }
+            };
         } catch (ArithmeticException | NumberFormatException e) {
             logger.trace("\"{}\" is not a valid integer number.", value, e);
             return value;
         }
-        logger.trace("Class \"{}\" cannot be converted to an integer number.", value.getClass().getName());
-        return value;
     }
 }

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -1250,12 +1250,18 @@ public class PersistenceExtensions {
         State averageState = internalAverageBetween(item, begin, end, effectiveServiceId);
 
         if (averageState != null) {
-            DecimalType dt = averageState.as(DecimalType.class);
+            Item baseItem = item instanceof GroupItem groupItem ? groupItem.getBaseItem() : item;
+            Unit<?> unit = (baseItem instanceof NumberItem numberItem)
+                    && (numberItem.getUnit() instanceof Unit<?> numberItemUnit) ? numberItemUnit.getSystemUnit() : null;
+            DecimalType dt;
+            if (unit != null && averageState instanceof QuantityType<?> averageQuantity) {
+                averageQuantity = averageQuantity.toUnit(unit);
+                dt = averageQuantity != null ? averageQuantity.as(DecimalType.class) : null;
+            } else {
+                dt = averageState.as(DecimalType.class);
+            }
             BigDecimal average = dt != null ? dt.toBigDecimal() : BigDecimal.ZERO, sum = BigDecimal.ZERO;
             int count = 0;
-
-            Item baseItem = item instanceof GroupItem groupItem ? groupItem.getBaseItem() : item;
-            Unit<?> unit = baseItem instanceof NumberItem numberItem ? numberItem.getUnit() : null;
 
             Iterator<HistoricItem> it = result.iterator();
             while (it.hasNext()) {
@@ -1409,13 +1415,14 @@ public class PersistenceExtensions {
             if (dt != null && DecimalType.ZERO.compareTo(dt) <= 0) {
                 BigDecimal deviation = dt.toBigDecimal().sqrt(MathContext.DECIMAL64);
                 Item baseItem = item instanceof GroupItem groupItem ? groupItem.getBaseItem() : item;
-                if (baseItem instanceof NumberItem numberItem) {
-                    Unit<?> unit = numberItem.getUnit();
-                    if (unit != null) {
-                        return new QuantityType<>(deviation, unit);
-                    }
+                Unit<?> unit = (baseItem instanceof NumberItem numberItem)
+                        && (numberItem.getUnit() instanceof Unit<?> numberItemUnit) ? numberItemUnit.getSystemUnit()
+                                : null;
+                if (unit != null) {
+                    return new QuantityType<>(deviation, unit);
+                } else {
+                    return new DecimalType(deviation);
                 }
-                return new DecimalType(deviation);
             }
         }
         return null;
@@ -1807,8 +1814,8 @@ public class PersistenceExtensions {
             Iterator<HistoricItem> it = result.iterator();
 
             Item baseItem = item instanceof GroupItem groupItem ? groupItem.getBaseItem() : item;
-            Unit<?> unit = baseItem instanceof NumberItem numberItem ? numberItem.getUnit() : null;
-
+            Unit<?> unit = (baseItem instanceof NumberItem numberItem)
+                    && (numberItem.getUnit() instanceof Unit<?> numberItemUnit) ? numberItemUnit.getSystemUnit() : null;
             BigDecimal sum = BigDecimal.ZERO;
             while (it.hasNext()) {
                 HistoricItem historicItem = it.next();
@@ -2689,20 +2696,19 @@ public class PersistenceExtensions {
         }
 
         // add HistoricItem at begin
-        if (betweenItemsList.isEmpty() || !betweenItemsList.get(0).getTimestamp().equals(begin)) {
+        if (betweenItemsList.isEmpty() || !betweenItemsList.getFirst().getTimestamp().equals(begin)) {
             HistoricItem first = beginTime.equals(now) ? historicItemOrCurrentState(item, null)
                     : internalPersistedState(item, beginTime, serviceId);
             if (first != null) {
                 first = new RetimedHistoricItem(first, beginTime);
             }
             if (first != null) {
-                betweenItemsList.add(0, first);
+                betweenItemsList.addFirst(first);
             }
         }
 
         // add HistoricItem at end
-        if (betweenItemsList.isEmpty()
-                || !betweenItemsList.get(betweenItemsList.size() - 1).getTimestamp().equals(end)) {
+        if (betweenItemsList.isEmpty() || !betweenItemsList.getLast().getTimestamp().equals(end)) {
             HistoricItem last = endTime.equals(now) ? historicItemOrCurrentState(item, null)
                     : internalPersistedState(item, endTime, serviceId);
             if (last != null) {

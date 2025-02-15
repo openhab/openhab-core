@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -18,7 +18,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -283,7 +282,7 @@ public class FeatureInstaller implements ConfigurationListener {
     }
 
     private void setOnlineRepoUrl() {
-        Path versionFilePath = Paths.get(OpenHAB.getUserDataFolder(), "etc", "version.properties");
+        Path versionFilePath = Path.of(OpenHAB.getUserDataFolder(), "etc", "version.properties");
         try (BufferedReader reader = Files.newBufferedReader(versionFilePath)) {
             Properties prop = new Properties();
             prop.load(reader);

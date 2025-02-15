@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -466,7 +466,7 @@ public class PersistenceManagerTest {
         assertThat(filterCriteria.getEndDate(), is(time4.atZone(ZoneId.systemDefault())));
 
         // verify restore future is not cancelled
-        verify(futures.get(0), never()).cancel(anyBoolean());
+        verify(futures.getFirst(), never()).cancel(anyBoolean());
 
         // verify new values are stored
         inOrder.verify(service, times(2)).store(any(Item.class), any(ZonedDateTime.class), any(State.class));
@@ -481,7 +481,7 @@ public class PersistenceManagerTest {
         manager.timeSeriesUpdated(TEST_ITEM, timeSeries3);
         // verify old restore future is cancelled
         inOrder.verify(service, times(1)).store(any(Item.class), any(ZonedDateTime.class), any(State.class));
-        verify(futures.get(0)).cancel(true);
+        verify(futures.getFirst()).cancel(true);
 
         // verify new restore future is properly created
         inOrder.verify(schedulerMock).at(any(SchedulerRunnable.class), eq(time5));
@@ -503,8 +503,8 @@ public class PersistenceManagerTest {
         verify(readyServiceMock, timeout(1000)).markReady(any());
         List<SchedulerRunnable> runnables = runnableCaptor.getAllValues();
         assertThat(runnables.size(), is(2));
-        runnables.get(0).run();
-        runnables.get(0).run();
+        runnables.getFirst().run();
+        runnables.getFirst().run();
         runnables.get(1).run();
         runnables.get(1).run();
 

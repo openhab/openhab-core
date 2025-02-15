@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -14,6 +14,8 @@ package org.openhab.core.automation.internal.commands;
 
 import java.io.File;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -101,13 +103,13 @@ public class AutomationCommandImport extends AutomationCommand {
      */
     private @Nullable URL initURL(String parameterValue) {
         try {
-            return new URL(parameterValue);
-        } catch (MalformedURLException mue) {
+            return (new URI(parameterValue)).toURL();
+        } catch (MalformedURLException | URISyntaxException mue) {
             File f = new File(parameterValue);
             if (f.isFile()) {
                 try {
                     return f.toURI().toURL();
-                } catch (MalformedURLException e) {
+                } catch (IllegalArgumentException | MalformedURLException e) {
                 }
             }
         }

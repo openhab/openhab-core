@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -45,13 +45,13 @@ public class ProfileI18nUtil {
         this.i18nProvider = i18nProvider;
     }
 
-    public @Nullable String getProfileLabel(Bundle bundle, ProfileTypeUID profileTypeUID, String defaultLabel,
+    public @Nullable String getProfileLabel(@Nullable Bundle bundle, ProfileTypeUID profileTypeUID, String defaultLabel,
             @Nullable Locale locale) {
         String key = I18nUtil.stripConstantOr(defaultLabel, () -> inferProfileTypeKey(profileTypeUID, "label"));
         return i18nProvider.getText(bundle, key, defaultLabel, locale);
     }
 
     private String inferProfileTypeKey(ProfileTypeUID profileTypeUID, String lastSegment) {
-        return "profile-type." + profileTypeUID.getBindingId() + "." + profileTypeUID.getId() + "." + lastSegment;
+        return "profile-type.%s.%s.%s".formatted(profileTypeUID.getBindingId(), profileTypeUID.getId(), lastSegment);
     }
 }

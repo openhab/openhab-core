@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -14,6 +14,7 @@ package org.openhab.core.internal.service;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -114,7 +115,7 @@ public class ReadyServiceImpl implements ReadyService {
     }
 
     private void notifyTracker(ReadyTracker readyTracker, Consumer<ReadyMarker> action) {
-        ReadyMarkerFilter f = trackers.get(readyTracker);
+        ReadyMarkerFilter f = Objects.requireNonNull(trackers.get(readyTracker));
         markers.stream().filter(f::apply).forEach(action);
     }
 }

@@ -17,10 +17,10 @@
   <description>The dependencies that are used to compile the core bundles</description>
 
   <properties>
-    <californium.version>2.7.4</californium.version>
-    <jetty.version>9.4.54.v20240208</jetty.version>
-    <pax.web.version>8.0.27</pax.web.version>
-    <swagger.version>2.2.15</swagger.version>
+    <californium.version>4.0.0-M2</californium.version>
+    <jetty.version>9.4.57.v20241219</jetty.version>
+    <pax.web.version>8.0.30</pax.web.version>
+    <swagger.version>2.2.28</swagger.version>
   </properties>
 
   <dependencies>
@@ -84,7 +84,7 @@
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
-      <version>3.14.0</version>
+      <version>3.17.0</version>
       <scope>compile</scope>
     </dependency>
 
@@ -103,25 +103,18 @@
       <groupId>org.eclipse.californium</groupId>
       <artifactId>element-connector</artifactId>
       <version>${californium.version}</version>
-      <exclusions>
-        <exclusion>
-          <groupId>net.i2p.crypto</groupId>
-          <artifactId>eddsa</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
     <dependency>
-      <groupId>org.eclipse.orbit.bundles</groupId>
-      <artifactId>net.i2p.crypto.eddsa</artifactId>
-      <version>0.3.0.v20220506-1020</version>
+      <groupId>org.eclipse.californium</groupId>
+      <artifactId>californium-osgi</artifactId>
+      <version>${californium.version}</version>
     </dependency>
 
     <!-- Gson -->
-    <!-- The Orbit bundle is used because LSP4J imports com.google.gson.internal -->
     <dependency>
-      <groupId>org.eclipse.orbit.bundles</groupId>
-      <artifactId>com.google.gson</artifactId>
-      <version>2.10.1.v20230109-0753</version>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
+      <version>2.11.0</version>
       <scope>compile</scope>
     </dependency>
 
@@ -203,7 +196,7 @@
     <dependency>
       <groupId>org.jupnp</groupId>
       <artifactId>org.jupnp</artifactId>
-      <version>3.0.1</version>
+      <version>3.0.3</version>
       <scope>compile</scope>
     </dependency>
 
@@ -365,7 +358,7 @@
     <dependency>
       <groupId>de.focus-shift</groupId>
       <artifactId>jollyday-jackson</artifactId>
-      <version>0.35.1</version>
+      <version>1.4.0</version>
       <scope>compile</scope>
     </dependency>
 
@@ -418,13 +411,13 @@
     <dependency>
       <groupId>net.java.dev.jna</groupId>
       <artifactId>jna</artifactId>
-      <version>5.14.0</version>
+      <version>5.16.0</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>net.java.dev.jna</groupId>
       <artifactId>jna-platform</artifactId>
-      <version>5.14.0</version>
+      <version>5.16.0</version>
       <scope>compile</scope>
     </dependency>
   </dependencies>

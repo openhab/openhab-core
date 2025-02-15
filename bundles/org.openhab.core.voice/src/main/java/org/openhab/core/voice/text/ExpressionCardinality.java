@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -60,7 +60,7 @@ public final class ExpressionCardinality extends Expression {
             node.setChildren(nodes.toArray(new ASTNode[0]));
             node.setRemainingTokens(list);
             node.setSuccess(true);
-            node.setValue(atMostOne ? (values.isEmpty() ? null : values.get(0)) : values.toArray());
+            node.setValue(atMostOne ? (values.isEmpty() ? null : values.getFirst()) : values.toArray());
             generateValue(node);
         }
         return node;

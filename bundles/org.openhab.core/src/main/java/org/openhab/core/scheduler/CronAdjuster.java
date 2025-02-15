@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -12,6 +12,7 @@
  */
 package org.openhab.core.scheduler;
 
+import java.time.DateTimeException;
 import java.time.DayOfWeek;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
@@ -106,6 +107,14 @@ public class CronAdjuster implements SchedulerTemporalAdjuster {
         parseAndAdd(cronExpression, parts[2], ChronoField.HOUR_OF_DAY);
         parseAndAdd(cronExpression, parts[1], ChronoField.MINUTE_OF_HOUR);
         parseAndAdd(cronExpression, parts[0], ChronoField.SECOND_OF_MINUTE);
+
+        try {
+            // Test the cron expression in action to make sure it won't cause too many restarts
+            adjustInto(java.time.ZonedDateTime.now());
+        } catch (final DateTimeException e) {
+            throw new IllegalArgumentException(
+                    String.format("Invalid cron expression '%s': %s", cronExpression, e.getMessage()));
+        }
     }
 
     /**
@@ -515,6 +524,7 @@ public class CronAdjuster implements SchedulerTemporalAdjuster {
         // we start over with this new time.
 
         int index = 0;
+        int restarts = 0;
         final int length = fields.size();
 
         while (index < length) {
@@ -525,6 +535,9 @@ public class CronAdjuster implements SchedulerTemporalAdjuster {
             if (out == null) {
                 index++;
             } else {
+                if (restarts++ > 1000) {
+                    throw new DateTimeException("Conditions not satisfied.");
+                }
                 ret = out;
                 index = 0;
             }
@@ -540,7 +553,7 @@ public class CronAdjuster implements SchedulerTemporalAdjuster {
     private Checker or(final List<Checker> checkers) {
         return checkers.size() > 1 //
                 ? temporal -> checkers.stream().anyMatch(c -> c.matches(temporal))
-                : checkers.get(0);
+                : checkers.getFirst();
     }
 
     /**

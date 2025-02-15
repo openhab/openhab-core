@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -174,7 +174,7 @@ public class ConfigurableServiceResource implements RESTResource {
                 + "=*))";
         List<ConfigurableServiceDTO> services = getServicesByFilter(filter, locale);
         if (services.size() == 1) {
-            return services.get(0);
+            return services.getFirst();
         }
         return null;
     }
@@ -391,9 +391,9 @@ public class ConfigurableServiceResource implements RESTResource {
             case 0:
                 return "";
             case 1:
-                return pids.get(0);
+                return pids.getFirst();
             default: // multiple entries
-                final String first = pids.get(0);
+                final String first = pids.getFirst();
                 boolean differences = false;
                 for (int i = 1; i < pids.size(); ++i) {
                     if (!first.equals(pids.get(i))) {

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -21,7 +21,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
@@ -71,8 +70,8 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
     @BeforeEach
     public void setUp() throws IOException, InvalidSyntaxException {
         configBaseDirectory = tmpBaseFolder.getAbsolutePath();
-        final Path source = Paths.get(CONFIGURATION_BASE_DIR);
-        Files.walkFileTree(source, new CopyDirectoryRecursive(source, Paths.get(configBaseDirectory)));
+        final Path source = Path.of(CONFIGURATION_BASE_DIR);
+        Files.walkFileTree(source, new CopyDirectoryRecursive(source, Path.of(configBaseDirectory)));
 
         configAdmin = getService(ConfigurationAdmin.class);
         assertThat(configAdmin, is(notNullValue()));

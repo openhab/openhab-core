@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -142,7 +142,7 @@ public class AbstractRemoteAddonServiceTest {
         // check only the installed addon is present
         addons = addonService.getAddons(null);
         assertThat(addons, hasSize(1));
-        assertThat(addons.get(0).getUid(), is(getFullAddonId(TEST_ADDON)));
+        assertThat(addons.getFirst().getUid(), is(getFullAddonId(TEST_ADDON)));
     }
 
     @Test

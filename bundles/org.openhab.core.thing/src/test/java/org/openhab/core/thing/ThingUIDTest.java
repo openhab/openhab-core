@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -53,6 +53,6 @@ public class ThingUIDTest {
 
         assertEquals("fake:type:bridge:thing", subject.getAsString());
         assertThat(subject.getBridgeIds(), hasSize(1));
-        assertEquals("bridge", subject.getBridgeIds().get(0));
+        assertEquals("bridge", subject.getBridgeIds().getFirst());
     }
 }

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -154,7 +154,7 @@ public class JavaOSGiTest extends JavaTest {
             new MissingServiceAnalyzer(System.out, bundleContext).printMissingServiceDetails(clazz);
             return null;
         } else {
-            return filteredServices.get(0);
+            return filteredServices.getFirst();
         }
     }
 
@@ -317,7 +317,7 @@ public class JavaOSGiTest extends JavaTest {
         ServiceRegistration<?> reg = null;
         List<ServiceRegistration<?>> regList = registeredServices.remove(interfaceName);
         if (regList != null) {
-            reg = regList.get(0);
+            reg = regList.getFirst();
             regList.forEach(r -> r.unregister());
         }
         return reg;

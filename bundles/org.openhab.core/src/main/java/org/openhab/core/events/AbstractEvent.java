@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -82,11 +82,12 @@ public abstract class AbstractEvent implements Event {
         if (!payload.equals(other.payload)) {
             return false;
         }
-        if (source == null) {
+        String localSource = source;
+        if (localSource == null) {
             if (other.source != null) {
                 return false;
             }
-        } else if (!source.equals(other.source)) {
+        } else if (!localSource.equals(other.source)) {
             return false;
         }
         if (!topic.equals(other.topic)) {

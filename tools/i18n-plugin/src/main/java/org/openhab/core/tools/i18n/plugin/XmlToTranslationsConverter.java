@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -191,8 +191,7 @@ public class XmlToTranslationsConverter {
                         .map(ThingType::getConfigDescriptionURI) //
                         .distinct() //
                         .map(bundleInfo::getConfigDescription) //
-                        .filter(Optional::isPresent) //
-                        .map(Optional::get));
+                        .flatMap(Optional::stream));
 
         Builder<TranslationsGroup> groupsBuilder = Stream.builder();
 
@@ -314,8 +313,7 @@ public class XmlToTranslationsConverter {
                         .map(ChannelType::getConfigDescriptionURI) //
                         .distinct() //
                         .map(bundleInfo::getConfigDescription) //
-                        .filter(Optional::isPresent) //
-                        .map(Optional::get));
+                        .flatMap(Optional::stream));
 
         Builder<TranslationsGroup> groupsBuilder = Stream.builder();
 

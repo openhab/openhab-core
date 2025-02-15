@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -16,6 +16,8 @@ import static org.openhab.core.auth.oauth2client.internal.Keyword.*;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.GeneralSecurityException;
 import java.time.Instant;
@@ -168,7 +170,7 @@ public class OAuthClientServiceImpl implements OAuthClientService {
     public String extractAuthCodeFromAuthResponse(String redirectURLwithParams) throws OAuthException {
         // parse the redirectURL
         try {
-            URL redirectURLObject = new URL(redirectURLwithParams);
+            URL redirectURLObject = (new URI(redirectURLwithParams)).toURL();
             UrlEncoded urlEncoded = new UrlEncoded(redirectURLObject.getQuery());
 
             String stateFromRedirectURL = urlEncoded.getValue(STATE, 0); // may contain multiple...
@@ -186,7 +188,7 @@ public class OAuthClientServiceImpl implements OAuthClientService {
                 throw new OAuthException(String.format("state from redirectURL is incorrect.  Expected: %s Found: %s",
                         persistedParams.state, stateFromRedirectURL));
             }
-        } catch (MalformedURLException e) {
+        } catch (IllegalArgumentException | MalformedURLException | URISyntaxException e) {
             throw new OAuthException("Redirect URL is malformed", e);
         }
     }

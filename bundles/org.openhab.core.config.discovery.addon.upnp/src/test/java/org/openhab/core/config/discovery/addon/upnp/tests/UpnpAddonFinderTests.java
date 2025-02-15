@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -12,16 +12,12 @@
  */
 package org.openhab.core.config.discovery.addon.upnp.tests;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 import java.net.InetAddress;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -85,7 +81,7 @@ public class UpnpAddonFinderTests {
         upnpService = mock(UpnpService.class, Mockito.RETURNS_DEEP_STUBS);
         URL url = null;
         try {
-            url = new URL("http://www.openhab.org/");
+            url = URI.create("http://www.openhab.org/").toURL();
         } catch (MalformedURLException e) {
             fail("MalformedURLException");
         }
@@ -114,7 +110,7 @@ public class UpnpAddonFinderTests {
         assertNotNull(upnpService);
         List<RemoteDevice> result = new ArrayList<>(upnpService.getRegistry().getRemoteDevices());
         assertEquals(1, result.size());
-        RemoteDevice device = result.get(0);
+        RemoteDevice device = result.getFirst();
         assertEquals("manufacturer", device.getDetails().getManufacturerDetails().getManufacturer());
         assertEquals("serialNumber", device.getDetails().getSerialNumber());
     }

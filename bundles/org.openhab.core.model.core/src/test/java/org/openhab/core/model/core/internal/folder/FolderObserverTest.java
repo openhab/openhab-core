@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -29,7 +29,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Comparator;
 import java.util.Dictionary;
@@ -253,7 +252,7 @@ public class FolderObserverTest extends JavaTest {
         configProps.put(subdir, "");
         folderObserver.activate(contextMock);
 
-        File file = new File(WATCHED_DIRECTORY, Paths.get(subdir, "MockFileInNoExtSubDir.txt").toString());
+        File file = new File(WATCHED_DIRECTORY, Path.of(subdir, "MockFileInNoExtSubDir.txt").toString());
         Files.writeString(file.toPath(), INITIAL_FILE_CONTENT, StandardCharsets.UTF_8, StandardOpenOption.CREATE);
         waitForAssert(() -> assertThat(file.exists(), is(true)));
 

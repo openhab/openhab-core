@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -54,7 +54,7 @@ public interface Item extends Identifiable<String> {
 
     /**
      * Returns the previous state of the item.
-     *
+     * 
      * @return the previous state of the item, or null if the item has never been changed.
      */
     @Nullable
@@ -70,7 +70,7 @@ public interface Item extends Identifiable<String> {
 
     /**
      * Returns the time the item was last changed.
-     *
+     * 
      * @return the time the item was last changed, or null if the item has never been changed.
      */
     @Nullable

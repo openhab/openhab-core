@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -64,7 +64,7 @@ public class ChannelGroupUID extends UID {
      */
     public String getId() {
         List<String> segments = getAllSegments();
-        return segments.get(segments.size() - 1);
+        return segments.getLast();
     }
 
     @Override

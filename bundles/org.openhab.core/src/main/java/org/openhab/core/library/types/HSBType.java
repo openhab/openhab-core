@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -12,6 +12,7 @@
  */
 package org.openhab.core.library.types;
 
+import java.io.Serial;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Arrays;
@@ -38,6 +39,7 @@ import org.openhab.core.util.ColorUtil;
 @NonNullByDefault
 public class HSBType extends PercentType implements ComplexType, State, Command {
 
+    @Serial
     private static final long serialVersionUID = 322902950356613226L;
 
     // constants for the constituents
@@ -87,7 +89,7 @@ public class HSBType extends PercentType implements ComplexType, State, Command 
     public HSBType(String value) {
         List<String> constituents = Arrays.stream(value.split(",")).map(String::trim).toList();
         if (constituents.size() == 3) {
-            this.hue = new BigDecimal(constituents.get(0));
+            this.hue = new BigDecimal(constituents.getFirst());
             this.saturation = new BigDecimal(constituents.get(1));
             this.value = new BigDecimal(constituents.get(2));
             validateValue(this.hue, this.saturation, this.value);

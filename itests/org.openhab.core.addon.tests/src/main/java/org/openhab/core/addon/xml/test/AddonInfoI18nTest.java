@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -65,7 +65,7 @@ public class AddonInfoI18nTest extends JavaOSGiTest {
     @Test
     public void assertAddonInfosWereLocalizedInDutch() throws Exception {
         addonInstaller.exec(TEST_BUNDLE_NAME, () -> {
-            Set<AddonInfo> bindingInfos = addonInfoRegistry.getAddonInfos(new Locale("nl"));
+            Set<AddonInfo> bindingInfos = addonInfoRegistry.getAddonInfos(Locale.of("nl"));
             AddonInfo bindingInfo = bindingInfos.iterator().next();
 
             assertThat(bindingInfo, is(notNullValue()));

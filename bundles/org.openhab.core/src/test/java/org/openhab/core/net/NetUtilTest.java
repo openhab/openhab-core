@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -129,7 +129,7 @@ public class NetUtilTest {
                 .getAddressesRangeByCidrAddress(new CidrAddress(testableAddress, (short) 24), 24);
 
         assertEquals(254, addresses.size());
-        assertEquals("192.168.1.1", addresses.get(0).getHostAddress());
+        assertEquals("192.168.1.1", addresses.getFirst().getHostAddress());
         assertEquals("192.168.1.254", addresses.get(253).getHostAddress());
     }
 
@@ -140,7 +140,7 @@ public class NetUtilTest {
                 .getAddressesRangeByCidrAddress(new CidrAddress(testableAddress, (short) 16), 16);
 
         assertEquals(65534, addresses.size());
-        assertEquals("127.0.0.1", addresses.get(0).getHostAddress());
+        assertEquals("127.0.0.1", addresses.getFirst().getHostAddress());
         assertEquals("127.0.255.254", addresses.get(65533).getHostAddress());
     }
 

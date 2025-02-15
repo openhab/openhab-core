@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -101,16 +101,15 @@ public class MetadataStateDescriptionFragmentProvider implements StateDescriptio
                     builder.withReadOnly(getBoolean(readOnly));
                 }
 
-                if (metadata.getConfiguration().containsKey("options")) {
-                    List<StateOption> stateOptions = Stream
-                            .of(metadata.getConfiguration().get("options").toString().split(",")).map(o -> {
-                                if (o.contains("=")) {
-                                    var pair = parseValueLabelPair(o.trim());
-                                    return new StateOption(pair[0], pair[1]);
-                                } else {
-                                    return new StateOption(o.trim(), null);
-                                }
-                            }).toList();
+                if (metadata.getConfiguration().get("options") instanceof Object options) {
+                    List<StateOption> stateOptions = Stream.of(options.toString().split(",")).map(o -> {
+                        if (o.contains("=")) {
+                            var pair = parseValueLabelPair(o.trim());
+                            return new StateOption(pair[0], pair[1]);
+                        } else {
+                            return new StateOption(o.trim(), null);
+                        }
+                    }).toList();
                     builder.withOptions(stateOptions);
                 }
 

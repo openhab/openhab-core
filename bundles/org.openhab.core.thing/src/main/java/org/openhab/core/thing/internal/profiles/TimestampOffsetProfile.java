@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -16,7 +16,6 @@ import java.time.Duration;
 import java.time.Instant;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.library.types.DateTimeType;
 import org.openhab.core.thing.profiles.ProfileCallback;
 import org.openhab.core.thing.profiles.ProfileContext;
@@ -61,10 +60,6 @@ public class TimestampOffsetProfile implements StateProfile {
                     OFFSET_PARAM);
             offset = Duration.ZERO;
         }
-    }
-
-    private @Nullable String toStringOrNull(@Nullable Object value) {
-        return value == null ? null : value.toString();
     }
 
     @Override

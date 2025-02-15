@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -13,8 +13,8 @@
 package org.openhab.core.events;
 
 import java.nio.file.FileSystems;
+import java.nio.file.Path;
 import java.nio.file.PathMatcher;
-import java.nio.file.Paths;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
@@ -46,6 +46,6 @@ public class TopicGlobEventFilter implements EventFilter {
 
     @Override
     public boolean apply(Event event) {
-        return topicMatcher.matches(Paths.get(event.getTopic()));
+        return topicMatcher.matches(Path.of(event.getTopic()));
     }
 }

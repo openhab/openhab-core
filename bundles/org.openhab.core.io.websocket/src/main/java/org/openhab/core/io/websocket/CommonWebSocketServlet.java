@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -13,6 +13,7 @@
 package org.openhab.core.io.websocket;
 
 import java.io.IOException;
+import java.io.Serial;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
@@ -65,6 +66,7 @@ import org.slf4j.LoggerFactory;
 @HttpWhiteboardServletPattern(CommonWebSocketServlet.SERVLET_PATH + "/*")
 @Component(immediate = true, service = { Servlet.class })
 public class CommonWebSocketServlet extends WebSocketServlet {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     public static final String SEC_WEBSOCKET_PROTOCOL_HEADER = "Sec-WebSocket-Protocol";

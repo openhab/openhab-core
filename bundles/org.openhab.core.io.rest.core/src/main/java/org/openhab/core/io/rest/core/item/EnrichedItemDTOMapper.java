@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -18,6 +18,7 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -105,6 +106,12 @@ public class EnrichedItemDTOMapper {
         }
         StateDescription stateDescription = considerTransformation(item.getStateDescription(locale));
 
+        String lastState = Optional.ofNullable(item.getLastState()).map(State::toFullString).orElse(null);
+        Long lastStateUpdate = Optional.ofNullable(item.getLastStateUpdate()).map(zdt -> zdt.toInstant().toEpochMilli())
+                .orElse(null);
+        Long lastStateChange = Optional.ofNullable(item.getLastStateChange()).map(zdt -> zdt.toInstant().toEpochMilli())
+                .orElse(null);
+
         final String link;
         if (uriBuilder != null) {
             link = uriBuilder.build(itemDTO.name).toASCIIString();
@@ -139,11 +146,11 @@ public class EnrichedItemDTOMapper {
             } else {
                 memberDTOs = new EnrichedItemDTO[0];
             }
-            enrichedItemDTO = new EnrichedGroupItemDTO(itemDTO, memberDTOs, link, state, transformedState,
-                    stateDescription, unitSymbol);
+            enrichedItemDTO = new EnrichedGroupItemDTO(itemDTO, memberDTOs, link, state, lastState, lastStateUpdate,
+                    lastStateChange, transformedState, stateDescription, unitSymbol);
         } else {
-            enrichedItemDTO = new EnrichedItemDTO(itemDTO, link, state, transformedState, stateDescription,
-                    item.getCommandDescription(locale), unitSymbol);
+            enrichedItemDTO = new EnrichedItemDTO(itemDTO, link, state, lastState, lastStateUpdate, lastStateChange,
+                    transformedState, stateDescription, item.getCommandDescription(locale), unitSymbol);
         }
 
         return enrichedItemDTO;

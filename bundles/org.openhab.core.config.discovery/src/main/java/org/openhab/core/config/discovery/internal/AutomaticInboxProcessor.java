@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -217,7 +217,7 @@ public class AutomaticInboxProcessor extends AbstractTypedEventSubscriber<ThingS
         if (results.size() == 1) {
             logger.debug("Auto-ignoring the inbox entry for the representation value '{}'.", representationValue);
 
-            inbox.setFlag(results.get(0).getThingUID(), DiscoveryResultFlag.IGNORED);
+            inbox.setFlag(results.getFirst().getThingUID(), DiscoveryResultFlag.IGNORED);
         }
     }
 
@@ -255,7 +255,7 @@ public class AutomaticInboxProcessor extends AbstractTypedEventSubscriber<ThingS
         if (results.size() == 1) {
             logger.debug("Removing the ignored result from the inbox for the representation value '{}'.",
                     representationValue);
-            inbox.remove(results.get(0).getThingUID());
+            inbox.remove(results.getFirst().getThingUID());
         }
     }
 

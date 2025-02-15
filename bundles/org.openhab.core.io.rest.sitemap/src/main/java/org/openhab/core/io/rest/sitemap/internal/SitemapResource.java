@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -74,6 +74,7 @@ import org.openhab.core.io.rest.sitemap.SitemapSubscriptionService.SitemapSubscr
 import org.openhab.core.items.GenericItem;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
+import org.openhab.core.items.events.GroupItemStateChangedEvent;
 import org.openhab.core.items.events.ItemEvent;
 import org.openhab.core.items.events.ItemStateChangedEvent;
 import org.openhab.core.library.CoreItemFactory;
@@ -918,7 +919,7 @@ public class SitemapResource
 
     @Override
     public Set<String> getSubscribedEventTypes() {
-        return Set.of(ItemStateChangedEvent.TYPE);
+        return Set.of(ItemStateChangedEvent.TYPE, GroupItemStateChangedEvent.TYPE);
     }
 
     @Override

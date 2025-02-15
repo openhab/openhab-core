@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -479,8 +479,8 @@ public abstract class BaseThingHandler implements ThingHandler {
                     channel.getConfiguration().getProperties()));
         } catch (ConfigValidationException e) {
             logger.warn(
-                    "Attempt to update thing '{}' with a thing containing invalid configuration '{}', blocked. This is most likely a bug.",
-                    thing.getUID(), thing.getConfiguration());
+                    "Attempt to update thing '{}' with a thing containing invalid configuration '{}' blocked. This is most likely a bug: {}",
+                    thing.getUID(), thing.getConfiguration(), e.getValidationMessages());
             return;
         }
         synchronized (this) {

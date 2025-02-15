@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Objects;
+import java.util.regex.Pattern;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -29,6 +30,7 @@ import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventPublisher;
+import org.openhab.core.events.TopicEventFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,6 +42,7 @@ import com.google.gson.reflect.TypeToken;
  * The {@link EventWebSocket} is the WebSocket implementation that extends the event bus
  *
  * @author Jan N. Klug - Initial contribution
+ * @author Florian Hotze - Add topic filter
  */
 @WebSocket
 @NonNullByDefault
@@ -49,6 +52,7 @@ public class EventWebSocket {
     public static final String WEBSOCKET_TOPIC_PREFIX = "openhab/websocket/";
 
     private static final Type STRING_LIST_TYPE = TypeToken.getParameterized(List.class, String.class).getType();
+    private static final Pattern TOPIC_VALIDATE_PATTERN = Pattern.compile("^!?(\\w*\\*?\\/?)+$");
 
     private final Logger logger = LoggerFactory.getLogger(EventWebSocket.class);
 
@@ -63,6 +67,8 @@ public class EventWebSocket {
 
     private List<String> typeFilter = List.of();
     private List<String> sourceFilter = List.of();
+    private @Nullable TopicEventFilter topicIncludeFilter = null;
+    private @Nullable TopicEventFilter topicExcludeFilter = null;
 
     public EventWebSocket(Gson gson, EventWebSocketAdapter wsAdapter, ItemEventUtility itemEventUtility,
             EventPublisher eventPublisher) {
@@ -148,6 +154,32 @@ public class EventWebSocket {
                                     remoteEndpoint.getInetSocketAddress(), typeFilter);
                             responseEvent = new EventDTO(WEBSOCKET_EVENT_TYPE, WEBSOCKET_TOPIC_PREFIX + "filter/source",
                                     eventDTO.payload, null, eventDTO.eventId);
+                        } else if ((WEBSOCKET_TOPIC_PREFIX + "filter/topic").equals(eventDTO.topic)) {
+                            List<String> topics = Objects
+                                    .requireNonNullElse(gson.fromJson(eventDTO.payload, STRING_LIST_TYPE), List.of());
+                            for (String topic : topics) {
+                                if (!TOPIC_VALIDATE_PATTERN.matcher(topic).matches()) {
+                                    throw new EventProcessingException(
+                                            "Invalid topic '" + topic + "' in topic filter WebSocketEvent");
+                                }
+                            }
+                            List<String> includeTopics = topics.stream().filter(t -> !t.startsWith("!")).toList();
+                            List<String> excludeTopics = topics.stream().filter(t -> t.startsWith("!"))
+                                    .map(t -> t.substring(1)).toList();
+                            // convert to regex: replace any wildcard (*) with the regex pattern (.*)
+                            includeTopics = includeTopics.stream().map(t -> t.trim().replace("*", ".*") + "$").toList();
+                            excludeTopics = excludeTopics.stream().map(t -> t.trim().replace("*", ".*") + "$").toList();
+                            // create topic filter if topic list not empty
+                            if (!includeTopics.isEmpty()) {
+                                topicIncludeFilter = new TopicEventFilter(includeTopics);
+                            }
+                            if (!excludeTopics.isEmpty()) {
+                                topicExcludeFilter = new TopicEventFilter(excludeTopics);
+                            }
+                            logger.debug("Setting topic filter for connection to {}: {}",
+                                    remoteEndpoint.getInetSocketAddress(), topics);
+                            responseEvent = new EventDTO(WEBSOCKET_EVENT_TYPE, WEBSOCKET_TOPIC_PREFIX + "filter/topic",
+                                    eventDTO.payload, null, eventDTO.eventId);
                         } else {
                             throw new EventProcessingException("Invalid topic or payload in WebSocketEvent");
                         }
@@ -195,7 +227,9 @@ public class EventWebSocket {
         try {
             String source = event.getSource();
             if ((source == null || !sourceFilter.contains(event.getSource()))
-                    && (typeFilter.isEmpty() || typeFilter.contains(event.getType()))) {
+                    && (typeFilter.isEmpty() || typeFilter.contains(event.getType()))
+                    && (topicIncludeFilter == null || topicIncludeFilter.apply(event))
+                    && (topicExcludeFilter == null || !topicExcludeFilter.apply(event))) {
                 sendMessage(gson.toJson(new EventDTO(event)));
             }
         } catch (IOException e) {

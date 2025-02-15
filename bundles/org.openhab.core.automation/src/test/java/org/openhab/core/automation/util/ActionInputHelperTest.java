@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -208,7 +208,7 @@ public class ActionInputHelperTest {
         List<ConfigDescriptionParameter> params = helper
                 .mapActionInputsToConfigDescriptionParameters(List.of(input1, input2));
         assertThat(params.size(), is(2));
-        checkParameter(params.get(0), "Boolean", ConfigDescriptionParameter.Type.BOOLEAN, PARAM_LABEL,
+        checkParameter(params.getFirst(), "Boolean", ConfigDescriptionParameter.Type.BOOLEAN, PARAM_LABEL,
                 PARAM_DESCRIPTION, true, "false", null, null, null);
         checkParameter(params.get(1), "String", ConfigDescriptionParameter.Type.TEXT, PARAM_LABEL, PARAM_DESCRIPTION,
                 false, null, null, null, null);

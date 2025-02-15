@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -160,7 +160,7 @@ public class SemanticsServiceImplTest {
     public void testGetLabelAndSynonyms() {
         List<String> result = service.getLabelAndSynonyms(bathroomTagClass, Locale.ENGLISH);
         assertEquals(6, result.size());
-        assertEquals("bathroom", result.get(0));
+        assertEquals("bathroom", result.getFirst());
         assertEquals("bathrooms", result.get(1));
         assertEquals("bath", result.get(2));
         assertEquals("baths", result.get(3));
@@ -169,14 +169,14 @@ public class SemanticsServiceImplTest {
 
         result = service.getLabelAndSynonyms(cleaningRobotTagClass, Locale.FRENCH);
         assertEquals(4, result.size());
-        assertEquals("robot de nettoyage", result.get(0));
+        assertEquals("robot de nettoyage", result.getFirst());
         assertEquals("robos de nettoyage", result.get(1));
         assertEquals("robot aspirateur", result.get(2));
         assertEquals("robots aspirateur", result.get(3));
 
         result = service.getLabelAndSynonyms(userLocationTagClass, Locale.ENGLISH);
         assertEquals(4, result.size());
-        assertEquals("custom label", result.get(0));
+        assertEquals("custom label", result.getFirst());
         assertEquals("synonym1", result.get(1));
         assertEquals("synonym2", result.get(2));
         assertEquals("synonym with space", result.get(3));
@@ -204,28 +204,28 @@ public class SemanticsServiceImplTest {
     public void testGetByLabelOrSynonym() {
         List<Class<? extends Tag>> tags = service.getByLabelOrSynonym("BATHROOM", Locale.ENGLISH);
         assertEquals(1, tags.size());
-        assertEquals(bathroomTagClass, tags.get(0));
+        assertEquals(bathroomTagClass, tags.getFirst());
         tags = service.getByLabelOrSynonym("POWDER Rooms", Locale.ENGLISH);
         assertEquals(1, tags.size());
-        assertEquals(bathroomTagClass, tags.get(0));
+        assertEquals(bathroomTagClass, tags.getFirst());
         tags = service.getByLabelOrSynonym("other bath", Locale.ENGLISH);
         assertTrue(tags.isEmpty());
 
         tags = service.getByLabelOrSynonym("ROBOT de nettoyage", Locale.FRENCH);
         assertEquals(1, tags.size());
-        assertEquals(cleaningRobotTagClass, tags.get(0));
+        assertEquals(cleaningRobotTagClass, tags.getFirst());
         tags = service.getByLabelOrSynonym("ROBOTS aspirateur", Locale.FRENCH);
         assertEquals(1, tags.size());
-        assertEquals(cleaningRobotTagClass, tags.get(0));
+        assertEquals(cleaningRobotTagClass, tags.getFirst());
         tags = service.getByLabelOrSynonym("Robot cuiseur", Locale.FRENCH);
         assertTrue(tags.isEmpty());
 
         tags = service.getByLabelOrSynonym("CUSTOM label", Locale.ENGLISH);
         assertEquals(1, tags.size());
-        assertEquals(userLocationTagClass, tags.get(0));
+        assertEquals(userLocationTagClass, tags.getFirst());
         tags = service.getByLabelOrSynonym("Synonym with space", Locale.ENGLISH);
         assertEquals(1, tags.size());
-        assertEquals(userLocationTagClass, tags.get(0));
+        assertEquals(userLocationTagClass, tags.getFirst());
         tags = service.getByLabelOrSynonym("wrong label", Locale.ENGLISH);
         assertTrue(tags.isEmpty());
     }

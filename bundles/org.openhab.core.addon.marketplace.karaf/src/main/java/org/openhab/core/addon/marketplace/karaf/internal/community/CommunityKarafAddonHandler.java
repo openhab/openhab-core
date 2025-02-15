@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -12,13 +12,13 @@
  */
 package org.openhab.core.addon.marketplace.karaf.internal.community;
 
-import static org.openhab.core.addon.marketplace.MarketplaceConstants.KAR_CONTENT_TYPE;
-import static org.openhab.core.addon.marketplace.MarketplaceConstants.KAR_DOWNLOAD_URL_PROPERTY;
+import static org.openhab.core.addon.marketplace.MarketplaceConstants.*;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -108,13 +108,14 @@ public class CommunityKarafAddonHandler implements MarketplaceAddonHandler {
 
     @Override
     public void install(Addon addon) throws MarketplaceHandlerException {
+        URL sourceUrl;
         try {
-            URL sourceUrl = new URL((String) addon.getProperties().get(KAR_DOWNLOAD_URL_PROPERTY));
-            addKarToCache(addon.getUid(), sourceUrl);
-            installFromCache(addon.getUid());
-        } catch (MalformedURLException e) {
+            sourceUrl = (new URI((String) addon.getProperties().get(KAR_DOWNLOAD_URL_PROPERTY))).toURL();
+        } catch (IllegalArgumentException | MalformedURLException | URISyntaxException e) {
             throw new MarketplaceHandlerException("Malformed source URL: " + e.getMessage(), e);
         }
+        addKarToCache(addon.getUid(), sourceUrl);
+        installFromCache(addon.getUid());
     }
 
     @Override

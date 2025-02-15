@@ -69,11 +69,11 @@
     <bnd.version>7.1.0</bnd.version>
     <commons.net.version>3.7.2</commons.net.version>
     <eea.version>2.4.0</eea.version>
-    <karaf.compile.version>4.4.6</karaf.compile.version>
-    <karaf.tooling.version>4.4.6</karaf.tooling.version>
-    <sat.version>0.16.0</sat.version>
-    <slf4j.version>2.0.12</slf4j.version>
-    <xtext.version>2.36.0</xtext.version>
+    <karaf.compile.version>4.4.7</karaf.compile.version>
+    <karaf.tooling.version>4.4.7</karaf.tooling.version>
+    <sat.version>0.17.0</sat.version>
+    <slf4j.version>2.0.16</slf4j.version>
+    <xtext.version>2.37.0</xtext.version>
     <spotless.version>2.43.0</spotless.version>
     <!-- Eclipse Java formatter version 4.26+ does not check test files -->
     <spotless.eclipse.version>4.25</spotless.eclipse.version>
@@ -297,7 +297,7 @@ Import-Package: \\
             <dependency>
               <groupId>org.eclipse.jdt</groupId>
               <artifactId>ecj</artifactId>
-              <version>3.36.0</version>
+              <version>3.39.0</version>
             </dependency>
           </dependencies>
         </plugin>
@@ -331,6 +331,7 @@ Import-Package: \\
           <artifactId>maven-javadoc-plugin</artifactId>
           <version>3.11.2</version>
           <configuration>
+            <outputDirectory>${project.build.directory}/site</outputDirectory>
             <failOnError>true</failOnError>
             <failOnWarnings>true</failOnWarnings>
             <doclint>none</doclint>
@@ -448,10 +449,8 @@ Import-Package: \\
             <strictCheck>true</strictCheck>
             <aggregate>true</aggregate>
             <mapping>
-              <groovy>JAVADOC_STYLE</groovy>
-              <java>JAVADOC_STYLE</java>
-              <mwe2>JAVADOC_STYLE</mwe2>
-              <xtend>JAVADOC_STYLE</xtend>
+              <mwe2>SLASHSTAR_STYLE</mwe2>
+              <xtend>SLASHSTAR_STYLE</xtend>
               <xml>xml-header-style</xml>
             </mapping>
             <useDefaultExcludes>true</useDefaultExcludes>

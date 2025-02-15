@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -12,6 +12,7 @@
  */
 package org.openhab.core.library.types;
 
+import java.io.Serial;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.DecimalFormat;
@@ -35,6 +36,7 @@ import org.openhab.core.types.State;
 @NonNullByDefault
 public class DecimalType extends Number implements PrimitiveType, State, Command, Comparable<DecimalType> {
 
+    @Serial
     private static final long serialVersionUID = 4226845847123464690L;
     protected static final BigDecimal BIG_DECIMAL_HUNDRED = BigDecimal.valueOf(100);
 

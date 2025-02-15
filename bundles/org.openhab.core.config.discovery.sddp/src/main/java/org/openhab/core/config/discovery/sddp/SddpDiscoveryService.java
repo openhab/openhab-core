@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -159,7 +159,7 @@ public class SddpDiscoveryService extends AbstractDiscoveryService
         if (!data.isBlank()) {
             List<String> lines = data.lines().toList();
             if (lines.size() > 1) {
-                String statement = lines.get(0).strip();
+                String statement = lines.getFirst().strip();
                 boolean offline = statement.startsWith(NOTIFY_OFFLINE_HEADER);
                 if (offline || statement.startsWith(NOTIFY_ALIVE_HEADER) || statement.startsWith(NOTIFY_IDENTIFY_HEADER)
                         || statement.startsWith(SEARCH_RESPONSE_HEADER)) {

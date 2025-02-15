@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -86,7 +86,7 @@ public class PointType implements ComplexType, Command, State {
         if (!value.isEmpty()) {
             List<String> elements = Arrays.stream(value.split(",")).map(String::trim).toList();
             if (elements.size() >= 2) {
-                canonicalize(new DecimalType(elements.get(0)), new DecimalType(elements.get(1)));
+                canonicalize(new DecimalType(elements.getFirst()), new DecimalType(elements.get(1)));
                 if (elements.size() == 3) {
                     setAltitude(new DecimalType(elements.get(2)));
                 } else if (elements.size() > 3) {

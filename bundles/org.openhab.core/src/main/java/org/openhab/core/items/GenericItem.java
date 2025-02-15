@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -213,8 +213,8 @@ public abstract class GenericItem implements ActiveItem {
 
     protected void internalSend(Command command) {
         // try to send the command to the bus
-        if (eventPublisher != null) {
-            eventPublisher.post(ItemEventFactory.createCommandEvent(this.getName(), command));
+        if (eventPublisher instanceof EventPublisher publisher) {
+            publisher.post(ItemEventFactory.createCommandEvent(this.getName(), command));
         }
     }
 
@@ -510,8 +510,8 @@ public abstract class GenericItem implements ActiveItem {
 
     @Override
     public @Nullable StateDescription getStateDescription(@Nullable Locale locale) {
-        if (stateDescriptionService != null) {
-            return stateDescriptionService.getStateDescription(this.name, locale);
+        if (stateDescriptionService instanceof StateDescriptionService service) {
+            return service.getStateDescription(this.name, locale);
         }
         return null;
     }
@@ -553,8 +553,8 @@ public abstract class GenericItem implements ActiveItem {
     }
 
     protected @Nullable CommandDescription getCommandOptions(@Nullable Locale locale) {
-        if (commandDescriptionService != null) {
-            CommandDescription commandDescription = commandDescriptionService.getCommandDescription(this.name, locale);
+        if (commandDescriptionService instanceof CommandDescriptionService service) {
+            CommandDescription commandDescription = service.getCommandDescription(this.name, locale);
             if (commandDescription != null) {
                 return commandDescription;
             }

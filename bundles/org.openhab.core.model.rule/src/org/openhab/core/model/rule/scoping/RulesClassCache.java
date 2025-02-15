@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -12,6 +12,7 @@
  */
 package org.openhab.core.model.rule.scoping;
 
+import java.io.Serial;
 import java.util.HashMap;
 
 import org.eclipse.xtext.common.types.access.impl.Primitives;
@@ -36,6 +37,7 @@ import org.slf4j.LoggerFactory;
 @Component
 public class RulesClassCache extends HashMap<String, Class<?>> {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private static RulesClassCache instance;

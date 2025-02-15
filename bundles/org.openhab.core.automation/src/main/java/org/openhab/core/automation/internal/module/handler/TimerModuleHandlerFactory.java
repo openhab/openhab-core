@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -49,7 +49,8 @@ public class TimerModuleHandlerFactory extends BaseModuleHandlerFactory {
     public static final String THREADPOOLNAME = "ruletimer";
     private static final Collection<String> TYPES = Arrays.asList(GenericCronTriggerHandler.MODULE_TYPE_ID,
             TimeOfDayTriggerHandler.MODULE_TYPE_ID, TimeOfDayConditionHandler.MODULE_TYPE_ID,
-            DayOfWeekConditionHandler.MODULE_TYPE_ID, DateTimeTriggerHandler.MODULE_TYPE_ID);
+            DayOfWeekConditionHandler.MODULE_TYPE_ID, DateTimeTriggerHandler.MODULE_TYPE_ID,
+            IntervalConditionHandler.MODULE_TYPE_ID);
 
     private final CronScheduler scheduler;
     private final ItemRegistry itemRegistry;
@@ -78,21 +79,26 @@ public class TimerModuleHandlerFactory extends BaseModuleHandlerFactory {
     protected @Nullable ModuleHandler internalCreate(Module module, String ruleUID) {
         logger.trace("create {} -> {}", module.getId(), module.getTypeUID());
         String moduleTypeUID = module.getTypeUID();
-        if (GenericCronTriggerHandler.MODULE_TYPE_ID.equals(moduleTypeUID) && module instanceof Trigger trigger) {
-            return new GenericCronTriggerHandler(trigger, scheduler);
-        } else if (TimeOfDayTriggerHandler.MODULE_TYPE_ID.equals(moduleTypeUID) && module instanceof Trigger trigger) {
-            return new TimeOfDayTriggerHandler(trigger, scheduler);
-        } else if (DateTimeTriggerHandler.MODULE_TYPE_ID.equals(moduleTypeUID) && module instanceof Trigger trigger) {
-            return new DateTimeTriggerHandler(trigger, scheduler, itemRegistry, bundleContext);
-        } else if (TimeOfDayConditionHandler.MODULE_TYPE_ID.equals(moduleTypeUID)
-                && module instanceof Condition condition) {
-            return new TimeOfDayConditionHandler(condition);
-        } else if (DayOfWeekConditionHandler.MODULE_TYPE_ID.equals(moduleTypeUID)
-                && module instanceof Condition condition) {
-            return new DayOfWeekConditionHandler(condition);
-        } else {
-            logger.error("The module handler type '{}' is not supported.", moduleTypeUID);
+        if (module instanceof Trigger trigger) {
+            switch (moduleTypeUID) {
+                case GenericCronTriggerHandler.MODULE_TYPE_ID:
+                    return new GenericCronTriggerHandler(trigger, scheduler);
+                case TimeOfDayTriggerHandler.MODULE_TYPE_ID:
+                    return new TimeOfDayTriggerHandler(trigger, scheduler);
+                case DateTimeTriggerHandler.MODULE_TYPE_ID:
+                    return new DateTimeTriggerHandler(trigger, scheduler, itemRegistry, bundleContext);
+            }
+        } else if (module instanceof Condition condition) {
+            switch (moduleTypeUID) {
+                case TimeOfDayConditionHandler.MODULE_TYPE_ID:
+                    return new TimeOfDayConditionHandler(condition);
+                case DayOfWeekConditionHandler.MODULE_TYPE_ID:
+                    return new DayOfWeekConditionHandler(condition);
+                case IntervalConditionHandler.MODULE_TYPE_ID:
+                    return new IntervalConditionHandler(condition);
+            }
         }
+        logger.error("The module handler type '{}' is not supported.", moduleTypeUID);
         return null;
     }
 }

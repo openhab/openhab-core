@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -49,7 +49,7 @@ public class EnrichedConfigDescriptionDTOMapperTest {
         ConfigDescriptionDTO cddto = EnrichedConfigDescriptionDTOMapper.map(configDescription);
         assertThat(cddto.parameters, hasSize(1));
 
-        ConfigDescriptionParameterDTO cdpdto = cddto.parameters.get(0);
+        ConfigDescriptionParameterDTO cdpdto = cddto.parameters.getFirst();
         assertThat(cdpdto, instanceOf(EnrichedConfigDescriptionParameterDTO.class));
         assertThat(cdpdto.defaultValue, is(nullValue()));
         EnrichedConfigDescriptionParameterDTO ecdpdto = (EnrichedConfigDescriptionParameterDTO) cdpdto;
@@ -66,7 +66,7 @@ public class EnrichedConfigDescriptionDTOMapperTest {
         ConfigDescriptionDTO cddto = EnrichedConfigDescriptionDTOMapper.map(configDescription);
         assertThat(cddto.parameters, hasSize(1));
 
-        ConfigDescriptionParameterDTO cdpdto = cddto.parameters.get(0);
+        ConfigDescriptionParameterDTO cdpdto = cddto.parameters.getFirst();
         assertThat(cdpdto, instanceOf(EnrichedConfigDescriptionParameterDTO.class));
         assertThat(cdpdto.defaultValue, is(CONFIG_PARAMETER_DEFAULT_VALUE));
         EnrichedConfigDescriptionParameterDTO ecdpdto = (EnrichedConfigDescriptionParameterDTO) cdpdto;
@@ -84,7 +84,7 @@ public class EnrichedConfigDescriptionDTOMapperTest {
         ConfigDescriptionDTO cddto = EnrichedConfigDescriptionDTOMapper.map(configDescription);
         assertThat(cddto.parameters, hasSize(1));
 
-        ConfigDescriptionParameterDTO cdpdto = cddto.parameters.get(0);
+        ConfigDescriptionParameterDTO cdpdto = cddto.parameters.getFirst();
         assertThat(cdpdto, instanceOf(EnrichedConfigDescriptionParameterDTO.class));
         assertThat(cdpdto.defaultValue, is(CONFIG_PARAMETER_DEFAULT_VALUE));
         EnrichedConfigDescriptionParameterDTO ecdpdto = (EnrichedConfigDescriptionParameterDTO) cdpdto;

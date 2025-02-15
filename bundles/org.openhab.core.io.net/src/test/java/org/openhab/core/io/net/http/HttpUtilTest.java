@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -15,6 +15,7 @@ package org.openhab.core.io.net.http;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.net.URI;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -40,7 +41,7 @@ public class HttpUtilTest extends BaseHttpUtilTest {
 
         assertEquals("Some content", result);
 
-        verify(httpClientMock).newRequest(URL);
+        verify(httpClientMock).newRequest(URI.create(URL));
         verify(requestMock).method(HttpMethod.GET);
         verify(requestMock).timeout(500, TimeUnit.MILLISECONDS);
         verify(requestMock).send();
@@ -48,7 +49,7 @@ public class HttpUtilTest extends BaseHttpUtilTest {
 
     @Test
     public void testAuthentication() throws Exception {
-        when(httpClientMock.newRequest("http://john:doe@example.org/")).thenReturn(requestMock);
+        when(httpClientMock.newRequest(URI.create("http://john:doe@example.org/"))).thenReturn(requestMock);
         mockResponse(HttpStatus.OK_200);
 
         String result = HttpUtil.executeUrl("GET", "http://john:doe@example.org/", 500);
