@@ -812,7 +812,7 @@ public class ThingResource implements RESTResource {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
                     @ApiResponse(responseCode = "400", description = "Unsupported syntax generator."),
-                    @ApiResponse(responseCode = "404", description = "Thing not found.") })
+                    @ApiResponse(responseCode = "400", description = "Invalid input (things data).") })
     public Response createFileFormat(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @DefaultValue("DSL") @QueryParam("format") @Parameter(description = "syntax format") String format,
@@ -828,10 +828,11 @@ public class ThingResource implements RESTResource {
         for (ThingDTO thingData : thingsData) {
             String uid = thingData.UID;
             if (uid == null || uid.isEmpty()) {
-                String message = "Thing UID missing in the thing data!";
+                String message = "Thing UID missing in things data!";
                 return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
             }
 
+            // TODO; disconnect from things registr=y
             ThingUID aThingUID = new ThingUID(uid);
             Thing thing = thingRegistry.get(aThingUID);
             if (thing == null) {

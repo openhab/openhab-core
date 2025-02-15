@@ -1010,12 +1010,12 @@ public class ItemResource implements RESTResource {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
                     @ApiResponse(responseCode = "400", description = "Unsupported syntax generator."),
-                    @ApiResponse(responseCode = "404", description = "Item not found.") })
+                    @ApiResponse(responseCode = "400", description = "Invalid input (items data).") })
     public Response createFileFormat(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @DefaultValue("DSL") @QueryParam("format") @Parameter(description = "syntax format") String format,
             @DefaultValue("true") @QueryParam("hideDefaultParameters") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters,
-            @Parameter(description = "items data", required = true) GroupItemDTO[] itemsData) {
+            @Parameter(description = "items data", required = true) EnrichedItemDTO[] itemsData) {
         ItemSyntaxGenerator generator = itemSyntaxGenerators.get(format);
         if (generator == null) {
             String message = "No syntax generator available for format " + format + "!";
@@ -1023,27 +1023,22 @@ public class ItemResource implements RESTResource {
         }
 
         List<Item> items = new ArrayList<>();
-        for (GroupItemDTO itemData : itemsData) {
+        for (EnrichedItemDTO itemData : itemsData) {
             String name = itemData.name;
             if (name == null || name.isEmpty()) {
-                String message = "Item name missing in the item data!";
+                String message = "Item name missing in items data!";
                 return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
             }
 
-            Item item = getItem(name);
-            if (item == null) {
-                String message = "Item " + name + " does not exist!";
-                return Response.status(Response.Status.NOT_FOUND).entity(message).build();
-            }
-
+            Item item;
             try {
                 item = ItemDTOMapper.map(itemData, itemBuilderFactory);
                 if (item == null) {
-                    String message = "Invalid item type in item data!";
+                    String message = "Invalid item type in items data!";
                     return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
                 }
             } catch (IllegalArgumentException e) {
-                String message = "Invalid item name in item data!";
+                String message = "Invalid item name in items data!";
                 return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
             }
 
