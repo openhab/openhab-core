@@ -946,8 +946,8 @@ public class ItemResource implements RESTResource {
             @DefaultValue("true") @QueryParam("hideDefaultParameters") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters) {
         ItemSyntaxGenerator generator = itemSyntaxGenerators.get(format);
         if (generator == null) {
-            String message = "No syntax generator available for format " + format + "!";
-            return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("No syntax generator available for format " + format + "!").build();
         }
         Collection<Item> items = itemRegistry.getAll();
         return Response.ok(generator.generateSyntax(sortItems(items), getMetadata(items), hideDefaultParameters))
@@ -973,16 +973,15 @@ public class ItemResource implements RESTResource {
 
         ItemSyntaxParser parser = itemSyntaxParsers.get(format);
         if (parser == null) {
-            String message = "No syntax parser available for format " + format + "!";
-            return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("No syntax parser available for format " + format + "!").build();
         }
 
         Collection<Item> items = new ArrayList<>();
         Collection<Metadata> metadata = new ArrayList<>();
         parser.parseSyntax(syntax, items, metadata);
         if (items.size() == 0) {
-            String message = "Invalid syntax!";
-            return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity("Invalid syntax!").build();
         }
 
         List<EnrichedItemDTO> itemsDTO = new ArrayList<>();
@@ -1018,28 +1017,26 @@ public class ItemResource implements RESTResource {
             @Parameter(description = "items data", required = true) EnrichedItemDTO[] itemsData) {
         ItemSyntaxGenerator generator = itemSyntaxGenerators.get(format);
         if (generator == null) {
-            String message = "No syntax generator available for format " + format + "!";
-            return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("No syntax generator available for format " + format + "!").build();
         }
 
         List<Item> items = new ArrayList<>();
         for (EnrichedItemDTO itemData : itemsData) {
             String name = itemData.name;
             if (name == null || name.isEmpty()) {
-                String message = "Item name missing in items data!";
-                return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
+                return Response.status(Response.Status.BAD_REQUEST).entity("Item name missing in items data!").build();
             }
 
             Item item;
             try {
                 item = ItemDTOMapper.map(itemData, itemBuilderFactory);
                 if (item == null) {
-                    String message = "Invalid item type in items data!";
-                    return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
+                    return Response.status(Response.Status.BAD_REQUEST).entity("Invalid item type in items data!")
+                            .build();
                 }
             } catch (IllegalArgumentException e) {
-                String message = "Invalid item name in items data!";
-                return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
+                return Response.status(Response.Status.BAD_REQUEST).entity("Invalid item name in items data!").build();
             }
 
             items.add(item);

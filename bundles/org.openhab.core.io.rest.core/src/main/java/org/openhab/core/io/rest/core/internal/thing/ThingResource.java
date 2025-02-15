@@ -762,8 +762,8 @@ public class ThingResource implements RESTResource {
             @DefaultValue("true") @QueryParam("hideDefaultParameters") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters) {
         ThingSyntaxGenerator generator = thingSyntaxGenerators.get(format);
         if (generator == null) {
-            String message = "No syntax generator available for format " + format + "!";
-            return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("No syntax generator available for format " + format + "!").build();
         }
         return Response.ok(generator.generateSyntax(sortThings(thingRegistry.getAll()), hideDefaultParameters)).build();
     }
@@ -786,14 +786,13 @@ public class ThingResource implements RESTResource {
 
         ThingSyntaxParser parser = thingSyntaxParsers.get(format);
         if (parser == null) {
-            String message = "No syntax parser available for format " + format + "!";
-            return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("No syntax parser available for format " + format + "!").build();
         }
 
         Collection<Thing> things = parser.parseSyntax(syntax);
         if (things.size() == 0) {
-            String message = "Invalid syntax!";
-            return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity("Invalid syntax!").build();
         }
 
         List<ThingDTO> thingsDTO = new ArrayList<>();
@@ -820,31 +819,62 @@ public class ThingResource implements RESTResource {
             @Parameter(description = "things data", required = true) ThingDTO[] thingsData) {
         ThingSyntaxGenerator generator = thingSyntaxGenerators.get(format);
         if (generator == null) {
-            String message = "No syntax generator available for format " + format + "!";
-            return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("No syntax generator available for format " + format + "!").build();
         }
 
         List<Thing> things = new ArrayList<>();
-        for (ThingDTO thingData : thingsData) {
-            String uid = thingData.UID;
-            if (uid == null || uid.isEmpty()) {
-                String message = "Thing UID missing in things data!";
-                return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
+        for (ThingDTO thingBean : thingsData) {
+            ThingUID thingUID = thingBean.UID == null ? null : new ThingUID(thingBean.UID);
+            ThingTypeUID thingTypeUID = new ThingTypeUID(thingBean.thingTypeUID);
+
+            ThingUID bridgeUID = null;
+
+            if (thingBean.bridgeUID != null) {
+                bridgeUID = new ThingUID(thingBean.bridgeUID);
+                if (thingUID != null && (!thingUID.getBindingId().equals(bridgeUID.getBindingId())
+                        || !thingUID.getBridgeIds().contains(bridgeUID.getId()))) {
+                    return Response.status(Response.Status.BAD_REQUEST)
+                            .entity("Thing UID '" + thingUID + "' does not match bridge UID '" + bridgeUID + "'")
+                            .build();
+                }
             }
 
-            // TODO; disconnect from things registr=y
-            ThingUID aThingUID = new ThingUID(uid);
-            Thing thing = thingRegistry.get(aThingUID);
-            if (thing == null) {
-                String message = "Thing UID " + uid + " does not exist!";
-                return Response.status(Response.Status.NOT_FOUND).entity(message).build();
+            // turn the ThingDTO's configuration into a Configuration
+            Configuration configuration = new Configuration(
+                    normalizeConfiguration(thingBean.configuration, thingTypeUID, thingUID));
+            if (thingUID != null) {
+                normalizeChannels(thingBean, thingUID);
             }
 
-            thingData.configuration = normalizeConfiguration(thingData.configuration, thing.getThingTypeUID(),
-                    thing.getUID());
-            normalizeChannels(thingData, thing.getUID());
+            Thing thing = thingRegistry.createThingOfType(thingTypeUID, thingUID, bridgeUID, thingBean.label,
+                    configuration);
 
-            thing = ThingHelper.merge(thing, thingData);
+            if (thing != null) {
+                if (thingBean.properties != null) {
+                    for (Entry<String, String> entry : thingBean.properties.entrySet()) {
+                        thing.setProperty(entry.getKey(), entry.getValue());
+                    }
+                }
+                if (thingBean.location != null) {
+                    thing.setLocation(thingBean.location);
+                }
+                if (thingBean.channels != null && !thingBean.channels.isEmpty()) {
+                    ThingDTO thingChannels = new ThingDTO();
+                    thingChannels.channels = thingBean.channels;
+                    thing = ThingHelper.merge(thing, thingChannels);
+                }
+            } else if (thingUID != null) {
+                // if there wasn't any ThingFactory capable of creating the thing,
+                // we create the Thing exactly the way we received it, i.e. we
+                // cannot take its thing type into account for automatically
+                // populating channels and properties.
+                thing = ThingDTOMapper.map(thingBean,
+                        thingTypeRegistry.getThingType(thingTypeUID) instanceof BridgeType);
+            } else {
+                return Response.status(Response.Status.BAD_REQUEST)
+                        .entity("A thing UID must be provided, since no binding can create the thing!").build();
+            }
 
             things.add(thing);
         }
