@@ -936,7 +936,7 @@ public class ItemResource implements RESTResource {
     @RolesAllowed({ Role.ADMIN })
     @Path("/syntax/generate")
     @Produces(MediaType.TEXT_PLAIN)
-    @Operation(operationId = "generateSyntaxForAllItems", summary = "Generate syntax for all items.", security = {
+    @Operation(operationId = "generateSyntaxForAllItems", summary = "Generate syntax for all items in the registry.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
                     @ApiResponse(responseCode = "400", description = "Unsupported syntax generator.") })
@@ -959,7 +959,7 @@ public class ItemResource implements RESTResource {
     @Path("/{itemname: [a-zA-Z_0-9]+}/syntax/parse")
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(operationId = "parseSyntaxForItem", summary = "Parse syntax for an item.", security = {
+    @Operation(operationId = "parseSyntaxForItem", summary = "Parse syntax for an item without updating the registry.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = EnrichedItemDTO.class))),
                     @ApiResponse(responseCode = "400", description = "Unsupported syntax parser."),
@@ -1012,7 +1012,7 @@ public class ItemResource implements RESTResource {
     @Path("/{itemname: [a-zA-Z_0-9]+}/syntax/generate")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
-    @Operation(operationId = "generateSyntaxForItem", summary = "Generate syntax for an item.", security = {
+    @Operation(operationId = "generateSyntaxForItem", summary = "Generate syntax for a provided item.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
                     @ApiResponse(responseCode = "400", description = "Unsupported syntax generator."),
@@ -1022,7 +1022,7 @@ public class ItemResource implements RESTResource {
             @PathParam("itemname") @Parameter(description = "item name") String itemname,
             @DefaultValue("DSL") @QueryParam("format") @Parameter(description = "syntax format") String format,
             @DefaultValue("true") @QueryParam("hideDefaultParameters") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters,
-            @Parameter(description = "item data", required = false) @Nullable GroupItemDTO itemData) {
+            @Parameter(description = "item data", required = true) GroupItemDTO itemData) {
         ItemSyntaxGenerator generator = itemSyntaxGenerators.get(format);
         if (generator == null) {
             String message = "No syntax generator available for format " + format + "!";
@@ -1035,24 +1035,22 @@ public class ItemResource implements RESTResource {
             return Response.status(Response.Status.NOT_FOUND).entity(message).build();
         }
 
-        if (itemData != null) {
-            String name = itemData.name;
-            if (name == null || !name.equals(itemname)) {
-                String message = "Name " + name + " in the item data is not consistent with name " + itemname
-                        + " in the API URL!";
-                return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
-            }
+        String name = itemData.name;
+        if (name == null || !name.equals(itemname)) {
+            String message = "Name " + name + " in the item data is not consistent with name " + itemname
+                    + " in the API URL!";
+            return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
+        }
 
-            try {
-                item = ItemDTOMapper.map(itemData, itemBuilderFactory);
-                if (item == null) {
-                    String message = "Invalid item type in item data!";
-                    return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
-                }
-            } catch (IllegalArgumentException e) {
-                String message = "Invalid item name in item data!";
+        try {
+            item = ItemDTOMapper.map(itemData, itemBuilderFactory);
+            if (item == null) {
+                String message = "Invalid item type in item data!";
                 return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
             }
+        } catch (IllegalArgumentException e) {
+            String message = "Invalid item name in item data!";
+            return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
         }
 
         List<Item> items = List.of(item);

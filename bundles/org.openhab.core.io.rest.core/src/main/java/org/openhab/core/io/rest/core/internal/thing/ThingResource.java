@@ -752,7 +752,7 @@ public class ThingResource implements RESTResource {
     @RolesAllowed({ Role.ADMIN })
     @Path("/syntax/generate")
     @Produces(MediaType.TEXT_PLAIN)
-    @Operation(operationId = "generateSyntaxForAllThings", summary = "Generate syntax for all things.", security = {
+    @Operation(operationId = "generateSyntaxForAllThings", summary = "Generate syntax for all things in the registry.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
                     @ApiResponse(responseCode = "400", description = "Unsupported syntax generator.") })
@@ -773,9 +773,9 @@ public class ThingResource implements RESTResource {
     @Path("/{thingUID}/syntax/parse")
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(operationId = "parseSyntaxForThing", summary = "Parse syntax for a thing.", security = {
+    @Operation(operationId = "parseSyntaxForThing", summary = "Parse syntax for a thing without updating the registry.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
-                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = EnrichedThingDTO.class))),
+                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ThingDTO.class))),
                     @ApiResponse(responseCode = "400", description = "Unsupported syntax parser."),
                     @ApiResponse(responseCode = "400", description = "Invalid syntax.") })
     public Response parseSyntaxForThing(
@@ -806,7 +806,7 @@ public class ThingResource implements RESTResource {
             return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
         }
 
-        return getThingResponse(Status.OK, thing, locale, null);
+        return Response.ok(ThingDTOMapper.map(thing)).build();
     }
 
     @POST
@@ -814,7 +814,7 @@ public class ThingResource implements RESTResource {
     @Path("/{thingUID}/syntax/generate")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
-    @Operation(operationId = "generateSyntaxForThing", summary = "Generate syntax for a thing.", security = {
+    @Operation(operationId = "generateSyntaxForThing", summary = "Generate syntax for a provided thing.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
                     @ApiResponse(responseCode = "400", description = "Unsupported syntax generator."),
@@ -824,7 +824,7 @@ public class ThingResource implements RESTResource {
             @PathParam("thingUID") @Parameter(description = "thingUID") String thingUID,
             @DefaultValue("DSL") @QueryParam("format") @Parameter(description = "syntax format") String format,
             @DefaultValue("true") @QueryParam("hideDefaultParameters") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters,
-            @Parameter(description = "thing data", required = false) @Nullable ThingDTO thingData) {
+            @Parameter(description = "thing data", required = true) ThingDTO thingData) {
         ThingSyntaxGenerator generator = thingSyntaxGenerators.get(format);
         if (generator == null) {
             String message = "No syntax generator available for format " + format + "!";
@@ -838,20 +838,18 @@ public class ThingResource implements RESTResource {
             return Response.status(Response.Status.NOT_FOUND).entity(message).build();
         }
 
-        if (thingData != null) {
-            String uid = thingData.UID;
-            if (uid != null && !uid.isEmpty() && !uid.equals(thingUID)) {
-                String message = "UID " + uid + " in the thing data is not consistent with UID " + thingUID
-                        + " in the API URL!";
-                return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
-            }
-
-            thingData.configuration = normalizeConfiguration(thingData.configuration, thing.getThingTypeUID(),
-                    thing.getUID());
-            normalizeChannels(thingData, thing.getUID());
-
-            thing = ThingHelper.merge(thing, thingData);
+        String uid = thingData.UID;
+        if (uid != null && !uid.isEmpty() && !uid.equals(thingUID)) {
+            String message = "UID " + uid + " in the thing data is not consistent with UID " + thingUID
+                    + " in the API URL!";
+            return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
         }
+
+        thingData.configuration = normalizeConfiguration(thingData.configuration, thing.getThingTypeUID(),
+                thing.getUID());
+        normalizeChannels(thingData, thing.getUID());
+
+        thing = ThingHelper.merge(thing, thingData);
 
         return Response.ok(generator.generateSyntax(List.of(thing), hideDefaultParameters)).build();
     }
