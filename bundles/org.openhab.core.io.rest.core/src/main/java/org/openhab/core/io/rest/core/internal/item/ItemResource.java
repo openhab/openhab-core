@@ -959,9 +959,9 @@ public class ItemResource implements RESTResource {
     @Path("/translate-from-file-format")
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(operationId = "parseFileFormat", summary = "Create JSON representing an item from file format.", security = {
+    @Operation(operationId = "parseFileFormat", summary = "Create JSON representing an array of items from file format.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
-                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = EnrichedItemDTO.class))),
+                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = EnrichedItemDTO.class), uniqueItems = true))),
                     @ApiResponse(responseCode = "400", description = "Unsupported syntax parser."),
                     @ApiResponse(responseCode = "400", description = "Invalid syntax.") })
     public Response parseFileFormat(final @Context UriInfo uriInfo, final @Context HttpHeaders httpHeaders,
@@ -980,23 +980,25 @@ public class ItemResource implements RESTResource {
         Collection<Item> items = new ArrayList<>();
         Collection<Metadata> metadata = new ArrayList<>();
         parser.parseSyntax(syntax, items, metadata);
-        if (items.size() != 1) {
-            String message = items.size() == 0 ? "Invalid syntax!"
-                    : "Only one item expected while several are provided!";
+        if (items.size() == 0) {
+            String message = "Invalid syntax!";
             return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
         }
 
-        Item item = items.iterator().next();
-        EnrichedItemDTO dto = EnrichedItemDTOMapper.map(item, false, null, uriBuilder(uriInfo, httpHeaders), locale,
-                zoneId);
-        // addMetadata(dto, namespaces, null);
-        dto.editable = isEditable(dto.name);
-        // if (dto instanceof EnrichedGroupItemDTO enrichedGroupItemDTO) {
-        // for (EnrichedItemDTO member : enrichedGroupItemDTO.members) {
-        // member.editable = isEditable(member.name);
-        // }
-        // }
-        return JSONResponse.createResponse(Status.OK, dto, null);
+        List<EnrichedItemDTO> itemsDTO = new ArrayList<>();
+        items.forEach(item -> {
+            EnrichedItemDTO dto = EnrichedItemDTOMapper.map(item, false, null, uriBuilder(uriInfo, httpHeaders), locale,
+                    zoneId);
+            // addMetadata(dto, namespaces, null);
+            dto.editable = isEditable(dto.name);
+            // if (dto instanceof EnrichedGroupItemDTO enrichedGroupItemDTO) {
+            // for (EnrichedItemDTO member : enrichedGroupItemDTO.members) {
+            // member.editable = isEditable(member.name);
+            // }
+            // }
+            itemsDTO.add(dto);
+        });
+        return Response.ok(itemsDTO).build();
     }
 
     @POST
@@ -1004,7 +1006,7 @@ public class ItemResource implements RESTResource {
     @Path("/translate-to-file-format")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
-    @Operation(operationId = "createFileFormat", summary = "Create file format from JSON representing an item.", security = {
+    @Operation(operationId = "createFileFormat", summary = "Create file format from JSON representing an array of items.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
                     @ApiResponse(responseCode = "400", description = "Unsupported syntax generator."),
@@ -1013,37 +1015,41 @@ public class ItemResource implements RESTResource {
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @DefaultValue("DSL") @QueryParam("format") @Parameter(description = "syntax format") String format,
             @DefaultValue("true") @QueryParam("hideDefaultParameters") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters,
-            @Parameter(description = "item data", required = true) GroupItemDTO itemData) {
+            @Parameter(description = "items data", required = true) GroupItemDTO[] itemsData) {
         ItemSyntaxGenerator generator = itemSyntaxGenerators.get(format);
         if (generator == null) {
             String message = "No syntax generator available for format " + format + "!";
             return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
         }
 
-        String name = itemData.name;
-        if (name == null || name.isEmpty()) {
-            String message = "Item name missing in the item data!";
-            return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
-        }
-
-        Item item = getItem(name);
-        if (item == null) {
-            String message = "Item " + name + " does not exist!";
-            return Response.status(Response.Status.NOT_FOUND).entity(message).build();
-        }
-
-        try {
-            item = ItemDTOMapper.map(itemData, itemBuilderFactory);
-            if (item == null) {
-                String message = "Invalid item type in item data!";
+        List<Item> items = new ArrayList<>();
+        for (GroupItemDTO itemData : itemsData) {
+            String name = itemData.name;
+            if (name == null || name.isEmpty()) {
+                String message = "Item name missing in the item data!";
                 return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
             }
-        } catch (IllegalArgumentException e) {
-            String message = "Invalid item name in item data!";
-            return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
+
+            Item item = getItem(name);
+            if (item == null) {
+                String message = "Item " + name + " does not exist!";
+                return Response.status(Response.Status.NOT_FOUND).entity(message).build();
+            }
+
+            try {
+                item = ItemDTOMapper.map(itemData, itemBuilderFactory);
+                if (item == null) {
+                    String message = "Invalid item type in item data!";
+                    return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
+                }
+            } catch (IllegalArgumentException e) {
+                String message = "Invalid item name in item data!";
+                return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
+            }
+
+            items.add(item);
         }
 
-        List<Item> items = List.of(item);
         return Response.ok(generator.generateSyntax(items, getMetadata(items), hideDefaultParameters)).build();
     }
 

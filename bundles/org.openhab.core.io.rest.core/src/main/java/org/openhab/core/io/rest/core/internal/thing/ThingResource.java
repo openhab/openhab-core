@@ -773,9 +773,9 @@ public class ThingResource implements RESTResource {
     @Path("/translate-from-file-format")
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(operationId = "parseFileFormat", summary = "Create JSON representing a thing from file format.", security = {
+    @Operation(operationId = "parseFileFormat", summary = "Create JSON representing an array of things from file format.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
-                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ThingDTO.class))),
+                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ThingDTO.class), uniqueItems = true))),
                     @ApiResponse(responseCode = "400", description = "Unsupported syntax parser."),
                     @ApiResponse(responseCode = "400", description = "Invalid syntax.") })
     public Response parseFileFormat(
@@ -791,14 +791,16 @@ public class ThingResource implements RESTResource {
         }
 
         Collection<Thing> things = parser.parseSyntax(syntax);
-        if (things.size() != 1) {
-            String message = things.size() == 0 ? "Invalid syntax!"
-                    : "Only one thing expected while several are provided!";
+        if (things.size() == 0) {
+            String message = "Invalid syntax!";
             return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
         }
 
-        Thing thing = things.iterator().next();
-        return Response.ok(ThingDTOMapper.map(thing)).build();
+        List<ThingDTO> thingsDTO = new ArrayList<>();
+        things.forEach(thing -> {
+            thingsDTO.add(ThingDTOMapper.map(thing));
+        });
+        return Response.ok(thingsDTO).build();
     }
 
     @POST
@@ -806,7 +808,7 @@ public class ThingResource implements RESTResource {
     @Path("/translate-to-file-format")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
-    @Operation(operationId = "createFileFormat", summary = "Create file format from JSON representing a thing.", security = {
+    @Operation(operationId = "createFileFormat", summary = "Create file format from JSON representing an array of things.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
                     @ApiResponse(responseCode = "400", description = "Unsupported syntax generator."),
@@ -815,33 +817,38 @@ public class ThingResource implements RESTResource {
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @DefaultValue("DSL") @QueryParam("format") @Parameter(description = "syntax format") String format,
             @DefaultValue("true") @QueryParam("hideDefaultParameters") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters,
-            @Parameter(description = "thing data", required = true) ThingDTO thingData) {
+            @Parameter(description = "things data", required = true) ThingDTO[] thingsData) {
         ThingSyntaxGenerator generator = thingSyntaxGenerators.get(format);
         if (generator == null) {
             String message = "No syntax generator available for format " + format + "!";
             return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
         }
 
-        String uid = thingData.UID;
-        if (uid == null || uid.isEmpty()) {
-            String message = "Thing UID missing in the thing data!";
-            return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
+        List<Thing> things = new ArrayList<>();
+        for (ThingDTO thingData : thingsData) {
+            String uid = thingData.UID;
+            if (uid == null || uid.isEmpty()) {
+                String message = "Thing UID missing in the thing data!";
+                return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
+            }
+
+            ThingUID aThingUID = new ThingUID(uid);
+            Thing thing = thingRegistry.get(aThingUID);
+            if (thing == null) {
+                String message = "Thing UID " + uid + " does not exist!";
+                return Response.status(Response.Status.NOT_FOUND).entity(message).build();
+            }
+
+            thingData.configuration = normalizeConfiguration(thingData.configuration, thing.getThingTypeUID(),
+                    thing.getUID());
+            normalizeChannels(thingData, thing.getUID());
+
+            thing = ThingHelper.merge(thing, thingData);
+
+            things.add(thing);
         }
 
-        ThingUID aThingUID = new ThingUID(uid);
-        Thing thing = thingRegistry.get(aThingUID);
-        if (thing == null) {
-            String message = "Thing UID " + uid + " does not exist!";
-            return Response.status(Response.Status.NOT_FOUND).entity(message).build();
-        }
-
-        thingData.configuration = normalizeConfiguration(thingData.configuration, thing.getThingTypeUID(),
-                thing.getUID());
-        normalizeChannels(thingData, thing.getUID());
-
-        thing = ThingHelper.merge(thing, thingData);
-
-        return Response.ok(generator.generateSyntax(List.of(thing), hideDefaultParameters)).build();
+        return Response.ok(generator.generateSyntax(things, hideDefaultParameters)).build();
     }
 
     private FirmwareDTO convertToFirmwareDTO(Firmware firmware) {
