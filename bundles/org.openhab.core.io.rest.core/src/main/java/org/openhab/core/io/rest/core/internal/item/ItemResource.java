@@ -934,13 +934,13 @@ public class ItemResource implements RESTResource {
 
     @GET
     @RolesAllowed({ Role.ADMIN })
-    @Path("/syntax/generate")
+    @Path("/file-format")
     @Produces(MediaType.TEXT_PLAIN)
-    @Operation(operationId = "generateSyntaxForAllItems", summary = "Generate syntax for all items in the registry.", security = {
+    @Operation(operationId = "createFileFormatForAllItems", summary = "Generate file format for all items in the registry.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
                     @ApiResponse(responseCode = "400", description = "Unsupported syntax generator.") })
-    public Response generateSyntaxForAllItems(
+    public Response createFileFormatForAllItems(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @DefaultValue("DSL") @QueryParam("format") @Parameter(description = "syntax format") String format,
             @DefaultValue("true") @QueryParam("hideDefaultParameters") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters) {
@@ -956,17 +956,16 @@ public class ItemResource implements RESTResource {
 
     @POST
     @RolesAllowed({ Role.ADMIN })
-    @Path("/{itemname: [a-zA-Z_0-9]+}/syntax/parse")
+    @Path("/translate-from-file-format")
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(operationId = "parseSyntaxForItem", summary = "Parse syntax for an item without updating the registry.", security = {
+    @Operation(operationId = "parseFileFormat", summary = "Create JSON representing an item from file format.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = EnrichedItemDTO.class))),
                     @ApiResponse(responseCode = "400", description = "Unsupported syntax parser."),
                     @ApiResponse(responseCode = "400", description = "Invalid syntax.") })
-    public Response parseSyntaxForItem(final @Context UriInfo uriInfo, final @Context HttpHeaders httpHeaders,
+    public Response parseFileFormat(final @Context UriInfo uriInfo, final @Context HttpHeaders httpHeaders,
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
-            @PathParam("itemname") @Parameter(description = "item name") String itemname,
             @DefaultValue("DSL") @QueryParam("format") @Parameter(description = "syntax format") String format,
             @Parameter(description = "item syntax", required = true) String syntax) {
         final Locale locale = localeService.getLocale(language);
@@ -988,13 +987,6 @@ public class ItemResource implements RESTResource {
         }
 
         Item item = items.iterator().next();
-        String name = item.getName();
-        if (!name.equals(itemname)) {
-            String message = "Name " + name + " in the parsed syntax is not consistent with name " + itemname
-                    + " in the API URL!";
-            return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
-        }
-
         EnrichedItemDTO dto = EnrichedItemDTOMapper.map(item, false, null, uriBuilder(uriInfo, httpHeaders), locale,
                 zoneId);
         // addMetadata(dto, namespaces, null);
@@ -1009,17 +1001,16 @@ public class ItemResource implements RESTResource {
 
     @POST
     @RolesAllowed({ Role.ADMIN })
-    @Path("/{itemname: [a-zA-Z_0-9]+}/syntax/generate")
+    @Path("/translate-to-file-format")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
-    @Operation(operationId = "generateSyntaxForItem", summary = "Generate syntax for a provided item.", security = {
+    @Operation(operationId = "createFileFormat", summary = "Create file format from JSON representing an item.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
                     @ApiResponse(responseCode = "400", description = "Unsupported syntax generator."),
                     @ApiResponse(responseCode = "404", description = "Item not found.") })
-    public Response generateSyntaxForItem(
+    public Response createFileFormat(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
-            @PathParam("itemname") @Parameter(description = "item name") String itemname,
             @DefaultValue("DSL") @QueryParam("format") @Parameter(description = "syntax format") String format,
             @DefaultValue("true") @QueryParam("hideDefaultParameters") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters,
             @Parameter(description = "item data", required = true) GroupItemDTO itemData) {
@@ -1029,17 +1020,16 @@ public class ItemResource implements RESTResource {
             return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
         }
 
-        Item item = getItem(itemname);
-        if (item == null) {
-            String message = "Item " + itemname + " does not exist!";
-            return Response.status(Response.Status.NOT_FOUND).entity(message).build();
+        String name = itemData.name;
+        if (name == null || name.isEmpty()) {
+            String message = "Item name missing in the item data!";
+            return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
         }
 
-        String name = itemData.name;
-        if (name == null || !name.equals(itemname)) {
-            String message = "Name " + name + " in the item data is not consistent with name " + itemname
-                    + " in the API URL!";
-            return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
+        Item item = getItem(name);
+        if (item == null) {
+            String message = "Item " + name + " does not exist!";
+            return Response.status(Response.Status.NOT_FOUND).entity(message).build();
         }
 
         try {

@@ -750,13 +750,13 @@ public class ThingResource implements RESTResource {
 
     @GET
     @RolesAllowed({ Role.ADMIN })
-    @Path("/syntax/generate")
+    @Path("/file-format")
     @Produces(MediaType.TEXT_PLAIN)
-    @Operation(operationId = "generateSyntaxForAllThings", summary = "Generate syntax for all things in the registry.", security = {
+    @Operation(operationId = "createFileFormatForAllThings", summary = "Generate file format for all things in the registry.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
                     @ApiResponse(responseCode = "400", description = "Unsupported syntax generator.") })
-    public Response generateSyntaxForAllThings(
+    public Response createFileFormatForAllThings(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @DefaultValue("DSL") @QueryParam("format") @Parameter(description = "syntax format") String format,
             @DefaultValue("true") @QueryParam("hideDefaultParameters") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters) {
@@ -770,17 +770,16 @@ public class ThingResource implements RESTResource {
 
     @POST
     @RolesAllowed({ Role.ADMIN })
-    @Path("/{thingUID}/syntax/parse")
+    @Path("/translate-from-file-format")
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(operationId = "parseSyntaxForThing", summary = "Parse syntax for a thing without updating the registry.", security = {
+    @Operation(operationId = "parseFileFormat", summary = "Create JSON representing a thing from file format.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = ThingDTO.class))),
                     @ApiResponse(responseCode = "400", description = "Unsupported syntax parser."),
                     @ApiResponse(responseCode = "400", description = "Invalid syntax.") })
-    public Response parseSyntaxForThing(
+    public Response parseFileFormat(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
-            @PathParam("thingUID") @Parameter(description = "thingUID") String thingUID,
             @DefaultValue("DSL") @QueryParam("format") @Parameter(description = "syntax format") String format,
             @Parameter(description = "thing syntax", required = true) String syntax) {
         final Locale locale = localeService.getLocale(language);
@@ -799,29 +798,21 @@ public class ThingResource implements RESTResource {
         }
 
         Thing thing = things.iterator().next();
-        String uid = thing.getUID().getAsString();
-        if (!uid.equals(thingUID)) {
-            String message = "UID " + uid + " in the parsed syntax is not consistent with UID " + thingUID
-                    + " in the API URL!";
-            return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
-        }
-
         return Response.ok(ThingDTOMapper.map(thing)).build();
     }
 
     @POST
     @RolesAllowed({ Role.ADMIN })
-    @Path("/{thingUID}/syntax/generate")
+    @Path("/translate-to-file-format")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
-    @Operation(operationId = "generateSyntaxForThing", summary = "Generate syntax for a provided thing.", security = {
+    @Operation(operationId = "createFileFormat", summary = "Create file format from JSON representing a thing.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
                     @ApiResponse(responseCode = "400", description = "Unsupported syntax generator."),
                     @ApiResponse(responseCode = "404", description = "Thing not found.") })
-    public Response generateSyntaxForThing(
+    public Response createFileFormat(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
-            @PathParam("thingUID") @Parameter(description = "thingUID") String thingUID,
             @DefaultValue("DSL") @QueryParam("format") @Parameter(description = "syntax format") String format,
             @DefaultValue("true") @QueryParam("hideDefaultParameters") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters,
             @Parameter(description = "thing data", required = true) ThingDTO thingData) {
@@ -831,18 +822,17 @@ public class ThingResource implements RESTResource {
             return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
         }
 
-        ThingUID aThingUID = new ThingUID(thingUID);
-        Thing thing = thingRegistry.get(aThingUID);
-        if (thing == null) {
-            String message = "Thing " + thingUID + " does not exist!";
-            return Response.status(Response.Status.NOT_FOUND).entity(message).build();
+        String uid = thingData.UID;
+        if (uid == null || uid.isEmpty()) {
+            String message = "Thing UID missing in the thing data!";
+            return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
         }
 
-        String uid = thingData.UID;
-        if (uid != null && !uid.isEmpty() && !uid.equals(thingUID)) {
-            String message = "UID " + uid + " in the thing data is not consistent with UID " + thingUID
-                    + " in the API URL!";
-            return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
+        ThingUID aThingUID = new ThingUID(uid);
+        Thing thing = thingRegistry.get(aThingUID);
+        if (thing == null) {
+            String message = "Thing UID " + uid + " does not exist!";
+            return Response.status(Response.Status.NOT_FOUND).entity(message).build();
         }
 
         thingData.configuration = normalizeConfiguration(thingData.configuration, thing.getThingTypeUID(),
