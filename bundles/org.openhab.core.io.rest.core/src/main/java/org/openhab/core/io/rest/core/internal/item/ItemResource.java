@@ -988,13 +988,21 @@ public class ItemResource implements RESTResource {
         items.forEach(item -> {
             EnrichedItemDTO dto = EnrichedItemDTOMapper.map(item, false, null, uriBuilder(uriInfo, httpHeaders), locale,
                     zoneId);
-            // addMetadata(dto, namespaces, null);
-            dto.editable = isEditable(dto.name);
-            // if (dto instanceof EnrichedGroupItemDTO enrichedGroupItemDTO) {
-            // for (EnrichedItemDTO member : enrichedGroupItemDTO.members) {
-            // member.editable = isEditable(member.name);
-            // }
-            // }
+
+            Map<String, Object> metadataMap = new HashMap<>();
+            metadata.stream().filter(md -> dto.name.equals(md.getUID().getItemName())).forEach(md -> {
+                MetadataDTO mdDto = new MetadataDTO();
+                mdDto.value = md.getValue();
+                mdDto.config = md.getConfiguration().isEmpty() ? null : md.getConfiguration();
+                metadataMap.put(md.getUID().getNamespace(), mdDto);
+            });
+            if (!metadataMap.isEmpty()) {
+                // we only set it in the dto if there is really data available
+                dto.metadata = metadataMap;
+            }
+
+            dto.editable = true;
+
             itemsDTO.add(dto);
         });
         return Response.ok(itemsDTO).build();
@@ -1022,6 +1030,7 @@ public class ItemResource implements RESTResource {
         }
 
         List<Item> items = new ArrayList<>();
+        Collection<Metadata> metadata = new ArrayList<>();
         for (EnrichedItemDTO itemData : itemsData) {
             String name = itemData.name;
             if (name == null || name.isEmpty()) {
@@ -1038,11 +1047,19 @@ public class ItemResource implements RESTResource {
             } catch (IllegalArgumentException e) {
                 return Response.status(Response.Status.BAD_REQUEST).entity("Invalid item name in items data!").build();
             }
-
             items.add(item);
+
+            if (itemData.metadata != null) {
+                for (Map.Entry<String, Object> entry : itemData.metadata.entrySet()) {
+                    // MetadataKey key = new MetadataKey(entry.getKey(), name);
+                    // MetadataDTO mdDto = (MetadataDTO) entry.getValue();
+                    // Metadata md = new Metadata(key, Objects.requireNonNull(mdDto.value), mdDto.config);
+                    // metadata.add(md);
+                }
+            }
         }
 
-        return Response.ok(generator.generateSyntax(items, getMetadata(items), hideDefaultParameters)).build();
+        return Response.ok(generator.generateSyntax(items, metadata, hideDefaultParameters)).build();
     }
 
     private JsonObject buildStatusObject(String itemName, String status, @Nullable String message) {
