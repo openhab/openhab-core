@@ -686,6 +686,7 @@ public class QuantityTypeTest {
         assertEquals(new QuantityType("20 K"), new QuantityType("50 K").subtract(new QuantityType("30 °C")));
         assertEquals(new QuantityType("20 K"), new QuantityType("50 K").subtract(new QuantityType("30 K")));
         assertEquals(new QuantityType("20 K"), new QuantityType("50 K").subtract(new QuantityType("54 °F")));
+    }
 
     @Test
     public void testEquals() {
