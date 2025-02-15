@@ -15,6 +15,7 @@ package org.openhab.core.thing.i18n;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import java.io.IOException;
@@ -328,7 +329,7 @@ public class ThingStatusInfoI18nLocalizationServiceOSGiTest extends JavaOSGiTest
      */
     private class BundleResolverImpl implements BundleResolver {
         @Override
-        public Bundle resolveBundle(@Nullable Class<?> clazz) {
+        public @Nullable Bundle resolveBundle(@Nullable Class<?> clazz) {
             if (clazz != null && clazz.equals(AbstractThingHandler.class)) {
                 return testBundle;
             } else {

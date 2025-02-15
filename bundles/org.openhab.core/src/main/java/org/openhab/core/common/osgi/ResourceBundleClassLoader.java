@@ -26,6 +26,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.osgi.framework.Bundle;
 
 /**
@@ -38,6 +40,7 @@ import org.osgi.framework.Bundle;
  * @author Martin Herbst - UTF-8 replaced by ISO-8859-1 to follow Java standards
  *
  */
+@NonNullByDefault
 public class ResourceBundleClassLoader extends ClassLoader {
 
     private Bundle bundle;
@@ -56,18 +59,19 @@ public class ResourceBundleClassLoader extends ClassLoader {
      *            considered.
      * @throws IllegalArgumentException if the bundle is null
      */
-    public ResourceBundleClassLoader(Bundle bundle, String path, String filePattern) throws IllegalArgumentException {
+    public ResourceBundleClassLoader(@Nullable Bundle bundle, @Nullable String path, @Nullable String filePattern)
+            throws IllegalArgumentException {
         if (bundle == null) {
             throw new IllegalArgumentException("The bundle must not be null!");
         }
 
         this.bundle = bundle;
-        this.path = (path != null) ? path : "/";
-        this.filePattern = (filePattern != null) ? filePattern : "*";
+        this.path = path != null ? path : "/";
+        this.filePattern = filePattern != null ? filePattern : "*";
     }
 
     @Override
-    public URL getResource(String name) {
+    public @Nullable URL getResource(String name) {
         Enumeration<URL> resourceFiles = this.bundle.findEntries(this.path, this.filePattern, true);
 
         List<URL> allResources = new LinkedList<>();
@@ -106,7 +110,7 @@ public class ResourceBundleClassLoader extends ClassLoader {
     }
 
     @Override
-    public InputStream getResourceAsStream(String name) {
+    public @Nullable InputStream getResourceAsStream(String name) {
         URL resourceURL = getResource(name);
         if (resourceURL != null) {
             try (InputStream resourceStream = resourceURL.openStream()) {

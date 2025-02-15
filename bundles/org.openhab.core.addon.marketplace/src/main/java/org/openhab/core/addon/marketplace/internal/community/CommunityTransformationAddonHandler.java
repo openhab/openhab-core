@@ -68,7 +68,8 @@ public class CommunityTransformationAddonHandler implements MarketplaceAddonHand
 
     @Activate
     public CommunityTransformationAddonHandler(final @Reference StorageService storageService) {
-        this.storage = storageService.getStorage("org.openhab.marketplace.transformation");
+        this.storage = storageService.getStorage("org.openhab.marketplace.transformation",
+                this.getClass().getClassLoader());
 
         this.yamlMapper = new ObjectMapper(new YAMLFactory());
         yamlMapper.findAndRegisterModules();
