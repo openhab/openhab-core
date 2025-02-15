@@ -38,8 +38,12 @@ public interface ItemSyntaxParser {
      * without impacting the item and metadata registries.
      *
      * @param syntax the syntax
-     * @param items a collection of items that is filled by the run of this method
-     * @param metadata a collection of metadata that is filled by the run of this method
+     * @param items the collection of {@link Item} to fill
+     * @param metadata the collection of {@link Metadata} to fill
+     * @param errors the string builder used to fill the errors
+     * @param warnings the string builder used to fill the warnings
+     * @return true if the parsing succeeded without errors
      */
-    void parseSyntax(String syntax, Collection<Item> items, Collection<Metadata> metadata);
+    boolean parseSyntax(String syntax, Collection<Item> items, Collection<Metadata> metadata, StringBuilder errors,
+            StringBuilder warnings);
 }

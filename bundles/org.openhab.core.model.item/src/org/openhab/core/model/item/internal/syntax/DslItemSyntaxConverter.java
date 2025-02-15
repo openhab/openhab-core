@@ -261,12 +261,16 @@ public class DslItemSyntaxConverter extends AbstractItemSyntaxGenerator implemen
     }
 
     @Override
-    public void parseSyntax(String syntax, Collection<Item> items, Collection<Metadata> metadata) {
+    public boolean parseSyntax(String syntax, Collection<Item> items, Collection<Metadata> metadata,
+            StringBuilder errors, StringBuilder warnings) {
         ByteArrayInputStream inputStream = new ByteArrayInputStream(syntax.getBytes());
-        String modelName = modelRepository.addStandaloneModel("items", inputStream);
+        String modelName = modelRepository.addStandaloneModel("items", inputStream, errors, warnings);
         if (modelName != null) {
-            items.addAll(standaloneItemProvider.getItemsFromStandaloneModel(modelName));
+            Collection<Item> newItems = standaloneItemProvider.getItemsFromStandaloneModel(modelName);
+            items.addAll(newItems);
             modelRepository.removeStandaloneModel(modelName);
+            return true;
         }
+        return false;
     }
 }

@@ -37,7 +37,10 @@ public interface ThingSyntaxParser {
      * the thing registry.
      *
      * @param syntax the syntax
-     * @return the collection of corresponding {@link Thing}
+     * @param things the collection of {@link Thing} to fill
+     * @param errors the string builder used to fill the errors
+     * @param warnings the string builder used to fill the warnings
+     * @return true if the parsing succeeded without errors
      */
-    Collection<Thing> parseSyntax(String syntax);
+    boolean parseSyntax(String syntax, Collection<Thing> things, StringBuilder errors, StringBuilder warnings);
 }

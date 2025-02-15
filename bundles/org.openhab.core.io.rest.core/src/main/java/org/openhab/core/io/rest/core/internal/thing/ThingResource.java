@@ -790,9 +790,11 @@ public class ThingResource implements RESTResource {
                     .entity("No syntax parser available for format " + format + "!").build();
         }
 
-        Collection<Thing> things = parser.parseSyntax(syntax);
-        if (things.size() == 0) {
-            return Response.status(Response.Status.BAD_REQUEST).entity("Invalid syntax!").build();
+        Collection<Thing> things = new ArrayList<>();
+        StringBuilder errors = new StringBuilder();
+        StringBuilder warnings = new StringBuilder();
+        if (!parser.parseSyntax(syntax, things, errors, warnings)) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(errors.toString()).build();
         }
 
         List<ThingDTO> thingsDTO = new ArrayList<>();

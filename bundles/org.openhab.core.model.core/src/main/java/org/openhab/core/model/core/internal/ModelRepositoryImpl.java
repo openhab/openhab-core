@@ -20,7 +20,6 @@ import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -100,20 +99,36 @@ public class ModelRepositoryImpl implements ModelRepository {
 
     @Override
     public boolean addOrRefreshModel(String name, final InputStream originalInputStream) {
-        return addOrRefreshModel(name, originalInputStream, false);
+        return addOrRefreshModel(name, originalInputStream, null, null, false);
     }
 
-    public boolean addOrRefreshModel(String name, final InputStream originalInputStream, boolean standalone) {
+    public boolean addOrRefreshModel(String name, final InputStream originalInputStream, @Nullable StringBuilder errors,
+            @Nullable StringBuilder warnings, boolean standalone) {
         logger.info("Loading model '{}'", name);
         Resource resource = null;
         byte[] bytes;
         try (InputStream inputStream = originalInputStream) {
             bytes = inputStream.readAllBytes();
-            String validationResult = validateModel(name, new ByteArrayInputStream(bytes));
-            if (validationResult != null) {
-                logger.warn("Configuration model '{}' has errors, therefore ignoring it: {}", name, validationResult);
+            StringBuilder newErrors = new StringBuilder();
+            StringBuilder newWarnings = new StringBuilder();
+            boolean valid = validateModel(name, new ByteArrayInputStream(bytes), newErrors, newWarnings);
+            if (errors != null) {
+                errors.append(newErrors);
+            }
+            if (warnings != null) {
+                warnings.append(newWarnings);
+            }
+            if (!valid) {
+                if (!standalone) {
+                    logger.warn("Configuration model '{}' has errors, therefore ignoring it: {}", name,
+                            newErrors.toString());
+                }
                 removeModel(name);
                 return false;
+            }
+            String message = newWarnings.toString();
+            if (!standalone && !message.isEmpty()) {
+                logger.info("Validation issues found in configuration model '{}', using it anyway:\n{}", name, message);
             }
         } catch (IOException e) {
             logger.warn("Configuration model '{}' cannot be parsed correctly!", name, e);
@@ -247,9 +262,10 @@ public class ModelRepositoryImpl implements ModelRepository {
     }
 
     @Override
-    public @Nullable String addStandaloneModel(String modelType, InputStream inputStream) {
+    public @Nullable String addStandaloneModel(String modelType, InputStream inputStream, StringBuilder errors,
+            StringBuilder warnings) {
         String name = "tmp_syntax_%d.%s".formatted(++counter, modelType);
-        return addOrRefreshModel(name, inputStream, true) ? name : null;
+        return addOrRefreshModel(name, inputStream, errors, warnings, true) ? name : null;
     }
 
     @Override
@@ -302,23 +318,21 @@ public class ModelRepositoryImpl implements ModelRepository {
      * @return error messages as a String if any syntactical error were found, <code>null</code> otherwise
      * @throws IOException if there was an error with the given {@link InputStream}, loading the resource from there
      */
-    private @Nullable String validateModel(String name, InputStream inputStream) throws IOException {
+    private boolean validateModel(String name, InputStream inputStream, StringBuilder errors, StringBuilder warnings)
+            throws IOException {
         // use another resource for validation in order to keep the original one for emergency-removal in case of errors
         Resource resource = resourceSet.createResource(URI.createURI("tmp_" + name));
         try {
             resource.load(inputStream, resourceOptions);
-            StringBuilder criticalErrors = new StringBuilder();
-            List<String> warnings = new LinkedList<>();
 
             if (!resource.getContents().isEmpty()) {
                 // Check for syntactical errors
                 for (Diagnostic diagnostic : resource.getErrors()) {
-                    criticalErrors
-                            .append(MessageFormat.format("[{0},{1}]: {2}\n", Integer.toString(diagnostic.getLine()),
-                                    Integer.toString(diagnostic.getColumn()), diagnostic.getMessage()));
+                    errors.append(MessageFormat.format("[{0},{1}]: {2}\n", Integer.toString(diagnostic.getLine()),
+                            Integer.toString(diagnostic.getColumn()), diagnostic.getMessage()));
                 }
-                if (!criticalErrors.isEmpty()) {
-                    return criticalErrors.toString();
+                if (!resource.getErrors().isEmpty()) {
+                    return false;
                 }
 
                 // Check for validation errors, but log them only
@@ -326,11 +340,7 @@ public class ModelRepositoryImpl implements ModelRepository {
                     final org.eclipse.emf.common.util.Diagnostic diagnostic = safeEmf
                             .call(() -> Diagnostician.INSTANCE.validate(resource.getContents().getFirst()));
                     for (org.eclipse.emf.common.util.Diagnostic d : diagnostic.getChildren()) {
-                        warnings.add(d.getMessage());
-                    }
-                    if (!warnings.isEmpty()) {
-                        logger.info("Validation issues found in configuration model '{}', using it anyway:\n{}", name,
-                                String.join("\n", warnings));
+                        warnings.append(d.getMessage() + "\n");
                     }
                 } catch (NullPointerException e) {
                     // see https://github.com/eclipse/smarthome/issues/3335
@@ -340,7 +350,7 @@ public class ModelRepositoryImpl implements ModelRepository {
         } finally {
             resourceSet.getResources().remove(resource);
         }
-        return null;
+        return true;
     }
 
     private void notifyListeners(String name, EventType type) {

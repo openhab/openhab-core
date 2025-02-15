@@ -979,9 +979,10 @@ public class ItemResource implements RESTResource {
 
         Collection<Item> items = new ArrayList<>();
         Collection<Metadata> metadata = new ArrayList<>();
-        parser.parseSyntax(syntax, items, metadata);
-        if (items.size() == 0) {
-            return Response.status(Response.Status.BAD_REQUEST).entity("Invalid syntax!").build();
+        StringBuilder errors = new StringBuilder();
+        StringBuilder warnings = new StringBuilder();
+        if (!parser.parseSyntax(syntax, items, metadata, errors, warnings)) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(errors.toString()).build();
         }
 
         List<EnrichedItemDTO> itemsDTO = new ArrayList<>();

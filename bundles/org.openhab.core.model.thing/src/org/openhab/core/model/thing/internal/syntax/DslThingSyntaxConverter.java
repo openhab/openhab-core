@@ -14,7 +14,6 @@ package org.openhab.core.model.thing.internal.syntax;
 
 import java.io.ByteArrayInputStream;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -197,14 +196,15 @@ public class DslThingSyntaxConverter extends AbstractThingSyntaxGenerator implem
     }
 
     @Override
-    public Collection<Thing> parseSyntax(String syntax) {
+    public boolean parseSyntax(String syntax, Collection<Thing> things, StringBuilder errors, StringBuilder warnings) {
         ByteArrayInputStream inputStream = new ByteArrayInputStream(syntax.getBytes());
-        String modelName = modelRepository.addStandaloneModel("things", inputStream);
+        String modelName = modelRepository.addStandaloneModel("things", inputStream, errors, warnings);
         if (modelName != null) {
-            Collection<Thing> things = standaloneThingProvider.getThingsFromStandaloneModel(modelName);
+            Collection<Thing> newThings = standaloneThingProvider.getThingsFromStandaloneModel(modelName);
+            things.addAll(newThings);
             modelRepository.removeStandaloneModel(modelName);
-            return things;
+            return true;
         }
-        return Collections.emptyList();
+        return false;
     }
 }

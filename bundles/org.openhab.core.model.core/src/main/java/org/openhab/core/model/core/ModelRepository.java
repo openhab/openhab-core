@@ -100,10 +100,12 @@ public interface ModelRepository {
      *
      * @param modelType the model type
      * @param inputStream an input stream with the model's content
+     * @param errors the string builder used to fill the errors
+     * @param warnings the string builder used to fill the warnings
      * @return the created model name if it was successfully processed, null otherwise
      */
     @Nullable
-    String addStandaloneModel(String modelType, InputStream inputStream);
+    String addStandaloneModel(String modelType, InputStream inputStream, StringBuilder errors, StringBuilder warnings);
 
     /**
      * Removes a standalone model from the repository
