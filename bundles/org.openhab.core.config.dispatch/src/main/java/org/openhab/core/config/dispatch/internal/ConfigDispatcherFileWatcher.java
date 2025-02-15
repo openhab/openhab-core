@@ -73,7 +73,7 @@ public class ConfigDispatcherFileWatcher implements WatchService.WatchEventListe
             } else if (kind == WatchService.Kind.DELETE) {
                 // Detect if a service specific configuration file was removed. We want to
                 // notify the service in this case with an updated empty configuration.
-                if (Files.isHidden(fullPath) || Files.isDirectory(fullPath) || !fullPath.toString().endsWith(".cfg")) {
+                if (!fullPath.toString().endsWith(".cfg")) {
                     return;
                 }
                 configDispatcher.fileRemoved(fullPath.toString());
