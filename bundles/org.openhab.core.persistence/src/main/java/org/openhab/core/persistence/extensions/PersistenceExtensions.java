@@ -41,6 +41,8 @@ import org.openhab.core.persistence.ModifiablePersistenceService;
 import org.openhab.core.persistence.PersistenceService;
 import org.openhab.core.persistence.PersistenceServiceRegistry;
 import org.openhab.core.persistence.QueryablePersistenceService;
+import org.openhab.core.persistence.registry.PersistenceServiceConfiguration;
+import org.openhab.core.persistence.registry.PersistenceServiceConfigurationRegistry;
 import org.openhab.core.types.State;
 import org.openhab.core.types.TimeSeries;
 import org.openhab.core.types.TypeParser;
@@ -72,12 +74,15 @@ import org.slf4j.LoggerFactory;
 public class PersistenceExtensions {
 
     private static @Nullable PersistenceServiceRegistry registry;
+    private static @Nullable PersistenceServiceConfigurationRegistry configRegistry;
     private static @Nullable TimeZoneProvider timeZoneProvider;
 
     @Activate
     public PersistenceExtensions(@Reference PersistenceServiceRegistry registry,
+            @Reference PersistenceServiceConfigurationRegistry configRegistry,
             @Reference TimeZoneProvider timeZoneProvider) {
         PersistenceExtensions.registry = registry;
+        PersistenceExtensions.configRegistry = configRegistry;
         PersistenceExtensions.timeZoneProvider = timeZoneProvider;
     }
 
@@ -108,7 +113,7 @@ public class PersistenceExtensions {
         }
         PersistenceService service = getService(effectiveServiceId);
         if (service != null) {
-            service.store(item);
+            service.store(item, getAlias(item, effectiveServiceId));
             return;
         }
         LoggerFactory.getLogger(PersistenceExtensions.class)
@@ -147,7 +152,7 @@ public class PersistenceExtensions {
         }
         PersistenceService service = getService(effectiveServiceId);
         if (service instanceof ModifiablePersistenceService modifiableService) {
-            modifiableService.store(item, timestamp, state);
+            modifiableService.store(item, timestamp, state, getAlias(item, effectiveServiceId));
             return;
         }
         LoggerFactory.getLogger(PersistenceExtensions.class)
@@ -225,8 +230,9 @@ public class PersistenceExtensions {
                 internalRemoveAllStatesBetween(item, timeSeries.getBegin().atZone(timeZone),
                         timeSeries.getEnd().atZone(timeZone), serviceId);
             }
+            String alias = getAlias(item, effectiveServiceId);
             timeSeries.getStates()
-                    .forEach(s -> modifiableService.store(item, s.timestamp().atZone(timeZone), s.state()));
+                    .forEach(s -> modifiableService.store(item, s.timestamp().atZone(timeZone), s.state(), alias));
             return;
         }
         LoggerFactory.getLogger(PersistenceExtensions.class)
@@ -315,10 +321,11 @@ public class PersistenceExtensions {
         if (service instanceof QueryablePersistenceService qService) {
             FilterCriteria filter = new FilterCriteria();
             filter.setEndDate(timestamp);
+            String alias = getAlias(item, effectiveServiceId);
             filter.setItemName(item.getName());
             filter.setPageSize(1);
             filter.setOrdering(Ordering.DESCENDING);
-            Iterable<HistoricItem> result = qService.query(filter);
+            Iterable<HistoricItem> result = qService.query(filter, alias);
             if (result.iterator().hasNext()) {
                 return result.iterator().next();
             }
@@ -448,6 +455,7 @@ public class PersistenceExtensions {
         PersistenceService service = getService(effectiveServiceId);
         if (service instanceof QueryablePersistenceService qService) {
             FilterCriteria filter = new FilterCriteria();
+            String alias = getAlias(item, effectiveServiceId);
             filter.setItemName(item.getName());
             if (forward) {
                 filter.setBeginDate(ZonedDateTime.now());
@@ -460,7 +468,7 @@ public class PersistenceExtensions {
             int startPage = 0;
             filter.setPageNumber(startPage);
 
-            Iterable<HistoricItem> items = qService.query(filter);
+            Iterable<HistoricItem> items = qService.query(filter, alias);
             Iterator<HistoricItem> itemIterator = items.iterator();
             State state = item.getState();
             if (itemIterator.hasNext()) {
@@ -491,7 +499,7 @@ public class PersistenceExtensions {
                         }
                         if (itemCount == filter.getPageSize()) {
                             filter.setPageNumber(++startPage);
-                            items = qService.query(filter);
+                            items = qService.query(filter, alias);
                             itemCount = 0;
                         } else {
                             items = null;
@@ -617,6 +625,7 @@ public class PersistenceExtensions {
         PersistenceService service = getService(effectiveServiceId);
         if (service instanceof QueryablePersistenceService qService) {
             FilterCriteria filter = new FilterCriteria();
+            String alias = getAlias(item, effectiveServiceId);
             filter.setItemName(item.getName());
             if (forward) {
                 filter.setBeginDate(ZonedDateTime.now());
@@ -629,7 +638,7 @@ public class PersistenceExtensions {
             int startPage = 0;
             filter.setPageNumber(startPage);
 
-            Iterable<HistoricItem> items = qService.query(filter);
+            Iterable<HistoricItem> items = qService.query(filter, alias);
             while (items != null) {
                 Iterator<HistoricItem> itemIterator = items.iterator();
                 int itemCount = 0;
@@ -642,7 +651,7 @@ public class PersistenceExtensions {
                 }
                 if (itemCount == filter.getPageSize()) {
                     filter.setPageNumber(++startPage);
-                    items = qService.query(filter);
+                    items = qService.query(filter, alias);
                 } else {
                     items = null;
                 }
@@ -2539,10 +2548,11 @@ public class PersistenceExtensions {
             } else {
                 filter.setEndDate(ZonedDateTime.now());
             }
+            String alias = getAlias(item, effectiveServiceId);
             filter.setItemName(item.getName());
             filter.setOrdering(Ordering.ASCENDING);
 
-            return qService.query(filter);
+            return qService.query(filter, alias);
         } else {
             LoggerFactory.getLogger(PersistenceExtensions.class)
                     .warn("There is no queryable persistence service registered with the id '{}'", effectiveServiceId);
@@ -2655,10 +2665,11 @@ public class PersistenceExtensions {
             } else {
                 filter.setEndDate(ZonedDateTime.now());
             }
+            String alias = getAlias(item, effectiveServiceId);
             filter.setItemName(item.getName());
             filter.setOrdering(Ordering.ASCENDING);
 
-            mService.remove(filter);
+            mService.remove(filter, alias);
         } else {
             LoggerFactory.getLogger(PersistenceExtensions.class)
                     .warn("There is no modifiable persistence service registered with the id '{}'", effectiveServiceId);
@@ -2731,6 +2742,15 @@ public class PersistenceExtensions {
         } else {
             LoggerFactory.getLogger(PersistenceExtensions.class)
                     .warn("PersistenceServiceRegistryImpl is not available!");
+        }
+        return null;
+    }
+
+    private static @Nullable String getAlias(Item item, String serviceId) {
+        PersistenceServiceConfigurationRegistry reg = configRegistry;
+        if (reg != null) {
+            PersistenceServiceConfiguration config = reg.get(serviceId);
+            return config != null ? config.getAliases().get(item.getName()) : null;
         }
         return null;
     }
