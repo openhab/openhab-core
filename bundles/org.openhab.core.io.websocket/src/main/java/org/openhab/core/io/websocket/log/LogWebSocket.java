@@ -67,8 +67,8 @@ public class LogWebSocket implements LogListener {
     private static final TypeToken<List<String>> STRING_LIST_TYPE = (TypeToken<List<String>>) TypeToken
             .getParameterized(List.class, String.class);
 
-    private final static int SEND_PERIOD = 100; // Minimum allowable time between log packets (in milliseconds)
-    private final static long FIRST_SEQUENCE = 0;
+    private static final int SEND_PERIOD = 100; // Minimum allowable time between log packets (in milliseconds)
+    private static final long FIRST_SEQUENCE = 0;
 
     private final Logger logger = LoggerFactory.getLogger(LogWebSocket.class);
 
@@ -116,7 +116,7 @@ public class LogWebSocket implements LogListener {
     @OnWebSocketMessage
     public void onText(String message) {
         // Detect empty message (keepalive) and ignore
-        if (message.equals("{}")) {
+        if ("{}".equals(message)) {
             return;
         }
 

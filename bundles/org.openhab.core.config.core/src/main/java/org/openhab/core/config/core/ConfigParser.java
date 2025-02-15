@@ -79,7 +79,6 @@ public final class ConfigParser {
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public static <T> @Nullable T configurationAs(Map<String, @Nullable Object> properties,
             Class<T> configurationClass) {
-
         Constructor<T> constructor;
         T configuration = null;
         try {
