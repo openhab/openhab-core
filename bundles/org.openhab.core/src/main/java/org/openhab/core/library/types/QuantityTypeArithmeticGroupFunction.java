@@ -29,8 +29,6 @@ import org.openhab.core.types.State;
 import org.openhab.core.types.UnDefType;
 import org.openhab.core.util.Statistics;
 
-import tech.units.indriya.AbstractUnit;
-
 /**
  * This interface is a container for dimension based functions that require {@link QuantityType}s for its calculations.
  *
@@ -55,7 +53,7 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
             State state = calculate(items);
             if (stateClass.isInstance(state)) {
                 if (state instanceof QuantityType<?> quantity) {
-                    state = toInvertibleUnit(quantity, baseItemUnit);
+                    state = quantity.toInvertibleUnit(baseItemUnit);
                 }
                 return stateClass.cast(state);
             } else {
@@ -66,27 +64,6 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
         @Override
         public State[] getParameters() {
             return new State[0];
-        }
-
-        /**
-         * Convert the given {@link QuantityType} to an equivalent based on the given {@link Unit}. The conversion can
-         * be made to both inverted and non-inverted units, so invertible type conversions (e.g. Mirek <=> Kelvin) are
-         * supported.
-         * <p>
-         * Note: we can use {@link QuantityType.toInvertibleUnit()} if OH Core PR #4561 is merged.
-         *
-         * @param source the {@link QuantityType} to be converted.
-         * @param targetUnit the {@link Unit} to convert to.
-         *
-         * @return a new {@link QuantityType} based on 'targetUnit' or null.
-         */
-        private @Nullable QuantityType<?> toInvertibleUnit(QuantityType<?> source, Unit<?> targetUnit) {
-            if (!targetUnit.equals(source.getUnit()) && !targetUnit.isCompatible(AbstractUnit.ONE)
-                    && source.getUnit().inverse().isCompatible(targetUnit)) {
-                QuantityType<?> sourceInSystemUnit = source.toUnit(source.getUnit().getSystemUnit());
-                return sourceInSystemUnit != null ? sourceInSystemUnit.inverse().toUnit(targetUnit) : null;
-            }
-            return source.toUnit(targetUnit);
         }
 
         /**
@@ -102,7 +79,7 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
          */
         private @Nullable QuantityType<?> toQuantityTypeOfUnit(@Nullable State state, Unit<?> unit) {
             return state instanceof QuantityType<?> quantity //
-                    ? toInvertibleUnit(quantity, unit)
+                    ? quantity.toInvertibleUnit(unit)
                     : null;
         }
 
