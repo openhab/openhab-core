@@ -177,20 +177,24 @@ public class ConfigUtil {
      * @throws IllegalArgumentException if an invalid type has been given
      */
     public static Object normalizeType(Object value, @Nullable ConfigDescriptionParameter configDescriptionParameter) {
+        Object result = null;
         if (configDescriptionParameter != null) {
             Normalizer normalizer = NormalizerFactory.getNormalizer(configDescriptionParameter);
-            return normalizer.normalize(value);
+            result = normalizer.normalize(value);
         } else if (value instanceof Boolean) {
-            return NormalizerFactory.getNormalizer(Type.BOOLEAN).normalize(value);
+            result = NormalizerFactory.getNormalizer(Type.BOOLEAN).normalize(value);
         } else if (value instanceof String) {
-            return NormalizerFactory.getNormalizer(Type.TEXT).normalize(value);
+            result = NormalizerFactory.getNormalizer(Type.TEXT).normalize(value);
         } else if (value instanceof Number) {
-            return NormalizerFactory.getNormalizer(Type.DECIMAL).normalize(value);
+            result = NormalizerFactory.getNormalizer(Type.DECIMAL).normalize(value);
         } else if (value instanceof Collection collection) {
-            return normalizeCollection(collection);
+            result = normalizeCollection(collection);
+        }
+        if (result != null) {
+            return result;
         }
         throw new IllegalArgumentException(
-                "Invalid type '{" + value.getClass().getCanonicalName() + "}' of configuration value!");
+                "Invalid type '{%s}' of configuration value!".formatted(value.getClass().getCanonicalName()));
     }
 
     /**
@@ -242,7 +246,7 @@ public class ConfigUtil {
      * @param value the value to return as normalized type
      * @return corresponding value as a valid type
      */
-    public static Object normalizeType(Object value) {
+    public static @Nullable Object normalizeType(Object value) {
         return normalizeType(value, null);
     }
 

@@ -240,10 +240,15 @@ public class QuantityType<T extends Quantity<T>> extends Number
         if (!(obj instanceof QuantityType<?> other)) {
             return false;
         }
-        if (!quantity.getUnit().isCompatible(other.quantity.getUnit())
-                && !quantity.getUnit().inverse().isCompatible(other.quantity.getUnit())) {
-            return false;
-        } else if (internalCompareTo(other) != 0) {
+        if (quantity.getUnit().isCompatible(other.quantity.getUnit())) {
+            if (internalCompareTo(other) != 0) {
+                return false;
+            }
+        } else if (quantity.getUnit().isCompatible(other.quantity.getUnit().inverse())) {
+            if (internalCompareTo(other.inverse()) != 0) {
+                return false;
+            }
+        } else {
             return false;
         }
 
@@ -264,8 +269,6 @@ public class QuantityType<T extends Quantity<T>> extends Number
             } else {
                 throw new IllegalArgumentException("Unable to convert to system unit during compare.");
             }
-        } else if (quantity.getUnit().inverse().isCompatible(o.quantity.getUnit())) {
-            return inverse().internalCompareTo(o);
         } else {
             throw new IllegalArgumentException("Can not compare incompatible units.");
         }

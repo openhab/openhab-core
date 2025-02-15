@@ -100,7 +100,7 @@ public class ConsoleSupportKaraf {
      */
     private void unregisterCommands() {
         for (final ConsoleCommandExtension command : commands) {
-            registerCommand(command);
+            unregisterCommand(command);
         }
     }
 

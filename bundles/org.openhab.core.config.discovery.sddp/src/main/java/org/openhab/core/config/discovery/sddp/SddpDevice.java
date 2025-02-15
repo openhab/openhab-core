@@ -110,7 +110,7 @@ public class SddpDevice {
 
     /**
      * Constructor.
-     * 
+     *
      * @param headers a map of parameter name / value pairs.
      * @param offline indicates if the device is being created from a NOTIFY OFFLINE announcement.
      */
@@ -161,5 +161,13 @@ public class SddpDevice {
      */
     public boolean isExpired() {
         return Instant.now().isAfter(expireInstant);
+    }
+
+    @Override
+    public String toString() {
+        return "SddpDevice [from=" + from + ", host=" + host + ", maxAge=" + maxAge + ", type=" + type
+                + ", primaryProxy=" + primaryProxy + ", proxies=" + proxies + ", manufacturer=" + manufacturer
+                + ", model=" + model + ", driver=" + driver + ", ipAddress=" + ipAddress + ", port=" + port
+                + ", macAddress=" + macAddress + ", expireInstant=" + expireInstant + "]";
     }
 }
