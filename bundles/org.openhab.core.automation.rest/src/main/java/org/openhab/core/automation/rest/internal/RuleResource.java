@@ -212,7 +212,8 @@ public class RuleResource implements RESTResource {
         Stream<EnrichedRuleDTO> rules = ruleRegistry.stream().filter(p) // filter according to Predicates
                 .map(rule -> EnrichedRuleDTOMapper.map(rule, ruleManager, managedRuleProvider)); // map matching rules
         if (summary != null && summary) {
-            rules = dtoMapper.limitToFields(rules, "uid,templateUID,name,visibility,description,status,tags,editable");
+            rules = dtoMapper.limitToFields(rules,
+                    "uid,templateUID,templateState,name,visibility,description,status,tags,editable");
         }
 
         return Response.ok(new Stream2JSONInputStream(rules)).build();

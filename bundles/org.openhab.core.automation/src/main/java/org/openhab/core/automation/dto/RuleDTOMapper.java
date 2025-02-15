@@ -14,6 +14,7 @@ package org.openhab.core.automation.dto;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.automation.Rule;
+import org.openhab.core.automation.Rule.TemplateState;
 import org.openhab.core.automation.util.RuleBuilder;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.config.core.dto.ConfigDescriptionDTOMapper;
@@ -34,13 +35,19 @@ public class RuleDTOMapper {
     }
 
     public static Rule map(final RuleDTO ruleDto) {
-        return RuleBuilder.create(ruleDto.uid).withActions(ActionDTOMapper.mapDto(ruleDto.actions))
+        RuleBuilder builder = RuleBuilder.create(ruleDto.uid).withActions(ActionDTOMapper.mapDto(ruleDto.actions))
                 .withConditions(ConditionDTOMapper.mapDto(ruleDto.conditions))
                 .withTriggers(TriggerDTOMapper.mapDto(ruleDto.triggers))
                 .withConfiguration(new Configuration(ruleDto.configuration))
                 .withConfigurationDescriptions(ConfigDescriptionDTOMapper.map(ruleDto.configDescriptions))
                 .withTemplateUID(ruleDto.templateUID).withVisibility(ruleDto.visibility).withTags(ruleDto.tags)
-                .withName(ruleDto.name).withDescription(ruleDto.description).build();
+                .withName(ruleDto.name).withDescription(ruleDto.description);
+        if (ruleDto.templateState == null) {
+            builder.withTemplateState(ruleDto.templateUID == null ? TemplateState.NO_TEMPLATE : TemplateState.PENDING);
+        } else {
+            builder.withTemplateState(TemplateState.typeOf(ruleDto.templateState));
+        }
+        return builder.build();
     }
 
     protected static void fillProperties(final Rule from, final RuleDTO to) {
@@ -50,6 +57,7 @@ public class RuleDTOMapper {
         to.configuration = from.getConfiguration().getProperties();
         to.configDescriptions = ConfigDescriptionDTOMapper.mapParameters(from.getConfigurationDescriptions());
         to.templateUID = from.getTemplateUID();
+        to.templateState = from.getTemplateState().toString();
         to.uid = from.getUID();
         to.name = from.getName();
         to.tags = from.getTags();
