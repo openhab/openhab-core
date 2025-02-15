@@ -649,13 +649,14 @@ public class QuantityTypeTest {
 
     @Test
     public void testMireds() {
-        QuantityType<Temperature> colorTemp = new QuantityType<>("2700 K");
+        // test value is selected to prevent any round-trip rounding errors
+        QuantityType<Temperature> colorTemp = new QuantityType<>("2000 K");
         QuantityType<?> mireds = colorTemp.toInvertibleUnit(Units.MIRED);
-        assertEquals(370, mireds.intValue());
+        assertEquals(500, mireds.intValue());
         assertThat(colorTemp.equals(mireds), is(true));
         assertThat(mireds.equals(colorTemp), is(true));
         QuantityType<?> andBack = mireds.toInvertibleUnit(Units.KELVIN);
-        assertEquals(2700, andBack.intValue());
+        assertEquals(2000, andBack.intValue());
     }
 
     @Test
@@ -663,6 +664,28 @@ public class QuantityTypeTest {
         QuantityType<Temperature> c = new QuantityType<>("1 °C");
         QuantityType<Temperature> f = c.toUnitRelative(ImperialUnits.FAHRENHEIT);
         assertEquals(1.8, f.doubleValue());
+    }
+
+    @Test
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public void testIncrementalAdd() {
+        assertEquals(new QuantityType("50 °C"), new QuantityType("20 °C").add(new QuantityType("30 °C")));
+        assertEquals(new QuantityType("50 °C"), new QuantityType("20 °C").add(new QuantityType("30 K")));
+        assertEquals(new QuantityType("50 °C"), new QuantityType("20 °C").add(new QuantityType("54 °F")));
+        assertEquals(new QuantityType("50 K"), new QuantityType("20 K").add(new QuantityType("30 °C")));
+        assertEquals(new QuantityType("50 K"), new QuantityType("20 K").add(new QuantityType("30 K")));
+        assertEquals(new QuantityType("50 K"), new QuantityType("20 K").add(new QuantityType("54 °F")));
+    }
+
+    @Test
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public void testIncrementalSubtract() {
+        assertEquals(new QuantityType("20 °C"), new QuantityType("50 °C").subtract(new QuantityType("30 °C")));
+        assertEquals(new QuantityType("20 °C"), new QuantityType("50 °C").subtract(new QuantityType("30 K")));
+        assertEquals(new QuantityType("20 °C"), new QuantityType("50 °C").subtract(new QuantityType("54 °F")));
+        assertEquals(new QuantityType("20 K"), new QuantityType("50 K").subtract(new QuantityType("30 °C")));
+        assertEquals(new QuantityType("20 K"), new QuantityType("50 K").subtract(new QuantityType("30 K")));
+        assertEquals(new QuantityType("20 K"), new QuantityType("50 K").subtract(new QuantityType("54 °F")));
     }
 
     @Test

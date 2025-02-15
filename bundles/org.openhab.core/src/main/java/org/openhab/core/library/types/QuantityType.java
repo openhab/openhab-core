@@ -317,8 +317,20 @@ public class QuantityType<T extends Quantity<T>> extends Number
     /**
      * Convert this QuantityType to a new {@link QuantityType} using the given target unit.
      *
-     * Implicit conversions using inverse units are allowed (i.e. {@code mired <=> Kelvin}). This may
-     * change the dimension.
+     * Implicit conversions using inverse units are allowed (i.e. {@code mired <=> Kelvin} / {@code Hertz <=> Second} /
+     * {@code Ohm <=> Siemens}). This may change the dimension.
+     * <p>
+     * This method converts the quantity from its actual unit to its respective system unit before converting to the
+     * inverse unit. This enables it to support not only conversions {@code mired <=> Kelvin} but also conversions
+     * {@code mired <=> Fahrenheit} and {@code mired <=> Celsius}.
+     * <p>
+     * Notes on units not yet implemented in openHAB:
+     * <li>The optics unit {@code Dioptre} ({@code dpt} / {@code D}) is the inverse of length ({@code m-1}); if it were
+     * added it would give correct results.</li>
+     * <li>The optics unit {@code Kaiser} for wave number is also the inverse of length ({@code cm-1}); it is old and
+     * not commonly used, but if it were added it would NOT give correct results.</li>
+     * <li>If you discover other units similar to {@code Kaiser} above: => Please inform openHAB maintainers.</li>
+     * <p>
      *
      * @param targetUnit the unit to which this {@link QuantityType} will be converted to.
      * @return the new {@link QuantityType} in the given {@link Unit} or {@code null} in case of an error.
@@ -327,7 +339,8 @@ public class QuantityType<T extends Quantity<T>> extends Number
         // only invert if unit is not equal and inverse is compatible and targetUnit is not ONE
         if (!targetUnit.equals(getUnit()) && !targetUnit.isCompatible(AbstractUnit.ONE)
                 && getUnit().inverse().isCompatible(targetUnit)) {
-            return inverse().toUnit(targetUnit);
+            QuantityType<?> systemQuantity = toUnit(getUnit().getSystemUnit());
+            return systemQuantity == null ? null : systemQuantity.inverse().toUnit(targetUnit);
         }
         return toUnit(targetUnit);
     }
@@ -337,7 +350,6 @@ public class QuantityType<T extends Quantity<T>> extends Number
         if (unit != null) {
             return toInvertibleUnit(unit);
         }
-
         return null;
     }
 
@@ -581,6 +593,17 @@ public class QuantityType<T extends Quantity<T>> extends Number
 
     /**
      * Returns the sum of the given {@link QuantityType} with this QuantityType.
+     * <p>
+     * The result is an incremental addition where the operand is interpreted as an amount to be added based on the
+     * difference between its value converted to the unit of this instance and the zero point of the unit of this
+     * instance. So for example:
+     * <li>Expression '{@code new QuantityType("20 °C").add(new QuantityType("30 °C")}' gives '{@code 50 °C}'</li>
+     * <li>Expression '{@code new QuantityType("20 °C").add(new QuantityType("30 K")}' gives '{@code 50 °C}'</li>
+     * <li>Expression '{@code new QuantityType("20 °C").add(new QuantityType("54 °F")}' gives '{@code 50 °C}'</li>
+     * <li>Expression '{@code new QuantityType("20 K").add(new QuantityType("30 °C")}' gives '{@code 50 K}'</li>
+     * <li>Expression '{@code new QuantityType("20 K").add(new QuantityType("30 K")}' gives '{@code 50 K}'</li>
+     * <li>Expression '{@code new QuantityType("20 K").add(new QuantityType("54 °F")}' gives '{@code 50 K}'</li>
+     * <p>
      *
      * @param state the {@link QuantityType} to add to this QuantityType.
      * @return the sum of the given {@link QuantityType} with this QuantityType.
@@ -602,6 +625,18 @@ public class QuantityType<T extends Quantity<T>> extends Number
 
     /**
      * Subtract the given {@link QuantityType} from this QuantityType.
+     *
+     * <p>
+     * The result is an incremental subtraction where the operand is interpreted as an amount to be subtracted based on
+     * the difference between its value converted to the unit of this instance and the zero point of the unit of this
+     * instance. So for example:
+     * <li>Expression '{@code new QuantityType("50 °C").subtract(new QuantityType("30 °C")}' gives '{@code 20 °C}'</li>
+     * <li>Expression '{@code new QuantityType("50 °C").subtract(new QuantityType("30 K")}' gives '{@code 20 °C}'</li>
+     * <li>Expression '{@code new QuantityType("50 °C").subtract(new QuantityType("54 °F")}' gives '{@code 20 °C}'</li>
+     * <li>Expression '{@code new QuantityType("50 K").subtract(new QuantityType("30 °C")}' gives '{@code 20 K}'</li>
+     * <li>Expression '{@code new QuantityType("50 K").subtract(new QuantityType("30 K")}' gives '{@code 20 K}'</li>
+     * <li>Expression '{@code new QuantityType("50 K").subtract(new QuantityType("54 °F")}' gives '{@code 20 K}'</li>
+     * <p>
      *
      * @param state the {@link QuantityType} to subtract from this QuantityType.
      * @return the difference by subtracting the given {@link QuantityType} from this QuantityType.
