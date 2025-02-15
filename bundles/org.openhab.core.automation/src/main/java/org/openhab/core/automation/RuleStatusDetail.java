@@ -64,6 +64,13 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * <td><b>N/A</b></td>
  * </tr>
  * <tr>
+ * <td><b>{@link #TEMPLATE_PENDING}</b></td>
+ * <td>Template processing pending</td>
+ * <td>Template processing pending</td>
+ * <td>Template processing pending</td>
+ * <td><b>N/A</b></td>
+ * </tr>
+ * <tr>
  * <td><b>{@link #INVALID_RULE}</b></td>
  * <td>Resolving failed</td>
  * <td><b>N/A</b></td>
@@ -82,6 +89,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * @author Yordan Mihaylov - Initial contribution
  * @author Kai Kreuzer - Refactored to match ThingStatusDetail implementation
  * @author Ana Dimova - add java doc
+ * @author Ravi Nadahar - added {@link #TEMPLATE_PENDING}
  */
 @NonNullByDefault
 public enum RuleStatusDetail {
@@ -90,8 +98,9 @@ public enum RuleStatusDetail {
     HANDLER_INITIALIZING_ERROR(2),
     CONFIGURATION_ERROR(3),
     TEMPLATE_MISSING_ERROR(4),
-    INVALID_RULE(5),
-    DISABLED(6);
+    TEMPLATE_PENDING(5),
+    INVALID_RULE(6),
+    DISABLED(7);
 
     private final int value;
 

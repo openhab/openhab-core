@@ -38,6 +38,7 @@ import org.openhab.core.automation.Action;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.ManagedRuleProvider;
 import org.openhab.core.automation.Rule;
+import org.openhab.core.automation.Rule.TemplateState;
 import org.openhab.core.automation.RuleManager;
 import org.openhab.core.automation.RuleProvider;
 import org.openhab.core.automation.RuleRegistry;
@@ -678,7 +679,7 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
         configs.put("updateItem", "templ_LampItem");
         configs.put("updateCommand", "ON");
         Rule templateRule = RuleBuilder.create("templateRuleUID").withTemplateUID("SimpleTestTemplate")
-                .withConfiguration(new Configuration(configs)).build();
+                .withTemplateState(TemplateState.PENDING).withConfiguration(new Configuration(configs)).build();
         ruleRegistry.add(templateRule);
         assertThat(ruleRegistry.get(templateRule.getUID()), is(notNullValue()));
 
@@ -727,7 +728,7 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
         configs.put("updateCommand", "ON");
         Configuration config = new Configuration(configs);
         Rule templateRule = RuleBuilder.create("xtemplateRuleUID").withTemplateUID("TestTemplateWithCompositeModules")
-                .withConfiguration(config).build();
+                .withTemplateState(TemplateState.PENDING).withConfiguration(config).build();
 
         ruleRegistry.add(templateRule);
         assertThat(ruleRegistry.get(templateRule.getUID()), is(notNullValue()));
