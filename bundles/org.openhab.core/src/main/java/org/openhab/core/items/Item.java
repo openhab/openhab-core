@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -19,15 +19,10 @@ import java.util.Set;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.registry.Identifiable;
-import org.openhab.core.library.types.OnOffType;
-import org.openhab.core.library.types.PercentType;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.CommandDescription;
-import org.openhab.core.types.CommandOption;
 import org.openhab.core.types.State;
 import org.openhab.core.types.StateDescription;
-import org.openhab.core.types.StateOption;
-import org.openhab.core.types.UnDefType;
 
 /**
  * <p>
@@ -75,14 +70,16 @@ public interface Item extends Identifiable<String> {
      * This method provides a list of all data types that can be used to update the item state
      *
      * <p>
-     * Imagine e.g. a dimmer device: It's status could be 0%, 10%, 50%, 100%, but also OFF or ON and maybe UNDEFINED. So
-     * the accepted data types would be in this case {@link PercentType}, {@link OnOffType} and {@link UnDefType}
+     * Imagine e.g. a dimmer device: It's status could be 0%, 10%, 50%, 100%, but also OFF or ON and maybe
+     * UNDEFINED. So the accepted data types would be in this case {@link org.openhab.core.library.types.PercentType},
+     * {@linkorg.openhab.core.library.types.OnOffType} and {@link org.openhab.core.types.UnDefType}
      *
      * <p>
      * The order of data types denotes the order of preference. So in case a state needs to be converted
      * in order to be accepted, it will be attempted to convert it to a type from top to bottom. Therefore
      * the type with the least information loss should be on top of the list - in the example above the
-     * {@link PercentType} carries more information than the {@link OnOffType}, hence it is listed first.
+     * {@link org.openhab.core.library.types.PercentType} carries more information than the
+     * {@linkorg.openhab.core.library.types.OnOffType}, hence it is listed first.
      *
      * @return a list of data types that can be used to update the item state
      */
@@ -93,8 +90,9 @@ public interface Item extends Identifiable<String> {
      * This method provides a list of all command types that can be used for this item
      *
      * <p>
-     * Imagine e.g. a dimmer device: You could ask it to dim to 0%, 10%, 50%, 100%, but also to turn OFF or ON. So the
-     * accepted command types would be in this case {@link PercentType}, {@link OnOffType}
+     * Imagine e.g. a dimmer device: You could ask it to dim to 0%, 10%, 50%, 100%, but also to turn OFF or ON.
+     * So the accepted command types would be in this case {@link org.openhab.core.library.types.PercentType},
+     * {@linkorg.openhab.core.library.types.OnOffType}
      *
      *
      * @return a list of all command types that can be used for this item
@@ -160,8 +158,8 @@ public interface Item extends Identifiable<String> {
 
     /**
      * Returns the {@link CommandDescription} for this item. In case no dedicated {@link CommandDescription} is
-     * provided the {@link StateOption}s from the {@link StateDescription} will be served as valid
-     * {@link CommandOption}s.
+     * provided the {@link org.openhab.core.types.StateOption}s from the {@link StateDescription} will be served
+     * as valid {@link org.openhab.core.types.CommandOption}s.
      *
      * @return the {@link CommandDescription} for the default locale (can be null).
      */
@@ -171,8 +169,9 @@ public interface Item extends Identifiable<String> {
 
     /**
      * Returns the {@link CommandDescription} for the given locale. In case no dedicated {@link CommandDescription} is
-     * provided the {@link StateOption}s from the {@link StateDescription} will be served as valid
-     * {@link CommandOption}s.
+     * provided the {@link org.openhab.core.types.StateOption}s from the {@link StateDescription} will be served as
+     * valid
+     * {@link org.openhab.core.types.CommandOption}s.
      *
      * @param locale locale (can be null)
      * @return command description (can be null)

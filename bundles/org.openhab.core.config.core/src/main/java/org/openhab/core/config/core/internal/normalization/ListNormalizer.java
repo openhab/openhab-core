@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,8 +12,12 @@
  */
 package org.openhab.core.config.core.internal.normalization;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.StreamSupport;
+
+import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
  * The normalizer for configuration parameters allowing multiple values. It converts all collections/arrays to a
@@ -22,6 +26,7 @@ import java.util.List;
  * @author Simon Kaufmann - Initial contribution
  * @author Thomas Höfer - made class final and minor javadoc changes
  */
+@NonNullByDefault
 final class ListNormalizer extends AbstractNormalizer {
 
     private final Normalizer delegate;
@@ -30,43 +35,26 @@ final class ListNormalizer extends AbstractNormalizer {
         this.delegate = delegate;
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @SuppressWarnings({ "unchecked" })
     @Override
     public Object doNormalize(Object value) {
         if (!isList(value)) {
-            List ret = new ArrayList(1);
-            ret.add(delegate.normalize(value));
-            return ret;
-        }
-        if (isArray(value)) {
-            List ret = new ArrayList(((Object[]) value).length);
-            for (Object object : ((Object[]) value)) {
-                ret.add(delegate.normalize(object));
-            }
-            return ret;
-        }
-        if (value instanceof List list) {
-            List ret = new ArrayList(list.size());
-            for (Object object : list) {
-                ret.add(delegate.normalize(object));
-            }
-            return ret;
-        }
-        if (value instanceof Iterable iterable) {
-            List ret = new ArrayList();
-            for (Object object : iterable) {
-                ret.add(delegate.normalize(object));
-            }
-            return ret;
+            return Set.of(value).stream().map(delegate::normalize).toList();
+        } else if (isArray(value)) {
+            return Arrays.stream((Object[]) value).map(delegate::normalize).toList();
+        } else if (value instanceof List list) {
+            return list.stream().map(delegate::normalize).toList();
+        } else if (value instanceof Iterable iterable) {
+            return StreamSupport.stream(iterable.spliterator(), false).map(delegate::normalize).toList();
         }
         return value;
     }
 
-    static boolean isList(Object value) {
+    private static boolean isList(Object value) {
         return isArray(value) || value instanceof Iterable;
     }
 
     private static boolean isArray(Object object) {
-        return object != null && object.getClass().isArray();
+        return object.getClass().isArray();
     }
 }

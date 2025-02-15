@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -86,7 +86,7 @@ public abstract class MarketplaceBundleInstaller {
                             "The local cache folder doesn't contain a single file: " + addonPath, null);
                 }
 
-                try (FileInputStream fileInputStream = new FileInputStream(bundleFiles.get(0).toFile())) {
+                try (FileInputStream fileInputStream = new FileInputStream(bundleFiles.getFirst().toFile())) {
                     Bundle bundle = bundleContext.installBundle(addonId, fileInputStream);
                     try {
                         bundle.start();

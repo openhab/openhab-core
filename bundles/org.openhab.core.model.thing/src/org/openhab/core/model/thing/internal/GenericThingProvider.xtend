@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -25,10 +25,8 @@ import org.openhab.core.config.core.ConfigDescriptionRegistry
 import org.openhab.core.config.core.ConfigUtil
 import org.openhab.core.config.core.Configuration
 import org.openhab.core.common.AbstractUID
-import org.openhab.core.common.registry.AbstractProvider
 import org.openhab.core.i18n.LocaleProvider
 import org.openhab.core.service.ReadyMarker
-import org.openhab.core.service.ReadyMarkerFilter
 import org.openhab.core.service.ReadyService
 import org.openhab.core.service.StartLevelService
 import org.openhab.core.thing.Channel
@@ -77,31 +75,31 @@ import org.slf4j.LoggerFactory
 @Component(immediate=true, service=ThingProvider)
 class GenericThingProvider extends AbstractProviderLazyNullness<Thing> implements ThingProvider, ModelRepositoryChangeListener, ReadyService.ReadyTracker {
 
-    private static final String XML_THING_TYPE = "openhab.xmlThingTypes";
+    static final String XML_THING_TYPE = "openhab.xmlThingTypes";
 
-    private LocaleProvider localeProvider
+    LocaleProvider localeProvider
 
-    private ModelRepository modelRepository
+    ModelRepository modelRepository
 
-    private ThingTypeRegistry thingTypeRegistry
-    private ChannelTypeRegistry channelTypeRegistry
+    ThingTypeRegistry thingTypeRegistry
+    ChannelTypeRegistry channelTypeRegistry
 
-    private BundleResolver bundleResolver;
+    BundleResolver bundleResolver;
 
-    private Map<String, Collection<Thing>> thingsMap = new ConcurrentHashMap
+    Map<String, Collection<Thing>> thingsMap = new ConcurrentHashMap
 
-    private List<ThingHandlerFactory> thingHandlerFactories = new CopyOnWriteArrayList<ThingHandlerFactory>()
+    List<ThingHandlerFactory> thingHandlerFactories = new CopyOnWriteArrayList<ThingHandlerFactory>()
 
-    private ConfigDescriptionRegistry configDescriptionRegistry
+    ConfigDescriptionRegistry configDescriptionRegistry
 
-    private val List<QueueContent> queue = new CopyOnWriteArrayList
-    private var Thread lazyRetryThread = null
+    val List<QueueContent> queue = new CopyOnWriteArrayList
+    var Thread lazyRetryThread = null
 
-    private static final Logger logger = LoggerFactory.getLogger(GenericThingProvider)
+    static final Logger logger = LoggerFactory.getLogger(GenericThingProvider)
 
-    private val Set<String> loadedXmlThingTypes = new CopyOnWriteArraySet
+    val Set<String> loadedXmlThingTypes = new CopyOnWriteArraySet
 
-    private var modelLoaded = false
+    var modelLoaded = false
 
     def void activate() {
         modelRepository.getAllModelNamesOfType("things").forEach [
@@ -138,7 +136,7 @@ class GenericThingProvider extends AbstractProviderLazyNullness<Thing> implement
                 val factory = thingHandlerFactories.findFirst [
                     supportsThingType(thingTypeUID)
                 ]
-                if (factory == null && modelLoaded) {
+                if (factory === null && modelLoaded) {
                     logger.info("No ThingHandlerFactory found for thing {} (thing-type is {}). Deferring initialization.",
                         thingUID, thingTypeUID)
                 }
@@ -602,10 +600,11 @@ class GenericThingProvider extends AbstractProviderLazyNullness<Thing> implement
     }
 
     def private createThingsFromModelForThingHandlerFactory(String modelName, ThingHandlerFactory factory) {
-        if (!loadedXmlThingTypes.contains(factory.bundleName) || modelRepository == null) {
+        if (!loadedXmlThingTypes.contains(factory.bundleName) || modelRepository === null) {
             return
         }
-        val oldThings = thingsMap.get(modelName).clone
+        val things = thingsMap.get(modelName)
+        val oldThings = things.clone
         val newThings = newArrayList()
 
         val model = modelRepository.getModel(modelName) as ThingModel
@@ -616,21 +615,23 @@ class GenericThingProvider extends AbstractProviderLazyNullness<Thing> implement
         }
 
         newThings.forEach [ newThing |
-            thingsMap.get(modelName).add(newThing)
             val oldThing = oldThings.findFirst[it.UID == newThing.UID]
             if (oldThing !== null) {
                 if (!ThingHelper.equals(oldThing, newThing)) {
+                    things.remove(oldThing)
+                    things.add(newThing)
                     logger.debug("Updating thing '{}' from model '{}'.", newThing.UID, modelName);
                     notifyListenersAboutUpdatedElement(oldThing, newThing)
                 }
             } else {
+                things.add(newThing)
                 logger.debug("Adding thing '{}' from model '{}'.", newThing.UID, modelName);
                 newThing.notifyListenersAboutAddedElement
             }
         ]
     }
 
-    private val lazyRetryRunnable = new Runnable() {
+    val lazyRetryRunnable = new Runnable() {
         override run() {
             logger.debug("Starting lazy retry thread")
             while (!queue.empty) {

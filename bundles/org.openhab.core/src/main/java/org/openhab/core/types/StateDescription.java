@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,6 +15,7 @@ package org.openhab.core.types;
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -115,10 +116,10 @@ public class StateDescription {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + (minimum != null ? minimum.hashCode() : 0);
-        result = prime * result + (maximum != null ? maximum.hashCode() : 0);
-        result = prime * result + (step != null ? step.hashCode() : 0);
-        result = prime * result + (pattern != null ? pattern.hashCode() : 0);
+        result = prime * result + Objects.hashCode(minimum);
+        result = prime * result + Objects.hashCode(maximum);
+        result = prime * result + Objects.hashCode(step);
+        result = prime * result + Objects.hashCode(pattern);
         result = prime * result + (readOnly ? 1231 : 1237);
         result = prime * result + options.hashCode();
         return result;
@@ -136,10 +137,8 @@ public class StateDescription {
             return false;
         }
         StateDescription other = (StateDescription) obj;
-        return (minimum != null ? minimum.equals(other.minimum) : other.minimum == null)
-                && (maximum != null ? maximum.equals(other.maximum) : other.maximum == null)
-                && (step != null ? step.equals(other.step) : other.step == null)
-                && (pattern != null ? pattern.equals(other.pattern) : other.pattern == null)
+        return Objects.equals(minimum, other.minimum) && Objects.equals(maximum, other.maximum)
+                && Objects.equals(step, other.step) && Objects.equals(pattern, other.pattern)
                 && readOnly == other.readOnly //
                 && options.equals(other.options);
     }

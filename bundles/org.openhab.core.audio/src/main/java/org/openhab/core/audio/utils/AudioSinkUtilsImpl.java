@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -70,7 +70,7 @@ public class AudioSinkUtilsImpl implements AudioSinkUtils {
                             e);
                     Integer bitRate = audioFormat.getBitRate();
                     if (bitRate != null && bitRate != 0) {
-                        long computedDuration = Float.valueOf((1f * dataTransferedLength / bitRate) * 1000000000)
+                        long computedDuration = Float.valueOf((8f * dataTransferedLength / bitRate) * 1000000000)
                                 .longValue();
                         return startTime + computedDuration;
                     } else {

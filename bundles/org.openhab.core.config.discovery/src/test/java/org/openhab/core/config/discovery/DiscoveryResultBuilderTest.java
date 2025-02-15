@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -56,6 +56,7 @@ public class DiscoveryResultBuilderTest {
         discoveryResult = builder.build();
     }
 
+    @Test
     public void testInstance() {
         assertThat(builder, is(instanceOf(DiscoveryResultBuilder.class)));
         assertThat(builder.withLabel("TEST"), is(instanceOf(DiscoveryResultBuilder.class)));

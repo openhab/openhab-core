@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,6 +17,7 @@ import java.util.stream.Stream;
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
@@ -32,6 +33,7 @@ import javax.ws.rs.core.Response.Status;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.auth.Role;
+import org.openhab.core.config.discovery.DiscoveryResult;
 import org.openhab.core.config.discovery.DiscoveryResultFlag;
 import org.openhab.core.config.discovery.dto.DiscoveryResultDTO;
 import org.openhab.core.config.discovery.dto.DiscoveryResultDTOMapper;
@@ -116,7 +118,7 @@ public class InboxResource implements RESTResource {
         ThingUID thingUIDObject = new ThingUID(thingUID);
         String notEmptyLabel = label != null && !label.isEmpty() ? label : null;
         String notEmptyNewThingId = newThingId != null && !newThingId.isEmpty() ? newThingId : null;
-        Thing thing = null;
+        Thing thing;
         try {
             thing = inbox.approve(thingUIDObject, notEmptyLabel, notEmptyNewThingId);
         } catch (IllegalArgumentException e) {
@@ -153,9 +155,14 @@ public class InboxResource implements RESTResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(operationId = "getDiscoveredInboxItems", summary = "Get all discovered things.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = DiscoveryResultDTO.class)))) })
-    public Response getAll() {
-        Stream<DiscoveryResultDTO> discoveryStream = inbox.getAll().stream().map(DiscoveryResultDTOMapper::map);
-        return Response.ok(new Stream2JSONInputStream(discoveryStream)).build();
+    public Response getAll(
+            @QueryParam("includeIgnored") @DefaultValue("true") @Parameter(description = "If true, include ignored inbox entries. Defaults to true") boolean includeIgnored) {
+        Stream<DiscoveryResult> discoveryStream = inbox.getAll().stream();
+        if (!includeIgnored) {
+            discoveryStream = discoveryStream
+                    .filter(discoveryResult -> discoveryResult.getFlag() != DiscoveryResultFlag.IGNORED);
+        }
+        return Response.ok(new Stream2JSONInputStream(discoveryStream.map(DiscoveryResultDTOMapper::map))).build();
     }
 
     @POST

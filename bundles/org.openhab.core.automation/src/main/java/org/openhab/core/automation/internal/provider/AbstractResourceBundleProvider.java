@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -266,7 +266,7 @@ public abstract class AbstractResourceBundleProvider<@NonNull E> {
             if (!newPortfolio.contains(uid)) {
                 final @Nullable E removedObject = providedObjectsHolder.remove(uid);
                 if (removedObject != null) {
-                    List<ProviderChangeListener<E>> snapshot = null;
+                    List<ProviderChangeListener<E>> snapshot;
                     synchronized (listeners) {
                         snapshot = new LinkedList<>(listeners);
                     }
@@ -333,7 +333,7 @@ public abstract class AbstractResourceBundleProvider<@NonNull E> {
             for (String uid : portfolio) {
                 final @Nullable E removedObject = providedObjectsHolder.remove(uid);
                 if (removedObject != null) {
-                    List<ProviderChangeListener<E>> snapshot = null;
+                    List<ProviderChangeListener<E>> snapshot;
                     synchronized (listeners) {
                         snapshot = new LinkedList<>(listeners);
                     }
@@ -431,7 +431,7 @@ public abstract class AbstractResourceBundleProvider<@NonNull E> {
     @SuppressWarnings("unchecked")
     protected void addNewProvidedObjects(List<String> newPortfolio, List<String> previousPortfolio,
             Set<E> parsedObjects) {
-        List<ProviderChangeListener<E>> snapshot = null;
+        List<ProviderChangeListener<E>> snapshot;
         synchronized (listeners) {
             snapshot = new LinkedList<>(listeners);
         }

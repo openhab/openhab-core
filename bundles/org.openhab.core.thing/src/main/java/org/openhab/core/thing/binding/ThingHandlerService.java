@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -64,7 +64,7 @@ public interface ThingHandlerService {
      * Implementations should override this method to add additional initialization code. This method should call
      * <code>super.initialize()</code> to ensure background discovery is properly handled.
      *
-     * See {@link #activate(), #{@link #dispose()}
+     * See {@link #activate()}, {@link #dispose()}
      */
     default void initialize() {
     }

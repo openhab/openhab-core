@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -21,10 +21,10 @@ import java.util.List;
  */
 public class TokenList {
 
-    private List<String> list = null;
+    private List<String> list;
 
-    private int head = 0;
-    private int tail = 0;
+    private int head;
+    private int tail;
 
     /**
      * Constructs a new instance.

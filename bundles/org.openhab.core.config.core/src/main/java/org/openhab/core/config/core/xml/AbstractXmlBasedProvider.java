@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -78,24 +79,13 @@ public abstract class AbstractXmlBasedProvider<@NonNull T_ID, @NonNull T_OBJECT 
         if (objectList.isEmpty()) {
             return;
         }
-        List<T_OBJECT> objects = acquireObjects(bundle);
-        if (objects == null) {
-            return;
-        }
+        List<T_OBJECT> objects = Objects
+                .requireNonNull(bundleObjectMap.computeIfAbsent(bundle, k -> new CopyOnWriteArrayList<>()));
         objects.addAll(objectList);
         for (T_OBJECT object : objectList) {
             // just make sure no old entry remains in the cache
             removeCachedEntries(object);
         }
-    }
-
-    private @Nullable List<T_OBJECT> acquireObjects(Bundle bundle) {
-        List<T_OBJECT> objects = bundleObjectMap.get(bundle);
-        if (objects == null) {
-            objects = new CopyOnWriteArrayList<>();
-            bundleObjectMap.put(bundle, objects);
-        }
-        return objects;
     }
 
     /**

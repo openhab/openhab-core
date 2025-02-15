@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -162,7 +162,7 @@ public class ChannelLinkNotifierOSGiTest extends JavaOSGiTest {
 
         public @Nullable Boolean isLinkedBasedOnEvent(ChannelUID channelUID) {
             List<Boolean> events = getChannelLinkEvents(channelUID);
-            return events.isEmpty() ? null : events.get(events.size() - 1);
+            return events.isEmpty() ? null : events.getLast();
         }
 
         public void resetChannelLinkEvents() {
@@ -295,7 +295,7 @@ public class ChannelLinkNotifierOSGiTest extends JavaOSGiTest {
     }
 
     private void forEachThingChannelUID(Thing thing, Consumer<ChannelUID> consumer) {
-        thing.getChannels().stream().map(Channel::getUID).forEach(consumer::accept);
+        thing.getChannels().stream().map(Channel::getUID).forEach(consumer);
     }
 
     private void addItemsAndLinks(Thing thing, String itemSuffix) {

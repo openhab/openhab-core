@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,7 +13,6 @@
 package org.openhab.core.automation.internal.provider;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -94,7 +93,7 @@ public class AutomationResourceBundlesEventQueue<@NonNull E> implements Runnable
     public void run() {
         boolean waitForEvents = true;
         while (true) {
-            List<BundleEvent> lQueue = null;
+            List<BundleEvent> lQueue;
             synchronized (this) {
                 if (closed) {
                     notifyAll();
@@ -117,9 +116,7 @@ public class AutomationResourceBundlesEventQueue<@NonNull E> implements Runnable
                 lQueue = queue;
                 shared = true;
             }
-            Iterator<BundleEvent> events = lQueue.iterator();
-            while (events.hasNext()) {
-                BundleEvent event = events.next();
+            for (BundleEvent event : lQueue) {
                 try {
                     processBundleChanged(event);
                     synchronized (this) {

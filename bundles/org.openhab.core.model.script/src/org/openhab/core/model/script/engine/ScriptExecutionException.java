@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,6 +12,8 @@
  */
 package org.openhab.core.model.script.engine;
 
+import java.io.Serial;
+
 /**
  * Exception that is thrown on errors during script execution.
  *
@@ -19,6 +21,7 @@ package org.openhab.core.model.script.engine;
  */
 public class ScriptExecutionException extends ScriptException {
 
+    @Serial
     private static final long serialVersionUID = 149490362444673405L;
 
     public ScriptExecutionException(final String message, final int line, final int column, final int length) {

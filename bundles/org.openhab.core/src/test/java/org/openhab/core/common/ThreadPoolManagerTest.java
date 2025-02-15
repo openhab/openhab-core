@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,13 +17,20 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.RunnableFuture;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -34,6 +41,169 @@ import org.junit.jupiter.api.Test;
  */
 @NonNullByDefault
 public class ThreadPoolManagerTest {
+
+    @BeforeAll
+    public static void enableSequentialScheduledExecutorService() {
+        ThreadPoolManager manager = new ThreadPoolManager();
+        manager.activate(Map.of("unit-test", "10"));
+    }
+
+    @Test
+    public void testSequentialExecutorServiceAssumptions() {
+        Callable<Boolean> callable = () -> true;
+        Runnable runnable = () -> {
+        };
+
+        ScheduledExecutorService service = Executors.newScheduledThreadPool(1);
+
+        assertTrue(service.submit(runnable) instanceof RunnableFuture);
+        assertTrue(service.submit(callable) instanceof RunnableFuture);
+
+        assertTrue(service.schedule(runnable, 1, TimeUnit.SECONDS) instanceof RunnableFuture);
+        assertTrue(service.schedule(callable, 1, TimeUnit.SECONDS) instanceof RunnableFuture);
+
+        var fixedRate = service.scheduleAtFixedRate(runnable, 1, 1, TimeUnit.SECONDS);
+
+        try {
+            assertTrue(fixedRate instanceof RunnableFuture);
+        } finally {
+            fixedRate.cancel(false);
+        }
+
+        var fixedDelay = service.scheduleWithFixedDelay(runnable, 1, 1, TimeUnit.SECONDS);
+
+        try {
+            assertTrue(fixedDelay instanceof RunnableFuture);
+        } finally {
+            fixedDelay.cancel(false);
+        }
+
+        service.shutdownNow();
+    }
+
+    @Test
+    public void testExecutionIsSequentialInSequentialExecutorService() {
+        ScheduledExecutorService service = ThreadPoolManager.getPoolBasedSequentialScheduledExecutorService("unit-test",
+                "thread-1");
+
+        AtomicBoolean done = new AtomicBoolean(false);
+
+        service.submit(() -> {
+            Thread.sleep(100);
+
+            done.set(true);
+
+            return null;
+        });
+
+        assertTrue(((CompletableFuture<Boolean>) service.submit(() -> done.get())).join());
+    }
+
+    @Test
+    public void testCancelDoesNotStopProcessingInSequentialExecutorService() throws InterruptedException {
+        CountDownLatch latch = new CountDownLatch(1);
+        ScheduledExecutorService service = ThreadPoolManager.getPoolBasedSequentialScheduledExecutorService("unit-test",
+                "thread-2");
+
+        service.submit(() -> {
+            Thread.sleep(100);
+
+            return null;
+        });
+
+        service.submit(() -> null).cancel(false);
+
+        service.submit(() -> {
+            latch.countDown();
+        });
+
+        assertTrue(latch.await(1, TimeUnit.SECONDS));
+    }
+
+    @Test
+    public void testInstancesDoNotBlockEachOtherInSequentialExecutorService() throws InterruptedException {
+        ScheduledExecutorService serviceA = ThreadPoolManager
+                .getPoolBasedSequentialScheduledExecutorService("unit-test", "thread-3");
+        ScheduledExecutorService serviceB = ThreadPoolManager
+                .getPoolBasedSequentialScheduledExecutorService("unit-test", "thread-4");
+
+        serviceA.submit(() -> {
+            Thread.sleep(100);
+
+            return null;
+        });
+
+        CountDownLatch latch = new CountDownLatch(1);
+
+        serviceB.submit(() -> {
+            latch.countDown();
+        });
+
+        assertTrue(latch.await(800, TimeUnit.MILLISECONDS));
+    }
+
+    @Test
+    public void testSchedulingWorksInSequentialExecutorService() throws InterruptedException {
+        ScheduledExecutorService service = ThreadPoolManager.getPoolBasedSequentialScheduledExecutorService("unit-test",
+                "thread-5");
+        CountDownLatch latch = new CountDownLatch(1);
+
+        service.schedule(() -> {
+            latch.countDown();
+        }, 200, TimeUnit.MILLISECONDS);
+
+        assertTrue(latch.await(1, TimeUnit.SECONDS));
+    }
+
+    @Test
+    public void testSchedulingGetsBlockedByRegularTaskInSequentialExecutorService() throws InterruptedException {
+        ScheduledExecutorService service = ThreadPoolManager.getPoolBasedSequentialScheduledExecutorService("unit-test",
+                "thread-6");
+        CountDownLatch latch = new CountDownLatch(1);
+
+        service.submit(() -> {
+            Thread.sleep(200);
+
+            return null;
+        });
+
+        service.schedule(() -> {
+            latch.countDown();
+        }, 20, TimeUnit.MILLISECONDS);
+
+        assertFalse(latch.await(100, TimeUnit.MILLISECONDS));
+    }
+
+    @Test
+    public void testSchedulingDoesSpawnNewThreads() throws InterruptedException {
+        ScheduledExecutorService serviceA = ThreadPoolManager
+                .getPoolBasedSequentialScheduledExecutorService("unit-test", "thread-7");
+        ScheduledExecutorService serviceB = ThreadPoolManager
+                .getPoolBasedSequentialScheduledExecutorService("unit-test", "thread-8");
+
+        for (int j = 0; j < 3; j++) {
+            CountDownLatch block = new CountDownLatch(1);
+            CountDownLatch check = new CountDownLatch(20);
+
+            for (int i = 0; i < 20; i++) {
+                serviceA.schedule(() -> {
+                    try {
+                        block.await();
+                    } catch (InterruptedException e) {
+                    }
+                    check.countDown();
+                }, 1, TimeUnit.MILLISECONDS);
+            }
+
+            Thread.sleep(80);
+
+            serviceB.schedule(() -> {
+                block.countDown();
+            }, 20, TimeUnit.MILLISECONDS);
+
+            assertTrue(check.await(800, TimeUnit.MILLISECONDS));
+        }
+    }
 
     @Test
     public void testGetScheduledPool() {
@@ -125,7 +295,7 @@ public class ThreadPoolManagerTest {
         ExecutorService threadPool = ThreadPoolManager.getPool(poolName);
         CountDownLatch cdl = new CountDownLatch(1);
         threadPool.execute(cdl::countDown);
-        assertTrue(cdl.await(1, TimeUnit.SECONDS), "Checking if thread pool " + poolName + " works");
+        assertTrue(cdl.await(5, TimeUnit.SECONDS), "Checking if thread pool " + poolName + " works");
         assertFalse(threadPool.isShutdown(), "Checking if thread pool is not shut down");
     }
 
@@ -133,7 +303,13 @@ public class ThreadPoolManagerTest {
         ScheduledExecutorService threadPool = ThreadPoolManager.getScheduledPool(poolName);
         CountDownLatch cdl = new CountDownLatch(1);
         threadPool.schedule(cdl::countDown, 100, TimeUnit.MILLISECONDS);
-        assertTrue(cdl.await(1, TimeUnit.SECONDS), "Checking if thread pool " + poolName + " works");
+        assertTrue(cdl.await(5, TimeUnit.SECONDS), "Checking if thread pool " + poolName + " works");
         assertFalse(threadPool.isShutdown(), "Checking if thread pool is not shut down");
+    }
+
+    @AfterAll
+    public static void disableSequentialScheduledExecutorService() {
+        ThreadPoolManager manager = new ThreadPoolManager();
+        manager.activate(Map.of("unit-test", "0"));
     }
 }

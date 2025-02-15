@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -920,8 +920,8 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         // thing manager posts the update to the event bus via EventPublisher
         state.callback.stateUpdated(CHANNEL_UID, new StringType("Value"));
         waitForAssert(() -> assertThat(receivedEvents.size(), is(1)));
-        assertThat(receivedEvents.get(0), is(instanceOf(ItemStateEvent.class)));
-        ItemStateEvent itemUpdateEvent = (ItemStateEvent) receivedEvents.get(0);
+        assertThat(receivedEvents.getFirst(), is(instanceOf(ItemStateEvent.class)));
+        ItemStateEvent itemUpdateEvent = (ItemStateEvent) receivedEvents.getFirst();
         assertThat(itemUpdateEvent.getTopic(), is("openhab/items/name/state"));
         assertThat(itemUpdateEvent.getItemName(), is(itemName));
         assertThat(itemUpdateEvent.getSource(), is(CHANNEL_UID.toString()));
@@ -936,8 +936,8 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         state.callback.stateUpdated(CHANNEL_UID, new StringType("Value"));
         waitForAssert(() -> assertThat(receivedEvents.size(), is(1)));
 
-        assertThat(receivedEvents.get(0), is(instanceOf(ItemStateEvent.class)));
-        itemUpdateEvent = (ItemStateEvent) receivedEvents.get(0);
+        assertThat(receivedEvents.getFirst(), is(instanceOf(ItemStateEvent.class)));
+        itemUpdateEvent = (ItemStateEvent) receivedEvents.getFirst();
         assertThat(itemUpdateEvent.getTopic(), is("openhab/items/name/state"));
         assertThat(itemUpdateEvent.getItemName(), is(itemName));
         assertThat(itemUpdateEvent.getSource(), is(CHANNEL_UID.toString()));
@@ -1279,7 +1279,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         managedThingProvider.add(thing);
 
         waitForAssert(() -> assertThat(receivedEvents.size(), is(2)));
-        assertThat(receivedEvents.get(0), is(equalTo(event)));
+        assertThat(receivedEvents.getFirst(), is(equalTo(event)));
         assertThat(receivedEvents.get(1), is(equalTo(event1)));
         receivedEvents.clear();
 
@@ -1289,7 +1289,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         state.callback.statusUpdated(thing, onlineNone);
 
         waitForAssert(() -> assertThat(receivedEvents.size(), is(1)));
-        assertThat(receivedEvents.get(0), is(equalTo(event)));
+        assertThat(receivedEvents.getFirst(), is(equalTo(event)));
         receivedEvents.clear();
 
         // set status to OFFLINE
@@ -1299,7 +1299,7 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         state.callback.statusUpdated(thing, offlineCommError);
 
         waitForAssert(() -> assertThat(receivedEvents.size(), is(1)));
-        assertThat(receivedEvents.get(0), is(equalTo(event)));
+        assertThat(receivedEvents.getFirst(), is(equalTo(event)));
         receivedEvents.clear();
 
         // set status to UNINITIALIZED
@@ -1361,10 +1361,10 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         managedThingProvider.add(thing);
 
         waitForAssert(() -> assertThat(infoChangedEvents.size(), is(1)));
-        assertThat(infoChangedEvents.get(0).getType(), is(ThingStatusInfoChangedEvent.TYPE));
-        assertThat(infoChangedEvents.get(0).getTopic(), is("openhab/things/binding:type:id/statuschanged"));
-        assertThat(infoChangedEvents.get(0).getStatusInfo().getStatus(), is(ThingStatus.INITIALIZING));
-        assertThat(infoChangedEvents.get(0).getOldStatusInfo().getStatus(), is(ThingStatus.UNINITIALIZED));
+        assertThat(infoChangedEvents.getFirst().getType(), is(ThingStatusInfoChangedEvent.TYPE));
+        assertThat(infoChangedEvents.getFirst().getTopic(), is("openhab/things/binding:type:id/statuschanged"));
+        assertThat(infoChangedEvents.getFirst().getStatusInfo().getStatus(), is(ThingStatus.INITIALIZING));
+        assertThat(infoChangedEvents.getFirst().getOldStatusInfo().getStatus(), is(ThingStatus.UNINITIALIZED));
         infoChangedEvents.clear();
 
         // set status to ONLINE (INITIALIZING -> ONLINE)
@@ -1372,10 +1372,10 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         state.callback.statusUpdated(thing, onlineNone);
 
         waitForAssert(() -> assertThat(infoChangedEvents.size(), is(1)));
-        assertThat(infoChangedEvents.get(0).getType(), is(ThingStatusInfoChangedEvent.TYPE));
-        assertThat(infoChangedEvents.get(0).getTopic(), is("openhab/things/binding:type:id/statuschanged"));
-        assertThat(infoChangedEvents.get(0).getStatusInfo().getStatus(), is(ThingStatus.ONLINE));
-        assertThat(infoChangedEvents.get(0).getOldStatusInfo().getStatus(), is(ThingStatus.INITIALIZING));
+        assertThat(infoChangedEvents.getFirst().getType(), is(ThingStatusInfoChangedEvent.TYPE));
+        assertThat(infoChangedEvents.getFirst().getTopic(), is("openhab/things/binding:type:id/statuschanged"));
+        assertThat(infoChangedEvents.getFirst().getStatusInfo().getStatus(), is(ThingStatus.ONLINE));
+        assertThat(infoChangedEvents.getFirst().getOldStatusInfo().getStatus(), is(ThingStatus.INITIALIZING));
         infoChangedEvents.clear();
 
         // set status to ONLINE again
@@ -1458,11 +1458,11 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
             assertThat(infoChangedEvents.size(), is(1));
         });
 
-        assertThat(infoEvents.get(0).getType(), is(ThingStatusInfoEvent.TYPE));
-        assertThat(infoEvents.get(0).getTopic(), is("openhab/things/binding:type:id/status"));
-        assertThat(infoEvents.get(0).getStatusInfo().getStatus(), is(ThingStatus.UNINITIALIZED));
-        assertThat(infoEvents.get(0).getStatusInfo().getStatusDetail(), is(ThingStatusDetail.NONE));
-        assertThat(infoEvents.get(0).getStatusInfo().getDescription(), is(nullValue()));
+        assertThat(infoEvents.getFirst().getType(), is(ThingStatusInfoEvent.TYPE));
+        assertThat(infoEvents.getFirst().getTopic(), is("openhab/things/binding:type:id/status"));
+        assertThat(infoEvents.getFirst().getStatusInfo().getStatus(), is(ThingStatus.UNINITIALIZED));
+        assertThat(infoEvents.getFirst().getStatusInfo().getStatusDetail(), is(ThingStatusDetail.NONE));
+        assertThat(infoEvents.getFirst().getStatusInfo().getDescription(), is(nullValue()));
 
         assertThat(infoEvents.get(1).getType(), is(ThingStatusInfoEvent.TYPE));
         assertThat(infoEvents.get(1).getTopic(), is("openhab/things/binding:type:id/status"));
@@ -1470,14 +1470,14 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
         assertThat(infoEvents.get(1).getStatusInfo().getStatusDetail(), is(ThingStatusDetail.NONE));
         assertThat(infoEvents.get(1).getStatusInfo().getDescription(), is(nullValue()));
 
-        assertThat(infoChangedEvents.get(0).getType(), is(ThingStatusInfoChangedEvent.TYPE));
-        assertThat(infoChangedEvents.get(0).getTopic(), is("openhab/things/binding:type:id/statuschanged"));
-        assertThat(infoChangedEvents.get(0).getStatusInfo().getStatus(), is(ThingStatus.INITIALIZING));
-        assertThat(infoChangedEvents.get(0).getStatusInfo().getStatusDetail(), is(ThingStatusDetail.NONE));
-        assertThat(infoChangedEvents.get(0).getStatusInfo().getDescription(), is(nullValue()));
-        assertThat(infoChangedEvents.get(0).getOldStatusInfo().getStatus(), is(ThingStatus.UNINITIALIZED));
-        assertThat(infoChangedEvents.get(0).getOldStatusInfo().getStatusDetail(), is(ThingStatusDetail.NONE));
-        assertThat(infoChangedEvents.get(0).getOldStatusInfo().getDescription(), is(nullValue()));
+        assertThat(infoChangedEvents.getFirst().getType(), is(ThingStatusInfoChangedEvent.TYPE));
+        assertThat(infoChangedEvents.getFirst().getTopic(), is("openhab/things/binding:type:id/statuschanged"));
+        assertThat(infoChangedEvents.getFirst().getStatusInfo().getStatus(), is(ThingStatus.INITIALIZING));
+        assertThat(infoChangedEvents.getFirst().getStatusInfo().getStatusDetail(), is(ThingStatusDetail.NONE));
+        assertThat(infoChangedEvents.getFirst().getStatusInfo().getDescription(), is(nullValue()));
+        assertThat(infoChangedEvents.getFirst().getOldStatusInfo().getStatus(), is(ThingStatus.UNINITIALIZED));
+        assertThat(infoChangedEvents.getFirst().getOldStatusInfo().getStatusDetail(), is(ThingStatusDetail.NONE));
+        assertThat(infoChangedEvents.getFirst().getOldStatusInfo().getDescription(), is(nullValue()));
 
         infoEvents.clear();
         infoChangedEvents.clear();
@@ -1499,20 +1499,20 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
             assertThat(infoChangedEvents.size(), is(1));
         });
 
-        assertThat(infoEvents.get(0).getType(), is(ThingStatusInfoEvent.TYPE));
-        assertThat(infoEvents.get(0).getTopic(), is("openhab/things/binding:type:id/status"));
-        assertThat(infoEvents.get(0).getStatusInfo().getStatus(), is(ThingStatus.ONLINE));
-        assertThat(infoEvents.get(0).getStatusInfo().getStatusDetail(), is(ThingStatusDetail.NONE));
-        assertThat(infoEvents.get(0).getStatusInfo().getDescription(), is("Thing is online."));
+        assertThat(infoEvents.getFirst().getType(), is(ThingStatusInfoEvent.TYPE));
+        assertThat(infoEvents.getFirst().getTopic(), is("openhab/things/binding:type:id/status"));
+        assertThat(infoEvents.getFirst().getStatusInfo().getStatus(), is(ThingStatus.ONLINE));
+        assertThat(infoEvents.getFirst().getStatusInfo().getStatusDetail(), is(ThingStatusDetail.NONE));
+        assertThat(infoEvents.getFirst().getStatusInfo().getDescription(), is("Thing is online."));
 
-        assertThat(infoChangedEvents.get(0).getType(), is(ThingStatusInfoChangedEvent.TYPE));
-        assertThat(infoChangedEvents.get(0).getTopic(), is("openhab/things/binding:type:id/statuschanged"));
-        assertThat(infoChangedEvents.get(0).getStatusInfo().getStatus(), is(ThingStatus.ONLINE));
-        assertThat(infoChangedEvents.get(0).getStatusInfo().getStatusDetail(), is(ThingStatusDetail.NONE));
-        assertThat(infoChangedEvents.get(0).getStatusInfo().getDescription(), is("Thing is online."));
-        assertThat(infoChangedEvents.get(0).getOldStatusInfo().getStatus(), is(ThingStatus.INITIALIZING));
-        assertThat(infoChangedEvents.get(0).getOldStatusInfo().getStatusDetail(), is(ThingStatusDetail.NONE));
-        assertThat(infoChangedEvents.get(0).getOldStatusInfo().getDescription(), is(nullValue()));
+        assertThat(infoChangedEvents.getFirst().getType(), is(ThingStatusInfoChangedEvent.TYPE));
+        assertThat(infoChangedEvents.getFirst().getTopic(), is("openhab/things/binding:type:id/statuschanged"));
+        assertThat(infoChangedEvents.getFirst().getStatusInfo().getStatus(), is(ThingStatus.ONLINE));
+        assertThat(infoChangedEvents.getFirst().getStatusInfo().getStatusDetail(), is(ThingStatusDetail.NONE));
+        assertThat(infoChangedEvents.getFirst().getStatusInfo().getDescription(), is("Thing is online."));
+        assertThat(infoChangedEvents.getFirst().getOldStatusInfo().getStatus(), is(ThingStatus.INITIALIZING));
+        assertThat(infoChangedEvents.getFirst().getOldStatusInfo().getStatusDetail(), is(ThingStatusDetail.NONE));
+        assertThat(infoChangedEvents.getFirst().getOldStatusInfo().getDescription(), is(nullValue()));
 
         infoEvents.clear();
         infoChangedEvents.clear();
@@ -1530,20 +1530,20 @@ public class ThingManagerOSGiTest extends JavaOSGiTest {
             assertThat(infoChangedEvents.size(), is(1));
         });
 
-        assertThat(infoEvents.get(0).getType(), is(ThingStatusInfoEvent.TYPE));
-        assertThat(infoEvents.get(0).getTopic(), is("openhab/things/binding:type:id/status"));
-        assertThat(infoEvents.get(0).getStatusInfo().getStatus(), is(ThingStatus.OFFLINE));
-        assertThat(infoEvents.get(0).getStatusInfo().getStatusDetail(), is(ThingStatusDetail.NONE));
-        assertThat(infoEvents.get(0).getStatusInfo().getDescription(), is("Thing ist offline."));
+        assertThat(infoEvents.getFirst().getType(), is(ThingStatusInfoEvent.TYPE));
+        assertThat(infoEvents.getFirst().getTopic(), is("openhab/things/binding:type:id/status"));
+        assertThat(infoEvents.getFirst().getStatusInfo().getStatus(), is(ThingStatus.OFFLINE));
+        assertThat(infoEvents.getFirst().getStatusInfo().getStatusDetail(), is(ThingStatusDetail.NONE));
+        assertThat(infoEvents.getFirst().getStatusInfo().getDescription(), is("Thing ist offline."));
 
-        assertThat(infoChangedEvents.get(0).getType(), is(ThingStatusInfoChangedEvent.TYPE));
-        assertThat(infoChangedEvents.get(0).getTopic(), is("openhab/things/binding:type:id/statuschanged"));
-        assertThat(infoChangedEvents.get(0).getStatusInfo().getStatus(), is(ThingStatus.OFFLINE));
-        assertThat(infoChangedEvents.get(0).getStatusInfo().getStatusDetail(), is(ThingStatusDetail.NONE));
-        assertThat(infoChangedEvents.get(0).getStatusInfo().getDescription(), is("Thing ist offline."));
-        assertThat(infoChangedEvents.get(0).getOldStatusInfo().getStatus(), is(ThingStatus.ONLINE));
-        assertThat(infoChangedEvents.get(0).getOldStatusInfo().getStatusDetail(), is(ThingStatusDetail.NONE));
-        assertThat(infoChangedEvents.get(0).getOldStatusInfo().getDescription(), is("Thing ist online."));
+        assertThat(infoChangedEvents.getFirst().getType(), is(ThingStatusInfoChangedEvent.TYPE));
+        assertThat(infoChangedEvents.getFirst().getTopic(), is("openhab/things/binding:type:id/statuschanged"));
+        assertThat(infoChangedEvents.getFirst().getStatusInfo().getStatus(), is(ThingStatus.OFFLINE));
+        assertThat(infoChangedEvents.getFirst().getStatusInfo().getStatusDetail(), is(ThingStatusDetail.NONE));
+        assertThat(infoChangedEvents.getFirst().getStatusInfo().getDescription(), is("Thing ist offline."));
+        assertThat(infoChangedEvents.getFirst().getOldStatusInfo().getStatus(), is(ThingStatus.ONLINE));
+        assertThat(infoChangedEvents.getFirst().getOldStatusInfo().getStatusDetail(), is(ThingStatusDetail.NONE));
+        assertThat(infoChangedEvents.getFirst().getOldStatusInfo().getDescription(), is("Thing ist online."));
 
         new DefaultLocaleSetter(configurationAdmin).setDefaultLocale(defaultLocale);
         waitForAssert(() -> assertThat(localeProvider.getLocale(), is(defaultLocale)));

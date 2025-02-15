@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,7 +13,6 @@
 package org.openhab.core.config.dispatch.internal;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -190,7 +189,7 @@ public class ConfigDispatcher {
     private void processOrphanExclusivePIDs() {
         for (String orphanPID : exclusivePIDMap.getOrphanPIDs()) {
             try {
-                Configuration configuration = null;
+                Configuration configuration;
                 if (orphanPID.contains(OpenHAB.SERVICE_CONTEXT_MARKER)) {
                     configuration = getConfigurationWithContext(orphanPID);
                 } else {
@@ -276,7 +275,7 @@ public class ConfigDispatcher {
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    private void internalProcessConfigFile(File configFile) throws IOException, FileNotFoundException {
+    private void internalProcessConfigFile(File configFile) throws IOException {
         if (configFile.isDirectory() || !configFile.getName().endsWith(".cfg")) {
             logger.debug("Ignoring file '{}'", configFile.getName());
             return;
@@ -295,7 +294,7 @@ public class ConfigDispatcher {
 
         // configuration file contains a PID Marker
         List<String> lines = Files.readAllLines(configFile.toPath(), StandardCharsets.UTF_8);
-        String exclusivePID = !lines.isEmpty() ? getPIDFromLine(lines.get(0)) : null;
+        String exclusivePID = !lines.isEmpty() ? getPIDFromLine(lines.getFirst()) : null;
         if (exclusivePID != null) {
             if (exclusivePIDMap.contains(exclusivePID)) {
                 logger.warn(

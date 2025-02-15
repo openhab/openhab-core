@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,6 +12,8 @@
  */
 package org.openhab.core.config.core.internal.normalization;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,12 +23,13 @@ import org.slf4j.LoggerFactory;
  * @author Simon Kaufmann - Initial contribution
  * @author Thomas Höfer - renamed normalizer interface and added javadoc
  */
+@NonNullByDefault
 abstract class AbstractNormalizer implements Normalizer {
 
     protected final Logger logger = LoggerFactory.getLogger(AbstractNormalizer.class);
 
     @Override
-    public final Object normalize(Object value) {
+    public final @Nullable Object normalize(@Nullable Object value) {
         if (value == null) {
             return null;
         }

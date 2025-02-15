@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -127,7 +127,7 @@ public class LRUMediaCacheEntry<V> {
      *
      * @return
      */
-    protected Long getTotalSize() {
+    protected long getTotalSize() {
         if (completed) { // we already know the total size of the sound
             return currentSize;
         } else {
@@ -323,7 +323,9 @@ public class LRUMediaCacheEntry<V> {
             return 0;
         }
         try {
-            return Math.max(0, Long.valueOf(fileChannelLocal.size() - offset).intValue());
+            long nBytes = Math.min(Integer.MAX_VALUE, Math.max(0, fileChannelLocal.size() - offset));
+            // nBytes is for sure in integer range, safe to cast
+            return (int) nBytes;
         } catch (IOException e) {
             logger.debug("Cannot get file length for cache file {}", key);
             return 0;

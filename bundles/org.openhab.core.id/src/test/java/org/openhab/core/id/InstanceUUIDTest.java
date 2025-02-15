@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,7 +17,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
@@ -41,7 +40,7 @@ public class InstanceUUIDTest {
     public void readFromPersistedFile() throws IOException {
         // we first need to remove the cached value
         InstanceUUID.uuid = null;
-        Path path = Paths.get(OpenHAB.getUserDataFolder(), InstanceUUID.UUID_FILE_NAME);
+        Path path = Path.of(OpenHAB.getUserDataFolder(), InstanceUUID.UUID_FILE_NAME);
         Files.createDirectories(path.getParent());
         Files.write(path, "123".getBytes());
         String uuid = InstanceUUID.get();
@@ -52,7 +51,7 @@ public class InstanceUUIDTest {
     public void ignoreEmptyFile() throws IOException {
         // we first need to remove the cached value
         InstanceUUID.uuid = null;
-        Path path = Paths.get(OpenHAB.getUserDataFolder(), InstanceUUID.UUID_FILE_NAME);
+        Path path = Path.of(OpenHAB.getUserDataFolder(), InstanceUUID.UUID_FILE_NAME);
         Files.createDirectories(path.getParent());
         Files.write(path, "".getBytes());
         String uuid = InstanceUUID.get();

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -99,7 +99,7 @@ public class I18nProviderImplTest {
     public void assertThatConfigurationWasSet() {
         i18nProviderImpl.modified((Map<String, Object>) initialConfig);
 
-        PointType location = i18nProviderImpl.getLocation();
+        PointType location = Objects.requireNonNull(i18nProviderImpl.getLocation());
         Locale setLocale = i18nProviderImpl.getLocale();
 
         assertThat(location.toString(), is(LOCATION_ZERO));
@@ -129,7 +129,7 @@ public class I18nProviderImplTest {
         conf.put(LOCATION, LOCATION_DARMSTADT);
         i18nProviderImpl.modified(conf);
 
-        PointType location = i18nProviderImpl.getLocation();
+        PointType location = Objects.requireNonNull(i18nProviderImpl.getLocation());
         Locale setLocale = i18nProviderImpl.getLocale();
 
         assertThat(location.toString(), is(LOCATION_DARMSTADT));
@@ -138,7 +138,7 @@ public class I18nProviderImplTest {
 
     @Test
     public void assertThatActivateSetsLocaleAndLocation() {
-        PointType location = i18nProviderImpl.getLocation();
+        PointType location = Objects.requireNonNull(i18nProviderImpl.getLocation());
         Locale setLocale = i18nProviderImpl.getLocale();
 
         assertThat(location.toString(), is(LOCATION_ZERO));
@@ -162,7 +162,7 @@ public class I18nProviderImplTest {
     public void assertThatConfigurationChangeWorks() {
         i18nProviderImpl.modified(buildRUConfig());
 
-        PointType location = i18nProviderImpl.getLocation();
+        PointType location = Objects.requireNonNull(i18nProviderImpl.getLocation());
         Locale setLocale = i18nProviderImpl.getLocale();
 
         assertThat(location.toString(), is(LOCATION_HAMBURG));

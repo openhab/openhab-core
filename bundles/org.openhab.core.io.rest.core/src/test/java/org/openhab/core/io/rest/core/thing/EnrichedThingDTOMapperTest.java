@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -94,9 +94,9 @@ public class EnrichedThingDTOMapperTest {
 
     private void assertChannels(EnrichedThingDTO enrichedThingDTO) {
         assertThat(enrichedThingDTO.channels, hasSize(2));
-        assertThat(enrichedThingDTO.channels.get(0), is(instanceOf(EnrichedChannelDTO.class)));
+        assertThat(enrichedThingDTO.channels.getFirst(), is(instanceOf(EnrichedChannelDTO.class)));
 
-        EnrichedChannelDTO channel1 = enrichedThingDTO.channels.get(0);
+        EnrichedChannelDTO channel1 = enrichedThingDTO.channels.getFirst();
         assertThat(channel1.linkedItems, hasSize(2));
     }
 

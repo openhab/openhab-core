@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,7 +14,6 @@ package org.openhab.core.automation.internal;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -109,17 +108,15 @@ public class ConnectionValidator {
         List<Input> inputs = type.getInputs(); // get inputs of the condition according to module type definition
 
         // gets connected inputs from the condition module and put them into map
-        Set<Connection> cons = getConnections(action.getInputs());
+        Set<Connection> connections = getConnections(action.getInputs());
         Map<String, Connection> connectionsMap = new HashMap<>();
-        Iterator<Connection> connectionsI = cons.iterator();
-        while (connectionsI.hasNext()) {
-            Connection connection = connectionsI.next();
+        for (Connection connection : connections) {
             String inputName = connection.getInputName();
             connectionsMap.put(inputName, connection);
         }
 
         // checks is there unconnected required inputs
-        if (inputs != null && !inputs.isEmpty()) {
+        if (!inputs.isEmpty()) {
             for (Input input : inputs) {
                 String name = input.getName();
                 Connection connection = connectionsMap.get(name);
@@ -185,17 +182,15 @@ public class ConnectionValidator {
         List<Input> inputs = type.getInputs(); // get inputs of the condition according to module type definition
 
         // gets connected inputs from the condition module and put them into map
-        Set<Connection> cons = getConnections(condition.getInputs());
+        Set<Connection> connections = getConnections(condition.getInputs());
         Map<String, Connection> connectionsMap = new HashMap<>();
-        Iterator<Connection> connectionsI = cons.iterator();
-        while (connectionsI.hasNext()) {
-            Connection connection = connectionsI.next();
+        for (Connection connection : connections) {
             String inputName = connection.getInputName();
             connectionsMap.put(inputName, connection);
         }
 
         // checks is there unconnected required inputs
-        if (inputs != null && !inputs.isEmpty()) {
+        if (!inputs.isEmpty()) {
             for (Input input : inputs) {
                 String name = input.getName();
                 Connection connection = connectionsMap.get(name);

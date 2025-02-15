@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,6 +14,8 @@ package org.openhab.core.library.types;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
+import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -24,6 +26,7 @@ import org.openhab.core.items.GroupFunction;
 import org.openhab.core.items.Item;
 import org.openhab.core.types.State;
 import org.openhab.core.types.UnDefType;
+import org.openhab.core.util.Statistics;
 
 /**
  * This interface is only a container for functions that require the core type library
@@ -32,6 +35,7 @@ import org.openhab.core.types.UnDefType;
  * @author Kai Kreuzer - Initial contribution
  * @author Thomas Eichstädt-Engelen - Added "N" functions
  * @author Gaël L'hopital - Added count function
+ * @author Fabian Vollmann - Added XOR function
  */
 @NonNullByDefault
 public interface ArithmeticGroupFunction extends GroupFunction {
@@ -210,6 +214,82 @@ public interface ArithmeticGroupFunction extends GroupFunction {
     }
 
     /**
+     * This does a logical 'xor' operation. If exactly one item is of 'activeState' this
+     * is returned, otherwise the 'passiveState' is returned.
+     *
+     * Through the getStateAs() method, it can be determined, how many
+     * items actually are in the 'activeState'.
+     */
+    class Xor implements GroupFunction {
+
+        protected final State activeState;
+        protected final State passiveState;
+
+        public Xor(@Nullable State activeValue, @Nullable State passiveValue) {
+            if (activeValue == null || passiveValue == null) {
+                throw new IllegalArgumentException("Parameters must not be null!");
+            }
+            this.activeState = activeValue;
+            this.passiveState = passiveValue;
+        }
+
+        @Override
+        public State calculate(@Nullable Set<Item> items) {
+            if (items != null) {
+                boolean foundOne = false;
+
+                for (Item item : items) {
+                    if (activeState.equals(item.getStateAs(activeState.getClass()))) {
+                        if (foundOne) {
+                            return passiveState;
+                        } else {
+                            foundOne = true;
+                        }
+                    }
+                }
+                if (foundOne) {
+                    return activeState;
+                }
+            }
+
+            return passiveState;
+        }
+
+        @Override
+        public @Nullable <T extends State> T getStateAs(@Nullable Set<Item> items, Class<T> stateClass) {
+            State state = calculate(items);
+            if (stateClass.isInstance(state)) {
+                return stateClass.cast(state);
+            } else {
+                if (stateClass == DecimalType.class) {
+                    if (items != null) {
+                        return stateClass.cast(new DecimalType(count(items, activeState)));
+                    } else {
+                        return stateClass.cast(DecimalType.ZERO);
+                    }
+                } else {
+                    return null;
+                }
+            }
+        }
+
+        private int count(Set<Item> items, State state) {
+            int count = 0;
+            for (Item item : items) {
+                if (state.equals(item.getStateAs(state.getClass()))) {
+                    count++;
+                }
+            }
+            return count;
+        }
+
+        @Override
+        public State[] getParameters() {
+            return new State[] { activeState, passiveState };
+        }
+    }
+
+    /**
      * This calculates the numeric average over all item states of decimal type.
      */
     class Avg implements GroupFunction {
@@ -235,6 +315,43 @@ public interface ArithmeticGroupFunction extends GroupFunction {
             } else {
                 return UnDefType.UNDEF;
             }
+        }
+
+        @Override
+        public @Nullable <T extends State> T getStateAs(@Nullable Set<Item> items, Class<T> stateClass) {
+            State state = calculate(items);
+            if (stateClass.isInstance(state)) {
+                return stateClass.cast(state);
+            } else {
+                return null;
+            }
+        }
+
+        @Override
+        public State[] getParameters() {
+            return new State[0];
+        }
+    }
+
+    /**
+     * This calculates the numeric median over all item states of decimal type.
+     */
+    class Median implements GroupFunction {
+
+        public Median() {
+        }
+
+        @Override
+        public State calculate(@Nullable Set<Item> items) {
+            if (items != null) {
+                List<BigDecimal> states = items.stream().map(item -> item.getStateAs(DecimalType.class))
+                        .filter(Objects::nonNull).map(DecimalType::toBigDecimal).toList();
+                BigDecimal median = Statistics.median(states);
+                if (median != null) {
+                    return new DecimalType(median);
+                }
+            }
+            return UnDefType.UNDEF;
         }
 
         @Override

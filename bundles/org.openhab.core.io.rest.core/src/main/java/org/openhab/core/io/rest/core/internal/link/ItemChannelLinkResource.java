@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -38,6 +38,7 @@ import org.openhab.core.io.rest.JSONResponse;
 import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
 import org.openhab.core.io.rest.Stream2JSONInputStream;
+import org.openhab.core.io.rest.core.link.BrokenItemChannelLinkDTO;
 import org.openhab.core.io.rest.core.link.EnrichedItemChannelLinkDTO;
 import org.openhab.core.io.rest.core.link.EnrichedItemChannelLinkDTOMapper;
 import org.openhab.core.items.Item;
@@ -52,6 +53,7 @@ import org.openhab.core.thing.ThingUID;
 import org.openhab.core.thing.link.AbstractLink;
 import org.openhab.core.thing.link.ItemChannelLink;
 import org.openhab.core.thing.link.ItemChannelLinkRegistry;
+import org.openhab.core.thing.link.ItemChannelLinkRegistry.ItemChannelLinkProblem;
 import org.openhab.core.thing.link.ManagedItemChannelLinkProvider;
 import org.openhab.core.thing.link.dto.ItemChannelLinkDTO;
 import org.openhab.core.thing.profiles.ProfileType;
@@ -87,6 +89,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * @author Yannick Schaus - Added filters to getAll
  * @author Markus Rathgeb - Migrated to JAX-RS Whiteboard Specification
  * @author Wouter Born - Migrated to OpenAPI annotations
+ * @author Arne Seime - Added orphan links detection
  */
 @Component(service = { RESTResource.class, ItemChannelLinkResource.class })
 @JaxrsResource
@@ -176,7 +179,7 @@ public class ItemChannelLinkResource implements RESTResource {
                 .toList();
 
         if (!links.isEmpty()) {
-            return JSONResponse.createResponse(Status.OK, links.get(0), null);
+            return JSONResponse.createResponse(Status.OK, links.getFirst(), null);
         }
         return JSONResponse.createErrorResponse(Status.NOT_FOUND,
                 "No link found for item '" + itemName + "' + and channelUID '" + channelUid + "'");
@@ -313,5 +316,19 @@ public class ItemChannelLinkResource implements RESTResource {
             return null;
         }
         return thing.getChannel(channelUID);
+    }
+
+    @GET
+    @Path("/orphans")
+    @Operation(operationId = "getOrphanLinks", summary = "Get orphan links between items and broken/non-existent thing channels", responses = {
+            @ApiResponse(responseCode = "200", description = "List of broken links") })
+    public Response getOrphanLinks() {
+        Map<ItemChannelLink, ItemChannelLinkProblem> orphanLinks = itemChannelLinkRegistry.getOrphanLinks();
+        List<BrokenItemChannelLinkDTO> brokenLinks = orphanLinks.entrySet().stream()
+                .map(e -> new BrokenItemChannelLinkDTO(EnrichedItemChannelLinkDTOMapper.map(e.getKey(),
+                        managedItemChannelLinkProvider.get(e.getKey().getUID()) != null), e.getValue()))
+                .toList();
+
+        return Response.ok(brokenLinks).build();
     }
 }

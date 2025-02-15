@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -18,7 +18,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
@@ -70,8 +69,8 @@ public class GenericItemTest {
         assertEquals(2, events.size());
 
         // first event should be updated event
-        assertInstanceOf(ItemStateUpdatedEvent.class, events.get(0));
-        ItemStateUpdatedEvent updated = (ItemStateUpdatedEvent) events.get(0);
+        assertInstanceOf(ItemStateUpdatedEvent.class, events.getFirst());
+        ItemStateUpdatedEvent updated = (ItemStateUpdatedEvent) events.getFirst();
         assertEquals(item.getName(), updated.getItemName());
         assertEquals("openhab/items/member1/stateupdated", updated.getTopic());
         assertEquals(item.getState(), updated.getItemState());
@@ -98,31 +97,12 @@ public class GenericItemTest {
         assertEquals(1, events.size()); // two before and one additional
 
         // event should be updated event
-        assertInstanceOf(ItemStateUpdatedEvent.class, events.get(0));
-        updated = (ItemStateUpdatedEvent) events.get(0);
+        assertInstanceOf(ItemStateUpdatedEvent.class, events.getFirst());
+        updated = (ItemStateUpdatedEvent) events.getFirst();
         assertEquals(item.getName(), updated.getItemName());
         assertEquals("openhab/items/member1/stateupdated", updated.getTopic());
         assertEquals(item.getState(), updated.getItemState());
         assertEquals(ItemStateUpdatedEvent.TYPE, updated.getType());
-    }
-
-    @Test
-    public void testAddGroupNameWithNull() {
-        TestItem item = new TestItem("member1");
-        assertThrows(IllegalArgumentException.class, () -> item.addGroupName(toNull()));
-    }
-
-    @Test
-    public void testAddGroupNamesWithNull() {
-        TestItem item = new TestItem("member1");
-        assertThrows(IllegalArgumentException.class,
-                () -> item.addGroupNames(Arrays.asList("group-a", toNull(), "group-b")));
-    }
-
-    @Test
-    public void testRemoveGroupNameWithNull() {
-        TestItem item = new TestItem("member1");
-        assertThrows(IllegalArgumentException.class, () -> item.removeGroupName(toNull()));
     }
 
     @Test

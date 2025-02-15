@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -42,7 +42,7 @@ public class ScriptEngineFactoryHelper {
     public static Map.@Nullable Entry<String, String> getParameterOption(ScriptEngineFactory engineFactory) {
         List<String> scriptTypes = engineFactory.getScriptTypes();
         if (!scriptTypes.isEmpty()) {
-            ScriptEngine scriptEngine = engineFactory.createScriptEngine(scriptTypes.get(0));
+            ScriptEngine scriptEngine = engineFactory.createScriptEngine(scriptTypes.getFirst());
             if (scriptEngine != null) {
                 Map.Entry<String, String> parameterOption = Map.entry(getPreferredMimeType(engineFactory),
                         getLanguageName(scriptEngine.getFactory()));
@@ -66,7 +66,7 @@ public class ScriptEngineFactoryHelper {
         }
         List<String> mimeTypes = new ArrayList<>(scriptTypes);
         mimeTypes.removeIf(mimeType -> !mimeType.contains("application") || "application/python".equals(mimeType));
-        return mimeTypes.isEmpty() ? scriptTypes.get(0) : mimeTypes.get(0);
+        return mimeTypes.isEmpty() ? scriptTypes.getFirst() : mimeTypes.getFirst();
     }
 
     public static String getLanguageName(javax.script.ScriptEngineFactory factory) {

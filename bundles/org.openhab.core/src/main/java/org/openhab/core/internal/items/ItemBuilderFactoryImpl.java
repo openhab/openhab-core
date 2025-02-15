@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -20,7 +20,6 @@ import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemBuilder;
 import org.openhab.core.items.ItemBuilderFactory;
 import org.openhab.core.items.ItemFactory;
-import org.openhab.core.library.CoreItemFactory;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -28,8 +27,8 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 
 /**
- * Provides an {@link ItemBuilder} with all available {@link ItemFactory}s set. The {@link CoreItemFactory} will always
- * be present.
+ * Provides an {@link ItemBuilder} with all available {@link ItemFactory}s set.
+ * The {@link org.openhab.core.library.CoreItemFactory} will always be present.
  *
  * @author Henning Treu - Initial contribution
  */

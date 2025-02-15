@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,8 +15,7 @@ package org.openhab.core.automation.integration.test;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -148,8 +147,7 @@ public class RuleSimulationTest extends JavaOSGiTest {
         List<RuleExecution> executions = ruleEngine.simulateRuleExecutions(from, until).toList();
 
         // Every rule fires twice a week. We simulate for two weeks so we expect 12 executions
-        // TODO: must be 12, but Ephemeris Condition is not yet evaluated in test, because dayset is not configured.
-        assertEquals(8, executions.size());
+        assertEquals(12, executions.size());
 
         Iterator<RuleExecution> it = executions.iterator();
 
@@ -159,16 +157,16 @@ public class RuleSimulationTest extends JavaOSGiTest {
         checkExecution(it.next(), cronRuleWithTimeOfDayCondition, 6, 10, 30);
         checkExecution(it.next(), timeOfDayTriggerWithDayOfWeekCondition, 6, 16, 00);
         checkExecution(it.next(), cronRuleWithTimeOfDayCondition, 8, 10, 30);
-        // checkExecution(it.next(), timeOfDayTriggerWithEphemerisCondition, 9, 10, 00);
-        // checkExecution(it.next(), timeOfDayTriggerWithEphemerisCondition, 10, 10, 00);
+        checkExecution(it.next(), timeOfDayTriggerWithEphemerisCondition, 9, 10, 00);
+        checkExecution(it.next(), timeOfDayTriggerWithEphemerisCondition, 10, 10, 00);
 
         // Second week
         checkExecution(it.next(), timeOfDayTriggerWithDayOfWeekCondition, 11, 16, 00);
         checkExecution(it.next(), cronRuleWithTimeOfDayCondition, 13, 10, 30);
         checkExecution(it.next(), timeOfDayTriggerWithDayOfWeekCondition, 13, 16, 00);
         checkExecution(it.next(), cronRuleWithTimeOfDayCondition, 15, 10, 30);
-        // checkExecution(it.next(), timeOfDayTriggerWithEphemerisCondition, 16, 10, 00);
-        // checkExecution(it.next(), timeOfDayTriggerWithEphemerisCondition, 17, 10, 00);
+        checkExecution(it.next(), timeOfDayTriggerWithEphemerisCondition, 16, 10, 00);
+        checkExecution(it.next(), timeOfDayTriggerWithEphemerisCondition, 17, 10, 00);
         assertFalse(it.hasNext());
     }
 

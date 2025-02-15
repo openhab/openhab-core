@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -84,26 +84,26 @@ class AddonInfoListReaderTest {
         assertNotNull(addons);
         List<AddonInfo> addonsInfos = addons.getAddons();
         assertEquals(1, addonsInfos.size());
-        AddonInfo addon = addonsInfos.get(0);
+        AddonInfo addon = addonsInfos.getFirst();
         assertNotNull(addon);
         List<AddonDiscoveryMethod> discoveryMethods = addon.getDiscoveryMethods();
         assertNotNull(discoveryMethods);
         assertEquals(2, discoveryMethods.size());
 
-        AddonDiscoveryMethod method = discoveryMethods.get(0);
+        AddonDiscoveryMethod method = discoveryMethods.getFirst();
         assertNotNull(method);
         assertEquals("mdns", method.getServiceType());
         List<AddonParameter> parameters = method.getParameters();
         assertNotNull(parameters);
         assertEquals(1, parameters.size());
-        AddonParameter parameter = parameters.get(0);
+        AddonParameter parameter = parameters.getFirst();
         assertNotNull(parameter);
         assertEquals("mdnsServiceType", parameter.getName());
         assertEquals("_printer._tcp.local.", parameter.getValue());
         List<AddonMatchProperty> matchProperties = method.getMatchProperties();
         assertNotNull(matchProperties);
         assertEquals(2, matchProperties.size());
-        AddonMatchProperty property = matchProperties.get(0);
+        AddonMatchProperty property = matchProperties.getFirst();
         assertNotNull(property);
         assertEquals("rp", property.getName());
         assertEquals(".*", property.getRegex());
@@ -118,7 +118,7 @@ class AddonInfoListReaderTest {
         matchProperties = method.getMatchProperties();
         assertNotNull(matchProperties);
         assertEquals(1, matchProperties.size());
-        property = matchProperties.get(0);
+        property = matchProperties.getFirst();
         assertNotNull(property);
         assertEquals("modelName", property.getName());
         assertEquals("Philips hue bridge", property.getRegex());

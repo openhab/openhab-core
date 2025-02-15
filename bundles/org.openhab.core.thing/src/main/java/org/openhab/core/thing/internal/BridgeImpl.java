@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 /**
  *
  * @author Denis Nobel - Initial contribution
- * @author Christoph Weitkamp - Added method `getThing(ThingUID)`
+ * @author Christoph Weitkamp - Added method {@code getThing(ThingUID)}
  */
 @NonNullByDefault
 public class BridgeImpl extends ThingImpl implements Bridge {
@@ -88,5 +88,10 @@ public class BridgeImpl extends ThingImpl implements Bridge {
             logger.warn("Handler of bridge '{}' must implement BridgeHandler interface.", getUID());
         }
         return bridgeHandler;
+    }
+
+    @Override
+    public String toString() {
+        return super.toString().replace("Bridge=False", "Bridge=True");
     }
 }

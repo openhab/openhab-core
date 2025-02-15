@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,8 +17,6 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.thing.Bridge;
-import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
 
@@ -57,8 +55,8 @@ public interface DiscoveryResult {
     /**
      * Returns the unique {@code Thing} type ID of this result object.
      * <p>
-     * A {@code Thing} type ID could be a product number which identifies the same type of {@link Thing}s. It's usually
-     * <i>not</i> a serial number.
+     * A {@code Thing} type ID could be a product number which identifies the same type of
+     * {@link org.openhab.core.thing.Thing}s. It's usually <i>not</i> a serial number.
      *
      * @return the unique Thing type
      */
@@ -115,7 +113,7 @@ public interface DiscoveryResult {
     String getLabel();
 
     /**
-     * Returns the unique {@link Bridge} ID of this result object.
+     * Returns the unique {@link org.openhab.core.thing.Bridge} ID of this result object.
      *
      * @return the unique Bridge ID
      */

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -33,6 +33,7 @@ import org.openhab.core.audio.AudioFormat;
 import org.openhab.core.audio.AudioSink;
 import org.openhab.core.audio.AudioSinkAsync;
 import org.openhab.core.audio.AudioStream;
+import org.openhab.core.audio.PipedAudioStream;
 import org.openhab.core.audio.URLAudioStream;
 import org.openhab.core.audio.UnsupportedAudioFormatException;
 import org.openhab.core.audio.UnsupportedAudioStreamException;
@@ -51,13 +52,14 @@ import org.slf4j.LoggerFactory;
  *
  * @author Kai Kreuzer - Initial contribution and API
  * @author Christoph Weitkamp - Added getSupportedStreams() and UnsupportedAudioStreamException
+ * @author Miguel Álvarez Díez - Added piped audio stream support
  *
  */
 @NonNullByDefault
 @Component(service = AudioSink.class, immediate = true)
 public class JavaSoundAudioSink extends AudioSinkAsync {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(JavaSoundAudioSink.class);
+    private final Logger logger = LoggerFactory.getLogger(JavaSoundAudioSink.class);
 
     private boolean isMac = false;
     private @Nullable PercentType macVolumeValue = null;
@@ -65,7 +67,8 @@ public class JavaSoundAudioSink extends AudioSinkAsync {
 
     private NamedThreadFactory threadFactory = new NamedThreadFactory("audio");
 
-    private static final Set<AudioFormat> SUPPORTED_AUDIO_FORMATS = Set.of(AudioFormat.MP3, AudioFormat.WAV);
+    private static final Set<AudioFormat> SUPPORTED_AUDIO_FORMATS = Set.of(AudioFormat.MP3, AudioFormat.WAV,
+            AudioFormat.PCM_SIGNED);
 
     // we accept any stream
     private static final Set<Class<? extends AudioStream>> SUPPORTED_AUDIO_STREAMS = Set.of(AudioStream.class);
@@ -81,21 +84,31 @@ public class JavaSoundAudioSink extends AudioSinkAsync {
     @Override
     public synchronized void processAsynchronously(final @Nullable AudioStream audioStream)
             throws UnsupportedAudioFormatException, UnsupportedAudioStreamException {
-        if (audioStream != null && !AudioFormat.CODEC_MP3.equals(audioStream.getFormat().getCodec())) {
+        if (audioStream instanceof PipedAudioStream pipedAudioStream
+                && AudioFormat.PCM_SIGNED.isCompatible(pipedAudioStream.getFormat())) {
+            pipedAudioStream.onClose(() -> playbackFinished(pipedAudioStream));
+            AudioPlayer audioPlayer = new AudioPlayer(pipedAudioStream);
+            audioPlayer.start();
+            try {
+                audioPlayer.join();
+            } catch (InterruptedException e) {
+                logger.debug("Audio stream has been interrupted.");
+            }
+        } else if (audioStream != null && !AudioFormat.CODEC_MP3.equals(audioStream.getFormat().getCodec())) {
             AudioPlayer audioPlayer = new AudioPlayer(audioStream);
             audioPlayer.start();
             try {
                 audioPlayer.join();
                 playbackFinished(audioStream);
             } catch (InterruptedException e) {
-                LOGGER.error("Playing audio has been interrupted.");
+                logger.error("Playing audio has been interrupted.");
             }
         } else {
             if (audioStream == null || audioStream instanceof URLAudioStream) {
                 // we are dealing with an infinite stream here
-                if (streamPlayer != null) {
+                if (streamPlayer instanceof Player player) {
                     // if we are already playing a stream, stop it first
-                    streamPlayer.close();
+                    player.close();
                     streamPlayer = null;
                 }
                 if (audioStream == null) {
@@ -106,7 +119,7 @@ public class JavaSoundAudioSink extends AudioSinkAsync {
                         // we start a new continuous stream and store its handle
                         playInThread(audioStream, true);
                     } catch (JavaLayerException e) {
-                        LOGGER.error("An exception occurred while playing url audio stream : '{}'", e.getMessage());
+                        logger.error("An exception occurred while playing url audio stream : '{}'", e.getMessage());
                     }
                     return;
                 }
@@ -115,7 +128,7 @@ public class JavaSoundAudioSink extends AudioSinkAsync {
                 try {
                     playInThread(audioStream, false);
                 } catch (JavaLayerException e) {
-                    LOGGER.error("An exception occurred while playing audio : '{}'", e.getMessage());
+                    logger.error("An exception occurred while playing audio : '{}'", e.getMessage());
                 }
             }
         }
@@ -131,7 +144,7 @@ public class JavaSoundAudioSink extends AudioSinkAsync {
             try {
                 streamPlayerFinal.play();
             } catch (Exception e) {
-                LOGGER.error("An exception occurred while playing audio : '{}'", e.getMessage());
+                logger.error("An exception occurred while playing audio : '{}'", e.getMessage());
             } finally {
                 streamPlayerFinal.close();
                 playbackFinished(audioStream);
@@ -140,9 +153,9 @@ public class JavaSoundAudioSink extends AudioSinkAsync {
     }
 
     protected synchronized void deactivate() {
-        if (streamPlayer != null) {
+        if (streamPlayer instanceof Player player) {
             // stop playing streams on shutdown
-            streamPlayer.close();
+            player.close();
             streamPlayer = null;
         }
     }
@@ -179,7 +192,7 @@ public class JavaSoundAudioSink extends AudioSinkAsync {
             if (volumes[0] != null) {
                 return new PercentType(Math.round(volumes[0] * 100f));
             } else {
-                LOGGER.warn("Cannot determine master volume level - assuming 100%");
+                logger.warn("Cannot determine master volume level - assuming 100%");
                 return PercentType.HUNDRED;
             }
         } else {
@@ -188,7 +201,7 @@ public class JavaSoundAudioSink extends AudioSinkAsync {
             if (cachedVolume == null) {
                 Process p = Runtime.getRuntime()
                         .exec(new String[] { "osascript", "-e", "output volume of (get volume settings)" });
-                String value = null;
+                String value;
                 try (Scanner scanner = new Scanner(p.getInputStream(), StandardCharsets.UTF_8.name())) {
                     value = scanner.useDelimiter("\\A").next().strip();
                 }
@@ -196,7 +209,7 @@ public class JavaSoundAudioSink extends AudioSinkAsync {
                     cachedVolume = new PercentType(value);
                     macVolumeValue = cachedVolume;
                 } catch (NumberFormatException e) {
-                    LOGGER.warn("Cannot determine master volume level, received response '{}' - assuming 100%", value);
+                    logger.warn("Cannot determine master volume level, received response '{}' - assuming 100%", value);
                     return PercentType.HUNDRED;
                 }
             }
@@ -236,7 +249,7 @@ public class JavaSoundAudioSink extends AudioSinkAsync {
                     }
                     port.close();
                 } catch (LineUnavailableException e) {
-                    LOGGER.error("Cannot access master volume control", e);
+                    logger.error("Cannot access master volume control", e);
                 }
             }
         }

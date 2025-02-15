@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -16,10 +16,10 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.BinaryOperator;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -28,8 +28,6 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The {@link AddonInfoRegistry} provides access to {@link AddonInfo} objects.
@@ -41,8 +39,6 @@ import org.slf4j.LoggerFactory;
 @Component(immediate = true, service = AddonInfoRegistry.class)
 @NonNullByDefault
 public class AddonInfoRegistry {
-
-    private final Logger logger = LoggerFactory.getLogger(AddonInfoRegistry.class);
 
     private final Collection<AddonInfoProvider> addonInfoProviders = new CopyOnWriteArrayList<>();
 
@@ -79,9 +75,7 @@ public class AddonInfoRegistry {
      */
     public @Nullable AddonInfo getAddonInfo(String uid, @Nullable Locale locale) {
         return addonInfoProviders.stream().map(p -> p.getAddonInfo(uid, locale)).filter(Objects::nonNull)
-                .collect(Collectors.groupingBy(a -> a == null ? "" : a.getUID(),
-                        Collectors.collectingAndThen(Collectors.reducing(mergeAddonInfos), Optional::get)))
-                .get(uid);
+                .collect(Collectors.toMap(a -> a.getUID(), Function.identity(), mergeAddonInfos)).get(uid);
     }
 
     /**
@@ -101,15 +95,8 @@ public class AddonInfoRegistry {
             return a;
         }
         AddonInfo.Builder builder = AddonInfo.builder(a);
-        if (a.isMasterAddonInfo()) {
-            builder.withName(a.getName());
-            builder.withDescription(a.getDescription());
-        } else {
-            builder.withName(b.getName());
+        if (a.getDescription().isBlank()) {
             builder.withDescription(b.getDescription());
-        }
-        if (!(a.isMasterAddonInfo() || b.isMasterAddonInfo())) {
-            builder.isMasterAddonInfo(false);
         }
         if (a.getConnection() == null && b.getConnection() != null) {
             builder.withConnection(b.getConnection());

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,6 +13,7 @@
 package org.openhab.core.automation.module.script.profile;
 
 import java.util.List;
+import java.util.Optional;
 
 import javax.script.ScriptException;
 
@@ -22,11 +23,12 @@ import org.openhab.core.config.core.ConfigParser;
 import org.openhab.core.thing.profiles.ProfileCallback;
 import org.openhab.core.thing.profiles.ProfileContext;
 import org.openhab.core.thing.profiles.ProfileTypeUID;
-import org.openhab.core.thing.profiles.StateProfile;
+import org.openhab.core.thing.profiles.TimeSeriesProfile;
 import org.openhab.core.transform.TransformationException;
 import org.openhab.core.transform.TransformationService;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
+import org.openhab.core.types.TimeSeries;
 import org.openhab.core.types.Type;
 import org.openhab.core.types.TypeParser;
 import org.openhab.core.types.UnDefType;
@@ -39,10 +41,12 @@ import org.slf4j.LoggerFactory;
  * @author Jan N. Klug - Initial contribution
  */
 @NonNullByDefault
-public class ScriptProfile implements StateProfile {
+public class ScriptProfile implements TimeSeriesProfile {
 
     public static final String CONFIG_TO_ITEM_SCRIPT = "toItemScript";
     public static final String CONFIG_TO_HANDLER_SCRIPT = "toHandlerScript";
+    public static final String CONFIG_COMMAND_FROM_ITEM_SCRIPT = "commandFromItemScript";
+    public static final String CONFIG_STATE_FROM_ITEM_SCRIPT = "stateFromItemScript";
 
     private final Logger logger = LoggerFactory.getLogger(ScriptProfile.class);
 
@@ -54,7 +58,8 @@ public class ScriptProfile implements StateProfile {
     private final List<Class<? extends Command>> handlerAcceptedCommandTypes;
 
     private final String toItemScript;
-    private final String toHandlerScript;
+    private final String commandFromItemScript;
+    private final String stateFromItemScript;
     private final ProfileTypeUID profileTypeUID;
 
     private final boolean isConfigured;
@@ -71,12 +76,24 @@ public class ScriptProfile implements StateProfile {
 
         this.toItemScript = ConfigParser.valueAsOrElse(profileContext.getConfiguration().get(CONFIG_TO_ITEM_SCRIPT),
                 String.class, "");
-        this.toHandlerScript = ConfigParser
+        String toHandlerScript = ConfigParser
                 .valueAsOrElse(profileContext.getConfiguration().get(CONFIG_TO_HANDLER_SCRIPT), String.class, "");
+        String localCommandFromItemScript = ConfigParser.valueAsOrElse(
+                profileContext.getConfiguration().get(CONFIG_COMMAND_FROM_ITEM_SCRIPT), String.class, "");
+        this.commandFromItemScript = localCommandFromItemScript.isBlank() ? toHandlerScript
+                : localCommandFromItemScript;
+        this.stateFromItemScript = ConfigParser
+                .valueAsOrElse(profileContext.getConfiguration().get(CONFIG_STATE_FROM_ITEM_SCRIPT), String.class, "");
 
-        if (toItemScript.isBlank() && toHandlerScript.isBlank()) {
+        if (!toHandlerScript.isBlank() && localCommandFromItemScript.isBlank()) {
+            logger.warn(
+                    "'toHandlerScript' has been deprecated! Please use 'commandFromItemScript' instead in link '{}'.",
+                    callback.getItemChannelLink());
+        }
+
+        if (toItemScript.isBlank() && commandFromItemScript.isBlank() && stateFromItemScript.isBlank()) {
             logger.error(
-                    "Neither 'toItemScript' nor 'toHandlerScript' defined in link '{}'. Profile will discard all states and commands.",
+                    "Neither 'toItemScript', 'commandFromItemScript' nor 'stateFromItemScript' defined in link '{}'. Profile will discard all states and commands.",
                     callback.getItemChannelLink());
             isConfigured = false;
             return;
@@ -92,18 +109,27 @@ public class ScriptProfile implements StateProfile {
 
     @Override
     public void onStateUpdateFromItem(State state) {
+        if (isConfigured) {
+            fromItem(stateFromItemScript, state);
+        }
     }
 
     @Override
     public void onCommandFromItem(Command command) {
         if (isConfigured) {
-            String returnValue = executeScript(toHandlerScript, command);
-            if (returnValue != null) {
-                // try to parse the value
-                Command newCommand = TypeParser.parseCommand(handlerAcceptedCommandTypes, returnValue);
-                if (newCommand != null) {
-                    callback.handleCommand(newCommand);
-                }
+            fromItem(commandFromItemScript, command);
+        }
+    }
+
+    private void fromItem(String script, Type type) {
+        String returnValue = executeScript(script, type);
+        if (returnValue != null) {
+            // try to parse the value
+            Command newCommand = TypeParser.parseCommand(handlerAcceptedCommandTypes, returnValue);
+            if (newCommand != null) {
+                callback.handleCommand(newCommand);
+            } else {
+                logger.debug("The given type {} could not be transformed to a command", type);
             }
         }
     }
@@ -124,19 +150,33 @@ public class ScriptProfile implements StateProfile {
     @Override
     public void onStateUpdateFromHandler(State state) {
         if (isConfigured) {
-            String returnValue = executeScript(toItemScript, state);
-            // special handling for UnDefType, it's not available in the TypeParser
-            if ("UNDEF".equals(returnValue)) {
-                callback.sendUpdate(UnDefType.UNDEF);
-            } else if ("NULL".equals(returnValue)) {
-                callback.sendUpdate(UnDefType.NULL);
-            } else if (returnValue != null) {
-                State newState = TypeParser.parseState(acceptedDataTypes, returnValue);
-                if (newState != null) {
-                    callback.sendUpdate(newState);
-                }
+            transformState(state).ifPresent(callback::sendUpdate);
+        }
+    }
+
+    @Override
+    public void onTimeSeriesFromHandler(TimeSeries timeSeries) {
+        if (isConfigured) {
+            TimeSeries transformedTimeSeries = new TimeSeries(timeSeries.getPolicy());
+            timeSeries.getStates().forEach(entry -> {
+                transformState(entry.state()).ifPresent(transformedState -> {
+                    transformedTimeSeries.add(entry.timestamp(), transformedState);
+                });
+            });
+            if (transformedTimeSeries.size() > 0) {
+                callback.sendTimeSeries(transformedTimeSeries);
             }
         }
+    }
+
+    private Optional<State> transformState(State state) {
+        return Optional.ofNullable(executeScript(toItemScript, state)).map(output -> {
+            return switch (output) {
+                case "UNDEF" -> UnDefType.UNDEF;
+                case "NULL" -> UnDefType.NULL;
+                default -> TypeParser.parseState(acceptedDataTypes, output);
+            };
+        });
     }
 
     private @Nullable String executeScript(String script, Type input) {

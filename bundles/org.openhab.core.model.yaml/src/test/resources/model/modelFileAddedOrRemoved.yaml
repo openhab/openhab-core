@@ -1,0 +1,28 @@
+# A YAML test file with different types
+# The structure is valid but also contains invalid elements
+
+version: 1
+
+# known first type
+firstType:
+  # a valid element with uid and description
+  - uid: First1
+    description: Description1
+
+  # a valid element with uid only
+  - uid: First2
+
+  # an invalid element (missing uid)
+  - description: Description3
+
+# known second type
+secondType:
+  # a valid element with id and label
+  - id: Second1
+    label: Label1
+
+# unknown third type
+thirdType:
+  - foo: Bar
+
+nonArrayElement: Test

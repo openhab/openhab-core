@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -186,7 +186,7 @@ public class ManagedItemProvider extends AbstractManagedProvider<Item, String, P
                 String itemName = entry.getKey();
                 PersistedItem persistedItem = entry.getValue();
                 Item item = itemFactory.createItem(persistedItem.itemType, itemName);
-                if (item != null && item instanceof GenericItem genericItem) {
+                if (item instanceof GenericItem genericItem) {
                     iterator.remove();
                     configureItem(persistedItem, genericItem);
                     notifyListenersAboutAddedElement(item);
@@ -217,7 +217,7 @@ public class ManagedItemProvider extends AbstractManagedProvider<Item, String, P
 
     @Override
     protected @Nullable Item toElement(String itemName, PersistedItem persistedItem) {
-        Item item = null;
+        Item item;
 
         if (GroupItem.TYPE.equals(persistedItem.itemType)) {
             String baseItemType = persistedItem.baseItemType;
@@ -236,7 +236,7 @@ public class ManagedItemProvider extends AbstractManagedProvider<Item, String, P
             item = createItem(persistedItem.itemType, itemName);
         }
 
-        if (item != null && item instanceof GenericItem genericItem) {
+        if (item instanceof GenericItem genericItem) {
             configureItem(persistedItem, genericItem);
         }
 
@@ -252,8 +252,8 @@ public class ManagedItemProvider extends AbstractManagedProvider<Item, String, P
     private GroupFunction getGroupFunction(PersistedItem persistedItem, @Nullable Item baseItem) {
         GroupFunctionDTO functionDTO = new GroupFunctionDTO();
         functionDTO.name = persistedItem.functionName;
-        if (persistedItem.functionParams != null) {
-            functionDTO.params = persistedItem.functionParams.toArray(new String[persistedItem.functionParams.size()]);
+        if (persistedItem.functionParams instanceof List<?> list) {
+            functionDTO.params = list.toArray(new String[list.size()]);
         }
         return ItemDTOMapper.mapFunction(baseItem, functionDTO);
     }

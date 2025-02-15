@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -258,7 +258,7 @@ public class SchedulerImplTest extends JavaTest {
         assertEquals(0, temporalAdjuster.getCount(), "Scheduler should have run 0 time");
 
         assertEquals(1, listAppender.list.size());
-        ILoggingEvent loggingEvent = listAppender.list.get(0);
+        ILoggingEvent loggingEvent = listAppender.list.getFirst();
         assertEquals(Level.WARN, loggingEvent.getLevel());
         assertEquals("Scheduled job 'myScheduledJob' failed and stopped", loggingEvent.getFormattedMessage());
     }

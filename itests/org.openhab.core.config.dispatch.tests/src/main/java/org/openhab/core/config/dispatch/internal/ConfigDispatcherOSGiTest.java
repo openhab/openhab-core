@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -21,7 +21,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
@@ -71,8 +70,8 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
     @BeforeEach
     public void setUp() throws IOException, InvalidSyntaxException {
         configBaseDirectory = tmpBaseFolder.getAbsolutePath();
-        final Path source = Paths.get(CONFIGURATION_BASE_DIR);
-        Files.walkFileTree(source, new CopyDirectoryRecursive(source, Paths.get(configBaseDirectory)));
+        final Path source = Path.of(CONFIGURATION_BASE_DIR);
+        Files.walkFileTree(source, new CopyDirectoryRecursive(source, Path.of(configBaseDirectory)));
 
         configAdmin = getService(ConfigurationAdmin.class);
         assertThat(configAdmin, is(notNullValue()));
@@ -926,15 +925,15 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
     }
 
     private @Nullable Configuration getConfigurationWithContext(String pidWithContext) {
-        String pid = null;
-        String configContext = null;
+        String pid;
+        String configContext;
         if (pidWithContext.contains(OpenHAB.SERVICE_CONTEXT_MARKER)) {
             pid = pidWithContext.split(OpenHAB.SERVICE_CONTEXT_MARKER)[0];
             configContext = pidWithContext.split(OpenHAB.SERVICE_CONTEXT_MARKER)[1];
         } else {
             throw new IllegalArgumentException("PID does not have a context");
         }
-        Configuration[] configs = null;
+        Configuration[] configs;
         try {
             configs = configAdmin.listConfigurations(
                     "(&(service.factoryPid=" + pid + ")(" + OpenHAB.SERVICE_CONTEXT + "=" + configContext + "))");

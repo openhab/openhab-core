@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -108,8 +108,10 @@ public class CurrencyService {
         Unit<Currency> baseCurrency = currencyProvider.getBaseCurrency();
         ((CurrencyUnit) BASE_CURRENCY).setSymbol(baseCurrency.getSymbol());
         ((CurrencyUnit) BASE_CURRENCY).setName(baseCurrency.getName());
-        unitFormatter.label(BASE_CURRENCY,
-                Objects.requireNonNullElse(baseCurrency.getSymbol(), baseCurrency.getName()));
+        unitFormatter.label(BASE_CURRENCY, baseCurrency.getName());
+        if (baseCurrency.getSymbol() != null) {
+            unitFormatter.alias(BASE_CURRENCY, baseCurrency.getSymbol());
+        }
 
         currencyProvider.getAdditionalCurrencies().forEach(CurrencyUnits::addUnit);
 

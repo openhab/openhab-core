@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,6 +14,7 @@ package org.openhab.core.common;
 
 import java.util.function.Consumer;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
@@ -24,7 +25,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * @param <T>
  */
 @NonNullByDefault
-public interface SafeCallerBuilder<T> {
+public interface SafeCallerBuilder<@NonNull T> {
 
     /**
      * Creates a dynamic proxy with the according properties which guards the caller from hanging implementations in the

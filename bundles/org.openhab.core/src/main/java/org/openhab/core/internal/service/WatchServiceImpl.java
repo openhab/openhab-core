@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -242,8 +242,8 @@ public class WatchServiceImpl implements WatchService, DirectoryChangeListener {
             return;
         }
 
-        DirectoryChangeEvent firstElement = events.get(0);
-        DirectoryChangeEvent lastElement = events.get(events.size() - 1);
+        DirectoryChangeEvent firstElement = events.getFirst();
+        DirectoryChangeEvent lastElement = events.getLast();
 
         // determine final event
         if (lastElement.eventType() == DirectoryChangeEvent.EventType.DELETE) {

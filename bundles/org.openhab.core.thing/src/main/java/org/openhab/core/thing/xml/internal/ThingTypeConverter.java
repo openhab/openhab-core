@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -80,10 +80,9 @@ public class ThingTypeConverter extends AbstractDescriptionTypeConverter<ThingTy
     @SuppressWarnings("unchecked")
     protected List<ChannelXmlResult>[] getChannelTypeReferenceObjects(NodeIterator nodeIterator)
             throws ConversionException {
-        List<ChannelXmlResult> channelTypeReferences = null;
         List<ChannelXmlResult> channelGroupTypeReferences = null;
-
-        channelTypeReferences = (List<ChannelXmlResult>) nodeIterator.nextList("channels", false);
+        List<ChannelXmlResult> channelTypeReferences = (List<ChannelXmlResult>) nodeIterator.nextList("channels",
+                false);
         if (channelTypeReferences == null) {
             channelGroupTypeReferences = (List<ChannelXmlResult>) nodeIterator.nextList("channel-groups", false);
         }

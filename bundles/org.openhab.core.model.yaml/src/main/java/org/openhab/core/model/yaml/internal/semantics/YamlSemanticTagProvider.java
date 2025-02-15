@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -20,13 +20,10 @@ import java.util.TreeSet;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.common.registry.AbstractProvider;
-import org.openhab.core.model.yaml.AbstractYamlFile;
-import org.openhab.core.model.yaml.YamlElement;
 import org.openhab.core.model.yaml.YamlModelListener;
 import org.openhab.core.semantics.SemanticTag;
 import org.openhab.core.semantics.SemanticTagImpl;
 import org.openhab.core.semantics.SemanticTagProvider;
-import org.openhab.core.semantics.SemanticTagRegistry;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -37,7 +34,7 @@ import org.slf4j.LoggerFactory;
  * {@link YamlSemanticTagProvider} is an OSGi service, that allows to define semantic tags
  * in YAML configuration files in folder conf/tags.
  * Files can be added, updated or removed at runtime.
- * These semantic tags are automatically exposed to the {@link SemanticTagRegistry}.
+ * These semantic tags are automatically exposed to the {@link org.openhab.core.semantics.SemanticTagRegistry}.
  *
  * @author Laurent Garnier - Initial contribution
  */
@@ -45,7 +42,7 @@ import org.slf4j.LoggerFactory;
 @Component(immediate = true, service = { SemanticTagProvider.class, YamlSemanticTagProvider.class,
         YamlModelListener.class })
 public class YamlSemanticTagProvider extends AbstractProvider<SemanticTag>
-        implements SemanticTagProvider, YamlModelListener<YamlSemanticTag> {
+        implements SemanticTagProvider, YamlModelListener<YamlSemanticTagDTO> {
 
     private final Logger logger = LoggerFactory.getLogger(YamlSemanticTagProvider.class);
 
@@ -66,23 +63,13 @@ public class YamlSemanticTagProvider extends AbstractProvider<SemanticTag>
     }
 
     @Override
-    public String getRootName() {
-        return "tags";
+    public Class<YamlSemanticTagDTO> getElementClass() {
+        return YamlSemanticTagDTO.class;
     }
 
     @Override
-    public Class<? extends AbstractYamlFile> getFileClass() {
-        return YamlSemanticTags.class;
-    }
-
-    @Override
-    public Class<YamlSemanticTag> getElementClass() {
-        return YamlSemanticTag.class;
-    }
-
-    @Override
-    public void addedModel(String modelName, Collection<? extends YamlElement> elements) {
-        List<SemanticTag> added = elements.stream().map(e -> mapSemanticTag((YamlSemanticTag) e))
+    public void addedModel(String modelName, Collection<YamlSemanticTagDTO> elements) {
+        List<SemanticTag> added = elements.stream().map(this::mapSemanticTag)
                 .sorted(Comparator.comparing(SemanticTag::getUID)).toList();
         tags.addAll(added);
         added.forEach(t -> {
@@ -92,8 +79,8 @@ public class YamlSemanticTagProvider extends AbstractProvider<SemanticTag>
     }
 
     @Override
-    public void updatedModel(String modelName, Collection<? extends YamlElement> elements) {
-        List<SemanticTag> updated = elements.stream().map(e -> mapSemanticTag((YamlSemanticTag) e)).toList();
+    public void updatedModel(String modelName, Collection<YamlSemanticTagDTO> elements) {
+        List<SemanticTag> updated = elements.stream().map(this::mapSemanticTag).toList();
         updated.forEach(t -> {
             tags.stream().filter(tag -> tag.getUID().equals(t.getUID())).findFirst().ifPresentOrElse(oldTag -> {
                 tags.remove(oldTag);
@@ -105,8 +92,8 @@ public class YamlSemanticTagProvider extends AbstractProvider<SemanticTag>
     }
 
     @Override
-    public void removedModel(String modelName, Collection<? extends YamlElement> elements) {
-        List<SemanticTag> removed = elements.stream().map(e -> mapSemanticTag((YamlSemanticTag) e))
+    public void removedModel(String modelName, Collection<YamlSemanticTagDTO> elements) {
+        List<SemanticTag> removed = elements.stream().map(this::mapSemanticTag)
                 .sorted(Comparator.comparing(SemanticTag::getUID).reversed()).toList();
         removed.forEach(t -> {
             tags.stream().filter(tag -> tag.getUID().equals(t.getUID())).findFirst().ifPresentOrElse(oldTag -> {
@@ -117,10 +104,7 @@ public class YamlSemanticTagProvider extends AbstractProvider<SemanticTag>
         });
     }
 
-    private SemanticTag mapSemanticTag(YamlSemanticTag tagDTO) {
-        if (tagDTO.uid == null) {
-            throw new IllegalArgumentException("The argument 'tagDTO.uid' must not be null.");
-        }
+    private SemanticTag mapSemanticTag(YamlSemanticTagDTO tagDTO) {
         return new SemanticTagImpl(tagDTO.uid, tagDTO.label, tagDTO.description, tagDTO.synonyms);
     }
 }

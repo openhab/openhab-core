@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,7 +17,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
-import java.util.Iterator;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -119,9 +118,7 @@ public class CommandlineRuleImporter extends AbstractCommandProvider<Rule> {
             throws ParsingException {
         Set<Rule> providedRules = parser.parse(inputStreamReader);
         if (providedRules != null && !providedRules.isEmpty()) {
-            Iterator<Rule> i = providedRules.iterator();
-            while (i.hasNext()) {
-                Rule rule = i.next();
+            for (Rule rule : providedRules) {
                 if (rule != null) {
                     if (ruleRegistry.get(rule.getUID()) != null) {
                         ruleRegistry.update(rule);

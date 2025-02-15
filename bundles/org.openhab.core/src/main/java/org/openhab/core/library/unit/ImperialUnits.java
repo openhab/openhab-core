@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -25,6 +25,7 @@ import javax.measure.quantity.Volume;
 import javax.measure.spi.SystemOfUnits;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.core.library.dimension.Density;
 import org.openhab.core.library.dimension.VolumetricFlowRate;
 
 import tech.units.indriya.format.SimpleUnitFormat;
@@ -48,6 +49,8 @@ public final class ImperialUnits extends CustomUnits {
 
     public static final Unit<Mass> POUND = addUnit(new TransformedUnit<>("lb", Units.GRAM,
             MultiplyConverter.ofRational(BigInteger.valueOf(45359237), BigInteger.valueOf(100000))));
+    public static final Unit<Mass> GRAIN = addUnit(
+            new TransformedUnit<>("gr", Units.GRAM, MultiplyConverter.of(0.06479891)));
     /** Additionally defined units to be used in openHAB **/
     public static final Unit<Pressure> INCH_OF_MERCURY = addUnit(new TransformedUnit<>("inHg", Units.PASCAL,
             MultiplyConverter.ofRational(BigInteger.valueOf(3386388), BigInteger.valueOf(1000))));
@@ -94,6 +97,8 @@ public final class ImperialUnits extends CustomUnits {
     public static final Unit<VolumetricFlowRate> GALLON_PER_MINUTE = addUnit(
             new ProductUnit<>(GALLON_LIQUID_US.divide(tech.units.indriya.unit.Units.MINUTE)));
 
+    public static final Unit<Density> GRAIN_PER_CUBICFOOT = addUnit(new ProductUnit<>(GRAIN.divide(CUBIC_FOOT)));
+
     /*
      * Add unit symbols for imperial units.
      */
@@ -111,6 +116,7 @@ public final class ImperialUnits extends CustomUnits {
         SimpleUnitFormat.getInstance().label(GALLON_LIQUID_US, GALLON_LIQUID_US.getSymbol());
         SimpleUnitFormat.getInstance().label(GALLON_PER_MINUTE, "gal/min");
         SimpleUnitFormat.getInstance().label(POUND_FORCE_SQUARE_INCH, POUND_FORCE_SQUARE_INCH.getSymbol());
+        SimpleUnitFormat.getInstance().label(GRAIN, GRAIN.getSymbol());
     }
 
     private ImperialUnits() {

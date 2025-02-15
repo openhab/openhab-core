@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,6 +12,7 @@
  */
 package org.openhab.core.automation.internal.ruleengine;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.Module;
@@ -23,7 +24,7 @@ import org.openhab.core.automation.handler.ModuleHandler;
  * @author Markus Rathgeb - Initial contribution
  */
 @NonNullByDefault
-public class WrappedModule<M extends Module, H extends ModuleHandler> {
+public class WrappedModule<@NonNull M extends Module, H extends ModuleHandler> {
 
     private final M module;
     private @Nullable H handler;

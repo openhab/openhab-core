@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -79,13 +79,13 @@ public class RuleEngineTest extends JavaOSGiTest {
     public void testAutoMapRuleConnections() {
         RuleImpl rule = createAutoMapRule();
         // check condition connections
-        Map<String, String> conditionInputs = rule.getConditions().get(0).getInputs();
+        Map<String, String> conditionInputs = rule.getConditions().getFirst().getInputs();
         assertEquals(1, conditionInputs.size(), "Number of user define condition inputs");
         assertEquals("triggerId.triggerOutput", conditionInputs.get("conditionInput"),
                 "Check user define condition connection");
 
         // check action connections
-        Map<String, String> actionInputs = rule.getActions().get(0).getInputs();
+        Map<String, String> actionInputs = rule.getActions().getFirst().getInputs();
         assertEquals(2, actionInputs.size(), "Number of user define action inputs");
         assertEquals("triggerId.triggerOutput", actionInputs.get("actionInput"),
                 "Check user define action connections for input actionInput");
@@ -98,7 +98,7 @@ public class RuleEngineTest extends JavaOSGiTest {
         assertEquals("AutoMapRule", ruleGet.getUID(), "Returned rule with wrong UID");
 
         // check condition connections
-        conditionInputs = ruleGet.getConditions().get(0).getInputs();
+        conditionInputs = ruleGet.getConditions().getFirst().getInputs();
         assertEquals(2, conditionInputs.size(), "Number of user define condition inputs");
         assertEquals("triggerId.triggerOutput", conditionInputs.get("conditionInput"),
                 "Check user define condition connection");
@@ -106,7 +106,7 @@ public class RuleEngineTest extends JavaOSGiTest {
                 "Auto map condition input in2[tagA, tagB] to trigger output out3[tagA, tagB, tagC]");
 
         // check action connections
-        actionInputs = ruleGet.getActions().get(0).getInputs();
+        actionInputs = ruleGet.getActions().getFirst().getInputs();
         assertEquals(4, actionInputs.size(), "Number of user define action inputs");
         assertEquals("triggerId.triggerOutput", actionInputs.get("actionInput"),
                 "Check user define action connections for input actionInput");
@@ -184,12 +184,12 @@ public class RuleEngineTest extends JavaOSGiTest {
 
         assertNotNull(rule4cfgD, "RuleImpl configuration description is null");
         assertEquals(1, rule4cfgD.size(), "Missing config description in rule copy");
-        ConfigDescriptionParameter rule4cfgDP = rule4cfgD.iterator().next();
+        ConfigDescriptionParameter rule4cfgDP = rule4cfgD.getFirst();
         assertEquals("3", rule4cfgDP.getDefault(), "Wrong default value in config description");
         assertEquals("context1", rule4cfgDP.getContext(), "Wrong context value in config description");
         assertNotNull(rule4cfgDP.getOptions(), "Null options in config description");
-        assertEquals("1", rule4cfgDP.getOptions().get(0).getValue(), "Wrong option value in config description");
-        assertEquals("one", rule4cfgDP.getOptions().get(0).getLabel(), "Wrong option label in config description");
+        assertEquals("1", rule4cfgDP.getOptions().getFirst().getValue(), "Wrong option value in config description");
+        assertEquals("one", rule4cfgDP.getOptions().getFirst().getLabel(), "Wrong option label in config description");
     }
 
     /**

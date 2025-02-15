@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -154,11 +155,8 @@ public class RuleSupportScriptExtension implements ScriptExtensionProvider {
             return obj;
         }
 
-        Map<String, Object> objects = objectCache.get(scriptIdentifier);
-        if (objects == null) {
-            objects = new HashMap<>();
-            objectCache.put(scriptIdentifier, objects);
-        }
+        Map<String, Object> objects = Objects
+                .requireNonNull(objectCache.computeIfAbsent(scriptIdentifier, k -> new HashMap<>()));
 
         obj = objects.get(type);
         if (obj != null) {

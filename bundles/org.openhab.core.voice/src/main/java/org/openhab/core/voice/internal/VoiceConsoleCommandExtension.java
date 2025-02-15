@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,17 +14,23 @@ package org.openhab.core.voice.internal;
 
 import static java.util.Comparator.comparing;
 
+import java.io.FileNotFoundException;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.MissingResourceException;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.OpenHAB;
+import org.openhab.core.audio.AudioException;
 import org.openhab.core.audio.AudioManager;
+import org.openhab.core.audio.FileAudioStream;
 import org.openhab.core.i18n.LocaleProvider;
 import org.openhab.core.io.console.Console;
 import org.openhab.core.io.console.extensions.AbstractConsoleCommandExtension;
@@ -52,12 +58,14 @@ import org.osgi.service.component.annotations.Reference;
  * @author Kai Kreuzer - Initial contribution
  * @author Wouter Born - Sort TTS voices
  * @author Laurent Garnier - Added sub-commands startdialog and stopdialog
+ * @author Miguel Álvarez - Add transcribe command
  */
 @Component(service = ConsoleCommandExtension.class)
 @NonNullByDefault
 public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtension {
 
     private static final String SUBCMD_SAY = "say";
+    private static final String SUBCMD_TRANSCRIBE = "transcribe";
     private static final String SUBCMD_INTERPRET = "interpret";
     private static final String SUBCMD_VOICES = "voices";
     private static final String SUBCMD_START_DIALOG = "startdialog";
@@ -90,8 +98,11 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
 
     @Override
     public List<String> getUsages() {
-        return List.of(buildCommandUsage(SUBCMD_SAY + " <text>", "speaks a text"),
-                buildCommandUsage(SUBCMD_INTERPRET + " <command>", "interprets a human language command"),
+        return List.of(buildCommandUsage(SUBCMD_SAY + " <text>", "speaks a text"), buildCommandUsage(
+                SUBCMD_TRANSCRIBE + " [--source <source>]|[--file <file>] [--stt <stt>] [--locale <locale>]",
+                "transcribe audio from default source, optionally specify a different source/file, speech-to-text service or locale"),
+                buildCommandUsage(SUBCMD_INTERPRET + " [--hlis <comma,separated,interpreters>] <command>",
+                        "interprets a human language command"),
                 buildCommandUsage(SUBCMD_VOICES, "lists available voices of the TTS services"),
                 buildCommandUsage(SUBCMD_DIALOGS, "lists the running dialog and their audio/voice services"),
                 buildCommandUsage(SUBCMD_DIALOG_REGS,
@@ -126,6 +137,10 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
                     } else {
                         console.println("Specify text to say (e.g. 'say hello')");
                     }
+                    return;
+                }
+                case SUBCMD_TRANSCRIBE -> {
+                    transcribe(args, console);
                     return;
                 }
                 case SUBCMD_INTERPRET -> {
@@ -266,14 +281,31 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
     }
 
     private void interpret(String[] args, Console console) {
-        StringBuilder sb = new StringBuilder(args[0]);
-        for (int i = 1; i < args.length; i++) {
+        @Nullable
+        String hliIdList = null;
+        String[] arguments;
+        if (args.length > 0 && "--hlis".equals(args[0])) {
+            if (args.length == 1) {
+                console.println("No hli id list provided.");
+                return;
+            }
+            hliIdList = args[1];
+            arguments = Arrays.copyOfRange(args, 2, args.length);
+        } else {
+            arguments = args;
+        }
+        if (arguments.length == 0) {
+            console.println("No command provided.");
+            return;
+        }
+        StringBuilder sb = new StringBuilder(arguments[0]);
+        for (int i = 1; i < arguments.length; i++) {
             sb.append(" ");
-            sb.append(args[i]);
+            sb.append(arguments[i]);
         }
         String msg = sb.toString();
         try {
-            String result = voiceManager.interpret(msg);
+            String result = voiceManager.interpret(msg, hliIdList);
             console.println(result);
         } catch (InterpretationException ie) {
             console.println(Objects.requireNonNullElse(ie.getMessage(),
@@ -303,6 +335,51 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
             msg.append(" ");
         }
         voiceManager.say(msg.toString());
+    }
+
+    private void transcribe(String[] args, Console console) {
+        HashMap<String, String> parameters;
+        try {
+            parameters = parseNamedParameters(args);
+        } catch (IllegalStateException e) {
+            console.println(Objects.requireNonNullElse(e.getMessage(), "An error parsing positional parameters"));
+            return;
+        }
+        @Nullable
+        Locale locale;
+        try {
+            locale = parameters.containsKey("locale")
+                    ? Locale.forLanguageTag(Objects.requireNonNull(parameters.get("locale")))
+                    : null;
+        } catch (MissingResourceException e) {
+            console.println("Error: Locale '" + parameters.get("locale") + "' is not correct.");
+            return;
+        }
+        String text;
+        if (parameters.containsKey("file")) {
+            FileAudioStream fileAudioStream;
+            try {
+                var file = Path.of(OpenHAB.getConfigFolder(), AudioManager.SOUND_DIR, parameters.get("file")).toFile();
+                if (!file.exists()) {
+                    throw new FileNotFoundException();
+                }
+                fileAudioStream = new FileAudioStream(file);
+            } catch (AudioException e) {
+                console.println("Error: Unable to open '" + parameters.get("file") + "' file audio stream.");
+                return;
+            } catch (FileNotFoundException e) {
+                console.println("Error: File '" + parameters.get("file") + "' not found in sound folder.");
+                return;
+            }
+            text = voiceManager.transcribe(fileAudioStream, parameters.get("stt"), locale);
+        } else {
+            text = voiceManager.transcribe(parameters.get("source"), parameters.get("stt"), null);
+        }
+        if (!text.isBlank()) {
+            console.println("Transcription: " + text);
+        } else {
+            console.println("No transcription generated");
+        }
     }
 
     private void listDialogRegistrations(Console console) {
@@ -405,7 +482,7 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
                         .orElse(null);
     }
 
-    private HashMap<String, String> parseDialogParameters(String[] args) {
+    private HashMap<String, String> parseNamedParameters(String[] args) {
         var parameters = new HashMap<String, String>();
         for (int i = 1; i < args.length; i++) {
             var arg = args[i].trim();
@@ -428,7 +505,7 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
         if (args.length < 2) {
             return dialogContextBuilder;
         }
-        var parameters = parseDialogParameters(args);
+        var parameters = parseNamedParameters(args);
         String sourceId = parameters.remove("source");
         if (sourceId != null) {
             var source = audioManager.getSource(sourceId);
@@ -463,7 +540,7 @@ public class VoiceConsoleCommandExtension extends AbstractConsoleCommandExtensio
     }
 
     private DialogRegistration parseDialogRegistration(String[] args) {
-        var parameters = parseDialogParameters(args);
+        var parameters = parseNamedParameters(args);
         @Nullable
         String sourceId = parameters.remove("source");
         if (sourceId == null) {

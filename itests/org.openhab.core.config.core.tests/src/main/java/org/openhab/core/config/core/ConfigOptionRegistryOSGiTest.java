@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -79,9 +79,9 @@ public class ConfigOptionRegistryOSGiTest extends JavaOSGiTest {
         assertThat(configDescriptions, is(not(nullValue())));
         assertThat("Config is found", configDescriptions.getUID(), is(DUMMY_URI));
         assertThat("Config contains parameter", configDescriptions.getParameters(), hasSize(1));
-        assertThat("Config parameter found", configDescriptions.getParameters().get(0).getName(),
+        assertThat("Config parameter found", configDescriptions.getParameters().getFirst().getName(),
                 is(equalTo("Param1")));
-        assertThat("Config parameter contains options", configDescriptions.getParameters().get(0).getOptions(),
+        assertThat("Config parameter contains options", configDescriptions.getParameters().getFirst().getOptions(),
                 hasSize(2));
 
         configDescriptionRegistry.removeConfigOptionProvider(configOptionsProviderMock);

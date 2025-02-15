@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -77,9 +77,7 @@ public class NamedThreadFactory implements ThreadFactory {
         this.daemonize = daemonize;
         this.priority = priority;
         this.namePrefix = "OH-" + id + "-";
-        final SecurityManager securityManager = System.getSecurityManager();
-        this.group = securityManager != null ? securityManager.getThreadGroup()
-                : Thread.currentThread().getThreadGroup();
+        this.group = Thread.currentThread().getThreadGroup();
     }
 
     @Override

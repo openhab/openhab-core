@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -157,6 +157,20 @@ public class StateDescriptionServiceImplTest {
         StateDescription stateDescription = Objects.requireNonNull(item.getStateDescription());
 
         assertThat(stateDescription.getOptions(), is(stateDescriptionFragment2.getOptions()));
+    }
+
+    @Test
+    public void testPatternWhenTwoDescriptionProvidersHigherRankingDoesntProvidePattern() {
+        StateDescriptionFragment stateDescriptionFragment1 = StateDescriptionFragmentBuilder.create().build();
+        registerStateDescriptionFragmentProvider(stateDescriptionFragment1, -1);
+
+        StateDescriptionFragment stateDescriptionFragment2 = StateDescriptionFragmentBuilder.create()
+                .withPattern("pattern").build();
+        registerStateDescriptionFragmentProvider(stateDescriptionFragment2, -2);
+
+        StateDescription stateDescription = Objects.requireNonNull(item.getStateDescription());
+
+        assertThat(stateDescription.getPattern(), is(stateDescriptionFragment2.getPattern()));
     }
 
     @Test

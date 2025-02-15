@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,8 +12,13 @@
  */
 package org.openhab.core.addon.marketplace.internal.community;
 
+import static org.openhab.core.addon.marketplace.MarketplaceConstants.*;
+import static org.openhab.core.addon.marketplace.internal.community.CommunityMarketplaceAddonService.YAML_CONTENT_PROPERTY;
+
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
@@ -46,14 +51,10 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 @Component(immediate = true)
 @NonNullByDefault
 public class CommunityUIWidgetAddonHandler implements MarketplaceAddonHandler {
-    private static final String YAML_DOWNLOAD_URL_PROPERTY = "yaml_download_url";
-    private static final String YAML_CONTENT_PROPERTY = "yaml_content";
-    private static final String UIWIDGETS_CONTENT_TYPE = "application/vnd.openhab.uicomponent;type=widget";
-
     private final Logger logger = LoggerFactory.getLogger(CommunityUIWidgetAddonHandler.class);
-    ObjectMapper yamlMapper;
 
-    private UIComponentRegistry widgetRegistry;
+    private final ObjectMapper yamlMapper;
+    private final UIComponentRegistry widgetRegistry;
 
     @Activate
     public CommunityUIWidgetAddonHandler(final @Reference UIComponentRegistryFactory uiComponentRegistryFactory) {
@@ -86,7 +87,8 @@ public class CommunityUIWidgetAddonHandler implements MarketplaceAddonHandler {
             } else if (yamlContent != null) {
                 addWidgetAsYAML(addon.getUid(), yamlContent);
             } else {
-                throw new IllegalArgumentException("Couldn't find the widget in the add-on entry");
+                throw new IllegalArgumentException(
+                        "Couldn't find the widget in the add-on entry. The starting code fence may not be marked as ```yaml");
             }
         } catch (IOException e) {
             logger.error("Widget from marketplace cannot be downloaded: {}", e.getMessage());
@@ -105,7 +107,12 @@ public class CommunityUIWidgetAddonHandler implements MarketplaceAddonHandler {
     }
 
     private String getWidgetFromURL(String urlString) throws IOException {
-        URL u = new URL(urlString);
+        URL u;
+        try {
+            u = (new URI(urlString)).toURL();
+        } catch (IllegalArgumentException | URISyntaxException e) {
+            throw new IOException(e);
+        }
         try (InputStream in = u.openStream()) {
             return new String(in.readAllBytes(), StandardCharsets.UTF_8);
         }

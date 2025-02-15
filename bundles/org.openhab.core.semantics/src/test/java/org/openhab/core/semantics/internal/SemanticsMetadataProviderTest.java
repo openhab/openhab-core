@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -250,7 +250,7 @@ public class SemanticsMetadataProviderTest extends JavaTest {
         assertDoesNotThrow(() -> semanticsMetadataProvider.added(groupItem1));
 
         assertLogMessage(SemanticsMetadataProvider.class, LogLevel.ERROR,
-                "Recursive group membership found: group1 is both, a direct or indirect parent and a child of group2.");
+                "Recursive group membership found: group1 is a member of group2, but it is also one of its ancestors.");
     }
 
     @Test
@@ -266,7 +266,7 @@ public class SemanticsMetadataProviderTest extends JavaTest {
         assertDoesNotThrow(() -> semanticsMetadataProvider.added(groupItem1));
 
         assertLogMessage(SemanticsMetadataProvider.class, LogLevel.ERROR,
-                "Recursive group membership found: group1 is both, a direct or indirect parent and a child of group3.");
+                "Recursive group membership found: group1 is a member of group3, but it is also one of its ancestors.");
     }
 
     @Test
@@ -278,6 +278,21 @@ public class SemanticsMetadataProviderTest extends JavaTest {
         groupItem1.addMember(groupItem2);
         groupItem1.addMember(numberItem);
         groupItem2.addMember(numberItem);
+
+        semanticsMetadataProvider.added(groupItem1);
+
+        assertNoLogMessage(SemanticsMetadataProvider.class);
+    }
+
+    @Test
+    public void testDuplicateMembershipOfGroupItemsDoesNotTriggerWarning() {
+        GroupItem groupItem1 = new GroupItem("group1");
+        GroupItem groupItem2 = new GroupItem("group2");
+        GroupItem groupItem3 = new GroupItem("group3");
+
+        groupItem1.addMember(groupItem2);
+        groupItem1.addMember(groupItem3);
+        groupItem2.addMember(groupItem3);
 
         semanticsMetadataProvider.added(groupItem1);
 

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -33,6 +33,7 @@ import org.openhab.core.internal.library.unit.CurrencyService;
 import org.openhab.core.library.dimension.Currency;
 import org.openhab.core.library.dimension.EnergyPrice;
 import org.openhab.core.library.types.QuantityType;
+import org.openhab.core.types.util.UnitUtils;
 
 /**
  * The {@link CurrencyUnitTest} contains tests for the currency units
@@ -95,6 +96,16 @@ public class CurrencyUnitTest {
         assertThat(price, is(notNullValue()));
         assertThat(price.getUnit(), is(TestCurrencyProvider.EUR));
         assertThat(price.doubleValue(), closeTo(1.25, 1E-4));
+    }
+
+    @Test
+    public void testEnergyPriceConversion() {
+        QuantityType<EnergyPrice> price = new QuantityType<>("0.25 EUR/kWh");
+        QuantityType<EnergyPrice> convertedPrice = price.toUnit("DKK/kWh");
+
+        assertThat(convertedPrice, is(notNullValue()));
+        assertThat(convertedPrice.getUnit(), is(UnitUtils.parseUnit("DKK/kWh")));
+        assertThat(convertedPrice.doubleValue(), closeTo(1.8625, 1e-4));
     }
 
     private static class TestCurrencyProvider implements CurrencyProvider {

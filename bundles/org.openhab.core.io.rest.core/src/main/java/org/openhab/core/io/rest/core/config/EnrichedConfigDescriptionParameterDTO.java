@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -18,8 +18,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
 import org.openhab.core.config.core.dto.ConfigDescriptionParameterDTO;
 import org.openhab.core.config.core.dto.FilterCriteriaDTO;
@@ -31,16 +29,15 @@ import org.openhab.core.config.core.dto.ParameterOptionDTO;
  *
  * @author Christoph Weitkamp - Initial contribution
  */
-@NonNullByDefault
 public class EnrichedConfigDescriptionParameterDTO extends ConfigDescriptionParameterDTO {
 
     private static final String DEFAULT_LIST_DELIMITER = ",";
 
-    public @Nullable Collection<String> defaultValues;
+    public Collection<String> defaultValues;
 
     public EnrichedConfigDescriptionParameterDTO(String name, Type type, BigDecimal minimum, BigDecimal maximum,
             BigDecimal stepsize, String pattern, Boolean required, Boolean readOnly, Boolean multiple, String context,
-            @Nullable String defaultValue, String label, String description, List<ParameterOptionDTO> options,
+            String defaultValue, String label, String description, List<ParameterOptionDTO> options,
             List<FilterCriteriaDTO> filterCriteria, String groupName, Boolean advanced, Boolean limitToOptions,
             Integer multipleLimit, String unit, String unitLabel, Boolean verify) {
         super(name, type, minimum, maximum, stepsize, pattern, required, readOnly, multiple, context, defaultValue,

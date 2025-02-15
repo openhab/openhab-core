@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -19,9 +19,14 @@ import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.openhab.core.internal.types.StateDescriptionFragmentImpl;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.type.AutoUpdatePolicy;
 import org.openhab.core.thing.type.ChannelDefinition;
@@ -48,14 +53,15 @@ public class AbstractStorageBasedTypeProviderTest {
 
     @Test
     public void testStateChannelTypeProperlyMappedToEntityAndBack() {
-        ChannelTypeUID channelTypeUID = new ChannelTypeUID("TestBinding:testChannelType");
+        ChannelTypeUID channelTypeUID = new ChannelTypeUID("TestBinding:testQuantityChannelType");
 
-        ChannelType expected = ChannelTypeBuilder.state(channelTypeUID, "testLabel", "Switch")
+        ChannelType expected = ChannelTypeBuilder.state(channelTypeUID, "testLabel", "Number:Length")
                 .withDescription("testDescription").withCategory("testCategory")
                 .withConfigDescriptionURI(URI.create("testBinding:testConfig"))
                 .withAutoUpdatePolicy(AutoUpdatePolicy.VETO).isAdvanced(true).withTag("testTag")
                 .withCommandDescription(CommandDescriptionBuilder.create().build())
-                .withStateDescriptionFragment(StateDescriptionFragmentBuilder.create().build()).build();
+                .withStateDescriptionFragment(StateDescriptionFragmentBuilder.create().build()).withUnitHint("km")
+                .build();
         AbstractStorageBasedTypeProvider.ChannelTypeEntity entity = AbstractStorageBasedTypeProvider
                 .mapToEntity(expected);
         ChannelType actual = AbstractStorageBasedTypeProvider.mapFromEntity(entity);
@@ -73,6 +79,7 @@ public class AbstractStorageBasedTypeProviderTest {
         assertThat(actual.getState(), is(expected.getState()));
         assertThat(actual.getItemType(), is(expected.getItemType()));
         assertThat(actual.getTags(), hasItems(expected.getTags().toArray(String[]::new)));
+        assertThat(actual.getUnitHint(), is(expected.getUnitHint()));
     }
 
     @Test
@@ -154,6 +161,37 @@ public class AbstractStorageBasedTypeProviderTest {
                     .orElse(null));
             assertChannelGroupDefinition(actualChannelGroupDefinition, expectedChannelGroupDefinition);
         }
+    }
+
+    @MethodSource
+    @ParameterizedTest
+    public void testMapToEntityIsComplete(Class<?> originalType, Class<?> mappedType, int allowedDelta) {
+        Class<?> clazz = originalType;
+        int originalTypeFieldCount = 0;
+        while (clazz != Object.class) {
+            originalTypeFieldCount += clazz.getDeclaredFields().length;
+            clazz = clazz.getSuperclass();
+        }
+
+        int mappedEntityFieldCount = mappedType.getDeclaredFields().length;
+
+        assertThat(originalType.getName() + " not properly mapped", mappedEntityFieldCount,
+                is(originalTypeFieldCount + allowedDelta));
+    }
+
+    private static Stream<Arguments> testMapToEntityIsComplete() {
+        return Stream.of( //
+                // isBridge is an extra field for storage and not present in ThingType
+                Arguments.of(ThingType.class, AbstractStorageBasedTypeProvider.ThingTypeEntity.class, 1),
+                Arguments.of(ChannelType.class, AbstractStorageBasedTypeProvider.ChannelTypeEntity.class, 0),
+                Arguments.of(ChannelDefinition.class, AbstractStorageBasedTypeProvider.ChannelDefinitionEntity.class,
+                        0),
+                // configDescriptionURI is not available for ChannelGroupType
+                Arguments.of(ChannelGroupType.class, AbstractStorageBasedTypeProvider.ChannelGroupTypeEntity.class, -1),
+                Arguments.of(ChannelGroupDefinition.class,
+                        AbstractStorageBasedTypeProvider.ChannelGroupDefinitionEntity.class, 0),
+                Arguments.of(StateDescriptionFragmentImpl.class,
+                        AbstractStorageBasedTypeProvider.StateDescriptionFragmentEntity.class, 0));
     }
 
     private void assertChannelDefinition(ChannelDefinition actual, ChannelDefinition expected) {

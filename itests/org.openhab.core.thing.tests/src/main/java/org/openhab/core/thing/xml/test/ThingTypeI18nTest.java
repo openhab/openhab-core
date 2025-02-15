@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -85,7 +85,7 @@ public class ThingTypeI18nTest extends JavaOSGiTest {
             assertNotNull(weatherGroupType);
 
             ChannelGroupType channelGroupType = channelGroupTypeRegistry.getChannelGroupType(
-                    weatherGroupType.getChannelGroupDefinitions().get(0).getTypeUID(), Locale.GERMAN);
+                    weatherGroupType.getChannelGroupDefinitions().getFirst().getTypeUID(), Locale.GERMAN);
             assertNotNull(channelGroupType);
 
             assertThat(channelGroupType.getLabel(), is("Wetterinformation mit Gruppe"));
@@ -186,7 +186,7 @@ public class ThingTypeI18nTest extends JavaOSGiTest {
             assertThat(temperatureChannelType.getDescription(),
                     is("Temperatur in Grad Celsius (Metrisch) oder Fahrenheit (Imperial)."));
             assertThat(temperatureChannelType.getState().getPattern(), is("%d Grad Celsius"));
-            assertThat(temperatureChannelType.getState().getOptions().get(0).getLabel(), is("Mein String"));
+            assertThat(temperatureChannelType.getState().getOptions().getFirst().getLabel(), is("Mein String"));
         }
     }
 

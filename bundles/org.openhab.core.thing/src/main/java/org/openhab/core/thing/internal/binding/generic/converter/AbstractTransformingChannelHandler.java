@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -74,9 +74,9 @@ public abstract class AbstractTransformingChannelHandler implements ChannelHandl
 
     @Override
     public void send(Command command) {
-        Consumer<String> sendHttpValue = this.sendValue;
-        if (sendHttpValue != null && channelConfig.mode != ChannelMode.READONLY) {
-            commandTransformations.apply(toString(command)).ifPresent(sendHttpValue);
+        Consumer<String> sendValue = this.sendValue;
+        if (sendValue != null && channelConfig.mode != ChannelMode.READONLY) {
+            commandTransformations.apply(toString(command)).ifPresent(sendValue);
         } else {
             throw new IllegalStateException("Read-only channel");
         }

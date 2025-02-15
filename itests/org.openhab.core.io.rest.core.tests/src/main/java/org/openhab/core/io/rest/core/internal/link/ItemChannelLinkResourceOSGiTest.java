@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -19,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -27,6 +28,7 @@ import java.util.List;
 
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
@@ -148,29 +150,39 @@ public class ItemChannelLinkResourceOSGiTest extends JavaOSGiTest {
     public void shouldIncludeEditableFields() throws IOException, JsonSyntaxException {
         managedItemChannelLinkProvider.add(link1);
         Response response = itemChannelLinkResource.getLink(ITEM_NAME1, CHANNEL_UID1);
-        JsonElement result = JsonParser
-                .parseString(new String(((InputStream) response.getEntity()).readAllBytes(), StandardCharsets.UTF_8));
+        JsonElement result = JsonParser.parseString(toString(response.getEntity()));
         JsonElement expected = JsonParser.parseString("{channelUID:\"" + CHANNEL_UID1
                 + "\", configuration:{}, editable:true, itemName:\"" + ITEM_NAME1 + "\"}");
         assertEquals(expected, result);
 
         response = itemChannelLinkResource.getAll(CHANNEL_UID1, ITEM_NAME1);
-        result = JsonParser
-                .parseString(new String(((InputStream) response.getEntity()).readAllBytes(), StandardCharsets.UTF_8));
+        result = JsonParser.parseString(toString(response.getEntity()));
         expected = JsonParser.parseString("[{channelUID:\"" + CHANNEL_UID1
                 + "\", configuration:{}, editable:true, itemName:\"" + ITEM_NAME1 + "\"}]");
         assertEquals(expected, result);
 
         response = itemChannelLinkResource.getLink(ITEM_NAME2, CHANNEL_UID2);
-        result = JsonParser
-                .parseString(new String(((InputStream) response.getEntity()).readAllBytes(), StandardCharsets.UTF_8));
+        result = JsonParser.parseString(toString(response.getEntity()));
         expected = JsonParser.parseString("{channelUID:\"" + CHANNEL_UID2
                 + "\", configuration:{}, editable:false, itemName:\"" + ITEM_NAME2 + "\", configuration:{}}");
         assertEquals(expected, result);
     }
 
     private List<String> readItemNamesFromResponse(Response response) throws IOException {
-        String jsonResponse = new String(((InputStream) response.getEntity()).readAllBytes(), StandardCharsets.UTF_8);
+        String jsonResponse = toString(response.getEntity());
         return JsonPath.read(jsonResponse, "$..itemName");
+    }
+
+    public String toString(Object entity) throws IOException {
+        byte[] bytes;
+        if (entity instanceof StreamingOutput streaming) {
+            try (ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
+                streaming.write(buffer);
+                bytes = buffer.toByteArray();
+            }
+        } else {
+            bytes = ((InputStream) entity).readAllBytes();
+        }
+        return new String(bytes, StandardCharsets.UTF_8);
     }
 }

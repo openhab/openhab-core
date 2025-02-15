@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,7 +12,6 @@
  */
 package org.openhab.core.thing.internal;
 
-import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -28,7 +27,6 @@ import javax.measure.Unit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.cache.ExpiringCacheMap;
 import org.openhab.core.common.AbstractUID;
 import org.openhab.core.common.SafeCaller;
 import org.openhab.core.common.registry.RegistryChangeListener;
@@ -98,6 +96,9 @@ import org.slf4j.LoggerFactory;
 @Component(service = { EventSubscriber.class, CommunicationManager.class }, immediate = true)
 public class CommunicationManager implements EventSubscriber, RegistryChangeListener<ItemChannelLink> {
 
+    private record CacheKey(String type, Profile profile, Thing thing) {
+    }
+
     private static final Profile NO_OP_PROFILE = new Profile() {
         private final ProfileTypeUID noOpProfileUID = new ProfileTypeUID(ProfileTypeUID.SYSTEM_SCOPE, "noop");
 
@@ -111,9 +112,6 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
             // no-op
         }
     };
-
-    // how long to cache profile safe call instances
-    private static final Duration CACHE_EXPIRATION = Duration.ofMinutes(30);
 
     // the timeout to use for any item event processing
     public static final long THINGHANDLER_EVENT_TIMEOUT = TimeUnit.SECONDS.toMillis(30);
@@ -132,7 +130,7 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
     private final SafeCaller safeCaller;
     private final ThingRegistry thingRegistry;
 
-    private final ExpiringCacheMap<Integer, Profile> profileSafeCallCache = new ExpiringCacheMap<>(CACHE_EXPIRATION);
+    private final ConcurrentHashMap<CacheKey, Profile> profileSafeCallCache = new ConcurrentHashMap<>();
 
     @Activate
     public CommunicationManager(final @Reference AutoUpdateManager autoUpdateManager,
@@ -228,13 +226,13 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
 
     private @Nullable ProfileTypeUID determineProfileTypeUID(ItemChannelLink link, Item item, @Nullable Thing thing) {
         ProfileTypeUID profileTypeUID = getConfiguredProfileTypeUID(link);
-        Channel channel = null;
+        Channel channel;
         if (profileTypeUID == null) {
             if (thing == null) {
                 return null;
             }
 
-            channel = thing.getChannel(link.getLinkedUID().getId());
+            channel = thing.getChannel(link.getLinkedUID());
             if (channel == null) {
                 return null;
             }
@@ -352,10 +350,10 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
     }
 
     private void applyProfileForUpdate(Profile profile, Thing thing, State convertedState) {
-        int key = Objects.hash("UPDATE", profile, thing);
-        Profile p = profileSafeCallCache.putIfAbsentAndGet(key, () -> safeCaller.create(profile, Profile.class) //
+        CacheKey key = new CacheKey("UPDATE", profile, thing);
+        Profile p = profileSafeCallCache.computeIfAbsent(key, (k) -> safeCaller.create(k.profile, Profile.class) //
                 .withAsync() //
-                .withIdentifier(thing) //
+                .withIdentifier(k.thing) //
                 .withTimeout(THINGHANDLER_EVENT_TIMEOUT) //
                 .build());
         if (p != null) {
@@ -366,12 +364,12 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
     }
 
     private void applyProfileForCommand(Profile profile, Thing thing, Command convertedCommand) {
-        if (profile instanceof StateProfile stateProfile) {
-            int key = Objects.hash("COMMAND", profile, thing);
-            Profile p = profileSafeCallCache.putIfAbsentAndGet(key,
-                    () -> safeCaller.create(stateProfile, StateProfile.class) //
+        if (profile instanceof StateProfile) {
+            CacheKey key = new CacheKey("COMMAND", profile, thing);
+            Profile p = profileSafeCallCache.computeIfAbsent(key,
+                    (k) -> safeCaller.create((StateProfile) k.profile, StateProfile.class) //
                             .withAsync() //
-                            .withIdentifier(thing) //
+                            .withIdentifier(k.thing) //
                             .withTimeout(THINGHANDLER_EVENT_TIMEOUT) //
                             .build());
             if (p instanceof StateProfile profileP) {
@@ -399,7 +397,7 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
             ThingUID thingUID = channelUID.getThingUID();
             Thing thing = thingRegistry.get(thingUID);
             if (thing != null) {
-                Channel channel = thing.getChannel(channelUID.getId());
+                Channel channel = thing.getChannel(channelUID);
                 if (channel != null) {
                     if (thing.getHandler() != null) {
                         // fix QuantityType/DecimalType, leave others as-is

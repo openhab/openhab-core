@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -20,9 +20,9 @@ import static org.openhab.core.config.discovery.inbox.InboxPredicates.*;
 
 import java.math.BigDecimal;
 import java.net.URI;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -148,7 +148,7 @@ public class InboxOSGiTest extends JavaOSGiTest {
             put("pnr", 1234455);
             put("snr", 12345);
             put("manufacturer", "huawei");
-            put("manufactured", new Date(12344));
+            put("manufactured", Instant.ofEpochMilli(12344));
         }
     };
 
@@ -160,10 +160,10 @@ public class InboxOSGiTest extends JavaOSGiTest {
             .withConfigDescriptionURI(testURI).build();
     private final ConfigDescription testConfigDescription = ConfigDescriptionBuilder.create(testURI)
             .withParameters(List.of(
-                    ConfigDescriptionParameterBuilder.create(discoveryResultPropertyKeys.get(0), Type.TEXT).build(),
+                    ConfigDescriptionParameterBuilder.create(discoveryResultPropertyKeys.getFirst(), Type.TEXT).build(),
                     ConfigDescriptionParameterBuilder.create(discoveryResultPropertyKeys.get(1), Type.INTEGER).build()))
             .build();
-    private final String[] keysInConfigDescription = new String[] { discoveryResultPropertyKeys.get(0),
+    private final String[] keysInConfigDescription = new String[] { discoveryResultPropertyKeys.getFirst(),
             discoveryResultPropertyKeys.get(1) };
     private final String[] keysNotInConfigDescription = new String[] { discoveryResultPropertyKeys.get(2),
             discoveryResultPropertyKeys.get(3), discoveryResultPropertyKeys.get(4) };
@@ -295,7 +295,7 @@ public class InboxOSGiTest extends JavaOSGiTest {
         allDiscoveryResults = inbox.getAll();
         assertThat(allDiscoveryResults.size(), is(1));
 
-        DiscoveryResult actualDiscoveryResult = allDiscoveryResults.get(0);
+        DiscoveryResult actualDiscoveryResult = allDiscoveryResults.getFirst();
         assertThat(actualDiscoveryResult.getThingUID(), is(thingUID));
         assertThat(actualDiscoveryResult.getThingTypeUID(), is(thingTypeUID));
         assertThat(actualDiscoveryResult.getBindingId(), is("dummyBindingId"));
@@ -338,7 +338,7 @@ public class InboxOSGiTest extends JavaOSGiTest {
         allDiscoveryResults = inbox.getAll();
         assertThat(allDiscoveryResults.size(), is(1));
 
-        DiscoveryResult actualDiscoveryResult = allDiscoveryResults.get(0);
+        DiscoveryResult actualDiscoveryResult = allDiscoveryResults.getFirst();
         assertThat(actualDiscoveryResult.getThingUID(), is(thingUID));
         assertThat(actualDiscoveryResult.getThingTypeUID(), is(thingTypeUID));
         assertThat(actualDiscoveryResult.getBindingId(), is("dummyBindingId"));
@@ -1019,7 +1019,7 @@ public class InboxOSGiTest extends JavaOSGiTest {
     @Test
     public void assertThatRemoveOlderResultsOnlyRemovesResultsFromTheSameDiscoveryService() {
         inbox.thingDiscovered(discoveryService1, testDiscoveryResult);
-        long now = new Date().getTime() + 1;
+        long now = Instant.now().toEpochMilli() + 1;
         assertThat(inbox.getAll().size(), is(1));
 
         // should not remove a result
@@ -1034,7 +1034,7 @@ public class InboxOSGiTest extends JavaOSGiTest {
     @Test
     public void assertThatRemoveOlderResultsRemovesResultsWithoutAsource() {
         inbox.add(testDiscoveryResult);
-        long now = new Date().getTime() + 1;
+        long now = Instant.now().toEpochMilli() + 1;
         assertThat(inbox.getAll().size(), is(1));
 
         // should remove a result

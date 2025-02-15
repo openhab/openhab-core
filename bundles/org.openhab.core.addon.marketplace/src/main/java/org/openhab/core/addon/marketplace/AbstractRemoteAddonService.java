@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,8 +12,9 @@
  */
 package org.openhab.core.addon.marketplace;
 
+import static org.openhab.core.common.ThreadPoolManager.THREAD_POOL_NAME_COMMON;
+
 import java.io.IOException;
-import java.net.URI;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -25,6 +26,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ScheduledExecutorService;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -36,6 +38,7 @@ import org.openhab.core.addon.AddonInfoRegistry;
 import org.openhab.core.addon.AddonService;
 import org.openhab.core.addon.AddonType;
 import org.openhab.core.cache.ExpiringCache;
+import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.config.core.ConfigParser;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventPublisher;
@@ -61,11 +64,23 @@ public abstract class AbstractRemoteAddonService implements AddonService {
     static final String CONFIG_REMOTE_ENABLED = "remote";
     static final String CONFIG_INCLUDE_INCOMPATIBLE = "includeIncompatible";
     static final Comparator<Addon> BY_COMPATIBLE_AND_VERSION = (addon1, addon2) -> {
-        // prefer compatible over incompatible
+        // prefer compatible to incompatible
         int compatible = Boolean.compare(addon2.getCompatible(), addon1.getCompatible());
-        // prefer newer version over older
-        return compatible != 0 ? compatible
-                : new BundleVersion(addon2.getVersion()).compareTo(new BundleVersion(addon1.getVersion()));
+        if (compatible != 0) {
+            return compatible;
+        }
+        try {
+            // Add-on versions often contain a dash instead of a dot as separator for the qualifier (e.g. -SNAPSHOT)
+            // This is not a valid format and everything after the dash needs to be removed.
+            BundleVersion version1 = new BundleVersion(addon1.getVersion().replaceAll("-.*", ".0"));
+            BundleVersion version2 = new BundleVersion(addon2.getVersion().replaceAll("-.*", ".0"));
+
+            // prefer newer version over older
+            return version2.compareTo(version1);
+        } catch (IllegalArgumentException e) {
+            // assume they are equal (for ordering) if we can't compare the versions
+            return 0;
+        }
     };
 
     protected final BundleVersion coreVersion;
@@ -79,9 +94,10 @@ public abstract class AbstractRemoteAddonService implements AddonService {
             this::getRemoteAddons);
     protected final AddonInfoRegistry addonInfoRegistry;
     protected List<Addon> cachedAddons = List.of();
-    protected List<String> installedAddons = List.of();
+    protected List<String> installedAddonIds = List.of();
 
     private final Logger logger = LoggerFactory.getLogger(AbstractRemoteAddonService.class);
+    private final ScheduledExecutorService scheduler = ThreadPoolManager.getScheduledPool(THREAD_POOL_NAME_COMMON);
 
     protected AbstractRemoteAddonService(EventPublisher eventPublisher, ConfigurationAdmin configurationAdmin,
             StorageService storageService, AddonInfoRegistry addonInfoRegistry, String servicePid) {
@@ -113,9 +129,17 @@ public abstract class AbstractRemoteAddonService implements AddonService {
                     getClass());
             return;
         }
+
         List<Addon> addons = new ArrayList<>();
+
+        // retrieve add-ons that should be available from storage and check if they are really installed
+        // this is safe, because the {@link AddonHandler}s only report ready when they installed everything from the
+        // cache
         try {
-            installedAddonStorage.stream().map(this::convertFromStorage).forEach(addons::add);
+            installedAddonStorage.stream().map(this::convertFromStorage).forEach(addon -> {
+                setInstalled(addon);
+                addons.add(addon);
+            });
         } catch (JsonSyntaxException e) {
             List.copyOf(installedAddonStorage.getKeys()).forEach(installedAddonStorage::remove);
             logger.error(
@@ -124,17 +148,22 @@ public abstract class AbstractRemoteAddonService implements AddonService {
             refreshSource();
         }
 
-        // create lookup list to make sure installed addons take precedence
-        List<String> installedAddons = addons.stream().map(Addon::getUid).toList();
+        // remove not installed add-ons from the add-ons list, but remember their UIDs to re-install them
+        List<String> missingAddons = addons.stream().filter(addon -> !addon.isInstalled()).map(Addon::getUid).toList();
+        missingAddons.forEach(installedAddonStorage::remove);
+        addons.removeIf(addon -> missingAddons.contains(addon.getUid()));
 
+        // create lookup list to make sure installed addons take precedence
+        List<String> currentAddonIds = addons.stream().map(Addon::getUid).toList();
+
+        // get the remote addons
         if (remoteEnabled()) {
             List<Addon> remoteAddons = Objects.requireNonNullElse(cachedRemoteAddons.getValue(), List.of());
-            remoteAddons.stream().filter(a -> !installedAddons.contains(a.getUid())).forEach(addons::add);
+            remoteAddons.stream().filter(a -> !currentAddonIds.contains(a.getUid())).forEach(addon -> {
+                setInstalled(addon);
+                addons.add(addon);
+            });
         }
-
-        // check real installation status based on handlers
-        addons.forEach(
-                addon -> addon.setInstalled(addonHandlers.stream().anyMatch(h -> h.isInstalled(addon.getUid()))));
 
         // remove incompatible add-ons if not enabled
         boolean showIncompatible = includeIncompatible();
@@ -150,7 +179,16 @@ public abstract class AbstractRemoteAddonService implements AddonService {
         }
 
         cachedAddons = addons;
-        this.installedAddons = installedAddons;
+        this.installedAddonIds = currentAddonIds;
+
+        if (!missingAddons.isEmpty()) {
+            logger.info("Re-installing missing add-ons from remote repository: {}", missingAddons);
+            scheduler.execute(() -> missingAddons.forEach(this::install));
+        }
+    }
+
+    private void setInstalled(Addon addon) {
+        addon.setInstalled(addonHandlers.stream().anyMatch(h -> h.isInstalled(addon.getUid())));
     }
 
     /**
@@ -189,9 +227,6 @@ public abstract class AbstractRemoteAddonService implements AddonService {
     }
 
     @Override
-    public abstract @Nullable Addon getAddon(String id, @Nullable Locale locale);
-
-    @Override
     public List<AddonType> getTypes(@Nullable Locale locale) {
         return AddonType.DEFAULT_TYPES;
     }
@@ -199,56 +234,60 @@ public abstract class AbstractRemoteAddonService implements AddonService {
     @Override
     public void install(String id) {
         Addon addon = getAddon(id, null);
-        if (addon != null) {
-            for (MarketplaceAddonHandler handler : addonHandlers) {
-                if (handler.supports(addon.getType(), addon.getContentType())) {
-                    if (!handler.isInstalled(addon.getUid())) {
-                        try {
-                            handler.install(addon);
-                            installedAddonStorage.put(id, gson.toJson(addon));
-                            refreshSource();
-                            postInstalledEvent(addon.getUid());
-                        } catch (MarketplaceHandlerException e) {
-                            postFailureEvent(addon.getUid(), e.getMessage());
-                        }
-                    } else {
-                        postFailureEvent(addon.getUid(), "Add-on is already installed.");
+        if (addon == null) {
+            postFailureEvent(id, "Add-on can't be installed because it is not known.");
+            return;
+        }
+        for (MarketplaceAddonHandler handler : addonHandlers) {
+            if (handler.supports(addon.getType(), addon.getContentType())) {
+                if (!handler.isInstalled(addon.getUid())) {
+                    try {
+                        handler.install(addon);
+                        addon.setInstalled(true);
+                        installedAddonStorage.put(id, gson.toJson(addon));
+                        cachedRemoteAddons.invalidateValue();
+                        refreshSource();
+                        postInstalledEvent(addon.getUid());
+                    } catch (MarketplaceHandlerException e) {
+                        postFailureEvent(addon.getUid(), e.getMessage());
                     }
-                    return;
+                } else {
+                    postFailureEvent(addon.getUid(), "Add-on is already installed.");
                 }
+                return;
             }
         }
-        postFailureEvent(id, "Add-on not known.");
+        postFailureEvent(id, "Add-on can't be installed because there is no handler for it.");
     }
 
     @Override
     public void uninstall(String id) {
         Addon addon = getAddon(id, null);
-        if (addon != null) {
-            for (MarketplaceAddonHandler handler : addonHandlers) {
-                if (handler.supports(addon.getType(), addon.getContentType())) {
-                    if (handler.isInstalled(addon.getUid())) {
-                        try {
-                            handler.uninstall(addon);
-                            installedAddonStorage.remove(id);
-                            refreshSource();
-                            postUninstalledEvent(addon.getUid());
-                        } catch (MarketplaceHandlerException e) {
-                            postFailureEvent(addon.getUid(), e.getMessage());
-                        }
-                    } else {
+        if (addon == null) {
+            postFailureEvent(id, "Add-on can't be uninstalled because it is not known.");
+            return;
+        }
+        for (MarketplaceAddonHandler handler : addonHandlers) {
+            if (handler.supports(addon.getType(), addon.getContentType())) {
+                if (handler.isInstalled(addon.getUid())) {
+                    try {
+                        handler.uninstall(addon);
                         installedAddonStorage.remove(id);
-                        postFailureEvent(addon.getUid(), "Add-on is not installed.");
+                        cachedRemoteAddons.invalidateValue();
+                        refreshSource();
+                        postUninstalledEvent(addon.getUid());
+                    } catch (MarketplaceHandlerException e) {
+                        postFailureEvent(addon.getUid(), e.getMessage());
                     }
-                    return;
+                } else {
+                    installedAddonStorage.remove(id);
+                    postFailureEvent(addon.getUid(), "Add-on is not installed.");
                 }
+                return;
             }
         }
-        postFailureEvent(id, "Add-on not known.");
+        postFailureEvent(id, "Add-on can't be uninstalled because there is no handler for it.");
     }
-
-    @Override
-    public abstract @Nullable String getAddonId(URI addonURI);
 
     /**
      * check if remote services are enabled
@@ -275,7 +314,7 @@ public abstract class AbstractRemoteAddonService implements AddonService {
             Dictionary<String, Object> properties = configuration.getProperties();
             if (properties == null) {
                 // if we can't determine a set property, we use false (default is show compatible only)
-                return true;
+                return false;
             }
             return ConfigParser.valueAsOrElse(properties.get(CONFIG_INCLUDE_INCOMPATIBLE), Boolean.class, false);
         } catch (IOException e) {

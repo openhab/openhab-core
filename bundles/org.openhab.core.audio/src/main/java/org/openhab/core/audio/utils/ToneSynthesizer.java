@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -69,8 +69,7 @@ public class ToneSynthesizer {
         var melodySounds = new ArrayList<Tone>();
         var noteTextList = melody.split("\\s");
         var melodyTextIndex = 0;
-        for (var i = 0; i < noteTextList.length; i++) {
-            var noteText = noteTextList[i];
+        for (String noteText : noteTextList) {
             var noteTextParts = noteText.split(":");
             var soundMillis = 200;
             switch (noteTextParts.length) {

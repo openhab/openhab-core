@@ -1,23 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-           xmlns:addon="https://openhab.org/schemas/addon/v1.0.0"
-           xmlns:addon-info-list="https://openhab.org/schemas/addon-info-list/v1.0.0"
-           targetNamespace="https://openhab.org/schemas/addon-info-list/v1.0.0">
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:addon="https://openhab.org/schemas/addon/v1.0.0"
+	xmlns:addon-info-list="https://openhab.org/schemas/addon-info-list/v1.0.0"
+	targetNamespace="https://openhab.org/schemas/addon-info-list/v1.0.0">
 
-    <xs:import namespace="https://openhab.org/schemas/addon/v1.0.0" schemaLocation="addon-1.0.0.xsd"/>
+	<xs:import namespace="https://openhab.org/schemas/addon/v1.0.0" schemaLocation="addon-1.0.0.xsd"/>
 
-    <xs:element name="addon-info-list">
-        <xs:complexType>
-            <xs:sequence>
-                <xs:element name="addons" type="addon-info-list:addons"/>
-            </xs:sequence>
-        </xs:complexType>
-    </xs:element>
+	<xs:element name="addon-info-list">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="addons" type="addon-info-list:addons"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
 
-    <xs:complexType name="addons">
-        <xs:sequence>
-            <xs:element name="addon" type="addon:addonInfo" maxOccurs="unbounded"/>
-        </xs:sequence>
-    </xs:complexType>
+	<xs:complexType name="addons">
+		<xs:sequence>
+			<xs:element name="addon" type="addon:addonInfo" maxOccurs="unbounded"/>
+		</xs:sequence>
+	</xs:complexType>
 
 </xs:schema>

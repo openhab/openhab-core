@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -25,7 +25,6 @@ import org.slf4j.LoggerFactory
 import org.openhab.core.items.Item
 import org.openhab.core.types.Command
 import org.openhab.core.types.State
-import org.openhab.core.events.Event
 import org.openhab.core.automation.module.script.rulesupport.shared.ValueCache
 
 /**
@@ -39,7 +38,7 @@ import org.openhab.core.automation.module.script.rulesupport.shared.ValueCache
  */
 class ScriptJvmModelInferrer extends AbstractModelInferrer {
 
-    static private final Logger logger = LoggerFactory.getLogger(ScriptJvmModelInferrer)
+    static final Logger logger = LoggerFactory.getLogger(ScriptJvmModelInferrer)
 
     /** Variable name for the input string in a "script transformation" or "script profile" */
     public static final String VAR_INPUT = "input";
@@ -85,7 +84,7 @@ class ScriptJvmModelInferrer extends AbstractModelInferrer {
     public static final String VAR_SHARED_CACHE = "sharedCache";
 
     /**
-     * conveninence API to build and initialize JvmTypes and their members.
+     * convenience API to build and initialize JvmTypes and their members.
      */
     @Inject extension JvmTypesBuilder
 
@@ -106,7 +105,7 @@ class ScriptJvmModelInferrer extends AbstractModelInferrer {
      */
     def dispatch void infer(Script script, IJvmDeclaredTypeAcceptor acceptor, boolean isPreIndexingPhase) {
         val className = script.eResource.URI.lastSegment.split("\\.").head.toFirstUpper + "Script"
-        acceptor.accept(script.toClass(className)).initializeLater [
+        acceptor.accept(script.toClass(className), [
 
             val Set<String> fieldNames = newHashSet()
 
@@ -167,6 +166,6 @@ class ScriptJvmModelInferrer extends AbstractModelInferrer {
                 parameters += script.toParameter(VAR_SHARED_CACHE, sharedCacheTypeRef)
                 body = script
             ]
-        ]
+        ])
     }
 }

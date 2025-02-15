@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,6 +13,7 @@
 package org.openhab.core.io.rest.core.internal.item;
 
 import java.time.Instant;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -42,7 +43,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -58,6 +58,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.auth.Role;
 import org.openhab.core.common.registry.RegistryChangedRunnableListener;
 import org.openhab.core.events.EventPublisher;
+import org.openhab.core.i18n.TimeZoneProvider;
 import org.openhab.core.io.rest.DTOMapper;
 import org.openhab.core.io.rest.JSONResponse;
 import org.openhab.core.io.rest.LocaleService;
@@ -181,17 +182,14 @@ public class ItemResource implements RESTResource {
     private final MetadataRegistry metadataRegistry;
     private final MetadataSelectorMatcher metadataSelectorMatcher;
     private final SemanticTagRegistry semanticTagRegistry;
-
-    private void resetCacheableListsLastModified() {
-        this.cacheableListsLastModified.clear();
-    }
+    private final TimeZoneProvider timeZoneProvider;
 
     private final RegistryChangedRunnableListener<Item> resetLastModifiedItemChangeListener = new RegistryChangedRunnableListener<>(
-            this::resetCacheableListsLastModified);
+            () -> lastModified = null);
     private final RegistryChangedRunnableListener<Metadata> resetLastModifiedMetadataChangeListener = new RegistryChangedRunnableListener<>(
-            this::resetCacheableListsLastModified);
+            () -> lastModified = null);
 
-    private Map<@Nullable String, Date> cacheableListsLastModified = new HashMap<>();
+    private @Nullable Date lastModified = null;
 
     @Activate
     public ItemResource(//
@@ -203,7 +201,8 @@ public class ItemResource implements RESTResource {
             final @Reference ManagedItemProvider managedItemProvider,
             final @Reference MetadataRegistry metadataRegistry,
             final @Reference MetadataSelectorMatcher metadataSelectorMatcher,
-            final @Reference SemanticTagRegistry semanticTagRegistry) {
+            final @Reference SemanticTagRegistry semanticTagRegistry,
+            final @Reference TimeZoneProvider timeZoneProvider) {
         this.dtoMapper = dtoMapper;
         this.eventPublisher = eventPublisher;
         this.itemBuilderFactory = itemBuilderFactory;
@@ -213,6 +212,7 @@ public class ItemResource implements RESTResource {
         this.metadataRegistry = metadataRegistry;
         this.metadataSelectorMatcher = metadataSelectorMatcher;
         this.semanticTagRegistry = semanticTagRegistry;
+        this.timeZoneProvider = timeZoneProvider;
 
         this.itemRegistry.addRegistryChangeListener(resetLastModifiedItemChangeListener);
         this.metadataRegistry.addRegistryChangeListener(resetLastModifiedMetadataChangeListener);
@@ -245,43 +245,44 @@ public class ItemResource implements RESTResource {
             @QueryParam("fields") @Parameter(description = "limit output to the given fields (comma separated)") @Nullable String fields,
             @DefaultValue("false") @QueryParam("staticDataOnly") @Parameter(description = "provides a cacheable list of values not expected to change regularly and checks the If-Modified-Since header, all other parameters are ignored except \"metadata\"") boolean staticDataOnly) {
         final Locale locale = localeService.getLocale(language);
+        final ZoneId zoneId = timeZoneProvider.getTimeZone();
         final Set<String> namespaces = splitAndFilterNamespaces(namespaceSelector, locale);
 
         final UriBuilder uriBuilder = uriBuilder(uriInfo, httpHeaders);
 
         if (staticDataOnly) {
-            Date lastModifiedDate = Date.from(Instant.now());
-            if (cacheableListsLastModified.containsKey(namespaceSelector)) {
-                lastModifiedDate = cacheableListsLastModified.get(namespaceSelector);
-                Response.ResponseBuilder responseBuilder = request.evaluatePreconditions(lastModifiedDate);
+            if (lastModified != null) {
+                Response.ResponseBuilder responseBuilder = request.evaluatePreconditions(lastModified);
                 if (responseBuilder != null) {
                     // send 304 Not Modified
                     return responseBuilder.build();
                 }
             } else {
-                lastModifiedDate = Date.from(Instant.now().truncatedTo(ChronoUnit.SECONDS));
-                cacheableListsLastModified.put(namespaceSelector, lastModifiedDate);
+                lastModified = Date.from(Instant.now().truncatedTo(ChronoUnit.SECONDS));
             }
 
-            Stream<EnrichedItemDTO> itemStream = getItems(null, null).stream() //
-                    .map(item -> EnrichedItemDTOMapper.map(item, false, null, uriBuilder, locale)) //
+            Stream<EnrichedItemDTO> itemStream = getItems(type, tags).stream() //
+                    .map(item -> EnrichedItemDTOMapper.map(item, false, null, uriBuilder, locale, zoneId)) //
                     .peek(dto -> addMetadata(dto, namespaces, null)) //
                     .peek(dto -> dto.editable = isEditable(dto.name));
             itemStream = dtoMapper.limitToFields(itemStream,
                     "name,label,type,groupType,function,category,editable,groupNames,link,tags,metadata,commandDescription,stateDescription");
 
-            CacheControl cc = new CacheControl();
-            cc.setNoCache(true);
-            cc.setMustRevalidate(true);
-            cc.setPrivate(true);
-            return Response.ok(new Stream2JSONInputStream(itemStream)).lastModified(lastModifiedDate).cacheControl(cc)
-                    .build();
+            return Response.ok(new Stream2JSONInputStream(itemStream)).lastModified(lastModified)
+                    .cacheControl(RESTConstants.CACHE_CONTROL).build();
         }
 
         Stream<EnrichedItemDTO> itemStream = getItems(type, tags).stream() //
-                .map(item -> EnrichedItemDTOMapper.map(item, recursive, null, uriBuilder, locale)) //
+                .map(item -> EnrichedItemDTOMapper.map(item, recursive, null, uriBuilder, locale, zoneId)) //
                 .peek(dto -> addMetadata(dto, namespaces, null)) //
-                .peek(dto -> dto.editable = isEditable(dto.name));
+                .peek(dto -> dto.editable = isEditable(dto.name)) //
+                .peek(dto -> {
+                    if (dto instanceof EnrichedGroupItemDTO enrichedGroupItemDTO) {
+                        for (EnrichedItemDTO member : enrichedGroupItemDTO.members) {
+                            member.editable = isEditable(member.name);
+                        }
+                    }
+                });
         itemStream = dtoMapper.limitToFields(itemStream, fields);
         return Response.ok(new Stream2JSONInputStream(itemStream)).build();
     }
@@ -317,12 +318,13 @@ public class ItemResource implements RESTResource {
     @Operation(operationId = "getItemByName", summary = "Gets a single item.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = EnrichedItemDTO.class))),
             @ApiResponse(responseCode = "404", description = "Item not found") })
-    public Response getItemData(final @Context UriInfo uriInfo, final @Context HttpHeaders httpHeaders,
+    public Response getItemByName(final @Context UriInfo uriInfo, final @Context HttpHeaders httpHeaders,
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @DefaultValue(".*") @QueryParam("metadata") @Parameter(description = "metadata selector - a comma separated list or a regular expression (returns all if no value given)") @Nullable String namespaceSelector,
             @DefaultValue("true") @QueryParam("recursive") @Parameter(description = "get member items if the item is a group item") boolean recursive,
             @PathParam("itemname") @Parameter(description = "item name") String itemname) {
         final Locale locale = localeService.getLocale(language);
+        final ZoneId zoneId = timeZoneProvider.getTimeZone();
         final Set<String> namespaces = splitAndFilterNamespaces(namespaceSelector, locale);
 
         // get item
@@ -331,9 +333,14 @@ public class ItemResource implements RESTResource {
         // if it exists
         if (item != null) {
             EnrichedItemDTO dto = EnrichedItemDTOMapper.map(item, recursive, null, uriBuilder(uriInfo, httpHeaders),
-                    locale);
+                    locale, zoneId);
             addMetadata(dto, namespaces, null);
             dto.editable = isEditable(dto.name);
+            if (dto instanceof EnrichedGroupItemDTO enrichedGroupItemDTO) {
+                for (EnrichedItemDTO member : enrichedGroupItemDTO.members) {
+                    member.editable = isEditable(member.name);
+                }
+            }
             return JSONResponse.createResponse(Status.OK, dto, null);
         } else {
             return getItemNotFoundResponse(itemname);
@@ -424,6 +431,7 @@ public class ItemResource implements RESTResource {
             @PathParam("itemname") @Parameter(description = "item name") String itemname,
             @Parameter(description = "valid item state (e.g. ON, OFF)", required = true) String value) {
         final Locale locale = localeService.getLocale(language);
+        final ZoneId zoneId = timeZoneProvider.getTimeZone();
 
         // get Item
         Item item = getItem(itemname);
@@ -436,7 +444,7 @@ public class ItemResource implements RESTResource {
             if (state != null) {
                 // set State and report OK
                 eventPublisher.post(ItemEventFactory.createStateEvent(itemname, state));
-                return getItemResponse(null, Status.ACCEPTED, null, locale, null);
+                return getItemResponse(null, Status.ACCEPTED, null, locale, zoneId, null);
             } else {
                 // State could not be parsed
                 return JSONResponse.createErrorResponse(Status.BAD_REQUEST, "State could not be parsed: " + value);
@@ -739,6 +747,7 @@ public class ItemResource implements RESTResource {
             @PathParam("itemname") @Parameter(description = "item name") String itemname,
             @Parameter(description = "item data", required = true) @Nullable GroupItemDTO item) {
         final Locale locale = localeService.getLocale(language);
+        final ZoneId zoneId = timeZoneProvider.getTimeZone();
 
         // If we didn't get an item bean, then return!
         if (item == null) {
@@ -763,12 +772,12 @@ public class ItemResource implements RESTResource {
                 // item does not yet exist, create it
                 managedItemProvider.add(newItem);
                 return getItemResponse(uriBuilder(uriInfo, httpHeaders), Status.CREATED, itemRegistry.get(itemname),
-                        locale, null);
+                        locale, zoneId, null);
             } else if (managedItemProvider.get(itemname) != null) {
                 // item already exists as a managed item, update it
                 managedItemProvider.update(newItem);
                 return getItemResponse(uriBuilder(uriInfo, httpHeaders), Status.OK, itemRegistry.get(itemname), locale,
-                        null);
+                        zoneId, null);
             } else {
                 // Item exists but cannot be updated
                 logger.warn("Cannot update existing item '{}', because is not managed.", itemname);
@@ -872,7 +881,8 @@ public class ItemResource implements RESTResource {
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @PathParam("itemName") @Parameter(description = "item name") String itemName,
             @PathParam("semanticClass") @Parameter(description = "semantic class") String semanticClassName) {
-        Locale locale = localeService.getLocale(language);
+        final Locale locale = localeService.getLocale(language);
+        final ZoneId zoneId = timeZoneProvider.getTimeZone();
 
         Class<? extends org.openhab.core.semantics.Tag> semanticClass = semanticTagRegistry
                 .getTagClassById(semanticClassName);
@@ -886,7 +896,7 @@ public class ItemResource implements RESTResource {
         }
 
         EnrichedItemDTO dto = EnrichedItemDTOMapper.map(foundItem, false, null, uriBuilder(uriInfo, httpHeaders),
-                locale);
+                locale, zoneId);
         dto.editable = isEditable(dto.name);
         return JSONResponse.createResponse(Status.OK, dto, null);
     }
@@ -935,8 +945,8 @@ public class ItemResource implements RESTResource {
      * @return Response configured to represent the Item in depending on the status
      */
     private Response getItemResponse(final @Nullable UriBuilder uriBuilder, Status status, @Nullable Item item,
-            Locale locale, @Nullable String errormessage) {
-        Object entity = null != item ? EnrichedItemDTOMapper.map(item, true, null, uriBuilder, locale) : null;
+            Locale locale, ZoneId zoneId, @Nullable String errormessage) {
+        Object entity = null != item ? EnrichedItemDTOMapper.map(item, true, null, uriBuilder, locale, zoneId) : null;
         return JSONResponse.createResponse(status, entity, errormessage);
     }
 

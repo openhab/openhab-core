@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
  * It handles the injection of the {@link ThingHandler}
  *
  * @author Jan N. Klug - Initial contribution
+ * @author Laurent Garnier - Added discovery with an optional input parameter
  */
 @NonNullByDefault
 public abstract class AbstractThingHandlerDiscoveryService<T extends ThingHandler> extends AbstractDiscoveryService
@@ -45,20 +46,25 @@ public abstract class AbstractThingHandlerDiscoveryService<T extends ThingHandle
     protected @NonNullByDefault({}) T thingHandler = (@NonNull T) null;
 
     protected AbstractThingHandlerDiscoveryService(Class<T> thingClazz, @Nullable Set<ThingTypeUID> supportedThingTypes,
-            int timeout, boolean backgroundDiscoveryEnabledByDefault) throws IllegalArgumentException {
-        super(supportedThingTypes, timeout, backgroundDiscoveryEnabledByDefault);
+            int timeout, boolean backgroundDiscoveryEnabledByDefault, @Nullable String scanInputLabel,
+            @Nullable String scanInputDescription) throws IllegalArgumentException {
+        super(supportedThingTypes, timeout, backgroundDiscoveryEnabledByDefault, scanInputLabel, scanInputDescription);
         this.thingClazz = thingClazz;
+        this.backgroundDiscoveryEnabled = backgroundDiscoveryEnabledByDefault;
+    }
+
+    protected AbstractThingHandlerDiscoveryService(Class<T> thingClazz, @Nullable Set<ThingTypeUID> supportedThingTypes,
+            int timeout, boolean backgroundDiscoveryEnabledByDefault) throws IllegalArgumentException {
+        this(thingClazz, supportedThingTypes, timeout, backgroundDiscoveryEnabledByDefault, null, null);
     }
 
     protected AbstractThingHandlerDiscoveryService(Class<T> thingClazz, @Nullable Set<ThingTypeUID> supportedThingTypes,
             int timeout) throws IllegalArgumentException {
-        super(supportedThingTypes, timeout);
-        this.thingClazz = thingClazz;
+        this(thingClazz, supportedThingTypes, timeout, true);
     }
 
     protected AbstractThingHandlerDiscoveryService(Class<T> thingClazz, int timeout) throws IllegalArgumentException {
-        super(timeout);
-        this.thingClazz = thingClazz;
+        this(thingClazz, null, timeout);
     }
 
     @Override
@@ -86,7 +92,8 @@ public abstract class AbstractThingHandlerDiscoveryService<T extends ThingHandle
         // thing handler is set. This is correctly handled in initialize
         if (config != null) {
             backgroundDiscoveryEnabled = ConfigParser.valueAsOrElse(
-                    config.get(DiscoveryService.CONFIG_PROPERTY_BACKGROUND_DISCOVERY), Boolean.class, false);
+                    config.get(DiscoveryService.CONFIG_PROPERTY_BACKGROUND_DISCOVERY), Boolean.class,
+                    backgroundDiscoveryEnabled);
         }
     }
 
@@ -94,7 +101,8 @@ public abstract class AbstractThingHandlerDiscoveryService<T extends ThingHandle
     public void modified(@Nullable Map<String, Object> config) {
         if (config != null) {
             boolean enabled = ConfigParser.valueAsOrElse(
-                    config.get(DiscoveryService.CONFIG_PROPERTY_BACKGROUND_DISCOVERY), Boolean.class, false);
+                    config.get(DiscoveryService.CONFIG_PROPERTY_BACKGROUND_DISCOVERY), Boolean.class,
+                    backgroundDiscoveryEnabled);
 
             if (backgroundDiscoveryEnabled && !enabled) {
                 stopBackgroundDiscovery();

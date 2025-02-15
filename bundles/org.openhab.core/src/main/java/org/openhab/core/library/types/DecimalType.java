@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,7 +12,9 @@
  */
 package org.openhab.core.library.types;
 
+import java.io.Serial;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.ParsePosition;
@@ -34,6 +36,7 @@ import org.openhab.core.types.State;
 @NonNullByDefault
 public class DecimalType extends Number implements PrimitiveType, State, Command, Comparable<DecimalType> {
 
+    @Serial
     private static final long serialVersionUID = 4226845847123464690L;
     protected static final BigDecimal BIG_DECIMAL_HUNDRED = BigDecimal.valueOf(100);
 
@@ -53,8 +56,12 @@ public class DecimalType extends Number implements PrimitiveType, State, Command
     public DecimalType(Number value) {
         if (value instanceof QuantityType type) {
             this.value = type.toBigDecimal();
-        } else if (value instanceof HSBType type) {
+        } else if (value instanceof DecimalType type) {
             this.value = type.toBigDecimal();
+        } else if (value instanceof BigDecimal decimal) {
+            this.value = decimal;
+        } else if (value instanceof BigInteger integer) {
+            this.value = new BigDecimal(integer);
         } else {
             this.value = new BigDecimal(value.toString());
         }

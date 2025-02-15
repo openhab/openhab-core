@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,6 +17,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.thing.type.ChannelType;
@@ -30,7 +31,7 @@ import org.openhab.core.thing.type.ChannelTypeUID;
  */
 @NonNullByDefault
 @SuppressWarnings("unchecked")
-abstract class AbstractChannelTypeBuilder<T extends ChannelTypeBuilder<T>> implements ChannelTypeBuilder<T> {
+abstract class AbstractChannelTypeBuilder<@NonNull T extends ChannelTypeBuilder<T>> implements ChannelTypeBuilder<T> {
 
     protected final ChannelTypeUID channelTypeUID;
     protected final String label;

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -26,6 +26,7 @@ import org.openhab.core.library.types.PercentType;
  * @author Kai Kreuzer - removed unwanted dependencies
  * @author Christoph Weitkamp - Added parameter to adjust the volume
  * @author Wouter Born - Added methods for getting all sinks and sources
+ * @author Miguel Álvarez - Add record method
  */
 @NonNullByDefault
 public interface AudioManager {
@@ -152,6 +153,15 @@ public interface AudioManager {
     void playMelody(String melody, @Nullable String sinkId, @Nullable PercentType volume);
 
     /**
+     * Record audio as a WAV file of the specified length to the sounds folder.
+     *
+     * @param seconds seconds to record.
+     * @param filename record filename.
+     * @param sourceId The id of the audio source to use or null for the default.
+     */
+    void record(int seconds, String filename, @Nullable String sourceId) throws AudioException;
+
+    /**
      * Retrieves the current volume of a sink
      *
      * @param sinkId the sink to get the volume for or null for the default
@@ -206,7 +216,7 @@ public interface AudioManager {
     /**
      * Get a list of source ids that match a given pattern
      *
-     * @param pattern pattern to search, can include `*` and `?` placeholders
+     * @param pattern pattern to search, can include {@code *} and {@code ?} placeholders
      * @return ids of matching sources
      */
     Set<String> getSourceIds(String pattern);
@@ -248,7 +258,7 @@ public interface AudioManager {
     /**
      * Get a list of sink ids that match a given pattern
      *
-     * @param pattern pattern to search, can include `*` and `?` placeholders
+     * @param pattern pattern to search, can include {@code *} and {@code ?} placeholders
      * @return ids of matching sinks
      */
     Set<String> getSinkIds(String pattern);

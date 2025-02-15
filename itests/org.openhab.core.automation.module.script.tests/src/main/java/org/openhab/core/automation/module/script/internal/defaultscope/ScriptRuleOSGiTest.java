@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -22,6 +22,8 @@ import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.Rule;
@@ -95,7 +97,8 @@ public class ScriptRuleOSGiTest extends JavaOSGiTest {
         registerService(eventSubscriber);
     }
 
-    // ignore - wip @Test
+    @Test
+    @Disabled("WIP")
     public void testPredefinedRule() throws ItemNotFoundException {
         EventPublisher eventPublisher = getService(EventPublisher.class);
         ItemRegistry itemRegistry = getService(ItemRegistry.class);

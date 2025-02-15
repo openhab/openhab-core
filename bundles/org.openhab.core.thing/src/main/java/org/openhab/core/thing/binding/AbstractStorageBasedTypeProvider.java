@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -251,6 +251,7 @@ public abstract class AbstractStorageBasedTypeProvider
         entity.commandDescription = channelType.getCommandDescription();
         entity.event = channelType.getEvent();
         entity.autoUpdatePolicy = channelType.getAutoUpdatePolicy();
+        entity.unitHint = channelType.getUnitHint();
         return entity;
     }
 
@@ -333,6 +334,9 @@ public abstract class AbstractStorageBasedTypeProvider
             }
             if (entity.autoUpdatePolicy != null) {
                 stateBuilder.withAutoUpdatePolicy(Objects.requireNonNull(entity.autoUpdatePolicy));
+            }
+            if (entity.unitHint != null) {
+                stateBuilder.withUnitHint(entity.unitHint);
             }
         }
         if (builder instanceof TriggerChannelTypeBuilderImpl triggerBuilder) {
@@ -424,6 +428,7 @@ public abstract class AbstractStorageBasedTypeProvider
         public @Nullable CommandDescription commandDescription;
         public @Nullable EventDescription event;
         public @Nullable AutoUpdatePolicy autoUpdatePolicy;
+        public @Nullable String unitHint;
     }
 
     static class ChannelGroupTypeEntity {

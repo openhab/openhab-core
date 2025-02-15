@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -16,6 +16,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -98,13 +99,14 @@ abstract class AbstractInvocationHandler<T> {
     void handleException(Method method, InvocationTargetException e) {
         Throwable cause = e.getCause();
         logger.error(MSG_ERROR, toString(method), target, cause == null ? "" : cause.getMessage(), e.getCause());
-        if (exceptionHandler != null) {
-            exceptionHandler.accept(cause == null ? e : cause);
+        Consumer<Throwable> localConsumer = exceptionHandler;
+        if (localConsumer != null) {
+            localConsumer.accept(cause == null ? e : cause);
         }
     }
 
     void handleDuplicate(Method method, DuplicateExecutionException e) {
-        Thread thread = e.getCallable().getThread();
+        Thread thread = Objects.requireNonNull(e.getCallable().getThread());
         logger.debug(MSG_DUPLICATE, toString(method), target, toString(e.getCallable().getMethod()), thread.getName(),
                 thread.getId(), thread.getState().toString(), getStacktrace(thread));
     }
@@ -117,8 +119,8 @@ abstract class AbstractInvocationHandler<T> {
         } else {
             logger.debug(MSG_TIMEOUT_Q, timeout, toString(invocation.getInvocationStack()));
         }
-        if (timeoutHandler != null) {
-            timeoutHandler.run();
+        if (timeoutHandler instanceof Runnable handler) {
+            handler.run();
         }
     }
 

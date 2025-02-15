@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,7 +12,10 @@
  */
 package org.openhab.core.thing.link;
 
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -155,25 +158,52 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
     }
 
     /**
-     * Remove all orphaned (item or channel missing) links
+     * Remove all orphaned (item or channel missing) links that are editable
      *
+     * @see #getOrphanLinks()
      * @return the number of removed links
      */
     public int purge() {
         ManagedProvider<ItemChannelLink, String> managedProvider = getManagedProvider()
                 .orElseThrow(() -> new IllegalStateException("ManagedProvider is not available"));
 
-        Set<String> allItems = itemRegistry.stream().map(Item::getName).collect(Collectors.toSet());
-        Set<ChannelUID> allChannels = thingRegistry.stream().map(Thing::getChannels).flatMap(List::stream)
-                .map(Channel::getUID).collect(Collectors.toSet());
-
-        Set<String> toRemove = managedProvider.getAll().stream()
-                .filter(link -> !allItems.contains(link.getItemName()) || !allChannels.contains(link.getLinkedUID()))
-                .map(ItemChannelLink::getUID).collect(Collectors.toSet());
+        List<String> toRemove = getOrphanLinks().keySet().stream().map(ItemChannelLink::getUID)
+                .filter(i -> managedProvider.get(i) != null).toList();
 
         toRemove.forEach(managedProvider::remove);
 
         return toRemove.size();
+    }
+
+    /**
+     * Get all orphan links (item or channel missing)
+     *
+     * @see #purge()
+     *
+     * @return a map with orphan links as key and reason they are broken as value
+     */
+    public Map<ItemChannelLink, ItemChannelLinkProblem> getOrphanLinks() {
+        Collection<Item> items = itemRegistry.getItems();
+        Collection<Thing> things = thingRegistry.getAll();
+
+        Map<ItemChannelLink, ItemChannelLinkProblem> results = new HashMap<>();
+
+        Collection<ChannelUID> channelUIDS = things.stream().map(Thing::getChannels).flatMap(List::stream)
+                .map(Channel::getUID).collect(Collectors.toSet());
+        Collection<String> itemNames = items.stream().map(Item::getName).collect(Collectors.toSet());
+
+        getAll().forEach(itemChannelLink -> {
+            if (!channelUIDS.contains(itemChannelLink.getLinkedUID())) {
+                if (!itemNames.contains(itemChannelLink.getItemName())) {
+                    results.put(itemChannelLink, ItemChannelLinkProblem.ITEM_AND_THING_CHANNEL_MISSING);
+                } else {
+                    results.put(itemChannelLink, ItemChannelLinkProblem.THING_CHANNEL_MISSING);
+                }
+            } else if (!itemNames.contains(itemChannelLink.getItemName())) {
+                results.put(itemChannelLink, ItemChannelLinkProblem.ITEM_MISSING);
+            }
+        });
+        return results;
     }
 
     @Override
@@ -192,5 +222,11 @@ public class ItemChannelLinkRegistry extends AbstractLinkRegistry<ItemChannelLin
     protected void notifyListenersAboutUpdatedElement(final ItemChannelLink oldElement, final ItemChannelLink element) {
         super.notifyListenersAboutUpdatedElement(oldElement, element);
         // it is not needed to send an event, because links can not be updated
+    }
+
+    public enum ItemChannelLinkProblem {
+        THING_CHANNEL_MISSING,
+        ITEM_MISSING,
+        ITEM_AND_THING_CHANNEL_MISSING;
     }
 }

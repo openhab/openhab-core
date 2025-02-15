@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -250,11 +250,17 @@ public class QuantityTypeTest {
         assertThat(millis.format("%.1f " + UnitUtils.UNIT_PLACEHOLDER), is("80000" + ds + "0 ms"));
         assertThat(minutes.format("%.1f " + UnitUtils.UNIT_PLACEHOLDER), is("1" + ds + "3 min"));
 
+        assertThat(seconds.format("%s"), is("80 s"));
+        assertThat(millis.format("%s"), is("80000 ms"));
+
         assertThat(seconds.format("%.1f"), is("80" + ds + "0"));
         assertThat(minutes.format("%.1f"), is("1" + ds + "3"));
 
         assertThat(seconds.format("%1$tH:%1$tM:%1$tS"), is("00:01:20"));
         assertThat(millis.format("%1$tHh %1$tMm %1$tSs"), is("00h 01m 20s"));
+        assertThat(millis.format("%1$tT.%1$tL"), is("00:01:20.000"));
+        assertThat(seconds.format("%1$tss and %1$tSs"), is("80s and 80s"));
+        assertThat(seconds.format("%1$tSs and %1$tMm"), is("20s and 01m"));
     }
 
     @Test
@@ -643,13 +649,14 @@ public class QuantityTypeTest {
 
     @Test
     public void testMireds() {
-        QuantityType<Temperature> colorTemp = new QuantityType<>("2700 K");
+        // test value is selected to prevent any round-trip rounding errors
+        QuantityType<Temperature> colorTemp = new QuantityType<>("2000 K");
         QuantityType<?> mireds = colorTemp.toInvertibleUnit(Units.MIRED);
-        assertEquals(370, mireds.intValue());
+        assertEquals(500, mireds.intValue());
         assertThat(colorTemp.equals(mireds), is(true));
         assertThat(mireds.equals(colorTemp), is(true));
         QuantityType<?> andBack = mireds.toInvertibleUnit(Units.KELVIN);
-        assertEquals(2700, andBack.intValue());
+        assertEquals(2000, andBack.intValue());
     }
 
     @Test
@@ -657,5 +664,68 @@ public class QuantityTypeTest {
         QuantityType<Temperature> c = new QuantityType<>("1 °C");
         QuantityType<Temperature> f = c.toUnitRelative(ImperialUnits.FAHRENHEIT);
         assertEquals(1.8, f.doubleValue());
+    }
+
+    @Test
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public void testIncrementalAdd() {
+        assertEquals(new QuantityType("50 °C"), new QuantityType("20 °C").add(new QuantityType("30 °C")));
+        assertEquals(new QuantityType("50 °C"), new QuantityType("20 °C").add(new QuantityType("30 K")));
+        assertEquals(new QuantityType("50 °C"), new QuantityType("20 °C").add(new QuantityType("54 °F")));
+        assertEquals(new QuantityType("50 K"), new QuantityType("20 K").add(new QuantityType("30 °C")));
+        assertEquals(new QuantityType("50 K"), new QuantityType("20 K").add(new QuantityType("30 K")));
+        assertEquals(new QuantityType("50 K"), new QuantityType("20 K").add(new QuantityType("54 °F")));
+    }
+
+    @Test
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public void testIncrementalSubtract() {
+        assertEquals(new QuantityType("20 °C"), new QuantityType("50 °C").subtract(new QuantityType("30 °C")));
+        assertEquals(new QuantityType("20 °C"), new QuantityType("50 °C").subtract(new QuantityType("30 K")));
+        assertEquals(new QuantityType("20 °C"), new QuantityType("50 °C").subtract(new QuantityType("54 °F")));
+        assertEquals(new QuantityType("20 K"), new QuantityType("50 K").subtract(new QuantityType("30 °C")));
+        assertEquals(new QuantityType("20 K"), new QuantityType("50 K").subtract(new QuantityType("30 K")));
+        assertEquals(new QuantityType("20 K"), new QuantityType("50 K").subtract(new QuantityType("54 °F")));
+    }
+
+    @Test
+    public void testEquals() {
+        QuantityType<Temperature> temp1 = new QuantityType<>("293.15 K");
+        QuantityType<Temperature> temp2 = new QuantityType<>("20 °C");
+        assertTrue(temp1.equals(temp2));
+        assertTrue(temp2.equals(temp1));
+        temp2 = new QuantityType<>("-5 °C");
+        assertFalse(temp1.equals(temp2));
+
+        temp1 = new QuantityType<>("100000 K");
+        temp2 = new QuantityType<>("10 mirek");
+        assertTrue(temp1.equals(temp2));
+        assertTrue(temp2.equals(temp1));
+        temp2 = new QuantityType<>("20 mirek");
+        assertFalse(temp1.equals(temp2));
+
+        temp1 = new QuantityType<>("0.1 MK");
+        temp2 = new QuantityType<>("10 mirek");
+        assertTrue(temp1.equals(temp2));
+        assertTrue(temp2.equals(temp1));
+        temp2 = new QuantityType<>("20 mirek");
+        assertFalse(temp1.equals(temp2));
+    }
+
+    @Test
+    public void testCompareTo() {
+        QuantityType<Temperature> temp1 = new QuantityType<>("293.15 K");
+        QuantityType<Temperature> temp2 = new QuantityType<>("20 °C");
+        assertEquals(0, temp1.compareTo(temp2));
+        temp2 = new QuantityType<>("-5 °C");
+        assertEquals(1, temp1.compareTo(temp2));
+        temp2 = new QuantityType<>("50 °C");
+        assertEquals(-1, temp1.compareTo(temp2));
+
+        QuantityType<Temperature> temp3 = new QuantityType<>("100000 K");
+        QuantityType<Temperature> temp4 = new QuantityType<>("10 mirek");
+        assertThrows(IllegalArgumentException.class, () -> {
+            temp3.compareTo(temp4);
+        });
     }
 }

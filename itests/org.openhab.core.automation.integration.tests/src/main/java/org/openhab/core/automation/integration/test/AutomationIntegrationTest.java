@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -665,7 +665,7 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
         TemplateRegistry<?> templateRegistry = getService(TemplateRegistry.class);
         assertThat(templateRegistry, is(notNullValue()));
         waitForAssert(() -> {
-            Template template = null;
+            Template template;
             template = templateRegistry.get("SimpleTestTemplate");
             assertThat(template, is(notNullValue()));
             assertThat(template.getTags(), is(notNullValue()));
@@ -713,7 +713,7 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
         TemplateRegistry<?> templateRegistry = getService(TemplateRegistry.class);
         assertThat(templateRegistry, is(notNullValue()));
         waitForAssert(() -> {
-            Template template = null;
+            Template template;
             template = templateRegistry.get("TestTemplateWithCompositeModules");
             assertThat(template, is(notNullValue()));
             assertThat(template.getTags(), is(notNullValue()));

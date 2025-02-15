@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -132,7 +132,7 @@ public class SymmetricKeyCipher implements StorageCipher {
 
     private SecretKey getOrGenerateEncryptionKey() throws NoSuchAlgorithmException, IOException {
         Configuration configuration = configurationAdmin.getConfiguration(PID);
-        String encryptionKeyInBase64 = null;
+        String encryptionKeyInBase64;
         Dictionary<String, Object> properties = configuration.getProperties();
         if (properties == null) {
             properties = new Hashtable<>();

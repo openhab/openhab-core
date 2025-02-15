@@ -6,6 +6,7 @@ bin/
 .metadata/
 */plugin.xml_gen
 .DS_Store
+build.log
 *.iml
 .idea/
 .gradle/

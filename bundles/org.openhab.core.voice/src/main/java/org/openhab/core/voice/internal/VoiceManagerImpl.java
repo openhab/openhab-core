@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,6 +12,7 @@
  */
 package org.openhab.core.voice.internal;
 
+import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,15 +29,19 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.WeakHashMap;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.audio.AudioException;
 import org.openhab.core.audio.AudioFormat;
 import org.openhab.core.audio.AudioManager;
 import org.openhab.core.audio.AudioSink;
@@ -55,7 +60,13 @@ import org.openhab.core.storage.StorageService;
 import org.openhab.core.voice.DialogContext;
 import org.openhab.core.voice.DialogRegistration;
 import org.openhab.core.voice.KSService;
+import org.openhab.core.voice.RecognitionStartEvent;
+import org.openhab.core.voice.RecognitionStopEvent;
+import org.openhab.core.voice.STTException;
 import org.openhab.core.voice.STTService;
+import org.openhab.core.voice.STTServiceHandle;
+import org.openhab.core.voice.SpeechRecognitionErrorEvent;
+import org.openhab.core.voice.SpeechRecognitionEvent;
 import org.openhab.core.voice.TTSException;
 import org.openhab.core.voice.TTSService;
 import org.openhab.core.voice.Voice;
@@ -85,6 +96,7 @@ import org.slf4j.LoggerFactory;
  * @author Wouter Born - Sort TTS options
  * @author Laurent Garnier - Updated methods startDialog and added method stopDialog
  * @author Miguel Álvarez - Use dialog context
+ * @author Miguel Álvarez - Add transcribe method
  */
 @Component(immediate = true, configurationPid = VoiceManagerImpl.CONFIGURATION_PID, //
         property = Constants.SERVICE_PID + "=org.openhab.voice")
@@ -286,6 +298,91 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
                 logger.warn("Error saying '{}': {}", text, e.getMessage());
             }
         }
+    }
+
+    @Override
+    public String transcribe(@Nullable String audioSourceId, @Nullable String sttId, @Nullable Locale locale) {
+        var audioSource = audioSourceId != null ? audioManager.getSource(audioSourceId) : audioManager.getSource();
+        if (audioSource == null) {
+            logger.warn("Audio source '{}' not available", audioSourceId != null ? audioSourceId : "default");
+            return "";
+        }
+        var sttService = sttId != null ? getSTT(sttId) : getSTT();
+        if (sttService == null) {
+            logger.warn("Speech-to-text service '{}' not available", sttId != null ? sttId : "default");
+            return "";
+        }
+        var sttFormat = VoiceManagerImpl.getBestMatch(audioSource.getSupportedFormats(),
+                sttService.getSupportedFormats());
+        if (sttFormat == null) {
+            logger.warn("No compatible audio format found for stt '{}' and the provided audio stream",
+                    sttService.getId());
+            return "";
+        }
+        AudioStream audioStream;
+        try {
+            audioStream = audioSource.getInputStream(sttFormat);
+        } catch (AudioException e) {
+            logger.warn("AudioException creating source audio stream: {}", e.getMessage());
+            return "";
+        }
+        return transcribe(audioStream, sttService, locale);
+    }
+
+    @Override
+    public String transcribe(AudioStream audioStream, @Nullable String sttId, @Nullable Locale locale) {
+        var sttService = sttId != null ? getSTT(sttId) : getSTT();
+        if (sttService == null) {
+            logger.warn("Speech-to-text service '{}' not available", sttId != null ? sttId : "default");
+            return "";
+        }
+        var sttFormat = VoiceManagerImpl.getBestMatch(Set.of(audioStream.getFormat()),
+                sttService.getSupportedFormats());
+        if (sttFormat == null) {
+            logger.warn("No compatible audio format found for stt '{}' and the provided audio stream",
+                    sttService.getId());
+            return "";
+        }
+        return transcribe(audioStream, sttService, locale);
+    }
+
+    private String transcribe(AudioStream audioStream, STTService sttService, @Nullable Locale locale) {
+        Locale nullSafeLocale = locale != null ? locale : localeProvider.getLocale();
+        CompletableFuture<String> transcriptionResult = new CompletableFuture<>();
+        STTServiceHandle sttServiceHandle;
+        try {
+            sttServiceHandle = sttService.recognize(sttEvent -> {
+                if (sttEvent instanceof SpeechRecognitionEvent sre) {
+                    logger.debug("SpeechRecognitionEvent event received");
+                    String transcript = sre.getTranscript();
+                    logger.debug("Text recognized: {}", transcript);
+                    transcriptionResult.complete(transcript);
+                } else if (sttEvent instanceof RecognitionStartEvent) {
+                    logger.debug("RecognitionStartEvent event received");
+                } else if (sttEvent instanceof RecognitionStopEvent) {
+                    logger.debug("RecognitionStopEvent event received");
+                } else if (sttEvent instanceof SpeechRecognitionErrorEvent sre) {
+                    logger.debug("SpeechRecognitionErrorEvent event received");
+                    transcriptionResult.completeExceptionally(
+                            new IOException("SpeechRecognitionErrorEvent emitted: " + sre.getMessage()));
+                }
+            }, audioStream, nullSafeLocale, new HashSet<>());
+        } catch (STTException e) {
+            logger.warn("STTException while running transcription");
+            return "";
+        }
+        try {
+            return transcriptionResult.get(60, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            logger.warn("InterruptedException waiting for transcription: {}", e.getMessage());
+            sttServiceHandle.abort();
+        } catch (ExecutionException e) {
+            logger.warn("ExecutionException running transcription: {}", e.getCause().getMessage());
+        } catch (TimeoutException e) {
+            logger.warn("TimeoutException waiting for transcription");
+            sttServiceHandle.abort();
+        }
+        return "";
     }
 
     @Override

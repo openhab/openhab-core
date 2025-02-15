@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -18,14 +18,14 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
-import org.openhab.core.config.discovery.DiscoveryResult;
 import org.openhab.core.config.discovery.DiscoveryResultFlag;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
 
 /**
  * The {@link DiscoveryResultImplTest} checks if any invalid input parameters
- * and the synchronization of {@link DiscoveryResult}s work in a correct way.
+ * and the synchronization of {@link org.openhab.core.config.discovery.DiscoveryResult}s
+ * work in a correct way.
  *
  * @author Michael Grammling - Initial contribution
  * @author Thomas Höfer - Added representation
@@ -36,12 +36,14 @@ public class DiscoveryResultImplTest {
 
     private static final int DEFAULT_TTL = 60;
 
+    @SuppressWarnings("deprecation")
     @Test
     public void testInvalidConstructorForThingType() {
         assertThrows(IllegalArgumentException.class,
                 () -> new DiscoveryResultImpl(null, new ThingUID("aa"), null, null, null, null, DEFAULT_TTL));
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     public void testInvalidConstructorForTTL() {
         ThingTypeUID thingTypeUID = new ThingTypeUID("bindingId", "thingType");
@@ -49,6 +51,7 @@ public class DiscoveryResultImplTest {
                 new ThingUID(thingTypeUID, "thingId"), null, null, null, null, -2));
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     public void testValidConstructor() {
         ThingTypeUID thingTypeUID = new ThingTypeUID("bindingId", "thingType");
@@ -66,6 +69,7 @@ public class DiscoveryResultImplTest {
         assertNull(discoveryResult.getRepresentationProperty());
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     public void testInvalidSynchronize() {
         ThingTypeUID thingTypeUID = new ThingTypeUID("bindingId", "thingType");
@@ -85,6 +89,7 @@ public class DiscoveryResultImplTest {
         assertEquals(DiscoveryResultFlag.IGNORED, discoveryResult.getFlag());
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     public void testIrrelevantSynchronize() {
         ThingTypeUID thingTypeUID = new ThingTypeUID("bindingId", "thingType");
@@ -107,6 +112,7 @@ public class DiscoveryResultImplTest {
         assertEquals(DiscoveryResultFlag.IGNORED, discoveryResult.getFlag());
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     public void testSynchronize() {
         ThingTypeUID thingTypeUID = new ThingTypeUID("bindingId", "thingType");
@@ -135,6 +141,7 @@ public class DiscoveryResultImplTest {
         assertEquals(DiscoveryResultFlag.IGNORED, discoveryResult.getFlag());
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     public void testThingTypeCompatibility() {
         ThingTypeUID thingTypeUID = new ThingTypeUID("bindingId", "thingType");

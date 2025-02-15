@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,6 +15,7 @@ package org.openhab.core.thing.i18n;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import java.io.IOException;
@@ -328,7 +329,7 @@ public class ThingStatusInfoI18nLocalizationServiceOSGiTest extends JavaOSGiTest
      */
     private class BundleResolverImpl implements BundleResolver {
         @Override
-        public Bundle resolveBundle(@Nullable Class<?> clazz) {
+        public @Nullable Bundle resolveBundle(@Nullable Class<?> clazz) {
             if (clazz != null && clazz.equals(AbstractThingHandler.class)) {
                 return testBundle;
             } else {

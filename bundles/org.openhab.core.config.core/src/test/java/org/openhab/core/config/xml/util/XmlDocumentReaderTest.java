@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -19,7 +19,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -57,7 +56,7 @@ public class XmlDocumentReaderTest {
     private @Nullable ConfigDescription readXML(String xml) throws IOException {
         Path tempFile = Files.createTempFile(null, null);
         tempFile.toFile().deleteOnExit();
-        Files.write(tempFile, xml.getBytes(StandardCharsets.UTF_8));
+        Files.writeString(tempFile, xml);
         return new ConfigDescriptionReader().readFromXML(tempFile.toUri().toURL());
     }
 
@@ -89,17 +88,18 @@ public class XmlDocumentReaderTest {
      */
     @Test
     public void defaultSecurityProtectsAgainstRemoteCodeExecution() throws Exception {
-        String xml = "<contact class='dynamic-proxy'>\n" //
-                + "  <interface>org.openhab.core.Contact</interface>\n"
-                + "  <handler class='java.beans.EventHandler'>\n" //
-                + "    <target class='java.lang.ProcessBuilder'>\n" //
-                + "      <command>\n" //
-                + "        <string>calc.exe</string>\n" //
-                + "      </command>\n" //
-                + "    </target>\n" //
-                + "    <action>start</action>\n" //
-                + "  </handler>\n" //
-                + "</contact>";
+        String xml = """
+                <contact class='dynamic-proxy'>
+                  <interface>org.openhab.core.Contact</interface>
+                  <handler class='java.beans.EventHandler'>
+                    <target class='java.lang.ProcessBuilder'>
+                      <command>
+                        <string>calc.exe</string>
+                      </command>
+                    </target>
+                    <action>start</action>
+                  </handler>
+                </contact>""";
 
         assertThrows(ForbiddenClassException.class, () -> readXML(xml));
     }

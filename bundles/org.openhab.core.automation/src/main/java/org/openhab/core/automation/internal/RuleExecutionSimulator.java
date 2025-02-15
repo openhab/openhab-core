@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -95,9 +95,7 @@ final class RuleExecutionSimulator {
             // Only triggers that are time-based will be considered within the simulation
             if (triggerHandler instanceof TimeBasedTriggerHandler handler) {
                 SchedulerTemporalAdjuster temporalAdjuster = handler.getTemporalAdjuster();
-                if (temporalAdjuster != null) {
-                    executions.addAll(simulateExecutionsForCronBasedRule(rule, from, until, temporalAdjuster));
-                }
+                executions.addAll(simulateExecutionsForCronBasedRule(rule, from, until, temporalAdjuster));
             }
         }
         logger.debug("Created {} rule simulations for rule {}.", executions.size(), rule.getName());

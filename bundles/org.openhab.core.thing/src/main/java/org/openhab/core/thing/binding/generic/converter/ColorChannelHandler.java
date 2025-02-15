@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -65,7 +65,7 @@ public class ColorChannelHandler extends AbstractTransformingChannelHandler {
             state = newState;
             return hsbToString(newState);
         } else if (command instanceof PercentType percentCommand && state instanceof HSBType colorState) {
-            HSBType newState = new HSBType(colorState.getBrightness(), colorState.getSaturation(), percentCommand);
+            HSBType newState = new HSBType(colorState.getHue(), colorState.getSaturation(), percentCommand);
             state = newState;
             return hsbToString(newState);
         }

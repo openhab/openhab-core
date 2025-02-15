@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,9 +15,9 @@ package org.openhab.core.config.discovery.internal;
 import static org.openhab.core.config.discovery.inbox.InboxPredicates.forThingUID;
 
 import java.net.URI;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -112,7 +112,7 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
 
         @Override
         public void run() {
-            long now = new Date().getTime();
+            Instant now = Instant.now();
             for (DiscoveryResult result : inbox.getAll()) {
                 if (isResultExpired(result, now)) {
                     logger.debug("Inbox entry for thing '{}' is expired and will be removed.", result.getThingUID());
@@ -121,11 +121,12 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
             }
         }
 
-        private boolean isResultExpired(DiscoveryResult result, long now) {
-            if (result.getTimeToLive() == DiscoveryResult.TTL_UNLIMITED) {
+        private boolean isResultExpired(DiscoveryResult result, Instant now) {
+            long ttl = result.getTimeToLive();
+            if (ttl == DiscoveryResult.TTL_UNLIMITED) {
                 return false;
             }
-            return (result.getTimestamp() + result.getTimeToLive() * 1000 < now);
+            return Instant.ofEpochMilli(result.getTimestamp()).plusSeconds(ttl).isBefore(now);
         }
     }
 
@@ -184,9 +185,6 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
 
     @Override
     public @Nullable Thing approve(ThingUID thingUID, @Nullable String label, @Nullable String newThingId) {
-        if (thingUID == null) {
-            throw new IllegalArgumentException("Thing UID must not be null");
-        }
         List<DiscoveryResult> results = stream().filter(forThingUID(thingUID)).toList();
         if (results.isEmpty()) {
             throw new IllegalArgumentException("No Thing with UID " + thingUID.getAsString() + " in inbox");
@@ -194,7 +192,7 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
         if (newThingId != null && newThingId.contains(AbstractUID.SEPARATOR)) {
             throw new IllegalArgumentException("New Thing ID " + newThingId + " must not contain multiple segments");
         }
-        DiscoveryResult result = results.get(0);
+        DiscoveryResult result = results.getFirst();
         final Map<String, String> properties = new HashMap<>();
         final Map<String, Object> configParams = new HashMap<>();
         getPropsAndConfigParams(result, properties, configParams);
@@ -372,22 +370,7 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
 
     @Override
     public Stream<DiscoveryResult> stream() {
-        final Storage<DiscoveryResult> discoveryResultStorage = this.discoveryResultStorage;
-        if (discoveryResultStorage == null) {
-            final ScheduledFuture<?> timeToLiveChecker = this.timeToLiveChecker;
-            logger.error("The OSGi lifecycle has been violated (storage: {}, ttl checker cancelled: {}).",
-                    this.discoveryResultStorage == null ? "null" : this.discoveryResultStorage,
-                    timeToLiveChecker == null ? "null" : timeToLiveChecker.isCancelled());
-            return Stream.empty();
-        }
-        final Collection<@Nullable DiscoveryResult> values = discoveryResultStorage.getValues();
-        if (values == null) {
-            logger.warn(
-                    "The storage service violates the nullness requirements (get values must not return null) (storage class: {}).",
-                    discoveryResultStorage.getClass());
-            return Stream.empty();
-        }
-        return (Stream<DiscoveryResult>) values.stream().filter(Objects::nonNull);
+        return (Stream<DiscoveryResult>) discoveryResultStorage.getValues().stream().filter(Objects::nonNull);
     }
 
     @Override
@@ -442,7 +425,7 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
                     removedThings.add(thingUID);
                     remove(thingUID);
                     logger.debug("Removed thing '{}' from inbox because it was older than {}.", thingUID,
-                            new Date(timestamp));
+                            Instant.ofEpochMilli(timestamp));
                 }
             }
         }
@@ -496,10 +479,7 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
      *         null, if no discovery result could be found
      */
     private @Nullable DiscoveryResult get(ThingUID thingUID) {
-        if (thingUID != null) {
-            return discoveryResultStorage.get(thingUID.toString());
-        }
-        return null;
+        return discoveryResultStorage.get(thingUID.toString());
     }
 
     private void notifyListeners(DiscoveryResult result, EventType type) {
@@ -536,6 +516,7 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
     }
 
     private void postEvent(DiscoveryResult result, EventType eventType) {
+        EventPublisher eventPublisher = this.eventPublisher;
         if (eventPublisher != null) {
             try {
                 switch (eventType) {
@@ -574,7 +555,7 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
     private List<ThingUID> getResultsForBridge(ThingUID bridgeUID) {
         List<ThingUID> thingsForBridge = new ArrayList<>();
         for (DiscoveryResult result : discoveryResultStorage.getValues()) {
-            if (bridgeUID.equals(result.getBridgeUID())) {
+            if (result != null && bridgeUID.equals(result.getBridgeUID())) {
                 thingsForBridge.add(result.getThingUID());
             }
         }
@@ -608,10 +589,8 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
 
     private Set<String> getConfigDescParamNames(List<ConfigDescriptionParameter> configDescParams) {
         Set<String> paramNames = new HashSet<>();
-        if (configDescParams != null) {
-            for (ConfigDescriptionParameter param : configDescParams) {
-                paramNames.add(param.getName());
-            }
+        for (ConfigDescriptionParameter param : configDescParams) {
+            paramNames.add(param.getName());
         }
         return paramNames;
     }

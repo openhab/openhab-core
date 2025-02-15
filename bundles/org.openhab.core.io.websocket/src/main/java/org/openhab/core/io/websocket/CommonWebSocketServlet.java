@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,8 +13,12 @@
 package org.openhab.core.io.websocket;
 
 import java.io.IOException;
+import java.io.Serial;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
@@ -43,17 +47,32 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The {@link CommonWebSocketServlet} provides the servlet for WebSocket connections
+ * The {@link CommonWebSocketServlet} provides the servlet for WebSocket connections.
+ *
+ * <p>
+ * Clients can authorize in two ways:
+ * <ul>
+ * <li>By setting <code>org.openhab.ws.accessToken.base64.</code> + base64-encoded access token and the
+ * {@link CommonWebSocketServlet#WEBSOCKET_PROTOCOL_DEFAULT} in the <code>Sec-WebSocket-Protocol</code> header.</li>
+ * <li>By providing the access token as query parameter <code>accessToken</code>.</li>
+ * </ul>
  *
  * @author Jan N. Klug - Initial contribution
  * @author Miguel Álvarez Díez - Refactor into a common servlet
+ * @author Florian Hotze - Support passing access token through Sec-WebSocket-Protocol header
  */
 @NonNullByDefault
 @HttpWhiteboardServletName(CommonWebSocketServlet.SERVLET_PATH)
 @HttpWhiteboardServletPattern(CommonWebSocketServlet.SERVLET_PATH + "/*")
 @Component(immediate = true, service = { Servlet.class })
 public class CommonWebSocketServlet extends WebSocketServlet {
+    @Serial
     private static final long serialVersionUID = 1L;
+
+    public static final String SEC_WEBSOCKET_PROTOCOL_HEADER = "Sec-WebSocket-Protocol";
+    public static final String WEBSOCKET_PROTOCOL_DEFAULT = "org.openhab.ws.protocol.default";
+    private static final Pattern WEBSOCKET_ACCESS_TOKEN_PATTERN = Pattern
+            .compile("org.openhab.ws.accessToken.base64.(?<base64>[A-Za-z0-9+/]*)");
 
     public static final String SERVLET_PATH = "/ws";
 
@@ -94,7 +113,31 @@ public class CommonWebSocketServlet extends WebSocketServlet {
             if (servletUpgradeRequest == null || servletUpgradeResponse == null) {
                 return null;
             }
-            if (isAuthorizedRequest(servletUpgradeRequest)) {
+
+            String accessToken = null;
+            String secWebSocketProtocolHeader = servletUpgradeRequest.getHeader(SEC_WEBSOCKET_PROTOCOL_HEADER);
+            if (secWebSocketProtocolHeader != null) { // if the client sends the Sec-WebSocket-Protocol header
+                // respond with the default protocol
+                servletUpgradeResponse.setHeader(SEC_WEBSOCKET_PROTOCOL_HEADER, WEBSOCKET_PROTOCOL_DEFAULT);
+                // extract the base64 encoded access token from the requested protocols
+                Matcher matcher = WEBSOCKET_ACCESS_TOKEN_PATTERN.matcher(secWebSocketProtocolHeader);
+                if (matcher.find() && matcher.group("base64") != null) {
+                    String base64 = matcher.group("base64");
+                    try {
+                        accessToken = new String(Base64.getDecoder().decode(base64));
+                    } catch (IllegalArgumentException e) {
+                        logger.warn("Invalid base64 encoded access token in Sec-WebSocket-Protocol header from {}.",
+                                servletUpgradeRequest.getRemoteAddress());
+                        return null;
+                    }
+                } else {
+                    logger.warn("Invalid use of Sec-WebSocket-Protocol header from {}.",
+                            servletUpgradeRequest.getRemoteAddress());
+                    return null;
+                }
+            }
+
+            if (accessToken != null ? isAuthorizedRequest(accessToken) : isAuthorizedRequest(servletUpgradeRequest)) {
                 String requestPath = servletUpgradeRequest.getRequestURI().getPath();
                 String pathPrefix = SERVLET_PATH + "/";
                 boolean useDefaultAdapter = requestPath.equals(pathPrefix) || !requestPath.startsWith(pathPrefix);
@@ -120,6 +163,17 @@ public class CommonWebSocketServlet extends WebSocketServlet {
                         servletUpgradeRequest.getRemoteAddress());
             }
             return null;
+        }
+
+        private boolean isAuthorizedRequest(String bearerToken) {
+            try {
+                var securityContext = authFilter.getSecurityContext(bearerToken);
+                return securityContext != null
+                        && (securityContext.isUserInRole(Role.USER) || securityContext.isUserInRole(Role.ADMIN));
+            } catch (AuthenticationException e) {
+                logger.warn("Error handling WebSocket authorization", e);
+                return false;
+            }
         }
 
         private boolean isAuthorizedRequest(ServletUpgradeRequest servletUpgradeRequest) {

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,12 +14,12 @@ package org.openhab.core.config.discovery.inbox.events;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.config.discovery.dto.DiscoveryResultDTO;
-import org.openhab.core.config.discovery.inbox.Inbox;
 import org.openhab.core.events.AbstractEvent;
 
 /**
- * Abstract implementation of an inbox event which will be posted by the {@link Inbox} for added, removed
- * and updated discovery results.
+ * Abstract implementation of an inbox event which will be posted by the
+ * {@link org.openhab.core.config.discovery.inbox.Inbox}
+ * for added, removed and updated discovery results.
  *
  * @author Stefan Bußweiler - Initial contribution
  */

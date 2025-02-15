@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -23,6 +23,7 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.StreamingOutput;
 
 import org.openhab.core.library.types.DateTimeType;
 import org.slf4j.Logger;
@@ -31,7 +32,6 @@ import org.slf4j.LoggerFactory;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonIOException;
 import com.google.gson.JsonObject;
 import com.google.gson.stream.JsonWriter;
 
@@ -40,10 +40,9 @@ import com.google.gson.stream.JsonWriter;
  *
  * @author Joerg Plewe - Initial contribution
  * @author Henning Treu - Provide streaming capabilities
+ * @author Jörg Sautter - Improve streaming capabilities
  */
 public class JSONResponse {
-
-    private final Logger logger = LoggerFactory.getLogger(JSONResponse.class);
 
     private static final JSONResponse INSTANCE = new JSONResponse();
     private final Gson gson = new GsonBuilder().setDateFormat(DateTimeType.DATE_PATTERN_WITH_TZ_AND_MS).create();
@@ -152,32 +151,14 @@ public class JSONResponse {
             return rp.build();
         }
 
-        // The PipedOutputStream will only be closed by the writing thread
-        // since closing it during this method call would be too early.
-        // The receiver of the response will read from the pipe after this method returns.
-        PipedOutputStream out = new PipedOutputStream();
+        rp.entity((StreamingOutput) (target) -> {
+            // target must not be closed, see javadoc of javax.ws.rs.ext.MessageBodyWriter
+            JsonWriter jsonWriter = new JsonWriter(
+                    new BufferedWriter(new OutputStreamWriter(target, StandardCharsets.UTF_8)));
 
-        try {
-            // we will not actively close the PipedInputStream since it is read by the receiving end
-            // and will be GC'ed once the response is consumed.
-            PipedJSONInputStream in = new PipedJSONInputStream(out);
-            rp.entity(in);
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
-        }
-
-        Thread writerThread = new Thread(() -> {
-            try (JsonWriter jsonWriter = new JsonWriter(
-                    new BufferedWriter(new OutputStreamWriter(out, StandardCharsets.UTF_8)))) {
-                gson.toJson(entity, entity.getClass(), jsonWriter);
-                jsonWriter.flush();
-            } catch (IOException | JsonIOException e) {
-                logger.debug("Error streaming JSON through PipedInputStream / PipedOutputStream.", e);
-            }
+            gson.toJson(entity, entity.getClass(), jsonWriter);
+            jsonWriter.flush();
         });
-
-        writerThread.setDaemon(true); // daemonize thread to permit the JVM shutdown even if we stream JSON.
-        writerThread.start();
 
         return rp.build();
     }

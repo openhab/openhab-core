@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -132,11 +132,7 @@ public class AutomationCommandsPluggable extends AutomationCommands implements C
         }
 
         String res = super.executeCommand(command, params);
-        if (res == null) {
-            console.println(String.format("Unsupported command %s", command));
-        } else {
-            console.println(res);
-        }
+        console.println(res);
     }
 
     @Override

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,15 +12,12 @@
  */
 package org.openhab.core.karaf.internal;
 
-import org.apache.karaf.features.FeaturesService;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.config.discovery.addon.AddonFinderService;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * This service is an implementation of an openHAB {@link AddonFinderService} using the Karaf features
@@ -31,14 +28,12 @@ import org.slf4j.LoggerFactory;
 @Component(name = "org.openhab.core.karafaddonfinders", immediate = true)
 @NonNullByDefault
 public class KarafAddonFinderService implements AddonFinderService {
-    private final Logger logger = LoggerFactory.getLogger(KarafAddonFinderService.class);
-
-    private final FeaturesService featuresService;
+    private final FeatureInstaller featureInstaller;
     private boolean deactivated;
 
     @Activate
-    public KarafAddonFinderService(final @Reference FeaturesService featuresService) {
-        this.featuresService = featuresService;
+    public KarafAddonFinderService(final @Reference FeatureInstaller featureInstaller) {
+        this.featureInstaller = featureInstaller;
     }
 
     @Deactivate
@@ -49,30 +44,14 @@ public class KarafAddonFinderService implements AddonFinderService {
     @Override
     public void install(String id) {
         if (!deactivated) {
-            try {
-                if (!featuresService.isInstalled(featuresService.getFeature(id))) {
-                    featuresService.installFeature(id);
-                }
-            } catch (Exception e) {
-                if (!deactivated) {
-                    logger.error("Failed to install add-on suggestion finder {}", id, e);
-                }
-            }
+            featureInstaller.addAddon(FeatureInstaller.FINDER_ADDON_TYPE, id);
         }
     }
 
     @Override
     public void uninstall(String id) {
         if (!deactivated) {
-            try {
-                if (featuresService.isInstalled(featuresService.getFeature(id))) {
-                    featuresService.uninstallFeature(id);
-                }
-            } catch (Exception e) {
-                if (!deactivated) {
-                    logger.error("Failed to uninstall add-on suggestion finder {}", id, e);
-                }
-            }
+            featureInstaller.removeAddon(FeatureInstaller.FINDER_ADDON_TYPE, id);
         }
     }
 }

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -156,11 +156,13 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
             for (UpnpIOParticipant participant : participants) {
                 if (Objects.equals(getDevice(participant), deviceRoot)) {
                     for (Entry<String, StateVariableValue> entry : values.entrySet()) {
-                        try {
-                            participant.onValueReceived(entry.getKey(), entry.getValue().getValue().toString(),
-                                    serviceId);
-                        } catch (Exception e) {
-                            logger.error("Participant threw an exception onValueReceived", e);
+                        Object value = entry.getValue().getValue();
+                        if (value != null) {
+                            try {
+                                participant.onValueReceived(entry.getKey(), value.toString(), serviceId);
+                            } catch (Exception e) {
+                                logger.error("Participant threw an exception onValueReceived", e);
+                            }
                         }
                     }
                     break;
@@ -383,7 +385,7 @@ public class UpnpIOServiceImpl implements UpnpIOService, RegistryListener {
     }
 
     private Service findService(Device device, String serviceID) {
-        Service service = null;
+        Service service;
         String namespace = device.getType().getNamespace();
         if (UDAServiceId.DEFAULT_NAMESPACE.equals(namespace)
                 || UDAServiceId.BROKEN_DEFAULT_NAMESPACE.equals(namespace)) {

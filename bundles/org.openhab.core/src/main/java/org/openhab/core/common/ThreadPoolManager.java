@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -22,6 +22,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -30,6 +31,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import org.openhab.core.common.PoolBasedSequentialScheduledExecutorService.BasePoolExecutor;
 import org.openhab.core.internal.common.WrappedScheduledExecutorService;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentConstants;
@@ -99,7 +101,10 @@ public class ThreadPoolManager {
                     Integer poolSize = Integer.valueOf(string);
                     configs.put(poolName, poolSize);
                     ThreadPoolExecutor pool = (ThreadPoolExecutor) pools.get(poolName);
-                    if (pool instanceof ScheduledThreadPoolExecutor) {
+                    if (pool instanceof BasePoolExecutor basePool) {
+                        basePool.setMinimumPoolSize(poolSize);
+                        LOGGER.debug("Updated scheduled thread pool '{}' to minimum size {}", poolName, poolSize);
+                    } else if (pool instanceof ScheduledThreadPoolExecutor) {
                         pool.setCorePoolSize(poolSize);
                         LOGGER.debug("Updated scheduled thread pool '{}' to size {}", poolName, poolSize);
                     } else if (pool instanceof QueueingThreadPoolExecutor) {
@@ -112,6 +117,40 @@ public class ThreadPoolManager {
                     continue;
                 }
             }
+        }
+    }
+
+    /**
+     * Returns an instance of a scheduled service, which will sequentially execute submitted tasks. If a task is
+     * currently running the task is queued until the previous one is completed, this also applies for scheduled tasks.
+     * The service might execute submitted task might in different threads, but still one after the other.
+     * If it is the first request for the given pool name and a pool is used, the instance is newly created.
+     *
+     * @param poolName a short name used to identify the pool, if a thread pool is used e.g. "bluetooth-discovery"
+     * @param threadName a short name used to identify the thread if no thread pool is used, e.g. "bluetooth"
+     * @return an instance to use
+     */
+    public static ScheduledExecutorService getPoolBasedSequentialScheduledExecutorService(String poolName,
+            String threadName) {
+        if (configs.getOrDefault(poolName, 0) > 0) {
+            ExecutorService pool = pools.computeIfAbsent(poolName, name -> {
+                int cfg = getConfig(name);
+                ScheduledThreadPoolExecutor executor = new BasePoolExecutor(name, cfg,
+                        new NamedThreadFactory(name, true, Thread.NORM_PRIORITY));
+                executor.setKeepAliveTime(THREAD_TIMEOUT, TimeUnit.SECONDS);
+                executor.allowCoreThreadTimeOut(true);
+                executor.setRemoveOnCancelPolicy(true);
+                LOGGER.debug("Created scheduled pool based thread pool '{}' of size {}", name, cfg);
+                return executor;
+            });
+
+            if (pool instanceof BasePoolExecutor service) {
+                return new PoolBasedSequentialScheduledExecutorService(service);
+            } else {
+                throw new IllegalArgumentException("Pool " + poolName + " is not a base pool!");
+            }
+        } else {
+            return Executors.newSingleThreadScheduledExecutor(new NamedThreadFactory(threadName));
         }
     }
 

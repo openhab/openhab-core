@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -73,9 +73,7 @@ public class BitUtilitiesExtractIndividualMethodsTest {
         for (int offset = 0; offset < 5; offset++) {
             int byteIndex = origByteIndex + offset;
             byte[] bytesOffsetted = new byte[origBytes.length + offset];
-            for (int i = 0; i < bytesOffsetted.length; i++) {
-                bytesOffsetted[i] = 99;
-            }
+            Arrays.fill(bytesOffsetted, (byte) 99);
             System.arraycopy(origBytes, 0, bytesOffsetted, offset, origBytes.length);
             // offsetted:
             streamBuilder.add(new Object[] { expectedResult, type, bytesOffsetted, byteIndex });

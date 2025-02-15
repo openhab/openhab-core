@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.regex.PatternSyntaxException;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -94,8 +93,7 @@ public class AddonInfoAddonsXmlProvider implements AddonInfoProvider {
         try {
             String xml = Files.readString(file.toPath());
             if (xml != null && !xml.isBlank()) {
-                addonInfos.addAll(reader.readFromXML(xml).getAddons().stream()
-                        .map(a -> AddonInfo.builder(a).isMasterAddonInfo(false).build()).collect(Collectors.toSet()));
+                addonInfos.addAll(reader.readFromXML(xml).getAddons());
             } else {
                 logger.warn("File '{}' contents are null or empty", file.getName());
             }

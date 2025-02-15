@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,8 +15,6 @@ package org.openhab.core.common;
 import static java.util.concurrent.Executors.defaultThreadFactory;
 
 import java.lang.Thread.UncaughtExceptionHandler;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -25,10 +23,12 @@ import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * A builder for {@link ThreadFactory} instances. This builder is intended to be used for creating thread factories to
- * be used, e.g., when creating {@link Executor}s via the {@link Executors} utility methods.
+ * be used, e.g., when creating {@link java.util.concurrent.Executor}s via the {@link java.util.concurrent.Executors}
+ * utility methods.
  * <p>
  * The built {@link ThreadFactory} uses a wrapped {@link ThreadFactory} to create threads (defaulting to
- * {@link Executors#defaultThreadFactory()}, and then overwrites thread properties as indicated in the build process.
+ * {@link java.util.concurrent.Executors#defaultThreadFactory()}, and then overwrites thread properties as indicated in
+ * the build process.
  *
  * @author Henning Sudbrock - Initial contribution
  */
@@ -60,7 +60,7 @@ public class ThreadFactoryBuilder {
     /**
      * Sets the wrapped thread factory used to create threads.
      * <p>
-     * If set to null, {@link Executors#defaultThreadFactory()} is used.
+     * If set to null, {@link java.util.concurrent.Executors#defaultThreadFactory()} is used.
      * <p>
      * Defaults to null.
      *

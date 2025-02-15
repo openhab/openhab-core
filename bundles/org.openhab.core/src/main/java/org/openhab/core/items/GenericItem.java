@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -131,9 +131,6 @@ public abstract class GenericItem implements ActiveItem {
      */
     @Override
     public void addGroupName(String groupItemName) {
-        if (groupItemName == null) {
-            throw new IllegalArgumentException("Group item name must not be null!");
-        }
         if (!groupNames.contains(groupItemName)) {
             groupNames.add(groupItemName);
         }
@@ -161,9 +158,6 @@ public abstract class GenericItem implements ActiveItem {
      */
     @Override
     public void removeGroupName(String groupItemName) {
-        if (groupItemName == null) {
-            throw new IllegalArgumentException("Group item name must not be null!");
-        }
         groupNames.remove(groupItemName);
     }
 
@@ -198,8 +192,8 @@ public abstract class GenericItem implements ActiveItem {
 
     protected void internalSend(Command command) {
         // try to send the command to the bus
-        if (eventPublisher != null) {
-            eventPublisher.post(ItemEventFactory.createCommandEvent(this.getName(), command));
+        if (eventPublisher instanceof EventPublisher publisher) {
+            publisher.post(ItemEventFactory.createCommandEvent(this.getName(), command));
         }
     }
 
@@ -300,7 +294,7 @@ public abstract class GenericItem implements ActiveItem {
         Set<StateChangeListener> clonedListeners = new CopyOnWriteArraySet<>(listeners);
         ExecutorService pool = ThreadPoolManager.getPool(ITEM_THREADPOOLNAME);
         try {
-            final boolean stateChanged = newState != null && !newState.equals(oldState);
+            final boolean stateChanged = !newState.equals(oldState);
             clonedListeners.forEach(listener -> pool.execute(() -> {
                 try {
                     listener.stateUpdated(GenericItem.this, newState);
@@ -378,7 +372,7 @@ public abstract class GenericItem implements ActiveItem {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        result = prime * result + name.hashCode();
         return result;
     }
 
@@ -394,11 +388,7 @@ public abstract class GenericItem implements ActiveItem {
             return false;
         }
         GenericItem other = (GenericItem) obj;
-        if (name == null) {
-            if (other.name != null) {
-                return false;
-            }
-        } else if (!name.equals(other.name)) {
+        if (!name.equals(other.name)) {
             return false;
         }
         return true;
@@ -466,19 +456,17 @@ public abstract class GenericItem implements ActiveItem {
 
     @Override
     public @Nullable StateDescription getStateDescription(@Nullable Locale locale) {
-        if (stateDescriptionService != null) {
-            return stateDescriptionService.getStateDescription(this.name, locale);
+        if (stateDescriptionService instanceof StateDescriptionService service) {
+            return service.getStateDescription(this.name, locale);
         }
         return null;
     }
 
     @Override
     public @Nullable CommandDescription getCommandDescription(@Nullable Locale locale) {
-        if (commandDescriptionService != null) {
-            CommandDescription commandDescription = commandDescriptionService.getCommandDescription(this.name, locale);
-            if (commandDescription != null) {
-                return commandDescription;
-            }
+        CommandDescription commandOptions = getCommandOptions(locale);
+        if (commandOptions != null) {
+            return commandOptions;
         }
 
         StateDescription stateDescription = getStateDescription(locale);
@@ -508,6 +496,17 @@ public abstract class GenericItem implements ActiveItem {
     protected void logSetTypeError(TimeSeries timeSeries) {
         logger.error("Tried to set invalid state in time series {} on item {} of type {}, ignoring it", timeSeries,
                 getName(), getClass().getSimpleName());
+    }
+
+    protected @Nullable CommandDescription getCommandOptions(@Nullable Locale locale) {
+        if (commandDescriptionService instanceof CommandDescriptionService service) {
+            CommandDescription commandDescription = service.getCommandDescription(this.name, locale);
+            if (commandDescription != null) {
+                return commandDescription;
+            }
+        }
+
+        return null;
     }
 
     private CommandDescription stateOptions2CommandOptions(StateDescription stateDescription) {

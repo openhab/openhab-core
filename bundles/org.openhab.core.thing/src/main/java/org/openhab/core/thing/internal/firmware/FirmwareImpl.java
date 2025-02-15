@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -189,7 +189,7 @@ public final class FirmwareImpl implements Firmware {
                         digestString.append(String.format("%02x", b));
                     }
 
-                    if (!md5Hash.equals(digestString.toString())) {
+                    if (!md5Hash.contentEquals(digestString)) {
                         bytes = null;
                         throw new IllegalStateException(
                                 String.format("Invalid MD5 checksum. Expected %s, but was %s.", md5Hash, digestString));

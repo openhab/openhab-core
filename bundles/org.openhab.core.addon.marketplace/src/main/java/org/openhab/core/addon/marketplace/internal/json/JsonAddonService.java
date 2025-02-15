@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,11 +12,15 @@
  */
 package org.openhab.core.addon.marketplace.internal.json;
 
+import static org.openhab.core.addon.marketplace.MarketplaceConstants.*;
+
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.lang.reflect.Type;
+import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Arrays;
@@ -34,6 +38,7 @@ import org.openhab.core.addon.AddonService;
 import org.openhab.core.addon.marketplace.AbstractRemoteAddonService;
 import org.openhab.core.addon.marketplace.MarketplaceAddonHandler;
 import org.openhab.core.addon.marketplace.internal.json.model.AddonEntryDTO;
+import org.openhab.core.config.core.ConfigParser;
 import org.openhab.core.config.core.ConfigurableService;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.storage.StorageService;
@@ -87,12 +92,22 @@ public class JsonAddonService extends AbstractRemoteAddonService {
     @Modified
     public void modified(@Nullable Map<String, Object> config) {
         if (config != null) {
-            String urls = Objects.requireNonNullElse((String) config.get(CONFIG_URLS), "");
-            addonServiceUrls = Arrays.asList(urls.split("\\|"));
-            showUnstable = (Boolean) config.getOrDefault(CONFIG_SHOW_UNSTABLE, false);
+            String urls = ConfigParser.valueAsOrElse(config.get(CONFIG_URLS), String.class, "");
+            addonServiceUrls = Arrays.asList(urls.split("\\|")).stream().filter(this::isValidUrl).toList();
+            showUnstable = ConfigParser.valueAsOrElse(config.get(CONFIG_SHOW_UNSTABLE), Boolean.class, false);
             cachedRemoteAddons.invalidateValue();
             refreshSource();
         }
+    }
+
+    private boolean isValidUrl(String urlString) {
+        try {
+            (new URI(urlString)).toURL();
+        } catch (IllegalArgumentException | URISyntaxException | MalformedURLException e) {
+            logger.warn("JSON Addon Service invalid URL: {}", urlString);
+            return false;
+        }
+        return true;
     }
 
     @Override
@@ -121,7 +136,7 @@ public class JsonAddonService extends AbstractRemoteAddonService {
     protected List<Addon> getRemoteAddons() {
         return addonServiceUrls.stream().map(urlString -> {
             try {
-                URL url = new URL(urlString);
+                URL url = URI.create(urlString).toURL();
                 URLConnection connection = url.openConnection();
                 connection.addRequestProperty("Accept", "application/json");
                 try (Reader reader = new InputStreamReader(connection.getInputStream())) {
@@ -136,7 +151,7 @@ public class JsonAddonService extends AbstractRemoteAddonService {
     }
 
     /**
-     * Check if the addon UID is present and the entry is eitehr stable or unstable add-ons are requested
+     * Check if the addon UID is present and the entry is either stable or unstable add-ons are requested
      *
      * @param addonEntry the add-on entry to check
      * @return {@code true} if the add-on entry should be processed, {@code false otherwise}
@@ -171,13 +186,13 @@ public class JsonAddonService extends AbstractRemoteAddonService {
 
         Map<String, Object> properties = new HashMap<>();
         if (addonEntry.url.endsWith(".jar")) {
-            properties.put("jar_download_url", addonEntry.url);
+            properties.put(JAR_DOWNLOAD_URL_PROPERTY, addonEntry.url);
         } else if (addonEntry.url.endsWith(".kar")) {
-            properties.put("kar_download_url", addonEntry.url);
+            properties.put(KAR_DOWNLOAD_URL_PROPERTY, addonEntry.url);
         } else if (addonEntry.url.endsWith(".json")) {
-            properties.put("json_download_url", addonEntry.url);
+            properties.put(JSON_DOWNLOAD_URL_PROPERTY, addonEntry.url);
         } else if (addonEntry.url.endsWith(".yaml")) {
-            properties.put("yaml_download_url", addonEntry.url);
+            properties.put(YAML_DOWNLOAD_URL_PROPERTY, addonEntry.url);
         }
 
         boolean compatible = true;

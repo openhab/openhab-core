@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -135,7 +135,7 @@ public class ModuleTypeI18nServiceImpl implements ModuleTypeI18nService {
             @Nullable String llabel, @Nullable String ldescription) {
         List<Input> inputs = moduleTypeI18nUtil.getLocalizedInputs(at.getInputs(), bundle, moduleTypeUID, locale);
         List<Output> outputs = moduleTypeI18nUtil.getLocalizedOutputs(at.getOutputs(), bundle, moduleTypeUID, locale);
-        ActionType lat = null;
+        ActionType lat;
         if (at instanceof CompositeActionType type) {
             List<Action> modules = moduleI18nUtil.getLocalizedModules(type.getChildren(), bundle, moduleTypeUID,
                     ModuleTypeI18nUtil.MODULE_TYPE, locale);
@@ -164,7 +164,7 @@ public class ModuleTypeI18nServiceImpl implements ModuleTypeI18nService {
             @Nullable Locale locale, @Nullable List<ConfigDescriptionParameter> lconfigDescriptions,
             @Nullable String llabel, @Nullable String ldescription) {
         List<Input> inputs = moduleTypeI18nUtil.getLocalizedInputs(ct.getInputs(), bundle, moduleTypeUID, locale);
-        ConditionType lct = null;
+        ConditionType lct;
         if (ct instanceof CompositeConditionType type) {
             List<Condition> modules = moduleI18nUtil.getLocalizedModules(type.getChildren(), bundle, moduleTypeUID,
                     ModuleTypeI18nUtil.MODULE_TYPE, locale);
@@ -193,7 +193,7 @@ public class ModuleTypeI18nServiceImpl implements ModuleTypeI18nService {
             @Nullable Locale locale, @Nullable List<ConfigDescriptionParameter> lconfigDescriptions,
             @Nullable String llabel, @Nullable String ldescription) {
         List<Output> outputs = moduleTypeI18nUtil.getLocalizedOutputs(tt.getOutputs(), bundle, moduleTypeUID, locale);
-        TriggerType ltt = null;
+        TriggerType ltt;
         if (tt instanceof CompositeTriggerType type) {
             List<Trigger> modules = moduleI18nUtil.getLocalizedModules(type.getChildren(), bundle, moduleTypeUID,
                     ModuleTypeI18nUtil.MODULE_TYPE, locale);

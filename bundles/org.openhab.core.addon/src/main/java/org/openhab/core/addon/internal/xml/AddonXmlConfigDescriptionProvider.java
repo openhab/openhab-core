@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,7 +13,6 @@
 package org.openhab.core.addon.internal.xml;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionProvider;
 import org.openhab.core.config.core.i18n.ConfigI18nLocalizationService;
 import org.openhab.core.config.core.xml.AbstractXmlConfigDescriptionProvider;
@@ -22,7 +21,7 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 /**
- * Provides {@link ConfigDescription}s for bindings which are read from XML files.
+ * Provides {@link org.openhab.core.config.core.ConfigDescription}s for bindings which are read from XML files.
  *
  * @author Simon Kaufmann - Initial contribution
  * @author Jan N. Klug - Refactored to cover all add-ons

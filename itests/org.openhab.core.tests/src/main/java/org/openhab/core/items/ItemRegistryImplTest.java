@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -35,6 +35,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.i18n.UnitProvider;
+import org.openhab.core.internal.items.DefaultStateDescriptionFragmentProvider;
 import org.openhab.core.internal.items.ItemBuilderFactoryImpl;
 import org.openhab.core.internal.items.ItemRegistryImpl;
 import org.openhab.core.items.events.ItemAddedEvent;
@@ -101,7 +102,8 @@ public class ItemRegistryImplTest extends JavaTest {
         itemProvider.add(cameraItem4);
 
         // setup ItemRegistryImpl with necessary dependencies:
-        itemRegistry = new ItemRegistryImpl(mock(MetadataRegistry.class)) {
+        itemRegistry = new ItemRegistryImpl(mock(MetadataRegistry.class),
+                mock(DefaultStateDescriptionFragmentProvider.class)) {
             {
                 addProvider(itemProvider);
                 setManagedProvider(itemProvider);
@@ -116,14 +118,14 @@ public class ItemRegistryImplTest extends JavaTest {
     public void assertGetItemsReturnsItemFromRegisteredItemProvider() {
         List<Item> items = new ArrayList<>(itemRegistry.getItems());
         assertThat(items.size(), is(5));
-        assertThat(items.get(0).getName(), is(equalTo(ITEM_NAME)));
+        assertThat(items.getFirst().getName(), is(equalTo(ITEM_NAME)));
     }
 
     @Test
     public void assertGetItemsOfTypeReturnsItemFromRegisteredItemProvider() {
         List<Item> items = new ArrayList<>(itemRegistry.getItemsOfType(CoreItemFactory.SWITCH));
         assertThat(items.size(), is(3));
-        assertThat(items.get(0).getName(), is(equalTo(ITEM_NAME)));
+        assertThat(items.getFirst().getName(), is(equalTo(ITEM_NAME)));
     }
 
     @Test
@@ -164,7 +166,7 @@ public class ItemRegistryImplTest extends JavaTest {
     public void assertGetItemsByTagWithTwoTagsReturnsItemFromRegisteredItemProvider() {
         List<Item> items = new ArrayList<>(itemRegistry.getItemsByTag(CAMERA_TAG, SENSOR_TAG));
         assertThat(items.size(), is(1));
-        assertThat(items.get(0).getName(), is(equalTo(CAMERA_ITEM_NAME2)));
+        assertThat(items.getFirst().getName(), is(equalTo(CAMERA_ITEM_NAME2)));
     }
 
     @Test
@@ -237,7 +239,7 @@ public class ItemRegistryImplTest extends JavaTest {
 
         Item res = itemRegistry.get("item");
         assertEquals(1, res.getGroupNames().size());
-        assertEquals("group", res.getGroupNames().get(0));
+        assertEquals("group", res.getGroupNames().getFirst());
 
         GroupItem group = (GroupItem) itemRegistry.get("group");
         assertEquals(1, group.getMembers().size());

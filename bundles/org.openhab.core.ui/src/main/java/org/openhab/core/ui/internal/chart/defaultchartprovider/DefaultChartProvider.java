@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -80,7 +80,7 @@ public class DefaultChartProvider implements ChartProvider {
             // If the start value is below the median, then count legend position down
             // Otherwise count up.
             // We use this to decide whether to put the legend in the top or bottom corner.
-            if (yData.iterator().next().floatValue() > ((series.getYMax() - series.getYMin()) / 2 + series.getYMin())) {
+            if (yData.getFirst().floatValue() > ((series.getYMax() - series.getYMin()) / 2 + series.getYMin())) {
                 counter++;
             } else {
                 counter--;
@@ -359,12 +359,12 @@ public class DefaultChartProvider implements ChartProvider {
             // For 'binary' states, we need to replicate the data
             // to avoid diagonal lines
             if (state instanceof OnOffType || state instanceof OpenClosedType) {
-                xData.add(Date.from(historicItem.getTimestamp().toInstant().minus(1, ChronoUnit.MILLIS)));
+                xData.add(Date.from(historicItem.getInstant().minus(1, ChronoUnit.MILLIS)));
                 yData.add(convertData(state));
             }
 
             state = historicItem.getState();
-            xData.add(Date.from(historicItem.getTimestamp().toInstant()));
+            xData.add(Date.from(historicItem.getInstant()));
             yData.add(convertData(state));
         }
 
@@ -382,8 +382,8 @@ public class DefaultChartProvider implements ChartProvider {
 
         // If there's only 1 data point, plot it again!
         if (xData.size() == 1) {
-            xData.add(xData.iterator().next());
-            yData.add(yData.iterator().next());
+            xData.add(xData.getFirst());
+            yData.add(yData.getFirst());
         }
 
         XYSeries series = chart.addSeries(label, xData, yData);

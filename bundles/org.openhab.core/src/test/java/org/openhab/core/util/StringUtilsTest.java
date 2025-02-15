@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -24,6 +24,17 @@ import org.junit.jupiter.api.Test;
  */
 @NonNullByDefault
 public class StringUtilsTest {
+
+    @Test
+    public void abbreviateTest() {
+        assertEquals("", StringUtils.abbreviate("", 10));
+        assertEquals(null, StringUtils.abbreviate(null, 5));
+        assertEquals("openHAB is the ...", StringUtils.abbreviate("openHAB is the greatest ever", 18));
+        assertEquals("four", StringUtils.abbreviate("four", 4));
+        assertEquals("...", StringUtils.abbreviate("four", 3));
+        assertEquals("abc", StringUtils.abbreviate("abc", 3));
+        assertEquals("abc", StringUtils.abbreviate("abc", 2));
+    }
 
     @Test
     public void chompTest() {
@@ -91,6 +102,18 @@ public class StringUtilsTest {
         assertEquals("AAAAAAp3RF@CT", StringUtils.padLeft("p3RF@CT", 13, "A"));
         assertEquals("nopaddingshouldhappen", StringUtils.padLeft("nopaddingshouldhappen", 21, "x"));
         assertEquals("LongerStringThenMinSize", StringUtils.padLeft("LongerStringThenMinSize", 10, "x"));
+        assertEquals("xxxhas space", StringUtils.padLeft("has space", 12, "x"));
+    }
+
+    @Test
+    public void padRight() {
+        assertEquals("000000", StringUtils.padRight("", 6, "0"));
+        assertEquals("000000", StringUtils.padRight(null, 6, "0"));
+        assertEquals("teststr000", StringUtils.padRight("teststr", 10, "0"));
+        assertEquals("p3RF@CTAAAAAA", StringUtils.padRight("p3RF@CT", 13, "A"));
+        assertEquals("nopaddingshouldhappen", StringUtils.padRight("nopaddingshouldhappen", 21, "x"));
+        assertEquals("LongerStringThenMinSize", StringUtils.padRight("LongerStringThenMinSize", 10, "x"));
+        assertEquals("has spacexxx", StringUtils.padRight("has space", 12, "x"));
     }
 
     @Test

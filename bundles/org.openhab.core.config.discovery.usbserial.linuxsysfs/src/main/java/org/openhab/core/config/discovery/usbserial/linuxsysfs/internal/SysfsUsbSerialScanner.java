@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
@@ -127,7 +126,7 @@ public class SysfsUsbSerialScanner implements UsbSerialScanner {
 
     @Override
     public boolean canPerformScans() {
-        return isReadable(Paths.get(sysfsTtyDevicesDirectory)) && isReadable(Paths.get(devDirectory));
+        return isReadable(Path.of(sysfsTtyDevicesDirectory)) && isReadable(Path.of(devDirectory));
     }
 
     /**
@@ -140,10 +139,10 @@ public class SysfsUsbSerialScanner implements UsbSerialScanner {
     private Set<SerialPortInfo> getSerialPortInfos() throws IOException {
         Set<SerialPortInfo> result = new HashSet<>();
 
-        try (DirectoryStream<Path> sysfsTtyPaths = newDirectoryStream(Paths.get(sysfsTtyDevicesDirectory))) {
+        try (DirectoryStream<Path> sysfsTtyPaths = newDirectoryStream(Path.of(sysfsTtyDevicesDirectory))) {
             for (Path sysfsTtyPath : sysfsTtyPaths) {
                 String serialPortName = sysfsTtyPath.getFileName().toString();
-                Path devicePath = Paths.get(devDirectory).resolve(serialPortName);
+                Path devicePath = Path.of(devDirectory).resolve(serialPortName);
                 Path sysfsDevicePath = getRealDevicePath(sysfsTtyPath);
                 if (sysfsDevicePath != null && isReadable(devicePath) && isWritable(devicePath)) {
                     result.add(new SerialPortInfo(devicePath, sysfsDevicePath));
@@ -163,7 +162,7 @@ public class SysfsUsbSerialScanner implements UsbSerialScanner {
                             String serialPortName = devicePath.getFileName().toString();
                             // get the corresponding real sysinfo special dir :
                             Path sysfsDevicePath = getRealDevicePath(
-                                    Paths.get(sysfsTtyDevicesDirectory).resolve(serialPortName));
+                                    Path.of(sysfsTtyDevicesDirectory).resolve(serialPortName));
                             if (sysfsDevicePath != null && isReadable(devicePath) && isWritable(devicePath)) {
                                 result.add(new SerialPortInfo(devLinkPath, sysfsDevicePath));
                             }
@@ -222,7 +221,10 @@ public class SysfsUsbSerialScanner implements UsbSerialScanner {
      * of a USB device.
      */
     private @Nullable Path getUsbInterfaceParentPath(Path sysfsPath) {
-        if (sysfsPath.getFileName() == null) {
+        if (sysfsPath.toString().indexOf('-') == -1) {
+            // a fast path to avoid pattern matching for dozens of not matching directories
+            return null;
+        } else if (sysfsPath.getFileName() == null) {
             return null;
         } else if (SYSFS_USB_INTERFACE_DIRECTORY_PATTERN.matcher(sysfsPath.getFileName().toString()).matches()) {
             return sysfsPath;

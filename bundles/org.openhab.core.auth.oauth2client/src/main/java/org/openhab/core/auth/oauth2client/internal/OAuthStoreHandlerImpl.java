@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -35,6 +35,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.auth.client.oauth2.AccessTokenResponse;
 import org.openhab.core.auth.client.oauth2.StorageCipher;
 import org.openhab.core.auth.oauth2client.internal.cipher.SymmetricKeyCipher;
+import org.openhab.core.library.types.DateTimeType;
 import org.openhab.core.storage.Storage;
 import org.openhab.core.storage.StorageService;
 import org.osgi.service.component.annotations.Activate;
@@ -238,7 +239,7 @@ public class OAuthStoreHandlerImpl implements OAuthStoreHandler {
         public StorageFacade(Storage<String> storage) {
             this.storage = storage;
             // Add adapters for Instant
-            gson = new GsonBuilder()
+            gson = new GsonBuilder().setDateFormat(DateTimeType.DATE_PATTERN_JSON_COMPAT)
                     .registerTypeAdapter(Instant.class, (JsonDeserializer<Instant>) (json, typeOfT, context) -> {
                         try {
                             return Instant.parse(json.getAsString());

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -138,7 +138,7 @@ public class ProfileTypeResourceTest extends JavaTest {
         // channel side
         assertThat(list.size(), is(1));
 
-        ProfileTypeDTO pt = list.get(0);
+        ProfileTypeDTO pt = list.getFirst();
         assertThat(pt.kind, is("STATE"));
         assertThat(pt.label, is("profile2"));
         assertThat(pt.uid, is(stateProfileTypeUID2.toString()));
@@ -165,7 +165,7 @@ public class ProfileTypeResourceTest extends JavaTest {
         // should be only the second trigger profile because the first one is restricted to another channel type UID
         assertThat(list.size(), is(1));
 
-        ProfileTypeDTO pt = list.get(0);
+        ProfileTypeDTO pt = list.getFirst();
         assertThat(pt.kind, is("TRIGGER"));
         assertThat(pt.label, is("profile4"));
         assertThat(pt.uid, is(triggerProfileTypeUID2.toString()));

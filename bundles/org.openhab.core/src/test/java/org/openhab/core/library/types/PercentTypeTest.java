@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -91,7 +91,6 @@ public class PercentTypeTest {
         // Construction for each locale should always return the same result regardless of the current default locale
         Stream.of(Locale.ENGLISH, Locale.GERMAN).forEach(locale -> {
             char ds = DecimalFormatSymbols.getInstance(locale).getDecimalSeparator();
-            char gs = DecimalFormatSymbols.getInstance(locale).getGroupingSeparator();
 
             assertEquals(new PercentType("0"), new PercentType("0", locale));
             assertEquals(new PercentType("0.000"), new PercentType(String.format("0%s000", ds), locale));

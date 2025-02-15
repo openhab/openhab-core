@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -134,12 +134,8 @@ public class KarafAddonService implements AddonService {
         AddonInfo addonInfo = addonInfoRegistry.getAddonInfo(uid, locale);
 
         if (addonInfo != null) {
-            if (addonInfo.isMasterAddonInfo()) {
-                addon = addon.withLabel(addonInfo.getName()).withDescription(addonInfo.getDescription());
-            } else {
-                addon = addon.withLabel(feature.getDescription());
-            }
-            addon = addon.withConnection(addonInfo.getConnection()).withCountries(addonInfo.getCountries())
+            addon = addon.withLabel(addonInfo.getName()).withDescription(addonInfo.getDescription())
+                    .withConnection(addonInfo.getConnection()).withCountries(addonInfo.getCountries())
                     .withLink(getDefaultDocumentationLink(type, name))
                     .withConfigDescriptionURI(addonInfo.getConfigDescriptionURI());
         } else {

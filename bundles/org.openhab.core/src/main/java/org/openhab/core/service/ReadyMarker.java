@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -55,8 +55,8 @@ public final class ReadyMarker {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((identifier == null) ? 0 : identifier.hashCode());
-        result = prime * result + ((type == null) ? 0 : type.hashCode());
+        result = prime * result + identifier.hashCode();
+        result = prime * result + type.hashCode();
         return result;
     }
 
@@ -72,18 +72,10 @@ public final class ReadyMarker {
             return false;
         }
         ReadyMarker other = (ReadyMarker) obj;
-        if (identifier == null) {
-            if (other.identifier != null) {
-                return false;
-            }
-        } else if (!identifier.equals(other.identifier)) {
+        if (!identifier.equals(other.identifier)) {
             return false;
         }
-        if (type == null) {
-            if (other.type != null) {
-                return false;
-            }
-        } else if (!type.equals(other.type)) {
+        if (!type.equals(other.type)) {
             return false;
         }
         return true;

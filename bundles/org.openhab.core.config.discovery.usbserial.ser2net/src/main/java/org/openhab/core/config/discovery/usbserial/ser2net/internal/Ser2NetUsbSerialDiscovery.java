@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -115,8 +115,7 @@ public class Ser2NetUsbSerialDiscovery implements ServiceListener, UsbSerialDisc
 
         Set<UsbSerialDeviceInformation> scanResult = Stream.of(mdnsClient.list(SERVICE_TYPE, SINGLE_SCAN_DURATION))
                 .map(this::createUsbSerialDeviceInformation) //
-                .filter(Optional::isPresent) //
-                .map(Optional::get) //
+                .flatMap(Optional::stream) //
                 .collect(Collectors.toSet());
 
         Set<UsbSerialDeviceInformation> added = setDifference(scanResult, lastScanResult);
@@ -125,9 +124,9 @@ public class Ser2NetUsbSerialDiscovery implements ServiceListener, UsbSerialDisc
 
         lastScanResult = scanResult;
 
-        removed.stream().forEach(this::announceRemovedDevice);
-        added.stream().forEach(this::announceAddedDevice);
-        unchanged.stream().forEach(this::announceAddedDevice);
+        removed.forEach(this::announceRemovedDevice);
+        added.forEach(this::announceAddedDevice);
+        unchanged.forEach(this::announceAddedDevice);
 
         logger.debug("Completed ser2net USB-Serial mDNS single discovery scan");
     }

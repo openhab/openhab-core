@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,6 +15,7 @@ package org.openhab.core.util;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -26,6 +27,25 @@ import org.eclipse.jdt.annotation.Nullable;
  */
 @NonNullByDefault
 public class StringUtils {
+
+    /**
+     * Input string is shortened to the maxwidth, the last 3 chars are replaced by ...
+     * 
+     * For example: (maxWidth 18) input="openHAB is the greatest ever", return="openHAB is the ..."
+     * 
+     * @param input input string
+     * @param maxWidth maxmimum amount of characters to return (including ...)
+     * @return Abbreviated String
+     */
+    public static @Nullable String abbreviate(final @Nullable String input, final int maxWidth) {
+        if (input != null) {
+            if (input.length() < 4 || input.length() <= maxWidth) {
+                return input;
+            }
+            return input.substring(0, maxWidth - 3) + "...";
+        }
+        return input;
+    }
 
     /**
      * If a newline char exists at the end of the line, it is removed
@@ -188,8 +208,29 @@ public class StringUtils {
      * @return the padded String
      */
     public static String padLeft(@Nullable String str, int minSize, String padString) {
-        String paddedString = str == null ? "" : str;
-        return String.format("%" + minSize + "s", paddedString).replace(" ", padString);
+        String paddedString = Objects.requireNonNullElse(str, "");
+        return paddedString.length() >= minSize ? paddedString
+                : padString.repeat(minSize - paddedString.length()) + paddedString;
+    }
+
+    /**
+     * Pads the string from the right
+     *
+     * <pre>
+      * padRight("9", 4, "0")        => "9000"
+      * padRight("3112", 12, "*")    => "3112********"
+      * padRight("openHAB", 4, "*")  => "openHAB"
+     * </pre>
+     *
+     * @param str the String to pad, may be null
+     * @param minSize the minimum String size to return
+     * @param padString the String to add when padding
+     * @return the padded String
+     */
+    public static String padRight(@Nullable String str, int minSize, String padString) {
+        String paddedString = Objects.requireNonNullElse(str, "");
+        return (paddedString.length() >= minSize) ? paddedString
+                : paddedString + padString.repeat(minSize - paddedString.length());
     }
 
     /**

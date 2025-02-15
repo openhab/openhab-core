@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,6 +14,8 @@ package org.openhab.core.automation.module.script.internal.handler;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
@@ -30,6 +32,8 @@ import org.slf4j.LoggerFactory;
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Simon Merschjohann - Initial contribution
+ * @author Florian Hotze - Add support for script pre-compilation, Synchronize script context access if the ScriptEngine
+ *         implements locking
  */
 @NonNullByDefault
 public class ScriptConditionHandler extends AbstractScriptModuleHandler<Condition> implements ConditionHandler {
@@ -43,22 +47,47 @@ public class ScriptConditionHandler extends AbstractScriptModuleHandler<Conditio
     }
 
     @Override
+    public void compile() throws ScriptException {
+        super.compileScript();
+    }
+
+    @Override
     public boolean isSatisfied(final Map<String, Object> context) {
         boolean result = false;
+
+        if (script.isEmpty()) {
+            return true;
+        }
+
         Optional<ScriptEngine> engine = getScriptEngine();
 
         if (engine.isPresent()) {
             ScriptEngine scriptEngine = engine.get();
-            setExecutionContext(scriptEngine, context);
             try {
-                Object returnVal = scriptEngine.eval(script);
+                if (scriptEngine instanceof Lock lock && !lock.tryLock(1, TimeUnit.MINUTES)) {
+                    logger.error(
+                            "Failed to acquire lock within one minute for script module '{}' of rule with UID '{}'",
+                            module.getId(), ruleUID);
+                    return result;
+                }
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            try {
+                setExecutionContext(scriptEngine, context);
+                Object returnVal = eval(scriptEngine, script);
                 if (returnVal instanceof Boolean boolean1) {
                     result = boolean1;
                 } else {
-                    logger.error("Script did not return a boolean value, but '{}'", returnVal);
+                    logger.error("Script of rule with UID '{}' did not return a boolean value, but '{}'", ruleUID,
+                            returnVal);
                 }
-            } catch (ScriptException e) {
-                logger.error("Script execution failed: {}", e.getMessage());
+                resetExecutionContext(scriptEngine, context);
+            } finally { // Make sure that Lock is unlocked regardless of an exception being thrown or not to avoid
+                        // deadlocks
+                if (scriptEngine instanceof Lock lock) {
+                    lock.unlock();
+                }
             }
         }
 

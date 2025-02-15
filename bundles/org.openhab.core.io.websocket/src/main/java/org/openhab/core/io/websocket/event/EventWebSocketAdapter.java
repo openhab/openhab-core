@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -37,7 +37,7 @@ import com.google.gson.Gson;
 @NonNullByDefault
 @Component(immediate = true, service = { EventSubscriber.class, WebSocketAdapter.class })
 public class EventWebSocketAdapter implements EventSubscriber, WebSocketAdapter {
-    public static final String ADAPTER_ID = "event-subscriber";
+    public static final String ADAPTER_ID = "events";
     private final Gson gson = new Gson();
     private final EventPublisher eventPublisher;
 

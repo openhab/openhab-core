@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -62,7 +62,7 @@ public class ConverterValueMap {
             throws ConversionException {
         this.reader = reader;
         this.context = context;
-        this.valueMap = readValueMap(this.reader, numberOfValues >= -1 ? numberOfValues : -1, this.context);
+        this.valueMap = readValueMap(this.reader, Math.max(numberOfValues, -1), this.context);
     }
 
     /**

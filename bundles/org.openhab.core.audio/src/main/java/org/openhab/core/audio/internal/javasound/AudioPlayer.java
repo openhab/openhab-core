@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,7 +17,6 @@ import java.io.IOException;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
-import javax.sound.sampled.Line;
 import javax.sound.sampled.Line.Info;
 import javax.sound.sampled.Mixer;
 import javax.sound.sampled.SourceDataLine;
@@ -77,10 +76,10 @@ public class AudioPlayer extends Thread {
             logger.warn("No line found: {}", e.getMessage());
             logger.info("Available lines are:");
             Mixer.Info[] mixerInfo = AudioSystem.getMixerInfo(); // get available mixers
-            Mixer mixer = null;
-            for (int cnt = 0; cnt < mixerInfo.length; cnt++) {
-                mixer = AudioSystem.getMixer(mixerInfo[cnt]);
-                Line.Info[] lineInfos = mixer.getSourceLineInfo();
+            Mixer mixer;
+            for (Mixer.Info value : mixerInfo) {
+                mixer = AudioSystem.getMixer(value);
+                Info[] lineInfos = mixer.getSourceLineInfo();
                 for (Info lineInfo : lineInfos) {
                     logger.info("{}", lineInfo);
                 }

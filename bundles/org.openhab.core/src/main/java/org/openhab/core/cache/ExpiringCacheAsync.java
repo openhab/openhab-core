@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -65,8 +65,8 @@ public class ExpiringCacheAsync<V> {
      * @param requestNewValueFuture If the value is expired, this supplier is called to supply the cache with a future
      *            that on completion will update the cached value
      * @return the value in form of a CompletableFuture. You can for instance use it this way:
-     *         `getValue().thenAccept(value->useYourValueHere(value));`. If you need the value synchronously you can use
-     *         `getValue().get()`.
+     *         {@code getValue().thenAccept(value->useYourValueHere(value));}. If you need the value synchronously you
+     *         can use {@code getValue().get()}.
      */
     public CompletableFuture<V> getValue(Supplier<CompletableFuture<V>> requestNewValueFuture) {
         if (isExpired()) {

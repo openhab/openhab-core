@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -110,16 +110,16 @@ public class AutoUpdateManagerTest {
 
         when(onlineThingMock.getHandler()).thenReturn(handlerMock);
         when(onlineThingMock.getStatus()).thenReturn(ThingStatus.ONLINE);
-        when(onlineThingMock.getChannel(eq(CHANNEL_UID_ONLINE_1.getId())))
+        when(onlineThingMock.getChannel(eq(CHANNEL_UID_ONLINE_1)))
                 .thenAnswer(answer -> ChannelBuilder.create(CHANNEL_UID_ONLINE_1, CoreItemFactory.STRING)
                         .withAutoUpdatePolicy(policies.get(CHANNEL_UID_ONLINE_1)).build());
-        when(onlineThingMock.getChannel(eq(CHANNEL_UID_ONLINE_2.getId())))
+        when(onlineThingMock.getChannel(eq(CHANNEL_UID_ONLINE_2)))
                 .thenAnswer(answer -> ChannelBuilder.create(CHANNEL_UID_ONLINE_2, CoreItemFactory.STRING)
                         .withAutoUpdatePolicy(policies.get(CHANNEL_UID_ONLINE_2)).build());
 
         when(offlineThingMock.getHandler()).thenReturn(handlerMock);
         when(offlineThingMock.getStatus()).thenReturn(ThingStatus.OFFLINE);
-        when(offlineThingMock.getChannel(eq(CHANNEL_UID_OFFLINE_1.getId())))
+        when(offlineThingMock.getChannel(eq(CHANNEL_UID_OFFLINE_1)))
                 .thenAnswer(answer -> ChannelBuilder.create(CHANNEL_UID_OFFLINE_1, CoreItemFactory.STRING)
                         .withAutoUpdatePolicy(policies.get(CHANNEL_UID_OFFLINE_1)).build());
 

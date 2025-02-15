@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -46,7 +46,7 @@ public class LocalizedKey {
         final int prime = 31;
         int result = 1;
         result = prime * result + key.hashCode();
-        result = prime * result + ((locale != null) ? locale.hashCode() : 0);
+        result = prime * result + (locale instanceof String string ? string.hashCode() : 0);
         return result;
     }
 

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,14 +12,14 @@
  */
 package org.openhab.core.ui.internal.items;
 
-import java.time.DateTimeException;
-import java.time.ZonedDateTime;
+import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.IllegalFormatException;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -39,12 +39,12 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.config.core.ConfigurableService;
+import org.openhab.core.i18n.TimeZoneProvider;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemNotUniqueException;
 import org.openhab.core.items.ItemRegistry;
-import org.openhab.core.items.RegistryHook;
 import org.openhab.core.library.items.CallItem;
 import org.openhab.core.library.items.ColorItem;
 import org.openhab.core.library.items.ContactItem;
@@ -64,7 +64,6 @@ import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.library.types.PercentType;
 import org.openhab.core.library.types.PlayPauseType;
 import org.openhab.core.library.types.QuantityType;
-import org.openhab.core.library.types.StringType;
 import org.openhab.core.model.sitemap.sitemap.ColorArray;
 import org.openhab.core.model.sitemap.sitemap.Default;
 import org.openhab.core.model.sitemap.sitemap.Group;
@@ -86,7 +85,6 @@ import org.openhab.core.types.StateDescription;
 import org.openhab.core.types.StateOption;
 import org.openhab.core.types.UnDefType;
 import org.openhab.core.types.util.UnitUtils;
-import org.openhab.core.ui.internal.UIActivator;
 import org.openhab.core.ui.items.ItemUIProvider;
 import org.openhab.core.ui.items.ItemUIRegistry;
 import org.osgi.framework.Constants;
@@ -113,6 +111,7 @@ import org.slf4j.LoggerFactory;
  * @author Laurent Garnier - Support added for multiple AND conditions in labelcolor/valuecolor/visibility
  * @author Laurent Garnier - new icon parameter based on conditional rules
  * @author Danny Baumann - widget label source support
+ * @author Laurent Garnier - Consider Colortemperaturepicker element as possible default widget
  */
 @NonNullByDefault
 @Component(immediate = true, configurationPid = "org.openhab.sitemap", //
@@ -138,6 +137,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
     protected final Set<ItemUIProvider> itemUIProviders = new HashSet<>();
 
     private final ItemRegistry itemRegistry;
+    private final TimeZoneProvider timeZoneProvider;
 
     private final Map<Widget, Widget> defaultWidgets = Collections.synchronizedMap(new WeakHashMap<>());
 
@@ -154,8 +154,10 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
     }
 
     @Activate
-    public ItemUIRegistryImpl(@Reference ItemRegistry itemRegistry) {
+    public ItemUIRegistryImpl(final @Reference ItemRegistry itemRegistry,
+            final @Reference TimeZoneProvider timeZoneProvider) {
         this.itemRegistry = itemRegistry;
+        this.timeZoneProvider = timeZoneProvider;
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
@@ -284,6 +286,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         } else if (DimmerItem.class.equals(itemType)) {
             Slider slider = SitemapFactory.eINSTANCE.createSlider();
             slider.setSwitchEnabled(true);
+            slider.setReleaseOnly(true);
             return slider;
         } else if (ImageItem.class.equals(itemType)) {
             return SitemapFactory.eINSTANCE.createImage();
@@ -302,6 +305,9 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
             }
             if (!isReadOnly && NumberItem.class.isAssignableFrom(itemType) && hasItemTag(itemName, "Setpoint")) {
                 return SitemapFactory.eINSTANCE.createSetpoint();
+            } else if (!isReadOnly && NumberItem.class.isAssignableFrom(itemType)
+                    && hasItemTag(itemName, "ColorTemperature")) {
+                return SitemapFactory.eINSTANCE.createColortemperaturepicker();
             } else {
                 return SitemapFactory.eINSTANCE.createText();
             }
@@ -340,7 +346,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
 
         String itemName = w.getItem();
         if (itemName == null || itemName.isBlank()) {
-            return transform(label, true, null);
+            return transform(label, true, null, null);
         }
 
         String labelMappedOption = null;
@@ -372,7 +378,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
                 state = item.getState();
 
                 if (formatPattern.contains("%d")) {
-                    if (!(state instanceof Number)) {
+                    if (!(state instanceof UnDefType) && !(state instanceof Number)) {
                         // States which do not provide a Number will be converted to DecimalType.
                         // e.g.: GroupItem can provide a count of items matching the active state
                         // for some group functions.
@@ -389,30 +395,43 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         }
 
         boolean considerTransform = false;
+        String transformFailbackValue = null;
         if (formatPattern != null) {
             if (formatPattern.isEmpty()) {
                 label = label.substring(0, label.indexOf("[")).trim();
             } else {
-                if (state == null || state instanceof UnDefType) {
+                if (state == null) {
                     formatPattern = formatUndefined(formatPattern);
                     considerTransform = true;
+                } else if (state instanceof UnDefType) {
+                    Matcher matcher = EXTRACT_TRANSFORM_FUNCTION_PATTERN.matcher(formatPattern);
+                    if (matcher.find()) {
+                        considerTransform = true;
+                        String type = matcher.group(1);
+                        String function = matcher.group(2);
+                        formatPattern = type + "(" + function + "):" + state.toString();
+                        transformFailbackValue = "-";
+                    } else {
+                        formatPattern = formatUndefined(formatPattern);
+                    }
                 } else {
                     // if the channel contains options, we build a label with the mapped option value
                     if (stateDescription != null) {
                         for (StateOption option : stateDescription.getOptions()) {
-                            if (option.getValue().equals(state.toString()) && option.getLabel() != null) {
-                                State stateOption = new StringType(option.getLabel());
+                            String optionLabel = option.getLabel();
+                            if (option.getValue().equals(state.toString()) && optionLabel != null) {
+                                String formatPatternOption;
                                 try {
-                                    String formatPatternOption = stateOption.format(formatPattern);
-                                    labelMappedOption = label.trim();
-                                    labelMappedOption = labelMappedOption.substring(0,
-                                            labelMappedOption.indexOf("[") + 1) + formatPatternOption + "]";
-                                } catch (IllegalArgumentException e) {
+                                    formatPatternOption = String.format(formatPattern, optionLabel);
+                                } catch (IllegalFormatException e) {
                                     logger.debug(
-                                            "Mapping option value '{}' for item {} using format '{}' failed ({}); mapping is ignored",
-                                            stateOption, itemName, formatPattern, e.getMessage());
-                                    labelMappedOption = null;
+                                            "Mapping option value '{}' for item {} using format '{}' failed ({}); format is ignored and option label is used",
+                                            optionLabel, itemName, formatPattern, e.getMessage());
+                                    formatPatternOption = optionLabel;
                                 }
+                                labelMappedOption = label.trim();
+                                labelMappedOption = labelMappedOption.substring(0, labelMappedOption.indexOf("[") + 1)
+                                        + formatPatternOption + "]";
                                 break;
                             }
                         }
@@ -438,12 +457,6 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
                             quantityState = convertStateToWidgetUnit(quantityState, w);
                             state = quantityState;
                         }
-                    } else if (state instanceof DateTimeType type) {
-                        // Translate a DateTimeType state to the local time zone
-                        try {
-                            state = type.toLocaleZone();
-                        } catch (DateTimeException ignored) {
-                        }
                     }
 
                     // The following exception handling has been added to work around a Java bug with formatting
@@ -455,11 +468,22 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
                         if (matcher.find()) {
                             considerTransform = true;
                             String type = matcher.group(1);
-                            String pattern = matcher.group(2);
+                            String function = matcher.group(2);
                             String value = matcher.group(3);
-                            formatPattern = type + "(" + pattern + "):" + state.format(value);
+                            formatPattern = type + "(" + function + "):";
+                            if (state instanceof DateTimeType dateTimeState) {
+                                formatPattern += dateTimeState.format(value, timeZoneProvider.getTimeZone());
+                                transformFailbackValue = dateTimeState.toFullString(timeZoneProvider.getTimeZone());
+                            } else {
+                                formatPattern += state.format(value);
+                                transformFailbackValue = state.toString();
+                            }
                         } else {
-                            formatPattern = state.format(formatPattern);
+                            if (state instanceof DateTimeType dateTimeState) {
+                                formatPattern = dateTimeState.format(formatPattern, timeZoneProvider.getTimeZone());
+                            } else {
+                                formatPattern = state.format(formatPattern);
+                            }
                         }
                     } catch (IllegalArgumentException e) {
                         logger.warn("Exception while formatting value '{}' of item {} with format '{}': {}", state,
@@ -476,7 +500,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
             }
         }
 
-        return transform(label, considerTransform, labelMappedOption);
+        return transform(label, considerTransform, transformFailbackValue, labelMappedOption);
     }
 
     @Override
@@ -617,36 +641,40 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
      * If the value does not start with the call to a transformation service,
      * we return the label with the mapped option value if provided (not null).
      */
-    private String transform(String label, boolean matchTransform, @Nullable String labelMappedOption) {
+    private String transform(String label, boolean matchTransform, @Nullable String transformFailbackValue,
+            @Nullable String labelMappedOption) {
         String ret = label;
         String formatPattern = getFormatPattern(label);
         if (formatPattern != null) {
             Matcher matcher = EXTRACT_TRANSFORM_FUNCTION_PATTERN.matcher(formatPattern);
             if (matchTransform && matcher.find()) {
                 String type = matcher.group(1);
-                String pattern = matcher.group(2);
+                String function = matcher.group(2);
                 String value = matcher.group(3);
-                TransformationService transformation = TransformationHelper
-                        .getTransformationService(UIActivator.getContext(), type);
-                if (transformation != null) {
-                    try {
-                        String transformationResult = transformation.transform(pattern, value);
-                        if (transformationResult != null) {
-                            ret = insertInLabel(label, transformationResult);
-                        } else {
-                            logger.warn("transformation of type {} did not return a valid result", type);
-                            ret = insertInLabel(label, UnDefType.NULL);
+                String failbackValue = transformFailbackValue != null ? transformFailbackValue : value;
+                try {
+                    TransformationService transformation = TransformationHelper.getTransformationService(type);
+                    if (transformation != null) {
+                        try {
+                            String transformationResult = transformation.transform(function, value);
+                            if (transformationResult != null) {
+                                ret = insertInLabel(label, transformationResult);
+                            } else {
+                                logger.warn("Transformation of type {} did not return a valid result", type);
+                                ret = insertInLabel(label, failbackValue);
+                            }
+                        } catch (RuntimeException e) {
+                            throw new TransformationException("Transformation service of type '" + type
+                                    + "' threw an exception: " + e.getMessage(), e);
                         }
-                    } catch (TransformationException e) {
-                        logger.error("transformation throws exception [transformation={}, value={}]", transformation,
-                                value, e);
-                        ret = insertInLabel(label, value);
+                    } else {
+                        throw new TransformationException(
+                                "Transformation service of type '" + type + "' is not available.");
                     }
-                } else {
-                    logger.warn(
-                            "couldn't transform value in label because transformationService of type '{}' is unavailable",
-                            type);
-                    ret = insertInLabel(label, value);
+                } catch (TransformationException e) {
+                    logger.warn("Failed transforming the value '{}' with pattern '{}': {}", value, formatPattern,
+                            e.getMessage());
+                    ret = insertInLabel(label, failbackValue);
                 }
             } else if (labelMappedOption != null) {
                 ret = labelMappedOption;
@@ -725,7 +753,8 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
                 returnState = itemState.as(DecimalType.class);
             }
         } else if (w instanceof Switch sw) {
-            if (sw.getMappings().isEmpty()) {
+            StateDescription stateDescr = i.getStateDescription();
+            if (sw.getMappings().isEmpty() && (stateDescr == null || stateDescr.getOptions().isEmpty())) {
                 returnState = itemState.as(OnOffType.class);
             }
         }
@@ -1115,9 +1144,9 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
                 } catch (NumberFormatException e) {
                     logger.debug("matchStateToValue: Decimal format exception: ", e);
                 }
-            } else if (state instanceof DateTimeType type) {
-                ZonedDateTime val = type.getZonedDateTime();
-                ZonedDateTime now = ZonedDateTime.now();
+            } else if (state instanceof DateTimeType dateTimeState) {
+                Instant val = dateTimeState.getInstant();
+                Instant now = Instant.now();
                 long secsDif = ChronoUnit.SECONDS.between(val, now);
 
                 try {
@@ -1396,16 +1425,6 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
     @Override
     public @Nullable Item remove(String itemName, boolean recursive) {
         return itemRegistry.remove(itemName, recursive);
-    }
-
-    @Override
-    public void addRegistryHook(RegistryHook<Item> hook) {
-        itemRegistry.addRegistryHook(hook);
-    }
-
-    @Override
-    public void removeRegistryHook(RegistryHook<Item> hook) {
-        itemRegistry.removeRegistryHook(hook);
     }
 
     @Override

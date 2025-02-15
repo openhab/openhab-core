@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -21,7 +21,6 @@ import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
@@ -118,12 +117,7 @@ public class SystemInfoResource implements RESTResource, ConfigurationListener {
             lastModified = Date.from(Instant.now().truncatedTo(ChronoUnit.SECONDS));
         }
 
-        CacheControl cc = new CacheControl();
-        cc.setNoCache(true);
-        cc.setMustRevalidate(true);
-        cc.setPrivate(true);
-
         final UoMInfoBean bean = new UoMInfoBean(unitProvider);
-        return Response.ok(bean).lastModified(lastModified).cacheControl(cc).build();
+        return Response.ok(bean).lastModified(lastModified).cacheControl(RESTConstants.CACHE_CONTROL).build();
     }
 }

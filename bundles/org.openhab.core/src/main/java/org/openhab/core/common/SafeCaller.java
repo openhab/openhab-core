@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,6 +14,7 @@ package org.openhab.core.common;
 
 import java.util.concurrent.TimeUnit;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
@@ -39,5 +40,5 @@ public interface SafeCaller {
      * @param interfaceType the interface which defines the relevant methods
      * @return a safe call builder instance.
      */
-    <T> SafeCallerBuilder<T> create(T target, Class<T> interfaceType);
+    <T> SafeCallerBuilder<@NonNull T> create(T target, Class<T> interfaceType);
 }

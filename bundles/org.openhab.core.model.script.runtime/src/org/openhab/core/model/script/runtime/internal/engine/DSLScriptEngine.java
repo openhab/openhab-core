@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -169,8 +169,10 @@ public class DSLScriptEngine implements javax.script.ScriptEngine {
 
         Map<String, Object> cachePreset = scriptExtensionAccessor.findPreset("cache",
                 (String) context.getAttribute("oh.engine-identifier", ScriptContext.ENGINE_SCOPE));
-        evalContext.newValue(QualifiedName.create("sharedCache"), cachePreset.get("sharedCache"));
-        evalContext.newValue(QualifiedName.create("privateCache"), cachePreset.get("privateCache"));
+        evalContext.newValue(QualifiedName.create(ScriptJvmModelInferrer.VAR_SHARED_CACHE),
+                cachePreset.get("sharedCache"));
+        evalContext.newValue(QualifiedName.create(ScriptJvmModelInferrer.VAR_PRIVATE_CACHE),
+                cachePreset.get("privateCache"));
         // now add specific implicit vars, where we have to map the right content
         Object value = context.getAttribute(OUTPUT_EVENT);
         if (value instanceof ChannelTriggeredEvent event) {

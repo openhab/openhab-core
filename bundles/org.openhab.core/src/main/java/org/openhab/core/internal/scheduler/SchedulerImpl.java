@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -200,15 +200,14 @@ public class SchedulerImpl implements Scheduler {
      */
     private static class ScheduledCompletableFutureRecurring<T> extends ScheduledCompletableFutureOnce<T> {
         private @Nullable volatile ScheduledCompletableFuture<T> scheduledPromise;
-        private @Nullable String identifier;
 
         public ScheduledCompletableFutureRecurring(@Nullable String identifier, ZonedDateTime scheduledTime) {
             super(identifier, scheduledTime);
             exceptionally(e -> {
                 synchronized (this) {
                     if (e instanceof CancellationException) {
-                        if (scheduledPromise != null) {
-                            scheduledPromise.cancel(true);
+                        if (scheduledPromise instanceof ScheduledCompletableFuture promise) {
+                            promise.cancel(true);
                         }
                     }
                 }
@@ -223,7 +222,7 @@ public class SchedulerImpl implements Scheduler {
                     future.cancel(true);
                 } else {
                     scheduledPromise = future;
-                    scheduledPromise.getPromise().exceptionally(ex -> {
+                    future.getPromise().exceptionally(ex -> {
                         // if an error occurs in the scheduled job propagate to parent
                         ScheduledCompletableFutureRecurring.this.completeExceptionally(ex);
                         return null;
@@ -234,12 +233,13 @@ public class SchedulerImpl implements Scheduler {
 
         @Override
         public long getDelay(@Nullable TimeUnit timeUnit) {
-            return scheduledPromise != null ? scheduledPromise.getDelay(timeUnit) : 0;
+            return scheduledPromise instanceof ScheduledCompletableFuture promise ? promise.getDelay(timeUnit) : 0;
         }
 
         @Override
         public ZonedDateTime getScheduledTime() {
-            return scheduledPromise != null ? scheduledPromise.getScheduledTime() : super.getScheduledTime();
+            return scheduledPromise instanceof ScheduledCompletableFuture promise ? promise.getScheduledTime()
+                    : super.getScheduledTime();
         }
     }
 

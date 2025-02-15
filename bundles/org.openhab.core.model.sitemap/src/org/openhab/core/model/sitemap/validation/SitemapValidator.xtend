@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,6 +15,9 @@
  */
 package org.openhab.core.model.sitemap.validation
 
+import org.openhab.core.model.sitemap.sitemap.Button
+import org.openhab.core.model.sitemap.sitemap.Buttongrid
+import org.openhab.core.model.sitemap.sitemap.Colortemperaturepicker
 import org.openhab.core.model.sitemap.sitemap.Frame
 import org.openhab.core.model.sitemap.sitemap.LinkableWidget
 import org.openhab.core.model.sitemap.sitemap.Setpoint
@@ -24,7 +27,6 @@ import org.openhab.core.model.sitemap.sitemap.Widget
 import org.eclipse.xtext.validation.Check
 import java.math.BigDecimal
 import org.openhab.core.model.sitemap.sitemap.Input
-import org.eclipse.xtext.nodemodel.INode
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils
 
 //import org.eclipse.xtext.validation.Check
@@ -45,6 +47,11 @@ class SitemapValidator extends AbstractSitemapValidator {
                     SitemapPackage.Literals.FRAME.getEStructuralFeature(SitemapPackage.FRAME__CHILDREN));
                 return;
             }
+            if (w instanceof Button) {
+                error("Frames should not contain Button, Button is allowed only in Buttongrid",
+                    SitemapPackage.Literals.FRAME.getEStructuralFeature(SitemapPackage.FRAME__CHILDREN));
+                return;
+            }
         }
     }
 
@@ -54,6 +61,11 @@ class SitemapValidator extends AbstractSitemapValidator {
         var containsOtherWidgets = false
 
         for (Widget w : sitemap.children) {
+            if (w instanceof Button) {
+                error("Sitemap should not contain Button, Button is allowed only in Buttongrid",
+                    SitemapPackage.Literals.SITEMAP.getEStructuralFeature(SitemapPackage.SITEMAP__NAME));
+                return;
+            }
             if (w instanceof Frame) {
                 containsFrames = true
             } else {
@@ -70,13 +82,21 @@ class SitemapValidator extends AbstractSitemapValidator {
     @Check
     def void checkFramesInWidgetList(LinkableWidget widget) {
         if (widget instanceof Frame) {
-
             // we have a dedicated check for frames in place
+            return;
+        }
+        if (widget instanceof Buttongrid) {
+            // we have a dedicated check for Buttongrid in place
             return;
         }
         var containsFrames = false
         var containsOtherWidgets = false
         for (Widget w : widget.children) {
+            if (w instanceof Button) {
+                error("Linkable widget should not contain Button, Button is allowed only in Buttongrid",
+                    SitemapPackage.Literals.FRAME.getEStructuralFeature(SitemapPackage.LINKABLE_WIDGET__CHILDREN));
+                return;
+            }
             if (w instanceof Frame) {
                 containsFrames = true
             } else {
@@ -86,6 +106,22 @@ class SitemapValidator extends AbstractSitemapValidator {
                 error("Linkable widget should contain either only frames or none at all",
                     SitemapPackage.Literals.FRAME.getEStructuralFeature(SitemapPackage.LINKABLE_WIDGET__CHILDREN));
                 return
+            }
+        }
+    }
+
+    @Check
+    def void checkWidgetsInButtongrid(Buttongrid grid) {
+        val nb = grid.getButtons.size()
+        if (nb > 0 && grid.item === null) {
+            error("To use the \"buttons\" parameter in a Buttongrid, the \"item\" parameter is required",
+                SitemapPackage.Literals.BUTTONGRID.getEStructuralFeature(SitemapPackage.BUTTONGRID__ITEM));
+        }
+        for (Widget w : grid.children) {
+            if (!(w instanceof Button)) {
+                error("Buttongrid must contain only Button",
+                    SitemapPackage.Literals.BUTTONGRID.getEStructuralFeature(SitemapPackage.BUTTONGRID__CHILDREN));
+                return;
             }
         }
     }
@@ -107,7 +143,15 @@ class SitemapValidator extends AbstractSitemapValidator {
                 SitemapPackage.Literals.SETPOINT.getEStructuralFeature(SitemapPackage.SETPOINT__MIN_VALUE));
         }
     }
-    
+
+    @Check
+    def void checkColortemperaturepicker(Colortemperaturepicker ctp) {
+        if (ctp.minValue !== null && ctp.maxValue !== null && ctp.minValue > ctp.maxValue) {
+            error("Colortemperaturepicker on item '" + ctp.item + "' has larger minValue than maxValue",
+                SitemapPackage.Literals.COLORTEMPERATUREPICKER.getEStructuralFeature(SitemapPackage.COLORTEMPERATUREPICKER__MIN_VALUE));
+        }
+    }
+
     @Check
     def void checkInputHintParameter(Input i) {
         if (i.inputHint !== null && !ALLOWED_HINTS.contains(i.inputHint)) {

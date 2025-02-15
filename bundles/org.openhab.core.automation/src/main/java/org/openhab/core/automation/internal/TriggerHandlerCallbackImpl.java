@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,7 +13,6 @@
 package org.openhab.core.automation.internal;
 
 import java.util.Map;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -23,7 +22,7 @@ import org.openhab.core.automation.RuleStatus;
 import org.openhab.core.automation.RuleStatusInfo;
 import org.openhab.core.automation.Trigger;
 import org.openhab.core.automation.handler.TriggerHandlerCallback;
-import org.openhab.core.common.NamedThreadFactory;
+import org.openhab.core.common.ThreadPoolManager;
 
 /**
  * This class is implementation of {@link TriggerHandlerCallback} used by the {@link Trigger}s to notify rule engine
@@ -48,7 +47,7 @@ public class TriggerHandlerCallbackImpl implements TriggerHandlerCallback {
     protected TriggerHandlerCallbackImpl(RuleEngineImpl re, String ruleUID) {
         this.re = re;
         this.ruleUID = ruleUID;
-        executor = Executors.newSingleThreadScheduledExecutor(new NamedThreadFactory("rule-" + ruleUID));
+        this.executor = ThreadPoolManager.getPoolBasedSequentialScheduledExecutorService("rules", "rule-" + ruleUID);
     }
 
     @Override

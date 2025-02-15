@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -31,6 +31,7 @@ public interface SerialPortEvent {
     int PE = 8;
     int FE = 9;
     int BI = 10;
+    int PORT_DISCONNECTED = 11;
 
     /**
      * Get the type of the event.

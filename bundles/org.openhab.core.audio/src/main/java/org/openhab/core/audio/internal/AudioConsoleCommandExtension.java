@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -42,12 +42,14 @@ import org.osgi.service.component.annotations.Reference;
  * @author Kai Kreuzer - refactored to match AudioManager implementation
  * @author Christoph Weitkamp - Added parameter to adjust the volume
  * @author Wouter Born - Sort audio sink and source options
+ * @author Miguel Álvarez Díez - Add record command
  */
 @Component(service = ConsoleCommandExtension.class)
 @NonNullByDefault
 public class AudioConsoleCommandExtension extends AbstractConsoleCommandExtension {
 
     static final String SUBCMD_PLAY = "play";
+    static final String SUBCMD_RECORD = "record";
     static final String SUBCMD_STREAM = "stream";
     static final String SUBCMD_SYNTHESIZE = "synthesize";
     static final String SUBCMD_SOURCES = "sources";
@@ -71,6 +73,8 @@ public class AudioConsoleCommandExtension extends AbstractConsoleCommandExtensio
                         "plays a sound file from the sounds folder through the optionally specified audio sink(s)"),
                 buildCommandUsage(SUBCMD_PLAY + " <sink> <filename> <volume>",
                         "plays a sound file from the sounds folder through the specified audio sink(s) with the specified volume"),
+                buildCommandUsage(SUBCMD_RECORD + " [<source>] <seconds> <filename>",
+                        "record an audio file of the specified seconds to the sounds folder. The extension '.wav' will be added to the filename if missed."),
                 buildCommandUsage(SUBCMD_STREAM + " [<sink>] <url>",
                         "streams the sound from the url through the optionally specified audio sink(s)"),
                 buildCommandUsage(SUBCMD_SYNTHESIZE + " [<sink>] \"<melody>\"",
@@ -93,6 +97,14 @@ public class AudioConsoleCommandExtension extends AbstractConsoleCommandExtensio
                     } else {
                         console.println(
                                 "Specify file to play, and optionally the sink(s) to use (e.g. 'play javasound hello.mp3')");
+                    }
+                    return;
+                case SUBCMD_RECORD:
+                    if (args.length > 2) {
+                        record(Arrays.copyOfRange(args, 1, args.length), console);
+                    } else {
+                        console.println(
+                                "Specify time to record and the desired filename, and optionally the source to use (e.g. 'record javasound 10 good_morning.wav')");
                     }
                     return;
                 case SUBCMD_STREAM:
@@ -161,7 +173,7 @@ public class AudioConsoleCommandExtension extends AbstractConsoleCommandExtensio
                 playOnSinks(args[0], args[1], null, console);
                 break;
             case 3:
-                PercentType volume = null;
+                PercentType volume;
                 try {
                     volume = PercentType.valueOf(args[2]);
                 } catch (Exception e) {
@@ -175,6 +187,21 @@ public class AudioConsoleCommandExtension extends AbstractConsoleCommandExtensio
         }
     }
 
+    private void record(String[] args, Console console) {
+        try {
+            @Nullable
+            String sourceId = args.length > 2 ? args[0] : null;
+            int seconds = Integer.parseInt(args.length > 2 ? args[1] : args[0]);
+            String filename = args.length > 2 ? args[2] : args[1];
+            audioManager.record(seconds, filename, sourceId);
+            console.println("Recording completed");
+        } catch (NumberFormatException e) {
+            console.println("Unable to parse the recording time: " + e.getMessage());
+        } catch (AudioException e) {
+            console.println("Recording terminated with audio exception: " + e.getMessage());
+        }
+    }
+
     private void synthesizeMelody(String[] args, Console console) {
         switch (args.length) {
             case 1:
@@ -184,7 +211,7 @@ public class AudioConsoleCommandExtension extends AbstractConsoleCommandExtensio
                 playMelodyOnSinks(args[0], args[1], null, console);
                 break;
             case 3:
-                PercentType volume = null;
+                PercentType volume;
                 try {
                     volume = PercentType.valueOf(args[2]);
                 } catch (Exception e) {

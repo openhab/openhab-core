@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -339,7 +339,7 @@ public class Printer {
         if (list != null && !list.isEmpty()) {
             for (Object element : list) {
                 if (element instanceof String string) {
-                    res.add(Utils.getColumn(columnWidths[0], values.get(0)) + string);
+                    res.add(Utils.getColumn(columnWidths[0], values.getFirst()) + string);
                     if (isFirst) {
                         isFirst = false;
                         values.set(0, "");
@@ -347,7 +347,7 @@ public class Printer {
                 } else if (element instanceof Module module) {
                     List<String> moduleRecords = getModuleRecords(module);
                     for (String elementRecord : moduleRecords) {
-                        res.add(Utils.getColumn(columnWidths[0], values.get(0)) + elementRecord);
+                        res.add(Utils.getColumn(columnWidths[0], values.getFirst()) + elementRecord);
                         if (isFirst) {
                             isFirst = false;
                             values.set(0, "");

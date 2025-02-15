@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -42,11 +42,13 @@ import org.slf4j.LoggerFactory;
  * The {@link Upgrader} contains the implementation of the upgrade methods
  *
  * @author Jan N. Klug - Initial contribution
+ * @author Florian Hotze - Add script profile upgrade
  */
 @NonNullByDefault
 public class Upgrader {
     public static final String ITEM_COPY_UNIT_TO_METADATA = "itemCopyUnitToMetadata";
     public static final String LINK_UPGRADE_JS_PROFILE = "linkUpgradeJsProfile";
+    public static final String LINK_UPGRADE_SCRIPT_PROFILE = "linkUpgradeScriptProfile";
 
     private final Logger logger = LoggerFactory.getLogger(Upgrader.class);
     private final String baseDir;
@@ -231,6 +233,49 @@ public class Upgrader {
 
         linkStorage.flush();
         upgradeRecords.put(LINK_UPGRADE_JS_PROFILE, new UpgradeRecord(ZonedDateTime.now()));
+        upgradeRecords.flush();
+    }
+
+    /**
+     * Upgrades the ItemChannelLink database for the separation of {@code toHandlerScript} into
+     * {@code commandFromItemScript} and {@code stateFromItemScript}.
+     * See <a href="https://github.com/openhab/openhab-core/pull/4058">openhab/openhab-core#4058</a>.
+     */
+    public void linkUpgradeScriptProfile() {
+        if (!checkUpgradeRecord(LINK_UPGRADE_SCRIPT_PROFILE)) {
+            return;
+        }
+
+        Path linkJsonDatabasePath = Path.of(baseDir, "jsondb", "org.openhab.core.thing.link.ItemChannelLink.json");
+        logger.info("Upgrading script profile configuration in database '{}'", linkJsonDatabasePath);
+
+        if (!Files.isWritable(linkJsonDatabasePath)) {
+            logger.error("Cannot access link database '{}', check path and access rights.", linkJsonDatabasePath);
+            return;
+        }
+        JsonStorage<ItemChannelLink> linkStorage = new JsonStorage<>(linkJsonDatabasePath.toFile(), null, 5, 0, 0,
+                List.of());
+
+        List.copyOf(linkStorage.getKeys()).forEach(linkUid -> {
+            ItemChannelLink link = Objects.requireNonNull(linkStorage.get(linkUid));
+            Configuration configuration = link.getConfiguration();
+            String profileName = (String) configuration.get(ItemChannelLinkConfigDescriptionProvider.PARAM_PROFILE);
+            if (profileName != null && profileName.startsWith("transform:")) {
+                String toHandlerScript = (String) configuration.get("toHandlerScript");
+                if (toHandlerScript != null) {
+                    configuration.put("commandFromItemScript", toHandlerScript);
+                    configuration.remove("toHandlerScript");
+
+                    linkStorage.put(linkUid, link);
+                    logger.info("{}: rewrote script profile link to new format", linkUid);
+                } else {
+                    logger.info("{}: link already has correct configuration", linkUid);
+                }
+            }
+        });
+
+        linkStorage.flush();
+        upgradeRecords.put(LINK_UPGRADE_SCRIPT_PROFILE, new UpgradeRecord(ZonedDateTime.now()));
         upgradeRecords.flush();
     }
 

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -62,7 +62,7 @@ public class ConfigDescriptionBuilderTest {
         assertThat(configDescription.getUID(), is(CONFIG_URI));
         assertThat(configDescription.getParameterGroups(), hasSize(0));
         assertThat(configDescription.getParameters(), hasSize(1));
-        assertThat(configDescription.getParameters().get(0), is(PARAM1));
+        assertThat(configDescription.getParameters().getFirst(), is(PARAM1));
     }
 
     @Test
@@ -81,7 +81,7 @@ public class ConfigDescriptionBuilderTest {
         ConfigDescription configDescription = builder.withParameterGroup(GROUP1).build();
         assertThat(configDescription.getUID(), is(CONFIG_URI));
         assertThat(configDescription.getParameterGroups(), hasSize(1));
-        assertThat(configDescription.getParameterGroups().get(0), is(GROUP1));
+        assertThat(configDescription.getParameterGroups().getFirst(), is(GROUP1));
         assertThat(configDescription.getParameters(), hasSize(0));
     }
 

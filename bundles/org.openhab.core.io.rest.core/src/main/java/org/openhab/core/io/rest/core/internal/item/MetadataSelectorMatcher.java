@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -78,8 +78,7 @@ public class MetadataSelectorMatcher {
             result.addAll(metadataNamespaces);
 
             // filter all name spaces which do not match the UID segment pattern (this will be the regex tokens):
-            return result.stream().filter(namespace -> namespace.matches(AbstractUID.SEGMENT_PATTERN))
-                    .collect(Collectors.toSet());
+            return result.stream().filter(AbstractUID::isValid).collect(Collectors.toSet());
         }
     }
 }

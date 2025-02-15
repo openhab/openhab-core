@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -283,6 +283,12 @@ public class ModbusManagerImpl implements ModbusManager {
      * Thread naming for modbus read & write requests. Also used by the monitor thread
      */
     private static final String MODBUS_POLLER_THREAD_POOL_NAME = "modbusManagerPollerThreadPool";
+
+    /**
+     * The slave exception code indicating that the device is currently busy processing another
+     * command.
+     */
+    private static final int MODBUS_EXCEPTION_SLAVE_DEVICE_BUSY = 6;
 
     /**
      * Log message with WARN level if the task queues exceed this limit.
@@ -662,7 +668,11 @@ public class ModbusManagerImpl implements ModbusManager {
                 } catch (ModbusSlaveException e) {
                     lastError.set(new ModbusSlaveErrorResponseExceptionImpl(e));
                     // Slave returned explicit error response, no reason to re-establish new connection
-                    if (willRetry) {
+                    if (willRetry && e.getType() == MODBUS_EXCEPTION_SLAVE_DEVICE_BUSY) {
+                        logger.debug(
+                                "Try {} out of {} failed when executing request ({}). The slave device is busy (exception code {}). Will try again soon. [operation ID {}]",
+                                tryIndex, maxTries, request, e.getType(), operationId);
+                    } else if (willRetry) {
                         logger.warn(
                                 "Try {} out of {} failed when executing request ({}). Will try again soon. Error was: {} {} [operation ID {}]",
                                 tryIndex, maxTries, request, e.getClass().getName(), e.getMessage(), operationId);

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -23,6 +23,7 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.ext.MessageBodyWriter;
 
 import org.openhab.core.io.rest.JSONInputStream;
@@ -81,6 +82,8 @@ public class GsonMessageBodyWriter<T> implements MessageBodyWriter<T> {
         try {
             if (object instanceof InputStream stream && object instanceof JSONInputStream) {
                 stream.transferTo(entityStream);
+            } else if (object instanceof StreamingOutput streaming) {
+                streaming.write(entityStream);
             } else {
                 entityStream.write(gson.toJson(object).getBytes(StandardCharsets.UTF_8));
             }

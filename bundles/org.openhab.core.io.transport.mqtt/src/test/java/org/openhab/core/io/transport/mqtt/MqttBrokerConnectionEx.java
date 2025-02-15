@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -26,8 +26,8 @@ import org.openhab.core.io.transport.mqtt.internal.client.MqttAsyncClientWrapper
 import com.hivemq.client.mqtt.MqttClientState;
 
 /**
- * We need an extended MqttBrokerConnection to overwrite the protected `connectionCallbacks` with
- * an instance that takes the mocked version of `MqttBrokerConnection` and overwrite the connection state.
+ * We need an extended MqttBrokerConnection to overwrite the protected {@link #connectionCallback} with
+ * an instance that takes the mocked version of {@link MqttBrokerConnection} and overwrite the connection state.
  *
  * We also mock the internal Mqtt3AsyncClient that in respect to the success flags
  * immediately succeed or fail with publish, subscribe, unsubscribe, connect, disconnect.

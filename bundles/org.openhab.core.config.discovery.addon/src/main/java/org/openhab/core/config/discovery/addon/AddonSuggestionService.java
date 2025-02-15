@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -19,17 +19,15 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Dictionary;
-import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -74,7 +72,7 @@ public class AddonSuggestionService implements AutoCloseable {
     private @Nullable Map<String, Object> config;
     private final ScheduledExecutorService scheduler;
     private final Map<String, Boolean> baseFinderConfig = new ConcurrentHashMap<>();
-    private final List<Future<?>> tasks = new CopyOnWriteArrayList<>();
+    private final ScheduledFuture<?> cfgRefreshTask;
 
     @Activate
     public AddonSuggestionService(final @Reference ConfigurationAdmin configurationAdmin,
@@ -82,21 +80,20 @@ public class AddonSuggestionService implements AutoCloseable {
         this.configurationAdmin = configurationAdmin;
         this.localeProvider = localeProvider;
 
-        SUGGESTION_FINDERS.forEach(f -> baseFinderConfig.put(f, true));
+        SUGGESTION_FINDERS.forEach(f -> baseFinderConfig.put(f, false));
         modified(config);
-        changed();
 
         // Changes to the configuration are expected to call the {@link modified} method. This works well when running
         // in Eclipse. Running in Karaf, the method was not consistently called. Therefore regularly check for changes
         // in configuration.
         // This pattern and code was re-used from {@link org.openhab.core.karaf.internal.FeatureInstaller}
         scheduler = ThreadPoolManager.getScheduledPool(ThreadPoolManager.THREAD_POOL_NAME_COMMON);
-        tasks.add(scheduler.scheduleWithFixedDelay(this::syncConfiguration, 1, 1, TimeUnit.MINUTES));
+        cfgRefreshTask = scheduler.scheduleWithFixedDelay(this::syncConfiguration, 1, 1, TimeUnit.MINUTES);
     }
 
     @Deactivate
     protected void deactivate() {
-        tasks.forEach(task -> task.cancel(true));
+        cfgRefreshTask.cancel(true);
     }
 
     @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY)
@@ -118,16 +115,18 @@ public class AddonSuggestionService implements AutoCloseable {
             String cfgParam = SUGGESTION_FINDER_CONFIGS.get(finder);
             if (cfgParam != null) {
                 boolean enabled = (config != null)
-                        ? ConfigParser.valueAsOrElse(config.get(cfgParam), Boolean.class, cfg)
+                        ? ConfigParser.valueAsOrElse(config.get(cfgParam), Boolean.class, true)
                         : cfg;
-                baseFinderConfig.put(finder, enabled);
-                String feature = SUGGESTION_FINDER_FEATURES.get(finder);
-                AddonFinderService finderService = addonFinderService;
-                if (feature != null && finderService != null) {
-                    if (enabled) {
-                        tasks.add(scheduler.submit(() -> finderService.install(feature)));
-                    } else {
-                        tasks.add(scheduler.submit(() -> finderService.uninstall(feature)));
+                if (cfg != enabled) {
+                    String type = SUGGESTION_FINDER_TYPES.get(finder);
+                    AddonFinderService finderService = addonFinderService;
+                    if (type != null && finderService != null) {
+                        baseFinderConfig.put(finder, enabled);
+                        if (enabled) {
+                            finderService.install(type);
+                        } else {
+                            finderService.uninstall(type);
+                        }
                     }
                 }
             }
@@ -141,12 +140,8 @@ public class AddonSuggestionService implements AutoCloseable {
             if (cfg == null) {
                 return;
             }
-            final Map<String, Object> cfgMap = new HashMap<>();
-            final Enumeration<String> enumeration = cfg.keys();
-            while (enumeration.hasMoreElements()) {
-                final String key = enumeration.nextElement();
-                cfgMap.put(key, cfg.get(key));
-            }
+            List<String> keys = Collections.list(cfg.keys());
+            final Map<String, Object> cfgMap = keys.stream().collect(Collectors.toMap(Function.identity(), cfg::get));
             if (!cfgMap.equals(config)) {
                 modified(cfgMap);
             }

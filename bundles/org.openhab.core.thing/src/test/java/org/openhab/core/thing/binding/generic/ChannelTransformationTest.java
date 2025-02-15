@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,11 +13,17 @@
 package org.openhab.core.thing.binding.generic;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 
+import java.util.List;
+import java.util.Optional;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -52,6 +58,16 @@ public class ChannelTransformationTest {
     private static final String T2_INPUT = T1_RESULT;
     private static final String T2_RESULT = "T2Result";
 
+    private static final String T3_NAME = T2_NAME;
+    private static final String T3_PATTERN = "a()b()))";
+    private static final String T3_INPUT = T2_RESULT;
+    private static final String T3_RESULT = "T3Result";
+
+    private static final String NULL_NAME = T1_NAME;
+    private static final String NULL_PATTERN = "NullPattern";
+    private static final String NULL_INPUT = T1_RESULT;
+    private static final @Nullable String NULL_RESULT = null;
+
     private @Mock @NonNullByDefault({}) TransformationService transformationService1Mock;
     private @Mock @NonNullByDefault({}) TransformationService transformationService2Mock;
 
@@ -69,6 +85,10 @@ public class ChannelTransformationTest {
                 .thenAnswer(answer -> T2_RESULT);
         Mockito.when(transformationService2Mock.transform(eq(T2_PATTERN), eq(T2_INPUT)))
                 .thenAnswer(answer -> T2_RESULT);
+        Mockito.when(transformationService2Mock.transform(eq(T3_PATTERN), eq(T3_INPUT)))
+                .thenAnswer(answer -> T3_RESULT);
+        Mockito.when(transformationService1Mock.transform(eq(NULL_PATTERN), eq(NULL_INPUT)))
+                .thenAnswer(answer -> NULL_RESULT);
 
         Mockito.when(serviceRef1Mock.getProperty(any())).thenReturn("TRANSFORM1");
         Mockito.when(serviceRef2Mock.getProperty(any())).thenReturn("TRANSFORM2");
@@ -97,13 +117,43 @@ public class ChannelTransformationTest {
     }
 
     @Test
-    public void testSingleTransformation() {
+    public void testNullReturningTransformation() {
+        String pattern = NULL_NAME + ":" + NULL_PATTERN;
+
+        ChannelTransformation transformation = new ChannelTransformation(pattern);
+        Optional<String> result = transformation.apply(NULL_INPUT);
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void testSingleTransformationWithColon() {
         String pattern = T1_NAME + ":" + T1_PATTERN;
 
         ChannelTransformation transformation = new ChannelTransformation(pattern);
         String result = transformation.apply(T1_INPUT).orElse(null);
 
         assertEquals(T1_RESULT, result);
+    }
+
+    @Test
+    public void testSingleTransformationWithParens() {
+        String pattern = T1_NAME + "(" + T1_PATTERN + ")";
+
+        ChannelTransformation transformation = new ChannelTransformation(pattern);
+        String result = transformation.apply(T1_INPUT).orElse(null);
+
+        assertEquals(T1_RESULT, result);
+    }
+
+    @Test
+    public void testParensTransformationWithNestedParensInPattern() {
+        String pattern = T3_NAME + "(" + T3_PATTERN + ")";
+
+        ChannelTransformation transformation = new ChannelTransformation(pattern);
+        String result = transformation.apply(T3_INPUT).orElse(null);
+
+        assertEquals(T3_RESULT, result);
     }
 
     @Test
@@ -127,7 +177,27 @@ public class ChannelTransformationTest {
     }
 
     @Test
-    public void testDoubleTransformationWithoutSpaces() {
+    public void testFirstTransformationReturningNull() {
+        List<String> pattern = List.of(NULL_NAME + ":" + NULL_PATTERN, T2_NAME + ":" + T2_PATTERN);
+
+        ChannelTransformation transformation = new ChannelTransformation(pattern);
+        Optional<String> result = transformation.apply(NULL_INPUT);
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void testSecondTransformationReturningNull() {
+        List<String> pattern = List.of(T1_NAME + ":" + T1_PATTERN, NULL_NAME + ":" + NULL_PATTERN);
+
+        ChannelTransformation transformation = new ChannelTransformation(pattern);
+        Optional<String> result = transformation.apply(T1_INPUT);
+
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void testColonDoubleTransformationWithoutSpaces() {
         String pattern = T1_NAME + ":" + T1_PATTERN + "∩" + T2_NAME + ":" + T2_PATTERN;
 
         ChannelTransformation transformation = new ChannelTransformation(pattern);
@@ -137,12 +207,157 @@ public class ChannelTransformationTest {
     }
 
     @Test
-    public void testDoubleTransformationWithSpaces() {
+    public void testTransformationsInAList() {
+        List<String> patterns = List.of(T1_NAME + ":" + T1_PATTERN, T2_NAME + ":" + T2_PATTERN);
+
+        ChannelTransformation transformation = new ChannelTransformation(patterns);
+        String result = transformation.apply(T1_INPUT).orElse(null);
+
+        assertEquals(T2_RESULT, result);
+    }
+
+    @Test
+    public void testMixedTransformationsInAList1() {
+        List<String> patterns = List.of(T1_NAME + ":" + T1_PATTERN + "∩" + T2_NAME + ":" + T2_PATTERN,
+                T3_NAME + ":" + T3_PATTERN);
+
+        ChannelTransformation transformation = new ChannelTransformation(patterns);
+        String result = transformation.apply(T1_INPUT).orElse(null);
+
+        assertEquals(T3_RESULT, result);
+    }
+
+    @Test
+    public void testMixedTransformationsInAList2() {
+        List<String> patterns = List.of(T1_NAME + ":" + T1_PATTERN,
+                T2_NAME + ":" + T2_PATTERN + "∩" + T3_NAME + ":" + T3_PATTERN);
+
+        ChannelTransformation transformation = new ChannelTransformation(patterns);
+        String result = transformation.apply(T1_INPUT).orElse(null);
+
+        assertEquals(T3_RESULT, result);
+    }
+
+    @Test
+    public void testParensDoubleTransformationWithoutSpaces() {
+        String pattern = T1_NAME + "(" + T1_PATTERN + ")∩" + T2_NAME + "(" + T2_PATTERN + ")";
+
+        ChannelTransformation transformation = new ChannelTransformation(pattern);
+        String result = transformation.apply(T1_INPUT).orElse(null);
+
+        assertEquals(T2_RESULT, result);
+    }
+
+    @Test
+    public void testMixedDoubleTransformationWithoutSpaces1() {
+        String pattern = T1_NAME + ":" + T1_PATTERN + "∩" + T2_NAME + "(" + T2_PATTERN + ")";
+
+        ChannelTransformation transformation = new ChannelTransformation(pattern);
+        String result = transformation.apply(T1_INPUT).orElse(null);
+
+        assertEquals(T2_RESULT, result);
+    }
+
+    @Test
+    public void testMixedDoubleTransformationWithoutSpaces2() {
+        String pattern = T1_NAME + "(" + T1_PATTERN + ")∩" + T2_NAME + ":" + T2_PATTERN;
+
+        ChannelTransformation transformation = new ChannelTransformation(pattern);
+        String result = transformation.apply(T1_INPUT).orElse(null);
+
+        assertEquals(T2_RESULT, result);
+    }
+
+    @Test
+    public void testColonDoubleTransformationWithSpaces() {
         String pattern = " " + T1_NAME + " : " + T1_PATTERN + " ∩ " + T2_NAME + " : " + T2_PATTERN + " ";
 
         ChannelTransformation transformation = new ChannelTransformation(pattern);
         String result = transformation.apply(T1_INPUT).orElse(null);
 
         assertEquals(T2_RESULT, result);
+    }
+
+    @Test
+    public void testParensDoubleTransformationWithSpaces() {
+        String pattern = " " + T1_NAME + " ( " + T1_PATTERN + " ) ∩ " + T2_NAME + " ( " + T2_PATTERN + " ) ";
+
+        ChannelTransformation transformation = new ChannelTransformation(pattern);
+        String result = transformation.apply(T1_INPUT).orElse(null);
+
+        assertEquals(T2_RESULT, result);
+    }
+
+    @Test
+    public void testMixedDoubleTransformationWithSpaces1() {
+        String pattern = " " + T1_NAME + " : " + T1_PATTERN + " ∩ " + T2_NAME + " ( " + T2_PATTERN + " ) ";
+
+        ChannelTransformation transformation = new ChannelTransformation(pattern);
+        String result = transformation.apply(T1_INPUT).orElse(null);
+
+        assertEquals(T2_RESULT, result);
+    }
+
+    @Test
+    public void testMixedDoubleTransformationWithSpaces2() {
+        String pattern = " " + T1_NAME + " ( " + T1_PATTERN + " ) ∩ " + T2_NAME + " : " + T2_PATTERN + " ";
+
+        ChannelTransformation transformation = new ChannelTransformation(pattern);
+        String result = transformation.apply(T1_INPUT).orElse(null);
+
+        assertEquals(T2_RESULT, result);
+    }
+
+    @Test
+    public void testIsValidTransform() {
+        // single with colon
+        assertTrue(ChannelTransformation.isValidTransformation("FOO:BAR"));
+        assertTrue(ChannelTransformation.isValidTransformation(" FOO : BAR "));
+
+        // single with parens
+        assertTrue(ChannelTransformation.isValidTransformation("FOO(BAR())"));
+        assertTrue(ChannelTransformation.isValidTransformation(" FOO ( BAR) )")); // deliberate extra closing parens
+
+        // chained with colon
+        assertTrue(ChannelTransformation.isValidTransformation("FOO:BAR∩BAZ:QUX"));
+        assertTrue(ChannelTransformation.isValidTransformation("FOO:BAR∩BAZ:QUX()"));
+        assertTrue(ChannelTransformation.isValidTransformation(" FOO : BAR ∩ BAZ : QUX() "));
+
+        // chained with parens
+        assertTrue(ChannelTransformation.isValidTransformation("FOO(BAR)∩BAZ(QUX)"));
+        assertTrue(ChannelTransformation.isValidTransformation("FOO(BAR)∩BAZ(QUX())"));
+        assertTrue(ChannelTransformation.isValidTransformation("FOO(BAR)∩BAZ(QUX))")); // deliberate extra parens
+        assertTrue(ChannelTransformation.isValidTransformation(" FOO ( BAR ) ∩ BAZ ( QUX )"));
+        assertTrue(ChannelTransformation.isValidTransformation(" FOO ( BAR ) ∩ BAZ ( QUX() )"));
+
+        // mixed chains
+        assertTrue(ChannelTransformation.isValidTransformation("FOO:BAR∩BAZ(QUX)"));
+        assertTrue(ChannelTransformation.isValidTransformation("FOO(BAR)∩BAZ:QUX"));
+        assertTrue(ChannelTransformation.isValidTransformation("FOO:BAR()∩BAZ(QUX())"));
+        assertTrue(ChannelTransformation.isValidTransformation(" FOO : BAR ∩ BAZ ( QUX ) "));
+        assertTrue(ChannelTransformation.isValidTransformation(" FOO ( BAR ) ∩ BAZ : QUX "));
+
+        // invalid syntaxes
+        assertFalse(ChannelTransformation.isValidTransformation(null));
+        assertFalse(ChannelTransformation.isValidTransformation(""));
+        assertFalse(ChannelTransformation.isValidTransformation(" "));
+        assertFalse(ChannelTransformation.isValidTransformation("FOOBAR"));
+        assertFalse(ChannelTransformation.isValidTransformation("(FOO)BAR"));
+        assertFalse(ChannelTransformation.isValidTransformation("FOO∩BAR"));
+        assertFalse(ChannelTransformation.isValidTransformation("FOO:BAR∩BAZ"));
+        assertFalse(ChannelTransformation.isValidTransformation("FOO(BAR)∩BAZ"));
+        assertFalse(ChannelTransformation.isValidTransformation("FOO∩BAZ:BAR"));
+        assertFalse(ChannelTransformation.isValidTransformation("FOO∩BAZ(BAR)"));
+    }
+
+    @Test
+    public void testBlanksAndCommentsAreDiscarded() {
+        List<String> pattern = List.of("#hash comment", "//double slashes", "  # preceded by spaces",
+                "  // ditto for slashes", "     ", "\t", "\t\t\t", "\t# preceded by a tab",
+                "\t // preceded by tab and space");
+
+        ChannelTransformation transformation = new ChannelTransformation(pattern);
+
+        assertTrue(transformation.isEmpty());
     }
 }

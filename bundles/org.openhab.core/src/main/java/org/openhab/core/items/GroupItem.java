@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -163,10 +163,6 @@ public class GroupItem extends GenericItem implements StateChangeListener, Metad
      * @throws IllegalArgumentException if the given item is null
      */
     public void addMember(Item item) {
-        if (item == null) {
-            throw new IllegalArgumentException("Item must not be null!");
-        }
-
         boolean added = members.addIfAbsent(item);
 
         // in case membership is constructed programmatically this sanitizes
@@ -190,9 +186,6 @@ public class GroupItem extends GenericItem implements StateChangeListener, Metad
     }
 
     public void replaceMember(Item oldItem, Item newItem) {
-        if (oldItem == null || newItem == null) {
-            throw new IllegalArgumentException("Items must not be null!");
-        }
         int index = members.indexOf(oldItem);
         if (index > -1) {
             Item old = members.set(index, newItem);
@@ -208,9 +201,6 @@ public class GroupItem extends GenericItem implements StateChangeListener, Metad
      * @throws IllegalArgumentException if the given item is null
      */
     public void removeMember(Item item) {
-        if (item == null) {
-            throw new IllegalArgumentException("Item must not be null!");
-        }
         members.remove(item);
         unregisterStateListener(item);
     }
@@ -233,10 +223,9 @@ public class GroupItem extends GenericItem implements StateChangeListener, Metad
      * @return the accepted data types of this group item
      */
     @Override
-    @SuppressWarnings("unchecked")
     public List<Class<? extends State>> getAcceptedDataTypes() {
-        if (baseItem != null) {
-            return baseItem.getAcceptedDataTypes();
+        if (baseItem instanceof Item item) {
+            return item.getAcceptedDataTypes();
         } else {
             List<Class<? extends State>> acceptedDataTypes = null;
 
@@ -259,10 +248,9 @@ public class GroupItem extends GenericItem implements StateChangeListener, Metad
      * @return the accepted command types of this group item
      */
     @Override
-    @SuppressWarnings("unchecked")
     public List<Class<? extends Command>> getAcceptedCommandTypes() {
-        if (baseItem != null) {
-            return baseItem.getAcceptedCommandTypes();
+        if (baseItem instanceof Item item) {
+            return item.getAcceptedCommandTypes();
         } else {
             List<Class<? extends Command>> acceptedCommandTypes = null;
 
@@ -287,6 +275,7 @@ public class GroupItem extends GenericItem implements StateChangeListener, Metad
 
     @Override
     protected void internalSend(Command command) {
+        EventPublisher eventPublisher = this.eventPublisher;
         if (eventPublisher != null) {
             for (Item member : members) {
                 // try to send the command to the bus
@@ -300,11 +289,12 @@ public class GroupItem extends GenericItem implements StateChangeListener, Metad
         // if a group does not have a function it cannot have a state
         @Nullable
         T newState = null;
-        if (function != null) {
-            newState = function.getStateAs(getStateMembers(getMembers()), typeClass);
+        if (function instanceof GroupFunction groupFunction) {
+            newState = groupFunction.getStateAs(getStateMembers(getMembers()), typeClass);
         }
 
-        if (newState == null && baseItem != null && baseItem instanceof GenericItem item) {
+        Item baseItem = this.baseItem;
+        if (newState == null && baseItem instanceof GenericItem item) {
             // we use the transformation method from the base item
             item.setState(state);
             newState = baseItem.getStateAs(typeClass);
@@ -323,9 +313,9 @@ public class GroupItem extends GenericItem implements StateChangeListener, Metad
         sb.append("Type=");
         sb.append(getClass().getSimpleName());
         sb.append(", ");
-        if (getBaseItem() != null) {
+        if (getBaseItem() instanceof Item item) {
             sb.append("BaseType=");
-            sb.append(baseItem.getClass().getSimpleName());
+            sb.append(item.getClass().getSimpleName());
             sb.append(", ");
         }
         sb.append("Members=");
@@ -363,8 +353,9 @@ public class GroupItem extends GenericItem implements StateChangeListener, Metad
     public void stateUpdated(Item item, State state) {
         State oldState = this.state;
         State newState = oldState;
-        if (function != null && baseItem != null && itemStateConverter != null) {
-            State calculatedState = function.calculate(getStateMembers(getMembers()));
+        ItemStateConverter itemStateConverter = this.itemStateConverter;
+        if (function instanceof GroupFunction groupFunction && baseItem != null && itemStateConverter != null) {
+            State calculatedState = groupFunction.calculate(getStateMembers(getMembers()));
             newState = itemStateConverter.convertToAcceptedState(calculatedState, baseItem);
             setState(newState);
             sendGroupStateUpdatedEvent(item.getName(), newState);
@@ -377,7 +368,8 @@ public class GroupItem extends GenericItem implements StateChangeListener, Metad
     @Override
     public void setState(State state) {
         State oldState = this.state;
-        if (baseItem != null && baseItem instanceof GenericItem item) {
+        Item baseItem = this.baseItem;
+        if (baseItem instanceof GenericItem item) {
             item.setState(state);
             this.state = baseItem.getState();
         } else {

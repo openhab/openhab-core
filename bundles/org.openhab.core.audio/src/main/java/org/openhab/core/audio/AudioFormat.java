@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,6 +12,7 @@
  */
 package org.openhab.core.audio;
 
+import java.util.Objects;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -23,9 +24,13 @@ import org.eclipse.jdt.annotation.Nullable;
  * @author Harald Kuhn - Initial contribution
  * @author Kelly Davis - Modified to match discussion in #584
  * @author Kai Kreuzer - Moved class, included constants, added toString
+ * @author Miguel Álvarez Díez - Add pcm signed format
  */
 @NonNullByDefault
 public class AudioFormat {
+    // generic pcm signed format (no container) without any further constraints
+    public static final AudioFormat PCM_SIGNED = new AudioFormat(AudioFormat.CONTAINER_NONE,
+            AudioFormat.CODEC_PCM_SIGNED, null, null, null, null);
 
     // generic mp3 format without any further constraints
     public static final AudioFormat MP3 = new AudioFormat(AudioFormat.CONTAINER_NONE, AudioFormat.CODEC_MP3, null, null,
@@ -282,22 +287,22 @@ public class AudioFormat {
         if (audioFormat == null) {
             return false;
         }
-        if ((null != getContainer()) && (!getContainer().equals(audioFormat.getContainer()))) {
+        if (getContainer() instanceof String container && !container.equals(audioFormat.getContainer())) {
             return false;
         }
-        if ((null != getCodec()) && (!getCodec().equals(audioFormat.getCodec()))) {
+        if (getCodec() instanceof String codec && !codec.equals(audioFormat.getCodec())) {
             return false;
         }
-        if ((null != isBigEndian()) && (!isBigEndian().equals(audioFormat.isBigEndian()))) {
+        if (isBigEndian() instanceof Boolean bigEndian && !bigEndian.equals(audioFormat.isBigEndian())) {
             return false;
         }
-        if ((null != getBitDepth()) && (!getBitDepth().equals(audioFormat.getBitDepth()))) {
+        if (getBitDepth() instanceof Integer bitDepth && !bitDepth.equals(audioFormat.getBitDepth())) {
             return false;
         }
-        if ((null != getBitRate()) && (!getBitRate().equals(audioFormat.getBitRate()))) {
+        if (getBitRate() instanceof Integer bitRate && !bitRate.equals(audioFormat.getBitRate())) {
             return false;
         }
-        if ((null != getFrequency()) && (!getFrequency().equals(audioFormat.getFrequency()))) {
+        if (getFrequency() instanceof Long frequency && !frequency.equals(audioFormat.getFrequency())) {
             return false;
         }
         return true;
@@ -381,8 +386,9 @@ public class AudioFormat {
                 continue;
             }
 
-            // Prefer WAVE container
-            if (!CONTAINER_WAVE.equals(format.getContainer())) {
+            // Prefer WAVE container or raw SIGNED PCM encoded audio
+            if (!CONTAINER_WAVE.equals(format.getContainer())
+                    && !(CONTAINER_NONE.equals(format.getContainer()) && CODEC_PCM_SIGNED.equals(format.getCodec()))) {
                 continue;
             }
 
@@ -436,29 +442,13 @@ public class AudioFormat {
     @Override
     public boolean equals(@Nullable Object obj) {
         if (obj instanceof AudioFormat format) {
-            if (!(null == getCodec() ? null == format.getCodec() : getCodec().equals(format.getCodec()))) {
-                return false;
-            }
-            if (!(null == getContainer() ? null == format.getContainer()
-                    : getContainer().equals(format.getContainer()))) {
-                return false;
-            }
-            if (!(null == isBigEndian() ? null == format.isBigEndian() : isBigEndian().equals(format.isBigEndian()))) {
-                return false;
-            }
-            if (!(null == getBitDepth() ? null == format.getBitDepth() : getBitDepth().equals(format.getBitDepth()))) {
-                return false;
-            }
-            if (!(null == getBitRate() ? null == format.getBitRate() : getBitRate().equals(format.getBitRate()))) {
-                return false;
-            }
-            if (!(null == getFrequency() ? null == format.getFrequency()
-                    : getFrequency().equals(format.getFrequency()))) {
-                return false;
-            }
-            if (!(null == getChannels() ? null == format.getChannels() : getChannels().equals(format.getChannels()))) {
-                return false;
-            }
+            return Objects.equals(getCodec(), format.getCodec()) && //
+                    Objects.equals(getContainer(), format.getContainer()) && //
+                    Objects.equals(isBigEndian(), format.isBigEndian()) && //
+                    Objects.equals(getBitDepth(), format.getBitDepth()) && //
+                    Objects.equals(getBitRate(), format.getBitRate()) && //
+                    Objects.equals(getFrequency(), format.getFrequency()) && //
+                    Objects.equals(getChannels(), format.getChannels());
         }
         return super.equals(obj);
     }
@@ -467,13 +457,13 @@ public class AudioFormat {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((bigEndian == null) ? 0 : bigEndian.hashCode());
-        result = prime * result + ((bitDepth == null) ? 0 : bitDepth.hashCode());
-        result = prime * result + ((bitRate == null) ? 0 : bitRate.hashCode());
-        result = prime * result + ((codec == null) ? 0 : codec.hashCode());
-        result = prime * result + ((container == null) ? 0 : container.hashCode());
-        result = prime * result + ((frequency == null) ? 0 : frequency.hashCode());
-        result = prime * result + ((channels == null) ? 0 : channels.hashCode());
+        result = prime * result + (bigEndian instanceof Object localBigEndian ? localBigEndian.hashCode() : 0);
+        result = prime * result + (bitDepth instanceof Object localBitDepth ? localBitDepth.hashCode() : 0);
+        result = prime * result + (bitRate instanceof Object localBitRate ? localBitRate.hashCode() : 0);
+        result = prime * result + (codec instanceof Object localCodec ? localCodec.hashCode() : 0);
+        result = prime * result + (container instanceof Object localContainer ? localContainer.hashCode() : 0);
+        result = prime * result + (frequency instanceof Object localFrequency ? localFrequency.hashCode() : 0);
+        result = prime * result + (channels instanceof Object localChannels ? localChannels.hashCode() : 0);
         return result;
     }
 

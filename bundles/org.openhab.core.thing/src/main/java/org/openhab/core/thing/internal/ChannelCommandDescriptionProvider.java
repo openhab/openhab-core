@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -95,7 +95,7 @@ public class ChannelCommandDescriptionProvider implements CommandDescriptionProv
                     if (dynamicCommandDescription == originalCommandDescription) {
                         logger.error(
                                 "Dynamic command description matches original command description. DynamicCommandDescriptionProvider implementations must never return the original command description. {} has to be fixed.",
-                                dynamicCommandDescription.getClass());
+                                dynamicCommandDescriptionProvider.getClass());
                     } else {
                         return dynamicCommandDescription;
                     }

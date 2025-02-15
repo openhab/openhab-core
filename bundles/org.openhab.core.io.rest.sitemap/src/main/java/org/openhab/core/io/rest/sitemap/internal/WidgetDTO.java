@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -28,6 +28,7 @@ import org.openhab.core.io.rest.core.item.EnrichedItemDTO;
  * @author Laurent Garnier - New field columns
  * @author Danny Baumann - New field labelSource
  * @author Laurent Garnier - Remove field columns
+ * @author Laurent Garnier - New fields row, column, command, releaseCommand and stateless for Button element
  */
 public class WidgetDTO {
 
@@ -55,7 +56,7 @@ public class WidgetDTO {
     // widget-specific attributes
     public final List<MappingDTO> mappings = new ArrayList<>();
     public Boolean switchSupport;
-    public Integer sendFrequency;
+    public Boolean releaseOnly;
     public Integer refresh;
     public Integer height;
     public BigDecimal minValue;
@@ -69,12 +70,17 @@ public class WidgetDTO {
     public String yAxisDecimalPattern;
     public Boolean legend;
     public Boolean forceAsItem;
+    public Integer row;
+    public Integer column;
+    public String command;
+    public String releaseCommand;
+    public Boolean stateless;
     public String state;
 
     public EnrichedItemDTO item;
     public PageDTO linkedPage;
 
-    // only for frames, other linkable widgets link to a page
+    // only for frames and button grids, other linkable widgets link to a page
     public final List<WidgetDTO> widgets = new ArrayList<>();
 
     public WidgetDTO() {

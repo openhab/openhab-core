@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,9 +12,14 @@
  */
 package org.openhab.core.automation.module.provider;
 
+import static org.openhab.core.automation.internal.module.handler.AnnotationActionHandler.MODULE_RESULT;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -39,11 +44,15 @@ import org.openhab.core.automation.type.ActionType;
 import org.openhab.core.automation.type.Input;
 import org.openhab.core.automation.type.ModuleTypeProvider;
 import org.openhab.core.automation.type.Output;
+import org.openhab.core.automation.util.ActionInputsHelper;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
 import org.openhab.core.config.core.ConfigDescriptionParameterBuilder;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.config.core.ParameterOption;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,8 +60,12 @@ import org.slf4j.LoggerFactory;
  * Helper methods for {@link AnnotatedActions} {@link ModuleTypeProvider}
  *
  * @author Stefan Triller - Initial contribution
+ * @author Florian Hotze - Added configuration description parameters for thing modules, Added method signature hash to
+ *         module ID in case of method overloads
+ * @author Laurent Garnier - Converted into a an OSGi component
  */
 @NonNullByDefault
+@Component(service = AnnotationActionModuleTypeHelper.class)
 public class AnnotationActionModuleTypeHelper {
 
     private final Logger logger = LoggerFactory.getLogger(AnnotationActionModuleTypeHelper.class);
@@ -60,6 +73,13 @@ public class AnnotationActionModuleTypeHelper {
     private static final String SELECT_SERVICE_LABEL = "Select Service Instance";
     private static final String SELECT_THING_LABEL = "Select Thing";
     public static final String CONFIG_PARAM = "config";
+
+    private final ActionInputsHelper actionInputsHelper;
+
+    @Activate
+    public AnnotationActionModuleTypeHelper(final @Reference ActionInputsHelper actionInputsHelper) {
+        this.actionInputsHelper = actionInputsHelper;
+    }
 
     public Collection<ModuleInformation> parseAnnotations(Object actionProvider) {
         Class<?> clazz = actionProvider.getClass();
@@ -77,19 +97,16 @@ public class AnnotationActionModuleTypeHelper {
         for (Method method : methods) {
             if (method.isAnnotationPresent(RuleAction.class)) {
                 List<Input> inputs = getInputsFromAction(method);
-                List<Output> outputs = getOutputsFromMethod(method);
+                List<Output> outputs = getOutputsFromAction(method);
 
                 RuleAction ruleAction = method.getAnnotation(RuleAction.class);
-                String uid = name + "." + method.getName();
+                String uid = getModuleIdFromMethod(name, method);
                 Set<String> tags = new HashSet<>(Arrays.asList(ruleAction.tags()));
 
                 ModuleInformation mi = new ModuleInformation(uid, actionProvider, method);
                 mi.setLabel(ruleAction.label());
                 mi.setDescription(ruleAction.description());
-                // We temporarily want to hide all ThingActions in UIs as we do not have a proper solution to enter
-                // their input values (see https://github.com/openhab/openhab-core/issues/1745)
-                // mi.setVisibility(ruleAction.visibility());
-                mi.setVisibility(Visibility.HIDDEN);
+                mi.setVisibility(ruleAction.visibility());
                 mi.setInputs(inputs);
                 mi.setOutputs(outputs);
                 mi.setTags(tags);
@@ -98,6 +115,20 @@ public class AnnotationActionModuleTypeHelper {
             }
         }
         return moduleInformation;
+    }
+
+    public String getModuleIdFromMethod(String actionScope, Method method) {
+        String uid = actionScope + "." + method.getName() + "#";
+        MessageDigest md5 = null;
+        try {
+            md5 = MessageDigest.getInstance("MD5");
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+        for (Class<?> parameter : method.getParameterTypes()) {
+            md5.update(parameter.getName().getBytes());
+        }
+        return uid + String.format("%032x", new BigInteger(1, md5.digest()));
     }
 
     private List<Input> getInputsFromAction(Method method) {
@@ -132,17 +163,36 @@ public class AnnotationActionModuleTypeHelper {
         return inputs;
     }
 
-    private List<Output> getOutputsFromMethod(Method method) {
-        List<Output> outputs = new ArrayList<>();
-        if (method.isAnnotationPresent(ActionOutputs.class)) {
-            for (ActionOutput ruleActionOutput : method.getAnnotationsByType(ActionOutput.class)) {
-                Output output = new Output(ruleActionOutput.name(), ruleActionOutput.type(), ruleActionOutput.label(),
-                        ruleActionOutput.description(),
-                        Arrays.stream(ruleActionOutput.tags()).collect(Collectors.toSet()),
-                        ruleActionOutput.reference(), ruleActionOutput.defaultValue());
+    private Output getOutputFromActionOutputAnnotation(ActionOutput ruleActionOutput, @Nullable String nameOverride) {
+        return new Output((nameOverride != null ? nameOverride : ruleActionOutput.name()), ruleActionOutput.type(),
+                ruleActionOutput.label(), ruleActionOutput.description(),
+                Arrays.stream(ruleActionOutput.tags()).collect(Collectors.toSet()), ruleActionOutput.reference(),
+                ruleActionOutput.defaultValue());
+    }
 
-                outputs.add(output);
+    private List<Output> getOutputsFromAction(Method method) {
+        List<Output> outputs = new ArrayList<>();
+        // ActionOutputs annotation
+        if (method.isAnnotationPresent(ActionOutputs.class)) {
+            for (ActionOutput ruleActionOutput : method.getAnnotation(ActionOutputs.class).value()) {
+                outputs.add(getOutputFromActionOutputAnnotation(ruleActionOutput, null));
             }
+            // no ActionOutputs annotation, but a Map<String, Object> return type
+        } else if (method.getAnnotatedReturnType().toString()
+                .equals("java.util.Map<java.lang.String, java.lang.Object>")) {
+            logger.warn(
+                    "Method {}::{} returns a Map<String, Object> but is not annotated with ActionOutputs. This should be fixed in the binding.",
+                    method.getDeclaringClass().getSimpleName(), method.getName());
+            return outputs;
+            // no ActionOutputs annotation and no Map<String, Object> return type, but a single ActionOutput annotation
+        } else if (method.isAnnotationPresent(ActionOutput.class)) {
+            ActionOutput ruleActionOutput = method.getAnnotation(ActionOutput.class);
+            if (!ruleActionOutput.name().equals(MODULE_RESULT)) {
+                logger.warn(
+                        "Method {}::{} has a single output but does not use the default output name in the ActionOutput annotation. This should be fixed in the binding.",
+                        method.getDeclaringClass().getSimpleName(), method.getName());
+            }
+            outputs.add(getOutputFromActionOutputAnnotation(ruleActionOutput, MODULE_RESULT));
         }
         return outputs;
     }
@@ -170,8 +220,25 @@ public class AnnotationActionModuleTypeHelper {
             if (configParam != null) {
                 configDescriptions.add(configParam);
             }
-            return new ActionType(uid, configDescriptions, mi.getLabel(), mi.getDescription(), mi.getTags(),
-                    mi.getVisibility(), mi.getInputs(), mi.getOutputs());
+
+            Visibility visibility = mi.getVisibility();
+
+            if (kind == ActionModuleKind.THING) {
+                // we have a Thing module, so we have to map the inputs to config description parameters for the UI
+                try {
+                    List<ConfigDescriptionParameter> inputConfigDescriptions = actionInputsHelper
+                            .mapActionInputsToConfigDescriptionParameters(mi.getInputs());
+                    configDescriptions.addAll(inputConfigDescriptions);
+                } catch (IllegalArgumentException e) {
+                    // we have an input without a supported type, so hide the Thing action
+                    visibility = Visibility.HIDDEN;
+                    logger.debug("{} Thing action {} has an input with an unsupported type, hiding it in the UI.",
+                            e.getMessage(), uid);
+                }
+            }
+
+            return new ActionType(uid, configDescriptions, mi.getLabel(), mi.getDescription(), mi.getTags(), visibility,
+                    mi.getInputs(), mi.getOutputs());
         }
         return null;
     }

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,13 +15,13 @@ package org.openhab.core.config.discovery.addon.process;
 import static org.openhab.core.config.discovery.addon.AddonFinderConstants.ADDON_SUGGESTION_FINDER;
 
 import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 import java.util.Set;
-import java.util.function.Predicate;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.addon.AddonDiscoveryMethod;
 import org.openhab.core.addon.AddonInfo;
 import org.openhab.core.addon.AddonMatchProperty;
@@ -46,35 +46,51 @@ public class ProcessAddonFinder extends BaseAddonFinder {
     public static final String SERVICE_NAME = SERVICE_TYPE + ADDON_SUGGESTION_FINDER;
 
     private static final String COMMAND = "command";
+    private static final String COMMAND_LINE = "commandLine";
+    private static final Set<String> SUPPORTED_PROPERTIES = Set.of(COMMAND, COMMAND_LINE);
 
     private final Logger logger = LoggerFactory.getLogger(ProcessAddonFinder.class);
 
-    // get list of running processes visible to openHAB,
-    // also tries to mitigate differences on different operating systems
-    String getProcessCommandProcess(ProcessHandle h) {
-        Optional<String> command = h.info().command();
-        if (command.isPresent()) {
-            return command.get();
+    /**
+     * Private record to extract match property parameters from a {@link ProcessHandle.Info} object.
+     * Tries to mitigate differences on different operating systems.
+     */
+    protected static record ProcessInfo(@Nullable String command, @Nullable String commandLine) {
+
+        /**
+         * Initializes the command and commandLine fields.
+         * If the command field is not present, it parses the first token in the command line.
+         */
+        protected static ProcessInfo from(ProcessHandle.Info info) {
+            String commandLine = info.commandLine().orElse(null);
+            String cmd = info.command().orElse(null);
+            if ((cmd == null || cmd.isEmpty()) && commandLine != null) {
+                cmd = commandLine;
+                String[] args = info.arguments().orElse(null);
+                if (args != null) {
+                    for (int i = args.length - 1; i >= 0; i--) {
+                        int index = cmd.lastIndexOf(args[i]);
+                        if (index >= 0) {
+                            cmd = cmd.substring(0, index);
+                        }
+                    }
+                }
+                cmd = cmd.stripTrailing();
+            }
+            return new ProcessInfo(cmd, commandLine);
         }
-        Optional<String[]> args = h.info().arguments();
-        if (args.isEmpty()) {
-            return "";
-        }
-        String[] argsArray = args.get();
-        if (argsArray.length < 1) {
-            return "";
-        }
-        return argsArray[0];
     }
 
     @Override
     public Set<AddonInfo> getSuggestedAddons() {
         logger.trace("ProcessAddonFinder::getSuggestedAddons");
         Set<AddonInfo> result = new HashSet<>();
-        Set<String> processList;
+        Set<ProcessInfo> processInfos;
+
         try {
-            processList = ProcessHandle.allProcesses().map(this::getProcessCommandProcess)
-                    .filter(Predicate.not(String::isEmpty)).collect(Collectors.toUnmodifiableSet());
+            processInfos = ProcessHandle.allProcesses().map(process -> ProcessInfo.from(process.info()))
+                    .filter(info -> (info.command != null) || (info.commandLine != null))
+                    .collect(Collectors.toUnmodifiableSet());
         } catch (SecurityException | UnsupportedOperationException unused) {
             logger.info("Cannot obtain process list, suggesting add-ons based on running processes is not possible");
             return result;
@@ -84,28 +100,30 @@ public class ProcessAddonFinder extends BaseAddonFinder {
             for (AddonDiscoveryMethod method : candidate.getDiscoveryMethods().stream()
                     .filter(method -> SERVICE_TYPE.equals(method.getServiceType())).toList()) {
 
-                List<AddonMatchProperty> matchProperties = method.getMatchProperties();
-                List<AddonMatchProperty> commands = matchProperties.stream()
-                        .filter(amp -> COMMAND.equals(amp.getName())).toList();
+                Map<String, Pattern> matchProperties = method.getMatchProperties().stream()
+                        .collect(Collectors.toMap(AddonMatchProperty::getName, AddonMatchProperty::getPattern));
 
-                if (matchProperties.size() != commands.size()) {
-                    logger.warn("Add-on '{}' addon.xml file contains unsupported 'match-property'", candidate.getUID());
-                }
-
-                if (commands.isEmpty()) {
-                    logger.warn("Add-on '{}' addon.xml file does not specify match property \"{}\"", candidate.getUID(),
-                            COMMAND);
+                if (matchProperties.isEmpty()) {
+                    logger.warn("Add-on info for '{}' contains no 'match-property'", candidate.getUID());
                     break;
                 }
 
-                // now check if a process matches the pattern defined in addon.xml
+                Set<String> propertyNames = new HashSet<>(matchProperties.keySet());
+                boolean noSupportedProperty = !propertyNames.removeAll(SUPPORTED_PROPERTIES);
+
+                if (!propertyNames.isEmpty()) {
+                    logger.warn("Add-on info for '{}' contains unsupported 'match-property' [{}]", candidate.getUID(),
+                            String.join(",", propertyNames));
+
+                    if (noSupportedProperty) {
+                        break;
+                    }
+                }
+
                 logger.trace("Checking candidate: {}", candidate.getUID());
-
-                for (AddonMatchProperty command : commands) {
-                    logger.trace("Candidate {}, pattern \"{}\"", candidate.getUID(), command.getRegex());
-                    boolean match = processList.stream().anyMatch(c -> command.getPattern().matcher(c).matches());
-
-                    if (match) {
+                for (ProcessInfo processInfo : processInfos) {
+                    if (propertyMatches(matchProperties, COMMAND, processInfo.command)
+                            && propertyMatches(matchProperties, COMMAND_LINE, processInfo.commandLine)) {
                         result.add(candidate);
                         logger.debug("Suggested add-on found: {}", candidate.getUID());
                         break;

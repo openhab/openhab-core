@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,11 +15,11 @@ package org.openhab.core.items.events;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.events.AbstractEvent;
-import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.dto.ItemDTO;
 
 /**
- * Abstract implementation of an item registry event which will be posted by the {@link ItemRegistry} for added, removed
+ * Abstract implementation of an item registry event which will be posted by the
+ * {@link org.openhab.core.items.ItemRegistry} for added, removed
  * and updated items.
  *
  * @author Stefan Bußweiler - Initial contribution

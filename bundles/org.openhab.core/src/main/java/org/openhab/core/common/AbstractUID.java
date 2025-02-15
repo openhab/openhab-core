@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,6 +14,7 @@ package org.openhab.core.common;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -26,7 +27,7 @@ import org.eclipse.jdt.annotation.Nullable;
 @NonNullByDefault
 public abstract class AbstractUID {
 
-    public static final String SEGMENT_PATTERN = "[\\w-]*";
+    private static final Pattern SEGMENT_PATTERN = Pattern.compile("[\\w-]*");
     public static final String SEPARATOR = ":";
     private final List<String> segments;
     private String uid = "";
@@ -95,8 +96,12 @@ public abstract class AbstractUID {
         return segments.get(segment);
     }
 
+    public static boolean isValid(@Nullable String segment) {
+        return segment != null && SEGMENT_PATTERN.matcher(segment).matches();
+    }
+
     protected void validateSegment(String segment, int index, int length) {
-        if (!segment.matches(SEGMENT_PATTERN)) {
+        if (!isValid(segment)) {
             throw new IllegalArgumentException(String.format(
                     "ID segment '%s' contains invalid characters. Each segment of the ID must match the pattern %s.",
                     segment, SEGMENT_PATTERN));

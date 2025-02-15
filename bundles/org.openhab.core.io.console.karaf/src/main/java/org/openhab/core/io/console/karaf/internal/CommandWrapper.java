@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -52,8 +52,8 @@ public class CommandWrapper implements Command, Action {
 
     /**
      * The constructor for the "help" instance of this class. This instance will be created by
-     * org.apache.karaf.shell.impl.action.command.ManagerImpl.instantiate(Class<? extends T>, Registry) and
-     * is used to print all usages from the `openhab` scope.
+     * {@code org.apache.karaf.shell.impl.action.command.ManagerImpl.instantiate(Class<? extends T>, Registry)} and
+     * is used to print all usages from the {@code openhab} scope.
      * The wrapped command is unused here because the karaf infrastructure will call the {@link #execute()} method.
      */
     public CommandWrapper() {

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,6 +12,8 @@
  */
 package org.openhab.core.config.core.internal.normalization;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 
 /**
@@ -22,6 +24,7 @@ import org.openhab.core.config.core.ConfigDescriptionParameter;
  * @author Simon Kaufmann - Initial contribution
  * @author Thomas Höfer - renamed from INormalizer and minor javadoc changes
  */
+@NonNullByDefault
 public interface Normalizer {
 
     /**
@@ -31,5 +34,6 @@ public interface Normalizer {
      * @param value the object to be normalized
      * @return the well-defined type or the given object, if it was not possible to convert it
      */
-    Object normalize(Object value);
+    @Nullable
+    Object normalize(@Nullable Object value);
 }

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -226,7 +226,7 @@ class ThingHandlerCallbackImpl implements ThingHandlerCallback {
 
     @Override
     public ChannelBuilder editChannel(Thing thing, ChannelUID channelUID) {
-        Channel channel = thing.getChannel(channelUID.getId());
+        Channel channel = thing.getChannel(channelUID);
         if (channel == null) {
             throw new IllegalArgumentException(
                     String.format("Channel '%s' does not exist for thing '%s'", channelUID, thing.getUID()));

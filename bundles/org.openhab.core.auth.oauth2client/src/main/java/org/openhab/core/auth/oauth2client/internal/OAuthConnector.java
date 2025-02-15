@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -39,6 +39,7 @@ import org.openhab.core.auth.client.oauth2.AccessTokenResponse;
 import org.openhab.core.auth.client.oauth2.OAuthException;
 import org.openhab.core.auth.client.oauth2.OAuthResponseException;
 import org.openhab.core.io.net.http.HttpClientFactory;
+import org.openhab.core.library.types.DateTimeType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,7 +84,8 @@ public class OAuthConnector {
     public OAuthConnector(HttpClientFactory httpClientFactory, @Nullable Fields extraFields, GsonBuilder gsonBuilder) {
         this.httpClientFactory = httpClientFactory;
         this.extraFields = extraFields;
-        gson = gsonBuilder.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+        gson = gsonBuilder.setDateFormat(DateTimeType.DATE_PATTERN_JSON_COMPAT)
+                .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
                 .registerTypeAdapter(Instant.class, (JsonDeserializer<Instant>) (json, typeOfT, context) -> {
                     try {
                         return Instant.parse(json.getAsString());
@@ -327,11 +329,17 @@ public class OAuthConnector {
 
             if (statusCode == HttpStatus.OK_200) {
                 AccessTokenResponse jsonResponse = gson.fromJson(content, AccessTokenResponse.class);
+                if (jsonResponse == null) {
+                    throw new OAuthException("Empty response content when deserializing AccessTokenResponse");
+                }
                 jsonResponse.setCreatedOn(Instant.now()); // this is not supplied by the response
                 logger.debug("grant type {} to URL {} success", grantType, request.getURI());
                 return jsonResponse;
             } else if (statusCode == HttpStatus.BAD_REQUEST_400) {
                 OAuthResponseException errorResponse = gson.fromJson(content, OAuthResponseException.class);
+                if (errorResponse == null) {
+                    throw new OAuthException("Empty response content when deserializing OAuthResponseException");
+                }
                 logger.error("grant type {} to URL {} failed with error code {}, description {}", grantType,
                         request.getURI(), errorResponse.getError(), errorResponse.getErrorDescription());
 
@@ -345,12 +353,8 @@ public class OAuthConnector {
             throw new IOException("Exception in oauth communication, grant type " + grantType, e);
         } catch (JsonSyntaxException e) {
             throw new OAuthException(String.format(
-                    "Unable to deserialize json into AccessTokenResponse/ OAuthResponseException. httpCode: %d json: %s: %s",
+                    "Unable to deserialize json into AccessTokenResponse/OAuthResponseException. httpCode: %d json: %s: %s",
                     statusCode, content, e.getMessage()), e);
-        } catch (Exception e) {
-            // Dont know what exception it is, wrap it up and throw it out
-            throw new OAuthException(
-                    "Exception in oauth communication, grant type " + grantType + ": " + e.getMessage(), e);
         }
     }
 

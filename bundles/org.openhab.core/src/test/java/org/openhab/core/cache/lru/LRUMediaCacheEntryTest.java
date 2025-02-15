@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -164,7 +164,7 @@ public class LRUMediaCacheEntryTest {
         assertTrue(fakeStream.isClosed()); // all client closed, the main stream should also be closed
 
         assertArrayEquals(new byte[] { 5, 6, 7, 8 }, byteReadFromStream1);
-        assertArrayEquals(new byte[] { 5, 6, 7, 8 }, byteReadFromStream1);
+        assertArrayEquals(new byte[] { 5, 6, 7, 8 }, byteReadFromStream2);
 
         // we call the TTS service only once
         verify(supplier, times(1)).get();
@@ -205,7 +205,7 @@ public class LRUMediaCacheEntryTest {
         if (possibleException != null) {
             throw possibleException;
         }
-        assertArrayEquals(randomData, bytesResultList.get(0));
+        assertArrayEquals(randomData, bytesResultList.getFirst());
         assertArrayEquals(randomData, bytesResultList.get(1));
 
         actualAudioStream1.close();

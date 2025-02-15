@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -45,7 +45,7 @@ class GroupStateTriggerHandlerTest extends JavaTest {
         when(moduleMock.getId()).thenReturn("triggerId");
         setupInterceptedLogger(GroupStateTriggerHandler.class, LogLevel.WARN);
 
-        GroupStateTriggerHandler handler = new GroupStateTriggerHandler(moduleMock, "ruleId", contextMock,
+        GroupStateTriggerHandler unused = new GroupStateTriggerHandler(moduleMock, "ruleId", contextMock,
                 itemRegistryMock);
 
         stopInterceptedLogger(GroupStateTriggerHandler.class);
@@ -61,7 +61,7 @@ class GroupStateTriggerHandlerTest extends JavaTest {
         when(moduleMock.getId()).thenReturn("triggerId");
         setupInterceptedLogger(GroupStateTriggerHandler.class, LogLevel.WARN);
 
-        GroupStateTriggerHandler handler = new GroupStateTriggerHandler(moduleMock, "ruleId", contextMock,
+        GroupStateTriggerHandler unused = new GroupStateTriggerHandler(moduleMock, "ruleId", contextMock,
                 itemRegistryMock);
 
         stopInterceptedLogger(GroupStateTriggerHandler.class);

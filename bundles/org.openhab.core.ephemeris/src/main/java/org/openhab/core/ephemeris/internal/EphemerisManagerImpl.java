@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2024 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -54,12 +55,12 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.jollyday.Holiday;
-import de.jollyday.HolidayManager;
-import de.jollyday.ManagerParameter;
-import de.jollyday.ManagerParameters;
-import de.jollyday.parameter.CalendarPartManagerParameter;
-import de.jollyday.util.ResourceUtil;
+import de.focus_shift.jollyday.core.Holiday;
+import de.focus_shift.jollyday.core.HolidayManager;
+import de.focus_shift.jollyday.core.ManagerParameter;
+import de.focus_shift.jollyday.core.ManagerParameters;
+import de.focus_shift.jollyday.core.parameter.CalendarPartManagerParameter;
+import de.focus_shift.jollyday.core.util.ResourceUtil;
 
 /**
  * This service provides functionality around ephemeris services and is the central service to be used directly by
@@ -95,10 +96,6 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
     final Map<String, Set<DayOfWeek>> daysets = new HashMap<>();
     private final Map<Object, HolidayManager> holidayManagers = new HashMap<>();
     private final List<String> countryParameters = new ArrayList<>();
-    /**
-     * Utility for accessing resources.
-     */
-    private final ResourceUtil resourceUtil = new ResourceUtil();
 
     private final LocaleProvider localeProvider;
     private final Bundle bundle;
@@ -110,6 +107,9 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
     public EphemerisManagerImpl(final @Reference LocaleProvider localeProvider, final BundleContext bundleContext) {
         this.localeProvider = localeProvider;
         bundle = bundleContext.getBundle();
+
+        // Default weekend dayset
+        addDayset(CONFIG_DAYSET_WEEKEND, List.of(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY));
 
         try (InputStream stream = bundle.getResource(JOLLYDAY_COUNTRY_DESCRIPTIONS).openStream()) {
             final Properties properties = new Properties();
@@ -225,8 +225,8 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
     private URL getUrl(String filename) throws FileNotFoundException {
         if (Files.exists(Paths.get(filename))) {
             try {
-                return new URL("file:" + filename);
-            } catch (MalformedURLException e) {
+                return (new URI("file:" + filename)).toURL();
+            } catch (IllegalArgumentException | MalformedURLException | URISyntaxException e) {
                 throw new FileNotFoundException(e.getMessage());
             }
         } else {
@@ -432,6 +432,6 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
 
     @Override
     public @Nullable String getHolidayDescription(@Nullable String holiday) {
-        return holiday != null ? resourceUtil.getHolidayDescription(localeProvider.getLocale(), holiday) : null;
+        return holiday != null ? ResourceUtil.getHolidayDescription(localeProvider.getLocale(), holiday) : null;
     }
 }
