@@ -106,6 +106,7 @@ import org.openhab.core.model.sitemap.sitemap.Widget;
 import org.openhab.core.types.State;
 import org.openhab.core.ui.items.ItemUIRegistry;
 import org.openhab.core.ui.items.ItemUIRegistry.WidgetLabelSource;
+import org.openhab.core.util.ColorUtil;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -745,7 +746,7 @@ public class SitemapResource
     public static @Nullable String convertItemValueColor(@Nullable String color, @Nullable State itemState) {
         if ("itemValue".equals(color)) {
             if (itemState instanceof HSBType hsbState) {
-                return "#" + Integer.toHexString(hsbState.getRGB()).substring(2);
+                return "#" + Integer.toHexString(ColorUtil.hsbTosRgb(hsbState)).substring(2);
             }
             return null;
         }

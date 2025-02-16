@@ -332,7 +332,7 @@ public class PersistenceExtensions {
 
     /**
      * Query the last historic update time of a given <code>item</code>. The default persistence service is used.
-     * Note the {@link Item.getLastStateUpdate()} is generally preferred to get the last update time of an item.
+     * Note the {@link Item#getLastStateUpdate()} is generally preferred to get the last update time of an item.
      *
      * @param item the item for which the last historic update time is to be returned
      * @return point in time of the last historic update to <code>item</code>, <code>null</code> if there are no
@@ -345,7 +345,7 @@ public class PersistenceExtensions {
 
     /**
      * Query for the last historic update time of a given <code>item</code>.
-     * Note the {@link Item.getLastStateUpdate()} is generally preferred to get the last update time of an item.
+     * Note the {@link Item#getLastStateUpdate()} is generally preferred to get the last update time of an item.
      *
      * @param item the item for which the last historic update time is to be returned
      * @param serviceId the name of the {@link PersistenceService} to use
@@ -389,7 +389,7 @@ public class PersistenceExtensions {
 
     /**
      * Query the last historic change time of a given <code>item</code>. The default persistence service is used.
-     * Note the {@link Item.getLastStateChange()} is generally preferred to get the last state change time of an item.
+     * Note the {@link Item#getLastStateChange()} is generally preferred to get the last state change time of an item.
      *
      * @param item the item for which the last historic change time is to be returned
      * @return point in time of the last historic change to <code>item</code>, <code>null</code> if there are no
@@ -402,7 +402,7 @@ public class PersistenceExtensions {
 
     /**
      * Query for the last historic change time of a given <code>item</code>.
-     * Note the {@link Item.getLastStateChange()} is generally preferred to get the last state change time of an item.
+     * Note the {@link Item#getLastStateChange()} is generally preferred to get the last state change time of an item.
      *
      * @param item the item for which the last historic change time is to be returned
      * @param serviceId the name of the {@link PersistenceService} to use
@@ -512,7 +512,7 @@ public class PersistenceExtensions {
 
     /**
      * Returns the previous state of a given <code>item</code>.
-     * Note the {@link Item.getLastState()} is generally preferred to get the previous state of an item.
+     * Note the {@link Item#getLastState()} is generally preferred to get the previous state of an item.
      *
      * @param item the item to get the previous state value for
      * @return the previous state or <code>null</code> if no previous state could be found, or if the default
@@ -524,7 +524,7 @@ public class PersistenceExtensions {
 
     /**
      * Returns the previous state of a given <code>item</code>.
-     * Note the {@link Item.getLastState()} is generally preferred to get the previous state of an item.
+     * Note the {@link Item#getLastState()} is generally preferred to get the previous state of an item.
      *
      * @param item the item to get the previous state value for
      * @param skipEqual if true, skips equal state values and searches the first state not equal the current state
@@ -538,7 +538,7 @@ public class PersistenceExtensions {
     /**
      * Returns the previous state of a given <code>item</code>.
      * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
-     * Note the {@link Item.getLastState()} is generally preferred to get the previous state of an item.
+     * Note the {@link Item#getLastState()} is generally preferred to get the previous state of an item.
      *
      * @param item the item to get the previous state value for
      * @param serviceId the name of the {@link PersistenceService} to use
@@ -552,7 +552,7 @@ public class PersistenceExtensions {
     /**
      * Returns the previous state of a given <code>item</code>.
      * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
-     * Note the {@link Item.getLastState()} is generally preferred to get the previous state of an item.
+     * Note the {@link Item#getLastState()} is generally preferred to get the previous state of an item.
      *
      * @param item the item to get the previous state value for
      * @param skipEqual if <code>true</code>, skips equal state values and searches the first state not equal the

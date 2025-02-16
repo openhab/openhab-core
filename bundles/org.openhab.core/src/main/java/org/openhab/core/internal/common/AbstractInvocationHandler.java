@@ -108,14 +108,14 @@ abstract class AbstractInvocationHandler<T> {
     void handleDuplicate(Method method, DuplicateExecutionException e) {
         Thread thread = Objects.requireNonNull(e.getCallable().getThread());
         logger.debug(MSG_DUPLICATE, toString(method), target, toString(e.getCallable().getMethod()), thread.getName(),
-                thread.getId(), thread.getState().toString(), getStacktrace(thread));
+                thread.threadId(), thread.getState().toString(), getStacktrace(thread));
     }
 
     void handleTimeout(Method method, Invocation invocation) {
         final Thread thread = invocation.getThread();
         if (thread != null) {
             logger.debug(MSG_TIMEOUT_R, timeout, toString(invocation.getInvocationStack()), thread.getName(),
-                    thread.getId(), thread.getState().toString(), getStacktrace(thread));
+                    thread.threadId(), thread.getState().toString(), getStacktrace(thread));
         } else {
             logger.debug(MSG_TIMEOUT_Q, timeout, toString(invocation.getInvocationStack()));
         }

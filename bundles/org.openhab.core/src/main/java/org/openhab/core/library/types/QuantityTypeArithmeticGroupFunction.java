@@ -146,7 +146,7 @@ public interface QuantityTypeArithmeticGroupFunction extends GroupFunction {
     /**
      * Calculates the sum of a set of item states whose value could be converted to the 'referenceUnit'.
      *
-     * Uses the {@link QuanitityType.add()} method so the result is an incremental sum based on the 'referenceUnit'. As
+     * Uses the {@link QuantityType#add} method so the result is an incremental sum based on the 'referenceUnit'. As
      * a general rule this class is instantiated with a 'referenceUnit' that is a "system unit" (which are zero based)
      * so such incremental sum is in fact also an absolute sum. However the class COULD be instantiated with a "non-
      * system unit" (e.g. °C, °F) in which case the result would be an incremental sum based on that unit.
