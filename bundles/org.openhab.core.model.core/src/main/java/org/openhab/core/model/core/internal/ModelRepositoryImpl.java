@@ -13,13 +13,13 @@
 package org.openhab.core.model.core.internal;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -50,6 +50,7 @@ import org.slf4j.LoggerFactory;
  * @author Kai Kreuzer - Initial contribution
  * @author Oliver Libutzki - Added reloadAllModelsOfType method
  * @author Simon Kaufmann - added validation of models before loading them
+ * @author Laurent Garnier - Added methods addStandaloneModel, removeStandaloneModel and generateSyntaxFromModel
  */
 @Component(immediate = true)
 @NonNullByDefault
@@ -63,6 +64,8 @@ public class ModelRepositoryImpl implements ModelRepository {
     private final List<ModelRepositoryChangeListener> listeners = new CopyOnWriteArrayList<>();
 
     private final SafeEMF safeEmf;
+
+    private int counter;
 
     @Activate
     public ModelRepositoryImpl(final @Reference SafeEMF safeEmf) {
@@ -96,16 +99,36 @@ public class ModelRepositoryImpl implements ModelRepository {
 
     @Override
     public boolean addOrRefreshModel(String name, final InputStream originalInputStream) {
+        return addOrRefreshModel(name, originalInputStream, null, null, false);
+    }
+
+    public boolean addOrRefreshModel(String name, final InputStream originalInputStream, @Nullable StringBuilder errors,
+            @Nullable StringBuilder warnings, boolean standalone) {
         logger.info("Loading model '{}'", name);
         Resource resource = null;
         byte[] bytes;
         try (InputStream inputStream = originalInputStream) {
             bytes = inputStream.readAllBytes();
-            String validationResult = validateModel(name, new ByteArrayInputStream(bytes));
-            if (validationResult != null) {
-                logger.warn("Configuration model '{}' has errors, therefore ignoring it: {}", name, validationResult);
+            StringBuilder newErrors = new StringBuilder();
+            StringBuilder newWarnings = new StringBuilder();
+            boolean valid = validateModel(name, new ByteArrayInputStream(bytes), newErrors, newWarnings);
+            if (errors != null) {
+                errors.append(newErrors);
+            }
+            if (warnings != null) {
+                warnings.append(newWarnings);
+            }
+            if (!valid) {
+                if (!standalone) {
+                    logger.warn("Configuration model '{}' has errors, therefore ignoring it: {}", name,
+                            newErrors.toString());
+                }
                 removeModel(name);
                 return false;
+            }
+            String message = newWarnings.toString();
+            if (!standalone && !message.isEmpty()) {
+                logger.info("Validation issues found in configuration model '{}', using it anyway:\n{}", name, message);
             }
         } catch (IOException e) {
             logger.warn("Configuration model '{}' cannot be parsed correctly!", name, e);
@@ -124,7 +147,9 @@ public class ModelRepositoryImpl implements ModelRepository {
                         resource = resourceSet.createResource(URI.createURI(name));
                         if (resource != null) {
                             resource.load(inputStream, resourceOptions);
-                            notifyListeners(name, EventType.ADDED);
+                            if (!standalone) {
+                                notifyListeners(name, EventType.ADDED);
+                            }
                             return true;
                         } else {
                             logger.warn("Ignoring file '{}' as we do not have a parser for it.", name);
@@ -135,7 +160,9 @@ public class ModelRepositoryImpl implements ModelRepository {
                 synchronized (resourceSet) {
                     resource.unload();
                     resource.load(inputStream, resourceOptions);
-                    notifyListeners(name, EventType.MODIFIED);
+                    if (!standalone) {
+                        notifyListeners(name, EventType.MODIFIED);
+                    }
                     return true;
                 }
             }
@@ -150,11 +177,17 @@ public class ModelRepositoryImpl implements ModelRepository {
 
     @Override
     public boolean removeModel(String name) {
+        return removeModel(name, false);
+    }
+
+    private boolean removeModel(String name, boolean standalone) {
         Resource resource = getResource(name);
         if (resource != null) {
             synchronized (resourceSet) {
                 // do not physically delete it, but remove it from the resource set
-                notifyListeners(name, EventType.REMOVED);
+                if (!standalone) {
+                    notifyListeners(name, EventType.REMOVED);
+                }
                 resourceSet.getResources().remove(resource);
                 return true;
             }
@@ -171,7 +204,8 @@ public class ModelRepositoryImpl implements ModelRepository {
 
             return resourceListCopy.stream()
                     .filter(input -> input.getURI().lastSegment().contains(".") && input.isLoaded()
-                            && modelType.equalsIgnoreCase(input.getURI().fileExtension()))
+                            && modelType.equalsIgnoreCase(input.getURI().fileExtension())
+                            && !input.getURI().lastSegment().startsWith("tmp_"))
                     .map(from -> from.getURI().path()).toList();
         }
     }
@@ -227,6 +261,38 @@ public class ModelRepositoryImpl implements ModelRepository {
         listeners.remove(listener);
     }
 
+    @Override
+    public @Nullable String addStandaloneModel(String modelType, InputStream inputStream, StringBuilder errors,
+            StringBuilder warnings) {
+        String name = "tmp_syntax_%d.%s".formatted(++counter, modelType);
+        return addOrRefreshModel(name, inputStream, errors, warnings, true) ? name : null;
+    }
+
+    @Override
+    public boolean removeStandaloneModel(String name) {
+        return removeModel(name, true);
+    }
+
+    @Override
+    public String generateSyntaxFromModel(String modelType, EObject modelContent) {
+        String result = "";
+        synchronized (resourceSet) {
+            String name = "tmp_generated_syntax_%d.%s".formatted(++counter, modelType);
+            Resource resource = resourceSet.createResource(URI.createURI(name));
+            try {
+                resource.getContents().add(modelContent);
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                resource.save(outputStream, Map.of(XtextResource.OPTION_ENCODING, StandardCharsets.UTF_8.name()));
+                result = new String(outputStream.toByteArray());
+            } catch (IOException e) {
+                logger.warn("Exception when saving the model {}", resource.getURI().lastSegment());
+            } finally {
+                resourceSet.getResources().remove(resource);
+            }
+        }
+        return result;
+    }
+
     private @Nullable Resource getResource(String name) {
         return resourceSet.getResource(URI.createURI(name), false);
     }
@@ -252,23 +318,21 @@ public class ModelRepositoryImpl implements ModelRepository {
      * @return error messages as a String if any syntactical error were found, <code>null</code> otherwise
      * @throws IOException if there was an error with the given {@link InputStream}, loading the resource from there
      */
-    private @Nullable String validateModel(String name, InputStream inputStream) throws IOException {
+    private boolean validateModel(String name, InputStream inputStream, StringBuilder errors, StringBuilder warnings)
+            throws IOException {
         // use another resource for validation in order to keep the original one for emergency-removal in case of errors
         Resource resource = resourceSet.createResource(URI.createURI("tmp_" + name));
         try {
             resource.load(inputStream, resourceOptions);
-            StringBuilder criticalErrors = new StringBuilder();
-            List<String> warnings = new LinkedList<>();
 
             if (!resource.getContents().isEmpty()) {
                 // Check for syntactical errors
                 for (Diagnostic diagnostic : resource.getErrors()) {
-                    criticalErrors
-                            .append(MessageFormat.format("[{0},{1}]: {2}\n", Integer.toString(diagnostic.getLine()),
-                                    Integer.toString(diagnostic.getColumn()), diagnostic.getMessage()));
+                    errors.append(MessageFormat.format("[{0},{1}]: {2}\n", Integer.toString(diagnostic.getLine()),
+                            Integer.toString(diagnostic.getColumn()), diagnostic.getMessage()));
                 }
-                if (!criticalErrors.isEmpty()) {
-                    return criticalErrors.toString();
+                if (!resource.getErrors().isEmpty()) {
+                    return false;
                 }
 
                 // Check for validation errors, but log them only
@@ -276,11 +340,7 @@ public class ModelRepositoryImpl implements ModelRepository {
                     final org.eclipse.emf.common.util.Diagnostic diagnostic = safeEmf
                             .call(() -> Diagnostician.INSTANCE.validate(resource.getContents().getFirst()));
                     for (org.eclipse.emf.common.util.Diagnostic d : diagnostic.getChildren()) {
-                        warnings.add(d.getMessage());
-                    }
-                    if (!warnings.isEmpty()) {
-                        logger.info("Validation issues found in configuration model '{}', using it anyway:\n{}", name,
-                                String.join("\n", warnings));
+                        warnings.append(d.getMessage() + "\n");
                     }
                 } catch (NullPointerException e) {
                     // see https://github.com/eclipse/smarthome/issues/3335
@@ -290,7 +350,7 @@ public class ModelRepositoryImpl implements ModelRepository {
         } finally {
             resourceSet.getResources().remove(resource);
         }
-        return null;
+        return true;
     }
 
     private void notifyListeners(String name, EventType type) {
