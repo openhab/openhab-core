@@ -261,19 +261,30 @@ public class FileFormatResource implements RESTResource {
     @Operation(operationId = "createFileFormatForAllItems", summary = "Create file format for existing items in the items registry.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
-                    @ApiResponse(responseCode = "400", description = "Unsupported syntax generator.") })
+                    @ApiResponse(responseCode = "400", description = "Unsupported syntax generator."),
+                    @ApiResponse(responseCode = "404", description = "Item not found in registry.") })
     public Response createFileFormatForAllItems(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @DefaultValue("DSL") @QueryParam("format") @Parameter(description = "syntax format") String format,
+            @QueryParam("filter") @Parameter(description = "filter item by its name", required = false) @Nullable String itemName,
             @DefaultValue("true") @QueryParam("hideDefaultParameters") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters) {
         ItemSyntaxGenerator generator = itemSyntaxGenerators.get(format);
         if (generator == null) {
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity("No syntax generator available for format " + format + "!").build();
         }
-        Collection<Item> items = itemRegistry.getAll();
-        return Response.ok(generator.generateSyntax(sortItems(items), getMetadata(items), hideDefaultParameters))
-                .build();
+        List<Item> items;
+        if (itemName != null) {
+            Item item = itemRegistry.get(itemName);
+            if (item == null) {
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity("Item with name '" + itemName + "' not found in the items registry!").build();
+            }
+            items = List.of(item);
+        } else {
+            items = sortItems(itemRegistry.getAll());
+        }
+        return Response.ok(generator.generateSyntax(items, getMetadata(items), hideDefaultParameters)).build();
     }
 
     @POST
@@ -392,17 +403,31 @@ public class FileFormatResource implements RESTResource {
     @Operation(operationId = "createFileFormatForAllThings", summary = "Create file format for existing things in the things registry.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
-                    @ApiResponse(responseCode = "400", description = "Unsupported syntax generator.") })
+                    @ApiResponse(responseCode = "400", description = "Unsupported syntax generator."),
+                    @ApiResponse(responseCode = "404", description = "Thing not found in registry.") })
     public Response createFileFormatForAllThings(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @DefaultValue("DSL") @QueryParam("format") @Parameter(description = "syntax format") String format,
+            @QueryParam("filter") @Parameter(description = "filter thing by its UID", required = false) @Nullable String thingUID,
             @DefaultValue("true") @QueryParam("hideDefaultParameters") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters) {
         ThingSyntaxGenerator generator = thingSyntaxGenerators.get(format);
         if (generator == null) {
             return Response.status(Response.Status.BAD_REQUEST)
                     .entity("No syntax generator available for format " + format + "!").build();
         }
-        return Response.ok(generator.generateSyntax(sortThings(thingRegistry.getAll()), hideDefaultParameters)).build();
+        List<Thing> things;
+        if (thingUID != null) {
+            ThingUID aThingUID = new ThingUID(thingUID);
+            Thing thing = thingRegistry.get(aThingUID);
+            if (thing == null) {
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity("Thing with UID '" + thingUID + "' not found in the things registry!").build();
+            }
+            things = List.of(thing);
+        } else {
+            things = sortThings(thingRegistry.getAll());
+        }
+        return Response.ok(generator.generateSyntax(things, hideDefaultParameters)).build();
     }
 
     @POST
