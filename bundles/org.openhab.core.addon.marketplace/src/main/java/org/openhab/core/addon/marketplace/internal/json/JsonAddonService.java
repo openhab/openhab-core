@@ -101,6 +101,9 @@ public class JsonAddonService extends AbstractRemoteAddonService {
     }
 
     private boolean isValidUrl(String urlString) {
+        if (urlString.isBlank()) {
+            return false;
+        }
         try {
             (new URI(urlString)).toURL();
         } catch (IllegalArgumentException | URISyntaxException | MalformedURLException e) {
