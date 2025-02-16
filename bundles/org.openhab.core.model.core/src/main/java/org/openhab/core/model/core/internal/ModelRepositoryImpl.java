@@ -13,6 +13,7 @@
 package org.openhab.core.model.core.internal;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -50,6 +51,7 @@ import org.slf4j.LoggerFactory;
  * @author Kai Kreuzer - Initial contribution
  * @author Oliver Libutzki - Added reloadAllModelsOfType method
  * @author Simon Kaufmann - added validation of models before loading them
+ * @author Laurent Garnier - Added method generateSyntaxFromModel
  */
 @Component(immediate = true)
 @NonNullByDefault
@@ -63,6 +65,8 @@ public class ModelRepositoryImpl implements ModelRepository {
     private final List<ModelRepositoryChangeListener> listeners = new CopyOnWriteArrayList<>();
 
     private final SafeEMF safeEmf;
+
+    private int counter;
 
     @Activate
     public ModelRepositoryImpl(final @Reference SafeEMF safeEmf) {
@@ -171,7 +175,8 @@ public class ModelRepositoryImpl implements ModelRepository {
 
             return resourceListCopy.stream()
                     .filter(input -> input.getURI().lastSegment().contains(".") && input.isLoaded()
-                            && modelType.equalsIgnoreCase(input.getURI().fileExtension()))
+                            && modelType.equalsIgnoreCase(input.getURI().fileExtension())
+                            && !input.getURI().lastSegment().startsWith("tmp_"))
                     .map(from -> from.getURI().path()).toList();
         }
     }
@@ -225,6 +230,26 @@ public class ModelRepositoryImpl implements ModelRepository {
     @Override
     public void removeModelRepositoryChangeListener(ModelRepositoryChangeListener listener) {
         listeners.remove(listener);
+    }
+
+    @Override
+    public String generateSyntaxFromModel(String modelType, EObject modelContent) {
+        String result = "";
+        synchronized (resourceSet) {
+            String name = "tmp_generated_syntax_%d.%s".formatted(++counter, modelType);
+            Resource resource = resourceSet.createResource(URI.createURI(name));
+            try {
+                resource.getContents().add(modelContent);
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                resource.save(outputStream, Map.of(XtextResource.OPTION_ENCODING, StandardCharsets.UTF_8.name()));
+                result = new String(outputStream.toByteArray());
+            } catch (IOException e) {
+                logger.warn("Exception when saving the model {}", resource.getURI().lastSegment());
+            } finally {
+                resourceSet.getResources().remove(resource);
+            }
+        }
+        return result;
     }
 
     private @Nullable Resource getResource(String name) {
