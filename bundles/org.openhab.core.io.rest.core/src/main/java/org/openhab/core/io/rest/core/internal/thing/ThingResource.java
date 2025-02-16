@@ -26,8 +26,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.annotation.security.RolesAllowed;
@@ -74,7 +72,6 @@ import org.openhab.core.io.rest.core.thing.EnrichedThingDTOMapper;
 import org.openhab.core.items.ItemFactory;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.ManagedItemProvider;
-import org.openhab.core.thing.Bridge;
 import org.openhab.core.thing.Channel;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.ManagedThingProvider;
@@ -98,8 +95,6 @@ import org.openhab.core.thing.firmware.dto.FirmwareStatusDTO;
 import org.openhab.core.thing.i18n.ThingStatusInfoI18nLocalizationService;
 import org.openhab.core.thing.link.ItemChannelLinkRegistry;
 import org.openhab.core.thing.link.ManagedItemChannelLinkProvider;
-import org.openhab.core.thing.syntax.ThingSyntaxGenerator;
-import org.openhab.core.thing.syntax.ThingSyntaxParser;
 import org.openhab.core.thing.type.BridgeType;
 import org.openhab.core.thing.type.ChannelType;
 import org.openhab.core.thing.type.ChannelTypeRegistry;
@@ -111,8 +106,6 @@ import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
 import org.osgi.service.jaxrs.whiteboard.JaxrsWhiteboardConstants;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JSONRequired;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
@@ -147,7 +140,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * @author Dimitar Ivanov - replaced Firmware UID with thing UID and firmware version
  * @author Markus Rathgeb - Migrated to JAX-RS Whiteboard Specification
  * @author Wouter Born - Migrated to OpenAPI annotations
- * @author Laurent Garnier - Added API to parse and generate syntax for thing
  */
 @Component
 @JaxrsResource
@@ -179,8 +171,6 @@ public class ThingResource implements RESTResource {
     private final ThingTypeRegistry thingTypeRegistry;
     private final RegistryChangedRunnableListener<Thing> resetLastModifiedChangeListener = new RegistryChangedRunnableListener<>(
             () -> lastModified = null);
-    private final Map<String, ThingSyntaxGenerator> thingSyntaxGenerators = new ConcurrentHashMap<>();
-    private final Map<String, ThingSyntaxParser> thingSyntaxParsers = new ConcurrentHashMap<>();
 
     private @Context @NonNullByDefault({}) UriInfo uriInfo;
     private @Nullable Date lastModified = null;
@@ -223,24 +213,6 @@ public class ThingResource implements RESTResource {
     @Deactivate
     void deactivate() {
         this.thingRegistry.removeRegistryChangeListener(resetLastModifiedChangeListener);
-    }
-
-    @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.MULTIPLE)
-    protected void addThingSyntaxGenerator(ThingSyntaxGenerator thingSyntaxGenerator) {
-        thingSyntaxGenerators.put(thingSyntaxGenerator.getGeneratorFormat(), thingSyntaxGenerator);
-    }
-
-    protected void removeThingSyntaxGenerator(ThingSyntaxGenerator thingSyntaxGenerator) {
-        thingSyntaxGenerators.remove(thingSyntaxGenerator.getGeneratorFormat());
-    }
-
-    @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.MULTIPLE)
-    protected void addThingSyntaxParser(ThingSyntaxParser thingSyntaxParser) {
-        thingSyntaxParsers.put(thingSyntaxParser.getParserFormat(), thingSyntaxParser);
-    }
-
-    protected void removeThingSyntaxParser(ThingSyntaxParser thingSyntaxParser) {
-        thingSyntaxParsers.remove(thingSyntaxParser.getParserFormat());
     }
 
     /**
@@ -748,142 +720,6 @@ public class ThingResource implements RESTResource {
         return Response.ok().entity(new Stream2JSONInputStream(firmwareStream)).build();
     }
 
-    @GET
-    @RolesAllowed({ Role.ADMIN })
-    @Path("/file-format")
-    @Produces(MediaType.TEXT_PLAIN)
-    @Operation(operationId = "createFileFormatForAllThings", summary = "Generate file format for all things in the registry.", security = {
-            @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
-                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
-                    @ApiResponse(responseCode = "400", description = "Unsupported syntax generator.") })
-    public Response createFileFormatForAllThings(
-            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
-            @DefaultValue("DSL") @QueryParam("format") @Parameter(description = "syntax format") String format,
-            @DefaultValue("true") @QueryParam("hideDefaultParameters") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters) {
-        ThingSyntaxGenerator generator = thingSyntaxGenerators.get(format);
-        if (generator == null) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                    .entity("No syntax generator available for format " + format + "!").build();
-        }
-        return Response.ok(generator.generateSyntax(sortThings(thingRegistry.getAll()), hideDefaultParameters)).build();
-    }
-
-    @POST
-    @RolesAllowed({ Role.ADMIN })
-    @Path("/translate-from-file-format")
-    @Consumes(MediaType.TEXT_PLAIN)
-    @Produces(MediaType.APPLICATION_JSON)
-    @Operation(operationId = "parseFileFormat", summary = "Create JSON representing an array of things from file format.", security = {
-            @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
-                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = ThingDTO.class), uniqueItems = true))),
-                    @ApiResponse(responseCode = "400", description = "Unsupported syntax parser."),
-                    @ApiResponse(responseCode = "400", description = "Invalid syntax.") })
-    public Response parseFileFormat(
-            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
-            @DefaultValue("DSL") @QueryParam("format") @Parameter(description = "syntax format") String format,
-            @Parameter(description = "thing syntax", required = true) String syntax) {
-        final Locale locale = localeService.getLocale(language);
-
-        ThingSyntaxParser parser = thingSyntaxParsers.get(format);
-        if (parser == null) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                    .entity("No syntax parser available for format " + format + "!").build();
-        }
-
-        Collection<Thing> things = new ArrayList<>();
-        StringBuilder errors = new StringBuilder();
-        StringBuilder warnings = new StringBuilder();
-        if (!parser.parseSyntax(syntax, things, errors, warnings)) {
-            return Response.status(Response.Status.BAD_REQUEST).entity(errors.toString()).build();
-        }
-
-        List<ThingDTO> thingsDTO = new ArrayList<>();
-        things.forEach(thing -> {
-            thingsDTO.add(ThingDTOMapper.map(thing));
-        });
-        return Response.ok(thingsDTO).build();
-    }
-
-    @POST
-    @RolesAllowed({ Role.ADMIN })
-    @Path("/translate-to-file-format")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.TEXT_PLAIN)
-    @Operation(operationId = "createFileFormat", summary = "Create file format from JSON representing an array of things.", security = {
-            @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
-                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
-                    @ApiResponse(responseCode = "400", description = "Unsupported syntax generator."),
-                    @ApiResponse(responseCode = "400", description = "Invalid input (things data).") })
-    public Response createFileFormat(
-            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
-            @DefaultValue("DSL") @QueryParam("format") @Parameter(description = "syntax format") String format,
-            @DefaultValue("true") @QueryParam("hideDefaultParameters") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters,
-            @Parameter(description = "things data", required = true) ThingDTO[] thingsData) {
-        ThingSyntaxGenerator generator = thingSyntaxGenerators.get(format);
-        if (generator == null) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                    .entity("No syntax generator available for format " + format + "!").build();
-        }
-
-        List<Thing> things = new ArrayList<>();
-        for (ThingDTO thingBean : thingsData) {
-            ThingUID thingUID = thingBean.UID == null ? null : new ThingUID(thingBean.UID);
-            ThingTypeUID thingTypeUID = new ThingTypeUID(thingBean.thingTypeUID);
-
-            ThingUID bridgeUID = null;
-
-            if (thingBean.bridgeUID != null) {
-                bridgeUID = new ThingUID(thingBean.bridgeUID);
-                if (thingUID != null && (!thingUID.getBindingId().equals(bridgeUID.getBindingId())
-                        || !thingUID.getBridgeIds().contains(bridgeUID.getId()))) {
-                    return Response.status(Response.Status.BAD_REQUEST)
-                            .entity("Thing UID '" + thingUID + "' does not match bridge UID '" + bridgeUID + "'")
-                            .build();
-                }
-            }
-
-            // turn the ThingDTO's configuration into a Configuration
-            Configuration configuration = new Configuration(
-                    normalizeConfiguration(thingBean.configuration, thingTypeUID, thingUID));
-            if (thingUID != null) {
-                normalizeChannels(thingBean, thingUID);
-            }
-
-            Thing thing = thingRegistry.createThingOfType(thingTypeUID, thingUID, bridgeUID, thingBean.label,
-                    configuration);
-
-            if (thing != null) {
-                if (thingBean.properties != null) {
-                    for (Entry<String, String> entry : thingBean.properties.entrySet()) {
-                        thing.setProperty(entry.getKey(), entry.getValue());
-                    }
-                }
-                if (thingBean.location != null) {
-                    thing.setLocation(thingBean.location);
-                }
-                if (thingBean.channels != null && !thingBean.channels.isEmpty()) {
-                    ThingDTO thingChannels = new ThingDTO();
-                    thingChannels.channels = thingBean.channels;
-                    thing = ThingHelper.merge(thing, thingChannels);
-                }
-            } else if (thingUID != null) {
-                // if there wasn't any ThingFactory capable of creating the thing,
-                // we create the Thing exactly the way we received it, i.e. we
-                // cannot take its thing type into account for automatically
-                // populating channels and properties.
-                thing = ThingDTOMapper.map(thingBean,
-                        thingTypeRegistry.getThingType(thingTypeUID) instanceof BridgeType);
-            } else {
-                return Response.status(Response.Status.BAD_REQUEST)
-                        .entity("A thing UID must be provided, since no binding can create the thing!").build();
-            }
-
-            things.add(thing);
-        }
-
-        return Response.ok(generator.generateSyntax(things, hideDefaultParameters)).build();
-    }
-
     private FirmwareDTO convertToFirmwareDTO(Firmware firmware) {
         return new FirmwareDTO(firmware.getThingTypeUID().getAsString(), firmware.getVendor(), firmware.getModel(),
                 firmware.isModelRestricted(), firmware.getDescription(), firmware.getVersion(),
@@ -1048,42 +884,6 @@ public class ThingResource implements RESTResource {
             return new URI(uriString);
         } catch (URISyntaxException e) {
             throw new BadRequestException("Invalid URI syntax: " + uriString);
-        }
-    }
-
-    /*
-     * Sort the things in such a way:
-     * - things are grouped by binding, sorted by natural order of binding name
-     * - all things of a binding are sorted to follow the tree, that is bridge thing is before its sub-things
-     * - all things of a binding at a certain tree depth are sorted by thing UID
-     */
-    private List<Thing> sortThings(Collection<Thing> things) {
-        List<Thing> thingTree = new ArrayList<>();
-        Set<String> bindings = things.stream().map(thing -> thing.getUID().getBindingId()).collect(Collectors.toSet());
-        for (String binding : bindings.stream().sorted().collect(Collectors.toList())) {
-            List<Thing> topThings = things.stream()
-                    .filter(thing -> thing.getUID().getBindingId().equals(binding) && thing.getBridgeUID() == null)
-                    .sorted((thing1, thing2) -> {
-                        return thing1.getUID().getAsString().compareTo(thing2.getUID().getAsString());
-                    }).collect(Collectors.toList());
-            for (Thing thing : topThings) {
-                fillThingTree(thingTree, thing);
-            }
-        }
-        return thingTree;
-    }
-
-    private void fillThingTree(List<Thing> things, Thing thing) {
-        if (!things.contains(thing)) {
-            things.add(thing);
-            if (thing instanceof Bridge bridge) {
-                List<Thing> subThings = bridge.getThings().stream().sorted((thing1, thing2) -> {
-                    return thing1.getUID().getAsString().compareTo(thing2.getUID().getAsString());
-                }).collect(Collectors.toList());
-                for (Thing subThing : subThings) {
-                    fillThingTree(things, subThing);
-                }
-            }
         }
     }
 }
