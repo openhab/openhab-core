@@ -25,10 +25,8 @@ import org.openhab.core.config.core.ConfigDescriptionRegistry
 import org.openhab.core.config.core.ConfigUtil
 import org.openhab.core.config.core.Configuration
 import org.openhab.core.common.AbstractUID
-import org.openhab.core.common.registry.AbstractProvider
 import org.openhab.core.i18n.LocaleProvider
 import org.openhab.core.service.ReadyMarker
-import org.openhab.core.service.ReadyMarkerFilter
 import org.openhab.core.service.ReadyService
 import org.openhab.core.service.StartLevelService
 import org.openhab.core.thing.Channel
@@ -78,31 +76,31 @@ import org.slf4j.LoggerFactory
 @Component(immediate=true, service=#[ThingProvider, StandaloneThingProvider])
 class GenericThingProvider extends AbstractProviderLazyNullness<Thing> implements ThingProvider, StandaloneThingProvider, ModelRepositoryChangeListener, ReadyService.ReadyTracker {
 
-    private static final String XML_THING_TYPE = "openhab.xmlThingTypes";
+    static final String XML_THING_TYPE = "openhab.xmlThingTypes";
 
-    private LocaleProvider localeProvider
+    LocaleProvider localeProvider
 
-    private ModelRepository modelRepository
+    ModelRepository modelRepository
 
-    private ThingTypeRegistry thingTypeRegistry
-    private ChannelTypeRegistry channelTypeRegistry
+    ThingTypeRegistry thingTypeRegistry
+    ChannelTypeRegistry channelTypeRegistry
 
-    private BundleResolver bundleResolver;
+    BundleResolver bundleResolver;
 
-    private Map<String, Collection<Thing>> thingsMap = new ConcurrentHashMap
+    Map<String, Collection<Thing>> thingsMap = new ConcurrentHashMap
 
-    private List<ThingHandlerFactory> thingHandlerFactories = new CopyOnWriteArrayList<ThingHandlerFactory>()
+    List<ThingHandlerFactory> thingHandlerFactories = new CopyOnWriteArrayList<ThingHandlerFactory>()
 
-    private ConfigDescriptionRegistry configDescriptionRegistry
+    ConfigDescriptionRegistry configDescriptionRegistry
 
-    private val List<QueueContent> queue = new CopyOnWriteArrayList
-    private var Thread lazyRetryThread = null
+    val List<QueueContent> queue = new CopyOnWriteArrayList
+    var Thread lazyRetryThread = null
 
-    private static final Logger logger = LoggerFactory.getLogger(GenericThingProvider)
+    static final Logger logger = LoggerFactory.getLogger(GenericThingProvider)
 
-    private val Set<String> loadedXmlThingTypes = new CopyOnWriteArraySet
+    val Set<String> loadedXmlThingTypes = new CopyOnWriteArraySet
 
-    private var modelLoaded = false
+    var modelLoaded = false
 
     def void activate() {
         modelRepository.getAllModelNamesOfType("things").forEach [
@@ -623,7 +621,7 @@ class GenericThingProvider extends AbstractProviderLazyNullness<Thing> implement
     }
 
     def private createThingsFromModelForThingHandlerFactory(String modelName, ThingHandlerFactory factory) {
-        if (!loadedXmlThingTypes.contains(factory.bundleName) || modelRepository == null) {
+        if (!loadedXmlThingTypes.contains(factory.bundleName) || modelRepository === null) {
             return
         }
         val things = thingsMap.get(modelName)
@@ -654,7 +652,7 @@ class GenericThingProvider extends AbstractProviderLazyNullness<Thing> implement
         ]
     }
 
-    private val lazyRetryRunnable = new Runnable() {
+    val lazyRetryRunnable = new Runnable() {
         override run() {
             logger.debug("Starting lazy retry thread")
             while (!queue.empty) {

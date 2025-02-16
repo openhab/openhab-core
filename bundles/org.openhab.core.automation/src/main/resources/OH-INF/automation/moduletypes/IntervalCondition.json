@@ -1,0 +1,18 @@
+{
+	"conditions": [
+		{
+			"uid": "timer.IntervalCondition",
+			"label": "a minimum interval between checks is reached",
+			"description": "Evaluates the interval between checks.",
+			"configDescriptions": [
+				{
+					"name": "minInterval",
+					"type": "INTEGER",
+					"label": "Minimum Interval",
+					"description": "Returns true if the last satisfied check was at least this many milliseconds ago.",
+					"required": true
+				}
+			]
+		}
+	]
+}

@@ -134,4 +134,6 @@ Fragment-Host: org.openhab.core.model.script
 	org.openhab.core.model.rule.runtime;version='[5.0.0,5.0.1)',\
 	de.focus_shift.jollyday-core;version='[1.4.0,1.4.1)',\
 	de.focus_shift.jollyday-jackson;version='[1.4.0,1.4.1)',\
-	org.ops4j.pax.logging.pax-logging-api;version='[2.2.8,2.2.9)'
+	org.ops4j.pax.logging.pax-logging-api;version='[2.2.8,2.2.9)',\
+	com.fasterxml.jackson.dataformat.jackson-dataformat-yaml;version='[2.18.2,2.18.3)',\
+	org.yaml.snakeyaml;version='[2.3.0,2.3.1)'

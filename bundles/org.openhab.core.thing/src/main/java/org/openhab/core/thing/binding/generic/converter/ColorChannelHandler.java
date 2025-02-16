@@ -28,6 +28,7 @@ import org.openhab.core.thing.internal.binding.generic.converter.AbstractTransfo
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
 import org.openhab.core.types.UnDefType;
+import org.openhab.core.util.ColorUtil;
 
 /**
  * The {@link ColorChannelHandler} implements {@link org.openhab.core.library.items.ColorItem} conversions
@@ -122,7 +123,7 @@ public class ColorChannelHandler extends AbstractTransformingChannelHandler {
     private String hsbToString(HSBType state) {
         switch (channelConfig.colorMode) {
             case RGB:
-                PercentType[] rgb = state.toRGB();
+                PercentType[] rgb = ColorUtil.hsbToRgbPercent(state);
                 return String.format("%1$d,%2$d,%3$d", rgb[0].toBigDecimal().multiply(BYTE_FACTOR).intValue(),
                         rgb[1].toBigDecimal().multiply(BYTE_FACTOR).intValue(),
                         rgb[2].toBigDecimal().multiply(BYTE_FACTOR).intValue());

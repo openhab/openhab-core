@@ -135,8 +135,7 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
     public synchronized void processWatchEvent(Kind kind, Path path) {
         Path fullPath = watchPath.resolve(path);
         String pathString = path.toString();
-        if (!Files.isReadable(fullPath) || Files.isDirectory(fullPath) || path.startsWith("automation")
-                || !pathString.endsWith(".yaml") || fullPath.toFile().isHidden()) {
+        if (path.startsWith("automation") || !pathString.endsWith(".yaml")) {
             logger.trace("Ignored {}", fullPath);
             return;
         }
@@ -144,29 +143,29 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
         // strip extension for model name
         String modelName = pathString.substring(0, pathString.lastIndexOf("."));
 
-        if (kind == WatchService.Kind.DELETE) {
-            logger.info("Removing YAML model {}", modelName);
-            YamlModelWrapper removedModel = modelCache.remove(modelName);
-            if (removedModel == null) {
-                return;
-            }
-            for (Map.Entry<String, List<JsonNode>> modelEntry : removedModel.getNodes().entrySet()) {
-                String elementName = modelEntry.getKey();
-                List<JsonNode> removedNodes = modelEntry.getValue();
-                if (!removedNodes.isEmpty()) {
-                    getElementListeners(elementName).forEach(listener -> {
-                        List removedElements = parseJsonNodes(removedNodes, listener.getElementClass());
-                        listener.removedModel(modelName, removedElements);
-                    });
+        try {
+            if (kind == WatchService.Kind.DELETE) {
+                logger.info("Removing YAML model {}", modelName);
+                YamlModelWrapper removedModel = modelCache.remove(modelName);
+                if (removedModel == null) {
+                    return;
                 }
-            }
-        } else {
-            if (kind == Kind.CREATE) {
-                logger.info("Adding YAML model {}", modelName);
-            } else {
-                logger.info("Updating YAML model {}", modelName);
-            }
-            try {
+                for (Map.Entry<String, List<JsonNode>> modelEntry : removedModel.getNodes().entrySet()) {
+                    String elementName = modelEntry.getKey();
+                    List<JsonNode> removedNodes = modelEntry.getValue();
+                    if (!removedNodes.isEmpty()) {
+                        getElementListeners(elementName).forEach(listener -> {
+                            List removedElements = parseJsonNodes(removedNodes, listener.getElementClass());
+                            listener.removedModel(modelName, removedElements);
+                        });
+                    }
+                }
+            } else if (!Files.isHidden(fullPath) && Files.isReadable(fullPath) && !Files.isDirectory(fullPath)) {
+                if (kind == Kind.CREATE) {
+                    logger.info("Adding YAML model {}", modelName);
+                } else {
+                    logger.info("Updating YAML model {}", modelName);
+                }
                 JsonNode fileContent = objectMapper.readTree(fullPath.toFile());
 
                 // check version
@@ -233,9 +232,11 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
                     // replace cache
                     model.getNodes().put(elementName, newNodeElements);
                 }
-            } catch (IOException e) {
-                logger.warn("Failed to read {}: {}", modelName, e.getMessage());
+            } else {
+                logger.trace("Ignored {}", fullPath);
             }
+        } catch (IOException e) {
+            logger.warn("Failed to process model {}: {}", modelName, e.getMessage());
         }
     }
 
