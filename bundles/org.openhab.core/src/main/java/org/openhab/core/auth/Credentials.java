@@ -12,11 +12,14 @@
  */
 package org.openhab.core.auth;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * Marker interface for credentials which can be handled by authentication providers.
  *
  * @author Łukasz Dywicki - Initial contribution
  */
+@NonNullByDefault
 public interface Credentials {
 
 }
