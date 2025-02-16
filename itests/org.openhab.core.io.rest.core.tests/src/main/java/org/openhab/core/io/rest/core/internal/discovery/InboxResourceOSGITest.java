@@ -32,7 +32,6 @@ import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
 import org.openhab.core.thing.binding.builder.ThingBuilder;
-import org.openhab.core.thing.type.ThingTypeRegistry;
 
 /**
  * @author Christoph Knauf - Initial contribution
@@ -49,16 +48,13 @@ public class InboxResourceOSGITest extends JavaOSGiTest {
     private @NonNullByDefault({}) InboxResource resource;
 
     private @Mock @NonNullByDefault({}) Inbox inboxMock;
-    private @Mock @NonNullByDefault({}) ThingTypeRegistry thingTypeRegistryMock;
-    private @Mock @NonNullByDefault({}) ConfigDescriptionRegistry configDescRegistryMock;
 
     @BeforeEach
     public void beforeEach() throws Exception {
         ConfigDescriptionRegistry configDescRegistry = getService(ConfigDescriptionRegistry.class);
         assertNotNull(configDescRegistry);
 
-        registerService(new InboxResource(inboxMock, thingTypeRegistryMock, configDescRegistryMock),
-                InboxResource.class.getName());
+        registerService(new InboxResource(inboxMock), InboxResource.class.getName());
         resource = getService(InboxResource.class);
         assertNotNull(resource);
     }

@@ -12,6 +12,8 @@
  */
 package org.openhab.core.io.rest.core.internal.fileformat;
 
+import static org.openhab.core.config.discovery.inbox.InboxPredicates.forThingUID;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.ZoneId;
@@ -36,6 +38,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
@@ -49,9 +52,12 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.auth.Role;
 import org.openhab.core.config.core.ConfigDescription;
+import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionRegistry;
 import org.openhab.core.config.core.ConfigUtil;
 import org.openhab.core.config.core.Configuration;
+import org.openhab.core.config.discovery.DiscoveryResult;
+import org.openhab.core.config.discovery.inbox.Inbox;
 import org.openhab.core.i18n.TimeZoneProvider;
 import org.openhab.core.io.rest.DTOMapper;
 import org.openhab.core.io.rest.LocaleService;
@@ -76,6 +82,7 @@ import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingRegistry;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
+import org.openhab.core.thing.binding.ThingFactory;
 import org.openhab.core.thing.dto.ChannelDTO;
 import org.openhab.core.thing.dto.ThingDTO;
 import org.openhab.core.thing.dto.ThingDTOMapper;
@@ -162,6 +169,7 @@ public class FileFormatResource implements RESTResource {
     private final MetadataRegistry metadataRegistry;
     private final ItemChannelLinkRegistry itemChannelLinkRegistry;
     private final ThingRegistry thingRegistry;
+    private final Inbox inbox;
     private final ThingTypeRegistry thingTypeRegistry;
     private final ChannelTypeRegistry channelTypeRegistry;
     private final ConfigDescriptionRegistry configDescRegistry;
@@ -180,6 +188,7 @@ public class FileFormatResource implements RESTResource {
             final @Reference MetadataRegistry metadataRegistry,
             final @Reference ItemChannelLinkRegistry itemChannelLinkRegistry,
             final @Reference ThingRegistry thingRegistry, //
+            final @Reference Inbox inbox, //
             final @Reference ThingTypeRegistry thingTypeRegistry, //
             final @Reference ChannelTypeRegistry channelTypeRegistry, //
             final @Reference ConfigDescriptionRegistry configDescRegistry, //
@@ -191,6 +200,7 @@ public class FileFormatResource implements RESTResource {
         this.metadataRegistry = metadataRegistry;
         this.itemChannelLinkRegistry = itemChannelLinkRegistry;
         this.thingRegistry = thingRegistry;
+        this.inbox = inbox;
         this.thingTypeRegistry = thingTypeRegistry;
         this.channelTypeRegistry = channelTypeRegistry;
         this.configDescRegistry = configDescRegistry;
@@ -248,7 +258,7 @@ public class FileFormatResource implements RESTResource {
     @RolesAllowed({ Role.ADMIN })
     @Path("/existing/items")
     @Produces(MediaType.TEXT_PLAIN)
-    @Operation(operationId = "createFileFormatForAllItems", summary = "Create file format for existing items in the registry.", security = {
+    @Operation(operationId = "createFileFormatForAllItems", summary = "Create file format for existing items in the items registry.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
                     @ApiResponse(responseCode = "400", description = "Unsupported syntax generator.") })
@@ -379,7 +389,7 @@ public class FileFormatResource implements RESTResource {
     @RolesAllowed({ Role.ADMIN })
     @Path("/existing/things")
     @Produces(MediaType.TEXT_PLAIN)
-    @Operation(operationId = "createFileFormatForAllThings", summary = "Create file format for existing things in the registry.", security = {
+    @Operation(operationId = "createFileFormatForAllThings", summary = "Create file format for existing things in the things registry.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
                     @ApiResponse(responseCode = "400", description = "Unsupported syntax generator.") })
@@ -509,6 +519,40 @@ public class FileFormatResource implements RESTResource {
         }
 
         return Response.ok(generator.generateSyntax(things, hideDefaultParameters)).build();
+    }
+
+    @GET
+    @Path("/existing/thing-from-inbox/{thingUID}")
+    @Produces(MediaType.TEXT_PLAIN)
+    @Operation(operationId = "generateSyntaxForDiscoveryResult", summary = "Create file format for an existing thing in the discovey registry.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "400", description = "Unsupported syntax generator."),
+            @ApiResponse(responseCode = "404", description = "Discovery result not found in the inbox or thing type not found.") })
+    public Response generateSyntaxForDiscoveryResult(
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
+            @PathParam("thingUID") @Parameter(description = "thingUID") String thingUID,
+            @DefaultValue("DSL") @QueryParam("format") @Parameter(description = "syntax format") String format,
+            @DefaultValue("true") @QueryParam("hideDefaultParameters") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters) {
+        ThingSyntaxGenerator generator = thingSyntaxGenerators.get(format);
+        if (generator == null) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("No syntax generator available for format " + format + "!").build();
+        }
+
+        List<DiscoveryResult> results = inbox.getAll().stream().filter(forThingUID(new ThingUID(thingUID))).toList();
+        if (results.isEmpty()) {
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity("Discovery result for thing with UID " + thingUID + " not found in the inbox!").build();
+        }
+        DiscoveryResult result = results.get(0);
+        ThingType thingType = thingTypeRegistry.getThingType(result.getThingTypeUID());
+        if (thingType == null) {
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity("Thing type with UID " + result.getThingTypeUID() + " does not exist!").build();
+        }
+
+        return Response.ok(generator.generateSyntax(List.of(simulateThing(result, thingType)), hideDefaultParameters))
+                .build();
     }
 
     /*
@@ -725,5 +769,29 @@ public class FileFormatResource implements RESTResource {
         } catch (URISyntaxException e) {
             throw new BadRequestException("Invalid URI syntax: " + uriString);
         }
+    }
+
+    /*
+     * Create a thing from a discovery result without inserting it in the thing registry
+     */
+    private Thing simulateThing(DiscoveryResult result, ThingType thingType) {
+        Map<String, Object> configParams = new HashMap<>();
+        List<ConfigDescriptionParameter> configDescriptionParameters = List.of();
+        URI descURI = thingType.getConfigDescriptionURI();
+        if (descURI != null) {
+            ConfigDescription desc = configDescRegistry.getConfigDescription(descURI);
+            if (desc != null) {
+                configDescriptionParameters = desc.getParameters();
+            }
+        }
+        for (ConfigDescriptionParameter param : configDescriptionParameters) {
+            Object value = result.getProperties().get(param.getName());
+            if (value != null) {
+                configParams.put(param.getName(), ConfigUtil.normalizeType(value, param));
+            }
+        }
+        Configuration config = new Configuration(configParams);
+        return ThingFactory.createThing(thingType, result.getThingUID(), config, result.getBridgeUID(),
+                configDescRegistry);
     }
 }
