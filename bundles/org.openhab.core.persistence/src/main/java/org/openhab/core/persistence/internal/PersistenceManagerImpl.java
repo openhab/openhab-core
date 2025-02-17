@@ -564,14 +564,9 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, State
                     .onException(e -> logger.error(
                             "Exception occurred while querying persistence service '{}' to restore '{}': {}",
                             queryService.getId(), item.getName(), e.getMessage(), e))
-<<<<<<< Upstream, based on origin/main
-                    .build().persistedItem(item.getName());
+                    .build().persistedItem(item.getName(), alias);
             if (persistedItem == null) {
-=======
-                    .build().query(filter, alias);
-            if (result == null) {
                 // in case of an exception or timeout, the safe caller returns null
->>>>>>> 80a9bbc persistence aliases
                 return;
             }
             GenericItem genericItem = (GenericItem) item;

@@ -187,7 +187,7 @@ public class PersistenceManagerTest {
         when(persistenceServiceMock.getId()).thenReturn(TEST_PERSISTENCE_SERVICE_ID);
         when(queryablePersistenceServiceMock.getId()).thenReturn(TEST_QUERYABLE_PERSISTENCE_SERVICE_ID);
         when(queryablePersistenceServiceMock.query(any(), any())).thenReturn(List.of(TEST_HISTORIC_ITEM));
-        when(queryablePersistenceServiceMock.persistedItem(any())).thenReturn(TEST_PERSISTED_ITEM);
+        when(queryablePersistenceServiceMock.persistedItem(any(), any())).thenReturn(TEST_PERSISTED_ITEM);
         when(modifiablePersistenceServiceMock.getId()).thenReturn(TEST_MODIFIABLE_PERSISTENCE_SERVICE_ID);
 
         manager = new PersistenceManagerImpl(cronSchedulerMock, schedulerMock, itemRegistryMock, safeCallerMock,
@@ -368,7 +368,7 @@ public class PersistenceManagerTest {
         assertThat(TEST_GROUP_ITEM.getState(), is(TEST_STATE));
         assertThat(TEST_GROUP_ITEM.getLastState(), is(TEST_LAST_STATE));
 
-        verify(queryablePersistenceServiceMock, times(3)).query(any(), any());
+        verify(queryablePersistenceServiceMock, times(3)).persistedItem(any(), any());
 
         ZonedDateTime lastStateUpdate = TEST_ITEM.getLastStateUpdate();
         assertNotNull(lastStateUpdate);
@@ -399,7 +399,7 @@ public class PersistenceManagerTest {
         assertThat(TEST_GROUP_ITEM.getState(), is(TEST_STATE));
         assertThat(TEST_GROUP_ITEM.getLastState(), is(TEST_LAST_STATE));
 
-        verify(queryablePersistenceServiceMock, times(2)).query(any(), any());
+        verify(queryablePersistenceServiceMock, times(2)).persistedItem(any(), any());
 
         ZonedDateTime lastStateUpdate = TEST_ITEM.getLastStateUpdate();
         assertNotNull(lastStateUpdate);

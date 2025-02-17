@@ -39,7 +39,7 @@ public interface QueryablePersistenceService extends PersistenceService {
     /**
      * Queries the {@link PersistenceService} for historic data with a given {@link FilterCriteria}.
      * If the persistence service implementing this class supports using aliases for item names, the default
-     * implementation of {@link #query(FilterCriteria, String)} should be overriden as well.
+     * implementation of {@link #query(FilterCriteria, String)} should be overridden as well.
      *
      * @param filter the filter to apply to the query
      * @return a time series of items
@@ -49,7 +49,7 @@ public interface QueryablePersistenceService extends PersistenceService {
     /**
      * Queries the {@link PersistenceService} for historic data with a given {@link FilterCriteria}.
      * If the persistence service implementing this interface supports aliases and relies on item registry lookups, the
-     * default implementation should be overriden to query the database with the aliased name.
+     * default implementation should be overridden to query the database with the aliased name.
      *
      * @param filter the filter to apply to the query
      * @param alias for item name in database
@@ -105,17 +105,21 @@ public interface QueryablePersistenceService extends PersistenceService {
      * persisted state. Persistence services can override this default implementation with a more specific or efficient
      * algorithm.
      *
+     * @param itemName name of item
+     * @param alias alias of item
+     *
      * @return a {@link PersistedItem} or null if the item has not been persisted
      */
-    default @Nullable PersistedItem persistedItem(String itemName) {
+    default @Nullable PersistedItem persistedItem(String itemName, @Nullable String alias) {
         State currentState = UnDefType.NULL;
         State previousState = null;
         ZonedDateTime lastUpdate = null;
         ZonedDateTime lastChange = null;
 
         int pageNumber = 0;
-        FilterCriteria filter = new FilterCriteria().setItemName(itemName).setEndDate(ZonedDateTime.now())
-                .setOrdering(Ordering.DESCENDING).setPageSize(1000).setPageNumber(pageNumber);
+        FilterCriteria filter = new FilterCriteria().setItemName(alias != null ? alias : itemName)
+                .setEndDate(ZonedDateTime.now()).setOrdering(Ordering.DESCENDING).setPageSize(1000)
+                .setPageNumber(pageNumber);
         Iterable<HistoricItem> items = query(filter);
         while (items != null) {
             Iterator<HistoricItem> it = items.iterator();
