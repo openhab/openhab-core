@@ -176,22 +176,20 @@ public class ConfigUtil {
      * @return corresponding value as a valid type
      * @throws IllegalArgumentException if an invalid type has been given
      */
-    public static Object normalizeType(Object value, @Nullable ConfigDescriptionParameter configDescriptionParameter) {
-        Object result = null;
+    @Nullable
+    public static Object normalizeType(@Nullable Object value,
+            @Nullable ConfigDescriptionParameter configDescriptionParameter) {
         if (configDescriptionParameter != null) {
             Normalizer normalizer = NormalizerFactory.getNormalizer(configDescriptionParameter);
-            result = normalizer.normalize(value);
+            return normalizer.normalize(value);
         } else if (value instanceof Boolean) {
-            result = NormalizerFactory.getNormalizer(Type.BOOLEAN).normalize(value);
+            return NormalizerFactory.getNormalizer(Type.BOOLEAN).normalize(value);
         } else if (value instanceof String) {
-            result = NormalizerFactory.getNormalizer(Type.TEXT).normalize(value);
+            return NormalizerFactory.getNormalizer(Type.TEXT).normalize(value);
         } else if (value instanceof Number) {
-            result = NormalizerFactory.getNormalizer(Type.DECIMAL).normalize(value);
+            return NormalizerFactory.getNormalizer(Type.DECIMAL).normalize(value);
         } else if (value instanceof Collection collection) {
-            result = normalizeCollection(collection);
-        }
-        if (result != null) {
-            return result;
+            return normalizeCollection(collection);
         }
         throw new IllegalArgumentException(
                 "Invalid type '{%s}' of configuration value!".formatted(value.getClass().getCanonicalName()));
@@ -214,20 +212,21 @@ public class ConfigUtil {
      * @return the normalized configuration or null if given configuration was null
      * @throws IllegalArgumentException if given config description is null
      */
-    public static Map<String, Object> normalizeTypes(Map<String, Object> configuration,
+    public static Map<String, @Nullable Object> normalizeTypes(Map<String, @Nullable Object> configuration,
             List<ConfigDescription> configDescriptions) {
         if (configDescriptions.isEmpty()) {
             throw new IllegalArgumentException("Config description must not be empty.");
         }
 
-        Map<String, Object> convertedConfiguration = new HashMap<>();
+        Map<String, @Nullable Object> convertedConfiguration = new HashMap<>();
 
         Map<String, ConfigDescriptionParameter> configParams = new HashMap<>();
         for (int i = configDescriptions.size() - 1; i >= 0; i--) {
             configParams.putAll(configDescriptions.get(i).toParametersMap());
         }
-        for (Entry<String, Object> parameter : configuration.entrySet()) {
+        for (Entry<String, @Nullable Object> parameter : configuration.entrySet()) {
             String name = parameter.getKey();
+            @Nullable
             Object value = parameter.getValue();
             if (!isOSGiConfigParameter(name)) {
                 ConfigDescriptionParameter configDescriptionParameter = configParams.get(name);
@@ -246,7 +245,7 @@ public class ConfigUtil {
      * @param value the value to return as normalized type
      * @return corresponding value as a valid type
      */
-    public static @Nullable Object normalizeType(Object value) {
+    public static @Nullable Object normalizeType(@Nullable Object value) {
         return normalizeType(value, null);
     }
 

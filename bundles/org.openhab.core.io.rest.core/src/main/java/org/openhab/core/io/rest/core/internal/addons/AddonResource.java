@@ -399,7 +399,7 @@ public class AddonResource implements RESTResource, EventSubscriber {
             @ApiResponse(responseCode = "500", description = "Configuration can not be updated due to internal error") })
     public Response updateConfiguration(@PathParam("addonId") @Parameter(description = "Add-on id") String addonId,
             @QueryParam("serviceId") @Parameter(description = "service ID") @Nullable String serviceId,
-            @Nullable Map<String, Object> configuration) {
+            @Nullable Map<String, @Nullable Object> configuration) {
         try {
             AddonService addonService = (serviceId != null) ? getServiceById(serviceId) : getDefaultService();
             if (addonService == null) {
@@ -425,8 +425,8 @@ public class AddonResource implements RESTResource, EventSubscriber {
         }
     }
 
-    private @Nullable Map<String, Object> normalizeConfiguration(@Nullable Map<String, Object> properties,
-            String addonId) {
+    private @Nullable Map<String, @Nullable Object> normalizeConfiguration(
+            @Nullable Map<String, @Nullable Object> properties, String addonId) {
         if (properties == null || properties.isEmpty()) {
             return properties;
         }
