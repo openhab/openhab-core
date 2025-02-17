@@ -126,6 +126,12 @@
 					]
 				},
 				{
+					"name": "lastStateUpdate",
+					"type": "java.time.ZonedDateTime",
+					"description": "the time of the previous state update",
+					"label": "Last State Update"
+				},
+				{
 					"name": "event",
 					"type": "org.openhab.core.events.Event",
 					"label": "Event",
@@ -220,8 +226,8 @@
 				{
 					"name": "newState",
 					"type": "state",
-					"description": "the new item state",
 					"label": "New State",
+					"description": "the new item state",
 					"tags": [
 						"state"
 					]
@@ -229,8 +235,20 @@
 				{
 					"name": "oldState",
 					"type": "state",
-					"description": "the old item state",
-					"label": "Old State"
+					"label": "Old State",
+					"description": "the old item state"
+				},
+				{
+					"name": "lastStateUpdate",
+					"type": "java.time.ZonedDateTime",
+					"label": "Last State Update",
+					"description": "the time of the previous state update"
+				},
+				{
+					"name": "lastStateChange",
+					"type": "java.time.ZonedDateTime",
+					"label": "Last State Change",
+					"description": "the time of the previous state change"
 				},
 				{
 					"name": "event",
@@ -403,6 +421,12 @@
 					]
 				},
 				{
+					"name": "lastStateUpdate",
+					"type": "java.time.ZonedDateTime",
+					"description": "the time of the previous state update",
+					"label": "Last State Update"
+				},
+				{
 					"name": "event",
 					"type": "org.openhab.core.events.Event",
 					"label": "Event",
@@ -517,6 +541,18 @@
 					"type": "state",
 					"description": "the old item state",
 					"label": "Old State"
+				},
+				{
+					"name": "lastStateUpdate",
+					"type": "java.time.ZonedDateTime",
+					"label": "Last State Update",
+					"description": "the time of the previous state update"
+				},
+				{
+					"name": "lastStateChange",
+					"type": "java.time.ZonedDateTime",
+					"label": "Last State Change",
+					"description": "the time of the previous state change"
 				},
 				{
 					"name": "event",

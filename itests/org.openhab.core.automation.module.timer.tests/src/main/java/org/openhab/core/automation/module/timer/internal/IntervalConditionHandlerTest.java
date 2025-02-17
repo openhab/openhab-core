@@ -168,7 +168,7 @@ public class IntervalConditionHandlerTest extends BasicConditionHandlerTest {
         logger.info("Rule is enabled and idle");
 
         logger.info("Send and wait for item state is ON");
-        eventPublisher.post(ItemEventFactory.createStateUpdatedEvent(testItemName1, OnOffType.ON));
+        eventPublisher.post(ItemEventFactory.createStateUpdatedEvent(testItemName1, OnOffType.ON, null));
 
         // the first event is always processed
         waitForAssert(() -> {
@@ -182,7 +182,7 @@ public class IntervalConditionHandlerTest extends BasicConditionHandlerTest {
 
         // Send a second event to check if the condition is still satisfied
         itemEvent = null; // reset it
-        eventPublisher.post(ItemEventFactory.createStateUpdatedEvent(testItemName1, OnOffType.ON));
+        eventPublisher.post(ItemEventFactory.createStateUpdatedEvent(testItemName1, OnOffType.ON, null));
 
         waitForAssert(() -> {
             assertThat(itemEvent, is(notNullValue()));
@@ -198,7 +198,7 @@ public class IntervalConditionHandlerTest extends BasicConditionHandlerTest {
 
         // prepare the execution
         itemEvent = null;
-        eventPublisher.post(ItemEventFactory.createStateUpdatedEvent(testItemName1, OnOffType.ON));
+        eventPublisher.post(ItemEventFactory.createStateUpdatedEvent(testItemName1, OnOffType.ON, null));
 
         // the first event is always allowed
         waitForAssert(() -> {
@@ -209,7 +209,7 @@ public class IntervalConditionHandlerTest extends BasicConditionHandlerTest {
 
         // the second event is not allowed
         itemEvent = null;
-        eventPublisher.post(ItemEventFactory.createStateUpdatedEvent(testItemName1, OnOffType.ON));
+        eventPublisher.post(ItemEventFactory.createStateUpdatedEvent(testItemName1, OnOffType.ON, null));
         Thread.sleep(200); // without this, the assertion will be immediately fulfilled regardless of event processing
         assertThat(itemEvent, is(nullValue()));
     }

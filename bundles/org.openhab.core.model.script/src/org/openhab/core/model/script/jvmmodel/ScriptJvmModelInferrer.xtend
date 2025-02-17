@@ -13,6 +13,7 @@
 package org.openhab.core.model.script.jvmmodel
 
 import com.google.inject.Inject
+import java.time.ZonedDateTime
 import java.util.Set
 import org.openhab.core.items.ItemRegistry
 import org.openhab.core.model.script.scoping.StateAndCommandProvider
@@ -60,6 +61,12 @@ class ScriptJvmModelInferrer extends AbstractModelInferrer {
 
     /** Variable name for the new state of an item in a "changed state triggered" or "updated state triggered" rule */
     public static final String VAR_NEW_STATE = "newState";
+
+    /** Variable name for the last update time of an item in a "changed state triggered" or "updated state triggered" rule */
+    public static final String VAR_LAST_STATE_UPDATE = "lastStateUpdate";
+
+    /** Variable name for the last change time of an item in a "changed state triggered" rule */
+    public static final String VAR_LAST_STATE_CHANGE = "lastStateChange";
 
     /** Variable name for the received command in a "command triggered" rule */
     public static final String VAR_RECEIVED_COMMAND = "receivedCommand";
@@ -160,6 +167,10 @@ class ScriptJvmModelInferrer extends AbstractModelInferrer {
                 parameters += script.toParameter(VAR_NEW_STATUS, newThingStatusRef)
                 val stateTypeRef2 = typeRef(State)
                 parameters += script.toParameter(VAR_NEW_STATE, stateTypeRef2)
+                val lastStateUpdateTypeRef = typeRef(ZonedDateTime)
+                parameters += script.toParameter(VAR_LAST_STATE_UPDATE, lastStateUpdateTypeRef)
+                val lastStateChangeTypeRef = typeRef(ZonedDateTime)
+                parameters += script.toParameter(VAR_LAST_STATE_CHANGE, lastStateChangeTypeRef)
                 val privateCacheTypeRef = typeRef(ValueCache)
                 parameters += script.toParameter(VAR_PRIVATE_CACHE, privateCacheTypeRef)
                 val sharedCacheTypeRef = typeRef(ValueCache)

@@ -12,7 +12,10 @@
  */
 package org.openhab.core.items.events;
 
+import java.time.ZonedDateTime;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.types.State;
 
 /**
@@ -34,6 +37,10 @@ public class ItemStateChangedEvent extends ItemEvent {
 
     protected final State oldItemState;
 
+    protected final @Nullable ZonedDateTime lastStateUpdate;
+
+    protected final @Nullable ZonedDateTime lastStateChange;
+
     /**
      * Constructs a new item state changed event.
      *
@@ -42,12 +49,16 @@ public class ItemStateChangedEvent extends ItemEvent {
      * @param itemName the item name
      * @param newItemState the new item state
      * @param oldItemState the old item state
+     * @param lastStateUpdate the last state update
+     * @param lastStateChange the last state change
      */
     protected ItemStateChangedEvent(String topic, String payload, String itemName, State newItemState,
-            State oldItemState) {
+            State oldItemState, @Nullable ZonedDateTime lastStateUpdate, @Nullable ZonedDateTime lastStateChange) {
         super(topic, payload, itemName, null);
         this.itemState = newItemState;
         this.oldItemState = oldItemState;
+        this.lastStateUpdate = lastStateUpdate;
+        this.lastStateChange = lastStateChange;
     }
 
     @Override
@@ -71,6 +82,24 @@ public class ItemStateChangedEvent extends ItemEvent {
      */
     public State getOldItemState() {
         return oldItemState;
+    }
+
+    /**
+     * Gets the timestamp of the previous state update that occurred prior to this event.
+     *
+     * @return the last state update
+     */
+    public @Nullable ZonedDateTime getLastStateUpdate() {
+        return lastStateUpdate;
+    }
+
+    /**
+     * Gets the timestamp of the previous state change that occurred prior to this event.
+     *
+     * @return the last state change
+     */
+    public @Nullable ZonedDateTime getLastStateChange() {
+        return lastStateChange;
     }
 
     @Override
