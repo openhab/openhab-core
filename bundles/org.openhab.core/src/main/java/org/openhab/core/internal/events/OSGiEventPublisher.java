@@ -41,30 +41,29 @@ public class OSGiEventPublisher implements EventPublisher {
     protected static final String PAYLOAD = "payload";
     protected static final String TYPE = "type";
 
-    private final EventAdmin osgiEventAdmin;
+    private final @Nullable EventAdmin osgiEventAdmin;
 
     @Activate
     public OSGiEventPublisher(final @Reference @Nullable EventAdmin eventAdmin) {
-        if (eventAdmin == null) {
-            throw new IllegalStateException("The event bus module is not available!");
-        }
         this.osgiEventAdmin = eventAdmin;
     }
 
     @Override
     public void post(final Event event) throws IllegalArgumentException, IllegalStateException {
+        EventAdmin eventAdmin = this.osgiEventAdmin;
         assertValidArgument(event);
-        postAsOSGiEvent(osgiEventAdmin, event);
+        assertValidState(eventAdmin);
+        postAsOSGiEvent(eventAdmin, event);
     }
 
-    private void postAsOSGiEvent(final EventAdmin eventAdmin, final Event event) throws IllegalStateException {
+    private void postAsOSGiEvent(final @Nullable EventAdmin eventAdmin, final Event event)
+            throws IllegalStateException {
         try {
             Dictionary<String, Object> properties = new Hashtable<>(3);
             properties.put(TYPE, event.getType());
             properties.put(PAYLOAD, event.getPayload());
             properties.put(TOPIC, event.getTopic());
-            String source = event.getSource();
-            if (source != null) {
+            if (event.getSource() instanceof String source) {
                 properties.put(SOURCE, source);
             }
             eventAdmin.postEvent(new org.osgi.service.event.Event("openhab", properties));
@@ -83,6 +82,12 @@ public class OSGiEventPublisher implements EventPublisher {
             throw new IllegalArgumentException(errorMsg.formatted(PAYLOAD));
         } else if (event.getTopic().isEmpty()) {
             throw new IllegalArgumentException(errorMsg.formatted(TOPIC));
+        }
+    }
+
+    private void assertValidState(@Nullable EventAdmin eventAdmin) throws IllegalStateException {
+        if (eventAdmin == null) {
+            throw new IllegalStateException("The event bus module is not available!");
         }
     }
 }
