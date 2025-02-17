@@ -89,11 +89,11 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
     private static final String PROPERTY_COUNTRY_DESCRIPTION_PREFIX = "country.description.";
     private static final String PROPERTY_COUNTRY_DESCRIPTION_DELIMITER = "\\.";
 
-    private final List<ParameterOption> countries = new ArrayList<>();
-    private final Map<String, List<ParameterOption>> regions = new HashMap<>();
-    private final Map<String, List<ParameterOption>> cities = new HashMap<>();
+    protected final List<ParameterOption> countries = new ArrayList<>();
+    protected final Map<String, List<ParameterOption>> regions = new HashMap<>();
+    protected final Map<String, List<ParameterOption>> cities = new HashMap<>();
 
-    private final Map<String, Set<DayOfWeek>> daysets = new HashMap<>();
+    protected final Map<String, Set<DayOfWeek>> daysets = new HashMap<>();
     private final Map<Object, HolidayManager> holidayManagers = new HashMap<>();
     private final List<String> countryParameters = new ArrayList<>();
 
@@ -224,7 +224,7 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
     private URL getUrl(String filename) throws FileNotFoundException {
         if (Files.exists(Paths.get(filename))) {
             try {
-                return new URL("file:" + filename);
+                return URI.create("file:" + filename).toURL();
             } catch (MalformedURLException e) {
                 throw new FileNotFoundException(e.getMessage());
             }
