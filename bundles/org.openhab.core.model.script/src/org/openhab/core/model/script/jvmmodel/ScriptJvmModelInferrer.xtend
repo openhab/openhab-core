@@ -13,7 +13,7 @@
 package org.openhab.core.model.script.jvmmodel
 
 import com.google.inject.Inject
-import java.time.ZonedDateTime
+import java.time.Instant
 import java.util.Set
 import org.openhab.core.items.ItemRegistry
 import org.openhab.core.model.script.scoping.StateAndCommandProvider
@@ -167,9 +167,9 @@ class ScriptJvmModelInferrer extends AbstractModelInferrer {
                 parameters += script.toParameter(VAR_NEW_STATUS, newThingStatusRef)
                 val stateTypeRef2 = script.newTypeRef(State)
                 parameters += script.toParameter(VAR_NEW_STATE, stateTypeRef2)
-                val lastStateUpdateTypeRef = script.newTypeRef(ZonedDateTime)
+                val lastStateUpdateTypeRef = script.newTypeRef(Instant)
                 parameters += script.toParameter(VAR_LAST_STATE_UPDATE, lastStateUpdateTypeRef)
-                val lastStateChangeTypeRef = script.newTypeRef(ZonedDateTime)
+                val lastStateChangeTypeRef = script.newTypeRef(Instant)
                 parameters += script.toParameter(VAR_LAST_STATE_CHANGE, lastStateChangeTypeRef)
                 val privateCacheTypeRef = script.newTypeRef(ValueCache)
                 parameters += script.toParameter(VAR_PRIVATE_CACHE, privateCacheTypeRef)

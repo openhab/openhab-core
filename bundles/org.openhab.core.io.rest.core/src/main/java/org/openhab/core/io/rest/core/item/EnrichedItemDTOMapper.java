@@ -12,6 +12,7 @@
  */
 package org.openhab.core.io.rest.core.item;
 
+import java.time.Instant;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -107,10 +108,8 @@ public class EnrichedItemDTOMapper {
         StateDescription stateDescription = considerTransformation(item.getStateDescription(locale));
 
         String lastState = Optional.ofNullable(item.getLastState()).map(State::toFullString).orElse(null);
-        Long lastStateUpdate = Optional.ofNullable(item.getLastStateUpdate()).map(zdt -> zdt.toInstant().toEpochMilli())
-                .orElse(null);
-        Long lastStateChange = Optional.ofNullable(item.getLastStateChange()).map(zdt -> zdt.toInstant().toEpochMilli())
-                .orElse(null);
+        Long lastStateUpdate = Optional.ofNullable(item.getLastStateUpdate()).map(Instant::toEpochMilli).orElse(null);
+        Long lastStateChange = Optional.ofNullable(item.getLastStateChange()).map(Instant::toEpochMilli).orElse(null);
 
         final String link;
         if (uriBuilder != null) {
