@@ -12,6 +12,9 @@
  */
 package org.openhab.core.model.thing.internal.syntax;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -71,7 +74,7 @@ public class DslThingSyntaxConverter extends AbstractThingSyntaxGenerator {
     }
 
     @Override
-    public synchronized String generateSyntax(List<Thing> things, boolean hideDefaultParameters) {
+    public synchronized void generateSyntax(OutputStream out, List<Thing> things, boolean hideDefaultParameters) {
         ThingModel model = ThingFactory.eINSTANCE.createThingModel();
         Set<Thing> handledThings = new HashSet<>();
         for (Thing thing : things) {
@@ -82,11 +85,15 @@ public class DslThingSyntaxConverter extends AbstractThingSyntaxGenerator {
                     .add(buildModelThing(thing, hideDefaultParameters, things.size() > 1, true, things, handledThings));
         }
         // Double quotes are unexpectedly generated in thing UID when the segment contains a -.
-        // Fix that by removing these double quotes.
-        String syntax = modelRepository.generateSyntaxFromModel("things", model)
-                .replaceAll(":\"([a-zA-Z0-9_][a-zA-Z0-9_-]*)\"", ":$1");
-        logger.debug("Generated syntax:\n{}", syntax);
-        return syntax;
+        // Fix that by removing these double quotes. Requires to first build the generated syntax as a String
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        modelRepository.generateSyntaxFromModel(outputStream, "things", model);
+        String syntax = new String(outputStream.toByteArray()).replaceAll(":\"([a-zA-Z0-9_][a-zA-Z0-9_-]*)\"", ":$1");
+        try {
+            out.write(syntax.getBytes());
+        } catch (IOException e) {
+            logger.warn("Exception when writing the generated syntax {}", e.getMessage());
+        }
     }
 
     private ModelThing buildModelThing(Thing thing, boolean hideDefaultParameters, boolean preferPresentationAsTree,

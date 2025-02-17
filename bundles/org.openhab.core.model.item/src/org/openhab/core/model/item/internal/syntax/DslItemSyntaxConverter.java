@@ -12,6 +12,7 @@
  */
 package org.openhab.core.model.item.internal.syntax;
 
+import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -78,16 +79,14 @@ public class DslItemSyntaxConverter extends AbstractItemSyntaxGenerator {
     }
 
     @Override
-    public synchronized String generateSyntax(List<Item> items, Collection<Metadata> metadata,
+    public synchronized void generateSyntax(OutputStream out, List<Item> items, Collection<Metadata> metadata,
             boolean hideDefaultParameters) {
         ItemModel model = ItemsFactory.eINSTANCE.createItemModel();
         for (Item item : items) {
             model.getItems().add(buildModelItem(item, getChannelLinks(metadata, item.getName()),
                     getMetadata(metadata, item.getName()), hideDefaultParameters));
         }
-        String syntax = modelRepository.generateSyntaxFromModel("items", model);
-        logger.debug("Generated syntax:\n{}", syntax);
-        return syntax;
+        modelRepository.generateSyntaxFromModel(out, "items", model);
     }
 
     private ModelItem buildModelItem(Item item, List<Metadata> channelLinks, List<Metadata> metadata,

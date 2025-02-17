@@ -12,6 +12,7 @@
  */
 package org.openhab.core.items.syntax;
 
+import java.io.OutputStream;
 import java.util.Collection;
 import java.util.List;
 
@@ -37,10 +38,11 @@ public interface ItemSyntaxGenerator {
     /**
      * Generate the syntax for a sorted list of items.
      *
+     * @param out the output stream to write the generated syntax to
      * @param items the items
      * @param metadata the provided collection of metadata for these items (including channel links)
      * @param hideDefaultParameters true to hide the configuration parameters having the default value
-     * @return the syntax for the items
      */
-    String generateSyntax(List<Item> items, Collection<Metadata> metadata, boolean hideDefaultParameters);
+    void generateSyntax(OutputStream out, List<Item> items, Collection<Metadata> metadata,
+            boolean hideDefaultParameters);
 }

@@ -13,6 +13,7 @@
 package org.openhab.core.model.core;
 
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Set;
 
 import org.eclipse.emf.ecore.EObject;
@@ -97,9 +98,10 @@ public interface ModelRepository {
     /**
      * Generate the syntax from a provided model content.
      *
+     * @param out the output stream to write the generated syntax to
      * @param modelType the model type
      * @param modelContent the content of the model
      * @return the corresponding syntax
      */
-    String generateSyntaxFromModel(String modelType, EObject modelContent);
+    void generateSyntaxFromModel(OutputStream out, String modelType, EObject modelContent);
 }

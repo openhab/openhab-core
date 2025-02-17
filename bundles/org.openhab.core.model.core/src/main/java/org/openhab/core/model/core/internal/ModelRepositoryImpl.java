@@ -13,9 +13,9 @@
 package org.openhab.core.model.core.internal;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -233,23 +233,20 @@ public class ModelRepositoryImpl implements ModelRepository {
     }
 
     @Override
-    public String generateSyntaxFromModel(String modelType, EObject modelContent) {
+    public void generateSyntaxFromModel(OutputStream out, String modelType, EObject modelContent) {
         String result = "";
         synchronized (resourceSet) {
             String name = "tmp_generated_syntax_%d.%s".formatted(++counter, modelType);
             Resource resource = resourceSet.createResource(URI.createURI(name));
             try {
                 resource.getContents().add(modelContent);
-                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-                resource.save(outputStream, Map.of(XtextResource.OPTION_ENCODING, StandardCharsets.UTF_8.name()));
-                result = new String(outputStream.toByteArray());
+                resource.save(out, Map.of(XtextResource.OPTION_ENCODING, StandardCharsets.UTF_8.name()));
             } catch (IOException e) {
                 logger.warn("Exception when saving the model {}", resource.getURI().lastSegment());
             } finally {
                 resourceSet.getResources().remove(resource);
             }
         }
-        return result;
     }
 
     private @Nullable Resource getResource(String name) {

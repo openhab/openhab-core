@@ -14,6 +14,7 @@ package org.openhab.core.io.rest.core.internal.fileformat;
 
 import static org.openhab.core.config.discovery.inbox.InboxPredicates.forThingUID;
 
+import java.io.ByteArrayOutputStream;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -180,8 +181,9 @@ public class FileFormatResource implements RESTResource {
                     .entity("Unsupported media type '" + acceptHeader + "'!").build();
         }
         Collection<Item> items = itemRegistry.getAll();
-        return Response.ok(generator.generateSyntax(sortItems(items), getMetadata(items), hideDefaultParameters))
-                .build();
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        generator.generateSyntax(outputStream, sortItems(items), getMetadata(items), hideDefaultParameters);
+        return Response.ok(new String(outputStream.toByteArray())).build();
     }
 
     @GET
@@ -210,7 +212,9 @@ public class FileFormatResource implements RESTResource {
                     .entity("Item with name '" + itemname + "' not found in the items registry!").build();
         }
         List<Item> items = List.of(item);
-        return Response.ok(generator.generateSyntax(items, getMetadata(items), hideDefaultParameters)).build();
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        generator.generateSyntax(outputStream, items, getMetadata(items), hideDefaultParameters);
+        return Response.ok(new String(outputStream.toByteArray())).build();
     }
 
     @GET
@@ -231,7 +235,9 @@ public class FileFormatResource implements RESTResource {
             return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE)
                     .entity("Unsupported media type '" + acceptHeader + "'!").build();
         }
-        return Response.ok(generator.generateSyntax(sortThings(thingRegistry.getAll()), hideDefaultParameters)).build();
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        generator.generateSyntax(outputStream, sortThings(thingRegistry.getAll()), hideDefaultParameters);
+        return Response.ok(new String(outputStream.toByteArray())).build();
     }
 
     @GET
@@ -260,7 +266,9 @@ public class FileFormatResource implements RESTResource {
             return Response.status(Response.Status.NOT_FOUND)
                     .entity("Thing with UID '" + thingUID + "' not found in the things registry!").build();
         }
-        return Response.ok(generator.generateSyntax(List.of(thing), hideDefaultParameters)).build();
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        generator.generateSyntax(outputStream, List.of(thing), hideDefaultParameters);
+        return Response.ok(new String(outputStream.toByteArray())).build();
     }
 
     @GET
@@ -294,8 +302,9 @@ public class FileFormatResource implements RESTResource {
                     .entity("Thing type with UID '" + result.getThingTypeUID() + "' does not exist!").build();
         }
 
-        return Response.ok(generator.generateSyntax(List.of(simulateThing(result, thingType)), hideDefaultParameters))
-                .build();
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        generator.generateSyntax(outputStream, List.of(simulateThing(result, thingType)), hideDefaultParameters);
+        return Response.ok(new String(outputStream.toByteArray())).build();
     }
 
     /*

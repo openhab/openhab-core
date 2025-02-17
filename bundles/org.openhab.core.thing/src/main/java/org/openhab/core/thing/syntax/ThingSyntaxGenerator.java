@@ -12,6 +12,7 @@
  */
 package org.openhab.core.thing.syntax;
 
+import java.io.OutputStream;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -35,9 +36,10 @@ public interface ThingSyntaxGenerator {
     /**
      * Generate the syntax for a sorted list of things.
      *
+     * @param out the output stream to write the generated syntax to
      * @param things the things
      * @param hideDefaultParameters true to hide the configuration parameters having the default value
      * @return the syntax for the things
      */
-    String generateSyntax(List<Thing> things, boolean hideDefaultParameters);
+    void generateSyntax(OutputStream out, List<Thing> things, boolean hideDefaultParameters);
 }
