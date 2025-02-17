@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -224,8 +225,8 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
     private URL getUrl(String filename) throws FileNotFoundException {
         if (Files.exists(Paths.get(filename))) {
             try {
-                return URI.create("file:" + filename).toURL();
-            } catch (MalformedURLException e) {
+                return (new URI("file:" + filename)).toURL();
+            } catch (IllegalArgumentException | MalformedURLException | URISyntaxException e) {
                 throw new FileNotFoundException(e.getMessage());
             }
         }
