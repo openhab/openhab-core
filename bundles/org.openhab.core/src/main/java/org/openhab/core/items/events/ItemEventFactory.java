@@ -15,7 +15,6 @@ package org.openhab.core.items.events;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.time.Instant;
-import java.time.ZonedDateTime;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -117,7 +116,7 @@ public class ItemEventFactory extends AbstractEventFactory {
         String memberName = getMemberName(topic);
         ItemStateUpdatedEventPayloadBean bean = deserializePayload(payload, ItemStateUpdatedEventPayloadBean.class);
         State state = getState(bean.getType(), bean.getValue());
-        ZonedDateTime lastStateUpdate = bean.getLastUpdate();
+        Instant lastStateUpdate = bean.getLastUpdate();
         return new GroupStateUpdatedEvent(topic, payload, itemName, memberName, state, lastStateUpdate, null);
     }
 
@@ -127,8 +126,8 @@ public class ItemEventFactory extends AbstractEventFactory {
         ItemStateChangedEventPayloadBean bean = deserializePayload(payload, ItemStateChangedEventPayloadBean.class);
         State state = getState(bean.getType(), bean.getValue());
         State oldState = getState(bean.getOldType(), bean.getOldValue());
-        ZonedDateTime lastStateChange = bean.getLastStateChange();
-        ZonedDateTime lastStateUpdate = bean.getLastStateUpdate();
+        Instant lastStateChange = bean.getLastStateChange();
+        Instant lastStateUpdate = bean.getLastStateUpdate();
         return new GroupItemStateChangedEvent(topic, payload, itemName, memberName, state, oldState, lastStateUpdate,
                 lastStateChange);
     }
@@ -158,7 +157,7 @@ public class ItemEventFactory extends AbstractEventFactory {
         String itemName = getItemName(topic);
         ItemStateUpdatedEventPayloadBean bean = deserializePayload(payload, ItemStateUpdatedEventPayloadBean.class);
         State state = getState(bean.getType(), bean.getValue());
-        ZonedDateTime lastStateUpdate = bean.getLastUpdate();
+        Instant lastStateUpdate = bean.getLastUpdate();
         return new ItemStateUpdatedEvent(topic, payload, itemName, state, lastStateUpdate, null);
     }
 
@@ -167,8 +166,8 @@ public class ItemEventFactory extends AbstractEventFactory {
         ItemStateChangedEventPayloadBean bean = deserializePayload(payload, ItemStateChangedEventPayloadBean.class);
         State state = getState(bean.getType(), bean.getValue());
         State oldState = getState(bean.getOldType(), bean.getOldValue());
-        ZonedDateTime lastStateUpdate = bean.getLastStateUpdate();
-        ZonedDateTime lastStateChange = bean.getLastStateChange();
+        Instant lastStateUpdate = bean.getLastStateUpdate();
+        Instant lastStateChange = bean.getLastStateChange();
         return new ItemStateChangedEvent(topic, payload, itemName, state, oldState, lastStateUpdate, lastStateChange);
     }
 
@@ -332,7 +331,7 @@ public class ItemEventFactory extends AbstractEventFactory {
      * @throws IllegalArgumentException if itemName or state is null
      */
     public static ItemStateUpdatedEvent createStateUpdatedEvent(String itemName, State state,
-            @Nullable ZonedDateTime lastStateUpdate) {
+            @Nullable Instant lastStateUpdate) {
         return createStateUpdatedEvent(itemName, state, lastStateUpdate, null);
     }
 
@@ -347,7 +346,7 @@ public class ItemEventFactory extends AbstractEventFactory {
      * @throws IllegalArgumentException if itemName or state is null
      */
     public static ItemStateUpdatedEvent createStateUpdatedEvent(String itemName, State state,
-            @Nullable ZonedDateTime lastStateUpdate, @Nullable String source) {
+            @Nullable Instant lastStateUpdate, @Nullable String source) {
         assertValidArguments(itemName, state, "state");
         String topic = buildTopic(ITEM_STATE_UPDATED_EVENT_TOPIC, itemName);
         ItemStateUpdatedEventPayloadBean bean = new ItemStateUpdatedEventPayloadBean(getStateType(state),
@@ -383,7 +382,7 @@ public class ItemEventFactory extends AbstractEventFactory {
      * @throws IllegalArgumentException if groupName or state is null
      */
     public static GroupStateUpdatedEvent createGroupStateUpdatedEvent(String groupName, String member, State state,
-            @Nullable ZonedDateTime lastStateUpdate, @Nullable String source) {
+            @Nullable Instant lastStateUpdate, @Nullable String source) {
         assertValidArguments(groupName, member, state, "state");
         String topic = buildGroupTopic(GROUP_STATE_EVENT_TOPIC, groupName, member);
         ItemStateUpdatedEventPayloadBean bean = new ItemStateUpdatedEventPayloadBean(getStateType(state),
@@ -422,7 +421,7 @@ public class ItemEventFactory extends AbstractEventFactory {
      * @throws IllegalArgumentException if itemName or state is null
      */
     public static ItemStateChangedEvent createStateChangedEvent(String itemName, State newState, State oldState,
-            @Nullable ZonedDateTime lastStateUpdate, @Nullable ZonedDateTime lastStateChange) {
+            @Nullable Instant lastStateUpdate, @Nullable Instant lastStateChange) {
         assertValidArguments(itemName, newState, "state");
         String topic = buildTopic(ITEM_STATE_CHANGED_EVENT_TOPIC, itemName);
         ItemStateChangedEventPayloadBean bean = new ItemStateChangedEventPayloadBean(getStateType(newState),
@@ -444,8 +443,7 @@ public class ItemEventFactory extends AbstractEventFactory {
      * @throws IllegalArgumentException if itemName or state is null
      */
     public static GroupItemStateChangedEvent createGroupStateChangedEvent(String itemName, String memberName,
-            State newState, State oldState, @Nullable ZonedDateTime lastStateUpdate,
-            @Nullable ZonedDateTime lastStateChange) {
+            State newState, State oldState, @Nullable Instant lastStateUpdate, @Nullable Instant lastStateChange) {
         assertValidArguments(itemName, memberName, newState, "state");
         String topic = buildGroupTopic(GROUPITEM_STATE_CHANGED_EVENT_TOPIC, itemName, memberName);
         ItemStateChangedEventPayloadBean bean = new ItemStateChangedEventPayloadBean(getStateType(newState),
@@ -578,7 +576,7 @@ public class ItemEventFactory extends AbstractEventFactory {
     private static class ItemStateUpdatedEventPayloadBean {
         private @NonNullByDefault({}) String type;
         private @NonNullByDefault({}) String value;
-        private @Nullable ZonedDateTime lastUpdate;
+        private @Nullable Instant lastUpdate;
 
         /**
          * Default constructor for deserialization e.g. by Gson.
@@ -587,7 +585,7 @@ public class ItemEventFactory extends AbstractEventFactory {
         protected ItemStateUpdatedEventPayloadBean() {
         }
 
-        public ItemStateUpdatedEventPayloadBean(String type, String value, @Nullable ZonedDateTime lastUpdate) {
+        public ItemStateUpdatedEventPayloadBean(String type, String value, @Nullable Instant lastUpdate) {
             this.type = type;
             this.value = value;
             this.lastUpdate = lastUpdate;
@@ -601,7 +599,7 @@ public class ItemEventFactory extends AbstractEventFactory {
             return value;
         }
 
-        public @Nullable ZonedDateTime getLastUpdate() {
+        public @Nullable Instant getLastUpdate() {
             return lastUpdate;
         }
     }
@@ -648,8 +646,8 @@ public class ItemEventFactory extends AbstractEventFactory {
         private @NonNullByDefault({}) String value;
         private @NonNullByDefault({}) String oldType;
         private @NonNullByDefault({}) String oldValue;
-        private @Nullable ZonedDateTime lastStateUpdate;
-        private @Nullable ZonedDateTime lastStateChange;
+        private @Nullable Instant lastStateUpdate;
+        private @Nullable Instant lastStateChange;
 
         /**
          * Default constructor for deserialization e.g. by Gson.
@@ -659,7 +657,7 @@ public class ItemEventFactory extends AbstractEventFactory {
         }
 
         public ItemStateChangedEventPayloadBean(String type, String value, String oldType, String oldValue,
-                @Nullable ZonedDateTime lastStateUpdate, @Nullable ZonedDateTime lastStateChange) {
+                @Nullable Instant lastStateUpdate, @Nullable Instant lastStateChange) {
             this.type = type;
             this.value = value;
             this.oldType = oldType;
@@ -684,11 +682,11 @@ public class ItemEventFactory extends AbstractEventFactory {
             return oldValue;
         }
 
-        public @Nullable ZonedDateTime getLastStateUpdate() {
+        public @Nullable Instant getLastStateUpdate() {
             return lastStateUpdate;
         }
 
-        public @Nullable ZonedDateTime getLastStateChange() {
+        public @Nullable Instant getLastStateChange() {
             return lastStateChange;
         }
     }

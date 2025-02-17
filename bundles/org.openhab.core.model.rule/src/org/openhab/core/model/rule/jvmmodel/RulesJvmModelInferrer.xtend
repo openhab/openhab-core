@@ -13,7 +13,7 @@
 package org.openhab.core.model.rule.jvmmodel
 
 import com.google.inject.Inject
-import java.time.ZonedDateTime
+import java.time.Instant
 import java.util.Set
 import org.openhab.core.items.Item
 import org.openhab.core.items.ItemRegistry
@@ -155,11 +155,11 @@ class RulesJvmModelInferrer extends ScriptJvmModelInferrer {
                         parameters += rule.toParameter(VAR_PREVIOUS_STATE, stateTypeRef)
                     }
                     if (containsStateChangeTrigger(rule) || containsStateUpdateTrigger(rule)) {
-                        val lastStateUpdateTypeRef = ruleModel.newTypeRef(ZonedDateTime)
+                        val lastStateUpdateTypeRef = ruleModel.newTypeRef(Instant)
                         parameters += rule.toParameter(VAR_LAST_STATE_UPDATE, lastStateUpdateTypeRef)
                     }
                     if (containsStateChangeTrigger(rule)) {
-                        val lastStateChangeTypeRef = ruleModel.newTypeRef(ZonedDateTime)
+                        val lastStateChangeTypeRef = ruleModel.newTypeRef(Instant)
                         parameters += rule.toParameter(VAR_LAST_STATE_CHANGE, lastStateChangeTypeRef)
                     }
                     if (containsEventTrigger(rule)) {

@@ -12,7 +12,7 @@
  */
 package org.openhab.core.items.events;
 
-import java.time.ZonedDateTime;
+import java.time.Instant;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -37,9 +37,9 @@ public class ItemStateChangedEvent extends ItemEvent {
 
     protected final State oldItemState;
 
-    protected final @Nullable ZonedDateTime lastStateUpdate;
+    protected final @Nullable Instant lastStateUpdate;
 
-    protected final @Nullable ZonedDateTime lastStateChange;
+    protected final @Nullable Instant lastStateChange;
 
     /**
      * Constructs a new item state changed event.
@@ -53,7 +53,7 @@ public class ItemStateChangedEvent extends ItemEvent {
      * @param lastStateChange the last state change
      */
     protected ItemStateChangedEvent(String topic, String payload, String itemName, State newItemState,
-            State oldItemState, @Nullable ZonedDateTime lastStateUpdate, @Nullable ZonedDateTime lastStateChange) {
+            State oldItemState, @Nullable Instant lastStateUpdate, @Nullable Instant lastStateChange) {
         super(topic, payload, itemName, null);
         this.itemState = newItemState;
         this.oldItemState = oldItemState;
@@ -89,7 +89,7 @@ public class ItemStateChangedEvent extends ItemEvent {
      *
      * @return the last state update
      */
-    public @Nullable ZonedDateTime getLastStateUpdate() {
+    public @Nullable Instant getLastStateUpdate() {
         return lastStateUpdate;
     }
 
@@ -98,7 +98,7 @@ public class ItemStateChangedEvent extends ItemEvent {
      *
      * @return the last state change
      */
-    public @Nullable ZonedDateTime getLastStateChange() {
+    public @Nullable Instant getLastStateChange() {
         return lastStateChange;
     }
 

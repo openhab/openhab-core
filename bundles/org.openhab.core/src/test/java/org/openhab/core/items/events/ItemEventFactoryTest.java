@@ -16,7 +16,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.time.ZonedDateTime;
+import java.time.Instant;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
@@ -226,8 +226,8 @@ public class ItemEventFactoryTest {
 
     @Test
     public void testCreateGroupStateChangedEventRawType() throws Exception {
-        ZonedDateTime lastStateUpdate = ZonedDateTime.now();
-        ZonedDateTime lastStateChange = ZonedDateTime.now().minusMinutes(1);
+        Instant lastStateUpdate = Instant.now();
+        Instant lastStateChange = Instant.now().minusSeconds(1);
         GroupItemStateChangedEvent giEventSource = ItemEventFactory.createGroupStateChangedEvent(GROUP_NAME, ITEM_NAME,
                 NEW_RAW_ITEM_STATE, RAW_ITEM_STATE, lastStateUpdate, lastStateChange);
 
