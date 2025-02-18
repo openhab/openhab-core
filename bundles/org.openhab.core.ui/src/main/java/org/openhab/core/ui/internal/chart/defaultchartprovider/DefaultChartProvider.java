@@ -106,6 +106,9 @@ public class DefaultChartProvider implements ChartProvider {
 
     private static final int DPI_DEFAULT = 96;
 
+    private static final String INTERPOLATION_LINEAR = "linear";
+    private static final String INTERPOLATION_STEP = "step";
+
     private final Logger logger = LoggerFactory.getLogger(DefaultChartProvider.class);
 
     private final ItemUIRegistry itemUIRegistry;
@@ -130,20 +133,21 @@ public class DefaultChartProvider implements ChartProvider {
     @Override
     public BufferedImage createChart(@Nullable String serviceId, @Nullable String theme, ZonedDateTime startTime,
             ZonedDateTime endTime, int height, int width, @Nullable String items, @Nullable String groups,
-            @Nullable Integer dpiValue, @Nullable Boolean legend)
+            @Nullable Integer dpiValue, @Nullable String interpolation, @Nullable Boolean legend)
             throws ItemNotFoundException, IllegalArgumentException {
-        return createChart(serviceId, theme, startTime, endTime, height, width, items, groups, dpiValue, null, legend);
+        return createChart(serviceId, theme, startTime, endTime, height, width, items, groups, dpiValue, null,
+                interpolation, legend);
     }
 
     @Override
     public BufferedImage createChart(@Nullable String serviceId, @Nullable String theme, ZonedDateTime startTime,
             ZonedDateTime endTime, int height, int width, @Nullable String items, @Nullable String groups,
-            @Nullable Integer dpiValue, @Nullable String yAxisDecimalPattern, @Nullable Boolean legend)
-            throws ItemNotFoundException, IllegalArgumentException {
+            @Nullable Integer dpiValue, @Nullable String yAxisDecimalPattern, @Nullable String interpolation,
+            @Nullable Boolean legend) throws ItemNotFoundException, IllegalArgumentException {
         logger.debug(
-                "Rendering chart: service: '{}', theme: '{}', startTime: '{}', endTime: '{}', width: '{}', height: '{}', items: '{}', groups: '{}', dpi: '{}', yAxisDecimalPattern: '{}', legend: '{}'",
+                "Rendering chart: service: '{}', theme: '{}', startTime: '{}', endTime: '{}', width: '{}', height: '{}', items: '{}', groups: '{}', dpi: '{}', yAxisDecimalPattern: '{}', interpolation: '{}', legend: '{}'",
                 serviceId, theme, startTime, endTime, width, height, items, groups, dpiValue, yAxisDecimalPattern,
-                legend);
+                interpolation, legend);
 
         // If a persistence service is specified, find the provider, or use the default provider
         PersistenceService service = (serviceId == null) ? persistenceServiceRegistry.getDefault()
@@ -188,8 +192,8 @@ public class DefaultChartProvider implements ChartProvider {
         // axis
         styler.setAxisTickLabelsFont(chartTheme.getAxisTickLabelsFont(dpi));
         styler.setAxisTickLabelsColor(chartTheme.getAxisTickLabelsColor());
-        styler.setXAxisMin((double) startTime.toInstant().toEpochMilli());
-        styler.setXAxisMax((double) endTime.toInstant().toEpochMilli());
+        styler.setXAxisMin(startTime.toInstant().toEpochMilli());
+        styler.setXAxisMax(endTime.toInstant().toEpochMilli());
         int yAxisSpacing = Math.max(height / 10, chartTheme.getAxisTickLabelsFont(dpi).getSize());
         if (yAxisDecimalPattern != null) {
             styler.setYAxisDecimalPattern(yAxisDecimalPattern);
@@ -219,7 +223,7 @@ public class DefaultChartProvider implements ChartProvider {
             for (String itemName : itemNames) {
                 Item item = itemUIRegistry.getItem(itemName);
                 if (addItem(chart, persistenceService, startTime, endTime, item, seriesCounter, chartTheme, dpi,
-                        legendPositionDecider)) {
+                        interpolation, legendPositionDecider)) {
                     seriesCounter++;
                 }
             }
@@ -233,7 +237,7 @@ public class DefaultChartProvider implements ChartProvider {
                 if (item instanceof GroupItem groupItem) {
                     for (Item member : groupItem.getMembers()) {
                         if (addItem(chart, persistenceService, startTime, endTime, member, seriesCounter, chartTheme,
-                                dpi, legendPositionDecider)) {
+                                dpi, interpolation, legendPositionDecider)) {
                             seriesCounter++;
                         }
                     }
@@ -307,7 +311,7 @@ public class DefaultChartProvider implements ChartProvider {
 
     private boolean addItem(XYChart chart, QueryablePersistenceService service, ZonedDateTime timeBegin,
             ZonedDateTime timeEnd, Item item, int seriesCounter, ChartTheme chartTheme, int dpi,
-            LegendPositionDecider legendPositionDecider) {
+            @Nullable String interpolation, LegendPositionDecider legendPositionDecider) {
         Color color = chartTheme.getLineColor(seriesCounter);
 
         // Get the item label
@@ -358,7 +362,9 @@ public class DefaultChartProvider implements ChartProvider {
         for (HistoricItem historicItem : result) {
             // For 'binary' states, we need to replicate the data
             // to avoid diagonal lines
-            if (state instanceof OnOffType || state instanceof OpenClosedType) {
+            if (state != null && INTERPOLATION_STEP.equals(interpolation)
+                    || ((state instanceof OnOffType || state instanceof OpenClosedType)
+                            && !INTERPOLATION_LINEAR.equals(interpolation))) {
                 xData.add(Date.from(historicItem.getInstant().minus(1, ChronoUnit.MILLIS)));
                 yData.add(convertData(state));
             }
