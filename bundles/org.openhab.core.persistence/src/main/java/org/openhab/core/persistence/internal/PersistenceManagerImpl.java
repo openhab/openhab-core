@@ -188,7 +188,7 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, State
                         .filter(itemConfig -> itemConfig.filters().stream().allMatch(filter -> filter.apply(item)))
                         .forEach(itemConfig -> {
                             itemConfig.filters().forEach(filter -> filter.persisted(item));
-                            container.getPersistenceService().store(item, itemConfig.alias());
+                            container.getPersistenceService().store(item, container.getAlias(item));
                         }));
     }
 
@@ -353,7 +353,7 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, State
                                 ZonedDateTime end = timeSeries.getEnd().atZone(ZoneId.systemDefault());
                                 FilterCriteria removeFilter = new FilterCriteria().setItemName(item.getName())
                                         .setBeginDate(begin).setEndDate(end);
-                                service.remove(removeFilter);
+                                service.remove(removeFilter, container.getAlias(item));
                                 ScheduledCompletableFuture<?> forecastJob = container.forecastJobs.get(item.getName());
                                 if (forecastJob != null && forecastJob.getScheduledTime().isAfter(begin)
                                         && forecastJob.getScheduledTime().isBefore(end)) {
@@ -478,12 +478,17 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, State
             }).stream());
         }
 
+        public @Nullable String getAlias(Item item) {
+            return configuration.getAliases().get(item.getName());
+        }
+
         private PersistenceServiceConfiguration getDefaultConfig() {
             List<PersistenceStrategy> strategies = persistenceService.getDefaultStrategies();
             List<PersistenceItemConfiguration> configs = List
-                    .of(new PersistenceItemConfiguration(List.of(new PersistenceAllConfig()), null, strategies, null));
-            return new PersistenceServiceConfiguration(persistenceService.getId(), configs, strategies, strategies,
-                    List.of());
+                    .of(new PersistenceItemConfiguration(List.of(new PersistenceAllConfig()), strategies, null));
+            Map<String, String> aliases = Map.of();
+            return new PersistenceServiceConfiguration(persistenceService.getId(), configs, aliases, strategies,
+                    strategies, List.of());
         }
 
         /**
@@ -550,6 +555,7 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, State
 
         private void restoreItemStateIfPossible(Item item) {
             QueryablePersistenceService queryService = (QueryablePersistenceService) persistenceService;
+            String alias = getAlias(item);
 
             PersistedItem persistedItem = safeCaller.create(queryService, QueryablePersistenceService.class)
                     .onTimeout(
@@ -558,8 +564,9 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, State
                     .onException(e -> logger.error(
                             "Exception occurred while querying persistence service '{}' to restore '{}': {}",
                             queryService.getId(), item.getName(), e.getMessage(), e))
-                    .build().persistedItem(item.getName());
+                    .build().persistedItem(item.getName(), alias);
             if (persistedItem == null) {
+                // in case of an exception or timeout, the safe caller returns null
                 return;
             }
             GenericItem genericItem = (GenericItem) item;
@@ -590,6 +597,7 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, State
         public void scheduleNextPersistedForecastForItem(String itemName) {
             Item item = itemRegistry.get(itemName);
             if (item instanceof GenericItem) {
+                String alias = getAlias(item);
                 QueryablePersistenceService queryService = (QueryablePersistenceService) persistenceService;
                 FilterCriteria filter = new FilterCriteria().setItemName(itemName).setBeginDate(ZonedDateTime.now())
                         .setOrdering(ASCENDING);
@@ -598,7 +606,7 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, State
                                 queryService.getId(), SafeCaller.DEFAULT_TIMEOUT))
                         .onException(e -> logger.error("Exception occurred while querying persistence service '{}': {}",
                                 queryService.getId(), e.getMessage(), e))
-                        .build().query(filter).iterator();
+                        .build().query(filter, alias).iterator();
                 while (result.hasNext()) {
                     HistoricItem next = result.next();
                     Instant timestamp = next.getInstant();
@@ -624,7 +632,7 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, State
                     if (itemConfig.filters().stream().allMatch(filter -> filter.apply(item))) {
                         long startTime = System.nanoTime();
                         itemConfig.filters().forEach(filter -> filter.persisted(item));
-                        persistenceService.store(item, itemConfig.alias());
+                        persistenceService.store(item, getAlias(item));
                         logger.trace("Storing item '{}' with persistence service '{}' took {}ms", item.getName(),
                                 configuration.getUID(), TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime));
                     }
