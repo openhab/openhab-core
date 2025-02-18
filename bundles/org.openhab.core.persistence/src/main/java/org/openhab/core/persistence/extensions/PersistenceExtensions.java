@@ -474,6 +474,9 @@ public class PersistenceExtensions {
             int startPage = 0;
             filter.setPageNumber(startPage);
 
+            TimeZoneProvider tzProvider = timeZoneProvider;
+            ZoneId timeZone = tzProvider != null ? tzProvider.getTimeZone() : ZoneId.systemDefault();
+
             Iterable<HistoricItem> items = qService.query(filter, alias);
             while (items != null) {
                 Iterator<HistoricItem> itemIterator = items.iterator();
@@ -486,7 +489,7 @@ public class PersistenceExtensions {
                             // Last persisted state value different from current state value, so it must have updated
                             // since last persist. We do not know when from persistence, so get it from the item.
                             return Optional.ofNullable(item.getLastStateUpdate())
-                                    .map(instant -> instant.atZone(ZoneId.systemDefault())).orElse(null);
+                                    .map(instant -> instant.atZone(timeZone)).orElse(null);
                         }
                         return historicItem.getTimestamp();
                     } else {
@@ -498,7 +501,7 @@ public class PersistenceExtensions {
                                 return historicItem.getTimestamp();
                             } else {
                                 return Optional.ofNullable(item.getLastStateChange())
-                                        .map(instant -> instant.atZone(ZoneId.systemDefault())).orElse(null);
+                                        .map(instant -> instant.atZone(timeZone)).orElse(null);
                             }
                         }
                         while (historicItem.getState().equals(state) && itemIterator.hasNext()) {
