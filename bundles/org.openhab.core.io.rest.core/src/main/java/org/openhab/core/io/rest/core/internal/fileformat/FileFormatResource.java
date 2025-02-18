@@ -168,7 +168,7 @@ public class FileFormatResource implements RESTResource {
     @Produces("text/vnd.openhab-dsl")
     @Operation(operationId = "createFileFormatForAllItems", summary = "Create file format for all existing items in registry.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
-                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = "text/vnd.openhab-dsl", schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = "text/vnd.openhab-dsl", schema = @Schema(example = "Group Group1 \"Label\"\nGroup:Switch:OR(ON,OFF) Group2 \"Label\"\nSwitch MyItem \"Label\" <icon> (Group1, Group2) [Tag1, Tag2] { channel=\"binding:type:id:channelid\", namespace=\"my value\" [param=\"my param value\"] }"))),
                     @ApiResponse(responseCode = "415", description = "Unsupported media type.") })
     public Response createFileFormatForAllItems(final @Context HttpHeaders httpHeaders,
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
@@ -192,7 +192,7 @@ public class FileFormatResource implements RESTResource {
     @Produces("text/vnd.openhab-dsl")
     @Operation(operationId = "createFileFormatForItem", summary = "Create file format for an existing item in registry.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
-                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = "text/vnd.openhab-dsl", schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = "text/vnd.openhab-dsl", schema = @Schema(example = "Number MyItem \"Label\" <icon> (Group1, Group2) [Tag1, Tag2] { channel=\"binding:type:id:channelid\", namespace=\"my value\" [param=\"my param value\"] }"))),
                     @ApiResponse(responseCode = "404", description = "Item not found in registry."),
                     @ApiResponse(responseCode = "415", description = "Unsupported media type.") })
     public Response createFileFormatForItem(final @Context HttpHeaders httpHeaders,
@@ -223,7 +223,7 @@ public class FileFormatResource implements RESTResource {
     @Produces("text/vnd.openhab-dsl")
     @Operation(operationId = "createFileFormatForAllThings", summary = "Create file format for all existing things in registry.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
-                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = "text/vnd.openhab-dsl", schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = "text/vnd.openhab-dsl", schema = @Schema(example = "Bridge binding:typeBridge:idBridge \"Label\" @ \"Location\" [stringParam=\"my value\"] {\n    Thing type id \"Label\" @ \"Location\" [booleanParam=true, decimalParam=2.5]\n}"))),
                     @ApiResponse(responseCode = "415", description = "Unsupported media type.") })
     public Response createFileFormatForAllThings(final @Context HttpHeaders httpHeaders,
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
@@ -246,7 +246,7 @@ public class FileFormatResource implements RESTResource {
     @Produces("text/vnd.openhab-dsl")
     @Operation(operationId = "createFileFormatForThing", summary = "Create file format for an existing thing in registry.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
-                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = "text/vnd.openhab-dsl", schema = @Schema(implementation = String.class))),
+                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = "text/vnd.openhab-dsl", schema = @Schema(example = "Thing binding:type:idBridge:id \"Label\" @ \"Location\" (binding:typeBridge:idBridge) [stringParam=\"my value\", booleanParam=true, decimalParam=2.5]"))),
                     @ApiResponse(responseCode = "404", description = "Thing not found in registry."),
                     @ApiResponse(responseCode = "415", description = "Unsupported media type.") })
     public Response createFileFormatForThing(final @Context HttpHeaders httpHeaders,
@@ -275,7 +275,7 @@ public class FileFormatResource implements RESTResource {
     @Path("/existing/thing-from-inbox/{thingUID}")
     @Produces("text/vnd.openhab-dsl")
     @Operation(operationId = "generateSyntaxForDiscoveryResult", summary = "Create file format for an existing thing in discovey registry.", responses = {
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = "text/vnd.openhab-dsl", schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = "text/vnd.openhab-dsl", schema = @Schema(example = "Thing binding:type:idBridge:id \"Label\" (binding:typeBridge:idBridge) [stringParam=\"my value\", booleanParam=true, decimalParam=2.5]"))),
             @ApiResponse(responseCode = "404", description = "Discovery result not found in the inbox or thing type not found."),
             @ApiResponse(responseCode = "415", description = "Unsupported media type.") })
     public Response generateSyntaxForDiscoveryResult(final @Context HttpHeaders httpHeaders,
