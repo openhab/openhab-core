@@ -501,7 +501,7 @@ public class ThingResource implements RESTResource {
     public Response updateConfiguration(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @PathParam("thingUID") @Parameter(description = "thing") String thingUID,
-            @Parameter(description = "configuration parameters") @Nullable Map<String, Object> configurationParameters)
+            @Parameter(description = "configuration parameters") @Nullable Map<String, @Nullable Object> configurationParameters)
             throws IOException {
         final Locale locale = localeService.getLocale(language);
 
@@ -788,8 +788,9 @@ public class ThingResource implements RESTResource {
         return linkedItemsMap;
     }
 
-    private @Nullable Map<String, Object> normalizeConfiguration(@Nullable Map<String, Object> properties,
-            ThingTypeUID thingTypeUID, @Nullable ThingUID thingUID) {
+    private @Nullable Map<String, @Nullable Object> normalizeConfiguration(
+            @Nullable Map<String, @Nullable Object> properties, ThingTypeUID thingTypeUID,
+            @Nullable ThingUID thingUID) {
         if (properties == null || properties.isEmpty()) {
             return properties;
         }
@@ -824,7 +825,7 @@ public class ThingResource implements RESTResource {
         return ConfigUtil.normalizeTypes(properties, configDescriptions);
     }
 
-    private @Nullable Map<String, Object> normalizeConfiguration(Map<String, Object> properties,
+    private @Nullable Map<String, @Nullable Object> normalizeConfiguration(Map<String, @Nullable Object> properties,
             ChannelTypeUID channelTypeUID, ChannelUID channelUID) {
         if (properties == null || properties.isEmpty()) {
             return properties;
