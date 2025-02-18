@@ -117,10 +117,9 @@ public interface QueryablePersistenceService extends PersistenceService {
         ZonedDateTime lastChange = null;
 
         int pageNumber = 0;
-        FilterCriteria filter = new FilterCriteria().setItemName(alias != null ? alias : itemName)
-                .setEndDate(ZonedDateTime.now()).setOrdering(Ordering.DESCENDING).setPageSize(1000)
-                .setPageNumber(pageNumber);
-        Iterable<HistoricItem> items = query(filter);
+        FilterCriteria filter = new FilterCriteria().setItemName(itemName).setEndDate(ZonedDateTime.now())
+                .setOrdering(Ordering.DESCENDING).setPageSize(1000).setPageNumber(pageNumber);
+        Iterable<HistoricItem> items = query(filter, alias);
         while (items != null) {
             Iterator<HistoricItem> it = items.iterator();
             int itemCount = 0;
