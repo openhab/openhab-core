@@ -377,6 +377,7 @@ public class ItemEventFactory extends AbstractEventFactory {
      * @param groupName the name of the group to report the state update for
      * @param member the name of the item that updated the group state
      * @param state the new state
+     * @param lastStateUpdate the time of the last state update
      * @param source the name of the source identifying the sender (can be null)
      * @return the created group item state update event
      * @throws IllegalArgumentException if groupName or state is null
@@ -439,6 +440,8 @@ public class ItemEventFactory extends AbstractEventFactory {
      * @param memberName the name of the member causing the group item state change
      * @param newState the new state to send
      * @param oldState the old state of the group item
+     * @param lastStateUpdate the time of the last state update
+     * @param lastStateChange the time of the last state change
      * @return the created group item state changed event
      * @throws IllegalArgumentException if itemName or state is null
      */
