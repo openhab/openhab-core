@@ -345,12 +345,12 @@ public class RuleResource implements RESTResource {
     @Consumes(MediaType.TEXT_PLAIN)
     @Operation(operationId = "enableRule", summary = "Sets the rule enabled status.", responses = {
             @ApiResponse(responseCode = "200", description = "OK"),
-            @ApiResponse(responseCode = "404", description = "Rule corresponding to the given UID does not found.") })
+            @ApiResponse(responseCode = "404", description = "Rule corresponding to the given UID was not found.") })
     public Response enableRule(@PathParam("ruleUID") @Parameter(description = "ruleUID") String ruleUID,
             @Parameter(description = "enable", required = true) String enabled) throws IOException {
         Rule rule = ruleRegistry.get(ruleUID);
         if (rule == null) {
-            logger.info("Received HTTP PUT request for set enabled at '{}' for the unknown rule '{}'.",
+            logger.info("Received HTTP POST request for set enabled at '{}' for the unknown rule '{}'.",
                     uriInfo.getPath(), ruleUID);
             return Response.status(Status.NOT_FOUND).build();
         } else {
@@ -360,12 +360,31 @@ public class RuleResource implements RESTResource {
     }
 
     @POST
+    @Path("/{ruleUID}/regenerate")
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Operation(operationId = "regenerateRule", summary = "Regenerates the rule from its template.", responses = {
+            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "404", description = "A template base rule with to the given UID was not found.") })
+    public Response regenerateRule(@PathParam("ruleUID") @Parameter(description = "ruleUID") String ruleUID)
+            throws IOException {
+        try {
+            ruleRegistry.regenerateFromTemplate(ruleUID);
+            return Response.ok(null, MediaType.TEXT_PLAIN).build();
+        } catch (IllegalArgumentException e) {
+            logger.info(
+                    "Received HTTP POST request for regenerating rule from template at '{}' for an invalid rule UID '{}'.",
+                    uriInfo.getPath(), ruleUID);
+            return Response.status(Status.NOT_FOUND).build();
+        }
+    }
+
+    @POST
     @RolesAllowed({ Role.USER, Role.ADMIN })
     @Path("/{ruleUID}/runnow")
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(operationId = "runRuleNow", summary = "Executes actions of the rule.", responses = {
             @ApiResponse(responseCode = "200", description = "OK"),
-            @ApiResponse(responseCode = "404", description = "Rule corresponding to the given UID does not found.") })
+            @ApiResponse(responseCode = "404", description = "Rule corresponding to the given UID was not found.") })
     public Response runNow(@PathParam("ruleUID") @Parameter(description = "ruleUID") String ruleUID,
             @Nullable @Parameter(description = "the context for running this rule", allowEmptyValue = true) Map<String, Object> context)
             throws IOException {

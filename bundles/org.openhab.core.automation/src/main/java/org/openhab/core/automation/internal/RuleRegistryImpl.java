@@ -24,6 +24,8 @@ import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.automation.Action;
+import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.ManagedRuleProvider;
 import org.openhab.core.automation.Module;
 import org.openhab.core.automation.Rule;
@@ -32,6 +34,7 @@ import org.openhab.core.automation.RuleProvider;
 import org.openhab.core.automation.RuleRegistry;
 import org.openhab.core.automation.RuleStatus;
 import org.openhab.core.automation.RuleStatusInfo;
+import org.openhab.core.automation.Trigger;
 import org.openhab.core.automation.internal.template.RuleTemplateRegistry;
 import org.openhab.core.automation.template.RuleTemplate;
 import org.openhab.core.automation.template.TemplateRegistry;
@@ -101,6 +104,7 @@ import org.slf4j.LoggerFactory;
  * @author Kai Kreuzer - refactored (managed) provider and registry implementation and other fixes
  * @author Benedikt Niehues - added events for rules
  * @author Victor Toni - return only copies of {@link Rule}s
+ * @author Ravi Nadahar - added support for regenerating {@link Rule}s from {@link RuleTemplate}s.
  */
 @NonNullByDefault
 @Component(service = RuleRegistry.class, immediate = true)
@@ -322,6 +326,44 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
             });
         }
         return result;
+    }
+
+    @Override
+    public void regenerateFromTemplate(String ruleUID) {
+        Rule rule = get(ruleUID);
+        if (rule == null) {
+            throw new IllegalArgumentException(
+                    "Can't regenerate rule from template because no rule with UID \"" + ruleUID + "\" exists");
+        }
+        if (rule.getTemplateUID() == null || rule.getTemplateState() == TemplateState.NO_TEMPLATE) {
+            throw new IllegalArgumentException(
+                    "Can't regenerate rule from template because the rule isn't linked to a template");
+        }
+        try {
+            Rule resolvedRule = resolveRuleByTemplate(
+                    RuleBuilder.create(rule).withActions((List<Action>) null).withConditions((List<Condition>) null)
+                            .withTriggers((List<Trigger>) null).withTemplateState(TemplateState.PENDING).build());
+            Provider<Rule> provider = getProvider(rule.getUID());
+            if (provider == null) {
+                logger.error("Regenerating rule '{}' fro template failed because the provider is unknown",
+                        rule.getUID());
+                return;
+            }
+            if (provider instanceof ManagedRuleProvider) {
+                update(resolvedRule);
+            } else {
+                updated(provider, rule, resolvedRule);
+            }
+            if (resolvedRule.getTemplateState() == TemplateState.TEMPLATE_MISSING) {
+                logger.warn("Failed to regenerate rule '{}' from template since the template is missing",
+                        rule.getUID());
+            } else {
+                logger.info("Rule '{}' was regenerated from template '{}'", rule.getUID(), rule.getTemplateUID());
+            }
+        } catch (IllegalArgumentException e) {
+            logger.error("Regenerating rule '{}' from template failed: {}", rule.getUID(), e.getMessage(), e);
+            throw e;
+        }
     }
 
     /**
