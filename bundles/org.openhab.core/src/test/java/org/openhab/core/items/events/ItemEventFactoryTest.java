@@ -245,7 +245,7 @@ public class ItemEventFactoryTest {
         assertNull(groupItemStateChangedEvent.getSource());
         assertEquals(NEW_RAW_ITEM_STATE, groupItemStateChangedEvent.getItemState());
         assertEquals(RAW_ITEM_STATE, groupItemStateChangedEvent.getOldItemState());
-        assertEquals(lastStateUpdate, groupItemStateChangedEvent.getLastStateUpdate());
-        assertEquals(lastStateChange, groupItemStateChangedEvent.getLastStateChange());
+        assertEquals(lastStateUpdate.toEpochMilli(), groupItemStateChangedEvent.getLastStateUpdate().toEpochMilli());
+        assertEquals(lastStateChange.toEpochMilli(), groupItemStateChangedEvent.getLastStateChange().toEpochMilli());
     }
 }

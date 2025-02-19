@@ -579,7 +579,7 @@ public class ItemEventFactory extends AbstractEventFactory {
     private static class ItemStateUpdatedEventPayloadBean {
         private @NonNullByDefault({}) String type;
         private @NonNullByDefault({}) String value;
-        private @Nullable Instant lastUpdate;
+        private @Nullable Long lastUpdate;
 
         /**
          * Default constructor for deserialization e.g. by Gson.
@@ -591,7 +591,7 @@ public class ItemEventFactory extends AbstractEventFactory {
         public ItemStateUpdatedEventPayloadBean(String type, String value, @Nullable Instant lastUpdate) {
             this.type = type;
             this.value = value;
-            this.lastUpdate = lastUpdate;
+            this.lastUpdate = lastUpdate != null ? lastUpdate.toEpochMilli() : null;
         }
 
         public String getType() {
@@ -603,7 +603,7 @@ public class ItemEventFactory extends AbstractEventFactory {
         }
 
         public @Nullable Instant getLastUpdate() {
-            return lastUpdate;
+            return lastUpdate != null ? Instant.ofEpochMilli(lastUpdate) : null;
         }
     }
 
@@ -649,8 +649,8 @@ public class ItemEventFactory extends AbstractEventFactory {
         private @NonNullByDefault({}) String value;
         private @NonNullByDefault({}) String oldType;
         private @NonNullByDefault({}) String oldValue;
-        private @Nullable Instant lastStateUpdate;
-        private @Nullable Instant lastStateChange;
+        private @Nullable Long lastStateUpdate;
+        private @Nullable Long lastStateChange;
 
         /**
          * Default constructor for deserialization e.g. by Gson.
@@ -665,8 +665,8 @@ public class ItemEventFactory extends AbstractEventFactory {
             this.value = value;
             this.oldType = oldType;
             this.oldValue = oldValue;
-            this.lastStateUpdate = lastStateUpdate;
-            this.lastStateChange = lastStateChange;
+            this.lastStateUpdate = lastStateUpdate != null ? lastStateUpdate.toEpochMilli() : null;
+            this.lastStateChange = lastStateChange != null ? lastStateChange.toEpochMilli() : null;
         }
 
         public String getType() {
@@ -686,11 +686,11 @@ public class ItemEventFactory extends AbstractEventFactory {
         }
 
         public @Nullable Instant getLastStateUpdate() {
-            return lastStateUpdate;
+            return lastStateUpdate != null ? Instant.ofEpochMilli(lastStateUpdate) : null;
         }
 
         public @Nullable Instant getLastStateChange() {
-            return lastStateChange;
+            return lastStateChange != null ? Instant.ofEpochMilli(lastStateChange) : null;
         }
     }
 
