@@ -130,8 +130,8 @@ public class ItemStateTriggerHandler extends BaseTriggerModuleHandler implements
                 State itemState = updatedEvent.getItemState();
                 if ((state == null || state.equals(itemState.toFullString()))) {
                     values.put("state", itemState);
+                    values.put("lastStateUpdate", updatedEvent.getLastStateUpdate());
                 }
-                values.put("lastStateUpdate", updatedEvent.getLastStateUpdate());
             } else if (event instanceof ItemStateChangedEvent changedEvent
                     && CHANGE_MODULE_TYPE_ID.equals(module.getTypeUID())) {
                 State itemState = changedEvent.getItemState();
@@ -140,9 +140,9 @@ public class ItemStateTriggerHandler extends BaseTriggerModuleHandler implements
                 if (stateMatches(this.state, itemState) && stateMatches(this.previousState, oldItemState)) {
                     values.put("oldState", oldItemState);
                     values.put("newState", itemState);
+                    values.put("lastStateUpdate", changedEvent.getLastStateUpdate());
+                    values.put("lastStateChange", changedEvent.getLastStateChange());
                 }
-                values.put("lastStateUpdate", changedEvent.getLastStateUpdate());
-                values.put("lastStateChange", changedEvent.getLastStateChange());
             }
             if (!values.isEmpty()) {
                 values.put("event", event);
