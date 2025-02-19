@@ -258,7 +258,8 @@ public class EventWebSocketTest {
         eventWebSocket.processEvent(event);
         verify(remoteEndpoint).sendString(gson.toJson(new EventDTO(event)));
 
-        event = ItemEventFactory.createStateChangedEvent(TEST_ITEM_NAME, DecimalType.ZERO, DecimalType.ZERO);
+        event = ItemEventFactory.createStateChangedEvent(TEST_ITEM_NAME, DecimalType.ZERO, DecimalType.ZERO, null,
+                null);
         eventWebSocket.processEvent(event);
         verify(remoteEndpoint).sendString(gson.toJson(new EventDTO(event)));
 
@@ -285,7 +286,8 @@ public class EventWebSocketTest {
         verify(remoteEndpoint, times(0)).sendString(any());
 
         // not excluded topics are sent
-        event = ItemEventFactory.createStateChangedEvent(TEST_ITEM_NAME, DecimalType.ZERO, DecimalType.ZERO);
+        event = ItemEventFactory.createStateChangedEvent(TEST_ITEM_NAME, DecimalType.ZERO, DecimalType.ZERO, null,
+                null);
         eventWebSocket.processEvent(event);
         verify(remoteEndpoint).sendString(gson.toJson(new EventDTO(event)));
 
@@ -309,7 +311,8 @@ public class EventWebSocketTest {
         clearInvocations(remoteEndpoint);
 
         // included topics are sent
-        Event event = ItemEventFactory.createStateChangedEvent(TEST_ITEM_NAME, DecimalType.ZERO, DecimalType.ZERO);
+        Event event = ItemEventFactory.createStateChangedEvent(TEST_ITEM_NAME, DecimalType.ZERO, DecimalType.ZERO, null,
+                null);
         eventWebSocket.processEvent(event);
         verify(remoteEndpoint).sendString(gson.toJson(new EventDTO(event)));
 

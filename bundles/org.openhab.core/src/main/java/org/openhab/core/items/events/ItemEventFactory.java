@@ -114,9 +114,10 @@ public class ItemEventFactory extends AbstractEventFactory {
     private Event createGroupStateUpdatedEvent(String topic, String payload) {
         String itemName = getItemName(topic);
         String memberName = getMemberName(topic);
-        ItemEventPayloadBean bean = deserializePayload(payload, ItemEventPayloadBean.class);
+        ItemStateUpdatedEventPayloadBean bean = deserializePayload(payload, ItemStateUpdatedEventPayloadBean.class);
         State state = getState(bean.getType(), bean.getValue());
-        return new GroupStateUpdatedEvent(topic, payload, itemName, memberName, state, null);
+        Instant lastStateUpdate = bean.getLastUpdate();
+        return new GroupStateUpdatedEvent(topic, payload, itemName, memberName, state, lastStateUpdate, null);
     }
 
     private Event createGroupStateChangedEvent(String topic, String payload) {
@@ -125,7 +126,10 @@ public class ItemEventFactory extends AbstractEventFactory {
         ItemStateChangedEventPayloadBean bean = deserializePayload(payload, ItemStateChangedEventPayloadBean.class);
         State state = getState(bean.getType(), bean.getValue());
         State oldState = getState(bean.getOldType(), bean.getOldValue());
-        return new GroupItemStateChangedEvent(topic, payload, itemName, memberName, state, oldState);
+        Instant lastStateChange = bean.getLastStateChange();
+        Instant lastStateUpdate = bean.getLastStateUpdate();
+        return new GroupItemStateChangedEvent(topic, payload, itemName, memberName, state, oldState, lastStateUpdate,
+                lastStateChange);
     }
 
     private Event createCommandEvent(String topic, String payload, @Nullable String source) {
@@ -151,9 +155,10 @@ public class ItemEventFactory extends AbstractEventFactory {
 
     private Event createStateUpdatedEvent(String topic, String payload) {
         String itemName = getItemName(topic);
-        ItemEventPayloadBean bean = deserializePayload(payload, ItemEventPayloadBean.class);
+        ItemStateUpdatedEventPayloadBean bean = deserializePayload(payload, ItemStateUpdatedEventPayloadBean.class);
         State state = getState(bean.getType(), bean.getValue());
-        return new ItemStateUpdatedEvent(topic, payload, itemName, state, null);
+        Instant lastStateUpdate = bean.getLastUpdate();
+        return new ItemStateUpdatedEvent(topic, payload, itemName, state, lastStateUpdate, null);
     }
 
     private Event createStateChangedEvent(String topic, String payload) {
@@ -161,7 +166,9 @@ public class ItemEventFactory extends AbstractEventFactory {
         ItemStateChangedEventPayloadBean bean = deserializePayload(payload, ItemStateChangedEventPayloadBean.class);
         State state = getState(bean.getType(), bean.getValue());
         State oldState = getState(bean.getOldType(), bean.getOldValue());
-        return new ItemStateChangedEvent(topic, payload, itemName, state, oldState);
+        Instant lastStateUpdate = bean.getLastStateUpdate();
+        Instant lastStateChange = bean.getLastStateChange();
+        return new ItemStateChangedEvent(topic, payload, itemName, state, oldState, lastStateUpdate, lastStateChange);
     }
 
     private Event createTimeSeriesEvent(String topic, String payload) {
@@ -319,11 +326,13 @@ public class ItemEventFactory extends AbstractEventFactory {
      *
      * @param itemName the name of the item to report the state update for
      * @param state the new state
+     * @param lastStateUpdate the time of the last state update
      * @return the created item state update event
      * @throws IllegalArgumentException if itemName or state is null
      */
-    public static ItemStateUpdatedEvent createStateUpdatedEvent(String itemName, State state) {
-        return createStateUpdatedEvent(itemName, state, null);
+    public static ItemStateUpdatedEvent createStateUpdatedEvent(String itemName, State state,
+            @Nullable Instant lastStateUpdate) {
+        return createStateUpdatedEvent(itemName, state, lastStateUpdate, null);
     }
 
     /**
@@ -331,16 +340,19 @@ public class ItemEventFactory extends AbstractEventFactory {
      *
      * @param itemName the name of the item to report the state update for
      * @param state the new state
+     * @param lastStateUpdate the time of the last state update
      * @param source the name of the source identifying the sender (can be null)
      * @return the created item state update event
      * @throws IllegalArgumentException if itemName or state is null
      */
-    public static ItemStateUpdatedEvent createStateUpdatedEvent(String itemName, State state, @Nullable String source) {
+    public static ItemStateUpdatedEvent createStateUpdatedEvent(String itemName, State state,
+            @Nullable Instant lastStateUpdate, @Nullable String source) {
         assertValidArguments(itemName, state, "state");
         String topic = buildTopic(ITEM_STATE_UPDATED_EVENT_TOPIC, itemName);
-        ItemEventPayloadBean bean = new ItemEventPayloadBean(getStateType(state), state.toFullString());
+        ItemStateUpdatedEventPayloadBean bean = new ItemStateUpdatedEventPayloadBean(getStateType(state),
+                state.toFullString(), lastStateUpdate);
         String payload = serializePayload(bean);
-        return new ItemStateUpdatedEvent(topic, payload, itemName, state, source);
+        return new ItemStateUpdatedEvent(topic, payload, itemName, state, lastStateUpdate, source);
     }
 
     public static ItemTimeSeriesEvent createTimeSeriesEvent(String itemName, TimeSeries timeSeries,
@@ -365,17 +377,19 @@ public class ItemEventFactory extends AbstractEventFactory {
      * @param groupName the name of the group to report the state update for
      * @param member the name of the item that updated the group state
      * @param state the new state
+     * @param lastStateUpdate the time of the last state update
      * @param source the name of the source identifying the sender (can be null)
      * @return the created group item state update event
      * @throws IllegalArgumentException if groupName or state is null
      */
     public static GroupStateUpdatedEvent createGroupStateUpdatedEvent(String groupName, String member, State state,
-            @Nullable String source) {
+            @Nullable Instant lastStateUpdate, @Nullable String source) {
         assertValidArguments(groupName, member, state, "state");
         String topic = buildGroupTopic(GROUP_STATE_EVENT_TOPIC, groupName, member);
-        ItemEventPayloadBean bean = new ItemEventPayloadBean(getStateType(state), state.toFullString());
+        ItemStateUpdatedEventPayloadBean bean = new ItemStateUpdatedEventPayloadBean(getStateType(state),
+                state.toFullString(), lastStateUpdate);
         String payload = serializePayload(bean);
-        return new GroupStateUpdatedEvent(topic, payload, groupName, member, state, source);
+        return new GroupStateUpdatedEvent(topic, payload, groupName, member, state, lastStateUpdate, source);
     }
 
     /**
@@ -403,16 +417,20 @@ public class ItemEventFactory extends AbstractEventFactory {
      * @param itemName the name of the item to send the state changed event for
      * @param newState the new state to send
      * @param oldState the old state of the item
+     * @param lastStateChange the time of the last state change
      * @return the created item state changed event
      * @throws IllegalArgumentException if itemName or state is null
      */
-    public static ItemStateChangedEvent createStateChangedEvent(String itemName, State newState, State oldState) {
+    public static ItemStateChangedEvent createStateChangedEvent(String itemName, State newState, State oldState,
+            @Nullable Instant lastStateUpdate, @Nullable Instant lastStateChange) {
         assertValidArguments(itemName, newState, "state");
         String topic = buildTopic(ITEM_STATE_CHANGED_EVENT_TOPIC, itemName);
         ItemStateChangedEventPayloadBean bean = new ItemStateChangedEventPayloadBean(getStateType(newState),
-                newState.toFullString(), getStateType(oldState), oldState.toFullString());
+                newState.toFullString(), getStateType(oldState), oldState.toFullString(), lastStateUpdate,
+                lastStateChange);
         String payload = serializePayload(bean);
-        return new ItemStateChangedEvent(topic, payload, itemName, newState, oldState);
+        return new ItemStateChangedEvent(topic, payload, itemName, newState, oldState, lastStateUpdate,
+                lastStateChange);
     }
 
     /**
@@ -422,17 +440,21 @@ public class ItemEventFactory extends AbstractEventFactory {
      * @param memberName the name of the member causing the group item state change
      * @param newState the new state to send
      * @param oldState the old state of the group item
+     * @param lastStateUpdate the time of the last state update
+     * @param lastStateChange the time of the last state change
      * @return the created group item state changed event
      * @throws IllegalArgumentException if itemName or state is null
      */
     public static GroupItemStateChangedEvent createGroupStateChangedEvent(String itemName, String memberName,
-            State newState, State oldState) {
+            State newState, State oldState, @Nullable Instant lastStateUpdate, @Nullable Instant lastStateChange) {
         assertValidArguments(itemName, memberName, newState, "state");
         String topic = buildGroupTopic(GROUPITEM_STATE_CHANGED_EVENT_TOPIC, itemName, memberName);
         ItemStateChangedEventPayloadBean bean = new ItemStateChangedEventPayloadBean(getStateType(newState),
-                newState.toFullString(), getStateType(oldState), oldState.toFullString());
+                newState.toFullString(), getStateType(oldState), oldState.toFullString(), lastStateUpdate,
+                lastStateChange);
         String payload = serializePayload(bean);
-        return new GroupItemStateChangedEvent(topic, payload, itemName, memberName, newState, oldState);
+        return new GroupItemStateChangedEvent(topic, payload, itemName, memberName, newState, oldState, lastStateUpdate,
+                lastStateChange);
     }
 
     /**
@@ -552,6 +574,40 @@ public class ItemEventFactory extends AbstractEventFactory {
     }
 
     /**
+     * This is a java bean that is used to serialize/deserialize item state updated event payload.
+     */
+    private static class ItemStateUpdatedEventPayloadBean {
+        private @NonNullByDefault({}) String type;
+        private @NonNullByDefault({}) String value;
+        private @Nullable Long lastUpdate;
+
+        /**
+         * Default constructor for deserialization e.g. by Gson.
+         */
+        @SuppressWarnings("unused")
+        protected ItemStateUpdatedEventPayloadBean() {
+        }
+
+        public ItemStateUpdatedEventPayloadBean(String type, String value, @Nullable Instant lastUpdate) {
+            this.type = type;
+            this.value = value;
+            this.lastUpdate = lastUpdate != null ? lastUpdate.toEpochMilli() : null;
+        }
+
+        public String getType() {
+            return type;
+        }
+
+        public String getValue() {
+            return value;
+        }
+
+        public @Nullable Instant getLastUpdate() {
+            return lastUpdate != null ? Instant.ofEpochMilli(lastUpdate) : null;
+        }
+    }
+
+    /**
      * This is a java bean that is used to serialize/deserialize item state changed event payload.
      */
     private static class ItemStatePredictedEventPayloadBean {
@@ -593,6 +649,8 @@ public class ItemEventFactory extends AbstractEventFactory {
         private @NonNullByDefault({}) String value;
         private @NonNullByDefault({}) String oldType;
         private @NonNullByDefault({}) String oldValue;
+        private @Nullable Long lastStateUpdate;
+        private @Nullable Long lastStateChange;
 
         /**
          * Default constructor for deserialization e.g. by Gson.
@@ -601,11 +659,14 @@ public class ItemEventFactory extends AbstractEventFactory {
         protected ItemStateChangedEventPayloadBean() {
         }
 
-        public ItemStateChangedEventPayloadBean(String type, String value, String oldType, String oldValue) {
+        public ItemStateChangedEventPayloadBean(String type, String value, String oldType, String oldValue,
+                @Nullable Instant lastStateUpdate, @Nullable Instant lastStateChange) {
             this.type = type;
             this.value = value;
             this.oldType = oldType;
             this.oldValue = oldValue;
+            this.lastStateUpdate = lastStateUpdate != null ? lastStateUpdate.toEpochMilli() : null;
+            this.lastStateChange = lastStateChange != null ? lastStateChange.toEpochMilli() : null;
         }
 
         public String getType() {
@@ -622,6 +683,14 @@ public class ItemEventFactory extends AbstractEventFactory {
 
         public String getOldValue() {
             return oldValue;
+        }
+
+        public @Nullable Instant getLastStateUpdate() {
+            return lastStateUpdate != null ? Instant.ofEpochMilli(lastStateUpdate) : null;
+        }
+
+        public @Nullable Instant getLastStateChange() {
+            return lastStateChange != null ? Instant.ofEpochMilli(lastStateChange) : null;
         }
     }
 

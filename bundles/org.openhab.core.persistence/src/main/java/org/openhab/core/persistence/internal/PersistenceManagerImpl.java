@@ -25,6 +25,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -575,8 +576,9 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, State
                 return;
             }
             genericItem.removeStateChangeListener(PersistenceManagerImpl.this);
-            genericItem.setState(persistedItem.getState(), persistedItem.getLastState(), persistedItem.getTimestamp(),
-                    persistedItem.getLastStateChange());
+            genericItem.setState(persistedItem.getState(), persistedItem.getLastState(),
+                    Optional.ofNullable(persistedItem.getTimestamp()).map(ZonedDateTime::toInstant).orElse(null),
+                    Optional.ofNullable(persistedItem.getLastStateChange()).map(ZonedDateTime::toInstant).orElse(null));
             genericItem.addStateChangeListener(PersistenceManagerImpl.this);
             if (logger.isDebugEnabled()) {
                 logger.debug("Restored item state from '{}' for item '{}' -> '{}'",

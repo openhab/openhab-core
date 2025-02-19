@@ -13,6 +13,7 @@
 package org.openhab.core.model.rule.jvmmodel
 
 import com.google.inject.Inject
+import java.time.Instant
 import java.util.Set
 import org.openhab.core.items.Item
 import org.openhab.core.items.ItemRegistry
@@ -145,9 +146,21 @@ class RulesJvmModelInferrer extends ScriptJvmModelInferrer {
                         val commandTypeRef = ruleModel.newTypeRef(Command)
                         parameters += rule.toParameter(VAR_RECEIVED_COMMAND, commandTypeRef)
                     }
+                    if ((containsStateChangeTrigger(rule) || containsStateUpdateTrigger(rule)) && !containsParam(parameters, VAR_NEW_STATE)) {
+                        val stateTypeRef = ruleModel.newTypeRef(State)
+                        parameters += rule.toParameter(VAR_NEW_STATE, stateTypeRef)
+                    }
                     if (containsStateChangeTrigger(rule) && !containsParam(parameters, VAR_PREVIOUS_STATE)) {
                         val stateTypeRef = ruleModel.newTypeRef(State)
                         parameters += rule.toParameter(VAR_PREVIOUS_STATE, stateTypeRef)
+                    }
+                    if (containsStateChangeTrigger(rule) || containsStateUpdateTrigger(rule)) {
+                        val lastStateUpdateTypeRef = ruleModel.newTypeRef(Instant)
+                        parameters += rule.toParameter(VAR_LAST_STATE_UPDATE, lastStateUpdateTypeRef)
+                    }
+                    if (containsStateChangeTrigger(rule)) {
+                        val lastStateChangeTypeRef = ruleModel.newTypeRef(Instant)
+                        parameters += rule.toParameter(VAR_LAST_STATE_CHANGE, lastStateChangeTypeRef)
                     }
                     if (containsEventTrigger(rule)) {
                         val eventTypeRef = ruleModel.newTypeRef(String)
@@ -162,10 +175,6 @@ class RulesJvmModelInferrer extends ScriptJvmModelInferrer {
                         parameters += rule.toParameter(VAR_PREVIOUS_STATUS, oldStatusRef)
                         val newStatusRef = ruleModel.newTypeRef(String)
                         parameters += rule.toParameter(VAR_NEW_STATUS, newStatusRef)
-                    }
-                    if ((containsStateChangeTrigger(rule) || containsStateUpdateTrigger(rule)) && !containsParam(parameters, VAR_NEW_STATE)) {
-                        val stateTypeRef = ruleModel.newTypeRef(State)
-                        parameters += rule.toParameter(VAR_NEW_STATE, stateTypeRef)
                     }
 
                     body = rule.script
