@@ -9,7 +9,7 @@
 
   <groupId>org.openhab.core</groupId>
   <artifactId>org.openhab.core.reactor</artifactId>
-  <version>4.3.3-SNAPSHOT</version>
+  <version>4.3.4-SNAPSHOT</version>
 
   <packaging>pom</packaging>
 
