@@ -12,11 +12,14 @@
  */
 package org.openhab.core.auth;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * Interface defining constants for roles within the framework.
  *
  * @author Kai Kreuzer - Initial contribution
  */
+@NonNullByDefault
 public interface Role {
 
     /**

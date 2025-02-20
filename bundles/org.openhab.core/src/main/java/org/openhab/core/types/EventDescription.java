@@ -14,11 +14,15 @@ package org.openhab.core.types;
 
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 /**
  * Describes event options and gives information how to interpret it.
  *
  * @author Moritz Kammerer - Initial contribution
  */
+@NonNullByDefault
 public class EventDescription {
     private final List<EventOption> options;
 
@@ -27,12 +31,8 @@ public class EventDescription {
      *
      * @param options predefined list of options
      */
-    public EventDescription(List<EventOption> options) {
-        if (options != null) {
-            this.options = List.copyOf(options);
-        } else {
-            this.options = List.of();
-        }
+    public EventDescription(@Nullable List<EventOption> options) {
+        this.options = options != null ? List.copyOf(options) : List.of();
     }
 
     /**
@@ -46,6 +46,6 @@ public class EventDescription {
 
     @Override
     public String toString() {
-        return "EventDescription [options=" + options + "]";
+        return "EventDescription [options=%s]".formatted(options);
     }
 }

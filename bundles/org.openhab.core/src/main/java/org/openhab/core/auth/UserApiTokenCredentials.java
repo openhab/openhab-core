@@ -12,11 +12,14 @@
  */
 package org.openhab.core.auth;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * Credentials which represent a user API token.
  *
  * @author Yannick Schaus - Initial contribution
  */
+@NonNullByDefault
 public class UserApiTokenCredentials implements Credentials {
 
     private final String userApiToken;
