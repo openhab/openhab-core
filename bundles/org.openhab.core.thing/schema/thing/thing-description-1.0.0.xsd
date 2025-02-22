@@ -215,7 +215,7 @@
 
 	<xs:complexType name="tags">
 		<xs:sequence>
-			<xs:element name="tag" type="thing-description:channel-tags" minOccurs="0" maxOccurs="2"/>
+			<xs:element name="tag" type="thing-description:channel-tags" minOccurs="1" maxOccurs="2"/>
 		</xs:sequence>
 	</xs:complexType>
 
