@@ -185,7 +185,7 @@ public class ThingTypeResource implements RESTResource {
                 thingType.getChannelDefinitions(), locale);
 
         return new ThingTypeDTO(thingType.getUID().toString(), thingType.getLabel(), thingType.getDescription(),
-                thingType.getCategory(), thingType.isListed(), parameters, channelDefinitions,
+                thingType.getCategory(), thingType.getTag(), thingType.isListed(), parameters, channelDefinitions,
                 convertToChannelGroupDefinitionDTOs(thingType.getChannelGroupDefinitions(), locale),
                 thingType.getSupportedBridgeTypeUIDs(), thingType.getProperties(), thingType instanceof BridgeType,
                 parameterGroups, thingType.getExtensibleChannelTypeIds());

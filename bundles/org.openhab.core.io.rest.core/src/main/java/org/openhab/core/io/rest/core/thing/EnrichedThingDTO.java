@@ -46,7 +46,7 @@ public class EnrichedThingDTO extends AbstractThingDTO {
     EnrichedThingDTO(ThingDTO thingDTO, List<EnrichedChannelDTO> channels, ThingStatusInfo statusInfo,
             FirmwareStatusDTO firmwareStatus, boolean editable) {
         super(thingDTO.thingTypeUID, thingDTO.UID, thingDTO.label, thingDTO.bridgeUID, thingDTO.configuration,
-                thingDTO.properties, thingDTO.location);
+                thingDTO.properties, thingDTO.location, thingDTO.tag);
         this.channels = channels;
         this.statusInfo = statusInfo;
         this.firmwareStatus = firmwareStatus;
