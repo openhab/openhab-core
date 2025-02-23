@@ -1,6 +1,6 @@
 <jaxb:bindings xmlns:jaxb="http://java.sun.com/xml/ns/jaxb" xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
                xmlns:xs="http://www.w3.org/2001/XMLSchema"  jaxb:version="2.0">
-    <jaxb:globalBindings>
+    <jaxb:globalBindings typesafeEnumBase="xs:string">
         <xjc:serializable uid="1"/>
     </jaxb:globalBindings>
 
