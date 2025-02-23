@@ -278,6 +278,7 @@
 			<xs:enumeration value="ColorTemperature"/>
 			<xs:enumeration value="Humidity"/>
 			<xs:enumeration value="Presence"/>
+			<xs:enumeration value="Airflow"/>
 			<xs:enumeration value="Pressure"/>
 			<xs:enumeration value="Smoke"/>
 			<xs:enumeration value="Noise"/>
