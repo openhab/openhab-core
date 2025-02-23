@@ -292,6 +292,9 @@
 			<xs:enumeration value="Current"/>
 			<xs:enumeration value="Frequency"/>
 			<xs:enumeration value="Gas"/>
+			<xs:enumeration value="Application"/>
+			<xs:enumeration value="Channel"/>
+			<xs:enumeration value="Mode"/>
 			<xs:enumeration value="SoundVolume"/>
 			<xs:enumeration value="Oil"/>
 			<xs:enumeration value="Duration"/>
