@@ -230,4 +230,19 @@ public interface Thing extends Identifiable<ThingUID> {
      * @return Returns {@code true} if the thing is enabled. Return {@code false} otherwise.
      */
     boolean isEnabled();
+
+    /**
+     * Get the semantic (equipment) tag of the {@link Thing}.
+     *
+     * @return the semantic (equipment) tag or {@code null} if no tag has been configured.
+     */
+    @Nullable
+    String getTag();
+
+    /**
+     * Set the semantic (equipment) tag of the {@link Thing}.
+     *
+     * @param tag the semantic (equipment) tag or {@code null} if no tag has been configured.
+     */
+    void setTag(@Nullable String tag);
 }

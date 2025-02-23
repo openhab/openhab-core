@@ -48,6 +48,7 @@ public class ThingBuilder {
     private @Nullable ThingUID bridgeUID;
     private @Nullable Map<String, String> properties;
     private @Nullable String location;
+    private @Nullable String tag;
 
     protected ThingBuilder(ThingTypeUID thingTypeUID, ThingUID thingUID) {
         this.thingUID = thingUID;
@@ -251,6 +252,17 @@ public class ThingBuilder {
         return this;
     }
 
+    /**
+     * Set the semantic (equipment) tag for this thing
+     *
+     * @param tag a string with semantic (equipment) tag for this thing
+     * @return the {@link ThingBuilder} itself
+     */
+    public ThingBuilder withTag(@Nullable String tag) {
+        this.tag = tag;
+        return this;
+    }
+
     protected Thing populate(ThingImpl thing) {
         thing.setLabel(label);
         thing.setChannels(channels);
@@ -262,6 +274,7 @@ public class ThingBuilder {
             }
         }
         thing.setLocation(location);
+        thing.setTag(tag);
         return thing;
     }
 

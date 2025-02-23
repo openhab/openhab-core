@@ -64,6 +64,8 @@ public class ThingImpl implements Thing {
 
     private @Nullable String location;
 
+    private @Nullable String tag;
+
     private transient volatile ThingStatusInfo status = ThingStatusInfoBuilder
             .create(ThingStatus.UNINITIALIZED, ThingStatusDetail.NONE).build();
 
@@ -283,5 +285,15 @@ public class ThingImpl implements Thing {
         }
         ThingImpl other = (ThingImpl) obj;
         return uid.equals(other.uid);
+    }
+
+    @Override
+    public @Nullable String getTag() {
+        return tag;
+    }
+
+    @Override
+    public void setTag(@Nullable String tag) {
+        this.tag = tag;
     }
 }

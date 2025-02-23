@@ -38,7 +38,7 @@ public class ThingTypeDTO extends StrippedThingTypeDTO {
     public ThingTypeDTO() {
     }
 
-    public ThingTypeDTO(String uid, String label, String description, String category, boolean listed,
+    public ThingTypeDTO(String uid, String label, String description, String category, String tag, boolean listed,
             List<ConfigDescriptionParameterDTO> configParameters, List<ChannelDefinitionDTO> channels,
             List<ChannelGroupDefinitionDTO> channelGroups, List<String> supportedBridgeTypeUIDs,
             Map<String, String> properties, boolean bridge, List<ConfigDescriptionParameterGroupDTO> parameterGroups,
@@ -47,6 +47,7 @@ public class ThingTypeDTO extends StrippedThingTypeDTO {
         this.label = label;
         this.description = description;
         this.category = category;
+        this.tag = tag;
         this.listed = listed;
         this.configParameters = configParameters;
         this.channels = channels;

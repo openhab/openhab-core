@@ -50,6 +50,7 @@ public class BridgeType extends ThingType {
      * @param description the human readable description for the according type
      *            (could be null or empty)
      * @param category the category of the bridge (could be null)
+     * @param tag the semantic (equipment) tag of the bridge (could be null)
      * @param listed determines whether it should be listed for manually pairing or not
      * @param representationProperty name of the property that uniquely identifies this Thing
      * @param channelDefinitions the channels this Thing type provides (could be null or empty)
@@ -61,12 +62,12 @@ public class BridgeType extends ThingType {
      * @throws IllegalArgumentException if the UID is null or empty, or the meta information is null
      */
     BridgeType(ThingTypeUID uid, @Nullable List<String> supportedBridgeTypeUIDs, String label,
-            @Nullable String description, @Nullable String category, boolean listed,
+            @Nullable String description, @Nullable String category, @Nullable String tag, boolean listed,
             @Nullable String representationProperty, @Nullable List<ChannelDefinition> channelDefinitions,
             @Nullable List<ChannelGroupDefinition> channelGroupDefinitions, @Nullable Map<String, String> properties,
             @Nullable URI configDescriptionURI, @Nullable List<String> extensibleChannelTypeIds)
             throws IllegalArgumentException {
-        super(uid, supportedBridgeTypeUIDs, label, description, category, listed, representationProperty,
+        super(uid, supportedBridgeTypeUIDs, label, description, category, tag, listed, representationProperty,
                 channelDefinitions, channelGroupDefinitions, properties, configDescriptionURI,
                 extensibleChannelTypeIds);
     }

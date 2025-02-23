@@ -37,6 +37,7 @@ public class ThingTypeBuilder {
     private @Nullable URI configDescriptionURI;
     private boolean listed;
     private @Nullable String category;
+    private @Nullable String tag;
     private @Nullable String description;
 
     private final String bindingId;
@@ -119,7 +120,7 @@ public class ThingTypeBuilder {
         }
 
         return new ThingType(new ThingTypeUID(bindingId, thingTypeId), supportedBridgeTypeUIDs, label, description,
-                category, listed, representationProperty, channelDefinitions, channelGroupDefinitions, properties,
+                category, tag, listed, representationProperty, channelDefinitions, channelGroupDefinitions, properties,
                 configDescriptionURI, extensibleChannelTypeIds);
     }
 
@@ -141,7 +142,7 @@ public class ThingTypeBuilder {
         }
 
         return new BridgeType(new ThingTypeUID(bindingId, thingTypeId), supportedBridgeTypeUIDs, label, description,
-                category, listed, representationProperty, channelDefinitions, channelGroupDefinitions, properties,
+                category, tag, listed, representationProperty, channelDefinitions, channelGroupDefinitions, properties,
                 configDescriptionURI, extensibleChannelTypeIds);
     }
 

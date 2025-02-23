@@ -76,6 +76,10 @@ public class ThingHelper {
         if (!Objects.equals(a.getLocation(), b.getLocation())) {
             return false;
         }
+        // tag
+        if (!Objects.equals(a.getTag(), b.getTag())) {
+            return false;
+        }
         // channels
         Set<Channel> channelsOfA = new HashSet<>(a.getChannels());
         Set<Channel> channelsOfB = new HashSet<>(b.getChannels());
@@ -170,6 +174,13 @@ public class ThingHelper {
             builder.withLocation(updatedContents.location);
         } else {
             builder.withLocation(thing.getLocation());
+        }
+
+        // Update the tag
+        if (updatedContents.tag != null) {
+            builder.withTag(updatedContents.tag);
+        } else {
+            builder.withTag(thing.getTag());
         }
 
         // update bridge UID

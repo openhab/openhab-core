@@ -47,6 +47,7 @@ public class ThingType extends AbstractDescriptionType {
     private final @Nullable String representationProperty;
     private final boolean listed;
     private final @Nullable String category;
+    private final @Nullable String tag;
 
     /**
      * Creates a new instance of this class with the specified parameters.
@@ -59,6 +60,8 @@ public class ThingType extends AbstractDescriptionType {
      *            (must neither be null nor empty)
      * @param description the human-readable description for the according type
      *            (could be null or empty)
+     * @param category the category of the thing (could be null)
+     * @param tag the semantic (equipment) tag of the thing (could be null)
      * @param listed determines whether it should be listed for manually pairing or not
      * @param representationProperty name of the property that uniquely identifies this Thing
      * @param channelDefinitions the channels this Thing type provides (could be null or empty)
@@ -70,7 +73,7 @@ public class ThingType extends AbstractDescriptionType {
      * @throws IllegalArgumentException if the UID is null or empty, or the meta information is null
      */
     ThingType(ThingTypeUID uid, @Nullable List<String> supportedBridgeTypeUIDs, String label,
-            @Nullable String description, @Nullable String category, boolean listed,
+            @Nullable String description, @Nullable String category, @Nullable String tag, boolean listed,
             @Nullable String representationProperty, @Nullable List<ChannelDefinition> channelDefinitions,
             @Nullable List<ChannelGroupDefinition> channelGroupDefinitions, @Nullable Map<String, String> properties,
             @Nullable URI configDescriptionURI, @Nullable List<String> extensibleChannelTypeIds)
@@ -78,6 +81,7 @@ public class ThingType extends AbstractDescriptionType {
         super(uid, label, description, configDescriptionURI);
 
         this.category = category;
+        this.tag = tag;
         this.listed = listed;
         this.representationProperty = representationProperty;
         this.supportedBridgeTypeUIDs = supportedBridgeTypeUIDs == null ? List.of()
@@ -156,6 +160,10 @@ public class ThingType extends AbstractDescriptionType {
 
     public @Nullable String getCategory() {
         return this.category;
+    }
+
+    public @Nullable String getTag() {
+        return this.tag;
     }
 
     /**
