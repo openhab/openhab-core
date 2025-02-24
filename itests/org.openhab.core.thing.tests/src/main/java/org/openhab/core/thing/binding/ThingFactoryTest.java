@@ -349,4 +349,13 @@ public class ThingFactoryTest extends JavaOSGiTest {
                 });
         registerService(channelGroupTypeProvider);
     }
+
+    @Test
+    public void createThingWithTag() {
+        ThingType thingType = ThingTypeBuilder.instance(new ThingTypeUID("bindingId:thingType"), "label")
+                .withTag("MotionDetector").build();
+        Thing thing = ThingFactory.createThing(thingType, new ThingUID(thingType.getUID(), "thingId"),
+                new Configuration());
+        assertThat(thing.getTag(), is("MotionDetector"));
+    }
 }

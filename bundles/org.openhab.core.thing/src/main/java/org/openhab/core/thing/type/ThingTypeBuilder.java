@@ -161,6 +161,11 @@ public class ThingTypeBuilder {
         return this;
     }
 
+    public ThingTypeBuilder withTag(String tag) {
+        this.tag = tag;
+        return this;
+    }
+
     public ThingTypeBuilder isListed(boolean listed) {
         this.listed = listed;
         return this;

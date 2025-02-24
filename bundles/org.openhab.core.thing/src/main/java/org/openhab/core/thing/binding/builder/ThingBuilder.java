@@ -87,7 +87,8 @@ public class ThingBuilder {
     public static ThingBuilder create(Thing thing) {
         return ThingBuilder.create(thing.getThingTypeUID(), thing.getUID()).withBridge(thing.getBridgeUID())
                 .withChannels(thing.getChannels()).withConfiguration(thing.getConfiguration())
-                .withLabel(thing.getLabel()).withLocation(thing.getLocation()).withProperties(thing.getProperties());
+                .withLabel(thing.getLabel()).withLocation(thing.getLocation()).withProperties(thing.getProperties())
+                .withTag(thing.getTag());
     }
 
     /**

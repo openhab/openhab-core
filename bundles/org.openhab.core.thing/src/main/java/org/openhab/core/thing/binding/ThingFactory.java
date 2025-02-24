@@ -91,7 +91,7 @@ public class ThingFactory {
         List<Channel> channels = ThingFactoryHelper.createChannels(thingType, thingUID, configDescriptionRegistry);
 
         return createThingBuilder(thingType, thingUID).withConfiguration(configuration).withChannels(channels)
-                .withProperties(thingType.getProperties()).withBridge(bridgeUID).build();
+                .withProperties(thingType.getProperties()).withBridge(bridgeUID).withTag(thingType.getTag()).build();
     }
 
     public static @Nullable Thing createThing(ThingUID thingUID, Configuration configuration,
