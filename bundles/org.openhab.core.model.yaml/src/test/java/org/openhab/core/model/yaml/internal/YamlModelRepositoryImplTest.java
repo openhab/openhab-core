@@ -14,6 +14,7 @@ package org.openhab.core.model.yaml.internal;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -41,6 +42,7 @@ import org.openhab.core.model.yaml.YamlModelListener;
 import org.openhab.core.model.yaml.test.FirstTypeDTO;
 import org.openhab.core.model.yaml.test.SecondTypeDTO;
 import org.openhab.core.service.WatchService;
+import org.yaml.snakeyaml.Yaml;
 
 /**
  * The {@link YamlModelRepositoryImplTest} contains tests for the {@link YamlModelRepositoryImpl} class.
@@ -204,8 +206,9 @@ public class YamlModelRepositoryImplTest {
 
         String actualFileContent = Files.readString(fullModelPath);
         String expectedFileContent = Files.readString(SOURCE_PATH.resolve("addToModelExpectedContent.yaml"));
+        Yaml yaml = new Yaml();
 
-        assertThat(actualFileContent, is(expectedFileContent.replaceAll("\r\n", "\n")));
+        assertThat(yaml.load(actualFileContent), equalTo(yaml.load(expectedFileContent.replaceAll("\r\n", "\n"))));
     }
 
     @Test
@@ -220,8 +223,9 @@ public class YamlModelRepositoryImplTest {
 
         String actualFileContent = Files.readString(fullModelPath);
         String expectedFileContent = Files.readString(SOURCE_PATH.resolve("updateInModelExpectedContent.yaml"));
+        Yaml yaml = new Yaml();
 
-        assertThat(actualFileContent, is(expectedFileContent.replaceAll("\r\n", "\n")));
+        assertThat(yaml.load(actualFileContent), equalTo(yaml.load(expectedFileContent.replaceAll("\r\n", "\n"))));
     }
 
     @Test

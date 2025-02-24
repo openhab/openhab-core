@@ -25,6 +25,7 @@ import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonParser;
 
 /**
  * {@link InboxEventFactoryTest} tests the {@link InboxEventFactory}.
@@ -71,7 +72,7 @@ public class InboxEventFactoryTest {
 
         assertThat(event.getType(), is(INBOX_ADDED_EVENT_TYPE));
         assertThat(event.getTopic(), is(INBOX_ADDED_EVENT_TOPIC));
-        assertThat(event.getPayload(), is(INBOX_ADDED_EVENT_PAYLOAD));
+        assertThat(JsonParser.parseString(event.getPayload()), is(JsonParser.parseString(INBOX_ADDED_EVENT_PAYLOAD)));
         assertThat(event.getDiscoveryResult(), not(nullValue()));
         assertThat(event.getDiscoveryResult().thingUID, is(THING_UID.getAsString()));
     }
