@@ -1,6 +1,6 @@
 <jaxb:bindings xmlns:jaxb="http://java.sun.com/xml/ns/jaxb" xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
                xmlns:xs="http://www.w3.org/2001/XMLSchema"  jaxb:version="2.0">
-    <jaxb:globalBindings typesafeEnumBase="xs:string">
+    <jaxb:globalBindings>
         <xjc:serializable uid="1"/>
     </jaxb:globalBindings>
 
@@ -19,6 +19,9 @@
             <jaxb:bindings node=".//xs:attribute[@name='value']">
                 <jaxb:property name="ValueAttribute"/>
             </jaxb:bindings>
+        </jaxb:bindings>
+        <jaxb:bindings node="//xs:simpleType[@name='channel-tag']">
+            <jaxb:typesafeEnumClass map="false"/>
         </jaxb:bindings>
     </jaxb:bindings>
 
