@@ -55,7 +55,7 @@ public class ThingDTOTest {
                         ChannelBuilder.create(new ChannelUID(THING_UID, "channel1"), CoreItemFactory.STRING).build(),
                         ChannelBuilder.create(new ChannelUID(THING_UID, "channel2"), CoreItemFactory.STRING).build())
                 .withConfiguration(new Configuration(Map.of("param1", "value1"))).withProperties(properties)
-                .withLocation("Somewhere over the rainbow").build();
+                .withLocation("Somewhere over the rainbow").withTag("MotionDetector").build();
         Thing result = ThingDTOMapper.map(ThingDTOMapper.map(subject), false);
         assertThat(result, is(instanceOf(ThingImpl.class)));
         assertThat(result.getThingTypeUID(), is(THING_TYPE_UID));
@@ -67,6 +67,7 @@ public class ThingDTOTest {
         assertThat(result.getProperties().values(), hasSize(1));
         assertThat(result.getProperties(), is(subject.getProperties()));
         assertThat(result.getLocation(), is(subject.getLocation()));
+        assertThat(result.getTag(), is(subject.getTag()));
     }
 
     @Test
