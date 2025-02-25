@@ -433,8 +433,9 @@ public class FileFormatResource implements RESTResource {
         }
         for (ConfigDescriptionParameter param : configDescriptionParameters) {
             Object value = result.getProperties().get(param.getName());
-            if (value != null) {
-                configParams.put(param.getName(), ConfigUtil.normalizeType(value, param));
+            Object normalizedValue = value != null ? ConfigUtil.normalizeType(value, param) : null;
+            if (normalizedValue != null) {
+                configParams.put(param.getName(), normalizedValue);
             }
         }
         Configuration config = new Configuration(configParams);
