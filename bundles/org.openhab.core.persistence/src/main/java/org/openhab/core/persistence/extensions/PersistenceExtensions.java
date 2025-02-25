@@ -487,7 +487,9 @@ public class PersistenceExtensions {
                         if (!forward && !historicItem.getState().equals(state)) {
                             // Last persisted state value different from current state value, so it must have updated
                             // since last persist. We do not know when from persistence, so get it from the item.
-                            return item.getLastStateUpdate();
+                            return item.getLastStateUpdate() != null
+                                    ? item.getLastStateUpdate().withZoneSameInstant(timeZone)
+                                    : null;
                         }
                         return historicItem.getTimestamp();
                     } else {
@@ -495,7 +497,12 @@ public class PersistenceExtensions {
                         if (!historicItem.getState().equals(state)) {
                             // Persisted state value different from current state value, so it must have changed, but we
                             // do not know when looking backward in persistence. Get it from the item.
-                            return forward ? historicItem.getTimestamp() : item.getLastStateChange();
+                            if (forward) {
+                                return historicItem.getTimestamp();
+                            }
+                            return item.getLastStateChange() != null
+                                    ? item.getLastStateChange().withZoneSameInstant(timeZone)
+                                    : null;
                         }
                         while (historicItem.getState().equals(state) && itemIterator.hasNext()) {
                             HistoricItem nextHistoricItem = itemIterator.next();
