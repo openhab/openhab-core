@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.model.item.internal.syntax;
+package org.openhab.core.model.item.internal.fileconverter;
 
 import java.io.OutputStream;
 import java.net.URI;
@@ -33,8 +33,8 @@ import org.openhab.core.items.GroupFunction;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.Metadata;
-import org.openhab.core.items.syntax.AbstractItemSyntaxGenerator;
-import org.openhab.core.items.syntax.ItemSyntaxGenerator;
+import org.openhab.core.items.fileconverter.AbstractItemFileGenerator;
+import org.openhab.core.items.fileconverter.ItemFileGenerator;
 import org.openhab.core.model.core.ModelRepository;
 import org.openhab.core.model.items.ItemModel;
 import org.openhab.core.model.items.ItemsFactory;
@@ -52,34 +52,34 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * {@link DslItemSyntaxConverter} is the DSL syntax converter for {@link Item} object
- * with the capabilities of parsing syntax and generating syntax.
+ * {@link DslItemFileConverter} is the DSL file converter for {@link Item} object
+ * with the capabilities of parsing and generating file.
  *
  * @author Laurent Garnier - Initial contribution
  */
 @NonNullByDefault
-@Component(immediate = true, service = ItemSyntaxGenerator.class)
-public class DslItemSyntaxConverter extends AbstractItemSyntaxGenerator {
+@Component(immediate = true, service = ItemFileGenerator.class)
+public class DslItemFileConverter extends AbstractItemFileGenerator {
 
-    private final Logger logger = LoggerFactory.getLogger(DslItemSyntaxConverter.class);
+    private final Logger logger = LoggerFactory.getLogger(DslItemFileConverter.class);
 
     private final ModelRepository modelRepository;
     private final ConfigDescriptionRegistry configDescriptionRegistry;
 
     @Activate
-    public DslItemSyntaxConverter(final @Reference ModelRepository modelRepository,
+    public DslItemFileConverter(final @Reference ModelRepository modelRepository,
             final @Reference ConfigDescriptionRegistry configDescriptionRegistry) {
         this.modelRepository = modelRepository;
         this.configDescriptionRegistry = configDescriptionRegistry;
     }
 
     @Override
-    public String getGeneratorFormat() {
+    public String getFileFormatGenerator() {
         return "DSL";
     }
 
     @Override
-    public synchronized void generateSyntax(OutputStream out, List<Item> items, Collection<Metadata> metadata,
+    public synchronized void generateFileFormat(OutputStream out, List<Item> items, Collection<Metadata> metadata,
             boolean hideDefaultParameters) {
         ItemModel model = ItemsFactory.eINSTANCE.createItemModel();
         for (Item item : items) {

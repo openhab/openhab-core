@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.thing.syntax;
+package org.openhab.core.thing.fileconverter;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -37,19 +37,19 @@ import org.openhab.core.thing.type.ThingTypeRegistry;
 import org.osgi.service.component.annotations.Activate;
 
 /**
- * {@link AbstractThingSyntaxGenerator} is the base class for any {@link Thing} syntax generator.
+ * {@link AbstractThingFileGenerator} is the base class for any {@link Thing} file generator.
  *
  * @author Laurent Garnier - Initial contribution
  */
 @NonNullByDefault
-public abstract class AbstractThingSyntaxGenerator implements ThingSyntaxGenerator {
+public abstract class AbstractThingFileGenerator implements ThingFileGenerator {
 
     private final ThingTypeRegistry thingTypeRegistry;
     private final ChannelTypeRegistry channelTypeRegistry;
     private final ConfigDescriptionRegistry configDescRegistry;
 
     @Activate
-    public AbstractThingSyntaxGenerator(ThingTypeRegistry thingTypeRegistry, ChannelTypeRegistry channelTypeRegistry,
+    public AbstractThingFileGenerator(ThingTypeRegistry thingTypeRegistry, ChannelTypeRegistry channelTypeRegistry,
             ConfigDescriptionRegistry configDescRegistry) {
         this.thingTypeRegistry = thingTypeRegistry;
         this.channelTypeRegistry = channelTypeRegistry;

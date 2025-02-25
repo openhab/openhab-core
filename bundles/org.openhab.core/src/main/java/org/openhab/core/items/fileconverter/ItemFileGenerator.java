@@ -10,36 +10,39 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.thing.syntax;
+package org.openhab.core.items.fileconverter;
 
 import java.io.OutputStream;
+import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.core.thing.Thing;
+import org.openhab.core.items.Item;
+import org.openhab.core.items.Metadata;
 
 /**
- * {@link ThingSyntaxGenerator} is the interface to implement by any syntax generator for {@link Thing} object.
+ * {@link ItemFileGenerator} is the interface to implement by any file generator for {@link Item} object.
  *
  * @author Laurent Garnier - Initial contribution
  */
 @NonNullByDefault
-public interface ThingSyntaxGenerator {
+public interface ItemFileGenerator {
 
     /**
-     * Returns the format of the syntax.
+     * Returns the format of the file.
      *
-     * @return the syntax format
+     * @return the file format
      */
-    String getGeneratorFormat();
+    String getFileFormatGenerator();
 
     /**
-     * Generate the syntax for a sorted list of things.
+     * Generate the file format for a sorted list of items.
      *
      * @param out the output stream to write the generated syntax to
-     * @param things the things
+     * @param items the items
+     * @param metadata the provided collection of metadata for these items (including channel links)
      * @param hideDefaultParameters true to hide the configuration parameters having the default value
-     * @return the syntax for the things
      */
-    void generateSyntax(OutputStream out, List<Thing> things, boolean hideDefaultParameters);
+    void generateFileFormat(OutputStream out, List<Item> items, Collection<Metadata> metadata,
+            boolean hideDefaultParameters);
 }

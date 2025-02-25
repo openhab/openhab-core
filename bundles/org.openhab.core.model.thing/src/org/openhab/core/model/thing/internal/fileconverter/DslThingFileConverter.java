@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.model.thing.internal.syntax;
+package org.openhab.core.model.thing.internal.fileconverter;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -33,8 +33,8 @@ import org.openhab.core.thing.Bridge;
 import org.openhab.core.thing.Channel;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingUID;
-import org.openhab.core.thing.syntax.AbstractThingSyntaxGenerator;
-import org.openhab.core.thing.syntax.ThingSyntaxGenerator;
+import org.openhab.core.thing.fileconverter.AbstractThingFileGenerator;
+import org.openhab.core.thing.fileconverter.ThingFileGenerator;
 import org.openhab.core.thing.type.ChannelKind;
 import org.openhab.core.thing.type.ChannelTypeRegistry;
 import org.openhab.core.thing.type.ChannelTypeUID;
@@ -46,21 +46,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * {@link DslThingSyntaxConverter} is the DSL syntax converter for {@link Thing} object
- * with the capabilities of parsing syntax and generating syntax.
+ * {@link DslThingFileConverter} is the DSL file converter for {@link Thing} object
+ * with the capabilities of parsing and generating file.
  *
  * @author Laurent Garnier - Initial contribution
  */
 @NonNullByDefault
-@Component(immediate = true, service = ThingSyntaxGenerator.class)
-public class DslThingSyntaxConverter extends AbstractThingSyntaxGenerator {
+@Component(immediate = true, service = ThingFileGenerator.class)
+public class DslThingFileConverter extends AbstractThingFileGenerator {
 
-    private final Logger logger = LoggerFactory.getLogger(DslThingSyntaxConverter.class);
+    private final Logger logger = LoggerFactory.getLogger(DslThingFileConverter.class);
 
     private final ModelRepository modelRepository;
 
     @Activate
-    public DslThingSyntaxConverter(final @Reference ModelRepository modelRepository,
+    public DslThingFileConverter(final @Reference ModelRepository modelRepository,
             final @Reference ThingTypeRegistry thingTypeRegistry,
             final @Reference ChannelTypeRegistry channelTypeRegistry,
             final @Reference ConfigDescriptionRegistry configDescRegistry) {
@@ -69,12 +69,12 @@ public class DslThingSyntaxConverter extends AbstractThingSyntaxGenerator {
     }
 
     @Override
-    public String getGeneratorFormat() {
+    public String getFileFormatGenerator() {
         return "DSL";
     }
 
     @Override
-    public synchronized void generateSyntax(OutputStream out, List<Thing> things, boolean hideDefaultParameters) {
+    public synchronized void generateFileFormat(OutputStream out, List<Thing> things, boolean hideDefaultParameters) {
         ThingModel model = ThingFactory.eINSTANCE.createThingModel();
         Set<Thing> handledThings = new HashSet<>();
         for (Thing thing : things) {

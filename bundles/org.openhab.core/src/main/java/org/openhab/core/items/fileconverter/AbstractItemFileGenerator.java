@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.items.syntax;
+package org.openhab.core.items.fileconverter;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -26,14 +26,14 @@ import org.openhab.core.items.Metadata;
 import org.openhab.core.library.CoreItemFactory;
 
 /**
- * {@link AbstractItemSyntaxGenerator} is the base class for any {@link Item} syntax generator.
+ * {@link AbstractItemFileGenerator} is the base class for any {@link Item} file generator.
  *
  * @author Laurent Garnier - Initial contribution
  */
 @NonNullByDefault
-public abstract class AbstractItemSyntaxGenerator implements ItemSyntaxGenerator {
+public abstract class AbstractItemFileGenerator implements ItemFileGenerator {
 
-    public AbstractItemSyntaxGenerator() {
+    public AbstractItemFileGenerator() {
     }
 
     /**

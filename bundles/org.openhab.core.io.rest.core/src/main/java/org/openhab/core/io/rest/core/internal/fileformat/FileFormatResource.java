@@ -54,15 +54,15 @@ import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.Metadata;
 import org.openhab.core.items.MetadataKey;
 import org.openhab.core.items.MetadataRegistry;
-import org.openhab.core.items.syntax.ItemSyntaxGenerator;
+import org.openhab.core.items.fileconverter.ItemFileGenerator;
 import org.openhab.core.thing.Bridge;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingRegistry;
 import org.openhab.core.thing.ThingUID;
 import org.openhab.core.thing.binding.ThingFactory;
+import org.openhab.core.thing.fileconverter.ThingFileGenerator;
 import org.openhab.core.thing.link.ItemChannelLink;
 import org.openhab.core.thing.link.ItemChannelLinkRegistry;
-import org.openhab.core.thing.syntax.ThingSyntaxGenerator;
 import org.openhab.core.thing.type.ThingType;
 import org.openhab.core.thing.type.ThingTypeRegistry;
 import org.osgi.service.component.annotations.Activate;
@@ -117,8 +117,8 @@ public class FileFormatResource implements RESTResource {
     private final Inbox inbox;
     private final ThingTypeRegistry thingTypeRegistry;
     private final ConfigDescriptionRegistry configDescRegistry;
-    private final Map<String, ItemSyntaxGenerator> itemSyntaxGenerators = new ConcurrentHashMap<>();
-    private final Map<String, ThingSyntaxGenerator> thingSyntaxGenerators = new ConcurrentHashMap<>();
+    private final Map<String, ItemFileGenerator> itemFileGenerators = new ConcurrentHashMap<>();
+    private final Map<String, ThingFileGenerator> thingFileGenerators = new ConcurrentHashMap<>();
 
     @Activate
     public FileFormatResource(//
@@ -143,21 +143,21 @@ public class FileFormatResource implements RESTResource {
     }
 
     @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.MULTIPLE)
-    protected void addItemSyntaxGenerator(ItemSyntaxGenerator itemSyntaxGenerator) {
-        itemSyntaxGenerators.put(itemSyntaxGenerator.getGeneratorFormat(), itemSyntaxGenerator);
+    protected void addItemFileGenerator(ItemFileGenerator itemFileGenerator) {
+        itemFileGenerators.put(itemFileGenerator.getFileFormatGenerator(), itemFileGenerator);
     }
 
-    protected void removeItemSyntaxGenerator(ItemSyntaxGenerator itemSyntaxGenerator) {
-        itemSyntaxGenerators.remove(itemSyntaxGenerator.getGeneratorFormat());
+    protected void removeItemFileGenerator(ItemFileGenerator itemFileGenerator) {
+        itemFileGenerators.remove(itemFileGenerator.getFileFormatGenerator());
     }
 
     @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.MULTIPLE)
-    protected void addThingSyntaxGenerator(ThingSyntaxGenerator thingSyntaxGenerator) {
-        thingSyntaxGenerators.put(thingSyntaxGenerator.getGeneratorFormat(), thingSyntaxGenerator);
+    protected void addThingFileGenerator(ThingFileGenerator thingFileGenerator) {
+        thingFileGenerators.put(thingFileGenerator.getFileFormatGenerator(), thingFileGenerator);
     }
 
-    protected void removeThingSyntaxGenerator(ThingSyntaxGenerator thingSyntaxGenerator) {
-        thingSyntaxGenerators.remove(thingSyntaxGenerator.getGeneratorFormat());
+    protected void removeThingFileGenerator(ThingFileGenerator thingFileGenerator) {
+        thingFileGenerators.remove(thingFileGenerator.getFileFormatGenerator());
     }
 
     @GET
@@ -172,14 +172,14 @@ public class FileFormatResource implements RESTResource {
             @DefaultValue("true") @QueryParam("hideDefaultParameters") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters) {
         String acceptHeader = httpHeaders.getHeaderString(HttpHeaders.ACCEPT);
         String format = "text/vnd.openhab.dsl.item".equals(acceptHeader) ? "DSL" : null;
-        ItemSyntaxGenerator generator = format == null ? null : itemSyntaxGenerators.get(format);
+        ItemFileGenerator generator = format == null ? null : itemFileGenerators.get(format);
         if (generator == null) {
             return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE)
                     .entity("Unsupported media type '" + acceptHeader + "'!").build();
         }
         Collection<Item> items = itemRegistry.getAll();
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        generator.generateSyntax(outputStream, sortItems(items), getMetadata(items), hideDefaultParameters);
+        generator.generateFileFormat(outputStream, sortItems(items), getMetadata(items), hideDefaultParameters);
         return Response.ok(new String(outputStream.toByteArray())).build();
     }
 
@@ -197,7 +197,7 @@ public class FileFormatResource implements RESTResource {
             @PathParam("itemname") @Parameter(description = "item name") String itemname) {
         String acceptHeader = httpHeaders.getHeaderString(HttpHeaders.ACCEPT);
         String format = "text/vnd.openhab.dsl.item".equals(acceptHeader) ? "DSL" : null;
-        ItemSyntaxGenerator generator = format == null ? null : itemSyntaxGenerators.get(format);
+        ItemFileGenerator generator = format == null ? null : itemFileGenerators.get(format);
         if (generator == null) {
             return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE)
                     .entity("Unsupported media type '" + acceptHeader + "'!").build();
@@ -209,7 +209,7 @@ public class FileFormatResource implements RESTResource {
         }
         List<Item> items = List.of(item);
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        generator.generateSyntax(outputStream, items, getMetadata(items), hideDefaultParameters);
+        generator.generateFileFormat(outputStream, items, getMetadata(items), hideDefaultParameters);
         return Response.ok(new String(outputStream.toByteArray())).build();
     }
 
@@ -225,13 +225,13 @@ public class FileFormatResource implements RESTResource {
             @DefaultValue("true") @QueryParam("hideDefaultParameters") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters) {
         String acceptHeader = httpHeaders.getHeaderString(HttpHeaders.ACCEPT);
         String format = "text/vnd.openhab.dsl.thing".equals(acceptHeader) ? "DSL" : null;
-        ThingSyntaxGenerator generator = format == null ? null : thingSyntaxGenerators.get(format);
+        ThingFileGenerator generator = format == null ? null : thingFileGenerators.get(format);
         if (generator == null) {
             return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE)
                     .entity("Unsupported media type '" + acceptHeader + "'!").build();
         }
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        generator.generateSyntax(outputStream, sortThings(thingRegistry.getAll()), hideDefaultParameters);
+        generator.generateFileFormat(outputStream, sortThings(thingRegistry.getAll()), hideDefaultParameters);
         return Response.ok(new String(outputStream.toByteArray())).build();
     }
 
@@ -249,7 +249,7 @@ public class FileFormatResource implements RESTResource {
             @PathParam("thingUID") @Parameter(description = "thingUID") String thingUID) {
         String acceptHeader = httpHeaders.getHeaderString(HttpHeaders.ACCEPT);
         String format = "text/vnd.openhab.dsl.thing".equals(acceptHeader) ? "DSL" : null;
-        ThingSyntaxGenerator generator = format == null ? null : thingSyntaxGenerators.get(format);
+        ThingFileGenerator generator = format == null ? null : thingFileGenerators.get(format);
         if (generator == null) {
             return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE)
                     .entity("Unsupported media type '" + acceptHeader + "'!").build();
@@ -261,24 +261,24 @@ public class FileFormatResource implements RESTResource {
                     .entity("Thing with UID '" + thingUID + "' not found in the things registry!").build();
         }
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        generator.generateSyntax(outputStream, List.of(thing), hideDefaultParameters);
+        generator.generateFileFormat(outputStream, List.of(thing), hideDefaultParameters);
         return Response.ok(new String(outputStream.toByteArray())).build();
     }
 
     @GET
     @Path("/existing/thing-from-inbox/{thingUID}")
     @Produces("text/vnd.openhab.dsl.thing")
-    @Operation(operationId = "generateSyntaxForDiscoveryResult", summary = "Create file format for an existing thing in discovey registry.", security = {
+    @Operation(operationId = "createFileFormatForDiscoveryResult", summary = "Create file format for an existing thing in discovey registry.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = "text/vnd.openhab.dsl.thing", schema = @Schema(example = "Thing binding:type:idBridge:id \"Label\" (binding:typeBridge:idBridge) [stringParam=\"my value\", booleanParam=true, decimalParam=2.5]"))),
                     @ApiResponse(responseCode = "404", description = "Discovery result not found in the inbox or thing type not found."),
                     @ApiResponse(responseCode = "415", description = "Unsupported media type.") })
-    public Response generateSyntaxForDiscoveryResult(final @Context HttpHeaders httpHeaders,
+    public Response createFileFormatForDiscoveryResult(final @Context HttpHeaders httpHeaders,
             @DefaultValue("true") @QueryParam("hideDefaultParameters") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters,
             @PathParam("thingUID") @Parameter(description = "thingUID") String thingUID) {
         String acceptHeader = httpHeaders.getHeaderString(HttpHeaders.ACCEPT);
         String format = "text/vnd.openhab.dsl.thing".equals(acceptHeader) ? "DSL" : null;
-        ThingSyntaxGenerator generator = format == null ? null : thingSyntaxGenerators.get(format);
+        ThingFileGenerator generator = format == null ? null : thingFileGenerators.get(format);
         if (generator == null) {
             return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE)
                     .entity("Unsupported media type '" + acceptHeader + "'!").build();
@@ -297,7 +297,7 @@ public class FileFormatResource implements RESTResource {
         }
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        generator.generateSyntax(outputStream, List.of(simulateThing(result, thingType)), hideDefaultParameters);
+        generator.generateFileFormat(outputStream, List.of(simulateThing(result, thingType)), hideDefaultParameters);
         return Response.ok(new String(outputStream.toByteArray())).build();
     }
 

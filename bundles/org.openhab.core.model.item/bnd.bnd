@@ -20,8 +20,8 @@ Import-Package: javax.measure,\
  org.openhab.core.common.registry,\
  org.openhab.core.i18n,\
  org.openhab.core.items,\
- org.openhab.core.items.syntax,\
  org.openhab.core.items.dto,\
+ org.openhab.core.items.fileconverter,\
  org.openhab.core.library.items,\
  org.openhab.core.library.types,\
  org.openhab.core.thing.util,\
