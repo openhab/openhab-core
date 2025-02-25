@@ -23,6 +23,7 @@ import org.openhab.core.thing.type.ThingType;
  * objects (DTOs).
  *
  * @author Miki Jankov - Initial contribution
+ * @author Andrew Fiddian-Green - Added semanticEquipmentTag
  */
 @NonNullByDefault
 public class StrippedThingTypeDTOMapper {

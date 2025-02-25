@@ -90,6 +90,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * @author Yannick Schaus - Added filter to getAll
  * @author Markus Rathgeb - Migrated to JAX-RS Whiteboard Specification
  * @author Wouter Born - Migrated to OpenAPI annotations
+ * @author Andrew Fiddian-Green - Added semanticEquipmentTag
  */
 @Component
 @JaxrsResource

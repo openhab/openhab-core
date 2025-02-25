@@ -30,6 +30,7 @@ import org.openhab.core.thing.ThingUID;
  * @author Michael Grammling - Initial contribution
  * @author Thomas Höfer - Added representation
  * @author Wouter Born - Migrate tests from Groovy to Java
+ * @author Andrew Fiddian-Green - Added semanticEquipmentTag
  */
 @NonNullByDefault
 public class DiscoveryResultImplTest {

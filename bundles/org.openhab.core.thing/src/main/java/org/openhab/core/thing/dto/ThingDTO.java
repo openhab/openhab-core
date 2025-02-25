@@ -23,6 +23,7 @@ import java.util.Map;
  * @author Stefan Bußweiler - Added new thing status handling
  * @author Simon Kaufmann - Added label
  * @author Wouter Born - Let (Enriched)ThingDTO extend AbstractThingDTO so both can define their own "channels" type
+ * @author Andrew Fiddian-Green - Added semanticEquipmentTag
  */
 public class ThingDTO extends AbstractThingDTO {
 

@@ -36,6 +36,7 @@ import org.openhab.core.thing.util.ThingHelper;
  *
  * @author Dennis Nobel - Initial contribution
  * @author Kai Kreuzer - Refactoring to make BridgeBuilder a subclass
+ * @author Andrew Fiddian-Green - Added semanticEquipmentTag
  */
 @NonNullByDefault
 public class ThingBuilder {
@@ -88,7 +89,7 @@ public class ThingBuilder {
         return ThingBuilder.create(thing.getThingTypeUID(), thing.getUID()).withBridge(thing.getBridgeUID())
                 .withChannels(thing.getChannels()).withConfiguration(thing.getConfiguration())
                 .withLabel(thing.getLabel()).withLocation(thing.getLocation()).withProperties(thing.getProperties())
-                .withSemanticEqipmentTag(thing.getSemanticEquipmentTag());
+                .withSemanticEquipmentTag(thing.getSemanticEquipmentTag());
     }
 
     /**
@@ -259,7 +260,7 @@ public class ThingBuilder {
      * @param semanticEquipmentTag a string with semantic (equipment) tag for this thing
      * @return the {@link ThingBuilder} itself
      */
-    public ThingBuilder withSemanticEqipmentTag(@Nullable String semanticEquipmentTag) {
+    public ThingBuilder withSemanticEquipmentTag(@Nullable String semanticEquipmentTag) {
         this.semanticEquipmentTag = semanticEquipmentTag;
         return this;
     }

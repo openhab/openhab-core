@@ -23,6 +23,7 @@ import org.openhab.core.thing.ThingUID;
  * objects.
  *
  * @author Stefan Bussweiler - Initial contribution
+ * @author Andrew Fiddian-Green - Added semanticEquipmentTag
  */
 @NonNullByDefault
 public class DiscoveryResultDTOMapper {

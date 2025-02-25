@@ -23,6 +23,7 @@ import org.openhab.core.config.discovery.DiscoveryResultFlag;
  *
  * @author Dennis Nobel - Initial contribution
  * @author Thomas Höfer - Added representation
+ * @author Andrew Fiddian-Green - Added semanticEquipmentTag
  */
 @NonNullByDefault
 public class DiscoveryResultDTO {

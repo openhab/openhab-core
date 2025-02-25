@@ -19,6 +19,7 @@ import java.util.List;
  * Stripped thing types exclude the parameters, configDescription and channels
  *
  * @author Miki Jankov - Initial contribution
+ * @author Andrew Fiddian-Green - Added semanticEquipmentTag
  */
 public class StrippedThingTypeDTO {
 

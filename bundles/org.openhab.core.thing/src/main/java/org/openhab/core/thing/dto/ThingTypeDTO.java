@@ -25,6 +25,7 @@ import org.openhab.core.config.core.dto.ConfigDescriptionParameterGroupDTO;
  * @author Thomas Höfer - Added thing and thing type properties
  * @author Chris Jackson - Added parameter groups
  * @author Miki Jankov - Introducing StrippedThingTypeDTO
+ * @author Andrew Fiddian-Green - Added semanticEquipmentTag
  */
 public class ThingTypeDTO extends StrippedThingTypeDTO {
 

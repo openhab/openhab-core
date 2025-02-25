@@ -32,6 +32,7 @@ import org.openhab.core.thing.util.ThingHelper;
  *
  * @author Stefan Bußweiler - Initial contribution
  * @author Kai Kreuzer - Added DTO to Thing mapping
+ * @author Andrew Fiddian-Green - Added semanticEquipmentTag
  */
 @NonNullByDefault
 public class ThingDTOMapper {

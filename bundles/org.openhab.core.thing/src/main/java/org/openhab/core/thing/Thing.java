@@ -35,6 +35,7 @@ import org.openhab.core.thing.binding.ThingHandler;
  * @author Kai Kreuzer - Removed linked items from Thing
  * @author Yordan Zhelev - Added method for getting the enabled status
  * @author Christoph Weitkamp - Added method {@code getChannel(ChannelUID)}
+ * @author Andrew Fiddian-Green - Added semanticEquipmentTag
  */
 @NonNullByDefault
 public interface Thing extends Identifiable<ThingUID> {

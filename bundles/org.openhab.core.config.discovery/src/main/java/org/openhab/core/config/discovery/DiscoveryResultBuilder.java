@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
  * @author Kai Kreuzer - Initial contribution
  * @author Andre Fuechsel - added support for time to live
  * @author Thomas Höfer - Added representation
+ * @author Andrew Fiddian-Green - Added semanticEquipmentTag
  *
  * @see DiscoveryResult
  */

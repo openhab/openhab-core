@@ -68,6 +68,7 @@ import org.openhab.core.thing.type.ThingTypeBuilder;
  * @author Alex Tugarev - Adapted for constructor modification of ConfigDescriptionParameter
  * @author Thomas Höfer - Thing type constructor modified because of thing properties introduction
  * @author Wouter Born - Migrate tests from Groovy to Java
+ * @author Andrew Fiddian-Green - Added semanticEquipmentTag
  */
 @NonNullByDefault
 public class ThingFactoryTest extends JavaOSGiTest {

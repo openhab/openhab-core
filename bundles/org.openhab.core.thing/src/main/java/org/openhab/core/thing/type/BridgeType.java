@@ -32,6 +32,7 @@ import org.openhab.core.thing.ThingTypeUID;
  * @author Michael Grammling - Initial contribution
  * @author Thomas Höfer - Added thing and thing type properties
  * @author Andre Fuechsel - Added representationProperty
+ * @author Andrew Fiddian-Green - Added semanticEquipmentTag
  */
 @NonNullByDefault
 public class BridgeType extends ThingType {

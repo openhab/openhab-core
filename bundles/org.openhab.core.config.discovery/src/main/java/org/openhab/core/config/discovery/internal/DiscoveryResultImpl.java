@@ -29,6 +29,7 @@ import org.openhab.core.thing.ThingUID;
 /**
  *
  * @author Kai Kreuzer - Initial contribution
+ * @author Andrew Fiddian-Green - Added semanticEquipmentTag
  */
 @NonNullByDefault
 public class DiscoveryResultImpl implements DiscoveryResult {

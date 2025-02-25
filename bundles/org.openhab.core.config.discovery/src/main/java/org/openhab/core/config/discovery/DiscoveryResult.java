@@ -28,6 +28,7 @@ import org.openhab.core.thing.ThingUID;
  * @author Kai Kreuzer - Initial contribution
  * @author Andre Fuechsel - added support for time to live
  * @author Thomas Höfer - Added representation
+ * @author Andrew Fiddian-Green - Added semanticEquipmentTag
  *
  * @see DiscoveryService
  * @see DiscoveryListener

@@ -35,6 +35,7 @@ import org.openhab.core.thing.ThingTypeUID;
  * @author Simon Kaufmann - Added listed field
  * @author Andre Fuechsel - Added representationProperty field
  * @author Stefan Triller - Added category field
+ * @author Andrew Fiddian-Green - Added semanticEquipmentTag
  */
 @NonNullByDefault
 public class ThingType extends AbstractDescriptionType {

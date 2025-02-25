@@ -45,6 +45,7 @@ import org.openhab.core.thing.internal.ThingImpl;
  *         ThingTypeDescription
  * @author Dennis Nobel - Removed createAndBindItems method
  * @author Kai Kreuzer - Added merge method
+ * @author Andrew Fiddian-Green - Added semanticEquipmentTag
  */
 @NonNullByDefault
 public class ThingHelper {
@@ -208,9 +209,9 @@ public class ThingHelper {
 
         // Update the semantic equipment tag
         if (updatedContents.semanticEquipmentTag != null) {
-            builder.withSemanticEqipmentTag(updatedContents.semanticEquipmentTag);
+            builder.withSemanticEquipmentTag(updatedContents.semanticEquipmentTag);
         } else {
-            builder.withSemanticEqipmentTag(thing.getSemanticEquipmentTag());
+            builder.withSemanticEquipmentTag(thing.getSemanticEquipmentTag());
         }
 
         Thing mergedThing = builder.build();

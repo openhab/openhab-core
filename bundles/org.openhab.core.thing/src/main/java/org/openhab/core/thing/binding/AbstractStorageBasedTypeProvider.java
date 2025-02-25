@@ -59,6 +59,7 @@ import org.openhab.core.types.StateOption;
  * persist those for future thing initializations
  *
  * @author Jan N. Klug - Initial contribution
+ * @author Andrew Fiddian-Green - Added semanticEquipmentTag
  */
 @NonNullByDefault
 public abstract class AbstractStorageBasedTypeProvider

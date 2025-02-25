@@ -45,6 +45,7 @@ import com.thoughtworks.xstream.converters.ConversionException;
  * @author Simon Kaufmann - Added listed field
  * @author Andre Fuechsel - Added representationProperty field
  * @author Stefan Triller - Added category field
+ * @author Andrew Fiddian-Green - Added semanticEquipmentTag
  */
 @NonNullByDefault
 public class ThingTypeXmlResult {
@@ -62,10 +63,11 @@ public class ThingTypeXmlResult {
     protected @Nullable List<NodeValue> properties;
     protected URI configDescriptionURI;
     protected ConfigDescription configDescription;
+    protected @Nullable String semanticEquipmentTag;
 
     public ThingTypeXmlResult(ThingTypeUID thingTypeUID, @Nullable List<String> supportedBridgeTypeUIDs, String label,
-            @Nullable String description, @Nullable String category, boolean listed,
-            @Nullable List<String> extensibleChannelTypeIds,
+            @Nullable String description, @Nullable String category, @Nullable String semanticEquipmentTag,
+            boolean listed, @Nullable List<String> extensibleChannelTypeIds,
             @Nullable List<ChannelXmlResult>[] channelTypeReferenceObjects, @Nullable List<NodeValue> properties,
             @Nullable String representationProperty, Object[] configDescriptionObjects) {
         this.thingTypeUID = thingTypeUID;
@@ -81,6 +83,7 @@ public class ThingTypeXmlResult {
         this.properties = properties;
         this.configDescriptionURI = (URI) configDescriptionObjects[0];
         this.configDescription = (ConfigDescription) configDescriptionObjects[1];
+        this.semanticEquipmentTag = semanticEquipmentTag;
     }
 
     public ThingTypeUID getUID() {
@@ -197,6 +200,11 @@ public class ThingTypeXmlResult {
             builder.withExtensibleChannelTypeIds(extensibleChannelTypeIds);
         }
 
+        String semanticEquipmentTag = this.semanticEquipmentTag;
+        if (semanticEquipmentTag != null) {
+            builder.withSemanticEquipmentTag(semanticEquipmentTag);
+        }
+
         return builder;
     }
 
@@ -208,10 +216,10 @@ public class ThingTypeXmlResult {
     public String toString() {
         return "ThingTypeXmlResult [thingTypeUID=" + thingTypeUID + ", supportedBridgeTypeUIDs="
                 + supportedBridgeTypeUIDs + ", label=" + label + ", description=" + description + ",  category="
-                + category + ", listed=" + listed + ", representationProperty=" + representationProperty
-                + ", channelTypeReferences=" + channelTypeReferences + ", channelGroupTypeReferences="
-                + channelGroupTypeReferences + ", extensibelChannelTypeIds=" + extensibleChannelTypeIds
-                + ", properties=" + properties + ", configDescriptionURI=" + configDescriptionURI
-                + ", configDescription=" + configDescription + "]";
+                + category + ", semanticEquipmentTag=" + semanticEquipmentTag + ", listed=" + listed
+                + ", representationProperty=" + representationProperty + ", channelTypeReferences="
+                + channelTypeReferences + ", channelGroupTypeReferences=" + channelGroupTypeReferences
+                + ", extensibelChannelTypeIds=" + extensibleChannelTypeIds + ", properties=" + properties
+                + ", configDescriptionURI=" + configDescriptionURI + ", configDescription=" + configDescription + "]";
     }
 }

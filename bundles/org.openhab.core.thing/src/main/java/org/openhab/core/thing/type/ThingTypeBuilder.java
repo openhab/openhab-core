@@ -24,6 +24,7 @@ import org.openhab.core.thing.ThingTypeUID;
  * A {@link ThingType} builder.
  *
  * @author Henning Treu - Initial contribution
+ * @author Andrew Fiddian-Green - Added semanticEquipmentTag
  */
 @NonNullByDefault
 public class ThingTypeBuilder {

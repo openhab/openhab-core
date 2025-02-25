@@ -41,6 +41,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader;
  * @author Thomas Höfer - Added thing and thing type properties
  * @author Chris Jackson - Added channel properties
  * @author Andre Fuechsel - Added representationProperty
+ * @author Andrew Fiddian-Green - Added semanticEquipmentTag
  */
 @NonNullByDefault
 public class ThingTypeConverter extends AbstractDescriptionTypeConverter<ThingTypeXmlResult> {
@@ -100,10 +101,10 @@ public class ThingTypeConverter extends AbstractDescriptionTypeConverter<ThingTy
             Map<String, String> attributes, NodeIterator nodeIterator) throws ConversionException {
         return new ThingTypeXmlResult(new ThingTypeUID(super.getUID(attributes, context)),
                 readSupportedBridgeTypeUIDs(nodeIterator, context), super.readLabel(nodeIterator),
-                super.readDescription(nodeIterator), readCategory(nodeIterator), getListed(attributes),
-                getExtensibleChannelTypeIds(attributes), getChannelTypeReferenceObjects(nodeIterator),
-                getProperties(nodeIterator), getRepresentationProperty(nodeIterator),
-                super.getConfigDescriptionObjects(nodeIterator));
+                super.readDescription(nodeIterator), readCategory(nodeIterator), getSemanticEquipmentTag(nodeIterator),
+                getListed(attributes), getExtensibleChannelTypeIds(attributes),
+                getChannelTypeReferenceObjects(nodeIterator), getProperties(nodeIterator),
+                getRepresentationProperty(nodeIterator), super.getConfigDescriptionObjects(nodeIterator));
     }
 
     protected List<String> getExtensibleChannelTypeIds(Map<String, String> attributes) {
@@ -134,5 +135,9 @@ public class ThingTypeConverter extends AbstractDescriptionTypeConverter<ThingTy
 
     protected @Nullable String getRepresentationProperty(NodeIterator nodeIterator) {
         return (String) nodeIterator.nextValue("representation-property", false);
+    }
+
+    protected @Nullable String getSemanticEquipmentTag(NodeIterator nodeIterator) {
+        return (String) nodeIterator.nextValue("equipment", false);
     }
 }

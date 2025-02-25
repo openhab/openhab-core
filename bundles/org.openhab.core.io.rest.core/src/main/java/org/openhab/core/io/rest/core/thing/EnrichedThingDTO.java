@@ -26,6 +26,7 @@ import org.openhab.core.thing.firmware.dto.FirmwareStatusDTO;
  * @author Kai Kreuzer - Removed links and items
  * @author Chris Jackson - Added 'editable' flag
  * @author Wouter Born - Let (Enriched)ThingDTO extend AbstractThingDTO so both can define their own "channels" type
+ * @author Andrew Fiddian-Green - Added semanticEquipmentTag
  */
 public class EnrichedThingDTO extends AbstractThingDTO {
 
