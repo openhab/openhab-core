@@ -135,6 +135,13 @@ public interface DiscoveryResult {
     long getTimeToLive();
 
     /**
+     * Returns the semantic (equipment) tag for this result object.
+     *
+     * @return the semantic (equipment) tag (could be empty)
+     */
+    String getSemanticEquipmentTag();
+
+    /**
      * Normalizes non-configuration properties by converting them to a String.
      * Properties in the list passed to this method remain unchanged.
      *

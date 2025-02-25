@@ -28,7 +28,7 @@ public class ThingStorageEntity extends ThingDTO {
 
     public ThingStorageEntity(ThingDTO thingDTO, boolean isBridge) {
         super(thingDTO.thingTypeUID, thingDTO.UID, thingDTO.label, thingDTO.bridgeUID, thingDTO.channels,
-                thingDTO.configuration, thingDTO.properties, thingDTO.location, thingDTO.tag);
+                thingDTO.configuration, thingDTO.properties, thingDTO.location, thingDTO.semanticEquipmentTag);
         this.isBridge = isBridge;
     }
 }

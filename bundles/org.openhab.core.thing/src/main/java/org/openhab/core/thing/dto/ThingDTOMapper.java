@@ -55,7 +55,7 @@ public class ThingDTOMapper {
 
         return new ThingDTO(thingTypeUID, thingUID, thing.getLabel(), bridgeUID != null ? bridgeUID.toString() : null,
                 channelDTOs, toMap(thing.getConfiguration()), thing.getProperties(), thing.getLocation(),
-                thing.getTag());
+                thing.getSemanticEquipmentTag());
     }
 
     /**

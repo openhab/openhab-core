@@ -48,7 +48,7 @@ public class ThingBuilder {
     private @Nullable ThingUID bridgeUID;
     private @Nullable Map<String, String> properties;
     private @Nullable String location;
-    private @Nullable String tag;
+    private @Nullable String semanticEquipmentTag;
 
     protected ThingBuilder(ThingTypeUID thingTypeUID, ThingUID thingUID) {
         this.thingUID = thingUID;
@@ -88,7 +88,7 @@ public class ThingBuilder {
         return ThingBuilder.create(thing.getThingTypeUID(), thing.getUID()).withBridge(thing.getBridgeUID())
                 .withChannels(thing.getChannels()).withConfiguration(thing.getConfiguration())
                 .withLabel(thing.getLabel()).withLocation(thing.getLocation()).withProperties(thing.getProperties())
-                .withTag(thing.getTag());
+                .withSemanticEqipmentTag(thing.getSemanticEquipmentTag());
     }
 
     /**
@@ -256,11 +256,11 @@ public class ThingBuilder {
     /**
      * Set the semantic (equipment) tag for this thing
      *
-     * @param tag a string with semantic (equipment) tag for this thing
+     * @param semanticEquipmentTag a string with semantic (equipment) tag for this thing
      * @return the {@link ThingBuilder} itself
      */
-    public ThingBuilder withTag(@Nullable String tag) {
-        this.tag = tag;
+    public ThingBuilder withSemanticEqipmentTag(@Nullable String semanticEquipmentTag) {
+        this.semanticEquipmentTag = semanticEquipmentTag;
         return this;
     }
 
@@ -275,7 +275,7 @@ public class ThingBuilder {
             }
         }
         thing.setLocation(location);
-        thing.setTag(tag);
+        thing.setSemanticEquipmentTag(semanticEquipmentTag);
         return thing;
     }
 

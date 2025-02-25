@@ -47,7 +47,7 @@ public class ThingType extends AbstractDescriptionType {
     private final @Nullable String representationProperty;
     private final boolean listed;
     private final @Nullable String category;
-    private final @Nullable String tag;
+    private final @Nullable String semanticEquipmentTag;
 
     /**
      * Creates a new instance of this class with the specified parameters.
@@ -61,7 +61,6 @@ public class ThingType extends AbstractDescriptionType {
      * @param description the human-readable description for the according type
      *            (could be null or empty)
      * @param category the category of the thing (could be null)
-     * @param tag the semantic (equipment) tag of the thing (could be null)
      * @param listed determines whether it should be listed for manually pairing or not
      * @param representationProperty name of the property that uniquely identifies this Thing
      * @param channelDefinitions the channels this Thing type provides (could be null or empty)
@@ -70,18 +69,18 @@ public class ThingType extends AbstractDescriptionType {
      * @param properties the properties this Thing type provides (could be null)
      * @param configDescriptionURI the link to the concrete ConfigDescription (could be null)
      * @param extensibleChannelTypeIds the channel-type ids this thing-type is extensible with (could be null or empty).
+     * @param semanticEquipmentTag the semantic (equipment) tag of the thing (could be null)
      * @throws IllegalArgumentException if the UID is null or empty, or the meta information is null
      */
     ThingType(ThingTypeUID uid, @Nullable List<String> supportedBridgeTypeUIDs, String label,
-            @Nullable String description, @Nullable String category, @Nullable String tag, boolean listed,
+            @Nullable String description, @Nullable String category, boolean listed,
             @Nullable String representationProperty, @Nullable List<ChannelDefinition> channelDefinitions,
             @Nullable List<ChannelGroupDefinition> channelGroupDefinitions, @Nullable Map<String, String> properties,
-            @Nullable URI configDescriptionURI, @Nullable List<String> extensibleChannelTypeIds)
-            throws IllegalArgumentException {
+            @Nullable URI configDescriptionURI, @Nullable List<String> extensibleChannelTypeIds,
+            @Nullable String semanticEquipmentTag) throws IllegalArgumentException {
         super(uid, label, description, configDescriptionURI);
 
         this.category = category;
-        this.tag = tag;
         this.listed = listed;
         this.representationProperty = representationProperty;
         this.supportedBridgeTypeUIDs = supportedBridgeTypeUIDs == null ? List.of()
@@ -93,6 +92,7 @@ public class ThingType extends AbstractDescriptionType {
         this.extensibleChannelTypeIds = extensibleChannelTypeIds == null ? List.of()
                 : Collections.unmodifiableList(extensibleChannelTypeIds);
         this.properties = properties == null ? Map.of() : Collections.unmodifiableMap(properties);
+        this.semanticEquipmentTag = semanticEquipmentTag;
     }
 
     /**
@@ -162,10 +162,6 @@ public class ThingType extends AbstractDescriptionType {
         return this.category;
     }
 
-    public @Nullable String getTag() {
-        return this.tag;
-    }
-
     /**
      * Check, if things of this thing type should be listed for manually pairing or not.
      *
@@ -213,5 +209,14 @@ public class ThingType extends AbstractDescriptionType {
 
     public List<String> getExtensibleChannelTypeIds() {
         return extensibleChannelTypeIds;
+    }
+
+    /**
+     * Get the semantic (equipment) tag of this thing type. May be {code null}.
+     *
+     * @return the semantic (equipment) tag or {@code null} if no tag has been configured.
+     */
+    public @Nullable String getSemanticEquipmentTag() {
+        return semanticEquipmentTag;
     }
 }

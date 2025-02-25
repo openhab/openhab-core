@@ -76,8 +76,8 @@ public class ThingHelper {
         if (!Objects.equals(a.getLocation(), b.getLocation())) {
             return false;
         }
-        // tag
-        if (!Objects.equals(a.getTag(), b.getTag())) {
+        // semantic equipment tag
+        if (!Objects.equals(a.getSemanticEquipmentTag(), b.getSemanticEquipmentTag())) {
             return false;
         }
         // channels
@@ -176,13 +176,6 @@ public class ThingHelper {
             builder.withLocation(thing.getLocation());
         }
 
-        // Update the tag
-        if (updatedContents.tag != null) {
-            builder.withTag(updatedContents.tag);
-        } else {
-            builder.withTag(thing.getTag());
-        }
-
         // update bridge UID
         if (updatedContents.bridgeUID != null) {
             builder.withBridge(new ThingUID(updatedContents.bridgeUID));
@@ -213,10 +206,11 @@ public class ThingHelper {
             builder.withChannels(thing.getChannels());
         }
 
-        if (updatedContents.location != null) {
-            builder.withLocation(updatedContents.location);
+        // Update the semantic equipment tag
+        if (updatedContents.semanticEquipmentTag != null) {
+            builder.withSemanticEqipmentTag(updatedContents.semanticEquipmentTag);
         } else {
-            builder.withLocation(thing.getLocation());
+            builder.withSemanticEqipmentTag(thing.getSemanticEquipmentTag());
         }
 
         Thing mergedThing = builder.build();

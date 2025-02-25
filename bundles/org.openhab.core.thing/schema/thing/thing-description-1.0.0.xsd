@@ -26,7 +26,7 @@
 			<xs:element name="label" type="xs:string"/>
 			<xs:element name="description" type="xs:string" minOccurs="0"/>
 			<xs:element name="category" type="xs:string" minOccurs="0"/>
-			<xs:element name="tag" type="thing-description:thing-tag" minOccurs="0"/>
+			<xs:element name="semantic-equipment-tag" type="thing-description:semanticEquipmentTag" minOccurs="0"/>
 			<xs:choice minOccurs="0">
 				<xs:element name="channels" type="thing-description:channels"/>
 				<xs:element name="channel-groups" type="thing-description:channelGroups"/>
@@ -271,9 +271,9 @@
 		</xs:simpleContent>
 	</xs:complexType>
 
-	<xs:simpleType name="thing-tag">
+	<xs:simpleType name="semanticEquipmentTag">
 		<xs:restriction base="xs:string">
-			<!-- Allowed Equipment (Thing) Tag Values -->
+			<!-- Allowed Semantic Equipment Tag Values -->
 			<xs:enumeration value="AlarmSystem"/>
 			<xs:enumeration value="Battery"/>
 			<xs:enumeration value="Blinds"/>

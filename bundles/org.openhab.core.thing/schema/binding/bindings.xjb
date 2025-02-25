@@ -20,7 +20,7 @@
                 <jaxb:property name="ValueAttribute"/>
             </jaxb:bindings>
         </jaxb:bindings>
-        <jaxb:bindings node="//xs:simpleType[@name='thing-tag']">
+        <jaxb:bindings node="//xs:simpleType[@name='semanticEquipmentTag']">
             <jaxb:typesafeEnumClass map="false"/>
         </jaxb:bindings>
     </jaxb:bindings>

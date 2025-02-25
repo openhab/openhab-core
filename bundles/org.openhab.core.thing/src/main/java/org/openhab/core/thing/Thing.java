@@ -237,12 +237,12 @@ public interface Thing extends Identifiable<ThingUID> {
      * @return the semantic (equipment) tag or {@code null} if no tag has been configured.
      */
     @Nullable
-    String getTag();
+    String getSemanticEquipmentTag();
 
     /**
      * Set the semantic (equipment) tag of the {@link Thing}.
      *
      * @param tag the semantic (equipment) tag or {@code null} if no tag has been configured.
      */
-    void setTag(@Nullable String tag);
+    void setSemanticEquipmentTag(@Nullable String semanticEquipmentTag);
 }

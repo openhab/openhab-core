@@ -37,12 +37,12 @@ public class ThingTypeBuilder {
     private @Nullable URI configDescriptionURI;
     private boolean listed;
     private @Nullable String category;
-    private @Nullable String tag;
     private @Nullable String description;
 
     private final String bindingId;
     private final String thingTypeId;
     private String label;
+    private @Nullable String semanticEquipmentTag;
 
     /**
      * Create and return a {@link ThingTypeBuilder} with the given {@code bindingId}, {@code thingTypeId} and
@@ -100,6 +100,7 @@ public class ThingTypeBuilder {
         configDescriptionURI = thingType.getConfigDescriptionURI();
         listed = thingType.isListed();
         category = thingType.getCategory();
+        semanticEquipmentTag = thingType.getSemanticEquipmentTag();
     }
 
     /**
@@ -120,8 +121,8 @@ public class ThingTypeBuilder {
         }
 
         return new ThingType(new ThingTypeUID(bindingId, thingTypeId), supportedBridgeTypeUIDs, label, description,
-                category, tag, listed, representationProperty, channelDefinitions, channelGroupDefinitions, properties,
-                configDescriptionURI, extensibleChannelTypeIds);
+                category, listed, representationProperty, channelDefinitions, channelGroupDefinitions, properties,
+                configDescriptionURI, extensibleChannelTypeIds, semanticEquipmentTag);
     }
 
     /**
@@ -142,8 +143,8 @@ public class ThingTypeBuilder {
         }
 
         return new BridgeType(new ThingTypeUID(bindingId, thingTypeId), supportedBridgeTypeUIDs, label, description,
-                category, tag, listed, representationProperty, channelDefinitions, channelGroupDefinitions, properties,
-                configDescriptionURI, extensibleChannelTypeIds);
+                category, listed, representationProperty, channelDefinitions, channelGroupDefinitions, properties,
+                configDescriptionURI, extensibleChannelTypeIds, semanticEquipmentTag);
     }
 
     public ThingTypeBuilder withLabel(String label) {
@@ -158,11 +159,6 @@ public class ThingTypeBuilder {
 
     public ThingTypeBuilder withCategory(String category) {
         this.category = category;
-        return this;
-    }
-
-    public ThingTypeBuilder withTag(String tag) {
-        this.tag = tag;
         return this;
     }
 
@@ -203,6 +199,11 @@ public class ThingTypeBuilder {
 
     public ThingTypeBuilder withSupportedBridgeTypeUIDs(List<String> supportedBridgeTypeUIDs) {
         this.supportedBridgeTypeUIDs = supportedBridgeTypeUIDs;
+        return this;
+    }
+
+    public ThingTypeBuilder withSemanticEquipmentTag(String semanticEquipmentTag) {
+        this.semanticEquipmentTag = semanticEquipmentTag;
         return this;
     }
 }

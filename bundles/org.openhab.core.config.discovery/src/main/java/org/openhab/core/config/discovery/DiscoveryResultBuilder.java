@@ -47,6 +47,7 @@ public class DiscoveryResultBuilder {
     private @Nullable String label;
     private long ttl = DiscoveryResult.TTL_UNLIMITED;
     private @Nullable ThingTypeUID thingTypeUID;
+    private @Nullable String semanticEquipmentTag;
 
     private DiscoveryResultBuilder(ThingUID thingUID) {
         this.thingUID = thingUID;
@@ -143,6 +144,17 @@ public class DiscoveryResultBuilder {
     }
 
     /**
+     * Sets the semantic (equipment) tag.
+     *
+     * @param semanticEquipmentTag semantic (equipment) tag
+     * @return the updated builder
+     */
+    public DiscoveryResultBuilder withSemanticEquipmentTag(@Nullable String semanticEquipmentTag) {
+        this.semanticEquipmentTag = semanticEquipmentTag;
+        return this;
+    }
+
+    /**
      * Builds a result with the settings of this builder.
      *
      * @return the desired result
@@ -161,7 +173,7 @@ public class DiscoveryResultBuilder {
             }
         }
         return new DiscoveryResultImpl(thingTypeUID, thingUID, bridgeUID, properties, representationProperty, label,
-                ttl);
+                ttl, semanticEquipmentTag);
     }
 
     private void validateThingUID(@Nullable ThingUID bridgeUID) {

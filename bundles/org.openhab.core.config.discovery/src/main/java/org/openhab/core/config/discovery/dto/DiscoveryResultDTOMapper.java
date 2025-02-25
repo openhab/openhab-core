@@ -39,7 +39,8 @@ public class DiscoveryResultDTOMapper {
 
         return new DiscoveryResultDTO(thingUID.toString(), bridgeUID != null ? bridgeUID.toString() : null,
                 discoveryResult.getThingTypeUID().toString(), discoveryResult.getLabel(), discoveryResult.getFlag(),
-                discoveryResult.getProperties(), discoveryResult.getRepresentationProperty());
+                discoveryResult.getProperties(), discoveryResult.getRepresentationProperty(),
+                discoveryResult.getSemanticEquipmentTag());
     }
 
     /**
@@ -60,6 +61,7 @@ public class DiscoveryResultDTOMapper {
         return DiscoveryResultBuilder.create(thingUID).withThingType(thingTypeUID).withBridge(bridgeUID)
                 .withLabel(discoveryResultDTO.label)
                 .withRepresentationProperty(discoveryResultDTO.representationProperty)
-                .withProperties(discoveryResultDTO.properties).build();
+                .withProperties(discoveryResultDTO.properties)
+                .withSemanticEquipmentTag(discoveryResultDTO.semanticEquipmentTag).build();
     }
 }

@@ -386,7 +386,6 @@ public abstract class AbstractStorageBasedTypeProvider
         public @NonNullByDefault({}) String label;
         public @Nullable String description;
         public @Nullable String category;
-        public @Nullable String tag;
         public @Nullable String representationProperty;
         public List<String> supportedBridgeTypeRefs = List.of();
         public @Nullable URI configDescriptionUri;
@@ -396,6 +395,7 @@ public abstract class AbstractStorageBasedTypeProvider
         public Map<String, String> properties = Map.of();
         public boolean isListed = false;
         public boolean isBridge = false;
+        public @Nullable String semanticEquipmentTag;
     }
 
     static class ChannelDefinitionEntity {

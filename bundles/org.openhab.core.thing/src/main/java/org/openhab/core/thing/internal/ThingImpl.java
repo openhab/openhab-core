@@ -64,7 +64,7 @@ public class ThingImpl implements Thing {
 
     private @Nullable String location;
 
-    private @Nullable String tag;
+    private @Nullable String semanticEquipmentTag;
 
     private transient volatile ThingStatusInfo status = ThingStatusInfoBuilder
             .create(ThingStatus.UNINITIALIZED, ThingStatusDetail.NONE).build();
@@ -260,6 +260,8 @@ public class ThingImpl implements Thing {
         sb.append(getStatus());
         sb.append(", StatusInfo=");
         sb.append(getStatusInfo());
+        sb.append(", SemanticEquipmentTag=");
+        sb.append(getSemanticEquipmentTag());
         sb.append(")");
         return sb.toString();
     }
@@ -288,12 +290,12 @@ public class ThingImpl implements Thing {
     }
 
     @Override
-    public @Nullable String getTag() {
-        return tag;
+    public @Nullable String getSemanticEquipmentTag() {
+        return semanticEquipmentTag;
     }
 
     @Override
-    public void setTag(@Nullable String tag) {
-        this.tag = tag;
+    public void setSemanticEquipmentTag(@Nullable String tag) {
+        this.semanticEquipmentTag = tag;
     }
 }
