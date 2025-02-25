@@ -36,6 +36,6 @@ public class StrippedThingTypeDTOMapper {
     public static StrippedThingTypeDTO map(ThingType thingType, Locale locale) {
         return new StrippedThingTypeDTO(thingType.getUID().toString(), thingType.getLabel(), thingType.getDescription(),
                 thingType.getCategory(), thingType.isListed(), thingType.getSupportedBridgeTypeUIDs(),
-                thingType instanceof BridgeType);
+                thingType instanceof BridgeType, thingType.getSemanticEquipmentTag());
     }
 }

@@ -220,6 +220,7 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
         } else {
             newThing.setLabel(result.getLabel());
         }
+        newThing.setSemanticEquipmentTag(result.getSemanticEquipmentTag());
         addThingSafely(newThing);
         return newThing;
     }
@@ -370,7 +371,7 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
 
     @Override
     public Stream<DiscoveryResult> stream() {
-        return (Stream<DiscoveryResult>) discoveryResultStorage.getValues().stream().filter(Objects::nonNull);
+        return discoveryResultStorage.getValues().stream().filter(Objects::nonNull);
     }
 
     @Override

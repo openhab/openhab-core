@@ -395,6 +395,7 @@ public abstract class AbstractStorageBasedTypeProvider
         public Map<String, String> properties = Map.of();
         public boolean isListed = false;
         public boolean isBridge = false;
+        public @Nullable String semanticEquipmentTag;
     }
 
     static class ChannelDefinitionEntity {

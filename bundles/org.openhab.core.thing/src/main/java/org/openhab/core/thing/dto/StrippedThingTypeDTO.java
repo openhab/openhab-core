@@ -29,12 +29,13 @@ public class StrippedThingTypeDTO {
     public boolean listed;
     public List<String> supportedBridgeTypeUIDs;
     public boolean bridge;
+    public String semanticEquipmentTag;
 
     public StrippedThingTypeDTO() {
     }
 
     public StrippedThingTypeDTO(String uid, String label, String description, String category, boolean listed,
-            List<String> supportedBridgeTypeUIDs, boolean bridge) {
+            List<String> supportedBridgeTypeUIDs, boolean bridge, String semanticEquipmentTag) {
         this.UID = uid;
         this.label = label;
         this.description = description;
@@ -42,5 +43,6 @@ public class StrippedThingTypeDTO {
         this.listed = listed;
         this.supportedBridgeTypeUIDs = supportedBridgeTypeUIDs;
         this.bridge = bridge;
+        this.semanticEquipmentTag = semanticEquipmentTag;
     }
 }

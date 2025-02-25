@@ -32,12 +32,14 @@ public abstract class AbstractThingDTO {
     public String UID;
     public String thingTypeUID;
     public String location;
+    public String semanticEquipmentTag;
 
     protected AbstractThingDTO() {
     }
 
     protected AbstractThingDTO(String thingTypeUID, String uid, String label, String bridgeUID,
-            Map<String, Object> configuration, Map<String, String> properties, String location) {
+            Map<String, Object> configuration, Map<String, String> properties, String location,
+            String semanticEquipmentTag) {
         this.thingTypeUID = thingTypeUID;
         this.UID = uid;
         this.label = label;
@@ -45,5 +47,6 @@ public abstract class AbstractThingDTO {
         this.configuration = configuration;
         this.properties = properties;
         this.location = location;
+        this.semanticEquipmentTag = semanticEquipmentTag;
     }
 }

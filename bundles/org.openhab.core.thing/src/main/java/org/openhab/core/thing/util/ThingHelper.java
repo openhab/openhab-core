@@ -76,6 +76,10 @@ public class ThingHelper {
         if (!Objects.equals(a.getLocation(), b.getLocation())) {
             return false;
         }
+        // semantic equipment tag
+        if (!Objects.equals(a.getSemanticEquipmentTag(), b.getSemanticEquipmentTag())) {
+            return false;
+        }
         // channels
         Set<Channel> channelsOfA = new HashSet<>(a.getChannels());
         Set<Channel> channelsOfB = new HashSet<>(b.getChannels());
@@ -202,10 +206,11 @@ public class ThingHelper {
             builder.withChannels(thing.getChannels());
         }
 
-        if (updatedContents.location != null) {
-            builder.withLocation(updatedContents.location);
+        // Update the semantic equipment tag
+        if (updatedContents.semanticEquipmentTag != null) {
+            builder.withSemanticEqipmentTag(updatedContents.semanticEquipmentTag);
         } else {
-            builder.withLocation(thing.getLocation());
+            builder.withSemanticEqipmentTag(thing.getSemanticEquipmentTag());
         }
 
         Thing mergedThing = builder.build();
