@@ -163,15 +163,15 @@ public class FileFormatResource implements RESTResource {
     @GET
     @RolesAllowed({ Role.ADMIN })
     @Path("/existing/items")
-    @Produces("text/vnd.openhab-dsl")
+    @Produces("text/vnd.openhab.dsl.item")
     @Operation(operationId = "createFileFormatForAllItems", summary = "Create file format for all existing items in registry.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
-                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = "text/vnd.openhab-dsl", schema = @Schema(example = "Group Group1 \"Label\"\nGroup:Switch:OR(ON,OFF) Group2 \"Label\"\nSwitch MyItem \"Label\" <icon> (Group1, Group2) [Tag1, Tag2] { channel=\"binding:type:id:channelid\", namespace=\"my value\" [param=\"my param value\"] }"))),
+                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = "text/vnd.openhab.dsl.item", schema = @Schema(example = "Group Group1 \"Label\"\nGroup:Switch:OR(ON,OFF) Group2 \"Label\"\nSwitch MyItem \"Label\" <icon> (Group1, Group2) [Tag1, Tag2] { channel=\"binding:type:id:channelid\", namespace=\"my value\" [param=\"my param value\"] }"))),
                     @ApiResponse(responseCode = "415", description = "Unsupported media type.") })
     public Response createFileFormatForAllItems(final @Context HttpHeaders httpHeaders,
             @DefaultValue("true") @QueryParam("hideDefaultParameters") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters) {
         String acceptHeader = httpHeaders.getHeaderString(HttpHeaders.ACCEPT);
-        String format = "text/vnd.openhab-dsl".equals(acceptHeader) ? "DSL" : null;
+        String format = "text/vnd.openhab.dsl.item".equals(acceptHeader) ? "DSL" : null;
         ItemSyntaxGenerator generator = format == null ? null : itemSyntaxGenerators.get(format);
         if (generator == null) {
             return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE)
@@ -186,17 +186,17 @@ public class FileFormatResource implements RESTResource {
     @GET
     @RolesAllowed({ Role.ADMIN })
     @Path("/existing/item/{itemname: [a-zA-Z_0-9]+}")
-    @Produces("text/vnd.openhab-dsl")
+    @Produces("text/vnd.openhab.dsl.item")
     @Operation(operationId = "createFileFormatForItem", summary = "Create file format for an existing item in registry.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
-                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = "text/vnd.openhab-dsl", schema = @Schema(example = "Number MyItem \"Label\" <icon> (Group1, Group2) [Tag1, Tag2] { channel=\"binding:type:id:channelid\", namespace=\"my value\" [param=\"my param value\"] }"))),
+                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = "text/vnd.openhab.dsl.item", schema = @Schema(example = "Number MyItem \"Label\" <icon> (Group1, Group2) [Tag1, Tag2] { channel=\"binding:type:id:channelid\", namespace=\"my value\" [param=\"my param value\"] }"))),
                     @ApiResponse(responseCode = "404", description = "Item not found in registry."),
                     @ApiResponse(responseCode = "415", description = "Unsupported media type.") })
     public Response createFileFormatForItem(final @Context HttpHeaders httpHeaders,
             @DefaultValue("true") @QueryParam("hideDefaultParameters") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters,
             @PathParam("itemname") @Parameter(description = "item name") String itemname) {
         String acceptHeader = httpHeaders.getHeaderString(HttpHeaders.ACCEPT);
-        String format = "text/vnd.openhab-dsl".equals(acceptHeader) ? "DSL" : null;
+        String format = "text/vnd.openhab.dsl.item".equals(acceptHeader) ? "DSL" : null;
         ItemSyntaxGenerator generator = format == null ? null : itemSyntaxGenerators.get(format);
         if (generator == null) {
             return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE)
@@ -216,15 +216,15 @@ public class FileFormatResource implements RESTResource {
     @GET
     @RolesAllowed({ Role.ADMIN })
     @Path("/existing/things")
-    @Produces("text/vnd.openhab-dsl")
+    @Produces("text/vnd.openhab.dsl.thing")
     @Operation(operationId = "createFileFormatForAllThings", summary = "Create file format for all existing things in registry.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
-                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = "text/vnd.openhab-dsl", schema = @Schema(example = "Bridge binding:typeBridge:idBridge \"Label\" @ \"Location\" [stringParam=\"my value\"] {\n    Thing type id \"Label\" @ \"Location\" [booleanParam=true, decimalParam=2.5]\n}"))),
+                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = "text/vnd.openhab.dsl.thing", schema = @Schema(example = "Bridge binding:typeBridge:idBridge \"Label\" @ \"Location\" [stringParam=\"my value\"] {\n    Thing type id \"Label\" @ \"Location\" [booleanParam=true, decimalParam=2.5]\n}"))),
                     @ApiResponse(responseCode = "415", description = "Unsupported media type.") })
     public Response createFileFormatForAllThings(final @Context HttpHeaders httpHeaders,
             @DefaultValue("true") @QueryParam("hideDefaultParameters") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters) {
         String acceptHeader = httpHeaders.getHeaderString(HttpHeaders.ACCEPT);
-        String format = "text/vnd.openhab-dsl".equals(acceptHeader) ? "DSL" : null;
+        String format = "text/vnd.openhab.dsl.thing".equals(acceptHeader) ? "DSL" : null;
         ThingSyntaxGenerator generator = format == null ? null : thingSyntaxGenerators.get(format);
         if (generator == null) {
             return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE)
@@ -238,17 +238,17 @@ public class FileFormatResource implements RESTResource {
     @GET
     @RolesAllowed({ Role.ADMIN })
     @Path("/existing/thing/{thingUID}")
-    @Produces("text/vnd.openhab-dsl")
+    @Produces("text/vnd.openhab.dsl.thing")
     @Operation(operationId = "createFileFormatForThing", summary = "Create file format for an existing thing in registry.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
-                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = "text/vnd.openhab-dsl", schema = @Schema(example = "Thing binding:type:idBridge:id \"Label\" @ \"Location\" (binding:typeBridge:idBridge) [stringParam=\"my value\", booleanParam=true, decimalParam=2.5]"))),
+                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = "text/vnd.openhab.dsl.thing", schema = @Schema(example = "Thing binding:type:idBridge:id \"Label\" @ \"Location\" (binding:typeBridge:idBridge) [stringParam=\"my value\", booleanParam=true, decimalParam=2.5]"))),
                     @ApiResponse(responseCode = "404", description = "Thing not found in registry."),
                     @ApiResponse(responseCode = "415", description = "Unsupported media type.") })
     public Response createFileFormatForThing(final @Context HttpHeaders httpHeaders,
             @DefaultValue("true") @QueryParam("hideDefaultParameters") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters,
             @PathParam("thingUID") @Parameter(description = "thingUID") String thingUID) {
         String acceptHeader = httpHeaders.getHeaderString(HttpHeaders.ACCEPT);
-        String format = "text/vnd.openhab-dsl".equals(acceptHeader) ? "DSL" : null;
+        String format = "text/vnd.openhab.dsl.thing".equals(acceptHeader) ? "DSL" : null;
         ThingSyntaxGenerator generator = format == null ? null : thingSyntaxGenerators.get(format);
         if (generator == null) {
             return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE)
@@ -267,17 +267,17 @@ public class FileFormatResource implements RESTResource {
 
     @GET
     @Path("/existing/thing-from-inbox/{thingUID}")
-    @Produces("text/vnd.openhab-dsl")
+    @Produces("text/vnd.openhab.dsl.thing")
     @Operation(operationId = "generateSyntaxForDiscoveryResult", summary = "Create file format for an existing thing in discovey registry.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
-                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = "text/vnd.openhab-dsl", schema = @Schema(example = "Thing binding:type:idBridge:id \"Label\" (binding:typeBridge:idBridge) [stringParam=\"my value\", booleanParam=true, decimalParam=2.5]"))),
+                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = "text/vnd.openhab.dsl.thing", schema = @Schema(example = "Thing binding:type:idBridge:id \"Label\" (binding:typeBridge:idBridge) [stringParam=\"my value\", booleanParam=true, decimalParam=2.5]"))),
                     @ApiResponse(responseCode = "404", description = "Discovery result not found in the inbox or thing type not found."),
                     @ApiResponse(responseCode = "415", description = "Unsupported media type.") })
     public Response generateSyntaxForDiscoveryResult(final @Context HttpHeaders httpHeaders,
             @DefaultValue("true") @QueryParam("hideDefaultParameters") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters,
             @PathParam("thingUID") @Parameter(description = "thingUID") String thingUID) {
         String acceptHeader = httpHeaders.getHeaderString(HttpHeaders.ACCEPT);
-        String format = "text/vnd.openhab-dsl".equals(acceptHeader) ? "DSL" : null;
+        String format = "text/vnd.openhab.dsl.thing".equals(acceptHeader) ? "DSL" : null;
         ThingSyntaxGenerator generator = format == null ? null : thingSyntaxGenerators.get(format);
         if (generator == null) {
             return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE)
