@@ -12,7 +12,7 @@
  */
 package org.openhab.core.items.events;
 
-import java.time.Instant;
+import java.time.ZonedDateTime;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -36,7 +36,7 @@ public class GroupStateUpdatedEvent extends ItemStateUpdatedEvent {
     private final String memberName;
 
     protected GroupStateUpdatedEvent(String topic, String payload, String itemName, String memberName,
-            State newItemState, @Nullable Instant lastStateUpdate, @Nullable String source) {
+            State newItemState, @Nullable ZonedDateTime lastStateUpdate, @Nullable String source) {
         super(topic, payload, itemName, newItemState, lastStateUpdate, source);
         this.memberName = memberName;
     }

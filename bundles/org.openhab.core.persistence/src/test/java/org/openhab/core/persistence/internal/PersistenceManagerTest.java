@@ -22,7 +22,6 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -367,12 +366,12 @@ public class PersistenceManagerTest {
 
         verify(queryablePersistenceServiceMock, times(3)).persistedItem(any(), any());
 
-        Instant lastStateUpdate = TEST_ITEM.getLastStateUpdate();
+        ZonedDateTime lastStateUpdate = TEST_ITEM.getLastStateUpdate();
         assertNotNull(lastStateUpdate);
-        assertTrue(lastStateUpdate.isAfter(Instant.now().minus(2, ChronoUnit.DAYS)));
-        Instant lastStateChange = TEST_ITEM.getLastStateChange();
+        assertTrue(lastStateUpdate.isAfter(ZonedDateTime.now().minusDays(2)));
+        ZonedDateTime lastStateChange = TEST_ITEM.getLastStateChange();
         assertNotNull(lastStateChange);
-        assertTrue(lastStateChange.isBefore(Instant.now().minus(2, ChronoUnit.DAYS)));
+        assertTrue(lastStateChange.isBefore(ZonedDateTime.now().minusDays(2)));
 
         verifyNoMoreInteractions(queryablePersistenceServiceMock);
         verifyNoMoreInteractions(persistenceServiceMock);
@@ -395,12 +394,12 @@ public class PersistenceManagerTest {
 
         verify(queryablePersistenceServiceMock, times(2)).persistedItem(any(), any());
 
-        Instant lastStateUpdate = TEST_ITEM.getLastStateUpdate();
+        ZonedDateTime lastStateUpdate = TEST_ITEM.getLastStateUpdate();
         assertNotNull(lastStateUpdate);
-        assertTrue(lastStateUpdate.isAfter(Instant.now().minus(1, ChronoUnit.DAYS)));
-        Instant lastStateChange = TEST_ITEM.getLastStateChange();
+        assertTrue(lastStateUpdate.isAfter(ZonedDateTime.now().minusDays(1)));
+        ZonedDateTime lastStateChange = TEST_ITEM.getLastStateChange();
         assertNotNull(lastStateChange);
-        assertTrue(lastStateChange.isAfter(Instant.now().minus(1, ChronoUnit.DAYS)));
+        assertTrue(lastStateChange.isAfter(ZonedDateTime.now().minusDays(1)));
 
         verifyNoMoreInteractions(queryablePersistenceServiceMock);
         verifyNoMoreInteractions(persistenceServiceMock);

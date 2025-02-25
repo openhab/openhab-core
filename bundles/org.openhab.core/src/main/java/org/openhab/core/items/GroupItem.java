@@ -12,7 +12,7 @@
  */
 package org.openhab.core.items;
 
-import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -366,8 +366,8 @@ public class GroupItem extends GenericItem implements StateChangeListener, Metad
         State oldState = this.state;
         State newState = oldState;
         ItemStateConverter itemStateConverter = this.itemStateConverter;
-        Instant lastStateUpdate = this.lastStateUpdate;
-        Instant lastStateChange = this.lastStateChange;
+        ZonedDateTime lastStateUpdate = this.lastStateUpdate;
+        ZonedDateTime lastStateChange = this.lastStateChange;
         if (function instanceof GroupFunction groupFunction && baseItem != null && itemStateConverter != null) {
             State calculatedState = groupFunction.calculate(getStateMembers(getMembers()));
             newState = itemStateConverter.convertToAcceptedState(calculatedState, baseItem);
@@ -381,7 +381,7 @@ public class GroupItem extends GenericItem implements StateChangeListener, Metad
 
     @Override
     public void setState(State state) {
-        Instant now = Instant.now();
+        ZonedDateTime now = ZonedDateTime.now();
         State oldState = this.state;
         Item baseItem = this.baseItem;
         if (baseItem instanceof GenericItem item) {
@@ -413,7 +413,7 @@ public class GroupItem extends GenericItem implements StateChangeListener, Metad
         }
     }
 
-    private void sendGroupStateUpdatedEvent(String memberName, State state, @Nullable Instant lastStateUpdate) {
+    private void sendGroupStateUpdatedEvent(String memberName, State state, @Nullable ZonedDateTime lastStateUpdate) {
         EventPublisher eventPublisher1 = this.eventPublisher;
         if (eventPublisher1 != null) {
             eventPublisher1.post(
@@ -422,7 +422,7 @@ public class GroupItem extends GenericItem implements StateChangeListener, Metad
     }
 
     private void sendGroupStateChangedEvent(String memberName, State newState, State oldState,
-            @Nullable Instant lastStateUpdate, @Nullable Instant lastStateChange) {
+            @Nullable ZonedDateTime lastStateUpdate, @Nullable ZonedDateTime lastStateChange) {
         EventPublisher eventPublisher1 = this.eventPublisher;
         if (eventPublisher1 != null) {
             eventPublisher1.post(ItemEventFactory.createGroupStateChangedEvent(getName(), memberName, newState,

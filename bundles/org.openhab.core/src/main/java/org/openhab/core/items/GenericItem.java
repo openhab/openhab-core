@@ -12,7 +12,7 @@
  */
 package org.openhab.core.items;
 
-import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -81,8 +81,8 @@ public abstract class GenericItem implements ActiveItem {
     protected State state = UnDefType.NULL;
     protected @Nullable State lastState;
 
-    protected @Nullable Instant lastStateUpdate;
-    protected @Nullable Instant lastStateChange;
+    protected @Nullable ZonedDateTime lastStateUpdate;
+    protected @Nullable ZonedDateTime lastStateChange;
 
     protected @Nullable String label;
 
@@ -115,12 +115,12 @@ public abstract class GenericItem implements ActiveItem {
     }
 
     @Override
-    public @Nullable Instant getLastStateUpdate() {
+    public @Nullable ZonedDateTime getLastStateUpdate() {
         return lastStateUpdate;
     }
 
     @Override
-    public @Nullable Instant getLastStateChange() {
+    public @Nullable ZonedDateTime getLastStateChange() {
         return lastStateChange;
     }
 
@@ -239,10 +239,10 @@ public abstract class GenericItem implements ActiveItem {
      * @param lastStateUpdate last state update of this item
      * @param lastStateChange last state change of this item
      */
-    public void setState(State state, @Nullable State lastState, @Nullable Instant lastStateUpdate,
-            @Nullable Instant lastStateChange) {
+    public void setState(State state, @Nullable State lastState, @Nullable ZonedDateTime lastStateUpdate,
+            @Nullable ZonedDateTime lastStateChange) {
         State oldState = this.state;
-        Instant oldStateUpdate = this.lastStateUpdate;
+        ZonedDateTime oldStateUpdate = this.lastStateUpdate;
         this.state = state;
         this.lastState = lastState != null ? lastState : this.lastState;
         this.lastStateUpdate = lastStateUpdate != null ? lastStateUpdate : this.lastStateUpdate;
@@ -263,7 +263,7 @@ public abstract class GenericItem implements ActiveItem {
      * @param state new state of this item
      */
     protected final void applyState(State state) {
-        Instant now = Instant.now();
+        ZonedDateTime now = ZonedDateTime.now();
         State oldState = this.state;
         boolean stateChanged = !oldState.equals(state);
         this.state = state;
@@ -323,15 +323,15 @@ public abstract class GenericItem implements ActiveItem {
         }
     }
 
-    private void sendStateUpdatedEvent(State newState, @Nullable Instant lastStateUpdate) {
+    private void sendStateUpdatedEvent(State newState, @Nullable ZonedDateTime lastStateUpdate) {
         EventPublisher eventPublisher1 = this.eventPublisher;
         if (eventPublisher1 != null) {
             eventPublisher1.post(ItemEventFactory.createStateUpdatedEvent(this.name, newState, lastStateUpdate, null));
         }
     }
 
-    private void sendStateChangedEvent(State newState, State oldState, @Nullable Instant lastStateUpdate,
-            @Nullable Instant lastStateChange) {
+    private void sendStateChangedEvent(State newState, State oldState, @Nullable ZonedDateTime lastStateUpdate,
+            @Nullable ZonedDateTime lastStateChange) {
         EventPublisher eventPublisher1 = this.eventPublisher;
         if (eventPublisher1 != null) {
             eventPublisher1.post(ItemEventFactory.createStateChangedEvent(this.name, newState, oldState,

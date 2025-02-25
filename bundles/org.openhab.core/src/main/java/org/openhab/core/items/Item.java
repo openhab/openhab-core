@@ -12,7 +12,7 @@
  */
 package org.openhab.core.items;
 
-import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -66,7 +66,7 @@ public interface Item extends Identifiable<String> {
      * @return the time the item was last updated, or null if the item has never been updated.
      */
     @Nullable
-    Instant getLastStateUpdate();
+    ZonedDateTime getLastStateUpdate();
 
     /**
      * Returns the time the item was last changed.
@@ -74,7 +74,7 @@ public interface Item extends Identifiable<String> {
      * @return the time the item was last changed, or null if the item has never been changed.
      */
     @Nullable
-    Instant getLastStateChange();
+    ZonedDateTime getLastStateChange();
 
     /**
      * returns the name of the item
