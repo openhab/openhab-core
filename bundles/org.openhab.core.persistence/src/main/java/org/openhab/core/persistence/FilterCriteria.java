@@ -35,8 +35,8 @@ import org.openhab.core.types.State;
  * a filter.
  *
  * @author Kai Kreuzer - Initial contribution
- * @author Lyubomir Papazov - Deprecate methods using java.util and add methods
- *         that use Java8's ZonedDateTime
+ * @author Lyubomir Papazov - Deprecate methods using java.util and add methods that use Java8's ZonedDateTime
+ * @author Mark Herwege - Copy constructor
  */
 @NonNullByDefault
 public class FilterCriteria {
@@ -90,6 +90,20 @@ public class FilterCriteria {
 
     /** Filter result to only contain entries that evaluate to true with the given operator and state */
     private @Nullable State state;
+
+    public FilterCriteria() {
+    }
+
+    public FilterCriteria(FilterCriteria filter) {
+        this.itemName = filter.itemName;
+        this.beginDate = filter.beginDate;
+        this.endDate = filter.endDate;
+        this.pageNumber = filter.pageNumber;
+        this.pageSize = filter.pageSize;
+        this.operator = filter.operator;
+        this.ordering = filter.ordering;
+        this.state = filter.state;
+    }
 
     public @Nullable String getItemName() {
         return itemName;

@@ -16,6 +16,7 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.closeTo;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.openhab.core.persistence.extensions.TestPersistenceService.*;
 
@@ -52,6 +53,7 @@ import org.openhab.core.library.unit.Units;
 import org.openhab.core.persistence.HistoricItem;
 import org.openhab.core.persistence.PersistenceService;
 import org.openhab.core.persistence.PersistenceServiceRegistry;
+import org.openhab.core.persistence.registry.PersistenceServiceConfigurationRegistry;
 import org.openhab.core.types.State;
 
 /**
@@ -64,6 +66,7 @@ import org.openhab.core.types.State;
  * @author Mark Herwege - lastChange and nextChange methods
  * @author Mark Herwege - handle persisted GroupItem with QuantityType
  * @author Mark Herwege - add median methods
+ * @author Mark Herwege - Implement aliases
  */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -80,6 +83,8 @@ public class PersistenceExtensionsTest {
     private @Mock @NonNullByDefault({}) ItemRegistry itemRegistryMock;
     private @Mock @NonNullByDefault({}) UnitProvider unitProviderMock;
     private @Mock @NonNullByDefault({}) TimeZoneProvider timeZoneProviderMock;
+
+    private @Mock @NonNullByDefault({}) PersistenceServiceConfigurationRegistry persistenceServiceConfigurationRegistryMock;
 
     private @NonNullByDefault({}) GenericItem numberItem, quantityItem, groupQuantityItem, switchItem;
 
@@ -109,6 +114,7 @@ public class PersistenceExtensionsTest {
         when(itemRegistryMock.get(TEST_SWITCH)).thenReturn(switchItem);
         when(itemRegistryMock.get(TEST_GROUP_QUANTITY_NUMBER)).thenReturn(groupQuantityItem);
 
+        when(persistenceServiceConfigurationRegistryMock.get(anyString())).thenReturn(null);
         when(timeZoneProviderMock.getTimeZone()).thenReturn(ZoneId.systemDefault());
 
         new PersistenceExtensions(new PersistenceServiceRegistry() {
@@ -135,7 +141,7 @@ public class PersistenceExtensionsTest {
             public @Nullable PersistenceService get(@Nullable String serviceId) {
                 return TestPersistenceService.SERVICE_ID.equals(serviceId) ? testPersistenceService : null;
             }
-        }, timeZoneProviderMock);
+        }, persistenceServiceConfigurationRegistryMock, timeZoneProviderMock);
     }
 
     @Test
@@ -3397,7 +3403,7 @@ public class PersistenceExtensionsTest {
             public @Nullable PersistenceService get(@Nullable String serviceId) {
                 return TestCachedValuesPersistenceService.ID.equals(serviceId) ? persistenceService : null;
             }
-        }, timeZoneProviderMock);
+        }, persistenceServiceConfigurationRegistryMock, timeZoneProviderMock);
 
         if (historicHours > 0) {
             ZonedDateTime beginHistory = now.minusHours(historicHours);

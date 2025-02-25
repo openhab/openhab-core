@@ -224,7 +224,7 @@ public class ConfigurableServiceResource implements RESTResource {
     public Response updateConfiguration(
             @HeaderParam("Accept-Language") @Parameter(description = "language") @Nullable String language,
             @PathParam("serviceId") @Parameter(description = "service ID") String serviceId,
-            @Nullable Map<String, Object> configuration) {
+            @Nullable Map<String, @Nullable Object> configuration) {
         Locale locale = localeService.getLocale(language);
         try {
             Configuration oldConfiguration = configurationService.get(serviceId);
@@ -238,8 +238,8 @@ public class ConfigurableServiceResource implements RESTResource {
         }
     }
 
-    private @Nullable Map<String, Object> normalizeConfiguration(@Nullable Map<String, Object> properties,
-            String serviceId, Locale locale) {
+    private @Nullable Map<String, @Nullable Object> normalizeConfiguration(
+            @Nullable Map<String, @Nullable Object> properties, String serviceId, Locale locale) {
         if (properties == null || properties.isEmpty()) {
             return properties;
         }

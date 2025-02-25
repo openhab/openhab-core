@@ -11,6 +11,7 @@ PersistenceModel:
 	'}'
 	('Filters' '{' filters+=Filter* '}')?
 	('Items' '{' configs+=PersistenceConfiguration* '}')?
+	('Aliases' '{' aliases+=AliasConfiguration* '}')?
 ;
 
 Strategy:
@@ -57,7 +58,7 @@ NotIncludeFilter:
 
 PersistenceConfiguration:
 	items+=(AllConfig | ItemConfig | GroupConfig | ItemExcludeConfig | GroupExcludeConfig)
-	   (',' items+=(AllConfig | ItemConfig | GroupConfig | ItemExcludeConfig | GroupExcludeConfig))* ('->' alias=STRING)? 
+	   (',' items+=(AllConfig | ItemConfig | GroupConfig | ItemExcludeConfig | GroupExcludeConfig))* 
 	((':' ('strategy' '=' strategies+=[Strategy|ID] (',' strategies+=[Strategy|ID])*)? 
 		 ('filter' '=' filters+=[Filter|ID] (',' filters+=[Filter|ID])*)?) 
 		| ';')
@@ -82,6 +83,10 @@ ItemExcludeConfig:
 
 GroupExcludeConfig:
     '!' groupExclude=ID '*'
+;
+
+AliasConfiguration:
+    item=ID '->' alias=(ID|STRING)
 ;
 
 DECIMAL returns ecore::EBigDecimal :
