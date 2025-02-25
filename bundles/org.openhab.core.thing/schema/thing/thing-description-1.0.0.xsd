@@ -215,7 +215,7 @@
 
 	<xs:complexType name="tags">
 		<xs:sequence>
-			<xs:element name="tag" type="thing-description:channel-tag" minOccurs="1" maxOccurs="2"/>
+			<xs:element name="tag" type="thing-description:semanticPropertyOrPointTag" minOccurs="1" maxOccurs="2"/>
 		</xs:sequence>
 	</xs:complexType>
 
@@ -270,7 +270,7 @@
 		</xs:simpleContent>
 	</xs:complexType>
 
-	<xs:simpleType name="channel-tag">
+	<xs:simpleType name="semanticPropertyOrPointTag">
 		<xs:restriction base="xs:string">
 			<!-- Allowed Property Tag Values -->
 			<xs:enumeration value="Temperature"/>
