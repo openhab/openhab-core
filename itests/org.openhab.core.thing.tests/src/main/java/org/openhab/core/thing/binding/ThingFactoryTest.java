@@ -72,6 +72,8 @@ import org.openhab.core.thing.type.ThingTypeBuilder;
 @NonNullByDefault
 public class ThingFactoryTest extends JavaOSGiTest {
 
+    private static final String SEMANTIC_EQUIPMENT_TAG = "MotionDetector";
+
     @Test
     public void createSimpleThing() {
         ThingType thingType = ThingTypeBuilder.instance("bindingId", "thingTypeId", "label").build();
@@ -353,9 +355,9 @@ public class ThingFactoryTest extends JavaOSGiTest {
     @Test
     public void createThingWithTag() {
         ThingType thingType = ThingTypeBuilder.instance(new ThingTypeUID("bindingId:thingType"), "label")
-                .withTag("MotionDetector").build();
+                .withSemanticEquipmentTag(SEMANTIC_EQUIPMENT_TAG).build();
         Thing thing = ThingFactory.createThing(thingType, new ThingUID(thingType.getUID(), "thingId"),
                 new Configuration());
-        assertThat(thing.getTag(), is("MotionDetector"));
+        assertThat(thing.getSemanticEquipmentTag(), is(SEMANTIC_EQUIPMENT_TAG));
     }
 }
