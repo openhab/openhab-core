@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Locale;
 
@@ -56,8 +56,8 @@ public class GenericItemTest {
 
     @Test
     public void testItemPostsEventsCorrectly() {
-        Instant lastStateUpdate;
-        Instant lastStateChange;
+        ZonedDateTime lastStateUpdate;
+        ZonedDateTime lastStateChange;
         EventPublisher publisher = mock(EventPublisher.class);
 
         TestItem item = new TestItem("member1");
@@ -167,7 +167,8 @@ public class GenericItemTest {
         TestItem item = new TestItem("member1");
         assertNull(item.getLastStateUpdate());
         item.setState(PercentType.HUNDRED);
-        assertThat(item.getLastStateUpdate().toEpochMilli() * 1.0, is(closeTo(Instant.now().toEpochMilli(), 5)));
+        assertThat(item.getLastStateUpdate().toInstant().toEpochMilli() * 1.0,
+                is(closeTo(ZonedDateTime.now().toInstant().toEpochMilli(), 5)));
     }
 
     @Test
@@ -175,17 +176,20 @@ public class GenericItemTest {
         TestItem item = new TestItem("member1");
         assertNull(item.getLastStateChange());
         item.setState(PercentType.HUNDRED);
-        Instant initialChangeTime = Instant.now();
-        assertThat(item.getLastStateChange().toEpochMilli() * 1.0, is(closeTo(initialChangeTime.toEpochMilli(), 5)));
+        ZonedDateTime initialChangeTime = ZonedDateTime.now();
+        assertThat(item.getLastStateChange().toInstant().toEpochMilli() * 1.0,
+                is(closeTo(initialChangeTime.toInstant().toEpochMilli(), 5)));
 
         Thread.sleep(50);
         item.setState(PercentType.HUNDRED);
-        assertThat(item.getLastStateChange().toEpochMilli() * 1.0, is(closeTo(initialChangeTime.toEpochMilli(), 5)));
+        assertThat(item.getLastStateChange().toInstant().toEpochMilli() * 1.0,
+                is(closeTo(initialChangeTime.toInstant().toEpochMilli(), 5)));
 
         Thread.sleep(50);
-        Instant secondChangeTime = Instant.now();
+        ZonedDateTime secondChangeTime = ZonedDateTime.now();
         item.setState(PercentType.ZERO);
-        assertThat(item.getLastStateChange().toEpochMilli() * 1.0, is(closeTo(secondChangeTime.toEpochMilli(), 5)));
+        assertThat(item.getLastStateChange().toInstant().toEpochMilli() * 1.0,
+                is(closeTo(secondChangeTime.toInstant().toEpochMilli(), 5)));
     }
 
     @Test

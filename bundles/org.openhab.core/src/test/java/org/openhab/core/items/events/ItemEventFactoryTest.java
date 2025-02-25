@@ -16,7 +16,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.time.Instant;
+import java.time.ZonedDateTime;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
@@ -226,8 +226,8 @@ public class ItemEventFactoryTest {
 
     @Test
     public void testCreateGroupStateChangedEventRawType() throws Exception {
-        Instant lastStateUpdate = Instant.now();
-        Instant lastStateChange = Instant.now().minusSeconds(1);
+        ZonedDateTime lastStateUpdate = ZonedDateTime.now();
+        ZonedDateTime lastStateChange = ZonedDateTime.now().minusMinutes(1);
         GroupItemStateChangedEvent giEventSource = ItemEventFactory.createGroupStateChangedEvent(GROUP_NAME, ITEM_NAME,
                 NEW_RAW_ITEM_STATE, RAW_ITEM_STATE, lastStateUpdate, lastStateChange);
 
@@ -245,7 +245,7 @@ public class ItemEventFactoryTest {
         assertNull(groupItemStateChangedEvent.getSource());
         assertEquals(NEW_RAW_ITEM_STATE, groupItemStateChangedEvent.getItemState());
         assertEquals(RAW_ITEM_STATE, groupItemStateChangedEvent.getOldItemState());
-        assertEquals(lastStateUpdate.toEpochMilli(), groupItemStateChangedEvent.getLastStateUpdate().toEpochMilli());
-        assertEquals(lastStateChange.toEpochMilli(), groupItemStateChangedEvent.getLastStateChange().toEpochMilli());
+        assertEquals(lastStateUpdate, groupItemStateChangedEvent.getLastStateUpdate());
+        assertEquals(lastStateChange, groupItemStateChangedEvent.getLastStateChange());
     }
 }

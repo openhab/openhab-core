@@ -127,7 +127,7 @@
 				},
 				{
 					"name": "lastStateUpdate",
-					"type": "java.time.Instant",
+					"type": "java.time.ZonedDateTime",
 					"description": "the time of the previous state update",
 					"label": "Last State Update"
 				},
@@ -240,13 +240,13 @@
 				},
 				{
 					"name": "lastStateUpdate",
-					"type": "java.time.Instant",
+					"type": "java.time.ZonedDateTime",
 					"label": "Last State Update",
 					"description": "the time of the previous state update"
 				},
 				{
 					"name": "lastStateChange",
-					"type": "java.time.Instant",
+					"type": "java.time.ZonedDateTime",
 					"label": "Last State Change",
 					"description": "the time of the previous state change"
 				},
@@ -422,7 +422,7 @@
 				},
 				{
 					"name": "lastStateUpdate",
-					"type": "java.time.Instant",
+					"type": "java.time.ZonedDateTime",
 					"description": "the time of the previous state update",
 					"label": "Last State Update"
 				},
@@ -544,13 +544,13 @@
 				},
 				{
 					"name": "lastStateUpdate",
-					"type": "java.time.Instant",
+					"type": "java.time.ZonedDateTime",
 					"label": "Last State Update",
 					"description": "the time of the previous state update"
 				},
 				{
 					"name": "lastStateChange",
-					"type": "java.time.Instant",
+					"type": "java.time.ZonedDateTime",
 					"label": "Last State Change",
 					"description": "the time of the previous state change"
 				},

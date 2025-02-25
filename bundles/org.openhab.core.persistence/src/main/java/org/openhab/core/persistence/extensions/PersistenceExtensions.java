@@ -22,7 +22,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.StreamSupport;
 
 import javax.measure.Unit;
@@ -488,8 +487,7 @@ public class PersistenceExtensions {
                         if (!forward && !historicItem.getState().equals(state)) {
                             // Last persisted state value different from current state value, so it must have updated
                             // since last persist. We do not know when from persistence, so get it from the item.
-                            return Optional.ofNullable(item.getLastStateUpdate())
-                                    .map(instant -> instant.atZone(timeZone)).orElse(null);
+                            return item.getLastStateUpdate();
                         }
                         return historicItem.getTimestamp();
                     } else {
@@ -497,12 +495,7 @@ public class PersistenceExtensions {
                         if (!historicItem.getState().equals(state)) {
                             // Persisted state value different from current state value, so it must have changed, but we
                             // do not know when looking backward in persistence. Get it from the item.
-                            if (forward) {
-                                return historicItem.getTimestamp();
-                            } else {
-                                return Optional.ofNullable(item.getLastStateChange())
-                                        .map(instant -> instant.atZone(timeZone)).orElse(null);
-                            }
+                            return forward ? historicItem.getTimestamp() : item.getLastStateChange();
                         }
                         while (historicItem.getState().equals(state) && itemIterator.hasNext()) {
                             HistoricItem nextHistoricItem = itemIterator.next();
