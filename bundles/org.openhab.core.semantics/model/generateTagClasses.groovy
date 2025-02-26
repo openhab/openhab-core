@@ -129,7 +129,7 @@ def header() {
         line.isBlank() ? " *" : " * " + line.replace("\${year}", year)
     }).collect(Collectors.toList())
 
-    headerLines.add(0, "/**")
+    headerLines.add(0, "/*")
     headerLines.add(" */")
     headerLines.add("")
 
