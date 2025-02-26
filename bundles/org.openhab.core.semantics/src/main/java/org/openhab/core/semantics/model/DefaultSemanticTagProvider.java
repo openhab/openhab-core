@@ -19,7 +19,6 @@ import java.util.List;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.common.registry.ProviderChangeListener;
 import org.openhab.core.semantics.SemanticTag;
-import org.openhab.core.semantics.SemanticTagImpl;
 import org.openhab.core.semantics.SemanticTagProvider;
 import org.osgi.service.component.annotations.Component;
 
@@ -36,272 +35,137 @@ public class DefaultSemanticTagProvider implements SemanticTagProvider {
 
     public DefaultSemanticTagProvider() {
         this.defaultTags = new ArrayList<>();
-        defaultTags.add(new SemanticTagImpl("Equipment", "", "", ""));
-        defaultTags.add(new SemanticTagImpl("Location", "", "", ""));
-        defaultTags.add(new SemanticTagImpl("Point", "", "", ""));
-        defaultTags.add(new SemanticTagImpl("Property", "", "", ""));
-        defaultTags.add(new SemanticTagImpl("Location_Indoor", //
-                "Indoor", "Anything that is inside a closed building", ""));
-        defaultTags.add(new SemanticTagImpl("Location_Indoor_Apartment", //
-                "Apartment", "", "Apartments"));
-        defaultTags.add(new SemanticTagImpl("Location_Indoor_Building", //
-                "Building", "", "Buildings"));
-        defaultTags.add(new SemanticTagImpl("Location_Indoor_Building_Garage", //
-                "Garage", "", "Garages"));
-        defaultTags.add(new SemanticTagImpl("Location_Indoor_Building_House", //
-                "House", "", "Houses"));
-        defaultTags.add(new SemanticTagImpl("Location_Indoor_Building_Shed", //
-                "Shed", "", "Sheds"));
-        defaultTags.add(new SemanticTagImpl("Location_Indoor_Building_SummerHouse", //
-                "Summer House", "", "Summer Houses, Second Home, Second Homes"));
-        defaultTags.add(new SemanticTagImpl("Location_Indoor_Floor", //
-                "Floor", "", "Floors"));
-        defaultTags.add(new SemanticTagImpl("Location_Indoor_Floor_GroundFloor", //
-                "Ground Floor", "", "Ground Floors, Downstairs"));
-        defaultTags.add(new SemanticTagImpl("Location_Indoor_Floor_FirstFloor", //
-                "First Floor", "", "First Floors, Upstairs"));
-        defaultTags.add(new SemanticTagImpl("Location_Indoor_Floor_SecondFloor", //
-                "Second Floor", "", "Second Floors"));
-        defaultTags.add(new SemanticTagImpl("Location_Indoor_Floor_ThirdFloor", //
-                "Third Floor", "", "Third Floors"));
-        defaultTags.add(new SemanticTagImpl("Location_Indoor_Floor_Attic", //
-                "Attic", "", "Attics"));
-        defaultTags.add(new SemanticTagImpl("Location_Indoor_Floor_Basement", //
-                "Basement", "", "Basements"));
-        defaultTags.add(new SemanticTagImpl("Location_Indoor_Corridor", //
-                "Corridor", "", "Corridors, Hallway, Hallways"));
-        defaultTags.add(new SemanticTagImpl("Location_Indoor_Room", //
-                "Room", "", "Rooms"));
-        defaultTags.add(new SemanticTagImpl("Location_Indoor_Room_Bathroom", //
-                "Bathroom", "", "Bathrooms, Bath, Baths, Powder Room, Powder Rooms"));
-        defaultTags.add(new SemanticTagImpl("Location_Indoor_Room_Bedroom", //
-                "Bedroom", "", "Bedrooms"));
-        defaultTags.add(new SemanticTagImpl("Location_Indoor_Room_BoilerRoom", //
-                "Boiler Room", "", "Boiler Rooms"));
-        defaultTags.add(new SemanticTagImpl("Location_Indoor_Room_Cellar", //
-                "Cellar", "", "Cellars"));
-        defaultTags.add(new SemanticTagImpl("Location_Indoor_Room_DiningRoom", //
-                "Dining Room", "", "Dining Rooms"));
-        defaultTags.add(new SemanticTagImpl("Location_Indoor_Room_Entry", //
-                "Entry", "", "Entries, Foyer, Foyers"));
-        defaultTags.add(new SemanticTagImpl("Location_Indoor_Room_FamilyRoom", //
-                "Family Room", "", "Family Rooms"));
-        defaultTags.add(new SemanticTagImpl("Location_Indoor_Room_GuestRoom", //
-                "Guest Room", "", "Guest Rooms"));
-        defaultTags.add(new SemanticTagImpl("Location_Indoor_Room_Kitchen", //
-                "Kitchen", "", "Kitchens"));
-        defaultTags.add(new SemanticTagImpl("Location_Indoor_Room_LaundryRoom", //
-                "Laundry Room", "", "Laundry Rooms"));
-        defaultTags.add(new SemanticTagImpl("Location_Indoor_Room_LivingRoom", //
-                "Living Room", "", "Living Rooms"));
-        defaultTags.add(new SemanticTagImpl("Location_Indoor_Room_Office", //
-                "Office", "", "Offices"));
-        defaultTags.add(new SemanticTagImpl("Location_Indoor_Room_Veranda", //
-                "Veranda", "", "Verandas"));
-        defaultTags.add(new SemanticTagImpl("Location_Outdoor", //
-                "Outdoor", "", ""));
-        defaultTags.add(new SemanticTagImpl("Location_Outdoor_Carport", //
-                "Carport", "", "Carports"));
-        defaultTags.add(new SemanticTagImpl("Location_Outdoor_Driveway", //
-                "Driveway", "", "Driveways"));
-        defaultTags.add(new SemanticTagImpl("Location_Outdoor_Garden", //
-                "Garden", "", "Gardens"));
-        defaultTags.add(new SemanticTagImpl("Location_Outdoor_Patio", //
-                "Patio", "", "Patios"));
-        defaultTags.add(new SemanticTagImpl("Location_Outdoor_Porch", //
-                "Porch", "", "Porches"));
-        defaultTags.add(new SemanticTagImpl("Location_Outdoor_Terrace", //
-                "Terrace", "", "Terraces, Deck, Decks"));
-        defaultTags.add(new SemanticTagImpl("Property_Temperature", //
-                "Temperature", "", "Temperatures"));
-        defaultTags.add(new SemanticTagImpl("Property_Light", //
-                "Light", "", "Lights, Lighting"));
-        defaultTags.add(new SemanticTagImpl("Property_ColorTemperature", //
-                "Color Temperature", "", ""));
-        defaultTags.add(new SemanticTagImpl("Property_Humidity", //
-                "Humidity", "", "Moisture"));
-        defaultTags.add(new SemanticTagImpl("Property_Presence", //
-                "Presence", "", ""));
-        defaultTags.add(new SemanticTagImpl("Property_Airflow", //
-                "Airflow", "", ""));
-        defaultTags.add(new SemanticTagImpl("Property_Pressure", //
-                "Pressure", "", ""));
-        defaultTags.add(new SemanticTagImpl("Property_Smoke", //
-                "Smoke", "", ""));
-        defaultTags.add(new SemanticTagImpl("Property_Noise", //
-                "Noise", "", ""));
-        defaultTags.add(new SemanticTagImpl("Property_Rain", //
-                "Rain", "", ""));
-        defaultTags.add(new SemanticTagImpl("Property_Wind", //
-                "Wind", "", ""));
-        defaultTags.add(new SemanticTagImpl("Property_Water", //
-                "Water", "", ""));
-        defaultTags.add(new SemanticTagImpl("Property_CO2", //
-                "CO2", "", "Carbon Dioxide"));
-        defaultTags.add(new SemanticTagImpl("Property_CO", //
-                "CO", "", "Carbon Monoxide"));
-        defaultTags.add(new SemanticTagImpl("Property_Energy", //
-                "Energy", "", ""));
-        defaultTags.add(new SemanticTagImpl("Property_Power", //
-                "Power", "", ""));
-        defaultTags.add(new SemanticTagImpl("Property_Voltage", //
-                "Voltage", "", ""));
-        defaultTags.add(new SemanticTagImpl("Property_Current", //
-                "Current", "", ""));
-        defaultTags.add(new SemanticTagImpl("Property_Frequency", //
-                "Frequency", "", ""));
-        defaultTags.add(new SemanticTagImpl("Property_Gas", //
-                "Gas", "", ""));
-        defaultTags.add(new SemanticTagImpl("Property_App", //
-                "App", "Software program", "Application"));
-        defaultTags.add(new SemanticTagImpl("Property_Channel", //
-                "Channel", "", ""));
-        defaultTags.add(new SemanticTagImpl("Property_Mode", //
-                "Mode", "", ""));
-        defaultTags.add(new SemanticTagImpl("Property_SoundVolume", //
-                "Sound Volume", "", ""));
-        defaultTags.add(new SemanticTagImpl("Property_Oil", //
-                "Oil", "", ""));
-        defaultTags.add(new SemanticTagImpl("Property_Duration", //
-                "Duration", "", ""));
-        defaultTags.add(new SemanticTagImpl("Property_Level", //
-                "Level", "", ""));
-        defaultTags.add(new SemanticTagImpl("Property_Opening", //
-                "Opening", "", ""));
-        defaultTags.add(new SemanticTagImpl("Property_Timestamp", //
-                "Timestamp", "", ""));
-        defaultTags.add(new SemanticTagImpl("Property_Ultraviolet", //
-                "Ultraviolet", "", "UV"));
-        defaultTags.add(new SemanticTagImpl("Property_Vibration", //
-                "Vibration", "", ""));
-        defaultTags.add(new SemanticTagImpl("Point_Alarm", //
-                "Alarm", "", ""));
-        defaultTags.add(new SemanticTagImpl("Point_Control", //
-                "Control", "", ""));
-        defaultTags.add(new SemanticTagImpl("Point_Control_Switch", //
-                "Switch", "", ""));
-        defaultTags.add(new SemanticTagImpl("Point_Measurement", //
-                "Measurement", "", ""));
-        defaultTags.add(new SemanticTagImpl("Point_Setpoint", //
-                "Setpoint", "", ""));
-        defaultTags.add(new SemanticTagImpl("Point_Status", //
-                "Status", "", ""));
-        defaultTags.add(new SemanticTagImpl("Point_Status_LowBattery", //
-                "LowBattery", "", ""));
-        defaultTags.add(new SemanticTagImpl("Point_Status_OpenLevel", //
-                "OpenLevel", "", ""));
-        defaultTags.add(new SemanticTagImpl("Point_Status_OpenState", //
-                "OpenState", "", ""));
-        defaultTags.add(new SemanticTagImpl("Point_Status_Tampered", //
-                "Tampered", "", ""));
-        defaultTags.add(new SemanticTagImpl("Point_Status_Tilt", //
-                "Tilt", "", ""));
-        defaultTags.add(new SemanticTagImpl("Equipment_AlarmSystem", //
-                "Alarm System", "", "Alarm Systems"));
-        defaultTags.add(new SemanticTagImpl("Equipment_Battery", //
-                "Battery", "", "Batteries"));
-        defaultTags.add(new SemanticTagImpl("Equipment_Blinds", //
-                "Blinds", "", "Rollershutter, Rollershutters, Roller shutter, Roller shutters, Shutter, Shutters"));
-        defaultTags.add(new SemanticTagImpl("Equipment_Boiler", //
-                "Boiler", "", "Boilers"));
-        defaultTags.add(new SemanticTagImpl("Equipment_Camera", //
-                "Camera", "", "Cameras"));
-        defaultTags.add(new SemanticTagImpl("Equipment_Car", //
-                "Car", "", "Cars"));
-        defaultTags.add(new SemanticTagImpl("Equipment_CleaningRobot", //
-                "Cleaning Robot", "", "Cleaning Robots, Vacuum robot, Vacuum robots"));
-        defaultTags.add(new SemanticTagImpl("Equipment_Door", //
-                "Door", "", "Doors"));
-        defaultTags.add(new SemanticTagImpl("Equipment_Door_BackDoor", //
-                "Back Door", "", "Back Doors"));
-        defaultTags.add(new SemanticTagImpl("Equipment_Door_CellarDoor", //
-                "Cellar Door", "", "Cellar Doors"));
-        defaultTags.add(new SemanticTagImpl("Equipment_Door_FrontDoor", //
-                "Front Door", "", "Front Doors, Frontdoor, Frontdoors"));
-        defaultTags.add(new SemanticTagImpl("Equipment_Door_GarageDoor", //
-                "Garage Door", "", "Garage Doors"));
-        defaultTags.add(new SemanticTagImpl("Equipment_Door_Gate", //
-                "Gate", "", "Gates"));
-        defaultTags.add(new SemanticTagImpl("Equipment_Door_InnerDoor", //
-                "Inner Door", "", "Inner Doors"));
-        defaultTags.add(new SemanticTagImpl("Equipment_Door_SideDoor", //
-                "Side Door", "", "Side Doors"));
-        defaultTags.add(new SemanticTagImpl("Equipment_Doorbell", //
-                "Doorbell", "", "Doorbells"));
-        defaultTags.add(new SemanticTagImpl("Equipment_Fan", //
-                "Fan", "", "Fans"));
-        defaultTags.add(new SemanticTagImpl("Equipment_Fan_CeilingFan", //
-                "Ceiling Fan", "", "Ceiling Fans"));
-        defaultTags.add(new SemanticTagImpl("Equipment_Fan_KitchenHood", //
-                "Kitchen Hood", "", "Kitchen Hoods"));
-        defaultTags.add(new SemanticTagImpl("Equipment_HVAC", //
-                "HVAC", "", "Heating, Ventilation, Air Conditioning, A/C, A/Cs, AC"));
-        defaultTags.add(new SemanticTagImpl("Equipment_Inverter", //
-                "Inverter", "", "Inverters"));
-        defaultTags.add(new SemanticTagImpl("Equipment_LawnMower", //
-                "Lawn Mower", "", "Lawn Mowers"));
-        defaultTags.add(new SemanticTagImpl("Equipment_Lightbulb", //
-                "Lightbulb", "", "Lightbulbs, Bulb, Bulbs, Lamp, Lamps, Lights, Lighting"));
-        defaultTags.add(new SemanticTagImpl("Equipment_Lightbulb_LightStripe", //
-                "Light Stripe", "", "Light Stripes"));
-        defaultTags.add(new SemanticTagImpl("Equipment_Lock", //
-                "Lock", "", "Locks"));
-        defaultTags.add(new SemanticTagImpl("Equipment_NetworkAppliance", //
-                "Network Appliance", "", "Network Appliances"));
-        defaultTags.add(new SemanticTagImpl("Equipment_PowerOutlet", //
-                "Power Outlet", "", "Power Outlets, Outlet, Outlets"));
-        defaultTags.add(new SemanticTagImpl("Equipment_Projector", //
-                "Projector", "", "Projectors, Beamer, Beamers"));
-        defaultTags.add(new SemanticTagImpl("Equipment_Pump", //
-                "Pump", "", "Pumps"));
-        defaultTags.add(new SemanticTagImpl("Equipment_RadiatorControl", //
-                "Radiator Control", "", "Radiator Controls, Radiator, Radiators"));
-        defaultTags.add(new SemanticTagImpl("Equipment_Receiver", //
-                "Receiver", "", "Receivers, Audio Receiver, Audio Receivers, AV Receiver, AV Receivers"));
-        defaultTags.add(new SemanticTagImpl("Equipment_RemoteControl", //
-                "Remote Control", "", "Remote Controls"));
-        defaultTags.add(new SemanticTagImpl("Equipment_Screen", //
-                "Screen", "", "Screens"));
-        defaultTags.add(new SemanticTagImpl("Equipment_Screen_Television", //
-                "Television", "", "Televisions, TV, TVs"));
-        defaultTags.add(new SemanticTagImpl("Equipment_Sensor", //
-                "Sensor", "", "Sensors"));
-        defaultTags.add(new SemanticTagImpl("Equipment_Sensor_MotionDetector", //
-                "Motion Detector", "", "Motion Detectors, Motion sensor, Motion sensors"));
-        defaultTags.add(new SemanticTagImpl("Equipment_Sensor_SmokeDetector", //
-                "Smoke Detector", "", "Smoke Detectors"));
-        defaultTags.add(new SemanticTagImpl("Equipment_Siren", //
-                "Siren", "", "Sirens"));
-        defaultTags.add(new SemanticTagImpl("Equipment_Smartphone", //
-                "Smartphone", "", "Smartphones, Phone, Phones"));
-        defaultTags.add(new SemanticTagImpl("Equipment_Speaker", //
-                "Speaker", "", "Speakers"));
-        defaultTags.add(new SemanticTagImpl("Equipment_Valve", //
-                "Valve", "", "Valves"));
-        defaultTags.add(new SemanticTagImpl("Equipment_VoiceAssistant", //
-                "Voice Assistant", "", "Voice Assistants"));
-        defaultTags.add(new SemanticTagImpl("Equipment_WallSwitch", //
-                "Wall Switch", "", "Wall Switches"));
-        defaultTags.add(new SemanticTagImpl("Equipment_WebService", //
-                "Web Service", "", "Web Services"));
-        defaultTags.add(new SemanticTagImpl("Equipment_WebService_WeatherService", //
-                "Weather Service", "", "Weather Services"));
-        defaultTags.add(new SemanticTagImpl("Equipment_WhiteGood", //
-                "White Good", "", "White Goods"));
-        defaultTags.add(new SemanticTagImpl("Equipment_WhiteGood_Dishwasher", //
-                "Dishwasher", "", "Dishwashers"));
-        defaultTags.add(new SemanticTagImpl("Equipment_WhiteGood_Dryer", //
-                "Dryer", "", "Dryers"));
-        defaultTags.add(new SemanticTagImpl("Equipment_WhiteGood_Freezer", //
-                "Freezer", "", "Freezers"));
-        defaultTags.add(new SemanticTagImpl("Equipment_WhiteGood_Oven", //
-                "Oven", "", "Ovens"));
-        defaultTags.add(new SemanticTagImpl("Equipment_WhiteGood_Refrigerator", //
-                "Refrigerator", "", "Refrigerators"));
-        defaultTags.add(new SemanticTagImpl("Equipment_WhiteGood_WashingMachine", //
-                "Washing Machine", "", "Washing Machines"));
-        defaultTags.add(new SemanticTagImpl("Equipment_Window", //
-                "Window", "", "Windows"));
+        defaultTags.add(DefaultSemanticTags.EQUIPMENT);
+        defaultTags.add(DefaultSemanticTags.LOCATION);
+        defaultTags.add(DefaultSemanticTags.POINT);
+        defaultTags.add(DefaultSemanticTags.PROPERTY);
+        defaultTags.add(DefaultSemanticTags.LOCATION_INDOOR);
+        defaultTags.add(DefaultSemanticTags.LOCATION_INDOOR_APARTMENT);
+        defaultTags.add(DefaultSemanticTags.LOCATION_INDOOR_BUILDING);
+        defaultTags.add(DefaultSemanticTags.LOCATION_INDOOR_BUILDING_GARAGE);
+        defaultTags.add(DefaultSemanticTags.LOCATION_INDOOR_BUILDING_HOUSE);
+        defaultTags.add(DefaultSemanticTags.LOCATION_INDOOR_BUILDING_SHED);
+        defaultTags.add(DefaultSemanticTags.LOCATION_INDOOR_BUILDING_SUMMERHOUSE);
+        defaultTags.add(DefaultSemanticTags.LOCATION_INDOOR_FLOOR);
+        defaultTags.add(DefaultSemanticTags.LOCATION_INDOOR_FLOOR_GROUNDFLOOR);
+        defaultTags.add(DefaultSemanticTags.LOCATION_INDOOR_FLOOR_FIRSTFLOOR);
+        defaultTags.add(DefaultSemanticTags.LOCATION_INDOOR_FLOOR_SECONDFLOOR);
+        defaultTags.add(DefaultSemanticTags.LOCATION_INDOOR_FLOOR_THIRDFLOOR);
+        defaultTags.add(DefaultSemanticTags.LOCATION_INDOOR_FLOOR_ATTIC);
+        defaultTags.add(DefaultSemanticTags.LOCATION_INDOOR_FLOOR_BASEMENT);
+        defaultTags.add(DefaultSemanticTags.LOCATION_INDOOR_CORRIDOR);
+        defaultTags.add(DefaultSemanticTags.LOCATION_INDOOR_ROOM);
+        defaultTags.add(DefaultSemanticTags.LOCATION_INDOOR_ROOM_BATHROOM);
+        defaultTags.add(DefaultSemanticTags.LOCATION_INDOOR_ROOM_BEDROOM);
+        defaultTags.add(DefaultSemanticTags.LOCATION_INDOOR_ROOM_BOILERROOM);
+        defaultTags.add(DefaultSemanticTags.LOCATION_INDOOR_ROOM_CELLAR);
+        defaultTags.add(DefaultSemanticTags.LOCATION_INDOOR_ROOM_DININGROOM);
+        defaultTags.add(DefaultSemanticTags.LOCATION_INDOOR_ROOM_ENTRY);
+        defaultTags.add(DefaultSemanticTags.LOCATION_INDOOR_ROOM_FAMILYROOM);
+        defaultTags.add(DefaultSemanticTags.LOCATION_INDOOR_ROOM_GUESTROOM);
+        defaultTags.add(DefaultSemanticTags.LOCATION_INDOOR_ROOM_KITCHEN);
+        defaultTags.add(DefaultSemanticTags.LOCATION_INDOOR_ROOM_LAUNDRYROOM);
+        defaultTags.add(DefaultSemanticTags.LOCATION_INDOOR_ROOM_LIVINGROOM);
+        defaultTags.add(DefaultSemanticTags.LOCATION_INDOOR_ROOM_OFFICE);
+        defaultTags.add(DefaultSemanticTags.LOCATION_INDOOR_ROOM_VERANDA);
+        defaultTags.add(DefaultSemanticTags.LOCATION_OUTDOOR);
+        defaultTags.add(DefaultSemanticTags.LOCATION_OUTDOOR_CARPORT);
+        defaultTags.add(DefaultSemanticTags.LOCATION_OUTDOOR_DRIVEWAY);
+        defaultTags.add(DefaultSemanticTags.LOCATION_OUTDOOR_GARDEN);
+        defaultTags.add(DefaultSemanticTags.LOCATION_OUTDOOR_PATIO);
+        defaultTags.add(DefaultSemanticTags.LOCATION_OUTDOOR_PORCH);
+        defaultTags.add(DefaultSemanticTags.LOCATION_OUTDOOR_TERRACE);
+        defaultTags.add(DefaultSemanticTags.PROPERTY_TEMPERATURE);
+        defaultTags.add(DefaultSemanticTags.PROPERTY_LIGHT);
+        defaultTags.add(DefaultSemanticTags.PROPERTY_COLORTEMPERATURE);
+        defaultTags.add(DefaultSemanticTags.PROPERTY_HUMIDITY);
+        defaultTags.add(DefaultSemanticTags.PROPERTY_PRESENCE);
+        defaultTags.add(DefaultSemanticTags.PROPERTY_PRESSURE);
+        defaultTags.add(DefaultSemanticTags.PROPERTY_SMOKE);
+        defaultTags.add(DefaultSemanticTags.PROPERTY_NOISE);
+        defaultTags.add(DefaultSemanticTags.PROPERTY_RAIN);
+        defaultTags.add(DefaultSemanticTags.PROPERTY_WIND);
+        defaultTags.add(DefaultSemanticTags.PROPERTY_WATER);
+        defaultTags.add(DefaultSemanticTags.PROPERTY_CO2);
+        defaultTags.add(DefaultSemanticTags.PROPERTY_CO);
+        defaultTags.add(DefaultSemanticTags.PROPERTY_ENERGY);
+        defaultTags.add(DefaultSemanticTags.PROPERTY_POWER);
+        defaultTags.add(DefaultSemanticTags.PROPERTY_VOLTAGE);
+        defaultTags.add(DefaultSemanticTags.PROPERTY_CURRENT);
+        defaultTags.add(DefaultSemanticTags.PROPERTY_FREQUENCY);
+        defaultTags.add(DefaultSemanticTags.PROPERTY_GAS);
+        defaultTags.add(DefaultSemanticTags.PROPERTY_SOUNDVOLUME);
+        defaultTags.add(DefaultSemanticTags.PROPERTY_OIL);
+        defaultTags.add(DefaultSemanticTags.PROPERTY_DURATION);
+        defaultTags.add(DefaultSemanticTags.PROPERTY_LEVEL);
+        defaultTags.add(DefaultSemanticTags.PROPERTY_OPENING);
+        defaultTags.add(DefaultSemanticTags.PROPERTY_TIMESTAMP);
+        defaultTags.add(DefaultSemanticTags.PROPERTY_ULTRAVIOLET);
+        defaultTags.add(DefaultSemanticTags.PROPERTY_VIBRATION);
+        defaultTags.add(DefaultSemanticTags.POINT_ALARM);
+        defaultTags.add(DefaultSemanticTags.POINT_CONTROL);
+        defaultTags.add(DefaultSemanticTags.POINT_CONTROL_SWITCH);
+        defaultTags.add(DefaultSemanticTags.POINT_MEASUREMENT);
+        defaultTags.add(DefaultSemanticTags.POINT_SETPOINT);
+        defaultTags.add(DefaultSemanticTags.POINT_STATUS);
+        defaultTags.add(DefaultSemanticTags.POINT_STATUS_LOWBATTERY);
+        defaultTags.add(DefaultSemanticTags.POINT_STATUS_OPENLEVEL);
+        defaultTags.add(DefaultSemanticTags.POINT_STATUS_OPENSTATE);
+        defaultTags.add(DefaultSemanticTags.POINT_STATUS_TAMPERED);
+        defaultTags.add(DefaultSemanticTags.POINT_STATUS_TILT);
+        defaultTags.add(DefaultSemanticTags.EQUIPMENT_ALARMSYSTEM);
+        defaultTags.add(DefaultSemanticTags.EQUIPMENT_BATTERY);
+        defaultTags.add(DefaultSemanticTags.EQUIPMENT_BLINDS);
+        defaultTags.add(DefaultSemanticTags.EQUIPMENT_BOILER);
+        defaultTags.add(DefaultSemanticTags.EQUIPMENT_CAMERA);
+        defaultTags.add(DefaultSemanticTags.EQUIPMENT_CAR);
+        defaultTags.add(DefaultSemanticTags.EQUIPMENT_CLEANINGROBOT);
+        defaultTags.add(DefaultSemanticTags.EQUIPMENT_DOOR);
+        defaultTags.add(DefaultSemanticTags.EQUIPMENT_DOOR_BACKDOOR);
+        defaultTags.add(DefaultSemanticTags.EQUIPMENT_DOOR_CELLARDOOR);
+        defaultTags.add(DefaultSemanticTags.EQUIPMENT_DOOR_FRONTDOOR);
+        defaultTags.add(DefaultSemanticTags.EQUIPMENT_DOOR_GARAGEDOOR);
+        defaultTags.add(DefaultSemanticTags.EQUIPMENT_DOOR_GATE);
+        defaultTags.add(DefaultSemanticTags.EQUIPMENT_DOOR_INNERDOOR);
+        defaultTags.add(DefaultSemanticTags.EQUIPMENT_DOOR_SIDEDOOR);
+        defaultTags.add(DefaultSemanticTags.EQUIPMENT_DOORBELL);
+        defaultTags.add(DefaultSemanticTags.EQUIPMENT_FAN);
+        defaultTags.add(DefaultSemanticTags.EQUIPMENT_FAN_CEILINGFAN);
+        defaultTags.add(DefaultSemanticTags.EQUIPMENT_FAN_KITCHENHOOD);
+        defaultTags.add(DefaultSemanticTags.EQUIPMENT_HVAC);
+        defaultTags.add(DefaultSemanticTags.EQUIPMENT_INVERTER);
+        defaultTags.add(DefaultSemanticTags.EQUIPMENT_LAWNMOWER);
+        defaultTags.add(DefaultSemanticTags.EQUIPMENT_LIGHTBULB);
+        defaultTags.add(DefaultSemanticTags.EQUIPMENT_LIGHTBULB_LIGHTSTRIPE);
+        defaultTags.add(DefaultSemanticTags.EQUIPMENT_LOCK);
+        defaultTags.add(DefaultSemanticTags.EQUIPMENT_NETWORKAPPLIANCE);
+        defaultTags.add(DefaultSemanticTags.EQUIPMENT_POWEROUTLET);
+        defaultTags.add(DefaultSemanticTags.EQUIPMENT_PROJECTOR);
+        defaultTags.add(DefaultSemanticTags.EQUIPMENT_PUMP);
+        defaultTags.add(DefaultSemanticTags.EQUIPMENT_RADIATORCONTROL);
+        defaultTags.add(DefaultSemanticTags.EQUIPMENT_RECEIVER);
+        defaultTags.add(DefaultSemanticTags.EQUIPMENT_REMOTECONTROL);
+        defaultTags.add(DefaultSemanticTags.EQUIPMENT_SCREEN);
+        defaultTags.add(DefaultSemanticTags.EQUIPMENT_SCREEN_TELEVISION);
+        defaultTags.add(DefaultSemanticTags.EQUIPMENT_SENSOR);
+        defaultTags.add(DefaultSemanticTags.EQUIPMENT_SENSOR_MOTIONDETECTOR);
+        defaultTags.add(DefaultSemanticTags.EQUIPMENT_SENSOR_SMOKEDETECTOR);
+        defaultTags.add(DefaultSemanticTags.EQUIPMENT_SIREN);
+        defaultTags.add(DefaultSemanticTags.EQUIPMENT_SMARTPHONE);
+        defaultTags.add(DefaultSemanticTags.EQUIPMENT_SPEAKER);
+        defaultTags.add(DefaultSemanticTags.EQUIPMENT_VALVE);
+        defaultTags.add(DefaultSemanticTags.EQUIPMENT_VOICEASSISTANT);
+        defaultTags.add(DefaultSemanticTags.EQUIPMENT_WALLSWITCH);
+        defaultTags.add(DefaultSemanticTags.EQUIPMENT_WEBSERVICE);
+        defaultTags.add(DefaultSemanticTags.EQUIPMENT_WEBSERVICE_WEATHERSERVICE);
+        defaultTags.add(DefaultSemanticTags.EQUIPMENT_WHITEGOOD);
+        defaultTags.add(DefaultSemanticTags.EQUIPMENT_WHITEGOOD_DISHWASHER);
+        defaultTags.add(DefaultSemanticTags.EQUIPMENT_WHITEGOOD_DRYER);
+        defaultTags.add(DefaultSemanticTags.EQUIPMENT_WHITEGOOD_FREEZER);
+        defaultTags.add(DefaultSemanticTags.EQUIPMENT_WHITEGOOD_OVEN);
+        defaultTags.add(DefaultSemanticTags.EQUIPMENT_WHITEGOOD_REFRIGERATOR);
+        defaultTags.add(DefaultSemanticTags.EQUIPMENT_WHITEGOOD_WASHINGMACHINE);
+        defaultTags.add(DefaultSemanticTags.EQUIPMENT_WINDOW);
     }
 
     @Override
