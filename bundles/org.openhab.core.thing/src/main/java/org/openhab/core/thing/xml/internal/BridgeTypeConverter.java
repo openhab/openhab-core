@@ -49,8 +49,8 @@ public class BridgeTypeConverter extends ThingTypeConverter {
             Map<String, String> attributes, NodeIterator nodeIterator) throws ConversionException {
         return new BridgeTypeXmlResult(new ThingTypeUID(getUID(attributes, context)),
                 readSupportedBridgeTypeUIDs(nodeIterator, context), readLabel(nodeIterator),
-                readDescription(nodeIterator), readCategory(nodeIterator), getSemanticEquipmentTag(nodeIterator),
-                getListed(attributes), getExtensibleChannelTypeIds(attributes),
+                readDescription(nodeIterator), readCategory(nodeIterator), getListed(attributes),
+                getExtensibleChannelTypeIds(attributes), getSemanticEquipmentTag(nodeIterator),
                 getChannelTypeReferenceObjects(nodeIterator), getProperties(nodeIterator),
                 getRepresentationProperty(nodeIterator), getConfigDescriptionObjects(nodeIterator));
     }

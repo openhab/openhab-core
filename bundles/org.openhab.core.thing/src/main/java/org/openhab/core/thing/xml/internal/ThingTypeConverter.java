@@ -101,8 +101,8 @@ public class ThingTypeConverter extends AbstractDescriptionTypeConverter<ThingTy
             Map<String, String> attributes, NodeIterator nodeIterator) throws ConversionException {
         return new ThingTypeXmlResult(new ThingTypeUID(super.getUID(attributes, context)),
                 readSupportedBridgeTypeUIDs(nodeIterator, context), super.readLabel(nodeIterator),
-                super.readDescription(nodeIterator), readCategory(nodeIterator), getSemanticEquipmentTag(nodeIterator),
-                getListed(attributes), getExtensibleChannelTypeIds(attributes),
+                super.readDescription(nodeIterator), readCategory(nodeIterator), getListed(attributes),
+                getExtensibleChannelTypeIds(attributes), getSemanticEquipmentTag(nodeIterator),
                 getChannelTypeReferenceObjects(nodeIterator), getProperties(nodeIterator),
                 getRepresentationProperty(nodeIterator), super.getConfigDescriptionObjects(nodeIterator));
     }
