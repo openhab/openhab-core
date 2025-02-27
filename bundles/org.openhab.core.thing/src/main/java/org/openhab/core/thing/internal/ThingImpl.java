@@ -296,7 +296,7 @@ public class ThingImpl implements Thing {
     }
 
     @Override
-    public void setSemanticEquipmentTag(@Nullable String tag) {
-        this.semanticEquipmentTag = tag;
+    public void setSemanticEquipmentTag(@Nullable String semanticEquipmentTag) {
+        this.semanticEquipmentTag = semanticEquipmentTag;
     }
 }

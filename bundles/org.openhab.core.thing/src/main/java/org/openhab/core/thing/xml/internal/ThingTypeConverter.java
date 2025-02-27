@@ -138,6 +138,6 @@ public class ThingTypeConverter extends AbstractDescriptionTypeConverter<ThingTy
     }
 
     protected @Nullable String getSemanticEquipmentTag(NodeIterator nodeIterator) {
-        return (String) nodeIterator.nextValue("equipment", false);
+        return (String) nodeIterator.nextValue("semantic-equipment-tag", false);
     }
 }

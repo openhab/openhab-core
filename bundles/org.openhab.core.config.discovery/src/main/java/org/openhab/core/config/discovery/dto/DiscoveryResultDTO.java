@@ -23,7 +23,6 @@ import org.openhab.core.config.discovery.DiscoveryResultFlag;
  *
  * @author Dennis Nobel - Initial contribution
  * @author Thomas Höfer - Added representation
- * @author Andrew Fiddian-Green - Added semanticEquipmentTag
  */
 @NonNullByDefault
 public class DiscoveryResultDTO {
@@ -35,14 +34,12 @@ public class DiscoveryResultDTO {
     public @Nullable String representationProperty;
     public @NonNullByDefault({}) String thingUID;
     public @Nullable String thingTypeUID;
-    public @Nullable String semanticEquipmentTag;
 
     public DiscoveryResultDTO() {
     }
 
     public DiscoveryResultDTO(String thingUID, @Nullable String bridgeUID, @Nullable String thingTypeUID, String label,
-            DiscoveryResultFlag flag, Map<String, Object> properties, @Nullable String representationProperty,
-            @Nullable String semanticEquipmentTag) {
+            DiscoveryResultFlag flag, Map<String, Object> properties, @Nullable String representationProperty) {
         this.thingUID = thingUID;
         this.thingTypeUID = thingTypeUID;
         this.bridgeUID = bridgeUID;
@@ -50,6 +47,5 @@ public class DiscoveryResultDTO {
         this.flag = flag;
         this.properties = properties;
         this.representationProperty = representationProperty;
-        this.semanticEquipmentTag = semanticEquipmentTag;
     }
 }

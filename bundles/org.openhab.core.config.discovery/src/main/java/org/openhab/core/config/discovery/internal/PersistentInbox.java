@@ -90,7 +90,6 @@ import org.slf4j.LoggerFactory;
  * @author Andre Fuechsel - Added removeOlderResults
  * @author Christoph Knauf - Added removeThingsForBridge and getPropsAndConfigParams
  * @author Laurent Garnier - Added parameter newThingId to method approve
- * @author Andrew Fiddian-Green - Added semanticEquipmentTag
  */
 @Component(immediate = true, service = Inbox.class)
 @NonNullByDefault
@@ -221,7 +220,6 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
         } else {
             newThing.setLabel(result.getLabel());
         }
-        newThing.setSemanticEquipmentTag(result.getSemanticEquipmentTag());
         addThingSafely(newThing);
         return newThing;
     }

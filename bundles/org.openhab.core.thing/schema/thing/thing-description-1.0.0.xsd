@@ -26,7 +26,7 @@
 			<xs:element name="label" type="xs:string"/>
 			<xs:element name="description" type="xs:string" minOccurs="0"/>
 			<xs:element name="category" type="xs:string" minOccurs="0"/>
-			<xs:element name="equipment" type="thing-description:semanticEquipmentTag" minOccurs="0"/>
+			<xs:element name="semantic-equipment-tag" type="thing-description:semanticEquipmentTag" minOccurs="0"/>
 			<xs:choice minOccurs="0">
 				<xs:element name="channels" type="thing-description:channels"/>
 				<xs:element name="channel-groups" type="thing-description:channelGroups"/>

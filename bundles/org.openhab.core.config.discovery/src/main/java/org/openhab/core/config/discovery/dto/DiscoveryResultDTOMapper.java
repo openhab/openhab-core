@@ -23,7 +23,6 @@ import org.openhab.core.thing.ThingUID;
  * objects.
  *
  * @author Stefan Bussweiler - Initial contribution
- * @author Andrew Fiddian-Green - Added semanticEquipmentTag
  */
 @NonNullByDefault
 public class DiscoveryResultDTOMapper {
@@ -40,8 +39,7 @@ public class DiscoveryResultDTOMapper {
 
         return new DiscoveryResultDTO(thingUID.toString(), bridgeUID != null ? bridgeUID.toString() : null,
                 discoveryResult.getThingTypeUID().toString(), discoveryResult.getLabel(), discoveryResult.getFlag(),
-                discoveryResult.getProperties(), discoveryResult.getRepresentationProperty(),
-                discoveryResult.getSemanticEquipmentTag());
+                discoveryResult.getProperties(), discoveryResult.getRepresentationProperty());
     }
 
     /**
@@ -62,7 +60,6 @@ public class DiscoveryResultDTOMapper {
         return DiscoveryResultBuilder.create(thingUID).withThingType(thingTypeUID).withBridge(bridgeUID)
                 .withLabel(discoveryResultDTO.label)
                 .withRepresentationProperty(discoveryResultDTO.representationProperty)
-                .withProperties(discoveryResultDTO.properties)
-                .withSemanticEquipmentTag(discoveryResultDTO.semanticEquipmentTag).build();
+                .withProperties(discoveryResultDTO.properties).build();
     }
 }

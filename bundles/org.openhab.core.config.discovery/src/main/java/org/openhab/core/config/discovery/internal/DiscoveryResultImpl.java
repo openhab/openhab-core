@@ -29,7 +29,6 @@ import org.openhab.core.thing.ThingUID;
 /**
  *
  * @author Kai Kreuzer - Initial contribution
- * @author Andrew Fiddian-Green - Added semanticEquipmentTag
  */
 @NonNullByDefault
 public class DiscoveryResultImpl implements DiscoveryResult {
@@ -44,7 +43,6 @@ public class DiscoveryResultImpl implements DiscoveryResult {
     private @NonNullByDefault({}) String label;
     private Instant timestamp = Instant.MIN;
     private long timeToLive = TTL_UNLIMITED;
-    private @NonNullByDefault({}) String semanticEquipmentTag;
 
     /**
      * Package protected default constructor to allow reflective instantiation.
@@ -71,7 +69,7 @@ public class DiscoveryResultImpl implements DiscoveryResult {
     @Deprecated
     public DiscoveryResultImpl(@Nullable ThingTypeUID thingTypeUID, ThingUID thingUID, @Nullable ThingUID bridgeUID,
             @Nullable Map<String, Object> properties, @Nullable String representationProperty, @Nullable String label,
-            long timeToLive, @Nullable String semanticEquipmentTag) throws IllegalArgumentException {
+            long timeToLive) throws IllegalArgumentException {
         if (timeToLive < 1 && timeToLive != TTL_UNLIMITED) {
             throw new IllegalArgumentException("The ttl must not be 0 or negative!");
         }
@@ -85,8 +83,6 @@ public class DiscoveryResultImpl implements DiscoveryResult {
 
         this.timestamp = Instant.now();
         this.timeToLive = timeToLive;
-
-        this.semanticEquipmentTag = semanticEquipmentTag;
 
         this.flag = DiscoveryResultFlag.NEW;
     }
@@ -215,7 +211,7 @@ public class DiscoveryResultImpl implements DiscoveryResult {
     public String toString() {
         return "DiscoveryResult [thingUID=" + thingUID + ", properties=" + properties + ", representationProperty="
                 + representationProperty + ", flag=" + flag + ", label=" + label + ", bridgeUID=" + bridgeUID + ", ttl="
-                + timeToLive + ", timestamp=" + timestamp + ", semanticEquipmentTag" + semanticEquipmentTag + "]";
+                + timeToLive + ", timestamp=" + timestamp + "]";
     }
 
     @Override
@@ -226,10 +222,5 @@ public class DiscoveryResultImpl implements DiscoveryResult {
     @Override
     public long getTimeToLive() {
         return timeToLive;
-    }
-
-    @Override
-    public String getSemanticEquipmentTag() {
-        return semanticEquipmentTag;
     }
 }

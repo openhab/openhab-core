@@ -30,19 +30,17 @@ import org.openhab.core.thing.ThingUID;
  * @author Michael Grammling - Initial contribution
  * @author Thomas Höfer - Added representation
  * @author Wouter Born - Migrate tests from Groovy to Java
- * @author Andrew Fiddian-Green - Added semanticEquipmentTag
  */
 @NonNullByDefault
 public class DiscoveryResultImplTest {
 
     private static final int DEFAULT_TTL = 60;
-    private static final String SEMANTIC_EQUIPMENT_TAG = "AlarmSystem";
 
     @SuppressWarnings("deprecation")
     @Test
     public void testInvalidConstructorForThingType() {
         assertThrows(IllegalArgumentException.class,
-                () -> new DiscoveryResultImpl(null, new ThingUID("aa"), null, null, null, null, DEFAULT_TTL, null));
+                () -> new DiscoveryResultImpl(null, new ThingUID("aa"), null, null, null, null, DEFAULT_TTL));
     }
 
     @SuppressWarnings("deprecation")
@@ -50,7 +48,7 @@ public class DiscoveryResultImplTest {
     public void testInvalidConstructorForTTL() {
         ThingTypeUID thingTypeUID = new ThingTypeUID("bindingId", "thingType");
         assertThrows(IllegalArgumentException.class, () -> new DiscoveryResultImpl(thingTypeUID,
-                new ThingUID(thingTypeUID, "thingId"), null, null, null, null, -2, null));
+                new ThingUID(thingTypeUID, "thingId"), null, null, null, null, -2));
     }
 
     @SuppressWarnings("deprecation")
@@ -59,13 +57,12 @@ public class DiscoveryResultImplTest {
         ThingTypeUID thingTypeUID = new ThingTypeUID("bindingId", "thingType");
 
         DiscoveryResultImpl discoveryResult = new DiscoveryResultImpl(thingTypeUID,
-                new ThingUID(thingTypeUID, "thingId"), null, null, null, null, DEFAULT_TTL, SEMANTIC_EQUIPMENT_TAG);
+                new ThingUID(thingTypeUID, "thingId"), null, null, null, null, DEFAULT_TTL);
 
         assertEquals("bindingId:thingType", discoveryResult.getThingTypeUID().toString());
         assertEquals("bindingId:thingType:thingId", discoveryResult.getThingUID().toString());
         assertEquals("bindingId", discoveryResult.getBindingId());
         assertEquals("", discoveryResult.getLabel());
-        assertEquals(SEMANTIC_EQUIPMENT_TAG, discoveryResult.getSemanticEquipmentTag());
         assertEquals(DiscoveryResultFlag.NEW, discoveryResult.getFlag());
 
         assertNotNull(discoveryResult.getProperties(), "The properties must never be null!");
@@ -81,7 +78,7 @@ public class DiscoveryResultImplTest {
 
         DiscoveryResultImpl discoveryResult = new DiscoveryResultImpl(thingTypeUID,
                 new ThingUID(thingTypeUID, "thingId"), null, discoveryResultSourceMap, "ipAddress", "TARGET",
-                DEFAULT_TTL, null);
+                DEFAULT_TTL);
         discoveryResult.setFlag(DiscoveryResultFlag.IGNORED);
 
         discoveryResult.synchronize(null);
@@ -101,11 +98,11 @@ public class DiscoveryResultImplTest {
 
         DiscoveryResultImpl discoveryResult = new DiscoveryResultImpl(thingTypeUID,
                 new ThingUID(thingTypeUID, "thingId"), null, discoveryResultSourceMap, "ipAddress", "TARGET",
-                DEFAULT_TTL, null);
+                DEFAULT_TTL);
         discoveryResult.setFlag(DiscoveryResultFlag.IGNORED);
 
         DiscoveryResultImpl discoveryResultSource = new DiscoveryResultImpl(thingTypeUID,
-                new ThingUID(thingTypeUID, "anotherThingId"), null, null, null, null, DEFAULT_TTL, null);
+                new ThingUID(thingTypeUID, "anotherThingId"), null, null, null, null, DEFAULT_TTL);
 
         discoveryResult.synchronize(discoveryResultSource);
 
@@ -124,7 +121,7 @@ public class DiscoveryResultImplTest {
 
         DiscoveryResultImpl discoveryResult = new DiscoveryResultImpl(thingTypeUID,
                 new ThingUID(thingTypeUID, "thingId"), null, discoveryResultSourceMap, "ipAddress", "TARGET",
-                DEFAULT_TTL, null);
+                DEFAULT_TTL);
         discoveryResult.setFlag(DiscoveryResultFlag.IGNORED);
 
         Map<String, Object> discoveryResultMap = Map.of( //
@@ -132,8 +129,7 @@ public class DiscoveryResultImplTest {
                 "macAddress", "AA:BB:CC:DD:EE:FF");
 
         DiscoveryResultImpl discoveryResultSource = new DiscoveryResultImpl(thingTypeUID,
-                new ThingUID(thingTypeUID, "thingId"), null, discoveryResultMap, "macAddress", "SOURCE", DEFAULT_TTL,
-                null);
+                new ThingUID(thingTypeUID, "thingId"), null, discoveryResultMap, "macAddress", "SOURCE", DEFAULT_TTL);
         discoveryResultSource.setFlag(DiscoveryResultFlag.NEW);
 
         discoveryResult.synchronize(discoveryResultSource);
@@ -150,7 +146,7 @@ public class DiscoveryResultImplTest {
     public void testThingTypeCompatibility() {
         ThingTypeUID thingTypeUID = new ThingTypeUID("bindingId", "thingType");
         DiscoveryResultImpl discoveryResult = new DiscoveryResultImpl(null, new ThingUID(thingTypeUID, "thingId"), null,
-                null, "nothing", "label", DEFAULT_TTL, null);
+                null, "nothing", "label", DEFAULT_TTL);
         assertNotNull(discoveryResult.getThingTypeUID());
         assertEquals(discoveryResult.getThingTypeUID(), thingTypeUID);
     }

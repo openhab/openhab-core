@@ -28,7 +28,6 @@ import org.openhab.core.thing.ThingUID;
  * @author Kai Kreuzer - Initial contribution
  * @author Andre Fuechsel - added support for time to live
  * @author Thomas Höfer - Added representation
- * @author Andrew Fiddian-Green - Added semanticEquipmentTag
  *
  * @see DiscoveryService
  * @see DiscoveryListener
@@ -134,13 +133,6 @@ public interface DiscoveryResult {
      * @return time to live in seconds
      */
     long getTimeToLive();
-
-    /**
-     * Returns the semantic (equipment) tag for this result object.
-     *
-     * @return the semantic (equipment) tag (could be empty)
-     */
-    String getSemanticEquipmentTag();
 
     /**
      * Normalizes non-configuration properties by converting them to a String.

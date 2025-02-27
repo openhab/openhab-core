@@ -32,7 +32,6 @@ import org.slf4j.LoggerFactory;
  * @author Kai Kreuzer - Initial contribution
  * @author Andre Fuechsel - added support for time to live
  * @author Thomas Höfer - Added representation
- * @author Andrew Fiddian-Green - Added semanticEquipmentTag
  *
  * @see DiscoveryResult
  */
@@ -48,7 +47,6 @@ public class DiscoveryResultBuilder {
     private @Nullable String label;
     private long ttl = DiscoveryResult.TTL_UNLIMITED;
     private @Nullable ThingTypeUID thingTypeUID;
-    private @Nullable String semanticEquipmentTag;
 
     private DiscoveryResultBuilder(ThingUID thingUID) {
         this.thingUID = thingUID;
@@ -145,17 +143,6 @@ public class DiscoveryResultBuilder {
     }
 
     /**
-     * Sets the semantic (equipment) tag.
-     *
-     * @param semanticEquipmentTag semantic (equipment) tag
-     * @return the updated builder
-     */
-    public DiscoveryResultBuilder withSemanticEquipmentTag(@Nullable String semanticEquipmentTag) {
-        this.semanticEquipmentTag = semanticEquipmentTag;
-        return this;
-    }
-
-    /**
      * Builds a result with the settings of this builder.
      *
      * @return the desired result
@@ -174,7 +161,7 @@ public class DiscoveryResultBuilder {
             }
         }
         return new DiscoveryResultImpl(thingTypeUID, thingUID, bridgeUID, properties, representationProperty, label,
-                ttl, semanticEquipmentTag);
+                ttl);
     }
 
     private void validateThingUID(@Nullable ThingUID bridgeUID) {
