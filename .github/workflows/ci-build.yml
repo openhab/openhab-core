@@ -18,7 +18,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        java: [ '21' ]
+        java: [ '21', '24-ea' ]
         maven: [ '3.9.9' ]
         os: [ 'ubuntu-24.04' ]
     name: Build (Java ${{ matrix.java }}, ${{ matrix.os }})
@@ -79,7 +79,7 @@ jobs:
           path: build.log
 
       - name: Upload SAT Summary Report
-        if: ${{ always() && ((steps.build.outcome == 'success') || (steps.build.outcome == 'failure')) }}
+        if: ${{ matrix.java == '21' && always() && ((steps.build.outcome == 'success') || (steps.build.outcome == 'failure')) }}
         uses: actions/upload-artifact@v4
         with:
           name: sat-summary-report
