@@ -140,6 +140,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * @author Dimitar Ivanov - replaced Firmware UID with thing UID and firmware version
  * @author Markus Rathgeb - Migrated to JAX-RS Whiteboard Specification
  * @author Wouter Born - Migrated to OpenAPI annotations
+ * @author Andrew Fiddian-Green - Added semanticEquipmentTag
  */
 @Component
 @JaxrsResource

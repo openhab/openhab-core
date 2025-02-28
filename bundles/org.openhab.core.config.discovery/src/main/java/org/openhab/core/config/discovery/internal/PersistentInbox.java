@@ -370,7 +370,7 @@ public final class PersistentInbox implements Inbox, DiscoveryListener, ThingReg
 
     @Override
     public Stream<DiscoveryResult> stream() {
-        return discoveryResultStorage.getValues().stream().filter(Objects::nonNull);
+        return (Stream<DiscoveryResult>) discoveryResultStorage.getValues().stream().filter(Objects::nonNull);
     }
 
     @Override
