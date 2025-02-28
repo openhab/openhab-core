@@ -29,637 +29,637 @@ public class DefaultSemanticTags {
     public static final SemanticTag POINT = new SemanticTagImpl("Point", "", "", "");
     public static final SemanticTag PROPERTY = new SemanticTagImpl("Property", "", "", "");
 
-    public static final SemanticTag INDOOR = new SemanticTagImpl( //
+    public static final SemanticTag LOCATION_INDOOR = new SemanticTagImpl( //
             "Location_Indoor", //
             "Indoor", //
             "Anything that is inside a closed building", //
             "");
-    public static final SemanticTag APARTMENT = new SemanticTagImpl( //
+    public static final SemanticTag LOCATION_APARTMENT = new SemanticTagImpl( //
             "Location_Indoor_Apartment", //
             "Apartment", //
             "", //
             "Apartments");
-    public static final SemanticTag BUILDING = new SemanticTagImpl( //
+    public static final SemanticTag LOCATION_BUILDING = new SemanticTagImpl( //
             "Location_Indoor_Building", //
             "Building", //
             "", //
             "Buildings");
-    public static final SemanticTag GARAGE = new SemanticTagImpl( //
+    public static final SemanticTag LOCATION_GARAGE = new SemanticTagImpl( //
             "Location_Indoor_Building_Garage", //
             "Garage", //
             "", //
             "Garages");
-    public static final SemanticTag HOUSE = new SemanticTagImpl( //
+    public static final SemanticTag LOCATION_HOUSE = new SemanticTagImpl( //
             "Location_Indoor_Building_House", //
             "House", //
             "", //
             "Houses");
-    public static final SemanticTag SHED = new SemanticTagImpl( //
+    public static final SemanticTag LOCATION_SHED = new SemanticTagImpl( //
             "Location_Indoor_Building_Shed", //
             "Shed", //
             "", //
             "Sheds");
-    public static final SemanticTag SUMMERHOUSE = new SemanticTagImpl( //
+    public static final SemanticTag LOCATION_SUMMERHOUSE = new SemanticTagImpl( //
             "Location_Indoor_Building_SummerHouse", //
             "Summer House", //
             "", //
             "Summer Houses, Second Home, Second Homes");
-    public static final SemanticTag FLOOR = new SemanticTagImpl( //
+    public static final SemanticTag LOCATION_FLOOR = new SemanticTagImpl( //
             "Location_Indoor_Floor", //
             "Floor", //
             "", //
             "Floors");
-    public static final SemanticTag GROUNDFLOOR = new SemanticTagImpl( //
+    public static final SemanticTag LOCATION_GROUNDFLOOR = new SemanticTagImpl( //
             "Location_Indoor_Floor_GroundFloor", //
             "Ground Floor", //
             "", //
             "Ground Floors, Downstairs");
-    public static final SemanticTag FIRSTFLOOR = new SemanticTagImpl( //
+    public static final SemanticTag LOCATION_FIRSTFLOOR = new SemanticTagImpl( //
             "Location_Indoor_Floor_FirstFloor", //
             "First Floor", //
             "", //
             "First Floors, Upstairs");
-    public static final SemanticTag SECONDFLOOR = new SemanticTagImpl( //
+    public static final SemanticTag LOCATION_SECONDFLOOR = new SemanticTagImpl( //
             "Location_Indoor_Floor_SecondFloor", //
             "Second Floor", //
             "", //
             "Second Floors");
-    public static final SemanticTag THIRDFLOOR = new SemanticTagImpl( //
+    public static final SemanticTag LOCATION_THIRDFLOOR = new SemanticTagImpl( //
             "Location_Indoor_Floor_ThirdFloor", //
             "Third Floor", //
             "", //
             "Third Floors");
-    public static final SemanticTag ATTIC = new SemanticTagImpl( //
+    public static final SemanticTag LOCATION_ATTIC = new SemanticTagImpl( //
             "Location_Indoor_Floor_Attic", //
             "Attic", //
             "", //
             "Attics");
-    public static final SemanticTag BASEMENT = new SemanticTagImpl( //
+    public static final SemanticTag LOCATION_BASEMENT = new SemanticTagImpl( //
             "Location_Indoor_Floor_Basement", //
             "Basement", //
             "", //
             "Basements");
-    public static final SemanticTag CORRIDOR = new SemanticTagImpl( //
+    public static final SemanticTag LOCATION_CORRIDOR = new SemanticTagImpl( //
             "Location_Indoor_Corridor", //
             "Corridor", //
             "", //
             "Corridors, Hallway, Hallways");
-    public static final SemanticTag ROOM = new SemanticTagImpl( //
+    public static final SemanticTag LOCATION_ROOM = new SemanticTagImpl( //
             "Location_Indoor_Room", //
             "Room", //
             "", //
             "Rooms");
-    public static final SemanticTag BATHROOM = new SemanticTagImpl( //
+    public static final SemanticTag LOCATION_BATHROOM = new SemanticTagImpl( //
             "Location_Indoor_Room_Bathroom", //
             "Bathroom", //
             "", //
             "Bathrooms, Bath, Baths, Powder Room, Powder Rooms");
-    public static final SemanticTag BEDROOM = new SemanticTagImpl( //
+    public static final SemanticTag LOCATION_BEDROOM = new SemanticTagImpl( //
             "Location_Indoor_Room_Bedroom", //
             "Bedroom", //
             "", //
             "Bedrooms");
-    public static final SemanticTag BOILERROOM = new SemanticTagImpl( //
+    public static final SemanticTag LOCATION_BOILERROOM = new SemanticTagImpl( //
             "Location_Indoor_Room_BoilerRoom", //
             "Boiler Room", //
             "", //
             "Boiler Rooms");
-    public static final SemanticTag CELLAR = new SemanticTagImpl( //
+    public static final SemanticTag LOCATION_CELLAR = new SemanticTagImpl( //
             "Location_Indoor_Room_Cellar", //
             "Cellar", //
             "", //
             "Cellars");
-    public static final SemanticTag DININGROOM = new SemanticTagImpl( //
+    public static final SemanticTag LOCATION_DININGROOM = new SemanticTagImpl( //
             "Location_Indoor_Room_DiningRoom", //
             "Dining Room", //
             "", //
             "Dining Rooms");
-    public static final SemanticTag ENTRY = new SemanticTagImpl( //
+    public static final SemanticTag LOCATION_ENTRY = new SemanticTagImpl( //
             "Location_Indoor_Room_Entry", //
             "Entry", //
             "", //
             "Entries, Foyer, Foyers");
-    public static final SemanticTag FAMILYROOM = new SemanticTagImpl( //
+    public static final SemanticTag LOCATION_FAMILYROOM = new SemanticTagImpl( //
             "Location_Indoor_Room_FamilyRoom", //
             "Family Room", //
             "", //
             "Family Rooms");
-    public static final SemanticTag GUESTROOM = new SemanticTagImpl( //
+    public static final SemanticTag LOCATION_GUESTROOM = new SemanticTagImpl( //
             "Location_Indoor_Room_GuestRoom", //
             "Guest Room", //
             "", //
             "Guest Rooms");
-    public static final SemanticTag KITCHEN = new SemanticTagImpl( //
+    public static final SemanticTag LOCATION_KITCHEN = new SemanticTagImpl( //
             "Location_Indoor_Room_Kitchen", //
             "Kitchen", //
             "", //
             "Kitchens");
-    public static final SemanticTag LAUNDRYROOM = new SemanticTagImpl( //
+    public static final SemanticTag LOCATION_LAUNDRYROOM = new SemanticTagImpl( //
             "Location_Indoor_Room_LaundryRoom", //
             "Laundry Room", //
             "", //
             "Laundry Rooms");
-    public static final SemanticTag LIVINGROOM = new SemanticTagImpl( //
+    public static final SemanticTag LOCATION_LIVINGROOM = new SemanticTagImpl( //
             "Location_Indoor_Room_LivingRoom", //
             "Living Room", //
             "", //
             "Living Rooms");
-    public static final SemanticTag OFFICE = new SemanticTagImpl( //
+    public static final SemanticTag LOCATION_OFFICE = new SemanticTagImpl( //
             "Location_Indoor_Room_Office", //
             "Office", //
             "", //
             "Offices");
-    public static final SemanticTag VERANDA = new SemanticTagImpl( //
+    public static final SemanticTag LOCATION_VERANDA = new SemanticTagImpl( //
             "Location_Indoor_Room_Veranda", //
             "Veranda", //
             "", //
             "Verandas");
-    public static final SemanticTag OUTDOOR = new SemanticTagImpl( //
+    public static final SemanticTag LOCATION_OUTDOOR = new SemanticTagImpl( //
             "Location_Outdoor", //
             "Outdoor", //
             "", //
             "");
-    public static final SemanticTag CARPORT = new SemanticTagImpl( //
+    public static final SemanticTag LOCATION_CARPORT = new SemanticTagImpl( //
             "Location_Outdoor_Carport", //
             "Carport", //
             "", //
             "Carports");
-    public static final SemanticTag DRIVEWAY = new SemanticTagImpl( //
+    public static final SemanticTag LOCATION_DRIVEWAY = new SemanticTagImpl( //
             "Location_Outdoor_Driveway", //
             "Driveway", //
             "", //
             "Driveways");
-    public static final SemanticTag GARDEN = new SemanticTagImpl( //
+    public static final SemanticTag LOCATION_GARDEN = new SemanticTagImpl( //
             "Location_Outdoor_Garden", //
             "Garden", //
             "", //
             "Gardens");
-    public static final SemanticTag PATIO = new SemanticTagImpl( //
+    public static final SemanticTag LOCATION_PATIO = new SemanticTagImpl( //
             "Location_Outdoor_Patio", //
             "Patio", //
             "", //
             "Patios");
-    public static final SemanticTag PORCH = new SemanticTagImpl( //
+    public static final SemanticTag LOCATION_PORCH = new SemanticTagImpl( //
             "Location_Outdoor_Porch", //
             "Porch", //
             "", //
             "Porches");
-    public static final SemanticTag TERRACE = new SemanticTagImpl( //
+    public static final SemanticTag LOCATION_TERRACE = new SemanticTagImpl( //
             "Location_Outdoor_Terrace", //
             "Terrace", //
             "", //
             "Terraces, Deck, Decks");
-    public static final SemanticTag TEMPERATURE = new SemanticTagImpl( //
+    public static final SemanticTag PROPERTY_TEMPERATURE = new SemanticTagImpl( //
             "Property_Temperature", //
             "Temperature", //
             "", //
             "Temperatures");
-    public static final SemanticTag LIGHT = new SemanticTagImpl( //
+    public static final SemanticTag PROPERTY_LIGHT = new SemanticTagImpl( //
             "Property_Light", //
             "Light", //
             "", //
             "Lights, Lighting");
-    public static final SemanticTag COLORTEMPERATURE = new SemanticTagImpl( //
+    public static final SemanticTag PROPERTY_COLORTEMPERATURE = new SemanticTagImpl( //
             "Property_ColorTemperature", //
             "Color Temperature", //
             "", //
             "");
-    public static final SemanticTag HUMIDITY = new SemanticTagImpl( //
+    public static final SemanticTag PROPERTY_HUMIDITY = new SemanticTagImpl( //
             "Property_Humidity", //
             "Humidity", //
             "", //
             "Moisture");
-    public static final SemanticTag PRESENCE = new SemanticTagImpl( //
+    public static final SemanticTag PROPERTY_PRESENCE = new SemanticTagImpl( //
             "Property_Presence", //
             "Presence", //
             "", //
             "");
-    public static final SemanticTag PRESSURE = new SemanticTagImpl( //
+    public static final SemanticTag PROPERTY_PRESSURE = new SemanticTagImpl( //
             "Property_Pressure", //
             "Pressure", //
             "", //
             "");
-    public static final SemanticTag SMOKE = new SemanticTagImpl( //
+    public static final SemanticTag PROPERTY_SMOKE = new SemanticTagImpl( //
             "Property_Smoke", //
             "Smoke", //
             "", //
             "");
-    public static final SemanticTag NOISE = new SemanticTagImpl( //
+    public static final SemanticTag PROPERTY_NOISE = new SemanticTagImpl( //
             "Property_Noise", //
             "Noise", //
             "", //
             "");
-    public static final SemanticTag RAIN = new SemanticTagImpl( //
+    public static final SemanticTag PROPERTY_RAIN = new SemanticTagImpl( //
             "Property_Rain", //
             "Rain", //
             "", //
             "");
-    public static final SemanticTag WIND = new SemanticTagImpl( //
+    public static final SemanticTag PROPERTY_WIND = new SemanticTagImpl( //
             "Property_Wind", //
             "Wind", //
             "", //
             "");
-    public static final SemanticTag WATER = new SemanticTagImpl( //
+    public static final SemanticTag PROPERTY_WATER = new SemanticTagImpl( //
             "Property_Water", //
             "Water", //
             "", //
             "");
-    public static final SemanticTag CO2 = new SemanticTagImpl( //
+    public static final SemanticTag PROPERTY_CO2 = new SemanticTagImpl( //
             "Property_CO2", //
             "CO2", //
             "", //
             "Carbon Dioxide");
-    public static final SemanticTag CO = new SemanticTagImpl( //
+    public static final SemanticTag PROPERTY_CO = new SemanticTagImpl( //
             "Property_CO", //
             "CO", //
             "", //
             "Carbon Monoxide");
-    public static final SemanticTag ENERGY = new SemanticTagImpl( //
+    public static final SemanticTag PROPERTY_ENERGY = new SemanticTagImpl( //
             "Property_Energy", //
             "Energy", //
             "", //
             "");
-    public static final SemanticTag POWER = new SemanticTagImpl( //
+    public static final SemanticTag PROPERTY_POWER = new SemanticTagImpl( //
             "Property_Power", //
             "Power", //
             "", //
             "");
-    public static final SemanticTag VOLTAGE = new SemanticTagImpl( //
+    public static final SemanticTag PROPERTY_VOLTAGE = new SemanticTagImpl( //
             "Property_Voltage", //
             "Voltage", //
             "", //
             "");
-    public static final SemanticTag CURRENT = new SemanticTagImpl( //
+    public static final SemanticTag PROPERTY_CURRENT = new SemanticTagImpl( //
             "Property_Current", //
             "Current", //
             "", //
             "");
-    public static final SemanticTag FREQUENCY = new SemanticTagImpl( //
+    public static final SemanticTag PROPERTY_FREQUENCY = new SemanticTagImpl( //
             "Property_Frequency", //
             "Frequency", //
             "", //
             "");
-    public static final SemanticTag GAS = new SemanticTagImpl( //
+    public static final SemanticTag PROPERTY_GAS = new SemanticTagImpl( //
             "Property_Gas", //
             "Gas", //
             "", //
             "");
-    public static final SemanticTag SOUNDVOLUME = new SemanticTagImpl( //
+    public static final SemanticTag PROPERTY_SOUNDVOLUME = new SemanticTagImpl( //
             "Property_SoundVolume", //
             "Sound Volume", //
             "", //
             "");
-    public static final SemanticTag OIL = new SemanticTagImpl( //
+    public static final SemanticTag PROPERTY_OIL = new SemanticTagImpl( //
             "Property_Oil", //
             "Oil", //
             "", //
             "");
-    public static final SemanticTag DURATION = new SemanticTagImpl( //
+    public static final SemanticTag PROPERTY_DURATION = new SemanticTagImpl( //
             "Property_Duration", //
             "Duration", //
             "", //
             "");
-    public static final SemanticTag LEVEL = new SemanticTagImpl( //
+    public static final SemanticTag PROPERTY_LEVEL = new SemanticTagImpl( //
             "Property_Level", //
             "Level", //
             "", //
             "");
-    public static final SemanticTag OPENING = new SemanticTagImpl( //
+    public static final SemanticTag PROPERTY_OPENING = new SemanticTagImpl( //
             "Property_Opening", //
             "Opening", //
             "", //
             "");
-    public static final SemanticTag TIMESTAMP = new SemanticTagImpl( //
+    public static final SemanticTag PROPERTY_TIMESTAMP = new SemanticTagImpl( //
             "Property_Timestamp", //
             "Timestamp", //
             "", //
             "");
-    public static final SemanticTag ULTRAVIOLET = new SemanticTagImpl( //
+    public static final SemanticTag PROPERTY_ULTRAVIOLET = new SemanticTagImpl( //
             "Property_Ultraviolet", //
             "Ultraviolet", //
             "", //
             "UV");
-    public static final SemanticTag VIBRATION = new SemanticTagImpl( //
+    public static final SemanticTag PROPERTY_VIBRATION = new SemanticTagImpl( //
             "Property_Vibration", //
             "Vibration", //
             "", //
             "");
-    public static final SemanticTag ALARM = new SemanticTagImpl( //
+    public static final SemanticTag POINT_ALARM = new SemanticTagImpl( //
             "Point_Alarm", //
             "Alarm", //
             "", //
             "");
-    public static final SemanticTag CONTROL = new SemanticTagImpl( //
+    public static final SemanticTag POINT_CONTROL = new SemanticTagImpl( //
             "Point_Control", //
             "Control", //
             "", //
             "");
-    public static final SemanticTag SWITCH = new SemanticTagImpl( //
+    public static final SemanticTag POINT_SWITCH = new SemanticTagImpl( //
             "Point_Control_Switch", //
             "Switch", //
             "", //
             "");
-    public static final SemanticTag MEASUREMENT = new SemanticTagImpl( //
+    public static final SemanticTag POINT_MEASUREMENT = new SemanticTagImpl( //
             "Point_Measurement", //
             "Measurement", //
             "", //
             "");
-    public static final SemanticTag SETPOINT = new SemanticTagImpl( //
+    public static final SemanticTag POINT_SETPOINT = new SemanticTagImpl( //
             "Point_Setpoint", //
             "Setpoint", //
             "", //
             "");
-    public static final SemanticTag STATUS = new SemanticTagImpl( //
+    public static final SemanticTag POINT_STATUS = new SemanticTagImpl( //
             "Point_Status", //
             "Status", //
             "", //
             "");
-    public static final SemanticTag LOWBATTERY = new SemanticTagImpl( //
+    public static final SemanticTag POINT_LOWBATTERY = new SemanticTagImpl( //
             "Point_Status_LowBattery", //
             "LowBattery", //
             "", //
             "");
-    public static final SemanticTag OPENLEVEL = new SemanticTagImpl( //
+    public static final SemanticTag POINT_OPENLEVEL = new SemanticTagImpl( //
             "Point_Status_OpenLevel", //
             "OpenLevel", //
             "", //
             "");
-    public static final SemanticTag OPENSTATE = new SemanticTagImpl( //
+    public static final SemanticTag POINT_OPENSTATE = new SemanticTagImpl( //
             "Point_Status_OpenState", //
             "OpenState", //
             "", //
             "");
-    public static final SemanticTag TAMPERED = new SemanticTagImpl( //
+    public static final SemanticTag POINT_TAMPERED = new SemanticTagImpl( //
             "Point_Status_Tampered", //
             "Tampered", //
             "", //
             "");
-    public static final SemanticTag TILT = new SemanticTagImpl( //
+    public static final SemanticTag POINT_TILT = new SemanticTagImpl( //
             "Point_Status_Tilt", //
             "Tilt", //
             "", //
             "");
-    public static final SemanticTag ALARMSYSTEM = new SemanticTagImpl( //
+    public static final SemanticTag EQUIPMENT_ALARMSYSTEM = new SemanticTagImpl( //
             "Equipment_AlarmSystem", //
             "Alarm System", //
             "", //
             "Alarm Systems");
-    public static final SemanticTag BATTERY = new SemanticTagImpl( //
+    public static final SemanticTag EQUIPMENT_BATTERY = new SemanticTagImpl( //
             "Equipment_Battery", //
             "Battery", //
             "", //
             "Batteries");
-    public static final SemanticTag BLINDS = new SemanticTagImpl( //
+    public static final SemanticTag EQUIPMENT_BLINDS = new SemanticTagImpl( //
             "Equipment_Blinds", //
             "Blinds", //
             "", //
             "Rollershutter, Rollershutters, Roller shutter, Roller shutters, Shutter, Shutters");
-    public static final SemanticTag BOILER = new SemanticTagImpl( //
+    public static final SemanticTag EQUIPMENT_BOILER = new SemanticTagImpl( //
             "Equipment_Boiler", //
             "Boiler", //
             "", //
             "Boilers");
-    public static final SemanticTag CAMERA = new SemanticTagImpl( //
+    public static final SemanticTag EQUIPMENT_CAMERA = new SemanticTagImpl( //
             "Equipment_Camera", //
             "Camera", //
             "", //
             "Cameras");
-    public static final SemanticTag CAR = new SemanticTagImpl( //
+    public static final SemanticTag EQUIPMENT_CAR = new SemanticTagImpl( //
             "Equipment_Car", //
             "Car", //
             "", //
             "Cars");
-    public static final SemanticTag CLEANINGROBOT = new SemanticTagImpl( //
+    public static final SemanticTag EQUIPMENT_CLEANINGROBOT = new SemanticTagImpl( //
             "Equipment_CleaningRobot", //
             "Cleaning Robot", //
             "", //
             "Cleaning Robots, Vacuum robot, Vacuum robots");
-    public static final SemanticTag DOOR = new SemanticTagImpl( //
+    public static final SemanticTag EQUIPMENT_DOOR = new SemanticTagImpl( //
             "Equipment_Door", //
             "Door", //
             "", //
             "Doors");
-    public static final SemanticTag BACKDOOR = new SemanticTagImpl( //
+    public static final SemanticTag EQUIPMENT_BACKDOOR = new SemanticTagImpl( //
             "Equipment_Door_BackDoor", //
             "Back Door", //
             "", //
             "Back Doors");
-    public static final SemanticTag CELLARDOOR = new SemanticTagImpl( //
+    public static final SemanticTag EQUIPMENT_CELLARDOOR = new SemanticTagImpl( //
             "Equipment_Door_CellarDoor", //
             "Cellar Door", //
             "", //
             "Cellar Doors");
-    public static final SemanticTag FRONTDOOR = new SemanticTagImpl( //
+    public static final SemanticTag EQUIPMENT_FRONTDOOR = new SemanticTagImpl( //
             "Equipment_Door_FrontDoor", //
             "Front Door", //
             "", //
             "Front Doors, Frontdoor, Frontdoors");
-    public static final SemanticTag GARAGEDOOR = new SemanticTagImpl( //
+    public static final SemanticTag EQUIPMENT_GARAGEDOOR = new SemanticTagImpl( //
             "Equipment_Door_GarageDoor", //
             "Garage Door", //
             "", //
             "Garage Doors");
-    public static final SemanticTag GATE = new SemanticTagImpl( //
+    public static final SemanticTag EQUIPMENT_GATE = new SemanticTagImpl( //
             "Equipment_Door_Gate", //
             "Gate", //
             "", //
             "Gates");
-    public static final SemanticTag INNERDOOR = new SemanticTagImpl( //
+    public static final SemanticTag EQUIPMENT_INNERDOOR = new SemanticTagImpl( //
             "Equipment_Door_InnerDoor", //
             "Inner Door", //
             "", //
             "Inner Doors");
-    public static final SemanticTag SIDEDOOR = new SemanticTagImpl( //
+    public static final SemanticTag EQUIPMENT_SIDEDOOR = new SemanticTagImpl( //
             "Equipment_Door_SideDoor", //
             "Side Door", //
             "", //
             "Side Doors");
-    public static final SemanticTag DOORBELL = new SemanticTagImpl( //
+    public static final SemanticTag EQUIPMENT_DOORBELL = new SemanticTagImpl( //
             "Equipment_Doorbell", //
             "Doorbell", //
             "", //
             "Doorbells");
-    public static final SemanticTag FAN = new SemanticTagImpl( //
+    public static final SemanticTag EQUIPMENT_FAN = new SemanticTagImpl( //
             "Equipment_Fan", //
             "Fan", //
             "", //
             "Fans");
-    public static final SemanticTag CEILINGFAN = new SemanticTagImpl( //
+    public static final SemanticTag EQUIPMENT_CEILINGFAN = new SemanticTagImpl( //
             "Equipment_Fan_CeilingFan", //
             "Ceiling Fan", //
             "", //
             "Ceiling Fans");
-    public static final SemanticTag KITCHENHOOD = new SemanticTagImpl( //
+    public static final SemanticTag EQUIPMENT_KITCHENHOOD = new SemanticTagImpl( //
             "Equipment_Fan_KitchenHood", //
             "Kitchen Hood", //
             "", //
             "Kitchen Hoods");
-    public static final SemanticTag HVAC = new SemanticTagImpl( //
+    public static final SemanticTag EQUIPMENT_HVAC = new SemanticTagImpl( //
             "Equipment_HVAC", //
             "HVAC", //
             "", //
             "Heating, Ventilation, Air Conditioning, A/C, A/Cs, AC");
-    public static final SemanticTag INVERTER = new SemanticTagImpl( //
+    public static final SemanticTag EQUIPMENT_INVERTER = new SemanticTagImpl( //
             "Equipment_Inverter", //
             "Inverter", //
             "", //
             "Inverters");
-    public static final SemanticTag LAWNMOWER = new SemanticTagImpl( //
+    public static final SemanticTag EQUIPMENT_LAWNMOWER = new SemanticTagImpl( //
             "Equipment_LawnMower", //
             "Lawn Mower", //
             "", //
             "Lawn Mowers");
-    public static final SemanticTag LIGHTBULB = new SemanticTagImpl( //
+    public static final SemanticTag EQUIPMENT_LIGHTBULB = new SemanticTagImpl( //
             "Equipment_Lightbulb", //
             "Lightbulb", //
             "", //
             "Lightbulbs, Bulb, Bulbs, Lamp, Lamps, Lights, Lighting");
-    public static final SemanticTag LIGHTSTRIPE = new SemanticTagImpl( //
+    public static final SemanticTag EQUIPMENT_LIGHTSTRIPE = new SemanticTagImpl( //
             "Equipment_Lightbulb_LightStripe", //
             "Light Stripe", //
             "", //
             "Light Stripes");
-    public static final SemanticTag LOCK = new SemanticTagImpl( //
+    public static final SemanticTag EQUIPMENT_LOCK = new SemanticTagImpl( //
             "Equipment_Lock", //
             "Lock", //
             "", //
             "Locks");
-    public static final SemanticTag NETWORKAPPLIANCE = new SemanticTagImpl( //
+    public static final SemanticTag EQUIPMENT_NETWORKAPPLIANCE = new SemanticTagImpl( //
             "Equipment_NetworkAppliance", //
             "Network Appliance", //
             "", //
             "Network Appliances");
-    public static final SemanticTag POWEROUTLET = new SemanticTagImpl( //
+    public static final SemanticTag EQUIPMENT_POWEROUTLET = new SemanticTagImpl( //
             "Equipment_PowerOutlet", //
             "Power Outlet", //
             "", //
             "Power Outlets, Outlet, Outlets");
-    public static final SemanticTag PROJECTOR = new SemanticTagImpl( //
+    public static final SemanticTag EQUIPMENT_PROJECTOR = new SemanticTagImpl( //
             "Equipment_Projector", //
             "Projector", //
             "", //
             "Projectors, Beamer, Beamers");
-    public static final SemanticTag PUMP = new SemanticTagImpl( //
+    public static final SemanticTag EQUIPMENT_PUMP = new SemanticTagImpl( //
             "Equipment_Pump", //
             "Pump", //
             "", //
             "Pumps");
-    public static final SemanticTag RADIATORCONTROL = new SemanticTagImpl( //
+    public static final SemanticTag EQUIPMENT_RADIATORCONTROL = new SemanticTagImpl( //
             "Equipment_RadiatorControl", //
             "Radiator Control", //
             "", //
             "Radiator Controls, Radiator, Radiators");
-    public static final SemanticTag RECEIVER = new SemanticTagImpl( //
+    public static final SemanticTag EQUIPMENT_RECEIVER = new SemanticTagImpl( //
             "Equipment_Receiver", //
             "Receiver", //
             "", //
             "Receivers, Audio Receiver, Audio Receivers, AV Receiver, AV Receivers");
-    public static final SemanticTag REMOTECONTROL = new SemanticTagImpl( //
+    public static final SemanticTag EQUIPMENT_REMOTECONTROL = new SemanticTagImpl( //
             "Equipment_RemoteControl", //
             "Remote Control", //
             "", //
             "Remote Controls");
-    public static final SemanticTag SCREEN = new SemanticTagImpl( //
+    public static final SemanticTag EQUIPMENT_SCREEN = new SemanticTagImpl( //
             "Equipment_Screen", //
             "Screen", //
             "", //
             "Screens");
-    public static final SemanticTag TELEVISION = new SemanticTagImpl( //
+    public static final SemanticTag EQUIPMENT_TELEVISION = new SemanticTagImpl( //
             "Equipment_Screen_Television", //
             "Television", //
             "", //
             "Televisions, TV, TVs");
-    public static final SemanticTag SENSOR = new SemanticTagImpl( //
+    public static final SemanticTag EQUIPMENT_SENSOR = new SemanticTagImpl( //
             "Equipment_Sensor", //
             "Sensor", //
             "", //
             "Sensors");
-    public static final SemanticTag MOTIONDETECTOR = new SemanticTagImpl( //
+    public static final SemanticTag EQUIPMENT_MOTIONDETECTOR = new SemanticTagImpl( //
             "Equipment_Sensor_MotionDetector", //
             "Motion Detector", //
             "", //
             "Motion Detectors, Motion sensor, Motion sensors");
-    public static final SemanticTag SMOKEDETECTOR = new SemanticTagImpl( //
+    public static final SemanticTag EQUIPMENT_SMOKEDETECTOR = new SemanticTagImpl( //
             "Equipment_Sensor_SmokeDetector", //
             "Smoke Detector", //
             "", //
             "Smoke Detectors");
-    public static final SemanticTag SIREN = new SemanticTagImpl( //
+    public static final SemanticTag EQUIPMENT_SIREN = new SemanticTagImpl( //
             "Equipment_Siren", //
             "Siren", //
             "", //
             "Sirens");
-    public static final SemanticTag SMARTPHONE = new SemanticTagImpl( //
+    public static final SemanticTag EQUIPMENT_SMARTPHONE = new SemanticTagImpl( //
             "Equipment_Smartphone", //
             "Smartphone", //
             "", //
             "Smartphones, Phone, Phones");
-    public static final SemanticTag SPEAKER = new SemanticTagImpl( //
+    public static final SemanticTag EQUIPMENT_SPEAKER = new SemanticTagImpl( //
             "Equipment_Speaker", //
             "Speaker", //
             "", //
             "Speakers");
-    public static final SemanticTag VALVE = new SemanticTagImpl( //
+    public static final SemanticTag EQUIPMENT_VALVE = new SemanticTagImpl( //
             "Equipment_Valve", //
             "Valve", //
             "", //
             "Valves");
-    public static final SemanticTag VOICEASSISTANT = new SemanticTagImpl( //
+    public static final SemanticTag EQUIPMENT_VOICEASSISTANT = new SemanticTagImpl( //
             "Equipment_VoiceAssistant", //
             "Voice Assistant", //
             "", //
             "Voice Assistants");
-    public static final SemanticTag WALLSWITCH = new SemanticTagImpl( //
+    public static final SemanticTag EQUIPMENT_WALLSWITCH = new SemanticTagImpl( //
             "Equipment_WallSwitch", //
             "Wall Switch", //
             "", //
             "Wall Switches");
-    public static final SemanticTag WEBSERVICE = new SemanticTagImpl( //
+    public static final SemanticTag EQUIPMENT_WEBSERVICE = new SemanticTagImpl( //
             "Equipment_WebService", //
             "Web Service", //
             "", //
             "Web Services");
-    public static final SemanticTag WEATHERSERVICE = new SemanticTagImpl( //
+    public static final SemanticTag EQUIPMENT_WEATHERSERVICE = new SemanticTagImpl( //
             "Equipment_WebService_WeatherService", //
             "Weather Service", //
             "", //
             "Weather Services");
-    public static final SemanticTag WHITEGOOD = new SemanticTagImpl( //
+    public static final SemanticTag EQUIPMENT_WHITEGOOD = new SemanticTagImpl( //
             "Equipment_WhiteGood", //
             "White Good", //
             "", //
             "White Goods");
-    public static final SemanticTag DISHWASHER = new SemanticTagImpl( //
+    public static final SemanticTag EQUIPMENT_DISHWASHER = new SemanticTagImpl( //
             "Equipment_WhiteGood_Dishwasher", //
             "Dishwasher", //
             "", //
             "Dishwashers");
-    public static final SemanticTag DRYER = new SemanticTagImpl( //
+    public static final SemanticTag EQUIPMENT_DRYER = new SemanticTagImpl( //
             "Equipment_WhiteGood_Dryer", //
             "Dryer", //
             "", //
             "Dryers");
-    public static final SemanticTag FREEZER = new SemanticTagImpl( //
+    public static final SemanticTag EQUIPMENT_FREEZER = new SemanticTagImpl( //
             "Equipment_WhiteGood_Freezer", //
             "Freezer", //
             "", //
             "Freezers");
-    public static final SemanticTag OVEN = new SemanticTagImpl( //
+    public static final SemanticTag EQUIPMENT_OVEN = new SemanticTagImpl( //
             "Equipment_WhiteGood_Oven", //
             "Oven", //
             "", //
             "Ovens");
-    public static final SemanticTag REFRIGERATOR = new SemanticTagImpl( //
+    public static final SemanticTag EQUIPMENT_REFRIGERATOR = new SemanticTagImpl( //
             "Equipment_WhiteGood_Refrigerator", //
             "Refrigerator", //
             "", //
             "Refrigerators");
-    public static final SemanticTag WASHINGMACHINE = new SemanticTagImpl( //
+    public static final SemanticTag EQUIPMENT_WASHINGMACHINE = new SemanticTagImpl( //
             "Equipment_WhiteGood_WashingMachine", //
             "Washing Machine", //
             "", //
             "Washing Machines");
-    public static final SemanticTag WINDOW = new SemanticTagImpl( //
+    public static final SemanticTag EQUIPMENT_WINDOW = new SemanticTagImpl( //
             "Equipment_Window", //
             "Window", //
             "", //
