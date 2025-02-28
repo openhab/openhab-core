@@ -64,6 +64,10 @@ def appendLabelsFile(FileWriter file, def line, String tagSet) {
     file.write("\n")
 }
 
+def camelToUpperCasedSnake(def tag) {
+    return tag.split(/(?=[A-Z][a-z])/).join("_").toUpperCase()
+}
+
 def createDefaultSemanticTags(def tagSets) {
     def file = new FileWriter("${baseDir}/src/main/java/org/openhab/core/semantics/model/DefaultSemanticTags.java")
     file.write(header)
@@ -85,19 +89,33 @@ public class DefaultSemanticTags {
     public static final SemanticTag LOCATION = new SemanticTagImpl("Location", "", "", "");
     public static final SemanticTag POINT = new SemanticTagImpl("Point", "", "", "");
     public static final SemanticTag PROPERTY = new SemanticTagImpl("Property", "", "", "");
-
 """)
+    def tags = [:]
     for (line in tagsCsv()) {
-        def tagId = (line.Parent ? tagSets.get(line.Parent) : line.Type) + "_" + line.Tag
-        def constantName = "${line.Type}_${line.Tag}".toUpperCase()
-        file.write("""    public static final SemanticTag ${constantName} = new SemanticTagImpl( //
-            "${tagId}", //
-            "${line.Label}", //
-            "${line.Description}", //
-            "${line.Synonyms}");
+        if (!tags.containsKey(line.Type)) {
+            tags[line.Type] = []
+        }
+        tags[line.Type].add(line)
+    }
+
+    for (type in tags.keySet()) {
+        file.write("""
+    public static class ${type} {""")
+        for (line in tags[type]) {
+            def tagId = (line.Parent ? tagSets.get(line.Parent) : line.Type) + "_" + line.Tag
+            def constantName = camelToUpperCasedSnake(line.Tag)
+            file.write("""
+        public static final SemanticTag ${constantName} = new SemanticTagImpl( //
+                "${tagId}", //
+                "${line.Label}", //
+                "${line.Description}", //
+                "${line.Synonyms}");""")
+        }
+        file.write("""
+    }
 """)
     }
-    file.write("""}
+        file.write("""}
 """)
     file.close()
 }
@@ -136,7 +154,7 @@ public class DefaultSemanticTagProvider implements SemanticTagProvider {
         defaultTags.add(DefaultSemanticTags.PROPERTY);
 """)    
     for (line in tagsCsv()) {
-        def constantName = "${line.Type}_${line.Tag}".toUpperCase()
+        def constantName = line.Type + "." + camelToUpperCasedSnake(line.Tag)
         file.write("""        defaultTags.add(DefaultSemanticTags.${constantName});
 """)
     }
