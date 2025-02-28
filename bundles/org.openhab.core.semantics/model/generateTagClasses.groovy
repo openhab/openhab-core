@@ -89,7 +89,8 @@ public class DefaultSemanticTags {
 """)
     for (line in tagsCsv()) {
         def tagId = (line.Parent ? tagSets.get(line.Parent) : line.Type) + "_" + line.Tag
-        file.write("""    public static final SemanticTag ${line.Tag.toUpperCase()} = new SemanticTagImpl( //
+        def constantName = "${line.Type}_${line.Tag}".toUpperCase()
+        file.write("""    public static final SemanticTag ${constantName} = new SemanticTagImpl( //
             "${tagId}", //
             "${line.Label}", //
             "${line.Description}", //
@@ -135,7 +136,8 @@ public class DefaultSemanticTagProvider implements SemanticTagProvider {
         defaultTags.add(DefaultSemanticTags.PROPERTY);
 """)    
     for (line in tagsCsv()) {
-        file.write("""        defaultTags.add(DefaultSemanticTags.${line.Tag.toUpperCase()});
+        def constantName = "${line.Type}_${line.Tag}".toUpperCase()
+        file.write("""        defaultTags.add(DefaultSemanticTags.${constantName});
 """)
     }
     file.write("""    }
