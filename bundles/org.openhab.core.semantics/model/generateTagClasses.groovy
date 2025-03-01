@@ -20,11 +20,9 @@ import java.util.stream.Collectors
 
 baseDir = Paths.get(getClass().protectionDomain.codeSource.location.toURI()).getParent().getParent().toAbsolutePath()
 header = header()
+tagsByType = [:]
 
 def tagSets = new TreeMap<String, String>()
-def tagsCsv() {
-    return parseCsv(new FileReader("${baseDir}/model/SemanticTags.csv"), separator: ',')
-}
 
 def labelsFile = new FileWriter("${baseDir}/src/main/resources/tags.properties")
 labelsFile.write("# Generated content - do not edit!\n")
@@ -36,6 +34,11 @@ for (line in tagsCsv()) {
     tagSets.put(line.Tag,tagSet)
 
     appendLabelsFile(labelsFile, line, tagSet)
+
+    if (!tagsByType.containsKey(line.Type)) {
+        tagsByType[line.Type] = []
+    }
+    tagsByType[line.Type].add(line)
 
     switch(line.Type) {
         case "Location"            : break;
@@ -54,6 +57,10 @@ createDefaultProviderFile(tagSets)
 println "\n\nTagSets:"
 for (String tagSet : tagSets) {
     println tagSet
+}
+
+def tagsCsv() {
+    return parseCsv(new FileReader("${baseDir}/model/SemanticTags.csv"), separator: ',')
 }
 
 def appendLabelsFile(FileWriter file, def line, String tagSet) {
@@ -90,18 +97,11 @@ public class DefaultSemanticTags {
     public static final SemanticTag POINT = new SemanticTagImpl("Point", "", "", "");
     public static final SemanticTag PROPERTY = new SemanticTagImpl("Property", "", "", "");
 """)
-    def tags = [:]
-    for (line in tagsCsv()) {
-        if (!tags.containsKey(line.Type)) {
-            tags[line.Type] = []
-        }
-        tags[line.Type].add(line)
-    }
 
-    for (type in tags.keySet()) {
+    for (type in tagsByType.keySet()) {
         file.write("""
     public static class ${type} {""")
-        for (line in tags[type]) {
+        for (line in tagsByType[type]) {
             def tagId = (line.Parent ? tagSets.get(line.Parent) : line.Type) + "_" + line.Tag
             def constantName = camelToUpperCasedSnake(line.Tag)
             file.write("""
