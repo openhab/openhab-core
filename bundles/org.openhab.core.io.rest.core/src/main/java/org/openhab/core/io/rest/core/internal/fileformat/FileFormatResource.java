@@ -239,10 +239,10 @@ public class FileFormatResource implements RESTResource {
     @RolesAllowed({ Role.ADMIN })
     @Path("/things/{thingUID}")
     @Produces("text/vnd.openhab.dsl.thing")
-    @Operation(operationId = "createFileFormatForThing", summary = "Create file format for an existing thing in registry.", security = {
+    @Operation(operationId = "createFileFormatForThing", summary = "Create file format for an existing thing in things or discovery registry.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = "text/vnd.openhab.dsl.thing", schema = @Schema(example = "Thing binding:type:idBridge:id \"Label\" @ \"Location\" (binding:typeBridge:idBridge) [stringParam=\"my value\", booleanParam=true, decimalParam=2.5]"))),
-                    @ApiResponse(responseCode = "404", description = "Thing not found in registry."),
+                    @ApiResponse(responseCode = "404", description = "Thing not found in things or discovery registry or thing type not found."),
                     @ApiResponse(responseCode = "415", description = "Unsupported media type.") })
     public Response createFileFormatForThing(final @Context HttpHeaders httpHeaders,
             @DefaultValue("true") @QueryParam("hideDefaultParameters") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters,
@@ -257,47 +257,23 @@ public class FileFormatResource implements RESTResource {
         ThingUID aThingUID = new ThingUID(thingUID);
         Thing thing = thingRegistry.get(aThingUID);
         if (thing == null) {
-            return Response.status(Response.Status.NOT_FOUND)
-                    .entity("Thing with UID '" + thingUID + "' not found in the things registry!").build();
+            List<DiscoveryResult> results = inbox.getAll().stream().filter(forThingUID(new ThingUID(thingUID)))
+                    .toList();
+            if (results.isEmpty()) {
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity("Thing with UID '" + thingUID + "' not found in the things or discovery registry!")
+                        .build();
+            }
+            DiscoveryResult result = results.get(0);
+            ThingType thingType = thingTypeRegistry.getThingType(result.getThingTypeUID());
+            if (thingType == null) {
+                return Response.status(Response.Status.NOT_FOUND)
+                        .entity("Thing type with UID '" + result.getThingTypeUID() + "' does not exist!").build();
+            }
+            thing = simulateThing(result, thingType);
         }
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         generator.generateFileFormat(outputStream, List.of(thing), hideDefaultParameters);
-        return Response.ok(new String(outputStream.toByteArray())).build();
-    }
-
-    @GET
-    @Path("/things/inbox/{thingUID}")
-    @Produces("text/vnd.openhab.dsl.thing")
-    @Operation(operationId = "createFileFormatForDiscoveryResult", summary = "Create file format for an existing thing in discovey registry.", security = {
-            @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
-                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = "text/vnd.openhab.dsl.thing", schema = @Schema(example = "Thing binding:type:idBridge:id \"Label\" (binding:typeBridge:idBridge) [stringParam=\"my value\", booleanParam=true, decimalParam=2.5]"))),
-                    @ApiResponse(responseCode = "404", description = "Discovery result not found in the inbox or thing type not found."),
-                    @ApiResponse(responseCode = "415", description = "Unsupported media type.") })
-    public Response createFileFormatForDiscoveryResult(final @Context HttpHeaders httpHeaders,
-            @DefaultValue("true") @QueryParam("hideDefaultParameters") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters,
-            @PathParam("thingUID") @Parameter(description = "thingUID") String thingUID) {
-        String acceptHeader = httpHeaders.getHeaderString(HttpHeaders.ACCEPT);
-        String format = "text/vnd.openhab.dsl.thing".equals(acceptHeader) ? "DSL" : null;
-        ThingFileGenerator generator = format == null ? null : thingFileGenerators.get(format);
-        if (generator == null) {
-            return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE)
-                    .entity("Unsupported media type '" + acceptHeader + "'!").build();
-        }
-
-        List<DiscoveryResult> results = inbox.getAll().stream().filter(forThingUID(new ThingUID(thingUID))).toList();
-        if (results.isEmpty()) {
-            return Response.status(Response.Status.NOT_FOUND)
-                    .entity("Discovery result for thing with UID '" + thingUID + "' not found in the inbox!").build();
-        }
-        DiscoveryResult result = results.get(0);
-        ThingType thingType = thingTypeRegistry.getThingType(result.getThingTypeUID());
-        if (thingType == null) {
-            return Response.status(Response.Status.NOT_FOUND)
-                    .entity("Thing type with UID '" + result.getThingTypeUID() + "' does not exist!").build();
-        }
-
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        generator.generateFileFormat(outputStream, List.of(simulateThing(result, thingType)), hideDefaultParameters);
         return Response.ok(new String(outputStream.toByteArray())).build();
     }
 
