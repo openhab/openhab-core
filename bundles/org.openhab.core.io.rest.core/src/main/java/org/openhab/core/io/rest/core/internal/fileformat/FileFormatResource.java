@@ -162,7 +162,7 @@ public class FileFormatResource implements RESTResource {
 
     @GET
     @RolesAllowed({ Role.ADMIN })
-    @Path("/existing/items")
+    @Path("/items")
     @Produces("text/vnd.openhab.dsl.item")
     @Operation(operationId = "createFileFormatForAllItems", summary = "Create file format for all existing items in registry.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
@@ -185,7 +185,7 @@ public class FileFormatResource implements RESTResource {
 
     @GET
     @RolesAllowed({ Role.ADMIN })
-    @Path("/existing/item/{itemname: [a-zA-Z_0-9]+}")
+    @Path("/items/{itemname: [a-zA-Z_0-9]+}")
     @Produces("text/vnd.openhab.dsl.item")
     @Operation(operationId = "createFileFormatForItem", summary = "Create file format for an existing item in registry.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
@@ -215,7 +215,7 @@ public class FileFormatResource implements RESTResource {
 
     @GET
     @RolesAllowed({ Role.ADMIN })
-    @Path("/existing/things")
+    @Path("/things")
     @Produces("text/vnd.openhab.dsl.thing")
     @Operation(operationId = "createFileFormatForAllThings", summary = "Create file format for all existing things in registry.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
@@ -237,7 +237,7 @@ public class FileFormatResource implements RESTResource {
 
     @GET
     @RolesAllowed({ Role.ADMIN })
-    @Path("/existing/thing/{thingUID}")
+    @Path("/things/{thingUID}")
     @Produces("text/vnd.openhab.dsl.thing")
     @Operation(operationId = "createFileFormatForThing", summary = "Create file format for an existing thing in registry.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
@@ -266,7 +266,7 @@ public class FileFormatResource implements RESTResource {
     }
 
     @GET
-    @Path("/existing/thing-from-inbox/{thingUID}")
+    @Path("/things/inbox/{thingUID}")
     @Produces("text/vnd.openhab.dsl.thing")
     @Operation(operationId = "createFileFormatForDiscoveryResult", summary = "Create file format for an existing thing in discovey registry.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
