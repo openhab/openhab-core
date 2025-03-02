@@ -12,6 +12,7 @@
  */
 package org.openhab.core.model.thing.internal.fileconverter;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -23,6 +24,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.ConfigDescriptionRegistry;
 import org.openhab.core.model.core.ModelRepository;
+import org.openhab.core.model.thing.internal.StandaloneThingProvider;
 import org.openhab.core.model.thing.thing.ModelBridge;
 import org.openhab.core.model.thing.thing.ModelChannel;
 import org.openhab.core.model.thing.thing.ModelProperty;
@@ -35,6 +37,7 @@ import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingUID;
 import org.openhab.core.thing.fileconverter.AbstractThingFileGenerator;
 import org.openhab.core.thing.fileconverter.ThingFileGenerator;
+import org.openhab.core.thing.fileconverter.ThingFileParser;
 import org.openhab.core.thing.type.ChannelKind;
 import org.openhab.core.thing.type.ChannelTypeRegistry;
 import org.openhab.core.thing.type.ChannelTypeUID;
@@ -52,20 +55,23 @@ import org.slf4j.LoggerFactory;
  * @author Laurent Garnier - Initial contribution
  */
 @NonNullByDefault
-@Component(immediate = true, service = ThingFileGenerator.class)
-public class DslThingFileConverter extends AbstractThingFileGenerator {
+@Component(immediate = true, service = { ThingFileGenerator.class, ThingFileParser.class })
+public class DslThingFileConverter extends AbstractThingFileGenerator implements ThingFileParser {
 
     private final Logger logger = LoggerFactory.getLogger(DslThingFileConverter.class);
 
     private final ModelRepository modelRepository;
+    private final StandaloneThingProvider standaloneThingProvider;
 
     @Activate
     public DslThingFileConverter(final @Reference ModelRepository modelRepository,
+            final @Reference StandaloneThingProvider standaloneThingProvider,
             final @Reference ThingTypeRegistry thingTypeRegistry,
             final @Reference ChannelTypeRegistry channelTypeRegistry,
             final @Reference ConfigDescriptionRegistry configDescRegistry) {
         super(thingTypeRegistry, channelTypeRegistry, configDescRegistry);
         this.modelRepository = modelRepository;
+        this.standaloneThingProvider = standaloneThingProvider;
     }
 
     @Override
@@ -74,15 +80,16 @@ public class DslThingFileConverter extends AbstractThingFileGenerator {
     }
 
     @Override
-    public synchronized void generateFileFormat(OutputStream out, List<Thing> things, boolean hideDefaultParameters) {
+    public synchronized void generateFileFormat(OutputStream out, List<Thing> things, boolean hideDefaultChannels,
+            boolean hideDefaultParameters) {
         ThingModel model = ThingFactory.eINSTANCE.createThingModel();
         Set<Thing> handledThings = new HashSet<>();
         for (Thing thing : things) {
             if (handledThings.contains(thing)) {
                 continue;
             }
-            model.getThings()
-                    .add(buildModelThing(thing, hideDefaultParameters, things.size() > 1, true, things, handledThings));
+            model.getThings().add(buildModelThing(thing, hideDefaultChannels, hideDefaultParameters, things.size() > 1,
+                    true, things, handledThings));
         }
         // Double quotes are unexpectedly generated in thing UID when the segment contains a -.
         // Fix that by removing these double quotes. Requires to first build the generated syntax as a String
@@ -96,11 +103,12 @@ public class DslThingFileConverter extends AbstractThingFileGenerator {
         }
     }
 
-    private ModelThing buildModelThing(Thing thing, boolean hideDefaultParameters, boolean preferPresentationAsTree,
-            boolean topLevel, List<Thing> onlyThings, Set<Thing> handledThings) {
+    private ModelThing buildModelThing(Thing thing, boolean hideDefaultChannels, boolean hideDefaultParameters,
+            boolean preferPresentationAsTree, boolean topLevel, List<Thing> onlyThings, Set<Thing> handledThings) {
         ModelThing model;
         ModelBridge modelBridge;
-        if (preferPresentationAsTree && thing instanceof Bridge bridge && !bridge.getThings().isEmpty()) {
+        List<Thing> childThings = getChildThings(thing, onlyThings);
+        if (preferPresentationAsTree && thing instanceof Bridge && !childThings.isEmpty()) {
             modelBridge = ThingFactory.eINSTANCE.createModelBridge();
             modelBridge.setBridge(true);
             model = modelBridge;
@@ -134,15 +142,15 @@ public class DslThingFileConverter extends AbstractThingFileGenerator {
 
         if (preferPresentationAsTree && modelBridge != null) {
             modelBridge.setThingsHeader(false);
-            for (Thing child : getChildThings(thing)) {
-                if (onlyThings.contains(child) && !handledThings.contains(child)) {
-                    modelBridge.getThings()
-                            .add(buildModelThing(child, hideDefaultParameters, true, false, onlyThings, handledThings));
+            for (Thing child : childThings) {
+                if (!handledThings.contains(child)) {
+                    modelBridge.getThings().add(buildModelThing(child, hideDefaultChannels, hideDefaultParameters, true,
+                            false, onlyThings, handledThings));
                 }
             }
         }
 
-        List<Channel> channels = getNonDefaultChannels(thing);
+        List<Channel> channels = hideDefaultChannels ? getNonDefaultChannels(thing) : thing.getChannels();
         model.setChannelsHeader(!channels.isEmpty());
         for (Channel channel : channels) {
             model.getChannels().add(buildModelChannel(channel, hideDefaultParameters));
@@ -188,5 +196,22 @@ public class DslThingFileConverter extends AbstractThingFileGenerator {
             property.getValue().add(value);
         }
         return property;
+    }
+
+    @Override
+    public String getFileFormatParser() {
+        return "DSL";
+    }
+
+    @Override
+    public boolean parseFileFormat(String syntax, List<Thing> things, List<String> errors, List<String> warnings) {
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(syntax.getBytes());
+        String modelName = modelRepository.addStandaloneModel("things", inputStream, errors, warnings);
+        if (modelName != null) {
+            things.addAll(standaloneThingProvider.getThingsFromStandaloneModel(modelName));
+            modelRepository.removeStandaloneModel(modelName);
+            return true;
+        }
+        return false;
     }
 }

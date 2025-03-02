@@ -63,16 +63,18 @@ public abstract class AbstractThingFileGenerator implements ThingFileGenerator {
     }
 
     /**
-     * Get the child things of a bridge thing, ordered by UID.
+     * Get the child things of a bridge thing amongst a list of things, ordered by UID.
      *
      * @param thing the thing
+     * @param fromThings the list of things to look for
      * @return the sorted list of child things or an empty list if the thing is not a bridge thing
      */
-    protected List<Thing> getChildThings(Thing thing) {
+    protected List<Thing> getChildThings(Thing thing, List<Thing> fromThings) {
         if (thing instanceof Bridge bridge) {
-            return bridge.getThings().stream().sorted((thing1, thing2) -> {
-                return thing1.getUID().getAsString().compareTo(thing2.getUID().getAsString());
-            }).collect(Collectors.toList());
+            return fromThings.stream().filter(th -> bridge.getUID().equals(th.getBridgeUID()))
+                    .sorted((thing1, thing2) -> {
+                        return thing1.getUID().getAsString().compareTo(thing2.getUID().getAsString());
+                    }).collect(Collectors.toList());
         }
         return List.of();
     }
@@ -174,32 +176,16 @@ public abstract class AbstractThingFileGenerator implements ThingFileGenerator {
      * Get non default channels.
      * It includes extensible channels and channels with a non default configuration.
      *
-     * Resulting channels are sorted in such a way that channels without channel type are after channels
-     * with a channel type. Sort is done first on the channel type and then on the channel UID.
-     *
      * @param thing the thing
-     * @return the sorted list of channels
+     * @return the list of channels
      */
     protected List<Channel> getNonDefaultChannels(Thing thing) {
         ThingType thingType = thingTypeRegistry.getThingType(thing.getThingTypeUID());
         List<String> ids = thingType != null ? thingType.getExtensibleChannelTypeIds() : List.of();
-        List<Channel> channels = thing
+        return thing
                 .getChannels().stream().filter(ch -> ch.getChannelTypeUID() == null
                         || ids.contains(ch.getChannelTypeUID().getId()) || channelWithNonDefaultConfig(ch))
                 .collect(Collectors.toList());
-        return channels.stream().sorted((ch1, ch2) -> {
-            ChannelTypeUID typeUID1 = ch1.getChannelTypeUID();
-            ChannelTypeUID typeUID2 = ch2.getChannelTypeUID();
-            if (typeUID1 != null && typeUID2 == null) {
-                return -1;
-            } else if (typeUID1 == null && typeUID2 != null) {
-                return 1;
-            } else if (typeUID1 != null && typeUID2 != null && !typeUID1.equals(typeUID2)) {
-                return typeUID1.getAsString().compareTo(typeUID2.getAsString());
-            } else {
-                return ch1.getUID().getAsString().compareTo(ch2.getUID().getAsString());
-            }
-        }).collect(Collectors.toList());
     }
 
     private boolean channelWithNonDefaultConfig(Channel channel) {
