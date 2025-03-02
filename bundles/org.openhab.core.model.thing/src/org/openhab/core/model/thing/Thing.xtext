@@ -26,9 +26,9 @@ ModelBridge returns ModelThing:
 		properties+=ModelProperty? (',' properties+=ModelProperty)*
 	']')?
 	('{'
-		('Things:')?
+		(thingsHeader?='Things:')?
 		things+=(ModelThing|ModelBridge)*
-		('Channels:')?			
+		(channelsHeader?='Channels:')?
 		channels+=ModelChannel*   
 		
 	'}')?
@@ -43,7 +43,7 @@ ModelThing:
 		properties+=ModelProperty? (',' properties+=ModelProperty)*
 	']')?
 	('{'
-		('Channels:')?
+		(channelsHeader?='Channels:')?
 		channels+=ModelChannel*
 	'}')?
 ;
