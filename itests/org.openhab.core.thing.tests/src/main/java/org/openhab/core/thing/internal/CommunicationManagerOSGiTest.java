@@ -360,7 +360,7 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
 
     @Test
     public void testItemStateEventSingleLink() {
-        manager.receive(ItemEventFactory.createStateUpdatedEvent(ITEM_NAME_2, OnOffType.ON));
+        manager.receive(ItemEventFactory.createStateUpdatedEvent(ITEM_NAME_2, OnOffType.ON, null));
         waitForAssert(() -> {
             verify(stateProfileMock).onStateUpdateFromItem(eq(OnOffType.ON));
             verify(triggerProfileMock).onStateUpdateFromItem(eq(OnOffType.ON));
@@ -371,7 +371,7 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
 
     @Test
     public void testItemStateEventMultiLink() {
-        manager.receive(ItemEventFactory.createStateUpdatedEvent(ITEM_NAME_1, OnOffType.ON));
+        manager.receive(ItemEventFactory.createStateUpdatedEvent(ITEM_NAME_1, OnOffType.ON, null));
         waitForAssert(() -> {
             verify(stateProfileMock, times(2)).onStateUpdateFromItem(eq(OnOffType.ON));
             verify(triggerProfileMock, times(2)).onStateUpdateFromItem(eq(OnOffType.ON));
@@ -382,8 +382,8 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
 
     @Test
     public void testItemStateEventNotToSource() {
-        manager.receive(
-                ItemEventFactory.createStateUpdatedEvent(ITEM_NAME_1, OnOffType.ON, STATE_CHANNEL_UID_2.getAsString()));
+        manager.receive(ItemEventFactory.createStateUpdatedEvent(ITEM_NAME_1, OnOffType.ON, null,
+                STATE_CHANNEL_UID_2.getAsString()));
         waitForAssert(() -> {
             verify(stateProfileMock).onStateUpdateFromItem(eq(OnOffType.ON));
             verify(triggerProfileMock, times(2)).onStateUpdateFromItem(eq(OnOffType.ON));

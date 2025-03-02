@@ -61,11 +61,16 @@ public class DSLScriptEngine implements javax.script.ScriptEngine {
 
     public static final String MIMETYPE_OPENHAB_DSL_RULE = "application/vnd.openhab.dsl.rule";
 
-    private static final Map<String, String> IMPLICIT_VARS = Map.of("command",
-            ScriptJvmModelInferrer.VAR_RECEIVED_COMMAND, "state", ScriptJvmModelInferrer.VAR_NEW_STATE, "newState",
-            ScriptJvmModelInferrer.VAR_NEW_STATE, "oldState", ScriptJvmModelInferrer.VAR_PREVIOUS_STATE,
-            "triggeringItem", ScriptJvmModelInferrer.VAR_TRIGGERING_ITEM, "triggeringGroup",
-            ScriptJvmModelInferrer.VAR_TRIGGERING_GROUP, "input", ScriptJvmModelInferrer.VAR_INPUT);
+    private static final Map<String, String> IMPLICIT_VARS = Map.of( //
+            "command", ScriptJvmModelInferrer.VAR_RECEIVED_COMMAND, //
+            "state", ScriptJvmModelInferrer.VAR_NEW_STATE, //
+            "newState", ScriptJvmModelInferrer.VAR_NEW_STATE, //
+            "oldState", ScriptJvmModelInferrer.VAR_PREVIOUS_STATE, //
+            "lastStateUpdate", ScriptJvmModelInferrer.VAR_LAST_STATE_UPDATE, //
+            "lastStateChange", ScriptJvmModelInferrer.VAR_LAST_STATE_CHANGE, //
+            "triggeringItem", ScriptJvmModelInferrer.VAR_TRIGGERING_ITEM, //
+            "triggeringGroup", ScriptJvmModelInferrer.VAR_TRIGGERING_GROUP, //
+            "input", ScriptJvmModelInferrer.VAR_INPUT);
 
     private final Logger logger = LoggerFactory.getLogger(DSLScriptEngine.class);
 
