@@ -83,10 +83,10 @@ public class EventHandler implements AutoCloseable {
     }
 
     public void handleEvent(org.osgi.service.event.Event osgiEvent) {
-        Object typeObj = osgiEvent.getProperty("type");
-        Object payloadObj = osgiEvent.getProperty("payload");
-        Object topicObj = osgiEvent.getProperty("topic");
-        Object sourceObj = osgiEvent.getProperty("source");
+        Object typeObj = osgiEvent.getProperty(OSGiEventPublisher.TYPE);
+        Object payloadObj = osgiEvent.getProperty(OSGiEventPublisher.PAYLOAD);
+        Object topicObj = osgiEvent.getProperty(OSGiEventPublisher.TOPIC);
+        Object sourceObj = osgiEvent.getProperty(OSGiEventPublisher.SOURCE);
 
         if (typeObj instanceof String typeStr && payloadObj instanceof String payloadStr
                 && topicObj instanceof String topicStr) {
