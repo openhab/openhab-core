@@ -12,6 +12,7 @@
  */
 package org.openhab.core.model.item.internal.fileconverter;
 
+import java.io.ByteArrayInputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -35,7 +36,9 @@ import org.openhab.core.items.Item;
 import org.openhab.core.items.Metadata;
 import org.openhab.core.items.fileconverter.AbstractItemFileGenerator;
 import org.openhab.core.items.fileconverter.ItemFileGenerator;
+import org.openhab.core.items.fileconverter.ItemFileParser;
 import org.openhab.core.model.core.ModelRepository;
+import org.openhab.core.model.item.internal.StandaloneItemProvider;
 import org.openhab.core.model.items.ItemModel;
 import org.openhab.core.model.items.ItemsFactory;
 import org.openhab.core.model.items.ModelBinding;
@@ -58,18 +61,21 @@ import org.slf4j.LoggerFactory;
  * @author Laurent Garnier - Initial contribution
  */
 @NonNullByDefault
-@Component(immediate = true, service = ItemFileGenerator.class)
-public class DslItemFileConverter extends AbstractItemFileGenerator {
+@Component(immediate = true, service = { ItemFileGenerator.class, ItemFileParser.class })
+public class DslItemFileConverter extends AbstractItemFileGenerator implements ItemFileParser {
 
     private final Logger logger = LoggerFactory.getLogger(DslItemFileConverter.class);
 
     private final ModelRepository modelRepository;
+    private final StandaloneItemProvider standaloneItemProvider;
     private final ConfigDescriptionRegistry configDescriptionRegistry;
 
     @Activate
     public DslItemFileConverter(final @Reference ModelRepository modelRepository,
+            final @Reference StandaloneItemProvider standaloneItemProvider,
             final @Reference ConfigDescriptionRegistry configDescriptionRegistry) {
         this.modelRepository = modelRepository;
+        this.standaloneItemProvider = standaloneItemProvider;
         this.configDescriptionRegistry = configDescriptionRegistry;
     }
 
@@ -246,5 +252,25 @@ public class DslItemFileConverter extends AbstractItemFileGenerator {
             handledNames.add(paramName);
         }
         return parameters;
+    }
+
+    @Override
+    public String getFileFormatParser() {
+        return "DSL";
+    }
+
+    @Override
+    public boolean parseFileFormat(String syntax, Collection<Item> items, Collection<Metadata> metadata,
+            StringBuilder errors, StringBuilder warnings) {
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(syntax.getBytes());
+        String modelName = modelRepository.addStandaloneModel("items", inputStream, errors, warnings);
+        if (modelName != null) {
+            Collection<Item> newItems = standaloneItemProvider.getItemsFromStandaloneModel(modelName);
+            items.addAll(newItems);
+            // TODO retrieve metadata
+            modelRepository.removeStandaloneModel(modelName);
+            return true;
+        }
+        return false;
     }
 }
