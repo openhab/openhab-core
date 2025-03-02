@@ -12,6 +12,7 @@
  */
 @Grab('com.xlson.groovycsv:groovycsv:1.1')
 import static com.xlson.groovycsv.CsvParser.parseCsv
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.time.Year
@@ -20,19 +21,25 @@ import java.util.stream.Collectors
 
 baseDir = Paths.get(getClass().protectionDomain.codeSource.location.toURI()).getParent().getParent().toAbsolutePath()
 header = header()
+tagsByType = [:]
 
 def tagSets = new TreeMap<String, String>()
 
 def labelsFile = new FileWriter("${baseDir}/src/main/resources/tags.properties")
 labelsFile.write("# Generated content - do not edit!\n")
 
-for (line in parseCsv(new FileReader("${baseDir}/model/SemanticTags.csv"), separator: ',')) {
+for (line in tagsCsv()) {
     println "Processing Tag $line.Tag"
 
     def tagSet = (line.Parent ? tagSets.get(line.Parent) : line.Type) + "_" + line.Tag
     tagSets.put(line.Tag,tagSet)
 
     appendLabelsFile(labelsFile, line, tagSet)
+
+    if (!tagsByType.containsKey(line.Type)) {
+        tagsByType[line.Type] = []
+    }
+    tagsByType[line.Type].add(line)
 
     switch(line.Type) {
         case "Location"            : break;
@@ -45,11 +52,17 @@ for (line in parseCsv(new FileReader("${baseDir}/model/SemanticTags.csv"), separ
 
 labelsFile.close()
 
+createDefaultSemanticTags(tagSets)
 createDefaultProviderFile(tagSets)
+updateThingDescriptionXsd()
 
 println "\n\nTagSets:"
 for (String tagSet : tagSets) {
     println tagSet
+}
+
+def tagsCsv() {
+    return parseCsv(new FileReader("${baseDir}/model/SemanticTags.csv"), separator: ',')
 }
 
 def appendLabelsFile(FileWriter file, def line, String tagSet) {
@@ -58,6 +71,55 @@ def appendLabelsFile(FileWriter file, def line, String tagSet) {
         file.write("," + line.Synonyms.replaceAll(", ", ","))
     }
     file.write("\n")
+}
+
+def camelToUpperCasedSnake(def tag) {
+    return tag.split(/(?=[A-Z][a-z])/).join("_").toUpperCase()
+}
+
+def createDefaultSemanticTags(def tagSets) {
+    def file = new FileWriter("${baseDir}/src/main/java/org/openhab/core/semantics/model/DefaultSemanticTags.java")
+    file.write(header)
+    file.write("""package org.openhab.core.semantics.model;
+
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.core.semantics.SemanticTag;
+import org.openhab.core.semantics.SemanticTagImpl;
+
+/**
+ * This class defines all the default semantic tags.
+ *
+ * @author Generated from generateTagClasses.groovy - Initial contribution
+ */
+@NonNullByDefault
+public class DefaultSemanticTags {
+
+    public static final SemanticTag EQUIPMENT = new SemanticTagImpl("Equipment", "", "", "");
+    public static final SemanticTag LOCATION = new SemanticTagImpl("Location", "", "", "");
+    public static final SemanticTag POINT = new SemanticTagImpl("Point", "", "", "");
+    public static final SemanticTag PROPERTY = new SemanticTagImpl("Property", "", "", "");
+""")
+
+    for (type in tagsByType.keySet()) {
+        file.write("""
+    public static class ${type} {""")
+        for (line in tagsByType[type]) {
+            def tagId = (line.Parent ? tagSets.get(line.Parent) : line.Type) + "_" + line.Tag
+            def constantName = camelToUpperCasedSnake(line.Tag)
+            file.write("""
+        public static final SemanticTag ${constantName} = new SemanticTagImpl( //
+                "${tagId}", //
+                "${line.Label}", //
+                "${line.Description}", //
+                "${line.Synonyms}");""")
+        }
+        file.write("""
+    }
+""")
+    }
+        file.write("""}
+""")
+    file.close()
 }
 
 def createDefaultProviderFile(def tagSets) {
@@ -72,7 +134,6 @@ import java.util.List;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.common.registry.ProviderChangeListener;
 import org.openhab.core.semantics.SemanticTag;
-import org.openhab.core.semantics.SemanticTagImpl;
 import org.openhab.core.semantics.SemanticTagProvider;
 import org.osgi.service.component.annotations.Component;
 
@@ -89,15 +150,14 @@ public class DefaultSemanticTagProvider implements SemanticTagProvider {
 
     public DefaultSemanticTagProvider() {
         this.defaultTags = new ArrayList<>();
-        defaultTags.add(new SemanticTagImpl("Equipment", "", "", ""));
-        defaultTags.add(new SemanticTagImpl("Location", "", "", ""));
-        defaultTags.add(new SemanticTagImpl("Point", "", "", ""));
-        defaultTags.add(new SemanticTagImpl("Property", "", "", ""));
+        defaultTags.add(DefaultSemanticTags.EQUIPMENT);
+        defaultTags.add(DefaultSemanticTags.LOCATION);
+        defaultTags.add(DefaultSemanticTags.POINT);
+        defaultTags.add(DefaultSemanticTags.PROPERTY);
 """)    
-    for (line in parseCsv(new FileReader("${baseDir}/model/SemanticTags.csv"), separator: ',')) {
-        def tagId = (line.Parent ? tagSets.get(line.Parent) : line.Type) + "_" + line.Tag
-        file.write("""        defaultTags.add(new SemanticTagImpl("${tagId}", //
-                "${line.Label}", "${line.Description}", "${line.Synonyms}"));
+    for (line in tagsCsv()) {
+        def constantName = line.Type + "." + camelToUpperCasedSnake(line.Tag)
+        file.write("""        defaultTags.add(DefaultSemanticTags.${constantName});
 """)
     }
     file.write("""    }
@@ -117,6 +177,45 @@ public class DefaultSemanticTagProvider implements SemanticTagProvider {
 }
 """)
     file.close()
+}
+
+def updateThingDescriptionXsd() {
+    def xsdPath = baseDir.resolveSibling("org.openhab.core.thing/schema/thing/thing-description-1.0.0.xsd")
+    def tempPath = xsdPath.resolveSibling("thing-description.xsd.tmp")
+    def xsdFile = new File(xsdPath.toString()).text
+    def tempFile = new FileWriter(tempPath.toString())
+    def tagSection = ""
+    def beginEquipment = "<!-- Begin Allowed Semantic Equipment Tag Values -->"
+    def beginProperty = "<!-- Begin Allowed Semantic Property Tag Values -->"
+    def beginPoint = "<!-- Begin Allowed Semantic Point Tag Values -->"
+    def endTag = "<!-- End Allowed Semantic "
+    def doNotEdit = "\t\t\t<!-- DO NOT EDIT THIS LIST - Generated by generateTagClasses.groovy -->"
+    xsdFile.eachLine { sourceLine, lineNumber ->
+        if (tagSection && !sourceLine.contains(endTag)) {
+            return
+        } else {
+            tempFile.write(sourceLine + "\n")
+
+            if (sourceLine.contains(endTag)) {
+                tagSection = ""
+            } else if (sourceLine.contains(beginEquipment)) {
+                tagSection = "Equipment"
+            } else if (sourceLine.contains(beginPoint)) {
+                tagSection = "Point"
+            } else if (sourceLine.contains(beginProperty)) {
+                tagSection = "Property"
+            }
+
+            if (tagSection) {
+                tempFile.write(doNotEdit + "\n")
+                for (tag in tagsByType[tagSection]) {
+                    tempFile.write("""\t\t\t<xs:enumeration value="${tag.Tag}"/>\n""")
+                }
+            }
+        }
+    }
+    tempFile.close()
+    Files.move(tempPath, xsdPath, REPLACE_EXISTING)
 }
 
 def header() {
