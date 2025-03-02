@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,8 +14,8 @@ package org.openhab.core.library.items;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
-import javax.measure.Dimension;
 import javax.measure.Quantity;
 import javax.measure.Unit;
 
@@ -35,6 +35,7 @@ import org.openhab.core.types.RefreshType;
 import org.openhab.core.types.State;
 import org.openhab.core.types.StateDescription;
 import org.openhab.core.types.StateDescriptionFragmentBuilder;
+import org.openhab.core.types.TimeSeries;
 import org.openhab.core.types.UnDefType;
 import org.openhab.core.types.util.UnitUtils;
 import org.slf4j.Logger;
@@ -73,7 +74,8 @@ public class NumberItem extends GenericItem implements MetadataAwareItem {
 
         String itemTypeExtension = ItemUtil.getItemTypeExtension(getType());
         if (itemTypeExtension != null) {
-            dimension = UnitUtils.parseDimension(itemTypeExtension);
+            Class<? extends Quantity<?>> dimension = UnitUtils.parseDimension(itemTypeExtension);
+            this.dimension = dimension;
             if (dimension == null) {
                 throw new IllegalArgumentException("The given dimension " + itemTypeExtension + " is unknown.");
             } else if (unitProvider == null) {
@@ -102,15 +104,13 @@ public class NumberItem extends GenericItem implements MetadataAwareItem {
 
     public void send(QuantityType<?> command) {
         if (dimension == null) {
-            DecimalType strippedCommand = new DecimalType(command.toBigDecimal());
+            DecimalType strippedCommand = new DecimalType(command);
             internalSend(strippedCommand);
+        } else if (command.getUnit().isCompatible(unit) || command.getUnit().inverse().isCompatible(unit)) {
+            internalSend(command);
         } else {
-            if (command.getUnit().isCompatible(unit) || command.getUnit().inverse().isCompatible(unit)) {
-                internalSend(command);
-            } else {
-                logger.warn("Command '{}' to item '{}' was rejected because it is incompatible with the item unit '{}'",
-                        command, name, unit);
-            }
+            logger.warn("Command '{}' to item '{}' was rejected because it is incompatible with the item unit '{}'",
+                    command, name, unit);
         }
     }
 
@@ -129,21 +129,19 @@ public class NumberItem extends GenericItem implements MetadataAwareItem {
     }
 
     /**
-     * Returns the {@link Dimension} associated with this {@link NumberItem}, may be null.
+     * Returns the {@link javax.measure.Dimension} associated with this {@link NumberItem}, may be null.
      *
-     * @return the {@link Dimension} associated with this {@link NumberItem}, may be null.
+     * @return the {@link javax.measure.Dimension} associated with this {@link NumberItem}, may be null.
      */
     public @Nullable Class<? extends Quantity<?>> getDimension() {
         return dimension;
     }
 
-    @Override
-    public void setState(State state) {
+    private @Nullable State getInternalState(State state) {
         if (state instanceof QuantityType<?> quantityType) {
             if (dimension == null) {
                 // QuantityType update to a NumberItem without unit, strip unit
-                DecimalType plainState = new DecimalType(quantityType.toBigDecimal());
-                super.applyState(plainState);
+                return new DecimalType(quantityType);
             } else {
                 // QuantityType update to a NumberItem with unit, convert to item unit (if possible)
                 Unit<?> stateUnit = quantityType.getUnit();
@@ -151,7 +149,7 @@ public class NumberItem extends GenericItem implements MetadataAwareItem {
                         ? quantityType.toInvertibleUnit(unit)
                         : null;
                 if (convertedState != null) {
-                    super.applyState(convertedState);
+                    return convertedState;
                 } else {
                     logger.warn("Failed to update item '{}' because '{}' could not be converted to the item unit '{}'",
                             name, state, unit);
@@ -160,15 +158,41 @@ public class NumberItem extends GenericItem implements MetadataAwareItem {
         } else if (state instanceof DecimalType decimalType) {
             if (dimension == null) {
                 // DecimalType update to NumberItem with unit
-                super.applyState(decimalType);
+                return decimalType;
             } else {
                 // DecimalType update for a NumberItem with dimension, convert to QuantityType
-                super.applyState(new QuantityType<>(decimalType.doubleValue(), unit));
+                return new QuantityType<>(decimalType.doubleValue(), unit);
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public void setState(State state) {
+        if (state instanceof DecimalType || state instanceof QuantityType<?>) {
+            State internalState = getInternalState(state);
+            if (internalState != null) {
+                applyState(internalState);
             }
         } else if (state instanceof UnDefType) {
-            super.applyState(state);
+            applyState(state);
         } else {
             logSetTypeError(state);
+        }
+    }
+
+    @Override
+    public void setTimeSeries(TimeSeries timeSeries) {
+        TimeSeries internalSeries = new TimeSeries(timeSeries.getPolicy());
+        timeSeries.getStates().forEach(s -> internalSeries.add(s.timestamp(),
+                Objects.requireNonNullElse(getInternalState(s.state()), UnDefType.NULL)));
+
+        if (dimension != null && internalSeries.getStates().allMatch(s -> s.state() instanceof QuantityType<?>)) {
+            applyTimeSeries(internalSeries);
+        } else if (internalSeries.getStates().allMatch(s -> s.state() instanceof DecimalType)) {
+            applyTimeSeries(internalSeries);
+        } else {
+            logSetTypeError(timeSeries);
         }
     }
 
@@ -199,12 +223,7 @@ public class NumberItem extends GenericItem implements MetadataAwareItem {
     public void addedMetadata(Metadata metadata) {
         if (dimension != null && UNIT_METADATA_NAMESPACE.equals(metadata.getUID().getNamespace())) {
             Unit<?> unit = UnitUtils.parseUnit(metadata.getValue());
-            if (unit == null) {
-                logger.warn("Unit '{}' could not be parsed to a known unit. Keeping old unit '{}' for item '{}'.",
-                        metadata.getValue(), this.unit, name);
-                return;
-            }
-            if (!unit.isCompatible(this.unit) && !unit.inverse().isCompatible(this.unit)) {
+            if ((unit == null) || (!unit.isCompatible(this.unit) && !unit.inverse().isCompatible(this.unit))) {
                 logger.warn("Unit '{}' could not be parsed to a known unit. Keeping old unit '{}' for item '{}'.",
                         metadata.getValue(), this.unit, name);
                 return;
@@ -222,9 +241,9 @@ public class NumberItem extends GenericItem implements MetadataAwareItem {
     @Override
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public void removedMetadata(Metadata metadata) {
+        Class<? extends Quantity<?>> dimension = this.dimension;
         if (dimension != null && UNIT_METADATA_NAMESPACE.equals(metadata.getUID().getNamespace())) {
-            assert unitProvider != null;
-            unit = unitProvider.getUnit((Class<? extends Quantity>) dimension);
+            unit = Objects.requireNonNull(unitProvider).getUnit((Class<? extends Quantity>) dimension);
             logger.trace("Item '{}' now has unit '{}'", name, unit);
         }
     }

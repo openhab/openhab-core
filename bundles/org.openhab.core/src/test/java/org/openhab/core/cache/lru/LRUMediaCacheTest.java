@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -75,8 +75,7 @@ public class LRUMediaCacheTest {
     }
 
     private LRUMediaCache<MetadataSample> createCache(long size) throws IOException {
-        return new LRUMediaCache<MetadataSample>(storageService, size, "lrucachetest.pid",
-                this.getClass().getClassLoader());
+        return new LRUMediaCache<>(storageService, size, "lrucachetest.pid", this.getClass().getClassLoader());
     }
 
     /**
@@ -90,7 +89,7 @@ public class LRUMediaCacheTest {
         LRUMediaCacheEntry<MetadataSample> cacheEntry = new LRUMediaCacheEntry<>("key1");
         lruCache.put(cacheEntry);
         assertEquals(cacheEntry, lruCache.cachedResults.get("key1"));
-        assertEquals(null, lruCache.cachedResults.get("key2"));
+        assertNull(lruCache.cachedResults.get("key2"));
     }
 
     /**
@@ -121,7 +120,7 @@ public class LRUMediaCacheTest {
         lruCache.makeSpace();
         // cacheEntry1 should be evicted now (size limit is 10, and effective size is 12 when we try to put the
         // cacheEntry4)
-        assertEquals(null, lruCache.cachedResults.get("key1"));
+        assertNull(lruCache.cachedResults.get("key1"));
 
         // getting cacheEntry2 will put it in head, cacheEntry3 is now tail
         assertEquals(cacheEntry2, lruCache.cachedResults.get("key2"));
@@ -129,7 +128,7 @@ public class LRUMediaCacheTest {
         // putting again cacheEntry1 should expel tail, which is cacheEntry3
         lruCache.cachedResults.put(cacheEntry1.getKey(), cacheEntry1);
         lruCache.makeSpace();
-        assertEquals(null, lruCache.cachedResults.get("key3"));
+        assertNull(lruCache.cachedResults.get("key3"));
     }
 
     /**
@@ -201,7 +200,7 @@ public class LRUMediaCacheTest {
         lruCache.makeSpace();
 
         // key2 should be expelled now
-        assertEquals(null, lruCache.cachedResults.get("key2"));
+        assertNull(lruCache.cachedResults.get("key2"));
 
         // key1 and key3 are a hit
         assertEquals(cacheEntry, lruCache.cachedResults.get("key1"));
@@ -271,7 +270,7 @@ public class LRUMediaCacheTest {
             file2Writer.write("falsedata");
         }
         when(storage.stream())
-                .thenAnswer((invocation) -> Stream.of(new AbstractMap.SimpleImmutableEntry("key1", metadataSample1),
+                .thenAnswer(invocation -> Stream.of(new AbstractMap.SimpleImmutableEntry("key1", metadataSample1),
                         new AbstractMap.SimpleImmutableEntry("key2", metadataSample2)));
 
         // create a LRU cache that will use the above data
@@ -279,13 +278,13 @@ public class LRUMediaCacheTest {
 
         LRUMediaCacheEntry<MetadataSample> result1 = lruCache.cachedResults.get("key1");
         assertNotNull(result1);
-        assertEquals(result1.getMetadata().getMeta2(), 1);
-        assertEquals(result1.getMetadata().getMeta1(), "text1");
+        assertEquals(1, result1.getMetadata().getMeta2());
+        assertEquals("text1", result1.getMetadata().getMeta1());
 
         LRUMediaCacheEntry<MetadataSample> result2 = lruCache.cachedResults.get("key2");
         assertNotNull(result2);
-        assertEquals(result2.getMetadata().getMeta1(), "text2");
-        assertEquals(result2.getMetadata().getMeta2(), 2);
+        assertEquals("text2", result2.getMetadata().getMeta1());
+        assertEquals(2, result2.getMetadata().getMeta2());
 
         LRUMediaCacheEntry<MetadataSample> result3 = lruCache.cachedResults.get("key3");
         assertNull(result3);
@@ -322,7 +321,7 @@ public class LRUMediaCacheTest {
 
         // prepare storage map for stream operation
         when(storage.stream())
-                .thenAnswer((invocation) -> Stream.of(new AbstractMap.SimpleImmutableEntry("key1", metadataSample1),
+                .thenAnswer(invocation -> Stream.of(new AbstractMap.SimpleImmutableEntry("key1", metadataSample1),
                         new AbstractMap.SimpleImmutableEntry("key2", metadataSample2)));
 
         // prepare some files : orphan file
@@ -386,7 +385,7 @@ public class LRUMediaCacheTest {
     public void faultyStreamTest() throws IOException {
         MetadataSample metadata = new MetadataSample("meta1", 42);
 
-        when(supplier.get()).thenAnswer((invocation) -> new LRUMediaCacheEntry<>("key", inputStreamMock, metadata));
+        when(supplier.get()).thenAnswer(invocation -> new LRUMediaCacheEntry<>("key", inputStreamMock, metadata));
         // In this test the stream will return two bytes of data, then an empty stream so signal its end.
         // it will be called twice, so return it twice
         when(inputStreamMock.readNBytes(any(Integer.class))).thenReturn(new byte[2], new byte[0], new byte[2],

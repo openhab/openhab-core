@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -95,13 +95,13 @@ public class QueueingThreadPoolExecutorTest {
         String poolName = "testQueuingTPEPoolSize2";
         ThreadPoolExecutor pool = QueueingThreadPoolExecutor.createInstance(poolName, 2);
 
-        assertEquals(pool.getActiveCount(), 0);
+        assertEquals(0, pool.getActiveCount());
         assertTrue(pool.allowsCoreThreadTimeOut());
-        assertEquals(pool.getCompletedTaskCount(), 0);
-        assertEquals(pool.getCorePoolSize(), 1);
-        assertEquals(pool.getMaximumPoolSize(), 2);
-        assertEquals(pool.getLargestPoolSize(), 0);
-        assertEquals(pool.getQueue().size(), 0);
+        assertEquals(0, pool.getCompletedTaskCount());
+        assertEquals(1, pool.getCorePoolSize());
+        assertEquals(2, pool.getMaximumPoolSize());
+        assertEquals(0, pool.getLargestPoolSize());
+        assertEquals(0, pool.getQueue().size());
 
         // now expect that no threads have been created
         assertFalse(areThreadsFromPoolRunning(poolName));
@@ -148,7 +148,7 @@ public class QueueingThreadPoolExecutorTest {
 
         // pool 2 tasks, threads must exist
         pool.execute(createRunnable10s());
-        assertEquals(pool.getActiveCount(), 1);
+        assertEquals(1, pool.getActiveCount());
         assertTrue(isPoolThreadActive(poolName, 1));
         Thread t1 = getThread(poolName + "-1");
         assertFalse(t1.isDaemon());
@@ -158,7 +158,7 @@ public class QueueingThreadPoolExecutorTest {
         assertEquals(t1.getPriority(), prio1);
 
         pool.execute(createRunnable10s());
-        assertEquals(pool.getActiveCount(), 2);
+        assertEquals(2, pool.getActiveCount());
         assertTrue(isPoolThreadActive(poolName, 2));
         Thread t2 = getThread(poolName + "-2");
         assertFalse(t2.isDaemon());
@@ -170,17 +170,17 @@ public class QueueingThreadPoolExecutorTest {
         // 2 more tasks, will be queued, no threads
         pool.execute(createRunnable1s());
         // as pool size is 2, no more active threads, will stay at 2
-        assertEquals(pool.getActiveCount(), 2);
+        assertEquals(2, pool.getActiveCount());
         assertFalse(isPoolThreadActive(poolName, 3));
-        assertEquals(pool.getQueue().size(), 1);
+        assertEquals(1, pool.getQueue().size());
 
         pool.execute(createRunnable1s());
-        assertEquals(pool.getActiveCount(), 2);
+        assertEquals(2, pool.getActiveCount());
         assertFalse(isPoolThreadActive(poolName, 4));
-        assertEquals(pool.getQueue().size(), 2);
+        assertEquals(2, pool.getQueue().size());
 
         // 0 are yet executed
-        assertEquals(pool.getCompletedTaskCount(), 0);
+        assertEquals(0, pool.getCompletedTaskCount());
 
         // needs to wait CORE_POOL_TIMEOUT + 2sec-queue-thread + x until all
         // threads are down again
@@ -249,7 +249,7 @@ public class QueueingThreadPoolExecutorTest {
         for (int i = 0; i < n; i++) {
             // we can only test if name is at least one character,
             // otherwise there will be threads found (handles poolName="")
-            if (poolName.length() > 0) {
+            if (!poolName.isEmpty()) {
                 if (l[i].getName().startsWith(poolName)) {
                     // enable printout to see threads
                     // System.out.println("areThreadsFromPoolRunning: " +

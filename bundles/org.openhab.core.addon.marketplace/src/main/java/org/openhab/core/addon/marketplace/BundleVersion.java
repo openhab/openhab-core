@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -140,15 +140,17 @@ public class BundleVersion {
         }
 
         // the release is always newer than a milestone or snapshot
-        if (qualifier == null) { // we are the release
+        Long thisQualifier = qualifier;
+        if (thisQualifier == null) { // we are the release
             return 1;
         }
-        if (other.qualifier == null) { // the other is the release
+        Long otherQualifier = other.qualifier;
+        if (otherQualifier == null) { // the other is the release
             return -1;
         }
 
         // both versions are milestones, we can compare them
-        return Long.compare(qualifier, other.qualifier);
+        return Long.compare(thisQualifier, otherQualifier);
     }
 
     @Override

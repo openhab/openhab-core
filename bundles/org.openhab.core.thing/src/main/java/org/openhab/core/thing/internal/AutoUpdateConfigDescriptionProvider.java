@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,11 +12,8 @@
  */
 package org.openhab.core.thing.internal;
 
-import static java.util.stream.Collectors.toList;
-
 import java.util.List;
 import java.util.Locale;
-import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -46,10 +43,10 @@ public class AutoUpdateConfigDescriptionProvider implements MetadataConfigDescri
 
     @Override
     public @Nullable List<ParameterOption> getParameterOptions(@Nullable Locale locale) {
-        return Stream.of( //
+        return List.of( //
                 new ParameterOption("true", "Enforce an auto update"), //
                 new ParameterOption("false", "Veto an auto update") //
-        ).collect(toList());
+        );
     }
 
     @Override

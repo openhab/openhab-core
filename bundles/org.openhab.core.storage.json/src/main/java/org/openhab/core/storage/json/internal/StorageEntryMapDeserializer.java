@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -60,7 +60,7 @@ public class StorageEntryMapDeserializer implements JsonDeserializer<Map<String,
             if (entrySet.size() != 2) {
                 return false;
             }
-            Set<String> keys = entrySet.stream().map(e -> e.getKey()).collect(Collectors.toSet());
+            Set<String> keys = entrySet.stream().map(Entry::getKey).collect(Collectors.toSet());
             if (!keys.contains(JsonStorage.CLASS) || !keys.contains(JsonStorage.VALUE)) {
                 return false;
             }

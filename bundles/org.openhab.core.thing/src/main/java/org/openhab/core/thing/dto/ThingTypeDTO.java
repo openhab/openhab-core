@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -38,12 +38,12 @@ public class ThingTypeDTO extends StrippedThingTypeDTO {
     public ThingTypeDTO() {
     }
 
-    public ThingTypeDTO(String UID, String label, String description, String category, boolean listed,
+    public ThingTypeDTO(String uid, String label, String description, String category, boolean listed,
             List<ConfigDescriptionParameterDTO> configParameters, List<ChannelDefinitionDTO> channels,
             List<ChannelGroupDefinitionDTO> channelGroups, List<String> supportedBridgeTypeUIDs,
             Map<String, String> properties, boolean bridge, List<ConfigDescriptionParameterGroupDTO> parameterGroups,
             List<String> extensibleChannelTypeIds) {
-        this.UID = UID;
+        this.UID = uid;
         this.label = label;
         this.description = description;
         this.category = category;

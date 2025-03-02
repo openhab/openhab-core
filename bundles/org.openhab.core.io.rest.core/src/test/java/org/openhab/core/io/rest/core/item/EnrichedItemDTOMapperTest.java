@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -55,31 +55,32 @@ public class EnrichedItemDTOMapperTest extends JavaTest {
             subGroup.addMember(stringItem);
         }
 
-        EnrichedGroupItemDTO dto = (EnrichedGroupItemDTO) EnrichedItemDTOMapper.map(group, false, null, null, null);
+        EnrichedGroupItemDTO dto = (EnrichedGroupItemDTO) EnrichedItemDTOMapper.map(group, false, null, null, null,
+                null);
         assertThat(dto.members.length, is(0));
 
-        dto = (EnrichedGroupItemDTO) EnrichedItemDTOMapper.map(group, true, null, null, null);
+        dto = (EnrichedGroupItemDTO) EnrichedItemDTOMapper.map(group, true, null, null, null, null);
         assertThat(dto.members.length, is(3));
         assertThat(((EnrichedGroupItemDTO) dto.members[0]).members.length, is(1));
 
         dto = (EnrichedGroupItemDTO) EnrichedItemDTOMapper.map(group, true,
-                i -> CoreItemFactory.NUMBER.equals(i.getType()), null, null);
+                i -> CoreItemFactory.NUMBER.equals(i.getType()), null, null, null);
         assertThat(dto.members.length, is(1));
 
         dto = (EnrichedGroupItemDTO) EnrichedItemDTOMapper.map(group, true,
-                i -> CoreItemFactory.NUMBER.equals(i.getType()) || i instanceof GroupItem, null, null);
+                i -> CoreItemFactory.NUMBER.equals(i.getType()) || i instanceof GroupItem, null, null, null);
         assertThat(dto.members.length, is(2));
         assertThat(((EnrichedGroupItemDTO) dto.members[0]).members.length, is(0));
 
         dto = (EnrichedGroupItemDTO) EnrichedItemDTOMapper.map(group, true,
-                i -> CoreItemFactory.NUMBER.equals(i.getType()) || i instanceof GroupItem, null, null);
+                i -> CoreItemFactory.NUMBER.equals(i.getType()) || i instanceof GroupItem, null, null, null);
         assertThat(dto.members.length, is(2));
         assertThat(((EnrichedGroupItemDTO) dto.members[0]).members.length, is(0));
 
         dto = (EnrichedGroupItemDTO) EnrichedItemDTOMapper.map(group, true,
                 i -> CoreItemFactory.NUMBER.equals(i.getType()) || i.getType().equals(CoreItemFactory.STRING)
                         || i instanceof GroupItem,
-                null, null);
+                null, null, null);
         assertThat(dto.members.length, is(2));
         assertThat(((EnrichedGroupItemDTO) dto.members[0]).members.length, is(1));
     }
@@ -92,10 +93,10 @@ public class EnrichedItemDTOMapperTest extends JavaTest {
         groupItem1.addMember(groupItem2);
         groupItem2.addMember(groupItem1);
 
-        assertDoesNotThrow(() -> EnrichedItemDTOMapper.map(groupItem1, true, null, null, null));
+        assertDoesNotThrow(() -> EnrichedItemDTOMapper.map(groupItem1, true, null, null, null, null));
 
         assertLogMessage(EnrichedItemDTOMapper.class, LogLevel.ERROR,
-                "Recursive group membership found: group1 is both, a direct or indirect parent and a child of group2.");
+                "Recursive group membership found: group1 is a member of group2, but it is also one of its ancestors.");
     }
 
     @Test
@@ -108,10 +109,10 @@ public class EnrichedItemDTOMapperTest extends JavaTest {
         groupItem2.addMember(groupItem3);
         groupItem3.addMember(groupItem1);
 
-        assertDoesNotThrow(() -> EnrichedItemDTOMapper.map(groupItem1, true, null, null, null));
+        assertDoesNotThrow(() -> EnrichedItemDTOMapper.map(groupItem1, true, null, null, null, null));
 
         assertLogMessage(EnrichedItemDTOMapper.class, LogLevel.ERROR,
-                "Recursive group membership found: group1 is both, a direct or indirect parent and a child of group3.");
+                "Recursive group membership found: group1 is a member of group3, but it is also one of its ancestors.");
     }
 
     @Test
@@ -124,7 +125,22 @@ public class EnrichedItemDTOMapperTest extends JavaTest {
         groupItem1.addMember(numberItem);
         groupItem2.addMember(numberItem);
 
-        EnrichedItemDTOMapper.map(groupItem1, true, null, null, null);
+        EnrichedItemDTOMapper.map(groupItem1, true, null, null, null, null);
+
+        assertNoLogMessage(EnrichedItemDTOMapper.class);
+    }
+
+    @Test
+    public void testDuplicateMembershipOfGroupItemsDoesNotTriggerWarning() {
+        GroupItem groupItem1 = new GroupItem("group1");
+        GroupItem groupItem2 = new GroupItem("group2");
+        GroupItem groupItem3 = new GroupItem("group3");
+
+        groupItem1.addMember(groupItem2);
+        groupItem1.addMember(groupItem3);
+        groupItem2.addMember(groupItem3);
+
+        EnrichedItemDTOMapper.map(groupItem1, true, null, null, null, null);
 
         assertNoLogMessage(EnrichedItemDTOMapper.class);
     }

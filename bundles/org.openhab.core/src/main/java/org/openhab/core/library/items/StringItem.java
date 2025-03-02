@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -24,6 +24,7 @@ import org.openhab.core.library.types.StringType;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.RefreshType;
 import org.openhab.core.types.State;
+import org.openhab.core.types.TimeSeries;
 import org.openhab.core.types.TypeParser;
 import org.openhab.core.types.UnDefType;
 
@@ -76,9 +77,18 @@ public class StringItem extends GenericItem {
     @Override
     public void setState(State state) {
         if (isAcceptedState(ACCEPTED_DATA_TYPES, state)) {
-            super.setState(state);
+            applyState(state);
         } else {
             logSetTypeError(state);
+        }
+    }
+
+    @Override
+    public void setTimeSeries(TimeSeries timeSeries) {
+        if (timeSeries.getStates().allMatch(s -> s.state() instanceof StringType)) {
+            applyTimeSeries(timeSeries);
+        } else {
+            logSetTypeError(timeSeries);
         }
     }
 }

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,14 +14,13 @@ package org.openhab.core.io.rest.auth.internal;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.jose4j.jwa.AlgorithmConstraints.ConstraintType;
@@ -72,7 +71,7 @@ public class JwtHelper {
         }
     }
 
-    private RsaJsonWebKey generateNewKey() throws JoseException, FileNotFoundException, IOException {
+    private RsaJsonWebKey generateNewKey() throws JoseException, IOException {
         RsaJsonWebKey newKey = RsaJwkGenerator.generateJwk(2048);
 
         File file = new File(KEY_FILE_PATH);
@@ -84,8 +83,8 @@ public class JwtHelper {
         return newKey;
     }
 
-    private RsaJsonWebKey loadOrGenerateKey() throws FileNotFoundException, JoseException, IOException {
-        try (final BufferedReader reader = Files.newBufferedReader(Paths.get(KEY_FILE_PATH))) {
+    private RsaJsonWebKey loadOrGenerateKey() throws JoseException, IOException {
+        try (final BufferedReader reader = Files.newBufferedReader(Path.of(KEY_FILE_PATH))) {
             return (RsaJsonWebKey) JsonWebKey.Factory.newJwk(reader.readLine());
         } catch (IOException | JoseException e) {
             RsaJsonWebKey key = generateNewKey();
@@ -116,8 +115,7 @@ public class JwtHelper {
             jwtClaims.setSubject(user.getName());
             jwtClaims.setClaim("client_id", clientId);
             jwtClaims.setClaim("scope", scope);
-            jwtClaims.setStringListClaim("role",
-                    new ArrayList<>(user.getRoles() != null ? user.getRoles() : Collections.emptySet()));
+            jwtClaims.setStringListClaim("role", new ArrayList<>(user.getRoles() != null ? user.getRoles() : Set.of()));
 
             JsonWebSignature jws = new JsonWebSignature();
             jws.setPayload(jwtClaims.toJson());

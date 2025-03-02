@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,6 +12,7 @@
  */
 package org.openhab.core.persistence;
 
+import java.time.Instant;
 import java.time.ZonedDateTime;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -37,6 +38,15 @@ public interface HistoricItem {
      * @return the timestamp of the item
      */
     ZonedDateTime getTimestamp();
+
+    /**
+     * returns the timestamp of the persisted item
+     *
+     * @return the timestamp of the item
+     */
+    default Instant getInstant() {
+        return getTimestamp().toInstant();
+    }
 
     /**
      * returns the current state of the item

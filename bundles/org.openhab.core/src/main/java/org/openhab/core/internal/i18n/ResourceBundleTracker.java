@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,6 +13,7 @@
 package org.openhab.core.internal.i18n;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -120,16 +121,14 @@ public class ResourceBundleTracker extends BundleTracker {
     /**
      * This method is used to get the host bundles of the parameter which is a fragment bundle.
      *
-     * @param bundle an OSGi fragment bundle.
+     * @param fragment an OSGi fragment bundle.
      * @return a list with the hosts of the <code>fragment</code> parameter.
      */
     private List<Bundle> returnHostBundles(Bundle fragment) {
         List<Bundle> hosts = new ArrayList<>();
         Bundle[] bundles = pkgAdmin.getHosts(fragment);
         if (bundles != null) {
-            for (int i = 0; i < bundles.length; i++) {
-                hosts.add(bundles[i]);
-            }
+            hosts.addAll(Arrays.asList(bundles));
         }
         return hosts;
     }

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -173,7 +173,7 @@ public class MqttBrokerConnectionTests extends JavaTest {
                 "MqttBrokerConnectionTests");
 
         // Check if the default policy is set and that the broker within the policy is set.
-        assertTrue(connection.getReconnectStrategy() instanceof PeriodicReconnectStrategy);
+        assertInstanceOf(PeriodicReconnectStrategy.class, connection.getReconnectStrategy());
         AbstractReconnectStrategy p = connection.getReconnectStrategy();
         assertThat(p.getBrokerConnection(), equalTo(connection));
     }
@@ -331,8 +331,8 @@ public class MqttBrokerConnectionTests extends JavaTest {
     public void setterGetterTests() {
         MqttBrokerConnectionEx connection = new MqttBrokerConnectionEx("123.123.123.123", null, false, false,
                 "setterGetterTests");
-        assertEquals(connection.getHost(), "123.123.123.123", "URL getter");
-        assertEquals(connection.getPort(), 1883, "Name getter"); // Check for non-secure port
+        assertEquals("123.123.123.123", connection.getHost(), "URL getter");
+        assertEquals(1883, connection.getPort(), "Name getter"); // Check for non-secure port
         assertFalse(connection.isSecure(), "Secure getter");
         assertFalse(connection.isHostnameValidated(), "HostnameValidated getter");
         assertEquals("setterGetterTests", connection.getClientId(), "ClientID getter");

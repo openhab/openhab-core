@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -56,7 +56,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * <td><b>N/A</b></td>
  * <td>
  * <li>Triggered</li>
- * <li><b>{@link RuleRegistry#runNow(String) runNow}</b></li></td>
+ * <li><b>{@link RuleManager#runNow(String) runNow}</b></li></td>
  * </tr>
  * <td></td>
  * <tr>
@@ -84,7 +84,7 @@ public enum RuleStatus {
 
     private final int value;
 
-    private RuleStatus(final int newValue) {
+    RuleStatus(final int newValue) {
         value = newValue;
     }
 

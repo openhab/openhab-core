@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -80,7 +80,7 @@ public class ThingRegistryImpl extends AbstractRegistry<Thing, ThingUID, ThingPr
         ThingUID thingUID = channelUID.getThingUID();
         Thing thing = get(thingUID);
         if (thing != null) {
-            return thing.getChannel(channelUID.getId());
+            return thing.getChannel(channelUID);
         }
         return null;
     }
@@ -96,7 +96,7 @@ public class ThingRegistryImpl extends AbstractRegistry<Thing, ThingUID, ThingPr
                 throw new IllegalStateException("Thing with UID " + thingUID + " has no handler attached.");
             }
         } else {
-            throw new IllegalArgumentException("Thing with UID " + thingUID + " does not exists.");
+            throw new IllegalArgumentException("Thing with UID " + thingUID + " does not exist.");
         }
     }
 

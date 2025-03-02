@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -20,8 +20,8 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
-import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -92,7 +92,7 @@ public class FirmwareTest extends JavaOSGiTest {
         String description = "description";
         String model = "model";
         boolean modelRestricted = true;
-        URL onlineChangelog = new URL("http://online.changelog");
+        URL onlineChangelog = URI.create("http://online.changelog").toURL();
         String prerequisiteVersion = "0.0.9";
         String md5hash = "123abc";
         String vendor = "vendor";
@@ -305,12 +305,10 @@ public class FirmwareTest extends JavaOSGiTest {
         String description = "description";
         String model = "model";
         boolean modelRestricted = true;
-        URL onlineChangelog = new URL("https://secure.com/changelog");
+        URL onlineChangelog = URI.create("https://secure.com/changelog").toURL();
         String prerequisiteVersion = "0.1";
         String vendor = "vendor";
-        Map<String, String> properties = new HashMap<>();
-        properties.put("prop1", "val1");
-        properties.put("prop2", "val2");
+        Map<String, String> properties = Map.of("prop1", "val1", "prop2", "val2");
         InputStream openStream = bundleContext.getBundle().getResource(FILE_NAME).openStream();
 
         Firmware firmware1 = FirmwareBuilder.create(THING_TYPE_UID, "1").withInputStream(openStream)
@@ -333,12 +331,10 @@ public class FirmwareTest extends JavaOSGiTest {
         String description = "description";
         String model = "model";
         boolean modelRestricted = true;
-        URL onlineChangelog = new URL("https://secure.com/changelog");
+        URL onlineChangelog = URI.create("https://secure.com/changelog").toURL();
         String prerequisiteVersion = "0.1";
         String vendor = "vendor";
-        Map<String, String> properties = new HashMap<>();
-        properties.put("prop1", "val1");
-        properties.put("prop2", "val2");
+        Map<String, String> properties = Map.of("prop1", "val1", "prop2", "val2");
         InputStream openStream = bundleContext.getBundle().getResource(FILE_NAME).openStream();
 
         Firmware firmware1 = FirmwareBuilder.create(THING_TYPE_UID, "1").withInputStream(openStream)
@@ -378,8 +374,7 @@ public class FirmwareTest extends JavaOSGiTest {
     }
 
     private Thing thingWithFirmwareVersion(String version) {
-        Map<String, String> properties = new HashMap<>();
-        properties.put(Thing.PROPERTY_FIRMWARE_VERSION, version);
+        Map<String, String> properties = Map.of(Thing.PROPERTY_FIRMWARE_VERSION, version);
         return ThingBuilder.create(THING_TYPE_UID, "testThing").withProperties(properties).build();
     }
 }

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -27,20 +27,26 @@ public class GlobalStrategies {
         @Override
         public String getName() {
             return "everyUpdate";
-        };
+        }
     };
 
     public static final Strategy CHANGE = new StrategyImpl() {
         @Override
         public String getName() {
             return "everyChange";
-        };
+        }
     };
 
     public static final Strategy RESTORE = new StrategyImpl() {
         @Override
         public String getName() {
             return "restoreOnStartup";
-        };
+        }
+    };
+    public static final Strategy FORECAST = new StrategyImpl() {
+        @Override
+        public String getName() {
+            return "forecast";
+        }
     };
 }

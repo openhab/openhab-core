@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,7 +17,6 @@ import java.util.Collection;
 import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -87,7 +86,7 @@ public class SerialConfigOptionProvider implements ConfigOptionProvider, UsbSeri
                             previouslyDiscovered.stream().map(UsbSerialDeviceInformation::getSerialPort))
                     .distinct() //
                     .map(serialPortName -> new ParameterOption(serialPortName, serialPortName)) //
-                    .collect(Collectors.toList());
+                    .toList();
         }
         return null;
     }

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -27,8 +27,8 @@ import org.openhab.core.config.core.Configuration;
  * <ul>
  * <li><b>Triggers:</b> a list of {@link Trigger} modules. Each {@link Trigger} from this list
  * can start the evaluation of the Rule. A Rule with an empty list of {@link Trigger}s can
- * only be triggered through the {@link RuleRegistry#runNow(String, boolean, java.util.Map)} method,
- * or directly executed with the {@link RuleRegistry#runNow(String)} method.
+ * only be triggered through the {@link RuleManager#runNow(String, boolean, java.util.Map)} method,
+ * or directly executed with the {@link RuleManager#runNow(String)} method.
  * <li><b>Conditions:</b> a list of {@link Condition} modules. When a Rule is triggered, the
  * evaluation of the Rule {@link Condition}s will determine if the Rule will be executed.
  * A Rule will be executed only when all it's {@link Condition}s are satisfied. If the {@link Condition}s

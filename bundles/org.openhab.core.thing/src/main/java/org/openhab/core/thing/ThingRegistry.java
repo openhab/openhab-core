@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -24,7 +24,7 @@ import org.openhab.core.thing.internal.ThingTracker;
 
 /**
  * {@link ThingRegistry} tracks all {@link Thing}s from different {@link ThingProvider}s and provides access to them.
- * The {@link ThingRegistry} supports adding of listeners (see {@link ThingsChangeListener}) and trackers
+ * The {@link ThingRegistry} supports adding of listeners (see {@link ThingRegistryChangeListener}) and trackers
  * (see {@link ThingTracker}).
  *
  * @author Dennis Nobel - Initial contribution

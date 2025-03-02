@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -88,6 +88,12 @@ public class DecimalTypeTest {
     public void testValidConstructors(String value) throws Exception {
         new DecimalType(value);
         DecimalType.valueOf(value);
+    }
+
+    @Test
+    public void testLowerCaseExponents() {
+        assertEquals(DecimalType.valueOf("1e3"), DecimalType.valueOf("1E3"));
+        assertEquals(DecimalType.valueOf("2.5e-3"), DecimalType.valueOf("2.5E-3"));
     }
 
     @ParameterizedTest

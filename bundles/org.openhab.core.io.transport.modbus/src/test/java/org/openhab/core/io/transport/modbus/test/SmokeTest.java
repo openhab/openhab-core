@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -157,7 +157,7 @@ public class SmokeTest extends IntegrationTestSupport {
         try (ModbusCommunicationInterface comms = modbusManager.newModbusCommunicationInterface(endpoint, null)) {
             comms.submitOneTimePoll(new ModbusReadRequestBlueprint(SLAVE_UNIT_ID,
                     ModbusReadFunctionCode.READ_MULTIPLE_REGISTERS, 0, 5, 1), result -> {
-                        assert result.getRegisters().isPresent();
+                        assertTrue(result.getRegisters().isPresent());
                         okCount.incrementAndGet();
                         callbackCalled.countDown();
                     }, failure -> {
@@ -169,7 +169,7 @@ public class SmokeTest extends IntegrationTestSupport {
 
             assertThat(okCount.get(), is(equalTo(0)));
             assertThat(errorCount.get(), is(equalTo(1)));
-            assertTrue(lastError.get() instanceof ModbusSlaveErrorResponseException, lastError.toString());
+            assertInstanceOf(ModbusSlaveErrorResponseException.class, lastError.get(), lastError.toString());
         }
     }
 
@@ -194,7 +194,7 @@ public class SmokeTest extends IntegrationTestSupport {
                 configuration)) {
             comms.submitOneTimePoll(new ModbusReadRequestBlueprint(SLAVE_UNIT_ID,
                     ModbusReadFunctionCode.READ_MULTIPLE_REGISTERS, 0, 5, 1), result -> {
-                        assert result.getRegisters().isPresent();
+                        assertTrue(result.getRegisters().isPresent());
                         okCount.incrementAndGet();
                         callbackCalled.countDown();
                     }, failure -> {
@@ -206,7 +206,7 @@ public class SmokeTest extends IntegrationTestSupport {
 
             assertThat(okCount.get(), is(equalTo(0)));
             assertThat(errorCount.get(), is(equalTo(1)));
-            assertTrue(lastError.get() instanceof ModbusConnectionException, lastError.toString());
+            assertInstanceOf(ModbusConnectionException.class, lastError.get(), lastError.toString());
         }
     }
 
@@ -228,7 +228,7 @@ public class SmokeTest extends IntegrationTestSupport {
         try (ModbusCommunicationInterface comms = modbusManager.newModbusCommunicationInterface(endpoint, null)) {
             comms.submitOneTimePoll(new ModbusReadRequestBlueprint(SLAVE_UNIT_ID,
                     ModbusReadFunctionCode.READ_MULTIPLE_REGISTERS, 0, 5, 1), result -> {
-                        assert result.getRegisters().isPresent();
+                        assertTrue(result.getRegisters().isPresent());
                         okCount.incrementAndGet();
                         callbackCalled.countDown();
                     }, failure -> {
@@ -239,7 +239,7 @@ public class SmokeTest extends IntegrationTestSupport {
             assertTrue(callbackCalled.await(15, TimeUnit.SECONDS));
             assertThat(okCount.get(), is(equalTo(0)));
             assertThat(lastError.toString(), errorCount.get(), is(equalTo(1)));
-            assertTrue(lastError.get() instanceof ModbusSlaveIOException, lastError.toString());
+            assertInstanceOf(ModbusSlaveIOException.class, lastError.get(), lastError.toString());
         }
     }
 
@@ -440,7 +440,7 @@ public class SmokeTest extends IntegrationTestSupport {
                 assertThat(response.getFunctionCode(), is(equalTo(15)));
 
                 assertThat(modbustRequestCaptor.getAllReturnValues().size(), is(equalTo(1)));
-                ModbusRequest request = modbustRequestCaptor.getAllReturnValues().get(0);
+                ModbusRequest request = modbustRequestCaptor.getAllReturnValues().getFirst();
                 assertThat(request.getFunctionCode(), is(equalTo(15)));
                 assertThat(((WriteMultipleCoilsRequest) request).getReference(), is(equalTo(3)));
                 assertThat(((WriteMultipleCoilsRequest) request).getBitCount(), is(equalTo(bits.size())));
@@ -478,10 +478,10 @@ public class SmokeTest extends IntegrationTestSupport {
             assertTrue(callbackCalled.await(60, TimeUnit.SECONDS));
 
             assertThat(unexpectedCount.get(), is(equalTo(0)));
-            assertTrue(lastError.get() instanceof ModbusSlaveErrorResponseException, lastError.toString());
+            assertInstanceOf(ModbusSlaveErrorResponseException.class, lastError.get(), lastError.toString());
 
             assertThat(modbustRequestCaptor.getAllReturnValues().size(), is(equalTo(1)));
-            ModbusRequest request = modbustRequestCaptor.getAllReturnValues().get(0);
+            ModbusRequest request = modbustRequestCaptor.getAllReturnValues().getFirst();
             assertThat(request.getFunctionCode(), is(equalTo(15)));
             assertThat(((WriteMultipleCoilsRequest) request).getReference(), is(equalTo(3)));
             assertThat(((WriteMultipleCoilsRequest) request).getBitCount(), is(equalTo(bits.size())));
@@ -520,7 +520,7 @@ public class SmokeTest extends IntegrationTestSupport {
             assertThat(response.getFunctionCode(), is(equalTo(5)));
 
             assertThat(modbustRequestCaptor.getAllReturnValues().size(), is(equalTo(1)));
-            ModbusRequest request = modbustRequestCaptor.getAllReturnValues().get(0);
+            ModbusRequest request = modbustRequestCaptor.getAllReturnValues().getFirst();
             assertThat(request.getFunctionCode(), is(equalTo(5)));
             assertThat(((WriteCoilRequest) request).getReference(), is(equalTo(3)));
             assertThat(((WriteCoilRequest) request).getCoil(), is(equalTo(true)));
@@ -555,10 +555,10 @@ public class SmokeTest extends IntegrationTestSupport {
             assertTrue(callbackCalled.await(60, TimeUnit.SECONDS));
 
             assertThat(unexpectedCount.get(), is(equalTo(0)));
-            assertTrue(lastError.get() instanceof ModbusSlaveErrorResponseException, lastError.toString());
+            assertInstanceOf(ModbusSlaveErrorResponseException.class, lastError.get(), lastError.toString());
 
             assertThat(modbustRequestCaptor.getAllReturnValues().size(), is(equalTo(1)));
-            ModbusRequest request = modbustRequestCaptor.getAllReturnValues().get(0);
+            ModbusRequest request = modbustRequestCaptor.getAllReturnValues().getFirst();
             assertThat(request.getFunctionCode(), is(equalTo(5)));
             assertThat(((WriteCoilRequest) request).getReference(), is(equalTo(300)));
             assertThat(((WriteCoilRequest) request).getCoil(), is(equalTo(true)));
@@ -695,8 +695,7 @@ public class SmokeTest extends IntegrationTestSupport {
     /**
      *
      * @param unexpectedCount number of unexpected callback calls
-     * @param callbackCalled number of callback calls (including unexpected)
-     * @param dataReceived number of expected callback calls (onBits or onRegisters)
+     * @param expectedCount number of expected callback calls (onBits or onRegisters)
      * @param pollStartMillis poll start time in milliepoch
      * @param expectedPollAverageMin average poll period should be at least greater than this
      * @param expectedPollAverageMax average poll period less than this
@@ -814,7 +813,7 @@ public class SmokeTest extends IntegrationTestSupport {
 
         EndpointPoolConfiguration newConfig = new EndpointPoolConfiguration();
         newConfig.setConnectMaxTries(5);
-        try (ModbusCommunicationInterface comms = modbusManager.newModbusCommunicationInterface(getEndpoint(),
+        try (ModbusCommunicationInterface unused = modbusManager.newModbusCommunicationInterface(getEndpoint(),
                 newConfig)) {
             // Sets configuration for the endpoint implicitly
         }
@@ -823,7 +822,8 @@ public class SmokeTest extends IntegrationTestSupport {
         assertThat(modbusManager.getEndpointPoolConfiguration(getEndpoint()), is(not(equalTo(defaultConfig))));
 
         // Reset config
-        try (ModbusCommunicationInterface comms = modbusManager.newModbusCommunicationInterface(getEndpoint(), null)) {
+        try (ModbusCommunicationInterface ignored = modbusManager.newModbusCommunicationInterface(getEndpoint(),
+                null)) {
             // Sets configuration for the endpoint implicitly
         }
         // Should match the default
@@ -864,7 +864,7 @@ public class SmokeTest extends IntegrationTestSupport {
                 long openSocketsAfter = getNumberOfOpenClients(SOCKET_SPY);
                 assertThat(openSocketsAfter, is(equalTo(1L)));
             });
-            try (ModbusCommunicationInterface comms2 = modbusManager.newModbusCommunicationInterface(endpoint,
+            try (ModbusCommunicationInterface ignored = modbusManager.newModbusCommunicationInterface(endpoint,
                     config)) {
                 {
                     CountDownLatch latch = new CountDownLatch(1);
@@ -952,7 +952,7 @@ public class SmokeTest extends IntegrationTestSupport {
      */
     private static class SpyingSocketFactory implements SocketImplFactory {
 
-        Queue<SocketImpl> sockets = new ConcurrentLinkedQueue<SocketImpl>();
+        Queue<SocketImpl> sockets = new ConcurrentLinkedQueue<>();
 
         @Override
         public SocketImpl createSocketImpl() {
@@ -995,8 +995,8 @@ public class SmokeTest extends IntegrationTestSupport {
                 Method socketImplCreateMethod = socketImplClass.getDeclaredMethod("createPlatformSocketImpl",
                         boolean.class);
                 socketImplCreateMethod.setAccessible(true);
-                Object socketImpl = socketImplCreateMethod.invoke(/* null since we deal with static method */ null,
-                        /* server */false);
+                Object socketImpl = socketImplCreateMethod
+                        .invoke(/* null since we deal with static method */ giveNull(), /* server */false);
 
                 Constructor<?> socksSocketImplConstructor = socksSocketImplClass
                         .getDeclaredConstructor(socketImplClass);

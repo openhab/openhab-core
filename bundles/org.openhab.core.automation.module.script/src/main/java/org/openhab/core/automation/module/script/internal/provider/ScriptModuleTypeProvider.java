@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -68,12 +68,12 @@ public class ScriptModuleTypeProvider extends AbstractProvider<ModuleType> imple
 
     @SuppressWarnings("unchecked")
     @Override
-    public @Nullable ModuleType getModuleType(String UID, @Nullable Locale locale) {
+    public @Nullable ModuleType getModuleType(String uid, @Nullable Locale locale) {
         if (parameterOptions.isEmpty()) {
             return null;
-        } else if (ScriptActionHandler.TYPE_ID.equals(UID)) {
+        } else if (ScriptActionHandler.TYPE_ID.equals(uid)) {
             return getScriptActionType(locale);
-        } else if (ScriptConditionHandler.TYPE_ID.equals(UID)) {
+        } else if (ScriptConditionHandler.TYPE_ID.equals(uid)) {
             return getScriptConditionType(locale);
         } else {
             return null;
@@ -84,13 +84,13 @@ public class ScriptModuleTypeProvider extends AbstractProvider<ModuleType> imple
         List<Output> outputs = new ArrayList<>();
         Output result = new Output("result", "java.lang.Object", "result", "the script result", null, null, null);
         outputs.add(result);
-        return new ActionType(ScriptActionHandler.TYPE_ID, getConfigDescriptions(locale), "execute a given script",
+        return new ActionType(ScriptActionHandler.TYPE_ID, getConfigDescriptions(locale), "execute an inline script",
                 "Allows the execution of a user-defined script.", null, Visibility.VISIBLE, null, outputs);
     }
 
     private ModuleType getScriptConditionType(@Nullable Locale locale) {
         return new ConditionType(ScriptConditionHandler.TYPE_ID, getConfigDescriptions(locale),
-                "a given script evaluates to true", "Allows the definition of a condition through a script.", null,
+                "an inline script evaluates to true", "Allows the definition of a condition through a script.", null,
                 Visibility.VISIBLE, null);
     }
 
@@ -99,7 +99,7 @@ public class ScriptModuleTypeProvider extends AbstractProvider<ModuleType> imple
     }
 
     /**
-     * This method creates the {@link ConfigurationDescriptionParameter}s used by the generated ScriptActionType and
+     * This method creates the {@link ConfigDescriptionParameter}s used by the generated ScriptActionType and
      * ScriptConditionType. {@link AbstractScriptModuleHandler} requires that the names of these be 'type' and 'script'.
      *
      * @return a list of {#link ConfigurationDescriptionParameter}s
@@ -161,7 +161,7 @@ public class ScriptModuleTypeProvider extends AbstractProvider<ModuleType> imple
     public void unsetScriptEngineFactory(ScriptEngineFactory engineFactory) {
         List<String> scriptTypes = engineFactory.getScriptTypes();
         if (!scriptTypes.isEmpty()) {
-            ScriptEngine scriptEngine = engineFactory.createScriptEngine(scriptTypes.get(0));
+            ScriptEngine scriptEngine = engineFactory.createScriptEngine(scriptTypes.getFirst());
             if (scriptEngine != null) {
                 parameterOptions.remove(ScriptEngineFactoryHelper.getPreferredMimeType(engineFactory));
                 logger.trace("ParameterOptions: {}", parameterOptions);

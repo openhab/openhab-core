@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -82,7 +82,7 @@ public abstract class AbstractCommandProvider<@NonNull E> implements ServiceTrac
      * high performance at runtime of the system, when the Rule Engine asks for any particular object, instead of
      * waiting it for parsing every time.
      * <p>
-     * The Map has for keys UIDs of the objects and for values {@link Localizer}s of the objects.
+     * The Map has for keys UIDs of the objects and for values the objects.
      */
     protected final Map<String, E> providedObjectsHolder = new HashMap<>();
 
@@ -94,14 +94,13 @@ public abstract class AbstractCommandProvider<@NonNull E> implements ServiceTrac
      * @param context is the {@link BundleContext}, used for creating a tracker for {@link Parser} services.
      */
     @SuppressWarnings("unchecked")
-    public AbstractCommandProvider(BundleContext context) {
+    protected AbstractCommandProvider(BundleContext context) {
         this.bundleContext = context;
         parserTracker = new ServiceTracker(context, Parser.class.getName(), this);
         parserTracker.open();
     }
 
     /**
-     * This method is inherited from {@link AbstractPersistentProvider}.
      * Extends parent's functionality with closing the {@link Parser} service tracker.
      * Clears the {@link #parsers}, {@link #providedObjectsHolder}, {@link #providerPortfolio}
      */

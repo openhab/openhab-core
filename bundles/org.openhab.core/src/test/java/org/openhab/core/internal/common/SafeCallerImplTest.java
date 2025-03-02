@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -25,9 +25,9 @@ import java.lang.management.ThreadMXBean;
 import java.text.MessageFormat;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 import java.util.Random;
 import java.util.concurrent.Callable;
@@ -544,13 +544,7 @@ public class SafeCallerImplTest extends JavaTest {
     }
 
     private void configureSingleThread() {
-        safeCaller.modified(new HashMap<>() {
-            private static final long serialVersionUID = 1L;
-
-            {
-                put("singleThread", "true");
-            }
-        });
+        safeCaller.modified(Map.of("singleThread", "true"));
     }
 
     /**
@@ -575,7 +569,7 @@ public class SafeCallerImplTest extends JavaTest {
      */
     private void joinAll() throws InterruptedException {
         while (!threads.isEmpty()) {
-            AssertingThread t = threads.remove(0);
+            AssertingThread t = threads.removeFirst();
             t.join();
             if (t.assertionError != null) {
                 throw t.assertionError;
@@ -597,7 +591,7 @@ public class SafeCallerImplTest extends JavaTest {
         @Override
         public void run() {
             try {
-                super.run();
+                super.run(); // NOPMD
             } catch (AssertionError e) {
                 AssertingThread.this.assertionError = e;
             } catch (RuntimeException e) {

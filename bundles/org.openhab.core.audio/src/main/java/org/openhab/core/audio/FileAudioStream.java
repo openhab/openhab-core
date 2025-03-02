@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -18,10 +18,12 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.audio.utils.AudioStreamUtils;
 import org.openhab.core.audio.utils.AudioWaveUtils;
+import org.openhab.core.common.Disposable;
 
 /**
  * This is an AudioStream from an audio file
@@ -31,7 +33,7 @@ import org.openhab.core.audio.utils.AudioWaveUtils;
  * @author Christoph Weitkamp - Refactored use of filename extension
  */
 @NonNullByDefault
-public class FileAudioStream extends FixedLengthAudioStream {
+public class FileAudioStream extends FixedLengthAudioStream implements Disposable {
 
     public static final String WAV_EXTENSION = "wav";
     public static final String MP3_EXTENSION = "mp3";
@@ -40,18 +42,26 @@ public class FileAudioStream extends FixedLengthAudioStream {
 
     private final File file;
     private final AudioFormat audioFormat;
-    private InputStream inputStream;
+    private FileInputStream inputStream;
     private final long length;
+    private final boolean isTemporaryFile;
+    private int markedOffset = 0;
+    private int alreadyRead = 0;
 
     public FileAudioStream(File file) throws AudioException {
         this(file, getAudioFormat(file));
     }
 
     public FileAudioStream(File file, AudioFormat format) throws AudioException {
+        this(file, format, false);
+    }
+
+    public FileAudioStream(File file, AudioFormat format, boolean isTemporaryFile) throws AudioException {
         this.file = file;
         this.inputStream = getInputStream(file);
         this.audioFormat = format;
         this.length = file.length();
+        this.isTemporaryFile = isTemporaryFile;
     }
 
     private static AudioFormat getAudioFormat(File file) throws AudioException {
@@ -79,7 +89,7 @@ public class FileAudioStream extends FixedLengthAudioStream {
         }
     }
 
-    private static InputStream getInputStream(File file) throws AudioException {
+    private static FileInputStream getInputStream(File file) throws AudioException {
         try {
             return new FileInputStream(file);
         } catch (FileNotFoundException e) {
@@ -94,7 +104,9 @@ public class FileAudioStream extends FixedLengthAudioStream {
 
     @Override
     public int read() throws IOException {
-        return inputStream.read();
+        int read = inputStream.read();
+        alreadyRead++;
+        return read;
     }
 
     @Override
@@ -116,13 +128,32 @@ public class FileAudioStream extends FixedLengthAudioStream {
         }
         try {
             inputStream = getInputStream(file);
+            inputStream.skipNBytes(markedOffset);
+            alreadyRead = markedOffset;
         } catch (AudioException e) {
             throw new IOException("Cannot reset file input stream: " + e.getMessage(), e);
         }
     }
 
     @Override
+    public synchronized void mark(int readlimit) {
+        markedOffset = alreadyRead;
+    }
+
+    @Override
+    public boolean markSupported() {
+        return true;
+    }
+
+    @Override
     public InputStream getClonedStream() throws AudioException {
         return getInputStream(file);
+    }
+
+    @Override
+    public void dispose() throws IOException {
+        if (isTemporaryFile) {
+            Files.delete(file.toPath());
+        }
     }
 }

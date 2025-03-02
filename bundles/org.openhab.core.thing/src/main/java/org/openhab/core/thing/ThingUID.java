@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -40,7 +40,7 @@ public class ThingUID extends UID {
     /**
      * Instantiates a new thing UID.
      *
-     * @param thingType the thing type
+     * @param thingTypeUID the thing type
      * @param id the id
      */
     public ThingUID(ThingTypeUID thingTypeUID, String id) {
@@ -50,7 +50,7 @@ public class ThingUID extends UID {
     /**
      * Instantiates a new thing UID.
      *
-     * @param thingType the thing type
+     * @param thingTypeUID the thing type
      * @param bridgeUID the bridge UID through which the thing is accessed
      * @param id the id of the thing
      */
@@ -62,7 +62,7 @@ public class ThingUID extends UID {
     /**
      * Instantiates a new thing UID.
      *
-     * @param thingType the thing type
+     * @param thingTypeUID the thing type
      * @param id the id
      */
     public ThingUID(ThingTypeUID thingTypeUID, String id, String... bridgeIds) {
@@ -156,7 +156,7 @@ public class ThingUID extends UID {
      */
     public String getId() {
         List<String> segments = getAllSegments();
-        return segments.get(segments.size() - 1);
+        return segments.getLast();
     }
 
     @Override

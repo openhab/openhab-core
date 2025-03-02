@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -28,7 +28,7 @@ public class TopicPrefixEventFilter implements EventFilter {
     /**
      * Constructs a new topic event filter.
      *
-     * @param topicRegex the prefix event topics must start with
+     * @param topicPrefix the prefix event topics must start with
      */
     public TopicPrefixEventFilter(String topicPrefix) {
         this.topicPrefix = topicPrefix;

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,7 +17,7 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.Map.Entry;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -65,8 +65,7 @@ public class CompositeModuleHandlerFactory extends BaseModuleHandlerFactory impl
     /**
      * The constructor of system handler factory for composite module types.
      *
-     * @param context is a bundle context
-     * @param mtManager is a module type manager
+     * @param mtRegistry is a module type registry
      * @param re is a rule engine
      */
     public CompositeModuleHandlerFactory(ModuleTypeRegistry mtRegistry, RuleEngineImpl re) {
@@ -95,9 +94,9 @@ public class CompositeModuleHandlerFactory extends BaseModuleHandlerFactory impl
         ModuleHandler handlerOfModule = getHandlers().get(getModuleIdentifier(childModulePrefix, module.getId()));
         if (handlerOfModule instanceof AbstractCompositeModuleHandler) {
             AbstractCompositeModuleHandler<ModuleImpl, ?, ?> h = (AbstractCompositeModuleHandler<ModuleImpl, ?, ?>) handlerOfModule;
-            Set<ModuleImpl> modules = h.moduleHandlerMap.keySet();
-            for (ModuleImpl child : modules) {
-                ModuleHandler childHandler = h.moduleHandlerMap.get(child);
+            for (Entry<ModuleImpl, @Nullable ? extends ModuleHandler> entry : h.moduleHandlerMap.entrySet()) {
+                ModuleImpl child = entry.getKey();
+                ModuleHandler childHandler = entry.getValue();
                 if (childHandler == null) {
                     continue;
                 }

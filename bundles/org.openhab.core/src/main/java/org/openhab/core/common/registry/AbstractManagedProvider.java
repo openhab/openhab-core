@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,7 +14,6 @@ package org.openhab.core.common.registry;
 
 import java.util.Collection;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -51,7 +50,7 @@ public abstract class AbstractManagedProvider<@NonNull E extends Identifiable<K>
 
     protected final Logger logger = LoggerFactory.getLogger(AbstractManagedProvider.class);
 
-    public AbstractManagedProvider(final StorageService storageService) {
+    protected AbstractManagedProvider(final StorageService storageService) {
         storage = storageService.getStorage(getStorageName(), this.getClass().getClassLoader());
     }
 
@@ -70,8 +69,7 @@ public abstract class AbstractManagedProvider<@NonNull E extends Identifiable<K>
 
     @Override
     public Collection<E> getAll() {
-        return (Collection<E>) storage.getKeys().stream().map(this::getElement).filter(Objects::nonNull)
-                .collect(Collectors.toList());
+        return (Collection<E>) storage.getKeys().stream().map(this::getElement).filter(Objects::nonNull).toList();
     }
 
     @Override
@@ -120,7 +118,7 @@ public abstract class AbstractManagedProvider<@NonNull E extends Identifiable<K>
                 return oldElement;
             }
         } else {
-            logger.warn("Could not update element with key {} in {}, because it does not exists.", key,
+            logger.warn("Could not update element with key {} in {}, because it does not exist.", key,
                     this.getClass().getSimpleName());
         }
 

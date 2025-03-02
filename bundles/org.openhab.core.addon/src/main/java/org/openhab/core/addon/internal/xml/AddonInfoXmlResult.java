@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -16,13 +16,13 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.addon.AddonInfo;
 import org.openhab.core.config.core.ConfigDescription;
-import org.openhab.core.config.core.ConfigDescriptionProvider;
 
 /**
  * The {@link AddonInfoXmlResult} is an intermediate XML conversion result object which
  * contains a mandatory {@link AddonInfo} and an optional {@link ConfigDescription} object.
  * <p>
- * If a {@link ConfigDescription} object exists, it must be added to the according {@link ConfigDescriptionProvider}.
+ * If a {@link ConfigDescription} object exists, it must be added to the according
+ * {@link org.openhab.core.config.core.ConfigDescriptionProvider}.
  *
  * @author Jan N. Klug - Initial contribution
  */

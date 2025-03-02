@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -58,7 +58,7 @@ public class Vendor {
     }
 
     /**
-     * This constructor initialize the {@link vendorId} and the {@link vendorVersion} of the vendor with corresponding
+     * This constructor initialize the {@link #vendorID} and the {@link #vendorVersion} of the vendor with corresponding
      * bundle ID and bundle version of a bundle that provides resources for the automation objects.
      *
      * @param name a bundle symbolic name of a bundle that providing resources for automation objects.
@@ -71,7 +71,7 @@ public class Vendor {
     }
 
     /**
-     * Getter of {@link vendorSymbolicName}.
+     * Getter of {@link #vendorSymbolicName}.
      *
      * @return a bundle symbolic name of a bundle that provides resources for the automation objects.
      */
@@ -80,7 +80,7 @@ public class Vendor {
     }
 
     /**
-     * Getter of {@link vendorId}.
+     * Getter of {@link #vendorID}.
      *
      * @return a bundle symbolic name of a bundle that provides resources for the automation objects.
      */
@@ -89,7 +89,7 @@ public class Vendor {
     }
 
     /**
-     * Getter of {@link vendorVersion}.
+     * Getter of {@link #vendorVersion}.
      *
      * @return a bundle version of a bundle that provides resources for the automation objects.
      */
@@ -98,7 +98,7 @@ public class Vendor {
     }
 
     /**
-     * Setter of {@link vendorVersion}.
+     * Setter of {@link #vendorVersion}.
      *
      * @param version a bundle version of a bundle that provides resources for the automation objects.
      */

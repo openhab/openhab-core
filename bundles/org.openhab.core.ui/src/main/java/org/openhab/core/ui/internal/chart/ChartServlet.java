@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,15 +12,16 @@
  */
 package org.openhab.core.ui.internal.chart;
 
-import static java.util.Map.entry;
-
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.io.Serial;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.Period;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.time.temporal.TemporalAmount;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -69,6 +70,8 @@ import org.slf4j.LoggerFactory;
  *
  * @author Chris Jackson - Initial contribution
  * @author Holger Reichert - Support for themes, DPI, legend hiding
+ * @author Laurent Garnier - Extend support to ISO8601 format for chart period parameter
+ * @author Laurent Garnier - Extend support to past and future for chart period parameter
  */
 @Component(immediate = true, service = { ChartServlet.class, Servlet.class }, configurationPid = "org.openhab.chart", //
         property = Constants.SERVICE_PID + "=org.openhab.chart")
@@ -78,6 +81,7 @@ import org.slf4j.LoggerFactory;
 @NonNullByDefault
 public class ChartServlet extends HttpServlet {
 
+    @Serial
     private static final long serialVersionUID = 7700873790924746422L;
 
     protected static final String CONFIG_URI = "system:chart";
@@ -99,17 +103,7 @@ public class ChartServlet extends HttpServlet {
     // The URI of this servlet
     public static final String SERVLET_PATH = "/chart";
 
-    private static final Duration DEFAULT_PERIOD = Duration.ofDays(1);
-
-    private static final Map<String, Duration> PERIODS = Map.ofEntries( //
-            entry("h", Duration.ofHours(1)), entry("4h", Duration.ofHours(4)), //
-            entry("8h", Duration.ofHours(8)), entry("12h", Duration.ofHours(12)), //
-            entry("D", Duration.ofDays(1)), entry("2D", Duration.ofDays(2)), //
-            entry("3D", Duration.ofDays(3)), entry("W", Duration.ofDays(7)), //
-            entry("2W", Duration.ofDays(14)), entry("M", Duration.ofDays(30)), //
-            entry("2M", Duration.ofDays(60)), entry("4M", Duration.ofDays(120)), //
-            entry("Y", Duration.ofDays(365))//
-    );
+    protected static final Duration DEFAULT_PERIOD = Duration.ofDays(1);
 
     protected static final Map<String, ChartProvider> CHART_PROVIDERS = new ConcurrentHashMap<>();
 
@@ -225,6 +219,7 @@ public class ChartServlet extends HttpServlet {
         String periodParam = req.getParameter("period");
         String timeBeginParam = req.getParameter("begin");
         String timeEndParam = req.getParameter("end");
+
         // To avoid ambiguity you are not allowed to specify period, begin and end time at the same time.
         if (periodParam != null && timeBeginParam != null && timeEndParam != null) {
             res.sendError(HttpServletResponse.SC_BAD_REQUEST,
@@ -232,8 +227,6 @@ public class ChartServlet extends HttpServlet {
             return;
         }
 
-        // Read out the parameter period, begin and end and save them.
-        Duration period = periodParam == null ? DEFAULT_PERIOD : PERIODS.getOrDefault(periodParam, DEFAULT_PERIOD);
         ZonedDateTime timeBegin = null;
         ZonedDateTime timeEnd = null;
 
@@ -257,18 +250,11 @@ public class ChartServlet extends HttpServlet {
             }
         }
 
-        // Set begin and end time and check legality.
-        if (timeBegin == null && timeEnd == null) {
-            timeEnd = ZonedDateTime.now(timeZoneProvider.getTimeZone());
-            timeBegin = timeEnd.minus(period);
-            logger.debug("No begin or end is specified, use now as end and now-period as begin.");
-        } else if (timeEnd == null) {
-            timeEnd = timeBegin.plus(period);
-            logger.debug("No end is specified, use begin + period as end.");
-        } else if (timeBegin == null) {
-            timeBegin = timeEnd.minus(period);
-            logger.debug("No begin is specified, use end-period as begin");
-        } else if (timeEnd.isBefore(timeBegin)) {
+        PeriodPastFuture period = getPeriodPastFuture(periodParam);
+        PeriodBeginEnd beginEnd = getPeriodBeginEnd(timeBegin, timeEnd, period,
+                ZonedDateTime.now(timeZoneProvider.getTimeZone()));
+
+        if (beginEnd.begin() != null && beginEnd.end() != null && beginEnd.end().isBefore(beginEnd.begin())) {
             res.sendError(HttpServletResponse.SC_BAD_REQUEST, "The end is before the begin.");
             return;
         }
@@ -317,9 +303,9 @@ public class ChartServlet extends HttpServlet {
 
         logger.debug("chart building with width {} height {} dpi {}", width, height, dpi);
         try {
-            BufferedImage chart = provider.createChart(serviceName, req.getParameter("theme"), timeBegin, timeEnd,
-                    height, width, req.getParameter("items"), req.getParameter("groups"), dpi, yAxisDecimalPattern,
-                    legend);
+            BufferedImage chart = provider.createChart(serviceName, req.getParameter("theme"), beginEnd.begin(),
+                    beginEnd.end(), height, width, req.getParameter("items"), req.getParameter("groups"), dpi,
+                    yAxisDecimalPattern, legend);
             // Set the content type to that provided by the chart provider
             res.setContentType("image/" + provider.getChartType());
             try (ImageOutputStream imageOutputStream = ImageIO.createImageOutputStream(res.getOutputStream())) {
@@ -358,5 +344,105 @@ public class ChartServlet extends HttpServlet {
 
     @Override
     public void destroy() {
+    }
+
+    protected static @Nullable TemporalAmount convertToTemporalAmount(@Nullable String periodParam,
+            @Nullable TemporalAmount defaultPeriod) {
+        TemporalAmount period = defaultPeriod;
+        String convertedPeriod = convertPeriodToISO8601(periodParam);
+        if (convertedPeriod != null) {
+            boolean failed = false;
+            try {
+                period = Period.parse(convertedPeriod);
+            } catch (DateTimeParseException e) {
+                failed = true;
+            }
+            if (failed) {
+                try {
+                    period = Duration.parse(convertedPeriod);
+                } catch (DateTimeParseException e) {
+                    // Ignored
+                }
+            }
+        }
+        return period;
+    }
+
+    private static @Nullable String convertPeriodToISO8601(@Nullable String period) {
+        if (period == null || period.startsWith("P") || !(period.endsWith("h") || period.endsWith("D")
+                || period.endsWith("W") || period.endsWith("M") || period.endsWith("Y"))) {
+            return period;
+        }
+        String newPeriod = period.length() == 1 ? "1" + period : period;
+        if (newPeriod.endsWith("h")) {
+            newPeriod = "T" + newPeriod.replace("h", "H");
+        }
+        return "P" + newPeriod;
+    }
+
+    protected static PeriodPastFuture getPeriodPastFuture(@Nullable String periodParam) {
+        String periodParamPast = null;
+        String periodParamFuture = null;
+        TemporalAmount defaultPeriodPast = DEFAULT_PERIOD;
+        TemporalAmount defaultPeriodFuture = null;
+        if (periodParam != null) {
+            int idx = periodParam.indexOf("-");
+            if (idx < 0) {
+                periodParamPast = periodParam;
+            } else {
+                if (idx > 0) {
+                    periodParamPast = periodParam.substring(0, idx);
+                } else {
+                    defaultPeriodPast = null;
+                    defaultPeriodFuture = DEFAULT_PERIOD;
+                }
+                periodParamFuture = periodParam.substring(idx + 1);
+            }
+        }
+        TemporalAmount periodPast = convertToTemporalAmount(periodParamPast, defaultPeriodPast);
+        TemporalAmount periodFuture = convertToTemporalAmount(periodParamFuture, defaultPeriodFuture);
+        return new PeriodPastFuture(periodPast, periodFuture);
+    }
+
+    protected static PeriodBeginEnd getPeriodBeginEnd(@Nullable ZonedDateTime begin, @Nullable ZonedDateTime end,
+            PeriodPastFuture period, ZonedDateTime now) {
+        ZonedDateTime timeBegin = begin;
+        ZonedDateTime timeEnd = end;
+        TemporalAmount periodPast = period.past();
+        TemporalAmount periodFuture = period.future();
+
+        if (timeBegin == null && timeEnd == null) {
+            timeBegin = timeEnd = now;
+            if (periodPast != null) {
+                timeBegin = timeBegin.minus(periodPast);
+            }
+            if (periodFuture != null) {
+                timeEnd = timeEnd.plus(periodFuture);
+            }
+        } else if (timeBegin != null && timeEnd == null) {
+            timeEnd = timeBegin;
+            if (periodPast != null) {
+                timeEnd = timeEnd.plus(periodPast);
+            }
+            if (periodFuture != null) {
+                timeEnd = timeEnd.plus(periodFuture);
+            }
+        } else if (timeBegin == null && timeEnd != null) {
+            timeBegin = timeEnd;
+            if (periodFuture != null) {
+                timeBegin = timeBegin.minus(periodFuture);
+            }
+            if (periodPast != null) {
+                timeBegin = timeBegin.minus(periodPast);
+            }
+        }
+
+        return new PeriodBeginEnd(Objects.requireNonNull(timeBegin), Objects.requireNonNull(timeEnd));
+    }
+
+    record PeriodPastFuture(@Nullable TemporalAmount past, @Nullable TemporalAmount future) {
+    }
+
+    record PeriodBeginEnd(ZonedDateTime begin, ZonedDateTime end) {
     }
 }

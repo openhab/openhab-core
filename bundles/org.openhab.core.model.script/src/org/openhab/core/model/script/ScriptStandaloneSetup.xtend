@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -27,8 +27,8 @@ class ScriptStandaloneSetup extends ScriptStandaloneSetupGenerated {
     
     static Injector injector
 
-    private ScriptServiceUtil scriptServiceUtil;
-    private ScriptEngine scriptEngine;
+    ScriptServiceUtil scriptServiceUtil;
+    ScriptEngine scriptEngine;
     
     def ScriptStandaloneSetup setScriptServiceUtil(ScriptServiceUtil scriptServiceUtil) {
         this.scriptServiceUtil = scriptServiceUtil;

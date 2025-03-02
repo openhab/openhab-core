@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -80,15 +80,15 @@ public class ThingType extends AbstractDescriptionType {
         this.category = category;
         this.listed = listed;
         this.representationProperty = representationProperty;
-        this.supportedBridgeTypeUIDs = supportedBridgeTypeUIDs == null ? Collections.emptyList()
+        this.supportedBridgeTypeUIDs = supportedBridgeTypeUIDs == null ? List.of()
                 : Collections.unmodifiableList(supportedBridgeTypeUIDs);
-        this.channelDefinitions = channelDefinitions == null ? Collections.emptyList()
+        this.channelDefinitions = channelDefinitions == null ? List.of()
                 : Collections.unmodifiableList(channelDefinitions);
-        this.channelGroupDefinitions = channelGroupDefinitions == null ? Collections.emptyList()
+        this.channelGroupDefinitions = channelGroupDefinitions == null ? List.of()
                 : Collections.unmodifiableList(channelGroupDefinitions);
-        this.extensibleChannelTypeIds = extensibleChannelTypeIds == null ? Collections.emptyList()
+        this.extensibleChannelTypeIds = extensibleChannelTypeIds == null ? List.of()
                 : Collections.unmodifiableList(extensibleChannelTypeIds);
-        this.properties = properties == null ? Collections.emptyMap() : Collections.unmodifiableMap(properties);
+        this.properties = properties == null ? Map.of() : Collections.unmodifiableMap(properties);
     }
 
     /**

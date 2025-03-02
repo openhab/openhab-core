@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -21,7 +21,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
@@ -193,9 +192,17 @@ public class HttpUtil {
         // Get shared http client from factory "on-demand"
         final HttpClient httpClient = httpClientFactory.getCommonHttpClient();
 
+        URI uri = null;
+        try {
+            uri = new URI(url);
+        } catch (NullPointerException | URISyntaxException e) {
+            LOGGER.debug("String {} can not be parsed as URI reference", url);
+            throw new IOException(e);
+        }
+
         HttpProxy proxy = null;
         // Only configure a proxy if a host is provided
-        if (proxyHost != null && !proxyHost.isBlank() && proxyPort != null && shouldUseProxy(url, nonProxyHosts)) {
+        if (proxyHost != null && !proxyHost.isBlank() && proxyPort != null && shouldUseProxy(uri, nonProxyHosts)) {
             AuthenticationStore authStore = httpClient.getAuthenticationStore();
             ProxyConfiguration proxyConfig = httpClient.getProxyConfiguration();
             List<Proxy> proxies = proxyConfig.getProxies();
@@ -209,7 +216,7 @@ public class HttpUtil {
 
         final HttpMethod method = HttpUtil.createHttpMethod(httpMethod);
 
-        final Request request = httpClient.newRequest(url).method(method).timeout(timeout, TimeUnit.MILLISECONDS);
+        final Request request = httpClient.newRequest(uri).method(method).timeout(timeout, TimeUnit.MILLISECONDS);
 
         if (httpHeaders != null) {
             for (String httpHeaderKey : httpHeaders.stringPropertyNames()) {
@@ -222,20 +229,15 @@ public class HttpUtil {
         }
 
         // add basic auth header, if url contains user info
-        try {
-            URI uri = new URI(url);
-            if (uri.getUserInfo() != null) {
-                String[] userInfo = uri.getUserInfo().split(":");
+        if (uri.getUserInfo() != null) {
+            String[] userInfo = uri.getUserInfo().split(":");
 
-                String user = userInfo[0];
-                String password = userInfo[1];
+            String user = userInfo[0];
+            String password = userInfo[1];
 
-                String basicAuthentication = "Basic "
-                        + Base64.getEncoder().encodeToString((user + ":" + password).getBytes());
-                request.header(HttpHeader.AUTHORIZATION, basicAuthentication);
-            }
-        } catch (URISyntaxException e) {
-            LOGGER.debug("String {} can not be parsed as URI reference", url);
+            String basicAuthentication = "Basic "
+                    + Base64.getEncoder().encodeToString((user + ":" + password).getBytes());
+            request.header(HttpHeader.AUTHORIZATION, basicAuthentication);
         }
 
         // add content if a valid method is given ...
@@ -281,7 +283,7 @@ public class HttpUtil {
             String proxyPortString = System.getProperty("http.proxyPort");
             if (proxyPortString != null && !proxyPortString.isBlank()) {
                 try {
-                    proxyParams.proxyPort = Integer.valueOf(proxyPortString);
+                    proxyParams.proxyPort = Integer.parseInt(proxyPortString);
                 } catch (NumberFormatException e) {
                     LOGGER.warn("'{}' is not a valid proxy port - using default port ({}) instead", proxyPortString,
                             proxyParams.proxyPort);
@@ -296,22 +298,21 @@ public class HttpUtil {
 
     /**
      * Determines whether the list of <code>nonProxyHosts</code> contains the
-     * host (which is part of the given <code>urlString</code> or not.
+     * url host (which is part of the given <code>uri</code> or not.
      *
-     * @param urlString
+     * @param uri
      * @param nonProxyHosts
-     * @return <code>false</code> if the host of the given <code>urlString</code> is contained in
+     * @return <code>false</code> if the host of the given <code>uri</code> is contained in
      *         <code>nonProxyHosts</code>-list and <code>true</code> otherwise
      */
-    private static boolean shouldUseProxy(String urlString, String nonProxyHosts) {
+    private static boolean shouldUseProxy(URI uri, String nonProxyHosts) {
         if (nonProxyHosts != null && !nonProxyHosts.isBlank()) {
-            String givenHost = urlString;
+            String givenHost = uri.toString();
 
             try {
-                URL url = new URL(urlString);
-                givenHost = url.getHost();
-            } catch (MalformedURLException e) {
-                LOGGER.error("the given url {} is malformed", urlString);
+                givenHost = uri.toURL().getHost();
+            } catch (IllegalArgumentException | MalformedURLException e) {
+                LOGGER.error("the given url {} is malformed", uri.toString());
             }
 
             String[] hosts = nonProxyHosts.split("\\|");
@@ -526,7 +527,8 @@ public class HttpUtil {
      * Check whether the content data is a JPEG file checking file start and end bytes.
      * {@link URLConnection#guessContentTypeFromStream(InputStream)} is wrong for some JPEG files.
      *
-     * @see https://en.wikipedia.org/wiki/JPEG#Syntax_and_structure
+     * @see <a href="https://en.wikipedia.org/wiki/JPEG#Syntax_and_structure">JPEG Syntax and structure</a>
+     *
      * @param data the data as buffer of bytes
      * @return <code>true</code> if the content is a JPEG file, <code>false</code> otherwise
      */

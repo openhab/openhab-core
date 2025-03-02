@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -43,8 +43,8 @@ public class ThingStatusInfoChangedEvent extends AbstractEvent {
      * @param topic the topic
      * @param payload the payload
      * @param thingUID the thing UID
-     * @param thingStatusInfo the thing status info object
-     * @param thingStatusInfo the old thing status info object
+     * @param newThingStatusInfo the thing status info object
+     * @param oldThingStatusInfo the old thing status info object
      */
     protected ThingStatusInfoChangedEvent(String topic, String payload, ThingUID thingUID,
             ThingStatusInfo newThingStatusInfo, ThingStatusInfo oldThingStatusInfo) {

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -58,7 +58,7 @@ public final class FirmwareStatusInfo {
     }
 
     /**
-     * Creates a new {@link FirmwareStatusInfo} having {@link FirmwareStatus#UNKNOWN) as firmware status.
+     * Creates a new {@link FirmwareStatusInfo} having {@link FirmwareStatus#UNKNOWN} as firmware status.
      *
      * @return the firmware status info (not null)
      */
@@ -67,7 +67,7 @@ public final class FirmwareStatusInfo {
     }
 
     /**
-     * Creates a new {@link FirmwareStatusInfo} having {@link FirmwareStatus#UP_TO_DATE) as firmware status.
+     * Creates a new {@link FirmwareStatusInfo} having {@link FirmwareStatus#UP_TO_DATE} as firmware status.
      *
      * @return the firmware status info (not null)
      */
@@ -76,7 +76,7 @@ public final class FirmwareStatusInfo {
     }
 
     /**
-     * Creates a new {@link FirmwareStatusInfo} having {@link FirmwareStatus#UPDATE_AVAILABLE) as firmware status.
+     * Creates a new {@link FirmwareStatusInfo} having {@link FirmwareStatus#UPDATE_AVAILABLE} as firmware status.
      *
      * @return the firmware status info (not null)
      */
@@ -85,7 +85,7 @@ public final class FirmwareStatusInfo {
     }
 
     /**
-     * Creates a new {@link FirmwareStatusInfo} having {@link FirmwareStatus#UPDATE_EXECUTBALE) as firmware status. The
+     * Creates a new {@link FirmwareStatusInfo} having {@link FirmwareStatus#UPDATE_EXECUTABLE} as firmware status. The
      * given firmware version represents the version of the latest updatable firmware for the thing.
      *
      * @param firmwareVersion the version of the latest updatable firmware for the thing (must not be null)

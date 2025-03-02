@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,10 +12,9 @@
  */
 package org.openhab.core.thing.internal.firmware;
 
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 
 import org.openhab.core.events.Event;
@@ -65,7 +64,7 @@ final class ProgressCallbackImpl implements ProgressCallback {
         PENDING,
         RUNNING,
         INITIALIZED
-    };
+    }
 
     private InternalState state;
 
@@ -90,7 +89,7 @@ final class ProgressCallbackImpl implements ProgressCallback {
         if (sequence == null || sequence.length == 0) {
             throw new IllegalArgumentException("Sequence must not be null or empty.");
         }
-        this.sequence = Collections.unmodifiableCollection(Arrays.asList(sequence));
+        this.sequence = List.of(sequence);
         progressIterator = this.sequence.iterator();
         this.state = InternalState.INITIALIZED;
     }
@@ -184,7 +183,7 @@ final class ProgressCallbackImpl implements ProgressCallback {
 
     void failedInternal(String errorMessageKey) {
         this.state = InternalState.FINISHED;
-        String errorMessage = getMessage(ProgressCallbackImpl.class, errorMessageKey, new Object[] {});
+        String errorMessage = getMessage(ProgressCallbackImpl.class, errorMessageKey);
         postResultInfoEvent(FirmwareUpdateResult.ERROR, errorMessage);
     }
 

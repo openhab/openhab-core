@@ -2,14 +2,14 @@
 	"actions": [
 		{
 			"uid": "core.RunRuleAction",
-			"label": "run rules",
-			"description": "runs/executes a rule or a group of rules specified by their UIDs.",
+			"label": "run scenes, scripts & rules",
+			"description": "Runs/Executes a single one or a group of those specified by their UIDs.",
 			"configDescriptions": [
 				{
 					"name": "ruleUIDs",
 					"type": "TEXT",
-					"label": "Rules",
-					"description": "Specifies the target rule(s) that should be executed.",
+					"label": "Scenes, scripts & rules",
+					"description": "Specifies the target scene(s), script(s) & rule(s) that should be executed.",
 					"required": true,
 					"multiple": true,
 					"context": "rule"

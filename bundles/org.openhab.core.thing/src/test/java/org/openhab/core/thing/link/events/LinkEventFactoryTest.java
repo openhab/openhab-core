@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -26,7 +26,7 @@ import org.openhab.core.thing.link.dto.ItemChannelLinkDTO;
 import com.google.gson.Gson;
 
 /**
- * {@link LinkEventFactoryTests} tests the {@link LinkEventFactory}.
+ * {@link LinkEventFactoryTest} tests the {@link LinkEventFactory}.
  *
  * @author Christoph Weitkamp - Initial contribution
  */

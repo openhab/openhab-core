@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -49,7 +49,7 @@ public class ChannelGroupType extends AbstractDescriptionType {
         super(uid, label, description, null);
 
         this.category = category;
-        this.channelDefinitions = channelDefinitions == null ? Collections.emptyList()
+        this.channelDefinitions = channelDefinitions == null ? List.of()
                 : Collections.unmodifiableList(channelDefinitions);
     }
 

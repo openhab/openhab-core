@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -110,7 +110,7 @@ public class ASTNode {
      *
      * @param name the name of the named node to be found
      * @param cls the node's value has to be assignable to a reference of this class to match during search
-     * @return the value of the resulting node. Null, if not found or the value does not match {@link cls}.
+     * @return the value of the resulting node. Null, if not found or the value does not match {@code cls}.
      */
     public Object findValue(String name, Class<?> cls) {
         ASTNode node = findNode(name);

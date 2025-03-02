@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -11,6 +11,8 @@
  * SPDX-License-Identifier: EPL-2.0
  */
 package org.openhab.core.io.rest.internal.resources.beans;
+
+import java.lang.management.ManagementFactory;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -39,6 +41,7 @@ public class SystemInfoBean {
         public final int availableProcessors = Runtime.getRuntime().availableProcessors();
         public final long freeMemory = Runtime.getRuntime().freeMemory();
         public final long totalMemory = Runtime.getRuntime().totalMemory();
+        public final long uptime = ManagementFactory.getRuntimeMXBean().getUptime() / 1000;
         public final int startLevel;
 
         public SystemInfo(int startLevel) {

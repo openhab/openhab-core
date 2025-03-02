@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -302,6 +302,33 @@ public class Addon {
      */
     public static Builder create(String uid) {
         return new Builder(uid);
+    }
+
+    public static Builder create(Addon addon) {
+        Addon.Builder builder = new Builder(addon.uid);
+        builder.id = addon.id;
+        builder.label = addon.label;
+        builder.version = addon.version;
+        builder.maturity = addon.maturity;
+        builder.compatible = addon.compatible;
+        builder.contentType = addon.contentType;
+        builder.link = addon.link;
+        builder.author = addon.author;
+        builder.verifiedAuthor = addon.verifiedAuthor;
+        builder.installed = addon.installed;
+        builder.type = addon.type;
+        builder.description = addon.description;
+        builder.detailedDescription = addon.detailedDescription;
+        builder.configDescriptionURI = addon.configDescriptionURI;
+        builder.keywords = addon.keywords;
+        builder.countries = addon.countries;
+        builder.license = addon.license;
+        builder.connection = addon.connection;
+        builder.backgroundColor = addon.backgroundColor;
+        builder.imageLink = addon.imageLink;
+        builder.properties = addon.properties;
+        builder.loggerPackages = addon.loggerPackages;
+        return builder;
     }
 
     public static class Builder {

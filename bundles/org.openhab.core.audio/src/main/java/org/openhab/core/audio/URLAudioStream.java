@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,6 +17,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.Socket;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
@@ -40,7 +42,7 @@ import org.slf4j.LoggerFactory;
  * @author Christoph Weitkamp - Refactored use of filename extension
  */
 @NonNullByDefault
-public class URLAudioStream extends AudioStream {
+public class URLAudioStream extends AudioStream implements ClonableAudioStream {
 
     private static final Pattern PLS_STREAM_PATTERN = Pattern.compile("^File[0-9]=(.+)$");
 
@@ -65,9 +67,10 @@ public class URLAudioStream extends AudioStream {
         final String filename = url.toLowerCase();
         final String extension = AudioStreamUtils.getExtension(filename);
         try {
+            URL streamUrl = new URI(url).toURL();
             switch (extension) {
                 case M3U_EXTENSION:
-                    try (Scanner scanner = new Scanner(new URL(url).openStream(), StandardCharsets.UTF_8.name())) {
+                    try (Scanner scanner = new Scanner(streamUrl.openStream(), StandardCharsets.UTF_8.name())) {
                         while (true) {
                             String line = scanner.nextLine();
                             if (!line.isEmpty() && !line.startsWith("#")) {
@@ -80,7 +83,7 @@ public class URLAudioStream extends AudioStream {
                     }
                     break;
                 case PLS_EXTENSION:
-                    try (Scanner scanner = new Scanner(new URL(url).openStream(), StandardCharsets.UTF_8.name())) {
+                    try (Scanner scanner = new Scanner(streamUrl.openStream(), StandardCharsets.UTF_8.name())) {
                         while (true) {
                             String line = scanner.nextLine();
                             if (!line.isEmpty() && line.startsWith("File")) {
@@ -98,7 +101,6 @@ public class URLAudioStream extends AudioStream {
                 default:
                     break;
             }
-            URL streamUrl = new URL(url);
             URLConnection connection = streamUrl.openConnection();
             if ("unknown/unknown".equals(connection.getContentType())) {
                 // Java does not parse non-standard headers used by SHOUTCast
@@ -119,7 +121,7 @@ public class URLAudioStream extends AudioStream {
                 // which opens a new connection and does not reuse the old one.
                 return connection.getInputStream();
             }
-        } catch (MalformedURLException e) {
+        } catch (MalformedURLException | URISyntaxException e) {
             logger.error("URL '{}' is not a valid url: {}", url, e.getMessage(), e);
             throw new AudioException("URL not valid");
         } catch (IOException e) {
@@ -145,13 +147,18 @@ public class URLAudioStream extends AudioStream {
     @Override
     public void close() throws IOException {
         super.close();
-        if (shoutCastSocket != null) {
-            shoutCastSocket.close();
+        if (shoutCastSocket instanceof Socket socket) {
+            socket.close();
         }
     }
 
     @Override
     public String toString() {
         return url;
+    }
+
+    @Override
+    public InputStream getClonedStream() throws AudioException {
+        return new URLAudioStream(url);
     }
 }

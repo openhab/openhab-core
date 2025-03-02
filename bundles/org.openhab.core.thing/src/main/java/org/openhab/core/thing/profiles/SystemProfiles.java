@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -134,4 +134,14 @@ public interface SystemProfiles {
 
     ProfileType TIMESTAMP_UPDATE_TYPE = ProfileTypeBuilder.newState(TIMESTAMP_UPDATE, "Timestamp on update")
             .withSupportedItemTypes(CoreItemFactory.DATETIME).build();
+
+    ProfileType BUTTON_TOGGLE_SWITCH_TYPE = ProfileTypeBuilder.newTrigger(BUTTON_TOGGLE_SWITCH, "Toggle Switch")
+            .withSupportedItemTypes(CoreItemFactory.SWITCH).build();
+
+    ProfileType BUTTON_TOGGLE_PLAYER_TYPE = ProfileTypeBuilder.newTrigger(BUTTON_TOGGLE_PLAYER, "Toggle Player")
+            .withSupportedItemTypes(CoreItemFactory.PLAYER).build();
+
+    ProfileType BUTTON_TOGGLE_ROLLERSHUTTER_TYPE = ProfileTypeBuilder
+            .newTrigger(BUTTON_TOGGLE_ROLLERSHUTTER, "Toggle Rollershutter")
+            .withSupportedItemTypes(CoreItemFactory.ROLLERSHUTTER).build();
 }

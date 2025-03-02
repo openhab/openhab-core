@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -68,7 +68,7 @@ public class SemanticsPredicates {
     /**
      * Creates a {@link Predicate} which can be used to filter {@link Item}s that relates to a given property.
      *
-     * @param type the semantic property to filter for
+     * @param property the semantic property to filter for
      * @return created {@link Predicate}
      */
     public static Predicate<Item> relatesTo(Class<? extends Property> property) {

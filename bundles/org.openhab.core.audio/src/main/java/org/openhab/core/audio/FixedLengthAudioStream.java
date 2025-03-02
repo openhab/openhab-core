@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,32 +12,18 @@
  */
 package org.openhab.core.audio;
 
-import java.io.InputStream;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * This is an {@link AudioStream}, which can provide information about its absolute length and is able to provide
- * cloned streams.
+ * This is a {@link AudioStream}, which can also provide information about its absolute length and get cloned.
  *
  * @author Kai Kreuzer - Initial contribution
+ * @author Gwendal Roulleau - Separate getClonedStream and length into their own interface.
+ * @deprecated You should consider using {@link ClonableAudioStream} and/or {@link SizeableAudioStream} to detect audio
+ *             stream capabilities
  */
 @NonNullByDefault
-public abstract class FixedLengthAudioStream extends AudioStream {
+@Deprecated
+public abstract class FixedLengthAudioStream extends AudioStream implements SizeableAudioStream, ClonableAudioStream {
 
-    /**
-     * Provides the length of the stream in bytes.
-     *
-     * @return absolute length in bytes
-     */
-    public abstract long length();
-
-    /**
-     * Returns a new, fully independent stream instance, which can be read and closed without impacting the original
-     * instance.
-     *
-     * @return a new input stream that can be consumed by the caller
-     * @throws AudioException if stream cannot be created
-     */
-    public abstract InputStream getClonedStream() throws AudioException;
 }

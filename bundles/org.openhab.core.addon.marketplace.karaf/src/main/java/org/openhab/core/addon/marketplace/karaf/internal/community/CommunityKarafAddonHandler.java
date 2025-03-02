@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,12 +12,13 @@
  */
 package org.openhab.core.addon.marketplace.karaf.internal.community;
 
-import static org.openhab.core.addon.marketplace.internal.community.CommunityMarketplaceAddonService.KAR_CONTENT_TYPE;
+import static org.openhab.core.addon.marketplace.MarketplaceConstants.*;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -25,7 +26,6 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.karaf.kar.KarService;
@@ -56,7 +56,6 @@ public class CommunityKarafAddonHandler implements MarketplaceAddonHandler {
     private static final Path KAR_CACHE_PATH = Path.of(OpenHAB.getUserDataFolder(), "marketplace", "kar");
     private static final List<String> SUPPORTED_EXT_TYPES = List.of("automation", "binding", "misc", "persistence",
             "transformation", "ui", "voice");
-    private static final String KAR_DOWNLOAD_URL_PROPERTY = "kar_download_url";
     private static final String KAR_EXTENSION = ".kar";
 
     private final Logger logger = LoggerFactory.getLogger(CommunityKarafAddonHandler.class);
@@ -109,13 +108,14 @@ public class CommunityKarafAddonHandler implements MarketplaceAddonHandler {
 
     @Override
     public void install(Addon addon) throws MarketplaceHandlerException {
+        URL sourceUrl;
         try {
-            URL sourceUrl = new URL((String) addon.getProperties().get(KAR_DOWNLOAD_URL_PROPERTY));
-            addKarToCache(addon.getUid(), sourceUrl);
-            installFromCache(addon.getUid());
-        } catch (MalformedURLException e) {
+            sourceUrl = (new URI((String) addon.getProperties().get(KAR_DOWNLOAD_URL_PROPERTY))).toURL();
+        } catch (IllegalArgumentException | MalformedURLException | URISyntaxException e) {
             throw new MarketplaceHandlerException("Malformed source URL: " + e.getMessage(), e);
         }
+        addKarToCache(addon.getUid(), sourceUrl);
+        installFromCache(addon.getUid());
     }
 
     @Override
@@ -123,7 +123,7 @@ public class CommunityKarafAddonHandler implements MarketplaceAddonHandler {
         try {
             Path addonPath = getAddonCacheDirectory(addon.getUid());
             List<String> repositories = karService.list();
-            for (Path path : karFilesStream(addonPath).collect(Collectors.toList())) {
+            for (Path path : karFilesStream(addonPath).toList()) {
                 String karRepoName = pathToKarRepoName(path);
                 if (repositories.contains(karRepoName)) {
                     karService.uninstall(karRepoName);

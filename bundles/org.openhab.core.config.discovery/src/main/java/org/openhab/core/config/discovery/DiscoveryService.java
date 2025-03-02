@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -39,6 +39,7 @@ import org.openhab.core.thing.ThingTypeUID;
  * @author Michael Grammling - Initial contribution
  * @author Kai Kreuzer - Refactored API
  * @author Dennis Nobel - Added background discovery configuration through Configuration Admin
+ * @author Laurent Garnier - Added discovery with an optional input parameter
  *
  * @see DiscoveryListener
  * @see DiscoveryServiceRegistry
@@ -50,7 +51,7 @@ public interface DiscoveryService {
      * Configuration property for enabling the auto discovery feature of a
      * DiscoveryService.
      */
-    static final String CONFIG_PROPERTY_BACKGROUND_DISCOVERY = "background";
+    String CONFIG_PROPERTY_BACKGROUND_DISCOVERY = "background";
 
     /**
      * Returns the list of {@code Thing} types which are supported by the {@link DiscoveryService}.
@@ -59,6 +60,31 @@ public interface DiscoveryService {
      *         (not null, could be empty)
      */
     Collection<ThingTypeUID> getSupportedThingTypes();
+
+    /**
+     * Returns {@code true} if the discovery supports an optional input parameter to run, otherwise {@code false}.
+     *
+     * @return true if the discovery supports an optional input parameter to run, otherwise false
+     */
+    boolean isScanInputSupported();
+
+    /**
+     * Returns the label of the supported input parameter to start the discovery.
+     *
+     * @return the label of the supported input parameter to start the discovery or null if input parameter not
+     *         supported
+     */
+    @Nullable
+    String getScanInputLabel();
+
+    /**
+     * Returns the description of the supported input parameter to start the discovery.
+     *
+     * @return the description of the supported input parameter to start the discovery or null if input parameter not
+     *         supported
+     */
+    @Nullable
+    String getScanInputDescription();
 
     /**
      * Returns the amount of time in seconds after which an active scan ends.
@@ -88,8 +114,22 @@ public interface DiscoveryService {
     void startScan(@Nullable ScanListener listener);
 
     /**
+     * Triggers this service to start an active scan for new devices using an input parameter for that.<br>
+     * This method must not block any calls such as {@link #abortScan()} and
+     * must return fast.
+     * <p>
+     * If started, any registered {@link DiscoveryListener} must be notified about {@link DiscoveryResult}s.
+     * <p>
+     * If there is already a scan running, it is aborted and a new scan is triggered.
+     *
+     * @param input an input parameter to be used during discovery scan
+     * @param listener a listener that is notified about errors or termination of the scan
+     */
+    void startScan(String input, @Nullable ScanListener listener);
+
+    /**
      * Stops an active scan for devices.<br>
-     * This method must not block any calls such as {@link #startScan()} and must
+     * This method must not block any calls such as {@link #startScan} and must
      * return fast.
      * <p>
      * After this method returns, no further notifications about {@link DiscoveryResult}s are allowed to be sent to any

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,7 +14,7 @@ package org.openhab.core.ui.icon.internal;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.time.Instant;
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -53,6 +53,7 @@ import org.slf4j.LoggerFactory;
 @NonNullByDefault
 public class IconServlet extends HttpServlet {
 
+    @Serial
     private static final long serialVersionUID = 2880642275858634578L;
 
     private final Logger logger = LoggerFactory.getLogger(IconServlet.class);
@@ -62,8 +63,6 @@ public class IconServlet extends HttpServlet {
     static final String PARAM_FORMAT = "format";
     static final String PARAM_ANY_FORMAT = "anyFormat";
     static final String PARAM_STATE = "state";
-
-    private long startupTime;
 
     protected String defaultIconSetId = "classic";
 
@@ -80,7 +79,6 @@ public class IconServlet extends HttpServlet {
 
     @Activate
     protected void activate(Map<String, Object> config) {
-        startupTime = System.currentTimeMillis();
         modified(config);
     }
 
@@ -94,11 +92,6 @@ public class IconServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        if (req.getDateHeader("If-Modified-Since") > startupTime) {
-            resp.setStatus(304);
-            return;
-        }
-
         String category = getCategory(req);
         if (category.isEmpty()) {
             logger.debug("URI must start with '{}' but is '{}'", SERVLET_PATH, req.getRequestURI());
@@ -148,7 +141,7 @@ public class IconServlet extends HttpServlet {
             }
 
             resp.setContentType(Format.SVG.equals(format) ? "image/svg+xml" : "image/png");
-            resp.setDateHeader("Last-Modified", Instant.now().toEpochMilli());
+            resp.setHeader("Cache-Control", "max-age=31536000");
             is.transferTo(resp.getOutputStream());
             resp.flushBuffer();
         } catch (IOException e) {

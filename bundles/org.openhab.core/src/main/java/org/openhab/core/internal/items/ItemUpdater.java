@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -22,6 +22,7 @@ import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.events.AbstractItemEventSubscriber;
 import org.openhab.core.items.events.ItemCommandEvent;
 import org.openhab.core.items.events.ItemStateEvent;
+import org.openhab.core.items.events.ItemTimeSeriesEvent;
 import org.openhab.core.types.State;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -70,7 +71,7 @@ public class ItemUpdater extends AbstractItemEventSubscriber {
                     } catch (ReflectiveOperationException e) {
                         // Should never happen
                         logger.warn("{} while creating {} instance: {}", e.getClass().getSimpleName(),
-                                state.getClass().getSimpleName(), e.getMessage());
+                                state.getSimpleName(), e.getMessage());
                     }
                 }
             }
@@ -91,6 +92,18 @@ public class ItemUpdater extends AbstractItemEventSubscriber {
             Item item = itemRegistry.getItem(commandEvent.getItemName());
             if (item instanceof GroupItem groupItem) {
                 groupItem.send(commandEvent.getItemCommand());
+            }
+        } catch (ItemNotFoundException e) {
+            logger.debug("Received command for non-existing item: {}", e.getMessage());
+        }
+    }
+
+    @Override
+    protected void receiveTimeSeries(ItemTimeSeriesEvent timeSeriesEvent) {
+        try {
+            Item item = itemRegistry.getItem(timeSeriesEvent.getItemName());
+            if (!(item instanceof GroupItem) && item instanceof GenericItem genericItem) {
+                genericItem.setTimeSeries(timeSeriesEvent.getTimeSeries());
             }
         } catch (ItemNotFoundException e) {
             logger.debug("Received command for non-existing item: {}", e.getMessage());

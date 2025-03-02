@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -43,9 +43,7 @@ public class HostFragmentMappingUtil {
     /**
      * This method is used to get the host bundles of the parameter which is a fragment bundle.
      *
-     * @param pkgAdmin
-     *
-     * @param bundle an OSGi fragment bundle.
+     * @param fragment an OSGi fragment bundle.
      * @return a list with the hosts of the <code>fragment</code> parameter.
      */
     static List<Bundle> returnHostBundles(Bundle fragment) {
@@ -54,9 +52,9 @@ public class HostFragmentMappingUtil {
         if (bundles != null) {
             hosts = Arrays.asList(bundles);
         } else {
-            for (Bundle host : hostFragmentMapping.keySet()) {
-                if (hostFragmentMapping.get(host).contains(fragment)) {
-                    hosts.add(host);
+            for (Entry<Bundle, List<Bundle>> entry : hostFragmentMapping.entrySet()) {
+                if (entry.getValue().contains(fragment)) {
+                    hosts.add(entry.getKey());
                 }
             }
         }

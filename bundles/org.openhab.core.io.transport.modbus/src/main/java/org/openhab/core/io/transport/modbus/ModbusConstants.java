@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -24,12 +24,12 @@ import org.eclipse.jdt.annotation.Nullable;
  *
  * Maximum number of registers that are allowed to be read.
  *
- * The Modbus protocol has many intepretation on maximum data size of messages. Good reference is here:
- * https://wingpath.co.uk/manpage.php?product=modtest&page=message_limits.html
+ * The Modbus protocol has many intepretation on maximum data size of messages. Good reference is
+ * <a href="https://wingpath.co.uk/manpage.php?product=modtest&amp;page=message_limits.html">here</a>.
  *
- * We try to follow modern specification here (V1.1B3):
- * https://modbus.org/docs/Modbus_Application_Protocol_V1_1b3.pdf. See section 4.1 Protocol Specification in the
- * specification.
+ * We try to follow <a href="https://modbus.org/docs/Modbus_Application_Protocol_V1_1b3.pdf">
+ * modern specification here (V1.1B3).</a>
+ * See section 4.1 Protocol Specification in the specification.
  *
  * According to V1.1B3, maximum size for PDU is 253 bytes, making maximum ADU size 256 (RTU) or 260 (TCP).
  *
@@ -40,7 +40,7 @@ import org.eclipse.jdt.annotation.Nullable;
  *
  *
  * Reads are limited by response PDU size.
- * Writes (FC15 & FC16) are limited by write request ADU size.
+ * Writes (FC15 and FC16) are limited by write request ADU size.
  *
  *
  * @author Sami Salonen - Initial contribution
@@ -55,7 +55,7 @@ public class ModbusConstants {
      * @author Sami Salonen - Initial contribution
      *
      */
-    public static enum ValueType {
+    public enum ValueType {
         BIT("bit", 1),
         INT8("int8", 8),
         UINT8("uint8", 8),

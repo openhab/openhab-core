@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,10 +17,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -41,7 +39,7 @@ public class BitUtilitiesExtractStateFromRegistersTest {
     }
 
     public static Collection<Object[]> data() {
-        return Collections.unmodifiableList(Stream.of(
+        return List.of(
                 //
                 // BIT
                 //
@@ -350,11 +348,10 @@ public class BitUtilitiesExtractStateFromRegistersTest {
                 new Object[] {
                         // out of bounds of unsigned 64bit
                         new DecimalType("16124500437522872585"), ValueType.UINT64_SWAP,
-                        shortArrayToRegisterArray(0x7909, 0x772E, 0xBBB7, 0xDFC5), 0 })
-                .collect(Collectors.toList()));
+                        shortArrayToRegisterArray(0x7909, 0x772E, 0xBBB7, 0xDFC5), 0 });
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings("unchecked")
     @ParameterizedTest
     @MethodSource("data")
     public void testextractStateFromRegisters(Object expectedResult, ValueType type, ModbusRegisterArray registers,

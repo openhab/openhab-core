@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -26,7 +26,7 @@ import org.eclipse.xtext.formatting.impl.FormattingConfig
  * see : http://www.eclipse.org/Xtext/documentation.html#formatting
  * on how and when to use it 
  * 
- * Also see {@link org.eclipse.xtext.xtext.XtextFormattingTokenSerializer} as an example
+ * Also see {@link org.eclipse.xtext.xtext.XtextFormatter} as an example
  */
 class ScriptFormatter extends AbstractDeclarativeFormatter {
 

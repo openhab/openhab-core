@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,8 +17,8 @@ import java.util.List;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * Implementing this interface allows a {@link ConsoleCommandExtension} to
- * provide completions for the user as they write commands.
+ * Implementing this interface allows a {@link org.openhab.core.io.console.extensions.ConsoleCommandExtension}
+ * to provide completions for the user as they write commands.
  *
  * @author Cody Cutrer - Initial contribution
  */

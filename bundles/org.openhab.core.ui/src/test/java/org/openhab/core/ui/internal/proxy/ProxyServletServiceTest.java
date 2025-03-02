@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -147,7 +147,7 @@ public class ProxyServletServiceTest {
         when(imageWidgetMock.getItem()).thenReturn(null);
         URI uri = service.uriFromRequest(requestMock);
         assertNotNull(uri);
-        assertEquals(uri.toString(), VALID_IMAGE_URL);
+        assertEquals(VALID_IMAGE_URL, uri.toString());
     }
 
     @Test
@@ -166,7 +166,7 @@ public class ProxyServletServiceTest {
         when(imageWidgetMock.getItem()).thenReturn(ITEM_NAME_UNDEF_STATE);
         URI uri = service.uriFromRequest(requestMock);
         assertNotNull(uri);
-        assertEquals(uri.toString(), VALID_IMAGE_URL);
+        assertEquals(VALID_IMAGE_URL, uri.toString());
     }
 
     @Test
@@ -176,7 +176,7 @@ public class ProxyServletServiceTest {
         when(imageWidgetMock.getItem()).thenReturn(ITEM_NAME_NULL_STATE);
         URI uri = service.uriFromRequest(requestMock);
         assertNotNull(uri);
-        assertEquals(uri.toString(), VALID_IMAGE_URL);
+        assertEquals(VALID_IMAGE_URL, uri.toString());
     }
 
     @Test
@@ -186,7 +186,7 @@ public class ProxyServletServiceTest {
         when(imageWidgetMock.getItem()).thenReturn(ITEM_NAME_ON_STATE);
         URI uri = service.uriFromRequest(requestMock);
         assertNotNull(uri);
-        assertEquals(uri.toString(), VALID_IMAGE_URL);
+        assertEquals(VALID_IMAGE_URL, uri.toString());
     }
 
     @Test
@@ -196,7 +196,7 @@ public class ProxyServletServiceTest {
         when(imageWidgetMock.getItem()).thenReturn(ITEM_NAME_INVALID_URL);
         URI uri = service.uriFromRequest(requestMock);
         assertNotNull(uri);
-        assertEquals(uri.toString(), VALID_IMAGE_URL);
+        assertEquals(VALID_IMAGE_URL, uri.toString());
     }
 
     @Test
@@ -206,7 +206,7 @@ public class ProxyServletServiceTest {
         when(imageWidgetMock.getItem()).thenReturn(ITEM_NAME_VALID_IMAGE_URL);
         URI uri = service.uriFromRequest(requestMock);
         assertNotNull(uri);
-        assertEquals(uri.toString(), ITEM_VALID_IMAGE_URL);
+        assertEquals(ITEM_VALID_IMAGE_URL, uri.toString());
     }
 
     @Test
@@ -216,7 +216,7 @@ public class ProxyServletServiceTest {
         when(videoWidgetMock.getItem()).thenReturn(null);
         URI uri = service.uriFromRequest(requestMock);
         assertNotNull(uri);
-        assertEquals(uri.toString(), VALID_VIDEO_URL);
+        assertEquals(VALID_VIDEO_URL, uri.toString());
     }
 
     @Test
@@ -235,7 +235,7 @@ public class ProxyServletServiceTest {
         when(videoWidgetMock.getItem()).thenReturn(ITEM_NAME_UNDEF_STATE);
         URI uri = service.uriFromRequest(requestMock);
         assertNotNull(uri);
-        assertEquals(uri.toString(), VALID_VIDEO_URL);
+        assertEquals(VALID_VIDEO_URL, uri.toString());
     }
 
     @Test
@@ -245,7 +245,7 @@ public class ProxyServletServiceTest {
         when(videoWidgetMock.getItem()).thenReturn(ITEM_NAME_NULL_STATE);
         URI uri = service.uriFromRequest(requestMock);
         assertNotNull(uri);
-        assertEquals(uri.toString(), VALID_VIDEO_URL);
+        assertEquals(VALID_VIDEO_URL, uri.toString());
     }
 
     @Test
@@ -255,7 +255,7 @@ public class ProxyServletServiceTest {
         when(videoWidgetMock.getItem()).thenReturn(ITEM_NAME_ON_STATE);
         URI uri = service.uriFromRequest(requestMock);
         assertNotNull(uri);
-        assertEquals(uri.toString(), VALID_VIDEO_URL);
+        assertEquals(VALID_VIDEO_URL, uri.toString());
     }
 
     @Test
@@ -265,7 +265,7 @@ public class ProxyServletServiceTest {
         when(videoWidgetMock.getItem()).thenReturn(ITEM_NAME_INVALID_URL);
         URI uri = service.uriFromRequest(requestMock);
         assertNotNull(uri);
-        assertEquals(uri.toString(), VALID_VIDEO_URL);
+        assertEquals(VALID_VIDEO_URL, uri.toString());
     }
 
     @Test
@@ -275,6 +275,6 @@ public class ProxyServletServiceTest {
         when(videoWidgetMock.getItem()).thenReturn(ITEM_NAME_VALID_VIDEO_URL);
         URI uri = service.uriFromRequest(requestMock);
         assertNotNull(uri);
-        assertEquals(uri.toString(), ITEM_VALID_VIDEO_URL);
+        assertEquals(ITEM_VALID_VIDEO_URL, uri.toString());
     }
 }

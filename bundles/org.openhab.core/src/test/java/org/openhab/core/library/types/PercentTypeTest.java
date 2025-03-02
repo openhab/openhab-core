@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -77,6 +77,12 @@ public class PercentTypeTest {
         PercentType.valueOf(value);
     }
 
+    @Test
+    public void testLowerCaseExponents() {
+        assertEquals(PercentType.valueOf("1e2"), PercentType.valueOf("1E2"));
+        assertEquals(PercentType.valueOf("1.1e1"), PercentType.valueOf("1.1E1"));
+    }
+
     @ParameterizedTest
     @MethodSource("locales")
     public void testLocalizedStringConstruction(Locale defaultLocale) {
@@ -85,7 +91,6 @@ public class PercentTypeTest {
         // Construction for each locale should always return the same result regardless of the current default locale
         Stream.of(Locale.ENGLISH, Locale.GERMAN).forEach(locale -> {
             char ds = DecimalFormatSymbols.getInstance(locale).getDecimalSeparator();
-            char gs = DecimalFormatSymbols.getInstance(locale).getGroupingSeparator();
 
             assertEquals(new PercentType("0"), new PercentType("0", locale));
             assertEquals(new PercentType("0.000"), new PercentType(String.format("0%s000", ds), locale));
@@ -95,7 +100,7 @@ public class PercentTypeTest {
             assertEquals(new PercentType("1"), new PercentType("1", locale));
             assertEquals(new PercentType("12"), new PercentType("12", locale));
             assertEquals(new PercentType("12.56"), new PercentType(String.format("12%s56", ds), locale));
-            assertEquals(new PercentType("100"), new PercentType(String.format("100", gs, gs), locale));
+            assertEquals(new PercentType("100"), new PercentType("100", locale));
         });
     }
 

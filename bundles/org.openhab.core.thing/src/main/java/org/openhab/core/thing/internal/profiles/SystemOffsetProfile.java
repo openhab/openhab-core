@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,10 +15,8 @@ package org.openhab.core.thing.internal.profiles;
 import java.math.BigDecimal;
 
 import javax.measure.UnconvertibleException;
-import javax.measure.quantity.Temperature;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.QuantityType;
 import org.openhab.core.library.unit.Units;
@@ -115,15 +113,7 @@ public class SystemOffsetProfile implements StateProfile {
                             state, offset);
                     finalOffset = new QuantityType<>(finalOffset.toBigDecimal(), qtState.getUnit());
                 }
-                // take care of temperatures because they start at offset -273°C = 0K
-                if (Units.KELVIN.equals(qtState.getUnit().getSystemUnit())) {
-                    QuantityType<Temperature> tmp = handleTemperature(qtState, finalOffset);
-                    if (tmp != null) {
-                        result = tmp;
-                    }
-                } else {
-                    result = qtState.add(finalOffset);
-                }
+                result = qtState.add(finalOffset);
             } catch (UnconvertibleException e) {
                 logger.warn("Cannot apply offset '{}' to state '{}' because types do not match.", finalOffset, qtState);
             }
@@ -136,18 +126,5 @@ public class SystemOffsetProfile implements StateProfile {
             result = state;
         }
         return result;
-    }
-
-    @SuppressWarnings("null")
-    private @Nullable QuantityType<Temperature> handleTemperature(QuantityType<Temperature> qtState,
-            QuantityType<Temperature> offset) {
-        // do the math in Kelvin and afterwards convert it back to the unit of the state
-        final QuantityType<Temperature> kelvinState = qtState.toUnit(Units.KELVIN);
-        final QuantityType<Temperature> kelvinOffset = offset.toUnitRelative(Units.KELVIN);
-        if (kelvinState == null || kelvinOffset == null) {
-            return null;
-        }
-
-        return kelvinState.add(kelvinOffset).toUnit(qtState.getUnit());
     }
 }

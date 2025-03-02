@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -33,13 +33,13 @@ public class SimpleStopWatch {
     private volatile long resumed;
 
     @FunctionalInterface
-    public abstract interface SupplierWithPollTaskUnregisteredException<T> {
-        public abstract T get() throws ModbusManagerImpl.PollTaskUnregistered;
+    public interface SupplierWithPollTaskUnregisteredException<T> {
+        T get() throws ModbusManagerImpl.PollTaskUnregistered;
     }
 
     @FunctionalInterface
-    public abstract interface RunnableWithModbusException {
-        public abstract void run() throws ModbusException;
+    public interface RunnableWithModbusException {
+        void run() throws ModbusException;
     }
 
     /**
@@ -143,7 +143,7 @@ public class SimpleStopWatch {
      *
      * First StopWatch is resumed, then action is applied. Finally the StopWatch is suspended.
      *
-     * @param supplier action to time
+     * @param runnable action to time
      * @return return value from supplier
      */
     public void timeRunnable(Runnable runnable) {

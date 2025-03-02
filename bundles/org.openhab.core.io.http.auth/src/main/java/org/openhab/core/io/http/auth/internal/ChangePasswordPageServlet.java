@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,6 +13,7 @@
 package org.openhab.core.io.http.auth.internal;
 
 import java.io.IOException;
+import java.io.Serial;
 import java.util.Map;
 
 import javax.servlet.Servlet;
@@ -48,6 +49,7 @@ public class ChangePasswordPageServlet extends AbstractAuthPageServlet {
 
     public static final String SERVLET_PATH = "/changePassword";
 
+    @Serial
     private static final long serialVersionUID = 5340598701104679843L;
 
     @Activate

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,7 +14,7 @@ package org.openhab.core.internal.items;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.*;
 
 import java.util.Locale;
@@ -88,7 +88,7 @@ public class ItemStateConverterImplTest {
         State originalState = new DecimalType(12.34);
         State state = itemStateConverter.convertToAcceptedState(originalState, item);
 
-        assertTrue(originalState == state);
+        assertSame(originalState, state);
     }
 
     @ParameterizedTest
@@ -146,7 +146,7 @@ public class ItemStateConverterImplTest {
         State originalState = new QuantityType<>("153 mired");
         State convertedState = itemStateConverter.convertToAcceptedState(originalState, item);
 
-        assertThat(((QuantityType) convertedState).intValue(), is(6535));
+        assertThat(((QuantityType<?>) convertedState).intValue(), is(6535));
     }
 
     @ParameterizedTest

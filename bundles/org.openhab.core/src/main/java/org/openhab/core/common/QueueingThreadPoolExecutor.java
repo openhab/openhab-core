@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -30,8 +30,9 @@ import org.slf4j.LoggerFactory;
 /**
  * This is a thread pool executor service, which works as a developer would expect it to work.
  * The default {@link ThreadPoolExecutor} does the following (see
- * <a href="http://docs.oracle.com/javase/7/docs/api/java/util/concurrent/ThreadPoolExecutor.html">the official
- * JavaDoc)</a>:
+ * <a href=
+ * "https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/ThreadPoolExecutor.html">the
+ * official JavaDoc)</a>:
  * <ul>
  * <li>If fewer than corePoolSize threads are running, the Executor always prefers adding a new thread rather than
  * queuing.</li>
@@ -166,10 +167,6 @@ public class QueueingThreadPoolExecutor extends ThreadPoolExecutor {
         if (taskQueue.isEmpty()) {
             super.execute(command);
         } else {
-            if (command == null) {
-                throw new IllegalArgumentException("Command can not be null.");
-            }
-
             // ignore incoming tasks when the executor is shutdown
             if (!isShutdown()) {
                 addToQueue(command);
@@ -239,8 +236,7 @@ public class QueueingThreadPoolExecutor extends ThreadPoolExecutor {
 
         public CommonThreadFactory(String name) {
             this.name = name;
-            SecurityManager s = System.getSecurityManager();
-            group = (s != null) ? s.getThreadGroup() : Thread.currentThread().getThreadGroup();
+            group = Thread.currentThread().getThreadGroup();
         }
 
         @Override

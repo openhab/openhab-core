@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,8 +17,8 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.WildcardType;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -32,6 +32,7 @@ import javax.measure.spi.SystemOfUnits;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.internal.library.unit.UnitInitializer;
+import org.openhab.core.library.unit.CurrencyUnits;
 import org.openhab.core.library.unit.ImperialUnits;
 import org.openhab.core.library.unit.SIUnits;
 import org.openhab.core.library.unit.Units;
@@ -59,8 +60,8 @@ public class UnitUtils {
     private static final String SI_DIMENSION_PREFIX = "si.uom.quantity.";
     private static final String FRAMEWORK_DIMENSION_PREFIX = "org.openhab.core.library.dimension.";
 
-    private static final Collection<Class<? extends SystemOfUnits>> ALL_SYSTEM_OF_UNITS = Arrays.asList(SIUnits.class,
-            ImperialUnits.class, Units.class, tech.units.indriya.unit.Units.class);
+    private static final Collection<Class<? extends SystemOfUnits>> ALL_SYSTEM_OF_UNITS = List.of(SIUnits.class,
+            ImperialUnits.class, Units.class, tech.units.indriya.unit.Units.class, CurrencyUnits.class);
 
     static {
         UnitInitializer.init();

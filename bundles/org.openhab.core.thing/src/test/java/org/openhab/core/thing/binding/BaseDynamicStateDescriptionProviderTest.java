@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -67,7 +67,7 @@ class BaseDynamicStateDescriptionProviderTest {
             this.eventPublisher = eventPublisherMock;
             this.itemChannelLinkRegistry = itemChannelLinkRegistryMock;
         }
-    };
+    }
 
     private @NonNullByDefault({}) BaseDynamicStateDescriptionProvider subject;
 
@@ -86,7 +86,7 @@ class BaseDynamicStateDescriptionProviderTest {
         verify(eventPublisherMock, times(1)).post(capture.capture());
 
         Event event = capture.getValue();
-        assertTrue(event instanceof ChannelDescriptionChangedEvent);
+        assertInstanceOf(ChannelDescriptionChangedEvent.class, event);
         ChannelDescriptionChangedEvent cdce = (ChannelDescriptionChangedEvent) event;
         assertEquals(CommonChannelDescriptionField.PATTERN, cdce.getField());
 
@@ -104,7 +104,7 @@ class BaseDynamicStateDescriptionProviderTest {
         verify(eventPublisherMock, times(1)).post(capture.capture());
 
         Event event = capture.getValue();
-        assertTrue(event instanceof ChannelDescriptionChangedEvent);
+        assertInstanceOf(ChannelDescriptionChangedEvent.class, event);
         ChannelDescriptionChangedEvent cdce = (ChannelDescriptionChangedEvent) event;
         assertEquals(CommonChannelDescriptionField.STATE_OPTIONS, cdce.getField());
 

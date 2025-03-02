@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -30,7 +30,6 @@ import org.openhab.core.scheduler.SchedulerRunnable;
 public class TimerImpl implements Timer {
 
     private final Scheduler scheduler;
-    private final ZonedDateTime startTime;
     private final SchedulerRunnable runnable;
     private final @Nullable String identifier;
     private ScheduledCompletableFuture<?> future;
@@ -42,7 +41,6 @@ public class TimerImpl implements Timer {
     public TimerImpl(Scheduler scheduler, ZonedDateTime startTime, SchedulerRunnable runnable,
             @Nullable String identifier) {
         this.scheduler = scheduler;
-        this.startTime = startTime;
         this.runnable = runnable;
         this.identifier = identifier;
 
@@ -78,7 +76,7 @@ public class TimerImpl implements Timer {
 
     @Override
     public boolean isRunning() {
-        return isActive() && ZonedDateTime.now().isAfter(startTime);
+        return isActive() && ZonedDateTime.now().isAfter(future.getScheduledTime());
     }
 
     @Override

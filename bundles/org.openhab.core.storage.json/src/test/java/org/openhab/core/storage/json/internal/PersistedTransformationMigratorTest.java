@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -30,6 +30,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.openhab.core.config.core.OrderingMapSerializer;
 import org.openhab.core.config.core.OrderingSetSerializer;
+import org.openhab.core.library.types.DateTimeType;
 import org.openhab.core.storage.json.internal.migration.PersistedTransformationTypeMigrator;
 import org.openhab.core.storage.json.internal.migration.TypeMigrationException;
 import org.openhab.core.storage.json.internal.migration.TypeMigrator;
@@ -47,8 +48,9 @@ import com.google.gson.JsonElement;
 public class PersistedTransformationMigratorTest {
 
     private final Gson internalMapper = new GsonBuilder() //
-            .registerTypeHierarchyAdapter(Map.class, new OrderingMapSerializer())//
-            .registerTypeHierarchyAdapter(Set.class, new OrderingSetSerializer())//
+            .setDateFormat(DateTimeType.DATE_PATTERN_JSON_COMPAT) //
+            .registerTypeHierarchyAdapter(Map.class, new OrderingMapSerializer()) //
+            .registerTypeHierarchyAdapter(Set.class, new OrderingSetSerializer()) //
             .registerTypeHierarchyAdapter(Map.class, new StorageEntryMapDeserializer()) //
             .setPrettyPrinting() //
             .create();

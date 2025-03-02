@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -41,6 +41,7 @@ import org.openhab.core.thing.util.ThingHandlerHelper;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.RefreshType;
 import org.openhab.core.types.State;
+import org.openhab.core.types.TimeSeries;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,6 +61,7 @@ import org.slf4j.LoggerFactory;
  * @author Stefan Bußweiler - Added new thing status handling, refactorings thing/bridge life cycle
  * @author Kai Kreuzer - Refactored isLinked method to not use deprecated functions anymore
  * @author Christoph Weitkamp - Moved OSGI ServiceTracker from BaseThingHandler to ThingHandlerCallback
+ * @author Jan N. Klug - added time series support
  */
 @NonNullByDefault
 public abstract class BaseThingHandler implements ThingHandler {
@@ -288,6 +290,36 @@ public abstract class BaseThingHandler implements ThingHandler {
     }
 
     /**
+     * Send a time series to the channel. This can be used to transfer historic data or forecasts.
+     *
+     * @param channelUID unique id of the channel
+     * @param timeSeries the {@link TimeSeries} that is sent
+     */
+    protected void sendTimeSeries(ChannelUID channelUID, TimeSeries timeSeries) {
+        synchronized (this) {
+            ThingHandlerCallback callback1 = this.callback;
+            if (callback1 != null) {
+                callback1.sendTimeSeries(channelUID, timeSeries);
+            } else {
+                logger.warn(
+                        "Handler {} of thing {} tried sending to channel {} although the handler was already disposed.",
+                        this.getClass().getSimpleName(), channelUID.getThingUID(), channelUID.getId());
+            }
+        }
+    }
+
+    /**
+     * Send a time series to the channel. This can be used to transfer historic data or forecasts.
+     *
+     * @param channelID id of the channel
+     * @param timeSeries the {@link TimeSeries} that is sent
+     */
+    protected void sendTimeSeries(String channelID, TimeSeries timeSeries) {
+        ChannelUID channelUID = new ChannelUID(this.getThing().getUID(), channelID);
+        sendTimeSeries(channelUID, timeSeries);
+    }
+
+    /**
      * Emits an event for the given channel.
      *
      * @param channelUID UID of the channel over which the event will be emitted
@@ -447,8 +479,8 @@ public abstract class BaseThingHandler implements ThingHandler {
                     channel.getConfiguration().getProperties()));
         } catch (ConfigValidationException e) {
             logger.warn(
-                    "Attempt to update thing '{}' with a thing containing invalid configuration '{}', blocked. This is most likely a bug.",
-                    thing.getUID(), thing.getConfiguration());
+                    "Attempt to update thing '{}' with a thing containing invalid configuration '{}' blocked. This is most likely a bug: {}",
+                    thing.getUID(), thing.getConfiguration(), e.getValidationMessages());
             return;
         }
         synchronized (this) {

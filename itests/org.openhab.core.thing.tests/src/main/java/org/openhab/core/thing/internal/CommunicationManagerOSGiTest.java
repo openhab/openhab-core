@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -18,8 +18,6 @@ import static org.mockito.Mockito.*;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.measure.quantity.Temperature;
 
@@ -27,7 +25,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
@@ -75,14 +72,13 @@ import org.openhab.core.thing.profiles.ProfileContext;
 import org.openhab.core.thing.profiles.ProfileFactory;
 import org.openhab.core.thing.profiles.ProfileTypeProvider;
 import org.openhab.core.thing.profiles.ProfileTypeUID;
-import org.openhab.core.thing.profiles.StateProfile;
+import org.openhab.core.thing.profiles.TimeSeriesProfile;
 import org.openhab.core.thing.profiles.TriggerProfile;
 import org.openhab.core.thing.type.ChannelKind;
 import org.openhab.core.thing.type.ChannelType;
-import org.openhab.core.thing.type.ChannelTypeRegistry;
 import org.openhab.core.thing.type.ChannelTypeUID;
 import org.openhab.core.types.Command;
-import org.openhab.core.types.State;
+import org.openhab.core.types.TimeSeries;
 
 /**
  *
@@ -93,7 +89,7 @@ import org.openhab.core.types.State;
 @NonNullByDefault
 public class CommunicationManagerOSGiTest extends JavaOSGiTest {
 
-    private class ItemChannelLinkRegistryAdvanced extends ItemChannelLinkRegistry {
+    private static class ItemChannelLinkRegistryAdvanced extends ItemChannelLinkRegistry {
         public ItemChannelLinkRegistryAdvanced(ThingRegistry thingRegistry, ItemRegistry itemRegistry) {
             super(thingRegistry, itemRegistry);
         }
@@ -104,7 +100,7 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
         }
     }
 
-    private static final UnitProvider unitProviderMock = mock(UnitProvider.class);
+    private static final UnitProvider UNIT_PROVIDER_MOCK = mock(UnitProvider.class);
 
     private static final String EVENT = "event";
     private static final String ITEM_NAME_1 = "testItem1";
@@ -116,7 +112,7 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
     private static final SwitchItem ITEM_2 = new SwitchItem(ITEM_NAME_2);
     private static final NumberItem ITEM_3 = new NumberItem(ITEM_NAME_3);
     private static final NumberItem ITEM_4 = new NumberItem(ITEM_NAME_4);
-    private static NumberItem ITEM_5 = new NumberItem(ITEM_NAME_5); // will be replaced later by dimension item
+    private NumberItem item5 = new NumberItem(ITEM_NAME_5); // will be replaced later by dimension item
 
     private static final ThingTypeUID THING_TYPE_UID = new ThingTypeUID("test", "type");
     private static final ThingUID THING_UID = new ThingUID("test", "thing");
@@ -148,13 +144,12 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
             ChannelBuilder.create(TRIGGER_CHANNEL_UID_2).withKind(ChannelKind.TRIGGER).build()).build();
 
     private @Mock @NonNullByDefault({}) AutoUpdateManager autoUpdateManagerMock;
-    private @Mock @NonNullByDefault({}) ChannelTypeRegistry channelTypeRegistryMock;
     private @Mock @NonNullByDefault({}) EventPublisher eventPublisherMock;
     private @Mock @NonNullByDefault({}) ItemRegistry itemRegistryMock;
     private @Mock @NonNullByDefault({}) ItemStateConverter itemStateConverterMock;
     private @Mock @NonNullByDefault({}) ProfileAdvisor profileAdvisorMock;
     private @Mock @NonNullByDefault({}) ProfileFactory profileFactoryMock;
-    private @Mock @NonNullByDefault({}) StateProfile stateProfileMock;
+    private @Mock @NonNullByDefault({}) TimeSeriesProfile stateProfileMock;
     private @Mock @NonNullByDefault({}) ThingHandler thingHandlerMock;
     private @Mock @NonNullByDefault({}) ThingRegistry thingRegistryMock;
     private @Mock @NonNullByDefault({}) TriggerProfile triggerProfileMock;
@@ -167,8 +162,8 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
 
     @BeforeEach
     public void beforeEach() {
-        when(unitProviderMock.getUnit(Temperature.class)).thenReturn(SIUnits.CELSIUS);
-        ITEM_5 = new NumberItem("Number:Temperature", ITEM_NAME_5, unitProviderMock);
+        when(UNIT_PROVIDER_MOCK.getUnit(Temperature.class)).thenReturn(SIUnits.CELSIUS);
+        item5 = new NumberItem("Number:Temperature", ITEM_NAME_5, UNIT_PROVIDER_MOCK);
 
         safeCaller = getService(SafeCaller.class);
         assertNotNull(safeCaller);
@@ -177,9 +172,8 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
 
         assertNotNull(profileFactory);
 
-        manager = new CommunicationManager(autoUpdateManagerMock, channelTypeRegistryMock, profileFactory, iclRegistry,
-                itemRegistryMock, itemStateConverterMock, eventPublisherMock, safeCaller, thingRegistryMock,
-                unitProviderMock);
+        manager = new CommunicationManager(autoUpdateManagerMock, profileFactory, iclRegistry, itemRegistryMock,
+                itemStateConverterMock, eventPublisherMock, safeCaller, thingRegistryMock);
 
         doAnswer(invocation -> {
             switch (((Channel) invocation.getArguments()[0]).getKind()) {
@@ -201,8 +195,8 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
         }).when(profileFactoryMock).createProfile(isA(ProfileTypeUID.class), isA(ProfileCallback.class),
                 isA(ProfileContext.class));
 
-        when(profileFactoryMock.getSupportedProfileTypeUIDs()).thenReturn(Stream
-                .of(new ProfileTypeUID("test:state"), new ProfileTypeUID("test:trigger")).collect(Collectors.toList()));
+        when(profileFactoryMock.getSupportedProfileTypeUIDs())
+                .thenReturn(List.of(new ProfileTypeUID("test:state"), new ProfileTypeUID("test:trigger")));
 
         manager.addProfileFactory(profileFactoryMock);
         manager.addProfileAdvisor(profileAdvisorMock);
@@ -227,18 +221,16 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
         when(itemRegistryMock.get(eq(ITEM_NAME_2))).thenReturn(ITEM_2);
         when(itemRegistryMock.get(eq(ITEM_NAME_3))).thenReturn(ITEM_3);
         when(itemRegistryMock.get(eq(ITEM_NAME_4))).thenReturn(ITEM_4);
-        when(itemRegistryMock.get(eq(ITEM_NAME_5))).thenReturn(ITEM_5);
+        when(itemRegistryMock.get(eq(ITEM_NAME_5))).thenReturn(item5);
 
         ChannelType channelType4 = mock(ChannelType.class);
         when(channelType4.getItemType()).thenReturn("Number:Temperature");
-
-        when(channelTypeRegistryMock.getChannelType(CHANNEL_TYPE_UID_4)).thenReturn(channelType4);
 
         THING.setHandler(thingHandlerMock);
 
         when(thingRegistryMock.get(eq(THING_UID))).thenReturn(THING);
 
-        manager.addItemFactory(new CoreItemFactory(unitProviderMock));
+        manager.addItemFactory(new CoreItemFactory(UNIT_PROVIDER_MOCK));
     }
 
     @Test
@@ -282,6 +274,32 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
     }
 
     @Test
+    public void testTimeSeriesSingleLink() {
+        TimeSeries timeSeries = new TimeSeries(TimeSeries.Policy.REPLACE);
+
+        manager.sendTimeSeries(STATE_CHANNEL_UID_1, timeSeries);
+
+        waitForAssert(() -> {
+            verify(stateProfileMock).onTimeSeriesFromHandler(eq(timeSeries));
+        });
+        verifyNoMoreInteractions(stateProfileMock);
+        verifyNoMoreInteractions(triggerProfileMock);
+    }
+
+    @Test
+    public void testTimeSeriesMultiLink() {
+        TimeSeries timeSeries = new TimeSeries(TimeSeries.Policy.REPLACE);
+
+        manager.sendTimeSeries(STATE_CHANNEL_UID_2, timeSeries);
+
+        waitForAssert(() -> {
+            verify(stateProfileMock, times(2)).onTimeSeriesFromHandler(eq(timeSeries));
+        });
+        verifyNoMoreInteractions(stateProfileMock);
+        verifyNoMoreInteractions(triggerProfileMock);
+    }
+
+    @Test
     public void testItemCommandEventSingleLink() {
         manager.receive(ItemEventFactory.createCommandEvent(ITEM_NAME_2, OnOffType.ON));
         waitForAssert(() -> {
@@ -307,7 +325,7 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
     public void testItemCommandEventDecimal2Quantity2() {
         MetadataKey key = new MetadataKey(NumberItem.UNIT_METADATA_NAMESPACE, ITEM_NAME_5);
         Metadata metadata = new Metadata(key, ImperialUnits.FAHRENHEIT.toString(), null);
-        ITEM_5.addedMetadata(metadata);
+        item5.addedMetadata(metadata);
 
         manager.receive(ItemEventFactory.createCommandEvent(ITEM_NAME_5, DecimalType.valueOf("20")));
         waitForAssert(() -> {
@@ -558,44 +576,15 @@ public class CommunicationManagerOSGiTest extends JavaOSGiTest {
     }
 
     @Test
-    public void testItemCommandEventTypeDowncast() {
+    public void testItemCommandTypeDowncast() {
         Thing thing = ThingBuilder
                 .create(THING_TYPE_UID, THING_UID).withChannels(ChannelBuilder
                         .create(STATE_CHANNEL_UID_2, CoreItemFactory.DIMMER).withKind(ChannelKind.STATE).build())
                 .build();
         thing.setHandler(thingHandlerMock);
         when(thingRegistryMock.get(eq(THING_UID))).thenReturn(thing);
-
-        manager.receive(ItemEventFactory.createCommandEvent(ITEM_NAME_2, HSBType.fromRGB(128, 128, 128)));
-        waitForAssert(() -> {
-            ArgumentCaptor<Command> commandCaptor = ArgumentCaptor.forClass(Command.class);
-            verify(stateProfileMock).onCommandFromItem(commandCaptor.capture());
-            Command command = commandCaptor.getValue();
-            assertNotNull(command);
-            assertEquals(PercentType.class, command.getClass());
-        });
-        verifyNoMoreInteractions(stateProfileMock);
-        verifyNoMoreInteractions(triggerProfileMock);
-    }
-
-    @Test
-    public void testItemStateEventTypeDowncast() {
-        Thing thing = ThingBuilder
-                .create(THING_TYPE_UID, THING_UID).withChannels(ChannelBuilder
-                        .create(STATE_CHANNEL_UID_2, CoreItemFactory.DIMMER).withKind(ChannelKind.STATE).build())
-                .build();
-        thing.setHandler(thingHandlerMock);
-        when(thingRegistryMock.get(eq(THING_UID))).thenReturn(thing);
-
-        manager.receive(ItemEventFactory.createStateUpdatedEvent(ITEM_NAME_2, HSBType.fromRGB(128, 128, 128)));
-        waitForAssert(() -> {
-            ArgumentCaptor<State> stateCaptor = ArgumentCaptor.forClass(State.class);
-            verify(stateProfileMock).onStateUpdateFromItem(stateCaptor.capture());
-            State state = stateCaptor.getValue();
-            assertNotNull(state);
-            assertEquals(PercentType.class, state.getClass());
-        });
-        verifyNoMoreInteractions(stateProfileMock);
-        verifyNoMoreInteractions(triggerProfileMock);
+        Command command = manager.toAcceptedCommand(HSBType.fromRGB(128, 128, 128),
+                thing.getChannel(STATE_CHANNEL_UID_2), ITEM_2);
+        assertEquals(PercentType.class, command.getClass());
     }
 }

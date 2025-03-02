@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -18,13 +18,12 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -115,14 +114,14 @@ public class JavaOSGiTest extends JavaTest {
 
         if (serviceReferences == null) {
             new MissingServiceAnalyzer(System.out, bundleContext).printMissingServiceDetails(clazz);
-            return Collections.emptyList();
+            return List.of();
         }
 
-        return Arrays //
+        return (List<T>) Arrays //
                 .stream(serviceReferences) //
                 .filter(filter) // apply the predicate
                 .map(this::unrefService) // get the actual services from the references
-                .collect(Collectors.toList()); // get the result as List
+                .toList(); // get the result as List
     }
 
     /**
@@ -155,14 +154,14 @@ public class JavaOSGiTest extends JavaTest {
             new MissingServiceAnalyzer(System.out, bundleContext).printMissingServiceDetails(clazz);
             return null;
         } else {
-            return filteredServices.get(0);
+            return filteredServices.getFirst();
         }
     }
 
     private <T> ServiceReference<T> @Nullable [] getServices(final Class<T> clazz) {
         try {
             @SuppressWarnings("unchecked")
-            ServiceReference<T> serviceReferences[] = (ServiceReference<T>[]) bundleContext
+            ServiceReference<T>[] serviceReferences = (ServiceReference<T>[]) bundleContext
                     .getServiceReferences(clazz.getName(), null);
             return serviceReferences;
         } catch (InvalidSyntaxException e) {
@@ -196,7 +195,7 @@ public class JavaOSGiTest extends JavaTest {
 
         if (serviceReferences == null) {
             new MissingServiceAnalyzer(System.out, bundleContext).printMissingServiceDetails(clazz);
-            return Collections.emptyList();
+            return List.of();
         }
 
         return Arrays //
@@ -204,7 +203,7 @@ public class JavaOSGiTest extends JavaTest {
                 .map(this::unrefService) // get the actual services from the references
                 .filter(implementationClass::isInstance) // check that are of implementationClass
                 .map(implementationClass::cast) // cast instances to implementationClass
-                .collect(Collectors.toList()) // get the result as List
+                .toList() // get the result as List
         ;
     }
 
@@ -266,11 +265,8 @@ public class JavaOSGiTest extends JavaTest {
     }
 
     private void saveServiceRegistration(final String interfaceName, final ServiceRegistration<?> srvReg) {
-        List<ServiceRegistration<?>> regs = registeredServices.get(interfaceName);
-        if (regs == null) {
-            regs = new ArrayList<>();
-            registeredServices.put(interfaceName, regs);
-        }
+        List<ServiceRegistration<?>> regs = Objects
+                .requireNonNull(registeredServices.computeIfAbsent(interfaceName, k -> new ArrayList<>()));
         regs.add(srvReg);
     }
 
@@ -281,7 +277,7 @@ public class JavaOSGiTest extends JavaTest {
      * The given interface names are used as OSGi service interface name.
      *
      * @param service service to be registered
-     * @param interfaceName interface name of the OSGi service
+     * @param interfaceNames interface names of the OSGi service
      * @param properties OSGi service properties
      * @return service registration object
      */
@@ -321,7 +317,7 @@ public class JavaOSGiTest extends JavaTest {
         ServiceRegistration<?> reg = null;
         List<ServiceRegistration<?>> regList = registeredServices.remove(interfaceName);
         if (regList != null) {
-            reg = regList.get(0);
+            reg = regList.getFirst();
             regList.forEach(r -> r.unregister());
         }
         return reg;
@@ -342,6 +338,15 @@ public class JavaOSGiTest extends JavaTest {
             throw new IllegalArgumentException(String
                     .format("The given reference (class: %s) does not implement an interface.", service.getClass()));
         }
+    }
+
+    /**
+     * Get the OSGi {@link BundleContext}
+     *
+     * @return the bundle context
+     */
+    protected BundleContext getBundleContext() {
+        return bundleContext;
     }
 
     /**

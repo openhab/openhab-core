@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -144,7 +144,8 @@ public class EclipseAddonService implements AddonService {
         if (addonInfo != null) {
             // only enrich if this add-on is installed, otherwise wrong data might be added
             addon = addon.withLabel(addonInfo.getName()).withDescription(addonInfo.getDescription())
-                    .withCountries(addonInfo.getCountries()).withLink(getDefaultDocumentationLink(type, name))
+                    .withConnection(addonInfo.getConnection()).withCountries(addonInfo.getCountries())
+                    .withLink(getDefaultDocumentationLink(type, name))
                     .withConfigDescriptionURI(addonInfo.getConfigDescriptionURI());
         } else {
             addon = addon.withLabel(name).withLink(getDefaultDocumentationLink(type, name));

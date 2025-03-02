@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -40,16 +40,18 @@ import io.micrometer.core.instrument.Tag;
 import io.micrometer.core.instrument.Tags;
 
 /**
- * The {@link ThingStateMetric} class implements a metric for the openHAB things states.
+ * The {@link ThingStateMetric} class implements a metric for the openHAB things
+ * states.
  *
  * @author Robert Bach - Initial contribution
+ * @author Scott Hraban - Create Meter using thingUid instead of thingId during
+ *         bind phase
  */
 @NonNullByDefault
 public class ThingStateMetric implements OpenhabCoreMeterBinder, EventSubscriber {
     private final Logger logger = LoggerFactory.getLogger(ThingStateMetric.class);
     public static final String METRIC_NAME = "openhab.thing.state";
     private static final String THING_TAG_NAME = "thing";
-    private static final String THINGSTATUS_TOPIC_PREFIX = "openhab/things/";
     private final ThingRegistry thingRegistry;
     private final Meter.Id commonMeterId;
     private final Map<Meter.Id, AtomicInteger> registeredMeters = new HashMap<>();
@@ -70,7 +72,7 @@ public class ThingStateMetric implements OpenhabCoreMeterBinder, EventSubscriber
         logger.debug("ThingStateMetric is being bound...");
         this.meterRegistry = meterRegistry;
         thingRegistry.getAll().forEach(
-                thing -> createOrUpdateMetricForBundleState(thing.getUID().getId(), thing.getStatus().ordinal()));
+                thing -> createOrUpdateMetricForBundleState(thing.getUID().getAsString(), thing.getStatus().ordinal()));
         eventSubscriberRegistration = this.bundleContext.registerService(EventSubscriber.class.getName(), this, null);
     }
 
@@ -111,10 +113,13 @@ public class ThingStateMetric implements OpenhabCoreMeterBinder, EventSubscriber
 
     @Override
     public void receive(Event event) {
-        logger.trace("Received ThingStatusInfo(Changed)Event...");
-        String thingId = event.getTopic().substring(THINGSTATUS_TOPIC_PREFIX.length(),
-                event.getTopic().lastIndexOf('/'));
-        ThingStatus status = gson.fromJson(event.getPayload(), ThingStatusInfo.class).getStatus();
-        createOrUpdateMetricForBundleState(thingId, status.ordinal());
+        if (event instanceof ThingStatusInfoEvent thingEvent) {
+            logger.trace("Received ThingStatusInfo(Changed)Event...");
+            String thingUid = thingEvent.getThingUID().getAsString();
+            ThingStatus status = gson.fromJson(event.getPayload(), ThingStatusInfo.class).getStatus();
+            createOrUpdateMetricForBundleState(thingUid, status.ordinal());
+        } else {
+            logger.trace("Received unsubscribed for event type {}", event.getClass().getSimpleName());
+        }
     }
 }

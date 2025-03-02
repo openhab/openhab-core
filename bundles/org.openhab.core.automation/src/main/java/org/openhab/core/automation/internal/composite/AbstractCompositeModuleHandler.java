@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -67,7 +67,8 @@ public abstract class AbstractCompositeModuleHandler<M extends Module, MT extend
      * @param mapModuleToHandler map containing pairs of child modules instances (defined by module type) and their
      *            handlers
      */
-    public AbstractCompositeModuleHandler(M module, MT moduleType, LinkedHashMap<M, @Nullable H> mapModuleToHandler) {
+    protected AbstractCompositeModuleHandler(M module, MT moduleType,
+            LinkedHashMap<M, @Nullable H> mapModuleToHandler) {
         this.module = module;
         this.moduleType = moduleType;
         this.moduleHandlerMap = mapModuleToHandler;

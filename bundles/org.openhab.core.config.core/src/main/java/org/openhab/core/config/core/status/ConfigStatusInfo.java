@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,12 +13,11 @@
 package org.openhab.core.config.core.status;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -43,7 +42,7 @@ public final class ConfigStatusInfo {
     }
 
     /**
-     * Creates a new {@link ConfigStatusInfo} with the given {@link ConfigStatusMessages}.
+     * Creates a new {@link ConfigStatusInfo} with the given {@link ConfigStatusMessage}s.
      *
      * @param configStatusMessages the configuration status messages to be added
      */
@@ -67,7 +66,7 @@ public final class ConfigStatusInfo {
      * @return an unmodifiable collection of the corresponding configuration status messages
      */
     public Collection<ConfigStatusMessage> getConfigStatusMessages(Type... types) {
-        final Collection<Type> typesCollection = Arrays.asList(types);
+        final Collection<Type> typesCollection = List.of(types);
         return filter(typesCollection, configStatusMessage -> typesCollection.contains(configStatusMessage.type));
     }
 
@@ -78,7 +77,7 @@ public final class ConfigStatusInfo {
      * @return an unmodifiable collection of the corresponding configuration status messages
      */
     public Collection<ConfigStatusMessage> getConfigStatusMessages(String... parameterNames) {
-        final Collection<String> parameterNamesCollection = Arrays.asList(parameterNames);
+        final Collection<String> parameterNamesCollection = List.of(parameterNames);
         return filter(parameterNamesCollection,
                 configStatusMessage -> parameterNamesCollection.contains(configStatusMessage.parameterName));
     }
@@ -137,7 +136,7 @@ public final class ConfigStatusInfo {
 
     private static Collection<ConfigStatusMessage> filterConfigStatusMessages(
             Collection<ConfigStatusMessage> configStatusMessages, Predicate<? super ConfigStatusMessage> predicate) {
-        return configStatusMessages.stream().filter(predicate).collect(Collectors.toList());
+        return configStatusMessages.stream().filter(predicate).toList();
     }
 
     @Override

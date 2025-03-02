@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,7 +12,6 @@
  */
 package org.openhab.core.thing.internal.console;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -132,7 +131,7 @@ public final class FirmwareUpdateConsoleCommandExtension extends AbstractConsole
         FirmwareStatusInfo firmwareStatusInfo = firmwareUpdateService.getFirmwareStatusInfo(thingUID);
 
         if (firmwareStatusInfo != null) {
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
             sb.append(String.format("Firmware status for thing with UID %s is %s.", thingUID,
                     firmwareStatusInfo.getFirmwareStatus()));
 
@@ -196,11 +195,10 @@ public final class FirmwareUpdateConsoleCommandExtension extends AbstractConsole
 
     @Override
     public List<String> getUsages() {
-        return Arrays.asList(new String[] {
-                buildCommandUsage(SUBCMD_LIST + " <thingUID>", "lists the available firmwares for a thing"),
+        return List.of(buildCommandUsage(SUBCMD_LIST + " <thingUID>", "lists the available firmwares for a thing"),
                 buildCommandUsage(SUBCMD_STATUS + " <thingUID>", "lists the firmware status for a thing"),
                 buildCommandUsage(SUBCMD_CANCEL + " <thingUID>", "cancels the update for a thing"), buildCommandUsage(
-                        SUBCMD_UPDATE + " <thingUID> <firmware version>", "updates the firmware for a thing") });
+                        SUBCMD_UPDATE + " <thingUID> <firmware version>", "updates the firmware for a thing"));
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)

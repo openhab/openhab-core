@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -25,7 +25,6 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.security.RolesAllowed;
-import javax.inject.Singleton;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -92,7 +91,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Path(SseResource.PATH_EVENTS)
 @RolesAllowed({ Role.USER, Role.ADMIN })
 @Tag(name = SseResource.PATH_EVENTS)
-@Singleton
 @NonNullByDefault
 public class SseResource implements RESTResource, SsePublisher {
 
@@ -199,8 +197,6 @@ public class SseResource implements RESTResource, SsePublisher {
     /**
      * Subscribes the connecting client for state updates. It will initially only send a "ready" event with a unique
      * connectionId that the client can use to dynamically alter the list of tracked items.
-     *
-     * @return {@link EventOutput} object associated with the incoming connection.
      */
     @GET
     @Path("/states")

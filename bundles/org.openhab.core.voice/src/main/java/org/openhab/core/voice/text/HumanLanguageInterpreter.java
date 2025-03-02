@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,6 +17,7 @@ import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.voice.DialogContext;
 
 /**
  * This is the interface that a human language text interpreter has to implement.
@@ -49,6 +50,19 @@ public interface HumanLanguageInterpreter {
      * @return a human language response
      */
     String interpret(Locale locale, String text) throws InterpretationException;
+
+    /**
+     * Interprets a human language text fragment of a given {@link Locale} with optional access to the context of a
+     * dialog execution.
+     *
+     * @param locale language of the text (given by a {@link Locale})
+     * @param text the text to interpret
+     * @return a human language response
+     */
+    default String interpret(Locale locale, String text, @Nullable DialogContext dialogContext)
+            throws InterpretationException {
+        return interpret(locale, text);
+    }
 
     /**
      * Gets the grammar of all commands of a given {@link Locale} of the interpreter

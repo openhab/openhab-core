@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -50,9 +50,6 @@ public class ItemCommandActionHandler extends BaseActionModuleHandler {
 
     /**
      * constructs a new ItemCommandActionHandler
-     *
-     * @param module
-     * @param moduleTypes
      */
     public ItemCommandActionHandler(Action module, EventPublisher eventPublisher, ItemRegistry itemRegistry) {
         super(module);

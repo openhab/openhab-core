@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,7 +15,6 @@ package org.openhab.core.io.rest.voice.internal;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.Consumes;
@@ -114,7 +113,7 @@ public class VoiceResource implements RESTResource {
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language) {
         final Locale locale = localeService.getLocale(language);
         List<HumanLanguageInterpreterDTO> dtos = voiceManager.getHLIs().stream().map(hli -> HLIMapper.map(hli, locale))
-                .collect(Collectors.toList());
+                .toList();
         return Response.ok(dtos).build();
     }
 
@@ -140,8 +139,9 @@ public class VoiceResource implements RESTResource {
     @POST
     @Path("/interpreters/{ids: [a-zA-Z_0-9,]+}")
     @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.TEXT_PLAIN)
     @Operation(operationId = "interpretText", summary = "Sends a text to a given human language interpreter(s).", responses = {
-            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "404", description = "No human language interpreter was found."),
             @ApiResponse(responseCode = "400", description = "interpretation exception occurs") })
     public Response interpret(
@@ -176,8 +176,9 @@ public class VoiceResource implements RESTResource {
     @POST
     @Path("/interpreters")
     @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.TEXT_PLAIN)
     @Operation(operationId = "interpretTextByDefaultInterpreter", summary = "Sends a text to the default human language interpreter.", responses = {
-            @ApiResponse(responseCode = "200", description = "OK"),
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "404", description = "No human language interpreter was found."),
             @ApiResponse(responseCode = "400", description = "interpretation exception occurs") })
     public Response interpret(
@@ -190,8 +191,8 @@ public class VoiceResource implements RESTResource {
         }
 
         try {
-            hli.interpret(locale, text);
-            return Response.ok(null, MediaType.TEXT_PLAIN).build();
+            String answer = hli.interpret(locale, text);
+            return Response.ok(answer, MediaType.TEXT_PLAIN).build();
         } catch (InterpretationException e) {
             return JSONResponse.createErrorResponse(Status.BAD_REQUEST, e.getMessage());
         }
@@ -203,7 +204,7 @@ public class VoiceResource implements RESTResource {
     @Operation(operationId = "getVoices", summary = "Get the list of all voices.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = VoiceDTO.class)))) })
     public Response getVoices() {
-        List<VoiceDTO> dtos = voiceManager.getAllVoices().stream().map(VoiceMapper::map).collect(Collectors.toList());
+        List<VoiceDTO> dtos = voiceManager.getAllVoices().stream().map(VoiceMapper::map).toList();
         return Response.ok(dtos).build();
     }
 

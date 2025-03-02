@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -16,6 +16,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
+import java.net.URI;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -33,7 +34,7 @@ import org.mockito.quality.Strictness;
 /**
  * Base class for tests for the <code>HttpRequestBuilder</code> and <code>HttpUtil</code> to validate their behavior
  *
- * @author Martin van Wingerden & Wouter Born - Initial contribution
+ * @author Martin van Wingerden and Wouter Born - Initial contribution
  * @author Markus Rathgeb - Base test classes without tests needs to be abstract
  */
 @ExtendWith(MockitoExtension.class)
@@ -55,7 +56,7 @@ public abstract class BaseHttpUtilTest {
         httpClientFactory.set(null, clientFactoryMock);
 
         when(clientFactoryMock.getCommonHttpClient()).thenReturn(httpClientMock);
-        when(httpClientMock.newRequest(URL)).thenReturn(requestMock);
+        when(httpClientMock.newRequest(URI.create(URL))).thenReturn(requestMock);
         when(requestMock.method(any(HttpMethod.class))).thenReturn(requestMock);
         when(requestMock.timeout(anyLong(), any(TimeUnit.class))).thenReturn(requestMock);
         when(requestMock.send()).thenReturn(contentResponseMock);

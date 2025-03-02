@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -42,7 +42,7 @@ public class AudioWaveUtils {
 
     /**
      *
-     * @param InputStream an inputStream of a wav file to analyze. The InputStream must have a fmt header
+     * @param inputStream an InputStream of a wav file to analyze. The InputStream must have a fmt header
      *            and support the mark/reset method
      * @return The audio format, or the default audio format if an error occured
      * @throws IOException If i/o exception occurs, or if the InputStream doesn't support the mark/reset
@@ -64,7 +64,7 @@ public class AudioWaveUtils {
             } else {
                 codecPCMSignedOrUnsigned = null;
             }
-            Integer bitRate = Math.round(format.getFrameRate() * format.getFrameSize()) * format.getChannels();
+            Integer bitRate = Math.round(format.getSampleRate() * format.getSampleSizeInBits() * format.getChannels());
             Long frequency = Float.valueOf(format.getSampleRate()).longValue();
             return new AudioFormat(AudioFormat.CONTAINER_WAVE, codecPCMSignedOrUnsigned, format.isBigEndian(),
                     format.getSampleSizeInBits(), bitRate, frequency, format.getChannels());
@@ -84,12 +84,12 @@ public class AudioWaveUtils {
      * as if it is a pure PCM stream, it could try to play it and will
      * do a "click" noise at the beginning.
      *
-     * @param audio A wav container in an InputStream
+     * @param data A wav container in an InputStream
      * @throws IOException
      */
     public static void removeFMT(InputStream data) throws IOException {
         DataInputStream dataInputStream = new DataInputStream(data);
-        Integer nextInt = dataInputStream.readInt();
+        int nextInt = dataInputStream.readInt();
         int i = 0;
         while (nextInt != DATA_MAGIC && i < 200) {
             nextInt = dataInputStream.readInt();

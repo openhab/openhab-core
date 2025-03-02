@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,6 +13,7 @@
 package org.openhab.core.model.persistence.internal;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -24,11 +25,18 @@ import org.openhab.core.common.registry.AbstractProvider;
 import org.openhab.core.model.core.EventType;
 import org.openhab.core.model.core.ModelRepository;
 import org.openhab.core.model.core.ModelRepositoryChangeListener;
+import org.openhab.core.model.persistence.persistence.AliasConfiguration;
 import org.openhab.core.model.persistence.persistence.AllConfig;
 import org.openhab.core.model.persistence.persistence.CronStrategy;
+import org.openhab.core.model.persistence.persistence.EqualsFilter;
 import org.openhab.core.model.persistence.persistence.Filter;
 import org.openhab.core.model.persistence.persistence.GroupConfig;
+import org.openhab.core.model.persistence.persistence.GroupExcludeConfig;
+import org.openhab.core.model.persistence.persistence.IncludeFilter;
 import org.openhab.core.model.persistence.persistence.ItemConfig;
+import org.openhab.core.model.persistence.persistence.ItemExcludeConfig;
+import org.openhab.core.model.persistence.persistence.NotEqualsFilter;
+import org.openhab.core.model.persistence.persistence.NotIncludeFilter;
 import org.openhab.core.model.persistence.persistence.PersistenceConfiguration;
 import org.openhab.core.model.persistence.persistence.PersistenceModel;
 import org.openhab.core.model.persistence.persistence.Strategy;
@@ -39,8 +47,12 @@ import org.openhab.core.persistence.PersistenceService;
 import org.openhab.core.persistence.config.PersistenceAllConfig;
 import org.openhab.core.persistence.config.PersistenceConfig;
 import org.openhab.core.persistence.config.PersistenceGroupConfig;
+import org.openhab.core.persistence.config.PersistenceGroupExcludeConfig;
 import org.openhab.core.persistence.config.PersistenceItemConfig;
+import org.openhab.core.persistence.config.PersistenceItemExcludeConfig;
+import org.openhab.core.persistence.filter.PersistenceEqualsFilter;
 import org.openhab.core.persistence.filter.PersistenceFilter;
+import org.openhab.core.persistence.filter.PersistenceIncludeFilter;
 import org.openhab.core.persistence.filter.PersistenceThresholdFilter;
 import org.openhab.core.persistence.filter.PersistenceTimeFilter;
 import org.openhab.core.persistence.registry.PersistenceServiceConfiguration;
@@ -51,6 +63,8 @@ import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class is the central part of the persistence management and delegation. It reads the persistence
@@ -59,11 +73,13 @@ import org.osgi.service.component.annotations.Reference;
  * @author Kai Kreuzer - Initial contribution
  * @author Markus Rathgeb - Move non-model logic to core.persistence
  * @author Jan N. Klug - Refactored to {@link PersistenceServiceConfigurationProvider}
+ * @author Mark Herwege - Separate alias handling
  */
 @Component(immediate = true, service = PersistenceServiceConfigurationProvider.class)
 @NonNullByDefault
 public class PersistenceModelManager extends AbstractProvider<PersistenceServiceConfiguration>
         implements ModelRepositoryChangeListener, PersistenceServiceConfigurationProvider {
+    private final Logger logger = LoggerFactory.getLogger(PersistenceModelManager.class);
     private final Map<String, PersistenceServiceConfiguration> configurations = new ConcurrentHashMap<>();
     private final ModelRepository modelRepository;
 
@@ -89,14 +105,19 @@ public class PersistenceModelManager extends AbstractProvider<PersistenceService
             String serviceName = serviceName(modelName);
             if (type == EventType.REMOVED) {
                 PersistenceServiceConfiguration removed = configurations.remove(serviceName);
-                notifyListenersAboutRemovedElement(removed);
+                if (removed == null) {
+                    logger.warn("Service for {} was already removed from registry, ignoring.", modelName);
+                } else {
+                    notifyListenersAboutRemovedElement(removed);
+                }
             } else {
                 final PersistenceModel model = (PersistenceModel) modelRepository.getModel(modelName);
 
                 if (model != null) {
                     PersistenceServiceConfiguration newConfiguration = new PersistenceServiceConfiguration(serviceName,
-                            mapConfigs(model.getConfigs()), mapStrategies(model.getDefaults()),
-                            mapStrategies(model.getStrategies()), mapFilters(model.getFilters()));
+                            mapConfigs(model.getConfigs()), mapAliases(model.getAliases()),
+                            mapStrategies(model.getDefaults()), mapStrategies(model.getStrategies()),
+                            mapFilters(model.getFilters()));
                     PersistenceServiceConfiguration oldConfiguration = configurations.put(serviceName,
                             newConfiguration);
                     if (oldConfiguration == null) {
@@ -144,10 +165,22 @@ public class PersistenceModelManager extends AbstractProvider<PersistenceService
                 items.add(new PersistenceGroupConfig(groupConfig.getGroup()));
             } else if (item instanceof ItemConfig itemConfig) {
                 items.add(new PersistenceItemConfig(itemConfig.getItem()));
+            } else if (item instanceof GroupExcludeConfig groupExcludeConfig) {
+                items.add(new PersistenceGroupExcludeConfig(groupExcludeConfig.getGroupExclude()));
+            } else if (item instanceof ItemExcludeConfig itemExcludeConfig) {
+                items.add(new PersistenceItemExcludeConfig(itemExcludeConfig.getItemExclude()));
             }
         }
-        return new PersistenceItemConfiguration(items, config.getAlias(), mapStrategies(config.getStrategies()),
+        return new PersistenceItemConfiguration(items, mapStrategies(config.getStrategies()),
                 mapFilters(config.getFilters()));
+    }
+
+    private Map<String, String> mapAliases(List<AliasConfiguration> aliases) {
+        final Map<String, String> map = new HashMap<>();
+        for (final AliasConfiguration alias : aliases) {
+            map.put(alias.getItem(), alias.getAlias());
+        }
+        return map;
     }
 
     private List<PersistenceStrategy> mapStrategies(List<Strategy> strategies) {
@@ -175,13 +208,21 @@ public class PersistenceModelManager extends AbstractProvider<PersistenceService
     }
 
     private PersistenceFilter mapFilter(Filter filter) {
-        if (filter.getDefinition() instanceof TimeFilter) {
-            TimeFilter timeFilter = (TimeFilter) filter.getDefinition();
+        if (filter.getDefinition() instanceof TimeFilter timeFilter) {
             return new PersistenceTimeFilter(filter.getName(), timeFilter.getValue(), timeFilter.getUnit());
-        } else if (filter.getDefinition() instanceof ThresholdFilter) {
-            ThresholdFilter thresholdFilter = (ThresholdFilter) filter.getDefinition();
+        } else if (filter.getDefinition() instanceof ThresholdFilter thresholdFilter) {
             return new PersistenceThresholdFilter(filter.getName(), thresholdFilter.getValue(),
-                    thresholdFilter.getUnit());
+                    thresholdFilter.getUnit(), thresholdFilter.isRelative());
+        } else if (filter.getDefinition() instanceof EqualsFilter equalsFilter) {
+            return new PersistenceEqualsFilter(filter.getName(), equalsFilter.getValues(), false);
+        } else if (filter.getDefinition() instanceof NotEqualsFilter notEqualsFilter) {
+            return new PersistenceEqualsFilter(filter.getName(), notEqualsFilter.getValues(), true);
+        } else if (filter.getDefinition() instanceof IncludeFilter includeFilter) {
+            return new PersistenceIncludeFilter(filter.getName(), includeFilter.getLower(), includeFilter.getUpper(),
+                    includeFilter.getUnit(), false);
+        } else if (filter.getDefinition() instanceof NotIncludeFilter notIncludeFilter) {
+            return new PersistenceIncludeFilter(filter.getName(), notIncludeFilter.getLower(),
+                    notIncludeFilter.getUpper(), notIncludeFilter.getUnit(), true);
         }
         throw new IllegalArgumentException("Unknown filter type " + filter.getClass());
     }

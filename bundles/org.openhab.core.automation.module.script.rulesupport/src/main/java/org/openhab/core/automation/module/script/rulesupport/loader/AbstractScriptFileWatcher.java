@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -62,7 +62,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Simon Merschjohann - Initial contribution
  * @author Kai Kreuzer - improved logging and removed thread pool
- * @author Jonathan Gilbert - added dependency tracking & per-script start levels; made reusable
+ * @author Jonathan Gilbert - added dependency tracking and per-script start levels; made reusable
  * @author Jan N. Klug - Refactored dependency tracking to script engine factories
  */
 @NonNullByDefault
@@ -96,7 +96,7 @@ public abstract class AbstractScriptFileWatcher implements WatchService.WatchEve
 
     private volatile int currentStartLevel;
 
-    public AbstractScriptFileWatcher(final WatchService watchService, final ScriptEngineManager manager,
+    protected AbstractScriptFileWatcher(final WatchService watchService, final ScriptEngineManager manager,
             final ReadyService readyService, final StartLevelService startLevelService, final String fileDirectory,
             boolean watchSubDirectories) {
         this.watchService = watchService;
@@ -239,8 +239,8 @@ public abstract class AbstractScriptFileWatcher implements WatchService.WatchEve
     }
 
     private CompletableFuture<Void> addFiles(Collection<Path> files) {
-        return CompletableFuture.allOf(files.stream().map(this::getScriptFileReference).filter(Optional::isPresent)
-                .map(Optional::get).sorted().map(this::addScriptFileReference).toArray(CompletableFuture<?>[]::new));
+        return CompletableFuture.allOf(files.stream().map(this::getScriptFileReference).flatMap(Optional::stream)
+                .sorted().map(this::addScriptFileReference).toArray(CompletableFuture<?>[]::new));
     }
 
     private CompletableFuture<Void> addScriptFileReference(ScriptFileReference newRef) {

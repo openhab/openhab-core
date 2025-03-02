@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -24,6 +24,11 @@ import org.openhab.core.io.rest.core.item.EnrichedItemDTO;
  * @author Kai Kreuzer - Initial contribution
  * @author Chris Jackson - Initial contribution
  * @author Laurent Garnier - New field iconcolor
+ * @author Mark herwege - New fields pattern, unit
+ * @author Laurent Garnier - New field columns
+ * @author Danny Baumann - New field labelSource
+ * @author Laurent Garnier - Remove field columns
+ * @author Laurent Garnier - New fields row, column, command, releaseCommand and stateless for Button element
  */
 public class WidgetDTO {
 
@@ -33,15 +38,25 @@ public class WidgetDTO {
     public boolean visibility;
 
     public String label;
+    public String labelSource;
     public String icon;
+    /**
+     * staticIcon is a boolean indicating if the widget state must be ignored when requesting the icon.
+     * It is set to true when the widget has either the staticIcon property set or the icon property set
+     * with conditional rules.
+     */
+    public Boolean staticIcon;
     public String labelcolor;
     public String valuecolor;
     public String iconcolor;
 
+    public String pattern;
+    public String unit;
+
     // widget-specific attributes
     public final List<MappingDTO> mappings = new ArrayList<>();
     public Boolean switchSupport;
-    public Integer sendFrequency;
+    public Boolean releaseOnly;
     public Integer refresh;
     public Integer height;
     public BigDecimal minValue;
@@ -55,12 +70,17 @@ public class WidgetDTO {
     public String yAxisDecimalPattern;
     public Boolean legend;
     public Boolean forceAsItem;
+    public Integer row;
+    public Integer column;
+    public String command;
+    public String releaseCommand;
+    public Boolean stateless;
     public String state;
 
     public EnrichedItemDTO item;
     public PageDTO linkedPage;
 
-    // only for frames, other linkable widgets link to a page
+    // only for frames and button grids, other linkable widgets link to a page
     public final List<WidgetDTO> widgets = new ArrayList<>();
 
     public WidgetDTO() {

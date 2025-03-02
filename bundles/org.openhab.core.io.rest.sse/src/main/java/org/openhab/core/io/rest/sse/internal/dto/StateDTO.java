@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -20,6 +20,10 @@ package org.openhab.core.io.rest.sse.internal.dto;
 public class StateDTO {
     public String state;
     public String displayState;
+    public Number numericState;
+    public String unit;
+
+    public String type;
 
     public StateDTO() {
     }

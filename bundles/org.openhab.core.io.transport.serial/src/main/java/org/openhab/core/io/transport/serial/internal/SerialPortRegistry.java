@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,10 +14,9 @@ package org.openhab.core.io.transport.serial.internal;
 
 import java.net.URI;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
+import java.util.Set;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.io.transport.serial.ProtocolType.PathType;
@@ -71,20 +70,18 @@ public class SerialPortRegistry {
         final Predicate<SerialPortProvider> filter;
         if (scheme != null) {
             // Get port providers which accept exactly the port with its scheme.
-            filter = provider -> provider.getAcceptedProtocols().filter(prot -> prot.getScheme().equals(scheme))
-                    .count() > 0;
+            filter = provider -> provider.getAcceptedProtocols().anyMatch(prot -> prot.getScheme().equals(scheme));
         } else {
             // Get port providers which accept the same type (local, net)
-            filter = provider -> provider.getAcceptedProtocols().filter(prot -> prot.getPathType().equals(pathType))
-                    .count() > 0;
+            filter = provider -> provider.getAcceptedProtocols().anyMatch(prot -> prot.getPathType().equals(pathType));
         }
 
-        return portCreators.stream().filter(filter).collect(Collectors.toList());
+        return portCreators.stream().filter(filter).toList();
     }
 
     public Collection<SerialPortProvider> getPortCreators() {
         synchronized (portCreators) {
-            return Collections.unmodifiableCollection(new HashSet<>(portCreators));
+            return Set.copyOf(portCreators);
         }
     }
 }

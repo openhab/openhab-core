@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -54,7 +54,7 @@ public abstract class AbstractDescriptionTypeConverter<T> extends GenericUnmarsh
      * @param clazz the class of the result type (must not be null)
      * @param type the name of the type (e.g. "thing-type", "channel-type")
      */
-    public AbstractDescriptionTypeConverter(Class<T> clazz, String type) {
+    protected AbstractDescriptionTypeConverter(Class<T> clazz, String type) {
         super(clazz);
         this.type = type;
         this.attributeMapValidator = new ConverterAttributeMapValidator(new String[][] { { "id", "true" } });

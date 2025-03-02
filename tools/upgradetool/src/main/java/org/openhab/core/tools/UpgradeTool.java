@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -62,7 +62,7 @@ public class UpgradeTool {
                 System.exit(0);
             }
 
-            System.setProperty(org.slf4j.impl.SimpleLogger.DEFAULT_LOG_LEVEL_KEY, loglevel);
+            System.setProperty(org.slf4j.simple.SimpleLogger.DEFAULT_LOG_LEVEL_KEY, loglevel);
 
             String baseDir = commandLine.hasOption(OPT_DIR) ? commandLine.getOptionValue(OPT_DIR)
                     : System.getenv("OPENHAB_USERDATA");
@@ -71,7 +71,7 @@ public class UpgradeTool {
                         "Please either set the environment variable ${OPENHAB_USERDATA} or provide a directory through the --dir option.");
                 System.exit(0);
             } else {
-                boolean force = commandLine.hasOption(OPT_FORCE) ? true : false;
+                boolean force = commandLine.hasOption(OPT_FORCE);
 
                 Upgrader upgrader = new Upgrader(baseDir, force);
                 if (!commandLine.hasOption(OPT_COMMAND)
@@ -82,10 +82,15 @@ public class UpgradeTool {
                         || LINK_UPGRADE_JS_PROFILE.equals(commandLine.getOptionValue(OPT_COMMAND))) {
                     upgrader.linkUpgradeJsProfile();
                 }
+                if (!commandLine.hasOption(OPT_COMMAND)
+                        || LINK_UPGRADE_SCRIPT_PROFILE.equals(commandLine.getOptionValue(OPT_COMMAND))) {
+                    upgrader.linkUpgradeScriptProfile();
+                }
             }
         } catch (ParseException e) {
             HelpFormatter formatter = new HelpFormatter();
-            String commands = Set.of(ITEM_COPY_UNIT_TO_METADATA, LINK_UPGRADE_JS_PROFILE).toString();
+            String commands = Set.of(ITEM_COPY_UNIT_TO_METADATA, LINK_UPGRADE_JS_PROFILE, LINK_UPGRADE_SCRIPT_PROFILE)
+                    .toString();
             formatter.printHelp("upgradetool", "", options, "Available commands: " + commands, true);
         }
 

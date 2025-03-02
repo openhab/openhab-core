@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -21,7 +21,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
@@ -30,7 +29,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -72,7 +70,7 @@ import org.slf4j.LoggerFactory;
 @NonNullByDefault
 public abstract class AbstractResourceBundleProvider<@NonNull E> {
 
-    public AbstractResourceBundleProvider(String path) {
+    protected AbstractResourceBundleProvider(String path) {
         this.path = path;
     }
 
@@ -164,12 +162,6 @@ public abstract class AbstractResourceBundleProvider<@NonNull E> {
         }
     }
 
-    /**
-     * This method is used to initialize field {@link #queue}, when the instance of
-     * {@link AutomationResourceBundlesEventQueue} is created.
-     *
-     * @param queue provides an access to the queue for processing bundles.
-     */
     protected AutomationResourceBundlesEventQueue getQueue() {
         return queue;
     }
@@ -274,7 +266,7 @@ public abstract class AbstractResourceBundleProvider<@NonNull E> {
             if (!newPortfolio.contains(uid)) {
                 final @Nullable E removedObject = providedObjectsHolder.remove(uid);
                 if (removedObject != null) {
-                    List<ProviderChangeListener<E>> snapshot = null;
+                    List<ProviderChangeListener<E>> snapshot;
                     synchronized (listeners) {
                         snapshot = new LinkedList<>(listeners);
                     }
@@ -341,7 +333,7 @@ public abstract class AbstractResourceBundleProvider<@NonNull E> {
             for (String uid : portfolio) {
                 final @Nullable E removedObject = providedObjectsHolder.remove(uid);
                 if (removedObject != null) {
-                    List<ProviderChangeListener<E>> snapshot = null;
+                    List<ProviderChangeListener<E>> snapshot;
                     synchronized (listeners) {
                         snapshot = new LinkedList<>(listeners);
                     }
@@ -388,20 +380,19 @@ public abstract class AbstractResourceBundleProvider<@NonNull E> {
                 URI uri = new URI(prefix + ":" + uid + ".name");
                 return config.stream()
                         .map(p -> localConfigI18nService.getLocalizedConfigDescriptionParameter(bundle, uri, p, locale))
-                        .collect(Collectors.toList());
+                        .toList();
             } catch (URISyntaxException e) {
                 logger.error("Constructed invalid uri '{}:{}.name'", prefix, uid, e);
                 return config;
             }
         }
-        return Collections.emptyList();
+        return List.of();
     }
 
     /**
      * This method is called from {@link #processAutomationProvider(Bundle)} to process the loading of the provided
      * objects.
      *
-     * @param vendor is a holder of information about the bundle providing data for import.
      * @param parser the {@link Parser} which is responsible for parsing of a particular format in which the provided
      *            objects are presented
      * @param url the resource which is used for loading the objects.
@@ -434,13 +425,13 @@ public abstract class AbstractResourceBundleProvider<@NonNull E> {
                 }
             }
         }
-        return Collections.emptySet();
+        return Set.of();
     }
 
     @SuppressWarnings("unchecked")
     protected void addNewProvidedObjects(List<String> newPortfolio, List<String> previousPortfolio,
             Set<E> parsedObjects) {
-        List<ProviderChangeListener<E>> snapshot = null;
+        List<ProviderChangeListener<E>> snapshot;
         synchronized (listeners) {
             snapshot = new LinkedList<>(listeners);
         }

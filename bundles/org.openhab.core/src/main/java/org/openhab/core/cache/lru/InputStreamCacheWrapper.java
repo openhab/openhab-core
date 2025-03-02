@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -37,6 +37,7 @@ public class InputStreamCacheWrapper extends InputStream {
 
     private LRUMediaCacheEntry<?> cacheEntry;
     private int offset = 0;
+    private int markedOffset = 0;
 
     /***
      * Construct a transparent InputStream wrapper around data from the cache.
@@ -88,7 +89,10 @@ public class InputStreamCacheWrapper extends InputStream {
 
     @Override
     public long skip(long n) throws IOException {
-        offset += n;
+        if (n > Integer.MAX_VALUE || n < Integer.MIN_VALUE) {
+            throw new IOException("Invalid offset, exceeds Integer range");
+        }
+        offset += (int) n;
         return n;
     }
 
@@ -102,7 +106,7 @@ public class InputStreamCacheWrapper extends InputStream {
     }
 
     public long length() {
-        Long totalSize = cacheEntry.getTotalSize();
+        long totalSize = cacheEntry.getTotalSize();
         if (totalSize > 0L) {
             return totalSize;
         }
@@ -112,5 +116,20 @@ public class InputStreamCacheWrapper extends InputStream {
 
     public InputStream getClonedStream() throws IOException {
         return cacheEntry.getInputStream();
+    }
+
+    @Override
+    public synchronized void mark(int readlimit) {
+        markedOffset = offset;
+    }
+
+    @Override
+    public synchronized void reset() throws IOException {
+        offset = markedOffset;
+    }
+
+    @Override
+    public boolean markSupported() {
+        return true;
     }
 }

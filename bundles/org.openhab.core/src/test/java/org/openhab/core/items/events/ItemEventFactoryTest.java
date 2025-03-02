@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -33,7 +33,7 @@ import org.openhab.core.types.UnDefType;
 import com.google.gson.Gson;
 
 /**
- * {@link ItemEventFactoryTests} tests the {@link ItemEventFactory}.
+ * {@link ItemEventFactoryTest} tests the {@link ItemEventFactory}.
  *
  * @author Stefan Bußweiler - Initial contribution
  */

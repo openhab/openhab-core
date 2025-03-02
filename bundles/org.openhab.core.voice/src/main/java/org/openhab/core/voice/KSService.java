@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -82,7 +82,7 @@ public interface KSService {
      * @param locale The {@code Locale} in which the target keywords are spoken
      * @param keyword The keyword which to spot
      * @return A {@link KSServiceHandle} used to abort keyword spotting
-     * @throws A {@link KSException} if any parameter is invalid or a problem occurs
+     * @throws KSException if any parameter is invalid or a problem occurs
      */
     KSServiceHandle spot(KSListener ksListener, AudioStream audioStream, Locale locale, String keyword)
             throws KSException;

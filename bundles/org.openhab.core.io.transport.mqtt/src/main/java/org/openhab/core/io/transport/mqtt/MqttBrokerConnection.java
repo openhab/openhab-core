@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -121,7 +121,7 @@ public class MqttBrokerConnection {
      * The callback will interact with the {@link AbstractReconnectStrategy} as well as inform registered
      * {@link MqttConnectionObserver}s.
      */
-    public class ConnectionCallback implements MqttClientConnectedListener, MqttClientDisconnectedListener {
+    public static class ConnectionCallback implements MqttClientConnectedListener, MqttClientDisconnectedListener {
         private final MqttBrokerConnection connection;
         private final Runnable cancelTimeoutFuture;
         private CompletableFuture<Boolean> future = new CompletableFuture<>();

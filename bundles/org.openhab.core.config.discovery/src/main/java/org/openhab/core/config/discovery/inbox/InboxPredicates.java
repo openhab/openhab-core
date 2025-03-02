@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -47,7 +47,7 @@ public class InboxPredicates {
 
     public static Predicate<DiscoveryResult> withProperty(@Nullable String propertyName, String propertyValue) {
         return r -> r.getProperties().containsKey(propertyName)
-                && r.getProperties().get(propertyName).equals(propertyValue);
+                && propertyValue.equals(r.getProperties().get(propertyName));
     }
 
     public static Predicate<DiscoveryResult> withRepresentationProperty(@Nullable String propertyName) {

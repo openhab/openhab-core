@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,7 +15,6 @@ package org.openhab.core.automation.internal.commands;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 
@@ -127,7 +126,7 @@ public class AutomationCommandList extends AutomationCommand {
             }
             if (getLocale) {
                 String l = parameterValue;
-                locale = new Locale(l);
+                locale = Locale.of(l);
                 getLocale = false;
             }
             if (getId && getLocale) {
@@ -278,7 +277,7 @@ public class AutomationCommandList extends AutomationCommand {
     private Collection<Rule> getRuleByFilter(Map<String, String> list) {
         Collection<Rule> rules = new ArrayList<>();
         if (!list.isEmpty()) {
-            Rule r = null;
+            Rule r;
             String uid = list.get(id);
             if (uid != null) {
                 r = autoCommands.getRule(uid);
@@ -313,7 +312,7 @@ public class AutomationCommandList extends AutomationCommand {
      */
     private Collection<RuleTemplate> getTemplateByFilter(Map<String, String> list) {
         Collection<RuleTemplate> templates = new ArrayList<>();
-        RuleTemplate t = null;
+        RuleTemplate t;
         String uid = list.get(id);
         if (uid != null) {
             t = autoCommands.getTemplate(uid, locale);
@@ -328,7 +327,7 @@ public class AutomationCommandList extends AutomationCommand {
                 return templates;
             } else {
                 for (String templateUID : list.keySet()) {
-                    if (templateUID.indexOf(id) != -1) {
+                    if (templateUID.contains(id)) {
                         templates.add(autoCommands.getTemplate(templateUID, locale));
                     }
                 }
@@ -348,7 +347,7 @@ public class AutomationCommandList extends AutomationCommand {
     private Collection<ModuleType> getModuleTypeByFilter(Map<String, String> list) {
         Collection<ModuleType> moduleTypes = new ArrayList<>();
         if (!list.isEmpty()) {
-            ModuleType mt = null;
+            ModuleType mt;
             String uid = list.get(id);
             if (uid != null) {
                 mt = autoCommands.getModuleType(uid, locale);
@@ -363,7 +362,7 @@ public class AutomationCommandList extends AutomationCommand {
                     return moduleTypes;
                 } else {
                     for (String typeUID : list.values()) {
-                        if (typeUID.indexOf(id) != -1) {
+                        if (typeUID.contains(id)) {
                             moduleTypes.add(autoCommands.getModuleType(typeUID, locale));
                         }
                     }
@@ -385,9 +384,7 @@ public class AutomationCommandList extends AutomationCommand {
     @SuppressWarnings({ "rawtypes", "unchecked" })
     private void addCollection(Collection collection, Map list) {
         if (collection != null && !collection.isEmpty()) {
-            Iterator i = collection.iterator();
-            while (i.hasNext()) {
-                Object element = i.next();
+            for (Object element : collection) {
                 if (element instanceof ModuleType type) {
                     list.put(type.getUID(), element);
                 }

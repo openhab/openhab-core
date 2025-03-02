@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,7 +12,6 @@
  */
 package org.openhab.core.model.thing.test.hue;
 
-import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -22,8 +21,8 @@ import static org.mockito.Mockito.*;
 import java.io.ByteArrayInputStream;
 import java.net.URI;
 import java.util.Collection;
+import java.util.List;
 import java.util.Locale;
-import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.AfterEach;
@@ -92,12 +91,11 @@ public class GenericThingProviderTest3 extends JavaOSGiTest {
         registerService(dumbThingHandlerFactory, ThingHandlerFactory.class.getName());
 
         ConfigDescription configDescription = ConfigDescriptionBuilder.create(new URI("test:test"))
-                .withParameters(Stream.of(
+                .withParameters(List.of(
                         ConfigDescriptionParameterBuilder.create("testAdditional", ConfigDescriptionParameter.Type.TEXT)
                                 .withRequired(false).withDefault("hello world").build(),
                         ConfigDescriptionParameterBuilder.create("testConf", ConfigDescriptionParameter.Type.TEXT)
-                                .withRequired(false).withDefault("bar").build())
-                        .collect(toList()))
+                                .withRequired(false).withDefault("bar").build()))
                 .build();
 
         ConfigDescriptionProvider configDescriptionProvider = mock(ConfigDescriptionProvider.class);

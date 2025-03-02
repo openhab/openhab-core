@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,6 +12,7 @@
  */
 package org.openhab.core.library.unit;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 
 import javax.measure.Quantity;
@@ -54,7 +55,9 @@ import org.openhab.core.library.dimension.DataAmount;
 import org.openhab.core.library.dimension.DataTransferRate;
 import org.openhab.core.library.dimension.Density;
 import org.openhab.core.library.dimension.ElectricConductivity;
+import org.openhab.core.library.dimension.EmissionIntensity;
 import org.openhab.core.library.dimension.Intensity;
+import org.openhab.core.library.dimension.RadiantExposure;
 import org.openhab.core.library.dimension.RadiationSpecificActivity;
 import org.openhab.core.library.dimension.VolumetricFlowRate;
 
@@ -89,15 +92,17 @@ public final class Units extends CustomUnits {
     public static final Unit<AmountOfSubstance> MOLE = addUnit(tech.units.indriya.unit.Units.MOLE);
     public static final Unit<Volume> LITRE = addUnit(tech.units.indriya.unit.Units.LITRE);
     @SuppressWarnings("unchecked")
-    public static final Unit<AmountOfSubstance> DEUTSCHE_HAERTE = addUnit(new TransformedUnit<>("°dH",
-            (Unit<AmountOfSubstance>) MetricPrefix.MILLI(Units.MOLE).divide(Units.LITRE), MultiplyConverter.of(5.6)));
+    public static final Unit<Dimensionless> DEUTSCHE_HAERTE = addUnit((Unit<Dimensionless>) new TransformedUnit<>("°dH",
+            MetricPrefix.MILLI(Units.MOLE).divide(Units.LITRE), MultiplyConverter.of(0.17833)));
     public static final Unit<Angle> DEGREE_ANGLE = addUnit(NonSI.DEGREE_ANGLE);
     public static final Unit<Angle> RADIAN = addUnit(tech.units.indriya.unit.Units.RADIAN);
     public static final Unit<ArealDensity> DOBSON_UNIT = addUnit(
-            new ProductUnit<ArealDensity>(MetricPrefix.MILLI(tech.units.indriya.unit.Units.MOLE).multiply(0.4462)
+            new ProductUnit<>(MetricPrefix.MILLI(tech.units.indriya.unit.Units.MOLE).multiply(0.4462)
                     .divide(tech.units.indriya.unit.Units.SQUARE_METRE)));
+    public static final Unit<ArealDensity> KILOGRAM_PER_SQUARE_METRE = addUnit(new ProductUnit<>(
+            tech.units.indriya.unit.Units.KILOGRAM.divide(tech.units.indriya.unit.Units.SQUARE_METRE)));
     public static final Unit<CatalyticActivity> KATAL = addUnit(tech.units.indriya.unit.Units.KATAL);
-    public static final Unit<Density> KILOGRAM_PER_CUBICMETRE = addUnit(new ProductUnit<Density>(
+    public static final Unit<Density> KILOGRAM_PER_CUBICMETRE = addUnit(new ProductUnit<>(
             tech.units.indriya.unit.Units.KILOGRAM.divide(tech.units.indriya.unit.Units.CUBIC_METRE)));
     public static final Unit<Density> MICROGRAM_PER_CUBICMETRE = addUnit(new TransformedUnit<>(KILOGRAM_PER_CUBICMETRE,
             MultiplyConverter.ofRational(BigInteger.ONE, BigInteger.valueOf(1000000000))));
@@ -116,18 +121,22 @@ public final class Units extends CustomUnits {
             tech.units.indriya.unit.Units.COULOMB.multiply(3600));
     public static final Unit<ElectricCharge> MILLIAMPERE_HOUR = addUnit(MetricPrefix.MILLI(AMPERE_HOUR));
     public static final Unit<ElectricConductance> SIEMENS = addUnit(tech.units.indriya.unit.Units.SIEMENS);
-    public static final Unit<ElectricConductivity> SIEMENS_PER_METRE = addUnit(new ProductUnit<ElectricConductivity>(
-            tech.units.indriya.unit.Units.SIEMENS.divide(tech.units.indriya.unit.Units.METRE)));
+    public static final Unit<ElectricConductivity> SIEMENS_PER_METRE = addUnit(
+            new ProductUnit<>(tech.units.indriya.unit.Units.SIEMENS.divide(tech.units.indriya.unit.Units.METRE)));
     public static final Unit<ElectricInductance> HENRY = addUnit(tech.units.indriya.unit.Units.HENRY);
     public static final Unit<ElectricPotential> VOLT = addUnit(tech.units.indriya.unit.Units.VOLT);
     public static final Unit<ElectricResistance> OHM = addUnit(tech.units.indriya.unit.Units.OHM);
     public static final Unit<Energy> JOULE = addUnit(tech.units.indriya.unit.Units.JOULE);
+    public static final Unit<Energy> CALORIE = addUnit(JOULE.multiply(new BigDecimal("4.184")));
+    public static final Unit<Energy> KILO_CALORIE = addUnit(MetricPrefix.KILO(CALORIE));
     public static final Unit<Energy> WATT_SECOND = addUnit(
             new ProductUnit<>(tech.units.indriya.unit.Units.WATT.multiply(tech.units.indriya.unit.Units.SECOND)));
     public static final Unit<Energy> WATT_HOUR = addUnit(
             new ProductUnit<>(tech.units.indriya.unit.Units.WATT.multiply(tech.units.indriya.unit.Units.HOUR)));
     public static final Unit<Energy> KILOWATT_HOUR = addUnit(MetricPrefix.KILO(WATT_HOUR));
     public static final Unit<Energy> MEGAWATT_HOUR = addUnit(MetricPrefix.MEGA(WATT_HOUR));
+    public static final Unit<EmissionIntensity> GRAM_PER_KILOWATT_HOUR = addUnit(
+            new ProductUnit<>(tech.units.indriya.unit.Units.GRAM.divide(KILOWATT_HOUR)));
     public static final Unit<Power> VAR = addUnit(new AlternateUnit<>(tech.units.indriya.unit.Units.WATT, "var"));
     public static final Unit<Power> KILOVAR = addUnit(MetricPrefix.KILO(VAR));
     public static final Unit<Energy> VAR_HOUR = addUnit(
@@ -181,6 +190,10 @@ public final class Units extends CustomUnits {
             new TransformedUnit<>("kn", tech.units.indriya.unit.Units.KILOMETRE_PER_HOUR,
                     MultiplyConverter.ofRational(BigInteger.valueOf(1852), BigInteger.valueOf(1000))));
     public static final Unit<SolidAngle> STERADIAN = addUnit(tech.units.indriya.unit.Units.STERADIAN);
+    public static final Unit<RadiantExposure> WATT_HOUR_PER_SQUARE_METRE = addUnit(
+            new ProductUnit<>(WATT_HOUR.divide(tech.units.indriya.unit.Units.SQUARE_METRE)));
+    public static final Unit<RadiantExposure> JOULE_PER_SQUARE_METRE = addUnit(
+            new ProductUnit<>(JOULE.divide(tech.units.indriya.unit.Units.SQUARE_METRE)));
     public static final Unit<Temperature> KELVIN = addUnit(tech.units.indriya.unit.Units.KELVIN);
     public static final Unit<?> MIRED = addUnit(MetricPrefix.MEGA(tech.units.indriya.unit.Units.KELVIN).inverse());
     public static final Unit<Time> SECOND = addUnit(tech.units.indriya.unit.Units.SECOND);
@@ -188,17 +201,18 @@ public final class Units extends CustomUnits {
     public static final Unit<Time> HOUR = addUnit(tech.units.indriya.unit.Units.HOUR);
     public static final Unit<Time> DAY = addUnit(tech.units.indriya.unit.Units.DAY);
     public static final Unit<Time> WEEK = addUnit(tech.units.indriya.unit.Units.WEEK);
+    public static final Unit<Time> MONTH = addUnit(tech.units.indriya.unit.Units.MONTH);
     public static final Unit<Time> YEAR = addUnit(tech.units.indriya.unit.Units.YEAR);
-    public static final Unit<VolumetricFlowRate> LITRE_PER_MINUTE = addUnit(new ProductUnit<VolumetricFlowRate>(
-            tech.units.indriya.unit.Units.LITRE.divide(tech.units.indriya.unit.Units.MINUTE)));
-    public static final Unit<VolumetricFlowRate> CUBICMETRE_PER_SECOND = addUnit(new ProductUnit<VolumetricFlowRate>(
-            tech.units.indriya.unit.Units.CUBIC_METRE.divide(tech.units.indriya.unit.Units.SECOND)));
-    public static final Unit<VolumetricFlowRate> CUBICMETRE_PER_MINUTE = addUnit(new ProductUnit<VolumetricFlowRate>(
-            tech.units.indriya.unit.Units.CUBIC_METRE.divide(tech.units.indriya.unit.Units.MINUTE)));
-    public static final Unit<VolumetricFlowRate> CUBICMETRE_PER_HOUR = addUnit(new ProductUnit<VolumetricFlowRate>(
-            tech.units.indriya.unit.Units.CUBIC_METRE.divide(tech.units.indriya.unit.Units.HOUR)));
-    public static final Unit<VolumetricFlowRate> CUBICMETRE_PER_DAY = addUnit(new ProductUnit<VolumetricFlowRate>(
-            tech.units.indriya.unit.Units.CUBIC_METRE.divide(tech.units.indriya.unit.Units.DAY)));
+    public static final Unit<VolumetricFlowRate> LITRE_PER_MINUTE = addUnit(
+            new ProductUnit<>(tech.units.indriya.unit.Units.LITRE.divide(tech.units.indriya.unit.Units.MINUTE)));
+    public static final Unit<VolumetricFlowRate> CUBICMETRE_PER_SECOND = addUnit(
+            new ProductUnit<>(tech.units.indriya.unit.Units.CUBIC_METRE.divide(tech.units.indriya.unit.Units.SECOND)));
+    public static final Unit<VolumetricFlowRate> CUBICMETRE_PER_MINUTE = addUnit(
+            new ProductUnit<>(tech.units.indriya.unit.Units.CUBIC_METRE.divide(tech.units.indriya.unit.Units.MINUTE)));
+    public static final Unit<VolumetricFlowRate> CUBICMETRE_PER_HOUR = addUnit(
+            new ProductUnit<>(tech.units.indriya.unit.Units.CUBIC_METRE.divide(tech.units.indriya.unit.Units.HOUR)));
+    public static final Unit<VolumetricFlowRate> CUBICMETRE_PER_DAY = addUnit(
+            new ProductUnit<>(tech.units.indriya.unit.Units.CUBIC_METRE.divide(tech.units.indriya.unit.Units.DAY)));
     public static final Unit<DataAmount> BIT = addUnit(new BaseUnit<>("bit", UnitDimension.parse('X')));
     public static final Unit<DataAmount> KILOBIT = addUnit(MetricPrefix.KILO(BIT));
     public static final Unit<DataAmount> MEGABIT = addUnit(MetricPrefix.MEGA(BIT));
@@ -223,13 +237,13 @@ public final class Units extends CustomUnits {
     public static final Unit<DataAmount> TEBIOCTET = addUnit(BinaryPrefix.TEBI(OCTET));
     public static final Unit<DataAmount> PEBIOCTET = addUnit(BinaryPrefix.PEBI(OCTET));
     public static final Unit<DataTransferRate> BIT_PER_SECOND = addUnit(
-            new ProductUnit<DataTransferRate>(BIT.divide(tech.units.indriya.unit.Units.SECOND)));
+            new ProductUnit<>(BIT.divide(tech.units.indriya.unit.Units.SECOND)));
     public static final Unit<DataTransferRate> KILOBIT_PER_SECOND = addUnit(MetricPrefix.KILO(BIT_PER_SECOND));
     public static final Unit<DataTransferRate> MEGABIT_PER_SECOND = addUnit(MetricPrefix.MEGA(BIT_PER_SECOND));
     public static final Unit<DataTransferRate> GIGABIT_PER_SECOND = addUnit(MetricPrefix.GIGA(BIT_PER_SECOND));
     public static final Unit<DataTransferRate> TERABIT_PER_SECOND = addUnit(MetricPrefix.TERA(BIT_PER_SECOND));
 
-    /**
+    /*
      * Add unit symbols for custom openHAB units.
      */
     static {
@@ -241,6 +255,8 @@ public final class Units extends CustomUnits {
         SimpleUnitFormat.getInstance().label(BIT_PER_SECOND, "bit/s");
         SimpleUnitFormat.getInstance().label(BYTE, "B");
         SimpleUnitFormat.getInstance().alias(BYTE, "o");
+        SimpleUnitFormat.getInstance().label(CALORIE, "cal");
+        SimpleUnitFormat.getInstance().label(KILO_CALORIE, "kcal");
         SimpleUnitFormat.getInstance().label(CURIE, "Ci");
         SimpleUnitFormat.getInstance().label(MILLI_CURIE, "mCi");
         SimpleUnitFormat.getInstance().label(MICRO_CURIE, "µCi");
@@ -253,8 +269,9 @@ public final class Units extends CustomUnits {
         SimpleUnitFormat.getInstance().label(DECIBEL, "dB");
         SimpleUnitFormat.getInstance().label(DECIBEL_MILLIWATTS, "dBm");
         SimpleUnitFormat.getInstance().label(DEGREE_ANGLE, "°");
-        SimpleUnitFormat.getInstance().label(DEUTSCHE_HAERTE, "°dH");
+        SimpleUnitFormat.getInstance().label(DEUTSCHE_HAERTE, DEUTSCHE_HAERTE.getSymbol());
         SimpleUnitFormat.getInstance().label(DOBSON_UNIT, "DU");
+        SimpleUnitFormat.getInstance().label(GRAM_PER_KILOWATT_HOUR, "g/kWh");
         SimpleUnitFormat.getInstance().label(GIGABYTE, "GB");
         SimpleUnitFormat.getInstance().label(GIBIBYTE, "GiB");
         SimpleUnitFormat.getInstance().alias(GIBIBYTE, "Gio");
@@ -266,6 +283,7 @@ public final class Units extends CustomUnits {
         SimpleUnitFormat.getInstance().alias(KIBIBYTE, "kio");
         SimpleUnitFormat.getInstance().label(KILOBIT, "kbit");
         SimpleUnitFormat.getInstance().label(KILOBIT_PER_SECOND, "kbit/s");
+        SimpleUnitFormat.getInstance().label(KILOGRAM_PER_SQUARE_METRE, "kg/m²");
         SimpleUnitFormat.getInstance().label(KILOVAR, "kvar");
         SimpleUnitFormat.getInstance().label(KILOVAR_HOUR, "kvarh");
         SimpleUnitFormat.getInstance().label(KILOVOLT_AMPERE, "kVA");
@@ -283,7 +301,9 @@ public final class Units extends CustomUnits {
         SimpleUnitFormat.getInstance().label(MILLIAMPERE_HOUR, "mAh");
         SimpleUnitFormat.getInstance().label(MILLIBAR, "mbar");
         SimpleUnitFormat.getInstance().label(MILLIMETRE_OF_MERCURY, MILLIMETRE_OF_MERCURY.getSymbol());
-        SimpleUnitFormat.getInstance().label(MIRED, "mired");
+        SimpleUnitFormat.getInstance().label(MIRED, "MK⁻¹");
+        SimpleUnitFormat.getInstance().alias(MIRED, "mired");
+        SimpleUnitFormat.getInstance().alias(MIRED, "mirek");
         SimpleUnitFormat.getInstance().label(PARTS_PER_BILLION, "ppb");
         SimpleUnitFormat.getInstance().label(PARTS_PER_MILLION, "ppm");
         SimpleUnitFormat.getInstance().label(PETABYTE, "PB");
@@ -303,7 +323,13 @@ public final class Units extends CustomUnits {
         SimpleUnitFormat.getInstance().label(VOLT_AMPERE, "VA");
         SimpleUnitFormat.getInstance().label(VOLT_AMPERE_HOUR, "VAh");
         SimpleUnitFormat.getInstance().label(WATT_HOUR, "Wh");
+        SimpleUnitFormat.getInstance().label(WATT_HOUR_PER_SQUARE_METRE, "Wh/m²");
         SimpleUnitFormat.getInstance().label(WATT_SECOND, "Ws");
+
+        // workarounds for https://github.com/unitsofmeasurement/indriya/issues/409
+        SimpleUnitFormat.getInstance().alias(MONTH, "mo");
+        SimpleUnitFormat.getInstance().alias(WEEK, "wk");
+        SimpleUnitFormat.getInstance().alias(YEAR, "y");
     }
 
     private Units() {

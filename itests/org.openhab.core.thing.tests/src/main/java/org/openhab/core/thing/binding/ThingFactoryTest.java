@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,9 +12,7 @@
  */
 package org.openhab.core.thing.binding;
 
-import static java.util.Collections.emptyList;
 import static java.util.Map.entry;
-import static java.util.stream.Collectors.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -28,7 +26,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -121,12 +118,12 @@ public class ThingFactoryTest extends JavaOSGiTest {
                 .state(new ChannelTypeUID("bindingId:cd2"), "channelLabel2", "itemType2")
                 .withConfigDescriptionURI(new URI("scheme", "channelType:cd2", null)).build();
 
-        registerChannelTypes(Stream.of(channelType1, channelType2).collect(toSet()), emptyList());
+        registerChannelTypes(Set.of(channelType1, channelType2), List.of());
 
         ChannelDefinition cd1 = new ChannelDefinitionBuilder("channel1", channelType1.getUID()).build();
         ChannelDefinition cd2 = new ChannelDefinitionBuilder("channel2", channelType2.getUID()).build();
 
-        return Stream.of(cd1, cd2).collect(toList());
+        return List.of(cd1, cd2);
     }
 
     @Test
@@ -155,7 +152,7 @@ public class ThingFactoryTest extends JavaOSGiTest {
         assertThat(thing.getConfiguration().get("testProperty"), is(not(nullValue())));
         assertThat(thing.getConfiguration().get("testProperty"), is(equalTo("default")));
         assertThat(thing.getChannels().size(), is(equalTo(2)));
-        assertThat(thing.getChannels().get(0).getConfiguration().get("testProperty"), is(equalTo("default")));
+        assertThat(thing.getChannels().getFirst().getConfiguration().get("testProperty"), is(equalTo("default")));
         assertThat(thing.getChannels().get(1).getConfiguration().get("testProperty"), is(equalTo("default")));
         assertThat(thing.getProperties().size(), is(0));
     }
@@ -203,8 +200,8 @@ public class ThingFactoryTest extends JavaOSGiTest {
                                 .withDefault("2.3,2.4,2.5").withLabel("label").withDescription("description")
                                 .withMultiple(true).withLimitToOptions(true).build();
 
-                        return ConfigDescriptionBuilder.create(uri)
-                                .withParameters(Stream.of(p1, p2, p3, p4, p5, p6).collect(toList())).build();
+                        return ConfigDescriptionBuilder.create(uri).withParameters(List.of(p1, p2, p3, p4, p5, p6))
+                                .build();
                     }
                 });
 
@@ -217,10 +214,9 @@ public class ThingFactoryTest extends JavaOSGiTest {
         assertThat(thing.getConfiguration().get("p4"), is(nullValue()));
         assertThat(thing.getConfiguration().get("p5"), is(instanceOf(List.class)));
         assertThat(((List<?>) thing.getConfiguration().get("p5")).size(), is(1));
-        assertThat(((List<?>) thing.getConfiguration().get("p5")).get(0), is(instanceOf(BigDecimal.class)));
-        assertThat(
-                ((BigDecimal) ((List<?>) thing.getConfiguration().get("p5")).get(0)).compareTo(new BigDecimal("2.3")),
-                is(0));
+        assertThat(((List<?>) thing.getConfiguration().get("p5")).getFirst(), is(instanceOf(BigDecimal.class)));
+        assertThat(((BigDecimal) ((List<?>) thing.getConfiguration().get("p5")).getFirst())
+                .compareTo(new BigDecimal("2.3")), is(0));
         assertThat(thing.getConfiguration().get("p6"), is(instanceOf(List.class)));
         assertThat(((List<?>) thing.getConfiguration().get("p6")).size(), is(3));
         assertThat(thing.getProperties().size(), is(0));
@@ -230,30 +226,30 @@ public class ThingFactoryTest extends JavaOSGiTest {
     public void createThingWithChannels() {
         ChannelType channelType1 = ChannelTypeBuilder
                 .state(new ChannelTypeUID("bindingId:channelTypeId1"), "channelLabel", CoreItemFactory.COLOR)
-                .withTags(Stream.of("tag1", "tag2").collect(toSet())).build();
+                .withTags(Set.of("tag1", "tag2")).build();
 
         ChannelType channelType2 = ChannelTypeBuilder
                 .state(new ChannelTypeUID("bindingId:channelTypeId2"), "channelLabel2", CoreItemFactory.DIMMER)
                 .withTag("tag3").build();
 
-        registerChannelTypes(Set.of(channelType1, channelType2), emptyList());
+        registerChannelTypes(Set.of(channelType1, channelType2), List.of());
 
         ChannelDefinition channelDef1 = new ChannelDefinitionBuilder("ch1", channelType1.getUID()).build();
         ChannelDefinition channelDef2 = new ChannelDefinitionBuilder("ch2", channelType2.getUID()).build();
 
         ThingType thingType = ThingTypeBuilder.instance(new ThingTypeUID("bindingId:thingType"), "label")
-                .withSupportedBridgeTypeUIDs(emptyList()).withChannelDefinitions(List.of(channelDef1, channelDef2))
+                .withSupportedBridgeTypeUIDs(List.of()).withChannelDefinitions(List.of(channelDef1, channelDef2))
                 .build();
         Configuration configuration = new Configuration();
 
         Thing thing = ThingFactory.createThing(thingType, new ThingUID(thingType.getUID(), "thingId"), configuration);
 
         assertThat(thing.getChannels().size(), is(2));
-        assertThat(thing.getChannels().get(0).getUID().toString(), is(equalTo("bindingId:thingType:thingId:ch1")));
-        assertThat(thing.getChannels().get(0).getAcceptedItemType(), is(equalTo(CoreItemFactory.COLOR)));
-        assertThat(thing.getChannels().get(0).getDefaultTags().contains("tag1"), is(true));
-        assertThat(thing.getChannels().get(0).getDefaultTags().contains("tag2"), is(true));
-        assertThat(thing.getChannels().get(0).getDefaultTags().contains("tag3"), is(false));
+        assertThat(thing.getChannels().getFirst().getUID().toString(), is(equalTo("bindingId:thingType:thingId:ch1")));
+        assertThat(thing.getChannels().getFirst().getAcceptedItemType(), is(equalTo(CoreItemFactory.COLOR)));
+        assertThat(thing.getChannels().getFirst().getDefaultTags().contains("tag1"), is(true));
+        assertThat(thing.getChannels().getFirst().getDefaultTags().contains("tag2"), is(true));
+        assertThat(thing.getChannels().getFirst().getDefaultTags().contains("tag3"), is(false));
         assertThat(thing.getChannels().get(1).getDefaultTags().contains("tag1"), is(false));
         assertThat(thing.getChannels().get(1).getDefaultTags().contains("tag2"), is(false));
         assertThat(thing.getChannels().get(1).getDefaultTags().contains("tag3"), is(true));
@@ -285,7 +281,7 @@ public class ThingFactoryTest extends JavaOSGiTest {
         registerChannelTypes(Set.of(channelType1, channelType2), Set.of(channelGroupType1, channelGroupType2));
 
         ThingType thingType = ThingTypeBuilder.instance(new ThingTypeUID("bindingId:thingType"), "label")
-                .withSupportedBridgeTypeUIDs(emptyList())
+                .withSupportedBridgeTypeUIDs(List.of())
                 .withChannelGroupDefinitions(List.of(channelGroupDef1, channelGroupDef2)).build();
         Configuration configuration = new Configuration();
 

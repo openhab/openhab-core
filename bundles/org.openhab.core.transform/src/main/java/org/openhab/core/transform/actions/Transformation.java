@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,7 +17,6 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.transform.TransformationException;
 import org.openhab.core.transform.TransformationHelper;
 import org.openhab.core.transform.TransformationService;
-import org.openhab.core.transform.internal.TransformationActivator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,8 +31,7 @@ public class Transformation {
 
     private static @Nullable String trans(String type, String function, String value) throws TransformationException {
         String result;
-        TransformationService service = TransformationHelper
-                .getTransformationService(TransformationActivator.getContext(), type);
+        TransformationService service = TransformationHelper.getTransformationService(type);
         if (service != null) {
             result = service.transform(function, value);
         } else {

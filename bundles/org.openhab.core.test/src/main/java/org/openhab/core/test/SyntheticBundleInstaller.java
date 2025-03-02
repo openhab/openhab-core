@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -185,7 +185,7 @@ public class SyntheticBundleInstaller {
      * Updates given bundle into the test runtime (the content is changed, but the symbolic name of the bundles remains
      * the same) with a new content, prepared in another resources directory.
      *
-     * @param bundleContextthe bundle context of the test runtime
+     * @param bundleContext the bundle context of the test runtime
      * @param bundleToUpdateName the symbolic name of the bundle to be updated
      * @param updateDirName the location of the new content, that the target bundle will be updated with
      * @param extensionsToInclude a list of extension to be included into the synthetic bundle
@@ -207,8 +207,6 @@ public class SyntheticBundleInstaller {
      * @param bundleContext the bundle context of the test runtime
      * @param testBundleName the name of the sub-directory of {@value #BUNDLE_POOL_PATH}, which contains the files for
      *            the synthetic bundle
-     * @param extensionsToInclude a list of extension to be included into the synthetic bundle fragment. In order to use
-     *            the list of default extensions ({@link #DEFAULT_EXTENSIONS})
      * @return the synthetic bundle representation
      * @throws Exception thrown when error occurs while installing or starting the synthetic bundle fragment
      */

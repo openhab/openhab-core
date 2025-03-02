@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -16,8 +16,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -80,7 +80,7 @@ public class AutoUpdateManagerTest extends JavaTest {
 
         Channel channel = ChannelBuilder.create(CHANNEL_UID).withType(CHANNEL_TYPE_UID).build();
 
-        autoUpdateManager = new AutoUpdateManager(Collections.emptyMap(), channelTypeRegistry, eventPublisher,
+        autoUpdateManager = new AutoUpdateManager(Map.of(), channelTypeRegistry, eventPublisher,
                 itemChannelLinkRegistry, metadataRegistry, thingRegistry);
 
         item = mock(Item.class);
@@ -91,13 +91,14 @@ public class AutoUpdateManagerTest extends JavaTest {
         when(thingRegistry.get(any(ThingUID.class))).thenReturn(thing);
         when(thing.getStatus()).thenReturn(ThingStatus.ONLINE);
         when(thing.getHandler()).thenReturn(mock(ThingHandler.class));
-        when(thing.getChannel(any(String.class))).thenReturn(channel);
+        when(thing.getChannel(any(ChannelUID.class))).thenReturn(channel);
     }
 
     @Test
     public void testAutoUpdateVetoFromChannelType() {
         when(channelTypeRegistry.getChannelType(any(ChannelTypeUID.class)))
-                .thenReturn(ChannelTypeBuilder.state(CHANNEL_TYPE_UID, "label", CoreItemFactory.SWITCH).withAutoUpdatePolicy(AutoUpdatePolicy.VETO).build());
+                .thenReturn(ChannelTypeBuilder.state(CHANNEL_TYPE_UID, "label", CoreItemFactory.SWITCH)
+                        .withAutoUpdatePolicy(AutoUpdatePolicy.VETO).build());
 
         autoUpdateManager.receiveCommand(ItemEventFactory.createCommandEvent(ITEM_NAME, OnOffType.ON), item);
 

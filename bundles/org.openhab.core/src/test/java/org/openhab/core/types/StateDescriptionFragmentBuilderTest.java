@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -16,7 +16,6 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.math.BigDecimal;
-import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -65,7 +64,7 @@ public class StateDescriptionFragmentBuilderTest {
 
     @Test
     public void builderWithEmptyOptions() {
-        List<StateOption> options = Collections.emptyList();
+        List<StateOption> options = List.of();
         assertThat(builder.withOptions(options).build().getOptions(), is(options));
     }
 
@@ -81,7 +80,6 @@ public class StateDescriptionFragmentBuilderTest {
         assertThat(builder.withOptions(options).build().getOptions(), is(options));
     }
 
-    @SuppressWarnings("deprecation")
     @Test
     public void builderWithStateDescription() {
         StateDescription source = new StateDescription(BigDecimal.ZERO, BigDecimal.TEN, BigDecimal.ONE, "pattern", true,
@@ -105,8 +103,8 @@ public class StateDescriptionFragmentBuilderTest {
                 .withStep(BigDecimal.ONE).withPattern("pattern").withReadOnly(Boolean.FALSE)
                 .withOptions(List.of(new StateOption("value", "label"))).build();
         StateDescriptionFragment fragment2 = builder.withMinimum(BigDecimal.ONE).withMaximum(BigDecimal.ONE)
-                .withStep(BigDecimal.ZERO).withPattern("pattern_new").withReadOnly(Boolean.TRUE)
-                .withOptions(Collections.emptyList()).build();
+                .withStep(BigDecimal.ZERO).withPattern("pattern_new").withReadOnly(Boolean.TRUE).withOptions(List.of())
+                .build();
 
         assertThat(fragment1.getMinimum(), is(not(fragment2.getMinimum())));
         assertThat(fragment1.getMaximum(), is(not(fragment2.getMaximum())));

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,8 +14,8 @@ package org.openhab.core.library.types;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.time.ZonedDateTime;
-import java.util.Collections;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -37,39 +37,39 @@ public class DateTimeGroupFunctionTest {
 
     @Test
     public void testLatestFunction() {
-        ZonedDateTime expectedDateTime = ZonedDateTime.now();
+        Instant expectedDateTime = Instant.now();
         Set<Item> items = new HashSet<>();
         items.add(new TestItem("TestItem1", new DateTimeType(expectedDateTime)));
         items.add(new TestItem("TestItem2", UnDefType.UNDEF));
-        items.add(new TestItem("TestItem3", new DateTimeType(expectedDateTime.minusDays(10))));
-        items.add(new TestItem("TestItem4", new DateTimeType(expectedDateTime.minusYears(1))));
+        items.add(new TestItem("TestItem3", new DateTimeType(expectedDateTime.minus(10, ChronoUnit.DAYS))));
+        items.add(new TestItem("TestItem4", new DateTimeType(expectedDateTime.minus(366, ChronoUnit.DAYS))));
         items.add(new TestItem("TestItem5", UnDefType.UNDEF));
         items.add(new TestItem("TestItem6", new DateTimeType(expectedDateTime.minusSeconds(1))));
 
         GroupFunction function = new DateTimeGroupFunction.Latest();
         State state = function.calculate(items);
 
-        assertTrue(expectedDateTime.isEqual(((DateTimeType) state).getZonedDateTime()));
+        assertTrue(expectedDateTime.equals(((DateTimeType) state).getInstant()));
     }
 
     @Test
     public void testEarliestFunction() {
-        ZonedDateTime expectedDateTime = ZonedDateTime.now();
+        Instant expectedDateTime = Instant.now();
         Set<Item> items = new HashSet<>();
         items.add(new TestItem("TestItem1", new DateTimeType(expectedDateTime)));
         items.add(new TestItem("TestItem2", UnDefType.UNDEF));
-        items.add(new TestItem("TestItem3", new DateTimeType(expectedDateTime.plusDays(10))));
-        items.add(new TestItem("TestItem4", new DateTimeType(expectedDateTime.plusYears(1))));
+        items.add(new TestItem("TestItem3", new DateTimeType(expectedDateTime.plus(10, ChronoUnit.DAYS))));
+        items.add(new TestItem("TestItem4", new DateTimeType(expectedDateTime.plus(366, ChronoUnit.DAYS))));
         items.add(new TestItem("TestItem5", UnDefType.UNDEF));
         items.add(new TestItem("TestItem6", new DateTimeType(expectedDateTime.plusSeconds(1))));
 
         GroupFunction function = new DateTimeGroupFunction.Earliest();
         State state = function.calculate(items);
 
-        assertTrue(expectedDateTime.isEqual(((DateTimeType) state).getZonedDateTime()));
+        assertTrue(expectedDateTime.equals(((DateTimeType) state).getInstant()));
     }
 
-    private class TestItem extends GenericItem {
+    private static class TestItem extends GenericItem {
 
         public TestItem(String name, State state) {
             super("Test", name);
@@ -78,12 +78,12 @@ public class DateTimeGroupFunctionTest {
 
         @Override
         public List<Class<? extends State>> getAcceptedDataTypes() {
-            return Collections.emptyList();
+            return List.of();
         }
 
         @Override
         public List<Class<? extends Command>> getAcceptedCommandTypes() {
-            return Collections.emptyList();
+            return List.of();
         }
     }
 }

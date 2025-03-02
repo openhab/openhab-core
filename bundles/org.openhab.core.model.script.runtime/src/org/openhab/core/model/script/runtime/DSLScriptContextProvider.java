@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -30,7 +30,7 @@ public interface DSLScriptContextProvider {
     /**
      * Identifier for scripts that are created from a DSL rule file
      */
-    static final String CONTEXT_IDENTIFIER = "// context: ";
+    String CONTEXT_IDENTIFIER = "// context: ";
 
     /**
      * Returns the evaluation context, i.e. the current state of the variables of the rule file.

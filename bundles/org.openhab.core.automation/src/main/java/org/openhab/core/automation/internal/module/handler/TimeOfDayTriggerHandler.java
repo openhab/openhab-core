@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,11 +13,15 @@
 package org.openhab.core.automation.internal.module.handler;
 
 import java.text.MessageFormat;
+import java.util.Map;
+import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.ModuleHandlerCallback;
 import org.openhab.core.automation.Trigger;
+import org.openhab.core.automation.events.AutomationEventFactory;
+import org.openhab.core.automation.events.TimerEvent;
 import org.openhab.core.automation.handler.BaseTriggerModuleHandler;
 import org.openhab.core.automation.handler.TimeBasedTriggerHandler;
 import org.openhab.core.automation.handler.TriggerHandlerCallback;
@@ -46,13 +50,14 @@ public class TimeOfDayTriggerHandler extends BaseTriggerModuleHandler
     public static final String CFG_TIME = "time";
 
     private final CronScheduler scheduler;
+    private final String time;
     private final String expression;
     private @Nullable ScheduledCompletableFuture<?> schedule;
 
     public TimeOfDayTriggerHandler(Trigger module, CronScheduler scheduler) {
         super(module);
         this.scheduler = scheduler;
-        String time = module.getConfiguration().get(CFG_TIME).toString();
+        this.time = module.getConfiguration().get(CFG_TIME).toString();
         this.expression = buildExpressionFromConfigurationTime(time);
     }
 
@@ -83,7 +88,9 @@ public class TimeOfDayTriggerHandler extends BaseTriggerModuleHandler
     @Override
     public void run() {
         if (callback != null) {
-            ((TriggerHandlerCallback) callback).triggered(module);
+            TimerEvent event = AutomationEventFactory.createTimerEvent(module.getTypeUID(),
+                    Objects.requireNonNullElse(module.getLabel(), module.getId()), Map.of(CFG_TIME, time));
+            ((TriggerHandlerCallback) callback).triggered(module, Map.of("event", event));
         } else {
             logger.debug("Tried to trigger, but callback isn't available!");
         }

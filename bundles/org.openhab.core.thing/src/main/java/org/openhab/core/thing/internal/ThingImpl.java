@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -43,7 +43,7 @@ import org.openhab.core.thing.binding.builder.ThingStatusInfoBuilder;
  *         ThingType Description
  * @author Thomas Höfer - Added thing and thing type properties
  * @author Simon Kaufmann - Added label
- * @author Christoph Weitkamp - Added method `getChannel(ChannelUID)`
+ * @author Christoph Weitkamp - Added method {@code getChannel(ChannelUID)}
  */
 @NonNullByDefault
 public class ThingImpl implements Thing {
@@ -235,6 +235,31 @@ public class ThingImpl implements Thing {
     @Override
     public boolean isEnabled() {
         return ThingStatusDetail.DISABLED != getStatusInfo().getStatusDetail();
+    }
+
+    @Override
+    public String toString() {
+        // Configuration is deliberately excluded because it might include sensitive data like passwords.
+        StringBuilder sb = new StringBuilder(getUID().toString());
+        sb.append(" (ThingTypeUID=");
+        sb.append(getThingTypeUID());
+        sb.append(", Bridge=False");
+        if (getBridgeUID() != null) {
+            sb.append(", BridgeUID=");
+            sb.append(getBridgeUID());
+        }
+        sb.append(", Label=");
+        sb.append(getLabel());
+        if (getLocation() != null) {
+            sb.append(", Location=");
+            sb.append(getLocation());
+        }
+        sb.append(", Status=");
+        sb.append(getStatus());
+        sb.append(", StatusInfo=");
+        sb.append(getStatusInfo());
+        sb.append(")");
+        return sb.toString();
     }
 
     @Override

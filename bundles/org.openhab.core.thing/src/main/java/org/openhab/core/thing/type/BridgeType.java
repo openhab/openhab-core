@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -39,9 +39,7 @@ public class BridgeType extends ThingType {
     /**
      * A new instance of BridgeType.
      *
-     * @see ThingType(uid, supportedBridgeTypeUIDs, label, description, category, listed, representationProperty,
-     *      channelDefinitions, channelGroupDefinitions, properties, configDescriptionURI,
-     *      extensibleChannelTypeIds)
+     * @see ThingType#ThingType(ThingTypeUID, List, String, String, String, boolean, String, List, List, Map, URI, List)
      *
      * @param uid the unique identifier which identifies this Thing type within the overall system
      *            (must neither be null, nor empty)
@@ -60,7 +58,7 @@ public class BridgeType extends ThingType {
      * @param properties the properties this Thing type provides (could be null)
      * @param configDescriptionURI the link to the concrete ConfigDescription (could be null)
      * @param extensibleChannelTypeIds the channel-type ids this thing-type is extensible with (could be null or empty).
-     * @throws IllegalArgumentException if the UID is null or empty, or the the meta information is null
+     * @throws IllegalArgumentException if the UID is null or empty, or the meta information is null
      */
     BridgeType(ThingTypeUID uid, @Nullable List<String> supportedBridgeTypeUIDs, String label,
             @Nullable String description, @Nullable String category, boolean listed,

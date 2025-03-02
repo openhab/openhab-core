@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -88,7 +88,7 @@ public class Bin2Json {
         try {
             parser = JBBPParser.prepare(parserRule);
         } catch (JBBPException e) {
-            throw new ConversionException(String.format("Illegal parser rule, reason: %s", e.getMessage(), e));
+            throw new ConversionException(String.format("Illegal parser rule, reason: %s", e.getMessage()), e);
         }
     }
 
@@ -103,7 +103,7 @@ public class Bin2Json {
         try {
             return convert(HexUtils.hexToBytes(hexString));
         } catch (IllegalArgumentException e) {
-            throw new ConversionException(String.format("Illegal hexstring , reason: %s", e.getMessage(), e));
+            throw new ConversionException(String.format("Illegal hexstring , reason: %s", e.getMessage()), e);
         }
     }
 
@@ -117,10 +117,8 @@ public class Bin2Json {
     public JsonObject convert(byte[] data) throws ConversionException {
         try {
             return convert(parser.parse(data));
-        } catch (IOException e) {
-            throw new ConversionException(String.format("Unexpected error, reason: %s", e.getMessage(), e));
-        } catch (JBBPException e) {
-            throw new ConversionException(String.format("Unexpected error, reason: %s", e.getMessage(), e));
+        } catch (IOException | JBBPException e) {
+            throw new ConversionException(String.format("Unexpected error, reason: %s", e.getMessage()), e);
         }
     }
 
@@ -134,10 +132,8 @@ public class Bin2Json {
     public JsonObject convert(InputStream inputStream) throws ConversionException {
         try {
             return convert(parser.parse(inputStream));
-        } catch (IOException e) {
-            throw new ConversionException(String.format("Unexpected error, reason: %s", e.getMessage(), e));
-        } catch (JBBPException e) {
-            throw new ConversionException(String.format("Unexpected error, reason: %s", e.getMessage(), e));
+        } catch (IOException | JBBPException e) {
+            throw new ConversionException(String.format("Unexpected error, reason: %s", e.getMessage()), e);
         }
     }
 
@@ -151,7 +147,7 @@ public class Bin2Json {
             }
             return json;
         } catch (JBBPException e) {
-            throw new ConversionException(String.format("Unexpected error, reason: %s", e.getMessage(), e));
+            throw new ConversionException(String.format("Unexpected error, reason: %s", e.getMessage()), e);
         }
     }
 

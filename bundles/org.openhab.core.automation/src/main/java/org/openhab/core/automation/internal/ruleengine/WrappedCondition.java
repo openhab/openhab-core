@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -33,8 +33,8 @@ import org.openhab.core.automation.type.Output;
 @NonNullByDefault
 public class WrappedCondition extends WrappedModule<Condition, ConditionHandler> {
 
-    private Map<String, String> inputs = Collections.emptyMap();
-    private Set<Connection> connections = Collections.emptySet();
+    private Map<String, String> inputs = Map.of();
+    private Set<Connection> connections = Set.of();
 
     public WrappedCondition(final Condition condition) {
         super(condition);
@@ -47,7 +47,7 @@ public class WrappedCondition extends WrappedModule<Condition, ConditionHandler>
      * @param connections the set of connections for this condition
      */
     public void setConnections(@Nullable Set<Connection> connections) {
-        this.connections = connections == null ? Collections.emptySet() : connections;
+        this.connections = connections == null ? Set.of() : connections;
     }
 
     public Set<Connection> getConnections() {
@@ -71,6 +71,6 @@ public class WrappedCondition extends WrappedModule<Condition, ConditionHandler>
      * @param inputs map that contains the inputs for this condition.
      */
     public void setInputs(@Nullable Map<String, String> inputs) {
-        this.inputs = inputs == null ? Collections.emptyMap() : Collections.unmodifiableMap(inputs);
+        this.inputs = inputs == null ? Map.of() : Collections.unmodifiableMap(inputs);
     }
 }

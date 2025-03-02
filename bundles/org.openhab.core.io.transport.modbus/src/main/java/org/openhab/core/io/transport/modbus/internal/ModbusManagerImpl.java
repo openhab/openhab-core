@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -117,7 +117,7 @@ public class ModbusManagerImpl implements ModbusManager {
          *             (ill-behaving slave)
          * @throws ModbusUnexpectedResponseSizeException when data length of the response and request do not match
          */
-        public void accept(AggregateStopWatch timer, T task, ModbusSlaveConnection connection)
+        void accept(AggregateStopWatch timer, T task, ModbusSlaveConnection connection)
                 throws ModbusException, IIOException, ModbusUnexpectedTransactionIdException,
                 ModbusUnexpectedResponseFunctionCodeException, ModbusUnexpectedResponseSizeException;
     }
@@ -205,7 +205,7 @@ public class ModbusManagerImpl implements ModbusManager {
                     request.getFunctionCode(), libRequest.getHexMessage(), operationId);
             // Might throw ModbusIOException (I/O error) or ModbusSlaveException (explicit exception response from
             // slave)
-            timer.transaction.timeRunnableWithModbusException(() -> transaction.execute());
+            timer.transaction.timeRunnableWithModbusException(transaction::execute);
             ModbusResponse response = transaction.getResponse();
             logger.trace("Response for read request (FC={}, transaction ID={}): {} [operation ID {}]",
                     response.getFunctionCode(), response.getTransactionID(), response.getHexMessage(), operationId);
@@ -243,7 +243,7 @@ public class ModbusManagerImpl implements ModbusManager {
 
             // Might throw ModbusIOException (I/O error) or ModbusSlaveException (explicit exception response from
             // slave)
-            timer.transaction.timeRunnableWithModbusException(() -> transaction.execute());
+            timer.transaction.timeRunnableWithModbusException(transaction::execute);
             ModbusResponse response = transaction.getResponse();
             logger.trace("Response for write request (FC={}, transaction ID={}): {} [operation ID {}]",
                     response.getFunctionCode(), response.getTransactionID(), response.getHexMessage(), operationId);
@@ -283,6 +283,12 @@ public class ModbusManagerImpl implements ModbusManager {
      * Thread naming for modbus read & write requests. Also used by the monitor thread
      */
     private static final String MODBUS_POLLER_THREAD_POOL_NAME = "modbusManagerPollerThreadPool";
+
+    /**
+     * The slave exception code indicating that the device is currently busy processing another
+     * command.
+     */
+    private static final int MODBUS_EXCEPTION_SLAVE_DEVICE_BUSY = 6;
 
     /**
      * Log message with WARN level if the task queues exceed this limit.
@@ -444,7 +450,7 @@ public class ModbusManagerImpl implements ModbusManager {
      *
      * In case connection cannot be established, callback is called with {@link ModbusConnectionException}
      *
-     * @param operationId id appened to log messages for identifying the operation
+     * @param timer the timer having an operationId that is appended to log messages for identifying the operation
      * @param oneOffTask whether this is one-off, or execution of previously scheduled poll
      * @param task task representing the read or write operation
      * @return {@link ModbusSlaveConnection} to the endpoint as specified by the task, or empty {@link Optional} when
@@ -488,7 +494,7 @@ public class ModbusManagerImpl implements ModbusManager {
         try {
             logger.trace("Calling error response callback {} for request {}. Error was {} {}", callback, request,
                     error.getClass().getName(), error.getMessage());
-            callback.handle(new AsyncModbusFailure<R>(request, error));
+            callback.handle(new AsyncModbusFailure<>(request, error));
         } finally {
             logger.trace("Called write response callback {} for request {}. Error was {} {}", callback, request,
                     error.getClass().getName(), error.getMessage());
@@ -575,7 +581,7 @@ public class ModbusManagerImpl implements ModbusManager {
             }
 
             int tryIndex = 0;
-            /**
+            /*
              * last execution is tracked such that the endpoint is not spammed on retry. First retry can be executed
              * right away since getConnection ensures enough time has passed since last transaction. More precisely,
              * ModbusSlaveConnectionFactoryImpl sleeps on activate() (i.e. before returning connection).
@@ -662,7 +668,11 @@ public class ModbusManagerImpl implements ModbusManager {
                 } catch (ModbusSlaveException e) {
                     lastError.set(new ModbusSlaveErrorResponseExceptionImpl(e));
                     // Slave returned explicit error response, no reason to re-establish new connection
-                    if (willRetry) {
+                    if (willRetry && e.getType() == MODBUS_EXCEPTION_SLAVE_DEVICE_BUSY) {
+                        logger.debug(
+                                "Try {} out of {} failed when executing request ({}). The slave device is busy (exception code {}). Will try again soon. [operation ID {}]",
+                                tryIndex, maxTries, request, e.getType(), operationId);
+                    } else if (willRetry) {
                         logger.warn(
                                 "Try {} out of {} failed when executing request ({}). Will try again soon. Error was: {} {} [operation ID {}]",
                                 tryIndex, maxTries, request, e.getClass().getName(), e.getMessage(), operationId);
@@ -934,7 +944,7 @@ public class ModbusManagerImpl implements ModbusManager {
 
     private void maybeCloseConnections(ModbusSlaveEndpoint endpoint) {
         boolean lastCommWithThisEndpointWasRemoved = communicationInterfaces.stream()
-                .filter(comm -> comm.endpoint.equals(endpoint)).count() == 0L;
+                .noneMatch(comm -> comm.endpoint.equals(endpoint));
         if (lastCommWithThisEndpointWasRemoved) {
             // Since last communication interface pointing to this endpoint was closed, we can clean up resources
             // and disconnect connections.

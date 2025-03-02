@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -25,7 +25,6 @@ import org.slf4j.LoggerFactory
 import org.openhab.core.items.Item
 import org.openhab.core.types.Command
 import org.openhab.core.types.State
-import org.openhab.core.events.Event
 import org.openhab.core.automation.module.script.rulesupport.shared.ValueCache
 
 /**
@@ -39,10 +38,16 @@ import org.openhab.core.automation.module.script.rulesupport.shared.ValueCache
  */
 class ScriptJvmModelInferrer extends AbstractModelInferrer {
 
-    static private final Logger logger = LoggerFactory.getLogger(ScriptJvmModelInferrer)
+    static final Logger logger = LoggerFactory.getLogger(ScriptJvmModelInferrer)
 
     /** Variable name for the input string in a "script transformation" or "script profile" */
     public static final String VAR_INPUT = "input";
+
+    /** Variable name for the group in a "member of state triggered" or "member of command triggered" rule */
+    public static final String VAR_TRIGGERING_GROUP = "triggeringGroup";
+
+    /** Variable name for the group in a "member of state triggered" or "member of command triggered" rule */
+    public static final String VAR_TRIGGERING_GROUP_NAME = "triggeringGroupName";
 
     /** Variable name for the item in a "state triggered" or "command triggered" rule */
     public static final String VAR_TRIGGERING_ITEM = "triggeringItem";
@@ -79,7 +84,7 @@ class ScriptJvmModelInferrer extends AbstractModelInferrer {
     public static final String VAR_SHARED_CACHE = "sharedCache";
 
     /**
-     * conveninence API to build and initialize JvmTypes and their members.
+     * convenience API to build and initialize JvmTypes and their members.
      */
     @Inject extension JvmTypesBuilder
 
@@ -92,15 +97,15 @@ class ScriptJvmModelInferrer extends AbstractModelInferrer {
     /**
      * Is called for each instance of the first argument's type contained in a resource.
      * 
-     * @param element - the model to create one or more JvmDeclaredTypes from.
-     * @param acceptor - each created JvmDeclaredType without a container should be passed to the acceptor in order get attached to the
+     * @param script the model to create one or more JvmDeclaredTypes from.
+     * @param acceptor each created JvmDeclaredType without a container should be passed to the acceptor in order get attached to the
      *                   current resource.
-     * @param isPreLinkingPhase - whether the method is called in a pre linking phase, i.e. when the global index isn't fully updated. You
-     *        must not rely on linking using the index if iPrelinkingPhase is <code>true</code>
+     * @param isPreIndexingPhase whether the method is called in a pre linking phase, i.e. when the global index isn't fully updated. You
+     *        must not rely on linking using the index if isPreIndexingPhase is <code>true</code>
      */
     def dispatch void infer(Script script, IJvmDeclaredTypeAcceptor acceptor, boolean isPreIndexingPhase) {
         val className = script.eResource.URI.lastSegment.split("\\.").head.toFirstUpper + "Script"
-        acceptor.accept(script.toClass(className)).initializeLater [
+        acceptor.accept(script.toClass(className), [
 
             val Set<String> fieldNames = newHashSet()
 
@@ -131,6 +136,10 @@ class ScriptJvmModelInferrer extends AbstractModelInferrer {
                 static = true
                 val inputTypeRef = script.newTypeRef(String)
                 parameters += script.toParameter(VAR_INPUT, inputTypeRef)
+                val groupTypeRef = script.newTypeRef(Item)
+                parameters += script.toParameter(VAR_TRIGGERING_GROUP, groupTypeRef)
+                val groupNameRef = script.newTypeRef(String)
+                parameters += script.toParameter(VAR_TRIGGERING_GROUP_NAME, groupNameRef)
                 val itemTypeRef = script.newTypeRef(Item)
                 parameters += script.toParameter(VAR_TRIGGERING_ITEM, itemTypeRef)
                 val itemNameRef = script.newTypeRef(String)
@@ -157,6 +166,6 @@ class ScriptJvmModelInferrer extends AbstractModelInferrer {
                 parameters += script.toParameter(VAR_SHARED_CACHE, sharedCacheTypeRef)
                 body = script
             ]
-        ]
+        ])
     }
 }

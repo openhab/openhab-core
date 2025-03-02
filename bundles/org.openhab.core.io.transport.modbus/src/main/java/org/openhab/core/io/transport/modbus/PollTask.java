@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -22,7 +22,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  *
  * @author Sami Salonen - Initial contribution
  *
- * @see ModbusManager.registerRegularPoll
+ * @see ModbusCommunicationInterface#registerRegularPoll
  */
 @NonNullByDefault
 public interface PollTask extends

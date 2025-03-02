@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -73,7 +73,7 @@ public class StateDescriptionConverter extends GenericUnmarshaller<StateDescript
 
     private boolean toBoolean(Map<String, String> attributes, String attribute, boolean defaultValue) {
         String attrValueText = attributes.get(attribute);
-        return attrValueText == null ? defaultValue : Boolean.valueOf(attrValueText);
+        return attrValueText == null ? defaultValue : Boolean.parseBoolean(attrValueText);
     }
 
     private List<StateOption> toListOfChannelState(NodeList nodeList) throws ConversionException {

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -24,9 +24,11 @@ import org.openhab.core.types.StateDescription;
  */
 public class EnrichedGroupItemDTO extends EnrichedItemDTO {
 
-    public EnrichedGroupItemDTO(ItemDTO itemDTO, EnrichedItemDTO[] members, String link, String state,
-            String transformedState, StateDescription stateDescription) {
-        super(itemDTO, link, state, transformedState, stateDescription, null);
+    public EnrichedGroupItemDTO(ItemDTO itemDTO, EnrichedItemDTO[] members, String link, String state, String lastState,
+            Long lastStateUpdate, Long lastStateChange, String transformedState, StateDescription stateDescription,
+            String unitSymbol) {
+        super(itemDTO, link, state, lastState, lastStateUpdate, lastStateChange, transformedState, stateDescription,
+                null, unitSymbol);
         this.members = members;
         this.groupType = ((GroupItemDTO) itemDTO).groupType;
         this.function = ((GroupItemDTO) itemDTO).function;

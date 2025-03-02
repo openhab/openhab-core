@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -57,7 +57,7 @@ public interface EphemerisManager {
      * Tests given day status against given userfile
      *
      * @param date observed day
-     * @param url bundle resource file containing holiday definitions
+     * @param resource bundle resource file containing holiday definitions
      * @return whether the day is bank holiday or not
      */
     boolean isBankHoliday(ZonedDateTime date, URL resource);
@@ -66,7 +66,7 @@ public interface EphemerisManager {
      * Tests given day status against given userfile
      *
      * @param date observed day
-     * @param source absolute or relative path to the file on local file system
+     * @param filename absolute or relative path to the file on local file system
      * @return whether the day is bank holiday or not
      * @throws FileNotFoundException
      */
@@ -85,7 +85,7 @@ public interface EphemerisManager {
      * Get given day name from given userfile
      *
      * @param date observed day
-     * @param url bundle resource file containing holiday definitions
+     * @param resource bundle resource file containing holiday definitions
      * @return name of the day or null if no corresponding entry
      */
     @Nullable
@@ -95,7 +95,7 @@ public interface EphemerisManager {
      * Get given day name from given userfile
      *
      * @param date observed day
-     * @param source absolute or relative path to the file on local file system
+     * @param filename absolute or relative path to the file on local file system
      * @return name of the day or null if no corresponding entry
      * @throws FileNotFoundException
      */
@@ -115,7 +115,7 @@ public interface EphemerisManager {
      * Gets the first next to come holiday in a 1 year time window
      *
      * @param startDate first day of the time window
-     * @param url bundle resource file containing holiday definitions
+     * @param resource bundle resource file containing holiday definitions
      * @return next coming holiday
      */
     @Nullable
@@ -125,7 +125,7 @@ public interface EphemerisManager {
      * Gets the first next to come holiday in a 1 year time window
      *
      * @param startDate first day of the time window
-     * @param source absolute or relative path to the file on local file system
+     * @param filename absolute or relative path to the file on local file system
      * @return next coming holiday
      * @throws FileNotFoundException
      */
@@ -135,7 +135,7 @@ public interface EphemerisManager {
     /**
      * Gets the localized holiday description
      *
-     * @param holidayName code of searched holiday
+     * @param holiday code of searched holiday
      * @return localized holiday description
      */
     @Nullable
@@ -155,7 +155,7 @@ public interface EphemerisManager {
      *
      * @param from first day of the time window
      * @param searchedHoliday name of the searched holiday
-     * @param url bundle resource file containing holiday definitions
+     * @param resource bundle resource file containing holiday definitions
      * @return difference in days, -1 if not found
      */
     long getDaysUntil(ZonedDateTime from, String searchedHoliday, URL resource);
@@ -165,7 +165,7 @@ public interface EphemerisManager {
      *
      * @param from first day of the time window
      * @param searchedHoliday name of the searched holiday
-     * @param source absolute or relative path to the file on local file system
+     * @param filename absolute or relative path to the file on local file system
      * @return difference in days, -1 if not found
      * @throws FileNotFoundException
      */

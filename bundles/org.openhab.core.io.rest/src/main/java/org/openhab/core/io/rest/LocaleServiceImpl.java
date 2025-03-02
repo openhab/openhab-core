@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -52,9 +52,9 @@ public class LocaleServiceImpl implements LocaleService {
                 split = acceptLanguageHttpHeader.split("-");
             }
             if (split.length == 2) {
-                locale = new Locale(split[0], split[1]);
+                locale = Locale.of(split[0], split[1]);
             } else {
-                locale = new Locale(split[0]);
+                locale = Locale.of(split[0]);
             }
         }
         return locale;
@@ -62,12 +62,12 @@ public class LocaleServiceImpl implements LocaleService {
 
     @Reference(policy = ReferencePolicy.DYNAMIC)
     protected void setLocaleProvider(LocaleProvider provider) {
-        logger.debug("The localeProvider in LocaleUtilService has been set");
+        logger.debug("The localeProvider in {} has been set", LocaleServiceImpl.class.getSimpleName());
         localeProvider = provider;
     }
 
     protected void unsetLocaleProvider(LocaleProvider provider) {
-        logger.debug("The localeProvider in LocaleUtilService has been unset");
+        logger.debug("The localeProvider in {} has been unset", LocaleServiceImpl.class.getSimpleName());
         localeProvider = null;
     }
 

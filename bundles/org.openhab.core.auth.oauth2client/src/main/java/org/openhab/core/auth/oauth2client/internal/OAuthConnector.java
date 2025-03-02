@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -39,6 +39,7 @@ import org.openhab.core.auth.client.oauth2.AccessTokenResponse;
 import org.openhab.core.auth.client.oauth2.OAuthException;
 import org.openhab.core.auth.client.oauth2.OAuthResponseException;
 import org.openhab.core.io.net.http.HttpClientFactory;
+import org.openhab.core.library.types.DateTimeType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,16 +64,28 @@ public class OAuthConnector {
 
     private final HttpClientFactory httpClientFactory;
 
+    private final @Nullable Fields extraFields;
+
     private final Logger logger = LoggerFactory.getLogger(OAuthConnector.class);
     private final Gson gson;
 
     public OAuthConnector(HttpClientFactory httpClientFactory) {
-        this(httpClientFactory, new GsonBuilder());
+        this(httpClientFactory, null, new GsonBuilder());
+    }
+
+    public OAuthConnector(HttpClientFactory httpClientFactory, @Nullable Fields extraFields) {
+        this(httpClientFactory, extraFields, new GsonBuilder());
     }
 
     public OAuthConnector(HttpClientFactory httpClientFactory, GsonBuilder gsonBuilder) {
+        this(httpClientFactory, null, gsonBuilder);
+    }
+
+    public OAuthConnector(HttpClientFactory httpClientFactory, @Nullable Fields extraFields, GsonBuilder gsonBuilder) {
         this.httpClientFactory = httpClientFactory;
-        gson = gsonBuilder.setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+        this.extraFields = extraFields;
+        gson = gsonBuilder.setDateFormat(DateTimeType.DATE_PATTERN_JSON_COMPAT)
+                .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
                 .registerTypeAdapter(Instant.class, (JsonDeserializer<Instant>) (json, typeOfT, context) -> {
                     try {
                         return Instant.parse(json.getAsString());
@@ -291,6 +304,14 @@ public class OAuthConnector {
                 fields.add(parameters[i], parameters[i + 1]);
             }
         }
+
+        if (extraFields != null) {
+            for (Fields.Field extra : extraFields) {
+                logger.debug("Oauth request (extra) parameter {}, value {}", extra.getName(), extra.getValue());
+                fields.put(extra);
+            }
+        }
+
         return fields;
     }
 
@@ -308,11 +329,17 @@ public class OAuthConnector {
 
             if (statusCode == HttpStatus.OK_200) {
                 AccessTokenResponse jsonResponse = gson.fromJson(content, AccessTokenResponse.class);
+                if (jsonResponse == null) {
+                    throw new OAuthException("Empty response content when deserializing AccessTokenResponse");
+                }
                 jsonResponse.setCreatedOn(Instant.now()); // this is not supplied by the response
                 logger.debug("grant type {} to URL {} success", grantType, request.getURI());
                 return jsonResponse;
             } else if (statusCode == HttpStatus.BAD_REQUEST_400) {
                 OAuthResponseException errorResponse = gson.fromJson(content, OAuthResponseException.class);
+                if (errorResponse == null) {
+                    throw new OAuthException("Empty response content when deserializing OAuthResponseException");
+                }
                 logger.error("grant type {} to URL {} failed with error code {}, description {}", grantType,
                         request.getURI(), errorResponse.getError(), errorResponse.getErrorDescription());
 
@@ -326,24 +353,23 @@ public class OAuthConnector {
             throw new IOException("Exception in oauth communication, grant type " + grantType, e);
         } catch (JsonSyntaxException e) {
             throw new OAuthException(String.format(
-                    "Unable to deserialize json into AccessTokenResponse/ OAuthResponseException. httpCode: %d json: %s",
-                    statusCode, content), e);
-        } catch (Exception e) {
-            // Dont know what exception it is, wrap it up and throw it out
-            throw new OAuthException("Exception in oauth communication, grant type " + grantType, e);
+                    "Unable to deserialize json into AccessTokenResponse/OAuthResponseException. httpCode: %d json: %s: %s",
+                    statusCode, content, e.getMessage()), e);
         }
     }
 
     /**
      * This is a special case where the httpClient (jetty) is created due to the need for certificate pinning.
-     * If certificate pinning is needed, please refer to {@code TrustManagerProvider}. The http client is
-     * created, used and then shutdown immediately after use. There is little reason to cache the client/ connections
+     * If certificate pinning is needed, please refer to
+     * {@code org.openhab.core.io.net.http.ExtensibleTrustManager ExtensibleTrustManager}.
+     * The http client is created, used and then shutdown immediately after use. There is little reason to cache the
+     * client/ connections
      * because oauth requests are short; and it may take hours/ days before the next request is needed.
      *
      * @param tokenUrl access token url
      * @return http client. This http client
      * @throws OAuthException If any exception is thrown while starting the http client.
-     * @see TrustManagerProvider
+     * @see org.openhab.core.io.net.http.ExtensibleTrustManager
      */
     private HttpClient createHttpClient(String tokenUrl) throws OAuthException {
         HttpClient httpClient = httpClientFactory.createHttpClient(HTTP_CLIENT_CONSUMER_NAME);

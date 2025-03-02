@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -45,11 +45,13 @@ public class UsbSerialDeviceInformation {
 
     private final String serialPort;
 
+    private boolean remote = false;
+
     public UsbSerialDeviceInformation(int vendorId, int productId, @Nullable String serialNumber,
             @Nullable String manufacturer, @Nullable String product, int interfaceNumber,
             @Nullable String interfaceDescription, String serialPort) {
-        this.vendorId = requireNonNull(vendorId);
-        this.productId = requireNonNull(productId);
+        this.vendorId = vendorId;
+        this.productId = productId;
 
         this.serialNumber = serialNumber;
         this.manufacturer = manufacturer;
@@ -118,6 +120,21 @@ public class UsbSerialDeviceInformation {
         return serialPort;
     }
 
+    /**
+     * @return if the serial device is remote or local.
+     */
+    public boolean getRemote() {
+        return remote;
+    }
+
+    /**
+     * Set the remote flag
+     */
+    public UsbSerialDeviceInformation setRemote(boolean remote) {
+        this.remote = remote;
+        return this;
+    }
+
     @SuppressWarnings("null")
     @Override
     public int hashCode() {
@@ -131,6 +148,7 @@ public class UsbSerialDeviceInformation {
         result = prime * result + ((product == null) ? 0 : product.hashCode());
         result = prime * result + ((serialNumber == null) ? 0 : serialNumber.hashCode());
         result = prime * result + ((interfaceDescription == null) ? 0 : interfaceDescription.hashCode());
+        result = prime * result + (remote ? 1 : 0);
         return result;
     }
 
@@ -180,6 +198,10 @@ public class UsbSerialDeviceInformation {
             return false;
         }
 
+        if (remote != other.remote) {
+            return false;
+        }
+
         return true;
     }
 
@@ -187,8 +209,8 @@ public class UsbSerialDeviceInformation {
     public String toString() {
         return String.format(
                 "UsbSerialDeviceInformation [vendorId=0x%04X, productId=0x%04X, serialNumber=%s, manufacturer=%s, "
-                        + "product=%s, interfaceNumber=0x%02X, interfaceDescription=%s, serialPort=%s]",
+                        + "product=%s, interfaceNumber=0x%02X, interfaceDescription=%s, serialPort=%s, remote=%b]",
                 vendorId, productId, serialNumber, manufacturer, product, interfaceNumber, interfaceDescription,
-                serialPort);
+                serialPort, remote);
     }
 }

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -29,78 +29,10 @@ import org.openhab.core.voice.text.HumanLanguageInterpreter;
  * @author Miguel Álvarez - Initial contribution
  */
 @NonNullByDefault
-public class DialogContext {
-    private final @Nullable KSService ks;
-    private final @Nullable String keyword;
-    private final STTService stt;
-    private final TTSService tts;
-    private final @Nullable Voice voice;
-    private final List<HumanLanguageInterpreter> hlis;
-    private final AudioSource source;
-    private final AudioSink sink;
-    private final Locale locale;
-    private final @Nullable String listeningItem;
-    private final @Nullable String listeningMelody;
-
-    public DialogContext(@Nullable KSService ks, @Nullable String keyword, STTService stt, TTSService tts,
-            @Nullable Voice voice, List<HumanLanguageInterpreter> hlis, AudioSource source, AudioSink sink,
-            Locale locale, @Nullable String listeningItem, @Nullable String listeningMelody) {
-        this.ks = ks;
-        this.keyword = keyword;
-        this.stt = stt;
-        this.tts = tts;
-        this.voice = voice;
-        this.hlis = hlis;
-        this.source = source;
-        this.sink = sink;
-        this.locale = locale;
-        this.listeningItem = listeningItem;
-        this.listeningMelody = listeningMelody;
-    }
-
-    public @Nullable KSService ks() {
-        return ks;
-    }
-
-    public @Nullable String keyword() {
-        return keyword;
-    }
-
-    public STTService stt() {
-        return stt;
-    }
-
-    public TTSService tts() {
-        return tts;
-    }
-
-    public @Nullable Voice voice() {
-        return voice;
-    }
-
-    public List<HumanLanguageInterpreter> hlis() {
-        return hlis;
-    }
-
-    public AudioSource source() {
-        return source;
-    }
-
-    public AudioSink sink() {
-        return sink;
-    }
-
-    public Locale locale() {
-        return locale;
-    }
-
-    public @Nullable String listeningItem() {
-        return listeningItem;
-    }
-
-    public @Nullable String listeningMelody() {
-        return listeningMelody;
-    }
+public record DialogContext(@Nullable KSService ks, @Nullable String keyword, STTService stt, TTSService tts,
+        @Nullable Voice voice, List<HumanLanguageInterpreter> hlis, AudioSource source, AudioSink sink, Locale locale,
+        String dialogGroup, @Nullable String locationItem, @Nullable String listeningItem,
+        @Nullable String listeningMelody) {
 
     /**
      * Builder for {@link DialogContext}
@@ -116,6 +48,8 @@ public class DialogContext {
         private @Nullable Voice voice;
         private List<HumanLanguageInterpreter> hlis = List.of();
         // options
+        private String dialogGroup = "default";
+        private @Nullable String locationItem;
         private @Nullable String listeningItem;
         private @Nullable String listeningMelody;
         private String keyword;
@@ -189,6 +123,20 @@ public class DialogContext {
             return this;
         }
 
+        public Builder withDialogGroup(@Nullable String dialogGroup) {
+            if (dialogGroup != null) {
+                this.dialogGroup = dialogGroup;
+            }
+            return this;
+        }
+
+        public Builder withLocationItem(@Nullable String locationItem) {
+            if (locationItem != null) {
+                this.locationItem = locationItem;
+            }
+            return this;
+        }
+
         public Builder withListeningItem(@Nullable String listeningItem) {
             if (listeningItem != null) {
                 this.listeningItem = listeningItem;
@@ -244,7 +192,7 @@ public class DialogContext {
                 throw new IllegalStateException("Cannot build dialog context: " + String.join(", ", errors) + ".");
             } else {
                 return new DialogContext(ksService, keyword, sttService, ttsService, voice, hliServices, audioSource,
-                        audioSink, locale, listeningItem, listeningMelody);
+                        audioSink, locale, dialogGroup, locationItem, listeningItem, listeningMelody);
             }
         }
     }

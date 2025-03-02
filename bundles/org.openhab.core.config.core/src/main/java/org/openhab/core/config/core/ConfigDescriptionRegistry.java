@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -126,12 +126,7 @@ public class ConfigDescriptionRegistry {
         }
 
         // Now convert the map into the collection
-        Collection<ConfigDescription> configDescriptions = new ArrayList<>(configMap.size());
-        for (ConfigDescription configDescription : configMap.values()) {
-            configDescriptions.add(configDescription);
-        }
-
-        return Collections.unmodifiableCollection(configDescriptions);
+        return Collections.unmodifiableCollection(new ArrayList<>(configMap.values()));
     }
 
     /**
@@ -245,10 +240,8 @@ public class ConfigDescriptionRegistry {
      */
     private ConfigDescriptionParameter getConfigOptions(URI uri, Set<URI> aliases, ConfigDescriptionParameter parameter,
             @Nullable Locale locale) {
-        List<ParameterOption> options = new ArrayList<>();
-
         // Add all the existing options that may be provided by the initial config description provider
-        options.addAll(parameter.getOptions());
+        List<ParameterOption> options = new ArrayList<>(parameter.getOptions());
 
         boolean found = fillFromProviders(uri, parameter, locale, options);
 

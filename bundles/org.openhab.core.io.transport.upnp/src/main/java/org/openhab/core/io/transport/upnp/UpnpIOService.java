@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -28,7 +28,7 @@ public interface UpnpIOService {
      * Invoke an UPNP Action
      * 
      * @param participant the participant to invoke the action for
-     * @param serivceID the UPNP service to invoke the action upon
+     * @param serviceID the UPNP service to invoke the action upon
      * @param actionID the Action to invoke
      * @param inputs a map of {variable,values} to parameterize the Action that will be invoked
      */

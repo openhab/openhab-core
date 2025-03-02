@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -33,7 +33,8 @@ import org.mockito.quality.Strictness;
 import org.openhab.core.audio.AudioFormat;
 import org.openhab.core.audio.AudioStream;
 import org.openhab.core.audio.ByteArrayAudioStream;
-import org.openhab.core.audio.FixedLengthAudioStream;
+import org.openhab.core.audio.utils.AudioSinkUtils;
+import org.openhab.core.audio.utils.AudioSinkUtilsImpl;
 import org.openhab.core.test.TestPortUtil;
 import org.openhab.core.test.TestServer;
 import org.openhab.core.test.java.JavaTest;
@@ -62,10 +63,11 @@ public abstract class AbstractAudioServletTest extends JavaTest {
 
     public @Mock @NonNullByDefault({}) HttpService httpServiceMock;
     public @Mock @NonNullByDefault({}) HttpContext httpContextMock;
+    public AudioSinkUtils audioSinkUtils = new AudioSinkUtilsImpl();
 
     @BeforeEach
     public void setupServerAndClient() {
-        audioServlet = new AudioServlet();
+        audioServlet = new AudioServlet(audioSinkUtils);
 
         ServletHolder servletHolder = new ServletHolder(audioServlet);
 
@@ -126,7 +128,7 @@ public abstract class AbstractAudioServletTest extends JavaTest {
 
         String path;
         if (timeInterval != null) {
-            path = audioServlet.serve((FixedLengthAudioStream) stream, timeInterval);
+            path = audioServlet.serve(stream, timeInterval);
         } else {
             path = audioServlet.serve(stream);
         }

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -19,7 +19,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -113,14 +112,14 @@ public class ProfileTypeResourceTest extends JavaTest {
     public void testGetAll() {
         Stream<ProfileTypeDTO> result = resource.getProfileTypes(null, null, null);
 
-        List<ProfileTypeDTO> list = result.collect(Collectors.toList());
+        List<ProfileTypeDTO> list = result.toList();
         assertThat(list.size(), is(4));
     }
 
     @Test
     public void testGetProfileTypesForStateChannel1() {
         Stream<ProfileTypeDTO> result = resource.getProfileTypes(null, pt1ChannelType1UID.toString(), null);
-        List<ProfileTypeDTO> list = result.collect(Collectors.toList());
+        List<ProfileTypeDTO> list = result.toList();
 
         // should be both state profiles because the second state profile supports ALL item types on the channel side
         assertThat(list.size(), is(2));
@@ -133,13 +132,13 @@ public class ProfileTypeResourceTest extends JavaTest {
     @Test
     public void testGetProfileTypesForOtherChannel() {
         Stream<ProfileTypeDTO> result = resource.getProfileTypes(null, otherStateChannelTypeUID.toString(), null);
-        List<ProfileTypeDTO> list = result.collect(Collectors.toList());
+        List<ProfileTypeDTO> list = result.toList();
 
         // should be only the second state profile because the first one is restricted to another item type on the
         // channel side
         assertThat(list.size(), is(1));
 
-        ProfileTypeDTO pt = list.get(0);
+        ProfileTypeDTO pt = list.getFirst();
         assertThat(pt.kind, is("STATE"));
         assertThat(pt.label, is("profile2"));
         assertThat(pt.uid, is(stateProfileTypeUID2.toString()));
@@ -148,7 +147,7 @@ public class ProfileTypeResourceTest extends JavaTest {
     @Test
     public void testGetProfileTypesForTriggerChannel1() {
         Stream<ProfileTypeDTO> result = resource.getProfileTypes(null, pt3ChannelType1UID.toString(), null);
-        List<ProfileTypeDTO> list = result.collect(Collectors.toList());
+        List<ProfileTypeDTO> list = result.toList();
 
         // should be both trigger profiles because the second trigger profile supports ALL channel types
         assertThat(list.size(), is(2));
@@ -161,12 +160,12 @@ public class ProfileTypeResourceTest extends JavaTest {
     @Test
     public void testGetProfileTypesForTriggerChannel2() {
         Stream<ProfileTypeDTO> result = resource.getProfileTypes(null, otherTriggerChannelTypeUID.toString(), null);
-        List<ProfileTypeDTO> list = result.collect(Collectors.toList());
+        List<ProfileTypeDTO> list = result.toList();
 
         // should be only the second trigger profile because the first one is restricted to another channel type UID
         assertThat(list.size(), is(1));
 
-        ProfileTypeDTO pt = list.get(0);
+        ProfileTypeDTO pt = list.getFirst();
         assertThat(pt.kind, is("TRIGGER"));
         assertThat(pt.label, is("profile4"));
         assertThat(pt.uid, is(triggerProfileTypeUID2.toString()));

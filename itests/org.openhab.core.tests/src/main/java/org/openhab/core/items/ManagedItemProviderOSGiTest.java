@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,7 +17,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -80,12 +79,12 @@ public class ManagedItemProviderOSGiTest extends JavaOSGiTest {
 
         @Override
         public List<Class<? extends State>> getAcceptedDataTypes() {
-            return Collections.emptyList();
+            return List.of();
         }
 
         @Override
         public List<Class<? extends Command>> getAcceptedCommandTypes() {
-            return Collections.emptyList();
+            return List.of();
         }
     }
 
@@ -310,7 +309,7 @@ public class ManagedItemProviderOSGiTest extends JavaOSGiTest {
         GroupItem result1 = (GroupItem) itemProvider.remove("GroupItem");
 
         assertThat(result1.getName(), is("GroupItem"));
-        assertEquals(result1.getFunction().getClass(), Avg.class);
+        assertEquals(Avg.class, result1.getFunction().getClass());
 
         assertThat(itemProvider.getAll().size(), is(0));
     }
@@ -326,11 +325,11 @@ public class ManagedItemProviderOSGiTest extends JavaOSGiTest {
         GroupItem item2 = new GroupItem("GroupItem2", new NumberItem("Number"), function2);
 
         assertThat(item1.getName(), is("GroupItem1"));
-        assertEquals(item1.getFunction().getClass(), And.class);
+        assertEquals(And.class, item1.getFunction().getClass());
         assertThat(item1.getFunction().getParameters(), is(new State[] { OnOffType.ON, OnOffType.OFF }));
 
         assertThat(item2.name, is("GroupItem2"));
-        assertEquals(item2.getFunction().getClass(), Sum.class);
+        assertEquals(Sum.class, item2.getFunction().getClass());
         assertThat(item2.getFunction().getParameters(), is(new State[0]));
 
         itemProvider.add(item1);
@@ -343,11 +342,11 @@ public class ManagedItemProviderOSGiTest extends JavaOSGiTest {
         GroupItem result2 = (GroupItem) itemProvider.remove("GroupItem2");
 
         assertThat(result1.getName(), is("GroupItem1"));
-        assertEquals(result1.getFunction().getClass(), And.class);
+        assertEquals(And.class, result1.getFunction().getClass());
         assertThat(result1.function.getParameters(), is(new State[] { OnOffType.ON, OnOffType.OFF }));
 
         assertThat(result2.getName(), is("GroupItem2"));
-        assertEquals(result2.getFunction().getClass(), Sum.class);
+        assertEquals(Sum.class, result2.getFunction().getClass());
         assertThat(result2.function.getParameters(), is(new State[0]));
 
         assertThat(itemProvider.getAll().size(), is(0));

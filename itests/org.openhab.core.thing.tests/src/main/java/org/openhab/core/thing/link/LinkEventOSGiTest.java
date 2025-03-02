@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -16,8 +16,6 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -42,14 +40,13 @@ public class LinkEventOSGiTest extends JavaOSGiTest {
     private @NonNullByDefault({}) ItemChannelLinkRegistry itemChannelLinkRegistry;
     private @NonNullByDefault({}) ItemChannelLinkEventSubscriber eventSubscriber;
 
-    class ItemChannelLinkEventSubscriber implements EventSubscriber {
+    static class ItemChannelLinkEventSubscriber implements EventSubscriber {
 
         private @Nullable Event lastReceivedEvent;
 
         @Override
         public Set<String> getSubscribedEventTypes() {
-            return Stream.of(ItemChannelLinkAddedEvent.TYPE, ItemChannelLinkRemovedEvent.TYPE)
-                    .collect(Collectors.toSet());
+            return Set.of(ItemChannelLinkAddedEvent.TYPE, ItemChannelLinkRemovedEvent.TYPE);
         }
 
         @Override

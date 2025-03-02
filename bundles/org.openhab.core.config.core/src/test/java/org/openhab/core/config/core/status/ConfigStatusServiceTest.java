@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -47,8 +47,8 @@ public class ConfigStatusServiceTest extends JavaTest {
     private static final String ENTITY_ID1 = "entity1";
     private static final String ENTITY_ID2 = "entity2";
 
-    private static final Locale LOCALE_DE = new Locale("de");
-    private static final Locale LOCALE_EN = new Locale("en");
+    private static final Locale LOCALE_DE = Locale.of("de");
+    private static final Locale LOCALE_EN = Locale.of("en");
 
     private static final String PARAM1 = "param1";
     private static final String PARAM2 = "param2";
@@ -108,7 +108,7 @@ public class ConfigStatusServiceTest extends JavaTest {
                 MessageFormat.format(MSG3_EN, ARGS), PARAM3_MSG3.statusCode));
 
         LocaleProvider localeProvider = mock(LocaleProvider.class);
-        when(localeProvider.getLocale()).thenReturn(new Locale("en", "US"));
+        when(localeProvider.getLocale()).thenReturn(Locale.of("en", "US"));
 
         configStatusService = new ConfigStatusService(mock(EventPublisher.class), localeProvider,
                 getTranslationProvider(), mock(BundleResolver.class));

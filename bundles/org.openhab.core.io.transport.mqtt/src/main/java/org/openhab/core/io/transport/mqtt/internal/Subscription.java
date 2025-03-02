@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -18,6 +18,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.io.transport.mqtt.MqttMessageSubscriber;
+import org.openhab.core.util.HexUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.hivemq.client.mqtt.mqtt3.message.publish.Mqtt3Publish;
 import com.hivemq.client.mqtt.mqtt5.message.publish.Mqtt5Publish;
@@ -31,6 +34,7 @@ import com.hivemq.client.mqtt.mqtt5.message.publish.Mqtt5Publish;
  */
 @NonNullByDefault
 public class Subscription {
+    private final Logger logger = LoggerFactory.getLogger(Subscription.class);
     private final Map<String, byte[]> retainedMessages = new ConcurrentHashMap<>();
     private final Collection<MqttMessageSubscriber> subscribers = ConcurrentHashMap.newKeySet();
 
@@ -81,10 +85,15 @@ public class Subscription {
         if (retain || retainedMessages.containsKey(topic)) {
             retainedMessages.put(topic, payload);
         }
-        subscribers.stream().forEach(subscriber -> processMessage(subscriber, topic, payload));
+        subscribers.forEach(subscriber -> processMessage(subscriber, topic, payload));
     }
 
     private void processMessage(MqttMessageSubscriber subscriber, String topic, byte[] payload) {
-        subscriber.processMessage(topic, payload);
+        try {
+            subscriber.processMessage(topic, payload);
+        } catch (RuntimeException e) {
+            logger.warn("A subscriber of type '{}' failed to process message '{}' to topic '{}'.",
+                    subscriber.getClass(), HexUtils.bytesToHex(payload), topic);
+        }
     }
 }

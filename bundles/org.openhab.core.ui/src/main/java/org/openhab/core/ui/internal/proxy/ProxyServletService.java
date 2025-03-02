@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,14 +13,15 @@
 package org.openhab.core.ui.internal.proxy;
 
 import java.io.IOException;
+import java.io.Serial;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.Base64;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.servlet.Servlet;
@@ -85,6 +86,7 @@ public class ProxyServletService extends HttpServlet {
     /** the alias for this servlet */
     public static final String PROXY_ALIAS = "proxy";
 
+    @Serial
     private static final long serialVersionUID = -4716754591953017793L;
     private static final String CONFIG_MAX_THREADS = "maxThreads";
     private static final int DEFAULT_MAX_THREADS = 8;
@@ -161,8 +163,8 @@ public class ProxyServletService extends HttpServlet {
     private Hashtable<String, @Nullable String> propsFromConfig(Map<String, Object> config, Servlet servlet) {
         Hashtable<String, @Nullable String> props = new Hashtable<>();
 
-        for (String key : config.keySet()) {
-            props.put(key, config.get(key).toString());
+        for (Entry<String, Object> entry : config.entrySet()) {
+            props.put(entry.getKey(), entry.getValue().toString());
         }
 
         // must specify for Jetty proxy servlet, per http://stackoverflow.com/a/27625380
@@ -242,7 +244,7 @@ public class ProxyServletService extends HttpServlet {
                         String.format("Widget '%s' could not be found!", widgetId));
             }
 
-            String uriString = null;
+            String uriString;
             if (widget instanceof Image image) {
                 uriString = image.getUrl();
             } else if (widget instanceof Video video) {
@@ -292,9 +294,15 @@ public class ProxyServletService extends HttpServlet {
     }
 
     private URI createURIFromString(String url) throws MalformedURLException, URISyntaxException {
-        // URI in this context should be valid URL. Therefore before creating URI, create URL,
+        URI uri = new URI(url);
+        // URI in this context should be valid URL. Therefore before returning URI, create URL,
         // which validates the string.
-        return new URL(url).toURI();
+        try {
+            uri.toURL();
+        } catch (IllegalArgumentException e) {
+            throw new MalformedURLException(e.getMessage());
+        }
+        return uri;
     }
 
     /**

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -157,7 +157,7 @@ public final class ThingStatusInfoI18nLocalizationService {
     /**
      * Utility class to parse the thing status description into the text reference and optional arguments.
      */
-    private final class ParsedDescription {
+    private static final class ParsedDescription {
 
         private static final int LIMIT = 2;
 
@@ -172,7 +172,7 @@ public final class ThingStatusInfoI18nLocalizationService {
                 this.args = null;
             } else {
                 this.args = Arrays.stream(parts[1].replaceAll("\\[|\\]|\"", "").split(","))
-                        .filter(s -> s != null && !s.trim().isEmpty()).map(s -> s.trim()).toArray(String[]::new);
+                        .filter(s -> s != null && !s.trim().isEmpty()).map(String::trim).toArray(String[]::new);
             }
         }
     }

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -20,14 +20,12 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.discovery.DiscoveryResult;
 import org.openhab.core.config.discovery.DiscoveryResultFlag;
-import org.openhab.core.config.discovery.DiscoveryService;
 import org.openhab.core.thing.Thing;
-import org.openhab.core.thing.ThingRegistry;
 import org.openhab.core.thing.ThingUID;
 
 /**
  * The {@link Inbox} is a service interface providing a container for discovered {@code Thing}s
- * (e.g. found by a {@link DiscoveryService}) as {@link DiscoveryResult}s.
+ * (e.g. found by a {@link org.openhab.core.config.discovery.DiscoveryService}) as {@link DiscoveryResult}s.
  * <p>
  * A {@link DiscoveryResult} entry in this container is not a full configured {@code Thing} and therefore no
  * {@code Thing} exists for it. A {@link DiscoveryResult} can be marked to be ignored, so that a specific {@code Thing}
@@ -95,7 +93,7 @@ public interface Inbox {
      * case the result object should be regarded as known by the system so that
      * further processing should be skipped.
      * <p>
-     * If the specified flag is {@code null}, {@link DiscoveryResultFlag.NEW} is set by default.
+     * If the specified flag is {@code null}, {@link DiscoveryResultFlag#NEW} is set by default.
      *
      * @param flag the flag of the given thingUID result to be set (could be null)
      */
@@ -126,7 +124,7 @@ public interface Inbox {
     void removeInboxListener(@Nullable InboxListener listener);
 
     /**
-     * Creates new {@link Thing} and adds it to the {@link ThingRegistry}.
+     * Creates new {@link Thing} and adds it to the {@link org.openhab.core.thing.ThingRegistry}.
      *
      * @param thingUID the UID of the Thing
      * @param label the label of the Thing

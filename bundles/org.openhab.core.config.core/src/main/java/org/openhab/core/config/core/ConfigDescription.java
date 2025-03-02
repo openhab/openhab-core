@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -74,8 +74,8 @@ public class ConfigDescription implements Identifiable<URI> {
         }
 
         this.uri = uri;
-        this.parameters = parameters == null ? Collections.emptyList() : Collections.unmodifiableList(parameters);
-        this.parameterGroups = groups == null ? Collections.emptyList() : Collections.unmodifiableList(groups);
+        this.parameters = parameters == null ? List.of() : Collections.unmodifiableList(parameters);
+        this.parameterGroups = groups == null ? List.of() : Collections.unmodifiableList(groups);
     }
 
     /**

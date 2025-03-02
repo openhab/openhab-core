@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -21,15 +21,12 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
 import java.time.Instant;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -73,8 +70,8 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
     @BeforeEach
     public void setUp() throws IOException, InvalidSyntaxException {
         configBaseDirectory = tmpBaseFolder.getAbsolutePath();
-        final Path source = Paths.get(CONFIGURATION_BASE_DIR);
-        Files.walkFileTree(source, new CopyDirectoryRecursive(source, Paths.get(configBaseDirectory)));
+        final Path source = Path.of(CONFIGURATION_BASE_DIR);
+        Files.walkFileTree(source, new CopyDirectoryRecursive(source, Path.of(configBaseDirectory)));
 
         configAdmin = getService(ConfigurationAdmin.class);
         assertThat(configAdmin, is(notNullValue()));
@@ -90,7 +87,7 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
         configDispatcher = new ConfigDispatcher(configAdmin);
     }
 
-    private class CopyDirectoryRecursive extends SimpleFileVisitor<Path> {
+    private static class CopyDirectoryRecursive extends SimpleFileVisitor<Path> {
         private final Path sourceDir;
         private final Path targetDir;
 
@@ -202,7 +199,7 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
         /*
          * Assert that the configuration is updated with an empty list for a file in the services directory.
          */
-        verifyValuesOfConfigurationProperty("local.service.fourth.pid", "service.property", 0, Collections.emptyList());
+        verifyValuesOfConfigurationProperty("local.service.fourth.pid", "service.property", 0, List.of());
 
         /*
          * Assert some edge cases containing special chars
@@ -928,15 +925,15 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
     }
 
     private @Nullable Configuration getConfigurationWithContext(String pidWithContext) {
-        String pid = null;
-        String configContext = null;
+        String pid;
+        String configContext;
         if (pidWithContext.contains(OpenHAB.SERVICE_CONTEXT_MARKER)) {
             pid = pidWithContext.split(OpenHAB.SERVICE_CONTEXT_MARKER)[0];
             configContext = pidWithContext.split(OpenHAB.SERVICE_CONTEXT_MARKER)[1];
         } else {
             throw new IllegalArgumentException("PID does not have a context");
         }
-        Configuration[] configs = null;
+        Configuration[] configs;
         try {
             configs = configAdmin.listConfigurations(
                     "(&(service.factoryPid=" + pid + ")(" + OpenHAB.SERVICE_CONTEXT + "=" + configContext + "))");
@@ -1058,8 +1055,7 @@ public class ConfigDispatcherOSGiTest extends JavaOSGiTest {
     private void truncateLastLine(File file) throws IOException {
         final Path path = file.toPath();
         List<String> lines = Files.readAllLines(path, StandardCharsets.UTF_8);
-        Files.writeString(path, lines.subList(0, lines.size() - 1).stream().collect(Collectors.joining("\n")),
-                StandardCharsets.UTF_8);
+        Files.writeString(path, String.join("\n", lines.subList(0, lines.size() - 1)), StandardCharsets.UTF_8);
     }
 
     private @Nullable String getLastModifiedValueForPoperty(String path, String property) {

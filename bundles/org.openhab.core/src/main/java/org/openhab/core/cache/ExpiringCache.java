@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -43,7 +43,7 @@ public class ExpiringCache<V> {
      *
      * @param expiry the duration for how long the value stays valid
      * @param action the action to retrieve/calculate the value
-     * @throws IllegalArgumentException For an expire value <=0.
+     * @throws IllegalArgumentException For an expire {@code value <=0}.
      */
     public ExpiringCache(Duration expiry, Supplier<@Nullable V> action) {
         if (expiry.isNegative() || expiry.isZero()) {
@@ -67,6 +67,7 @@ public class ExpiringCache<V> {
      * Returns the value - possibly from the cache, if it is still valid.
      */
     public synchronized @Nullable V getValue() {
+        @Nullable
         V cachedValue = value.get();
         if (cachedValue == null || isExpired()) {
             return refreshValue();
@@ -98,6 +99,7 @@ public class ExpiringCache<V> {
      * @return the new value
      */
     public synchronized @Nullable V refreshValue() {
+        @Nullable
         V freshValue = action.get();
         value = new SoftReference<>(freshValue);
         expiresAt = calcExpiresAt();

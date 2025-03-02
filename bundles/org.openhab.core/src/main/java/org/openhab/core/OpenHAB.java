@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,7 +14,6 @@ package org.openhab.core;
 
 import java.io.FileInputStream;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
@@ -29,11 +28,17 @@ import org.osgi.framework.FrameworkUtil;
 @NonNullByDefault
 public class OpenHAB {
 
+    /** The program argument name for setting the runtime directory path */
+    public static final String RUNTIME_DIR_PROG_ARGUMENT = "openhab.runtime";
+
     /** The program argument name for setting the user data directory path */
     public static final String USERDATA_DIR_PROG_ARGUMENT = "openhab.userdata";
 
     /** The program argument name for setting the main config directory path */
     public static final String CONFIG_DIR_PROG_ARGUMENT = "openhab.conf";
+
+    /** The default runtime directory name */
+    public static final String DEFAULT_RUNTIME_FOLDER = "runtime";
 
     /** The default main configuration directory name */
     public static final String DEFAULT_CONFIG_FOLDER = "conf";
@@ -50,7 +55,7 @@ public class OpenHAB {
     /** the service pid used for the definition of the base package and add-ons */
     public static final String ADDONS_SERVICE_PID = "org.openhab.addons";
 
-    /** the configuraton parameter name used for the base package */
+    /** the configuration parameter name used for the base package */
     public static final String CFG_PACKAGE = "package";
 
     /**
@@ -78,7 +83,7 @@ public class OpenHAB {
      */
     public static String buildString() {
         Properties prop = new Properties();
-        Path versionFilePath = Paths.get(getUserDataFolder(), "etc", "version.properties");
+        Path versionFilePath = Path.of(getUserDataFolder(), "etc", "version.properties");
         try (FileInputStream fis = new FileInputStream(versionFilePath.toFile())) {
             prop.load(fis);
             String buildNo = prop.getProperty("build-no");
@@ -89,6 +94,21 @@ public class OpenHAB {
             // ignore if the file is not there or not readable
         }
         return "Unknown Build No.";
+    }
+
+    /**
+     * Returns the runtime folder path name. The runtime folder <code>&lt;openhab-home&gt;/runtime</code> can be
+     * overwritten by setting the System property <code>openhab.runtime</code>.
+     *
+     * @return the runtime folder path name
+     */
+    public static String getRuntimeFolder() {
+        String progArg = System.getProperty(RUNTIME_DIR_PROG_ARGUMENT);
+        if (progArg != null) {
+            return progArg;
+        } else {
+            return DEFAULT_RUNTIME_FOLDER;
+        }
     }
 
     /**

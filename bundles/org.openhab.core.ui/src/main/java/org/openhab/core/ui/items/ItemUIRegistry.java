@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -34,9 +34,22 @@ import org.openhab.core.types.State;
  * @author Kai Kreuzer - Initial contribution
  * @author Chris Jackson - Initial contribution
  * @author Laurent Garnier - new method getIconColor
+ * @author Mark Herwege - new method getFormatPattern
+ * @author Laurent Garnier - new method getConditionalIcon
+ * @author Danny Baumann - widget label source support
  */
 @NonNullByDefault
 public interface ItemUIRegistry extends ItemRegistry, ItemUIProvider {
+    enum WidgetLabelSource {
+        /** Label is taken from widget definition in sitemap */
+        SITEMAP_WIDGET,
+        /** Label is taken from the widget's backing item definition */
+        ITEM_LABEL,
+        /** Label equals the widget's backing item name */
+        ITEM_NAME,
+        /** No suitable label source could be determined */
+        NONE
+    }
 
     /**
      * Retrieves the label for a widget.
@@ -54,6 +67,14 @@ public interface ItemUIRegistry extends ItemRegistry, ItemUIProvider {
      */
     @Nullable
     String getLabel(Widget w);
+
+    /**
+     * Retrieves the label source for a widget.
+     *
+     * @param w the widget to retrieve the label source for
+     * @return the source the widget label is taken from
+     */
+    WidgetLabelSource getLabelSource(Widget w);
 
     /**
      * Retrieves the category for a widget.
@@ -105,7 +126,7 @@ public interface ItemUIRegistry extends ItemRegistry, ItemUIProvider {
      * this should be used instead of Sitemap.getChildren() as the default
      * widgets have to be resolved to a concrete widget type.
      *
-     * @param w the sitemap to retrieve the children for
+     * @param sitemap the sitemap to retrieve the children for
      * @return the children of the sitemap
      */
     EList<Widget> getChildren(Sitemap sitemap);
@@ -129,6 +150,15 @@ public interface ItemUIRegistry extends ItemRegistry, ItemUIProvider {
      */
     @Nullable
     EObject getParent(Widget w);
+
+    /**
+     * Gets the format pattern for the widget value, retrieved from widget label, item label or item state description
+     *
+     * @param w Widget
+     * @return String with the format pattern
+     */
+    @Nullable
+    String getFormatPattern(Widget w);
 
     /**
      * Gets the label color for the widget. Checks conditional statements to
@@ -159,6 +189,17 @@ public interface ItemUIRegistry extends ItemRegistry, ItemUIProvider {
      */
     @Nullable
     String getIconColor(Widget w);
+
+    /**
+     * Gets the icon for the widget. Checks conditional statements to
+     * find the icon based on the item value
+     *
+     * @param w Widget
+     * @return the icon reference or null in case no conditional statement is defined or no conditional statement is
+     *         fulfilled.
+     */
+    @Nullable
+    String getConditionalIcon(Widget w);
 
     /**
      * Gets the widget visibility based on the item state

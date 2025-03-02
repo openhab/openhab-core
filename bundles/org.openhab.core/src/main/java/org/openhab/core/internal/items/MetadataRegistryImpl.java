@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -72,7 +72,7 @@ public class MetadataRegistryImpl extends AbstractRegistry<Metadata, MetadataKey
      * @param itemname the name of the item for which the namespaces should be searched.
      */
     @Override
-    public Collection getAllNamespaces(String itemname) {
+    public Collection<String> getAllNamespaces(String itemname) {
         return stream().map(Metadata::getUID).filter(key -> key.getItemName().equals(itemname))
                 .map(MetadataKey::getNamespace).collect(Collectors.toSet());
     }

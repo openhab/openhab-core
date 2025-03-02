@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,12 +13,11 @@
 package org.openhab.core.library.types;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.core.library.items.PlayerItem;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.PrimitiveType;
 
 /**
- * This type is used by the {@link PlayerItem}.
+ * This type is used by the {@link org.openhab.core.library.items.PlayerItem}.
  *
  * @author Alex Tugarev - Initial contribution
  */

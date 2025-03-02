@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,7 +17,6 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import java.time.Duration;
-import java.util.HashMap;
 import java.util.Map;
 
 import javax.measure.quantity.Temperature;
@@ -69,7 +68,7 @@ class ExpireManagerTest {
 
     @BeforeEach
     public void setup() {
-        expireManager = new ExpireManager(new HashMap<>(), eventPublisherMock, metadataRegistryMock, itemRegistryMock);
+        expireManager = new ExpireManager(Map.of(), eventPublisherMock, metadataRegistryMock, itemRegistryMock);
     }
 
     @Test
@@ -350,23 +349,23 @@ class ExpireManagerTest {
         cfg = new ExpireManager.ExpireConfig(testItem, "1h,15 °C", Map.of());
         assertEquals(Duration.ofHours(1), cfg.duration);
         assertEquals(new QuantityType<Temperature>("15 °C"), cfg.expireState);
-        assertEquals(null, cfg.expireCommand);
+        assertNull(cfg.expireCommand);
 
         testItem = new StringItem(ITEMNAME);
         cfg = new ExpireManager.ExpireConfig(testItem, "1h,NULL", Map.of());
         assertEquals(Duration.ofHours(1), cfg.duration);
         assertEquals(UnDefType.NULL, cfg.expireState);
-        assertEquals(null, cfg.expireCommand);
+        assertNull(cfg.expireCommand);
 
         cfg = new ExpireManager.ExpireConfig(testItem, "1h,'NULL'", Map.of());
         assertEquals(Duration.ofHours(1), cfg.duration);
         assertEquals(new StringType("NULL"), cfg.expireState);
-        assertEquals(null, cfg.expireCommand);
+        assertNull(cfg.expireCommand);
 
         cfg = new ExpireManager.ExpireConfig(testItem, "1h,'UNDEF'", Map.of());
         assertEquals(Duration.ofHours(1), cfg.duration);
         assertEquals(new StringType("UNDEF"), cfg.expireState);
-        assertEquals(null, cfg.expireCommand);
+        assertNull(cfg.expireCommand);
     }
 
     private Metadata config(String metadata) {

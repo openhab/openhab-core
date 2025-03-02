@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -33,7 +33,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.NewCookie;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
@@ -95,6 +94,8 @@ public class TokenResource implements RESTResource {
 
     /** The name of the HTTP-only cookie holding the session ID */
     public static final String SESSIONID_COOKIE_NAME = "X-OPENHAB-SESSIONID";
+    private static final String SESSIONID_COOKIE_FORMAT = SESSIONID_COOKIE_NAME
+            + "=%s; Domain=%s; Path=/; Max-Age=2147483647; HttpOnly; SameSite=Strict";
 
     /** The default lifetime of tokens in minutes before they expire */
     public static final int TOKEN_LIFETIME = 60;
@@ -244,9 +245,10 @@ public class TokenResource implements RESTResource {
         if (sessionCookie != null && sessionCookie.getValue().equals(session.get().getSessionId())) {
             try {
                 URI domainUri = new URI(session.get().getRedirectUri());
-                NewCookie newCookie = new NewCookie(SESSIONID_COOKIE_NAME, null, "/", domainUri.getHost(), null, 0,
-                        false, true);
-                response.cookie(newCookie);
+                // workaround to set the SameSite cookie attribute until we upgrade to
+                // jakarta.ws.rs/jakarta.ws.rs-api/3.1.0 or newer
+                response.header("Set-Cookie",
+                        SESSIONID_COOKIE_FORMAT.formatted(UUID.randomUUID(), domainUri.getHost()));
             } catch (Exception e) {
             }
         }
@@ -351,9 +353,9 @@ public class TokenResource implements RESTResource {
                     throw new IllegalArgumentException(
                             "Will not honor the request to set a session cookie for this client, because it's only allowed for root redirect URIs");
                 }
-                NewCookie newCookie = new NewCookie(SESSIONID_COOKIE_NAME, sessionId, "/", domainUri.getHost(), null,
-                        2147483647, false, true);
-                response.cookie(newCookie);
+                // workaround to set the SameSite cookie attribute until we upgrade to
+                // jakarta.ws.rs/jakarta.ws.rs-api/3.1.0 or newer
+                response.header("Set-Cookie", SESSIONID_COOKIE_FORMAT.formatted(sessionId, domainUri.getHost()));
 
                 // also mark the session as supported by a cookie
                 newSession.setSessionCookie(true);

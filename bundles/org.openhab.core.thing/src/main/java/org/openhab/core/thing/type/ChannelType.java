@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -32,6 +32,7 @@ import org.openhab.core.types.StateDescription;
  *
  * @author Michael Grammling - Initial contribution
  * @author Henning Treu - add command options
+ * @author Mark Herwege - added unit hint
  */
 @NonNullByDefault
 public class ChannelType extends AbstractDescriptionType {
@@ -43,6 +44,7 @@ public class ChannelType extends AbstractDescriptionType {
     private final @Nullable String category;
     private final @Nullable StateDescription state;
     private final @Nullable CommandDescription commandDescription;
+    private final @Nullable String unitHint;
     private final @Nullable EventDescription event;
     private final @Nullable AutoUpdatePolicy autoUpdatePolicy;
 
@@ -68,11 +70,12 @@ public class ChannelType extends AbstractDescriptionType {
      * @throws IllegalArgumentException if the UID or the item type is null or empty,
      *             or the meta information is null
      */
-    protected ChannelType(ChannelTypeUID uid, boolean advanced, @Nullable String itemType, ChannelKind kind,
-            String label, @Nullable String description, @Nullable String category, @Nullable Set<String> tags,
-            @Nullable StateDescription state, @Nullable CommandDescription commandDescription,
-            @Nullable EventDescription event, @Nullable URI configDescriptionURI,
-            @Nullable AutoUpdatePolicy autoUpdatePolicy) throws IllegalArgumentException {
+    protected ChannelType(ChannelTypeUID uid, boolean advanced, @Nullable String itemType, @Nullable String unitHint,
+            ChannelKind kind, String label, @Nullable String description, @Nullable String category,
+            @Nullable Set<String> tags, @Nullable StateDescription state,
+            @Nullable CommandDescription commandDescription, @Nullable EventDescription event,
+            @Nullable URI configDescriptionURI, @Nullable AutoUpdatePolicy autoUpdatePolicy)
+            throws IllegalArgumentException {
         super(uid, label, description, configDescriptionURI);
 
         if (kind == ChannelKind.STATE && (itemType == null || itemType.isBlank())) {
@@ -81,8 +84,13 @@ public class ChannelType extends AbstractDescriptionType {
         if (kind == ChannelKind.TRIGGER && itemType != null) {
             throw new IllegalArgumentException("If the kind is 'trigger', the item type must not be set!");
         }
+        if ((itemType == null || !itemType.startsWith("Number:")) && unitHint != null) {
+            throw new IllegalArgumentException(
+                    "A unit hint must not be set if the item type is not a number with dimension!");
+        }
 
         this.itemType = itemType;
+        this.unitHint = unitHint;
         this.kind = kind;
 
         this.tags = tags == null ? Set.of() : Set.copyOf(tags);
@@ -139,6 +147,16 @@ public class ChannelType extends AbstractDescriptionType {
      */
     public @Nullable StateDescription getState() {
         return state;
+    }
+
+    /**
+     * Returns the {@link unitHint} of a channel which gives information on what unit to suggest when creating an item
+     * linked to the channel.
+     *
+     * @return the {@link unitHint}
+     */
+    public @Nullable String getUnitHint() {
+        return unitHint;
     }
 
     /**

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,7 +13,6 @@
 package org.openhab.core.config.dispatch.internal;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -28,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -191,7 +189,7 @@ public class ConfigDispatcher {
     private void processOrphanExclusivePIDs() {
         for (String orphanPID : exclusivePIDMap.getOrphanPIDs()) {
             try {
-                Configuration configuration = null;
+                Configuration configuration;
                 if (orphanPID.contains(OpenHAB.SERVICE_CONTEXT_MARKER)) {
                     configuration = getConfigurationWithContext(orphanPID);
                 } else {
@@ -230,12 +228,7 @@ public class ConfigDispatcher {
             File[] files = dir.listFiles();
             // Sort the files by modification time,
             // so that the last modified file is processed last.
-            Arrays.sort(files, new Comparator<File>() {
-                @Override
-                public int compare(File left, File right) {
-                    return Long.compare(left.lastModified(), right.lastModified());
-                }
-            });
+            Arrays.sort(files, Comparator.comparingLong(File::lastModified));
             for (File file : files) {
                 try {
                     internalProcessConfigFile(file);
@@ -282,7 +275,7 @@ public class ConfigDispatcher {
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    private void internalProcessConfigFile(File configFile) throws IOException, FileNotFoundException {
+    private void internalProcessConfigFile(File configFile) throws IOException {
         if (configFile.isDirectory() || !configFile.getName().endsWith(".cfg")) {
             logger.debug("Ignoring file '{}'", configFile.getName());
             return;
@@ -301,7 +294,7 @@ public class ConfigDispatcher {
 
         // configuration file contains a PID Marker
         List<String> lines = Files.readAllLines(configFile.toPath(), StandardCharsets.UTF_8);
-        String exclusivePID = !lines.isEmpty() ? getPIDFromLine(lines.get(0)) : null;
+        String exclusivePID = !lines.isEmpty() ? getPIDFromLine(lines.getFirst()) : null;
         if (exclusivePID != null) {
             if (exclusivePIDMap.contains(exclusivePID)) {
                 logger.warn(
@@ -436,14 +429,14 @@ public class ConfigDispatcher {
             String value = trimmedLine.substring(property.length() + 1).trim();
             if (value.startsWith(DEFAULT_LIST_STARTING_CHARACTER) && value.endsWith(DEFAULT_LIST_ENDING_CHARACTER)) {
                 logger.debug("Found list in value '{}'", value);
-                List<String> values = Arrays.asList(value //
+                //
+                List<String> values = Arrays.stream(value //
                         .replace(DEFAULT_LIST_STARTING_CHARACTER, "") //
                         .replace(DEFAULT_LIST_ENDING_CHARACTER, "")//
                         .split(DEFAULT_LIST_DELIMITER))//
-                        .stream()//
-                        .map(v -> v.trim())//
+                        .map(String::trim)//
                         .filter(v -> !v.isEmpty())//
-                        .collect(Collectors.toList());
+                        .toList();
                 return new ParseLineResult(pid, property.trim(), values);
             } else {
                 return new ParseLineResult(pid, property.trim(), value);
@@ -458,7 +451,7 @@ public class ConfigDispatcher {
      * Represents a result of parseLine().
      */
     @NonNullByDefault
-    private class ParseLineResult {
+    private static class ParseLineResult {
         public @Nullable String pid;
         public @Nullable String property;
         public @Nullable Object value;
@@ -538,16 +531,16 @@ public class ConfigDispatcher {
          * @return the list of PIDs which where not processed either during #activate or on file deleted event.
          */
         public List<String> getOrphanPIDs() {
-            return processedPIDMapping.entrySet().stream().filter(e -> e.getValue() == null).map(e -> e.getKey())
-                    .collect(Collectors.toList());
+            return processedPIDMapping.entrySet().stream().filter(e -> e.getValue() == null).map(Entry::getKey)
+                    .toList();
         }
 
         /**
          * Set the exclusivePID list to the processed PIDs (mapped path is not null).
          */
         public void setCurrentExclusivePIDList() {
-            exclusivePIDs = processedPIDMapping.entrySet().stream().filter(e -> e.getValue() != null)
-                    .map(e -> e.getKey()).collect(Collectors.toList());
+            exclusivePIDs = processedPIDMapping.entrySet().stream().filter(e -> e.getValue() != null).map(Entry::getKey)
+                    .toList();
         }
 
         public boolean contains(String pid) {

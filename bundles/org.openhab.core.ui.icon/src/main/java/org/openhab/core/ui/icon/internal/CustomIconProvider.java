@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,7 +17,6 @@ import java.io.InputStream;
 import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
 import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -78,7 +77,7 @@ public class CustomIconProvider extends AbstractResourceIconProvider {
 
     @Override
     public Set<IconSet> getIconSets(@Nullable Locale locale) {
-        return Collections.emptySet();
+        return Set.of();
     }
 
     @Override

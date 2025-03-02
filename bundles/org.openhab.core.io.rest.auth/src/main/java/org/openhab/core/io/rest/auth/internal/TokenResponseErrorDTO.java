@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,7 +15,8 @@ package org.openhab.core.io.rest.auth.internal;
 /**
  * A DTO object for an unsuccessful token endpoint response, as per RFC 6749, Section 5.2.
  *
- * {@linkplain https://tools.ietf.org/html/rfc6749#section-5.2}
+ * @see <a href="https://datatracker.ietf.org/doc/html/rfc6749#section-5.2">RFC 6749: Issuing an Access Token - Error
+ *      Response</a>
  *
  * @author Yannick Schaus - initial contribution
  */

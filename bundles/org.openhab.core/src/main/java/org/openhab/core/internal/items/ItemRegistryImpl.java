@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,12 +12,9 @@
  */
 package org.openhab.core.internal.items;
 
-import static java.util.stream.Collectors.toList;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -38,7 +35,6 @@ import org.openhab.core.items.ManagedItemProvider;
 import org.openhab.core.items.Metadata;
 import org.openhab.core.items.MetadataAwareItem;
 import org.openhab.core.items.MetadataRegistry;
-import org.openhab.core.items.RegistryHook;
 import org.openhab.core.items.events.ItemEventFactory;
 import org.openhab.core.service.CommandDescriptionService;
 import org.openhab.core.service.ReadyService;
@@ -61,6 +57,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Stefan Bußweiler - Migration to new event mechanism
+ * @author Laurent Garnier - handle new DefaultStateDescriptionFragmentProvider
  */
 @NonNullByDefault
 @Component(immediate = true)
@@ -69,17 +66,19 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
 
     private final Logger logger = LoggerFactory.getLogger(ItemRegistryImpl.class);
 
-    private final List<RegistryHook<Item>> registryHooks = new CopyOnWriteArrayList<>();
     private @Nullable StateDescriptionService stateDescriptionService;
     private @Nullable CommandDescriptionService commandDescriptionService;
     private final MetadataRegistry metadataRegistry;
+    private final DefaultStateDescriptionFragmentProvider defaultStateDescriptionFragmentProvider;
 
     private @Nullable ItemStateConverter itemStateConverter;
 
     @Activate
-    public ItemRegistryImpl(final @Reference MetadataRegistry metadataRegistry) {
+    public ItemRegistryImpl(final @Reference MetadataRegistry metadataRegistry,
+            final @Reference DefaultStateDescriptionFragmentProvider defaultStateDescriptionFragmentProvider) {
         super(ItemProvider.class);
         this.metadataRegistry = metadataRegistry;
+        this.defaultStateDescriptionFragmentProvider = defaultStateDescriptionFragmentProvider;
     }
 
     @Activate
@@ -154,28 +153,24 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
 
     private void addToGroupItems(Item item, List<String> groupItemNames) {
         for (String groupName : groupItemNames) {
-            if (groupName != null) {
-                try {
-                    if (getItem(groupName) instanceof GroupItem groupItem) {
-                        groupItem.addMember(item);
-                    }
-                } catch (ItemNotFoundException e) {
-                    // the group might not yet be registered, let's ignore this
+            try {
+                if (getItem(groupName) instanceof GroupItem groupItem) {
+                    groupItem.addMember(item);
                 }
+            } catch (ItemNotFoundException e) {
+                // the group might not yet be registered, let's ignore this
             }
         }
     }
 
     private void replaceInGroupItems(Item oldItem, Item newItem, List<String> groupItemNames) {
         for (String groupName : groupItemNames) {
-            if (groupName != null) {
-                try {
-                    if (getItem(groupName) instanceof GroupItem groupItem) {
-                        groupItem.replaceMember(oldItem, newItem);
-                    }
-                } catch (ItemNotFoundException e) {
-                    // the group might not yet be registered, let's ignore this
+            try {
+                if (getItem(groupName) instanceof GroupItem groupItem) {
+                    groupItem.replaceMember(oldItem, newItem);
                 }
+            } catch (ItemNotFoundException e) {
+                // the group might not yet be registered, let's ignore this
             }
         }
     }
@@ -200,6 +195,8 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
 
         // add the item to all relevant groups
         addToGroupItems(item, item.getGroupNames());
+
+        defaultStateDescriptionFragmentProvider.onItemAdded(item);
     }
 
     private void injectServices(Item item) {
@@ -225,14 +222,12 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
 
     private void removeFromGroupItems(Item item, List<String> groupItemNames) {
         for (String groupName : groupItemNames) {
-            if (groupName != null) {
-                try {
-                    if (getItem(groupName) instanceof GroupItem groupItem) {
-                        groupItem.removeMember(item);
-                    }
-                } catch (ItemNotFoundException e) {
-                    // the group might not yet be registered, let's ignore this
+            try {
+                if (getItem(groupName) instanceof GroupItem groupItem) {
+                    groupItem.removeMember(item);
                 }
+            } catch (ItemNotFoundException e) {
+                // the group might not yet be registered, let's ignore this
             }
         }
     }
@@ -248,6 +243,7 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
             genericItem.dispose();
         }
         removeFromGroupItems(element, element.getGroupNames());
+        defaultStateDescriptionFragmentProvider.onItemRemoved(element);
     }
 
     @Override
@@ -262,15 +258,18 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
         // don't use #initialize and retain order of items in groups:
         List<String> oldNames = oldItem.getGroupNames();
         List<String> newNames = item.getGroupNames();
-        List<String> commonNames = oldNames.stream().filter(newNames::contains).collect(toList());
+        List<String> commonNames = oldNames.stream().filter(newNames::contains).toList();
 
-        removeFromGroupItems(oldItem, oldNames.stream().filter(name -> !commonNames.contains(name)).collect(toList()));
+        removeFromGroupItems(oldItem, oldNames.stream().filter(name -> !commonNames.contains(name)).toList());
         replaceInGroupItems(oldItem, item, commonNames);
-        addToGroupItems(item, newNames.stream().filter(name -> !commonNames.contains(name)).collect(toList()));
+        addToGroupItems(item, newNames.stream().filter(name -> !commonNames.contains(name)).toList());
         if (item instanceof GroupItem groupItem) {
             addMembersToGroupItem(groupItem);
         }
         injectServices(item);
+
+        defaultStateDescriptionFragmentProvider.onItemRemoved(oldItem);
+        defaultStateDescriptionFragmentProvider.onItemAdded(item);
     }
 
     @Override
@@ -370,71 +369,30 @@ public class ItemRegistryImpl extends AbstractRegistry<Item, String, ItemProvide
 
     @Override
     protected void notifyListenersAboutAddedElement(Item element) {
-        super.notifyListenersAboutAddedElement(element);
         postEvent(ItemEventFactory.createAddedEvent(element));
+        super.notifyListenersAboutAddedElement(element);
     }
 
     @Override
     protected void notifyListenersAboutRemovedElement(Item element) {
-        super.notifyListenersAboutRemovedElement(element);
         postEvent(ItemEventFactory.createRemovedEvent(element));
+        super.notifyListenersAboutRemovedElement(element);
     }
 
     @Override
     protected void notifyListenersAboutUpdatedElement(Item oldElement, Item element) {
-        super.notifyListenersAboutUpdatedElement(oldElement, element);
         postEvent(ItemEventFactory.createUpdateEvent(element, oldElement));
-    }
-
-    @Override
-    public void added(Provider<Item> provider, Item element) {
-        for (RegistryHook<Item> registryHook : registryHooks) {
-            registryHook.beforeAdding(element);
-        }
-        super.added(provider, element);
-    }
-
-    @Override
-    protected void addProvider(Provider<Item> provider) {
-        for (Item element : provider.getAll()) {
-            for (RegistryHook<Item> registryHook : registryHooks) {
-                registryHook.beforeAdding(element);
-            }
-        }
-        super.addProvider(provider);
+        super.notifyListenersAboutUpdatedElement(oldElement, element);
     }
 
     @Override
     public void removed(Provider<Item> provider, Item element) {
         super.removed(provider, element);
-        for (RegistryHook<Item> registryHook : registryHooks) {
-            registryHook.afterRemoving(element);
-        }
         if (provider instanceof ManagedItemProvider) {
             // remove our metadata for that item
             logger.debug("Item {} was removed, trying to clean up corresponding metadata", element.getUID());
             metadataRegistry.removeItemMetadata(element.getName());
         }
-    }
-
-    @Override
-    protected void removeProvider(Provider<Item> provider) {
-        super.removeProvider(provider);
-        for (Item element : provider.getAll()) {
-            for (RegistryHook<Item> registryHook : registryHooks) {
-                registryHook.afterRemoving(element);
-            }
-        }
-    }
-
-    @Override
-    public void addRegistryHook(RegistryHook<Item> hook) {
-        registryHooks.add(hook);
-    }
-
-    @Override
-    public void removeRegistryHook(RegistryHook<Item> hook) {
-        registryHooks.remove(hook);
     }
 
     @Reference(cardinality = ReferenceCardinality.OPTIONAL, policy = ReferencePolicy.DYNAMIC)

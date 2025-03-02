@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -22,8 +22,6 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.X509ExtendedTrustManager;
@@ -174,7 +172,7 @@ public class ExtensibleTrustManagerImplTest {
     private Collection<List<?>> constructAlternativeNames(String... alternatives) {
         Collection<List<?>> alternativeNames = new ArrayList<>();
         for (String alternative : alternatives) {
-            alternativeNames.add(Stream.of(0, alternative).collect(Collectors.toList()));
+            alternativeNames.add(List.of(0, alternative));
         }
 
         return alternativeNames;

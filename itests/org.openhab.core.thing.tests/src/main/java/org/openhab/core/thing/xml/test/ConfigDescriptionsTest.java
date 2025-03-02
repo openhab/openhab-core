@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -141,7 +141,7 @@ public class ConfigDescriptionsTest extends JavaOSGiTest {
     private String join(Collection<?> elements, String separator) {
         StringBuilder sb = new StringBuilder();
         for (Object element : elements) {
-            if (sb.length() > 0) {
+            if (!sb.isEmpty()) {
                 sb.append(separator);
             }
             if (element != null) {

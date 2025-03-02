@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -233,7 +233,7 @@ public class ChannelCommandDescriptionProviderOSGiTest extends JavaOSGiTest {
         List<CommandOption> opts = command.getCommandOptions();
         assertNotNull(opts);
         assertEquals(1, opts.size());
-        final CommandOption opt0 = opts.get(0);
+        final CommandOption opt0 = opts.getFirst();
         assertNotNull(opt0);
         assertEquals("SOUND", opt0.getCommand());
         assertEquals("My great sound.", opt0.getLabel());
@@ -247,7 +247,7 @@ public class ChannelCommandDescriptionProviderOSGiTest extends JavaOSGiTest {
         opts = command.getCommandOptions();
         assertNotNull(opts);
         assertEquals(1, opts.size());
-        final CommandOption opt1 = opts.get(0);
+        final CommandOption opt1 = opts.getFirst();
         assertNotNull(opt1);
         assertEquals("COMMAND", opt1.getCommand());
         assertEquals("My command.", opt1.getLabel());
@@ -261,7 +261,7 @@ public class ChannelCommandDescriptionProviderOSGiTest extends JavaOSGiTest {
         opts = command.getCommandOptions();
         assertNotNull(opts);
         assertEquals(1, opts.size());
-        final CommandOption opt2 = opts.get(0);
+        final CommandOption opt2 = opts.getFirst();
         assertEquals("NEW COMMAND", opt2.getCommand());
         assertEquals("My new command.", opt2.getLabel());
     }
@@ -294,7 +294,7 @@ public class ChannelCommandDescriptionProviderOSGiTest extends JavaOSGiTest {
         List<CommandOption> opts = command.getCommandOptions();
         assertNotNull(opts);
         assertEquals(1, opts.size());
-        final CommandOption opt2 = opts.get(0);
+        final CommandOption opt2 = opts.getFirst();
         assertEquals("NEW COMMAND", opt2.getCommand());
         assertEquals("My new command.", opt2.getLabel());
     }
@@ -311,7 +311,7 @@ public class ChannelCommandDescriptionProviderOSGiTest extends JavaOSGiTest {
                 @Nullable CommandDescription originalCommandDescription, @Nullable Locale locale) {
             String id = channel.getUID().getIdWithoutGroup();
             if ("7_2".equals(id)) {
-                assertEquals(channel.getChannelTypeUID(), CHANNEL_TYPE_UID);
+                assertEquals(CHANNEL_TYPE_UID, channel.getChannelTypeUID());
                 return newCommand;
             }
             return null;
@@ -326,7 +326,7 @@ public class ChannelCommandDescriptionProviderOSGiTest extends JavaOSGiTest {
         }
     }
 
-    class TestThingHandlerFactory extends BaseThingHandlerFactory {
+    static class TestThingHandlerFactory extends BaseThingHandlerFactory {
 
         @Override
         public void activate(final ComponentContext ctx) {
@@ -376,7 +376,7 @@ public class ChannelCommandDescriptionProviderOSGiTest extends JavaOSGiTest {
     }
 
     private abstract static class AbstractThingHandler extends BaseThingHandler {
-        public AbstractThingHandler(Thing thing) {
+        protected AbstractThingHandler(Thing thing) {
             super(thing);
         }
     }
@@ -387,8 +387,8 @@ public class ChannelCommandDescriptionProviderOSGiTest extends JavaOSGiTest {
      */
     private class BundleResolverImpl implements BundleResolver {
         @Override
-        public Bundle resolveBundle(@NonNullByDefault({}) Class<?> clazz) {
-            if (clazz != null && clazz.equals(AbstractThingHandler.class)) {
+        public @Nullable Bundle resolveBundle(@NonNullByDefault({}) Class<?> clazz) {
+            if (clazz.equals(AbstractThingHandler.class)) {
                 return testBundle;
             } else {
                 return FrameworkUtil.getBundle(clazz);

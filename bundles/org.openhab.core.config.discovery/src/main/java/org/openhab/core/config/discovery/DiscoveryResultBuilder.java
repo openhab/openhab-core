@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -50,7 +50,7 @@ public class DiscoveryResultBuilder {
 
     private DiscoveryResultBuilder(ThingUID thingUID) {
         this.thingUID = thingUID;
-    };
+    }
 
     /**
      * Creates a new builder for a given thing UID.
@@ -89,7 +89,7 @@ public class DiscoveryResultBuilder {
     /**
      * Adds a property to the desired result.
      *
-     * @param property of the desired result
+     * @param key property of the desired result
      * @return the updated builder
      */
     public DiscoveryResultBuilder withProperty(String key, Object value) {

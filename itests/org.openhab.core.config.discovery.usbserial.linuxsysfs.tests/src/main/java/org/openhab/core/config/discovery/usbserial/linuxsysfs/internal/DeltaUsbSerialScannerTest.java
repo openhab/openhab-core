@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,7 +12,6 @@
  */
 package org.openhab.core.config.discovery.usbserial.linuxsysfs.internal;
 
-import static java.util.Collections.emptySet;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsEmptyCollection.empty;
@@ -57,7 +56,7 @@ public class DeltaUsbSerialScannerTest {
      */
     @Test
     public void testInitialEmptyResult() throws IOException {
-        when(usbSerialScannerMock.scan()).thenReturn(emptySet());
+        when(usbSerialScannerMock.scan()).thenReturn(Set.of());
 
         Delta<UsbSerialDeviceInformation> delta = deltaUsbSerialScanner.scan();
 

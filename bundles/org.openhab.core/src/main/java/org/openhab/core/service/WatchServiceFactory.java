@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -35,7 +35,6 @@ public interface WatchServiceFactory {
      *
      * @param name the name of the service to create/get (must follow the conventions of an OSGi service name)
      * @param basePath the base path of the watch service (path is created if it does not exist)
-     * @return a {@link WatchService} with the given configuration
      * @throws IOException if the {@link WatchService} could not be instantiated
      */
     void createWatchService(String name, Path basePath) throws IOException;

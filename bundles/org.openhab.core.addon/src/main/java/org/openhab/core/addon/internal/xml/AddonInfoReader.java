@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,6 +15,9 @@ package org.openhab.core.addon.internal.xml;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.core.addon.AddonDiscoveryMethod;
+import org.openhab.core.addon.AddonMatchProperty;
+import org.openhab.core.addon.AddonParameter;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionParameterGroup;
@@ -26,6 +29,7 @@ import org.openhab.core.config.core.xml.FilterCriteriaConverter;
 import org.openhab.core.config.core.xml.util.NodeAttributes;
 import org.openhab.core.config.core.xml.util.NodeAttributesConverter;
 import org.openhab.core.config.core.xml.util.NodeList;
+import org.openhab.core.config.core.xml.util.NodeListConverter;
 import org.openhab.core.config.core.xml.util.NodeValue;
 import org.openhab.core.config.core.xml.util.NodeValueConverter;
 import org.openhab.core.config.core.xml.util.XmlDocumentReader;
@@ -33,7 +37,7 @@ import org.openhab.core.config.core.xml.util.XmlDocumentReader;
 import com.thoughtworks.xstream.XStream;
 
 /**
- * The {@link AddonInfoReader} reads XML documents, which contain the {@code binding} XML tag,
+ * The {@link AddonInfoReader} reads XML documents, which contain the {@code addon} XML tag,
  * and converts them to {@link AddonInfoXmlResult} objects.
  * <p>
  * This reader uses {@code XStream} and {@code StAX} to parse and convert the XML document.
@@ -59,12 +63,16 @@ public class AddonInfoReader extends XmlDocumentReader<AddonInfoXmlResult> {
     @Override
     protected void registerConverters(XStream xstream) {
         xstream.registerConverter(new NodeAttributesConverter());
+        xstream.registerConverter(new NodeListConverter());
         xstream.registerConverter(new NodeValueConverter());
         xstream.registerConverter(new AddonInfoConverter());
         xstream.registerConverter(new ConfigDescriptionConverter());
         xstream.registerConverter(new ConfigDescriptionParameterConverter());
         xstream.registerConverter(new ConfigDescriptionParameterGroupConverter());
         xstream.registerConverter(new FilterCriteriaConverter());
+        xstream.registerConverter(new AddonDiscoveryMethodConverter());
+        xstream.registerConverter(new AddonParameterConverter());
+        xstream.registerConverter(new AddonMatchPropertyConverter());
     }
 
     @Override
@@ -84,5 +92,14 @@ public class AddonInfoReader extends XmlDocumentReader<AddonInfoXmlResult> {
         xstream.alias("filter", List.class);
         xstream.alias("criteria", FilterCriteria.class);
         xstream.alias("service-id", NodeValue.class);
+        xstream.alias("discovery-methods", NodeList.class);
+        xstream.alias("discovery-method", AddonDiscoveryMethod.class);
+        xstream.alias("service-type", NodeValue.class);
+        xstream.alias("discovery-parameters", NodeList.class);
+        xstream.alias("discovery-parameter", AddonParameter.class);
+        xstream.alias("match-properties", NodeList.class);
+        xstream.alias("match-property", AddonMatchProperty.class);
+        xstream.alias("value", NodeValue.class);
+        xstream.alias("regex", NodeValue.class);
     }
 }

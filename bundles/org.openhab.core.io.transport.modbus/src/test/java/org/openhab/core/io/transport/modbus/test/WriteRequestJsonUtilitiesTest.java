@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -20,7 +20,6 @@ import static org.openhab.core.io.transport.modbus.ModbusConstants.*;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -37,14 +36,13 @@ import org.openhab.core.io.transport.modbus.json.WriteRequestJsonUtilities;
 public class WriteRequestJsonUtilitiesTest {
 
     private static final List<String> MAX_REGISTERS = IntStream.range(0, MAX_REGISTERS_WRITE_COUNT).mapToObj(i -> "1")
-            .collect(Collectors.toList());
+            .toList();
     private static final List<String> OVER_MAX_REGISTERS = IntStream.range(0, MAX_REGISTERS_WRITE_COUNT + 1)
-            .mapToObj(i -> "1").collect(Collectors.toList());
+            .mapToObj(i -> "1").toList();
 
-    private static final List<String> MAX_COILS = IntStream.range(0, MAX_BITS_WRITE_COUNT).mapToObj(i -> "1")
-            .collect(Collectors.toList());
+    private static final List<String> MAX_COILS = IntStream.range(0, MAX_BITS_WRITE_COUNT).mapToObj(i -> "1").toList();
     private static final List<String> OVER_MAX_COILS = IntStream.range(0, MAX_BITS_WRITE_COUNT + 1).mapToObj(i -> "1")
-            .collect(Collectors.toList());
+            .toList();
 
     @Test
     public void testEmptyArray() {

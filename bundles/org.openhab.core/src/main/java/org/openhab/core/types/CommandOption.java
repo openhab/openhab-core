@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -11,6 +11,8 @@
  * SPDX-License-Identifier: EPL-2.0
  */
 package org.openhab.core.types;
+
+import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -68,7 +70,7 @@ public class CommandOption {
         final int prime = 31;
         int result = 1;
         result = prime * result + command.hashCode();
-        result = prime * result + (label != null ? label.hashCode() : 0);
+        result = prime * result + Objects.hashCode(label);
         return result;
     }
 
@@ -84,7 +86,7 @@ public class CommandOption {
             return false;
         }
         CommandOption other = (CommandOption) obj;
-        return command.equals(other.command) && (label != null ? label.equals(other.label) : other.label == null);
+        return command.equals(other.command) && Objects.equals(label, other.label);
     }
 
     @Override

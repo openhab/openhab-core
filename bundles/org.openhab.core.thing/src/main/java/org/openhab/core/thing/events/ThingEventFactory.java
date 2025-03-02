@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -114,7 +114,7 @@ public class ThingEventFactory extends AbstractEventFactory {
         }
     }
 
-    public static interface CommonChannelDescriptionFieldPayloadBean {
+    public interface CommonChannelDescriptionFieldPayloadBean {
     }
 
     public static class ChannelDescriptionPatternPayloadBean implements CommonChannelDescriptionFieldPayloadBean {
@@ -320,7 +320,7 @@ public class ThingEventFactory extends AbstractEventFactory {
      * Creates a {@link ChannelTriggeredEvent}
      *
      * @param event the event
-     * @param channel the {@link ChannelUID}
+     * @param channelUID the {@link ChannelUID}
      * @return Created {@link ChannelTriggeredEvent}
      */
     public static ChannelTriggeredEvent createTriggerEvent(String event, ChannelUID channelUID) {

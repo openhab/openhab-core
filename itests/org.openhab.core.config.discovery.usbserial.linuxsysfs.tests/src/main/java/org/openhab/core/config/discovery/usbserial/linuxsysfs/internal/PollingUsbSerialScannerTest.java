@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,7 +17,6 @@ import static org.mockito.Mockito.*;
 import static org.openhab.core.config.discovery.usbserial.linuxsysfs.internal.PollingUsbSerialScanner.PAUSE_BETWEEN_SCANS_IN_SECONDS_ATTRIBUTE;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -52,8 +51,7 @@ public class PollingUsbSerialScannerTest {
 
     @BeforeEach
     public void beforeEach() {
-        Map<String, Object> config = new HashMap<>();
-        config.put(PAUSE_BETWEEN_SCANS_IN_SECONDS_ATTRIBUTE, "1");
+        Map<String, Object> config = Map.of(PAUSE_BETWEEN_SCANS_IN_SECONDS_ATTRIBUTE, "1");
 
         pollingScanner = new PollingUsbSerialScanner(config, usbSerialScannerMock);
 

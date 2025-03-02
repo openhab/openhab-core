@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -19,6 +19,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.Socket;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -113,7 +115,11 @@ public final class PEMTrustManager extends X509ExtendedTrustManager {
      * @throws CertificateInstantiationException
      */
     public static PEMTrustManager getInstanceFromServer(String url) throws MalformedURLException, CertificateException {
-        return getInstanceFromServer(new URL(url));
+        try {
+            return getInstanceFromServer((new URI(url)).toURL());
+        } catch (IllegalArgumentException | URISyntaxException e) {
+            throw new MalformedURLException(e.getMessage());
+        }
     }
 
     /**
@@ -232,7 +238,7 @@ public final class PEMTrustManager extends X509ExtendedTrustManager {
         File certFile = new File(path);
         if (certFile.exists()) {
             try {
-                return new String(Files.readAllBytes(certFile.toPath()), StandardCharsets.UTF_8);
+                return Files.readString(certFile.toPath());
             } catch (IOException e) {
                 LoggerFactory.getLogger(PEMTrustManager.class).error("An unexpected IOException occurred: ", e);
             }

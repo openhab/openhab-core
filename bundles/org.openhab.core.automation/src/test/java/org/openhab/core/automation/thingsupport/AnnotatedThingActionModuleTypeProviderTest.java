@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -16,6 +16,11 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import java.lang.reflect.Method;
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -39,6 +44,7 @@ import org.openhab.core.automation.type.ActionType;
 import org.openhab.core.automation.type.Input;
 import org.openhab.core.automation.type.ModuleType;
 import org.openhab.core.automation.type.Output;
+import org.openhab.core.automation.util.ActionInputsHelper;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ParameterOption;
 import org.openhab.core.test.java.JavaTest;
@@ -59,7 +65,22 @@ public class AnnotatedThingActionModuleTypeProviderTest extends JavaTest {
 
     private static final ThingTypeUID TEST_THING_TYPE_UID = new ThingTypeUID("binding", "thing-type");
 
-    private static final String TEST_ACTION_TYPE_ID = "test.testMethod";
+    private static final String TEST_ACTION_SIGNATURE_HASH;
+    static {
+        MessageDigest md5 = null;
+        try {
+            md5 = MessageDigest.getInstance("MD5");
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
+        Method method = Arrays.stream(TestThingActionProvider.class.getDeclaredMethods())
+                .filter(m -> m.getName().equals("testMethod")).findFirst().orElseThrow();
+        for (Class<?> parameter : method.getParameterTypes()) {
+            md5.update(parameter.getName().getBytes());
+        }
+        TEST_ACTION_SIGNATURE_HASH = String.format("%032x", new BigInteger(1, md5.digest()));
+    }
+    private static final String TEST_ACTION_TYPE_ID = "test.testMethod#" + TEST_ACTION_SIGNATURE_HASH;
     private static final String ACTION_LABEL = "Test Label";
     private static final String ACTION_DESCRIPTION = "My Description";
 
@@ -79,6 +100,7 @@ public class AnnotatedThingActionModuleTypeProviderTest extends JavaTest {
     private static final String ACTION_OUTPUT2_TYPE = "java.lang.String";
 
     private @Mock @NonNullByDefault({}) ModuleTypeI18nService moduleTypeI18nServiceMock;
+    private @Mock @NonNullByDefault({}) ActionInputsHelper actionInputsHelperMock;
     private @Mock @NonNullByDefault({}) ThingHandler handler1Mock;
     private @Mock @NonNullByDefault({}) ThingHandler handler2Mock;
 
@@ -104,7 +126,8 @@ public class AnnotatedThingActionModuleTypeProviderTest extends JavaTest {
     @Test
     public void testMultiServiceAnnotationActions() {
         AnnotatedThingActionModuleTypeProvider prov = new AnnotatedThingActionModuleTypeProvider(
-                moduleTypeI18nServiceMock);
+                moduleTypeI18nServiceMock, new AnnotationActionModuleTypeHelper(actionInputsHelperMock),
+                actionInputsHelperMock);
 
         prov.addAnnotatedThingActions(actionProviderConf1);
 
@@ -120,7 +143,7 @@ public class AnnotatedThingActionModuleTypeProviderTest extends JavaTest {
         assertTrue(types.contains(TEST_ACTION_TYPE_ID));
 
         ModuleType mt = prov.getModuleType(TEST_ACTION_TYPE_ID, null);
-        assertTrue(mt instanceof ActionType);
+        assertInstanceOf(ActionType.class, mt);
 
         ActionType at = (ActionType) mt;
 
@@ -142,7 +165,7 @@ public class AnnotatedThingActionModuleTypeProviderTest extends JavaTest {
                 assertEquals(ACTION_INPUT1_DEFAULT_VALUE, in.getDefaultValue());
                 assertEquals(ACTION_INPUT1_DESCRIPTION, in.getDescription());
                 assertEquals(ACTION_INPUT1_REFERENCE, in.getReference());
-                assertEquals(true, in.isRequired());
+                assertTrue(in.isRequired());
                 assertEquals("Item", in.getType());
 
                 Set<String> inputTags = in.getTags();
@@ -188,7 +211,7 @@ public class AnnotatedThingActionModuleTypeProviderTest extends JavaTest {
                 List<ParameterOption> parameterOptions = cdp.getOptions();
                 assertEquals(1, parameterOptions.size());
 
-                ParameterOption po = parameterOptions.get(0);
+                ParameterOption po = parameterOptions.getFirst();
                 assertEquals("binding:thing-type:test2", po.getValue());
             }
         }
@@ -204,7 +227,7 @@ public class AnnotatedThingActionModuleTypeProviderTest extends JavaTest {
     }
 
     @ThingActionsScope(name = "test")
-    private class TestThingActionProvider implements ThingActions {
+    private static class TestThingActionProvider implements ThingActions {
 
         private @Nullable ThingHandler handler;
 

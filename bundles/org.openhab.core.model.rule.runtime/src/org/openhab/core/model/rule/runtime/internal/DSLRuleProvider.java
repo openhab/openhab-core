@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -135,14 +135,17 @@ public class DSLRuleProvider
         String ruleModelType = modelFileName.substring(modelFileName.lastIndexOf(".") + 1);
         if ("rules".equalsIgnoreCase(ruleModelType)) {
             String ruleModelName = modelFileName.substring(0, modelFileName.lastIndexOf("."));
+            List<ModelRulePair> modelRules = new ArrayList<>();
             switch (type) {
                 case ADDED:
                     EObject model = modelRepository.getModel(modelFileName);
                     if (model instanceof RuleModel ruleModel) {
                         int index = 1;
                         for (org.openhab.core.model.rule.rules.Rule rule : ruleModel.getRules()) {
-                            addRule(toRule(ruleModelName, rule, index));
+                            Rule newRule = toRule(ruleModelName, rule, index);
+                            rules.put(newRule.getUID(), newRule);
                             xExpressions.put(ruleModelName + "-" + index, rule.getScript());
+                            modelRules.add(new ModelRulePair(newRule, null));
                             index++;
                         }
                         handleVarDeclarations(ruleModelName, ruleModel);
@@ -155,9 +158,10 @@ public class DSLRuleProvider
                         int index = 1;
                         for (org.openhab.core.model.rule.rules.Rule rule : ruleModel.getRules()) {
                             Rule newRule = toRule(ruleModelName, rule, index);
-                            Rule oldRule = rules.get(ruleModelName);
-                            updateRule(oldRule, newRule);
+                            Rule oldRule = rules.remove(ruleModelName);
+                            rules.put(newRule.getUID(), newRule);
                             xExpressions.put(ruleModelName + "-" + index, rule.getScript());
+                            modelRules.add(new ModelRulePair(newRule, oldRule));
                             index++;
                         }
                         handleVarDeclarations(ruleModelName, ruleModel);
@@ -169,28 +173,30 @@ public class DSLRuleProvider
                 default:
                     logger.debug("Unknown event type.");
             }
+            notifyProviderChangeListeners(modelRules);
         } else if ("script".equals(ruleModelType)) {
+            List<ModelRulePair> modelRules = new ArrayList<>();
             switch (type) {
                 case MODIFIED:
-                    Rule oldRule = rules.remove(modelFileName);
-                    if (oldRule != null) {
-                        removeRule(oldRule);
-                    }
                 case ADDED:
                     EObject model = modelRepository.getModel(modelFileName);
                     if (model instanceof Script script) {
-                        addRule(toRule(modelFileName, script));
+                        Rule oldRule = rules.remove(modelFileName);
+                        Rule newRule = toRule(modelFileName, script);
+                        rules.put(newRule.getUID(), newRule);
+                        modelRules.add(new ModelRulePair(newRule, oldRule));
                     }
                     break;
                 case REMOVED:
-                    oldRule = rules.remove(modelFileName);
+                    Rule oldRule = rules.remove(modelFileName);
                     if (oldRule != null) {
-                        removeRule(oldRule);
+                        listeners.forEach(listener -> listener.removed(this, oldRule));
                     }
                     break;
                 default:
                     logger.debug("Unknown event type.");
             }
+            notifyProviderChangeListeners(modelRules);
         }
     }
 
@@ -209,34 +215,13 @@ public class DSLRuleProvider
         contexts.put(modelName, context);
     }
 
-    private void addRule(Rule rule) {
-        rules.put(rule.getUID(), rule);
-
-        for (ProviderChangeListener<Rule> providerChangeListener : listeners) {
-            providerChangeListener.added(this, rule);
-        }
-    }
-
-    private void updateRule(@Nullable Rule oldRule, Rule newRule) {
-        if (oldRule != null) {
-            rules.remove(oldRule.getUID());
-            for (ProviderChangeListener<Rule> providerChangeListener : listeners) {
-                providerChangeListener.updated(this, oldRule, newRule);
-            }
-        } else {
-            for (ProviderChangeListener<Rule> providerChangeListener : listeners) {
-                providerChangeListener.added(this, newRule);
-            }
-        }
-        rules.put(newRule.getUID(), newRule);
-    }
-
     private void removeRuleModel(String modelName) {
         Iterator<Entry<String, Rule>> it = rules.entrySet().iterator();
         while (it.hasNext()) {
             Entry<String, Rule> entry = it.next();
             if (belongsToModel(entry.getKey(), modelName)) {
-                removeRule(entry.getValue());
+                listeners.forEach(listener -> listener.removed(this, entry.getValue()));
+
                 it.remove();
             }
         }
@@ -257,12 +242,6 @@ public class DSLRuleProvider
             return prefix.equals(modelName);
         }
         return false;
-    }
-
-    private void removeRule(Rule rule) {
-        for (ProviderChangeListener<Rule> providerChangeListener : listeners) {
-            providerChangeListener.removed(this, rule);
-        }
     }
 
     private Rule toRule(String modelName, Script script) {
@@ -317,7 +296,8 @@ public class DSLRuleProvider
             s += "\n\n";
         }
         String firstLine = s.lines().findFirst().orElse("");
-        String indentation = firstLine.substring(0, firstLine.length() - firstLine.stripLeading().length());
+        String indentation = firstLine == null ? ""
+                : firstLine.substring(0, firstLine.length() - firstLine.stripLeading().length());
         return s.lines().map(line -> (line.startsWith(indentation) ? line.substring(indentation.length()) : line))
                 .collect(Collectors.joining("\n"));
     }
@@ -325,7 +305,7 @@ public class DSLRuleProvider
     private @Nullable Trigger mapTrigger(EventTrigger t) {
         if (t instanceof SystemOnStartupTrigger) {
             Configuration cfg = new Configuration();
-            cfg.put("startlevel", 20);
+            cfg.put("startlevel", 40);
             return TriggerBuilder.create().withId(Integer.toString(triggerId++))
                     .withTypeUID("core.SystemStartlevelTrigger").withConfiguration(cfg).build();
         } else if (t instanceof SystemStartlevelTrigger slTrigger) {
@@ -413,6 +393,7 @@ public class DSLRuleProvider
             Configuration cfg = new Configuration();
             cfg.put("itemName", tt.getItem());
             cfg.put("timeOnly", tt.isTimeOnly());
+            cfg.put("offset", tt.getOffset());
             return TriggerBuilder.create().withId(Integer.toString((triggerId++))).withTypeUID("timer.DateTimeTrigger")
                     .withConfiguration(cfg).build();
         } else if (t instanceof EventEmittedTrigger eeTrigger) {
@@ -449,20 +430,41 @@ public class DSLRuleProvider
             String ruleModelName = ruleFileName.substring(0, ruleFileName.indexOf("."));
             if (model instanceof RuleModel ruleModel) {
                 int index = 1;
+                List<ModelRulePair> modelRules = new ArrayList<>();
                 for (org.openhab.core.model.rule.rules.Rule rule : ruleModel.getRules()) {
-                    addRule(toRule(ruleModelName, rule, index));
+                    Rule newRule = toRule(ruleModelName, rule, index);
                     xExpressions.put(ruleModelName + "-" + index, rule.getScript());
+                    modelRules.add(new ModelRulePair(newRule, null));
                     index++;
                 }
                 handleVarDeclarations(ruleModelName, ruleModel);
+
+                notifyProviderChangeListeners(modelRules);
             }
         }
         modelRepository.addModelRepositoryChangeListener(this);
         readyService.markReady(marker);
     }
 
+    private void notifyProviderChangeListeners(List<ModelRulePair> modelRules) {
+        modelRules.forEach(rulePair -> {
+            Rule oldRule = rulePair.oldRule();
+            if (oldRule != null) {
+                rules.remove(oldRule.getUID());
+                rules.put(rulePair.newRule().getUID(), rulePair.newRule());
+                listeners.forEach(listener -> listener.updated(this, oldRule, rulePair.newRule()));
+            } else {
+                rules.put(rulePair.newRule().getUID(), rulePair.newRule());
+                listeners.forEach(listener -> listener.added(this, rulePair.newRule()));
+            }
+        });
+    }
+
     @Override
     public void onReadyMarkerRemoved(ReadyMarker readyMarker) {
         readyService.unmarkReady(marker);
+    }
+
+    private record ModelRulePair(Rule newRule, @Nullable Rule oldRule) {
     }
 }

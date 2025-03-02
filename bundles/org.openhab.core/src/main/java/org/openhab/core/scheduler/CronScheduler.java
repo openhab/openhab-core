@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -83,7 +83,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * &#64;reboot                 Run at startup                                                               &#64;reboot
  * </pre>
  * <p>
- * Please note that for the constants we follow the Java 8 Date & Time constants.
+ * Please note that for the constants we follow the Java 8 Date and Time constants.
  * Major difference is the day number. In Quartz this is 0-6 for SAT-SUN while
  * here it is 1-7 for MON-SUN.
  *
@@ -112,9 +112,8 @@ public interface CronScheduler {
      * time, the runnable will be run. The method returns a {@link ScheduledCompletableFuture}
      * that can be used to stop scheduling. The run method of cronJob takes
      * an environment object. An environment object is a custom interface where
-     * the names of the methods are the keys in the properties (see {@link DTOs}).
+     * the names of the methods are the keys in the properties (see {@link org.openhab.core.items.dto.ItemDTO DTOs}).
      *
-     * @param <T> The data type of the parameter for the cron job
      * @param cronJob The runnable to run
      * @param cronExpression A cron expression
      * @return A {@link ScheduledCompletableFuture} to cancel the schedule

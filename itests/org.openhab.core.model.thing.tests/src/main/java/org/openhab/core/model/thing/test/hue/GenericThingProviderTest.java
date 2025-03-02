@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,7 +12,6 @@
  */
 package org.openhab.core.model.thing.test.hue;
 
-import static java.util.stream.Collectors.toSet;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsIterableContaining.hasItems;
@@ -23,7 +22,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.AfterEach;
@@ -221,7 +219,7 @@ public class GenericThingProviderTest extends JavaOSGiTest {
         assertThat(bulb2, isA(Thing.class));
         // channels should be Color as defined in dsl and color_temperature from thingType
         assertThat(bulb2.getChannels().size(), is(2));
-        Channel firstChannel = bulb2.getChannels().get(0);
+        Channel firstChannel = bulb2.getChannels().getFirst();
         assertThat(firstChannel.getUID().toString(), is("hue:LCT001:bulb2:color"));
         assertThat(firstChannel.getAcceptedItemType(), is(CoreItemFactory.COLOR));
         assertThat(bulb2.getBridgeUID(), is(nullValue()));
@@ -421,8 +419,10 @@ public class GenericThingProviderTest extends JavaOSGiTest {
     public void assertThatStandaloneThingsCanHaveBridgesInLongNotation() {
         assertThat(thingRegistry.getAll().size(), is(0));
 
-        String model = "Bridge hue:bridge:myBridge @ \"basement\" [ ip = \"1.2.3.4\", username = \"123\" ]\n"
-                + "hue:LCT001:bulb1 (hue:bridge:myBridge) [ lightId = \"1\" ] { Switch : notification }\n";
+        String model = """
+                Bridge hue:bridge:myBridge @ "basement" [ ip = "1.2.3.4", username = "123" ]
+                hue:LCT001:bulb1 (hue:bridge:myBridge) [ lightId = "1" ] { Switch : notification }
+                """;
 
         modelRepository.addOrRefreshModel(TESTMODEL_NAME, new ByteArrayInputStream(model.getBytes()));
         Collection<Thing> actualThings = thingRegistry.getAll();
@@ -464,8 +464,10 @@ public class GenericThingProviderTest extends JavaOSGiTest {
     public void assertThatStandaloneThingWithoutAbridgeDoesNotWorkInShortNotation() {
         assertThat(thingRegistry.getAll().size(), is(0));
 
-        String model = "LCT001 bulb1 [ lightId = \"1\" ] { Switch : notification }\n"
-                + "hue:LCT001:bulb2 (hue:bridge:myBridge) [ lightId = \"2\" ] { Switch : notification }\n";
+        String model = """
+                LCT001 bulb1 [ lightId = "1" ] { Switch : notification }
+                hue:LCT001:bulb2 (hue:bridge:myBridge) [ lightId = "2" ] { Switch : notification }
+                """;
 
         modelRepository.addOrRefreshModel(TESTMODEL_NAME, new ByteArrayInputStream(model.getBytes()));
         Collection<Thing> actualThings = thingRegistry.getAll();
@@ -483,7 +485,7 @@ public class GenericThingProviderTest extends JavaOSGiTest {
         EventSubscriber thingEventSubscriber = new EventSubscriber() {
             @Override
             public Set<String> getSubscribedEventTypes() {
-                return Stream.of(ThingUpdatedEvent.TYPE, ThingRemovedEvent.TYPE, ThingAddedEvent.TYPE).collect(toSet());
+                return Set.of(ThingUpdatedEvent.TYPE, ThingRemovedEvent.TYPE, ThingAddedEvent.TYPE);
             }
 
             @Override
@@ -521,7 +523,7 @@ public class GenericThingProviderTest extends JavaOSGiTest {
 
         waitForAssert(() -> {
             assertEquals(1, receivedEvents.size());
-            Event event = receivedEvents.get(0);
+            Event event = receivedEvents.getFirst();
             assertEquals(ThingUpdatedEvent.class, event.getClass());
             ThingUpdatedEvent thingUpdatedEvent = (ThingUpdatedEvent) event;
             assertEquals("hue:LCT001:my1234Bridge:myKitchenBulb1", thingUpdatedEvent.getThing().UID);

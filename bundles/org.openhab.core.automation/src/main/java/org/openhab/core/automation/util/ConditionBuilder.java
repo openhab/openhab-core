@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,8 +12,6 @@
  */
 package org.openhab.core.automation.util;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -49,7 +47,7 @@ public class ConditionBuilder extends ModuleBuilder<ConditionBuilder, Condition>
     }
 
     public ConditionBuilder withInputs(@Nullable Map<String, String> inputs) {
-        this.inputs = inputs != null ? Collections.unmodifiableMap(new HashMap<>(inputs)) : null;
+        this.inputs = inputs != null ? Map.copyOf(inputs) : null;
         return this;
     }
 

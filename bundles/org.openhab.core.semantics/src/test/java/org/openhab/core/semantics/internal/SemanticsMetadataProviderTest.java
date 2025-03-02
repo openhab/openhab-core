@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -16,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
+import java.util.List;
 import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -35,7 +36,12 @@ import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.Metadata;
+import org.openhab.core.library.items.NumberItem;
 import org.openhab.core.library.items.SwitchItem;
+import org.openhab.core.semantics.ManagedSemanticTagProvider;
+import org.openhab.core.semantics.SemanticTagRegistry;
+import org.openhab.core.semantics.model.DefaultSemanticTagProvider;
+import org.openhab.core.test.java.JavaTest;
 
 /**
  * @author Simon Lamon - Initial contribution
@@ -43,20 +49,27 @@ import org.openhab.core.library.items.SwitchItem;
 @NonNullByDefault
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
-public class SemanticsMetadataProviderTest {
+public class SemanticsMetadataProviderTest extends JavaTest {
 
     private static final String ITEM_NAME = "switchItem";
 
     private static final String GROUP_ITEM_NAME = "groupItem";
 
-    private @NonNullByDefault({}) @Mock ItemRegistry itemRegistry;
-    private @NonNullByDefault({}) @Mock ProviderChangeListener<@NonNull Metadata> changeListener;
+    private @Mock @NonNullByDefault({}) ItemRegistry itemRegistry;
+    private @Mock @NonNullByDefault({}) ProviderChangeListener<@NonNull Metadata> changeListener;
+    private @Mock @NonNullByDefault({}) ManagedSemanticTagProvider managedSemanticTagProviderMock;
 
     private @NonNullByDefault({}) SemanticsMetadataProvider semanticsMetadataProvider;
 
     @BeforeEach
     public void beforeEach() throws Exception {
-        semanticsMetadataProvider = new SemanticsMetadataProvider(itemRegistry) {
+        setupInterceptedLogger(SemanticsMetadataProvider.class, LogLevel.DEBUG);
+
+        when(managedSemanticTagProviderMock.getAll()).thenReturn(List.of());
+        SemanticTagRegistry semanticTagRegistry = new SemanticTagRegistryImpl(new DefaultSemanticTagProvider(),
+                managedSemanticTagProviderMock);
+
+        semanticsMetadataProvider = new SemanticsMetadataProvider(itemRegistry, semanticTagRegistry) {
             {
                 addProviderChangeListener(changeListener);
             }
@@ -170,7 +183,7 @@ public class SemanticsMetadataProviderTest {
 
         Metadata metadata = Objects.requireNonNull(getMetadata(item));
         assertEquals("Equipment_Door", metadata.getValue());
-        assertEquals(metadata.getConfiguration().get("hasLocation"), GROUP_ITEM_NAME);
+        assertEquals(GROUP_ITEM_NAME, metadata.getConfiguration().get("hasLocation"));
     }
 
     @Test
@@ -195,7 +208,7 @@ public class SemanticsMetadataProviderTest {
 
         Metadata metadata = Objects.requireNonNull(getMetadata(item));
         assertEquals("Equipment_Door", oldMetadata.getValue());
-        assertEquals(metadata.getConfiguration().get("hasLocation"), GROUP_ITEM_NAME);
+        assertEquals(GROUP_ITEM_NAME, metadata.getConfiguration().get("hasLocation"));
     }
 
     @Test
@@ -215,7 +228,7 @@ public class SemanticsMetadataProviderTest {
 
         Metadata oldMetadata = Objects.requireNonNull(getMetadata(item));
         assertEquals("Equipment_Door", oldMetadata.getValue());
-        assertEquals(oldMetadata.getConfiguration().get("hasLocation"), GROUP_ITEM_NAME);
+        assertEquals(GROUP_ITEM_NAME, oldMetadata.getConfiguration().get("hasLocation"));
 
         when(itemRegistry.get(GROUP_ITEM_NAME)).thenReturn(null);
 
@@ -224,6 +237,66 @@ public class SemanticsMetadataProviderTest {
         Metadata metadata = Objects.requireNonNull(getMetadata(item));
         assertEquals("Equipment_Door", metadata.getValue());
         assertNull(metadata.getConfiguration().get("hasLocation"));
+    }
+
+    @Test
+    public void testRecursiveGroupMembershipDoesNotResultInStackOverflowError() {
+        GroupItem groupItem1 = new GroupItem("group1");
+        GroupItem groupItem2 = new GroupItem("group2");
+
+        groupItem1.addMember(groupItem2);
+        groupItem2.addMember(groupItem1);
+
+        assertDoesNotThrow(() -> semanticsMetadataProvider.added(groupItem1));
+
+        assertLogMessage(SemanticsMetadataProvider.class, LogLevel.ERROR,
+                "Recursive group membership found: group1 is a member of group2, but it is also one of its ancestors.");
+    }
+
+    @Test
+    public void testIndirectRecursiveMembershipDoesNotThrowStackOverflowError() {
+        GroupItem groupItem1 = new GroupItem("group1");
+        GroupItem groupItem2 = new GroupItem("group2");
+        GroupItem groupItem3 = new GroupItem("group3");
+
+        groupItem1.addMember(groupItem2);
+        groupItem2.addMember(groupItem3);
+        groupItem3.addMember(groupItem1);
+
+        assertDoesNotThrow(() -> semanticsMetadataProvider.added(groupItem1));
+
+        assertLogMessage(SemanticsMetadataProvider.class, LogLevel.ERROR,
+                "Recursive group membership found: group1 is a member of group3, but it is also one of its ancestors.");
+    }
+
+    @Test
+    public void testDuplicateMembershipOfPlainItemsDoesNotTriggerWarning() {
+        GroupItem groupItem1 = new GroupItem("group1");
+        GroupItem groupItem2 = new GroupItem("group2");
+        NumberItem numberItem = new NumberItem("number");
+
+        groupItem1.addMember(groupItem2);
+        groupItem1.addMember(numberItem);
+        groupItem2.addMember(numberItem);
+
+        semanticsMetadataProvider.added(groupItem1);
+
+        assertNoLogMessage(SemanticsMetadataProvider.class);
+    }
+
+    @Test
+    public void testDuplicateMembershipOfGroupItemsDoesNotTriggerWarning() {
+        GroupItem groupItem1 = new GroupItem("group1");
+        GroupItem groupItem2 = new GroupItem("group2");
+        GroupItem groupItem3 = new GroupItem("group3");
+
+        groupItem1.addMember(groupItem2);
+        groupItem1.addMember(groupItem3);
+        groupItem2.addMember(groupItem3);
+
+        semanticsMetadataProvider.added(groupItem1);
+
+        assertNoLogMessage(SemanticsMetadataProvider.class);
     }
 
     private @Nullable Metadata getMetadata(Item item) {

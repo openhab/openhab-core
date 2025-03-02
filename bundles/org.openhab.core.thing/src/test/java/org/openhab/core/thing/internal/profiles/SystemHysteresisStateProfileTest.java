@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -18,7 +18,6 @@ import static org.mockito.Mockito.*;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -85,7 +84,7 @@ public class SystemHysteresisStateProfileTest {
     }
 
     public static Collection<Object[]> parameters() {
-        return Arrays.asList(new Object[][] { //
+        return List.of(new Object[][] { //
                 // lower bound = upper bound = 10, one state update / command (PercentType)
                 { new ParameterSet(List.of(PercentType.HUNDRED), List.of(OnOffType.ON), BigDecimal.TEN, null) }, //
                 { new ParameterSet(List.of(PERCENT_TYPE_TWENTY_FIVE), List.of(OnOffType.ON), BigDecimal.TEN, null) }, //

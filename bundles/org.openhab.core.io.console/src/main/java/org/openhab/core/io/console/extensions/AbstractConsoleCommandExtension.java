@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -32,7 +32,7 @@ public abstract class AbstractConsoleCommandExtension implements ConsoleCommandE
      * @param cmd The command the extension is used for.
      * @param desc The description what this extension is handling.
      */
-    public AbstractConsoleCommandExtension(final String cmd, final String desc) {
+    protected AbstractConsoleCommandExtension(final String cmd, final String desc) {
         this.cmd = cmd;
         this.desc = desc;
     }

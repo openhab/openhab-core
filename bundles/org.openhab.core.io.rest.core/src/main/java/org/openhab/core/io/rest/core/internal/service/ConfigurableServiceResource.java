@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -18,11 +18,9 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.Consumes;
@@ -56,6 +54,7 @@ import org.openhab.core.io.rest.core.config.ConfigurationService;
 import org.openhab.core.io.rest.core.service.ConfigurableServiceDTO;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -175,7 +174,7 @@ public class ConfigurableServiceResource implements RESTResource {
                 + "=*))";
         List<ConfigurableServiceDTO> services = getServicesByFilter(filter, locale);
         if (services.size() == 1) {
-            return services.get(0);
+            return services.getFirst();
         }
         return null;
     }
@@ -207,7 +206,7 @@ public class ConfigurableServiceResource implements RESTResource {
         try {
             Configuration configuration = configurationService.get(serviceId);
             return configuration != null ? Response.ok(configuration.getProperties()).build()
-                    : Response.ok(Collections.emptyMap()).build();
+                    : Response.ok(Map.of()).build();
         } catch (IOException ex) {
             logger.error("Cannot get configuration for service {}: ", serviceId, ex);
             return Response.status(Status.INTERNAL_SERVER_ERROR).build();
@@ -225,7 +224,7 @@ public class ConfigurableServiceResource implements RESTResource {
     public Response updateConfiguration(
             @HeaderParam("Accept-Language") @Parameter(description = "language") @Nullable String language,
             @PathParam("serviceId") @Parameter(description = "service ID") String serviceId,
-            @Nullable Map<String, Object> configuration) {
+            @Nullable Map<String, @Nullable Object> configuration) {
         Locale locale = localeService.getLocale(language);
         try {
             Configuration oldConfiguration = configurationService.get(serviceId);
@@ -239,8 +238,8 @@ public class ConfigurableServiceResource implements RESTResource {
         }
     }
 
-    private @Nullable Map<String, Object> normalizeConfiguration(@Nullable Map<String, Object> properties,
-            String serviceId, Locale locale) {
+    private @Nullable Map<String, @Nullable Object> normalizeConfiguration(
+            @Nullable Map<String, @Nullable Object> properties, String serviceId, Locale locale) {
         if (properties == null || properties.isEmpty()) {
             return properties;
         }
@@ -298,7 +297,7 @@ public class ConfigurableServiceResource implements RESTResource {
             for (ServiceReference<?> serviceReference : serviceReferences) {
                 String id = getServiceId(serviceReference);
                 ConfigurableService configurableService = ConfigurableServiceUtil
-                        .asConfigurableService((key) -> serviceReference.getProperty(key));
+                        .asConfigurableService(serviceReference::getProperty);
 
                 String defaultLabel = configurableService.label();
                 if (defaultLabel.isEmpty()) { // for multi context services the label can be changed and must be read
@@ -309,7 +308,11 @@ public class ConfigurableServiceResource implements RESTResource {
                 String key = I18nUtil.stripConstantOr(defaultLabel,
                         () -> inferKey(configurableService.description_uri(), "label"));
 
-                String label = i18nProvider.getText(serviceReference.getBundle(), key, defaultLabel, locale);
+                // i18n file containing label for system:addons service is exceptionally located in bundle
+                // org.openhab.core (and not in bundle org.openhab.core.addon.eclipse)
+                String label = i18nProvider.getText("system:addons".equals(configurableService.description_uri())
+                        ? FrameworkUtil.getBundle(OpenHAB.class)
+                        : serviceReference.getBundle(), key, defaultLabel, locale);
 
                 String category = configurableService.category();
 
@@ -338,7 +341,7 @@ public class ConfigurableServiceResource implements RESTResource {
 
             if (refs != null && refs.length > 0) {
                 ConfigurableService configurableService = ConfigurableServiceUtil
-                        .asConfigurableService((key) -> refs[0].getProperty(key));
+                        .asConfigurableService(key -> refs[0].getProperty(key));
                 configDescriptionURI = configurableService.description_uri();
             }
         } catch (InvalidSyntaxException e) {
@@ -369,7 +372,7 @@ public class ConfigurableServiceResource implements RESTResource {
         } else if (pid instanceof String[] pids) {
             serviceId = getServicePID(cn, Arrays.asList(pids));
         } else if (pid instanceof Collection<?> pids) {
-            serviceId = getServicePID(cn, pids.stream().map(entry -> entry.toString()).collect(Collectors.toList()));
+            serviceId = getServicePID(cn, pids.stream().map(Object::toString).toList());
         } else {
             logger.warn("The component \"{}\" is using an unhandled service PID type ({}). Use component name.", cn,
                     pid.getClass());
@@ -388,9 +391,9 @@ public class ConfigurableServiceResource implements RESTResource {
             case 0:
                 return "";
             case 1:
-                return pids.get(0);
+                return pids.getFirst();
             default: // multiple entries
-                final String first = pids.get(0);
+                final String first = pids.getFirst();
                 boolean differences = false;
                 for (int i = 1; i < pids.size(); ++i) {
                     if (!first.equals(pids.get(i))) {

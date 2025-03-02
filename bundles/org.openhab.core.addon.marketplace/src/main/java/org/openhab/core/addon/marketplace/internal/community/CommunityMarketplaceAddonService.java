@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,6 +13,7 @@
 package org.openhab.core.addon.marketplace.internal.community;
 
 import static org.openhab.core.addon.Addon.CODE_MATURITY_LEVELS;
+import static org.openhab.core.addon.marketplace.MarketplaceConstants.*;
 
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -30,12 +31,12 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.addon.Addon;
+import org.openhab.core.addon.AddonInfoRegistry;
 import org.openhab.core.addon.AddonService;
 import org.openhab.core.addon.AddonType;
 import org.openhab.core.addon.marketplace.AbstractRemoteAddonService;
@@ -73,11 +74,9 @@ import org.slf4j.LoggerFactory;
 @ConfigurableService(category = "system", label = CommunityMarketplaceAddonService.SERVICE_NAME, description_uri = CommunityMarketplaceAddonService.CONFIG_URI)
 @NonNullByDefault
 public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService {
-    public static final String JAR_CONTENT_TYPE = "application/vnd.openhab.bundle";
-    public static final String KAR_CONTENT_TYPE = "application/vnd.openhab.feature;type=karfile";
-    public static final String RULETEMPLATES_CONTENT_TYPE = "application/vnd.openhab.ruletemplate";
-    public static final String UIWIDGETS_CONTENT_TYPE = "application/vnd.openhab.uicomponent;type=widget";
-    public static final String BLOCKLIBRARIES_CONTENT_TYPE = "application/vnd.openhab.uicomponent;type=blocks";
+    public static final String CODE_CONTENT_SUFFIX = "_content";
+    public static final String JSON_CONTENT_PROPERTY = "json" + CODE_CONTENT_SUFFIX;
+    public static final String YAML_CONTENT_PROPERTY = "yaml" + CODE_CONTENT_SUFFIX;
 
     // constants for the configuration properties
     static final String SERVICE_NAME = "Community Marketplace";
@@ -90,19 +89,20 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
     private static final String COMMUNITY_BASE_URL = "https://community.openhab.org";
     private static final String COMMUNITY_MARKETPLACE_URL = COMMUNITY_BASE_URL + "/c/marketplace/69/l/latest";
     private static final String COMMUNITY_TOPIC_URL = COMMUNITY_BASE_URL + "/t/";
-    private static final Pattern BUNDLE_NAME_PATTERN = Pattern.compile(".*/(.*)-\\d+\\.\\d+\\.\\d+.*");
+    private static final Pattern BUNDLE_NAME_PATTERN = Pattern.compile(".*/(.*?)-\\d+\\.\\d+\\.\\d+.*");
 
     private static final String SERVICE_ID = "marketplace";
     private static final String ADDON_ID_PREFIX = SERVICE_ID + ":";
 
-    private static final String JSON_CODE_MARKUP_START = "<pre><code class=\"lang-json\">";
-    private static final String YAML_CODE_MARKUP_START = "<pre><code class=\"lang-yaml\">";
-    private static final String CODE_MARKUP_END = "</code></pre>";
+    private static final Pattern CODE_MARKUP_PATTERN = Pattern.compile(
+            "<pre(?: data-code-wrap=\"[a-z]+\")?><code class=\"lang-(?<lang>[a-z]+)\">(?<content>.*?)</code></pre>",
+            Pattern.DOTALL);
 
     private static final Integer BUNDLES_CATEGORY = 73;
     private static final Integer RULETEMPLATES_CATEGORY = 74;
     private static final Integer UIWIDGETS_CATEGORY = 75;
     private static final Integer BLOCKLIBRARIES_CATEGORY = 76;
+    private static final Integer TRANSFORMATIONS_CATEGORY = 80;
 
     private static final String PUBLISHED_TAG = "published";
 
@@ -115,8 +115,8 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
     @Activate
     public CommunityMarketplaceAddonService(final @Reference EventPublisher eventPublisher,
             @Reference ConfigurationAdmin configurationAdmin, @Reference StorageService storageService,
-            Map<String, Object> config) {
-        super(eventPublisher, configurationAdmin, storageService, SERVICE_PID);
+            @Reference AddonInfoRegistry addonInfoRegistry, Map<String, Object> config) {
+        super(eventPublisher, configurationAdmin, storageService, addonInfoRegistry, SERVICE_PID);
         modified(config);
     }
 
@@ -163,7 +163,7 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
         try {
             List<DiscourseCategoryResponseDTO> pages = new ArrayList<>();
 
-            URL url = new URL(COMMUNITY_MARKETPLACE_URL);
+            URL url = URI.create(COMMUNITY_MARKETPLACE_URL).toURL();
             int pageNb = 1;
             while (url != null) {
                 URLConnection connection = url.openConnection();
@@ -180,16 +180,16 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
 
                     if (parsed.topicList.moreTopicsUrl != null) {
                         // Discourse URL for next page is wrong
-                        url = new URL(COMMUNITY_MARKETPLACE_URL + "?page=" + pageNb++);
+                        url = URI.create(COMMUNITY_MARKETPLACE_URL + "?page=" + pageNb++).toURL();
                     } else {
                         url = null;
                     }
                 }
             }
 
-            List<DiscourseUser> users = pages.stream().flatMap(p -> Stream.of(p.users)).collect(Collectors.toList());
+            List<DiscourseUser> users = pages.stream().flatMap(p -> Stream.of(p.users)).toList();
             pages.stream().flatMap(p -> Stream.of(p.topicList.topics))
-                    .filter(t -> showUnpublished || Arrays.asList(t.tags).contains(PUBLISHED_TAG))
+                    .filter(t -> showUnpublished || List.of(t.tags).contains(PUBLISHED_TAG))
                     .map(t -> Optional.ofNullable(convertTopicItemToAddon(t, users)))
                     .forEach(a -> a.ifPresent(addons::add));
         } catch (Exception e) {
@@ -200,10 +200,13 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
 
     @Override
     public @Nullable Addon getAddon(String uid, @Nullable Locale locale) {
+        String queryId = uid.startsWith(ADDON_ID_PREFIX) ? uid : ADDON_ID_PREFIX + uid;
+
         // check if it is an installed add-on (cachedAddons also contains possibly incomplete results from the remote
         // side, we need to retrieve them from Discourse)
-        if (installedAddons.contains(uid)) {
-            return cachedAddons.stream().filter(e -> uid.equals(e.getUid())).findAny().orElse(null);
+
+        if (installedAddonIds.contains(queryId)) {
+            return cachedAddons.stream().filter(e -> queryId.equals(e.getUid())).findAny().orElse(null);
         }
 
         if (!remoteEnabled()) {
@@ -212,7 +215,7 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
 
         // retrieve from remote
         try {
-            URL url = new URL(String.format("%s%s", COMMUNITY_TOPIC_URL, uid.replace(ADDON_ID_PREFIX, "")));
+            URL url = URI.create(COMMUNITY_TOPIC_URL + uid.replace(ADDON_ID_PREFIX, "")).toURL();
             URLConnection connection = url.openConnection();
             connection.addRequestProperty("Accept", "application/json");
             if (this.apiKey != null) {
@@ -238,7 +241,9 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
 
     private @Nullable AddonType getAddonType(@Nullable Integer category, List<String> tags) {
         // check if we can determine the addon type from the category
-        if (RULETEMPLATES_CATEGORY.equals(category)) {
+        if (TRANSFORMATIONS_CATEGORY.equals(category)) {
+            return AddonType.TRANSFORMATION;
+        } else if (RULETEMPLATES_CATEGORY.equals(category)) {
             return AddonType.AUTOMATION;
         } else if (UIWIDGETS_CATEGORY.equals(category)) {
             return AddonType.UI;
@@ -256,7 +261,9 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
 
     private String getContentType(@Nullable Integer category, List<String> tags) {
         // check if we can determine the addon type from the category
-        if (RULETEMPLATES_CATEGORY.equals(category)) {
+        if (TRANSFORMATIONS_CATEGORY.equals(category)) {
+            return TRANSFORMATIONS_CONTENT_TYPE;
+        } else if (RULETEMPLATES_CATEGORY.equals(category)) {
             return RULETEMPLATES_CONTENT_TYPE;
         } else if (UIWIDGETS_CATEGORY.equals(category)) {
             return UIWIDGETS_CONTENT_TYPE;
@@ -400,18 +407,18 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
         if (topic.postStream.posts[0].linkCounts != null) {
             for (DiscoursePostLink postLink : topic.postStream.posts[0].linkCounts) {
                 if (postLink.url.endsWith(".jar")) {
-                    properties.put("jar_download_url", postLink.url);
+                    properties.put(JAR_DOWNLOAD_URL_PROPERTY, postLink.url);
                     id = determineIdFromUrl(postLink.url);
                 }
                 if (postLink.url.endsWith(".kar")) {
-                    properties.put("kar_download_url", postLink.url);
+                    properties.put(KAR_DOWNLOAD_URL_PROPERTY, postLink.url);
                     id = determineIdFromUrl(postLink.url);
                 }
                 if (postLink.url.endsWith(".json")) {
-                    properties.put("json_download_url", postLink.url);
+                    properties.put(JSON_DOWNLOAD_URL_PROPERTY, postLink.url);
                 }
                 if (postLink.url.endsWith(".yaml")) {
-                    properties.put("yaml_download_url", postLink.url);
+                    properties.put(YAML_DOWNLOAD_URL_PROPERTY, postLink.url);
                 }
             }
         }
@@ -420,28 +427,23 @@ public class CommunityMarketplaceAddonService extends AbstractRemoteAddonService
             id = topic.id.toString(); // this is a fallback if we couldn't find a better id
         }
 
-        if (detailedDescription.contains(JSON_CODE_MARKUP_START)) {
-            String jsonContent = detailedDescription.substring(
-                    detailedDescription.indexOf(JSON_CODE_MARKUP_START) + JSON_CODE_MARKUP_START.length(),
-                    detailedDescription.indexOf(CODE_MARKUP_END, detailedDescription.indexOf(JSON_CODE_MARKUP_START)));
-            properties.put("json_content", unescapeEntities(jsonContent));
-        }
-        if (detailedDescription.contains(YAML_CODE_MARKUP_START)) {
-            String yamlContent = detailedDescription.substring(
-                    detailedDescription.indexOf(YAML_CODE_MARKUP_START) + YAML_CODE_MARKUP_START.length(),
-                    detailedDescription.indexOf(CODE_MARKUP_END, detailedDescription.indexOf(YAML_CODE_MARKUP_START)));
-            properties.put("yaml_content", unescapeEntities(yamlContent));
+        Matcher codeMarkup = CODE_MARKUP_PATTERN.matcher(detailedDescription);
+        if (codeMarkup.find()) {
+            properties.put(codeMarkup.group("lang") + CODE_CONTENT_SUFFIX,
+                    unescapeEntities(codeMarkup.group("content")));
         }
 
         // try to use a handler to determine if the add-on is installed
         boolean installed = addonHandlers.stream()
                 .anyMatch(handler -> handler.supports(type, contentType) && handler.isInstalled(uid));
 
-        return Addon.create(uid).withType(type).withId(id).withContentType(contentType).withLabel(topic.title)
-                .withImageLink(topic.imageUrl).withLink(COMMUNITY_TOPIC_URL + topic.id.toString())
+        Addon.Builder builder = Addon.create(uid).withType(type).withId(id).withContentType(contentType)
+                .withLabel(topic.title).withImageLink(topic.imageUrl)
+                .withLink(COMMUNITY_TOPIC_URL + topic.id.toString())
                 .withAuthor(topic.postStream.posts[0].displayUsername).withMaturity(maturity)
-                .withDetailedDescription(detailedDescription).withInstalled(installed).withProperties(properties)
-                .build();
+                .withDetailedDescription(detailedDescription).withInstalled(installed).withProperties(properties);
+
+        return builder.build();
     }
 
     private @Nullable String determineIdFromUrl(String url) {

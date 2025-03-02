@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -32,6 +32,7 @@ import org.eclipse.xtext.xbase.XExpression;
 import org.eclipse.xtext.xbase.interpreter.IEvaluationContext;
 import org.eclipse.xtext.xbase.interpreter.impl.DefaultEvaluationContext;
 import org.openhab.core.automation.module.script.ScriptExtensionAccessor;
+import org.openhab.core.items.Item;
 import org.openhab.core.items.events.ItemEvent;
 import org.openhab.core.model.script.engine.Script;
 import org.openhab.core.model.script.engine.ScriptExecutionException;
@@ -63,7 +64,8 @@ public class DSLScriptEngine implements javax.script.ScriptEngine {
     private static final Map<String, String> IMPLICIT_VARS = Map.of("command",
             ScriptJvmModelInferrer.VAR_RECEIVED_COMMAND, "state", ScriptJvmModelInferrer.VAR_NEW_STATE, "newState",
             ScriptJvmModelInferrer.VAR_NEW_STATE, "oldState", ScriptJvmModelInferrer.VAR_PREVIOUS_STATE,
-            "triggeringItem", ScriptJvmModelInferrer.VAR_TRIGGERING_ITEM, "input", ScriptJvmModelInferrer.VAR_INPUT);
+            "triggeringItem", ScriptJvmModelInferrer.VAR_TRIGGERING_ITEM, "triggeringGroup",
+            ScriptJvmModelInferrer.VAR_TRIGGERING_GROUP, "input", ScriptJvmModelInferrer.VAR_INPUT);
 
     private final Logger logger = LoggerFactory.getLogger(DSLScriptEngine.class);
 
@@ -167,8 +169,10 @@ public class DSLScriptEngine implements javax.script.ScriptEngine {
 
         Map<String, Object> cachePreset = scriptExtensionAccessor.findPreset("cache",
                 (String) context.getAttribute("oh.engine-identifier", ScriptContext.ENGINE_SCOPE));
-        evalContext.newValue(QualifiedName.create("sharedCache"), cachePreset.get("sharedCache"));
-        evalContext.newValue(QualifiedName.create("privateCache"), cachePreset.get("privateCache"));
+        evalContext.newValue(QualifiedName.create(ScriptJvmModelInferrer.VAR_SHARED_CACHE),
+                cachePreset.get("sharedCache"));
+        evalContext.newValue(QualifiedName.create(ScriptJvmModelInferrer.VAR_PRIVATE_CACHE),
+                cachePreset.get("privateCache"));
         // now add specific implicit vars, where we have to map the right content
         Object value = context.getAttribute(OUTPUT_EVENT);
         if (value instanceof ChannelTriggeredEvent event) {
@@ -179,6 +183,11 @@ public class DSLScriptEngine implements javax.script.ScriptEngine {
         if (value instanceof ItemEvent event) {
             evalContext.newValue(QualifiedName.create(ScriptJvmModelInferrer.VAR_TRIGGERING_ITEM_NAME),
                     event.getItemName());
+            Object group = context.getAttribute(ScriptJvmModelInferrer.VAR_TRIGGERING_GROUP);
+            if (group instanceof Item groupItem) {
+                evalContext.newValue(QualifiedName.create(ScriptJvmModelInferrer.VAR_TRIGGERING_GROUP_NAME),
+                        groupItem.getName());
+            }
         }
         if (value instanceof ThingStatusInfoChangedEvent event) {
             evalContext.newValue(QualifiedName.create(ScriptJvmModelInferrer.VAR_TRIGGERING_THING),

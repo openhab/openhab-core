@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config-description:config-descriptions
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:config-description="https://openhab.org/schemas/config-description/v1.0.0"
+	xsi:schemaLocation="https://openhab.org/schemas/config-description/v1.0.0
+	https://openhab.org/schemas/config-description-1.0.0.xsd">
+
+	<config-description uri="system:units">
+
+		<parameter name="currencyProvider" type="text">
+			<label>Currency Provider</label>
+			<description>The service that is used to provide a set of currencies and their exchange rates.</description>
+		</parameter>
+		<parameter name="fixedBaseCurrency" type="text" pattern="[A-Z]{3}">
+			<label>Fixed Base Currency</label>
+			<description>The base currency of this system when the fixed currency provider is used.</description>
+		</parameter>
+
+	</config-description>
+</config-description:config-descriptions>

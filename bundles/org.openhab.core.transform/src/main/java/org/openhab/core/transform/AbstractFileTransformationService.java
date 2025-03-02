@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -19,7 +19,6 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
@@ -29,7 +28,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -189,9 +187,9 @@ public abstract class AbstractFileTransformationService<T> implements Transforma
     }
 
     private void watchSubDirectory(String subDirectory, final WatchService watchService) {
-        if (watchedDirectories.indexOf(subDirectory) == -1) {
+        if (!watchedDirectories.contains(subDirectory)) {
             String watchedDirectory = getSourcePath() + subDirectory;
-            Path transformFilePath = Paths.get(watchedDirectory);
+            Path transformFilePath = Path.of(watchedDirectory);
             try {
                 WatchKey registrationKey = transformFilePath.register(watchService, ENTRY_DELETE, ENTRY_MODIFY);
                 logger.debug("Watching directory {}", transformFilePath);
@@ -264,8 +262,9 @@ public abstract class AbstractFileTransformationService<T> implements Transforma
      */
     protected String getLocalizedProposedFilename(String filename, final WatchService watchService) {
         final File file = new File(filename);
-        if (file.getParent() != null) {
-            watchSubDirectory(file.getParent(), watchService);
+        final String parent = file.getParent();
+        if (parent != null) {
+            watchSubDirectory(parent, watchService);
         }
 
         String sourcePath = getSourcePath();
@@ -296,11 +295,10 @@ public abstract class AbstractFileTransformationService<T> implements Transforma
      */
     protected List<String> getFilenames(String[] validExtensions) {
         File path = new File(getSourcePath());
-        return Arrays.asList(path.listFiles(new FileExtensionsFilter(validExtensions))).stream().map(f -> f.getName())
-                .collect(Collectors.toList());
+        return Arrays.stream(path.listFiles(new FileExtensionsFilter(validExtensions))).map(File::getName).toList();
     }
 
-    protected class FileExtensionsFilter implements FilenameFilter {
+    protected static class FileExtensionsFilter implements FilenameFilter {
 
         private final String[] validExtensions;
 

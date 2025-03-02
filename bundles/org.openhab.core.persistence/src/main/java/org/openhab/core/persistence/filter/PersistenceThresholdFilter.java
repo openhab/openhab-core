@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -20,6 +20,7 @@ import java.util.Map;
 import javax.measure.UnconvertibleException;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.items.Item;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.QuantityType;
@@ -29,7 +30,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * The {@link PersistenceThresholdFilter} is a filter to prevent persistence based on a threshold.
- *
+ * <p />
  * The filter returns {@code false} if the new value deviates by less than {@link #value}. If unit is "%" is
  * {@code true}, the filter returns {@code false} if the relative deviation is less than {@link #value}.
  *
@@ -43,13 +44,16 @@ public class PersistenceThresholdFilter extends PersistenceFilter {
 
     private final BigDecimal value;
     private final String unit;
+    private final boolean relative;
 
     private final transient Map<String, State> valueCache = new HashMap<>();
 
-    public PersistenceThresholdFilter(String name, BigDecimal value, String unit) {
+    public PersistenceThresholdFilter(String name, BigDecimal value, @Nullable String unit,
+            @Nullable Boolean relative) {
         super(name);
         this.value = value;
-        this.unit = unit;
+        this.unit = (unit == null) ? "" : unit;
+        this.relative = relative != null && relative;
     }
 
     public BigDecimal getValue() {
@@ -58,6 +62,10 @@ public class PersistenceThresholdFilter extends PersistenceFilter {
 
     public String getUnit() {
         return unit;
+    }
+
+    public boolean isRelative() {
+        return relative;
     }
 
     @Override
@@ -75,10 +83,10 @@ public class PersistenceThresholdFilter extends PersistenceFilter {
             return true;
         }
 
-        if (state instanceof DecimalType) {
+        if (state instanceof DecimalType decimalState) {
             BigDecimal oldState = ((DecimalType) cachedState).toBigDecimal();
-            BigDecimal delta = oldState.subtract(((DecimalType) state).toBigDecimal());
-            if ("%".equals(unit) && !BigDecimal.ZERO.equals(oldState)) {
+            BigDecimal delta = oldState.subtract(decimalState.toBigDecimal());
+            if (relative && !BigDecimal.ZERO.equals(oldState)) {
                 delta = delta.multiply(HUNDRED).divide(oldState, 2, RoundingMode.HALF_UP);
             }
             return delta.abs().compareTo(value) > 0;
@@ -86,7 +94,7 @@ public class PersistenceThresholdFilter extends PersistenceFilter {
             try {
                 QuantityType oldState = (QuantityType) cachedState;
                 QuantityType delta = oldState.subtract((QuantityType) state);
-                if ("%".equals(unit)) {
+                if (relative) {
                     if (BigDecimal.ZERO.equals(oldState.toBigDecimal())) {
                         // value is different and old value is 0 -> always above relative threshold
                         return true;
@@ -117,6 +125,7 @@ public class PersistenceThresholdFilter extends PersistenceFilter {
 
     @Override
     public String toString() {
-        return String.format("%s [name=%s, value=%s, unit=%s]", getClass().getSimpleName(), getName(), value, unit);
+        return String.format("%s [name=%s, value=%s, unit=%s, relative=%b]", getClass().getSimpleName(), getName(),
+                value, unit, relative);
     }
 }

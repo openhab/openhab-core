@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,8 +14,8 @@ package org.openhab.core.ui.internal.proxy;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serial;
 import java.net.URI;
-import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -29,7 +29,6 @@ import org.eclipse.jetty.client.api.Request;
 import org.eclipse.jetty.client.api.Response;
 import org.eclipse.jetty.client.util.InputStreamResponseListener;
 import org.eclipse.jetty.http.HttpField;
-import org.eclipse.jetty.http.HttpFields;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,6 +44,7 @@ public class BlockingProxyServlet extends HttpServlet {
 
     private final Logger logger = LoggerFactory.getLogger(BlockingProxyServlet.class);
 
+    @Serial
     private static final long serialVersionUID = -4716754591953017794L;
 
     private final ProxyServletService service;
@@ -91,13 +91,8 @@ public class BlockingProxyServlet extends HttpServlet {
                 // wait for the response headers to arrive or the timeout to expire
                 Response httpResponse = listener.get(TIMEOUT, TimeUnit.MILLISECONDS);
 
-                // get response headers
-                HttpFields headers = httpResponse.getHeaders();
-                Iterator<HttpField> iterator = headers.iterator();
-
-                // copy all headers
-                while (iterator.hasNext()) {
-                    HttpField header = iterator.next();
+                // copy all response headers
+                for (HttpField header : httpResponse.getHeaders()) {
                     response.setHeader(header.getName(), header.getValue());
                 }
             } catch (TimeoutException e) {

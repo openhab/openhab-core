@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -65,6 +65,14 @@ public class DialogRegistration {
      * Linked listening item
      */
     public @Nullable String listeningItem;
+    /**
+     * Linked location item
+     */
+    public @Nullable String locationItem;
+    /**
+     * Dialog group name
+     */
+    public @Nullable String dialogGroup;
     /**
      * Custom listening melody
      */

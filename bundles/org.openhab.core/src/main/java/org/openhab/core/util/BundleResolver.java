@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,6 +12,8 @@
  */
 package org.openhab.core.util;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.osgi.framework.Bundle;
 
 /**
@@ -19,6 +21,7 @@ import org.osgi.framework.Bundle;
  *
  * @author Henning Treu - Initial contribution
  */
+@NonNullByDefault
 public interface BundleResolver {
 
     /**
@@ -27,5 +30,6 @@ public interface BundleResolver {
      * @param clazz the {@link Class} to resolve the bundle for.
      * @return the bundle associated with the given {@link Class}.
      */
+    @Nullable
     Bundle resolveBundle(Class<?> clazz);
 }

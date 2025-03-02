@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,11 +12,12 @@
  */
 package org.openhab.core.model.script.actions;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.when;
+
+import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,10 +34,10 @@ import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.model.script.internal.engine.action.SemanticsActionService;
-import org.openhab.core.semantics.model.equipment.Battery;
-import org.openhab.core.semantics.model.equipment.CleaningRobot;
-import org.openhab.core.semantics.model.location.Bathroom;
-import org.openhab.core.semantics.model.location.Indoor;
+import org.openhab.core.semantics.ManagedSemanticTagProvider;
+import org.openhab.core.semantics.Tag;
+import org.openhab.core.semantics.internal.SemanticTagRegistryImpl;
+import org.openhab.core.semantics.model.DefaultSemanticTagProvider;
 
 /**
  * This are tests for {@link Semantics} actions.
@@ -50,6 +51,7 @@ public class SemanticsTest {
 
     private @Mock @NonNullByDefault({}) ItemRegistry itemRegistryMock;
     private @Mock @NonNullByDefault({}) UnitProvider unitProviderMock;
+    private @Mock @NonNullByDefault({}) ManagedSemanticTagProvider managedSemanticTagProviderMock;
 
     private @NonNullByDefault({}) GroupItem indoorLocationItem;
     private @NonNullByDefault({}) GroupItem bathroomLocationItem;
@@ -57,6 +59,11 @@ public class SemanticsTest {
     private @NonNullByDefault({}) GenericItem temperaturePointItem;
     private @NonNullByDefault({}) GenericItem humidityPointItem;
     private @NonNullByDefault({}) GenericItem subEquipmentItem;
+
+    private @NonNullByDefault({}) Class<? extends Tag> indoorTagClass;
+    private @NonNullByDefault({}) Class<? extends Tag> bathroomTagClass;
+    private @NonNullByDefault({}) Class<? extends Tag> cleaningRobotTagClass;
+    private @NonNullByDefault({}) Class<? extends Tag> batteryTagClass;
 
     @BeforeEach
     public void setup() throws ItemNotFoundException {
@@ -98,6 +105,15 @@ public class SemanticsTest {
         equipmentItem.addMember(subEquipmentItem);
         subEquipmentItem.addGroupName(equipmentItem.getName());
 
+        when(managedSemanticTagProviderMock.getAll()).thenReturn(List.of());
+        SemanticTagRegistryImpl semanticTagRegistryImpl = new SemanticTagRegistryImpl(new DefaultSemanticTagProvider(),
+                managedSemanticTagProviderMock);
+
+        indoorTagClass = semanticTagRegistryImpl.getTagClassById("Location_Indoor");
+        bathroomTagClass = semanticTagRegistryImpl.getTagClassById("Location_Indoor_Room_Bathroom");
+        cleaningRobotTagClass = semanticTagRegistryImpl.getTagClassById("Equipment_CleaningRobot");
+        batteryTagClass = semanticTagRegistryImpl.getTagClassById("Equipment_Battery");
+
         when(itemRegistryMock.getItem("TestHouse")).thenReturn(indoorLocationItem);
         when(itemRegistryMock.getItem("TestBathRoom")).thenReturn(bathroomLocationItem);
         when(itemRegistryMock.getItem("Test08")).thenReturn(equipmentItem);
@@ -122,9 +138,9 @@ public class SemanticsTest {
 
     @Test
     public void testGetLocationType() {
-        assertThat(Semantics.getLocationType(indoorLocationItem), is(Indoor.class));
+        assertThat(Semantics.getLocationType(indoorLocationItem), is(indoorTagClass));
 
-        assertThat(Semantics.getLocationType(bathroomLocationItem), is(Bathroom.class));
+        assertThat(Semantics.getLocationType(bathroomLocationItem), is(bathroomTagClass));
 
         assertNull(Semantics.getLocationType(humidityPointItem));
     }
@@ -142,11 +158,11 @@ public class SemanticsTest {
 
     @Test
     public void testGetEquipmentType() {
-        assertThat(Semantics.getEquipmentType(equipmentItem), is(CleaningRobot.class));
+        assertThat(Semantics.getEquipmentType(equipmentItem), is(cleaningRobotTagClass));
 
-        assertThat(Semantics.getEquipmentType(temperaturePointItem), is(CleaningRobot.class));
+        assertThat(Semantics.getEquipmentType(temperaturePointItem), is(cleaningRobotTagClass));
 
-        assertThat(Semantics.getEquipmentType(subEquipmentItem), is(Battery.class));
+        assertThat(Semantics.getEquipmentType(subEquipmentItem), is(batteryTagClass));
 
         assertNull(Semantics.getEquipmentType(humidityPointItem));
     }

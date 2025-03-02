@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -22,8 +22,7 @@ import com.google.gson.Gson;
 /**
  * The {@link AbstractEventFactory} defines an abstract implementation of the {@link EventFactory} interface. Subclasses
  * must implement the abstract method {@link #createEventByType(String, String, String, String)} in order to create
- * event
- * instances based on the event type.
+ * event instances based on the event type.
  *
  * @author Stefan Bußweiler - Initial contribution
  */
@@ -39,7 +38,7 @@ public abstract class AbstractEventFactory implements EventFactory {
      *
      * @param supportedEventTypes the supported event types
      */
-    public AbstractEventFactory(Set<String> supportedEventTypes) {
+    protected AbstractEventFactory(Set<String> supportedEventTypes) {
         this.supportedEventTypes = Set.copyOf(supportedEventTypes);
     }
 

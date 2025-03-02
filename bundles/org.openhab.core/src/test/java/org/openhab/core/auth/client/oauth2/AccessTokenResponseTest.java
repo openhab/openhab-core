@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -76,6 +76,6 @@ public class AccessTokenResponseTest {
         // token has a life time of 60 seconds
         token.setExpiresIn(60);
 
-        assertTrue(!token.isExpired(Instant.now(), 10), "Token should have been expired due to buffer");
+        assertFalse(token.isExpired(Instant.now(), 10), "Token should not have been expired even due to buffer");
     }
 }

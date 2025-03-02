@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -18,7 +18,6 @@ import java.util.Formatter;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -85,9 +84,9 @@ public class PointType implements ComplexType, Command, State {
 
     public PointType(String value) {
         if (!value.isEmpty()) {
-            List<String> elements = Arrays.stream(value.split(",")).map(String::trim).collect(Collectors.toList());
+            List<String> elements = Arrays.stream(value.split(",")).map(String::trim).toList();
             if (elements.size() >= 2) {
-                canonicalize(new DecimalType(elements.get(0)), new DecimalType(elements.get(1)));
+                canonicalize(new DecimalType(elements.getFirst()), new DecimalType(elements.get(1)));
                 if (elements.size() == 3) {
                     setAltitude(new DecimalType(elements.get(2)));
                 } else if (elements.size() > 3) {
@@ -224,15 +223,15 @@ public class PointType implements ComplexType, Command, State {
     private void canonicalize(DecimalType aLat, DecimalType aLon) {
         latitude = FLAT.add(aLat.toBigDecimal()).remainder(CIRCLE);
         longitude = aLon.toBigDecimal();
-        if (latitude.compareTo(BigDecimal.ZERO) == -1) {
+        if (latitude.compareTo(BigDecimal.ZERO) < 0) {
             latitude = latitude.add(CIRCLE);
         }
 
         latitude = latitude.subtract(FLAT);
-        if (latitude.compareTo(RIGHT) == 1) {
+        if (latitude.compareTo(RIGHT) > 0) {
             latitude = FLAT.subtract(latitude);
             longitude = longitude.add(FLAT);
-        } else if (latitude.compareTo(RIGHT.negate()) == -1) {
+        } else if (latitude.compareTo(RIGHT.negate()) < 0) {
             latitude = FLAT.negate().subtract(latitude);
             longitude = longitude.add(FLAT);
         }

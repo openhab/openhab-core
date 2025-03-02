@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,9 +15,9 @@ package org.openhab.core.thing.binding;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -34,8 +34,12 @@ import org.openhab.core.thing.binding.firmware.FirmwareUpdateHandler;
 import org.openhab.core.thing.type.ThingType;
 import org.openhab.core.thing.type.ThingTypeRegistry;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceObjects;
+import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.ServiceScope;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,9 +56,12 @@ import org.slf4j.LoggerFactory;
  * @author Thomas Höfer - added config status provider and firmware update handler service registration
  * @author Stefan Bußweiler - API changes due to bridge/thing life cycle refactoring, removed OSGi service registration
  *         for thing handlers
+ * @author Connor Petty - added osgi service registration for thing handler services.
  */
 @NonNullByDefault
 public abstract class BaseThingHandlerFactory implements ThingHandlerFactory {
+
+    private static final String THING_HANDLER_SERVICE_CANONICAL_NAME = ThingHandlerService.class.getCanonicalName();
 
     protected @NonNullByDefault({}) BundleContext bundleContext;
 
@@ -63,7 +70,7 @@ public abstract class BaseThingHandlerFactory implements ThingHandlerFactory {
     private final Map<String, ServiceRegistration<ConfigStatusProvider>> configStatusProviders = new ConcurrentHashMap<>();
     private final Map<String, ServiceRegistration<FirmwareUpdateHandler>> firmwareUpdateHandlers = new ConcurrentHashMap<>();
 
-    private final Map<ThingUID, Set<ServiceRegistration<?>>> thingHandlerServices = new ConcurrentHashMap<>();
+    private final Map<ThingUID, Set<RegisteredThingHandlerService<?>>> thingHandlerServices = new ConcurrentHashMap<>();
 
     private @NonNullByDefault({}) ServiceTracker<ThingTypeRegistry, ThingTypeRegistry> thingTypeRegistryServiceTracker;
     private @NonNullByDefault({}) ServiceTracker<ConfigDescriptionRegistry, ConfigDescriptionRegistry> configDescriptionRegistryServiceTracker;
@@ -143,67 +150,72 @@ public abstract class BaseThingHandlerFactory implements ThingHandlerFactory {
 
     private void registerServices(Thing thing, ThingHandler thingHandler) {
         ThingUID thingUID = thing.getUID();
-        for (Class<?> c : thingHandler.getServices()) {
+        for (Class<? extends ThingHandlerService> c : thingHandler.getServices()) {
+            if (!ThingHandlerService.class.isAssignableFrom(c)) {
+                logger.warn(
+                        "Should register service={} for thingUID={}, but it does not implement the interface ThingHandlerService.",
+                        c.getCanonicalName(), thingUID);
+                continue;
+            }
+            registerThingHandlerService(thingUID, thingHandler, c);
+        }
+    }
+
+    private <T extends ThingHandlerService> void registerThingHandlerService(ThingUID thingUID,
+            ThingHandler thingHandler, Class<T> c) {
+        RegisteredThingHandlerService<T> registeredService;
+
+        Component component = c.getAnnotation(Component.class);
+        if (component != null && component.enabled()) {
+            if (component.scope() != ServiceScope.PROTOTYPE) {
+                // then we cannot use it.
+                logger.warn("Could not register service for class={}. Service must have a prototype scope",
+                        c.getCanonicalName());
+                return;
+            }
+            if (component.service().length != 1 || component.service()[0] != c) {
+                logger.warn(
+                        "Could not register service for class={}. ThingHandlerService with @Component must only label itself as a service.",
+                        c.getCanonicalName());
+                return;
+            }
+        }
+
+        ServiceReference<T> serviceRef = bundleContext.getServiceReference(c);
+        if (serviceRef != null) {
+            ServiceObjects<T> serviceObjs = bundleContext.getServiceObjects(serviceRef);
+            registeredService = new RegisteredThingHandlerService<>(serviceObjs);
+        } else {
             try {
-                Object serviceInstance = c.getConstructor().newInstance();
-
-                ThingHandlerService ths = null;
-                if (serviceInstance instanceof ThingHandlerService service) {
-                    ths = service;
-                    ths.setThingHandler(thingHandler);
-                } else {
-                    logger.warn(
-                            "Should register service={} for thingUID={}, but it does not implement the interface ThingHandlerService.",
-                            c.getCanonicalName(), thingUID);
-                    continue;
-                }
-
-                Set<Class<?>> interfaces = getAllInterfaces(c);
-                List<String> serviceNames = new LinkedList<>();
-                interfaces.forEach(i -> {
-                    String className = i.getCanonicalName();
-                    // we only add specific ThingHandlerServices, i.e. those that derive from the ThingHandlerService
-                    // interface, NOT the ThingHandlerService itself. We do this to register them as specific OSGi
-                    // services later, rather than as a generic ThingHandlerService.
-                    if (className != null && !className.equals(ThingHandlerService.class.getCanonicalName())) {
-                        serviceNames.add(className);
-                    }
-                });
-                if (!serviceNames.isEmpty()) {
-                    String[] serviceNamesArray = serviceNames.toArray(new String[serviceNames.size()]);
-                    ServiceRegistration<?> serviceReg = bundleContext.registerService(serviceNamesArray,
-                            serviceInstance, null);
-                    if (serviceReg != null) {
-                        Set<ServiceRegistration<?>> serviceRegs = thingHandlerServices.get(thingUID);
-                        if (serviceRegs == null) {
-                            Set<ServiceRegistration<?>> set = new HashSet<>();
-                            set.add(serviceReg);
-                            thingHandlerServices.put(thingUID, set);
-                        } else {
-                            serviceRegs.add(serviceReg);
-                        }
-                        ths.activate();
-                    }
-                }
+                T serviceInstance = c.getConstructor().newInstance();
+                registeredService = new RegisteredThingHandlerService<>(serviceInstance);
             } catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException
                     | InvocationTargetException e) {
                 logger.warn("Could not register service for class={}", c.getCanonicalName(), e);
+                return;
             }
         }
+
+        String[] serviceNames = getAllInterfaces(c).stream()//
+                .map(Class::getCanonicalName)
+                // we only add specific ThingHandlerServices, i.e. those that derive from the
+                // ThingHandlerService
+                // interface, NOT the ThingHandlerService itself. We do this to register them as specific OSGi
+                // services later, rather than as a generic ThingHandlerService.
+                .filter(className -> className != null && !className.equals(THING_HANDLER_SERVICE_CANONICAL_NAME))
+                .toArray(String[]::new);
+
+        registeredService.initializeService(thingHandler, serviceNames);
+
+        Objects.requireNonNull(thingHandlerServices.computeIfAbsent(thingUID, uid -> new HashSet<>()))
+                .add(registeredService);
     }
 
     private void unregisterServices(Thing thing) {
         ThingUID thingUID = thing.getUID();
-        Set<ServiceRegistration<?>> serviceRegs = thingHandlerServices.remove(thingUID);
+        Set<RegisteredThingHandlerService<?>> serviceRegs = thingHandlerServices.remove(thingUID);
         if (serviceRegs != null) {
-            serviceRegs.forEach(serviceReg -> {
-                ThingHandlerService ths = (ThingHandlerService) getBundleContext()
-                        .getService(serviceReg.getReference());
-                serviceReg.unregister();
-                if (ths != null) {
-                    ths.deactivate();
-                }
-            });
+            serviceRegs.forEach(RegisteredThingHandlerService::disposeService);
         }
     }
 
@@ -213,7 +225,7 @@ public abstract class BaseThingHandlerFactory implements ThingHandlerFactory {
      * @param clazz The class
      * @return A {@link List} of interfaces
      */
-    private Set<Class<?>> getAllInterfaces(Class<?> clazz) {
+    private static Set<Class<?>> getAllInterfaces(Class<?> clazz) {
         Set<Class<?>> interfaces = new HashSet<>();
         for (Class<?> superclazz = clazz; superclazz != null; superclazz = superclazz.getSuperclass()) {
             interfaces.addAll(Arrays.asList(superclazz.getInterfaces()));
@@ -353,5 +365,48 @@ public abstract class BaseThingHandlerFactory implements ThingHandlerFactory {
                     "Config Description Registry has not been properly initialized. Did you forget to call super.activate()?");
         }
         return configDescriptionRegistryServiceTracker.getService();
+    }
+
+    private class RegisteredThingHandlerService<T extends ThingHandlerService> {
+
+        private final T serviceInstance;
+
+        private @Nullable ServiceObjects<T> serviceObjects;
+
+        private @Nullable ServiceRegistration<?> serviceRegistration;
+
+        public RegisteredThingHandlerService(T serviceInstance) {
+            this.serviceInstance = serviceInstance;
+        }
+
+        public RegisteredThingHandlerService(ServiceObjects<T> serviceObjs) {
+            this.serviceInstance = serviceObjs.getService();
+            this.serviceObjects = serviceObjs;
+        }
+
+        public void initializeService(ThingHandler handler, String[] serviceNames) {
+            serviceInstance.setThingHandler(handler);
+            if (serviceNames.length > 0) {
+                ServiceRegistration<?> serviceReg = bundleContext.registerService(serviceNames, serviceInstance, null);
+                if (serviceReg != null) {
+                    serviceRegistration = serviceReg;
+                }
+            }
+            serviceInstance.initialize();
+        }
+
+        public void disposeService() {
+            serviceInstance.dispose();
+
+            ServiceRegistration<?> serviceReg = this.serviceRegistration;
+            if (serviceReg != null) {
+                serviceReg.unregister();
+            }
+
+            ServiceObjects<T> serviceObjs = this.serviceObjects;
+            if (serviceObjs != null) {
+                serviceObjs.ungetService(serviceInstance);
+            }
+        }
     }
 }

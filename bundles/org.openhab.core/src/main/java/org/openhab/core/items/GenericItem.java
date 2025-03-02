@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,6 +12,7 @@
  */
 package org.openhab.core.items;
 
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -23,7 +24,6 @@ import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ExecutorService;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -39,6 +39,7 @@ import org.openhab.core.types.CommandOption;
 import org.openhab.core.types.RefreshType;
 import org.openhab.core.types.State;
 import org.openhab.core.types.StateDescription;
+import org.openhab.core.types.TimeSeries;
 import org.openhab.core.types.UnDefType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,6 +52,8 @@ import org.slf4j.LoggerFactory;
  * @author Kai Kreuzer - Initial contribution
  * @author Andre Fuechsel - Added tags
  * @author Stefan Bußweiler - Migration to new ESH event concept
+ * @author Jan N. Klug - Added time series support
+ * @author Mark Herwege - Added setState override to restore all item state information
  */
 @NonNullByDefault
 public abstract class GenericItem implements ActiveItem {
@@ -64,6 +67,9 @@ public abstract class GenericItem implements ActiveItem {
     protected Set<StateChangeListener> listeners = new CopyOnWriteArraySet<>(
             Collections.newSetFromMap(new WeakHashMap<>()));
 
+    protected Set<TimeSeriesListener> timeSeriesListeners = new CopyOnWriteArraySet<>(
+            Collections.newSetFromMap(new WeakHashMap<>()));
+
     protected List<String> groupNames = new ArrayList<>();
 
     protected Set<String> tags = new HashSet<>();
@@ -73,6 +79,10 @@ public abstract class GenericItem implements ActiveItem {
     protected final String type;
 
     protected State state = UnDefType.NULL;
+    protected @Nullable State lastState;
+
+    protected @Nullable ZonedDateTime lastStateUpdate;
+    protected @Nullable ZonedDateTime lastStateChange;
 
     protected @Nullable String label;
 
@@ -100,6 +110,21 @@ public abstract class GenericItem implements ActiveItem {
     }
 
     @Override
+    public @Nullable State getLastState() {
+        return lastState;
+    }
+
+    @Override
+    public @Nullable ZonedDateTime getLastStateUpdate() {
+        return lastStateUpdate;
+    }
+
+    @Override
+    public @Nullable ZonedDateTime getLastStateChange() {
+        return lastStateChange;
+    }
+
+    @Override
     public String getUID() {
         return getName();
     }
@@ -116,7 +141,7 @@ public abstract class GenericItem implements ActiveItem {
 
     @Override
     public List<String> getGroupNames() {
-        return Collections.unmodifiableList(new ArrayList<>(groupNames));
+        return List.copyOf(groupNames);
     }
 
     /**
@@ -127,9 +152,6 @@ public abstract class GenericItem implements ActiveItem {
      */
     @Override
     public void addGroupName(String groupItemName) {
-        if (groupItemName == null) {
-            throw new IllegalArgumentException("Group item name must not be null!");
-        }
         if (!groupNames.contains(groupItemName)) {
             groupNames.add(groupItemName);
         }
@@ -157,9 +179,6 @@ public abstract class GenericItem implements ActiveItem {
      */
     @Override
     public void removeGroupName(String groupItemName) {
-        if (groupItemName == null) {
-            throw new IllegalArgumentException("Group item name must not be null!");
-        }
         groupNames.remove(groupItemName);
     }
 
@@ -194,8 +213,8 @@ public abstract class GenericItem implements ActiveItem {
 
     protected void internalSend(Command command) {
         // try to send the command to the bus
-        if (eventPublisher != null) {
-            eventPublisher.post(ItemEventFactory.createCommandEvent(this.getName(), command));
+        if (eventPublisher instanceof EventPublisher publisher) {
+            publisher.post(ItemEventFactory.createCommandEvent(this.getName(), command));
         }
     }
 
@@ -212,6 +231,32 @@ public abstract class GenericItem implements ActiveItem {
     }
 
     /**
+     * Set a new state, lastState, lastStateUpdate and lastStateChange. This method is intended to be used for restoring
+     * from persistence.
+     *
+     * @param state new state of this item
+     * @param lastState last state of this item
+     * @param lastStateUpdate last state update of this item
+     * @param lastStateChange last state change of this item
+     */
+    public void setState(State state, @Nullable State lastState, @Nullable ZonedDateTime lastStateUpdate,
+            @Nullable ZonedDateTime lastStateChange) {
+        State oldState = this.state;
+        ZonedDateTime oldStateUpdate = this.lastStateUpdate;
+        this.state = state;
+        this.lastState = lastState;
+        this.lastStateUpdate = lastStateUpdate;
+        this.lastStateChange = lastStateChange;
+        if (oldStateUpdate != null && lastStateUpdate != null && !oldStateUpdate.equals(lastStateUpdate)) {
+            notifyListeners(oldState, state);
+        }
+        sendStateUpdatedEvent(state);
+        if (!oldState.equals(state)) {
+            sendStateChangedEvent(state, oldState);
+        }
+    }
+
+    /**
      * Sets new state, notifies listeners and sends events.
      *
      * Classes overriding the {@link #setState(State)} method should call this method in order to actually set the
@@ -220,12 +265,63 @@ public abstract class GenericItem implements ActiveItem {
      * @param state new state of this item
      */
     protected final void applyState(State state) {
+        ZonedDateTime now = ZonedDateTime.now();
         State oldState = this.state;
+        boolean stateChanged = !oldState.equals(state);
         this.state = state;
+        if (stateChanged) {
+            lastState = oldState; // update before we notify listeners
+        }
         notifyListeners(oldState, state);
         sendStateUpdatedEvent(state);
-        if (!oldState.equals(state)) {
+        if (stateChanged) {
             sendStateChangedEvent(state, oldState);
+            lastStateChange = now; // update after we've notified listeners
+        }
+        lastStateUpdate = now;
+    }
+
+    /**
+     * Set a new time series.
+     * <p/>
+     * Subclasses may override this method in order to do necessary conversions upfront. Afterwards,
+     * {@link #applyTimeSeries(TimeSeries)} should be called by classes overriding this method.
+     * <p/>
+     * A time series may only contain events that are compatible with the item's internal state.
+     *
+     * @param timeSeries new time series of this item
+     */
+    public void setTimeSeries(TimeSeries timeSeries) {
+        applyTimeSeries(timeSeries);
+    }
+
+    /**
+     * Sets new time series, notifies listeners and sends events.
+     * <p />
+     * Classes overriding the {@link #setTimeSeries(TimeSeries)} method should call this method in order to actually set
+     * the time series, inform listeners and send the event.
+     * <p/>
+     * A time series may only contain events that are compatible with the item's internal state.
+     *
+     * @param timeSeries new time series of this item
+     */
+    protected final void applyTimeSeries(TimeSeries timeSeries) {
+        // notify listeners
+        Set<TimeSeriesListener> clonedListeners = new CopyOnWriteArraySet<>(timeSeriesListeners);
+        ExecutorService pool = ThreadPoolManager.getPool(ITEM_THREADPOOLNAME);
+        clonedListeners.forEach(listener -> pool.execute(() -> {
+            try {
+                listener.timeSeriesUpdated(GenericItem.this, timeSeries);
+            } catch (Exception e) {
+                logger.warn("failed notifying listener '{}' about timeseries update of item {}: {}", listener,
+                        GenericItem.this.getName(), e.getMessage(), e);
+            }
+        }));
+
+        // send event
+        EventPublisher eventPublisher1 = this.eventPublisher;
+        if (eventPublisher1 != null) {
+            eventPublisher1.post(ItemEventFactory.createTimeSeriesUpdatedEvent(this.name, timeSeries, null));
         }
     }
 
@@ -252,7 +348,7 @@ public abstract class GenericItem implements ActiveItem {
         Set<StateChangeListener> clonedListeners = new CopyOnWriteArraySet<>(listeners);
         ExecutorService pool = ThreadPoolManager.getPool(ITEM_THREADPOOLNAME);
         try {
-            final boolean stateChanged = newState != null && !newState.equals(oldState);
+            final boolean stateChanged = !newState.equals(oldState);
             clonedListeners.forEach(listener -> pool.execute(() -> {
                 try {
                     listener.stateUpdated(GenericItem.this, newState);
@@ -289,13 +385,13 @@ public abstract class GenericItem implements ActiveItem {
         if (!getTags().isEmpty()) {
             sb.append(", ");
             sb.append("Tags=[");
-            sb.append(getTags().stream().collect(Collectors.joining(", ")));
+            sb.append(String.join(", ", getTags()));
             sb.append("]");
         }
         if (!getGroupNames().isEmpty()) {
             sb.append(", ");
             sb.append("Groups=[");
-            sb.append(getGroupNames().stream().collect(Collectors.joining(", ")));
+            sb.append(String.join(", ", getGroupNames()));
             sb.append("]");
         }
         sb.append(")");
@@ -314,11 +410,23 @@ public abstract class GenericItem implements ActiveItem {
         }
     }
 
+    public void addTimeSeriesListener(TimeSeriesListener listener) {
+        synchronized (timeSeriesListeners) {
+            timeSeriesListeners.add(listener);
+        }
+    }
+
+    public void removeTimeSeriesListener(TimeSeriesListener listener) {
+        synchronized (timeSeriesListeners) {
+            timeSeriesListeners.remove(listener);
+        }
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        result = prime * result + name.hashCode();
         return result;
     }
 
@@ -334,11 +442,7 @@ public abstract class GenericItem implements ActiveItem {
             return false;
         }
         GenericItem other = (GenericItem) obj;
-        if (name == null) {
-            if (other.name != null) {
-                return false;
-            }
-        } else if (!name.equals(other.name)) {
+        if (!name.equals(other.name)) {
             return false;
         }
         return true;
@@ -346,7 +450,7 @@ public abstract class GenericItem implements ActiveItem {
 
     @Override
     public Set<String> getTags() {
-        return Collections.unmodifiableSet(new HashSet<>(tags));
+        return Set.copyOf(tags);
     }
 
     @Override
@@ -406,19 +510,17 @@ public abstract class GenericItem implements ActiveItem {
 
     @Override
     public @Nullable StateDescription getStateDescription(@Nullable Locale locale) {
-        if (stateDescriptionService != null) {
-            return stateDescriptionService.getStateDescription(this.name, locale);
+        if (stateDescriptionService instanceof StateDescriptionService service) {
+            return service.getStateDescription(this.name, locale);
         }
         return null;
     }
 
     @Override
     public @Nullable CommandDescription getCommandDescription(@Nullable Locale locale) {
-        if (commandDescriptionService != null) {
-            CommandDescription commandDescription = commandDescriptionService.getCommandDescription(this.name, locale);
-            if (commandDescription != null) {
-                return commandDescription;
-            }
+        CommandDescription commandOptions = getCommandOptions(locale);
+        if (commandOptions != null) {
+            return commandOptions;
         }
 
         StateDescription stateDescription = getStateDescription(locale);
@@ -437,8 +539,7 @@ public abstract class GenericItem implements ActiveItem {
      * @return true if state is an acceptedDataType or subclass thereof
      */
     public boolean isAcceptedState(List<Class<? extends State>> acceptedDataTypes, State state) {
-        return acceptedDataTypes.stream().map(clazz -> clazz.isAssignableFrom(state.getClass())).filter(found -> found)
-                .findAny().isPresent();
+        return acceptedDataTypes.stream().anyMatch(clazz -> clazz.isAssignableFrom(state.getClass()));
     }
 
     protected void logSetTypeError(State state) {
@@ -446,7 +547,23 @@ public abstract class GenericItem implements ActiveItem {
                 state.getClass().getSimpleName(), getName(), getClass().getSimpleName());
     }
 
-    private @Nullable CommandDescription stateOptions2CommandOptions(StateDescription stateDescription) {
+    protected void logSetTypeError(TimeSeries timeSeries) {
+        logger.error("Tried to set invalid state in time series {} on item {} of type {}, ignoring it", timeSeries,
+                getName(), getClass().getSimpleName());
+    }
+
+    protected @Nullable CommandDescription getCommandOptions(@Nullable Locale locale) {
+        if (commandDescriptionService instanceof CommandDescriptionService service) {
+            CommandDescription commandDescription = service.getCommandDescription(this.name, locale);
+            if (commandDescription != null) {
+                return commandDescription;
+            }
+        }
+
+        return null;
+    }
+
+    private CommandDescription stateOptions2CommandOptions(StateDescription stateDescription) {
         CommandDescriptionBuilder builder = CommandDescriptionBuilder.create();
         stateDescription.getOptions()
                 .forEach(so -> builder.withCommandOption(new CommandOption(so.getValue(), so.getLabel())));

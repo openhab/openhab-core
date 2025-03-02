@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -41,6 +41,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.openhab.core.library.types.PointType;
+import org.openhab.core.library.unit.CurrencyUnits;
 import org.openhab.core.library.unit.ImperialUnits;
 import org.openhab.core.library.unit.SIUnits;
 import org.openhab.core.library.unit.Units;
@@ -98,7 +99,7 @@ public class I18nProviderImplTest {
     public void assertThatConfigurationWasSet() {
         i18nProviderImpl.modified((Map<String, Object>) initialConfig);
 
-        PointType location = i18nProviderImpl.getLocation();
+        PointType location = Objects.requireNonNull(i18nProviderImpl.getLocation());
         Locale setLocale = i18nProviderImpl.getLocale();
 
         assertThat(location.toString(), is(LOCATION_ZERO));
@@ -128,7 +129,7 @@ public class I18nProviderImplTest {
         conf.put(LOCATION, LOCATION_DARMSTADT);
         i18nProviderImpl.modified(conf);
 
-        PointType location = i18nProviderImpl.getLocation();
+        PointType location = Objects.requireNonNull(i18nProviderImpl.getLocation());
         Locale setLocale = i18nProviderImpl.getLocale();
 
         assertThat(location.toString(), is(LOCATION_DARMSTADT));
@@ -137,7 +138,7 @@ public class I18nProviderImplTest {
 
     @Test
     public void assertThatActivateSetsLocaleAndLocation() {
-        PointType location = i18nProviderImpl.getLocation();
+        PointType location = Objects.requireNonNull(i18nProviderImpl.getLocation());
         Locale setLocale = i18nProviderImpl.getLocale();
 
         assertThat(location.toString(), is(LOCATION_ZERO));
@@ -161,7 +162,7 @@ public class I18nProviderImplTest {
     public void assertThatConfigurationChangeWorks() {
         i18nProviderImpl.modified(buildRUConfig());
 
-        PointType location = i18nProviderImpl.getLocation();
+        PointType location = Objects.requireNonNull(i18nProviderImpl.getLocation());
         Locale setLocale = i18nProviderImpl.getLocale();
 
         assertThat(location.toString(), is(LOCATION_HAMBURG));
@@ -176,15 +177,16 @@ public class I18nProviderImplTest {
     @MethodSource("getAllDimensions")
     @SuppressWarnings("unchecked")
     public <T extends Quantity<T>> void assertThatUnitProviderIsComplete(String dimensionName) {
-        Class<? extends Quantity<?>> dimension = UnitUtils.parseDimension(dimensionName);
-        assertThat(dimension, is(notNullValue()));
+        Class<? extends Quantity<?>> dimension = Objects.requireNonNull(UnitUtils.parseDimension(dimensionName));
 
         Unit<?> defaultUnit = i18nProviderImpl.getUnit((Class<T>) dimension);
         assertThat(dimensionName + " has no default unit", defaultUnit, notNullValue());
     }
 
     private static Stream<String> getAllDimensions() {
-        return Stream.of(SIUnits.getInstance(), Units.getInstance(), ImperialUnits.getInstance())
+        return Stream
+                .of(SIUnits.getInstance(), Units.getInstance(), ImperialUnits.getInstance(),
+                        CurrencyUnits.getInstance())
                 .map(SystemOfUnits::getUnits).flatMap(Collection::stream) //
                 .map(UnitUtils::getDimensionName).filter(Objects::nonNull).map(Objects::requireNonNull).distinct();
     }

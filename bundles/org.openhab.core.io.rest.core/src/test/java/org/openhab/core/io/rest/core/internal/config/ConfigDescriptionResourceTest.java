@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,6 +17,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -24,6 +25,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
@@ -79,7 +81,7 @@ public class ConfigDescriptionResourceTest {
     public void shouldReturnAllConfigDescriptions() throws IOException {
         Response response = resource.getAll(null, null);
         assertThat(response.getStatus(), is(200));
-        assertThat(new String(((InputStream) response.getEntity()).readAllBytes(), StandardCharsets.UTF_8), is(
+        assertThat(toString(response.getEntity()), is(
                 "[{\"uri\":\"system:i18n\",\"parameters\":[{\"default\":\"test\",\"name\":\"name\",\"required\":false,\"type\":\"TEXT\",\"readOnly\":false,\"multiple\":false,\"advanced\":false,\"verify\":false,\"limitToOptions\":true,\"options\":[],\"filterCriteria\":[]}],\"parameterGroups\":[]},{\"uri\":\"system:ephemeris\",\"parameters\":[{\"name\":\"country\",\"required\":false,\"type\":\"TEXT\",\"readOnly\":false,\"multiple\":false,\"advanced\":false,\"verify\":false,\"limitToOptions\":true,\"options\":[],\"filterCriteria\":[]}],\"parameterGroups\":[]}]"));
     }
 
@@ -87,7 +89,7 @@ public class ConfigDescriptionResourceTest {
     public void shouldReturnAConfigDescription() throws IOException {
         Response response = resource.getByURI(null, CONFIG_DESCRIPTION_SYSTEM_I18N_URI);
         assertThat(response.getStatus(), is(200));
-        assertThat(new String(((InputStream) response.getEntity()).readAllBytes(), StandardCharsets.UTF_8), is(
+        assertThat(toString(response.getEntity()), is(
                 "{\"uri\":\"system:i18n\",\"parameters\":[{\"default\":\"test\",\"name\":\"name\",\"required\":false,\"type\":\"TEXT\",\"readOnly\":false,\"multiple\":false,\"advanced\":false,\"verify\":false,\"limitToOptions\":true,\"options\":[],\"filterCriteria\":[]}],\"parameterGroups\":[]}"));
     }
 
@@ -95,5 +97,18 @@ public class ConfigDescriptionResourceTest {
     public void shouldReturnStatus404() {
         Response response = resource.getByURI(null, "uri:invalid");
         assertThat(response.getStatus(), is(404));
+    }
+
+    public String toString(Object entity) throws IOException {
+        byte[] bytes;
+        if (entity instanceof StreamingOutput streaming) {
+            try (ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
+                streaming.write(buffer);
+                bytes = buffer.toByteArray();
+            }
+        } else {
+            bytes = ((InputStream) entity).readAllBytes();
+        }
+        return new String(bytes, StandardCharsets.UTF_8);
     }
 }

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -20,9 +20,9 @@ import static org.openhab.core.config.discovery.inbox.InboxPredicates.*;
 
 import java.math.BigDecimal;
 import java.net.URI;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -148,7 +148,7 @@ public class InboxOSGiTest extends JavaOSGiTest {
             put("pnr", 1234455);
             put("snr", 12345);
             put("manufacturer", "huawei");
-            put("manufactured", new Date(12344));
+            put("manufactured", Instant.ofEpochMilli(12344));
         }
     };
 
@@ -160,10 +160,10 @@ public class InboxOSGiTest extends JavaOSGiTest {
             .withConfigDescriptionURI(testURI).build();
     private final ConfigDescription testConfigDescription = ConfigDescriptionBuilder.create(testURI)
             .withParameters(List.of(
-                    ConfigDescriptionParameterBuilder.create(discoveryResultPropertyKeys.get(0), Type.TEXT).build(),
+                    ConfigDescriptionParameterBuilder.create(discoveryResultPropertyKeys.getFirst(), Type.TEXT).build(),
                     ConfigDescriptionParameterBuilder.create(discoveryResultPropertyKeys.get(1), Type.INTEGER).build()))
             .build();
-    private final String[] keysInConfigDescription = new String[] { discoveryResultPropertyKeys.get(0),
+    private final String[] keysInConfigDescription = new String[] { discoveryResultPropertyKeys.getFirst(),
             discoveryResultPropertyKeys.get(1) };
     private final String[] keysNotInConfigDescription = new String[] { discoveryResultPropertyKeys.get(2),
             discoveryResultPropertyKeys.get(3), discoveryResultPropertyKeys.get(4) };
@@ -295,7 +295,7 @@ public class InboxOSGiTest extends JavaOSGiTest {
         allDiscoveryResults = inbox.getAll();
         assertThat(allDiscoveryResults.size(), is(1));
 
-        DiscoveryResult actualDiscoveryResult = allDiscoveryResults.get(0);
+        DiscoveryResult actualDiscoveryResult = allDiscoveryResults.getFirst();
         assertThat(actualDiscoveryResult.getThingUID(), is(thingUID));
         assertThat(actualDiscoveryResult.getThingTypeUID(), is(thingTypeUID));
         assertThat(actualDiscoveryResult.getBindingId(), is("dummyBindingId"));
@@ -338,7 +338,7 @@ public class InboxOSGiTest extends JavaOSGiTest {
         allDiscoveryResults = inbox.getAll();
         assertThat(allDiscoveryResults.size(), is(1));
 
-        DiscoveryResult actualDiscoveryResult = allDiscoveryResults.get(0);
+        DiscoveryResult actualDiscoveryResult = allDiscoveryResults.getFirst();
         assertThat(actualDiscoveryResult.getThingUID(), is(thingUID));
         assertThat(actualDiscoveryResult.getThingTypeUID(), is(thingTypeUID));
         assertThat(actualDiscoveryResult.getBindingId(), is("dummyBindingId"));
@@ -808,7 +808,7 @@ public class InboxOSGiTest extends JavaOSGiTest {
                 .anyMatch(forThingUID(THING1_WITH_BRIDGE.getThingUID()).and(withFlag(DiscoveryResultFlag.NEW))));
         assertFalse(inbox.stream()
                 .anyMatch(forThingUID(THING2_WITH_BRIDGE.getThingUID()).and(withFlag(DiscoveryResultFlag.NEW))));
-        assertThat(inbox.stream().filter(withFlag(DiscoveryResultFlag.NEW)).collect(Collectors.toList()),
+        assertThat(inbox.stream().filter(withFlag(DiscoveryResultFlag.NEW)).toList(),
                 hasItems(THING_WITHOUT_BRIDGE, THING_WITH_OTHER_BRIDGE));
         waitForAssert(() -> {
             assertThat(receivedEvents.size(), is(3));
@@ -845,7 +845,7 @@ public class InboxOSGiTest extends JavaOSGiTest {
 
         registry.add(BridgeBuilder.create(BRIDGE_THING_TYPE_UID, BRIDGE_THING_UID).build());
         assertFalse(inbox.stream().anyMatch(forThingUID(BRIDGE.getThingUID()).and(withFlag(DiscoveryResultFlag.NEW))));
-        assertThat(inbox.stream().filter(withFlag(DiscoveryResultFlag.NEW)).collect(Collectors.toList()),
+        assertThat(inbox.stream().filter(withFlag(DiscoveryResultFlag.NEW)).toList(),
                 hasItems(THING1_WITH_BRIDGE, THING2_WITH_BRIDGE, THING_WITHOUT_BRIDGE));
         waitForAssert(() -> {
             assertThat(receivedEvents.size(), is(1));
@@ -879,7 +879,7 @@ public class InboxOSGiTest extends JavaOSGiTest {
         inbox.add(THING2_WITH_BRIDGE);
         inbox.add(THING_WITHOUT_BRIDGE);
         inbox.add(THING_WITH_OTHER_BRIDGE);
-        assertThat(inbox.stream().filter(withFlag(DiscoveryResultFlag.NEW)).collect(Collectors.toList()),
+        assertThat(inbox.stream().filter(withFlag(DiscoveryResultFlag.NEW)).toList(),
                 hasItems(THING1_WITH_BRIDGE, THING2_WITH_BRIDGE, THING_WITHOUT_BRIDGE, THING_WITH_OTHER_BRIDGE));
 
         registry.forceRemove(BRIDGE.getThingUID());
@@ -889,7 +889,7 @@ public class InboxOSGiTest extends JavaOSGiTest {
                     .anyMatch(forThingUID(THING1_WITH_BRIDGE.getThingUID()).and(withFlag(DiscoveryResultFlag.NEW))));
             assertFalse(inbox.stream()
                     .anyMatch(forThingUID(THING2_WITH_BRIDGE.getThingUID()).and(withFlag(DiscoveryResultFlag.NEW))));
-            assertThat(inbox.stream().filter(withFlag(DiscoveryResultFlag.NEW)).collect(Collectors.toList()),
+            assertThat(inbox.stream().filter(withFlag(DiscoveryResultFlag.NEW)).toList(),
                     hasItems(THING_WITHOUT_BRIDGE, THING_WITH_OTHER_BRIDGE));
         });
     }
@@ -905,12 +905,12 @@ public class InboxOSGiTest extends JavaOSGiTest {
         Thing approvedThing = inbox.approve(testThing.getUID(), testThingLabel, null);
         Thing addedThing = registry.get(testThing.getUID());
 
-        assertFalse(addedThing == null);
-        assertFalse(approvedThing == null);
-        assertTrue(approvedThing.equals(addedThing));
-        discoveryResultProperties.keySet().forEach(key -> {
+        assertNotNull(addedThing);
+        assertNotNull(approvedThing);
+        assertEquals(approvedThing, addedThing);
+        discoveryResultProperties.forEach((key, value) -> {
             String thingProperty = addedThing.getProperties().get(key);
-            String descResultParam = String.valueOf(discoveryResultProperties.get(key));
+            String descResultParam = String.valueOf(value);
             assertThat(thingProperty, is(notNullValue()));
             assertThat(descResultParam, is(notNullValue()));
             assertThat(thingProperty, is(descResultParam));
@@ -946,9 +946,9 @@ public class InboxOSGiTest extends JavaOSGiTest {
         Thing approvedThing = inbox.approve(testThing.getUID(), null, testId2);
         Thing addedThing = registry.get(test2Thing.getUID());
 
-        assertFalse(addedThing == null);
-        assertFalse(approvedThing == null);
-        assertTrue(approvedThing.equals(addedThing));
+        assertNotNull(addedThing);
+        assertNotNull(approvedThing);
+        assertEquals(approvedThing, addedThing);
     }
 
     @Test
@@ -993,24 +993,24 @@ public class InboxOSGiTest extends JavaOSGiTest {
 
         Thing approvedThing = inbox.approve(testThing.getUID(), testThingLabel, null);
         Thing addedThing = registry.get(testThing.getUID());
-        assertTrue(approvedThing.equals(addedThing));
-        assertFalse(addedThing == null);
+        assertEquals(approvedThing, addedThing);
+        assertNotNull(addedThing);
         for (String key : keysInConfigDescription) {
             Object thingConfItem = addedThing.getConfiguration().get(key);
             Object descResultParam = discoveryResultProperties.get(key);
             if (descResultParam instanceof Number) {
                 descResultParam = new BigDecimal(descResultParam.toString());
             }
-            assertFalse(thingConfItem == null);
-            assertFalse(descResultParam == null);
-            assertTrue(thingConfItem.equals(descResultParam));
+            assertNotNull(thingConfItem);
+            assertNotNull(descResultParam);
+            assertEquals(thingConfItem, descResultParam);
         }
         for (String key : keysNotInConfigDescription) {
             String thingProperty = addedThing.getProperties().get(key);
             String descResultParam = String.valueOf(discoveryResultProperties.get(key));
-            assertFalse(thingProperty == null);
-            assertFalse(descResultParam == null);
-            assertTrue(thingProperty.equals(descResultParam));
+            assertNotNull(thingProperty);
+            assertNotNull(descResultParam);
+            assertEquals(thingProperty, descResultParam);
         }
 
         services.forEach(this::unregisterService);
@@ -1019,7 +1019,7 @@ public class InboxOSGiTest extends JavaOSGiTest {
     @Test
     public void assertThatRemoveOlderResultsOnlyRemovesResultsFromTheSameDiscoveryService() {
         inbox.thingDiscovered(discoveryService1, testDiscoveryResult);
-        long now = new Date().getTime() + 1;
+        long now = Instant.now().toEpochMilli() + 1;
         assertThat(inbox.getAll().size(), is(1));
 
         // should not remove a result
@@ -1034,7 +1034,7 @@ public class InboxOSGiTest extends JavaOSGiTest {
     @Test
     public void assertThatRemoveOlderResultsRemovesResultsWithoutAsource() {
         inbox.add(testDiscoveryResult);
-        long now = new Date().getTime() + 1;
+        long now = Instant.now().toEpochMilli() + 1;
         assertThat(inbox.getAll().size(), is(1));
 
         // should remove a result
@@ -1076,7 +1076,7 @@ public class InboxOSGiTest extends JavaOSGiTest {
         assertThat(future.get(), is(true));
     }
 
-    class DummyThingHandlerFactory extends BaseThingHandlerFactory {
+    static class DummyThingHandlerFactory extends BaseThingHandlerFactory {
 
         public DummyThingHandlerFactory(ComponentContext context) {
             super.activate(context);

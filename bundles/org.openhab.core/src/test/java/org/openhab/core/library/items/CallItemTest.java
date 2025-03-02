@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -32,13 +32,13 @@ public class CallItemTest {
         CallItem callItem1 = new CallItem("testItem");
 
         callItem1.setState(callType1);
-        assertEquals(callItem1.toString(),
-                "testItem (Type=CallItem, State=0699222222,0179999998, Label=null, Category=null)");
+        assertEquals("testItem (Type=CallItem, State=0699222222,0179999998, Label=null, Category=null)",
+                callItem1.toString());
 
         callType1 = new StringListType("0699222222,0179999998");
         callItem1.setState(callType1);
-        assertEquals(callItem1.toString(),
-                "testItem (Type=CallItem, State=0699222222,0179999998, Label=null, Category=null)");
+        assertEquals("testItem (Type=CallItem, State=0699222222,0179999998, Label=null, Category=null)",
+                callItem1.toString());
     }
 
     @Test

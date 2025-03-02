@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,7 +13,11 @@
 package org.openhab.core.io.rest.ui.internal;
 
 import java.security.InvalidParameterException;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -27,13 +31,16 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.auth.Role;
+import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
 import org.openhab.core.io.rest.Stream2JSONInputStream;
@@ -45,6 +52,7 @@ import org.openhab.core.ui.tiles.Tile;
 import org.openhab.core.ui.tiles.TileProvider;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
 import org.osgi.service.component.annotations.Reference;
 import org.osgi.service.jaxrs.whiteboard.JaxrsWhiteboardConstants;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JSONRequired;
@@ -84,12 +92,23 @@ public class UIResource implements RESTResource {
     private final UIComponentRegistryFactory componentRegistryFactory;
     private final TileProvider tileProvider;
 
+    private Map<String, Date> lastModifiedDates = new HashMap<>();
+    private Map<String, RegistryChangeListener<RootUIComponent>> registryChangeListeners = new HashMap<>();
+
     @Activate
     public UIResource( //
             final @Reference UIComponentRegistryFactory componentRegistryFactory,
             final @Reference TileProvider tileProvider) {
         this.componentRegistryFactory = componentRegistryFactory;
         this.tileProvider = tileProvider;
+    }
+
+    @Deactivate
+    public void deactivate() {
+        registryChangeListeners.forEach((n, l) -> {
+            UIComponentRegistry registry = componentRegistryFactory.getRegistry(n);
+            registry.removeRegistryChangeListener(l);
+        });
     }
 
     @GET
@@ -107,7 +126,7 @@ public class UIResource implements RESTResource {
     @Produces({ MediaType.APPLICATION_JSON })
     @Operation(operationId = "getRegisteredUIComponentsInNamespace", summary = "Get all registered UI components in the specified namespace.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = RootUIComponent.class)))) })
-    public Response getAllComponents(@PathParam("namespace") String namespace,
+    public Response getAllComponents(@Context Request request, @PathParam("namespace") String namespace,
             @QueryParam("summary") @Parameter(description = "summary fields only") @Nullable Boolean summary) {
         UIComponentRegistry registry = componentRegistryFactory.getRegistry(namespace);
         Stream<RootUIComponent> components = registry.getAll().stream();
@@ -126,8 +145,30 @@ public class UIResource implements RESTResource {
                 }
                 return component;
             });
+            return Response.ok(new Stream2JSONInputStream(components)).build();
+        } else {
+            if (!registryChangeListeners.containsKey(namespace)) {
+                RegistryChangeListener<RootUIComponent> changeListener = new ResetLastModifiedChangeListener(namespace);
+                registryChangeListeners.put(namespace, changeListener);
+                registry.addRegistryChangeListener(changeListener);
+            }
+
+            Date lastModifiedDate = Date.from(Instant.now());
+            if (lastModifiedDates.containsKey(namespace)) {
+                lastModifiedDate = lastModifiedDates.get(namespace);
+                Response.ResponseBuilder responseBuilder = request.evaluatePreconditions(lastModifiedDate);
+                if (responseBuilder != null) {
+                    // send 304 Not Modified
+                    return responseBuilder.build();
+                }
+            } else {
+                lastModifiedDate = Date.from(Instant.now().truncatedTo(ChronoUnit.SECONDS));
+                lastModifiedDates.put(namespace, lastModifiedDate);
+            }
+
+            return Response.ok(new Stream2JSONInputStream(components)).lastModified(lastModifiedDate)
+                    .cacheControl(RESTConstants.CACHE_CONTROL).build();
         }
-        return Response.ok(new Stream2JSONInputStream(components)).build();
     }
 
     @GET
@@ -207,5 +248,33 @@ public class UIResource implements RESTResource {
 
     private TileDTO toTileDTO(Tile tile) {
         return new TileDTO(tile.getName(), tile.getUrl(), tile.getOverlay(), tile.getImageUrl());
+    }
+
+    private void resetLastModifiedDate(String namespace) {
+        lastModifiedDates.remove(namespace);
+    }
+
+    private class ResetLastModifiedChangeListener implements RegistryChangeListener<RootUIComponent> {
+
+        private String namespace;
+
+        ResetLastModifiedChangeListener(String namespace) {
+            this.namespace = namespace;
+        }
+
+        @Override
+        public void added(RootUIComponent element) {
+            resetLastModifiedDate(namespace);
+        }
+
+        @Override
+        public void removed(RootUIComponent element) {
+            resetLastModifiedDate(namespace);
+        }
+
+        @Override
+        public void updated(RootUIComponent oldElement, RootUIComponent element) {
+            resetLastModifiedDate(namespace);
+        }
     }
 }

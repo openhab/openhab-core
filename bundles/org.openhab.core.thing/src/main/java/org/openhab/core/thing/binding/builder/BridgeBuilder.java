@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -46,6 +46,19 @@ public class BridgeBuilder extends ThingBuilder {
 
     public static BridgeBuilder create(ThingTypeUID thingTypeUID, ThingUID thingUID) {
         return new BridgeBuilder(thingTypeUID, thingUID);
+    }
+
+    /**
+     * Create a new bridge {@link BridgeBuilder} for a copy of the given bridge
+     *
+     * @param bridge the {@link Bridge} to create this builder from
+     * @return the created {@link BridgeBuilder}
+     *
+     */
+    public static BridgeBuilder create(Bridge bridge) {
+        return BridgeBuilder.create(bridge.getThingTypeUID(), bridge.getUID()).withBridge(bridge.getBridgeUID())
+                .withChannels(bridge.getChannels()).withConfiguration(bridge.getConfiguration())
+                .withLabel(bridge.getLabel()).withLocation(bridge.getLocation()).withProperties(bridge.getProperties());
     }
 
     @Override

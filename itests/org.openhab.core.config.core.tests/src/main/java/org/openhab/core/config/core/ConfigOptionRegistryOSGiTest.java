@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -19,7 +19,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -57,11 +56,8 @@ public class ConfigOptionRegistryOSGiTest extends JavaOSGiTest {
         ConfigDescription configDescription = ConfigDescriptionBuilder.create(DUMMY_URI).withParameter(param1).build();
 
         // Create config option list
-        List<ParameterOption> oList1 = new ArrayList<>();
-        ParameterOption parameterOption = new ParameterOption("Option1", "Option1");
-        oList1.add(parameterOption);
-        parameterOption = new ParameterOption("Option2", "Option2");
-        oList1.add(parameterOption);
+        List<ParameterOption> oList1 = List.of(new ParameterOption("Option1", "Option1"),
+                new ParameterOption("Option2", "Option2"));
 
         when(configOptionsProviderMock.getParameterOptions(any(), any(), any(), any())).thenReturn(oList1);
 
@@ -83,9 +79,9 @@ public class ConfigOptionRegistryOSGiTest extends JavaOSGiTest {
         assertThat(configDescriptions, is(not(nullValue())));
         assertThat("Config is found", configDescriptions.getUID(), is(DUMMY_URI));
         assertThat("Config contains parameter", configDescriptions.getParameters(), hasSize(1));
-        assertThat("Config parameter found", configDescriptions.getParameters().get(0).getName(),
+        assertThat("Config parameter found", configDescriptions.getParameters().getFirst().getName(),
                 is(equalTo("Param1")));
-        assertThat("Config parameter contains options", configDescriptions.getParameters().get(0).getOptions(),
+        assertThat("Config parameter contains options", configDescriptions.getParameters().getFirst().getOptions(),
                 hasSize(2));
 
         configDescriptionRegistry.removeConfigOptionProvider(configOptionsProviderMock);

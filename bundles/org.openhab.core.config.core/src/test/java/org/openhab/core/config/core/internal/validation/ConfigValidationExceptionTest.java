@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -43,8 +43,8 @@ public class ConfigValidationExceptionTest {
     private static final String PARAM1 = "param1";
     private static final String PARAM2 = "param2";
 
-    private static final Locale DE = new Locale("de");
-    private static final Locale EN = new Locale("en");
+    private static final Locale DE = Locale.GERMAN;
+    private static final Locale EN = Locale.ENGLISH;
 
     private static final int MAX = 3;
     private static final String TXT_DE1 = "German 1";

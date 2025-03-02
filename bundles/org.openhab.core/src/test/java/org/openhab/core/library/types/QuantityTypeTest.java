@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,6 +14,7 @@ package org.openhab.core.library.types;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.number.IsCloseTo.closeTo;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.openhab.core.library.unit.MetricPrefix.CENTI;
 
@@ -142,7 +143,30 @@ public class QuantityTypeTest {
         new QuantityType<>("0E-22 m");
         new QuantityType<>("10E-3");
         new QuantityType<>("10E3");
+        new QuantityType<>("1 /s");
+        new QuantityType<>("1/s");
+        new QuantityType<>("1Ω·m");
+        new QuantityType<>("1 Ω·m");
+        new QuantityType<>("1.5E2Ω·m");
         QuantityType.valueOf("2m");
+    }
+
+    @Test
+    public void testLowerCaseExponents() {
+        assertEquals(QuantityType.valueOf("10e3"), QuantityType.valueOf("10E3"));
+        assertEquals(QuantityType.valueOf("1.1e3 W"), QuantityType.valueOf("1.1E3 W"));
+        assertEquals(QuantityType.valueOf("1.1e3 m"), QuantityType.valueOf("1.1E3 m"));
+        assertEquals(QuantityType.valueOf("1.1e3m"), QuantityType.valueOf("1.1E3 m"));
+        assertEquals(QuantityType.valueOf("1.1e3m³"), QuantityType.valueOf("1.1E3 m³"));
+        assertEquals(QuantityType.valueOf("1.1e3m·cm"), QuantityType.valueOf("1.1E3 m·cm"));
+        assertEquals(QuantityType.valueOf("1.1e3 \u03BCm"), QuantityType.valueOf("1.1E3 µm"));
+        assertEquals(QuantityType.valueOf("1.1e3\u03BCm"), QuantityType.valueOf("1.1E3 µm"));
+        assertEquals(QuantityType.valueOf("1.1e3 \u00B5m"), QuantityType.valueOf("1.1E3 µm"));
+        assertEquals(QuantityType.valueOf("1.1e3\u00B5m"), QuantityType.valueOf("1.1E3 µm"));
+        assertEquals(QuantityType.valueOf("1.1e3Ω·m"), QuantityType.valueOf("1.1E3 Ω·m"));
+        assertEquals(QuantityType.valueOf("1.1e3 Ω·m"), QuantityType.valueOf("1.1E3 Ω·m"));
+        assertEquals(QuantityType.valueOf("1.1e3/s"), QuantityType.valueOf("1.1E3 /s"));
+        assertEquals(QuantityType.valueOf("1.1e3 /s"), QuantityType.valueOf("1.1E3 /s"));
     }
 
     @ParameterizedTest
@@ -190,20 +214,20 @@ public class QuantityTypeTest {
     public void testUnits() {
         QuantityType<Length> dt2 = new QuantityType<>("2 m");
         // Check that the unit has correctly been identified
-        assertEquals(dt2.getDimension(), UnitDimension.LENGTH);
-        assertEquals(dt2.getUnit(), SIUnits.METRE);
+        assertEquals(UnitDimension.LENGTH, dt2.getDimension());
+        assertEquals(SIUnits.METRE, dt2.getUnit());
         assertEquals("2 m", dt2.toString());
 
         QuantityType<Length> dt1 = new QuantityType<>("2.1cm");
         // Check that the unit has correctly been identified
-        assertEquals(dt1.getDimension(), UnitDimension.LENGTH);
-        assertEquals(dt1.getUnit(), CENTI(SIUnits.METRE));
+        assertEquals(UnitDimension.LENGTH, dt1.getDimension());
+        assertEquals(CENTI(SIUnits.METRE), dt1.getUnit());
         assertEquals("2.1 cm", dt1.toString());
 
         assertEquals(dt1.intValue(), dt2.intValue());
 
         QuantityType<Length> dt3 = new QuantityType<>("200cm");
-        assertEquals(dt3.compareTo(dt2), 0);
+        assertEquals(0, dt3.compareTo(dt2));
         assertTrue(dt3.equals(dt2));
 
         QuantityType dt4 = new QuantityType<>("2kg");
@@ -226,11 +250,17 @@ public class QuantityTypeTest {
         assertThat(millis.format("%.1f " + UnitUtils.UNIT_PLACEHOLDER), is("80000" + ds + "0 ms"));
         assertThat(minutes.format("%.1f " + UnitUtils.UNIT_PLACEHOLDER), is("1" + ds + "3 min"));
 
+        assertThat(seconds.format("%s"), is("80 s"));
+        assertThat(millis.format("%s"), is("80000 ms"));
+
         assertThat(seconds.format("%.1f"), is("80" + ds + "0"));
         assertThat(minutes.format("%.1f"), is("1" + ds + "3"));
 
         assertThat(seconds.format("%1$tH:%1$tM:%1$tS"), is("00:01:20"));
         assertThat(millis.format("%1$tHh %1$tMm %1$tSs"), is("00h 01m 20s"));
+        assertThat(millis.format("%1$tT.%1$tL"), is("00:01:20.000"));
+        assertThat(seconds.format("%1$tss and %1$tSs"), is("80s and 80s"));
+        assertThat(seconds.format("%1$tSs and %1$tMm"), is("20s and 01m"));
     }
 
     @Test
@@ -263,7 +293,7 @@ public class QuantityTypeTest {
         QuantityType<?> dt2 = QuantityType.valueOf("2");
         QuantityType<?> dt3 = dt2.toUnit("m");
         // Inconvertible units
-        assertTrue(dt3 == null);
+        assertNull(dt3);
     }
 
     @Test
@@ -319,7 +349,7 @@ public class QuantityTypeTest {
                 new QuantityType<>(0.1, Units.RADIAN).as(PercentType.class));
 
         // incompatible units
-        assertEquals(null, new QuantityType<>("0.5 m").as(PercentType.class));
+        assertNull(new QuantityType<>("0.5 m").as(PercentType.class));
     }
 
     @ParameterizedTest
@@ -340,6 +370,26 @@ public class QuantityTypeTest {
 
         QuantityType<?> result = new QuantityType<>("20 m").add(new QuantityType<>("20cm"));
         assertThat(result, is(new QuantityType<>("20.20 m")));
+
+        assertThat(new QuantityType<>("65 °F").add(new QuantityType<>("1 °F")), is(new QuantityType<>("66 °F")));
+        assertThat(new QuantityType<>("65 °F").add(new QuantityType<>("2 °F")), is(new QuantityType<>("67 °F")));
+        assertThat(new QuantityType<>("1 °F").add(new QuantityType<>("65 °F")), is(new QuantityType<>("66 °F")));
+        assertThat(new QuantityType<>("2 °F").add(new QuantityType<>("65 °F")), is(new QuantityType<>("67 °F")));
+
+        result = new QuantityType<>("65 °F").add(new QuantityType<>("5 °C")).toUnit("°F");
+        assertThat(result.doubleValue(), is(closeTo(74d, 0.0000000000000001d)));
+        assertEquals(ImperialUnits.FAHRENHEIT, result.getUnit());
+
+        // test associativity of add
+        QuantityType<Temperature> tempResult = new QuantityType<Temperature>("1 °F").add(new QuantityType<>("2 °F"))
+                .add(new QuantityType<>("3 °F"));
+        assertThat(tempResult, is(new QuantityType<Temperature>("1 °F")
+                .add(new QuantityType<Temperature>("2 °F").add(new QuantityType<>("3 °F")))));
+        assertThat(tempResult, is(new QuantityType<Temperature>("6 °F")));
+
+        assertThat(new QuantityType<>("65 kWh").add(new QuantityType<>("1 kWh")), is(new QuantityType<>("66 kWh")));
+        assertThat(new QuantityType<>("65 kJ").add(new QuantityType<>("1 kJ")), is(new QuantityType<>("66 kJ")));
+        assertThat(new QuantityType<>("65 kWh").add(new QuantityType<>("1 kJ")), is(new QuantityType<>("234001 kJ")));
     }
 
     @Test
@@ -354,16 +404,73 @@ public class QuantityTypeTest {
 
         QuantityType<?> result = new QuantityType<>("20 m").subtract(new QuantityType<>("20cm"));
         assertThat(result, is(new QuantityType<>("19.80 m")));
+
+        assertThat(new QuantityType<>("65 °F").subtract(new QuantityType<>("1 °F")), is(new QuantityType<>("64 °F")));
+        assertThat(new QuantityType<>("65 °F").subtract(new QuantityType<>("2 °F")), is(new QuantityType<>("63 °F")));
+        assertThat(new QuantityType<>("1 °F").subtract(new QuantityType<>("65 °F")), is(new QuantityType<>("-64 °F")));
+        assertThat(new QuantityType<>("2 °F").subtract(new QuantityType<>("65 °F")), is(new QuantityType<>("-63 °F")));
+
+        assertThat(new QuantityType<>("65 kWh").subtract(new QuantityType<>("1 kWh")),
+                is(new QuantityType<>("64 kWh")));
+        assertThat(new QuantityType<>("65 kJ").subtract(new QuantityType<>("1 kJ")), is(new QuantityType<>("64 kJ")));
+        assertThat(new QuantityType<>("65 kWh").subtract(new QuantityType<>("1 kJ")),
+                is(new QuantityType<>("233999 kJ")));
     }
 
     @Test
     public void testMultiplyNumber() {
         assertThat(new QuantityType<>("2 m").multiply(BigDecimal.valueOf(2)), is(new QuantityType<>("4 m")));
+
+        assertThat(new QuantityType<>("65 °F").multiply(BigDecimal.valueOf(1)).toUnit("°F").doubleValue(),
+                is(closeTo(65d, 0.0000000000000001d)));
+        assertThat(new QuantityType<>("65 °F").multiply(BigDecimal.valueOf(2)).toUnit("°F").doubleValue(),
+                is(closeTo(589.67d, 0.0000000000000001d)));
     }
 
     @Test
     public void testMultiplyQuantityType() {
+        QuantityType<?> result;
+
         assertThat(new QuantityType<>("2 m").multiply(new QuantityType<>("4 cm")), is(new QuantityType<>("8 m·cm")));
+
+        // Make sure the original unit is preserved when multiplying with dimensionless, so add associativity is
+        // guaranteed
+        result = new QuantityType<>("65 °F").multiply(QuantityType.valueOf(1, Units.ONE));
+        assertThat(result.doubleValue(), is(closeTo(65d, 0.0000000000000001d)));
+        assertEquals(ImperialUnits.FAHRENHEIT, result.getUnit());
+        result = new QuantityType<>("65 °F").multiply(QuantityType.valueOf(2, Units.ONE));
+        assertThat(result.doubleValue(), is(closeTo(589.67d, 0.0000000000000001d)));
+        assertEquals(ImperialUnits.FAHRENHEIT, result.getUnit());
+        result = QuantityType.valueOf(1, Units.ONE).multiply(new QuantityType<>("65 °F"));
+        assertThat(result.doubleValue(), is(closeTo(65d, 0.0000000000000001d)));
+        assertEquals(ImperialUnits.FAHRENHEIT, result.getUnit());
+        result = QuantityType.valueOf(2, Units.ONE).multiply(new QuantityType<>("65 °F"));
+        assertThat(result.doubleValue(), is(closeTo(589.67d, 0.0000000000000001d)));
+        assertEquals(ImperialUnits.FAHRENHEIT, result.getUnit());
+
+        result = new QuantityType<>("65 °F").multiply(new QuantityType<>("1 °F"));
+        assertThat(result.doubleValue(), is(closeTo(74598.68175925925925925925925925927d, 0.0000000000000001d)));
+        assertEquals(Units.KELVIN.multiply(Units.KELVIN), result.getUnit());
+        result = new QuantityType<>("65 °F").multiply(new QuantityType<>("2 °F"));
+        assertThat(result.doubleValue(), is(closeTo(74760.6169444444444444444444444444d, 0.0000000000000001d)));
+        assertEquals(Units.KELVIN.multiply(Units.KELVIN), result.getUnit());
+        result = new QuantityType<>("1 °F").multiply(new QuantityType<>("65 °F"));
+        assertThat(result.doubleValue(), is(closeTo(74598.68175925925925925925925925927d, 0.0000000000000001d)));
+        assertEquals(Units.KELVIN.multiply(Units.KELVIN), result.getUnit());
+        result = new QuantityType<>("2 °F").multiply(new QuantityType<>("65 °F"));
+        assertThat(result.doubleValue(), is(closeTo(74760.6169444444444444444444444444d, 0.0000000000000001d)));
+        assertEquals(Units.KELVIN.multiply(Units.KELVIN), result.getUnit());
+
+        assertThat(new QuantityType<>("65 kWh").multiply(QuantityType.valueOf(1, Units.ONE)),
+                is(new QuantityType<>("65 kWh")));
+        assertThat(new QuantityType<>("65 kJ").multiply(QuantityType.valueOf(1, Units.ONE)),
+                is(new QuantityType<>("65 kJ")));
+        assertThat(new QuantityType<>("65 kWh").multiply(new QuantityType<>("1 kWh")),
+                is(new QuantityType<>(65, Units.KILOWATT_HOUR.multiply(Units.KILOWATT_HOUR))));
+        assertThat(new QuantityType<>("65 kJ").multiply(new QuantityType<>("1 kJ")),
+                is(new QuantityType<>(65, MetricPrefix.KILO(Units.JOULE).multiply(MetricPrefix.KILO(Units.JOULE)))));
+        assertThat(new QuantityType<>("65 kWh").multiply(new QuantityType<>("1 kJ")),
+                is(new QuantityType<>(65, Units.KILOWATT_HOUR.multiply(MetricPrefix.KILO(Units.JOULE)))));
     }
 
     @ParameterizedTest
@@ -372,6 +479,11 @@ public class QuantityTypeTest {
         Locale.setDefault(locale);
 
         assertThat(new QuantityType<>("4 m").divide(BigDecimal.valueOf(2)), is(new QuantityType<>("2 m")));
+
+        assertThat(new QuantityType<>("65 °F").divide(BigDecimal.valueOf(1)).toUnit("°F").doubleValue(),
+                is(closeTo(65d, 0.0000000000000001d)));
+        assertThat(new QuantityType<>("65 °F").divide(BigDecimal.valueOf(2)).toUnit("°F").doubleValue(),
+                is(closeTo(-197.335d, 0.0000000000000001d)));
     }
 
     @ParameterizedTest
@@ -379,7 +491,55 @@ public class QuantityTypeTest {
     public void testDivideQuantityType(Locale locale) {
         Locale.setDefault(locale);
 
+        QuantityType<?> result;
+
         assertThat(new QuantityType<>("4 m").divide(new QuantityType<>("2 cm")), is(new QuantityType<>("2 m/cm")));
+
+        // Make sure the original unit is preserved when dividing with dimensionless, so add associativity is guaranteed
+        result = new QuantityType<>("65 °F").divide(QuantityType.valueOf(1, Units.ONE));
+        assertThat(result.doubleValue(), is(closeTo(65d, 0.0000000000000001d)));
+        assertEquals(ImperialUnits.FAHRENHEIT, result.getUnit());
+        result = new QuantityType<>("65 °F").divide(QuantityType.valueOf(2, Units.ONE));
+        assertThat(result.doubleValue(), is(closeTo(-197.335d, 0.0000000000000001d)));
+        assertEquals(ImperialUnits.FAHRENHEIT, result.getUnit());
+        result = QuantityType.valueOf(1, Units.ONE).divide(new QuantityType<>("65 °F"));
+        assertThat(result.doubleValue(), is(closeTo(0.003430727886099834181485505174681228d, 0.0000000000000001d)));
+        assertEquals(Units.KELVIN.inverse(), result.getUnit());
+        result = QuantityType.valueOf(2, Units.ONE).divide(new QuantityType<>("65 °F"));
+        assertThat(result.doubleValue(), is(closeTo(0.006861455772199668362971010349362456d, 0.0000000000000001d)));
+        assertEquals(Units.KELVIN.inverse(), result.getUnit());
+
+        result = new QuantityType<>("65 °F").divide(new QuantityType<>("1 °F"));
+        assertThat(result.doubleValue(),
+                is(closeTo(1.138928083009529598193934920876115122114246640762367855514793670089202480d,
+                        0.0000000000000001d)));
+        assertEquals(Units.ONE, result.getUnit());
+        result = new QuantityType<>("65 °F").divide(new QuantityType<>("2 °F"));
+        assertThat(result.doubleValue(),
+                is(closeTo(1.136461108584053544739749171486126553533555353390950245846600385556783676d,
+                        0.0000000000000001d)));
+        assertEquals(Units.ONE, result.getUnit());
+        result = new QuantityType<>("1 °F").divide(new QuantityType<>("65 °F"));
+        assertThat(result.doubleValue(),
+                is(closeTo(0.878018564049783673547182038233556349552596235093804994885674169795613456d,
+                        0.0000000000000001d)));
+        assertEquals(Units.ONE, result.getUnit());
+        result = new QuantityType<>("2 °F").divide(new QuantityType<>("65 °F"));
+        assertThat(result.doubleValue(),
+                is(closeTo(0.879924523986505803648007318886157031927295252253797625173918844225890256d,
+                        0.0000000000000001d)));
+        assertEquals(Units.ONE, result.getUnit());
+
+        assertThat(new QuantityType<>("65 kWh").divide(QuantityType.valueOf(1, Units.ONE)),
+                is(new QuantityType<>("65 kWh")));
+        assertThat(new QuantityType<>("65 kJ").divide(QuantityType.valueOf(1, Units.ONE)),
+                is(new QuantityType<>("65 kJ")));
+        assertThat(new QuantityType<>("65 kWh").divide(new QuantityType<>("1 kWh")),
+                is(new QuantityType<>(65, Units.ONE)));
+        assertThat(new QuantityType<>("65 kJ").divide(new QuantityType<>("1 kJ")),
+                is(new QuantityType<>(65, Units.ONE)));
+        assertThat(new QuantityType<>("65 kWh").divide(new QuantityType<>("1 kJ")).toUnit(Units.ONE),
+                is(new QuantityType<>(234000, Units.ONE)));
     }
 
     @ParameterizedTest
@@ -463,11 +623,11 @@ public class QuantityTypeTest {
         assertEquals(8, bits.byteValue());
         bytes = new QuantityType<>("1 MB");
         assertEquals("1 MB", bytes.toString());
-        bytes = new QuantityType<DataAmount>(1, MetricPrefix.MEGA(Units.BYTE));
+        bytes = new QuantityType<>(1, MetricPrefix.MEGA(Units.BYTE));
         assertEquals("1 MB", bytes.toString());
         bytes = new QuantityType<>("1 GiB");
         assertEquals("1 GiB", bytes.toString());
-        bytes = new QuantityType<DataAmount>(1, BinaryPrefix.GIBI(Units.BYTE));
+        bytes = new QuantityType<>(1, BinaryPrefix.GIBI(Units.BYTE));
         assertEquals("1 GiB", bytes.toString());
         QuantityType<DataAmount> bigAmount = new QuantityType<>("1 kio");
         QuantityType<DataAmount> octets = bigAmount.toUnit(Units.OCTET);
@@ -489,19 +649,83 @@ public class QuantityTypeTest {
 
     @Test
     public void testMireds() {
-        QuantityType<Temperature> colorTemp = new QuantityType<>("2700 K");
+        // test value is selected to prevent any round-trip rounding errors
+        QuantityType<Temperature> colorTemp = new QuantityType<>("2000 K");
         QuantityType<?> mireds = colorTemp.toInvertibleUnit(Units.MIRED);
-        assertEquals(370, mireds.intValue());
+        assertEquals(500, mireds.intValue());
         assertThat(colorTemp.equals(mireds), is(true));
         assertThat(mireds.equals(colorTemp), is(true));
         QuantityType<?> andBack = mireds.toInvertibleUnit(Units.KELVIN);
-        assertEquals(2700, andBack.intValue());
+        assertEquals(2000, andBack.intValue());
     }
 
     @Test
     public void testRelativeConversion() {
-        QuantityType<Temperature> c = new QuantityType("1 °C");
+        QuantityType<Temperature> c = new QuantityType<>("1 °C");
         QuantityType<Temperature> f = c.toUnitRelative(ImperialUnits.FAHRENHEIT);
         assertEquals(1.8, f.doubleValue());
+    }
+
+    @Test
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public void testIncrementalAdd() {
+        assertEquals(new QuantityType("50 °C"), new QuantityType("20 °C").add(new QuantityType("30 °C")));
+        assertEquals(new QuantityType("50 °C"), new QuantityType("20 °C").add(new QuantityType("30 K")));
+        assertEquals(new QuantityType("50 °C"), new QuantityType("20 °C").add(new QuantityType("54 °F")));
+        assertEquals(new QuantityType("50 K"), new QuantityType("20 K").add(new QuantityType("30 °C")));
+        assertEquals(new QuantityType("50 K"), new QuantityType("20 K").add(new QuantityType("30 K")));
+        assertEquals(new QuantityType("50 K"), new QuantityType("20 K").add(new QuantityType("54 °F")));
+    }
+
+    @Test
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public void testIncrementalSubtract() {
+        assertEquals(new QuantityType("20 °C"), new QuantityType("50 °C").subtract(new QuantityType("30 °C")));
+        assertEquals(new QuantityType("20 °C"), new QuantityType("50 °C").subtract(new QuantityType("30 K")));
+        assertEquals(new QuantityType("20 °C"), new QuantityType("50 °C").subtract(new QuantityType("54 °F")));
+        assertEquals(new QuantityType("20 K"), new QuantityType("50 K").subtract(new QuantityType("30 °C")));
+        assertEquals(new QuantityType("20 K"), new QuantityType("50 K").subtract(new QuantityType("30 K")));
+        assertEquals(new QuantityType("20 K"), new QuantityType("50 K").subtract(new QuantityType("54 °F")));
+    }
+
+    @Test
+    public void testEquals() {
+        QuantityType<Temperature> temp1 = new QuantityType<>("293.15 K");
+        QuantityType<Temperature> temp2 = new QuantityType<>("20 °C");
+        assertTrue(temp1.equals(temp2));
+        assertTrue(temp2.equals(temp1));
+        temp2 = new QuantityType<>("-5 °C");
+        assertFalse(temp1.equals(temp2));
+
+        temp1 = new QuantityType<>("100000 K");
+        temp2 = new QuantityType<>("10 mirek");
+        assertTrue(temp1.equals(temp2));
+        assertTrue(temp2.equals(temp1));
+        temp2 = new QuantityType<>("20 mirek");
+        assertFalse(temp1.equals(temp2));
+
+        temp1 = new QuantityType<>("0.1 MK");
+        temp2 = new QuantityType<>("10 mirek");
+        assertTrue(temp1.equals(temp2));
+        assertTrue(temp2.equals(temp1));
+        temp2 = new QuantityType<>("20 mirek");
+        assertFalse(temp1.equals(temp2));
+    }
+
+    @Test
+    public void testCompareTo() {
+        QuantityType<Temperature> temp1 = new QuantityType<>("293.15 K");
+        QuantityType<Temperature> temp2 = new QuantityType<>("20 °C");
+        assertEquals(0, temp1.compareTo(temp2));
+        temp2 = new QuantityType<>("-5 °C");
+        assertEquals(1, temp1.compareTo(temp2));
+        temp2 = new QuantityType<>("50 °C");
+        assertEquals(-1, temp1.compareTo(temp2));
+
+        QuantityType<Temperature> temp3 = new QuantityType<>("100000 K");
+        QuantityType<Temperature> temp4 = new QuantityType<>("10 mirek");
+        assertThrows(IllegalArgumentException.class, () -> {
+            temp3.compareTo(temp4);
+        });
     }
 }

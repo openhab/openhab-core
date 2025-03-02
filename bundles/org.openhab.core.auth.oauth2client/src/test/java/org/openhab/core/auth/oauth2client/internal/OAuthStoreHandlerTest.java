@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -38,7 +38,7 @@ import org.openhab.core.test.storage.VolatileStorage;
 
 /**
  * The {@link OAuthStoreHandlerTest} contains tests for
- * {@link org.openhab.core.auth.oauth2client.OAuthStoreHandlerImpl}
+ * {@link org.openhab.core.auth.oauth2client.internal.OAuthStoreHandlerImpl}
  *
  * @author Jacob Laursen - Initial contribution
  */

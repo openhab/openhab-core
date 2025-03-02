@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -25,8 +25,10 @@ import org.openhab.core.i18n.TranslationProvider;
 import org.osgi.framework.Bundle;
 
 /**
- * This class is used as utility for resolving the localized {@link ModuleTypes}s. It automatically infers the key if
- * the default text is not a constant with the assistance of {@link TranslationProvider}.
+ * This class is used as utility for resolving the localized {@link org.openhab.core.automation.type.ModuleType
+ * ModuleTypes}s.
+ * It automatically infers the key if the default text is not a constant with the assistance of
+ * {@link TranslationProvider}.
  *
  * @author Ana Dimova - Initial contribution
  * @author Yordan Mihaylov - updates related to api changes

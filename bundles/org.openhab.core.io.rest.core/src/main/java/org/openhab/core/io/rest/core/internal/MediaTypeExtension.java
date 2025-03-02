@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -30,6 +30,7 @@ import javax.ws.rs.ext.MessageBodyReader;
 import javax.ws.rs.ext.MessageBodyWriter;
 
 import org.openhab.core.io.rest.RESTConstants;
+import org.openhab.core.library.types.DateTimeType;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.jaxrs.whiteboard.JaxrsWhiteboardConstants;
 import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsApplicationSelect;
@@ -61,7 +62,7 @@ public class MediaTypeExtension<T> implements MessageBodyReader<T>, MessageBodyW
      * Constructor.
      */
     public MediaTypeExtension() {
-        final Gson gson = new GsonBuilder().create();
+        final Gson gson = new GsonBuilder().setDateFormat(DateTimeType.DATE_PATTERN_JSON_COMPAT).create();
         readers.put(mediaTypeWithoutParams(MediaType.APPLICATION_JSON_TYPE), new GsonMessageBodyReader<>(gson));
         readers.put(mediaTypeWithoutParams(MediaType.TEXT_PLAIN_TYPE), new PlainMessageBodyReader<>());
         writers.put(mediaTypeWithoutParams(MediaType.APPLICATION_JSON_TYPE), new GsonMessageBodyWriter<>(gson));

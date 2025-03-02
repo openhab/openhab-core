@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,7 +15,7 @@ package org.openhab.core.thing.internal.profiles;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
-import java.time.ZonedDateTime;
+import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -38,14 +38,14 @@ public class TimestampTriggerProfileTest {
         ProfileCallback callback = mock(ProfileCallback.class);
         TriggerProfile profile = new TimestampTriggerProfile(callback);
 
-        ZonedDateTime now = ZonedDateTime.now();
+        Instant now = Instant.now();
         profile.onTriggerFromHandler(CommonTriggerEvents.PRESSED);
         ArgumentCaptor<State> capture = ArgumentCaptor.forClass(State.class);
         verify(callback, times(1)).sendUpdate(capture.capture());
 
         State result = capture.getValue();
         DateTimeType updateResult = (DateTimeType) result;
-        ZonedDateTime timestamp = updateResult.getZonedDateTime();
+        Instant timestamp = updateResult.getInstant();
         long difference = ChronoUnit.MINUTES.between(now, timestamp);
         assertTrue(difference < 1);
     }

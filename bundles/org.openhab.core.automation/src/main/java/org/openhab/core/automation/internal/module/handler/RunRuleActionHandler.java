@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,14 +12,17 @@
  */
 package org.openhab.core.automation.internal.module.handler;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.Action;
+import org.openhab.core.automation.events.AutomationEventFactory;
 import org.openhab.core.automation.handler.BaseActionModuleHandler;
 import org.openhab.core.config.core.Configuration;
+import org.openhab.core.events.Event;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,6 +67,7 @@ public class RunRuleActionHandler extends BaseActionModuleHandler {
      * the UIDs of the rules to be executed.
      */
     private final List<String> ruleUIDs;
+    private final String moduleId;
 
     /**
      * boolean to express if the conditions should be considered, defaults to
@@ -84,16 +88,22 @@ public class RunRuleActionHandler extends BaseActionModuleHandler {
             throw new IllegalArgumentException("'ruleUIDs' property must not be null.");
         }
         if (config.get(CONSIDER_CONDITIONS_KEY) != null && config.get(CONSIDER_CONDITIONS_KEY) instanceof Boolean) {
-            this.considerConditions = ((Boolean) config.get(CONSIDER_CONDITIONS_KEY)).booleanValue();
+            this.considerConditions = (Boolean) config.get(CONSIDER_CONDITIONS_KEY);
         }
+        this.moduleId = module.getId();
     }
 
     @Override
     public @Nullable Map<String, Object> execute(Map<String, Object> context) {
         // execute each rule after the other; at the moment synchronously
+        Object previousEvent = context.get("event");
+        Event event = AutomationEventFactory.createExecutionEvent(moduleId,
+                previousEvent instanceof Event ? Map.of("previous", previousEvent) : null, "runRuleAction");
+        Map<String, Object> newContext = new HashMap<>(context);
+        newContext.put("event", event);
         for (String uid : ruleUIDs) {
             if (callback != null) {
-                callback.runNow(uid, considerConditions, context);
+                callback.runNow(uid, considerConditions, newContext);
             } else {
                 logger.warn("Action is not applied to {} because rule engine is not available.", uid);
             }

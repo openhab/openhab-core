@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,7 +13,7 @@
 package org.openhab.core.config.core.validation;
 
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 import org.openhab.core.config.core.ConfigDescription;
@@ -50,7 +50,7 @@ public final class ConfigValidationMessage {
      * @param messageKey the message key to be used for internationalization
      */
     public ConfigValidationMessage(String parameterName, String defaultMessage, String messageKey) {
-        this(parameterName, defaultMessage, messageKey, Collections.<String> emptyList());
+        this(parameterName, defaultMessage, messageKey, List.of());
     }
 
     /**

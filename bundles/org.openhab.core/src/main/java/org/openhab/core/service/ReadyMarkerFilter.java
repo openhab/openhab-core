@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -58,7 +58,7 @@ public final class ReadyMarkerFilter {
     /**
      * Returns a {@link ReadyMarkerFilter} restricted to the given identifier.
      *
-     * @param type
+     * @param identifier
      * @return
      */
     public ReadyMarkerFilter withIdentifier(@Nullable String identifier) {

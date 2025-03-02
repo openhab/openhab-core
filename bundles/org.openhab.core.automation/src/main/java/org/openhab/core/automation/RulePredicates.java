@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -44,9 +44,9 @@ public class RulePredicates {
      * <br/>
      * The name space is part of the UID and the prefix thereof.
      * <br/>
-     * If the UID does not contain a {@link PREFIX_SEPARATOR} {@code null} will be returned.
+     * If the UID does not contain a {@link #PREFIX_SEPARATOR} {@code null} will be returned.
      * <br/>
-     * If the UID does contain a {@link PREFIX_SEPARATOR} the prefix until the first occurrence will be returned.
+     * If the UID does contain a {@link #PREFIX_SEPARATOR} the prefix until the first occurrence will be returned.
      * <br/>
      * If the prefix would have a zero length {@code null} will be returned.
      *
@@ -87,9 +87,7 @@ public class RulePredicates {
      */
     public static Predicate<Rule> hasAnyOfPrefixes(String... prefixes) {
         final HashSet<String> namespaceSet = new HashSet<>(prefixes.length);
-        for (final String namespace : prefixes) {
-            namespaceSet.add(namespace);
-        }
+        namespaceSet.addAll(Arrays.asList(prefixes));
 
         // this will even work for null namespace
         return r -> namespaceSet.contains(getPrefix(r));
@@ -98,7 +96,6 @@ public class RulePredicates {
     /**
      * Creates a {@link Predicate} which can be used to match {@link Rule}s with one or more tags.
      *
-     * @param tags to search for.
      * @return created {@link Predicate}.
      */
     public static Predicate<Rule> hasTags() {
@@ -110,7 +107,6 @@ public class RulePredicates {
     /**
      * Creates a {@link Predicate} which can be used to match {@link Rule}s without tags.
      *
-     * @param tags to search for.
      * @return created {@link Predicate}.
      */
     public static Predicate<Rule> hasNoTags() {

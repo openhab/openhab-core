@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -240,7 +240,6 @@ public class ModbusBitUtilities {
      * - it is assumed that each high and low byte is encoded in most significant bit first order
      *
      * @param bytes registers represented by sequence of bytes
-     * @param registerIndex index of register. First register has index of 0.
      * @param index index of the byte in registers
      * @return 0 when bit is set, 1 otherwise
      * @throws IllegalArgumentException when index is out of bounds
@@ -272,7 +271,6 @@ public class ModbusBitUtilities {
      * - it is assumed that each high and low byte is encoded in most significant bit first order
      *
      * @param bytes registers represented by sequence of bytes
-     * @param registerIndex index of register. First register has index of 0.
      * @param index index of the byte in registers
      * @return 0 when bit is set, 1 otherwise
      * @throws IllegalArgumentException when index is out of bounds
@@ -280,9 +278,7 @@ public class ModbusBitUtilities {
     public static short extractUInt8(byte[] bytes, int index) {
         assertIndexAndType(bytes, index, ValueType.UINT8);
         int signed = extractSInt8(bytes, index);
-        short unsigned = (short) (signed & 0xff);
-        assert unsigned >= 0;
-        return unsigned;
+        return (short) (signed & 0xff);
     }
 
     /**
@@ -315,9 +311,7 @@ public class ModbusBitUtilities {
     public static int extractUInt16(byte[] bytes, int index) {
         assertIndexAndType(bytes, index, ValueType.UINT16);
         int signed = extractSInt16(bytes, index);
-        int unsigned = signed & 0xffff;
-        assert unsigned >= 0;
-        return unsigned;
+        return signed & 0xffff;
     }
 
     /**
@@ -352,9 +346,7 @@ public class ModbusBitUtilities {
     public static long extractUInt32(byte[] bytes, int index) {
         assertIndexAndType(bytes, index, ValueType.UINT32);
         long signed = extractSInt32(bytes, index);
-        long unsigned = signed & 0xffff_ffffL;
-        assert unsigned >= 0;
-        return unsigned;
+        return signed & 0xffff_ffffL;
     }
 
     /**
@@ -394,9 +386,7 @@ public class ModbusBitUtilities {
     public static long extractUInt32Swap(byte[] bytes, int index) {
         assertIndexAndType(bytes, index, ValueType.UINT32_SWAP);
         long signed = extractSInt32Swap(bytes, index);
-        long unsigned = signed & 0xffff_ffffL;
-        assert unsigned >= 0;
-        return unsigned;
+        return signed & 0xffff_ffffL;
     }
 
     /**
@@ -653,7 +643,7 @@ public class ModbusBitUtilities {
                 // big endian byte ordering
                 byte hi = (byte) (shortValue >> 8);
                 byte lo = (byte) shortValue;
-                return new ModbusRegisterArray(new byte[] { hi, lo });
+                return new ModbusRegisterArray(hi, lo);
             }
             case INT32:
             case UINT32: {
@@ -663,7 +653,7 @@ public class ModbusBitUtilities {
                 byte lo1 = (byte) (intValue >> 16);
                 byte hi2 = (byte) (intValue >> 8);
                 byte lo2 = (byte) intValue;
-                return new ModbusRegisterArray(new byte[] { hi1, lo1, hi2, lo2 });
+                return new ModbusRegisterArray(hi1, lo1, hi2, lo2);
             }
             case INT32_SWAP:
             case UINT32_SWAP: {
@@ -674,7 +664,7 @@ public class ModbusBitUtilities {
                 byte hi2 = (byte) (intValue >> 8);
                 byte lo2 = (byte) intValue;
                 // Swapped order of registers
-                return new ModbusRegisterArray(new byte[] { hi2, lo2, hi1, lo1 });
+                return new ModbusRegisterArray(hi2, lo2, hi1, lo1);
             }
             case FLOAT32: {
                 float floatValue = numericCommand.floatValue();
@@ -684,7 +674,7 @@ public class ModbusBitUtilities {
                 byte lo1 = (byte) (intBits >> 16);
                 byte hi2 = (byte) (intBits >> 8);
                 byte lo2 = (byte) intBits;
-                return new ModbusRegisterArray(new byte[] { hi1, lo1, hi2, lo2 });
+                return new ModbusRegisterArray(hi1, lo1, hi2, lo2);
             }
             case FLOAT32_SWAP: {
                 float floatValue = numericCommand.floatValue();
@@ -695,7 +685,7 @@ public class ModbusBitUtilities {
                 byte hi2 = (byte) (intBits >> 8);
                 byte lo2 = (byte) intBits;
                 // Swapped order of registers
-                return new ModbusRegisterArray(new byte[] { hi2, lo2, hi1, lo1 });
+                return new ModbusRegisterArray(hi2, lo2, hi1, lo1);
             }
             case INT64:
             case UINT64: {
@@ -709,7 +699,7 @@ public class ModbusBitUtilities {
                 byte lo3 = (byte) (longValue >> 16);
                 byte hi4 = (byte) (longValue >> 8);
                 byte lo4 = (byte) longValue;
-                return new ModbusRegisterArray(new byte[] { hi1, lo1, hi2, lo2, hi3, lo3, hi4, lo4 });
+                return new ModbusRegisterArray(hi1, lo1, hi2, lo2, hi3, lo3, hi4, lo4);
             }
             case INT64_SWAP:
             case UINT64_SWAP: {
@@ -724,7 +714,7 @@ public class ModbusBitUtilities {
                 byte hi4 = (byte) (longValue >> 8);
                 byte lo4 = (byte) longValue;
                 // Swapped order of registers
-                return new ModbusRegisterArray(new byte[] { hi4, lo4, hi3, lo3, hi2, lo2, hi1, lo1 });
+                return new ModbusRegisterArray(hi4, lo4, hi3, lo3, hi2, lo2, hi1, lo1);
             }
             default:
                 throw new IllegalArgumentException(
@@ -735,8 +725,8 @@ public class ModbusBitUtilities {
     /**
      * Converts command to a boolean
      *
-     * true value is represented by {@link OnOffType.ON}, {@link OpenClosedType.OPEN}.
-     * false value is represented by {@link OnOffType.OFF}, {@link OpenClosedType.CLOSED}.
+     * true value is represented by {@link OnOffType#ON}, {@link OpenClosedType#OPEN}.
+     * false value is represented by {@link OnOffType#OFF}, {@link OpenClosedType#CLOSED}.
      * Furthermore, {@link DecimalType} are converted to boolean true if they are unequal to zero.
      *
      * @param command to convert to boolean

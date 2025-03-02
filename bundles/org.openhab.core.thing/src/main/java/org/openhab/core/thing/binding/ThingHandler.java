@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,7 +13,7 @@
 package org.openhab.core.thing.binding;
 
 import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -154,7 +154,7 @@ public interface ThingHandler {
      * returns to {@link ThingStatus#ONLINE}, the thing status must be changed at least to {@link ThingStatus#OFFLINE}
      * with detail {@link ThingStatusDetail#NONE}.
      *
-     * @param thingStatusInfo the status info of the bridge
+     * @param bridgeStatusInfo the status info of the bridge
      */
     void bridgeStatusChanged(ThingStatusInfo bridgeStatusInfo);
 
@@ -178,6 +178,6 @@ public interface ThingHandler {
      * @return - list of classes that will be registered as OSGi services
      */
     default Collection<Class<? extends ThingHandlerService>> getServices() {
-        return Collections.emptyList();
+        return List.of();
     }
 }

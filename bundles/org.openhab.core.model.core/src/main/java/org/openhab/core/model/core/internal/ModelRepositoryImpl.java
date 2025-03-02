@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,6 +15,7 @@ package org.openhab.core.model.core.internal;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -24,7 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.stream.Collectors;
 
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
@@ -51,6 +51,7 @@ import org.slf4j.LoggerFactory;
  * @author Kai Kreuzer - Initial contribution
  * @author Oliver Libutzki - Added reloadAllModelsOfType method
  * @author Simon Kaufmann - added validation of models before loading them
+ * @author Laurent Garnier - Added method generateSyntaxFromModel
  */
 @Component(immediate = true)
 @NonNullByDefault
@@ -64,6 +65,8 @@ public class ModelRepositoryImpl implements ModelRepository {
     private final List<ModelRepositoryChangeListener> listeners = new CopyOnWriteArrayList<>();
 
     private final SafeEMF safeEmf;
+
+    private int counter;
 
     @Activate
     public ModelRepositoryImpl(final @Reference SafeEMF safeEmf) {
@@ -82,7 +85,7 @@ public class ModelRepositoryImpl implements ModelRepository {
             Resource resource = getResource(name);
             if (resource != null) {
                 if (!resource.getContents().isEmpty()) {
-                    return resource.getContents().get(0);
+                    return resource.getContents().getFirst();
                 } else {
                     logger.warn("Configuration model '{}' is either empty or cannot be parsed correctly!", name);
                     resourceSet.getResources().remove(resource);
@@ -99,7 +102,7 @@ public class ModelRepositoryImpl implements ModelRepository {
     public boolean addOrRefreshModel(String name, final InputStream originalInputStream) {
         logger.info("Loading model '{}'", name);
         Resource resource = null;
-        byte[] bytes = null;
+        byte[] bytes;
         try (InputStream inputStream = originalInputStream) {
             bytes = inputStream.readAllBytes();
             String validationResult = validateModel(name, new ByteArrayInputStream(bytes));
@@ -172,8 +175,9 @@ public class ModelRepositoryImpl implements ModelRepository {
 
             return resourceListCopy.stream()
                     .filter(input -> input.getURI().lastSegment().contains(".") && input.isLoaded()
-                            && modelType.equalsIgnoreCase(input.getURI().fileExtension()))
-                    .map(from -> from.getURI().path()).collect(Collectors.toList());
+                            && modelType.equalsIgnoreCase(input.getURI().fileExtension())
+                            && !input.getURI().lastSegment().startsWith("tmp_"))
+                    .map(from -> from.getURI().path()).toList();
         }
     }
 
@@ -228,6 +232,23 @@ public class ModelRepositoryImpl implements ModelRepository {
         listeners.remove(listener);
     }
 
+    @Override
+    public void generateSyntaxFromModel(OutputStream out, String modelType, EObject modelContent) {
+        String result = "";
+        synchronized (resourceSet) {
+            String name = "tmp_generated_syntax_%d.%s".formatted(++counter, modelType);
+            Resource resource = resourceSet.createResource(URI.createURI(name));
+            try {
+                resource.getContents().add(modelContent);
+                resource.save(out, Map.of(XtextResource.OPTION_ENCODING, StandardCharsets.UTF_8.name()));
+            } catch (IOException e) {
+                logger.warn("Exception when saving the model {}", resource.getURI().lastSegment());
+            } finally {
+                resourceSet.getResources().remove(resource);
+            }
+        }
+    }
+
     private @Nullable Resource getResource(String name) {
         return resourceSet.getResource(URI.createURI(name), false);
     }
@@ -268,20 +289,20 @@ public class ModelRepositoryImpl implements ModelRepository {
                             .append(MessageFormat.format("[{0},{1}]: {2}\n", Integer.toString(diagnostic.getLine()),
                                     Integer.toString(diagnostic.getColumn()), diagnostic.getMessage()));
                 }
-                if (criticalErrors.length() > 0) {
+                if (!criticalErrors.isEmpty()) {
                     return criticalErrors.toString();
                 }
 
                 // Check for validation errors, but log them only
                 try {
                     final org.eclipse.emf.common.util.Diagnostic diagnostic = safeEmf
-                            .call(() -> Diagnostician.INSTANCE.validate(resource.getContents().get(0)));
+                            .call(() -> Diagnostician.INSTANCE.validate(resource.getContents().getFirst()));
                     for (org.eclipse.emf.common.util.Diagnostic d : diagnostic.getChildren()) {
                         warnings.add(d.getMessage());
                     }
                     if (!warnings.isEmpty()) {
                         logger.info("Validation issues found in configuration model '{}', using it anyway:\n{}", name,
-                                warnings.stream().collect(Collectors.joining("\n")));
+                                String.join("\n", warnings));
                     }
                 } catch (NullPointerException e) {
                     // see https://github.com/eclipse/smarthome/issues/3335

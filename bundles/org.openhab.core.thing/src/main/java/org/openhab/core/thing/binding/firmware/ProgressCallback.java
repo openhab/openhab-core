@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -28,7 +28,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  *
  * For updates which are based on a percentage progress it is optional to define a sequence of {@link ProgressStep}s and
  * to use the {@link ProgressCallback#next()} method. In order to indicate that the percentage progress has changed, the
- * method {@link ProgressCallback#update(progress)} has to be used. It allows to update the percentage progress to a
+ * method {@link ProgressCallback#update(int)} has to be used. It allows to update the percentage progress to a
  * value between 0 and 100.
  *
  * @author Thomas Höfer - Initial contribution
@@ -107,8 +107,9 @@ public interface ProgressCallback {
      * previous defined sequence.
      *
      * @param progress the progress between 0 and 100
-     * @throws IllegalArgumentException if given progress is < 0 or > 100
-     * @throws IllegalArgumentException if given progress is smaller than old progress
+     * @throws IllegalArgumentException if given progress is {@code < 0} or {@code > 100} or if given progress is
+     *             smaller than old
+     *             progress
      * @throws IllegalStateException if update is finished
      */
     void update(int progress);

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -43,7 +43,7 @@ import com.thoughtworks.xstream.converters.ConversionException;
  * service at the <i>OSGi</i> service registry.
  * <p>
  * The {@link ThingTypeXmlProvider} uses an internal cache consisting of {@link #thingTypeRefs},
- * {@link #channelGroupTypeRefs}, {@link #channelGroupTypes} and {@link #channelTypes}. This cache is used to merge
+ * {@link #channelGroupTypeRefs}, {@link #channelTypeRefs}. This cache is used to merge
  * first the {@link ChannelType} definitions with the {@link ChannelGroupTypeXmlResult} objects to create valid
  * {@link ChannelGroupType} objects. After that the {@link ChannelType} and the {@link ChannelGroupType} definitions are
  * used to merge with the {@link ThingTypeXmlResult} objects to create valid {@link ThingType} objects. After the merge

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,12 +15,10 @@ package org.openhab.core.thing.internal.profiles;
 import static org.openhab.core.thing.profiles.SystemProfiles.*;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -72,18 +70,20 @@ public class SystemProfileFactory implements ProfileFactory, ProfileAdvisor, Pro
             RAWROCKER_NEXT_PREVIOUS_TYPE, RAWROCKER_ON_OFF_TYPE, RAWROCKER_PLAY_PAUSE_TYPE,
             RAWROCKER_REWIND_FASTFORWARD_TYPE, RAWROCKER_STOP_MOVE_TYPE, RAWROCKER_UP_DOWN_TYPE,
             TRIGGER_EVENT_STRING_TYPE, TIMESTAMP_CHANGE_TYPE, TIMESTAMP_OFFSET_TYPE, TIMESTAMP_TRIGGER_TYPE,
-            TIMESTAMP_UPDATE_TYPE);
+            TIMESTAMP_UPDATE_TYPE, BUTTON_TOGGLE_SWITCH_TYPE, BUTTON_TOGGLE_PLAYER_TYPE,
+            BUTTON_TOGGLE_ROLLERSHUTTER_TYPE);
 
     private static final Set<ProfileTypeUID> SUPPORTED_PROFILE_TYPE_UIDS = Set.of(DEFAULT, FOLLOW, HYSTERESIS, OFFSET,
             RANGE, RAWBUTTON_ON_OFF_SWITCH, RAWBUTTON_TOGGLE_PLAYER, RAWBUTTON_TOGGLE_ROLLERSHUTTER,
             RAWBUTTON_TOGGLE_SWITCH, RAWROCKER_DIMMER, RAWROCKER_NEXT_PREVIOUS, RAWROCKER_ON_OFF, RAWROCKER_PLAY_PAUSE,
             RAWROCKER_REWIND_FASTFORWARD, RAWROCKER_STOP_MOVE, RAWROCKER_UP_DOWN, TRIGGER_EVENT_STRING,
-            TIMESTAMP_CHANGE, TIMESTAMP_OFFSET, TIMESTAMP_TRIGGER, TIMESTAMP_UPDATE);
+            TIMESTAMP_CHANGE, TIMESTAMP_OFFSET, TIMESTAMP_TRIGGER, TIMESTAMP_UPDATE, BUTTON_TOGGLE_SWITCH,
+            BUTTON_TOGGLE_PLAYER, BUTTON_TOGGLE_ROLLERSHUTTER);
 
     private final Map<LocalizedKey, ProfileType> localizedProfileTypeCache = new ConcurrentHashMap<>();
 
     private final ProfileTypeI18nLocalizationService profileTypeI18nLocalizationService;
-    private final Bundle bundle;
+    private final @Nullable Bundle bundle;
 
     @Activate
     public SystemProfileFactory(final @Reference ChannelTypeRegistry channelTypeRegistry,
@@ -108,29 +108,29 @@ public class SystemProfileFactory implements ProfileFactory, ProfileAdvisor, Pro
         } else if (RANGE.equals(profileTypeUID)) {
             return new SystemRangeStateProfile(callback, context);
         } else if (BUTTON_TOGGLE_SWITCH.equals(profileTypeUID)) {
-            return new ToggleProfile<OnOffType>(callback, context, BUTTON_TOGGLE_SWITCH,
+            return new ToggleProfile<>(callback, context, BUTTON_TOGGLE_SWITCH,
                     DefaultSystemChannelTypeProvider.SYSTEM_BUTTON, OnOffType.ON, OnOffType.OFF,
                     CommonTriggerEvents.SHORT_PRESSED);
         } else if (BUTTON_TOGGLE_PLAYER.equals(profileTypeUID)) {
-            return new ToggleProfile<PlayPauseType>(callback, context, BUTTON_TOGGLE_PLAYER,
+            return new ToggleProfile<>(callback, context, BUTTON_TOGGLE_PLAYER,
                     DefaultSystemChannelTypeProvider.SYSTEM_BUTTON, PlayPauseType.PLAY, PlayPauseType.PAUSE,
                     CommonTriggerEvents.SHORT_PRESSED);
         } else if (BUTTON_TOGGLE_ROLLERSHUTTER.equals(profileTypeUID)) {
-            return new ToggleProfile<UpDownType>(callback, context, BUTTON_TOGGLE_ROLLERSHUTTER,
+            return new ToggleProfile<>(callback, context, BUTTON_TOGGLE_ROLLERSHUTTER,
                     DefaultSystemChannelTypeProvider.SYSTEM_BUTTON, UpDownType.UP, UpDownType.DOWN,
                     CommonTriggerEvents.SHORT_PRESSED);
         } else if (RAWBUTTON_ON_OFF_SWITCH.equals(profileTypeUID)) {
             return new RawButtonOnOffSwitchProfile(callback);
         } else if (RAWBUTTON_TOGGLE_SWITCH.equals(profileTypeUID)) {
-            return new ToggleProfile<OnOffType>(callback, context, RAWBUTTON_TOGGLE_SWITCH,
+            return new ToggleProfile<>(callback, context, RAWBUTTON_TOGGLE_SWITCH,
                     DefaultSystemChannelTypeProvider.SYSTEM_RAWBUTTON, OnOffType.ON, OnOffType.OFF,
                     CommonTriggerEvents.PRESSED);
         } else if (RAWBUTTON_TOGGLE_PLAYER.equals(profileTypeUID)) {
-            return new ToggleProfile<PlayPauseType>(callback, context, RAWBUTTON_TOGGLE_PLAYER,
+            return new ToggleProfile<>(callback, context, RAWBUTTON_TOGGLE_PLAYER,
                     DefaultSystemChannelTypeProvider.SYSTEM_RAWBUTTON, PlayPauseType.PLAY, PlayPauseType.PAUSE,
                     CommonTriggerEvents.PRESSED);
         } else if (RAWBUTTON_TOGGLE_ROLLERSHUTTER.equals(profileTypeUID)) {
-            return new ToggleProfile<UpDownType>(callback, context, RAWBUTTON_TOGGLE_ROLLERSHUTTER,
+            return new ToggleProfile<>(callback, context, RAWBUTTON_TOGGLE_ROLLERSHUTTER,
                     DefaultSystemChannelTypeProvider.SYSTEM_RAWBUTTON, UpDownType.UP, UpDownType.DOWN,
                     CommonTriggerEvents.PRESSED);
         } else if (RAWROCKER_DIMMER.equals(profileTypeUID)) {
@@ -219,8 +219,7 @@ public class SystemProfileFactory implements ProfileFactory, ProfileAdvisor, Pro
 
     @Override
     public Collection<ProfileType> getProfileTypes(@Nullable Locale locale) {
-        return Collections.unmodifiableList(SUPPORTED_PROFILE_TYPES.stream()
-                .map(p -> createLocalizedProfileType(p, locale)).collect(Collectors.toList()));
+        return SUPPORTED_PROFILE_TYPES.stream().map(p -> createLocalizedProfileType(p, locale)).toList();
     }
 
     @Override
@@ -237,13 +236,12 @@ public class SystemProfileFactory implements ProfileFactory, ProfileAdvisor, Pro
             return cachedEntry;
         }
 
-        ProfileType localizedProfileType = profileTypeI18nLocalizationService.createLocalizedProfileType(bundle,
-                profileType, locale);
-        if (localizedProfileType != null) {
+        if (bundle instanceof Bundle localBundle) {
+            ProfileType localizedProfileType = profileTypeI18nLocalizationService
+                    .createLocalizedProfileType(localBundle, profileType, locale);
             localizedProfileTypeCache.put(localizedKey, localizedProfileType);
             return localizedProfileType;
-        } else {
-            return profileType;
         }
+        return profileType;
     }
 }

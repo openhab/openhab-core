@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -61,11 +61,11 @@ public class Ser2NetUsbSerialDiscoveryTest {
     private @NonNullByDefault({}) Ser2NetUsbSerialDiscovery discovery;
 
     private UsbSerialDeviceInformation usb1 = new UsbSerialDeviceInformation(0x100, 0x111, "serial1", "manufacturer1",
-            "product1", 0x1, "interface1", "rfc2217://1.1.1.1:1000");
+            "product1", 0x1, "interface1", "rfc2217://1.1.1.1:1000").setRemote(true);
     private UsbSerialDeviceInformation usb2 = new UsbSerialDeviceInformation(0x200, 0x222, "serial2", "manufacturer2",
-            "product2", 0x2, "interface2", "rfc2217://[0:0:0:0:0:ffff:0202:0202]:2222");
+            "product2", 0x2, "interface2", "rfc2217://[0:0:0:0:0:ffff:0202:0202]:2222").setRemote(true);
     private UsbSerialDeviceInformation usb3 = new UsbSerialDeviceInformation(0x300, 0x333, null, null, null, 0x3, null,
-            "rfc2217://123.222.100.000:3030");
+            "rfc2217://123.222.100.000:3030").setRemote(true);
 
     @BeforeEach
     public void beforeEach() {

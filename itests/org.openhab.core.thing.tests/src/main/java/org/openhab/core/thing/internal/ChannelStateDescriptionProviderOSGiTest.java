@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -276,7 +276,7 @@ public class ChannelStateDescriptionProviderOSGiTest extends JavaOSGiTest {
         assertTrue(state.isReadOnly());
         List<StateOption> opts = state.getOptions();
         assertEquals(1, opts.size());
-        final StateOption opt = opts.get(0);
+        final StateOption opt = opts.getFirst();
         assertEquals("SOUND", opt.getValue());
         assertEquals("My great sound.", opt.getLabel());
 
@@ -341,14 +341,14 @@ public class ChannelStateDescriptionProviderOSGiTest extends JavaOSGiTest {
         opts = state.getOptions();
         assertNotNull(opts);
         assertEquals(2, opts.size());
-        final StateOption opt0 = opts.get(0);
+        final StateOption opt0 = opts.getFirst();
         assertNotNull(opt0);
-        assertEquals(opt0.getValue(), "value0");
-        assertEquals(opt0.getLabel(), "label0");
+        assertEquals("value0", opt0.getValue());
+        assertEquals("label0", opt0.getLabel());
         final StateOption opt1 = opts.get(1);
         assertNotNull(opt1);
-        assertEquals(opt1.getValue(), "value1");
-        assertEquals(opt1.getLabel(), "label1");
+        assertEquals("value1", opt1.getValue());
+        assertEquals("label1", opt1.getLabel());
 
         item = itemRegistry.getItem("TestItem7_2");
         assertEquals(CoreItemFactory.NUMBER, item.getType());
@@ -365,7 +365,7 @@ public class ChannelStateDescriptionProviderOSGiTest extends JavaOSGiTest {
         opts = state.getOptions();
         assertNotNull(opts);
         assertEquals(1, opts.size());
-        final StateOption opt2 = opts.get(0);
+        final StateOption opt2 = opts.getFirst();
         assertEquals("NEW SOUND", opt2.getValue());
         assertEquals("My great new sound.", opt2.getLabel());
     }
@@ -406,7 +406,7 @@ public class ChannelStateDescriptionProviderOSGiTest extends JavaOSGiTest {
         List<StateOption> opts = state.getOptions();
         assertNotNull(opts);
         assertEquals(1, opts.size());
-        final StateOption opt2 = opts.get(0);
+        final StateOption opt2 = opts.getFirst();
         assertEquals("NEW SOUND", opt2.getValue());
         assertEquals("My great new sound.", opt2.getLabel());
     }
@@ -426,10 +426,10 @@ public class ChannelStateDescriptionProviderOSGiTest extends JavaOSGiTest {
                 @Nullable Locale locale) {
             String id = channel.getUID().getIdWithoutGroup();
             if ("7_1".equals(id)) {
-                assertEquals(channel.getChannelTypeUID(), CHANNEL_TYPE_7_UID);
+                assertEquals(CHANNEL_TYPE_7_UID, channel.getChannelTypeUID());
                 return newState;
             } else if ("7_2".equals(id)) {
-                assertEquals(channel.getChannelTypeUID(), CHANNEL_TYPE_7_UID);
+                assertEquals(CHANNEL_TYPE_7_UID, channel.getChannelTypeUID());
                 StateDescriptionFragmentBuilder builder = (original == null) ? StateDescriptionFragmentBuilder.create()
                         : StateDescriptionFragmentBuilder.create(original);
                 return builder.withMinimum(original.getMinimum().add(BigDecimal.ONE))
@@ -451,7 +451,7 @@ public class ChannelStateDescriptionProviderOSGiTest extends JavaOSGiTest {
         }
     }
 
-    class TestThingHandlerFactory extends BaseThingHandlerFactory {
+    static class TestThingHandlerFactory extends BaseThingHandlerFactory {
 
         @Override
         public void activate(final ComponentContext ctx) {
@@ -501,7 +501,7 @@ public class ChannelStateDescriptionProviderOSGiTest extends JavaOSGiTest {
     }
 
     private abstract static class AbstractThingHandler extends BaseThingHandler {
-        public AbstractThingHandler(Thing thing) {
+        protected AbstractThingHandler(Thing thing) {
             super(thing);
         }
     }
@@ -512,7 +512,7 @@ public class ChannelStateDescriptionProviderOSGiTest extends JavaOSGiTest {
      */
     private class BundleResolverImpl implements BundleResolver {
         @Override
-        public Bundle resolveBundle(@Nullable Class<?> clazz) {
+        public @Nullable Bundle resolveBundle(@Nullable Class<?> clazz) {
             if (clazz != null && clazz.equals(AbstractThingHandler.class)) {
                 return testBundle;
             } else {

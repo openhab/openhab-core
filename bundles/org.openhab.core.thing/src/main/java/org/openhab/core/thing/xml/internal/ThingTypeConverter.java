@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,10 +12,7 @@
  */
 package org.openhab.core.thing.xml.internal;
 
-import static java.util.stream.Collectors.toList;
-
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -83,10 +80,9 @@ public class ThingTypeConverter extends AbstractDescriptionTypeConverter<ThingTy
     @SuppressWarnings("unchecked")
     protected List<ChannelXmlResult>[] getChannelTypeReferenceObjects(NodeIterator nodeIterator)
             throws ConversionException {
-        List<ChannelXmlResult> channelTypeReferences = null;
         List<ChannelXmlResult> channelGroupTypeReferences = null;
-
-        channelTypeReferences = (List<ChannelXmlResult>) nodeIterator.nextList("channels", false);
+        List<ChannelXmlResult> channelTypeReferences = (List<ChannelXmlResult>) nodeIterator.nextList("channels",
+                false);
         if (channelTypeReferences == null) {
             channelGroupTypeReferences = (List<ChannelXmlResult>) nodeIterator.nextList("channel-groups", false);
         }
@@ -113,10 +109,10 @@ public class ThingTypeConverter extends AbstractDescriptionTypeConverter<ThingTy
     protected List<String> getExtensibleChannelTypeIds(Map<String, String> attributes) {
         String extensible = attributes.get("extensible");
         if (extensible == null) {
-            return Collections.emptyList();
+            return List.of();
         }
 
-        return Arrays.stream(extensible.split(",")).map(String::trim).collect(toList());
+        return Arrays.stream(extensible.split(",")).map(String::trim).toList();
     }
 
     protected @Nullable String readCategory(NodeIterator nodeIterator) {

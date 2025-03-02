@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -66,19 +66,21 @@ public class GenericThingProviderTest2 extends JavaOSGiTest {
         Collection<Thing> things = thingRegistry.getAll();
         assertThat(things.size(), is(0));
 
-        String model = "Bridge Xhue:Xbridge:myBridge [ XipAddress = \"1.2.3.4\", XuserName = \"123\" ] {" + //
-                "    XLCT001 bulb1 [ XlightId = \"1\" ] { Switch : notification }" + //
-                "    Bridge Xbridge myBridge2 [ ] {" + //
-                "        XLCT001 bulb2 [ ]" + //
-                "    }" + //
-                "}" + //
-                "Xhue:XTEST:bulb4 [ XlightId = \"5\"]{" + //
-                "    Switch : notification [ duration = \"5\" ]" + //
-                "}" + //
-                "" + //
-                "Xhue:XLCT001:bulb3 [ XlightId = \"4\" ] {" + //
-                "    Switch : notification [ duration = \"5\" ]" + //
-                "}";
+        String model = """
+                Bridge Xhue:Xbridge:myBridge [ XipAddress = "1.2.3.4", XuserName = "123" ] {
+                    XLCT001 bulb1 [ XlightId = "1" ] { Switch : notification }
+                    Bridge Xbridge myBridge2 [ ] {
+                        XLCT001 bulb2 [ ]
+                    }
+                }
+                Xhue:XTEST:bulb4 [ XlightId = "5"] {
+                    Switch : notification [ duration = "5" ]
+                }
+
+                Xhue:XLCT001:bulb3 [ XlightId = "4" ] {
+                    Switch : notification [ duration = "5" ]
+                }
+                """;
 
         modelRepository.addOrRefreshModel(TESTMODEL_NAME, new ByteArrayInputStream(model.getBytes()));
         Collection<Thing> actualThings = thingRegistry.getAll();
@@ -87,7 +89,6 @@ public class GenericThingProviderTest2 extends JavaOSGiTest {
 
         registerService(hueThingHandlerFactory, ThingHandlerFactory.class.getName());
 
-        actualThings = thingRegistry.getAll();
         assertThat(thingRegistry.getAll().size(), is(6));
 
         unregisterService(hueThingHandlerFactory);

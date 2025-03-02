@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -73,7 +73,7 @@ public class SystemProfileFactoryOSGiTest extends JavaOSGiTest {
     @Test
     public void systemProfileTypesAndUidsShouldBeAvailable() {
         Collection<ProfileTypeUID> systemProfileTypeUIDs = profileFactory.getSupportedProfileTypeUIDs();
-        assertThat(systemProfileTypeUIDs, hasSize(21));
+        assertThat(systemProfileTypeUIDs, hasSize(24));
 
         Collection<ProfileType> systemProfileTypes = profileFactory.getProfileTypes(null);
         assertThat(systemProfileTypes, hasSize(systemProfileTypeUIDs.size()));

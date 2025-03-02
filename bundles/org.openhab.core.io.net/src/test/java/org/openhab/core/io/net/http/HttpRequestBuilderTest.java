@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,6 +15,7 @@ package org.openhab.core.io.net.http;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
 
+import java.net.URI;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -32,7 +33,7 @@ import org.mockito.ArgumentMatchers;
 /**
  * Test cases for the <code>HttpRequestBuilder</code> to validate its behaviour
  *
- * @author Martin van Wingerden & Wouter Born - Initial contribution
+ * @author Martin van Wingerden and Wouter Born - Initial contribution
  */
 @NonNullByDefault
 public class HttpRequestBuilderTest extends BaseHttpUtilTest {
@@ -45,7 +46,7 @@ public class HttpRequestBuilderTest extends BaseHttpUtilTest {
 
         assertEquals("Some content", result);
 
-        verify(httpClientMock).newRequest(URL);
+        verify(httpClientMock).newRequest(URI.create(URL));
         verify(requestMock).method(HttpMethod.GET);
         verify(requestMock).send();
     }

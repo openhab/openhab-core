@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -96,7 +96,7 @@ public class ChannelBuilder {
         ChannelBuilder channelBuilder = create(channel.getUID(), channel.getAcceptedItemType())
                 .withConfiguration(channel.getConfiguration()).withDefaultTags(channel.getDefaultTags())
                 .withKind(channel.getKind()).withProperties(channel.getProperties())
-                .withType(channel.getChannelTypeUID());
+                .withType(channel.getChannelTypeUID()).withAutoUpdatePolicy(channel.getAutoUpdatePolicy());
         String label = channel.getLabel();
         if (label != null) {
             channelBuilder.withLabel(label);
@@ -155,7 +155,7 @@ public class ChannelBuilder {
     /**
      * Sets the channel description. This allows overriding of the default description set in the {@link ChannelType}.
      *
-     * @param label the channel label to override the description set in the {@link ChannelType}
+     * @param description the channel label to override the description set in the {@link ChannelType}
      * @return channel builder
      */
     public ChannelBuilder withDescription(String description) {

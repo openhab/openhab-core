@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -37,10 +37,10 @@ public class LocationItemTest {
         locationBerlin.setState(pointBerlin);
 
         DecimalType distance = locationParis.distanceFrom(locationParis);
-        assertEquals(distance.intValue(), 0);
+        assertEquals(0, distance.intValue());
 
         double parisBerlin = locationParis.distanceFrom(locationBerlin).doubleValue();
-        assertEquals(parisBerlin, 878400, 50);
+        assertEquals(878400, parisBerlin, 50);
     }
 
     @Test

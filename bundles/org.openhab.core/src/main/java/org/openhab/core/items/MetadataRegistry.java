@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -28,7 +28,7 @@ import org.openhab.core.common.registry.Registry;
 @NonNullByDefault
 public interface MetadataRegistry extends Registry<Metadata, MetadataKey> {
 
-    static final String INTERNAL_NAMESPACE_PREFIX = "_";
+    String INTERNAL_NAMESPACE_PREFIX = "_";
 
     /**
      * Determines whether the given namespace is internal.

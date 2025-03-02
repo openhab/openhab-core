@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,6 +13,8 @@
 package org.openhab.core.automation.internal;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -41,6 +43,7 @@ import org.openhab.core.config.core.ConfigDescriptionParameterBuilder;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.config.core.FilterCriteria;
 import org.openhab.core.config.core.ParameterOption;
+import org.openhab.core.service.StartLevelService;
 import org.openhab.core.test.java.JavaOSGiTest;
 
 /**
@@ -54,10 +57,14 @@ public class RuleEngineTest extends JavaOSGiTest {
 
     private @NonNullByDefault({}) RuleEngineImpl ruleEngine;
     private @NonNullByDefault({}) RuleRegistry ruleRegistry;
+    private @NonNullByDefault({}) StartLevelService startLevelService;
 
     @BeforeEach
     public void setup() {
         registerVolatileStorageService();
+        startLevelService = mock(StartLevelService.class);
+        when(startLevelService.getStartLevel()).thenReturn(100);
+        registerService(startLevelService, StartLevelService.class.getName());
         ruleEngine = (RuleEngineImpl) getService(RuleManager.class);
         ruleRegistry = getService(RuleRegistry.class);
         registerService(new TestModuleTypeProvider(), ModuleTypeProvider.class.getName());
@@ -72,13 +79,13 @@ public class RuleEngineTest extends JavaOSGiTest {
     public void testAutoMapRuleConnections() {
         RuleImpl rule = createAutoMapRule();
         // check condition connections
-        Map<String, String> conditionInputs = rule.getConditions().get(0).getInputs();
+        Map<String, String> conditionInputs = rule.getConditions().getFirst().getInputs();
         assertEquals(1, conditionInputs.size(), "Number of user define condition inputs");
         assertEquals("triggerId.triggerOutput", conditionInputs.get("conditionInput"),
                 "Check user define condition connection");
 
         // check action connections
-        Map<String, String> actionInputs = rule.getActions().get(0).getInputs();
+        Map<String, String> actionInputs = rule.getActions().getFirst().getInputs();
         assertEquals(2, actionInputs.size(), "Number of user define action inputs");
         assertEquals("triggerId.triggerOutput", actionInputs.get("actionInput"),
                 "Check user define action connections for input actionInput");
@@ -91,7 +98,7 @@ public class RuleEngineTest extends JavaOSGiTest {
         assertEquals("AutoMapRule", ruleGet.getUID(), "Returned rule with wrong UID");
 
         // check condition connections
-        conditionInputs = ruleGet.getConditions().get(0).getInputs();
+        conditionInputs = ruleGet.getConditions().getFirst().getInputs();
         assertEquals(2, conditionInputs.size(), "Number of user define condition inputs");
         assertEquals("triggerId.triggerOutput", conditionInputs.get("conditionInput"),
                 "Check user define condition connection");
@@ -99,7 +106,7 @@ public class RuleEngineTest extends JavaOSGiTest {
                 "Auto map condition input in2[tagA, tagB] to trigger output out3[tagA, tagB, tagC]");
 
         // check action connections
-        actionInputs = ruleGet.getActions().get(0).getInputs();
+        actionInputs = ruleGet.getActions().getFirst().getInputs();
         assertEquals(4, actionInputs.size(), "Number of user define action inputs");
         assertEquals("triggerId.triggerOutput", actionInputs.get("actionInput"),
                 "Check user define action connections for input actionInput");
@@ -177,12 +184,12 @@ public class RuleEngineTest extends JavaOSGiTest {
 
         assertNotNull(rule4cfgD, "RuleImpl configuration description is null");
         assertEquals(1, rule4cfgD.size(), "Missing config description in rule copy");
-        ConfigDescriptionParameter rule4cfgDP = rule4cfgD.iterator().next();
+        ConfigDescriptionParameter rule4cfgDP = rule4cfgD.getFirst();
         assertEquals("3", rule4cfgDP.getDefault(), "Wrong default value in config description");
         assertEquals("context1", rule4cfgDP.getContext(), "Wrong context value in config description");
         assertNotNull(rule4cfgDP.getOptions(), "Null options in config description");
-        assertEquals("1", rule4cfgDP.getOptions().get(0).getValue(), "Wrong option value in config description");
-        assertEquals("one", rule4cfgDP.getOptions().get(0).getLabel(), "Wrong option label in config description");
+        assertEquals("1", rule4cfgDP.getOptions().getFirst().getValue(), "Wrong option value in config description");
+        assertEquals("one", rule4cfgDP.getOptions().getFirst().getLabel(), "Wrong option label in config description");
     }
 
     /**
@@ -286,47 +293,46 @@ public class RuleEngineTest extends JavaOSGiTest {
     }
 
     private List<Trigger> createTriggers(String type) {
-        List<Trigger> triggers = new ArrayList<>();
         Configuration configurations = new Configuration();
         configurations.put("a", "x");
         configurations.put("b", "y");
         configurations.put("c", "z");
-        triggers.add(ModuleBuilder.createTrigger().withId("triggerId").withTypeUID(type)
+
+        return List.of(ModuleBuilder.createTrigger().withId("triggerId").withTypeUID(type)
                 .withConfiguration(configurations).build());
-        return triggers;
     }
 
     private List<Condition> createConditions(String type) {
-        List<Condition> conditions = new ArrayList<>();
         Configuration configurations = new Configuration();
         configurations.put("a", "x");
         configurations.put("b", "y");
         configurations.put("c", "z");
-        Map<String, String> inputs = new HashMap<>(11);
-        String ouputModuleId = "triggerId";
+
+        String outputModuleId = "triggerId";
         String outputName = "triggerOutput";
         String inputName = "conditionInput";
-        inputs.put(inputName, ouputModuleId + "." + outputName);
-        conditions.add(ModuleBuilder.createCondition().withId("conditionId").withTypeUID(type)
+        Map<String, String> inputs = Map.of(inputName, outputModuleId + "." + outputName);
+
+        return List.of(ModuleBuilder.createCondition().withId("conditionId").withTypeUID(type)
                 .withConfiguration(configurations).withInputs(inputs).build());
-        return conditions;
     }
 
     private List<Action> createActions(String type) {
-        List<Action> actions = new ArrayList<>();
         Configuration configurations = new Configuration();
         configurations.put("a", "x");
         configurations.put("b", "y");
         configurations.put("c", "z");
-        Map<String, String> inputs = new HashMap<>(11);
-        String ouputModuleId = "triggerId";
+
+        String outputModuleId = "triggerId";
         String outputName = "triggerOutput";
         String inputName = "actionInput";
-        inputs.put(inputName, ouputModuleId + "." + outputName);
-        inputs.put("in6", ouputModuleId + "." + outputName);
-        actions.add(ModuleBuilder.createAction().withId("actionId").withTypeUID(type).withConfiguration(configurations)
-                .withInputs(inputs).build());
-        return actions;
+
+        Map<String, String> inputs = new HashMap<>(11);
+        inputs.put(inputName, outputModuleId + "." + outputName);
+        inputs.put("in6", outputModuleId + "." + outputName);
+
+        return List.of(ModuleBuilder.createAction().withId("actionId").withTypeUID(type)
+                .withConfiguration(configurations).withInputs(inputs).build());
     }
 
     private List<ConfigDescriptionParameter> createConfigDescriptions() {

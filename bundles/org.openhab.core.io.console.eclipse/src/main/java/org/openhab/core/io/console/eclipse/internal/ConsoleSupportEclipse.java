@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,7 +17,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -64,9 +63,7 @@ public class ConsoleSupportEclipse implements CommandProvider {
     }
 
     private Collection<ConsoleCommandExtension> getConsoleCommandExtensions() {
-        final Set<ConsoleCommandExtension> set = new HashSet<>();
-        set.addAll(consoleCommandExtensions.values());
-        return set;
+        return new HashSet<>(consoleCommandExtensions.values());
     }
 
     /**

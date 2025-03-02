@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -236,7 +236,7 @@ public class ThingRegistryOSGiTest extends JavaOSGiTest {
         Thing thing = thingRegistry.createThingOfType(expectedThingTypeUID, expectedThingUID, expectedBridgeUID,
                 expectedLabel, expectedConfiguration);
         waitForAssert(() -> {
-            assertTrue(thingResultWrapper.get() != null);
+            assertNotNull(thingResultWrapper.get());
         });
 
         assertThat(thing, is(notNullValue()));

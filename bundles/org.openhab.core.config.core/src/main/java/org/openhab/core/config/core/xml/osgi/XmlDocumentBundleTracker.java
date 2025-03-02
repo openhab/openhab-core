@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,9 +14,7 @@ package org.openhab.core.config.core.xml.osgi;
 
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -90,11 +88,11 @@ public class XmlDocumentBundleTracker<@NonNull T> extends BundleTracker<Bundle> 
      * create, close, open
      * This can be handled correctly using three states and checking the transition.
      */
-    private static enum OpenState {
+    private enum OpenState {
         CREATED,
         OPENED,
         CLOSED
-    };
+    }
 
     public static final String THREAD_POOL_NAME = "file-processing";
 
@@ -150,9 +148,9 @@ public class XmlDocumentBundleTracker<@NonNull T> extends BundleTracker<Bundle> 
     private Set<Bundle> getRelevantBundles() {
         BundleTracker<?> bundleTracker = relevantBundlesTracker;
         if (bundleTracker == null || bundleTracker.getBundles() == null) {
-            return Collections.emptySet();
+            return Set.of();
         }
-        return (Set<Bundle>) Arrays.stream(bundleTracker.getBundles()).collect(Collectors.toSet());
+        return Set.of(bundleTracker.getBundles());
     }
 
     @Override

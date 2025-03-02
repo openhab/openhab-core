@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -323,7 +323,6 @@ public class Printer {
      * This method is responsible for printing the strings, representing the auxiliary automation objects.
      *
      * @param columnWidths represents the column widths of the table.
-     * @param width represents the table width.
      * @param prop is a property name of the property with value the collection of the auxiliary automation objects for
      *            printing.
      * @param list with the auxiliary automation objects for printing.
@@ -340,7 +339,7 @@ public class Printer {
         if (list != null && !list.isEmpty()) {
             for (Object element : list) {
                 if (element instanceof String string) {
-                    res.add(Utils.getColumn(columnWidths[0], values.get(0)) + string);
+                    res.add(Utils.getColumn(columnWidths[0], values.getFirst()) + string);
                     if (isFirst) {
                         isFirst = false;
                         values.set(0, "");
@@ -348,7 +347,7 @@ public class Printer {
                 } else if (element instanceof Module module) {
                     List<String> moduleRecords = getModuleRecords(module);
                     for (String elementRecord : moduleRecords) {
-                        res.add(Utils.getColumn(columnWidths[0], values.get(0)) + elementRecord);
+                        res.add(Utils.getColumn(columnWidths[0], values.getFirst()) + elementRecord);
                         if (isFirst) {
                             isFirst = false;
                             values.set(0, "");
@@ -396,8 +395,8 @@ public class Printer {
         int[] columnWidths = new int[] { COLUMN_PROPERTY_VALUE };
         List<String> columnValues = new ArrayList<>();
         columnValues.add(module.getId());
-        List<String> moduleContent = new ArrayList<>();
-        moduleContent.addAll(Utils.getTableTitle(Utils.getRow(columnWidths, columnValues), COLUMN_PROPERTY_VALUE));
+        List<String> moduleContent = new ArrayList<>(
+                Utils.getTableTitle(Utils.getRow(columnWidths, columnValues), COLUMN_PROPERTY_VALUE));
 
         columnWidths = new int[] { COLUMN_CONFIG_PARAMETER, COLUMN_CONFIG_PARAMETER_VALUE };
         columnValues.set(0, ID);
@@ -530,10 +529,10 @@ public class Printer {
     }
 
     /**
-     * This method is responsible for printing the set of {@link Input}s or {@link Output}s or {@link Inputs}s.
+     * This method is responsible for printing the set of tags.
      *
-     * @param set is the set of {@link Input}s or {@link Output}s or {@link Inputs}s for printing.
-     * @return a formated string, representing the set of {@link Input}s or {@link Output}s or {@link Input}s.
+     * @param tags is the set of tags for printing.
+     * @return a formatted string, representing the set of tags.
      */
     private static String getTagsRecord(Set<String> tags) {
         if (tags == null || tags.isEmpty()) {

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,10 +12,7 @@
  */
 package org.openhab.core.library.types;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Formatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -41,19 +38,19 @@ public class StringListType implements Command, State {
     public static final String REGEX_SPLITTER = "(?<!\\\\)" + DELIMITER;
 
     public StringListType() {
-        typeDetails = Collections.emptyList();
+        typeDetails = List.of();
     }
 
     public StringListType(List<String> rows) {
-        typeDetails = new ArrayList<>(rows);
+        typeDetails = List.copyOf(rows);
     }
 
     public StringListType(StringType... rows) {
-        typeDetails = Arrays.stream(rows).map(StringType::toString).collect(Collectors.toList());
+        typeDetails = Arrays.stream(rows).map(StringType::toString).toList();
     }
 
     public StringListType(String... rows) {
-        typeDetails = Arrays.asList(rows);
+        typeDetails = List.of(rows);
     }
 
     /**
@@ -61,7 +58,7 @@ public class StringListType implements Command, State {
      */
     public StringListType(String serialized) {
         typeDetails = Arrays.stream(serialized.split(REGEX_SPLITTER, -1))
-                .map(s -> s.replace(ESCAPED_DELIMITER, DELIMITER)).collect(Collectors.toList());
+                .map(s -> s.replace(ESCAPED_DELIMITER, DELIMITER)).toList();
     }
 
     public String getValue(final int index) {
@@ -74,7 +71,7 @@ public class StringListType implements Command, State {
     /**
      * <p>
      * Formats the value of this type according to a pattern (@see
-     * {@link Formatter}). One single value of this type can be referenced
+     * {@link java.util.Formatter}). One single value of this type can be referenced
      * by the pattern using an index. The item order is defined by the natural
      * (alphabetical) order of their keys.
      *

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,11 +14,13 @@ package org.openhab.core.voice;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.audio.AudioSource;
+import org.openhab.core.audio.AudioStream;
 import org.openhab.core.library.types.PercentType;
 import org.openhab.core.voice.text.HumanLanguageInterpreter;
 import org.openhab.core.voice.text.InterpretationException;
@@ -30,6 +32,7 @@ import org.openhab.core.voice.text.InterpretationException;
  * @author Christoph Weitkamp - Added parameter to adjust the volume
  * @author Laurent Garnier - Updated methods startDialog and added method stopDialog
  * @author Miguel Álvarez - New dialog methods using DialogContext
+ * @author Miguel Álvarez - Add transcribe method
  */
 @NonNullByDefault
 public interface VoiceManager {
@@ -94,6 +97,26 @@ public interface VoiceManager {
     void say(String text, @Nullable String voiceId, @Nullable String sinkId, @Nullable PercentType volume);
 
     /**
+     * Run speech-to-text using the provided audio source.
+     *
+     * @param audioSourceId Audio source to listen.
+     * @param sttId The id of the speech-to-text service to use or null to use the default.
+     * @param locale The locale to use or null to use the default.
+     * @return a human language transcription or empty.
+     */
+    String transcribe(@Nullable String audioSourceId, @Nullable String sttId, @Nullable Locale locale);
+
+    /**
+     * Run speech-to-text over the provided audio stream.
+     *
+     * @param audioStream Audio stream to transcribe.
+     * @param sttId The id of the speech-to-text service to use or null to use the default.
+     * @param locale The locale to use or null to use the default.
+     * @return a human language transcription or empty.
+     */
+    String transcribe(AudioStream audioStream, @Nullable String sttId, @Nullable Locale locale);
+
+    /**
      * Interprets the passed string using the default services for HLI and locale.
      *
      * @param text The text to interpret
@@ -134,6 +157,11 @@ public interface VoiceManager {
      */
     @Nullable
     DialogContext getLastDialogContext();
+
+    /**
+     * Returns a list with the contexts of all running dialogs.
+     */
+    List<DialogContext> getDialogsContexts();
 
     /**
      * Starts an infinite dialog sequence: keyword spotting on the audio source, audio source listening to retrieve

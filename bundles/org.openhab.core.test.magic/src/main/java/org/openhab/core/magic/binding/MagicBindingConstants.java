@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -48,6 +48,7 @@ public class MagicBindingConstants {
     public static final ThingTypeUID THING_TYPE_DYNAMIC_STATE_DESCRIPTION = new ThingTypeUID(BINDING_ID,
             "dynamic-state-description");
     public static final ThingTypeUID THING_TYPE_ONLINE_OFFLINE = new ThingTypeUID(BINDING_ID, "online-offline");
+    public static final ThingTypeUID THING_TYPE_TIMESERIES = new ThingTypeUID(BINDING_ID, "timeseries");
 
     // bridged things
     public static final ThingTypeUID THING_TYPE_BRIDGE_1 = new ThingTypeUID(BINDING_ID, "magic-bridge1");
@@ -67,7 +68,7 @@ public class MagicBindingConstants {
     public static final String CHANNEL_BATTERY_LEVEL = "battery-level";
     public static final String CHANNEL_SYSTEM_COMMAND = "systemcommand";
     public static final String CHANNEL_SIGNAL_STRENGTH = "signal-strength";
-
+    public static final String CHANNEL_FORECAST = "forecast";
     // Firmware update needed models
     public static final String UPDATE_MODEL_PROPERTY = "updateModel";
 

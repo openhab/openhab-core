@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -38,6 +38,7 @@ public class PersistenceGlobalScopeProvider extends AbstractGlobalScopeProvider 
         res.getContents().add(GlobalStrategies.UPDATE);
         res.getContents().add(GlobalStrategies.CHANGE);
         res.getContents().add(GlobalStrategies.RESTORE);
+        res.getContents().add(GlobalStrategies.FORECAST);
     }
 
     @Override

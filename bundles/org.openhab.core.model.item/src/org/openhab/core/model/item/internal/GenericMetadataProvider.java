@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,7 +15,6 @@ package org.openhab.core.model.item.internal;
 import static java.util.stream.Collectors.toSet;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -107,7 +106,7 @@ public class GenericMetadataProvider extends AbstractProvider<Metadata> implemen
     public Collection<Metadata> getAll() {
         try {
             lock.readLock().lock();
-            return Collections.unmodifiableSet(new HashSet<>(metadata));
+            return Set.copyOf(metadata);
         } finally {
             lock.readLock().unlock();
         }

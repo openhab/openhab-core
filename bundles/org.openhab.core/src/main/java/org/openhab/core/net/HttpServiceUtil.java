@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -76,7 +76,7 @@ public class HttpServiceUtil {
                 }
                 value = ref.getProperty(Constants.SERVICE_RANKING);
                 final int serviceRanking;
-                if (value == null || !(value instanceof Integer)) {
+                if (!(value instanceof Integer)) {
                     serviceRanking = 0;
                 } else {
                     serviceRanking = (Integer) value;
@@ -100,8 +100,8 @@ public class HttpServiceUtil {
                 } catch (final NumberFormatException ex) {
                     // If the property could not be parsed, the HTTP servlet itself has to care and warn about.
                 }
-            } else if (value instanceof Integer) {
-                return (Integer) value;
+            } else if (value instanceof Integer integerValue) {
+                return integerValue;
             }
         }
 

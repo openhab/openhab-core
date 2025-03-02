@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -42,6 +42,7 @@ import org.openhab.core.automation.internal.module.handler.ThingStatusTriggerHan
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.i18n.TimeZoneProvider;
 import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.service.StartLevelService;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -78,14 +79,17 @@ public class CoreModuleHandlerFactory extends BaseModuleHandlerFactory implement
     private final TimeZoneProvider timeZoneProvider;
     private final EventPublisher eventPublisher;
     private final BundleContext bundleContext;
+    private final StartLevelService startLevelService;
 
     @Activate
     public CoreModuleHandlerFactory(BundleContext bundleContext, final @Reference EventPublisher eventPublisher,
-            final @Reference ItemRegistry itemRegistry, final @Reference TimeZoneProvider timeZoneProvider) {
+            final @Reference ItemRegistry itemRegistry, final @Reference TimeZoneProvider timeZoneProvider,
+            final @Reference StartLevelService startLevelService) {
         this.bundleContext = bundleContext;
         this.eventPublisher = eventPublisher;
         this.itemRegistry = itemRegistry;
         this.timeZoneProvider = timeZoneProvider;
+        this.startLevelService = startLevelService;
     }
 
     @Override

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -18,7 +18,7 @@ import org.openhab.core.automation.Trigger;
 import org.openhab.core.config.core.Configuration;
 
 /**
- * This class is implementation of {@link Trigger} modules used in the {@link RuleEngine}s.
+ * This class is implementation of {@link Trigger} modules used in the rule engines.
  *
  * @author Yordan Mihaylov - Initial contribution
  */

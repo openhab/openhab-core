@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -118,7 +118,7 @@ public class BitArray implements Iterable<Boolean> {
 
     @Override
     public Iterator<Boolean> iterator() {
-        return IntStream.range(0, size()).mapToObj(i -> getBit(i)).iterator();
+        return IntStream.range(0, size()).mapToObj(this::getBit).iterator();
     }
 
     @Override

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -20,7 +20,6 @@ import static org.mockito.Mockito.*;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -97,10 +96,10 @@ public class PersistentInboxTest {
         when(thingHandlerFactoryMock.createThing(eq(THING_TYPE_UID), any(Configuration.class), eq(THING_UID), any()))
                 .then(invocation -> ThingBuilder.create(THING_TYPE_UID, "test")
                         .withConfiguration((Configuration) invocation.getArguments()[1]).build());
-        when(thingHandlerFactoryMock
-                .createThing(eq(THING_TYPE_UID), any(Configuration.class), eq(THING_OTHER_UID), any()))
-                        .then(invocation -> ThingBuilder.create(THING_TYPE_UID, THING_OTHER_ID)
-                                .withConfiguration((Configuration) invocation.getArguments()[1]).build());
+        when(thingHandlerFactoryMock.createThing(eq(THING_TYPE_UID), any(Configuration.class), eq(THING_OTHER_UID),
+                any()))
+                .then(invocation -> ThingBuilder.create(THING_TYPE_UID, THING_OTHER_ID)
+                        .withConfiguration((Configuration) invocation.getArguments()[1]).build());
         inbox = new PersistentInbox(storageServiceMock, mock(DiscoveryServiceRegistry.class), thingRegistryMock,
                 thingProviderMock, thingTypeRegistryMock, configDescriptionRegistryMock);
         inbox.addThingHandlerFactory(thingHandlerFactoryMock);
@@ -108,20 +107,19 @@ public class PersistentInboxTest {
 
     @Test
     public void testConfigUpdateNormalizationWithConfigDescription() throws URISyntaxException {
-        Map<String, Object> props = new HashMap<>();
-        props.put("foo", "1");
+        Map<String, Object> props = Map.of("foo", "1");
         Configuration config = new Configuration(props);
         Thing thing = ThingBuilder.create(THING_TYPE_UID, THING_UID).withConfiguration(config).build();
         configureConfigDescriptionRegistryMock("foo", Type.TEXT);
         when(thingRegistryMock.get(eq(THING_UID))).thenReturn(thing);
         when(thingProviderMock.get(eq(THING_UID))).thenReturn(thing);
 
-        assertTrue(thing.getConfiguration().get("foo") instanceof String);
+        assertInstanceOf(String.class, thing.getConfiguration().get("foo"));
 
         inbox.activate();
         inbox.add(DiscoveryResultBuilder.create(THING_UID).withProperty("foo", 3).build());
 
-        assertTrue(thing.getConfiguration().get("foo") instanceof String);
+        assertInstanceOf(String.class, thing.getConfiguration().get("foo"));
         // thing updated if managed
         assertEquals("3", thing.getConfiguration().get("foo"));
     }
@@ -133,12 +131,12 @@ public class PersistentInboxTest {
         configureConfigDescriptionRegistryMock("foo", Type.TEXT);
         when(thingRegistryMock.get(eq(THING_UID))).thenReturn(thing);
 
-        assertTrue(thing.getConfiguration().get("foo") instanceof String);
+        assertInstanceOf(String.class, thing.getConfiguration().get("foo"));
 
         inbox.activate();
         inbox.add(DiscoveryResultBuilder.create(THING_UID).withProperty("foo", 3).build());
 
-        assertTrue(thing.getConfiguration().get("foo") instanceof String);
+        assertInstanceOf(String.class, thing.getConfiguration().get("foo"));
         // thing not updated if unmanaged
         assertEquals("1", thing.getConfiguration().get("foo"));
     }
@@ -152,8 +150,10 @@ public class PersistentInboxTest {
         inbox.activate();
         inbox.approve(THING_UID, "Test", null);
 
+        Thing lastAddedThing = this.lastAddedThing;
+        assertNotNull(lastAddedThing);
         assertEquals(THING_UID, lastAddedThing.getUID());
-        assertTrue(lastAddedThing.getConfiguration().get("foo") instanceof String);
+        assertInstanceOf(String.class, lastAddedThing.getConfiguration().get("foo"));
         assertEquals("3", lastAddedThing.getConfiguration().get("foo"));
     }
 
@@ -166,8 +166,10 @@ public class PersistentInboxTest {
         inbox.activate();
         inbox.approve(THING_UID, "Test", THING_OTHER_ID);
 
+        Thing lastAddedThing = this.lastAddedThing;
+        assertNotNull(lastAddedThing);
         assertEquals(THING_OTHER_UID, lastAddedThing.getUID());
-        assertTrue(lastAddedThing.getConfiguration().get("foo") instanceof String);
+        assertInstanceOf(String.class, lastAddedThing.getConfiguration().get("foo"));
         assertEquals("3", lastAddedThing.getConfiguration().get("foo"));
     }
 

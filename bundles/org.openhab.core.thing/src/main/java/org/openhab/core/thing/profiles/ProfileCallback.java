@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -16,6 +16,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.thing.link.ItemChannelLink;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
+import org.openhab.core.types.TimeSeries;
 
 /**
  * Gives access to the framework features for continuing the communication flow.
@@ -52,4 +53,11 @@ public interface ProfileCallback {
      * @param state
      */
     void sendUpdate(State state);
+
+    /**
+     * Send a {@link TimeSeries} update to the framework.
+     *
+     * @param timeSeries
+     */
+    void sendTimeSeries(TimeSeries timeSeries);
 }

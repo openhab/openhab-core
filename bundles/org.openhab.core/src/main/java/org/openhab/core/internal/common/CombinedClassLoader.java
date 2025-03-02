@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -75,7 +75,7 @@ public class CombinedClassLoader extends ClassLoader {
     public static CombinedClassLoader fromClassLoaders(final ClassLoader parent,
             final Stream<ClassLoader> delegateClassLoaders) {
         return new CombinedClassLoader(parent,
-                delegateClassLoaders.collect(Collectors.toMap(cl -> cl, cl -> Collections.emptySet())));
+                delegateClassLoaders.collect(Collectors.toMap(cl -> cl, cl -> Set.of())));
     }
 
     private CombinedClassLoader(ClassLoader parent, Map<ClassLoader, Set<Class<?>>> delegateClassLoaders) {

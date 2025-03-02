@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,7 +14,6 @@ package org.openhab.core.automation.internal.parser.gson;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -68,6 +67,6 @@ public class TemplateGSONParser extends AbstractGSONParser<Template> {
             } catch (IOException e) {
             }
         }
-        return Collections.emptySet();
+        return Set.of();
     }
 }

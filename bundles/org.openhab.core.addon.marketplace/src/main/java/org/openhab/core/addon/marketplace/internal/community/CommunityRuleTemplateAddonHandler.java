@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,8 +12,13 @@
  */
 package org.openhab.core.addon.marketplace.internal.community;
 
+import static org.openhab.core.addon.marketplace.MarketplaceConstants.*;
+import static org.openhab.core.addon.marketplace.internal.community.CommunityMarketplaceAddonService.*;
+
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
@@ -22,8 +27,6 @@ import org.openhab.core.addon.Addon;
 import org.openhab.core.addon.marketplace.MarketplaceAddonHandler;
 import org.openhab.core.addon.marketplace.MarketplaceHandlerException;
 import org.openhab.core.addon.marketplace.internal.automation.MarketplaceRuleTemplateProvider;
-import org.openhab.core.automation.template.RuleTemplateProvider;
-import org.openhab.core.storage.Storage;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -32,8 +35,9 @@ import org.slf4j.LoggerFactory;
 
 /**
  * A {@link MarketplaceAddonHandler} implementation, which handles rule templates as JSON files and installs
- * them by adding them to a {@link Storage}. The templates are then served from this storage through a dedicated
- * {@link RuleTemplateProvider}.
+ * them by adding them to a {@link org.openhab.core.storage.Storage}. The templates are then served from this storage
+ * through a dedicated
+ * {@link org.openhab.core.automation.template.RuleTemplateProvider}.
  *
  * @author Kai Kreuzer - Initial contribution and API
  * @author Yannick Schaus - refactoring
@@ -42,12 +46,6 @@ import org.slf4j.LoggerFactory;
 @Component(immediate = true)
 @NonNullByDefault
 public class CommunityRuleTemplateAddonHandler implements MarketplaceAddonHandler {
-    private static final String JSON_DOWNLOAD_URL_PROPERTY = "json_download_url";
-    private static final String YAML_DOWNLOAD_URL_PROPERTY = "yaml_download_url";
-    private static final String JSON_CONTENT_PROPERTY = "json_content";
-    private static final String YAML_CONTENT_PROPERTY = "yaml_content";
-    private static final String RULETEMPLATES_CONTENT_TYPE = "application/vnd.openhab.ruletemplate";
-
     private final Logger logger = LoggerFactory.getLogger(CommunityRuleTemplateAddonHandler.class);
 
     private final MarketplaceRuleTemplateProvider marketplaceRuleTemplateProvider;
@@ -87,10 +85,10 @@ public class CommunityRuleTemplateAddonHandler implements MarketplaceAddonHandle
             }
         } catch (IOException e) {
             logger.error("Rule template from marketplace cannot be downloaded: {}", e.getMessage());
-            throw new MarketplaceHandlerException("Template cannot be downloaded.", e);
+            throw new MarketplaceHandlerException("Rule template cannot be downloaded", e);
         } catch (Exception e) {
-            logger.error("Rule template from marketplace is invalid: {}", e.getMessage());
-            throw new MarketplaceHandlerException("Template is not valid.", e);
+            logger.error("Failed to add rule template from the marketplace: {}", e.getMessage());
+            throw new MarketplaceHandlerException("Rule template is invalid", e);
         }
     }
 
@@ -103,7 +101,12 @@ public class CommunityRuleTemplateAddonHandler implements MarketplaceAddonHandle
     }
 
     private String getTemplateFromURL(String urlString) throws IOException {
-        URL u = new URL(urlString);
+        URL u;
+        try {
+            u = (new URI(urlString)).toURL();
+        } catch (IllegalArgumentException | URISyntaxException e) {
+            throw new IOException(e);
+        }
         try (InputStream in = u.openStream()) {
             return new String(in.readAllBytes(), StandardCharsets.UTF_8);
         }

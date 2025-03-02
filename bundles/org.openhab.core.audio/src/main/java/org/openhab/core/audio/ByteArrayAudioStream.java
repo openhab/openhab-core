@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -19,7 +19,8 @@ import java.io.InputStream;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * This is an implementation of a {@link FixedLengthAudioStream}, which is based on a simple byte array.
+ * This is an implementation of an {@link AudioStream} with known length and a clone method, which is based on a simple
+ * byte array.
  *
  * @author Kai Kreuzer - Initial contribution
  */
@@ -59,5 +60,20 @@ public class ByteArrayAudioStream extends FixedLengthAudioStream {
     @Override
     public InputStream getClonedStream() {
         return new ByteArrayAudioStream(bytes, format);
+    }
+
+    @Override
+    public synchronized void mark(int readlimit) {
+        stream.mark(readlimit);
+    }
+
+    @Override
+    public synchronized void reset() throws IOException {
+        stream.reset();
+    }
+
+    @Override
+    public boolean markSupported() {
+        return true;
     }
 }

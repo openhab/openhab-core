@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -40,14 +40,44 @@ public interface ThingHandlerService {
     ThingHandler getThingHandler();
 
     /**
-     * Method that will be called if this service will be activated
+     * This method is used by the framework during activation of the OSGi component.
+     * It is called BEFORE the thing handler is set.
+     *
+     * See {@link #initialize()}, {@link #deactivate()}
      */
     default void activate() {
     }
 
     /**
-     * Method that will be called if this service will be deactivated
+     * This method is used by the framework during de-activation of the OSGi component.
+     * It is NOT guaranteed that the thing handler is still valid.
+     *
+     * See {@link #dispose()}, {@link #activate()}
      */
     default void deactivate() {
+    }
+
+    /**
+     * This method is used by the framework during activation of the service.
+     * It is called AFTER the component is fully activated and thing handler has been set.
+     *
+     * Implementations should override this method to add additional initialization code. This method should call
+     * <code>super.initialize()</code> to ensure background discovery is properly handled.
+     *
+     * See {@link #activate()}, {@link #dispose()}
+     */
+    default void initialize() {
+    }
+
+    /**
+     * This method is used by the framework during de-activation of the service.
+     * It is called while the component is still activated.
+     *
+     * Code depending on an activated service should go here. This method should call <code>super.dispose()</code> to
+     * ensure background discovery is properly handled.
+     *
+     * See {@link #deactivate()}, {@link #initialize()}
+     */
+    default void dispose() {
     }
 }

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,9 +15,9 @@ package org.openhab.core.automation.internal.provider;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -53,8 +53,6 @@ public class RuleResourceBundleImporter extends AbstractResourceBundleProvider<R
     /**
      * This constructor is responsible for initializing the path to resources and tracking the managing service of the
      * {@link Rule}s.
-     *
-     * @param registry the managing service of the {@link Rule}s.
      */
     public RuleResourceBundleImporter() {
         super(ROOT_DIRECTORY + "/rules/");
@@ -118,11 +116,11 @@ public class RuleResourceBundleImporter extends AbstractResourceBundleProvider<R
                 if (parser != null) {
                     Set<Rule> parsedObjects = parseData(parser, url, bundle);
                     if (!parsedObjects.isEmpty()) {
-                        addNewProvidedObjects(Collections.emptyList(), Collections.emptyList(), parsedObjects);
+                        addNewProvidedObjects(List.of(), List.of(), parsedObjects);
                     }
                 }
             }
-            putNewPortfolio(vendor, Collections.emptyList());
+            putNewPortfolio(vendor, List.of());
         }
     }
 
@@ -149,10 +147,9 @@ public class RuleResourceBundleImporter extends AbstractResourceBundleProvider<R
     protected List<String> getPreviousPortfolio(Vendor vendor) {
         List<String> portfolio = providerPortfolio.get(vendor);
         if (portfolio == null) {
-            for (Vendor v : providerPortfolio.keySet()) {
-                if (v.getVendorSymbolicName().equals(vendor.getVendorSymbolicName())) {
-                    List<String> vendorPortfolio = providerPortfolio.get(v);
-                    return vendorPortfolio == null ? List.of() : vendorPortfolio;
+            for (Entry<Vendor, List<String>> entry : providerPortfolio.entrySet()) {
+                if (entry.getKey().getVendorSymbolicName().equals(vendor.getVendorSymbolicName())) {
+                    return entry.getValue();
                 }
             }
         }

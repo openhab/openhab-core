@@ -17,6 +17,36 @@
 				expected. Enabling this option will include these entries in the list of available add-ons.</description>
 			<default>false</default>
 		</parameter>
+		<parameter name="suggestionFinderUpnp" type="boolean">
+			<advanced>true</advanced>
+			<label>UPnP Suggestion Finder</label>
+			<description>Use UPnP network scan to suggest add-ons. Enabling/disabling may take up to 1 minute.</description>
+			<default>true</default>
+		</parameter>
+		<parameter name="suggestionFinderMdns" type="boolean">
+			<advanced>true</advanced>
+			<label>mDNS Suggestion Finder</label>
+			<description>Use mDNS network scan to suggest add-ons. Enabling/disabling may take up to 1 minute.</description>
+			<default>true</default>
+		</parameter>
+		<parameter name="suggestionFinderIp" type="boolean">
+			<advanced>true</advanced>
+			<label>IP-based Suggestion Finder</label>
+			<description>Use IP network discovery broadcasts to suggest add-ons. Enabling/disabling may take up to 1 minute.</description>
+			<default>true</default>
+		</parameter>
+		<parameter name="suggestionFinderSddp" type="boolean">
+			<advanced>true</advanced>
+			<label>SDDP Suggestion Finder</label>
+			<description>Use SDDP network scan to suggest add-ons. Enabling/disabling may take up to 1 minute.</description>
+			<default>true</default>
+		</parameter>
+		<parameter name="suggestionFinderUsb" type="boolean">
+			<advanced>true</advanced>
+			<label>USB Suggestion Finder</label>
+			<description>Scan connected USB devices to suggest add-ons. Enabling/disabling may take up to 1 minute.</description>
+			<default>true</default>
+		</parameter>
 	</config-description>
 
 </config-description:config-descriptions>

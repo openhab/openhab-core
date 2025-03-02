@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -28,7 +28,7 @@ public interface LocaleService {
     /**
      * Returns the locale in respect to the given "Accept-Language" HTTP header.
      *
-     * @param language value of the "Accept-Language" HTTP header (can be null).
+     * @param acceptLanguageHttpHeader value of the "Accept-Language" HTTP header (can be null).
      * @return Locale for the "Accept-Language" HTTP header or default locale if
      *         header is not set or can not be parsed.
      */

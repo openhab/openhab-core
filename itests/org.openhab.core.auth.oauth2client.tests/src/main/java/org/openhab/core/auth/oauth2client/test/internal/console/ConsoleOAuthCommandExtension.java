@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,7 +13,6 @@
 package org.openhab.core.auth.oauth2client.test.internal.console;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 
 import org.openhab.core.auth.client.oauth2.AccessTokenResponse;
@@ -136,7 +135,7 @@ public class ConsoleOAuthCommandExtension extends AbstractConsoleCommandExtensio
      */
     @Override
     public List<String> getUsages() {
-        return Arrays.asList(
+        return List.of(
                 buildCommandUsage("<agent> create","create an oauth client. Agent:={Code | ResourceOwner}"),
                 buildCommandUsage("<agent> getClient <handle>", "get the client by handle"),
                 buildCommandUsage("<agent> getAccessTokenByResourceOwnerPassword","get access token by resource owner username and password"),

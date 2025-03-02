@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -272,7 +272,7 @@ public class ChangeThingTypeOSGiTest extends JavaOSGiTest {
         assertThat(thing.getConfiguration().get("parametergeneric"), is("defaultgeneric"));
         assertThat(thing.getConfiguration().get("providedspecific"), is(nullValue()));
         assertThat(thing.getChannels().size(), is(1));
-        assertThat(thing.getChannels().get(0).getUID(), is(CHANNEL_GENERIC_UID));
+        assertThat(thing.getChannels().getFirst().getUID(), is(CHANNEL_GENERIC_UID));
         assertThat(thing.getProperties().get("universal"), is("survives"));
 
         ThingHandlerFactory handlerFactory = getService(ThingHandlerFactory.class, SampleThingHandlerFactory.class);
@@ -391,7 +391,7 @@ public class ChangeThingTypeOSGiTest extends JavaOSGiTest {
 
         // Ensure that the new set of channels is there
         assertThat(thing.getChannels().size(), is(1));
-        assertThat(thing.getChannels().get(0).getUID().getId(), containsString("specific"));
+        assertThat(thing.getChannels().getFirst().getUID().getId(), containsString("specific"));
 
         // Ensure that the old properties are still there
         assertThat(thing.getProperties().get("universal"), is("survives"));

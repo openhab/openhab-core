@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -20,7 +20,6 @@ import static org.openhab.core.config.serial.internal.SerialConfigOptionProvider
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -83,7 +82,7 @@ public class SerialConfigOptionProviderTest {
         Collection<ParameterOption> actual = provider.getParameterOptions(URI.create("uri"), "serialPort", SERIAL_PORT,
                 null);
         Collection<ParameterOption> expected = Arrays.stream(serialPortIdentifiers)
-                .map(id -> new ParameterOption(id, id)).collect(Collectors.toList());
+                .map(id -> new ParameterOption(id, id)).toList();
         assertThat(actual, is(expected));
     }
 

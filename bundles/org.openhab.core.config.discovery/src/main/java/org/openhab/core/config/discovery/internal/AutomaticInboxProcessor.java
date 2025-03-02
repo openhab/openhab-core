@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -20,7 +20,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -214,11 +213,11 @@ public class AutomaticInboxProcessor extends AbstractTypedEventSubscriber<ThingS
 
     private void ignoreInInbox(ThingTypeUID thingtypeUID, String representationValue) {
         List<DiscoveryResult> results = inbox.stream().filter(withRepresentationPropertyValue(representationValue))
-                .filter(forThingTypeUID(thingtypeUID)).collect(Collectors.toList());
+                .filter(forThingTypeUID(thingtypeUID)).toList();
         if (results.size() == 1) {
             logger.debug("Auto-ignoring the inbox entry for the representation value '{}'.", representationValue);
 
-            inbox.setFlag(results.get(0).getThingUID(), DiscoveryResultFlag.IGNORED);
+            inbox.setFlag(results.getFirst().getThingUID(), DiscoveryResultFlag.IGNORED);
         }
     }
 
@@ -252,12 +251,11 @@ public class AutomaticInboxProcessor extends AbstractTypedEventSubscriber<ThingS
 
     private void removeFromInbox(ThingTypeUID thingtypeUID, String representationValue) {
         List<DiscoveryResult> results = inbox.stream().filter(withRepresentationPropertyValue(representationValue))
-                .filter(forThingTypeUID(thingtypeUID)).filter(withFlag(DiscoveryResultFlag.IGNORED))
-                .collect(Collectors.toList());
+                .filter(forThingTypeUID(thingtypeUID)).filter(withFlag(DiscoveryResultFlag.IGNORED)).toList();
         if (results.size() == 1) {
             logger.debug("Removing the ignored result from the inbox for the representation value '{}'.",
                     representationValue);
-            inbox.remove(results.get(0).getThingUID());
+            inbox.remove(results.getFirst().getThingUID());
         }
     }
 

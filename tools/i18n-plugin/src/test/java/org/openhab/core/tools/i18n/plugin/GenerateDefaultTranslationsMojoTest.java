@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,22 +17,20 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.openhab.core.tools.i18n.plugin.DefaultTranslationsGenerationMode.*;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Comparator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.SystemStreamLog;
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 /**
  * Tests {@link GenerateDefaultTranslationsMojo}.
@@ -42,7 +40,7 @@ import org.junit.jupiter.api.Test;
 @NonNullByDefault
 public class GenerateDefaultTranslationsMojoTest {
 
-    public @NonNullByDefault({}) Path tempPath;
+    public @TempDir @NonNullByDefault({}) Path tempPath;
     public @NonNullByDefault({}) Path tempI18nPath;
 
     public static final Path TTS_RESOURCES_PATH = Path.of("src/test/resources/acmetts.bundle");
@@ -95,18 +93,12 @@ public class GenerateDefaultTranslationsMojoTest {
 
     @BeforeEach
     public void before() throws IOException {
-        tempPath = Files.createTempDirectory("i18n-");
         tempI18nPath = tempPath.resolve("OH-INF/i18n");
 
         mojo = new GenerateDefaultTranslationsMojo();
         mojo.setLog(new SystemStreamLog());
         mojo.setOhinfDirectory(tempPath.resolve("OH-INF").toFile());
         mojo.setTargetDirectory(tempI18nPath.toFile());
-    }
-
-    @AfterEach
-    public void afterEach() throws IOException {
-        Files.walk(tempPath).sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
     }
 
     private void assertSameProperties(Path expectedPath, Path actualPath) throws IOException {

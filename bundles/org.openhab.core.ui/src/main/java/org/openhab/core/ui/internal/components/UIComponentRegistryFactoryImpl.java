@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,7 +12,6 @@
  */
 package org.openhab.core.ui.internal.components;
 
-import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -118,7 +117,7 @@ public class UIComponentRegistryFactoryImpl implements UIComponentRegistryFactor
         Set<UIComponentProvider> existing = providers.get(provider.getNamespace());
 
         if (existing == null) {
-            existing = Collections.emptySet();
+            existing = Set.of();
         }
 
         Set<UIComponentProvider> updated = new HashSet<>(existing);

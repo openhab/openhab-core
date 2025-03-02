@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,7 +15,7 @@ package org.openhab.core.thing.internal.profiles;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
-import java.time.ZonedDateTime;
+import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -40,7 +40,7 @@ public class TimestampProfileTest extends JavaTest {
         ProfileCallback callback = mock(ProfileCallback.class);
         TimestampUpdateProfile timestampProfile = new TimestampUpdateProfile(callback);
 
-        ZonedDateTime now = ZonedDateTime.now();
+        Instant now = Instant.now();
         timestampProfile.onStateUpdateFromHandler(new DecimalType(23));
 
         ArgumentCaptor<State> capture = ArgumentCaptor.forClass(State.class);
@@ -48,7 +48,7 @@ public class TimestampProfileTest extends JavaTest {
 
         State result = capture.getValue();
         DateTimeType updateResult = (DateTimeType) result;
-        ZonedDateTime timestamp = updateResult.getZonedDateTime();
+        Instant timestamp = updateResult.getInstant();
         long difference = ChronoUnit.MINUTES.between(now, timestamp);
         assertTrue(difference < 1);
     }
@@ -66,7 +66,7 @@ public class TimestampProfileTest extends JavaTest {
         State result = capture.getValue();
         DateTimeType changeResult = (DateTimeType) result;
 
-        waitForAssert(() -> assertTrue(ZonedDateTime.now().isAfter(changeResult.getZonedDateTime())));
+        waitForAssert(() -> assertTrue(Instant.now().isAfter(changeResult.getInstant())));
 
         // The state is unchanged, no additional call to the callback
         timestampProfile.onStateUpdateFromHandler(new DecimalType(23));
@@ -77,6 +77,6 @@ public class TimestampProfileTest extends JavaTest {
         verify(callback, times(2)).sendUpdate(capture.capture());
         result = capture.getValue();
         DateTimeType updatedResult = (DateTimeType) result;
-        assertTrue(updatedResult.getZonedDateTime().isAfter(changeResult.getZonedDateTime()));
+        assertTrue(updatedResult.getInstant().isAfter(changeResult.getInstant()));
     }
 }

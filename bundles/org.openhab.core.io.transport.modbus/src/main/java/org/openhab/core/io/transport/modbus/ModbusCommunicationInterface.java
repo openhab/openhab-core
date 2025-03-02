@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -45,8 +45,8 @@ public interface ModbusCommunicationInterface extends AutoCloseable {
      * background.
      *
      * @param request request to send
-     * @param callback callback to call with data
-     * @param callback callback to call in case of failure
+     * @param resultCallback callback to call with data
+     * @param failureCallback callback to call in case of failure
      * @return future representing the polled task
      * @throws IllegalStateException when this communication has been closed already
      */
@@ -62,8 +62,8 @@ public interface ModbusCommunicationInterface extends AutoCloseable {
      * @param request request to send
      * @param pollPeriodMillis poll interval, in milliseconds
      * @param initialDelayMillis initial delay before starting polling, in milliseconds
-     * @param callback callback to call with data
-     * @param callback callback to call in case of failure
+     * @param resultCallback callback to call with data
+     * @param failureCallback callback to call in case of failure
      * @return poll task representing the regular poll
      * @throws IllegalStateException when this communication has been closed already
      */
@@ -86,8 +86,8 @@ public interface ModbusCommunicationInterface extends AutoCloseable {
      * background.
      *
      * @param request request to send
-     * @param callback callback to call with response
-     * @param callback callback to call in case of failure
+     * @param resultCallback callback to call with response
+     * @param failureCallback callback to call in case of failure
      * @return future representing the task
      * @throws IllegalStateException when this communication has been closed already
      */

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -33,7 +33,7 @@ public class StringListTypeTest {
         StringListType call2 = new StringListType("0699222222,0179999998");
 
         assertEquals(call1.getValue(origIdx), call2.getValue(destIdx));
-        assertEquals(call2.toString(), "0699222222,0179999998");
+        assertEquals("0699222222,0179999998", call2.toString());
     }
 
     @Test

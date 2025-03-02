@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -91,7 +91,7 @@ public class ThingTypesTest extends JavaOSGiTest {
             assertThat(thingType.getLabel(), is("HUE Lamp"));
             assertThat(thingType.getDescription(), is("My own great HUE Lamp."));
             assertThat(thingType.getSupportedBridgeTypeUIDs().size(), is(1));
-            assertThat(thingType.getSupportedBridgeTypeUIDs().get(0), is("hue:bridge"));
+            assertThat(thingType.getSupportedBridgeTypeUIDs().getFirst(), is("hue:bridge"));
             assertThat(thingType.getExtensibleChannelTypeIds(), containsInAnyOrder("alarm", "brightness"));
             assertThat(thingType.getProperties().size(), is(2));
             assertThat(thingType.getProperties().get("key1"), is("value1"));
@@ -172,8 +172,8 @@ public class ThingTypesTest extends JavaOSGiTest {
             assertThat(state.getPattern(), is(equalTo("%d Peek")));
             assertThat(state.isReadOnly(), is(true));
             assertThat(state.getOptions().size(), is(2));
-            assertThat(state.getOptions().get(0).getValue(), is(equalTo("SOUND")));
-            assertThat(state.getOptions().get(0).getLabel(), is(equalTo("My great sound.")));
+            assertThat(state.getOptions().getFirst().getValue(), is(equalTo("SOUND")));
+            assertThat(state.getOptions().getFirst().getLabel(), is(equalTo("My great sound.")));
 
             // HUE Lamp with group
             thingType = thingTypes.stream().filter(it -> "hue:lamp-with-group".equals(it.toString())).findFirst().get();

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -32,10 +32,12 @@ public class AudioStreamFromCache extends FixedLengthAudioStream {
 
     private InputStreamCacheWrapper inputStream;
     private AudioFormat audioFormat;
+    private String key;
 
-    public AudioStreamFromCache(InputStreamCacheWrapper inputStream, AudioFormatInfo audioFormat) {
+    public AudioStreamFromCache(InputStreamCacheWrapper inputStream, AudioFormatInfo audioFormat, String key) {
         this.inputStream = inputStream;
         this.audioFormat = audioFormat.toAudioFormat();
+        this.key = key;
     }
 
     @Override
@@ -100,5 +102,10 @@ public class AudioStreamFromCache extends FixedLengthAudioStream {
     @Override
     public boolean markSupported() {
         return inputStream.markSupported();
+    }
+
+    @Override
+    public @Nullable String getId() {
+        return key;
     }
 }

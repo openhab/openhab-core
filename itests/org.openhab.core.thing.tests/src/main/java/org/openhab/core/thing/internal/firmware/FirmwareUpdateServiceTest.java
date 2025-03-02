@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -24,7 +24,6 @@ import static org.openhab.core.thing.firmware.FirmwareStatusInfo.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -162,7 +161,7 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
             if (THING_TYPE_UID_WITHOUT_FW.equals(thing.getThingTypeUID())
                     || THING_TYPE_UID2.equals(thing.getThingTypeUID())
                     || THING_TYPE_UID3.equals(thing.getThingTypeUID())) {
-                return Collections.emptySet();
+                return Set.of();
             } else {
                 Supplier<TreeSet<Firmware>> supplier = TreeSet::new;
                 return Stream.of(FW009_EN, FW111_EN, FW112_EN).collect(Collectors.toCollection(supplier));
@@ -195,7 +194,7 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
         // verify that the corresponding events are sent
         ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
         verify(eventPublisherMock, times(3)).post(eventCaptor.capture());
-        assertFirmwareStatusInfoEvent(THING1_UID, eventCaptor.getAllValues().get(0), updateExecutableInfoFw112);
+        assertFirmwareStatusInfoEvent(THING1_UID, eventCaptor.getAllValues().getFirst(), updateExecutableInfoFw112);
         assertFirmwareStatusInfoEvent(THING2_UID, eventCaptor.getAllValues().get(1), upToDateInfo);
         assertFirmwareStatusInfoEvent(THING2_UID, eventCaptor.getAllValues().get(2), unknownInfo);
     }
@@ -222,7 +221,7 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
             Thing thing = (Thing) invocation.getArguments()[0];
             if (THING_TYPE_UID_WITHOUT_FW.equals(thing.getThingTypeUID())
                     || THING_TYPE_UID1.equals(thing.getThingTypeUID())) {
-                return Collections.emptySet();
+                return Set.of();
             } else {
                 return Set.of(FWALPHA_EN);
             }
@@ -233,7 +232,7 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
         // verify that the corresponding events are sent
         ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
         verify(eventPublisherMock, times(2)).post(eventCaptor.capture());
-        assertFirmwareStatusInfoEvent(THING3_UID, eventCaptor.getAllValues().get(0), unknownInfo);
+        assertFirmwareStatusInfoEvent(THING3_UID, eventCaptor.getAllValues().getFirst(), unknownInfo);
         assertFirmwareStatusInfoEvent(THING3_UID, eventCaptor.getAllValues().get(1), upToDateInfo);
     }
 
@@ -247,7 +246,7 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
         // verify that the corresponding events are sent
         ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
         verify(eventPublisherMock, times(1)).post(eventCaptor.capture());
-        assertFirmwareStatusInfoEvent(THING1_UID, eventCaptor.getAllValues().get(0), updateExecutableInfoFw112);
+        assertFirmwareStatusInfoEvent(THING1_UID, eventCaptor.getAllValues().getFirst(), updateExecutableInfoFw112);
     }
 
     @Test
@@ -264,7 +263,7 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
         waitForAssert(() -> {
             ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
             verify(eventPublisherMock, times(3)).post(eventCaptor.capture());
-            assertFirmwareStatusInfoEvent(THING1_UID, eventCaptor.getAllValues().get(0), updateExecutableInfoFw112);
+            assertFirmwareStatusInfoEvent(THING1_UID, eventCaptor.getAllValues().getFirst(), updateExecutableInfoFw112);
             assertFirmwareStatusInfoEvent(THING2_UID, eventCaptor.getAllValues().get(1), upToDateInfo);
             assertFirmwareStatusInfoEvent(THING3_UID, eventCaptor.getAllValues().get(2), unknownInfo);
 
@@ -278,7 +277,7 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
             Thing thing = (Thing) invocation.getArguments()[0];
             if (THING_TYPE_UID_WITHOUT_FW.equals(thing.getThingTypeUID())
                     || THING_TYPE_UID2.equals(thing.getThingTypeUID())) {
-                return Collections.emptySet();
+                return Set.of();
             } else {
                 return Set.of(FW113_EN);
             }
@@ -289,7 +288,7 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
             verify(eventPublisherMock, times(2)).post(eventCaptor.capture());
 
             FirmwareStatusInfo updateExecutableInfoFw113 = createUpdateExecutableInfo(thing1.getUID(), V113);
-            assertFirmwareStatusInfoEvent(THING1_UID, eventCaptor.getAllValues().get(0), updateExecutableInfoFw113);
+            assertFirmwareStatusInfoEvent(THING1_UID, eventCaptor.getAllValues().getFirst(), updateExecutableInfoFw113);
 
             updateExecutableInfoFw113 = createUpdateExecutableInfo(thing2.getUID(), V113);
             assertFirmwareStatusInfoEvent(THING2_UID, eventCaptor.getAllValues().get(1), updateExecutableInfoFw113);
@@ -303,7 +302,7 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
         waitForAssert(() -> {
             ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
             verify(eventPublisherMock, times(2)).post(eventCaptor.capture());
-            assertFirmwareStatusInfoEvent(THING1_UID, eventCaptor.getAllValues().get(0), updateExecutableInfoFw112);
+            assertFirmwareStatusInfoEvent(THING1_UID, eventCaptor.getAllValues().getFirst(), updateExecutableInfoFw112);
             assertFirmwareStatusInfoEvent(THING2_UID, eventCaptor.getAllValues().get(1), upToDateInfo);
         });
     }
@@ -326,7 +325,7 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
         // verify that the corresponding events are sent
         ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
         verify(eventPublisherMock, times(2)).post(eventCaptor.capture());
-        assertFirmwareStatusInfoEvent(THING1_UID, eventCaptor.getAllValues().get(0), updateExecutableInfoFw112);
+        assertFirmwareStatusInfoEvent(THING1_UID, eventCaptor.getAllValues().getFirst(), updateExecutableInfoFw112);
         assertFirmwareStatusInfoEvent(THING1_UID, eventCaptor.getAllValues().get(1), upToDateInfo);
     }
 
@@ -469,7 +468,7 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
         // verify that the corresponding events are sent
         ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
         verify(eventPublisherMock, times(2)).post(eventCaptor.capture());
-        assertFirmwareStatusInfoEvent(THING2_UID, eventCaptor.getAllValues().get(0), upToDateInfo);
+        assertFirmwareStatusInfoEvent(THING2_UID, eventCaptor.getAllValues().getFirst(), upToDateInfo);
         assertFirmwareStatusInfoEvent(THING2_UID, eventCaptor.getAllValues().get(1), updateExecutableInfoFw112);
     }
 
@@ -545,7 +544,7 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
             Thing thing = (Thing) invocation.getArguments()[0];
             if (THING_TYPE_UID_WITHOUT_FW.equals(thing.getThingTypeUID())
                     || THING_TYPE_UID2.equals(thing.getThingTypeUID())) {
-                return Collections.emptySet();
+                return Set.of();
             } else {
                 Supplier<TreeSet<Firmware>> supplier = TreeSet::new;
                 return Stream.of(FW111_FIX_EN, FW113_EN).collect(Collectors.toCollection(supplier));
@@ -581,7 +580,7 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
             Thing thing = (Thing) invocation.getArguments()[0];
             if (THING_TYPE_UID_WITHOUT_FW.equals(thing.getThingTypeUID())
                     || THING_TYPE_UID2.equals(thing.getThingTypeUID())) {
-                return Collections.emptySet();
+                return Set.of();
             } else {
                 Supplier<TreeSet<Firmware>> supplier = TreeSet::new;
                 return Stream.of(FW111_FIX_EN, FW113_EN).collect(Collectors.toCollection(supplier));
@@ -657,7 +656,7 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
             if (THING_TYPE_UID1.equals(thing.getThingTypeUID())) {
                 return Set.of(FWALPHA_RESTRICTED_TO_MODEL2);
             } else {
-                return Collections.emptySet();
+                return Set.of();
             }
         });
 
@@ -702,8 +701,7 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
             verify(eventPublisherMock, atLeast(SEQUENCE.length + 1)).post(eventCaptor.capture());
         });
         events.get().addAll(eventCaptor.getAllValues());
-        List<Event> list = events.get().stream().filter(FirmwareUpdateProgressInfoEvent.class::isInstance)
-                .collect(Collectors.toList());
+        List<Event> list = events.get().stream().filter(FirmwareUpdateProgressInfoEvent.class::isInstance).toList();
         assertTrue(list.size() >= SEQUENCE.length);
         for (int i = 0; i < SEQUENCE.length; i++) {
             FirmwareUpdateProgressInfoEvent event = (FirmwareUpdateProgressInfoEvent) list.get(i);
@@ -903,7 +901,7 @@ public class FirmwareUpdateServiceTest extends JavaOSGiTest {
             ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
             verify(eventPublisherMock, atLeast(expectedEventCount)).post(eventCaptor.capture());
             List<Event> allValues = eventCaptor.getAllValues().stream()
-                    .filter(FirmwareUpdateResultInfoEvent.class::isInstance).collect(Collectors.toList());
+                    .filter(FirmwareUpdateResultInfoEvent.class::isInstance).toList();
             assertEquals(expectedEventCount, allValues.size());
             assertFailedFirmwareUpdate(THING1_UID, allValues.get(expectedEventCount - 1), text);
         });

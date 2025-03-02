@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -25,6 +25,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.common.Disposable;
 import org.openhab.core.storage.Storage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -126,7 +127,7 @@ public class LRUMediaCacheEntry<V> {
      *
      * @return
      */
-    protected Long getTotalSize() {
+    protected long getTotalSize() {
         if (completed) { // we already know the total size of the sound
             return currentSize;
         } else {
@@ -233,6 +234,9 @@ public class LRUMediaCacheEntry<V> {
                     if (inputStreamLocal != null) {
                         inputStreamLocal.close();
                     }
+                    if (inputStreamLocal instanceof Disposable disposableStream) {
+                        disposableStream.dispose();
+                    }
                 }
             }
         } finally {
@@ -292,7 +296,7 @@ public class LRUMediaCacheEntry<V> {
             }
         }
         // the cache file is now filled, get bytes from it.
-        long maxToRead = Math.min(currentSize, sizeToRead);
+        long maxToRead = Math.min(fileChannelLocal.size(), sizeToRead);
         ByteBuffer byteBufferFromChannelFile = ByteBuffer.allocate((int) maxToRead);
         int byteReadNumber = fileChannelLocal.read(byteBufferFromChannelFile, Integer.valueOf(start).longValue());
         logger.trace("Read {} bytes from the filechannel", byteReadNumber);
@@ -319,7 +323,9 @@ public class LRUMediaCacheEntry<V> {
             return 0;
         }
         try {
-            return Math.max(0, Long.valueOf(fileChannelLocal.size() - offset).intValue());
+            long nBytes = Math.min(Integer.MAX_VALUE, Math.max(0, fileChannelLocal.size() - offset));
+            // nBytes is for sure in integer range, safe to cast
+            return (int) nBytes;
         } catch (IOException e) {
             logger.debug("Cannot get file length for cache file {}", key);
             return 0;

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,7 +12,6 @@
  */
 package org.openhab.core.thing.internal;
 
-import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -28,14 +27,12 @@ import javax.measure.Unit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.cache.ExpiringCacheMap;
 import org.openhab.core.common.AbstractUID;
 import org.openhab.core.common.SafeCaller;
 import org.openhab.core.common.registry.RegistryChangeListener;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.events.EventSubscriber;
-import org.openhab.core.i18n.UnitProvider;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemFactory;
 import org.openhab.core.items.ItemRegistry;
@@ -72,10 +69,11 @@ import org.openhab.core.thing.profiles.ProfileContext;
 import org.openhab.core.thing.profiles.ProfileFactory;
 import org.openhab.core.thing.profiles.ProfileTypeUID;
 import org.openhab.core.thing.profiles.StateProfile;
+import org.openhab.core.thing.profiles.TimeSeriesProfile;
 import org.openhab.core.thing.profiles.TriggerProfile;
-import org.openhab.core.thing.type.ChannelTypeRegistry;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
+import org.openhab.core.types.TimeSeries;
 import org.openhab.core.types.Type;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -92,10 +90,14 @@ import org.slf4j.LoggerFactory;
  * It mainly mediates commands, state updates and triggers from ThingHandlers to the framework and vice versa.
  *
  * @author Simon Kaufmann - Initial contribution factored out of ThingManger
+ * @author Jan N. Klug - Added time series support
  */
 @NonNullByDefault
 @Component(service = { EventSubscriber.class, CommunicationManager.class }, immediate = true)
 public class CommunicationManager implements EventSubscriber, RegistryChangeListener<ItemChannelLink> {
+
+    private record CacheKey(String type, Profile profile, Thing thing) {
+    }
 
     private static final Profile NO_OP_PROFILE = new Profile() {
         private final ProfileTypeUID noOpProfileUID = new ProfileTypeUID(ProfileTypeUID.SYSTEM_SCOPE, "noop");
@@ -111,9 +113,6 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
         }
     };
 
-    // how long to cache profile safe call instances
-    private static final Duration CACHE_EXPIRATION = Duration.ofMinutes(30);
-
     // the timeout to use for any item event processing
     public static final long THINGHANDLER_EVENT_TIMEOUT = TimeUnit.SECONDS.toMillis(30);
 
@@ -123,7 +122,6 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
     private final Logger logger = LoggerFactory.getLogger(CommunicationManager.class);
 
     private final AutoUpdateManager autoUpdateManager;
-    private final ChannelTypeRegistry channelTypeRegistry;
     private final SystemProfileFactory defaultProfileFactory;
     private final ItemChannelLinkRegistry itemChannelLinkRegistry;
     private final ItemRegistry itemRegistry;
@@ -131,22 +129,19 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
     private final EventPublisher eventPublisher;
     private final SafeCaller safeCaller;
     private final ThingRegistry thingRegistry;
-    private final UnitProvider unitProvider;
 
-    private final ExpiringCacheMap<Integer, Profile> profileSafeCallCache = new ExpiringCacheMap<>(CACHE_EXPIRATION);
+    private final ConcurrentHashMap<CacheKey, Profile> profileSafeCallCache = new ConcurrentHashMap<>();
 
     @Activate
     public CommunicationManager(final @Reference AutoUpdateManager autoUpdateManager,
-            final @Reference ChannelTypeRegistry channelTypeRegistry,
             final @Reference SystemProfileFactory defaultProfileFactory,
             final @Reference ItemChannelLinkRegistry itemChannelLinkRegistry,
             final @Reference ItemRegistry itemRegistry, //
             final @Reference ItemStateConverter itemStateConverter, //
             final @Reference EventPublisher eventPublisher, //
             final @Reference SafeCaller safeCaller, //
-            final @Reference ThingRegistry thingRegistry, final @Reference UnitProvider unitProvider) {
+            final @Reference ThingRegistry thingRegistry) {
         this.autoUpdateManager = autoUpdateManager;
-        this.channelTypeRegistry = channelTypeRegistry;
         this.defaultProfileFactory = defaultProfileFactory;
         this.itemChannelLinkRegistry = itemChannelLinkRegistry;
         this.itemRegistry = itemRegistry;
@@ -154,7 +149,6 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
         this.eventPublisher = eventPublisher;
         this.safeCaller = safeCaller;
         this.thingRegistry = thingRegistry;
-        this.unitProvider = unitProvider;
 
         itemChannelLinkRegistry.addRegistryChangeListener(this);
     }
@@ -227,18 +221,18 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
 
     private ProfileCallback createCallback(ItemChannelLink link) {
         return new ProfileCallbackImpl(eventPublisher, safeCaller, itemStateConverter, link, thingRegistry::get,
-                this::getItem);
+                this::getItem, this::toAcceptedCommand);
     }
 
     private @Nullable ProfileTypeUID determineProfileTypeUID(ItemChannelLink link, Item item, @Nullable Thing thing) {
         ProfileTypeUID profileTypeUID = getConfiguredProfileTypeUID(link);
-        Channel channel = null;
+        Channel channel;
         if (profileTypeUID == null) {
             if (thing == null) {
                 return null;
             }
 
-            channel = thing.getChannel(link.getLinkedUID().getId());
+            channel = thing.getChannel(link.getLinkedUID());
             if (channel == null) {
                 return null;
             }
@@ -288,9 +282,13 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
         if (item != null && thing != null) {
             Channel channel = thing.getChannel(link.getLinkedUID());
             if (channel != null) {
+                String acceptedItemType = Objects.requireNonNullElse(channel.getAcceptedItemType(), "");
+                if (acceptedItemType.startsWith("Number")) {
+                    acceptedItemType = "Number";
+                }
                 context = new ProfileContextImpl(link.getConfiguration(), item.getAcceptedDataTypes(),
-                        item.getAcceptedCommandTypes(), acceptedCommandTypeMap.getOrDefault(
-                                Objects.requireNonNullElse(channel.getAcceptedItemType(), ""), List.of()));
+                        item.getAcceptedCommandTypes(),
+                        acceptedCommandTypeMap.getOrDefault(acceptedItemType, List.of()));
             }
         }
 
@@ -352,10 +350,10 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
     }
 
     private void applyProfileForUpdate(Profile profile, Thing thing, State convertedState) {
-        int key = Objects.hash("UPDATE", profile, thing);
-        Profile p = profileSafeCallCache.putIfAbsentAndGet(key, () -> safeCaller.create(profile, Profile.class) //
+        CacheKey key = new CacheKey("UPDATE", profile, thing);
+        Profile p = profileSafeCallCache.computeIfAbsent(key, (k) -> safeCaller.create(k.profile, Profile.class) //
                 .withAsync() //
-                .withIdentifier(thing) //
+                .withIdentifier(k.thing) //
                 .withTimeout(THINGHANDLER_EVENT_TIMEOUT) //
                 .build());
         if (p != null) {
@@ -366,12 +364,12 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
     }
 
     private void applyProfileForCommand(Profile profile, Thing thing, Command convertedCommand) {
-        if (profile instanceof StateProfile stateProfile) {
-            int key = Objects.hash("COMMAND", profile, thing);
-            Profile p = profileSafeCallCache.putIfAbsentAndGet(key,
-                    () -> safeCaller.create(stateProfile, StateProfile.class) //
+        if (profile instanceof StateProfile) {
+            CacheKey key = new CacheKey("COMMAND", profile, thing);
+            Profile p = profileSafeCallCache.computeIfAbsent(key,
+                    (k) -> safeCaller.create((StateProfile) k.profile, StateProfile.class) //
                             .withAsync() //
-                            .withIdentifier(thing) //
+                            .withIdentifier(k.thing) //
                             .withTimeout(THINGHANDLER_EVENT_TIMEOUT) //
                             .build());
             if (p instanceof StateProfile profileP) {
@@ -399,19 +397,14 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
             ThingUID thingUID = channelUID.getThingUID();
             Thing thing = thingRegistry.get(thingUID);
             if (thing != null) {
-                Channel channel = thing.getChannel(channelUID.getId());
+                Channel channel = thing.getChannel(channelUID);
                 if (channel != null) {
-                    @Nullable
-                    T convertedType = toAcceptedType(type, channel, acceptedTypesFunction, item);
-                    if (convertedType != null) {
-                        if (thing.getHandler() != null) {
-                            Profile profile = getProfile(link, item, thing);
-                            action.applyProfile(profile, thing, convertedType);
-                        }
-                    } else {
-                        logger.debug(
-                                "Received event '{}' ({}) could not be converted to any type accepted by item '{}' ({})",
-                                type, type.getClass().getSimpleName(), itemName, item.getType());
+                    if (thing.getHandler() != null) {
+                        // fix QuantityType/DecimalType, leave others as-is
+                        @Nullable
+                        T uomType = fixUoM(type, channel, item);
+                        Profile profile = getProfile(link, item, thing);
+                        action.applyProfile(profile, thing, uomType != null ? uomType : type);
                     }
                 } else {
                     logger.debug("Received  event '{}' for non-existing channel '{}', not forwarding it to the handler",
@@ -425,8 +418,7 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
     }
 
     @SuppressWarnings("unchecked")
-    private <T extends Type> @Nullable T toAcceptedType(T originalType, Channel channel,
-            Function<@Nullable String, @Nullable List<Class<? extends T>>> acceptedTypesFunction, Item item) {
+    private <T extends Type> @Nullable T fixUoM(@Nullable T originalType, Channel channel, Item item) {
         String channelAcceptedItemType = channel.getAcceptedItemType();
 
         if (channelAcceptedItemType == null) {
@@ -449,22 +441,40 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
             Unit<?> unit = Objects.requireNonNull(((NumberItem) item).getUnit());
             return (T) new QuantityType<>(decimalType.toBigDecimal(), unit);
         }
+        return null;
+    }
+
+    public @Nullable Command toAcceptedCommand(Command originalType, @Nullable Channel channel, @Nullable Item item) {
+        if (item == null || channel == null) {
+            logger.warn("Trying to convert types for non-existing channel or item, discarding command.");
+            return null;
+        }
+        String channelAcceptedItemType = channel.getAcceptedItemType();
+
+        if (channelAcceptedItemType == null) {
+            return originalType;
+        }
+
+        Command uomCommand = fixUoM(originalType, channel, item);
+        if (uomCommand != null) {
+            return uomCommand;
+        }
 
         // handle HSBType/PercentType
         if (CoreItemFactory.DIMMER.equals(channelAcceptedItemType) && originalType instanceof HSBType hsb) {
-            return (T) (hsb.as(PercentType.class));
+            return hsb.as(PercentType.class);
         }
 
         // check for other cases if the type is acceptable
-        List<Class<? extends T>> acceptedTypes = acceptedTypesFunction.apply(channelAcceptedItemType);
+        List<Class<? extends Command>> acceptedTypes = acceptedCommandTypeMap.get(channelAcceptedItemType);
         if (acceptedTypes == null || acceptedTypes.contains(originalType.getClass())) {
             return originalType;
         } else if (acceptedTypes.contains(PercentType.class) && originalType instanceof State state
                 && PercentType.class.isAssignableFrom(originalType.getClass())) {
-            return (@Nullable T) state.as(PercentType.class);
+            return state.as(PercentType.class);
         } else if (acceptedTypes.contains(OnOffType.class) && originalType instanceof State state
                 && PercentType.class.isAssignableFrom(originalType.getClass())) {
-            return (@Nullable T) state.as(OnOffType.class);
+            return state.as(OnOffType.class);
         } else {
             logger.debug("Received not accepted type '{}' for channel '{}'", originalType.getClass().getSimpleName(),
                     channel.getUID());
@@ -507,6 +517,20 @@ public class CommunicationManager implements EventSubscriber, RegistryChangeList
         handleCallFromHandler(channelUID, thing, profile -> {
             if (profile instanceof StateProfile stateProfile) {
                 stateProfile.onCommandFromHandler(command);
+            }
+        });
+    }
+
+    public void sendTimeSeries(ChannelUID channelUID, TimeSeries timeSeries) {
+        ThingUID thingUID = channelUID.getThingUID();
+        Thing thing = thingRegistry.get(thingUID);
+        handleCallFromHandler(channelUID, thing, profile -> {
+            // TODO: check which profiles need enhancements
+            if (profile instanceof TimeSeriesProfile timeSeriesProfile) {
+                timeSeriesProfile.onTimeSeriesFromHandler(timeSeries);
+            } else {
+                logger.warn("Profile '{}' on channel {} does not support time series.", profile.getProfileTypeUID(),
+                        channelUID);
             }
         });
     }

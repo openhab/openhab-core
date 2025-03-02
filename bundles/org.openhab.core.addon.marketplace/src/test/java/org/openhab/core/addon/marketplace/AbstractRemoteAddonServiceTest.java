@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,11 +13,8 @@
 package org.openhab.core.addon.marketplace;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.*;
+import static org.mockito.Mockito.*;
 import static org.openhab.core.addon.marketplace.AbstractRemoteAddonService.CONFIG_REMOTE_ENABLED;
 import static org.openhab.core.addon.marketplace.test.TestAddonService.ALL_ADDON_COUNT;
 import static org.openhab.core.addon.marketplace.test.TestAddonService.COMPATIBLE_ADDON_COUNT;
@@ -31,6 +28,7 @@ import java.io.IOException;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
@@ -43,6 +41,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.openhab.core.addon.Addon;
+import org.openhab.core.addon.AddonInfoRegistry;
 import org.openhab.core.addon.marketplace.test.TestAddonHandler;
 import org.openhab.core.addon.marketplace.test.TestAddonService;
 import org.openhab.core.events.Event;
@@ -64,6 +63,7 @@ import org.osgi.service.cm.ConfigurationAdmin;
 @NonNullByDefault
 public class AbstractRemoteAddonServiceTest {
     private @Mock @NonNullByDefault({}) StorageService storageService;
+    private @Mock @NonNullByDefault({}) AddonInfoRegistry addonInfoRegistry;
     private @Mock @NonNullByDefault({}) ConfigurationAdmin configurationAdmin;
     private @Mock @NonNullByDefault({}) EventPublisher eventPublisher;
     private @Mock @NonNullByDefault({}) Configuration configuration;
@@ -82,7 +82,7 @@ public class AbstractRemoteAddonServiceTest {
 
         addonHandler = new TestAddonHandler();
 
-        addonService = new TestAddonService(eventPublisher, configurationAdmin, storageService);
+        addonService = new TestAddonService(eventPublisher, configurationAdmin, storageService, addonInfoRegistry);
         addonService.addAddonHandler(addonHandler);
     }
 
@@ -93,7 +93,7 @@ public class AbstractRemoteAddonServiceTest {
         addonHandler = new TestAddonHandler();
         addonHandler.setReady(false);
 
-        addonService = new TestAddonService(eventPublisher, configurationAdmin, storageService);
+        addonService = new TestAddonService(eventPublisher, configurationAdmin, storageService, addonInfoRegistry);
         addonService.addAddonHandler(addonHandler);
 
         List<Addon> addons = addonService.getAddons(null);
@@ -142,7 +142,7 @@ public class AbstractRemoteAddonServiceTest {
         // check only the installed addon is present
         addons = addonService.getAddons(null);
         assertThat(addons, hasSize(1));
-        assertThat(addons.get(0).getUid(), is(getFullAddonId(TEST_ADDON)));
+        assertThat(addons.getFirst().getUid(), is(getFullAddonId(TEST_ADDON)));
     }
 
     @Test
@@ -245,13 +245,44 @@ public class AbstractRemoteAddonServiceTest {
     }
 
     @Test
-    public void testAddonUninstallRemovesStorageEntryOnUninstalledAddon() {
+    public void testUninstalledAddonIsReinstalled() {
         addonService.addToStorage(TEST_ADDON);
         addonService.getAddons(null);
 
-        addonService.uninstall(TEST_ADDON);
+        checkResult(TEST_ADDON, getFullAddonId(TEST_ADDON) + "/installed", true, true);
+    }
 
-        checkResult(TEST_ADDON, getFullAddonId(TEST_ADDON) + "/failed", false, true);
+    // add-comparisons
+    @Test
+    public void testAddonOrdering() {
+        Addon addon1 = getMockedAddon("4.1.0", false);
+        Addon addon2 = getMockedAddon("4.2.0", true);
+        Addon addon3 = getMockedAddon("4.1.4", false);
+        Addon addon4 = getMockedAddon("4.2.1", true);
+        List<Addon> actual = Stream.of(addon1, addon2, addon3, addon4)
+                .sorted(AbstractRemoteAddonService.BY_COMPATIBLE_AND_VERSION).toList();
+        List<Addon> expected = List.of(addon4, addon2, addon3, addon1);
+
+        assertThat(actual, is(equalTo(expected)));
+    }
+
+    @Test
+    public void testSnapshotVersionsAreParsedProperly() {
+        Addon addon1 = getMockedAddon("4.1.0", true);
+        Addon addon2 = getMockedAddon("4.2.0-SNAPSHOT", true);
+
+        List<Addon> actual = Stream.of(addon1, addon2).sorted(AbstractRemoteAddonService.BY_COMPATIBLE_AND_VERSION)
+                .toList();
+        List<Addon> expected = List.of(addon2, addon1);
+
+        assertThat(actual, is(equalTo(expected)));
+    }
+
+    private Addon getMockedAddon(String version, boolean compatible) {
+        Addon addon = mock(Addon.class);
+        when(addon.getVersion()).thenReturn(version);
+        when(addon.getCompatible()).thenReturn(compatible);
+        return addon;
     }
 
     /**
@@ -265,11 +296,11 @@ public class AbstractRemoteAddonServiceTest {
     private void checkResult(String id, String expectedEventTopic, boolean installStatus, boolean present) {
         // assert expected event is posted
         ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
-        Mockito.verify(eventPublisher).post(eventCaptor.capture());
+        Mockito.verify(eventPublisher, timeout(5000)).post(eventCaptor.capture());
         Event event = eventCaptor.getValue();
         String topic = "openhab/addons/" + expectedEventTopic;
 
-        assertThat(event.getTopic(), is(topic));
+        assertThat(event.toString(), event.getTopic(), is(topic));
 
         // assert addon handler was called (by checking it's installed status)
         assertThat(addonHandler.isInstalled(getFullAddonId(id)), is(installStatus));

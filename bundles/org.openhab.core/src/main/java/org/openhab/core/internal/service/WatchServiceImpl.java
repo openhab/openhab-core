@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -115,7 +115,7 @@ public class WatchServiceImpl implements WatchService, DirectoryChangeListener {
             closeWatcherAndUnregister();
 
             if (!Files.exists(basePath)) {
-                logger.info("Watch directory '{}' does not exists. Trying to create it.", basePath);
+                logger.info("Watch directory '{}' does not exist. Trying to create it.", basePath);
                 Files.createDirectories(basePath);
             }
 
@@ -215,6 +215,7 @@ public class WatchServiceImpl implements WatchService, DirectoryChangeListener {
 
     @Override
     public void onEvent(@Nullable DirectoryChangeEvent directoryChangeEvent) throws IOException {
+        logger.trace("onEvent {}", directoryChangeEvent);
         if (directoryChangeEvent == null || directoryChangeEvent.isDirectory()
                 || directoryChangeEvent.eventType() == DirectoryChangeEvent.EventType.OVERFLOW) {
             // exit early, we are neither interested in directory events nor in OVERFLOW events
@@ -241,8 +242,8 @@ public class WatchServiceImpl implements WatchService, DirectoryChangeListener {
             return;
         }
 
-        DirectoryChangeEvent firstElement = events.get(0);
-        DirectoryChangeEvent lastElement = events.get(events.size() - 1);
+        DirectoryChangeEvent firstElement = events.getFirst();
+        DirectoryChangeEvent lastElement = events.getLast();
 
         // determine final event
         if (lastElement.eventType() == DirectoryChangeEvent.EventType.DELETE) {
@@ -253,9 +254,17 @@ public class WatchServiceImpl implements WatchService, DirectoryChangeListener {
             hashCache.remove(lastElement.path());
             doNotify(path, Kind.DELETE);
         } else if (firstElement.eventType() == DirectoryChangeEvent.EventType.CREATE) {
+            if (lastElement.hash() == null) {
+                logger.warn("Detected invalid event (hash must not be null for CREATE/MODIFY): {}", lastElement);
+                return;
+            }
             hashCache.put(lastElement.path(), lastElement.hash());
             doNotify(path, Kind.CREATE);
         } else {
+            if (lastElement.hash() == null) {
+                logger.warn("Detected invalid event (hash must not be null for CREATE/MODIFY): {}", lastElement);
+                return;
+            }
             FileHash oldHash = hashCache.put(lastElement.path(), lastElement.hash());
             if (!Objects.equals(oldHash, lastElement.hash())) {
                 // only notify if hashes are different, otherwise the file content did not chnge

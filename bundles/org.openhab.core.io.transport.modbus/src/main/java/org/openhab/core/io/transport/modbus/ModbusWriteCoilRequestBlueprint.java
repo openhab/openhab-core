@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -35,8 +35,8 @@ public class ModbusWriteCoilRequestBlueprint extends ModbusWriteRequestBlueprint
      * @param slaveId slave id to write to
      * @param reference reference address
      * @param data bit to write
-     * @param writeMultiple whether to use {@link ModbusWriteFunctionCode.WRITE_MULTIPLE_COILS} over
-     *            {@link ModbusWriteFunctionCode.WRITE_COIL}
+     * @param writeMultiple whether to use {@link ModbusWriteFunctionCode#WRITE_MULTIPLE_COILS} over
+     *            {@link ModbusWriteFunctionCode#WRITE_COIL}
      * @param maxTries maximum number of tries in case of errors, should be at least 1
      */
     public ModbusWriteCoilRequestBlueprint(int slaveId, int reference, boolean data, boolean writeMultiple,
@@ -50,8 +50,8 @@ public class ModbusWriteCoilRequestBlueprint extends ModbusWriteRequestBlueprint
      * @param slaveId slave id to write to
      * @param reference reference address
      * @param data bit(s) to write
-     * @param writeMultiple whether to use {@link ModbusWriteFunctionCode.WRITE_MULTIPLE_COILS} over
-     *            {@link ModbusWriteFunctionCode.WRITE_COIL}. Useful with single bit of data.
+     * @param writeMultiple whether to use {@link ModbusWriteFunctionCode#WRITE_MULTIPLE_COILS} over
+     *            {@link ModbusWriteFunctionCode#WRITE_COIL}. Useful with single bit of data.
      * @param maxTries maximum number of tries in case of errors, should be at least 1
      * @throws IllegalArgumentException in case <code>data</code> is empty, <code>writeMultiple</code> is
      *             <code>false</code> but there are many bits to write.

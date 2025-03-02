@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -34,23 +34,23 @@ import org.eclipse.jdt.annotation.Nullable;
 @NonNullByDefault
 public interface SerialPort extends Closeable {
 
-    final int DATABITS_5 = 5;
-    final int DATABITS_6 = 6;
-    final int DATABITS_7 = 7;
-    final int DATABITS_8 = 8;
-    final int PARITY_NONE = 0;
-    final int PARITY_ODD = 1;
-    final int PARITY_EVEN = 2;
-    final int PARITY_MARK = 3;
-    final int PARITY_SPACE = 4;
-    final int STOPBITS_1 = 1;
-    final int STOPBITS_2 = 2;
-    final int STOPBITS_1_5 = 3;
-    final int FLOWCONTROL_NONE = 0;
-    final int FLOWCONTROL_RTSCTS_IN = 1;
-    final int FLOWCONTROL_RTSCTS_OUT = 2;
-    final int FLOWCONTROL_XONXOFF_IN = 4;
-    final int FLOWCONTROL_XONXOFF_OUT = 8;
+    int DATABITS_5 = 5;
+    int DATABITS_6 = 6;
+    int DATABITS_7 = 7;
+    int DATABITS_8 = 8;
+    int PARITY_NONE = 0;
+    int PARITY_ODD = 1;
+    int PARITY_EVEN = 2;
+    int PARITY_MARK = 3;
+    int PARITY_SPACE = 4;
+    int STOPBITS_1 = 1;
+    int STOPBITS_2 = 2;
+    int STOPBITS_1_5 = 3;
+    int FLOWCONTROL_NONE = 0;
+    int FLOWCONTROL_RTSCTS_IN = 1;
+    int FLOWCONTROL_RTSCTS_OUT = 2;
+    int FLOWCONTROL_XONXOFF_IN = 4;
+    int FLOWCONTROL_XONXOFF_OUT = 8;
 
     @Override
     void close();
@@ -150,7 +150,7 @@ public interface SerialPort extends Closeable {
     String getName();
 
     /**
-     * Registers a {@link SerialPortEventListener} object to listen for {@link SerialEvents}.
+     * Registers a {@link SerialPortEventListener} object to listen for {@link SerialPortEvent}s.
      *
      * <p>
      * Interest in specific events may be expressed using the notifyOnXXX calls.
@@ -266,7 +266,7 @@ public interface SerialPort extends Closeable {
     /**
      * Sets the flow control mode value.
      *
-     * @param flowcontrol The flowcontrol (<code>int</code>) parameter.
+     * @param flowcontrolRtsctsOut The flowcontrol (<code>int</code>) parameter.
      * @throws UnsupportedCommOperationException Unsupported Comm Operation Exception.
      */
     void setFlowControlMode(int flowcontrolRtsctsOut) throws UnsupportedCommOperationException;
@@ -281,7 +281,7 @@ public interface SerialPort extends Closeable {
     /**
      * Enable receive threshold with the specified thresh parameter.
      *
-     * @param thresh The thresh (<code>int</code>) parameter.
+     * @param i The thresh (<code>int</code>) parameter.
      * @throws UnsupportedCommOperationException Unsupported Comm Operation Exception.
      */
     void enableReceiveThreshold(int i) throws UnsupportedCommOperationException;

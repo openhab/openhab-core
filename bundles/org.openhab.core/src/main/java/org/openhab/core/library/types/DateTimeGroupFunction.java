@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,7 +12,7 @@
  */
 package org.openhab.core.library.types;
 
-import java.time.ZonedDateTime;
+import java.time.Instant;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -33,7 +33,7 @@ public interface DateTimeGroupFunction extends GroupFunction {
     /**
      * This calculates the maximum value of all item states of DateType type.
      */
-    static class Latest implements GroupFunction {
+    class Latest implements GroupFunction {
 
         public Latest() {
         }
@@ -41,12 +41,12 @@ public interface DateTimeGroupFunction extends GroupFunction {
         @Override
         public State calculate(@Nullable Set<Item> items) {
             if (items != null && !items.isEmpty()) {
-                ZonedDateTime max = null;
+                Instant max = null;
                 for (Item item : items) {
                     DateTimeType itemState = item.getStateAs(DateTimeType.class);
                     if (itemState != null) {
-                        if (max == null || max.isBefore(itemState.getZonedDateTime())) {
-                            max = itemState.getZonedDateTime();
+                        if (max == null || max.isBefore(itemState.getInstant())) {
+                            max = itemState.getInstant();
                         }
                     }
                 }
@@ -76,7 +76,7 @@ public interface DateTimeGroupFunction extends GroupFunction {
     /**
      * This calculates the minimum value of all item states of DateType type.
      */
-    static class Earliest implements GroupFunction {
+    class Earliest implements GroupFunction {
 
         public Earliest() {
         }
@@ -84,12 +84,12 @@ public interface DateTimeGroupFunction extends GroupFunction {
         @Override
         public State calculate(@Nullable Set<Item> items) {
             if (items != null && !items.isEmpty()) {
-                ZonedDateTime max = null;
+                Instant max = null;
                 for (Item item : items) {
                     DateTimeType itemState = item.getStateAs(DateTimeType.class);
                     if (itemState != null) {
-                        if (max == null || max.isAfter(itemState.getZonedDateTime())) {
-                            max = itemState.getZonedDateTime();
+                        if (max == null || max.isAfter(itemState.getInstant())) {
+                            max = itemState.getInstant();
                         }
                     }
                 }

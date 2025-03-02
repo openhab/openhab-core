@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,7 +14,6 @@ package org.openhab.core.karaf.internal;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
@@ -39,7 +38,6 @@ public class LoggerBean {
     }
 
     public LoggerBean(Map<String, String> logLevels) {
-        loggers = logLevels.entrySet().stream().map(l -> new LoggerInfo(l.getKey(), l.getValue()))
-                .collect(Collectors.toList());
+        loggers = logLevels.entrySet().stream().map(l -> new LoggerInfo(l.getKey(), l.getValue())).toList();
     }
 }

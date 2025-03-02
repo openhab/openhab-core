@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -19,7 +19,7 @@ import org.openhab.core.items.Item;
 import org.openhab.core.thing.ChannelUID;
 
 /**
- * {@link ItemChannelLink} defines a link between an {@link Item} and a {@link Channel}.
+ * {@link ItemChannelLink} defines a link between an {@link Item} and a {@link org.openhab.core.thing.Channel}.
  *
  * @author Dennis Nobel - Initial contribution, Added getIDFor method
  * @author Jochen Hiller - Bugfix 455434: added default constructor, object is now mutable

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -19,7 +19,6 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.Stream.Builder;
 
@@ -51,7 +50,7 @@ public class BitUtilitiesExtractIndividualMethodsTest {
             ModbusRegisterArray registers = (ModbusRegisterArray) values[2];
             int index = (int) values[3];
             return registerVariations(expectedResult, type, registers, index);
-        }).collect(Collectors.toList());
+        }).toList();
     }
 
     public static Stream<Object[]> filteredTestData(ValueType type) {
@@ -74,9 +73,7 @@ public class BitUtilitiesExtractIndividualMethodsTest {
         for (int offset = 0; offset < 5; offset++) {
             int byteIndex = origByteIndex + offset;
             byte[] bytesOffsetted = new byte[origBytes.length + offset];
-            for (int i = 0; i < bytesOffsetted.length; i++) {
-                bytesOffsetted[i] = 99;
-            }
+            Arrays.fill(bytesOffsetted, (byte) 99);
             System.arraycopy(origBytes, 0, bytesOffsetted, offset, origBytes.length);
             // offsetted:
             streamBuilder.add(new Object[] { expectedResult, type, bytesOffsetted, byteIndex });
@@ -106,7 +103,7 @@ public class BitUtilitiesExtractIndividualMethodsTest {
                 type);
         final Object expectedNumber;
         if (expectedResult instanceof Class class1 && Exception.class.isAssignableFrom(class1)) {
-            assertThrows((Class<? extends Throwable>) expectedResult, () -> methodUnderTest.get());
+            assertThrows((Class<? extends Throwable>) expectedResult, methodUnderTest::get);
         } else if (expectedResult instanceof Optional<?> optional) {
             assertTrue(optional.isEmpty());
             if (defaultWhenEmptyOptional == null) {
@@ -129,7 +126,7 @@ public class BitUtilitiesExtractIndividualMethodsTest {
     public void testExtractIndividualSInt16(Object expectedResult, ValueType type, byte[] bytes, int byteIndex)
             throws InstantiationException, IllegalAccessException {
         testIndividual(expectedResult, type, bytes, byteIndex, () -> ModbusBitUtilities.extractSInt16(bytes, byteIndex),
-                decimal -> decimal.shortValue());
+                Number::shortValue);
     }
 
     public static Stream<Object[]> filteredTestDataUInt16() {
@@ -141,7 +138,7 @@ public class BitUtilitiesExtractIndividualMethodsTest {
     public void testExtractIndividualUInt16(Object expectedResult, ValueType type, byte[] bytes, int byteIndex)
             throws InstantiationException, IllegalAccessException {
         testIndividual(expectedResult, type, bytes, byteIndex, () -> ModbusBitUtilities.extractUInt16(bytes, byteIndex),
-                decimal -> decimal.intValue());
+                DecimalType::intValue);
     }
 
     public static Stream<Object[]> filteredTestDataSInt32() {
@@ -153,7 +150,7 @@ public class BitUtilitiesExtractIndividualMethodsTest {
     public void testExtractIndividualSInt32(Object expectedResult, ValueType type, byte[] bytes, int byteIndex)
             throws InstantiationException, IllegalAccessException {
         testIndividual(expectedResult, type, bytes, byteIndex, () -> ModbusBitUtilities.extractSInt32(bytes, byteIndex),
-                decimal -> decimal.intValue());
+                DecimalType::intValue);
     }
 
     public static Stream<Object[]> filteredTestDataUInt32() {
@@ -165,7 +162,7 @@ public class BitUtilitiesExtractIndividualMethodsTest {
     public void testExtractIndividualUInt32(Object expectedResult, ValueType type, byte[] bytes, int byteIndex)
             throws InstantiationException, IllegalAccessException {
         testIndividual(expectedResult, type, bytes, byteIndex, () -> ModbusBitUtilities.extractUInt32(bytes, byteIndex),
-                decimal -> decimal.longValue());
+                DecimalType::longValue);
     }
 
     public static Stream<Object[]> filteredTestDataSInt32Swap() {
@@ -177,7 +174,7 @@ public class BitUtilitiesExtractIndividualMethodsTest {
     public void testExtractIndividualSInt32Swap(Object expectedResult, ValueType type, byte[] bytes, int byteIndex)
             throws InstantiationException, IllegalAccessException {
         testIndividual(expectedResult, type, bytes, byteIndex,
-                () -> ModbusBitUtilities.extractSInt32Swap(bytes, byteIndex), decimal -> decimal.intValue());
+                () -> ModbusBitUtilities.extractSInt32Swap(bytes, byteIndex), DecimalType::intValue);
     }
 
     public static Stream<Object[]> filteredTestDataUInt32Swap() {
@@ -189,7 +186,7 @@ public class BitUtilitiesExtractIndividualMethodsTest {
     public void testExtractIndividualUInt32Swap(Object expectedResult, ValueType type, byte[] bytes, int byteIndex)
             throws InstantiationException, IllegalAccessException {
         testIndividual(expectedResult, type, bytes, byteIndex,
-                () -> ModbusBitUtilities.extractUInt32Swap(bytes, byteIndex), decimal -> decimal.longValue());
+                () -> ModbusBitUtilities.extractUInt32Swap(bytes, byteIndex), DecimalType::longValue);
     }
 
     public static Stream<Object[]> filteredTestDataSInt64() {
@@ -201,7 +198,7 @@ public class BitUtilitiesExtractIndividualMethodsTest {
     public void testExtractIndividualSInt64(Object expectedResult, ValueType type, byte[] bytes, int byteIndex)
             throws InstantiationException, IllegalAccessException {
         testIndividual(expectedResult, type, bytes, byteIndex, () -> ModbusBitUtilities.extractSInt64(bytes, byteIndex),
-                decimal -> decimal.longValue());
+                DecimalType::longValue);
     }
 
     public static Stream<Object[]> filteredTestDataUInt64() {
@@ -225,7 +222,7 @@ public class BitUtilitiesExtractIndividualMethodsTest {
     public void testExtractIndividualSInt64Swap(Object expectedResult, ValueType type, byte[] bytes, int byteIndex)
             throws InstantiationException, IllegalAccessException {
         testIndividual(expectedResult, type, bytes, byteIndex,
-                () -> ModbusBitUtilities.extractSInt64Swap(bytes, byteIndex), decimal -> decimal.longValue());
+                () -> ModbusBitUtilities.extractSInt64Swap(bytes, byteIndex), DecimalType::longValue);
     }
 
     public static Stream<Object[]> filteredTestDataUInt64Swap() {
@@ -250,7 +247,7 @@ public class BitUtilitiesExtractIndividualMethodsTest {
     public void testExtractIndividualFloat32(Object expectedResult, ValueType type, byte[] bytes, int byteIndex)
             throws InstantiationException, IllegalAccessException {
         testIndividual(expectedResult, type, bytes, byteIndex,
-                () -> ModbusBitUtilities.extractFloat32(bytes, byteIndex), decimal -> decimal.floatValue(), Float.NaN);
+                () -> ModbusBitUtilities.extractFloat32(bytes, byteIndex), DecimalType::floatValue, Float.NaN);
     }
 
     public static Stream<Object[]> filteredTestDataFloat32Swap() {
@@ -262,7 +259,6 @@ public class BitUtilitiesExtractIndividualMethodsTest {
     public void testExtractIndividualFloat32Swap(Object expectedResult, ValueType type, byte[] bytes, int byteIndex)
             throws InstantiationException, IllegalAccessException {
         testIndividual(expectedResult, type, bytes, byteIndex,
-                () -> ModbusBitUtilities.extractFloat32Swap(bytes, byteIndex), decimal -> decimal.floatValue(),
-                Float.NaN);
+                () -> ModbusBitUtilities.extractFloat32Swap(bytes, byteIndex), DecimalType::floatValue, Float.NaN);
     }
 }

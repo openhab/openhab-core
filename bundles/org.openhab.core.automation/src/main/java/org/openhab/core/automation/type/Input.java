@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,9 +12,10 @@
  */
 package org.openhab.core.automation.type;
 
-import java.util.Collections;
 import java.util.Set;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.Module;
 import org.openhab.core.automation.Rule;
 
@@ -33,20 +34,26 @@ import org.openhab.core.automation.Rule;
  * "temperature", for example. The value "*" means that all possible types are acceptable. The type is used to determine
  * which {@link Output} can be connected to this {@link Input}.</li>
  * <li>label (optional) - short description (one word) of the {@link Input}</li>
- * <li>description (optional) - long user friendly description of the {@link Input}</li>
+ * <li>description (optional) - long user-friendly description of the {@link Input}</li>
+ * <li>tags (optional) - add additional restrictions to connections between {@code Input}s and {@link Output}s. The
+ * input tags must be subset of the output tags to succeed the connection.</li>
+ * <li>required (optional) - defines if the {@link Input} is required or optional. The default value is false.</li>
+ * <li>reference (optional) - refers to the input of parent module type or null. If this input is part of the system
+ * module the reference should be null.</li>
  * <li>default value (optional) - the string representation of the default value of the {@link Input}. It must be
  * compatible with the type of the {@link Input}</li>
- * <li>required (optional) - defines if the {@link Input} is required or optional. The default value is false.</li>
  * </ul>
  *
  * @author Yordan Mihaylov - Initial contribution
+ * @author Florian Hotze - Add null annotations
  */
+@NonNullByDefault
 public class Input {
 
     /**
      * Specifies a unique name of the {@code Input} in scope of the {@link Module}.
      */
-    private String name;
+    private @NonNullByDefault({}) String name;
 
     /**
      * Specifies the acceptable data type for this {@link Input}. The value could be any string that makes sense for the
@@ -54,25 +61,25 @@ public class Input {
      * value "*" means that all possible types are acceptable. The type is used to determine which {@link Output} can be
      * connected to this {@link Input} instance.
      */
-    private String type;
+    private @NonNullByDefault({}) String type;
 
     /**
      * Keeps a single word description of the {@code Input}.
      */
-    private String label;
+    private @Nullable String label;
 
     /**
-     * Keeps the user friendly description of the {@code Input}.
+     * Keeps the user-friendly description of the {@code Input}.
      */
-    private String description;
+    private @Nullable String description;
 
     /**
      * Determines if the {@code Input} is required or optional.
      */
     private boolean required = false;
-    private Set<String> tags;
-    private String reference;
-    private String defaultValue;
+    private @Nullable Set<String> tags;
+    private @Nullable String reference;
+    private @Nullable String defaultValue;
 
     /**
      * Default constructor for deserialization e.g. by Gson.
@@ -99,12 +106,12 @@ public class Input {
      * @param name unique name of the {@code Input} in scope of the module.
      * @param type the acceptable data type for this {@link Input}.
      * @param label a single word description of the {@code Input}.
-     * @param description user friendly description of the {@code Input}.
-     * @param tags are associated with the {@code Input}. The tags adds additional restrictions to connections
+     * @param description user-friendly description of the {@code Input}.
+     * @param tags are associated with the {@code Input}. The tags add additional restrictions to connections
      *            between {@code Input}s and {@link Output}s. The input tags must be subset of the output tags
      *            to succeed the connection.
      *            For example: When we want to connect input to output and both have same java.lang.double data
-     *            type. The the output has assign "temperature" and "celsius" tags then the input must have at
+     *            type. The output has assign "temperature" and "celsius" tags then the input must have at
      *            least one of these output's tags (i.e. "temperature") to connect this {@code Input} to the
      *            selected output.
      * @param required determines if the {@code Input} is required or optional.
@@ -114,8 +121,8 @@ public class Input {
      *            must be the type the Input.
      * @throws IllegalArgumentException If one of the name or type parameters is null.
      */
-    public Input(String name, String type, String label, String description, Set<String> tags, boolean required,
-            String reference, String defaultValue) {
+    public Input(String name, String type, @Nullable String label, @Nullable String description,
+            @Nullable Set<String> tags, boolean required, @Nullable String reference, @Nullable String defaultValue) {
         if (name == null) {
             throw new IllegalArgumentException("The name of the input must not be NULL!");
         }
@@ -146,16 +153,16 @@ public class Input {
      *
      * @return label of the Input.
      */
-    public String getLabel() {
+    public @Nullable String getLabel() {
         return label;
     }
 
     /**
      * Gets the long description of the Input.
      *
-     * @return user friendly description of the Input.
+     * @return user-friendly description of the Input.
      */
-    public String getDescription() {
+    public @Nullable String getDescription() {
         return description;
     }
 
@@ -189,7 +196,8 @@ public class Input {
      * @return tags associated with this Input.
      */
     public Set<String> getTags() {
-        return tags != null ? tags : Collections.<String> emptySet();
+        Set<String> tags = this.tags;
+        return tags != null ? tags : Set.of();
     }
 
     /**
@@ -198,7 +206,7 @@ public class Input {
      *
      * @return reference to data source.
      */
-    public String getReference() {
+    public @Nullable String getReference() {
         return reference;
     }
 
@@ -208,7 +216,7 @@ public class Input {
      *
      * @return the string representation of the default value of this {@link Input}.
      */
-    public String getDefaultValue() {
+    public @Nullable String getDefaultValue() {
         return defaultValue;
     }
 

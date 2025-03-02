@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -33,7 +33,7 @@ import org.openhab.core.automation.module.script.internal.provider.ScriptModuleT
 @NonNullByDefault
 public interface ScriptEngineFactory {
 
-    static final ScriptEngineManager ENGINE_MANAGER = new ScriptEngineManager();
+    ScriptEngineManager ENGINE_MANAGER = new ScriptEngineManager();
 
     /**
      * Key to access engine identifier in script context.

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -81,7 +81,7 @@ public class StateUtil {
         states.add(RewindFastforwardType.REWIND);
         states.add(RewindFastforwardType.FASTFORWARD);
 
-        StringListType stringList = new StringListType(new String[] { "foo", "bar" });
+        StringListType stringList = new StringListType("foo", "bar");
         states.add(stringList);
 
         StringType string = new StringType("foo");

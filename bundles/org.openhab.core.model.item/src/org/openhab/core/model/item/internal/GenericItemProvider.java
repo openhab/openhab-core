@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,7 +15,6 @@ package org.openhab.core.model.item.internal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -98,8 +97,8 @@ public class GenericItemProvider extends AbstractProvider<Item>
         this.genericMetaDataProvider = genericMetadataProvider;
 
         Object serviceRanking = properties.get(Constants.SERVICE_RANKING);
-        if (serviceRanking instanceof Integer) {
-            rank = (Integer) serviceRanking;
+        if (serviceRanking instanceof Integer integerValue) {
+            rank = integerValue;
         } else {
             rank = 0;
         }
@@ -256,6 +255,8 @@ public class GenericItemProvider extends AbstractProvider<Item>
                 label = label.substring(0, label.indexOf("[")).trim();
                 stateDescriptionFragments.put(modelItem.getName(),
                         StateDescriptionFragmentBuilder.create().withPattern(format).build());
+            } else {
+                stateDescriptionFragments.remove(modelItem.getName());
             }
             activeItem.setLabel(label);
             activeItem.setCategory(modelItem.getIcon());
@@ -348,7 +349,15 @@ public class GenericItemProvider extends AbstractProvider<Item>
             String config = binding.getConfiguration();
 
             Configuration configuration = new Configuration();
-            binding.getProperties().forEach(p -> configuration.put(p.getKey(), p.getValue()));
+            binding.getProperties().forEach(p -> {
+                Object value = p.getValue();
+                // Single valued lists get unwrapped to just their one value for
+                // backwards compatibility
+                if (value instanceof List listValue && listValue.size() == 1) {
+                    value = listValue.getFirst();
+                }
+                configuration.put(p.getKey(), value);
+            });
 
             BindingConfigReader localReader = reader;
             if (reader == null) {
@@ -477,7 +486,7 @@ public class GenericItemProvider extends AbstractProvider<Item>
 
     private Map<String, Item> toItemMap(@Nullable Collection<Item> items) {
         if (items == null || items.isEmpty()) {
-            return Collections.emptyMap();
+            return Map.of();
         }
 
         Map<String, Item> ret = new LinkedHashMap<>();

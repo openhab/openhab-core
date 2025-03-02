@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,6 +14,7 @@ package org.openhab.core.io.http.auth.internal;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serial;
 import java.io.UncheckedIOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -51,6 +52,7 @@ import org.slf4j.LoggerFactory;
 @NonNullByDefault
 public abstract class AbstractAuthPageServlet extends HttpServlet {
 
+    @Serial
     private static final long serialVersionUID = 5340598701104679840L;
 
     private static final String MESSAGES_BUNDLE_NAME = "messages";
@@ -67,7 +69,7 @@ public abstract class AbstractAuthPageServlet extends HttpServlet {
 
     protected String pageTemplate;
 
-    public AbstractAuthPageServlet(BundleContext bundleContext, @Reference UserRegistry userRegistry,
+    protected AbstractAuthPageServlet(BundleContext bundleContext, @Reference UserRegistry userRegistry,
             @Reference AuthenticationProvider authProvider, @Reference LocaleProvider localeProvider) {
         this.userRegistry = userRegistry;
         this.authProvider = authProvider;

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -68,7 +68,6 @@ public final class FirmwareEventFactory extends AbstractEventFactory {
      * Creates a new {@link FirmwareStatusInfoEvent}.
      *
      * @param firmwareStatusInfo the firmware status information (must not be null)
-     * @param thingUID the thing UID for which the new firmware status info is to be sent (must not be null)
      * @return the corresponding firmware status info event
      * @throws IllegalArgumentException if given firmware status info is null
      */
@@ -86,7 +85,6 @@ public final class FirmwareEventFactory extends AbstractEventFactory {
      * Creates a new {@link FirmwareUpdateProgressInfoEvent}.
      *
      * @param progressInfo the progress information of the firmware update process (must not be null)
-     * @param thingUID the thing UID for which the progress info is to be sent (must not be null)
      * @return the corresponding progress info event
      * @throws IllegalArgumentException if given progress info is null
      */
@@ -105,7 +103,6 @@ public final class FirmwareEventFactory extends AbstractEventFactory {
      * Creates a new {@link FirmwareUpdateResultInfoEvent}.
      *
      * @param firmwareUpdateResultInfo the firmware update result information (must not be null)
-     * @param thingUID the thing UID for which the result information is to be sent (must not be null)
      * @return the corresponding firmware update result info event
      * @throws IllegalArgumentException if given firmware update result info event is null
      */

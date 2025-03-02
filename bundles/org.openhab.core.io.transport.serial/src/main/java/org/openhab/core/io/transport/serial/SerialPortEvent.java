@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -21,16 +21,17 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  */
 @NonNullByDefault
 public interface SerialPortEvent {
-    final int DATA_AVAILABLE = 1;
-    final int OUTPUT_BUFFER_EMPTY = 2;
-    final int CTS = 3;
-    final int DSR = 4;
-    final int RI = 5;
-    final int CD = 6;
-    final int OE = 7;
-    final int PE = 8;
-    final int FE = 9;
-    final int BI = 10;
+    int DATA_AVAILABLE = 1;
+    int OUTPUT_BUFFER_EMPTY = 2;
+    int CTS = 3;
+    int DSR = 4;
+    int RI = 5;
+    int CD = 6;
+    int OE = 7;
+    int PE = 8;
+    int FE = 9;
+    int BI = 10;
+    int PORT_DISCONNECTED = 11;
 
     /**
      * Get the type of the event.

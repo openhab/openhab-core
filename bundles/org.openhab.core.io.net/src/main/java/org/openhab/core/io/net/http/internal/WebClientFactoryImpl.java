@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -24,11 +24,20 @@ import javax.net.ssl.TrustManager;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jetty.client.HttpClient;
+import org.eclipse.jetty.client.HttpDestination;
+import org.eclipse.jetty.client.HttpExchange;
 import org.eclipse.jetty.client.HttpProxy;
+import org.eclipse.jetty.client.api.Connection;
+import org.eclipse.jetty.client.http.HttpChannelOverHTTP;
+import org.eclipse.jetty.client.http.HttpClientTransportOverHTTP;
+import org.eclipse.jetty.client.http.HttpConnectionOverHTTP;
+import org.eclipse.jetty.client.http.HttpReceiverOverHTTP;
 import org.eclipse.jetty.http.HttpHeader;
 import org.eclipse.jetty.http.HttpVersion;
 import org.eclipse.jetty.http.PreEncodedHttpField;
 import org.eclipse.jetty.http2.client.HTTP2Client;
+import org.eclipse.jetty.io.EndPoint;
+import org.eclipse.jetty.util.Promise;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.eclipse.jetty.websocket.client.WebSocketClient;
@@ -186,8 +195,8 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
         if (value == null) {
             return defaultValue;
         }
-        if (value instanceof Integer) {
-            return (Integer) value;
+        if (value instanceof Integer integerValue) {
+            return integerValue;
         }
         if (value instanceof String string) {
             try {
@@ -235,7 +244,7 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
         try {
             logger.debug("creating http client for consumer {}", consumerName);
 
-            HttpClient httpClient = new HttpClient(
+            HttpClient httpClient = new HttpClient(new CustomHttpClientTransportOverHTTP(),
                     sslContextFactory != null ? sslContextFactory : createSslContextFactory());
 
             // If proxy is set as property (standard Java property), provide the proxy information to Jetty HTTP
@@ -411,6 +420,50 @@ public class WebClientFactoryImpl implements HttpClientFactory, WebSocketFactory
         } catch (Exception e) {
             throw new HttpClientInitializationException(
                     "unexpected checked exception during initialization of the Jetty HTTP/2 client", e);
+        }
+    }
+
+    /**
+     * Extends the default {@link HttpClientTransportOverHTTP) but exposes the underling {@link EndPoint} of each
+     * request/response.
+     * It mimics the way it's done in higher Jetty Http client versions.
+     */
+    private static class CustomHttpClientTransportOverHTTP extends HttpClientTransportOverHTTP {
+        @Override
+        @NonNullByDefault({})
+        protected HttpConnectionOverHTTP newHttpConnection(EndPoint endPoint, HttpDestination destination,
+                Promise<Connection> promise) {
+            return new HttpConnectionOverHTTP(endPoint, destination, promise) {
+                @Override
+                protected HttpChannelOverHTTP newHttpChannel() {
+                    return new HttpChannelOverHTTP(this) {
+                        @Override
+                        protected HttpReceiverOverHTTP newHttpReceiver() {
+                            return new CustomHttpReceiverOverHTTP(this);
+                        }
+                    };
+                }
+            };
+        }
+
+        private static class CustomHttpReceiverOverHTTP extends HttpReceiverOverHTTP {
+            private final HttpChannelOverHTTP channel;
+
+            public CustomHttpReceiverOverHTTP(HttpChannelOverHTTP channel) {
+                super(channel);
+                this.channel = channel;
+            }
+
+            @Override
+            public boolean headerComplete() {
+                HttpExchange exchange = getHttpExchange();
+                if (exchange != null) {
+                    // Store the EndPoint is case of upgrades
+                    exchange.getRequest().getConversation().setAttribute(EndPoint.class.getName(),
+                            channel.getHttpConnection().getEndPoint());
+                }
+                return super.headerComplete();
+            }
         }
     }
 }

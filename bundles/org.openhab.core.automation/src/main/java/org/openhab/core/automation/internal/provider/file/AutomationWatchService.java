@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,19 +12,23 @@
  */
 package org.openhab.core.automation.internal.provider.file;
 
-import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.service.WatchService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * This class is an implementation of {@link AbstractWatchService} which is responsible for tracking changes in file
- * system by Java WatchService.
+ * This class is an implementation of {@link WatchService.WatchEventListener} which is responsible for tracking file
+ * system changes.
  * <p>
  * It provides functionality for tracking {@link #watchingDir} changes to import or remove the automation objects.
  *
  * @author Ana Dimova - Initial contribution
+ * @author Arne Seime - Fixed watch event handling
  */
 @SuppressWarnings("rawtypes")
 @NonNullByDefault
@@ -33,6 +37,7 @@ public class AutomationWatchService implements WatchService.WatchEventListener {
     private final WatchService watchService;
     private final Path watchingDir;
     private AbstractFileProvider provider;
+    private final Logger logger = LoggerFactory.getLogger(AutomationWatchService.class);
 
     public AutomationWatchService(AbstractFileProvider provider, WatchService watchService, String watchingDir) {
         this.watchService = watchService;
@@ -54,13 +59,17 @@ public class AutomationWatchService implements WatchService.WatchEventListener {
 
     @Override
     public void processWatchEvent(WatchService.Kind kind, Path path) {
-        File file = path.toFile();
-        if (!file.isHidden()) {
+        Path fullPath = watchingDir.resolve(path);
+        try {
             if (kind == WatchService.Kind.DELETE) {
-                provider.removeResources(file);
-            } else if (file.canRead()) {
-                provider.importResources(file);
+                provider.removeResources(fullPath.toFile());
+            } else if (!Files.isHidden(fullPath)
+                    && (kind == WatchService.Kind.CREATE || kind == WatchService.Kind.MODIFY)) {
+                provider.importResources(fullPath.toFile());
             }
+        } catch (IOException e) {
+            logger.error("Failed to process automation watch event {} for \"{}\": {}", kind, fullPath, e.getMessage());
+            logger.trace("", e);
         }
     }
 }

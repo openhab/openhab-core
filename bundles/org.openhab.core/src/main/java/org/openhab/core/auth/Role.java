@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -22,10 +22,10 @@ public interface Role {
     /**
      * Role of users with administrative rights
      */
-    final String ADMIN = "administrator";
+    String ADMIN = "administrator";
 
     /**
      * Role of a regular user without any exceptional permissions or restrictions
      */
-    final String USER = "user";
+    String USER = "user";
 }

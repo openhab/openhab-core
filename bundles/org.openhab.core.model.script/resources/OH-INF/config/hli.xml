@@ -5,7 +5,7 @@
 	xsi:schemaLocation="https://openhab.org/schemas/config-description/v1.0.0
 		https://openhab.org/schemas/config-description-1.0.0.xsd">
 
-	<config-description uri="voice:rulehli">
+	<config-description uri="system:rulehli">
 		<parameter name="item" type="text">
 			<context>item</context>
 			<filter><criteria name="type">String</criteria></filter>

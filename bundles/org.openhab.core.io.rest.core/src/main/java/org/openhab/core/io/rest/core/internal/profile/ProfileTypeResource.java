@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -116,7 +116,7 @@ public class ProfileTypeResource implements RESTResource {
             @Nullable String itemType) {
         return profileTypeRegistry.getProfileTypes(locale).stream().filter(matchesChannelUID(channelTypeUID, locale))
                 .filter(matchesItemType(itemType)).sorted(Comparator.comparing(ProfileType::getLabel))
-                .map(profileType -> ProfileTypeDTOMapper.map(profileType));
+                .map(ProfileTypeDTOMapper::map);
     }
 
     private Predicate<ProfileType> matchesChannelUID(@Nullable String channelTypeUID, @Nullable Locale locale) {

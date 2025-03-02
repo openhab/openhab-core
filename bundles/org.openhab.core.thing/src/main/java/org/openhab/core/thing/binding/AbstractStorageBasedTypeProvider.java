@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -20,7 +20,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -76,7 +75,7 @@ public abstract class AbstractStorageBasedTypeProvider
      *
      * @param storageService a persistent {@link StorageService}
      */
-    public AbstractStorageBasedTypeProvider(StorageService storageService) {
+    protected AbstractStorageBasedTypeProvider(StorageService storageService) {
         String thingTypeStorageName = getClass().getName() + "-ThingType";
         String channelTypeStorageName = getClass().getName() + "-ChannelType";
         String channelGroupTypeStorageName = getClass().getName() + "-ChannelGroupType";
@@ -199,7 +198,7 @@ public abstract class AbstractStorageBasedTypeProvider
         entity.configDescriptionUri = thingType.getConfigDescriptionURI();
         entity.category = thingType.getCategory();
         entity.channelGroupDefinitions = thingType.getChannelGroupDefinitions().stream()
-                .map(AbstractStorageBasedTypeProvider::mapToEntity).collect(Collectors.toList());
+                .map(AbstractStorageBasedTypeProvider::mapToEntity).toList();
         entity.channelDefinitions = thingType.getChannelDefinitions().stream()
                 .map(AbstractStorageBasedTypeProvider::mapToEntity).toList();
         entity.representationProperty = thingType.getRepresentationProperty();
@@ -252,6 +251,7 @@ public abstract class AbstractStorageBasedTypeProvider
         entity.commandDescription = channelType.getCommandDescription();
         entity.event = channelType.getEvent();
         entity.autoUpdatePolicy = channelType.getAutoUpdatePolicy();
+        entity.unitHint = channelType.getUnitHint();
         return entity;
     }
 
@@ -334,6 +334,9 @@ public abstract class AbstractStorageBasedTypeProvider
             }
             if (entity.autoUpdatePolicy != null) {
                 stateBuilder.withAutoUpdatePolicy(Objects.requireNonNull(entity.autoUpdatePolicy));
+            }
+            if (entity.unitHint != null) {
+                stateBuilder.withUnitHint(entity.unitHint);
             }
         }
         if (builder instanceof TriggerChannelTypeBuilderImpl triggerBuilder) {
@@ -425,6 +428,7 @@ public abstract class AbstractStorageBasedTypeProvider
         public @Nullable CommandDescription commandDescription;
         public @Nullable EventDescription event;
         public @Nullable AutoUpdatePolicy autoUpdatePolicy;
+        public @Nullable String unitHint;
     }
 
     static class ChannelGroupTypeEntity {

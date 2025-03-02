@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -93,9 +93,7 @@ public class ConfigDescriptionParameterGroupBuilder {
      *
      * @return the desired result
      */
-    @SuppressWarnings("deprecation")
     public ConfigDescriptionParameterGroup build() throws IllegalArgumentException {
-        return new ConfigDescriptionParameterGroup(name, context, advanced != null ? advanced : false, label,
-                description);
+        return new ConfigDescriptionParameterGroup(name, context, advanced != null && advanced, label, description);
     }
 }

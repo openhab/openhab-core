@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,7 +14,6 @@ package org.openhab.core.thing.xml.internal;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -29,7 +28,7 @@ import com.thoughtworks.xstream.converters.ConversionException;
  * The {@link ChannelGroupTypeXmlResult} is an intermediate XML conversion result object which
  * contains all parts of a {@link ChannelGroupType} object.
  * <p>
- * To create a concrete {@link ChannelGroupType} object, the method {@link #toChannelGroupType(Map)} must be called.
+ * To create a concrete {@link ChannelGroupType} object, the method {@link #toChannelGroupType()} must be called.
  *
  * @author Michael Grammling - Initial contribution
  * @author Chris Jackson - Updated to support channel properties

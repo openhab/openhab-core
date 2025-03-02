@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -85,8 +85,8 @@ public class ItemStateConverterImpl implements ItemStateConverter {
                 Class<? extends Quantity<?>> dimension = numberItem.getDimension();
                 @SuppressWarnings({ "unchecked", "rawtypes" })
                 // explicit cast to Class<? extends Quantity> as JDK compiler complains
-                Unit<? extends Quantity<?>> conversionUnit = unitProvider
-                        .getUnit((Class<? extends Quantity>) dimension);
+                Unit<? extends Quantity<?>> conversionUnit = dimension == null ? null
+                        : unitProvider.getUnit((Class<? extends Quantity>) dimension);
                 if (conversionUnit != null
                         && UnitUtils.isDifferentMeasurementSystem(conversionUnit, quantityState.getUnit())) {
                     return convertOrUndef(quantityState, conversionUnit);

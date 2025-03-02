@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -18,19 +18,24 @@ org.openhab.core.model
 
 import com.google.inject.Binder
 import com.google.inject.name.Names
+import org.openhab.core.model.formatting.ItemsFormatter
 import org.openhab.core.model.internal.valueconverter.ItemValueConverters
 import org.eclipse.xtext.conversion.IValueConverterService
+import org.eclipse.xtext.formatting.IFormatter
 import org.eclipse.xtext.linking.lazy.LazyURIEncoder
 
 /** 
  * Use this class to register components to be used at runtime / without the Equinox extension registry.
  */
 class ItemsRuntimeModule extends AbstractItemsRuntimeModule {
-    
     override Class<? extends IValueConverterService> bindIValueConverterService() {
         return ItemValueConverters
     }
-    
+
+    override Class<? extends IFormatter> bindIFormatter() {
+        return ItemsFormatter
+    }
+
     override void configureUseIndexFragmentsForLazyLinking(Binder binder) {
         binder.bind(Boolean.TYPE).annotatedWith(Names.named(LazyURIEncoder.USE_INDEXED_FRAGMENTS_BINDING)).toInstance(
             Boolean.FALSE)

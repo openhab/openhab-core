@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -136,7 +136,7 @@ public class BindingBaseClassesOSGiTest extends JavaOSGiTest {
         managedThingProvider.getAll().forEach(t -> managedThingProvider.remove(t.getUID()));
     }
 
-    class SimpleThingHandlerFactory extends BaseThingHandlerFactory {
+    static class SimpleThingHandlerFactory extends BaseThingHandlerFactory {
         private final Set<ThingHandler> handlers = new HashSet<>();
 
         @Override
@@ -180,7 +180,7 @@ public class BindingBaseClassesOSGiTest extends JavaOSGiTest {
         }
     }
 
-    class SimpleBridgeHandler extends BaseBridgeHandler {
+    static class SimpleBridgeHandler extends BaseBridgeHandler {
 
         SimpleBridgeHandler(Bridge bridge) {
             super(bridge);
@@ -434,7 +434,7 @@ public class BindingBaseClassesOSGiTest extends JavaOSGiTest {
         }
     }
 
-    class YetAnotherThingHandlerFactory extends BaseThingHandlerFactory {
+    static class YetAnotherThingHandlerFactory extends BaseThingHandlerFactory {
 
         @Override
         public boolean supportsThingType(ThingTypeUID thingTypeUID) {
@@ -498,7 +498,7 @@ public class BindingBaseClassesOSGiTest extends JavaOSGiTest {
         public @Nullable Thing getThing() {
             return thing;
         }
-    };
+    }
 
     @Test
     public void assertThingCanBeUpdatedFromThingHandler() {

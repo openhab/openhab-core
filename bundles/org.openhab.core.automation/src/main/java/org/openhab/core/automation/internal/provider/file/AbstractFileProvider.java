@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -23,6 +23,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -32,6 +33,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.OpenHAB;
 import org.openhab.core.automation.parser.Parser;
 import org.openhab.core.automation.parser.ParsingException;
+import org.openhab.core.automation.parser.ValidationException;
 import org.openhab.core.automation.template.Template;
 import org.openhab.core.automation.template.TemplateProvider;
 import org.openhab.core.automation.type.ModuleType;
@@ -49,6 +51,7 @@ import org.slf4j.LoggerFactory;
  * {@link ProviderChangeListener}s for adding, updating and removing the {@link ModuleType}s or {@link Template}s.
  *
  * @author Ana Dimova - Initial contribution
+ * @author Arne Seime - Added object validation support
  */
 @NonNullByDefault
 public abstract class AbstractFileProvider<@NonNull E> implements Provider<E> {
@@ -86,7 +89,7 @@ public abstract class AbstractFileProvider<@NonNull E> implements Provider<E> {
     private final Map<String, List<URL>> urls = new ConcurrentHashMap<>();
     private final List<ProviderChangeListener<E>> listeners = new ArrayList<>();
 
-    public AbstractFileProvider(String root) {
+    protected AbstractFileProvider(String root) {
         this.rootSubdirectory = root;
         configurationRoots = new String[] { OpenHAB.getConfigFolder() + File.separator + "automation" };
     }
@@ -252,29 +255,48 @@ public abstract class AbstractFileProvider<@NonNull E> implements Provider<E> {
             }
         } else {
             synchronized (urls) {
-                List<URL> value = urls.get(parserType);
-                if (value == null) {
-                    value = new ArrayList<>();
-                    urls.put(parserType, value);
-                }
+                List<URL> value = Objects.requireNonNull(urls.computeIfAbsent(parserType, k -> new ArrayList<>()));
                 value.add(url);
             }
             logger.debug("Parser {} not available", parserType, new Exception());
         }
     }
 
+    @SuppressWarnings("null")
     protected void updateProvidedObjectsHolder(URL url, Set<E> providedObjects) {
         if (providedObjects != null && !providedObjects.isEmpty()) {
             List<String> uids = new ArrayList<>();
             for (E providedObject : providedObjects) {
+                try {
+                    validateObject(providedObject);
+                } catch (ValidationException e) {
+                    logger.warn("Rejecting \"{}\" because the validation failed: {}", url, e.getMessage());
+                    logger.trace("", e);
+                    continue;
+                }
                 String uid = getUID(providedObject);
+                if (providerPortfolio.entrySet().stream().filter(e -> !url.equals(e.getKey()))
+                        .flatMap(e -> e.getValue().stream()).anyMatch(u -> uid.equals(u))) {
+                    logger.warn("Rejecting \"{}\" from \"{}\" because the UID is already registered", uid, url);
+                    continue;
+                }
                 uids.add(uid);
                 final @Nullable E oldProvidedObject = providedObjectsHolder.put(uid, providedObject);
                 notifyListeners(oldProvidedObject, providedObject);
             }
-            providerPortfolio.put(url, uids);
+            if (!uids.isEmpty()) {
+                providerPortfolio.put(url, uids);
+            }
         }
     }
+
+    /**
+     * Validates that the parsed object is valid. For no validation, create an empty method.
+     *
+     * @param object the object to validate.
+     * @throws ValidationException If the validation failed.
+     */
+    protected abstract void validateObject(E object) throws ValidationException;
 
     protected void removeElements(@Nullable List<String> objectsForRemove) {
         if (objectsForRemove != null) {

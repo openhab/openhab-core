@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -74,9 +74,9 @@ public class GenericEventTriggerHandler extends BaseTriggerModuleHandler impleme
             topicFilter = null;
         }
         if (module.getConfiguration().get(CFG_TYPES) != null) {
-            this.types = Set.of(((String) module.getConfiguration().get(CFG_TYPES)).split(","));
+            types = Set.of(((String) module.getConfiguration().get(CFG_TYPES)).split(","));
         } else {
-            this.types = Set.of();
+            types = Set.of();
         }
         String payload = (String) module.getConfiguration().get(CFG_PAYLOAD);
         if (!payload.isBlank()) {
@@ -104,11 +104,8 @@ public class GenericEventTriggerHandler extends BaseTriggerModuleHandler impleme
     public void receive(Event event) {
         ModuleHandlerCallback callback = this.callback;
         if (callback != null) {
-            logger.trace("Received Event: Source: {} Topic: {} Type: {}  Payload: {}", event.getSource(),
-                    event.getTopic(), event.getType(), event.getPayload());
-            if (!event.getTopic().contains(source)) {
-                return;
-            }
+            logger.trace("Received Event: Topic: {} Type: {} Source: {} Payload: {}", event.getTopic(), event.getType(),
+                    event.getSource(), event.getPayload());
             Map<String, Object> values = new HashMap<>();
             values.put("event", event);
 

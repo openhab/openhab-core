@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -98,17 +98,17 @@ public class ReferenceResolverUtilTest {
         Module trigger = ModuleBuilder.createTrigger().withId("id1").withTypeUID("typeUID1")
                 .withConfiguration(new Configuration(MODULE_CONFIGURATION)).build();
         ReferenceResolver.updateConfiguration(trigger.getConfiguration(), CONTEXT, logger);
-        assertEquals(trigger.getConfiguration(), new Configuration(EXPECTED_MODULE_CONFIGURATION));
+        assertEquals(new Configuration(EXPECTED_MODULE_CONFIGURATION), trigger.getConfiguration());
         // test condition configuration.
         Module condition = ModuleBuilder.createCondition().withId("id2").withTypeUID("typeUID2")
                 .withConfiguration(new Configuration(MODULE_CONFIGURATION)).build();
         ReferenceResolver.updateConfiguration(condition.getConfiguration(), CONTEXT, logger);
-        assertEquals(condition.getConfiguration(), new Configuration(EXPECTED_MODULE_CONFIGURATION));
+        assertEquals(new Configuration(EXPECTED_MODULE_CONFIGURATION), condition.getConfiguration());
         // test action configuration.
         Module action = ModuleBuilder.createAction().withId("id3").withTypeUID("typeUID3")
                 .withConfiguration(new Configuration(MODULE_CONFIGURATION)).build();
         ReferenceResolver.updateConfiguration(action.getConfiguration(), CONTEXT, logger);
-        assertEquals(action.getConfiguration(), new Configuration(EXPECTED_MODULE_CONFIGURATION));
+        assertEquals(new Configuration(EXPECTED_MODULE_CONFIGURATION), action.getConfiguration());
     }
 
     @Test
@@ -117,26 +117,26 @@ public class ReferenceResolverUtilTest {
         Module condition = ModuleBuilder.createCondition().withId("id1").withTypeUID("typeUID1")
                 .withInputs(COMPOSITE_CHILD_MODULE_INPUTS_REFERENCES).build();
         Map<String, Object> conditionContext = ReferenceResolver.getCompositeChildContext(condition, CONTEXT);
-        assertEquals(conditionContext, EXPECTED_COMPOSITE_CHILD_MODULE_CONTEXT);
+        assertEquals(EXPECTED_COMPOSITE_CHILD_MODULE_CONTEXT, conditionContext);
         // test Composite child ModuleImpl(action) context
         Module action = ModuleBuilder.createAction().withId("id2").withTypeUID("typeUID2")
                 .withInputs(COMPOSITE_CHILD_MODULE_INPUTS_REFERENCES).build();
         assertEquals(EXPECTED_COMPOSITE_CHILD_MODULE_CONTEXT, conditionContext);
         Map<String, Object> actionContext = ReferenceResolver.getCompositeChildContext(action, CONTEXT);
-        assertEquals(actionContext, EXPECTED_COMPOSITE_CHILD_MODULE_CONTEXT);
+        assertEquals(EXPECTED_COMPOSITE_CHILD_MODULE_CONTEXT, actionContext);
     }
 
     @Test
     public void testSplitReferenceToTokens() {
         assertNull(ReferenceResolver.splitReferenceToTokens(null));
-        assertTrue(ReferenceResolver.splitReferenceToTokens("").length == 0);
+        assertEquals(0, ReferenceResolver.splitReferenceToTokens("").length);
         final String[] referenceTokens = ReferenceResolver
                 .splitReferenceToTokens(".module.array[\".na[m}.\"e\"][1].values1");
-        assertTrue("module".equals(referenceTokens[0]));
-        assertTrue("array".equals(referenceTokens[1]));
-        assertTrue(".na[m}.\"e".equals(referenceTokens[2]));
-        assertTrue("1".equals(referenceTokens[3]));
-        assertTrue("values1".equals(referenceTokens[4]));
+        assertEquals("module", referenceTokens[0]);
+        assertEquals("array", referenceTokens[1]);
+        assertEquals(".na[m}.\"e", referenceTokens[2]);
+        assertEquals("1", referenceTokens[3]);
+        assertEquals("values1", referenceTokens[4]);
     }
 
     @Test
@@ -250,7 +250,7 @@ public class ReferenceResolverUtilTest {
                 ReferenceResolver.splitReferenceToTokens("[2].value")));
     }
 
-    public class B1<T> {
+    public static class B1<T> {
         @SuppressWarnings("unused")
         private final T value;
 
@@ -259,7 +259,7 @@ public class ReferenceResolverUtilTest {
         }
     }
 
-    public class B2<T> {
+    public static class B2<T> {
         public T value;
 
         public B2(T value) {

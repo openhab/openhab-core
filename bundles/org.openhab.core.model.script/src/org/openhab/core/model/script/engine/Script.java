@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -22,7 +22,7 @@ import org.eclipse.xtext.xbase.interpreter.IEvaluationContext;
 @SuppressWarnings("restriction")
 public interface Script {
 
-    static final String SCRIPT_FILEEXT = "script";
+    String SCRIPT_FILEEXT = "script";
 
     /**
      * Executes the script instance and returns the execution result

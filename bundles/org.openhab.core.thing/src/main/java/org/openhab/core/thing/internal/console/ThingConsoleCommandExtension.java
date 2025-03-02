@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,7 +13,6 @@
 package org.openhab.core.thing.internal.console;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -89,7 +88,7 @@ public class ThingConsoleCommandExtension extends AbstractConsoleCommandExtensio
                     printThings(console, things);
                     return;
                 case SUBCMD_SHOW:
-                    printThingsDetails(console, Arrays.asList(args).subList(1, args.length));
+                    printThingsDetails(console, List.of(args).subList(1, args.length));
                     return;
                 case SUBCMD_CLEAR:
                     removeAllThings(console, things);

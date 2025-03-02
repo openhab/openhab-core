@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -24,8 +24,8 @@ import org.openhab.core.items.Item;
 
 /**
  * The {@link PersistenceTimeFilter} is a filter to prevent persistence base on intervals.
- *
- * The filter returns {@link false} if the time between now and the time of the last persisted value is less than
+ * <p />
+ * The filter returns {@code false} if the time between now and the time of the last persisted value is less than
  * {@link #duration} {@link #unit}
  *
  * @author Jan N. Klug - Initial contribution
@@ -38,10 +38,10 @@ public class PersistenceTimeFilter extends PersistenceFilter {
     private transient @Nullable Duration duration;
     private final transient Map<String, ZonedDateTime> nextPersistenceTimes = new HashMap<>();
 
-    public PersistenceTimeFilter(String name, int value, String unit) {
+    public PersistenceTimeFilter(String name, int value, @Nullable String unit) {
         super(name);
         this.value = value;
-        this.unit = unit;
+        this.unit = (unit == null) ? "s" : unit;
     }
 
     public int getValue() {

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -16,11 +16,11 @@ import java.net.URI;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.addon.Addon;
+import org.openhab.core.addon.AddonInfoRegistry;
 import org.openhab.core.addon.marketplace.AbstractRemoteAddonService;
 import org.openhab.core.addon.marketplace.BundleVersion;
 import org.openhab.core.addon.marketplace.MarketplaceAddonHandler;
@@ -51,8 +51,8 @@ public class TestAddonService extends AbstractRemoteAddonService {
     private int remoteCalls = 0;
 
     public TestAddonService(EventPublisher eventPublisher, ConfigurationAdmin configurationAdmin,
-            StorageService storageService) {
-        super(eventPublisher, configurationAdmin, storageService, SERVICE_PID);
+            StorageService storageService, AddonInfoRegistry addonInfoRegistry) {
+        super(eventPublisher, configurationAdmin, storageService, addonInfoRegistry, SERVICE_PID);
     }
 
     @Override
@@ -73,9 +73,12 @@ public class TestAddonService extends AbstractRemoteAddonService {
     @Override
     protected List<Addon> getRemoteAddons() {
         remoteCalls++;
-        return REMOTE_ADDONS.stream().map(id -> Addon.create(SERVICE_PID + ":" + id).withType("binding")
-                .withId(id.substring("binding-".length())).withContentType(TestAddonHandler.TEST_ADDON_CONTENT_TYPE)
-                .withCompatible(!id.equals(INCOMPATIBLE_VERSION)).build()).collect(Collectors.toList());
+        return REMOTE_ADDONS.stream()
+                .map(id -> Addon.create(SERVICE_PID + ":" + id).withType("binding").withVersion("4.1.0")
+                        .withId(id.substring("binding-".length()))
+                        .withContentType(TestAddonHandler.TEST_ADDON_CONTENT_TYPE)
+                        .withCompatible(!id.equals(INCOMPATIBLE_VERSION)).build())
+                .toList();
     }
 
     @Override
@@ -90,7 +93,7 @@ public class TestAddonService extends AbstractRemoteAddonService {
 
     @Override
     public @Nullable Addon getAddon(String id, @Nullable Locale locale) {
-        String remoteId = SERVICE_PID + ":" + id;
+        String remoteId = id.startsWith(SERVICE_PID) ? id : SERVICE_PID + ":" + id;
         return cachedAddons.stream().filter(a -> remoteId.equals(a.getUid())).findAny().orElse(null);
     }
 
@@ -115,7 +118,7 @@ public class TestAddonService extends AbstractRemoteAddonService {
      */
     public void setInstalled(String id) {
         Addon addon = Addon.create(SERVICE_PID + ":" + id).withType("binding").withId(id.substring("binding-".length()))
-                .withContentType(TestAddonHandler.TEST_ADDON_CONTENT_TYPE).build();
+                .withVersion("4.1.0").withContentType(TestAddonHandler.TEST_ADDON_CONTENT_TYPE).build();
 
         addonHandlers.forEach(addonHandler -> {
             try {
@@ -133,7 +136,7 @@ public class TestAddonService extends AbstractRemoteAddonService {
      */
     public void addToStorage(String id) {
         Addon addon = Addon.create(SERVICE_PID + ":" + id).withType("binding").withId(id.substring("binding-".length()))
-                .withContentType(TestAddonHandler.TEST_ADDON_CONTENT_TYPE).build();
+                .withVersion("4.1.0").withContentType(TestAddonHandler.TEST_ADDON_CONTENT_TYPE).build();
 
         addon.setInstalled(true);
         installedAddonStorage.put(id, gson.toJson(addon));

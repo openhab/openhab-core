@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -83,7 +83,7 @@ public interface STTService {
      * @param locale The {@code Locale} in which the target speech is spoken
      * @param grammars The JSpeech Grammar Format grammar specifying allowed statements
      * @return A {@link STTServiceHandle} used to abort recognition
-     * @throws A {@link SSTException} if any parameter is invalid or a STT problem occurs
+     * @throws STTException if any parameter is invalid or a STT problem occurs
      */
     STTServiceHandle recognize(STTListener sttListener, AudioStream audioStream, Locale locale, Set<String> grammars)
             throws STTException;

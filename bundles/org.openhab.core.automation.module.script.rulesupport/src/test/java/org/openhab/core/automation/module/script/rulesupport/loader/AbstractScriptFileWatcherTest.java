@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,16 +12,13 @@
  */
 package org.openhab.core.automation.module.script.rulesupport.loader;
 
-import static java.nio.file.StandardWatchEventKinds.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.openhab.core.OpenHAB.CONFIG_DIR_PROG_ARGUMENT;
-import static org.openhab.core.service.WatchService.Kind.CREATE;
-import static org.openhab.core.service.WatchService.Kind.DELETE;
-import static org.openhab.core.service.WatchService.Kind.MODIFY;
+import static org.openhab.core.service.WatchService.Kind.*;
 
 import java.io.File;
 import java.io.IOException;

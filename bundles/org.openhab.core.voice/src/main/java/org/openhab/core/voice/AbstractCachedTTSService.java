@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -32,7 +32,7 @@ public abstract class AbstractCachedTTSService implements CachedTTSService {
 
     private final TTSCache ttsCache;
 
-    public AbstractCachedTTSService(final @Reference TTSCache ttsCache) {
+    protected AbstractCachedTTSService(final @Reference TTSCache ttsCache) {
         this.ttsCache = ttsCache;
     }
 

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -35,6 +35,7 @@ import org.openhab.core.thing.type.ChannelType;
 import org.openhab.core.thing.type.ChannelTypeUID;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
+import org.openhab.core.types.TimeSeries;
 
 /**
  * {@link ThingHandlerCallback} is callback interface for {@link ThingHandler}s. The implementation of a
@@ -64,6 +65,14 @@ public interface ThingHandlerCallback {
      * @param command command
      */
     void postCommand(ChannelUID channelUID, Command command);
+
+    /**
+     * Informs about a time series, whcihs is send from the channel.
+     *
+     * @param channelUID channel UID
+     * @param timeSeries time series
+     */
+    void sendTimeSeries(ChannelUID channelUID, TimeSeries timeSeries);
 
     /**
      * Informs about an updated status of a thing.
@@ -156,7 +165,7 @@ public interface ThingHandlerCallback {
 
     /**
      * Creates a {@link ChannelBuilder} which is preconfigured with values from the given {@link Channel} and allows to
-     * modify it. The methods {@link BaseThingHandler#editThing(Thing)} and {@link BaseThingHandler#updateThing(Thing)}
+     * modify it. The methods {@link BaseThingHandler#editThing()} and {@link BaseThingHandler#updateThing(Thing)}
      * must be called to persist the changes.
      *
      * @param thing {@link Thing} (must not be null)

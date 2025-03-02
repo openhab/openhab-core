@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -33,13 +33,13 @@ public abstract class AbstractThingDTO {
     public String thingTypeUID;
     public String location;
 
-    public AbstractThingDTO() {
+    protected AbstractThingDTO() {
     }
 
-    protected AbstractThingDTO(String thingTypeUID, String UID, String label, String bridgeUID,
+    protected AbstractThingDTO(String thingTypeUID, String uid, String label, String bridgeUID,
             Map<String, Object> configuration, Map<String, String> properties, String location) {
         this.thingTypeUID = thingTypeUID;
-        this.UID = UID;
+        this.UID = uid;
         this.label = label;
         this.bridgeUID = bridgeUID;
         this.configuration = configuration;

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -28,9 +28,10 @@ import org.openhab.core.config.core.ConfigDescriptionParameter;
 /**
  * This class provides common functionality for creating {@link ModuleType} instances. Each {@link ModuleType} instance
  * defines the meta-information needed for creation of a {@link Module} instance which is a building block for a
- * {@link Rule}. The meta-information describes the {@link Configuration} of a {@link Module} providing list with
- * {@link ConfigDescriptionParameter}s, {@link Input}s and {@link Output}s of a {@link Module}. Each {@link ModuleType}
- * instance owns a unique id which is used as reference in the {@link Module}s, to find their meta-information.
+ * {@link Rule}. The meta-information describes the {@link org.openhab.core.config.core.Configuration} of a
+ * {@link Module} providing list with {@link ConfigDescriptionParameter}s, {@link Input}s and {@link Output}s of a
+ * {@link Module}. Each {@link ModuleType} instance owns a unique id which is used as reference in the {@link Module}s,
+ * to find their meta-information.
  * <p>
  * Whether the {@link ModuleType}s can be used by anyone, depends from their {@link Visibility} value, but they can be
  * modified only by their creator.
@@ -78,19 +79,19 @@ public abstract class ModuleType implements Identifiable<String> {
      * Creates a {@link ModuleType} instance. This constructor is responsible to initialize common base properties of
      * the {@link ModuleType}s.
      *
-     * @param UID the {@link ModuleType}'s identifier, or {@code null} if a random identifier should be
+     * @param uid the {@link ModuleType}'s identifier, or {@code null} if a random identifier should be
      *            generated.
      * @param configDescriptions describing meta-data for the configuration of the future {@link Module} instances
      */
-    public ModuleType(@Nullable String UID, @Nullable List<ConfigDescriptionParameter> configDescriptions) {
-        this(UID, configDescriptions, null, null, null, null);
+    public ModuleType(@Nullable String uid, @Nullable List<ConfigDescriptionParameter> configDescriptions) {
+        this(uid, configDescriptions, null, null, null, null);
     }
 
     /**
      * Creates a {@link ModuleType} instance. This constructor is responsible to initialize all common properties of
      * the {@link ModuleType}s.
      *
-     * @param UID the {@link ModuleType}'s identifier, or {@code null} if a random identifier should be
+     * @param uid the {@link ModuleType}'s identifier, or {@code null} if a random identifier should be
      *            generated.
      * @param configDescriptions describing meta-data for the configuration of the future {@link Module} instances.
      * @param label a short and accurate, human-readable label of the {@link ModuleType}.
@@ -102,15 +103,15 @@ public abstract class ModuleType implements Identifiable<String> {
      *            If {@code null} is provided the default visibility {@link Visibility#VISIBLE} will be
      *            used.
      */
-    public ModuleType(@Nullable String UID, @Nullable List<ConfigDescriptionParameter> configDescriptions,
+    public ModuleType(@Nullable String uid, @Nullable List<ConfigDescriptionParameter> configDescriptions,
             @Nullable String label, @Nullable String description, @Nullable Set<String> tags,
             @Nullable Visibility visibility) {
-        this.uid = UID == null ? UUID.randomUUID().toString() : UID;
+        this.uid = uid == null ? UUID.randomUUID().toString() : uid;
         this.label = label;
         this.description = description;
-        this.configDescriptions = configDescriptions == null ? Collections.emptyList()
+        this.configDescriptions = configDescriptions == null ? List.of()
                 : Collections.unmodifiableList(configDescriptions);
-        this.tags = tags == null ? Collections.emptySet() : Collections.unmodifiableSet(tags);
+        this.tags = tags == null ? Set.of() : Collections.unmodifiableSet(tags);
         this.visibility = visibility == null ? Visibility.VISIBLE : visibility;
     }
 

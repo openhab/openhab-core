@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -103,8 +103,9 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
             "electric-current");
     public static final ChannelTypeUID SYSTEM_CHANNEL_TYPE_UID_ELECTRIC_VOLTAGE = new ChannelTypeUID(BINDING_ID,
             "electric-voltage");
-    public static final ChannelTypeUID SYSTEM_CHANNEL_TYPE_UID_ELECTRICAL_ENERGY = new ChannelTypeUID(BINDING_ID,
-            "electrical-energy");
+    public static final ChannelTypeUID SYSTEM_CHANNEL_TYPE_UID_ELECTRIC_ENERGY = new ChannelTypeUID(BINDING_ID,
+            "electric-energy");
+    public static final ChannelTypeUID SYSTEM_CHANNEL_TYPE_UID_UV_INDEX = new ChannelTypeUID(BINDING_ID, "uv-index");
 
     /**
      * Signal strength default system wide {@link ChannelType}. Represents signal strength of a device as a number
@@ -242,8 +243,8 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
      */
     public static final ChannelType SYSTEM_COLOR_TEMPERATURE_ABS = ChannelTypeBuilder
             .state(SYSTEM_CHANNEL_TYPE_UID_COLOR_TEMPERATURE_ABS, "Color Temperature", "Number:Temperature")
-            .withDescription("Controls the color temperature of the light in Kelvin").withCategory("ColorLight")
-            .isAdvanced(true)
+            .withUnitHint("K").withDescription("Controls the color temperature of the light in Kelvin")
+            .withCategory("ColorLight").isAdvanced(true)
             .withStateDescriptionFragment(StateDescriptionFragmentBuilder.create().withMinimum(new BigDecimal(1000))
                     .withMaximum(new BigDecimal(10000)).withPattern("%.0f K").build())
             .withTags(List.of("Control", "ColorTemperature")).build();
@@ -265,7 +266,7 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
      */
     public static final ChannelType SYSTEM_MUTE = ChannelTypeBuilder
             .state(SYSTEM_CHANNEL_TYPE_UID_MUTE, "Mute", CoreItemFactory.SWITCH)
-            .withDescription("Mute audio of the device").withCategory("SoundVolume")
+            .withDescription("Mute audio of the device").withCategory("SoundVolume_Mute")
             .withTags(List.of("Switch", "SoundVolume")).build();
 
     /**
@@ -340,7 +341,7 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
      */
     public static final ChannelType SYSTEM_ATMOSPHERIC_HUMIDITY = ChannelTypeBuilder
             .state(SYSTEM_CHANNEL_TYPE_UID_ATMOSPHERIC_HUMIDITY, "Atmospheric Humidity", "Number:Dimensionless")
-            .withDescription("Current atmospheric relative humidity").withCategory("Humidity")
+            .withUnitHint("%").withDescription("Current atmospheric relative humidity").withCategory("Humidity")
             .withStateDescriptionFragment(
                     StateDescriptionFragmentBuilder.create().withReadOnly(true).withPattern("%.0f %%").build())
             .withTags(List.of("Measurement", "Humidity")).build();
@@ -391,11 +392,20 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
      * Electrical-energy: system wide {@link ChannelType} which shows the electrical energy
      */
     public static final ChannelType SYSTEM_ELECTRICAL_ENERGY = ChannelTypeBuilder
-            .state(SYSTEM_CHANNEL_TYPE_UID_ELECTRICAL_ENERGY, "Electrical Energy", "Number:Energy")
-            .withDescription("Current electrical energy").withCategory("Energy")
+            .state(SYSTEM_CHANNEL_TYPE_UID_ELECTRIC_ENERGY, "Electric Energy", "Number:Energy")
+            .withDescription("Current electric energy").withCategory("Energy")
             .withStateDescriptionFragment(
                     StateDescriptionFragmentBuilder.create().withReadOnly(true).withPattern("%.1f %unit%").build())
             .withTags(List.of("Measurement", "Energy")).build();
+
+    /**
+     * UV Index: system wide {@link ChannelType} which shows the UV Index
+     */
+    public static final ChannelType SYSTEM_UV_INDEX = ChannelTypeBuilder
+            .state(SYSTEM_CHANNEL_TYPE_UID_UV_INDEX, "UV Index", CoreItemFactory.NUMBER)
+            .withDescription("Current UV index").withStateDescriptionFragment(StateDescriptionFragmentBuilder.create()
+                    .withReadOnly(true).withPattern("%d").withMinimum(BigDecimal.ONE).build())
+            .withTags(List.of("Measurement", "Ultraviolet")).build();
 
     private static final Collection<ChannelType> CHANNEL_TYPES = List.of(SYSTEM_CHANNEL_SIGNAL_STRENGTH,
             SYSTEM_CHANNEL_LOW_BATTERY, SYSTEM_CHANNEL_BATTERY_LEVEL, SYSTEM_TRIGGER, SYSTEM_RAWBUTTON, SYSTEM_BUTTON,
@@ -404,7 +414,7 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
             SYSTEM_MEDIA_TITLE, SYSTEM_MEDIA_ARTIST, SYSTEM_WIND_DIRECTION, SYSTEM_WIND_SPEED,
             SYSTEM_OUTDOOR_TEMPERATURE, SYSTEM_INDOOR_TEMPERATURE, SYSTEM_ATMOSPHERIC_HUMIDITY,
             SYSTEM_BAROMETRIC_PRESSURE, SYSTEM_ELECTRIC_POWER, SYSTEM_ELECTRIC_CURRENT, SYSTEM_ELECTRIC_VOLTAGE,
-            SYSTEM_ELECTRICAL_ENERGY);
+            SYSTEM_ELECTRICAL_ENERGY, SYSTEM_UV_INDEX);
 
     private final Map<LocalizedKey, ChannelType> localizedChannelTypeCache = new ConcurrentHashMap<>();
 

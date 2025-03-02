@@ -234,4 +234,44 @@
 			</parameter>
 		</config-description>
 	</thing-type>
+
+	<thing-type id="timeseries">
+		<label>Magic Timeseries Updates Thing</label>
+		<description>Demonstrates the use of TimeSeries as forecast.</description>
+		<channels>
+			<channel id="forecast" typeId="forecast"/>
+		</channels>
+		<config-description>
+			<parameter name="interval" type="integer" min="60" unit="s">
+				<label>Interval</label>
+				<description>The interval to send the generated data.</description>
+				<default>600</default>
+			</parameter>
+			<parameter name="type" type="text">
+				<label>Type</label>
+				<description>How to generate the values.</description>
+				<options>
+					<option value="RND">Random</option>
+					<option value="ASC">Ascending</option>
+					<option value="DESC">Descending</option>
+				</options>
+				<default>RND</default>
+			</parameter>
+			<parameter name="min" type="decimal">
+				<label>Minimum</label>
+				<description>The minimum value.</description>
+				<default>0</default>
+			</parameter>
+			<parameter name="max" type="decimal">
+				<label>Maximum</label>
+				<description>The maximum value.</description>
+				<default>100</default>
+			</parameter>
+			<parameter name="count" type="integer" min="0">
+				<label>Value Count</label>
+				<description>The number of values to generate.</description>
+				<default>10</default>
+			</parameter>
+		</config-description>
+	</thing-type>
 </thing:thing-descriptions>

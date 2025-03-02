@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,12 +15,12 @@ package org.openhab.core.internal.types;
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.types.StateDescription;
 import org.openhab.core.types.StateDescriptionFragment;
-import org.openhab.core.types.StateDescriptionFragmentBuilder;
 import org.openhab.core.types.StateOption;
 
 /**
@@ -31,7 +31,7 @@ import org.openhab.core.types.StateOption;
 @NonNullByDefault
 public class StateDescriptionFragmentImpl implements StateDescriptionFragment {
 
-    private class StateDescriptionImpl extends StateDescription {
+    private static class StateDescriptionImpl extends StateDescription {
         StateDescriptionImpl(@Nullable BigDecimal minimum, @Nullable BigDecimal maximum, @Nullable BigDecimal step,
                 @Nullable String pattern, boolean readOnly, @Nullable List<StateOption> options) {
             super(minimum, maximum, step, pattern, readOnly, options);
@@ -61,7 +61,7 @@ public class StateDescriptionFragmentImpl implements StateDescriptionFragment {
      * @param pattern pattern to render the state
      * @param readOnly if the state can be changed by the system
      * @param options predefined list of options
-     * @deprecated use {@link StateDescriptionFragmentBuilder} instead.
+     * @deprecated use {@link org.openhab.core.types.StateDescriptionFragmentBuilder} instead.
      */
     @Deprecated
     public StateDescriptionFragmentImpl(@Nullable BigDecimal minimum, @Nullable BigDecimal maximum,
@@ -72,8 +72,7 @@ public class StateDescriptionFragmentImpl implements StateDescriptionFragment {
         this.step = step;
         this.pattern = pattern;
         this.readOnly = readOnly;
-        this.options = options == null || options.isEmpty() ? Collections.emptyList()
-                : Collections.unmodifiableList(options);
+        this.options = options == null || options.isEmpty() ? List.of() : Collections.unmodifiableList(options);
     }
 
     /**
@@ -81,7 +80,7 @@ public class StateDescriptionFragmentImpl implements StateDescriptionFragment {
      * Note: State options will only be set if not empty.
      *
      * @param legacy the {@link StateDescription} to initialize from.
-     * @deprecated use {@link StateDescriptionFragmentBuilder} instead.
+     * @deprecated use {@link org.openhab.core.types.StateDescriptionFragmentBuilder} instead.
      */
     @Deprecated
     public StateDescriptionFragmentImpl(StateDescription legacy) {
@@ -170,8 +169,7 @@ public class StateDescriptionFragmentImpl implements StateDescriptionFragment {
             return null;
         }
         final Boolean ro = readOnly;
-        return new StateDescriptionImpl(minimum, maximum, step, pattern, ro == null ? false : ro.booleanValue(),
-                options);
+        return new StateDescriptionImpl(minimum, maximum, step, pattern, ro != null && ro.booleanValue(), options);
     }
 
     /**
@@ -197,7 +195,8 @@ public class StateDescriptionFragmentImpl implements StateDescriptionFragment {
         if (readOnly == null) {
             readOnly = fragment.isReadOnly();
         }
-        if (options == null || options.isEmpty()) {
+        List<StateOption> localOptions = options;
+        if (localOptions == null || localOptions.isEmpty()) {
             options = fragment.getOptions();
         }
         return this;
@@ -207,12 +206,12 @@ public class StateDescriptionFragmentImpl implements StateDescriptionFragment {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + (minimum != null ? minimum.hashCode() : 0);
-        result = prime * result + (maximum != null ? maximum.hashCode() : 0);
-        result = prime * result + (step != null ? step.hashCode() : 0);
-        result = prime * result + (pattern != null ? pattern.hashCode() : 0);
+        result = prime * result + Objects.hashCode(minimum);
+        result = prime * result + Objects.hashCode(maximum);
+        result = prime * result + Objects.hashCode(step);
+        result = prime * result + Objects.hashCode(pattern);
         result = prime * result + (readOnly ? 1231 : 1237);
-        result = prime * result + (options != null ? options.hashCode() : 0);
+        result = prime * result + Objects.hashCode(options);
         return result;
     }
 
@@ -228,12 +227,9 @@ public class StateDescriptionFragmentImpl implements StateDescriptionFragment {
             return false;
         }
         StateDescriptionFragmentImpl other = (StateDescriptionFragmentImpl) obj;
-        return (minimum != null ? minimum.equals(other.minimum) : other.minimum == null)
-                && (maximum != null ? maximum.equals(other.maximum) : other.maximum == null)
-                && (step != null ? step.equals(other.step) : other.step == null)
-                && (pattern != null ? pattern.equals(other.pattern) : other.pattern == null)
-                && (readOnly != null ? readOnly.equals(other.readOnly) : other.readOnly == null)
-                && (options != null ? options.equals(other.options) : other.options == null);
+        return Objects.equals(minimum, other.minimum) && Objects.equals(maximum, other.maximum)
+                && Objects.equals(step, other.step) && Objects.equals(pattern, other.pattern)
+                && Objects.equals(readOnly, other.readOnly) && Objects.equals(options, other.options);
     }
 
     @Override

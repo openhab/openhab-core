@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,19 +14,18 @@ package org.openhab.core.config.discovery.internal;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
-import org.openhab.core.config.discovery.DiscoveryResult;
 import org.openhab.core.config.discovery.DiscoveryResultFlag;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
 
 /**
  * The {@link DiscoveryResultImplTest} checks if any invalid input parameters
- * and the synchronization of {@link DiscoveryResult}s work in a correct way.
+ * and the synchronization of {@link org.openhab.core.config.discovery.DiscoveryResult}s
+ * work in a correct way.
  *
  * @author Michael Grammling - Initial contribution
  * @author Thomas Höfer - Added representation
@@ -37,12 +36,14 @@ public class DiscoveryResultImplTest {
 
     private static final int DEFAULT_TTL = 60;
 
+    @SuppressWarnings("deprecation")
     @Test
     public void testInvalidConstructorForThingType() {
         assertThrows(IllegalArgumentException.class,
                 () -> new DiscoveryResultImpl(null, new ThingUID("aa"), null, null, null, null, DEFAULT_TTL));
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     public void testInvalidConstructorForTTL() {
         ThingTypeUID thingTypeUID = new ThingTypeUID("bindingId", "thingType");
@@ -50,6 +51,7 @@ public class DiscoveryResultImplTest {
                 new ThingUID(thingTypeUID, "thingId"), null, null, null, null, -2));
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     public void testValidConstructor() {
         ThingTypeUID thingTypeUID = new ThingTypeUID("bindingId", "thingType");
@@ -67,12 +69,12 @@ public class DiscoveryResultImplTest {
         assertNull(discoveryResult.getRepresentationProperty());
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     public void testInvalidSynchronize() {
         ThingTypeUID thingTypeUID = new ThingTypeUID("bindingId", "thingType");
 
-        Map<String, Object> discoveryResultSourceMap = new HashMap<>();
-        discoveryResultSourceMap.put("ipAddress", "127.0.0.1");
+        Map<String, Object> discoveryResultSourceMap = Map.of("ipAddress", "127.0.0.1");
 
         DiscoveryResultImpl discoveryResult = new DiscoveryResultImpl(thingTypeUID,
                 new ThingUID(thingTypeUID, "thingId"), null, discoveryResultSourceMap, "ipAddress", "TARGET",
@@ -87,12 +89,12 @@ public class DiscoveryResultImplTest {
         assertEquals(DiscoveryResultFlag.IGNORED, discoveryResult.getFlag());
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     public void testIrrelevantSynchronize() {
         ThingTypeUID thingTypeUID = new ThingTypeUID("bindingId", "thingType");
 
-        Map<String, Object> discoveryResultSourceMap = new HashMap<>();
-        discoveryResultSourceMap.put("ipAddress", "127.0.0.1");
+        Map<String, Object> discoveryResultSourceMap = Map.of("ipAddress", "127.0.0.1");
 
         DiscoveryResultImpl discoveryResult = new DiscoveryResultImpl(thingTypeUID,
                 new ThingUID(thingTypeUID, "thingId"), null, discoveryResultSourceMap, "ipAddress", "TARGET",
@@ -110,21 +112,21 @@ public class DiscoveryResultImplTest {
         assertEquals(DiscoveryResultFlag.IGNORED, discoveryResult.getFlag());
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     public void testSynchronize() {
         ThingTypeUID thingTypeUID = new ThingTypeUID("bindingId", "thingType");
 
-        Map<String, Object> discoveryResultSourceMap = new HashMap<>();
-        discoveryResultSourceMap.put("ipAddress", "127.0.0.1");
+        Map<String, Object> discoveryResultSourceMap = Map.of("ipAddress", "127.0.0.1");
 
         DiscoveryResultImpl discoveryResult = new DiscoveryResultImpl(thingTypeUID,
                 new ThingUID(thingTypeUID, "thingId"), null, discoveryResultSourceMap, "ipAddress", "TARGET",
                 DEFAULT_TTL);
         discoveryResult.setFlag(DiscoveryResultFlag.IGNORED);
 
-        Map<String, Object> discoveryResultMap = new HashMap<>();
-        discoveryResultMap.put("ipAddress", "192.168.178.1");
-        discoveryResultMap.put("macAddress", "AA:BB:CC:DD:EE:FF");
+        Map<String, Object> discoveryResultMap = Map.of( //
+                "ipAddress", "192.168.178.1", //
+                "macAddress", "AA:BB:CC:DD:EE:FF");
 
         DiscoveryResultImpl discoveryResultSource = new DiscoveryResultImpl(thingTypeUID,
                 new ThingUID(thingTypeUID, "thingId"), null, discoveryResultMap, "macAddress", "SOURCE", DEFAULT_TTL);
@@ -139,6 +141,7 @@ public class DiscoveryResultImplTest {
         assertEquals(DiscoveryResultFlag.IGNORED, discoveryResult.getFlag());
     }
 
+    @SuppressWarnings("deprecation")
     @Test
     public void testThingTypeCompatibility() {
         ThingTypeUID thingTypeUID = new ThingTypeUID("bindingId", "thingType");

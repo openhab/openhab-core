@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -44,21 +44,24 @@ public class ProfileTypeI18nLocalizationService {
         this.profileI18nUtil = new ProfileI18nUtil(i18nProvider);
     }
 
-    public ProfileType createLocalizedProfileType(Bundle bundle, ProfileType profileType, @Nullable Locale locale) {
+    public ProfileType createLocalizedProfileType(@Nullable Bundle bundle, ProfileType profileType,
+            @Nullable Locale locale) {
         ProfileTypeUID profileTypeUID = profileType.getUID();
         String defaultLabel = profileType.getLabel();
-        String label = profileI18nUtil.getProfileLabel(bundle, profileTypeUID, defaultLabel, locale);
+        if (bundle != null) {
+            String label = profileI18nUtil.getProfileLabel(bundle, profileTypeUID, defaultLabel, locale);
+            label = label != null ? label : defaultLabel;
 
-        if (profileType instanceof StateProfileType type) {
-            return ProfileTypeBuilder.newState(profileTypeUID, label != null ? label : defaultLabel)
-                    .withSupportedItemTypes(profileType.getSupportedItemTypes())
-                    .withSupportedItemTypesOfChannel(type.getSupportedItemTypesOfChannel()).build();
-        } else if (profileType instanceof TriggerProfileType type) {
-            return ProfileTypeBuilder.newTrigger(profileTypeUID, label != null ? label : defaultLabel)
-                    .withSupportedItemTypes(profileType.getSupportedItemTypes())
-                    .withSupportedChannelTypeUIDs(type.getSupportedChannelTypeUIDs()).build();
-        } else {
-            return profileType;
+            if (profileType instanceof StateProfileType type) {
+                return ProfileTypeBuilder.newState(profileTypeUID, label)
+                        .withSupportedItemTypes(profileType.getSupportedItemTypes())
+                        .withSupportedItemTypesOfChannel(type.getSupportedItemTypesOfChannel()).build();
+            } else if (profileType instanceof TriggerProfileType type) {
+                return ProfileTypeBuilder.newTrigger(profileTypeUID, label)
+                        .withSupportedItemTypes(profileType.getSupportedItemTypes())
+                        .withSupportedChannelTypeUIDs(type.getSupportedChannelTypeUIDs()).build();
+            }
         }
+        return profileType;
     }
 }

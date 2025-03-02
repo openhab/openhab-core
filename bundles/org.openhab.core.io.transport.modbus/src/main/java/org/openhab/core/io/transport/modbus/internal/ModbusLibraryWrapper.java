@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,7 +14,6 @@ package org.openhab.core.io.transport.modbus.internal;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -191,7 +190,7 @@ public class ModbusLibraryWrapper {
      */
     public static ModbusTransaction createTransactionForEndpoint(ModbusSlaveEndpoint endpoint,
             ModbusSlaveConnection connection) {
-        ModbusTransaction transaction = endpoint.accept(new ModbusSlaveEndpointVisitor<ModbusTransaction>() {
+        ModbusTransaction transaction = endpoint.accept(new ModbusSlaveEndpointVisitor<>() {
 
             @Override
             public @NonNull ModbusTransaction visit(ModbusTCPSlaveEndpoint modbusIPSlavePoolingKey) {
@@ -265,12 +264,12 @@ public class ModbusLibraryWrapper {
     /**
      * Convert {@link ModbusRegisterArray} to array of {@link Register}
      *
-     * @param bits
+     * @param arr
      * @return
      */
     public static Register[] convertRegisters(ModbusRegisterArray arr) {
-        return IntStream.range(0, arr.size()).mapToObj(i -> new SimpleInputRegister(arr.getRegister(i)))
-                .collect(Collectors.toList()).toArray(new Register[0]);
+        return IntStream.range(0, arr.size()).mapToObj(i -> new SimpleInputRegister(arr.getRegister(i))).toList()
+                .toArray(new Register[0]);
     }
 
     /**
@@ -304,7 +303,7 @@ public class ModbusLibraryWrapper {
     /**
      * Invoke callback with the data received
      *
-     * @param message original request
+     * @param request original request
      * @param callback callback for read
      * @param response Modbus library response object
      */

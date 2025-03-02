@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,12 +13,14 @@
 package org.openhab.core.items;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.closeTo;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-import java.util.Arrays;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Locale;
 
@@ -40,6 +42,7 @@ import org.openhab.core.types.CommandOption;
 import org.openhab.core.types.State;
 import org.openhab.core.types.StateDescriptionFragmentBuilder;
 import org.openhab.core.types.StateOption;
+import org.openhab.core.types.UnDefType;
 
 /**
  * The GenericItemTest tests functionality of the GenericItem.
@@ -70,8 +73,8 @@ public class GenericItemTest {
         assertEquals(2, events.size());
 
         // first event should be updated event
-        assertInstanceOf(ItemStateUpdatedEvent.class, events.get(0));
-        ItemStateUpdatedEvent updated = (ItemStateUpdatedEvent) events.get(0);
+        assertInstanceOf(ItemStateUpdatedEvent.class, events.getFirst());
+        ItemStateUpdatedEvent updated = (ItemStateUpdatedEvent) events.getFirst();
         assertEquals(item.getName(), updated.getItemName());
         assertEquals("openhab/items/member1/stateupdated", updated.getTopic());
         assertEquals(item.getState(), updated.getItemState());
@@ -98,31 +101,12 @@ public class GenericItemTest {
         assertEquals(1, events.size()); // two before and one additional
 
         // event should be updated event
-        assertInstanceOf(ItemStateUpdatedEvent.class, events.get(0));
-        updated = (ItemStateUpdatedEvent) events.get(0);
+        assertInstanceOf(ItemStateUpdatedEvent.class, events.getFirst());
+        updated = (ItemStateUpdatedEvent) events.getFirst();
         assertEquals(item.getName(), updated.getItemName());
         assertEquals("openhab/items/member1/stateupdated", updated.getTopic());
         assertEquals(item.getState(), updated.getItemState());
         assertEquals(ItemStateUpdatedEvent.TYPE, updated.getType());
-    }
-
-    @Test
-    public void testAddGroupNameWithNull() {
-        TestItem item = new TestItem("member1");
-        assertThrows(IllegalArgumentException.class, () -> item.addGroupName(toNull()));
-    }
-
-    @Test
-    public void testAddGroupNamesWithNull() {
-        TestItem item = new TestItem("member1");
-        assertThrows(IllegalArgumentException.class,
-                () -> item.addGroupNames(Arrays.asList("group-a", toNull(), "group-b")));
-    }
-
-    @Test
-    public void testRemoveGroupNameWithNull() {
-        TestItem item = new TestItem("member1");
-        assertThrows(IllegalArgumentException.class, () -> item.removeGroupName(toNull()));
     }
 
     @Test
@@ -151,6 +135,47 @@ public class GenericItemTest {
         TestItem item = new TestItem("member1");
         item.setState(StringType.valueOf("Hello World"));
         assertNull(item.getStateAs(toNull()));
+    }
+
+    @Test
+    public void testGetLastStateUpdate() {
+        TestItem item = new TestItem("member1");
+        assertNull(item.getLastStateUpdate());
+        item.setState(PercentType.HUNDRED);
+        assertThat(item.getLastStateUpdate().toInstant().toEpochMilli() * 1.0,
+                is(closeTo(ZonedDateTime.now().toInstant().toEpochMilli(), 5)));
+    }
+
+    @Test
+    public void testGetLastStateChange() throws InterruptedException {
+        TestItem item = new TestItem("member1");
+        assertNull(item.getLastStateChange());
+        item.setState(PercentType.HUNDRED);
+        ZonedDateTime initialChangeTime = ZonedDateTime.now();
+        assertThat(item.getLastStateChange().toInstant().toEpochMilli() * 1.0,
+                is(closeTo(initialChangeTime.toInstant().toEpochMilli(), 5)));
+
+        Thread.sleep(50);
+        item.setState(PercentType.HUNDRED);
+        assertThat(item.getLastStateChange().toInstant().toEpochMilli() * 1.0,
+                is(closeTo(initialChangeTime.toInstant().toEpochMilli(), 5)));
+
+        Thread.sleep(50);
+        ZonedDateTime secondChangeTime = ZonedDateTime.now();
+        item.setState(PercentType.ZERO);
+        assertThat(item.getLastStateChange().toInstant().toEpochMilli() * 1.0,
+                is(closeTo(secondChangeTime.toInstant().toEpochMilli(), 5)));
+    }
+
+    @Test
+    public void testGetLastState() {
+        TestItem item = new TestItem("member1");
+        assertEquals(UnDefType.NULL, item.getState());
+        assertNull(item.getLastState());
+        item.setState(PercentType.HUNDRED);
+        assertEquals(UnDefType.NULL, item.getLastState());
+        item.setState(PercentType.ZERO);
+        assertEquals(PercentType.HUNDRED, item.getLastState());
     }
 
     @Test

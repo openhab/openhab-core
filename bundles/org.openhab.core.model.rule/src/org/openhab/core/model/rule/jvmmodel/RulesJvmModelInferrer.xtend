@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,7 +17,6 @@ import java.util.Set
 import org.openhab.core.items.Item
 import org.openhab.core.items.ItemRegistry
 import org.openhab.core.thing.ThingRegistry
-import org.openhab.core.thing.events.ChannelTriggeredEvent
 import org.openhab.core.types.Command
 import org.openhab.core.types.State
 import org.openhab.core.model.rule.rules.ChangedEventTrigger
@@ -33,14 +32,13 @@ import org.openhab.core.model.rule.rules.ThingStateChangedEventTrigger
 import org.openhab.core.model.rule.rules.UpdateEventTrigger
 import org.openhab.core.model.script.jvmmodel.ScriptJvmModelInferrer
 import org.openhab.core.model.script.scoping.StateAndCommandProvider
-import org.eclipse.xtext.naming.IQualifiedNameProvider
 import org.eclipse.xtext.xbase.jvmmodel.IJvmDeclaredTypeAcceptor
 import org.eclipse.xtext.xbase.jvmmodel.JvmTypesBuilder
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.eclipse.xtext.common.types.JvmFormalParameter
 import org.eclipse.emf.common.util.EList
-import org.openhab.core.events.Event
+import org.openhab.core.automation.module.script.rulesupport.shared.ValueCache
 
 /**
  * <p>Infers a JVM model from the source model.</p> 
@@ -53,13 +51,12 @@ import org.openhab.core.events.Event
  */
 class RulesJvmModelInferrer extends ScriptJvmModelInferrer {
 
-    private final Logger logger = LoggerFactory.getLogger(RulesJvmModelInferrer)
+    final Logger logger = LoggerFactory.getLogger(RulesJvmModelInferrer)
 
     /**
-     * conveninence API to build and initialize JvmTypes and their members.
+     * convenience API to build and initialize JvmTypes and their members.
      */
     @Inject extension JvmTypesBuilder
-    @Inject extension IQualifiedNameProvider
 
     @Inject
     ItemRegistry itemRegistry
@@ -73,15 +70,15 @@ class RulesJvmModelInferrer extends ScriptJvmModelInferrer {
     /**
      * Is called for each instance of the first argument's type contained in a resource.
      * 
-     * @param element - the model to create one or more JvmDeclaredTypes from.
-     * @param acceptor - each created JvmDeclaredType without a container should be passed to the acceptor in order get attached to the
+     * @param ruleModel the model to create one or more JvmDeclaredTypes from.
+     * @param acceptor each created JvmDeclaredType without a container should be passed to the acceptor in order get attached to the
      *                   current resource.
-     * @param isPreLinkingPhase - whether the method is called in a pre linking phase, i.e. when the global index isn't fully updated. You
-     *        must not rely on linking using the index if iPrelinkingPhase is <code>true</code>
+     * @param isPreIndexingPhase whether the method is called in a pre linking phase, i.e. when the global index isn't fully updated. You
+     *        must not rely on linking using the index if isPreIndexingPhase is <code>true</code>
      */
     def dispatch void infer(RuleModel ruleModel, IJvmDeclaredTypeAcceptor acceptor, boolean isPreIndexingPhase) {
         val className = ruleModel.eResource.URI.lastSegment.split("\\.").head.toFirstUpper + "Rules"
-        acceptor.accept(ruleModel.toClass(className)).initializeLater [
+        acceptor.accept(ruleModel.toClass(className), [
             members += ruleModel.variables.map [
                 toField(name, type?.cloneWithProxies) => [ field |
                     field.static = true
@@ -130,7 +127,15 @@ class RulesJvmModelInferrer extends ScriptJvmModelInferrer {
             members += ruleModel.rules.map [ rule |
                 rule.toMethod("_" + rule.name, ruleModel.newTypeRef(Void.TYPE)) [
                     static = true
+                    val privateCacheTypeRef = ruleModel.newTypeRef(ValueCache)
+                    parameters += rule.toParameter(VAR_PRIVATE_CACHE, privateCacheTypeRef)
+                    val sharedCacheTypeRef = ruleModel.newTypeRef(ValueCache)
+                    parameters += rule.toParameter(VAR_SHARED_CACHE, sharedCacheTypeRef)
                     if ((containsCommandTrigger(rule)) || (containsStateChangeTrigger(rule)) || (containsStateUpdateTrigger(rule))) {
+                        val groupTypeRef = ruleModel.newTypeRef(Item)
+                        parameters += rule.toParameter(VAR_TRIGGERING_GROUP, groupTypeRef)
+                        val groupNameRef = ruleModel.newTypeRef(String)
+                        parameters += rule.toParameter(VAR_TRIGGERING_GROUP_NAME, groupNameRef)
                         val itemTypeRef = ruleModel.newTypeRef(Item)
                         parameters += rule.toParameter(VAR_TRIGGERING_ITEM, itemTypeRef)
                         val itemNameRef = ruleModel.newTypeRef(String)
@@ -166,7 +171,7 @@ class RulesJvmModelInferrer extends ScriptJvmModelInferrer {
                     body = rule.script
                 ]
             ]
-        ]
+        ])
     }
 
     def private boolean containsParam(EList<JvmFormalParameter> params, String param) {

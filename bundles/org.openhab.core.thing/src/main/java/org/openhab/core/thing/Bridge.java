@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -22,7 +22,7 @@ import org.openhab.core.thing.binding.BridgeHandler;
  * A {@link Bridge} is a {@link Thing} that connects other {@link Thing}s.
  *
  * @author Dennis Nobel - Initial contribution
- * @author Christoph Weitkamp - Added method `getThing(ThingUID)`
+ * @author Christoph Weitkamp - Added method {@code getThing(ThingUID)}
  */
 @NonNullByDefault
 public interface Bridge extends Thing {

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -105,8 +105,8 @@ public class ModbusSlaveConnectionFactoryImpl
             long reconnectAfterMillis = configuration.getReconnectAfterMillis();
             long connectionAgeMillis = System.currentTimeMillis() - localLastConnected;
             long disconnectIfConnectedBeforeMillis = disconnectIfConnectedBefore.getOrDefault(localEndpoint, -1L);
-            boolean disconnectSinceTooOldConnection = disconnectIfConnectedBeforeMillis < 0L ? false
-                    : localLastConnected <= disconnectIfConnectedBeforeMillis;
+            boolean disconnectSinceTooOldConnection = disconnectIfConnectedBeforeMillis >= 0L
+                    && localLastConnected <= disconnectIfConnectedBeforeMillis;
             boolean shouldBeDisconnected = (reconnectAfterMillis == 0
                     || (reconnectAfterMillis > 0 && connectionAgeMillis > reconnectAfterMillis)
                     || disconnectSinceTooOldConnection);

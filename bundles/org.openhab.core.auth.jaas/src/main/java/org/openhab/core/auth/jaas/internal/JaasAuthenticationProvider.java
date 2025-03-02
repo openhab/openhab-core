@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,7 +14,6 @@ package org.openhab.core.auth.jaas.internal;
 
 import java.io.IOException;
 import java.security.Principal;
-import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
@@ -73,7 +72,7 @@ public class JaasAuthenticationProvider implements AuthenticationProvider {
         final ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
         try {
             Principal userPrincipal = new GenericUser(name);
-            Subject subject = new Subject(true, Set.of(userPrincipal), Collections.emptySet(), Set.of(userCredentials));
+            Subject subject = new Subject(true, Set.of(userPrincipal), Set.of(), Set.of(userCredentials));
 
             Thread.currentThread().setContextClassLoader(ManagedUserLoginModule.class.getClassLoader());
             LoginContext loginContext = new LoginContext(realmName, subject, new CallbackHandler() {

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -33,7 +33,7 @@ public class ConsoleInterpreter {
     public static String getHelp(final String base, final String separator,
             Collection<ConsoleCommandExtension> extensions) {
         final List<String> usages = ConsoleInterpreter.getUsages(extensions);
-        final StringBuffer buffer = new StringBuffer();
+        final StringBuilder buffer = new StringBuilder();
 
         buffer.append("---openHAB commands---\n\t");
         for (int i = 0; i < usages.size(); i++) {

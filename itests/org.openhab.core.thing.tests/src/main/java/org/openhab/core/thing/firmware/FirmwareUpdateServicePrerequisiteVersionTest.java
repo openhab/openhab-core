@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -18,7 +18,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
-import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -97,8 +96,7 @@ public class FirmwareUpdateServicePrerequisiteVersionTest extends JavaOSGiTest {
         when(thing.getThingTypeUID()).thenReturn(thingTypeUID);
         when(thing.getUID()).thenReturn(new ThingUID(thingTypeUID, thingUID));
 
-        Map<String, String> propertiesMap = new HashMap<>();
-        propertiesMap.put(Thing.PROPERTY_FIRMWARE_VERSION, firmware.getVersion());
+        Map<String, String> propertiesMap = Map.of(Thing.PROPERTY_FIRMWARE_VERSION, firmware.getVersion());
         when(thing.getProperties()).thenReturn(propertiesMap);
 
         return thing;

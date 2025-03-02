@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,7 +12,6 @@
  */
 package org.openhab.core.items;
 
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.common.registry.Provider;
 
@@ -24,6 +23,6 @@ import org.openhab.core.common.registry.Provider;
  * @author Kai Kreuzer - Initial contribution
  */
 @NonNullByDefault
-public interface ItemProvider extends Provider<@NonNull Item> {
+public interface ItemProvider extends Provider<Item> {
 
 }

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,10 +15,10 @@ package org.openhab.core.automation.integration.test;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -54,6 +53,7 @@ import org.openhab.core.automation.util.RuleBuilder;
 import org.openhab.core.common.registry.ProviderChangeListener;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.service.ReadyMarker;
+import org.openhab.core.service.StartLevelService;
 import org.openhab.core.storage.StorageService;
 import org.openhab.core.test.java.JavaOSGiTest;
 import org.slf4j.Logger;
@@ -71,10 +71,15 @@ public class RuleSimulationTest extends JavaOSGiTest {
 
     private @Nullable RuleRegistry ruleRegistry;
     private @Nullable RuleManager ruleEngine;
+    private @NonNullByDefault({}) StartLevelService startLevelService;
 
     @BeforeEach
     public void before() {
         registerVolatileStorageService();
+
+        startLevelService = mock(StartLevelService.class);
+        when(startLevelService.getStartLevel()).thenReturn(100);
+        registerService(startLevelService, StartLevelService.class.getName());
 
         StorageService storageService = getService(StorageService.class);
 
@@ -139,11 +144,10 @@ public class RuleSimulationTest extends JavaOSGiTest {
         final ZonedDateTime from = ZonedDateTime.of(2021, 1, 4, 0, 0, 0, 0, ZoneId.systemDefault());
         final ZonedDateTime until = ZonedDateTime.of(2021, 1, 17, 23, 59, 59, 0, ZoneId.systemDefault());
 
-        List<RuleExecution> executions = ruleEngine.simulateRuleExecutions(from, until).collect(Collectors.toList());
+        List<RuleExecution> executions = ruleEngine.simulateRuleExecutions(from, until).toList();
 
         // Every rule fires twice a week. We simulate for two weeks so we expect 12 executions
-        // TODO: must be 12, but Ephemeris Condition is not yet evaluated in test, because dayset is not configured.
-        assertEquals(8, executions.size());
+        assertEquals(12, executions.size());
 
         Iterator<RuleExecution> it = executions.iterator();
 
@@ -153,16 +157,16 @@ public class RuleSimulationTest extends JavaOSGiTest {
         checkExecution(it.next(), cronRuleWithTimeOfDayCondition, 6, 10, 30);
         checkExecution(it.next(), timeOfDayTriggerWithDayOfWeekCondition, 6, 16, 00);
         checkExecution(it.next(), cronRuleWithTimeOfDayCondition, 8, 10, 30);
-        // checkExecution(it.next(), timeOfDayTriggerWithEphemerisCondition, 9, 10, 00);
-        // checkExecution(it.next(), timeOfDayTriggerWithEphemerisCondition, 10, 10, 00);
+        checkExecution(it.next(), timeOfDayTriggerWithEphemerisCondition, 9, 10, 00);
+        checkExecution(it.next(), timeOfDayTriggerWithEphemerisCondition, 10, 10, 00);
 
         // Second week
         checkExecution(it.next(), timeOfDayTriggerWithDayOfWeekCondition, 11, 16, 00);
         checkExecution(it.next(), cronRuleWithTimeOfDayCondition, 13, 10, 30);
         checkExecution(it.next(), timeOfDayTriggerWithDayOfWeekCondition, 13, 16, 00);
         checkExecution(it.next(), cronRuleWithTimeOfDayCondition, 15, 10, 30);
-        // checkExecution(it.next(), timeOfDayTriggerWithEphemerisCondition, 16, 10, 00);
-        // checkExecution(it.next(), timeOfDayTriggerWithEphemerisCondition, 17, 10, 00);
+        checkExecution(it.next(), timeOfDayTriggerWithEphemerisCondition, 16, 10, 00);
+        checkExecution(it.next(), timeOfDayTriggerWithEphemerisCondition, 17, 10, 00);
         assertFalse(it.hasNext());
     }
 
@@ -212,8 +216,7 @@ public class RuleSimulationTest extends JavaOSGiTest {
     private static Rule createRuleWithTimeOfDayTrigger() {
         int rand = new Random().nextInt();
 
-        Map<String, Object> configs = new HashMap<>();
-        configs.put(TimeOfDayTriggerHandler.CFG_TIME, "16:00");
+        Map<String, Object> configs = Map.of(TimeOfDayTriggerHandler.CFG_TIME, "16:00");
         final Configuration triggerConfig = new Configuration(configs);
         final String triggerUID = "TimeOfDayTrigger_" + rand;
         List<Trigger> triggers = List.of(ModuleBuilder.createTrigger().withId(triggerUID)
@@ -223,8 +226,7 @@ public class RuleSimulationTest extends JavaOSGiTest {
         List<Action> actions = List.of(ModuleBuilder.createAction().withId("ItemPostCommandAction_" + rand)
                 .withTypeUID("core.ItemCommandAction").withConfiguration(actionConfig).build());
 
-        configs = new HashMap<>();
-        configs.put(DayOfWeekConditionHandler.CFG_DAYS, Arrays.asList("MON", "WED"));
+        configs = Map.of(DayOfWeekConditionHandler.CFG_DAYS, List.of("MON", "WED"));
         final Configuration conditionConfig = new Configuration(configs);
         List<Condition> conditions = List.of(ModuleBuilder.createCondition().withId("DayCondition" + rand)
                 .withTypeUID(DayOfWeekConditionHandler.MODULE_TYPE_ID).withConfiguration(conditionConfig).build());
@@ -240,8 +242,7 @@ public class RuleSimulationTest extends JavaOSGiTest {
     private static Rule createRuleWithEphemerisCondition() {
         int rand = new Random().nextInt();
 
-        Map<String, Object> configs = new HashMap<>();
-        configs.put(TimeOfDayTriggerHandler.CFG_TIME, "10:00");
+        Map<String, Object> configs = Map.of(TimeOfDayTriggerHandler.CFG_TIME, "10:00");
         final Configuration triggerConfig = new Configuration(configs);
         final String triggerUID = "TimeOfDayTrigger_" + rand;
         List<Trigger> triggers = List.of(ModuleBuilder.createTrigger().withId(triggerUID)

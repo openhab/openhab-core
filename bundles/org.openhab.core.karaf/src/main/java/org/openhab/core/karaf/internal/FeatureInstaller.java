@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -18,7 +18,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -83,16 +82,15 @@ public class FeatureInstaller implements ConfigurationListener {
     protected static final String CONFIG_URI = "system:addons";
 
     public static final String PREFIX = "openhab-";
-    public static final String PREFIX_PACKAGE = "package-";
-    public static final String MINIMAL_PACKAGE = "minimal";
 
     private static final String CFG_REMOTE = "remote";
     private static final String PAX_URL_PID = "org.ops4j.pax.url.mvn";
     private static final String ADDONS_PID = "org.openhab.addons";
     private static final String PROPERTY_MVN_REPOS = "org.ops4j.pax.url.mvn.repositories";
 
-    public static final List<String> ADDON_TYPES = AddonType.DEFAULT_TYPES.stream().map(AddonType::getId)
-            .collect(Collectors.toList());
+    public static final String FINDER_ADDON_TYPE = "core-config-discovery-addon";
+    public static final List<String> ADDON_TYPES = Stream
+            .concat(AddonType.DEFAULT_TYPES.stream().map(AddonType::getId), Stream.of(FINDER_ADDON_TYPE)).toList();
 
     private final Logger logger = LoggerFactory.getLogger(FeatureInstaller.class);
 
@@ -191,19 +189,10 @@ public class FeatureInstaller implements ConfigurationListener {
                 waitForConfigUpdateEvent();
             }
 
-            if (installPackage(config)) {
-                changed = true;
-                // our package selection has changed, so let's wait for the values to be available in config admin
-                // which we will receive as another call to modified
-                continue;
-            }
-
             if (installAddons(config)) {
                 changed = true;
             }
         }
-
-        processingConfigQueue.set(false);
 
         try {
             if (changed) {
@@ -212,6 +201,8 @@ public class FeatureInstaller implements ConfigurationListener {
         } catch (Exception e) {
             logger.error("Failed to refresh bundles after processing config update", e);
         }
+
+        processingConfigQueue.set(false);
     }
 
     public void addAddon(String type, String id) {
@@ -278,7 +269,7 @@ public class FeatureInstaller implements ConfigurationListener {
     private void changeAddonConfig(String type, String id, BiFunction<Collection<String>, String, Boolean> method)
             throws IOException {
         Configuration cfg = configurationAdmin.getConfiguration(OpenHAB.ADDONS_SERVICE_PID, null);
-        Dictionary<String, Object> props = cfg.getProperties();
+        Dictionary<String, Object> props = Objects.requireNonNullElse(cfg.getProperties(), new Hashtable<>());
         Object typeProp = props.get(type);
         String[] addonIds = typeProp != null ? typeProp.toString().split(",") : new String[0];
         Set<String> normalizedIds = new HashSet<>(); // sets don't allow duplicates
@@ -291,7 +282,7 @@ public class FeatureInstaller implements ConfigurationListener {
     }
 
     private void setOnlineRepoUrl() {
-        Path versionFilePath = Paths.get(OpenHAB.getUserDataFolder(), "etc", "version.properties");
+        Path versionFilePath = Path.of(OpenHAB.getUserDataFolder(), "etc", "version.properties");
         try (BufferedReader reader = Files.newBufferedReader(versionFilePath)) {
             Properties prop = new Properties();
             prop.load(reader);
@@ -479,26 +470,6 @@ public class FeatureInstaller implements ConfigurationListener {
         }
     }
 
-    private boolean installFeature(String name) {
-        try {
-            Feature[] features = featuresService.listInstalledFeatures();
-            if (!anyMatchingFeature(features, withName(name))) {
-                featuresService.installFeature(name,
-                        EnumSet.of(FeaturesService.Option.Upgrade, FeaturesService.Option.NoAutoRefreshBundles));
-                features = featuresService.listInstalledFeatures();
-                if (anyMatchingFeature(features, withName(name))) {
-                    logger.debug("Installed '{}'", name);
-                    postInstalledEvent(name);
-                    return true;
-                }
-            }
-        } catch (Exception e) {
-            logger.error("Failed installing '{}': {}", name, e.getMessage(), debugException(e));
-            configMapCache = null; // make sure we retry the installation
-        }
-        return false;
-    }
-
     private void uninstallFeature(String name) {
         try {
             Feature[] features = featuresService.listInstalledFeatures();
@@ -510,27 +481,6 @@ public class FeatureInstaller implements ConfigurationListener {
         } catch (Exception e) {
             logger.debug("Failed uninstalling '{}': {}", name, e.getMessage());
         }
-    }
-
-    private boolean installPackage(final Map<String, Object> config) {
-        boolean configChanged = false;
-        Object packageName = config.get(OpenHAB.CFG_PACKAGE);
-        if (packageName instanceof String currentPackage) {
-            String fullName = PREFIX + PREFIX_PACKAGE + currentPackage.strip();
-            if (!MINIMAL_PACKAGE.equals(currentPackage)) {
-                configChanged = installFeature(fullName);
-            }
-
-            // uninstall all other packages
-            try {
-                Stream.of(featuresService.listFeatures()).map(Feature::getName)
-                        .filter(feature -> feature.startsWith(PREFIX + PREFIX_PACKAGE) && !feature.equals(fullName))
-                        .forEach(this::uninstallFeature);
-            } catch (Exception e) {
-                logger.error("Failed retrieving features: {}", e.getMessage(), debugException(e));
-            }
-        }
-        return configChanged;
     }
 
     private void postInstalledEvent(String featureName) {

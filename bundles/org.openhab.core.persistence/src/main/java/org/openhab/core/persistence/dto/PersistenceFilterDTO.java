@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,6 +13,7 @@
 package org.openhab.core.persistence.dto;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * The {@link org.openhab.core.persistence.dto.PersistenceFilterDTO} is used for transferring persistence filter
@@ -21,7 +22,24 @@ import java.math.BigDecimal;
  * @author Jan N. Klug - Initial contribution
  */
 public class PersistenceFilterDTO {
-    public String name = "";
-    public BigDecimal value = BigDecimal.ZERO;
-    public String unit = "";
+    public String name;
+
+    // threshold and time
+    public BigDecimal value;
+
+    // threshold
+    public Boolean relative;
+
+    // threshold, include/exclude
+    public String unit;
+
+    // include/exclude
+    public BigDecimal lower;
+    public BigDecimal upper;
+
+    // equals/not equals
+    public List<String> values;
+
+    // equals/not equals, include/exclude
+    public Boolean inverted;
 }

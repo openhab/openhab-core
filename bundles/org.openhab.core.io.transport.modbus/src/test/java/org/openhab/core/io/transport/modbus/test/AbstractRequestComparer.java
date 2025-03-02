@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -29,7 +29,7 @@ abstract class AbstractRequestComparer<T extends ModbusWriteRequestBlueprint> ex
     private ModbusWriteFunctionCode expectedFunctionCode;
     private int expectedMaxTries;
 
-    public AbstractRequestComparer(int expectedUnitId, int expectedAddress,
+    protected AbstractRequestComparer(int expectedUnitId, int expectedAddress,
             ModbusWriteFunctionCode expectedFunctionCode, int expectedMaxTries) {
         this.expectedUnitId = expectedUnitId;
         this.expectedAddress = expectedAddress;

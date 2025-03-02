@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -33,7 +33,6 @@ public class ServiceDescription {
      * @param serviceName String service name, like "openHAB"
      * @param servicePort Int service port, like 8080
      * @param serviceProperties Hashtable service props, like url = "/rest"
-     * @param serviceDescription String service description text, like "openHAB REST interface"
      */
     public ServiceDescription(String serviceType, String serviceName, int servicePort,
             Hashtable<String, String> serviceProperties) {

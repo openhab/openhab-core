@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,7 +17,6 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.automation.Module;
@@ -37,12 +36,11 @@ public class WrappedRule {
 
     private static <T extends WrappedModule, U extends Module> List<T> map(final List<U> in, Function<U, T> factory,
             final Collection<WrappedModule<Module, ModuleHandler>> coll) {
-        // explicit cast to List <? extends T> as JDK compiler complains
-        return Collections.unmodifiableList((List<? extends T>) in.stream().map(module -> {
+        return in.stream().map(module -> {
             final T impl = factory.apply(module);
             coll.add(impl);
             return impl;
-        }).collect(Collectors.toList()));
+        }).toList();
     }
 
     private final Rule rule;

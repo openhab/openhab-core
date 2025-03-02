@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -30,8 +30,6 @@ import org.osgi.framework.Bundle;
  * is itself registered as {@link ConfigDescriptionProvider} service at the <i>OSGi</i> service registry.
  *
  * @author Michael Grammling - Initial contribution
- *
- * @see ConfigDescriptionXmlProviderFactory
  */
 @NonNullByDefault
 public class ConfigDescriptionXmlProvider implements XmlDocumentProvider<List<ConfigDescription>> {

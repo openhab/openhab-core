@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,22 +12,22 @@
  */
 package org.openhab.core.automation.integration.test;
 
-import static java.util.stream.Collectors.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -49,6 +49,7 @@ import org.openhab.core.automation.events.RuleRemovedEvent;
 import org.openhab.core.automation.events.RuleStatusInfoEvent;
 import org.openhab.core.automation.events.RuleUpdatedEvent;
 import org.openhab.core.automation.internal.RuleEngineImpl;
+import org.openhab.core.automation.internal.module.factory.CoreModuleHandlerFactory;
 import org.openhab.core.automation.template.RuleTemplate;
 import org.openhab.core.automation.template.RuleTemplateProvider;
 import org.openhab.core.automation.template.Template;
@@ -67,6 +68,7 @@ import org.openhab.core.config.core.Configuration;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.events.EventSubscriber;
+import org.openhab.core.i18n.TimeZoneProvider;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemProvider;
@@ -76,6 +78,7 @@ import org.openhab.core.items.events.ItemEventFactory;
 import org.openhab.core.library.items.SwitchItem;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.service.ReadyMarker;
+import org.openhab.core.service.StartLevelService;
 import org.openhab.core.storage.StorageService;
 import org.openhab.core.test.java.JavaOSGiTest;
 import org.slf4j.Logger;
@@ -93,6 +96,7 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
     private final Logger logger = LoggerFactory.getLogger(AutomationIntegrationTest.class);
     private @Nullable EventPublisher eventPublisher;
     private @Nullable ItemRegistry itemRegistry;
+    private @NonNullByDefault({}) StartLevelService startLevelService;
     private @Nullable RuleRegistry ruleRegistry;
     private @Nullable RuleManager ruleEngine;
     private @Nullable ManagedRuleProvider managedRuleProvider;
@@ -106,7 +110,17 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
     public void before() {
         logger.info("@Before.begin");
 
-        getService(ItemRegistry.class);
+        eventPublisher = getService(EventPublisher.class);
+        itemRegistry = getService(ItemRegistry.class);
+        startLevelService = mock(StartLevelService.class);
+        when(startLevelService.getStartLevel()).thenReturn(100);
+        registerService(startLevelService, StartLevelService.class.getName());
+
+        CoreModuleHandlerFactory coreModuleHandlerFactory = new CoreModuleHandlerFactory(getBundleContext(),
+                Objects.requireNonNull(eventPublisher), Objects.requireNonNull(itemRegistry),
+                mock(TimeZoneProvider.class), startLevelService);
+        mock(CoreModuleHandlerFactory.class);
+        registerService(coreModuleHandlerFactory);
 
         ItemProvider itemProvider = new ItemProvider() {
             @Override
@@ -148,8 +162,6 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
         registerVolatileStorageService();
 
         StorageService storageService = getService(StorageService.class);
-        eventPublisher = getService(EventPublisher.class);
-        itemRegistry = getService(ItemRegistry.class);
         ruleRegistry = getService(RuleRegistry.class);
         ruleEngine = getService(RuleManager.class);
         managedRuleProvider = getService(ManagedRuleProvider.class);
@@ -193,7 +205,7 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
         EventSubscriber ruleEventHandler = new EventSubscriber() {
             @Override
             public Set<String> getSubscribedEventTypes() {
-                return Stream.of(RuleAddedEvent.TYPE, RuleRemovedEvent.TYPE, RuleUpdatedEvent.TYPE).collect(toSet());
+                return Set.of(RuleAddedEvent.TYPE, RuleRemovedEvent.TYPE, RuleUpdatedEvent.TYPE);
             }
 
             @Override
@@ -653,7 +665,7 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
         TemplateRegistry<?> templateRegistry = getService(TemplateRegistry.class);
         assertThat(templateRegistry, is(notNullValue()));
         waitForAssert(() -> {
-            Template template = null;
+            Template template;
             template = templateRegistry.get("SimpleTestTemplate");
             assertThat(template, is(notNullValue()));
             assertThat(template.getTags(), is(notNullValue()));
@@ -701,7 +713,7 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
         TemplateRegistry<?> templateRegistry = getService(TemplateRegistry.class);
         assertThat(templateRegistry, is(notNullValue()));
         waitForAssert(() -> {
-            Template template = null;
+            Template template;
             template = templateRegistry.get("TestTemplateWithCompositeModules");
             assertThat(template, is(notNullValue()));
             assertThat(template.getTags(), is(notNullValue()));
@@ -756,10 +768,10 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
         TemplateRegistry<RuleTemplate> templateRegistry = getService(TemplateRegistry.class);
         ModuleTypeRegistry moduleTypeRegistry = getService(ModuleTypeRegistry.class);
         String templateUID = "testTemplate1";
-        Set<String> tags = Stream.of("test", "testTag").collect(toSet());
-        List<Trigger> templateTriggers = Collections.emptyList();
-        List<Condition> templateConditions = Collections.emptyList();
-        List<Action> templateActions = Collections.emptyList();
+        Set<String> tags = Set.of("test", "testTag");
+        List<Trigger> templateTriggers = List.of();
+        List<Condition> templateConditions = List.of();
+        List<Action> templateActions = List.of();
         List<ConfigDescriptionParameter> templateConfigDescriptionParameters = List
                 .of(ConfigDescriptionParameterBuilder.create("param", ConfigDescriptionParameter.Type.TEXT).build());
         RuleTemplate template = new RuleTemplate(templateUID, "Test template Label", "Test template description", tags,
@@ -773,8 +785,8 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
 
         RuleTemplateProvider templateProvider = new RuleTemplateProvider() {
             @Override
-            public @Nullable RuleTemplate getTemplate(String UID, @Nullable Locale locale) {
-                if (UID.equals(templateUID)) {
+            public @Nullable RuleTemplate getTemplate(String uid, @Nullable Locale locale) {
+                if (uid.equals(templateUID)) {
                     return template;
                 } else {
                     return null;
@@ -807,7 +819,7 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
 
             @Override
             public Collection<ModuleType> getAll() {
-                return Stream.of(triggerType, actionType).collect(toSet());
+                return Set.of(triggerType, actionType);
             }
 
             @Override
@@ -815,10 +827,10 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
             }
 
             @Override
-            public <T extends ModuleType> @Nullable T getModuleType(String UID, @Nullable Locale locale) {
-                if (UID.equals(triggerTypeUID)) {
+            public <T extends ModuleType> @Nullable T getModuleType(String uid, @Nullable Locale locale) {
+                if (uid.equals(triggerTypeUID)) {
                     return (T) triggerType;
-                } else if (UID.equals(actionTypeUID)) {
+                } else if (uid.equals(actionTypeUID)) {
                     return (T) actionType;
                 } else {
                     return null;
@@ -827,7 +839,7 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
 
             @Override
             public <T extends ModuleType> Collection<T> getModuleTypes(@Nullable Locale locale) {
-                return (Collection<T>) Stream.of(triggerType, actionType).collect(toSet());
+                return (Collection<T>) Set.of(triggerType, actionType);
             }
         };
 
@@ -897,14 +909,13 @@ public class AutomationIntegrationTest extends JavaOSGiTest {
         String triggerId = "ItemStateChangeTrigger" + random;
         List<Trigger> triggers = List.of(ModuleBuilder.createTrigger().withId(triggerId)
                 .withTypeUID("core.GenericEventTrigger").withConfiguration(triggerConfig).build());
-        List<Condition> conditions = Stream.of(
+        List<Condition> conditions = List.of(
                 ModuleBuilder.createCondition().withId("ItemStateCondition" + random)
                         .withTypeUID("core.GenericCompareCondition").withConfiguration(condition1Config)
                         .withInputs(Map.of("input", triggerId + ".event")).build(),
                 ModuleBuilder.createCondition().withId("ItemStateCondition" + (random + 1))
                         .withTypeUID("core.GenericCompareCondition").withConfiguration(condition2Config)
-                        .withInputs(Map.of("input", triggerId + ".event")).build())
-                .collect(toList());
+                        .withInputs(Map.of("input", triggerId + ".event")).build());
 
         List<Action> actions = List.of(ModuleBuilder.createAction().withId("ItemPostCommandAction" + random)
                 .withTypeUID("core.ItemCommandAction").withConfiguration(actionConfig).build());

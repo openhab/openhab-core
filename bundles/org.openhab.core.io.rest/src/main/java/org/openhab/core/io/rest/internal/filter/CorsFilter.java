@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,7 +15,6 @@ package org.openhab.core.io.rest.internal.filter;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerResponseContext;
@@ -77,8 +76,7 @@ public class CorsFilter implements ContainerResponseFilter {
     static final List<String> ACCEPTED_HTTP_METHODS_LIST = List.of(HTTP_GET_METHOD, HTTP_POST_METHOD, HTTP_PUT_METHOD,
             HTTP_DELETE_METHOD, HTTP_HEAD_METHOD, HTTP_OPTIONS_METHOD);
 
-    static final String ACCEPTED_HTTP_METHODS = ACCEPTED_HTTP_METHODS_LIST.stream()
-            .collect(Collectors.joining(HEADERS_SEPARATOR));
+    static final String ACCEPTED_HTTP_METHODS = String.join(HEADERS_SEPARATOR, ACCEPTED_HTTP_METHODS_LIST);
 
     private final transient Logger logger = LoggerFactory.getLogger(CorsFilter.class);
 
@@ -159,7 +157,7 @@ public class CorsFilter implements ContainerResponseFilter {
         if (values == null || values.isEmpty()) {
             return null;
         }
-        return values.get(0);
+        return values.getFirst();
     }
 
     /**

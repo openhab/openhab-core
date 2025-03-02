@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,17 +12,20 @@
  */
 package org.openhab.core.thing.binding.firmware;
 
+import java.util.Locale;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingStatus;
+import org.openhab.core.thing.ThingStatusDetail;
+import org.openhab.core.thing.ThingUID;
 import org.openhab.core.thing.firmware.FirmwareUpdateService;
 
 /**
  * The {@link FirmwareUpdateHandler} can be implemented and registered as an OSGi service in order to update the
  * firmware for the physical device of a {@link Thing}. The {@link FirmwareUpdateService} tracks each firmware
  * update handler and starts the firmware update process by the operation
- * {@link FirmwareUpdateService#updateFirmware(org.openhab.core.thing.ThingUID, FirmwareUID, java.util.Locale)}
- * .
+ * {@link FirmwareUpdateService#updateFirmware(ThingUID, String, Locale)}.
  *
  * @author Thomas Höfer - Initial contribution
  */
@@ -53,7 +56,7 @@ public interface FirmwareUpdateHandler {
     /**
      * Returns true, if this firmware update handler is in a state in which the firmware update can be executed,
      * otherwise false (e.g. the thing is {@link ThingStatus#OFFLINE} or its status detail is already
-     * {@link ThingStatusDetail#FIRMWARE_UPDATING.)
+     * {@link ThingStatusDetail#FIRMWARE_UPDATING}.)
      *
      * @return true, if this firmware update handler is in a state in which the firmware update can be executed,
      *         otherwise false

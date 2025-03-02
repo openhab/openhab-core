@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,15 +12,13 @@
  */
 package org.openhab.core.events.system;
 
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.events.AbstractEventFactory;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventFactory;
-import org.openhab.core.types.Type;
 import org.osgi.service.component.annotations.Component;
 
 /**
@@ -35,11 +33,11 @@ public class SystemEventFactory extends AbstractEventFactory {
     static final String SYSTEM_STARTLEVEL_TOPIC = "openhab/system/startlevel";
 
     public SystemEventFactory() {
-        super(Stream.of(StartlevelEvent.TYPE).collect(Collectors.toSet()));
+        super(Set.of(StartlevelEvent.TYPE));
     }
 
     /**
-     * Creates a trigger event from a {@link Type}.
+     * Creates a trigger event from a {@link org.openhab.core.types.Type}.
      *
      * @param startlevel Startlevel of system
      * @return Created start level event.

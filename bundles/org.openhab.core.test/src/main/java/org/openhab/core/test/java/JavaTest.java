@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -145,7 +145,7 @@ public class JavaTest {
      * @return true on success, false on timeout
      */
     protected boolean waitFor(BooleanSupplier condition, long timeout, long sleepTime) {
-        int waitingTime = 0;
+        long waitingTime = 0;
         boolean rv;
         while (!(rv = condition.getAsBoolean()) && waitingTime < timeout) {
             waitingTime += sleepTime;

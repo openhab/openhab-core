@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,6 +15,7 @@ package org.openhab.core.audio;
 import java.io.IOException;
 import java.util.Locale;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -58,12 +59,46 @@ public interface AudioSink {
      *
      * In case the audioStream is null, this should be interpreted as a request to end any currently playing stream.
      *
+     * When the stream is not needed anymore, if the stream implements the {@link org.openhab.core.common.Disposable}
+     * interface, the sink should hereafter get rid of it by calling the dispose method.
+     *
      * @param audioStream the audio stream to play or null to keep quiet
      * @throws UnsupportedAudioFormatException If audioStream format is not supported
      * @throws UnsupportedAudioStreamException If audioStream is not supported
+     * @deprecated Use {@link AudioSink#processAndComplete(AudioStream)}
      */
+    @Deprecated
     void process(@Nullable AudioStream audioStream)
             throws UnsupportedAudioFormatException, UnsupportedAudioStreamException;
+
+    /**
+     * Processes the passed {@link AudioStream}, and returns a CompletableFuture that should complete when the sound is
+     * fully played. It is the sink responsibility to complete this future.
+     *
+     * If the passed {@link AudioStream} is not supported by this instance, an {@link UnsupportedAudioStreamException}
+     * is thrown.
+     *
+     * If the passed {@link AudioStream} has an {@link AudioFormat} not supported by this instance,
+     * an {@link UnsupportedAudioFormatException} is thrown.
+     *
+     * In case the audioStream is null, this should be interpreted as a request to end any currently playing stream.
+     *
+     * When the stream is not needed anymore, if the stream implements the {@link org.openhab.core.common.Disposable}
+     * interface, the sink should hereafter get rid of it by calling the dispose method.
+     *
+     * @param audioStream the audio stream to play or null to keep quiet
+     * @return A future completed when the sound is fully played. The method can instead complete with
+     *         UnsupportedAudioFormatException if the audioStream format is not supported, or
+     *         UnsupportedAudioStreamException If audioStream is not supported
+     */
+    default CompletableFuture<@Nullable Void> processAndComplete(@Nullable AudioStream audioStream) {
+        try {
+            process(audioStream);
+        } catch (UnsupportedAudioFormatException | UnsupportedAudioStreamException e) {
+            return CompletableFuture.failedFuture(e);
+        }
+        return CompletableFuture.completedFuture(null);
+    }
 
     /**
      * Gets a set containing all supported audio formats

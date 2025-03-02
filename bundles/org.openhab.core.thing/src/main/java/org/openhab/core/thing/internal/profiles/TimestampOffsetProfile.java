@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,14 +12,10 @@
  */
 package org.openhab.core.thing.internal.profiles;
 
-import java.time.DateTimeException;
 import java.time.Duration;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.Instant;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.internal.i18n.I18nProviderImpl;
 import org.openhab.core.library.types.DateTimeType;
 import org.openhab.core.thing.profiles.ProfileCallback;
 import org.openhab.core.thing.profiles.ProfileContext;
@@ -36,22 +32,18 @@ import org.slf4j.LoggerFactory;
 /**
  * Applies the given parameter "offset" to a {@link DateTimeType} state.
  *
- * Options for the "timezone" parameter are provided by the {@link I18nProviderImpl}.
- *
  * @author Christoph Weitkamp - Initial contribution
  */
 @NonNullByDefault
 public class TimestampOffsetProfile implements StateProfile {
 
     static final String OFFSET_PARAM = "offset";
-    static final String TIMEZONE_PARAM = "timezone";
 
     private final Logger logger = LoggerFactory.getLogger(TimestampOffsetProfile.class);
 
     private final ProfileCallback callback;
 
     private final Duration offset;
-    private @Nullable ZoneId timeZone;
 
     public TimestampOffsetProfile(ProfileCallback callback, ProfileContext context) {
         this.callback = callback;
@@ -61,30 +53,13 @@ public class TimestampOffsetProfile implements StateProfile {
         if (offsetParam instanceof Number bd) {
             offset = Duration.ofSeconds(bd.longValue());
         } else if (offsetParam instanceof String s) {
-            offset = Duration.ofSeconds(Long.valueOf(s));
+            offset = Duration.ofSeconds(Long.parseLong(s));
         } else {
             logger.error(
                     "Parameter '{}' is not of type String or Number. Please make sure it is one of both, e.g. 3 or \"-1\".",
                     OFFSET_PARAM);
             offset = Duration.ZERO;
         }
-
-        String timeZoneParam = toStringOrNull(context.getConfiguration().get(TIMEZONE_PARAM));
-        logger.debug("Configuring profile with {} parameter '{}'", TIMEZONE_PARAM, timeZoneParam);
-        if (timeZoneParam == null || timeZoneParam.isBlank()) {
-            timeZone = null;
-        } else {
-            try {
-                timeZone = ZoneId.of(timeZoneParam);
-            } catch (DateTimeException e) {
-                logger.debug("Error setting time zone '{}': {}", timeZoneParam, e.getMessage());
-                timeZone = null;
-            }
-        }
-    }
-
-    private @Nullable String toStringOrNull(@Nullable Object value) {
-        return value == null ? null : value.toString();
     }
 
     @Override
@@ -98,42 +73,37 @@ public class TimestampOffsetProfile implements StateProfile {
 
     @Override
     public void onCommandFromItem(Command command) {
-        callback.handleCommand((Command) applyOffsetAndTimezone(command, false));
+        callback.handleCommand((Command) applyOffset(command, false));
     }
 
     @Override
     public void onCommandFromHandler(Command command) {
-        callback.sendCommand((Command) applyOffsetAndTimezone(command, true));
+        callback.sendCommand((Command) applyOffset(command, true));
     }
 
     @Override
     public void onStateUpdateFromHandler(State state) {
-        callback.sendUpdate((State) applyOffsetAndTimezone(state, true));
+        callback.sendUpdate((State) applyOffset(state, true));
     }
 
-    private Type applyOffsetAndTimezone(Type type, boolean towardsItem) {
+    private Type applyOffset(Type type, boolean towardsItem) {
         if (type instanceof UnDefType) {
             // we cannot adjust UNDEF or NULL values, thus we simply return them without reporting an error or warning
             return type;
         }
 
         Duration finalOffset = towardsItem ? offset : offset.negated();
-        Type result = UnDefType.UNDEF;
+        Type result;
         if (type instanceof DateTimeType timeType) {
-            ZonedDateTime zdt = timeType.getZonedDateTime();
+            Instant instant = timeType.getInstant();
 
             // apply offset
             if (!Duration.ZERO.equals(offset)) {
                 // we do not need apply an offset equals to 0
-                zdt = zdt.plus(finalOffset);
+                instant = instant.plus(finalOffset);
             }
 
-            // apply time zone
-            ZoneId localTimeZone = timeZone;
-            if (localTimeZone != null && !zdt.getZone().equals(localTimeZone) && towardsItem) {
-                zdt = zdt.withZoneSameInstant(localTimeZone);
-            }
-            result = new DateTimeType(zdt);
+            result = new DateTimeType(instant);
         } else {
             logger.warn(
                     "Offset '{}' cannot be applied to the incompatible state '{}' sent from the binding. Returning original state.",

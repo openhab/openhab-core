@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -45,7 +45,7 @@ public abstract class AbstractResourceIconProvider implements IconProvider {
 
     protected final TranslationProvider i18nProvider;
 
-    public AbstractResourceIconProvider(final TranslationProvider i18nProvider) {
+    protected AbstractResourceIconProvider(final TranslationProvider i18nProvider) {
         this.i18nProvider = i18nProvider;
     }
 
@@ -88,9 +88,9 @@ public abstract class AbstractResourceIconProvider implements IconProvider {
         } else {
             // let's treat all percentage-based categories
             try {
-                Double stateAsDouble = Double.valueOf(iconState);
+                double stateAsDouble = Double.parseDouble(iconState);
                 if (stateAsDouble >= 0 && stateAsDouble <= 100) {
-                    for (int i = stateAsDouble.intValue(); i >= 0; i--) {
+                    for (int i = (int) stateAsDouble; i >= 0; i--) {
                         String resourceWithNumberState = category.toLowerCase() + "-" + i + "."
                                 + format.toString().toLowerCase();
                         if (hasResource(iconSetId, resourceWithNumberState)) {

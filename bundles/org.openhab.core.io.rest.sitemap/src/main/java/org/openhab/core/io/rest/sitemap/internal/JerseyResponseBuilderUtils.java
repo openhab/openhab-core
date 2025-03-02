@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -25,7 +25,8 @@ import org.osgi.dto.DTO;
  * Data transfer object until UIs are fixed.
  *
  * <p>
- * {@link https://github.com/openhab/openhab-core/issues/1216}
+ * 
+ * @see <a href="https://github.com/openhab/openhab-core/issues/1216">Sitemap Events: registration response buggy</a>
  *
  * @author Markus Rathgeb - Initial contribution
  */

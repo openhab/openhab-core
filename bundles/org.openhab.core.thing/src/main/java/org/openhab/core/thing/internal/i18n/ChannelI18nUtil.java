@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -31,8 +31,8 @@ import org.osgi.framework.Bundle;
  * A utility service which localises {@link ChannelDefinition}.
  * Falls back to a localised {@link ChannelType} for label and description when not given otherwise.
  *
- * @see {@link ThingTypeI18nLocalizationService}
- * @see {@link ChannelGroupTypeI18nLocalizationService}
+ * @see org.openhab.core.thing.i18n.ThingTypeI18nLocalizationService ThingTypeI18nLocalizationService
+ * @see org.openhab.core.thing.i18n.ChannelGroupTypeI18nLocalizationService ChannelGroupTypeI18nLocalizationService
  *
  * @author Henning Treu - Initial contribution
  */

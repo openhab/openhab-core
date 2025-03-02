@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,7 +14,6 @@ package org.openhab.core.io.rest.internal;
 
 import java.lang.reflect.Field;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -42,7 +41,7 @@ public class DTOMapperImpl implements DTOMapper {
         if (fields == null || fields.trim().isEmpty()) {
             return itemStream;
         }
-        List<String> fieldList = Stream.of(fields.split(",")).map(field -> field.trim()).collect(Collectors.toList());
+        List<String> fieldList = Stream.of(fields.split(",")).map(String::trim).toList();
         return itemStream.map(dto -> {
             for (Field field : dto.getClass().getFields()) {
                 if (!fieldList.contains(field.getName())) {

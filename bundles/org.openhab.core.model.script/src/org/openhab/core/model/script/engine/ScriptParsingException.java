@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,6 +12,7 @@
  */
 package org.openhab.core.model.script.engine;
 
+import java.io.Serial;
 import java.util.List;
 
 import org.eclipse.emf.ecore.resource.Resource.Diagnostic;
@@ -26,6 +27,7 @@ import org.eclipse.xtext.validation.Issue;
  */
 public class ScriptParsingException extends ScriptException {
 
+    @Serial
     private static final long serialVersionUID = -3784970293118871807L;
 
     public ScriptParsingException(String message, String scriptAsString) {

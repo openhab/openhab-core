@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -336,7 +336,7 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
             ignoreStateUpdates = getBooleanConfigValue(configuration, CONFIG_IGNORE_STATE_UPDATES);
             ignoreCommands = getBooleanConfigValue(configuration, CONFIG_IGNORE_COMMANDS);
 
-            if ((stateOrCommand != null) && (stateOrCommand.length() > 0)) {
+            if ((stateOrCommand != null) && (!stateOrCommand.isEmpty())) {
                 if (stateOrCommand.startsWith(COMMAND_PREFIX)) {
                     String commandString = stateOrCommand.substring(COMMAND_PREFIX.length());
                     expireCommand = TypeParser.parseCommand(item.getAcceptedCommandTypes(), commandString);

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -20,12 +20,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.mutable.Mutable;
+import org.apache.commons.lang3.mutable.MutableObject;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
@@ -74,8 +74,7 @@ public class LRUMediaCacheEntryTest {
     }
 
     private LRUMediaCache<MetadataSample> createCache(long size) throws IOException {
-        return new LRUMediaCache<MetadataSample>(storageService, size, "lrucachetest.pid",
-                this.getClass().getClassLoader());
+        return new LRUMediaCache<>(storageService, size, "lrucachetest.pid", this.getClass().getClassLoader());
     }
 
     public static class FakeStream extends InputStream {
@@ -165,7 +164,7 @@ public class LRUMediaCacheEntryTest {
         assertTrue(fakeStream.isClosed()); // all client closed, the main stream should also be closed
 
         assertArrayEquals(new byte[] { 5, 6, 7, 8 }, byteReadFromStream1);
-        assertArrayEquals(new byte[] { 5, 6, 7, 8 }, byteReadFromStream1);
+        assertArrayEquals(new byte[] { 5, 6, 7, 8 }, byteReadFromStream2);
 
         // we call the TTS service only once
         verify(supplier, times(1)).get();
@@ -191,11 +190,22 @@ public class LRUMediaCacheEntryTest {
         InputStream actualAudioStream2 = lruMediaCacheEntry.getInputStream();
 
         // read bytes from the two stream concurrently
-        List<InputStream> parallelAudioStreamList = Arrays.asList(actualAudioStream1, actualAudioStream2);
-        List<byte[]> bytesResultList = parallelAudioStreamList.parallelStream().map(this::readSafe)
-                .collect(Collectors.toList());
+        Mutable<@Nullable IOException> exceptionCatched = new MutableObject<>();
+        List<InputStream> parallelAudioStreamList = List.of(actualAudioStream1, actualAudioStream2);
+        List<byte[]> bytesResultList = parallelAudioStreamList.parallelStream().map(stream -> {
+            try {
+                return stream.readAllBytes();
+            } catch (IOException e) {
+                exceptionCatched.setValue(e);
+                return new byte[0];
+            }
+        }).toList();
 
-        assertArrayEquals(randomData, bytesResultList.get(0));
+        IOException possibleException = exceptionCatched.getValue();
+        if (possibleException != null) {
+            throw possibleException;
+        }
+        assertArrayEquals(randomData, bytesResultList.getFirst());
         assertArrayEquals(randomData, bytesResultList.get(1));
 
         actualAudioStream1.close();
@@ -206,14 +216,6 @@ public class LRUMediaCacheEntryTest {
         // we call the TTS service only once
         verify(supplier).get();
         verifyNoMoreInteractions(ttsServiceMock);
-    }
-
-    private byte[] readSafe(InputStream InputStream) {
-        try {
-            return InputStream.readAllBytes();
-        } catch (IOException e) {
-            return new byte[0];
-        }
     }
 
     private byte[] getRandomData(int length) {

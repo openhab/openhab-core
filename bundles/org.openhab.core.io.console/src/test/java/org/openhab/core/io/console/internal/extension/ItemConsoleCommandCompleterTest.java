@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -63,13 +63,13 @@ public class ItemConsoleCommandCompleterTest {
 
         assertTrue(completer.complete(new String[] { "It" }, 0, 2, candidates));
         assertEquals(2, candidates.size());
-        assertEquals("Item1 ", candidates.get(0));
+        assertEquals("Item1 ", candidates.getFirst());
         assertEquals("Item2 ", candidates.get(1));
         candidates.clear();
 
         assertTrue(completer.complete(new String[] { "JI" }, 0, 2, candidates));
         assertEquals(1, candidates.size());
-        assertEquals("JItem1 ", candidates.get(0));
+        assertEquals("JItem1 ", candidates.getFirst());
         candidates.clear();
 
         // case sensitive
@@ -98,7 +98,7 @@ public class ItemConsoleCommandCompleterTest {
 
         assertTrue(completer.complete(new String[] { "Item1", "" }, 1, 0, candidates));
         assertEquals(3, candidates.size());
-        assertEquals("OFF ", candidates.get(0));
+        assertEquals("OFF ", candidates.getFirst());
         assertEquals("ON ", candidates.get(1));
         assertEquals("REFRESH ", candidates.get(2));
         candidates.clear();
@@ -106,7 +106,7 @@ public class ItemConsoleCommandCompleterTest {
         // case insensitive
         assertTrue(completer.complete(new String[] { "Item1", "o" }, 1, 1, candidates));
         assertEquals(2, candidates.size());
-        assertEquals("OFF ", candidates.get(0));
+        assertEquals("OFF ", candidates.getFirst());
         assertEquals("ON ", candidates.get(1));
     }
 
@@ -123,7 +123,7 @@ public class ItemConsoleCommandCompleterTest {
 
         assertTrue(completer.complete(new String[] { "Item1", "" }, 1, 0, candidates));
         assertEquals(4, candidates.size());
-        assertEquals("NULL ", candidates.get(0));
+        assertEquals("NULL ", candidates.getFirst());
         assertEquals("OFF ", candidates.get(1));
         assertEquals("ON ", candidates.get(2));
         assertEquals("UNDEF ", candidates.get(3));
@@ -132,7 +132,7 @@ public class ItemConsoleCommandCompleterTest {
         // case insensitive
         assertTrue(completer.complete(new String[] { "Item1", "o" }, 1, 1, candidates));
         assertEquals(2, candidates.size());
-        assertEquals("OFF ", candidates.get(0));
+        assertEquals("OFF ", candidates.getFirst());
         assertEquals("ON ", candidates.get(1));
     }
 }

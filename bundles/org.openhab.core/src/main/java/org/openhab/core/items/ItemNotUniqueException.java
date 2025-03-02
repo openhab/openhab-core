@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,6 +12,7 @@
  */
 package org.openhab.core.items;
 
+import java.io.Serial;
 import java.util.Collection;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -25,6 +26,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 @NonNullByDefault
 public class ItemNotUniqueException extends ItemLookupException {
 
+    @Serial
     private static final long serialVersionUID = 5154625234283910124L;
 
     private final Collection<Item> matchingItems;

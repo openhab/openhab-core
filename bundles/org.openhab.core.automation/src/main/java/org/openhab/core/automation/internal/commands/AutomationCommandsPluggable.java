@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,11 +12,9 @@
  */
 package org.openhab.core.automation.internal.commands;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -122,7 +120,7 @@ public class AutomationCommandsPluggable extends AutomationCommands implements C
     @Override
     public void execute(String[] args, Console console) {
         if (args.length == 0) {
-            console.println(getUsages().stream().collect(Collectors.joining("\n")));
+            console.println(String.join("\n", getUsages()));
             return;
         }
 
@@ -134,16 +132,12 @@ public class AutomationCommandsPluggable extends AutomationCommands implements C
         }
 
         String res = super.executeCommand(command, params);
-        if (res == null) {
-            console.println(String.format("Unsupported command %s", command));
-        } else {
-            console.println(res);
-        }
+        console.println(res);
     }
 
     @Override
     public List<String> getUsages() {
-        return Arrays.asList(new String[] {
+        return List.of(
                 buildCommandUsage(LIST_MODULE_TYPES + " [-st] <filter> <language>",
                         "lists all Module Types. If filter is present, lists only matching Module Types."
                                 + " If language is missing, the default language will be used."),
@@ -175,7 +169,7 @@ public class AutomationCommandsPluggable extends AutomationCommands implements C
                         "Enables the Rule, specified by given UID. If enable parameter is missing, "
                                 + "the result of the command will be visualization of enabled/disabled state of the rule, "
                                 + "if its value is \"true\" or \"false\", "
-                                + "the result of the command will be to set enable/disable on the Rule.") });
+                                + "the result of the command will be to set enable/disable on the Rule."));
     }
 
     @Override

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -63,7 +63,7 @@ public interface RuleManager {
      *
      * @param ruleUID UID of the {@link Rule}
      * @return {@link RuleStatusInfo} object containing status of the looking {@link Rule} or null when a rule with
-     *         specified UID does not exists.
+     *         specified UID does not exist.
      */
     @Nullable
     RuleStatusInfo getStatusInfo(String ruleUID);
@@ -73,7 +73,7 @@ public interface RuleManager {
      *
      * @param ruleUID UID of the {@link Rule}
      * @return {@link RuleStatus} object containing status of the looking {@link Rule} or null when a rule with
-     *         specified UID does not exists.
+     *         specified UID does not exist.
      */
     @Nullable
     RuleStatus getStatus(String ruleUID);

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -28,7 +28,6 @@ import org.openhab.core.automation.internal.provider.i18n.RuleTemplateI18nUtil;
 import org.openhab.core.automation.parser.Parser;
 import org.openhab.core.automation.template.RuleTemplate;
 import org.openhab.core.automation.template.RuleTemplateProvider;
-import org.openhab.core.automation.template.Template;
 import org.openhab.core.automation.template.TemplateProvider;
 import org.openhab.core.automation.type.ModuleType;
 import org.openhab.core.common.registry.Provider;
@@ -46,15 +45,15 @@ import org.osgi.service.component.annotations.ReferenceCardinality;
 import org.osgi.service.component.annotations.ReferencePolicy;
 
 /**
- * This class is implementation of {@link TemplateProvider}. It serves for providing {@link RuleTemplates}s by loading
+ * This class is implementation of {@link TemplateProvider}. It serves for providing {@link RuleTemplate}s by loading
  * bundle resources. It extends functionality of {@link AbstractResourceBundleProvider} by specifying:
  * <ul>
- * <li>the path to resources, corresponding to the {@link RuleTemplates}s - root directory
+ * <li>the path to resources, corresponding to the {@link RuleTemplate}s - root directory
  * {@link AbstractResourceBundleProvider#ROOT_DIRECTORY} with sub-directory "templates".
- * <li>type of the {@link Parser}s, corresponding to the {@link RuleTemplates}s - {@link Parser#PARSER_TEMPLATE}
- * <li>specific functionality for loading the {@link RuleTemplates}s
+ * <li>type of the {@link Parser}s, corresponding to the {@link RuleTemplate}s - {@link Parser#PARSER_TEMPLATE}
+ * <li>specific functionality for loading the {@link RuleTemplate}s
  * <li>tracking the managing service of the {@link ModuleType}s.
- * <li>tracking the managing of the {@link RuleTemplates}s.
+ * <li>tracking the managing of the {@link RuleTemplate}s.
  * </ul>
  *
  * @author Ana Dimova - Initial contribution
@@ -72,9 +71,7 @@ public class TemplateResourceBundleProvider extends AbstractResourceBundleProvid
 
     /**
      * This constructor is responsible for initializing the path to resources and tracking the managing service of the
-     * {@link ModuleType}s and the managing service of the {@link RuleTemplates}s.
-     *
-     * @param context is the {@code BundleContext}, used for creating a tracker for {@link Parser} services.
+     * {@link ModuleType}s and the managing service of the {@link RuleTemplate}s.
      */
     @Activate
     public TemplateResourceBundleProvider(final @Reference ConfigI18nLocalizationService configI18nService,
@@ -131,8 +128,8 @@ public class TemplateResourceBundleProvider extends AbstractResourceBundleProvid
      * @see TemplateProvider#getTemplate(java.lang.String, java.util.Locale)
      */
     @Override
-    public @Nullable RuleTemplate getTemplate(String UID, @Nullable Locale locale) {
-        return getPerLocale(providedObjectsHolder.get(UID), locale);
+    public @Nullable RuleTemplate getTemplate(String uid, @Nullable Locale locale) {
+        return getPerLocale(providedObjectsHolder.get(uid), locale);
     }
 
     /**
@@ -151,11 +148,11 @@ public class TemplateResourceBundleProvider extends AbstractResourceBundleProvid
     }
 
     /**
-     * This method is used to localize the {@link Template}s.
+     * This method is used to localize the {@link RuleTemplate}s.
      *
-     * @param element is the {@link Template} that must be localized.
+     * @param defTemplate is the {@link RuleTemplate} that must be localized.
      * @param locale represents a specific geographical, political, or cultural region.
-     * @return the localized {@link Template}.
+     * @return the localized {@link RuleTemplate}.
      */
     private @Nullable RuleTemplate getPerLocale(@Nullable RuleTemplate defTemplate, @Nullable Locale locale) {
         if (locale == null || defTemplate == null) {

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,6 +14,8 @@ package org.openhab.core.addon.xml.test;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.openhab.core.config.discovery.addon.mdns.MDNSAddonFinder.MDNS_SERVICE_TYPE;
 
 import java.net.URI;
 import java.util.List;
@@ -24,8 +26,11 @@ import java.util.stream.Collectors;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.openhab.core.addon.AddonDiscoveryMethod;
 import org.openhab.core.addon.AddonInfo;
 import org.openhab.core.addon.AddonInfoRegistry;
+import org.openhab.core.addon.AddonMatchProperty;
+import org.openhab.core.addon.AddonParameter;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionRegistry;
@@ -66,6 +71,39 @@ public class AddonInfoTest extends JavaOSGiTest {
             assertThat(addonInfo.getDescription(),
                     is("The hue Binding integrates the Philips hue system. It allows to control hue lights."));
             assertThat(addonInfo.getName(), is("hue Binding"));
+
+            List<AddonDiscoveryMethod> discoveryMethods = addonInfo.getDiscoveryMethods();
+            assertNotNull(discoveryMethods);
+            assertEquals(2, discoveryMethods.size());
+
+            AddonDiscoveryMethod discoveryMethod = discoveryMethods.getFirst();
+            assertNotNull(discoveryMethod);
+            assertEquals("mdns", discoveryMethod.getServiceType());
+            List<AddonParameter> parameters = discoveryMethod.getParameters();
+            assertNotNull(parameters);
+            assertEquals(1, parameters.size());
+            AddonParameter parameter = parameters.getFirst();
+            assertNotNull(parameter);
+            assertEquals(MDNS_SERVICE_TYPE, parameter.getName());
+            assertEquals("_hue._tcp.local.", parameter.getValue());
+            List<AddonMatchProperty> properties = discoveryMethod.getMatchProperties();
+            assertNotNull(properties);
+            assertEquals(0, properties.size());
+
+            discoveryMethod = discoveryMethods.get(1);
+            assertNotNull(discoveryMethod);
+            assertEquals("upnp", discoveryMethod.getServiceType());
+            parameters = discoveryMethod.getParameters();
+            assertNotNull(parameters);
+            assertEquals(0, parameters.size());
+            properties = discoveryMethod.getMatchProperties();
+            assertNotNull(properties);
+            assertEquals(1, properties.size());
+            AddonMatchProperty property = properties.getFirst();
+            assertNotNull(property);
+            assertEquals("modelName", property.getName());
+            assertEquals("Philips hue bridge", property.getRegex());
+            assertTrue(property.getPattern().matcher("Philips hue bridge").matches());
         });
     }
 

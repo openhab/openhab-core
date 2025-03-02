@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -85,7 +85,7 @@ class ConfigDescriptionDTOTest {
                 .map(ConfigDescriptionDTOMapper.mapParameters(subject));
         assertThat(result, hasSize(1));
 
-        ConfigDescriptionParameter parameter = result.get(0);
+        ConfigDescriptionParameter parameter = result.getFirst();
         assertThat(parameter.getName(), is(PARAM_NAME));
         assertThat(parameter.getType(), is(Type.INTEGER));
         assertThat(parameter.isAdvanced(), is(true));
@@ -120,7 +120,7 @@ class ConfigDescriptionDTOTest {
                 .mapParameterGroupsDTO(ConfigDescriptionDTOMapper.mapParameterGroups(subject));
         assertThat(result, hasSize(1));
 
-        ConfigDescriptionParameterGroup parameterGroup = result.get(0);
+        ConfigDescriptionParameterGroup parameterGroup = result.getFirst();
         assertThat(parameterGroup.getName(), is(PARAMETER_GROUP_NAME));
         assertThat(parameterGroup.isAdvanced(), is(true));
         assertThat(parameterGroup.getContext(), is(PARAMETER_GROUP_CONTEXT));

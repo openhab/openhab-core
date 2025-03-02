@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -74,7 +74,9 @@ public class ScriptProfileFactory implements ProfileFactory, ProfileTypeProvider
     public void bindScriptTransformationService(ScriptTransformationService service, Map<String, Object> properties) {
         String serviceId = (String) properties.get(TransformationService.SERVICE_PROPERTY_NAME);
         String serviceLabel = (String) properties.get(TransformationService.SERVICE_PROPERTY_LABEL);
-        services.put(serviceId, new ServiceRecord(service, serviceLabel));
+        if (serviceId != null && serviceLabel != null) {
+            services.put(serviceId, new ServiceRecord(service, serviceLabel));
+        }
     }
 
     public void unbindScriptTransformationService(ScriptTransformationService service, Map<String, Object> properties) {

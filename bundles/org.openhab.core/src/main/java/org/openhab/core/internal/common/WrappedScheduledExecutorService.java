@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -18,6 +18,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadFactory;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,6 +33,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Hilbrand Bouwkamp - Initial contribution
  */
+@NonNullByDefault
 public class WrappedScheduledExecutorService extends ScheduledThreadPoolExecutor {
 
     final Logger logger = LoggerFactory.getLogger(WrappedScheduledExecutorService.class);
@@ -40,7 +43,7 @@ public class WrappedScheduledExecutorService extends ScheduledThreadPoolExecutor
     }
 
     @Override
-    protected void afterExecute(Runnable r, Throwable t) {
+    protected void afterExecute(@Nullable Runnable r, @Nullable Throwable t) {
         super.afterExecute(r, t);
         Throwable actualThrowable = t;
         if (actualThrowable == null && r instanceof Future<?> f) {

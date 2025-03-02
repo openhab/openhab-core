@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,7 +12,7 @@
  */
 package org.openhab.core.model.item.internal;
 
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.joining;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
@@ -23,12 +23,10 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.AfterEach;
@@ -159,12 +157,14 @@ public class GenericItemProviderTest extends JavaOSGiTest {
         Collection<Item> items = itemRegistry.getAll();
         assertThat(items, hasSize(0));
 
-        String model = "Group Weather [TAG1]\n" + "Group Weather_Chart (Weather)\n"
-                + "Number Weather_Temperature      \"Outside Temperature [%.1f °C]\" <temperature> (Weather_Chart) [TAG1, TAG2] { channel=\"acmeweather:weather:berlin:temperature\" }\n"
-                + "Number Weather_Temp_Max         \"Todays Maximum [%.1f °C]\"  <temperature> (Weather_Chart)\n"
-                + "Number Weather_Temp_Min         \"Todays Minimum [%.1f °C]\"  <temperature> (Weather_Chart)\n"
-                + "Number Weather_Chart_Period     \"Chart Period\"\n"
-                + "DateTime Weather_LastUpdate     \"Last Update [%1$ta %1$tR]\" <clock> [TAG1, TAG2, TAG3]";
+        String model = """
+                Group Weather [TAG1]
+                Group Weather_Chart (Weather)
+                Number Weather_Temperature      "Outside Temperature [%.1f °C]" <temperature> (Weather_Chart) [TAG1, TAG2] { channel="acmeweather:weather:berlin:temperature" }
+                Number Weather_Temp_Max         "Todays Maximum [%.1f °C]"  <temperature> (Weather_Chart)
+                Number Weather_Temp_Min         "Todays Minimum [%.1f °C]"  <temperature> (Weather_Chart)
+                Number Weather_Chart_Period     "Chart Period"
+                DateTime Weather_LastUpdate     "Last Update [%1$ta %1$tR]" <clock> [TAG1, TAG2, TAG3]""";
 
         modelRepository.addOrRefreshModel(TESTMODEL_NAME, new ByteArrayInputStream(model.getBytes()));
         Collection<Item> actualItems = itemRegistry.getAll();
@@ -262,7 +262,7 @@ public class GenericItemProviderTest extends JavaOSGiTest {
 
             @Override
             public Set<String> getSubscribedEventTypes() {
-                return Stream.of(ItemAddedEvent.TYPE, ItemUpdatedEvent.TYPE, ItemRemovedEvent.TYPE).collect(toSet());
+                return Set.of(ItemAddedEvent.TYPE, ItemUpdatedEvent.TYPE, ItemRemovedEvent.TYPE);
             }
         };
 
@@ -324,7 +324,7 @@ public class GenericItemProviderTest extends JavaOSGiTest {
 
             @Override
             public Set<String> getSubscribedEventTypes() {
-                return Stream.of(ItemAddedEvent.TYPE, ItemUpdatedEvent.TYPE, ItemRemovedEvent.TYPE).collect(toSet());
+                return Set.of(ItemAddedEvent.TYPE, ItemUpdatedEvent.TYPE, ItemRemovedEvent.TYPE);
             }
         };
 
@@ -369,9 +369,10 @@ public class GenericItemProviderTest extends JavaOSGiTest {
     public void assertThatTheItemRegistryGetsTheSameInstanceOnItemUpdatesWithoutChanges() throws Exception {
         assertThat(itemRegistry.getAll(), hasSize(0));
 
-        String model = "String test1 \"Test Item [%s]\" { channel=\"test:test:test:test\" }\n"
-                + "String test2 \"Test Item [%s]\" { channel=\"test:test:test:test\" }\n"
-                + "String test3 \"Test Item [%s]\" { channel=\"test:test:test:test\" }";
+        String model = """
+                String test1 "Test Item [%s]" { channel="test:test:test:test" }
+                String test2 "Test Item [%s]" { channel="test:test:test:test" }
+                String test3 "Test Item [%s]" { channel="test:test:test:test" }""";
         modelRepository.addOrRefreshModel(TESTMODEL_NAME, new ByteArrayInputStream(model.getBytes()));
         waitForAssert(() -> assertThat(itemRegistry.getAll(), hasSize(3)));
 
@@ -421,9 +422,7 @@ public class GenericItemProviderTest extends JavaOSGiTest {
         assertThat(groupItem, is(notNullValue()));
 
         int number = 0;
-        Iterator<Item> it = groupItem.getMembers().iterator();
-        while (it.hasNext()) {
-            Item item = it.next();
+        for (Item item : groupItem.getMembers()) {
             assertThat(item.getName(), is("number" + (++number)));
         }
     }
@@ -460,9 +459,7 @@ public class GenericItemProviderTest extends JavaOSGiTest {
         assertThat(groupItem, is(notNullValue()));
 
         int number = 0;
-        Iterator<Item> it = groupItem.getMembers().iterator();
-        while (it.hasNext()) {
-            Item item = it.next();
+        for (Item item : groupItem.getMembers()) {
             assertThat(item.getName(), is("number" + (++number)));
             if (number == 7) {
                 assertThat(item.getLabel(), is("Number Seven"));
@@ -589,7 +586,7 @@ public class GenericItemProviderTest extends JavaOSGiTest {
 
             @Override
             public Set<String> getSubscribedEventTypes() {
-                return Stream.of(ItemRemovedEvent.TYPE).collect(toSet());
+                return Set.of(ItemRemovedEvent.TYPE);
             }
         };
 
@@ -627,6 +624,41 @@ public class GenericItemProviderTest extends JavaOSGiTest {
     }
 
     @Test
+    public void testMetadataPropertyTypes() {
+        String model = "Switch simple { namespace=\"value\"[string=\"string\", bool=false, int=2, stringList=\"string1\",\"string2\", boolList=false,true] } ";
+
+        modelRepository.addOrRefreshModel(TESTMODEL_NAME, new ByteArrayInputStream(model.getBytes()));
+        Item item = itemRegistry.get("simple");
+        assertThat(item, is(notNullValue()));
+
+        Metadata res = metadataRegistry.get(new MetadataKey("namespace", "simple"));
+        assertThat(res, is(notNullValue()));
+        assertThat(res.getValue(), is("value"));
+        assertThat(res.getConfiguration(), is(notNullValue()));
+        var config = res.getConfiguration();
+        assertThat(config.size(), is(5));
+        assertThat(config.get("string"), is("string"));
+        assertThat(config.get("bool"), is(false));
+        assertThat(config.get("int"), is(new BigDecimal("2")));
+
+        var list = config.get("stringList");
+        assertThat(list, is(notNullValue()));
+        assertThat(list, instanceOf(List.class));
+        List<Object> values = (List<Object>) list;
+        assertThat(values.size(), is(2));
+        assertThat(values.getFirst(), is("string1"));
+        assertThat(values.get(1), is("string2"));
+
+        list = config.get("boolList");
+        assertThat(list, is(notNullValue()));
+        assertThat(list, instanceOf(List.class));
+        values = (List<Object>) list;
+        assertThat(values.size(), is(2));
+        assertThat(values.getFirst(), is(false));
+        assertThat(values.get(1), is(true));
+    }
+
+    @Test
     public void testTagUpdate() {
         modelRepository.addOrRefreshModel(TESTMODEL_NAME, new ByteArrayInputStream("Switch s [foo]".getBytes()));
         Item item1 = itemRegistry.get("s");
@@ -656,5 +688,28 @@ public class GenericItemProviderTest extends JavaOSGiTest {
         StateDescription stateDescription = item.getStateDescription();
         assertThat(stateDescription, is(notNullValue()));
         assertThat(stateDescription.getPattern(), is("XPATH(/*[name()='liveStreams']/*[name()='stream']):%s"));
+
+        model = "Switch s \"Info [%s]\"";
+        modelRepository.addOrRefreshModel(TESTMODEL_NAME, new ByteArrayInputStream(model.getBytes()));
+        item = itemRegistry.get("s");
+        assertThat(item, is(notNullValue()));
+        stateDescription = item.getStateDescription();
+        assertThat(stateDescription, is(notNullValue()));
+        assertThat(stateDescription.getPattern(), is("%s"));
+
+        model = "Switch s \"Info\"";
+        modelRepository.addOrRefreshModel(TESTMODEL_NAME, new ByteArrayInputStream(model.getBytes()));
+        item = itemRegistry.get("s");
+        assertThat(item, is(notNullValue()));
+        stateDescription = item.getStateDescription();
+        assertThat(stateDescription, is(nullValue()));
+
+        model = "Switch s \"Info [%s]\"";
+        modelRepository.addOrRefreshModel(TESTMODEL_NAME, new ByteArrayInputStream(model.getBytes()));
+        item = itemRegistry.get("s");
+        assertThat(item, is(notNullValue()));
+        stateDescription = item.getStateDescription();
+        assertThat(stateDescription, is(notNullValue()));
+        assertThat(stateDescription.getPattern(), is("%s"));
     }
 }

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,6 +14,7 @@ package org.openhab.core.thing;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -25,12 +26,12 @@ import org.eclipse.jdt.annotation.Nullable;
  * @author Jochen Hiller - Bugfix 455434: added default constructor
  * @author Dennis Nobel - Added channel group id
  * @author Kai Kreuzer - Changed creation of channels to not require a thing type
- * @author Christoph Weitkamp - Changed pattern for validating last segment to contain either a single `#` or none
+ * @author Christoph Weitkamp - Changed pattern for validating last segment to contain either a single {@code #} or none
  */
 @NonNullByDefault
 public class ChannelUID extends UID {
 
-    public static final String CHANNEL_SEGMENT_PATTERN = "[\\w-]*|[\\w-]*#[\\w-]*";
+    public static final Pattern CHANNEL_SEGMENT_PATTERN = Pattern.compile("[\\w-]*(?:#[\\w-]*)?");
     public static final String CHANNEL_GROUP_SEPARATOR = "#";
 
     /**
@@ -93,7 +94,7 @@ public class ChannelUID extends UID {
      */
     public String getId() {
         List<String> segments = getAllSegments();
-        return segments.get(segments.size() - 1);
+        return segments.getLast();
     }
 
     /**
@@ -132,7 +133,7 @@ public class ChannelUID extends UID {
         if (index < length - 1) {
             super.validateSegment(segment, index, length);
         } else {
-            if (!segment.matches(CHANNEL_SEGMENT_PATTERN)) {
+            if (!CHANNEL_SEGMENT_PATTERN.matcher(segment).matches()) {
                 throw new IllegalArgumentException(String.format(
                         "UID segment '%s' contains invalid characters. The last segment of the channel UID must match the pattern '%s'.",
                         segment, CHANNEL_SEGMENT_PATTERN));

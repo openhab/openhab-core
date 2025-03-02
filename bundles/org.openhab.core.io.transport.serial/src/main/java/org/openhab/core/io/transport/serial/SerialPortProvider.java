@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -30,8 +30,7 @@ public interface SerialPortProvider {
      * Gets the {@link SerialPortIdentifier} if it is available or null otherwise.
      *
      * @param portName The ports name.
-     * @return The created {@link SerialPort}.
-     * @throws NoSuchPortException If the serial port does not exist.
+     * @return The created {@link SerialPort} or <code>null</code> if the serial port does not exist.
      * @throws UnsupportedCommOperationException
      * @throws PortInUseException
      */

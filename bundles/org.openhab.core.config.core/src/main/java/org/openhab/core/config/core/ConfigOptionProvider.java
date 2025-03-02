@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -30,7 +30,7 @@ import org.eclipse.jdt.annotation.Nullable;
 public interface ConfigOptionProvider {
 
     /**
-     * Provides a collection of {@link ParameterOptions}s.
+     * Provides a collection of {@link ParameterOption}s.
      *
      * @param uri the uri of the config description
      * @param param the parameter name for which the requested options shall be returned

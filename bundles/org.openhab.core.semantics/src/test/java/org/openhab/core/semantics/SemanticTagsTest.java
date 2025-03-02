@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,42 +12,47 @@
  */
 package org.openhab.core.semantics;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.*;
 
-import java.util.Locale;
+import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.openhab.core.i18n.UnitProvider;
 import org.openhab.core.items.GenericItem;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.library.CoreItemFactory;
-import org.openhab.core.semantics.model.equipment.CleaningRobot;
-import org.openhab.core.semantics.model.equipment.Equipments;
-import org.openhab.core.semantics.model.location.Bathroom;
-import org.openhab.core.semantics.model.location.Kitchen;
-import org.openhab.core.semantics.model.location.Locations;
-import org.openhab.core.semantics.model.location.Room;
-import org.openhab.core.semantics.model.point.Measurement;
-import org.openhab.core.semantics.model.point.Points;
-import org.openhab.core.semantics.model.property.Light;
-import org.openhab.core.semantics.model.property.Properties;
-import org.openhab.core.semantics.model.property.SoundVolume;
-import org.openhab.core.semantics.model.property.Temperature;
+import org.openhab.core.semantics.internal.SemanticTagRegistryImpl;
+import org.openhab.core.semantics.model.DefaultSemanticTagProvider;
 
 /**
  * @author Kai Kreuzer - Initial contribution
  */
 @NonNullByDefault
+@ExtendWith(MockitoExtension.class)
 public class SemanticTagsTest {
+
+    private static final String CUSTOM_LOCATION = "CustomLocation";
+    private static final String CUSTOM_EQUIPMENT = "CustomEquipment";
+    private static final String CUSTOM_POINT = "CustomPoint";
+    private static final String CUSTOM_PROPERTY = "CustomProperty";
+
+    private @Mock @NonNullByDefault({}) ManagedSemanticTagProvider managedSemanticTagProviderMock;
 
     private @NonNullByDefault({}) GroupItem locationItem;
     private @NonNullByDefault({}) GroupItem equipmentItem;
     private @NonNullByDefault({}) GenericItem pointItem;
+
+    private @NonNullByDefault({}) Class<? extends Tag> roomTagClass;
+    private @NonNullByDefault({}) Class<? extends Tag> bathroomTagClass;
+    private @NonNullByDefault({}) Class<? extends Tag> cleaningRobotTagClass;
+    private @NonNullByDefault({}) Class<? extends Tag> measurementTagClass;
+    private @NonNullByDefault({}) Class<? extends Tag> temperatureTagClass;
 
     @BeforeEach
     public void setup() {
@@ -62,85 +67,75 @@ public class SemanticTagsTest {
         pointItem = itemFactory.createItem(CoreItemFactory.NUMBER, "TestTemperature");
         pointItem.addTag("Measurement");
         pointItem.addTag("Temperature");
+
+        SemanticTag customLocationTag = new SemanticTagImpl("Location_" + CUSTOM_LOCATION, null, null, List.of());
+        SemanticTag customEquipmentTag = new SemanticTagImpl("Equipment_" + CUSTOM_EQUIPMENT, null, null, List.of());
+        SemanticTag customPointTag = new SemanticTagImpl("Point_" + CUSTOM_POINT, null, null, List.of());
+        SemanticTag customPropertyTag = new SemanticTagImpl("Property_" + CUSTOM_PROPERTY, null, null, List.of());
+        when(managedSemanticTagProviderMock.getAll())
+                .thenReturn(List.of(customLocationTag, customEquipmentTag, customPointTag, customPropertyTag));
+        new SemanticTagRegistryImpl(new DefaultSemanticTagProvider(), managedSemanticTagProviderMock);
+
+        roomTagClass = SemanticTags.getById("Location_Indoor_Room");
+        bathroomTagClass = SemanticTags.getById("Location_Indoor_Room_Bathroom");
+        cleaningRobotTagClass = SemanticTags.getById("Equipment_CleaningRobot");
+        measurementTagClass = SemanticTags.getById("Point_Measurement");
+        temperatureTagClass = SemanticTags.getById("Property_Temperature");
+    }
+
+    @Test
+    public void testTagClasses() {
+        assertNotNull(roomTagClass);
+        assertNotNull(bathroomTagClass);
+        assertNotNull(cleaningRobotTagClass);
+        assertNotNull(measurementTagClass);
+        assertNotNull(temperatureTagClass);
     }
 
     @Test
     public void testByTagId() {
         assertEquals(Location.class, SemanticTags.getById("Location"));
-        assertEquals(Room.class, SemanticTags.getById("Room"));
-        assertEquals(Room.class, SemanticTags.getById("Location_Indoor_Room"));
-        assertEquals(Bathroom.class, SemanticTags.getById("Bathroom"));
-        assertEquals(Bathroom.class, SemanticTags.getById("Room_Bathroom"));
-        assertEquals(Bathroom.class, SemanticTags.getById("Indoor_Room_Bathroom"));
-        assertEquals(Bathroom.class, SemanticTags.getById("Location_Indoor_Room_Bathroom"));
-    }
-
-    @Test
-    public void testByLabel() {
-        assertEquals(Kitchen.class, SemanticTags.getByLabel("Kitchen", Locale.ENGLISH));
-        assertEquals(Kitchen.class, SemanticTags.getByLabel("Küche", Locale.GERMAN));
-        assertNull(SemanticTags.getByLabel("Bad", Locale.GERMAN));
-    }
-
-    @Test
-    public void testByLabelOrSynonym() {
-        assertEquals(Kitchen.class, SemanticTags.getByLabelOrSynonym("Kitchen", Locale.ENGLISH).iterator().next());
-        assertEquals(Kitchen.class, SemanticTags.getByLabelOrSynonym("Küche", Locale.GERMAN).iterator().next());
-        assertEquals(Bathroom.class, SemanticTags.getByLabelOrSynonym("Badezimmer", Locale.GERMAN).iterator().next());
-    }
-
-    @Test
-    public void testGetLabel() {
-        assertEquals("Kitchen", SemanticTags.getLabel(Kitchen.class, Locale.ENGLISH));
-        assertEquals("Sound Volume", SemanticTags.getLabel(SoundVolume.class, Locale.ENGLISH));
-    }
-
-    @Test
-    public void testGetSynonyms() {
-        assertThat(SemanticTags.getSynonyms(Light.class, Locale.ENGLISH), hasItems("Lights", "Lighting"));
-    }
-
-    @Test
-    public void testGetDescription() {
-        Class<? extends Tag> tag = SemanticTags.add("TestDesc", Light.class, null, null, "Test Description");
-        assertEquals("Test Description", SemanticTags.getDescription(tag, Locale.ENGLISH));
+        assertEquals(roomTagClass, SemanticTags.getById("Room"));
+        assertEquals(roomTagClass, SemanticTags.getById("Indoor_Room"));
+        assertEquals(roomTagClass, SemanticTags.getById("Location_Indoor_Room"));
+        assertEquals(bathroomTagClass, SemanticTags.getById("Bathroom"));
+        assertEquals(bathroomTagClass, SemanticTags.getById("Room_Bathroom"));
+        assertEquals(bathroomTagClass, SemanticTags.getById("Indoor_Room_Bathroom"));
+        assertEquals(bathroomTagClass, SemanticTags.getById("Location_Indoor_Room_Bathroom"));
     }
 
     @Test
     public void testGetSemanticType() {
-        assertEquals(Bathroom.class, SemanticTags.getSemanticType(locationItem));
-        assertEquals(CleaningRobot.class, SemanticTags.getSemanticType(equipmentItem));
-        assertEquals(Measurement.class, SemanticTags.getSemanticType(pointItem));
+        assertEquals(bathroomTagClass, SemanticTags.getSemanticType(locationItem));
+        assertEquals(cleaningRobotTagClass, SemanticTags.getSemanticType(equipmentItem));
+        assertEquals(measurementTagClass, SemanticTags.getSemanticType(pointItem));
     }
 
     @Test
     public void testGetLocation() {
-        assertEquals(Bathroom.class, SemanticTags.getLocation(locationItem));
+        assertEquals(bathroomTagClass, SemanticTags.getLocation(locationItem));
     }
 
     @Test
     public void testGetEquipment() {
-        assertEquals(CleaningRobot.class, SemanticTags.getEquipment(equipmentItem));
+        assertEquals(cleaningRobotTagClass, SemanticTags.getEquipment(equipmentItem));
     }
 
     @Test
     public void testGetPoint() {
-        assertEquals(Measurement.class, SemanticTags.getPoint(pointItem));
+        assertEquals(measurementTagClass, SemanticTags.getPoint(pointItem));
     }
 
     @Test
     public void testGetProperty() {
-        assertEquals(Temperature.class, SemanticTags.getProperty(pointItem));
+        assertEquals(temperatureTagClass, SemanticTags.getProperty(pointItem));
     }
 
     @Test
     public void testAddLocation() {
-        String tagName = "CustomLocation";
-        Class customTag = SemanticTags.add(tagName, Location.class);
+        String tagName = CUSTOM_LOCATION;
+        Class<? extends Tag> customTag = SemanticTags.getById(tagName);
         assertNotNull(customTag);
-        assertEquals(customTag, SemanticTags.getById(tagName));
-        assertEquals(customTag, SemanticTags.getByLabel("Custom Location", Locale.getDefault()));
-        assertTrue(Locations.stream().toList().contains(customTag));
 
         GroupItem myItem = new GroupItem("MyLocation");
         myItem.addTag(tagName);
@@ -149,21 +144,10 @@ public class SemanticTagsTest {
     }
 
     @Test
-    public void testAddLocationWithParentString() {
-        String tagName = "CustomLocationParentString";
-        Class customTag = SemanticTags.add(tagName, "Location");
-        assertNotNull(customTag);
-        assertTrue(Locations.stream().toList().contains(customTag));
-    }
-
-    @Test
     public void testAddEquipment() {
-        String tagName = "CustomEquipment";
-        Class customTag = SemanticTags.add(tagName, Equipment.class);
+        String tagName = CUSTOM_EQUIPMENT;
+        Class<? extends Tag> customTag = SemanticTags.getById(tagName);
         assertNotNull(customTag);
-        assertEquals(customTag, SemanticTags.getById(tagName));
-        assertEquals(customTag, SemanticTags.getByLabel("Custom Equipment", Locale.getDefault()));
-        assertTrue(Equipments.stream().toList().contains(customTag));
 
         GroupItem myItem = new GroupItem("MyEquipment");
         myItem.addTag(tagName);
@@ -172,21 +156,10 @@ public class SemanticTagsTest {
     }
 
     @Test
-    public void testAddEquipmentWithParentString() {
-        String tagName = "CustomEquipmentParentString";
-        Class customTag = SemanticTags.add(tagName, "Television");
-        assertNotNull(customTag);
-        assertTrue(Equipments.stream().toList().contains(customTag));
-    }
-
-    @Test
     public void testAddPoint() {
-        String tagName = "CustomPoint";
-        Class customTag = SemanticTags.add(tagName, Point.class);
+        String tagName = CUSTOM_POINT;
+        Class<? extends Tag> customTag = SemanticTags.getById(tagName);
         assertNotNull(customTag);
-        assertEquals(customTag, SemanticTags.getById(tagName));
-        assertEquals(customTag, SemanticTags.getByLabel("Custom Point", Locale.getDefault()));
-        assertTrue(Points.stream().toList().contains(customTag));
 
         GroupItem myItem = new GroupItem("MyItem");
         myItem.addTag(tagName);
@@ -195,56 +168,14 @@ public class SemanticTagsTest {
     }
 
     @Test
-    public void testAddPointParentString() {
-        String tagName = "CustomPointParentString";
-        Class customTag = SemanticTags.add(tagName, "Control");
-        assertNotNull(customTag);
-        assertTrue(Points.stream().toList().contains(customTag));
-    }
-
-    @Test
     public void testAddProperty() {
-        String tagName = "CustomProperty";
-        Class customTag = SemanticTags.add(tagName, Property.class);
+        String tagName = CUSTOM_PROPERTY;
+        Class<? extends Tag> customTag = SemanticTags.getById(tagName);
         assertNotNull(customTag);
-        assertEquals(customTag, SemanticTags.getById(tagName));
-        assertEquals(customTag, SemanticTags.getByLabel("Custom Property", Locale.getDefault()));
-        assertTrue(Properties.stream().toList().contains(customTag));
 
         GroupItem myItem = new GroupItem("MyItem");
         myItem.addTag(tagName);
 
         assertEquals(customTag, SemanticTags.getProperty(myItem));
-    }
-
-    @Test
-    public void testAddPropertyParentString() {
-        String tagName = "CustomPropertyParentString";
-        Class customTag = SemanticTags.add(tagName, "Property");
-        assertNotNull(customTag);
-        assertTrue(Properties.stream().toList().contains(customTag));
-    }
-
-    @Test
-    public void testAddingExistingTagShouldFail() {
-        assertNull(SemanticTags.add("Room", Location.class));
-
-        assertNotNull(SemanticTags.add("CustomLocation1", Location.class));
-        assertNull(SemanticTags.add("CustomLocation1", Location.class));
-    }
-
-    @Test
-    public void testAddWithCustomLabel() {
-        Class tag = SemanticTags.add("CustomProperty2", Property.class, " Custom Label ", null, null);
-        assertEquals(tag, SemanticTags.getByLabel("Custom Label", Locale.getDefault()));
-    }
-
-    @Test
-    public void testAddWithSynonyms() {
-        String synonyms = " Synonym1, Synonym2 , Synonym With Space ";
-        Class tag = SemanticTags.add("CustomProperty3", Property.class, null, synonyms, null);
-        assertEquals(tag, SemanticTags.getByLabelOrSynonym("Synonym1", Locale.getDefault()).get(0));
-        assertEquals(tag, SemanticTags.getByLabelOrSynonym("Synonym2", Locale.getDefault()).get(0));
-        assertEquals(tag, SemanticTags.getByLabelOrSynonym("Synonym With Space", Locale.getDefault()).get(0));
     }
 }

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -49,7 +49,7 @@ public abstract class AbstractDescriptionType implements Identifiable<UID> {
      * @param configDescriptionURI the {@link URI} that references the {@link ConfigDescription} of this type
      * @throws IllegalArgumentException if the UID is null, or the label is null or empty
      */
-    public AbstractDescriptionType(UID uid, String label, @Nullable String description,
+    protected AbstractDescriptionType(UID uid, String label, @Nullable String description,
             @Nullable URI configDescriptionURI) throws IllegalArgumentException {
         if (label.isEmpty()) {
             throw new IllegalArgumentException("The label must neither be null nor empty!");

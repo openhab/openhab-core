@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -115,7 +115,7 @@ public class ManagedThingProviderOSGiTest extends JavaOSGiTest {
         AsyncResultWrapper<Provider<Thing>> thingProviderWrapper = new AsyncResultWrapper<>();
         AsyncResultWrapper<Thing> thingWrapper = new AsyncResultWrapper<>();
 
-        registerThingsChangeListener(new ProviderChangeListener<Thing>() {
+        registerThingsChangeListener(new ProviderChangeListener<>() {
             @Override
             public void added(Provider<Thing> provider, Thing thing) {
                 thingProviderWrapper.set(provider);
@@ -150,7 +150,7 @@ public class ManagedThingProviderOSGiTest extends JavaOSGiTest {
         Thing thing1 = ThingBuilder.create(THING_TYPE_UID, THING1_ID).build();
         managedThingProvider.add(thing1);
 
-        registerThingsChangeListener(new ProviderChangeListener<Thing>() {
+        registerThingsChangeListener(new ProviderChangeListener<>() {
             @Override
             public void added(Provider<Thing> provider, Thing thing) {
             }

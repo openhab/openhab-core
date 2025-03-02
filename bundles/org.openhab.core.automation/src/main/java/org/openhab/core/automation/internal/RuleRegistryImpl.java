@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,10 +17,10 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -63,7 +63,7 @@ import org.slf4j.LoggerFactory;
  * The {@link RuleRegistryImpl} provides basic functionality for managing {@link Rule}s.
  * It can be used to
  * <ul>
- * <li>Add Rules with the {@link #add(Rule)}, {@link #added(Provider, Rule)}, {@link #addProvider(RuleProvider)}
+ * <li>Add Rules with the {@link #add(Rule)}, {@link #added(Provider, Rule)}, {@link #addProvider(Provider)}
  * methods.</li>
  * <li>Get the existing rules with the {@link #get(String)}, {@link #getAll()}, {@link #getByTag(String)},
  * {@link #getByTags(String[])} methods.</li>
@@ -93,7 +93,7 @@ import org.slf4j.LoggerFactory;
  * <li>If one of the Rule's Triggers is triggered, the Rule becomes {@link RuleStatus#RUNNING}.
  * When the execution is complete, it will become {@link RuleStatus#IDLE} again.</li>
  * <li>If a Rule is disabled with {@link #setEnabled(String, boolean)}, it's status is set to
- * {@link RuleStatus#DISABLED}.</li>
+ * {@link RuleStatusDetail#DISABLED}.</li>
  * </ul>
  *
  * @author Yordan Mihaylov - Initial contribution
@@ -130,7 +130,7 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
     /**
      * Activates this component. Called from DS.
      *
-     * @param componentContext this component context.
+     * @param bundleContext this component context.
      */
     @Override
     @Activate
@@ -377,11 +377,8 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
      */
     private void updateRuleTemplateMapping(String templateUID, String ruleUID, boolean resolved) {
         synchronized (this) {
-            Set<String> ruleUIDs = mapTemplateToRules.get(templateUID);
-            if (ruleUIDs == null) {
-                ruleUIDs = new HashSet<>();
-                mapTemplateToRules.put(templateUID, ruleUIDs);
-            }
+            Set<String> ruleUIDs = Objects
+                    .requireNonNull(mapTemplateToRules.computeIfAbsent(templateUID, k -> new HashSet<>()));
             if (resolved) {
                 ruleUIDs.remove(ruleUID);
             } else {
@@ -500,7 +497,7 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
             if (isOptionalConfig(configDescriptions)) {
                 return;
             } else {
-                StringBuffer statusDescription = new StringBuffer();
+                StringBuilder statusDescription = new StringBuilder();
                 String msg = " '%s';";
                 for (ConfigDescriptionParameter configParameter : configDescriptions) {
                     if (configParameter.isRequired()) {
@@ -517,7 +514,7 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
                 processValue(configurations.remove(configParameterName), configParameter);
             }
             if (!configurations.isEmpty()) {
-                StringBuffer statusDescription = new StringBuffer();
+                StringBuilder statusDescription = new StringBuilder();
                 String msg = " '%s';";
                 for (String name : configurations.keySet()) {
                     statusDescription.append(String.format(msg, name));
@@ -537,9 +534,7 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
     private boolean isOptionalConfig(List<ConfigDescriptionParameter> configDescriptions) {
         if (configDescriptions != null && !configDescriptions.isEmpty()) {
             boolean required = false;
-            Iterator<ConfigDescriptionParameter> i = configDescriptions.iterator();
-            while (i.hasNext()) {
-                ConfigDescriptionParameter param = i.next();
+            for (ConfigDescriptionParameter param : configDescriptions) {
                 required = required || param.isRequired();
             }
             return !required;
@@ -594,7 +589,7 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
                 return configValue instanceof Boolean;
             case INTEGER:
                 return configValue instanceof BigDecimal || configValue instanceof Integer
-                        || configValue instanceof Double && ((Double) configValue).intValue() == (Double) configValue;
+                        || configValue instanceof Double doubleValue && doubleValue.intValue() == doubleValue;
             case DECIMAL:
                 return configValue instanceof BigDecimal || configValue instanceof Double;
         }
@@ -610,7 +605,7 @@ public class RuleRegistryImpl extends AbstractRegistry<Rule, String, RuleProvide
      */
     private void resolveModuleConfigReferences(List<? extends Module> modules, Map<String, ?> ruleConfiguration) {
         if (modules != null) {
-            StringBuffer statusDescription = new StringBuffer();
+            StringBuilder statusDescription = new StringBuilder();
             for (Module module : modules) {
                 try {
                     ReferenceResolver.updateConfiguration(module.getConfiguration(), ruleConfiguration, logger);

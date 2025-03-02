@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,13 +12,12 @@
  */
 package org.openhab.core.scheduler;
 
+import java.time.DateTimeException;
 import java.time.DayOfWeek;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.Temporal;
-import java.time.temporal.TemporalAdjuster;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +31,8 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 /**
- * This class creates a {@link TemporalAdjuster} that takes a temporal and adjust it to the next deadline based on a
+ * This class creates a {@link java.time.temporal.TemporalAdjuster} that takes a temporal and adjust it to the next
+ * deadline based on a
  * cron specification.
  *
  * @See http://www.cronmaker.com/
@@ -107,6 +107,14 @@ public class CronAdjuster implements SchedulerTemporalAdjuster {
         parseAndAdd(cronExpression, parts[2], ChronoField.HOUR_OF_DAY);
         parseAndAdd(cronExpression, parts[1], ChronoField.MINUTE_OF_HOUR);
         parseAndAdd(cronExpression, parts[0], ChronoField.SECOND_OF_MINUTE);
+
+        try {
+            // Test the cron expression in action to make sure it won't cause too many restarts
+            adjustInto(java.time.ZonedDateTime.now());
+        } catch (final DateTimeException e) {
+            throw new IllegalArgumentException(
+                    String.format("Invalid cron expression '%s': %s", cronExpression, e.getMessage()));
+        }
     }
 
     /**
@@ -157,7 +165,7 @@ public class CronAdjuster implements SchedulerTemporalAdjuster {
             }
             return map;
         } else {
-            return Collections.emptyMap();
+            return Map.of();
         }
     }
 
@@ -208,7 +216,7 @@ public class CronAdjuster implements SchedulerTemporalAdjuster {
      * @param chronoField the chronoField is part belongs to
      */
     private void parseAndAdd(final String cronExpression, final String part, final ChronoField chronoField) {
-        parse(cronExpression, part, chronoField, Collections.emptyMap());
+        parse(cronExpression, part, chronoField, Map.of());
     }
 
     /**
@@ -278,7 +286,7 @@ public class CronAdjuster implements SchedulerTemporalAdjuster {
                 return CronAdjuster::isLastWorkingDayInMonth;
             } else if (sub.endsWith("W")) {
                 final int n = parseInt(cronExpression, chronoField, sub.substring(0, sub.length() - 1));
-                return (temporal) -> isNearestWorkDay(temporal, n);
+                return temporal -> isNearestWorkDay(temporal, n);
             }
             // fall through, it is a normal expression
         }
@@ -459,7 +467,7 @@ public class CronAdjuster implements SchedulerTemporalAdjuster {
      * because this object is ordered for temporal index no conversion is needed here.
      *
      * @param cronExpression the whole cron expression
-     * @param name the cron value to parse
+     * @param value the cron value to parse
      * @param names map with names of the week
      * @return temporal index of day of the week
      */
@@ -516,6 +524,7 @@ public class CronAdjuster implements SchedulerTemporalAdjuster {
         // we start over with this new time.
 
         int index = 0;
+        int restarts = 0;
         final int length = fields.size();
 
         while (index < length) {
@@ -526,6 +535,9 @@ public class CronAdjuster implements SchedulerTemporalAdjuster {
             if (out == null) {
                 index++;
             } else {
+                if (restarts++ > 1000) {
+                    throw new DateTimeException("Conditions not satisfied.");
+                }
                 ret = out;
                 index = 0;
             }
@@ -541,7 +553,7 @@ public class CronAdjuster implements SchedulerTemporalAdjuster {
     private Checker or(final List<Checker> checkers) {
         return checkers.size() > 1 //
                 ? temporal -> checkers.stream().anyMatch(c -> c.matches(temporal))
-                : checkers.get(0);
+                : checkers.getFirst();
     }
 
     /**

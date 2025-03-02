@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,7 +15,6 @@ package org.openhab.core.internal.i18n;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
@@ -65,9 +64,7 @@ public class TranslationProviderOSGiTest extends JavaOSGiTest {
         translationProvider = getService(TranslationProvider.class);
 
         LocaleProvider localeProvider = getService(LocaleProvider.class);
-        Map<String, Object> localeCfg = new HashMap<>();
-        localeCfg.put("language", "de");
-        localeCfg.put("region", "DE");
+        Map<String, Object> localeCfg = Map.of("language", "de", "region", "DE");
         ((I18nProviderImpl) localeProvider).modified(localeCfg);
     }
 
@@ -116,7 +113,7 @@ public class TranslationProviderOSGiTest extends JavaOSGiTest {
         text = translationProvider.getText(bundle, KEY_BYE, "default", null);
         assertTextEquals(text, "default");
 
-        text = translationProvider.getText(bundle, KEY_BYE, "default", new Locale("de", "AT"));
+        text = translationProvider.getText(bundle, KEY_BYE, "default", Locale.of("de", "AT"));
         assertTextEquals(text, BYE_DE);
 
         text = translationProvider.getText(bundle, KEY_BYE, "default", Locale.ENGLISH);
@@ -151,7 +148,7 @@ public class TranslationProviderOSGiTest extends JavaOSGiTest {
         text = translationProvider.getText(bundle, KEY_BYE, "default", null, null, null);
         assertTextEquals(text, "default");
 
-        text = translationProvider.getText(bundle, KEY_BYE, "default", new Locale("de", "AT"), (Object[]) null);
+        text = translationProvider.getText(bundle, KEY_BYE, "default", Locale.of("de", "AT"), (Object[]) null);
         assertTextEquals(text, BYE_DE);
 
         text = translationProvider.getText(bundle, KEY_BYE, "default", Locale.ENGLISH, (Object[]) null);

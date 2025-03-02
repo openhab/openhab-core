@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -19,13 +19,17 @@ import org.openhab.core.io.rest.core.item.EnrichedItemDTO;
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Laurent Garnier - New field iconcolor
+ * @author Laurent Garnier - New field reloadIcon
+ * @author Danny Baumann - New field labelSource
  */
 public class SitemapWidgetEvent extends SitemapEvent {
 
     public String widgetId;
 
     public String label;
+    public String labelSource;
     public String icon;
+    public boolean reloadIcon;
     public String labelcolor;
     public String valuecolor;
     public String iconcolor;

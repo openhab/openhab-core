@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,8 +12,6 @@
  */
 package org.openhab.core.voice.text;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -23,10 +21,10 @@ import java.util.List;
  */
 public class TokenList {
 
-    private List<String> list = null;
+    private List<String> list;
 
-    private int head = 0;
-    private int tail = 0;
+    private int head;
+    private int tail;
 
     /**
      * Constructs a new instance.
@@ -34,7 +32,7 @@ public class TokenList {
      * @param list of the initial tokens
      */
     public TokenList(List<String> list) {
-        this.list = Collections.unmodifiableList(new ArrayList<>(list));
+        this.list = List.copyOf(list);
         this.head = 0;
         this.tail = list.size() - 1;
     }

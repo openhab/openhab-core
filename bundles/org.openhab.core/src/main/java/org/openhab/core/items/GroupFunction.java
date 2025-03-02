@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -60,7 +60,7 @@ public interface GroupFunction {
      *
      * @author Kai Kreuzer - Initial contribution
      */
-    static class Equality implements GroupFunction {
+    class Equality implements GroupFunction {
 
         @Override
         public State calculate(@Nullable Set<Item> items) {

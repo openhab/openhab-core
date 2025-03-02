@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,7 +17,8 @@ import org.openhab.core.auth.User;
 /**
  * A DTO object for a successful token endpoint response, as per RFC 6749, Section 5.1.
  *
- * {@linkplain https://tools.ietf.org/html/rfc6749#section-5.1}
+ * @see <a href="https://datatracker.ietf.org/doc/html/rfc6749#section-5.1">RFC 6749: Issuing an Access Token -
+ *      Successful Response</a>
  *
  * @author Yannick Schaus - initial contribution
  */

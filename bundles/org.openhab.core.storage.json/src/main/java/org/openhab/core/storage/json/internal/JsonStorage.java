@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,23 +17,27 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.config.core.ConfigurationDeserializer;
 import org.openhab.core.config.core.OrderingMapSerializer;
 import org.openhab.core.config.core.OrderingSetSerializer;
+import org.openhab.core.library.types.DateTimeType;
 import org.openhab.core.storage.Storage;
 import org.openhab.core.storage.json.internal.migration.TypeMigrationException;
 import org.openhab.core.storage.json.internal.migration.TypeMigrator;
@@ -60,6 +64,7 @@ import com.google.gson.JsonSyntaxException;
  *         de-/serialization, keep json structures in map
  * @author Sami Salonen - ordered inner and outer serialization of Maps,
  *         Sets and properties of Configuration
+ * @author Jörg Sautter - use a scheduled thread pool
  */
 @NonNullByDefault
 public class JsonStorage<T> implements Storage<T> {
@@ -75,8 +80,8 @@ public class JsonStorage<T> implements Storage<T> {
     private static final String BACKUP_EXTENSION = "backup";
     private static final String SEPARATOR = "--";
 
-    private final Timer commitTimer;
-    private @Nullable TimerTask commitTimerTask;
+    private final ScheduledExecutorService scheduledExecutorService;
+    private @Nullable ScheduledFuture<?> commitScheduledFuture;
 
     private long deferredSince = 0;
 
@@ -97,22 +102,25 @@ public class JsonStorage<T> implements Storage<T> {
         this.maxBackupFiles = maxBackupFiles;
         this.writeDelay = writeDelay;
         this.maxDeferredPeriod = maxDeferredPeriod;
-        this.typeMigrators = typeMigrators.stream().collect(Collectors.toMap(e -> e.getOldType(), e -> e));
+        this.typeMigrators = typeMigrators.stream().collect(Collectors.toMap(TypeMigrator::getOldType, e -> e));
 
         this.internalMapper = new GsonBuilder() //
+                .setDateFormat(DateTimeType.DATE_PATTERN_JSON_COMPAT) //
                 .registerTypeHierarchyAdapter(Map.class, new OrderingMapSerializer())//
                 .registerTypeHierarchyAdapter(Set.class, new OrderingSetSerializer())//
                 .registerTypeHierarchyAdapter(Map.class, new StorageEntryMapDeserializer()) //
                 .setPrettyPrinting() //
                 .create();
         this.entityMapper = new GsonBuilder() //
+                .setDateFormat(DateTimeType.DATE_PATTERN_JSON_COMPAT) //
                 .registerTypeHierarchyAdapter(Map.class, new OrderingMapSerializer())//
                 .registerTypeHierarchyAdapter(Set.class, new OrderingSetSerializer())//
                 .registerTypeAdapter(Configuration.class, new ConfigurationDeserializer()) //
+                .registerTypeAdapter(Instant.class, new InstantTypeAdapter()) //
                 .setPrettyPrinting() //
                 .create();
 
-        commitTimer = new Timer();
+        scheduledExecutorService = ThreadPoolManager.getScheduledPool("JsonStorage");
 
         Map<String, StorageEntry> inputMap = null;
         if (file.exists()) {
@@ -293,7 +301,7 @@ public class JsonStorage<T> implements Storage<T> {
     private List<Long> calculateFileTimes() {
         File folder = new File(file.getParent() + File.separator + BACKUP_EXTENSION);
         if (!folder.isDirectory()) {
-            return Collections.emptyList();
+            return List.of();
         }
         List<Long> fileTimes = new ArrayList<>();
         File[] files = folder.listFiles();
@@ -333,11 +341,11 @@ public class JsonStorage<T> implements Storage<T> {
      * require a read and write, and is thus slower).
      */
     public synchronized void flush() {
-        // Stop any existing timer
-        TimerTask commitTimerTask = this.commitTimerTask;
-        if (commitTimerTask != null) {
-            commitTimerTask.cancel();
-            this.commitTimerTask = null;
+        // Stop any existing scheduled commit
+        ScheduledFuture<?> commitScheduledFuture = this.commitScheduledFuture;
+        if (commitScheduledFuture != null) {
+            commitScheduledFuture.cancel(false);
+            this.commitScheduledFuture = null;
         }
 
         if (dirty) {
@@ -376,41 +384,29 @@ public class JsonStorage<T> implements Storage<T> {
         }
     }
 
-    private class CommitTimerTask extends TimerTask {
-        @Override
-        public void run() {
-            // Save the database
-            flush();
-        }
-    }
-
     public synchronized void deferredCommit() {
         dirty = true;
 
-        // Stop any existing timer
-        TimerTask commitTimerTask = this.commitTimerTask;
-        if (commitTimerTask != null) {
-            commitTimerTask.cancel();
-            this.commitTimerTask = null;
+        // Stop any existing scheduled commit
+        ScheduledFuture<?> commitScheduledFuture = this.commitScheduledFuture;
+        if (commitScheduledFuture != null) {
+            commitScheduledFuture.cancel(false);
+            this.commitScheduledFuture = null;
         }
 
         // Handle a maximum time for deferring the commit.
         // This stops a pathological loop preventing saving
-        if (deferredSince != 0 && deferredSince < System.nanoTime() - (maxDeferredPeriod * 1000L)) {
+        if (deferredSince != 0 && deferredSince < System.currentTimeMillis() - maxDeferredPeriod) {
             flush();
-            // as we committed the database now, there is no need to start a new commit
-            // timer
+            // as we committed the database now, there is no need to schedule a new commit
             return;
         }
 
         if (deferredSince == 0) {
-            deferredSince = System.nanoTime();
+            deferredSince = System.currentTimeMillis();
         }
 
-        // Create the timer task
-        commitTimerTask = new CommitTimerTask();
-
-        // Start the timer
-        commitTimer.schedule(commitTimerTask, writeDelay);
+        // Schedule the commit
+        this.commitScheduledFuture = scheduledExecutorService.schedule(this::flush, writeDelay, TimeUnit.MILLISECONDS);
     }
 }

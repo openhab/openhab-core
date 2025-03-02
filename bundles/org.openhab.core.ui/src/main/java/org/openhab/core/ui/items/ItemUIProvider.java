@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -38,7 +38,7 @@ public interface ItemUIProvider {
     /**
      * Returns the label text to be used for an item in the UI.
      *
-     * @param item the name of the item to return the label text for
+     * @param itemName the name of the item to return the label text for
      * @return the label text to be used in the UI or null if undefined.
      */
     @Nullable

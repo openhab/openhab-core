@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -75,7 +75,6 @@ public class ReferenceResolver {
      * try to find values for {{firstName}} and {{lastName}} in the given context and replace them. References that are
      * not found in the context - are not replaced.
      *
-     * @param module module that is directly part of Rule or part of CompositeModule
      * @param context containing Rule configuration or Composite configuration values.
      */
     public static void updateConfiguration(Configuration config, Map<String, ?> context, Logger logger) {

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,11 +12,13 @@
  */
 package org.openhab.core.model.thing
 
-import org.openhab.core.model.thing.valueconverter.ThingValueConverters
-import org.eclipse.xtext.conversion.IValueConverterService
-import org.eclipse.xtext.linking.lazy.LazyURIEncoder
 import com.google.inject.Binder
 import com.google.inject.name.Names
+import org.openhab.core.model.thing.formatting.ThingFormatter
+import org.openhab.core.model.thing.valueconverter.ThingValueConverters
+import org.eclipse.xtext.conversion.IValueConverterService
+import org.eclipse.xtext.formatting.IFormatter
+import org.eclipse.xtext.linking.lazy.LazyURIEncoder
 
 /** 
  * Use this class to register components to be used at runtime / without the Equinox extension registry.
@@ -28,6 +30,10 @@ import com.google.inject.name.Names
 
     override Class<? extends org.eclipse.xtext.serializer.sequencer.ISyntacticSequencer> bindISyntacticSequencer() {
         return org.openhab.core.model.thing.serializer.ThingSyntacticSequencerExtension
+    }
+
+    override Class<? extends IFormatter> bindIFormatter() {
+        return ThingFormatter
     }
 
     override void configureUseIndexFragmentsForLazyLinking(Binder binder) {

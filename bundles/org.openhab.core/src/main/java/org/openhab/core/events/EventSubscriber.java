@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -30,7 +30,7 @@ public interface EventSubscriber {
      * The constant {@link #ALL_EVENT_TYPES} must be returned by the {@link #getSubscribedEventTypes()} method, if the
      * event subscriber should subscribe to all event types.
      */
-    static String ALL_EVENT_TYPES = "ALL";
+    String ALL_EVENT_TYPES = "ALL";
 
     /**
      * Gets the event types to which the event subscriber is subscribed to.

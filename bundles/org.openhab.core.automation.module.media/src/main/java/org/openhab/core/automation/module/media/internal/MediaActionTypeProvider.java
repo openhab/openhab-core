@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,11 +13,10 @@
 package org.openhab.core.automation.module.media.internal;
 
 import static java.util.Comparator.comparing;
-import static java.util.stream.Collectors.toList;
 
 import java.io.File;
 import java.math.BigDecimal;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -61,8 +60,8 @@ public class MediaActionTypeProvider implements ModuleTypeProvider {
 
     @SuppressWarnings("unchecked")
     @Override
-    public @Nullable ModuleType getModuleType(String UID, @Nullable Locale locale) {
-        switch (UID) {
+    public @Nullable ModuleType getModuleType(String uid, @Nullable Locale locale) {
+        switch (uid) {
             case PlayActionHandler.TYPE_ID:
                 return getPlayActionType(locale);
             case SayActionHandler.TYPE_ID:
@@ -139,7 +138,7 @@ public class MediaActionTypeProvider implements ModuleTypeProvider {
      */
     private List<ParameterOption> getSoundOptions() {
         List<ParameterOption> options = new ArrayList<>();
-        File soundsDir = Paths.get(OpenHAB.getConfigFolder(), AudioManager.SOUND_DIR).toFile();
+        File soundsDir = Path.of(OpenHAB.getConfigFolder(), AudioManager.SOUND_DIR).toFile();
         if (soundsDir.isDirectory()) {
             for (String fileName : soundsDir.list()) {
                 if (fileName.contains(".") && !fileName.startsWith(".")) {
@@ -149,7 +148,7 @@ public class MediaActionTypeProvider implements ModuleTypeProvider {
                     options.add(new ParameterOption(fileName, capitalizedSoundName));
                 }
             }
-            options.sort(comparing(o -> o.getLabel()));
+            options.sort(comparing(ParameterOption::getLabel));
         }
         return options;
     }
@@ -162,7 +161,7 @@ public class MediaActionTypeProvider implements ModuleTypeProvider {
     private List<ParameterOption> getSinkOptions(@Nullable Locale locale) {
         final Locale safeLocale = locale != null ? locale : Locale.getDefault();
         return audioManager.getAllSinks().stream().sorted(comparing(s -> s.getLabel(safeLocale)))
-                .map(s -> new ParameterOption(s.getId(), s.getLabel(safeLocale))).collect(toList());
+                .map(s -> new ParameterOption(s.getId(), s.getLabel(safeLocale))).toList();
     }
 
     @Override

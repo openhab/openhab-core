@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -82,17 +82,17 @@ public class AbstractResourceIconProviderTest {
                 String state = substringAfterLast(resourceName, "-");
                 state = substringBeforeLast(state, ".");
                 return "30".equals(state) || "y z".equals(state);
-            };
+            }
 
             @Override
             public Set<IconSet> getIconSets(@Nullable Locale locale) {
                 return Set.of();
-            };
+            }
 
             @Override
             public Integer getPriority() {
                 return 0;
-            };
+            }
         };
     }
 

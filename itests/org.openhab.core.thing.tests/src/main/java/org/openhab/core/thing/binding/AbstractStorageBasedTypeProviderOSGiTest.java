@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,12 +13,9 @@
 package org.openhab.core.thing.binding;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.*;
+
+import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
@@ -58,8 +55,7 @@ public class AbstractStorageBasedTypeProviderOSGiTest extends JavaOSGiTest {
     public void setup() {
         registerVolatileStorageService();
 
-        StorageService storageService = getService(StorageService.class);
-        assertThat(storageService, is(notNullValue()));
+        StorageService storageService = Objects.requireNonNull(getService(StorageService.class));
 
         typeProvider = new AbstractStorageBasedTypeProvider(storageService) {
         };

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,12 +12,17 @@
  */
 package org.openhab.core.io.rest.core.internal.persistence;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.Consumes;
@@ -54,10 +59,13 @@ import org.openhab.core.persistence.FilterCriteria;
 import org.openhab.core.persistence.FilterCriteria.Ordering;
 import org.openhab.core.persistence.HistoricItem;
 import org.openhab.core.persistence.ModifiablePersistenceService;
+import org.openhab.core.persistence.PersistenceItemConfiguration;
 import org.openhab.core.persistence.PersistenceItemInfo;
+import org.openhab.core.persistence.PersistenceManager;
 import org.openhab.core.persistence.PersistenceService;
 import org.openhab.core.persistence.PersistenceServiceRegistry;
 import org.openhab.core.persistence.QueryablePersistenceService;
+import org.openhab.core.persistence.config.PersistenceAllConfig;
 import org.openhab.core.persistence.dto.ItemHistoryDTO;
 import org.openhab.core.persistence.dto.PersistenceServiceConfigurationDTO;
 import org.openhab.core.persistence.dto.PersistenceServiceDTO;
@@ -65,8 +73,10 @@ import org.openhab.core.persistence.registry.ManagedPersistenceServiceConfigurat
 import org.openhab.core.persistence.registry.PersistenceServiceConfiguration;
 import org.openhab.core.persistence.registry.PersistenceServiceConfigurationDTOMapper;
 import org.openhab.core.persistence.registry.PersistenceServiceConfigurationRegistry;
+import org.openhab.core.persistence.strategy.PersistenceStrategy;
 import org.openhab.core.types.State;
 import org.openhab.core.types.TypeParser;
+import org.openhab.core.types.UnDefType;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -98,6 +108,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * @author Lyubomir Papazov - Change java.util.Date references to be of type java.time.ZonedDateTime
  * @author Markus Rathgeb - Migrated to JAX-RS Whiteboard Specification
  * @author Wouter Born - Migrated to OpenAPI annotations
+ * @author Mark Herwege - Implement aliases
  */
 @Component
 @JaxrsResource
@@ -121,6 +132,7 @@ public class PersistenceResource implements RESTResource {
     private final ItemRegistry itemRegistry;
     private final LocaleService localeService;
     private final PersistenceServiceRegistry persistenceServiceRegistry;
+    private final PersistenceManager persistenceManager;
     private final PersistenceServiceConfigurationRegistry persistenceServiceConfigurationRegistry;
     private final ManagedPersistenceServiceConfigurationProvider managedPersistenceServiceConfigurationProvider;
     private final TimeZoneProvider timeZoneProvider;
@@ -130,12 +142,14 @@ public class PersistenceResource implements RESTResource {
             final @Reference ItemRegistry itemRegistry, //
             final @Reference LocaleService localeService,
             final @Reference PersistenceServiceRegistry persistenceServiceRegistry,
+            final @Reference PersistenceManager persistenceManager,
             final @Reference PersistenceServiceConfigurationRegistry persistenceServiceConfigurationRegistry,
             final @Reference ManagedPersistenceServiceConfigurationProvider managedPersistenceServiceConfigurationProvider,
             final @Reference TimeZoneProvider timeZoneProvider) {
         this.itemRegistry = itemRegistry;
         this.localeService = localeService;
         this.persistenceServiceRegistry = persistenceServiceRegistry;
+        this.persistenceManager = persistenceManager;
         this.persistenceServiceConfigurationRegistry = persistenceServiceConfigurationRegistry;
         this.managedPersistenceServiceConfigurationProvider = managedPersistenceServiceConfigurationProvider;
         this.timeZoneProvider = timeZoneProvider;
@@ -166,11 +180,25 @@ public class PersistenceResource implements RESTResource {
     public Response httpGetPersistenceServiceConfiguration(@Context HttpHeaders headers,
             @Parameter(description = "Id of the persistence service.") @PathParam("serviceId") String serviceId) {
         PersistenceServiceConfiguration configuration = persistenceServiceConfigurationRegistry.get(serviceId);
+        boolean editable = managedPersistenceServiceConfigurationProvider.get(serviceId) != null;
+
+        if (configuration == null) {
+            PersistenceService service = persistenceServiceRegistry.get(serviceId);
+            if (service != null) {
+                List<PersistenceStrategy> strategies = service.getDefaultStrategies();
+                List<PersistenceItemConfiguration> configs = List
+                        .of(new PersistenceItemConfiguration(List.of(new PersistenceAllConfig()), strategies, null));
+                Map<String, String> aliases = Map.of();
+                configuration = new PersistenceServiceConfiguration(serviceId, configs, aliases, strategies, strategies,
+                        List.of());
+                editable = true;
+            }
+        }
 
         if (configuration != null) {
             PersistenceServiceConfigurationDTO configurationDTO = PersistenceServiceConfigurationDTOMapper
                     .map(configuration);
-            configurationDTO.editable = managedPersistenceServiceConfigurationProvider.get(serviceId) != null;
+            configurationDTO.editable = editable;
             return JSONResponse.createResponse(Status.OK, configurationDTO, null);
         } else {
             return Response.status(Status.NOT_FOUND).build();
@@ -274,8 +302,9 @@ public class PersistenceResource implements RESTResource {
                     + DateTimeType.DATE_PATTERN_WITH_TZ_AND_MS + "]") @QueryParam("endtime") @Nullable String endTime,
             @Parameter(description = "Page number of data to return. This parameter will enable paging.") @QueryParam("page") int pageNumber,
             @Parameter(description = "The length of each page.") @QueryParam("pagelength") int pageLength,
-            @Parameter(description = "Gets one value before and after the requested period.") @QueryParam("boundary") boolean boundary) {
-        return getItemHistoryDTO(serviceId, itemName, startTime, endTime, pageNumber, pageLength, boundary);
+            @Parameter(description = "Gets one value before and after the requested period.") @QueryParam("boundary") boolean boundary,
+            @Parameter(description = "Adds the current Item state into the requested period (the item state will be before or at the endtime)") @QueryParam("itemState") boolean itemState) {
+        return getItemHistoryDTO(serviceId, itemName, startTime, endTime, pageNumber, pageLength, boundary, itemState);
     }
 
     @DELETE
@@ -317,16 +346,17 @@ public class PersistenceResource implements RESTResource {
 
     private ZonedDateTime convertTime(String sTime) {
         DateTimeType dateTime = new DateTimeType(sTime);
-        return dateTime.getZonedDateTime();
+        return dateTime.getZonedDateTime(timeZoneProvider.getTimeZone());
     }
 
     private Response getItemHistoryDTO(@Nullable String serviceId, String itemName, @Nullable String timeBegin,
-            @Nullable String timeEnd, int pageNumber, int pageLength, boolean boundary) {
+            @Nullable String timeEnd, int pageNumber, int pageLength, boolean boundary, boolean itemState) {
         // Benchmarking timer...
         long timerStart = System.currentTimeMillis();
 
         @Nullable
-        ItemHistoryDTO dto = createDTO(serviceId, itemName, timeBegin, timeEnd, pageNumber, pageLength, boundary);
+        ItemHistoryDTO dto = createDTO(serviceId, itemName, timeBegin, timeEnd, pageNumber, pageLength, boundary,
+                itemState);
 
         if (dto == null) {
             return JSONResponse.createErrorResponse(Status.BAD_REQUEST,
@@ -339,10 +369,14 @@ public class PersistenceResource implements RESTResource {
     }
 
     protected @Nullable ItemHistoryDTO createDTO(@Nullable String serviceId, String itemName,
-            @Nullable String timeBegin, @Nullable String timeEnd, int pageNumber, int pageLength, boolean boundary) {
+            @Nullable String timeBegin, @Nullable String timeEnd, int pageNumber, int pageLength, boolean boundary,
+            boolean itemState) {
         // If serviceId is null, then use the default service
         PersistenceService service;
         String effectiveServiceId = serviceId != null ? serviceId : persistenceServiceRegistry.getDefaultId();
+        if (effectiveServiceId == null) {
+            return null;
+        }
         service = persistenceServiceRegistry.get(effectiveServiceId);
 
         if (service == null) {
@@ -386,12 +420,13 @@ public class PersistenceResource implements RESTResource {
         }
 
         Iterable<HistoricItem> result;
-        State state;
 
         long quantity = 0L;
 
         ItemHistoryDTO dto = new ItemHistoryDTO();
         dto.name = itemName;
+        PersistenceServiceConfiguration config = persistenceServiceConfigurationRegistry.get(effectiveServiceId);
+        String alias = config != null ? config.getAliases().get(itemName) : null;
 
         // If "boundary" is true then we want to get one value before and after the requested period
         // This is necessary for values that don't change often otherwise data will start after the start of the graph
@@ -403,7 +438,7 @@ public class PersistenceResource implements RESTResource {
             filterBeforeStart.setEndDate(dateTimeBegin);
             filterBeforeStart.setPageSize(1);
             filterBeforeStart.setOrdering(Ordering.DESCENDING);
-            result = qService.query(filterBeforeStart);
+            result = qService.query(filterBeforeStart, alias);
             if (result.iterator().hasNext()) {
                 dto.addData(dateTimeBegin.toInstant().toEpochMilli(), result.iterator().next().getState());
                 quantity++;
@@ -422,29 +457,31 @@ public class PersistenceResource implements RESTResource {
         filter.setBeginDate(dateTimeBegin);
         filter.setEndDate(dateTimeEnd);
         filter.setOrdering(Ordering.ASCENDING);
-        result = qService.query(filter);
+        result = qService.query(filter, alias);
         Iterator<HistoricItem> it = result.iterator();
 
         // Iterate through the data
-        HistoricItem lastItem = null;
+        State lastState = null;
         while (it.hasNext()) {
             HistoricItem historicItem = it.next();
-            state = historicItem.getState();
+            State state = historicItem.getState();
+            long timestamp = historicItem.getInstant().toEpochMilli();
 
             // For 'binary' states, we need to replicate the data
             // to avoid diagonal lines
             if (state instanceof OnOffType || state instanceof OpenClosedType) {
-                if (lastItem != null) {
-                    dto.addData(historicItem.getTimestamp().toInstant().toEpochMilli(), lastItem.getState());
+                if (lastState != null && !lastState.equals(state)) {
+                    dto.addData(timestamp, lastState);
                     quantity++;
                 }
             }
 
-            dto.addData(historicItem.getTimestamp().toInstant().toEpochMilli(), state);
+            dto.addData(timestamp, state);
             quantity++;
-            lastItem = historicItem;
+            lastState = state;
         }
 
+        boolean addedBoundaryEnd = false;
         if (boundary) {
             // Get the value after the end time.
             FilterCriteria filterAfterEnd = new FilterCriteria();
@@ -452,10 +489,35 @@ public class PersistenceResource implements RESTResource {
             filterAfterEnd.setBeginDate(dateTimeEnd);
             filterAfterEnd.setPageSize(1);
             filterAfterEnd.setOrdering(Ordering.ASCENDING);
-            result = qService.query(filterAfterEnd);
+            result = qService.query(filterAfterEnd, alias);
             if (result.iterator().hasNext()) {
                 dto.addData(dateTimeEnd.toInstant().toEpochMilli(), result.iterator().next().getState());
                 quantity++;
+                addedBoundaryEnd = true;
+            }
+        }
+
+        // only add the item state if it was requested and the boundary end was not added
+        // if the boundary end was added, there is no need to add the item state moved to the end time
+        if (itemState && !addedBoundaryEnd) {
+            try {
+                long time = Instant.now().toEpochMilli();
+                // if the current time is after the requested end time, move the item state to the end time
+                if (time > dateTimeEnd.toInstant().toEpochMilli()) {
+                    time = dateTimeEnd.toInstant().toEpochMilli();
+                }
+                State state = itemRegistry.getItem(itemName).getState();
+                if (state instanceof UnDefType) {
+                    logger.debug("State of item '{}' is undefined, not adding it to the response.", itemName);
+                } else {
+                    logger.debug("Adding state of item '{}' to the response: {} - {}", itemName, time, state);
+                    dto.addData(time, state);
+                    quantity++;
+                    dto.sortData();
+                }
+            } catch (ItemNotFoundException e) {
+                logger.debug("Item '{}' not found, not adding the state to the response.", itemName);
+                return null;
             }
         }
 
@@ -493,32 +555,66 @@ public class PersistenceResource implements RESTResource {
     private Response getServiceItemList(@Nullable String serviceId) {
         // If serviceId is null, then use the default service
         PersistenceService service;
-        if (serviceId == null) {
-            service = persistenceServiceRegistry.getDefault();
-        } else {
-            service = persistenceServiceRegistry.get(serviceId);
+        String effectiveServiceId = serviceId != null ? serviceId : persistenceServiceRegistry.getDefaultId();
+        if (effectiveServiceId == null) {
+            logger.debug("Persistence service not found '{}'.", effectiveServiceId);
+            return JSONResponse.createErrorResponse(Status.BAD_REQUEST,
+                    "Persistence service not found: " + effectiveServiceId);
         }
+        service = persistenceServiceRegistry.get(effectiveServiceId);
 
         if (service == null) {
-            logger.debug("Persistence service not found '{}'.", serviceId);
-            return JSONResponse.createErrorResponse(Status.BAD_REQUEST, "Persistence service not found: " + serviceId);
+            logger.debug("Persistence service not found '{}'.", effectiveServiceId);
+            return JSONResponse.createErrorResponse(Status.BAD_REQUEST,
+                    "Persistence service not found: " + effectiveServiceId);
         }
 
         if (!(service instanceof QueryablePersistenceService)) {
-            logger.debug("Persistence service not queryable '{}'.", serviceId);
+            logger.debug("Persistence service not queryable '{}'.", effectiveServiceId);
             return JSONResponse.createErrorResponse(Status.BAD_REQUEST,
-                    "Persistence service not queryable: " + serviceId);
+                    "Persistence service not queryable: " + effectiveServiceId);
         }
 
         QueryablePersistenceService qService = (QueryablePersistenceService) service;
 
-        return JSONResponse.createResponse(Status.OK, qService.getItemInfo(), "");
+        PersistenceServiceConfiguration config = persistenceServiceConfigurationRegistry.get(effectiveServiceId);
+        Map<String, String> aliases = config != null ? config.getAliases() : Map.of();
+        Set<PersistenceItemInfo> itemInfo = qService.getItemInfo().stream().map(info -> {
+            String alias = aliases.get(info.getName());
+            if (alias != null) {
+                return new PersistenceItemInfo() {
+
+                    @Override
+                    public String getName() {
+                        return alias;
+                    }
+
+                    @Override
+                    public @Nullable Integer getCount() {
+                        return info.getCount();
+                    }
+
+                    @Override
+                    public @Nullable Date getEarliest() {
+                        return info.getEarliest();
+                    }
+
+                    @Override
+                    public @Nullable Date getLatest() {
+                        return info.getLatest();
+                    }
+                };
+            } else {
+                return info;
+            }
+        }).collect(Collectors.toSet());
+        return JSONResponse.createResponse(Status.OK, itemInfo, "");
     }
 
     private Response deletePersistenceItemData(@Nullable String serviceId, String itemName, @Nullable String timeBegin,
             @Nullable String timeEnd) {
         // For deleting, we must specify a service id - don't use the default service
-        if (serviceId == null || serviceId.length() == 0) {
+        if (serviceId == null || serviceId.isEmpty()) {
             logger.debug("Persistence service must be specified for delete operations.");
             return JSONResponse.createErrorResponse(Status.BAD_REQUEST,
                     "Persistence service must be specified for delete operations.");
@@ -550,13 +646,15 @@ public class PersistenceResource implements RESTResource {
         // This is necessary for values that don't change often otherwise data will start after the start of the graph
         // (or not at all if there's no change during the graph period)
         FilterCriteria filter = new FilterCriteria();
+        PersistenceServiceConfiguration config = persistenceServiceConfigurationRegistry.get(serviceId);
+        String alias = config != null ? config.getAliases().get(itemName) : null;
         filter.setItemName(itemName);
         filter.setBeginDate(dateTimeBegin);
         filter.setEndDate(dateTimeEnd);
 
         ModifiablePersistenceService mService = (ModifiablePersistenceService) service;
         try {
-            mService.remove(filter);
+            mService.remove(filter, alias);
         } catch (IllegalArgumentException e) {
             return JSONResponse.createErrorResponse(Status.BAD_REQUEST, "Invalid filter parameters.");
         }
@@ -569,7 +667,7 @@ public class PersistenceResource implements RESTResource {
         String effectiveServiceId = serviceId != null ? serviceId : persistenceServiceRegistry.getDefaultId();
 
         PersistenceService service = persistenceServiceRegistry.get(effectiveServiceId);
-        if (service == null) {
+        if (effectiveServiceId == null || service == null) {
             logger.warn("Persistence service not found '{}'.", effectiveServiceId);
             return JSONResponse.createErrorResponse(Status.BAD_REQUEST,
                     "Persistence service not found: " + effectiveServiceId);
@@ -598,7 +696,7 @@ public class PersistenceResource implements RESTResource {
         }
 
         ZonedDateTime dateTime = null;
-        if (time != null && time.length() != 0) {
+        if (time != null && !time.isEmpty()) {
             dateTime = convertTime(time);
         }
         if (dateTime == null || dateTime.toEpochSecond() == 0) {
@@ -607,7 +705,12 @@ public class PersistenceResource implements RESTResource {
         }
 
         ModifiablePersistenceService mService = (ModifiablePersistenceService) service;
-        mService.store(item, dateTime, state);
+        PersistenceServiceConfiguration config = persistenceServiceConfigurationRegistry.get(effectiveServiceId);
+        String alias = config != null ? config.getAliases().get(itemName) : null;
+        mService.store(item, dateTime, state, alias);
+
+        persistenceManager.handleExternalPersistenceDataChange(mService, item);
+
         return Response.status(Status.OK).build();
     }
 }

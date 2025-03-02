@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -39,7 +39,7 @@ public abstract class AbstractProvider<@NonNull E> implements Provider<E> {
         UPDATED
     }
 
-    protected final Logger logger = LoggerFactory.getLogger(AbstractProvider.class);
+    private Logger logger = LoggerFactory.getLogger(AbstractProvider.class);
     protected List<ProviderChangeListener<E>> listeners = new CopyOnWriteArrayList<>();
 
     @Override

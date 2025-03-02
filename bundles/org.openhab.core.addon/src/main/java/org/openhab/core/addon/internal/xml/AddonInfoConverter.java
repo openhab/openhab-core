@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -18,6 +18,7 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.addon.AddonDiscoveryMethod;
 import org.openhab.core.addon.AddonInfo;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionBuilder;
@@ -25,18 +26,19 @@ import org.openhab.core.config.core.xml.util.ConverterAttributeMapValidator;
 import org.openhab.core.config.core.xml.util.GenericUnmarshaller;
 import org.openhab.core.config.core.xml.util.NodeIterator;
 
-import com.thoughtworks.xstream.converters.Converter;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 
 /**
- * The {@link AddonInfoConverter} is a concrete implementation of the {@code XStream} {@link Converter} interface used
+ * The {@link AddonInfoConverter} is a concrete implementation of the {@code XStream}
+ * {@link com.thoughtworks.xstream.converters.Converter} interface used
  * to convert add-on information within an XML document into a {@link AddonInfoXmlResult} object.
  * This converter converts {@code addon} XML tags.
  *
  * @author Michael Grammling - Initial contribution
  * @author Andre Fuechsel - Made author tag optional
  * @author Jan N. Klug - Refactored to cover all add-ons
+ * @author Andrew Fiddian-Green - Added discovery methods
  */
 @NonNullByDefault
 public class AddonInfoConverter extends GenericUnmarshaller<AddonInfoXmlResult> {
@@ -106,6 +108,11 @@ public class AddonInfoConverter extends GenericUnmarshaller<AddonInfoXmlResult> 
         }
 
         addonInfo.withConfigDescriptionURI(configDescriptionURI);
+
+        Object object = nodeIterator.nextList("discovery-methods", false);
+        addonInfo.withDiscoveryMethods(!(object instanceof List<?> list) ? null
+                : list.stream().filter(AddonDiscoveryMethod.class::isInstance).map(e -> ((AddonDiscoveryMethod) e))
+                        .toList());
 
         nodeIterator.assertEndOfType();
 

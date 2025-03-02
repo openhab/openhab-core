@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -22,8 +22,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.hamcrest.CoreMatchers;
@@ -75,8 +73,7 @@ public class EnrichedThingDTOMapperTest {
 
     @Test
     public void shouldMapEnrichedThingDTO() {
-        when(linkedItemsMapMock.get("1"))
-                .thenReturn(Stream.of("linkedItem1", "linkedItem2").collect(Collectors.toSet()));
+        when(linkedItemsMapMock.get("1")).thenReturn(Set.of("linkedItem1", "linkedItem2"));
 
         EnrichedThingDTO enrichedThingDTO = EnrichedThingDTOMapper.map(thingMock, thingStatusInfoMock,
                 firmwareStatusMock, linkedItemsMapMock, true);
@@ -97,9 +94,9 @@ public class EnrichedThingDTOMapperTest {
 
     private void assertChannels(EnrichedThingDTO enrichedThingDTO) {
         assertThat(enrichedThingDTO.channels, hasSize(2));
-        assertThat(enrichedThingDTO.channels.get(0), is(instanceOf(EnrichedChannelDTO.class)));
+        assertThat(enrichedThingDTO.channels.getFirst(), is(instanceOf(EnrichedChannelDTO.class)));
 
-        EnrichedChannelDTO channel1 = enrichedThingDTO.channels.get(0);
+        EnrichedChannelDTO channel1 = enrichedThingDTO.channels.getFirst();
         assertThat(channel1.linkedItems, hasSize(2));
     }
 

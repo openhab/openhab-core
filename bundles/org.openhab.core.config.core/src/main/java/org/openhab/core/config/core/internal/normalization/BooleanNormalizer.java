@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,6 +12,9 @@
  */
 package org.openhab.core.config.core.internal.normalization;
 
+import java.util.Set;
+
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 
 /**
@@ -24,32 +27,29 @@ import org.openhab.core.config.core.ConfigDescriptionParameter;
  * @author Simon Kaufmann - Initial contribution
  * @author Thomas Höfer - made class final and minor javadoc changes
  */
+@NonNullByDefault
 final class BooleanNormalizer extends AbstractNormalizer {
+    private static final Set<String> TRUES = Set.of("true", "yes", "on", "1");
+    private static final Set<String> FALSES = Set.of("false", "no", "off", "0");
 
     @Override
     public Object doNormalize(Object value) {
-        if (value instanceof Boolean) {
-            return value;
-        }
-        if (value instanceof Byte) {
-            return handleNumeric(((Byte) value).longValue());
-        }
-        if (value instanceof Integer) {
-            return handleNumeric(((Integer) value).longValue());
-        }
-        if (value instanceof Long) {
-            return handleNumeric((Long) value);
-        }
-        String s = value.toString();
-        if ("true".equalsIgnoreCase(s) || "yes".equalsIgnoreCase(s) || "on".equalsIgnoreCase(s)
-                || "1".equalsIgnoreCase(s)) {
-            return true;
-        } else if ("false".equalsIgnoreCase(s) || "no".equalsIgnoreCase(s) || "off".equalsIgnoreCase(s)
-                || "0".equalsIgnoreCase(s)) {
-            return false;
-        }
-        logger.trace("Class \"{}\" cannot be converted to boolean.", value.getClass().getName());
-        return value;
+        return switch (value) {
+            case Boolean bool -> bool;
+            case Byte byteValue -> handleNumeric(byteValue.longValue());
+            case Integer integerValue -> handleNumeric(integerValue.longValue());
+            case Long longValue -> handleNumeric(longValue);
+            default -> {
+                String s = value.toString().toLowerCase();
+                if (TRUES.contains(s)) {
+                    yield true;
+                } else if (FALSES.contains(s)) {
+                    yield false;
+                }
+                logger.trace("Class \"{}\" cannot be converted to boolean.", value.getClass().getName());
+                yield value;
+            }
+        };
     }
 
     private Object handleNumeric(long numeric) {
@@ -57,9 +57,8 @@ final class BooleanNormalizer extends AbstractNormalizer {
             return true;
         } else if (numeric == 0) {
             return false;
-        } else {
-            logger.trace("\"{}\" cannot be interpreted as a boolean.", numeric);
-            return numeric;
         }
+        logger.trace("\"{}\" cannot be interpreted as a boolean.", numeric);
+        return numeric;
     }
 }

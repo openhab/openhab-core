@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -23,6 +23,7 @@ import org.openhab.core.items.ItemStateConverter;
 import org.openhab.core.items.events.ItemEventFactory;
 import org.openhab.core.library.items.StringItem;
 import org.openhab.core.library.types.StringType;
+import org.openhab.core.thing.Channel;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingUID;
 import org.openhab.core.thing.binding.ThingHandler;
@@ -32,6 +33,7 @@ import org.openhab.core.thing.profiles.ProfileCallback;
 import org.openhab.core.thing.util.ThingHandlerHelper;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
+import org.openhab.core.types.TimeSeries;
 import org.openhab.core.types.TypeParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,16 +54,19 @@ public class ProfileCallbackImpl implements ProfileCallback {
     private final Function<String, @Nullable Item> itemProvider;
     private final SafeCaller safeCaller;
     private final ItemStateConverter itemStateConverter;
+    private final AcceptedTypeConverter acceptedTypeConverter;
 
     public ProfileCallbackImpl(EventPublisher eventPublisher, SafeCaller safeCaller,
             ItemStateConverter itemStateConverter, ItemChannelLink link,
-            Function<ThingUID, @Nullable Thing> thingProvider, Function<String, @Nullable Item> itemProvider) {
+            Function<ThingUID, @Nullable Thing> thingProvider, Function<String, @Nullable Item> itemProvider,
+            AcceptedTypeConverter acceptedTypeConverter) {
         this.eventPublisher = eventPublisher;
         this.safeCaller = safeCaller;
         this.itemStateConverter = itemStateConverter;
         this.link = link;
         this.thingProvider = thingProvider;
         this.itemProvider = itemProvider;
+        this.acceptedTypeConverter = acceptedTypeConverter;
     }
 
     @Override
@@ -78,11 +83,22 @@ public class ProfileCallbackImpl implements ProfileCallback {
                 if (ThingHandlerHelper.isHandlerInitialized(thing)) {
                     logger.debug("Delegating command '{}' for item '{}' to handler for channel '{}'", command,
                             link.getItemName(), link.getLinkedUID());
-                    safeCaller.create(handler, ThingHandler.class)
-                            .withTimeout(CommunicationManager.THINGHANDLER_EVENT_TIMEOUT).onTimeout(() -> {
-                                logger.warn("Handler for thing '{}' takes more than {}ms for handling a command",
-                                        handler.getThing().getUID(), CommunicationManager.THINGHANDLER_EVENT_TIMEOUT);
-                            }).build().handleCommand(link.getLinkedUID(), command);
+                    Channel channel = thing.getChannel(link.getLinkedUID());
+                    Command convertedCommand = acceptedTypeConverter.toAcceptedCommand(command, channel,
+                            itemProvider.apply(link.getItemName()));
+                    if (convertedCommand != null) {
+                        safeCaller.create(handler, ThingHandler.class)
+                                .withTimeout(CommunicationManager.THINGHANDLER_EVENT_TIMEOUT).onTimeout(() -> {
+                                    logger.warn("Handler for thing '{}' takes more than {}ms for handling a command",
+                                            handler.getThing().getUID(),
+                                            CommunicationManager.THINGHANDLER_EVENT_TIMEOUT);
+                                }).build().handleCommand(link.getLinkedUID(), command);
+                    } else {
+                        logger.debug(
+                                "Not delegating command '{}' for item '{}' to handler for channel '{}', "
+                                        + "because it was not possible to convcert it to an accepted type).",
+                                command, link.getItemName(), link.getLinkedUID());
+                    }
                 } else {
                     logger.debug("Not delegating command '{}' for item '{}' to handler for channel '{}', "
                             + "because handler is not initialized (thing must be in status UNKNOWN, ONLINE or OFFLINE but was {}).",
@@ -128,5 +144,24 @@ public class ProfileCallbackImpl implements ProfileCallback {
 
         eventPublisher.post(
                 ItemEventFactory.createStateEvent(link.getItemName(), acceptedState, link.getLinkedUID().toString()));
+    }
+
+    @Override
+    public void sendTimeSeries(TimeSeries timeSeries) {
+        Item item = itemProvider.apply(link.getItemName());
+        if (item == null) {
+            logger.warn("Cannot send time series event '{}' for item '{}', because no item could be found.", timeSeries,
+                    link.getItemName());
+            return;
+        }
+
+        eventPublisher.post(
+                ItemEventFactory.createTimeSeriesEvent(link.getItemName(), timeSeries, link.getLinkedUID().toString()));
+    }
+
+    @FunctionalInterface
+    public interface AcceptedTypeConverter {
+        @Nullable
+        Command toAcceptedCommand(Command originalType, @Nullable Channel channel, @Nullable Item item);
     }
 }

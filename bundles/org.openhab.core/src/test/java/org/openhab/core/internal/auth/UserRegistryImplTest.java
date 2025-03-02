@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -98,11 +98,11 @@ public class UserRegistryImplTest {
         registry.addUserSession(user, session1);
         registry.addUserSession(user, session2);
         registry.addUserSession(user, session3);
-        assertEquals(user.getSessions().size(), 3);
+        assertEquals(3, user.getSessions().size());
         registry.removeUserSession(user, session3);
-        assertEquals(user.getSessions().size(), 2);
+        assertEquals(2, user.getSessions().size());
         registry.clearSessions(user);
-        assertEquals(user.getSessions().size(), 0);
+        assertEquals(0, user.getSessions().size());
     }
 
     @Test
@@ -113,7 +113,7 @@ public class UserRegistryImplTest {
         String token1 = registry.addUserApiToken(user, "token1", "scope1");
         String token2 = registry.addUserApiToken(user, "token2", "scope2");
         String token3 = registry.addUserApiToken(user, "token3", "scope3");
-        assertEquals(user.getApiTokens().size(), 3);
+        assertEquals(3, user.getApiTokens().size());
         registry.authenticate(new UserApiTokenCredentials(token1));
         registry.authenticate(new UserApiTokenCredentials(token2));
         registry.authenticate(new UserApiTokenCredentials(token3));
@@ -123,6 +123,6 @@ public class UserRegistryImplTest {
                 user.getApiTokens().stream().filter(t -> "token2".equals(t.getName())).findAny().get());
         registry.removeUserApiToken(user,
                 user.getApiTokens().stream().filter(t -> "token3".equals(t.getName())).findAny().get());
-        assertEquals(user.getApiTokens().size(), 0);
+        assertEquals(0, user.getApiTokens().size());
     }
 }

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -33,9 +33,9 @@ public class StrippedThingTypeDTO {
     public StrippedThingTypeDTO() {
     }
 
-    public StrippedThingTypeDTO(String UID, String label, String description, String category, boolean listed,
+    public StrippedThingTypeDTO(String uid, String label, String description, String category, boolean listed,
             List<String> supportedBridgeTypeUIDs, boolean bridge) {
-        this.UID = UID;
+        this.UID = uid;
         this.label = label;
         this.description = description;
         this.category = category;

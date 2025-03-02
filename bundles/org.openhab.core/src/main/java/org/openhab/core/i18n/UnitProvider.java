@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -11,6 +11,8 @@
  * SPDX-License-Identifier: EPL-2.0
  */
 package org.openhab.core.i18n;
+
+import java.util.Collection;
 
 import javax.measure.Quantity;
 import javax.measure.Unit;
@@ -44,4 +46,6 @@ public interface UnitProvider {
      * @return the {@link SystemOfUnits} which is currently set, must not be null.
      */
     SystemOfUnits getMeasurementSystem();
+
+    Collection<Class<? extends Quantity<?>>> getAllDimensions();
 }

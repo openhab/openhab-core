@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,12 +12,10 @@
  */
 package org.openhab.core.io.console.internal.extension;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -74,8 +72,8 @@ public class ItemConsoleCommandExtension extends AbstractConsoleCommandExtension
                     default:
                         return false;
                 }
-                return new StringsCompleter(items.stream().map(i -> i.getName()).collect(Collectors.toList()), true)
-                        .complete(args, cursorArgumentIndex, cursorPosition, candidates);
+                return new StringsCompleter(items.stream().map(Item::getName).toList(), true).complete(args,
+                        cursorArgumentIndex, cursorPosition, candidates);
             }
             if (cursorArgumentIndex == 2 && args[0].equals(SUBCMD_RMTAG)) {
                 Item item = managedItemProvider.get(args[1]);
@@ -102,13 +100,13 @@ public class ItemConsoleCommandExtension extends AbstractConsoleCommandExtension
 
     @Override
     public List<String> getUsages() {
-        return Arrays.asList(new String[] {
+        return List.of(
                 buildCommandUsage(SUBCMD_LIST + " [<pattern>]",
                         "lists names and types of all items (matching the pattern, if given)"),
                 buildCommandUsage(SUBCMD_CLEAR, "removes all items"),
                 buildCommandUsage(SUBCMD_REMOVE + " <itemName>", "removes the given item"),
                 buildCommandUsage(SUBCMD_ADDTAG + " <itemName> <tag>", "adds a tag to the given item"),
-                buildCommandUsage(SUBCMD_RMTAG + " <itemName> <tag>", "removes a tag from the given item") });
+                buildCommandUsage(SUBCMD_RMTAG + " <itemName> <tag>", "removes a tag from the given item"));
     }
 
     @Override

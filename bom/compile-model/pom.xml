@@ -1,13 +1,13 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
     <groupId>org.openhab.core.bom</groupId>
     <artifactId>org.openhab.core.reactor.bom</artifactId>
-    <version>4.0.0-SNAPSHOT</version>
+    <version>5.0.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>org.openhab.core.bom.compile-model</artifactId>
@@ -30,7 +30,7 @@
   <dependencies>
     <dependency>
       <groupId>org.eclipse.xtext</groupId>
-      <artifactId>org.eclipse.xtext.generator</artifactId>
+      <artifactId>org.eclipse.xtext.xtext.generator</artifactId>
       <version>${xtext.version}</version>
       <scope>compile</scope>
       <exclusions>
@@ -83,12 +83,6 @@
     <dependency>
       <groupId>org.eclipse.emf</groupId>
       <artifactId>org.eclipse.emf.mwe2.launch</artifactId>
-      <exclusions>
-        <exclusion>
-          <groupId>com.google.inject</groupId>
-          <artifactId>guice</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
 
     <dependency>
@@ -138,17 +132,9 @@
 
     <!-- Classgraph -->
     <dependency>
-      <groupId>org.eclipse.orbit.bundles</groupId>
-      <artifactId>io.github.classgraph</artifactId>
-      <version>4.8.149.v20220915-0556</version>
-      <scope>compile</scope>
-    </dependency>
-
-    <!-- Guice -->
-    <dependency>
-      <groupId>org.eclipse.orbit.bundles</groupId>
-      <artifactId>com.google.inject</artifactId>
-      <version>5.0.1.v20210324-2015</version>
+      <groupId>io.github.classgraph</groupId>
+      <artifactId>classgraph</artifactId>
+      <version>4.8.176</version>
       <scope>compile</scope>
     </dependency>
 
@@ -162,10 +148,6 @@
         <exclusion>
           <groupId>org.eclipse.platform</groupId>
           <artifactId>org.eclipse.osgi</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.google.inject</groupId>
-          <artifactId>guice</artifactId>
         </exclusion>
       </exclusions>
     </dependency>

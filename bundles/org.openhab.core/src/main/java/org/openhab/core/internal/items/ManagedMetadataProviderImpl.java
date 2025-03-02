@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -74,7 +74,7 @@ public class ManagedMetadataProviderImpl extends AbstractManagedProvider<Metadat
     /**
      * Removes all metadata of a given item
      *
-     * @param itemname the name of the item for which the metadata is to be removed.
+     * @param name the name of the item for which the metadata is to be removed.
      */
     @Override
     public void removeItemMetadata(String name) {
@@ -84,7 +84,7 @@ public class ManagedMetadataProviderImpl extends AbstractManagedProvider<Metadat
 
     @Override
     public Collection<Metadata> getAll() {
-        return super.getAll().stream().map(this::normalizeMetadata).collect(Collectors.toUnmodifiableList());
+        return super.getAll().stream().map(this::normalizeMetadata).toList();
     }
 
     @Override

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -28,6 +28,7 @@ import java.util.Optional;
 import javax.ws.rs.core.Response;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.io.rest.core.service.ConfigurableServiceDTO;
@@ -135,7 +136,7 @@ public class ConfigurableServiceResourceOSGiTest extends JavaOSGiTest {
         Response response = configurableServiceResource.getConfiguration("id");
         assertThat(response.getStatus(), is(200));
 
-        Map<String, Object> newConfiguration = new HashMap<>();
+        Map<String, @Nullable Object> newConfiguration = new HashMap<>();
         newConfiguration.put("a", "b");
         response = configurableServiceResource.updateConfiguration("en", "id", newConfiguration);
         assertThat(response.getStatus(), is(204));

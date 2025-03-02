@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -16,7 +16,6 @@ import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * The {@link org.openhab.core.persistence.dto.PersistenceItemConfigurationDTO} is used for transferring persistence
@@ -29,5 +28,4 @@ public class PersistenceItemConfigurationDTO {
     public Collection<String> items = List.of();
     public Collection<String> strategies = List.of();
     public Collection<String> filters = List.of();
-    public @Nullable String alias;
 }

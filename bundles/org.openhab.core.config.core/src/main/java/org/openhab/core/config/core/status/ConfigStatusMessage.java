@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -66,7 +66,7 @@ public final class ConfigStatusMessage {
          * The type for a pending message. It should be used if the transmission of the configuration parameter to the
          * entity is pending.
          */
-        PENDING;
+        PENDING
     }
 
     /** The name of the configuration parameter. */

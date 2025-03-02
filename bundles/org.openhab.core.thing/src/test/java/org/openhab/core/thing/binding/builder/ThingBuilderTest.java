@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,7 +17,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -93,7 +92,7 @@ public class ThingBuilderTest {
         thingBuilder.withoutChannel(new ChannelUID(THING_UID, "channel1"));
         Thing thing = thingBuilder.build();
         assertThat(thing.getChannels(), hasSize(1));
-        assertThat(thing.getChannels().get(0).getUID().getId(), is(equalTo("channel2")));
+        assertThat(thing.getChannels().getFirst().getUID().getId(), is(equalTo("channel2")));
     }
 
     @Test
@@ -114,8 +113,8 @@ public class ThingBuilderTest {
     @Test
     public void subsequentBuildsCreateIndependentThings() {
         Thing thing = thingBuilder.withLabel("Test").withLocation("Some Place").withProperties(properties).build();
-        Thing otherThing = thingBuilder.withLabel("Second Test").withLocation("Other Place")
-                .withProperties(Collections.emptyMap()).build();
+        Thing otherThing = thingBuilder.withLabel("Second Test").withLocation("Other Place").withProperties(Map.of())
+                .build();
 
         assertThat(otherThing.getLabel(), is(not(thing.getLabel())));
         assertThat(otherThing.getLocation(), is(not(thing.getLocation())));

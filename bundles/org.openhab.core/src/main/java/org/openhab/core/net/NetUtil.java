@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -19,6 +19,7 @@ import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -56,6 +57,7 @@ import org.slf4j.LoggerFactory;
  * @author Stefan Triller - Converted to OSGi service with primary ipv4 conf
  * @author Gary Tse - Network address change listener
  * @author Tim Roberts - Added primary address change to network address change listener
+ * @author Leo Siepel - Added methods to improve support for network scanning
  */
 @Component(configurationPid = "org.openhab.network", property = { "service.pid=org.openhab.network",
         "service.config.description.uri=system:network", "service.config.label=Network Settings",
@@ -86,7 +88,7 @@ public class NetUtil implements NetworkAddressService {
     // must be initialized before activate due to OSGi reference
     private Set<NetworkAddressChangeListener> networkAddressChangeListeners = ConcurrentHashMap.newKeySet();
 
-    private Collection<CidrAddress> lastKnownInterfaceAddresses = Collections.emptyList();
+    private Collection<CidrAddress> lastKnownInterfaceAddresses = List.of();
     private final ScheduledExecutorService scheduledExecutorService = ThreadPoolManager
             .getScheduledPool(ThreadPoolManager.THREAD_POOL_NAME_COMMON);
     private @Nullable ScheduledFuture<?> networkInterfacePollFuture = null;
@@ -100,17 +102,17 @@ public class NetUtil implements NetworkAddressService {
 
     @Activate
     protected void activate(Map<String, Object> props) {
-        lastKnownInterfaceAddresses = Collections.emptyList();
+        lastKnownInterfaceAddresses = List.of();
         modified(props);
     }
 
     @Deactivate
     protected void deactivate() {
-        lastKnownInterfaceAddresses = Collections.emptyList();
+        lastKnownInterfaceAddresses = List.of();
         networkAddressChangeListeners = ConcurrentHashMap.newKeySet();
 
-        if (networkInterfacePollFuture != null) {
-            networkInterfacePollFuture.cancel(true);
+        if (networkInterfacePollFuture instanceof ScheduledFuture<?> future) {
+            future.cancel(true);
             networkInterfacePollFuture = null;
         }
     }
@@ -157,13 +159,13 @@ public class NetUtil implements NetworkAddressService {
     public @Nullable String getPrimaryIpv4HostAddress() {
         String primaryIP;
 
-        if (primaryAddress != null) {
-            String[] addrString = primaryAddress.split("/");
+        if (primaryAddress instanceof String address) {
+            String[] addrString = address.split("/");
             if (addrString.length > 1) {
                 String ip = getIPv4inSubnet(addrString[0], addrString[1]);
                 if (ip == null) {
                     // an error has occurred, using first interface like nothing has been configured
-                    LOGGER.warn("Invalid address '{}', will use first interface instead.", primaryAddress);
+                    LOGGER.warn("Invalid address '{}', will use first interface instead.", address);
                     primaryIP = getFirstLocalIPv4Address();
                 } else {
                     primaryIP = ip;
@@ -307,7 +309,7 @@ public class NetUtil implements NetworkAddressService {
     private static @Nullable String getFirstIpv4BroadcastAddress() {
         final List<String> broadcastAddresses = getAllBroadcastAddresses();
         if (!broadcastAddresses.isEmpty()) {
-            return broadcastAddresses.get(0);
+            return broadcastAddresses.getFirst();
         } else {
             return null;
         }
@@ -319,7 +321,7 @@ public class NetUtil implements NetworkAddressService {
      *
      * Example to get a list of only IPv4 addresses in string representation:
      * List<String> l = getAllInterfaceAddresses().stream().filter(a->a.getAddress() instanceof
-     * Inet4Address).map(a->a.getAddress().getHostAddress()).collect(Collectors.toList());
+     * Inet4Address).map(a->a.getAddress().getHostAddress()).toList();
      *
      * down, or loopback interfaces are skipped.
      *
@@ -347,9 +349,8 @@ public class NetUtil implements NetworkAddressService {
             }
 
             for (InterfaceAddress cidr : networkInterface.getInterfaceAddresses()) {
-                final InetAddress address = cidr.getAddress();
-                assert address != null; // NetworkInterface.getInterfaceAddresses() should return only non-null
-                                        // addresses
+                // NetworkInterface.getInterfaceAddresses() should return only non-null addresses
+                final InetAddress address = Objects.requireNonNull(cidr.getAddress());
                 interfaceIPs.add(new CidrAddress(address, cidr.getNetworkPrefixLength()));
             }
         }
@@ -388,7 +389,7 @@ public class NetUtil implements NetworkAddressService {
     /**
      * Get the network address a specific ip address is in
      *
-     * @param ipAddressString ipv4 address of the device (i.e. 192.168.5.1)
+     * @param ipAddressString IPv4 address of the device (i.e. 192.168.5.1)
      * @param netMask netmask in bits (i.e. 24)
      * @return network a device is in (i.e. 192.168.5.0)
      * @throws IllegalArgumentException if parameters are wrong
@@ -424,7 +425,7 @@ public class NetUtil implements NetworkAddressService {
     /**
      * Get the network broadcast address of the subnet a specific ip address is in
      *
-     * @param ipAddressString ipv4 address of the device (i.e. 192.168.5.1)
+     * @param ipAddressString IPv4 address of the device (i.e. 192.168.5.1)
      * @param prefix network prefix in bits (i.e. 24)
      * @return network broadcast address of the network the device is in (i.e. 192.168.5.255)
      * @throws IllegalArgumentException if parameters are wrong
@@ -512,8 +513,8 @@ public class NetUtil implements NetworkAddressService {
     }
 
     private void scheduleToPollNetworkInterface(int intervalInSeconds) {
-        if (networkInterfacePollFuture != null) {
-            networkInterfacePollFuture.cancel(true);
+        if (networkInterfacePollFuture instanceof ScheduledFuture<?> future) {
+            future.cancel(true);
             networkInterfacePollFuture = null;
         }
 
@@ -531,19 +532,20 @@ public class NetUtil implements NetworkAddressService {
 
         // Look for added addresses to notify
         List<CidrAddress> added = newInterfaceAddresses.stream()
-                .filter(newInterfaceAddr -> !lastKnownInterfaceAddresses.contains(newInterfaceAddr))
-                .collect(Collectors.toList());
+                .filter(newInterfaceAddr -> !lastKnownInterfaceAddresses.contains(newInterfaceAddr)).toList();
 
         // Look for removed addresses to notify
         List<CidrAddress> removed = lastKnownInterfaceAddresses.stream()
-                .filter(lastKnownInterfaceAddr -> !newInterfaceAddresses.contains(lastKnownInterfaceAddr))
-                .collect(Collectors.toList());
+                .filter(lastKnownInterfaceAddr -> !newInterfaceAddresses.contains(lastKnownInterfaceAddr)).toList();
 
         lastKnownInterfaceAddresses = newInterfaceAddresses;
 
         if (!added.isEmpty() || !removed.isEmpty()) {
-            LOGGER.debug("added {} network interfaces: {}", added.size(), Arrays.deepToString(added.toArray()));
-            LOGGER.debug("removed {} network interfaces: {}", removed.size(), Arrays.deepToString(removed.toArray()));
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("added {} network interfaces: {}", added.size(), Arrays.deepToString(added.toArray()));
+                LOGGER.debug("removed {} network interfaces: {}", removed.size(),
+                        Arrays.deepToString(removed.toArray()));
+            }
 
             notifyListeners(added, removed);
         }
@@ -580,9 +582,6 @@ public class NetUtil implements NetworkAddressService {
     }
 
     private boolean getConfigParameter(Map<String, Object> parameters, String parameter, boolean defaultValue) {
-        if (parameters == null) {
-            return defaultValue;
-        }
         Object value = parameters.get(parameter);
         if (value == null) {
             return defaultValue;
@@ -591,9 +590,97 @@ public class NetUtil implements NetworkAddressService {
             return boolean1;
         }
         if (value instanceof String string) {
-            return Boolean.valueOf(string);
+            return Boolean.parseBoolean(string);
         } else {
             return defaultValue;
         }
+    }
+
+    /**
+     * For all network interfaces (except loopback) all IPv4 addresses are returned.
+     * This list can for example, be used to scan the network for available devices.
+     *
+     * @return A full list of IP {@link InetAddress} (except network and broadcast)
+     */
+    public static List<InetAddress> getFullRangeOfAddressesToScan() {
+        List<InetAddress> addressesToScan = List.of();
+        List<CidrAddress> ipV4InterfaceAddresses = NetUtil.getAllInterfaceAddresses().stream()
+                .filter(a -> a.getAddress() instanceof Inet4Address).collect(Collectors.toList());
+
+        for (CidrAddress i : ipV4InterfaceAddresses) {
+            addressesToScan.addAll(getAddressesRangeByCidrAddress(i, i.getPrefix()));
+        }
+        return addressesToScan;
+    }
+
+    /**
+     * For the given {@link CidrAddress} all IPv4 addresses are returned.
+     * This list can, for example, be used to scan the network for available devices.
+     *
+     * @param iFaceAddress The {@link CidrAddress} of the network interface
+     * @param maxAllowedPrefixLength Control the maximum allowed prefix length of the network (e.g. 24 for class C).
+     *            iFaceAddress's with a larger prefix are ignored and return an empty result.
+     * @return A full list of IP {@link InetAddress} (except network and broadcast)
+     */
+    public static List<InetAddress> getAddressesRangeByCidrAddress(CidrAddress iFaceAddress,
+            int maxAllowedPrefixLength) {
+        if (!(iFaceAddress.getAddress() instanceof Inet4Address) || iFaceAddress.getPrefix() < maxAllowedPrefixLength) {
+            return List.of();
+        }
+
+        List<byte[]> addresses = getAddressesInSubnet(iFaceAddress.getAddress().getAddress(), iFaceAddress.getPrefix());
+        if (addresses.size() > 2) {
+            addresses.removeFirst(); // remove network address
+            addresses.removeLast(); // remove broadcast address
+        }
+
+        return addresses.stream().map(m -> {
+            try {
+                return InetAddress.getByAddress(m);
+            } catch (UnknownHostException e) {
+                return null;
+            }
+        }).filter(f -> f != null).sorted((a, b) -> {
+            byte[] aOct = a.getAddress();
+            byte[] bOct = b.getAddress();
+            int r = 0;
+            for (int i = 0; i < aOct.length && i < bOct.length; i++) {
+                r = Integer.compare(aOct[i] & 0xff, bOct[i] & 0xff);
+                if (r != 0) {
+                    return r;
+                }
+            }
+            return r;
+        }).collect(Collectors.toList());
+    }
+
+    /**
+     * Calculate each IP address within a subnet
+     *
+     * @param address IPv4 address in byte array form (i.e. 127.0.0.1 = 01111111 00000000 00000000 00000001)
+     * @param maskLength Network mask length (i.e. the number after the forward-slash, '/', in CIDR notation)
+     * @return A list of all possible IP addresses in byte array form
+     */
+    private static List<byte[]> getAddressesInSubnet(byte[] address, int maskLength) {
+        byte[] lowestAddress = address.clone();
+        for (int bit = maskLength; bit < 32; bit++) {
+            lowestAddress[bit / 8] &= ~(1 << (bit % 8));
+        }
+        int lowestAddressAsLong = ByteBuffer.wrap(lowestAddress).getInt(); // big-endian by default
+
+        byte[] highestAddress = address.clone();
+        for (int bit = maskLength; bit < 32; bit++) {
+            highestAddress[bit / 8] |= ~(1 << (bit % 8));
+        }
+        int highestAddressAsLong = ByteBuffer.wrap(highestAddress).getInt();
+
+        List<byte[]> addresses = new ArrayList<byte[]>();
+        for (int i = lowestAddressAsLong; i <= highestAddressAsLong; i++) {
+            ByteBuffer dbuf = ByteBuffer.allocate(4);
+            dbuf.putInt(i);
+            addresses.add(dbuf.array());
+        }
+
+        return addresses;
     }
 }

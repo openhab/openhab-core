@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -115,7 +115,7 @@ public class HSBTypeTest {
     @Test
     public void testConversionToPointType() {
         // should not be possible => null
-        assertEquals(null, new HSBType("100,100,100").as(PointType.class));
+        assertNull(new HSBType("100,100,100").as(PointType.class));
     }
 
     @Test
@@ -203,7 +203,7 @@ public class HSBTypeTest {
         assertDoesNotThrow(() -> hsb1.closeTo(hsb2, 0.1));
 
         assertTrue(hsb1.closeTo(hsb2, 0.01));
-        assertTrue(!hsb1.closeTo(hsb3, 0.01));
+        assertFalse(hsb1.closeTo(hsb3, 0.01));
         assertTrue(hsb1.closeTo(hsb3, 0.5));
     }
 }

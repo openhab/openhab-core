@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -16,6 +16,7 @@ import java.io.File;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.service.WatchService;
@@ -35,11 +36,8 @@ public class WatchServiceUtil {
             WatchService watchService) {
         AutomationWatchService aws = null;
         synchronized (WATCH_SERVICES) {
-            Map<String, AutomationWatchService> watchers = WATCH_SERVICES.get(provider);
-            if (watchers == null) {
-                watchers = new HashMap<>();
-                WATCH_SERVICES.put(provider, watchers);
-            }
+            Map<String, AutomationWatchService> watchers = Objects
+                    .requireNonNull(WATCH_SERVICES.computeIfAbsent(provider, k -> new HashMap<>()));
             if (watchers.get(watchingDir) == null) {
                 aws = new AutomationWatchService(provider, watchService, watchingDir);
                 watchers.put(watchingDir, aws);

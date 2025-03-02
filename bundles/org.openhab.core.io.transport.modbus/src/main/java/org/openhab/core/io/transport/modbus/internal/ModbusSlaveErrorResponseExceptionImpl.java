@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,6 +12,7 @@
  */
 package org.openhab.core.io.transport.modbus.internal;
 
+import java.io.Serial;
 import java.util.Optional;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -30,6 +31,7 @@ import net.wimpi.modbus.ModbusSlaveException;
 @NonNullByDefault
 public class ModbusSlaveErrorResponseExceptionImpl extends ModbusSlaveErrorResponseException {
 
+    @Serial
     private static final long serialVersionUID = 6334580162425192133L;
     private int rawCode;
     private Optional<KnownExceptionCode> exceptionCode;
@@ -50,7 +52,7 @@ public class ModbusSlaveErrorResponseExceptionImpl extends ModbusSlaveErrorRespo
     @Override
     public @Nullable String getMessage() {
         return String.format("Slave responded with error=%d (%s)", rawCode,
-                exceptionCode.map(c -> c.name()).orElse("unknown error code"));
+                exceptionCode.map(Enum::name).orElse("unknown error code"));
     }
 
     @Override

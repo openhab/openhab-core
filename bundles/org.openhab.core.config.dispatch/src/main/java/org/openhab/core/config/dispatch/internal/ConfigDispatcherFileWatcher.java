@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -73,7 +73,7 @@ public class ConfigDispatcherFileWatcher implements WatchService.WatchEventListe
             } else if (kind == WatchService.Kind.DELETE) {
                 // Detect if a service specific configuration file was removed. We want to
                 // notify the service in this case with an updated empty configuration.
-                if (Files.isHidden(fullPath) || Files.isDirectory(fullPath) || !fullPath.toString().endsWith(".cfg")) {
+                if (!fullPath.toString().endsWith(".cfg")) {
                     return;
                 }
                 configDispatcher.fileRemoved(fullPath.toString());

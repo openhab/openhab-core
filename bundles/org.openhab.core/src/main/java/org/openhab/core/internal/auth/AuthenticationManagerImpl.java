@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -48,9 +48,7 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
                 unmatched = false;
                 try {
                     Authentication authentication = provider.authenticate(credentials);
-                    if (authentication != null) {
-                        return authentication;
-                    }
+                    return authentication;
                 } catch (AuthenticationException e) {
                     logger.info("Failed to authenticate credentials {} with provider {}", credentials.getClass(),
                             provider, e);

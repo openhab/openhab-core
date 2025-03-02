@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -19,7 +19,6 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -38,6 +37,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.openhab.core.config.core.ConfigDescriptionRegistry;
+import org.openhab.core.test.java.JavaTest;
 import org.openhab.core.transform.Transformation;
 import org.openhab.core.transform.TransformationException;
 import org.openhab.core.transform.TransformationRegistry;
@@ -50,7 +50,7 @@ import org.openhab.core.transform.TransformationRegistry;
 @NonNullByDefault
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
-public class ScriptTransformationServiceTest {
+public class ScriptTransformationServiceTest extends JavaTest {
     private static final String SCRIPT_LANGUAGE = "customDsl";
     private static final String SCRIPT_UID = "scriptUid." + SCRIPT_LANGUAGE;
     private static final String INVALID_SCRIPT_UID = "invalidScriptUid";
@@ -75,8 +75,7 @@ public class ScriptTransformationServiceTest {
 
     @BeforeEach
     public void setUp() throws ScriptException {
-        Map<String, Object> properties = new HashMap<>();
-        properties.put(ScriptTransformationService.SCRIPT_TYPE_PROPERTY_NAME, SCRIPT_LANGUAGE);
+        Map<String, Object> properties = Map.of(ScriptTransformationService.SCRIPT_TYPE_PROPERTY_NAME, SCRIPT_LANGUAGE);
         service = new ScriptTransformationService(transformationRegistry, mock(ConfigDescriptionRegistry.class),
                 scriptEngineManager, properties);
 
@@ -113,7 +112,6 @@ public class ScriptTransformationServiceTest {
         verify(scriptContext).setAttribute(eq("input"), eq("input"), eq(ScriptContext.ENGINE_SCOPE));
         verify(scriptContext).setAttribute(eq("param1"), eq("value1"), eq(ScriptContext.ENGINE_SCOPE));
         verify(scriptContext).setAttribute(eq("param2"), eq("value2"), eq(ScriptContext.ENGINE_SCOPE));
-        verifyNoMoreInteractions(scriptContext);
     }
 
     @Test
@@ -123,7 +121,6 @@ public class ScriptTransformationServiceTest {
         verify(scriptContext).setAttribute(eq("input"), eq("input"), eq(ScriptContext.ENGINE_SCOPE));
         verify(scriptContext).setAttribute(eq("param1"), eq("&amp;"), eq(ScriptContext.ENGINE_SCOPE));
         verify(scriptContext).setAttribute(eq("param2"), eq("=value"), eq(ScriptContext.ENGINE_SCOPE));
-        verifyNoMoreInteractions(scriptContext);
     }
 
     @Test
@@ -142,7 +139,23 @@ public class ScriptTransformationServiceTest {
         inOrder.verify(scriptContext, times(2)).setAttribute(anyString(), anyString(), eq(ScriptContext.ENGINE_SCOPE));
         inOrder.verify((Compilable) scriptEngine).compile(SCRIPT);
         inOrder.verify(scriptEngine).eval(SCRIPT);
-        inOrder.verifyNoMoreInteractions();
+    }
+
+    @Test
+    public void scriptAttributesRemovedAfterExecution() throws TransformationException, ScriptException {
+        abstract class CompilableScriptEngine implements ScriptEngine, Compilable {
+        }
+        scriptEngine = mock(CompilableScriptEngine.class);
+
+        when(scriptEngineContainer.getScriptEngine()).thenReturn(scriptEngine);
+        when(scriptEngine.getContext()).thenReturn(scriptContext);
+
+        InOrder inOrder = inOrder(scriptContext, scriptEngine);
+
+        service.transform(SCRIPT_UID + "?param1=value1", "input");
+
+        inOrder.verify(scriptEngine).eval(SCRIPT);
+        inOrder.verify(scriptContext).removeAttribute(eq("param1"), eq(ScriptContext.ENGINE_SCOPE));
     }
 
     @Test
@@ -151,7 +164,7 @@ public class ScriptTransformationServiceTest {
 
         verify(scriptContext).setAttribute(eq("input"), eq("input"), eq(ScriptContext.ENGINE_SCOPE));
         verify(scriptContext).setAttribute(eq("param1"), eq("value1"), eq(ScriptContext.ENGINE_SCOPE));
-        verifyNoMoreInteractions(scriptContext);
+        verify(scriptContext, times(0)).setAttribute(eq("invalid"), any(), eq(ScriptContext.ENGINE_SCOPE));
     }
 
     @Test
@@ -189,6 +202,21 @@ public class ScriptTransformationServiceTest {
         assertThat(e.getMessage(), is("Failed to execute script."));
         assertThat(e.getCause(), instanceOf(ScriptException.class));
         assertThat(e.getCause().getMessage(), is("exception"));
+    }
+
+    @Test
+    public void recoversFromClosedScriptContext() throws ScriptException, TransformationException {
+        when(scriptEngine.eval(SCRIPT)).thenThrow(new IllegalStateException("The Context is already closed."))
+                .thenReturn(SCRIPT_OUTPUT);
+        setupInterceptedLogger(ScriptTransformationService.class, LogLevel.WARN);
+
+        String returnValue = Objects.requireNonNull(service.transform(SCRIPT_UID, "input"));
+
+        assertThat(returnValue, is(SCRIPT_OUTPUT));
+
+        stopInterceptedLogger(ScriptTransformationService.class);
+        assertLogMessage(ScriptTransformationService.class, LogLevel.WARN, "Script engine context " + SCRIPT_UID
+                + " is already closed, this should not happen. Recreating script engine.");
     }
 
     @Test

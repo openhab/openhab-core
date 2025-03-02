@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,6 +17,7 @@ import java.math.BigDecimal;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
+import org.openhab.core.config.core.ParameterOption;
 import org.openhab.core.config.core.validation.ConfigValidationMessage;
 
 /**
@@ -42,7 +43,8 @@ final class OptionsValidator implements ConfigDescriptionParameterValidator {
             invalid = param.getOptions().stream().map(o -> new BigDecimal(o.getValue()))
                     .noneMatch(v -> v.compareTo(bdValue) == 0);
         } else {
-            invalid = param.getOptions().stream().map(o -> o.getValue()).noneMatch(v -> v.equals(value.toString()));
+            invalid = param.getOptions().stream().map(ParameterOption::getValue)
+                    .noneMatch(v -> v.equals(value.toString()));
         }
 
         if (invalid) {

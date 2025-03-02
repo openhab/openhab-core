@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -16,6 +16,7 @@ import static java.util.Map.entry;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -24,7 +25,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -41,6 +41,7 @@ import org.openhab.core.automation.events.RuleRemovedEvent;
 import org.openhab.core.automation.events.RuleStatusInfoEvent;
 import org.openhab.core.automation.events.RuleUpdatedEvent;
 import org.openhab.core.automation.internal.RuleEngineImpl;
+import org.openhab.core.automation.internal.module.factory.CoreModuleHandlerFactory;
 import org.openhab.core.automation.util.ModuleBuilder;
 import org.openhab.core.automation.util.RuleBuilder;
 import org.openhab.core.common.registry.ProviderChangeListener;
@@ -48,6 +49,7 @@ import org.openhab.core.config.core.Configuration;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventPublisher;
 import org.openhab.core.events.EventSubscriber;
+import org.openhab.core.i18n.TimeZoneProvider;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemProvider;
@@ -57,6 +59,7 @@ import org.openhab.core.items.events.ItemEventFactory;
 import org.openhab.core.library.items.SwitchItem;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.service.ReadyMarker;
+import org.openhab.core.service.StartLevelService;
 import org.openhab.core.test.java.JavaOSGiTest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,12 +77,23 @@ public class RuleEventTest extends JavaOSGiTest {
 
     private @Nullable Event itemEvent = null;
     private @Nullable Event ruleRemovedEvent = null;
+    private @NonNullByDefault({}) StartLevelService startLevelService;
 
     public RuleEventTest() {
     }
 
     @BeforeEach
     public void before() {
+        startLevelService = mock(StartLevelService.class);
+        when(startLevelService.getStartLevel()).thenReturn(100);
+        registerService(startLevelService, StartLevelService.class.getName());
+        EventPublisher eventPublisher = Objects.requireNonNull(getService(EventPublisher.class));
+        ItemRegistry itemRegistry = Objects.requireNonNull(getService(ItemRegistry.class));
+        CoreModuleHandlerFactory coreModuleHandlerFactory = new CoreModuleHandlerFactory(getBundleContext(),
+                eventPublisher, itemRegistry, mock(TimeZoneProvider.class), mock(StartLevelService.class));
+        mock(CoreModuleHandlerFactory.class);
+        registerService(coreModuleHandlerFactory);
+
         ItemProvider itemProvider = new ItemProvider() {
 
             @Override
@@ -148,9 +162,7 @@ public class RuleEventTest extends JavaOSGiTest {
         ruleRegistry.add(rule);
         ruleEngine.setEnabled(rule.getUID(), true);
 
-        waitForAssert(() -> {
-            assertThat(ruleEngine.getStatusInfo(rule.getUID()).getStatus(), is(RuleStatus.IDLE));
-        });
+        waitForAssert(() -> assertThat(ruleEngine.getStatusInfo(rule.getUID()).getStatus(), is(RuleStatus.IDLE)));
 
         // TEST RULE
 
@@ -186,7 +198,7 @@ public class RuleEventTest extends JavaOSGiTest {
         assertThat(ruleEvents.stream().filter(e -> "openhab/rules/myRule21/state".equals(e.getTopic())).findFirst()
                 .isPresent(), is(true));
         List<Event> stateEvents = ruleEvents.stream().filter(e -> "openhab/rules/myRule21/state".equals(e.getTopic()))
-                .collect(Collectors.toList());
+                .toList();
         assertThat(stateEvents, is(notNullValue()));
         Optional<Event> runningEvent = stateEvents.stream()
                 .filter(e -> ((RuleStatusInfoEvent) e).getStatusInfo().getStatus() == RuleStatus.RUNNING).findFirst();

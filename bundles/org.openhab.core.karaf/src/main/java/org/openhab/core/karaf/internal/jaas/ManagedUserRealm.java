@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -15,7 +15,6 @@ package org.openhab.core.karaf.internal.jaas;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.inject.Singleton;
 import javax.security.auth.login.AppConfigurationEntry;
 import javax.security.auth.login.AppConfigurationEntry.LoginModuleControlFlag;
 
@@ -30,7 +29,6 @@ import org.osgi.service.component.annotations.Component;
  *
  * @author Yannick Schaus - initial contribution
  */
-@Singleton
 @Component(service = JaasRealm.class)
 @Service
 public class ManagedUserRealm implements JaasRealm {

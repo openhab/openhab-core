@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -21,6 +21,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.Trigger;
 import org.openhab.core.automation.handler.BaseTriggerModuleHandler;
 import org.openhab.core.automation.handler.TriggerHandlerCallback;
+import org.openhab.core.config.core.ConfigParser;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventSubscriber;
 import org.openhab.core.items.Item;
@@ -50,7 +51,6 @@ public class GroupCommandTriggerHandler extends BaseTriggerModuleHandler impleme
     private final @Nullable String command;
 
     private final Set<String> types;
-    private final BundleContext bundleContext;
     private final ItemRegistry itemRegistry;
 
     public static final String MODULE_TYPE_ID = "core.GroupCommandTrigger";
@@ -59,18 +59,21 @@ public class GroupCommandTriggerHandler extends BaseTriggerModuleHandler impleme
     public static final String CFG_COMMAND = "command";
     private final String ruleUID;
 
-    private ServiceRegistration<?> eventSubscriberRegistration;
+    private final ServiceRegistration<?> eventSubscriberRegistration;
 
     public GroupCommandTriggerHandler(Trigger module, String ruleUID, BundleContext bundleContext,
             ItemRegistry itemRegistry) {
         super(module);
-        this.groupName = (String) module.getConfiguration().get(CFG_GROUPNAME);
+        this.groupName = ConfigParser.valueAsOrElse(module.getConfiguration().get(CFG_GROUPNAME), String.class, "");
+        if (this.groupName.isBlank()) {
+            logger.warn("GroupCommandTrigger {} of rule {} has no groupName configured and will not work.",
+                    module.getId(), ruleUID);
+        }
         this.command = (String) module.getConfiguration().get(CFG_COMMAND);
         this.types = Set.of(ItemCommandEvent.TYPE, ItemAddedEvent.TYPE, ItemRemovedEvent.TYPE);
-        this.bundleContext = bundleContext;
         this.itemRegistry = itemRegistry;
         this.ruleUID = ruleUID;
-        eventSubscriberRegistration = this.bundleContext.registerService(EventSubscriber.class.getName(), this, null);
+        eventSubscriberRegistration = bundleContext.registerService(EventSubscriber.class.getName(), this, null);
 
         if (itemRegistry.get(groupName) == null) {
             logger.warn("Group '{}' needed for rule '{}' is missing. Trigger '{}' will not work.", groupName, ruleUID,
@@ -106,10 +109,14 @@ public class GroupCommandTriggerHandler extends BaseTriggerModuleHandler impleme
             if (event instanceof ItemCommandEvent icEvent) {
                 String itemName = icEvent.getItemName();
                 Item item = itemRegistry.get(itemName);
+                Item group = itemRegistry.get(groupName);
                 if (item != null && item.getGroupNames().contains(groupName)) {
                     String command = this.command;
                     Command itemCommand = icEvent.getItemCommand();
                     if (command == null || command.equals(itemCommand.toFullString())) {
+                        if (group != null) {
+                            values.put("triggeringGroup", group);
+                        }
                         values.put("triggeringItem", item);
                         values.put("command", itemCommand);
                         values.put("event", event);

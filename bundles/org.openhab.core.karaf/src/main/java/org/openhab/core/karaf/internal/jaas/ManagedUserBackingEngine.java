@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,12 +13,10 @@
 package org.openhab.core.karaf.internal.jaas;
 
 import java.security.Principal;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.apache.karaf.jaas.boot.principal.GroupPrincipal;
 import org.apache.karaf.jaas.boot.principal.RolePrincipal;
@@ -36,7 +34,7 @@ import org.openhab.core.auth.UserRegistry;
  */
 public class ManagedUserBackingEngine implements BackingEngine {
 
-    UserRegistry userRegistry;
+    private final UserRegistry userRegistry;
 
     public ManagedUserBackingEngine(UserRegistry userRegistry) {
         this.userRegistry = userRegistry;
@@ -44,7 +42,7 @@ public class ManagedUserBackingEngine implements BackingEngine {
 
     @Override
     public void addUser(String username, String password) {
-        userRegistry.register(username, password, new HashSet<String>(Set.of(Role.USER)));
+        userRegistry.register(username, password, new HashSet<>(Set.of(Role.USER)));
     }
 
     @Override
@@ -54,7 +52,7 @@ public class ManagedUserBackingEngine implements BackingEngine {
 
     @Override
     public List<UserPrincipal> listUsers() {
-        return userRegistry.getAll().stream().map(u -> new UserPrincipal(u.getName())).collect(Collectors.toList());
+        return userRegistry.getAll().stream().map(u -> new UserPrincipal(u.getName())).toList();
     }
 
     @Override
@@ -68,12 +66,12 @@ public class ManagedUserBackingEngine implements BackingEngine {
 
     @Override
     public List<GroupPrincipal> listGroups(UserPrincipal user) {
-        return Collections.emptyList();
+        return List.of();
     }
 
     @Override
     public Map<GroupPrincipal, String> listGroups() {
-        return Collections.emptyMap();
+        return Map.of();
     }
 
     @Override
@@ -95,9 +93,9 @@ public class ManagedUserBackingEngine implements BackingEngine {
     public List<RolePrincipal> listRoles(Principal principal) {
         User user = userRegistry.get(principal.getName());
         if (user != null) {
-            return user.getRoles().stream().map(r -> new RolePrincipal(r)).collect(Collectors.toList());
+            return user.getRoles().stream().map(r -> new RolePrincipal(r)).toList();
         }
-        return Collections.emptyList();
+        return List.of();
     }
 
     @Override

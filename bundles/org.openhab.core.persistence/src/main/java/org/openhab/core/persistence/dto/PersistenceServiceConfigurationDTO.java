@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,6 +14,7 @@ package org.openhab.core.persistence.dto;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
@@ -26,10 +27,13 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 public class PersistenceServiceConfigurationDTO {
     public String serviceId = "";
     public Collection<PersistenceItemConfigurationDTO> configs = List.of();
+    public Map<String, String> aliases = Map.of();
     public Collection<String> defaults = List.of();
     public Collection<PersistenceCronStrategyDTO> cronStrategies = List.of();
     public Collection<PersistenceFilterDTO> thresholdFilters = List.of();
     public Collection<PersistenceFilterDTO> timeFilters = List.of();
+    public Collection<PersistenceFilterDTO> equalsFilters = List.of();
+    public Collection<PersistenceFilterDTO> includeFilters = List.of();
 
     public boolean editable = false;
 }

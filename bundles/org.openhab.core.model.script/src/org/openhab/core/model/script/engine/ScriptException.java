@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,6 +12,7 @@
  */
 package org.openhab.core.model.script.engine;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -22,6 +23,7 @@ import java.util.List;
  * @author Kai Kreuzer - Initial contribution
  */
 public abstract class ScriptException extends Exception {
+    @Serial
     private static final long serialVersionUID = -4155948282895039148L;
 
     private String scriptText;
@@ -74,8 +76,6 @@ public abstract class ScriptException extends Exception {
 
     /**
      * Creates a ScriptException with one Error.
-     *
-     * @param errors
      */
     private ScriptException(final String scriptText, final ScriptError error) {
         super(error.getMessage()); // ?
@@ -134,7 +134,7 @@ public abstract class ScriptException extends Exception {
 
             int i = 1;
             for (ScriptError e : getErrors()) {
-                if (sb.length() > 0) {
+                if (!sb.isEmpty()) {
                     sb.append('\n');
                 }
                 sb.append("   ");

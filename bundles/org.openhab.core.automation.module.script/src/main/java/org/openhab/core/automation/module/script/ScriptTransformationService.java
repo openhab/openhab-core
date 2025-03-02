@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,8 +17,8 @@ import static org.openhab.core.automation.module.script.profile.ScriptProfileFac
 import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -29,7 +29,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import javax.script.Compilable;
 import javax.script.CompiledScript;
@@ -187,8 +186,10 @@ public class ScriptTransformationService implements TransformationService, Confi
                         : scriptEngineContainer.getScriptEngine();
                 ScriptContext executionContext = engine.getContext();
                 executionContext.setAttribute("input", source, ScriptContext.ENGINE_SCOPE);
+                ArrayList<String> injectedParams = null;
 
                 if (params != null) {
+                    injectedParams = new ArrayList<>();
                     for (String param : params.split("&")) {
                         String[] splitString = param.split("=");
                         if (splitString.length != 2) {
@@ -199,6 +200,7 @@ public class ScriptTransformationService implements TransformationService, Confi
                             param = URLDecoder.decode(splitString[0], StandardCharsets.UTF_8);
                             String value = URLDecoder.decode(splitString[1], StandardCharsets.UTF_8);
                             executionContext.setAttribute(param, value, ScriptContext.ENGINE_SCOPE);
+                            injectedParams.add(param);
                         }
                     }
                 }
@@ -212,10 +214,29 @@ public class ScriptTransformationService implements TransformationService, Confi
                     scriptRecord.compiledScript = compiledScript;
                 }
 
-                Object result = compiledScript != null ? compiledScript.eval() : engine.eval(scriptRecord.script);
-                return result == null ? null : result.toString();
+                try {
+                    Object result = compiledScript != null ? compiledScript.eval() : engine.eval(scriptRecord.script);
+                    return result == null ? null : result.toString();
+                } finally {
+                    if (injectedParams != null) {
+                        injectedParams
+                                .forEach(param -> executionContext.removeAttribute(param, ScriptContext.ENGINE_SCOPE));
+                    }
+                }
             } catch (ScriptException e) {
                 throw new TransformationException("Failed to execute script.", e);
+            } catch (IllegalStateException e) {
+                // ISE thrown by JS Scripting if script engine already closed
+                if ("The Context is already closed.".equals(e.getMessage())) {
+                    logger.warn(
+                            "Script engine context {} is already closed, this should not happen. Recreating script engine.",
+                            scriptUid);
+                    scriptCache.remove(scriptUid);
+                    return transform(function, source);
+                } else {
+                    // rethrow
+                    throw e;
+                }
             }
         } finally {
             scriptRecord.lock.unlock();
@@ -244,9 +265,11 @@ public class ScriptTransformationService implements TransformationService, Confi
             return null;
         }
 
-        if (ScriptProfile.CONFIG_TO_HANDLER_SCRIPT.equals(param) || ScriptProfile.CONFIG_TO_ITEM_SCRIPT.equals(param)) {
+        if (ScriptProfile.CONFIG_TO_HANDLER_SCRIPT.equals(param) || ScriptProfile.CONFIG_TO_ITEM_SCRIPT.equals(param)
+                || ScriptProfile.CONFIG_COMMAND_FROM_ITEM_SCRIPT.equals(param)
+                || ScriptProfile.CONFIG_STATE_FROM_ITEM_SCRIPT.equals(param)) {
             return transformationRegistry.getTransformations(List.of(scriptType.toLowerCase())).stream()
-                    .map(c -> new ParameterOption(c.getUID(), c.getLabel())).collect(Collectors.toList());
+                    .map(c -> new ParameterOption(c.getUID(), c.getLabel())).toList();
         }
         return null;
     }
@@ -258,7 +281,7 @@ public class ScriptTransformationService implements TransformationService, Confi
             return List.of(configDescription);
         }
 
-        return Collections.emptyList();
+        return List.of();
     }
 
     @Override

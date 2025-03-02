@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -23,7 +23,7 @@ public interface ModelRepositoryChangeListener {
 
     /**
      * Performs dispatch of all binding configs and
-     * fires all {@link ItemsChangeListener}s if {@code modelName} ends with "items".
+     * fires all {@link org.openhab.core.items.ItemRegistryChangeListener}s if {@code modelName} ends with "items".
      */
     void modelChanged(String modelName, EventType type);
 }

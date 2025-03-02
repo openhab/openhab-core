@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,6 +12,7 @@
  */
 package org.openhab.core.auth.client.oauth2;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.Instant;
 import java.util.Objects;
@@ -32,6 +33,7 @@ public final class AccessTokenResponse implements Serializable, Cloneable {
     /**
      * For Serializable
      */
+    @Serial
     private static final long serialVersionUID = 4837164195629364014L;
 
     /**

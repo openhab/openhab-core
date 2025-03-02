@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -114,7 +114,7 @@ public class PointTypeTest {
         assertEquals(48.856614, pointParis.getLatitude().doubleValue(), 0.0000001);
 
         double gravParis = pointParis.getGravity().doubleValue();
-        assertEquals(gravParis, 9.809, 0.001);
+        assertEquals(9.809, gravParis, 0.001);
     }
 
     @Test
@@ -139,7 +139,7 @@ public class PointTypeTest {
         // Ensure that constructor and toString are consistent
         // https://bugs.eclipse.org/bugs/show_bug.cgi?id=467612#c17
         PointType point3 = PointType.valueOf("-100,200");
-        assertTrue(point3.equals(PointType.valueOf(point3.toString())));
+        assertEquals(point3, PointType.valueOf(point3.toString()));
     }
 
     @Test

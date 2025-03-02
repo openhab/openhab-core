@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -88,7 +88,7 @@ public class CompositeTriggerHandler
                                 ref = ref.substring(i + 1);
                             }
                         }
-                        Object value = null;
+                        Object value;
                         int idx = ReferenceResolver.getNextRefToken(ref, 1);
                         if (idx < ref.length()) {
                             String outputId = ref.substring(0, idx);
@@ -114,10 +114,10 @@ public class CompositeTriggerHandler
 
     /**
      * The {@link CompositeTriggerHandler} sets itself as callback to the child triggers and store the callback to the
-     * rule engine. In this way the trigger of composite type will be notified always when some of the child triggers
+     * rule engine. In this way the trigger of composite type will always be notified when some of the child triggers
      * are triggered and has an opportunity to set the outputs of parent trigger to the rule context.
      *
-     * @see org.openhab.core.automation.handler.TriggerHandler#setTriggerHandlerCallback(org.openhab.core.automation.handler.TriggerHandlerCallback)
+     * @see org.openhab.core.automation.handler.TriggerHandler#setCallback(ModuleHandlerCallback)
      */
     @Override
     public void setCallback(@Nullable ModuleHandlerCallback callback) {

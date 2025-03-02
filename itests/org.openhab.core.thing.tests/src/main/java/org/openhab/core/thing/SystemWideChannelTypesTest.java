@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -36,14 +36,14 @@ import org.openhab.core.types.StateOption;
 @NonNullByDefault
 public class SystemWideChannelTypesTest extends JavaOSGiTest {
 
-    private static final int NUMBER_OF_SYSTEM_WIDE_CHANNEL_TYPES = 29;
+    private static final int NUMBER_OF_SYSTEM_WIDE_CHANNEL_TYPES = 30;
 
     private @NonNullByDefault({}) ChannelTypeProvider systemChannelTypeProvider;
 
     @BeforeEach
     public void setUp() {
         ChannelTypeProvider provider = getService(ChannelTypeProvider.class, DefaultSystemChannelTypeProvider.class);
-        assertTrue(provider instanceof DefaultSystemChannelTypeProvider);
+        assertInstanceOf(DefaultSystemChannelTypeProvider.class, provider);
         systemChannelTypeProvider = provider;
     }
 
@@ -80,7 +80,8 @@ public class SystemWideChannelTypesTest extends JavaOSGiTest {
         assertNotNull(systemChannelTypeProvider.getChannelType(SYSTEM_CHANNEL_TYPE_UID_ELECTRIC_POWER, null));
         assertNotNull(systemChannelTypeProvider.getChannelType(SYSTEM_CHANNEL_TYPE_UID_ELECTRIC_CURRENT, null));
         assertNotNull(systemChannelTypeProvider.getChannelType(SYSTEM_CHANNEL_TYPE_UID_ELECTRIC_VOLTAGE, null));
-        assertNotNull(systemChannelTypeProvider.getChannelType(SYSTEM_CHANNEL_TYPE_UID_ELECTRICAL_ENERGY, null));
+        assertNotNull(systemChannelTypeProvider.getChannelType(SYSTEM_CHANNEL_TYPE_UID_ELECTRIC_ENERGY, null));
+        assertNotNull(systemChannelTypeProvider.getChannelType(SYSTEM_CHANNEL_TYPE_UID_UV_INDEX, null));
     }
 
     @Test

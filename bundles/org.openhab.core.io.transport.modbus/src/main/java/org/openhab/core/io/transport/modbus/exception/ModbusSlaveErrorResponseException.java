@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -12,6 +12,7 @@
  */
 package org.openhab.core.io.transport.modbus.exception;
 
+import java.io.Serial;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -41,7 +42,7 @@ public abstract class ModbusSlaveErrorResponseException extends ModbusTransportE
      * @author Sami Salonen - Initial contribution
      *
      */
-    public static enum KnownExceptionCode {
+    public enum KnownExceptionCode {
         ILLEGAL_FUNCTION(1),
         ILLEGAL_DATA_ACCESS(2),
         ILLEGAL_DATA_VALUE(3),
@@ -55,7 +56,7 @@ public abstract class ModbusSlaveErrorResponseException extends ModbusTransportE
 
         private final int exceptionCode;
 
-        private KnownExceptionCode(int exceptionCode) {
+        KnownExceptionCode(int exceptionCode) {
             this.exceptionCode = exceptionCode;
         }
 
@@ -153,6 +154,7 @@ public abstract class ModbusSlaveErrorResponseException extends ModbusTransportE
     public static final int GATEWAY_TARGET_DEVICE_FAILED_TO_RESPOND = KnownExceptionCode.GATEWAY_TARGET_DEVICE_FAILED_TO_RESPOND
             .getExceptionCode();
 
+    @Serial
     private static final long serialVersionUID = -1435199498550990487L;
 
     /**

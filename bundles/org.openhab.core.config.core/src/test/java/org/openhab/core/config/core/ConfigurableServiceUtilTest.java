@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -43,8 +43,7 @@ public class ConfigurableServiceUtilTest {
         properties.put(SERVICE_PROPERTY_FACTORY_SERVICE, factory);
         properties.put(SERVICE_PROPERTY_LABEL, label);
 
-        ConfigurableService configurableService = ConfigurableServiceUtil
-                .asConfigurableService((key) -> properties.get(key));
+        ConfigurableService configurableService = ConfigurableServiceUtil.asConfigurableService(properties::get);
 
         assertThat(configurableService.annotationType(), is(ConfigurableService.class));
         assertThat(configurableService.category(), is(category));
@@ -57,8 +56,7 @@ public class ConfigurableServiceUtilTest {
     public void asConfigurableServiceUndefinedProperties() {
         Properties properties = new Properties();
 
-        ConfigurableService configurableService = ConfigurableServiceUtil
-                .asConfigurableService((key) -> properties.get(key));
+        ConfigurableService configurableService = ConfigurableServiceUtil.asConfigurableService(properties::get);
 
         assertThat(configurableService.annotationType(), is(ConfigurableService.class));
         assertThat(configurableService.category(), is(emptyString()));

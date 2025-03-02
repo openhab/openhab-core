@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -70,42 +70,43 @@ public class PersistenceThresholdFilterTest {
 
     @Test
     public void differentItemSameValue() {
-        filterTest(ITEM_NAME_2, DecimalType.ZERO, DecimalType.ZERO, "", true);
+        filterTest(ITEM_NAME_2, DecimalType.ZERO, DecimalType.ZERO, "", false, true);
     }
 
     @ParameterizedTest
     @MethodSource("argumentProvider")
-    public void filterTest(State state1, State state2, String unit, boolean expected) {
-        filterTest(ITEM_NAME_1, state1, state2, unit, expected);
+    public void filterTest(State state1, State state2, String unit, boolean relative, boolean expected) {
+        filterTest(ITEM_NAME_1, state1, state2, unit, relative, expected);
     }
 
     private static Stream<Arguments> argumentProvider() {
         return Stream.of(//
                 // same item, same value -> false
-                Arguments.of(DecimalType.ZERO, DecimalType.ZERO, "", false),
+                Arguments.of(DecimalType.ZERO, DecimalType.ZERO, "", false, false),
                 // plain decimal, below threshold, absolute
-                Arguments.of(DecimalType.ZERO, DecimalType.valueOf("5"), "", false),
+                Arguments.of(DecimalType.ZERO, DecimalType.valueOf("5"), "", false, false),
                 // plain decimal, above threshold, absolute
-                Arguments.of(DecimalType.ZERO, DecimalType.valueOf("15"), "", true),
+                Arguments.of(DecimalType.ZERO, DecimalType.valueOf("15"), "", false, true),
                 // plain decimal, below threshold, relative
-                Arguments.of(DecimalType.valueOf("10.0"), DecimalType.valueOf("9.5"), "%", false),
+                Arguments.of(DecimalType.valueOf("10.0"), DecimalType.valueOf("9.5"), "", true, false),
                 // plain decimal, above threshold, relative
-                Arguments.of(DecimalType.valueOf("10.0"), DecimalType.valueOf("11.5"), "%", true),
+                Arguments.of(DecimalType.valueOf("10.0"), DecimalType.valueOf("11.5"), "", true, true),
                 // quantity type, below threshold, relative
-                Arguments.of(new QuantityType<>("15 A"), new QuantityType<>("14000 mA"), "%", false),
+                Arguments.of(new QuantityType<>("15 A"), new QuantityType<>("14000 mA"), "", true, false),
                 // quantity type, above threshold, relative
-                Arguments.of(new QuantityType<>("2000 mbar"), new QuantityType<>("2.6 bar"), "%", true),
+                Arguments.of(new QuantityType<>("2000 mbar"), new QuantityType<>("2.6 bar"), "", true, true),
                 // quantity type, below threshold, absolute, no unit
-                Arguments.of(new QuantityType<>("100 K"), new QuantityType<>("105 K"), "", false),
+                Arguments.of(new QuantityType<>("100 K"), new QuantityType<>("105 K"), "", false, false),
                 // quantity type, above threshold, absolute, no unit
-                Arguments.of(new QuantityType<>("20 V"), new QuantityType<>("9000 mV"), "", true),
+                Arguments.of(new QuantityType<>("20 V"), new QuantityType<>("9000 mV"), "", false, true),
                 // quantity type, below threshold, absolute, with unit
-                Arguments.of(new QuantityType<>("10 m"), new QuantityType<>("10.002 m"), "mm", false),
+                Arguments.of(new QuantityType<>("10 m"), new QuantityType<>("10.002 m"), "mm", false, false),
                 // quantity type, above threshold, absolute, with unit
-                Arguments.of(new QuantityType<>("-10 °C"), new QuantityType<>("5 °C"), "K", true));
+                Arguments.of(new QuantityType<>("-10 °C"), new QuantityType<>("5 °C"), "K", false, true));
     }
 
-    private void filterTest(String item2name, State state1, State state2, String unit, boolean expected) {
+    private void filterTest(String item2name, State state1, State state2, String unit, boolean relative,
+            boolean expected) {
         String itemType = "Number";
         if (state1 instanceof QuantityType<?> q) {
             itemType += ":" + UnitUtils.getDimensionName(q.getUnit());
@@ -117,7 +118,7 @@ public class PersistenceThresholdFilterTest {
         item1.setState(state1);
         item2.setState(state2);
 
-        PersistenceFilter filter = new PersistenceThresholdFilter("test", BigDecimal.TEN, unit);
+        PersistenceFilter filter = new PersistenceThresholdFilter("test", BigDecimal.TEN, unit, relative);
 
         assertThat(filter.apply(item1), is(true));
         filter.persisted(item1);

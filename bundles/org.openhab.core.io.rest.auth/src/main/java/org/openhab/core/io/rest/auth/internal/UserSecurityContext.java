@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -38,7 +38,7 @@ public class UserSecurityContext implements AuthenticationSecurityContext {
      * Constructs a security context from an instance of {@link User}
      *
      * @param user the user
-     * @param the related {@link Authentication}
+     * @param authentication the related {@link Authentication}
      * @param authenticationScheme the scheme that was used to authenticate the user, e.g. "Basic"
      */
     public UserSecurityContext(User user, Authentication authentication, String authenticationScheme) {

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -11,6 +11,8 @@
  * SPDX-License-Identifier: EPL-2.0
  */
 package org.openhab.core.io.transport.modbus.internal;
+
+import java.time.Duration;
 
 import org.apache.commons.pool2.impl.DefaultEvictionPolicy;
 import org.apache.commons.pool2.impl.EvictionPolicy;
@@ -51,7 +53,7 @@ public class ModbusPoolConfig extends GenericKeyedObjectPoolConfig<@Nullable Mod
         setMaxTotalPerKey(1);
 
         // block infinitely when exhausted
-        setMaxWaitMillis(-1);
+        setMaxWait(Duration.ofMillis(-1));
 
         // Connections are "tested" on return. Effectively, disconnected connections are destroyed when returning on
         // pool
@@ -65,7 +67,7 @@ public class ModbusPoolConfig extends GenericKeyedObjectPoolConfig<@Nullable Mod
 
         // Evict idle connections every 10 seconds
         setEvictionPolicy(new ModbusSlaveConnectionEvictionPolicy());
-        setTimeBetweenEvictionRunsMillis(10000);
+        setTimeBetweenEvictionRuns(Duration.ofMillis(10000));
         // Let eviction re-create ready-to-use idle (=unconnected) connections
         // This is to avoid occasional / rare deadlocks seen with pool 2.8.1 & 2.4.3 when
         // borrow hangs (waiting indefinitely for idle object to appear in the pool)

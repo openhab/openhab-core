@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -14,6 +14,7 @@ package org.openhab.core.io.rest.core.internal;
 
 import java.io.IOException;
 
+import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 
@@ -50,6 +51,11 @@ public class JSONResponseExceptionMapper implements ExceptionMapper<Exception> {
             logger.debug("Failed writing HTTP response, since other side closed the connection", e);
             // Returning null results in a Response.Status.NO_CONTENT response.
             return null;
+        } else if (e instanceof ClientErrorException cee) {
+            // we catch this exception to avoid confusion errors in the log file, since this is not any error situation
+            // see https://github.com/openhab/openhab-distro/issues/1616
+            logger.debug("Requested resource not (yet) found", cee);
+            return cee.getResponse();
         } else {
             logger.error("Unexpected exception occurred while processing REST request.", e);
             return delegate.toResponse(e);

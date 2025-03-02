@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,7 +17,7 @@ import java.text.ParseException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
+import java.util.WeakHashMap;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -34,6 +34,7 @@ import org.openhab.core.items.ItemUtil;
 import org.openhab.core.items.events.ItemEventFactory;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.voice.DialogContext;
+import org.openhab.core.voice.KSEdgeService;
 import org.openhab.core.voice.KSErrorEvent;
 import org.openhab.core.voice.KSEvent;
 import org.openhab.core.voice.KSException;
@@ -69,13 +70,13 @@ import org.slf4j.LoggerFactory;
  * @author Miguel Álvarez - Close audio streams + use RecognitionStartEvent
  * @author Miguel Álvarez - Use dialog context
  * @author Miguel Álvarez - Add sounds
+ * @author Miguel Álvarez - Add dialog groups
  *
  */
 @NonNullByDefault
 public class DialogProcessor implements KSListener, STTListener {
-
     private final Logger logger = LoggerFactory.getLogger(DialogProcessor.class);
-
+    private final WeakHashMap<String, DialogContext> activeDialogGroups;
     public final DialogContext dialogContext;
     private @Nullable List<ToneSynthesizer.Tone> listeningMelody;
     private final EventPublisher eventPublisher;
@@ -105,11 +106,12 @@ public class DialogProcessor implements KSListener, STTListener {
     private @Nullable ToneSynthesizer toneSynthesizer;
 
     public DialogProcessor(DialogContext context, DialogEventListener eventListener, EventPublisher eventPublisher,
-            TranslationProvider i18nProvider, Bundle bundle) {
+            WeakHashMap<String, DialogContext> activeDialogGroups, TranslationProvider i18nProvider, Bundle bundle) {
         this.dialogContext = context;
         this.eventListener = eventListener;
         this.eventPublisher = eventPublisher;
         this.i18nProvider = i18nProvider;
+        this.activeDialogGroups = activeDialogGroups;
         this.bundle = bundle;
         var ks = context.ks();
         this.ksFormat = ks != null
@@ -163,9 +165,13 @@ public class DialogProcessor implements KSListener, STTListener {
                 return;
             }
             try {
-                AudioStream stream = dialogContext.source().getInputStream(fmt);
-                streamKS = stream;
-                ksServiceHandle = ksService.spot(this, stream, dialogContext.locale(), keyword);
+                if (ksService instanceof KSEdgeService service) {
+                    service.spot(this);
+                } else {
+                    AudioStream stream = dialogContext.source().getInputStream(fmt);
+                    streamKS = stream;
+                    ksServiceHandle = ksService.spot(this, stream, dialogContext.locale(), keyword);
+                }
                 playStartSound();
             } catch (AudioException e) {
                 logger.warn("Encountered audio error: {}", e.getMessage());
@@ -182,7 +188,15 @@ public class DialogProcessor implements KSListener, STTListener {
      * Starts a single dialog
      */
     public void startSimpleDialog() {
-        abortSTT();
+        synchronized (activeDialogGroups) {
+            if (!activeDialogGroups.containsKey(dialogContext.dialogGroup())) {
+                logger.debug("Acquiring dialog group '{}'", dialogContext.dialogGroup());
+                activeDialogGroups.put(dialogContext.dialogGroup(), dialogContext);
+            } else {
+                logger.warn("Ignoring keyword spotting event, dialog group '{}' running", dialogContext.dialogGroup());
+                return;
+            }
+        }
         closeStreamSTT();
         isSTTServerAborting = false;
         AudioFormat fmt = sttFormat;
@@ -196,6 +210,7 @@ public class DialogProcessor implements KSListener, STTListener {
             AudioStream stream = dialogContext.source().getInputStream(fmt);
             streamSTT = stream;
             sttServiceHandle = dialogContext.stt().recognize(this, stream, dialogContext.locale(), new HashSet<>());
+            return;
         } catch (AudioException e) {
             logger.warn("Error creating the audio stream: {}", e.getMessage());
         } catch (STTException e) {
@@ -207,6 +222,11 @@ public class DialogProcessor implements KSListener, STTListener {
             } else if (text != null) {
                 say(text.replace("{0}", ""));
             }
+        }
+        // In case of error release dialog group
+        synchronized (activeDialogGroups) {
+            logger.debug("Releasing dialog group '{}' due to errors", dialogContext.dialogGroup());
+            activeDialogGroups.remove(dialogContext.dialogGroup());
         }
     }
 
@@ -221,6 +241,13 @@ public class DialogProcessor implements KSListener, STTListener {
         toggleProcessing(false);
         playStopSound();
         eventListener.onDialogStopped(dialogContext);
+    }
+
+    /**
+     * Returns the dialog context used to start this processor.
+     */
+    public DialogContext getContext() {
+        return dialogContext;
     }
 
     /**
@@ -257,6 +284,10 @@ public class DialogProcessor implements KSListener, STTListener {
             sttServiceHandle = null;
         }
         isSTTServerAborting = true;
+        synchronized (activeDialogGroups) {
+            logger.debug("Releasing dialog group '{}'", dialogContext.dialogGroup());
+            activeDialogGroups.remove(dialogContext.dialogGroup());
+        }
     }
 
     private void closeStreamSTT() {
@@ -278,27 +309,24 @@ public class DialogProcessor implements KSListener, STTListener {
         processing = value;
         String item = dialogContext.listeningItem();
         if (item != null && ItemUtil.isValidItemName(item)) {
-            OnOffType command = (value) ? OnOffType.ON : OnOffType.OFF;
-            eventPublisher.post(ItemEventFactory.createCommandEvent(item, command));
+            eventPublisher.post(ItemEventFactory.createCommandEvent(item, OnOffType.from(value)));
         }
     }
 
     @Override
     public void ksEventReceived(KSEvent ksEvent) {
-        if (!processing) {
-            isSTTServerAborting = false;
-            if (ksEvent instanceof KSpottedEvent) {
-                logger.debug("KSpottedEvent event received");
-                try {
-                    startSimpleDialog();
-                } catch (IllegalStateException e) {
-                    logger.warn("{}", e.getMessage());
-                }
-            } else if (ksEvent instanceof KSErrorEvent kse) {
-                logger.debug("KSErrorEvent event received");
-                String text = i18nProvider.getText(bundle, "error.ks-error", null, dialogContext.locale());
-                say(text == null ? kse.getMessage() : text.replace("{0}", kse.getMessage()));
+        isSTTServerAborting = false;
+        if (ksEvent instanceof KSpottedEvent) {
+            logger.debug("KSpottedEvent event received");
+            try {
+                startSimpleDialog();
+            } catch (IllegalStateException e) {
+                logger.warn("{}", e.getMessage());
             }
+        } else if (ksEvent instanceof KSErrorEvent kse) {
+            logger.debug("KSErrorEvent event received");
+            String text = i18nProvider.getText(bundle, "error.ks-error", null, dialogContext.locale());
+            say(text == null ? kse.getMessage() : text.replace("{0}", kse.getMessage()));
         }
     }
 
@@ -315,7 +343,7 @@ public class DialogProcessor implements KSListener, STTListener {
                 String error = null;
                 for (HumanLanguageInterpreter interpreter : dialogContext.hlis()) {
                     try {
-                        answer = interpreter.interpret(dialogContext.locale(), question);
+                        answer = interpreter.interpret(dialogContext.locale(), question, dialogContext);
                         logger.debug("Interpretation result: {}", answer);
                         error = null;
                         break;
@@ -334,12 +362,14 @@ public class DialogProcessor implements KSListener, STTListener {
             logger.debug("RecognitionStopEvent event received");
             toggleProcessing(false);
         } else if (sttEvent instanceof SpeechRecognitionErrorEvent sre) {
-            logger.debug("SpeechRecognitionErrorEvent event received");
+            String message = sre.getMessage();
+            logger.debug("SpeechRecognitionErrorEvent event received: {}", message);
             if (!isSTTServerAborting) {
                 abortSTT();
                 toggleProcessing(false);
-                String text = i18nProvider.getText(bundle, "error.stt-error", null, dialogContext.locale());
-                say(text == null ? sre.getMessage() : text.replace("{0}", sre.getMessage()));
+                if (!message.isEmpty()) {
+                    say(message);
+                }
             }
         }
     }
@@ -401,12 +431,12 @@ public class DialogProcessor implements KSListener, STTListener {
 
     private void playStartSound() {
         playNotes(Stream.of(ToneSynthesizer.Note.G, ToneSynthesizer.Note.A, ToneSynthesizer.Note.B)
-                .map(note -> ToneSynthesizer.noteTone(note, 100L)).collect(Collectors.toList()));
+                .map(note -> ToneSynthesizer.noteTone(note, 100L)).toList());
     }
 
     private void playStopSound() {
         playNotes(Stream.of(ToneSynthesizer.Note.B, ToneSynthesizer.Note.A, ToneSynthesizer.Note.G)
-                .map(note -> ToneSynthesizer.noteTone(note, 100L)).collect(Collectors.toList()));
+                .map(note -> ToneSynthesizer.noteTone(note, 100L)).toList());
     }
 
     private void playOnListeningSound() {

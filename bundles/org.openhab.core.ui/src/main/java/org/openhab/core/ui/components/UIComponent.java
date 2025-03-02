@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -52,7 +52,7 @@ public class UIComponent {
     public UIComponent(String componentType) {
         super();
         this.component = componentType;
-        this.config = new HashMap<String, Object>();
+        this.config = new HashMap<>();
     }
 
     /**
@@ -136,9 +136,9 @@ public class UIComponent {
      */
     public List<UIComponent> addSlot(String slotName) {
         if (slots == null) {
-            slots = new HashMap<String, List<UIComponent>>();
+            slots = new HashMap<>();
         }
-        List<UIComponent> newSlot = new ArrayList<UIComponent>();
+        List<UIComponent> newSlot = new ArrayList<>();
         this.slots.put(slotName, newSlot);
 
         return newSlot;

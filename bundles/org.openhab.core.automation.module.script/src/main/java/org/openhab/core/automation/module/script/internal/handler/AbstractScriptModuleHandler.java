@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -18,10 +18,14 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.UUID;
 
+import javax.script.Compilable;
+import javax.script.CompiledScript;
 import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
+import javax.script.ScriptException;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.Module;
 import org.openhab.core.automation.handler.BaseModuleHandler;
 import org.openhab.core.automation.module.script.ScriptEngineContainer;
@@ -32,9 +36,12 @@ import org.slf4j.LoggerFactory;
 
 /**
  * This is an abstract class that can be used when implementing any module handler that handles scripts.
+ * <p>
+ * Remember to implement multi-thread synchronization in the concrete handler if the script engine is not thread-safe!
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Simon Merschjohann - Initial contribution
+ * @author Florian Hotze - Add support for script pre-compilation
  *
  * @param <T> the type of module the concrete handler can handle
  */
@@ -54,28 +61,54 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
     private final String engineIdentifier;
 
     private Optional<ScriptEngine> scriptEngine = Optional.empty();
+    private Optional<CompiledScript> compiledScript = Optional.empty();
     private final String type;
     protected final String script;
 
     protected final String ruleUID;
 
-    public AbstractScriptModuleHandler(T module, String ruleUID, ScriptEngineManager scriptEngineManager) {
+    protected AbstractScriptModuleHandler(T module, String ruleUID, ScriptEngineManager scriptEngineManager) {
         super(module);
         this.scriptEngineManager = scriptEngineManager;
         this.ruleUID = ruleUID;
         this.engineIdentifier = UUID.randomUUID().toString();
 
-        this.type = getValidConfigParameter(SCRIPT_TYPE, module.getConfiguration(), module.getId());
-        this.script = getValidConfigParameter(SCRIPT, module.getConfiguration(), module.getId());
+        this.type = getValidConfigParameter(SCRIPT_TYPE, module.getConfiguration(), module.getId(), false);
+        this.script = getValidConfigParameter(SCRIPT, module.getConfiguration(), module.getId(), true);
     }
 
-    private static String getValidConfigParameter(String parameter, Configuration config, String moduleId) {
+    private static String getValidConfigParameter(String parameter, Configuration config, String moduleId,
+            boolean emptyAllowed) {
         Object value = config.get(parameter);
-        if (value != null && value instanceof String string && !string.trim().isEmpty()) {
+        if (value instanceof String string && (emptyAllowed || !string.trim().isEmpty())) {
             return string;
         } else {
             throw new IllegalStateException(String.format(
                     "Config parameter '%s' is missing in the configuration of module '%s'.", parameter, moduleId));
+        }
+    }
+
+    /**
+     * Creates the {@link ScriptEngine} and compiles the script if the {@link ScriptEngine} implements
+     * {@link Compilable}.
+     */
+    protected void compileScript() throws ScriptException {
+        if (compiledScript.isPresent()) {
+            return;
+        }
+        if (!scriptEngineManager.isSupported(this.type)) {
+            logger.debug(
+                    "ScriptEngine for language '{}' could not be found, skipping compilation of script for identifier: {}",
+                    type, engineIdentifier);
+            return;
+        }
+        Optional<ScriptEngine> engine = getScriptEngine();
+        if (engine.isPresent()) {
+            ScriptEngine scriptEngine = engine.get();
+            if (scriptEngine instanceof Compilable compilable) {
+                logger.debug("Pre-compiling script of rule with UID '{}'", ruleUID);
+                compiledScript = Optional.ofNullable(compilable.compile(script));
+            }
         }
     }
 
@@ -167,5 +200,27 @@ public abstract class AbstractScriptModuleHandler<T extends Module> extends Base
             }
             executionContext.removeAttribute(key, ScriptContext.ENGINE_SCOPE);
         }
+    }
+
+    /**
+     * Evaluates the passed script with the ScriptEngine.
+     *
+     * @param engine the script engine that is used
+     * @param script the script to evaluate
+     * @return the value returned from the execution of the script
+     */
+    protected @Nullable Object eval(ScriptEngine engine, String script) {
+        try {
+            if (compiledScript.isPresent()) {
+                logger.debug("Executing pre-compiled script of rule with UID '{}'", ruleUID);
+                return compiledScript.get().eval(engine.getContext());
+            }
+            logger.debug("Executing script of rule with UID '{}'", ruleUID);
+            return engine.eval(script);
+        } catch (ScriptException e) {
+            logger.error("Script execution of rule with UID '{}' failed: {}", ruleUID, e.getMessage(),
+                    logger.isDebugEnabled() ? e : null);
+        }
+        return null;
     }
 }

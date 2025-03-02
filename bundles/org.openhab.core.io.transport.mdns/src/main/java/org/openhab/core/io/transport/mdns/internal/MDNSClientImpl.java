@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -191,6 +191,10 @@ public class MDNSClientImpl implements MDNSClient, NetworkAddressChangeListener 
     @Override
     public void unregisterService(ServiceDescription description) {
         activeServices.remove(description);
+        unregisterServiceInternal(description);
+    }
+
+    private void unregisterServiceInternal(ServiceDescription description) {
         for (JmDNS instance : jmdnsInstances.values()) {
             try {
                 logger.debug("Unregistering service {} at {}:{} ({})", description.serviceType,
@@ -277,7 +281,59 @@ public class MDNSClientImpl implements MDNSClient, NetworkAddressChangeListener 
     @Override
     public void onChanged(List<CidrAddress> added, List<CidrAddress> removed) {
         logger.debug("ip address change: added {}, removed {}", added, removed);
-        close();
-        start();
+
+        Set<InetAddress> filteredAddresses = getAllInetAddresses();
+
+        // First check if there is really a jmdns instance to remove or add
+        boolean changeRequired = false;
+        for (InetAddress address : jmdnsInstances.keySet()) {
+            if (!filteredAddresses.contains(address)) {
+                changeRequired = true;
+                break;
+            }
+        }
+        if (!changeRequired) {
+            for (InetAddress address : filteredAddresses) {
+                JmDNS jmdns = jmdnsInstances.get(address);
+                if (jmdns == null) {
+                    changeRequired = true;
+                    break;
+                }
+            }
+        }
+        if (!changeRequired) {
+            logger.debug("mDNS services already OK for these ip addresses");
+            return;
+        }
+
+        for (ServiceDescription description : activeServices) {
+            unregisterServiceInternal(description);
+        }
+        for (InetAddress address : jmdnsInstances.keySet()) {
+            if (!filteredAddresses.contains(address)) {
+                JmDNS jmdns = jmdnsInstances.remove(address);
+                if (jmdns != null) {
+                    closeQuietly(jmdns);
+                    logger.debug("mDNS service has been stopped ({} for IP {})", jmdns.getName(),
+                            address.getHostAddress());
+                }
+            }
+        }
+        for (InetAddress address : filteredAddresses) {
+            JmDNS jmdns = jmdnsInstances.get(address);
+            if (jmdns == null) {
+                createJmDNSByAddress(address);
+            } else {
+                logger.debug("mDNS service was already started ({} for IP {})", jmdns.getName(),
+                        address.getHostAddress());
+            }
+        }
+        for (ServiceDescription description : activeServices) {
+            try {
+                registerServiceInternal(description);
+            } catch (IOException e) {
+                logger.warn("Exception while registering service {}", description, e);
+            }
+        }
     }
 }

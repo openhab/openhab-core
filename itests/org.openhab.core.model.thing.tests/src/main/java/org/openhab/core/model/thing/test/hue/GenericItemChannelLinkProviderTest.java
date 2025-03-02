@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -100,7 +100,7 @@ public class GenericItemChannelLinkProviderTest extends JavaOSGiTest {
 
             List<ItemChannelLink> actualItemChannelLinks = new ArrayList<>(itemChannelLinkRegistry.getAll());
             assertThat(actualItemChannelLinks.size(), is(1));
-            assertThat(actualItemChannelLinks.get(0).toString(),
+            assertThat(actualItemChannelLinks.getFirst().toString(),
                     is(equalTo("Light3Color -> hue:LCT001:huebridge:bulb3:color")));
         });
     }
@@ -133,7 +133,7 @@ public class GenericItemChannelLinkProviderTest extends JavaOSGiTest {
 
             List<ItemChannelLink> actualItemChannelLinks = new ArrayList<>(itemChannelLinkRegistry.getAll());
             assertThat(actualItemChannelLinks.size(), is(2));
-            assertThat(actualItemChannelLinks.get(0).toString(),
+            assertThat(actualItemChannelLinks.getFirst().toString(),
                     is(equalTo("Light3Color -> hue:LCT001:huebridge:bulb3:color")));
             assertThat(actualItemChannelLinks.get(1).toString(),
                     is(equalTo("Light3Color -> hue:LCT001:huebridge:bulb4:color")));

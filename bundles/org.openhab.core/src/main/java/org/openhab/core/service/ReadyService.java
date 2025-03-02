@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -67,7 +67,7 @@ public interface ReadyService {
      * The provided tracker will get notified about the addition of all existing readyMarkers right away.
      *
      * @param readyTracker
-     * @param readyMarker
+     * @param filter
      */
     void registerTracker(ReadyTracker readyTracker, ReadyMarkerFilter filter);
 

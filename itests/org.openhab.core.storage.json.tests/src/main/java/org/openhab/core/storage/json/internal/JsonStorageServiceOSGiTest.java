@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
@@ -66,13 +65,13 @@ public class JsonStorageServiceOSGiTest extends JavaOSGiTest {
     @AfterAll
     public static void afterClass() throws IOException {
         // clean up database files ...
-        final Path userData = Paths.get(OpenHAB.getUserDataFolder());
+        final Path userData = Path.of(OpenHAB.getUserDataFolder());
         if (Files.exists(userData)) {
             try (Stream<Path> walk = Files.walk(userData)) {
                 walk.sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
             }
         }
-        final Path config = Paths.get(OpenHAB.getConfigFolder());
+        final Path config = Path.of(OpenHAB.getConfigFolder());
         if (Files.exists(config)) {
             try (Stream<Path> walk = Files.walk(config)) {
                 walk.sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
@@ -114,7 +113,7 @@ public class JsonStorageServiceOSGiTest extends JavaOSGiTest {
 
     @Test
     public void testOverride() {
-        PersistedItem pItem = null;
+        PersistedItem pItem;
 
         assertThat(storage.getKeys().size(), is(0));
 

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -42,6 +42,7 @@ import org.openhab.core.thing.type.ThingType;
 import org.openhab.core.thing.util.ThingHandlerHelper;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.State;
+import org.openhab.core.types.TimeSeries;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,6 +69,11 @@ class ThingHandlerCallbackImpl implements ThingHandlerCallback {
     @Override
     public void postCommand(ChannelUID channelUID, Command command) {
         thingManager.communicationManager.postCommand(channelUID, command);
+    }
+
+    @Override
+    public void sendTimeSeries(ChannelUID channelUID, TimeSeries timeSeries) {
+        thingManager.communicationManager.sendTimeSeries(channelUID, timeSeries);
     }
 
     @Override
@@ -220,7 +226,7 @@ class ThingHandlerCallbackImpl implements ThingHandlerCallback {
 
     @Override
     public ChannelBuilder editChannel(Thing thing, ChannelUID channelUID) {
-        Channel channel = thing.getChannel(channelUID.getId());
+        Channel channel = thing.getChannel(channelUID);
         if (channel == null) {
             throw new IllegalArgumentException(
                     String.format("Channel '%s' does not exist for thing '%s'", channelUID, thing.getUID()));

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -94,7 +94,7 @@ public class ProxyFilter implements ContainerRequestFilter {
         // it
         String uriString = scheme + "://" + host.trim();
 
-        URI newBaseUri = null;
+        URI newBaseUri;
         try {
             newBaseUri = new URI(uriString);
         } catch (URISyntaxException e) {
@@ -129,6 +129,6 @@ public class ProxyFilter implements ContainerRequestFilter {
             return null;
         }
 
-        return values.get(0);
+        return values.getFirst();
     }
 }

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -17,15 +17,13 @@ import static java.util.function.Predicate.not;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -70,7 +68,10 @@ public class ConfigUtil {
     }
 
     static @Nullable Object getDefaultValueAsCorrectType(String parameterName, Type parameterType,
-            String defaultValue) {
+            @Nullable String defaultValue) {
+        if (defaultValue == null) {
+            return null;
+        }
         try {
             switch (parameterType) {
                 case TEXT:
@@ -118,14 +119,13 @@ public class ConfigUtil {
                 if (defaultValue != null && configuration.get(parameter.getName()) == null) {
                     if (parameter.isMultiple()) {
                         if (defaultValue.contains(DEFAULT_LIST_DELIMITER)) {
-                            List<Object> values = (List<Object>) List.of(defaultValue.split(DEFAULT_LIST_DELIMITER))
-                                    .stream() //
+                            List<Object> values = (List<Object>) Stream.of(defaultValue.split(DEFAULT_LIST_DELIMITER))
                                     .map(String::trim) //
                                     .filter(not(String::isEmpty)) //
                                     .map(value -> ConfigUtil.getDefaultValueAsCorrectType(parameter.getName(),
                                             parameter.getType(), value)) //
                                     .filter(Objects::nonNull) //
-                                    .collect(Collectors.toList());
+                                    .toList();
                             Integer multipleLimit = parameter.getMultipleLimit();
                             if (multipleLimit != null && values.size() > multipleLimit.intValue()) {
                                 LoggerFactory.getLogger(ConfigUtil.class).warn(
@@ -136,7 +136,7 @@ public class ConfigUtil {
                         } else {
                             Object value = ConfigUtil.getDefaultValueAsCorrectType(parameter);
                             if (value != null) {
-                                configuration.put(parameter.getName(), Arrays.asList(value));
+                                configuration.put(parameter.getName(), List.of(value));
                             }
                         }
                     } else {
@@ -176,19 +176,23 @@ public class ConfigUtil {
      * @return corresponding value as a valid type
      * @throws IllegalArgumentException if an invalid type has been given
      */
-    public static Object normalizeType(Object value, @Nullable ConfigDescriptionParameter configDescriptionParameter) {
+    @Nullable
+    public static Object normalizeType(@Nullable Object value,
+            @Nullable ConfigDescriptionParameter configDescriptionParameter) {
         if (configDescriptionParameter != null) {
             Normalizer normalizer = NormalizerFactory.getNormalizer(configDescriptionParameter);
             return normalizer.normalize(value);
-        } else if (value instanceof Boolean || value instanceof String || value instanceof BigDecimal) {
-            return value;
+        } else if (value instanceof Boolean) {
+            return NormalizerFactory.getNormalizer(Type.BOOLEAN).normalize(value);
+        } else if (value instanceof String) {
+            return NormalizerFactory.getNormalizer(Type.TEXT).normalize(value);
         } else if (value instanceof Number) {
-            return new BigDecimal(value.toString());
+            return NormalizerFactory.getNormalizer(Type.DECIMAL).normalize(value);
         } else if (value instanceof Collection collection) {
             return normalizeCollection(collection);
         }
         throw new IllegalArgumentException(
-                "Invalid type '{" + value.getClass().getCanonicalName() + "}' of configuration value!");
+                "Invalid type '{%s}' of configuration value!".formatted(value.getClass().getCanonicalName()));
     }
 
     /**
@@ -208,20 +212,21 @@ public class ConfigUtil {
      * @return the normalized configuration or null if given configuration was null
      * @throws IllegalArgumentException if given config description is null
      */
-    public static Map<String, Object> normalizeTypes(Map<String, Object> configuration,
+    public static Map<String, @Nullable Object> normalizeTypes(Map<String, @Nullable Object> configuration,
             List<ConfigDescription> configDescriptions) {
         if (configDescriptions.isEmpty()) {
             throw new IllegalArgumentException("Config description must not be empty.");
         }
 
-        Map<String, Object> convertedConfiguration = new HashMap<>();
+        Map<String, @Nullable Object> convertedConfiguration = new HashMap<>();
 
         Map<String, ConfigDescriptionParameter> configParams = new HashMap<>();
         for (int i = configDescriptions.size() - 1; i >= 0; i--) {
             configParams.putAll(configDescriptions.get(i).toParametersMap());
         }
-        for (Entry<String, Object> parameter : configuration.entrySet()) {
+        for (Entry<String, @Nullable Object> parameter : configuration.entrySet()) {
             String name = parameter.getKey();
+            @Nullable
             Object value = parameter.getValue();
             if (!isOSGiConfigParameter(name)) {
                 ConfigDescriptionParameter configDescriptionParameter = configParams.get(name);
@@ -240,7 +245,7 @@ public class ConfigUtil {
      * @param value the value to return as normalized type
      * @return corresponding value as a valid type
      */
-    public static Object normalizeType(Object value) {
+    public static @Nullable Object normalizeType(@Nullable Object value) {
         return normalizeType(value, null);
     }
 
@@ -254,13 +259,13 @@ public class ConfigUtil {
     private static Collection<Object> normalizeCollection(Collection<@NonNull ?> collection)
             throws IllegalArgumentException {
         if (collection.isEmpty()) {
-            return Collections.emptyList();
+            return List.of();
         } else {
             final List<Object> lst = new ArrayList<>(collection.size());
             for (final Object it : collection) {
                 final Object normalized = normalizeType(it, null);
                 lst.add(normalized);
-                if (normalized.getClass() != lst.get(0).getClass()) {
+                if (normalized.getClass() != lst.getFirst().getClass()) {
                     throw new IllegalArgumentException(
                             "Invalid configuration property. Heterogeneous collection value!");
                 }

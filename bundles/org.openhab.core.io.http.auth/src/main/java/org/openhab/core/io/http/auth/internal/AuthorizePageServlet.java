@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2010-2023 Contributors to the openHAB project
+/*
+ * Copyright (c) 2010-2025 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,6 +13,7 @@
 package org.openhab.core.io.http.auth.internal;
 
 import java.io.IOException;
+import java.io.Serial;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -62,6 +63,7 @@ public class AuthorizePageServlet extends AbstractAuthPageServlet {
 
     public static final String SERVLET_PATH = "/auth";
 
+    @Serial
     private static final long serialVersionUID = 5340598701104679843L;
 
     private final Logger logger = LoggerFactory.getLogger(AuthorizePageServlet.class);
@@ -77,7 +79,7 @@ public class AuthorizePageServlet extends AbstractAuthPageServlet {
         Map<String, String[]> params = req.getParameterMap();
 
         try {
-            String message = "";
+            String message;
             String scope = params.containsKey("scope") ? params.get("scope")[0] : "";
             String clientId = params.containsKey("client_id") ? params.get("client_id")[0] : "";
 
