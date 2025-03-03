@@ -220,6 +220,10 @@ public class UIComponentSitemapProvider implements SitemapProvider, RegistryChan
                 setWidgetPropertyFromComponentConfig(widget, component, "legend", SitemapPackage.CHART__LEGEND);
                 setWidgetPropertyFromComponentConfig(widget, component, "forceAsItem",
                         SitemapPackage.CHART__FORCE_AS_ITEM);
+                setWidgetPropertyFromComponentConfig(widget, component, "yAxisDecimalPattern",
+                        SitemapPackage.CHART__YAXIS_DECIMAL_PATTERN);
+                setWidgetPropertyFromComponentConfig(widget, component, "interpolation",
+                        SitemapPackage.CHART__INTERPOLATION);
                 break;
             case "Webview":
                 WebviewImpl webviewWidget = (WebviewImpl) SitemapFactory.eINSTANCE.createWebview();

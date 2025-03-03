@@ -86,7 +86,8 @@ Chart:
     ('valuecolor=[' (ValueColor+=ColorArray (',' ValueColor+=ColorArray)*) ']')? &
     ('iconcolor=[' (IconColor+=ColorArray (',' IconColor+=ColorArray)*) ']')? &
     ('visibility=[' (Visibility+=VisibilityRule (',' Visibility+=VisibilityRule)*) ']')? &
-    ('yAxisDecimalPattern=' yAxisDecimalPattern=(STRING))?);
+    ('yAxisDecimalPattern=' yAxisDecimalPattern=(STRING))? &
+    ('interpolation=' interpolation=(STRING))?);
 
 Webview:
     'Webview' (('item=' item=ItemRef)? & ('label=' label=(ID | STRING))? &
