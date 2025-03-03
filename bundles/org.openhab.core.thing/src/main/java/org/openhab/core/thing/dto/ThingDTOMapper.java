@@ -32,6 +32,7 @@ import org.openhab.core.thing.util.ThingHelper;
  *
  * @author Stefan Bußweiler - Initial contribution
  * @author Kai Kreuzer - Added DTO to Thing mapping
+ * @author Andrew Fiddian-Green - Added semanticEquipmentTag
  */
 @NonNullByDefault
 public class ThingDTOMapper {
@@ -54,7 +55,8 @@ public class ThingDTOMapper {
         final ThingUID bridgeUID = thing.getBridgeUID();
 
         return new ThingDTO(thingTypeUID, thingUID, thing.getLabel(), bridgeUID != null ? bridgeUID.toString() : null,
-                channelDTOs, toMap(thing.getConfiguration()), thing.getProperties(), thing.getLocation());
+                channelDTOs, toMap(thing.getConfiguration()), thing.getProperties(), thing.getLocation(),
+                thing.getSemanticEquipmentTag());
     }
 
     /**
