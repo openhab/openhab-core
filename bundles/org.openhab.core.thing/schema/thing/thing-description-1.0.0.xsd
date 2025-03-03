@@ -215,7 +215,7 @@
 
 	<xs:complexType name="tags">
 		<xs:sequence>
-			<xs:element name="tag" type="xs:string" minOccurs="1" maxOccurs="unbounded"/>
+			<xs:element name="tag" type="thing-description:semanticPropertyOrPointTag" minOccurs="1" maxOccurs="2"/>
 		</xs:sequence>
 	</xs:complexType>
 
@@ -269,4 +269,56 @@
 			</xs:extension>
 		</xs:simpleContent>
 	</xs:complexType>
+
+	<xs:simpleType name="semanticPropertyOrPointTag">
+		<xs:restriction base="xs:string">
+			<!-- Begin Allowed Semantic Property Tag Values -->
+			<xs:enumeration value="Temperature"/>
+			<xs:enumeration value="Light"/>
+			<xs:enumeration value="ColorTemperature"/>
+			<xs:enumeration value="Humidity"/>
+			<xs:enumeration value="Presence"/>
+			<xs:enumeration value="Airflow"/>
+			<xs:enumeration value="Pressure"/>
+			<xs:enumeration value="Smoke"/>
+			<xs:enumeration value="Noise"/>
+			<xs:enumeration value="Rain"/>
+			<xs:enumeration value="Wind"/>
+			<xs:enumeration value="Water"/>
+			<xs:enumeration value="CO2"/>
+			<xs:enumeration value="CO"/>
+			<xs:enumeration value="Energy"/>
+			<xs:enumeration value="Power"/>
+			<xs:enumeration value="Voltage"/>
+			<xs:enumeration value="Current"/>
+			<xs:enumeration value="Frequency"/>
+			<xs:enumeration value="Gas"/>
+			<xs:enumeration value="Application"/>
+			<xs:enumeration value="Channel"/>
+			<xs:enumeration value="Mode"/>
+			<xs:enumeration value="SoundVolume"/>
+			<xs:enumeration value="Oil"/>
+			<xs:enumeration value="Duration"/>
+			<xs:enumeration value="Level"/>
+			<xs:enumeration value="Opening"/>
+			<xs:enumeration value="Timestamp"/>
+			<xs:enumeration value="Ultraviolet"/>
+			<xs:enumeration value="Vibration"/>
+			<!-- End Allowed Semantic Property Tag Values -->
+
+			<!-- Begin Allowed Semantic Point Tag Values -->
+			<xs:enumeration value="Alarm"/>
+			<xs:enumeration value="Control"/>
+			<xs:enumeration value="Switch"/>
+			<xs:enumeration value="Measurement"/>
+			<xs:enumeration value="Setpoint"/>
+			<xs:enumeration value="Status"/>
+			<xs:enumeration value="LowBattery"/>
+			<xs:enumeration value="OpenLevel"/>
+			<xs:enumeration value="OpenState"/>
+			<xs:enumeration value="Tampered"/>
+			<xs:enumeration value="Tilt"/>
+			<!-- End Allowed Semantic Point Tag Values -->
+		</xs:restriction>
+	</xs:simpleType>
 </xs:schema>
