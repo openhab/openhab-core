@@ -32,7 +32,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.knowm.xchart.XYChart;
 import org.knowm.xchart.XYChartBuilder;
 import org.knowm.xchart.XYSeries;
-import org.knowm.xchart.style.Styler;
+import org.knowm.xchart.style.AxesChartStyler.TextAlignment;
 import org.knowm.xchart.style.Styler.LegendPosition;
 import org.knowm.xchart.style.XYStyler;
 import org.knowm.xchart.style.markers.None;
@@ -194,14 +194,14 @@ public class DefaultChartProvider implements ChartProvider {
         // axis
         styler.setAxisTickLabelsFont(chartTheme.getAxisTickLabelsFont(dpi));
         styler.setAxisTickLabelsColor(chartTheme.getAxisTickLabelsColor());
-        styler.setXAxisMin(startTime.toInstant().toEpochMilli());
-        styler.setXAxisMax(endTime.toInstant().toEpochMilli());
+        styler.setXAxisMin((double) startTime.toInstant().toEpochMilli());
+        styler.setXAxisMax((double) endTime.toInstant().toEpochMilli());
         int yAxisSpacing = Math.max(height / 10, chartTheme.getAxisTickLabelsFont(dpi).getSize());
         if (yAxisDecimalPattern != null) {
             styler.setYAxisDecimalPattern(yAxisDecimalPattern);
         }
         styler.setYAxisTickMarkSpacingHint(yAxisSpacing);
-        styler.setYAxisLabelAlignment(Styler.TextAlignment.Right);
+        styler.setYAxisLabelAlignment(TextAlignment.Right);
         // chart
         styler.setChartBackgroundColor(chartTheme.getChartBackgroundColor());
         styler.setChartFontColor(chartTheme.getChartFontColor());
