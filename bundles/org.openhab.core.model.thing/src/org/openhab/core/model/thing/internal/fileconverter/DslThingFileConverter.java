@@ -15,6 +15,7 @@ package org.openhab.core.model.thing.internal.fileconverter;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -184,6 +185,12 @@ public class DslThingFileConverter extends AbstractThingFileGenerator {
             } else {
                 property = null;
             }
+        } else if (value instanceof Double doubleValue) {
+            // DSL thing syntax does not like a configuration parameter value provided as Double type.
+            // By security, we apply a conversion to a BigDecimal in case this would happen.
+            logger.debug("Configuration parameter {} with value {} is provided unexpectedly as Double type", key,
+                    value);
+            property.getValue().add(BigDecimal.valueOf(doubleValue));
         } else {
             property.getValue().add(value);
         }
