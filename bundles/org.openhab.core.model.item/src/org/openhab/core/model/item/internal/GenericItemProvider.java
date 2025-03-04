@@ -15,6 +15,7 @@ package org.openhab.core.model.item.internal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -67,11 +68,13 @@ import org.slf4j.LoggerFactory;
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Thomas Eichstaedt-Engelen - Initial contribution
+ * @author Laurent Garnier - Add interface StandaloneItemProvider
  */
 @NonNullByDefault
-@Component(service = { ItemProvider.class, StateDescriptionFragmentProvider.class }, immediate = true)
-public class GenericItemProvider extends AbstractProvider<Item>
-        implements ModelRepositoryChangeListener, ItemProvider, StateDescriptionFragmentProvider {
+@Component(service = { ItemProvider.class, StandaloneItemProvider.class,
+        StateDescriptionFragmentProvider.class }, immediate = true)
+public class GenericItemProvider extends AbstractProvider<Item> implements ModelRepositoryChangeListener, ItemProvider,
+        StandaloneItemProvider, StateDescriptionFragmentProvider {
 
     private final Logger logger = LoggerFactory.getLogger(GenericItemProvider.class);
 
@@ -519,6 +522,14 @@ public class GenericItemProvider extends AbstractProvider<Item>
 
         logger.debug("Couldn't find ItemFactory for item '{}' of type '{}'", itemName, itemType);
         return null;
+    }
+
+    @Override
+    public Collection<Item> getItemsFromStandaloneModel(String modelName) {
+        if (modelName.endsWith("items")) {
+            return getItemsFromModel(modelName);
+        }
+        return Collections.emptyList();
     }
 
     @Override
