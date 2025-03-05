@@ -76,8 +76,8 @@ public class OAuthRfc8628ClientService extends OAuthClientServiceImpl {
             return atr.getAccessToken();
         }
 
-        public long getInterval() {
-            return Long.parseLong(atr.getState());
+        public int getInterval() {
+            return Integer.parseInt(atr.getState());
         }
 
         public String getUserUri() {
@@ -92,11 +92,11 @@ public class OAuthRfc8628ClientService extends OAuthClientServiceImpl {
             atr.setAccessToken(deviceCode);
         }
 
-        public void setExpiresIn(long expiresIn) {
+        public void setExpiresIn(int expiresIn) {
             atr.setExpiresIn(expiresIn);
         }
 
-        public void setInterval(long interval) {
+        public void setInterval(int interval) {
             atr.setState(String.valueOf(interval));
         }
 
@@ -105,10 +105,10 @@ public class OAuthRfc8628ClientService extends OAuthClientServiceImpl {
         }
     }
 
-    private static final String AUTH_START_FAILED = "Rfc8628Authentication process start failed";
-    private static final String THREADPOOL_NAME = "oAuthDeviceCodeGrantFlow";
+    private static final String RFC_8628_SUFFIX = "#rfc-8628";
+    private static final String THREADPOOL_NAME = "oAuth" + RFC_8628_SUFFIX;
     private static final String DEVICE_GRANT = "urn:ietf:params:oauth:grant-type:device_code";
-    private static final String DCR_HANDLE_SUFFIX = "#rfc-8628-dcr";
+    private static final String AUTH_START_FAILED = "Rfc8628Authentication process start failed";
 
     public static OAuthRfc8628ClientService createInstance(String handle, OAuthStoreHandler storeHandler,
             HttpClientFactory httpClientFactory, PersistedParams params) {
@@ -126,14 +126,15 @@ public class OAuthRfc8628ClientService extends OAuthClientServiceImpl {
     private final ScheduledExecutorService scheduler;
     private final HttpClient httpClient;
     private final Gson gson;
-    private final String dcrHandle;
+    private final String dcrStorageHandle;
 
     private @Nullable ScheduledFuture<?> rfcStep4and5Task;
+    private @Nullable DeviceCodeResponse cachedDeviceCodeResponse;
 
     protected OAuthRfc8628ClientService(String handle, int tokenExpiresInSeconds, HttpClientFactory httpClientFactory,
             @Nullable GsonBuilder gsonBuilder) {
         super(handle, tokenExpiresInSeconds, httpClientFactory, gsonBuilder);
-        this.dcrHandle = handle + DCR_HANDLE_SUFFIX;
+        this.dcrStorageHandle = handle + RFC_8628_SUFFIX;
         this.gson = (gsonBuilder != null ? gsonBuilder : new GsonBuilder()).create();
         this.httpClient = httpClientFactory.getCommonHttpClient();
         this.scheduler = ThreadPoolManager.getScheduledPool(THREADPOOL_NAME);
@@ -143,11 +144,11 @@ public class OAuthRfc8628ClientService extends OAuthClientServiceImpl {
      * Begins the Rfc8628 Device Code Grant Flow authentication process. Specifically it executes
      * the following steps as described in the article in the link below:
      * <ul>
-     * <li>Step 1. create a request and POST it to the 'device authorize url'</li>
-     * <li>Step 2. process the response and create a {@link DeviceCodeResponse}</li>
-     * <li>Step 3. the user goes off to authenticate themselves at the 'user authentication url</li>
-     * <li>Step 4. repeatedly create a request and POST it to the 'token url'</li>
-     * <li>Step 5. repeatedly read the response and eventually create a {@link AccessTokenResponse}</li>
+     * <li>Step 1: create a request and POST it to the 'device authorize url'</li>
+     * <li>Step 2: process the response and create a {@link DeviceCodeResponse}</li>
+     * <li>Step 3: the user goes off to authenticate themselves at the 'user authentication url</li>
+     * <li>Step 4: repeatedly create a request and POST it to the 'token url'</li>
+     * <li>Step 5: repeatedly read the response and eventually create a {@link AccessTokenResponse}</li>
      * </ul>
      *
      * @see <a href=
@@ -166,9 +167,10 @@ public class OAuthRfc8628ClientService extends OAuthClientServiceImpl {
         }
 
         DeviceCodeResponse dcr = storageLoadDeviceCodeResponse();
-        if (dcr == null || dcr.isExpired(Instant.now(), 0)) {
+        if (dcr == null || dcr.isExpired(Instant.now(), dcr.getInterval())) {
             dcr = rfcStep1and2GetDeviceCodeResponse();
         }
+        cachedDeviceCodeResponse = dcr;
         storageSaveDeviceCodeResponse(dcr);
 
         rfcStep4and5TaskCancel();
@@ -210,8 +212,8 @@ public class OAuthRfc8628ClientService extends OAuthClientServiceImpl {
                 if (tokenValues != null) {
                     String deviceCode = toString(tokenValues.get("device_code"));
                     String userUri = toString(tokenValues.get("verification_uri_complete"));
-                    long expiresIn = toLong(tokenValues.get("expires_in"));
-                    long interval = toLong(tokenValues.get("interval"));
+                    int expiresIn = toInt(tokenValues.get("expires_in"));
+                    int interval = toInt(tokenValues.get("interval"));
 
                     if (deviceCode != null && userUri != null && expiresIn > 0 && interval > 0) {
                         DeviceCodeResponse dcr = new DeviceCodeResponse();
@@ -273,7 +275,7 @@ public class OAuthRfc8628ClientService extends OAuthClientServiceImpl {
                     String accessToken = toString(tokenValues.get("access_token"));
                     String accessTokenType = toString(tokenValues.get("token_type"));
                     String refreshToken = toString(tokenValues.get("refresh_token"));
-                    long expiresIn = toLong(tokenValues.get("expires_in"));
+                    long expiresIn = toInt(tokenValues.get("expires_in"));
 
                     if (accessToken != null && refreshToken != null && accessTokenType != null && expiresIn > 0) {
                         AccessTokenResponse atr = new AccessTokenResponse();
@@ -297,11 +299,11 @@ public class OAuthRfc8628ClientService extends OAuthClientServiceImpl {
      * Runnable polling task for step 4 and 5
      */
     private synchronized void rfcStep4and5RepeatTask() {
-        DeviceCodeResponse dcr = storageLoadDeviceCodeResponse();
         AccessTokenResponse atr = null;
         Instant now = Instant.now();
 
-        if ((dcr != null) && !dcr.isExpired(now, 0)) {
+        DeviceCodeResponse dcr = cachedDeviceCodeResponse;
+        if (dcr != null && !dcr.isExpired(now, 5)) {
             atr = rfcStep4and5GetAccessTokenResponse(dcr.getDeviceCode());
         }
 
@@ -320,7 +322,7 @@ public class OAuthRfc8628ClientService extends OAuthClientServiceImpl {
 
     private @Nullable DeviceCodeResponse storageLoadDeviceCodeResponse() {
         try {
-            AccessTokenResponse atr = storeHandler.loadAccessTokenResponse(dcrHandle);
+            AccessTokenResponse atr = storeHandler.loadAccessTokenResponse(dcrStorageHandle);
             if (atr != null) {
                 return new DeviceCodeResponse(atr);
             }
@@ -330,12 +332,12 @@ public class OAuthRfc8628ClientService extends OAuthClientServiceImpl {
     }
 
     private void storageSaveDeviceCodeResponse(@Nullable DeviceCodeResponse dcr) {
-        AccessTokenResponse acr = dcr != null ? dcr.getAccessTokenResponse() : null;
-        storeHandler.saveAccessTokenResponse(dcrHandle, acr);
+        AccessTokenResponse atr = dcr != null ? dcr.getAccessTokenResponse() : null;
+        storeHandler.saveAccessTokenResponse(dcrStorageHandle, atr);
     }
 
-    private long toLong(@Nullable Object object) {
-        return object instanceof Integer i ? i : 0;
+    private int toInt(@Nullable Object obj) {
+        return obj instanceof Integer i ? i : 0;
     }
 
     private String toQueryParameter(String key, String value) {
@@ -346,7 +348,7 @@ public class OAuthRfc8628ClientService extends OAuthClientServiceImpl {
         }
     }
 
-    private @Nullable String toString(@Nullable Object object) {
-        return object instanceof String string ? string : null;
+    private @Nullable String toString(@Nullable Object obj) {
+        return obj instanceof String string ? string : null;
     }
 }
