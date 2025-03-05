@@ -65,7 +65,7 @@ public class OAuthClientServiceImpl implements OAuthClientService {
 
     private final transient Logger logger = LoggerFactory.getLogger(OAuthClientServiceImpl.class);
 
-    private @NonNullByDefault({}) OAuthStoreHandler storeHandler;
+    protected @NonNullByDefault({}) OAuthStoreHandler storeHandler;
 
     // Constructor params - static
     private final String handle;
@@ -74,13 +74,13 @@ public class OAuthClientServiceImpl implements OAuthClientService {
     private final @Nullable GsonBuilder gsonBuilder;
     private final List<AccessTokenRefreshListener> accessTokenRefreshListeners = new ArrayList<>();
 
-    private PersistedParams persistedParams = new PersistedParams();
+    protected PersistedParams persistedParams = new PersistedParams();
 
     private @Nullable Fields extraAuthFields = null;
 
     private volatile boolean closed = false;
 
-    private OAuthClientServiceImpl(String handle, int tokenExpiresInSeconds, HttpClientFactory httpClientFactory,
+    protected OAuthClientServiceImpl(String handle, int tokenExpiresInSeconds, HttpClientFactory httpClientFactory,
             @Nullable GsonBuilder gsonBuilder) {
         this.handle = handle;
         this.tokenExpiresInSeconds = tokenExpiresInSeconds;

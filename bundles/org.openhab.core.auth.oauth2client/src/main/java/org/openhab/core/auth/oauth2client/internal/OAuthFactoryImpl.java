@@ -87,6 +87,28 @@ public class OAuthFactoryImpl implements OAuthFactory {
     }
 
     @Override
+    public OAuthClientService createOAuthRfc8628ClientService(String handle, String tokenUrl, String authorizationUrl,
+            String clientId, String scope) {
+        PersistedParams params = oAuthStoreHandler.loadPersistedParams(handle);
+        PersistedParams newParams = new PersistedParams(handle, tokenUrl, authorizationUrl, clientId, null, scope,
+                false, tokenExpiresInBuffer, null);
+        OAuthClientService clientImpl = null;
+
+        // If parameters in storage and parameters are the same as arguments passed get the client from storage
+        if (params != null && params.equals(newParams)) {
+            clientImpl = getOAuthClientService(handle);
+        }
+        // If no client with parameters or with different parameters create or update (if parameters are different)
+        // client in storage.
+        if (clientImpl == null) {
+            clientImpl = OAuthRfc8628ClientService.createInstance(handle, oAuthStoreHandler, httpClientFactory,
+                    newParams);
+            oauthClientServiceCache.put(handle, clientImpl);
+        }
+        return clientImpl;
+    }
+
+    @Override
     public @Nullable OAuthClientService getOAuthClientService(String handle) {
         OAuthClientService clientImpl = oauthClientServiceCache.get(handle);
 

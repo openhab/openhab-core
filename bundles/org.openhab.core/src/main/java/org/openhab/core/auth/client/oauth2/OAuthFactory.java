@@ -75,4 +75,7 @@ public interface OAuthFactory {
      * @param handle the handle to the OAuth service
      */
     void deleteServiceAndAccessToken(String handle);
+
+    OAuthClientService createOAuthRfc8628ClientService(String handle, String tokenUrl, String authorizationUrl,
+            String clientId, String scope);
 }
