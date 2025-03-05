@@ -309,4 +309,27 @@ public interface OAuthClientService extends AutoCloseable {
      * @return the OAuth service
      */
     OAuthClientService withGsonBuilder(GsonBuilder gsonBuilder);
+
+    /**
+     * Begins the Rfc8628 Device Code Grant Flow authentication process. Specifically it executes
+     * the following steps as described in the article in the link below:
+     * <ul>
+     * <li>Step 1: create a request and POST it to the 'device authorize url'</li>
+     * <li>Step 2: process the response and create a {@link DeviceCodeResponse}</li>
+     * <li>Step 3: the user goes off to authenticate themselves at the 'user authentication url</li>
+     * <li>Step 4: repeatedly create a request and POST it to the 'token url'</li>
+     * <li>Step 5: repeatedly read the response and eventually create a {@link AccessTokenResponse}</li>
+     * </ul>
+     *
+     * @see <a href=
+     *      "https://support.tado.com/en/articles/8565472-how-do-i-authenticate-to-access-the-rest-api">Article</a>
+     *
+     * @return the uri that the user shall visit to authenticate, or null if no visit is required.
+     *
+     * @throws OAuthResponseException
+     * @throws IOException
+     * @throws OAuthException
+     */
+    @Nullable
+    String getRfc8628AuthenticationUserUri() throws OAuthException, IOException, OAuthResponseException;
 }

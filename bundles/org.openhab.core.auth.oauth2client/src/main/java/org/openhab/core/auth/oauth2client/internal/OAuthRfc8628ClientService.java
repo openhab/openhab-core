@@ -160,8 +160,9 @@ public class OAuthRfc8628ClientService extends OAuthClientServiceImpl {
      * @throws IOException
      * @throws OAuthException
      */
+    @Override
     public synchronized @Nullable String getRfc8628AuthenticationUserUri()
-            throws OAuthException, IOException, OAuthResponseException, GeneralSecurityException {
+            throws OAuthException, IOException, OAuthResponseException {
         if (getAccessTokenResponse() != null) {
             return null; // already authenticated
         }
@@ -242,6 +243,12 @@ public class OAuthRfc8628ClientService extends OAuthClientServiceImpl {
         rfcStep4and5Task = null;
     }
 
+    @Override
+    public void close() {
+        rfcStep4and5TaskCancel();
+        super.close();
+    }
+
     /**
      * Whilst the user is completing the Device Code Grant Flow authentication process step 3
      * we continue, in parallel, the completion of the authentication process by repeating the
@@ -320,13 +327,14 @@ public class OAuthRfc8628ClientService extends OAuthClientServiceImpl {
         }
     }
 
-    private @Nullable DeviceCodeResponse storageLoadDeviceCodeResponse() {
+    private @Nullable DeviceCodeResponse storageLoadDeviceCodeResponse() throws OAuthException {
         try {
             AccessTokenResponse atr = storeHandler.loadAccessTokenResponse(dcrStorageHandle);
             if (atr != null) {
                 return new DeviceCodeResponse(atr);
             }
         } catch (GeneralSecurityException e) {
+            throw new OAuthException(e);
         }
         return null;
     }

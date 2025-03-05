@@ -440,4 +440,10 @@ public class OAuthClientServiceImpl implements OAuthClientService {
 
         return clientService;
     }
+
+    @Override
+    public @Nullable String getRfc8628AuthenticationUserUri()
+            throws OAuthException, IOException, OAuthResponseException {
+        throw new UnsupportedOperationException("Rfc8628 is not implemented");
+    }
 }
