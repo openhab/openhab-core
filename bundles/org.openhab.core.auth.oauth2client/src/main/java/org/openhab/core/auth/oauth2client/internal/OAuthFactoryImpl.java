@@ -75,7 +75,7 @@ public class OAuthFactoryImpl implements OAuthFactory {
 
         // If parameters in storage and parameters are the same as arguments passed get the client from storage
         if (params != null && params.equals(newParams)) {
-            clientImpl = getOAuthClientService(handle);
+            clientImpl = getOAuthClientService(handle, OAuthClientServiceImpl.class);
         }
         // If no client with parameters or with different parameters create or update (if parameters are different)
         // client in storage.
@@ -96,7 +96,7 @@ public class OAuthFactoryImpl implements OAuthFactory {
 
         // If parameters in storage and parameters are the same as arguments passed get the client from storage
         if (params != null && params.equals(newParams)) {
-            clientImpl = getOAuthClientService(handle);
+            clientImpl = getOAuthClientService(handle, OAuthRfc8628ClientService.class);
         }
         // If no client with parameters or with different parameters create or update (if parameters are different)
         // client in storage.
@@ -109,14 +109,25 @@ public class OAuthFactoryImpl implements OAuthFactory {
     }
 
     @Override
-    public @Nullable OAuthClientService getOAuthClientService(String handle) {
+    public @Nullable OAuthClientService getOAuthClientService(String handle, Class<?> targetClassType) {
         OAuthClientService clientImpl = oauthClientServiceCache.get(handle);
 
         if (clientImpl == null || clientImpl.isClosed()) {
             // This happens after reboot, or client was closed without factory knowing; create a new client
             // the store has the handle/config data
-            clientImpl = OAuthClientServiceImpl.getInstance(handle, oAuthStoreHandler, tokenExpiresInBuffer,
-                    httpClientFactory);
+
+            // create a regular OAuthClientServiceImpl class
+            if (targetClassType == OAuthClientServiceImpl.class) {
+                clientImpl = OAuthClientServiceImpl.getInstance(handle, oAuthStoreHandler, tokenExpiresInBuffer,
+                        httpClientFactory);
+            } else
+
+            // create an OAuthRfc8628ClientService class
+            if (targetClassType == OAuthRfc8628ClientService.class) {
+                clientImpl = OAuthRfc8628ClientService.getInstance(handle, oAuthStoreHandler, tokenExpiresInBuffer,
+                        httpClientFactory);
+            }
+
             if (clientImpl == null) {
                 return null;
             }

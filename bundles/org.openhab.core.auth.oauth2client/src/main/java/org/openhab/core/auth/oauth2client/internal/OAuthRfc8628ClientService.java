@@ -43,6 +43,8 @@ import com.google.gson.GsonBuilder;
  * The {@link OAuthRfc8628ClientService} extends {@link OAuthClientServiceImpl} to provide
  * an implementation of the oAuth RFC-8628 Device Code Grant Flow authentication process.
  *
+ * @see <a href="https://datatracker.ietf.org/doc/html/rfc8628">RFC-8628</a>
+ *
  * @author Andrew Fiddian-Green - Initial contribution
  */
 @NonNullByDefault

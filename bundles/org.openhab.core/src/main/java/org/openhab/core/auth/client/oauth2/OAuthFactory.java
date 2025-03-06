@@ -61,13 +61,14 @@ public interface OAuthFactory {
             String clientId, String scope);
 
     /**
-     * Gets the OAuth service for a given handle
+     * Gets the OAuth service for a given handle. Casts the result to the given class type.
      *
      * @param handle the handle to the OAuth service
+     * @param targetClassType the target OAuth service class type
      * @return the OAuth service or null if it doesn't exist
      */
     @Nullable
-    OAuthClientService getOAuthClientService(String handle);
+    OAuthClientService getOAuthClientService(String handle, Class<?> targetClassType);
 
     /**
      * Unget an OAuth service, this unget/unregister the service, and frees the resources.
