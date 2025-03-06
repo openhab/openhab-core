@@ -122,12 +122,12 @@ public interface OAuthClientService extends AutoCloseable {
      *            returned by the oauth provider. It is encoded in application/x-www-form-urlencoded format
      *            as stated in RFC 6749 section 4.1.2.
      *            To quote from the RFC:
-     * 
+     *
      *            <pre>{@code
      *            HTTP/1.1 302 Found
      *            Location: https://client.example.com/cb?code=SplxlOBeZQQYbYS6WxSbIA&state=xyz
      *            }</pre>
-     * 
+     *
      * @return AuthorizationCode This authorizationCode can be used in the call {#getOAuthTokenByAuthCode(String)}
      * @throws OAuthException If the state from redirectURLwithParams does not exactly match the expectedState, or
      *             exceptions arise while parsing redirectURLwithParams.
@@ -311,8 +311,9 @@ public interface OAuthClientService extends AutoCloseable {
     OAuthClientService withGsonBuilder(GsonBuilder gsonBuilder);
 
     /**
-     * Begins the Rfc8628 Device Code Grant Flow authentication process. Specifically it executes
-     * the following steps as described in the article in the link below:
+     * Begins the RFC-8628 Device Code Grant Flow authentication process.
+     * Specifically it executes the following steps as described in the article in the link below:
+     *
      * <ul>
      * <li>Step 1: create a request and POST it to the 'device authorize url'</li>
      * <li>Step 2: process the response and create a {@link DeviceCodeResponse}</li>
@@ -321,15 +322,14 @@ public interface OAuthClientService extends AutoCloseable {
      * <li>Step 5: repeatedly read the response and eventually create a {@link AccessTokenResponse}</li>
      * </ul>
      *
-     * @see <a href=
-     *      "https://support.tado.com/en/articles/8565472-how-do-i-authenticate-to-access-the-rest-api">Article</a>
+     * @see <a href="https://datatracker.ietf.org/doc/html/rfc8628">RFC-8628</a>
      *
-     * @return the uri that the user shall visit to authenticate, or null if no visit is required.
+     * @return if a non null URI is returned it means the user is expected to open it and authenticate themselves.
      *
-     * @throws OAuthResponseException
-     * @throws IOException
      * @throws OAuthException
+     * @throws IOException
+     * @throws OAuthResponseException
      */
     @Nullable
-    String getRfc8628AuthenticationUserUri() throws OAuthException, IOException, OAuthResponseException;
+    String getUserAuthenticationUri() throws OAuthException, IOException, OAuthResponseException;
 }

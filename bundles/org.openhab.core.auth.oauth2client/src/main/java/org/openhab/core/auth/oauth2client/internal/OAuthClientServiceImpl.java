@@ -442,8 +442,7 @@ public class OAuthClientServiceImpl implements OAuthClientService {
     }
 
     @Override
-    public @Nullable String getRfc8628AuthenticationUserUri()
-            throws OAuthException, IOException, OAuthResponseException {
-        throw new UnsupportedOperationException("Rfc8628 is not implemented");
+    public @Nullable String getUserAuthenticationUri() throws OAuthException, IOException, OAuthResponseException {
+        throw new UnsupportedOperationException("RFC-8628 not implemented in this class");
     }
 }

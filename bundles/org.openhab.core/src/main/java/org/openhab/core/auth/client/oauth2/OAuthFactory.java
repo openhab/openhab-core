@@ -46,6 +46,21 @@ public interface OAuthFactory {
             @Nullable Boolean supportsBasicAuth);
 
     /**
+     * Creates a new OAuth RFC-8628 service. Use this method only once to obtain a handle and store
+     * this handle for further use in a persistent storage container.
+     *
+     * @param handle the handle to the OAuth service
+     * @param tokenUrl the token url of the OAuth provider. This is used for getting access token.
+     * @param authorizationUrl the authorization url of the OAuth provider. This is used purely for generating
+     *            authorization code/ url.
+     * @param clientId the client id
+     * @param scope the desired scope
+     * @return the OAuth service
+     */
+    OAuthClientService createOAuthRfc8628ClientService(String handle, String tokenUrl, String authorizationUrl,
+            String clientId, String scope);
+
+    /**
      * Gets the OAuth service for a given handle
      *
      * @param handle the handle to the OAuth service
@@ -75,7 +90,4 @@ public interface OAuthFactory {
      * @param handle the handle to the OAuth service
      */
     void deleteServiceAndAccessToken(String handle);
-
-    OAuthClientService createOAuthRfc8628ClientService(String handle, String tokenUrl, String authorizationUrl,
-            String clientId, String scope);
 }

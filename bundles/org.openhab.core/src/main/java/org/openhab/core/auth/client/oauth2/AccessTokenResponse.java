@@ -28,7 +28,7 @@ import java.util.Objects;
  * @author Michael Bock - Initial contribution
  * @author Gary Tse - Adaptation for Eclipse SmartHome
  */
-public class AccessTokenResponse implements Serializable, Cloneable {
+public final class AccessTokenResponse implements Serializable, Cloneable {
 
     /**
      * For Serializable

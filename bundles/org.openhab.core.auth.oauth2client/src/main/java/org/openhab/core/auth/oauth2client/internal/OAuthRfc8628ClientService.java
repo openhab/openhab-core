@@ -13,12 +13,8 @@
 package org.openhab.core.auth.oauth2client.internal;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.security.GeneralSecurityException;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -32,6 +28,7 @@ import org.eclipse.jetty.client.api.Request;
 import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.http.HttpStatus;
 import org.openhab.core.auth.client.oauth2.AccessTokenResponse;
+import org.openhab.core.auth.client.oauth2.DeviceCodeResponse;
 import org.openhab.core.auth.client.oauth2.OAuthException;
 import org.openhab.core.auth.client.oauth2.OAuthResponseException;
 import org.openhab.core.common.ThreadPoolManager;
@@ -44,73 +41,65 @@ import com.google.gson.GsonBuilder;
 
 /**
  * The {@link OAuthRfc8628ClientService} extends {@link OAuthClientServiceImpl} to provide
- * an implementation of the oAuth Rfc8628 Device Code Grant Flow authentication process.
+ * an implementation of the oAuth RFC-8628 Device Code Grant Flow authentication process.
  *
  * @author Andrew Fiddian-Green - Initial contribution
  */
 @NonNullByDefault
 public class OAuthRfc8628ClientService extends OAuthClientServiceImpl {
 
-    /**
-     * Private class that wraps an {@link AccessTokenResponse} and re-purposes some of its fields
-     * to encapsulate the data from Rfc8628 device code responses. This allows us to use the
-     * same AccessTokenResponse storage mechanism to handle DeviceCodeResponses too.
-     */
-    protected class DeviceCodeResponse {
-        private final AccessTokenResponse atr;
+    private static final String RFC_8628_SUFFIX = "#rfc8628";
+    private static final String RESOURCE_ID = "oAuth" + RFC_8628_SUFFIX;
 
-        public DeviceCodeResponse() {
-            atr = new AccessTokenResponse();
-            atr.setCreatedOn(Instant.now());
-        }
+    // URL parameter names
+    private static final String PARAM_ID_SCOPE = "scope";
+    private static final String PARAM_CLIENT_ID = "client_id";
+    private static final String PARAM_DEVICE_CODE = "device_code";
+    private static final String PARAM_GRANT_TYPE = "grant_type";
 
-        public DeviceCodeResponse(AccessTokenResponse atr) {
-            this.atr = atr;
-        }
+    // URL parameter values
+    private static final String PARAM_GRANT_TYPE_VALUE = "urn:ietf:params:oauth:grant-type:device_code";
 
-        public AccessTokenResponse getAccessTokenResponse() {
-            return atr;
-        }
+    // JSON element names
+    private static final String JSON_ACCESS_TOKEN = "access_token";
+    private static final String JSON_REFRESH_TOKEN = "refresh_token";
+    private static final String JSON_TOKEN_TYPE = "token_type";
+    private static final String JSON_INTERVAL = "interval";
+    private static final String JSON_EXPIRES_IN = "expires_in";
+    private static final String JSON_USER_AUTH_URI = "verification_uri_complete";
+    private static final String JSON_DEVICE_CODE = PARAM_DEVICE_CODE;
 
-        public String getDeviceCode() {
-            return atr.getAccessToken();
-        }
+    private final Logger logger = LoggerFactory.getLogger(OAuthRfc8628ClientService.class);
 
-        public int getInterval() {
-            return Integer.parseInt(atr.getState());
-        }
+    private final ScheduledExecutorService scheduler;
+    private final HttpClient httpClient;
+    private final Gson gson;
+    private final String dcrStorageHandle;
 
-        public String getUserUri() {
-            return atr.getRefreshToken();
-        }
+    private @Nullable ScheduledFuture<?> scheduledAccessTokenResponsePolling;
+    private @Nullable DeviceCodeResponse pollingDeviceCodeResponse;
 
-        public boolean isExpired(Instant givenTime, int tokenExpiresInBuffer) {
-            return atr.isExpired(givenTime, tokenExpiresInBuffer);
-        }
+    protected OAuthRfc8628ClientService(String handle, int tokenExpiresInSeconds, HttpClientFactory httpClientFactory,
+            @Nullable GsonBuilder gsonBuilder) {
+        super(handle, tokenExpiresInSeconds, httpClientFactory, gsonBuilder);
 
-        public void setDeviceCode(String deviceCode) {
-            atr.setAccessToken(deviceCode);
-        }
-
-        public void setExpiresIn(int expiresIn) {
-            atr.setExpiresIn(expiresIn);
-        }
-
-        public void setInterval(int interval) {
-            atr.setState(String.valueOf(interval));
-        }
-
-        public void setUserUri(String userUri) {
-            atr.setRefreshToken(userUri);
-        }
+        this.scheduler = ThreadPoolManager.getScheduledPool(RESOURCE_ID);
+        this.httpClient = httpClientFactory.createHttpClient(RESOURCE_ID);
+        this.gson = (gsonBuilder != null ? gsonBuilder : new GsonBuilder()).create();
+        this.dcrStorageHandle = handle + RFC_8628_SUFFIX;
     }
 
-    private static final String RFC_8628_SUFFIX = "#rfc-8628";
-    private static final String THREADPOOL_NAME = "oAuth" + RFC_8628_SUFFIX;
-    private static final String DEVICE_GRANT = "urn:ietf:params:oauth:grant-type:device_code";
-    private static final String AUTH_START_FAILED = "Rfc8628Authentication process start failed";
-
-    public static OAuthRfc8628ClientService createInstance(String handle, OAuthStoreHandler storeHandler,
+    /**
+     * It should only be used internally, thus the access is package level
+     *
+     * @param handle The handle produced previously from
+     *            {@link org.openhab.core.auth.client.oauth2.OAuthFactory#createOAuthRfc8628ClientService}
+     * @param storeHandler Storage handler
+     * @param httpClientFactory Http client factory
+     * @param params These parameters are static with respect to the OAuth provider and thus can be persisted.
+     * @return OAuthRfc8628ClientService (extends OAuthClientServiceImpl) an instance
+     */
+    static OAuthRfc8628ClientService createInstance(String handle, OAuthStoreHandler storeHandler,
             HttpClientFactory httpClientFactory, PersistedParams params) {
         OAuthRfc8628ClientService clientService = new OAuthRfc8628ClientService(handle, params.tokenExpiresInSeconds,
                 httpClientFactory, null);
@@ -122,167 +111,193 @@ public class OAuthRfc8628ClientService extends OAuthClientServiceImpl {
         return clientService;
     }
 
-    private final Logger logger = LoggerFactory.getLogger(OAuthRfc8628ClientService.class);
-    private final ScheduledExecutorService scheduler;
-    private final HttpClient httpClient;
-    private final Gson gson;
-    private final String dcrStorageHandle;
+    /**
+     * It should only be used internally, thus the access is package level
+     *
+     * @param handle The handle produced previously from
+     *            {@link org.openhab.core.auth.client.oauth2.OAuthFactory#createOAuthClientService}
+     * @param storeHandler Storage handler
+     * @param tokenExpiresInSeconds Positive integer; a small time buffer in seconds. It is used to calculate the expiry
+     *            of the access tokens. This allows the access token to expire earlier than the
+     *            official stated expiry time; thus prevents the caller obtaining a valid token at the time of invoke,
+     *            only to find the token immediately expired.
+     * @param httpClientFactory Http client factory
+     * @return new instance of OAuthClientServiceImpl or null if it doesn't exist
+     * @throws IllegalStateException if store is not available.
+     */
+    static @Nullable OAuthRfc8628ClientService getInstance(String handle, OAuthStoreHandler storeHandler,
+            int tokenExpiresInSeconds, HttpClientFactory httpClientFactory) {
+        // Load parameters from Store
+        PersistedParams persistedParamsFromStore = storeHandler.loadPersistedParams(handle);
+        if (persistedParamsFromStore == null) {
+            return null;
+        }
+        OAuthRfc8628ClientService clientService = new OAuthRfc8628ClientService(handle, tokenExpiresInSeconds,
+                httpClientFactory, null);
+        clientService.storeHandler = storeHandler;
+        clientService.persistedParams = persistedParamsFromStore;
 
-    private @Nullable ScheduledFuture<?> rfcStep4and5Task;
-    private @Nullable DeviceCodeResponse cachedDeviceCodeResponse;
-
-    protected OAuthRfc8628ClientService(String handle, int tokenExpiresInSeconds, HttpClientFactory httpClientFactory,
-            @Nullable GsonBuilder gsonBuilder) {
-        super(handle, tokenExpiresInSeconds, httpClientFactory, gsonBuilder);
-        this.dcrStorageHandle = handle + RFC_8628_SUFFIX;
-        this.gson = (gsonBuilder != null ? gsonBuilder : new GsonBuilder()).create();
-        this.httpClient = httpClientFactory.getCommonHttpClient();
-        this.scheduler = ThreadPoolManager.getScheduledPool(THREADPOOL_NAME);
+        return clientService;
     }
 
-    /**
-     * Begins the Rfc8628 Device Code Grant Flow authentication process. Specifically it executes
-     * the following steps as described in the article in the link below:
-     * <ul>
-     * <li>Step 1: create a request and POST it to the 'device authorize url'</li>
-     * <li>Step 2: process the response and create a {@link DeviceCodeResponse}</li>
-     * <li>Step 3: the user goes off to authenticate themselves at the 'user authentication url</li>
-     * <li>Step 4: repeatedly create a request and POST it to the 'token url'</li>
-     * <li>Step 5: repeatedly read the response and eventually create a {@link AccessTokenResponse}</li>
-     * </ul>
-     *
-     * @see <a href=
-     *      "https://support.tado.com/en/articles/8565472-how-do-i-authenticate-to-access-the-rest-api">Article</a>
-     *
-     * @return the uri that the user shall visit to authenticate, or null if no visit is required.
-     *
-     * @throws OAuthResponseException
-     * @throws IOException
-     * @throws OAuthException
-     */
     @Override
-    public synchronized @Nullable String getRfc8628AuthenticationUserUri()
+    public synchronized @Nullable String getUserAuthenticationUri()
             throws OAuthException, IOException, OAuthResponseException {
-        if (getAccessTokenResponse() != null) {
-            return null; // already authenticated
+        try {
+            if (getAccessTokenResponse() != null) {
+                // the AccessTokenResponse is OK; return null (authentication not required)
+                return null;
+            }
+
+            httpClientStart();
+
+            // retrieve the DeviceCodeResponse from storage
+            DeviceCodeResponse dcr;
+            dcr = DeviceCodeResponse
+                    .createFromAccessTokenResponse(storeHandler.loadAccessTokenResponse(dcrStorageHandle));
+
+            if (dcr != null) {
+                // the DeviceCodeResponse is OK; get the AccessTokenResponse from it
+                AccessTokenResponse atr = getAccessTokenResponse(dcr);
+
+                if (atr != null) {
+                    // the AccessTokenResponse is OK; store it and return null (authentication not required)
+                    importAccessTokenResponse(atr);
+                    return null;
+                }
+
+                // no AccessTokenResponse; replace the prior (i.e. invalid) DeviceCodeResponse
+                dcr = getDeviceCodeResponse();
+            }
+
+            if (dcr == null || dcr.isExpired(Instant.now(), 0)) {
+                // the DeviceCodeResponse is bad; replace it
+                dcr = getDeviceCodeResponse();
+            }
+
+            // cancel any prior AccessTokenResponse polling task
+            cancelAccessTokenResponsePolling();
+
+            // the DeviceCodeResponse is OK; cache it locally, store it, and start polling for an AccessTokenResponse
+            pollingDeviceCodeResponse = dcr;
+            storeHandler.saveAccessTokenResponse(dcrStorageHandle, DeviceCodeResponse.getAccessTokenResponse(dcr));
+
+            scheduledAccessTokenResponsePolling = scheduler.scheduleWithFixedDelay(() -> pollAccessTokenResponse(),
+                    dcr.getInterval(), dcr.getInterval(), TimeUnit.SECONDS);
+
+            return dcr.getUserAuthenticationUri();
+        } catch (GeneralSecurityException e) {
+            logger.debug("getUserAuthenticationUri() error {}", e.getMessage(), e);
+            throw new OAuthException(e);
+        } catch (OAuthException | IOException | OAuthResponseException e) {
+            logger.debug("getUserAuthenticationUri() error {}", e.getMessage(), e);
+            throw e;
+        } finally {
+            httpClientStop();
         }
+    }
 
-        DeviceCodeResponse dcr = storageLoadDeviceCodeResponse();
-        if (dcr == null || dcr.isExpired(Instant.now(), dcr.getInterval())) {
-            dcr = rfcStep1and2GetDeviceCodeResponse();
+    private synchronized void cancelAccessTokenResponsePolling() {
+        ScheduledFuture<?> task = scheduledAccessTokenResponsePolling;
+        if (task != null) {
+            task.cancel(false);
         }
-        cachedDeviceCodeResponse = dcr;
-        storageSaveDeviceCodeResponse(dcr);
+        scheduledAccessTokenResponsePolling = null;
+    }
 
-        rfcStep4and5TaskCancel();
-
-        if (dcr == null) {
-            throw new OAuthException(AUTH_START_FAILED);
-        }
-
-        rfcStep4and5Task = scheduler.scheduleWithFixedDelay(() -> rfcStep4and5RepeatTask(), dcr.getInterval(),
-                dcr.getInterval(), TimeUnit.SECONDS);
-
-        return dcr.getUserUri();
+    @Override
+    public void close() {
+        cancelAccessTokenResponsePolling();
+        httpClientStop();
+        scheduler.close();
+        super.close();
     }
 
     /**
      * Start the first steps of the Device Code Grant Flow authentication process as follows:
+     *
      * <ul>
      * <li>Step 1: create a request and POST it to the authorization url</li>
      * <li>Step 2: process the response and create a {@link DeviceCodeResponse}</li>
      * </ul>
      *
      * @return a new {@link DeviceCodeResponse} object or null
+     *
+     * @throws OAuthException
      */
-    private synchronized @Nullable DeviceCodeResponse rfcStep1and2GetDeviceCodeResponse() {
-        List<String> queryParams = new ArrayList<>();
-        queryParams.add(toQueryParameter("client_id", persistedParams.clientId));
-        queryParams.add(toQueryParameter("scope", persistedParams.scope));
-
-        Request request = httpClient.newRequest(persistedParams.authorizationUrl + "?" + String.join("&", queryParams)) //
-                .method(HttpMethod.POST).timeout(5, TimeUnit.SECONDS);
-        logger.trace("Step 1: {}", request);
+    private synchronized DeviceCodeResponse getDeviceCodeResponse() throws OAuthException {
+        String url = persistedParams.authorizationUrl;
+        Request request = httpClient.newRequest(url).method(HttpMethod.POST).timeout(5, TimeUnit.SECONDS);
+        request.param(PARAM_CLIENT_ID, persistedParams.clientId);
+        request.param(PARAM_ID_SCOPE, persistedParams.scope);
+        logger.trace("getDeviceCodeResponse() => {}", request);
 
         try {
             ContentResponse response = request.send();
             String content = response.getContentAsString();
-            logger.trace("Step 2: {}", content);
-            if (response.getStatus() == HttpStatus.OK_200) {
-                Map<?, ?> tokenValues = gson.fromJson(content, Map.class);
-                if (tokenValues != null) {
-                    String deviceCode = toString(tokenValues.get("device_code"));
-                    String userUri = toString(tokenValues.get("verification_uri_complete"));
-                    int expiresIn = toInt(tokenValues.get("expires_in"));
-                    int interval = toInt(tokenValues.get("interval"));
+            logger.trace("getDeviceCodeResponse() <= {}", content);
 
-                    if (deviceCode != null && userUri != null && expiresIn > 0 && interval > 0) {
+            if (response.getStatus() == HttpStatus.OK_200) {
+                Map<?, ?> jsonMap = gson.fromJson(content, Map.class);
+                if (jsonMap != null) {
+                    String userAuthenticationUri = toString(jsonMap.get(JSON_USER_AUTH_URI));
+                    String deviceCode = toString(jsonMap.get(JSON_DEVICE_CODE));
+                    int expiresIn = toInt(jsonMap.get(JSON_EXPIRES_IN));
+                    int interval = toInt(jsonMap.get(JSON_INTERVAL));
+
+                    if (deviceCode != null && userAuthenticationUri != null && expiresIn > 0 && interval > 0) {
                         DeviceCodeResponse dcr = new DeviceCodeResponse();
                         dcr.setDeviceCode(deviceCode);
-                        dcr.setUserUri(userUri);
+                        dcr.setUserAuthenticationUri(userAuthenticationUri);
                         dcr.setExpiresIn(expiresIn);
                         dcr.setInterval(interval);
+                        logger.trace("getDeviceCodeResponse() {}", dcr);
                         return dcr;
                     }
                 }
             }
-            logger.debug("Step 2: error '{}'", response);
-        } catch (
-
-        Exception e) {
-            logger.debug("Step 1: error calling {}", persistedParams.authorizationUrl, e);
+            throw new OAuthException("getDeviceCodeResponse() error " + response);
+        } catch (Exception e) {
+            throw new OAuthException("getDeviceCodeResponse() error", e);
         }
-        return null;
-    }
-
-    private synchronized void rfcStep4and5TaskCancel() {
-        ScheduledFuture<?> task = rfcStep4and5Task;
-        if (task != null) {
-            task.cancel(false);
-        }
-        rfcStep4and5Task = null;
-    }
-
-    @Override
-    public void close() {
-        rfcStep4and5TaskCancel();
-        super.close();
     }
 
     /**
      * Whilst the user is completing the Device Code Grant Flow authentication process step 3
      * we continue, in parallel, the completion of the authentication process by repeating the
      * following steps:
+     *
      * <ul>
      * <li>Step 4: repeatedly create a request and POST it to the token url</li>
      * <li>Step 5: repeatedly read the response and eventually create a {@link AccessTokenResponse}</li>
      * </ul>
      *
-     * @param deviceCode the device code
+     * @param dcr the {@link DeviceCodeResponse}
      *
      * @return an {@link AccessTokenResponse} object or null
+     * @throws OAuthException
      */
-    private synchronized @Nullable AccessTokenResponse rfcStep4and5GetAccessTokenResponse(String deviceCode) {
-        List<String> queryParams = new ArrayList<>();
-        queryParams.add(toQueryParameter("client_id", persistedParams.clientId));
-        queryParams.add(toQueryParameter("grant_type", DEVICE_GRANT));
-        queryParams.add(toQueryParameter("device_code", deviceCode));
-
-        Request request = httpClient.newRequest(persistedParams.tokenUrl + "?" + String.join("&", queryParams)) //
-                .method(HttpMethod.POST).timeout(5, TimeUnit.SECONDS);
-        logger.trace("Step 4: {}", request);
+    private synchronized @Nullable AccessTokenResponse getAccessTokenResponse(DeviceCodeResponse dcr)
+            throws OAuthException {
+        String url = persistedParams.tokenUrl;
+        Request request = httpClient.newRequest(url).method(HttpMethod.POST).timeout(5, TimeUnit.SECONDS);
+        request.param(PARAM_CLIENT_ID, persistedParams.clientId);
+        request.param(PARAM_GRANT_TYPE, PARAM_GRANT_TYPE_VALUE);
+        request.param(PARAM_DEVICE_CODE, dcr.getDeviceCode());
+        logger.trace("getAccessTokenResponse() => {}", request);
 
         try {
             ContentResponse response = request.send();
             String content = response.getContentAsString();
-            logger.trace("Step 5: {}", content);
+            logger.trace("getAccessTokenResponse() <= {}", content);
+
             if (response.getStatus() == HttpStatus.OK_200) {
-                Map<?, ?> tokenValues = gson.fromJson(content, Map.class);
-                if (tokenValues != null) {
-                    String accessToken = toString(tokenValues.get("access_token"));
-                    String accessTokenType = toString(tokenValues.get("token_type"));
-                    String refreshToken = toString(tokenValues.get("refresh_token"));
-                    long expiresIn = toInt(tokenValues.get("expires_in"));
+                Map<?, ?> jsonMap = gson.fromJson(content, Map.class);
+                if (jsonMap != null) {
+                    String accessToken = toString(jsonMap.get(JSON_ACCESS_TOKEN));
+                    String accessTokenType = toString(jsonMap.get(JSON_TOKEN_TYPE));
+                    String refreshToken = toString(jsonMap.get(JSON_REFRESH_TOKEN));
+                    int expiresIn = toInt(jsonMap.get(JSON_EXPIRES_IN));
 
                     if (accessToken != null && refreshToken != null && accessTokenType != null && expiresIn > 0) {
                         AccessTokenResponse atr = new AccessTokenResponse();
@@ -291,69 +306,74 @@ public class OAuthRfc8628ClientService extends OAuthClientServiceImpl {
                         atr.setTokenType(accessTokenType);
                         atr.setExpiresIn(expiresIn);
                         atr.setRefreshToken(refreshToken);
+                        logger.trace("getAccessTokenResponse() {}", atr);
                         return atr;
                     }
                 }
-                logger.debug("Step 5: error '{}'", response);
+                throw new OAuthException("getAccessTokenResponse() error");
             }
+            // return without exception since other HTTP responses are allowed during AccessTokenResponse polling
+            return null;
         } catch (Exception e) {
-            logger.debug("Step 4: error calling {}", persistedParams.tokenUrl, e);
+            throw new OAuthException("getAccessTokenResponse() error", e);
         }
-        return null;
+    }
+
+    private void httpClientStart() throws OAuthException {
+        if (!httpClient.isStarted()) {
+            try {
+                httpClient.start();
+            } catch (Exception e) {
+                throw new OAuthException("httpClientStart() error " + e.getMessage());
+            }
+        }
+    }
+
+    private void httpClientStop() {
+        try {
+            httpClient.stop();
+        } catch (Exception e) {
+        }
     }
 
     /**
-     * Runnable polling task for step 4 and 5
+     * Runnable task for polling for an {@link AccessTokenResponse}
      */
-    private synchronized void rfcStep4and5RepeatTask() {
-        AccessTokenResponse atr = null;
+    private synchronized void pollAccessTokenResponse() {
         Instant now = Instant.now();
+        DeviceCodeResponse dcr = pollingDeviceCodeResponse;
 
-        DeviceCodeResponse dcr = cachedDeviceCodeResponse;
-        if (dcr != null && !dcr.isExpired(now, 5)) {
-            atr = rfcStep4and5GetAccessTokenResponse(dcr.getDeviceCode());
+        // the DeviceCodeResponse is OK; get the AccessTokenResponse
+        AccessTokenResponse atr = null;
+        if (dcr != null && !dcr.isExpired(now, 0)) {
+            try {
+                atr = getAccessTokenResponse(dcr);
+            } catch (OAuthException e) {
+                logger.debug("pollAccessTokenResponse() error {}", e.getMessage(), e);
+                cancelAccessTokenResponsePolling();
+            }
         }
 
+        // the AccessTokenResponse is OK; store it, and cancel the AccessTokenResponse polling
         if (atr != null) {
             try {
                 importAccessTokenResponse(atr);
             } catch (OAuthException e) {
-                logger.warn("Step 4: unxexpected error {}", e.getMessage(), e);
+                logger.debug("pollAccessTokenResponse() error {}", e.getMessage(), e);
             }
+            cancelAccessTokenResponsePolling();
+        } else
+
+        // the DeviceCodeResponse has expired; cancel the AccessTokenResponse polling
+        if (dcr == null || dcr.isExpired(now, 0)) {
+            cancelAccessTokenResponsePolling();
         }
 
-        if (atr != null || dcr == null || dcr.isExpired(now, 0)) {
-            rfcStep4and5TaskCancel();
-        }
-    }
-
-    private @Nullable DeviceCodeResponse storageLoadDeviceCodeResponse() throws OAuthException {
-        try {
-            AccessTokenResponse atr = storeHandler.loadAccessTokenResponse(dcrStorageHandle);
-            if (atr != null) {
-                return new DeviceCodeResponse(atr);
-            }
-        } catch (GeneralSecurityException e) {
-            throw new OAuthException(e);
-        }
-        return null;
-    }
-
-    private void storageSaveDeviceCodeResponse(@Nullable DeviceCodeResponse dcr) {
-        AccessTokenResponse atr = dcr != null ? dcr.getAccessTokenResponse() : null;
-        storeHandler.saveAccessTokenResponse(dcrStorageHandle, atr);
+        // getting here means the AccessTokenResponse polling will continue
     }
 
     private int toInt(@Nullable Object obj) {
-        return obj instanceof Integer i ? i : 0;
-    }
-
-    private String toQueryParameter(String key, String value) {
-        try {
-            return key + "=" + URLEncoder.encode(value, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            return key + "=" + value;
-        }
+        return obj instanceof Number number ? number.intValue() : 0;
     }
 
     private @Nullable String toString(@Nullable Object obj) {
