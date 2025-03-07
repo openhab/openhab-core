@@ -75,7 +75,7 @@ public class OAuthFactoryImpl implements OAuthFactory {
 
         // If parameters in storage and parameters are the same as arguments passed get the client from storage
         if (params != null && params.equals(newParams)) {
-            clientImpl = getOAuthClientService(handle, OAuthClientServiceImpl.class);
+            clientImpl = getOAuthClientService(handle);
         }
         // If no client with parameters or with different parameters create or update (if parameters are different)
         // client in storage.
@@ -87,47 +87,14 @@ public class OAuthFactoryImpl implements OAuthFactory {
     }
 
     @Override
-    public OAuthClientService createOAuthRfc8628ClientService(String handle, String tokenUrl, String authorizationUrl,
-            String clientId, String scope) {
-        PersistedParams params = oAuthStoreHandler.loadPersistedParams(handle);
-        PersistedParams newParams = new PersistedParams(handle, tokenUrl, authorizationUrl, clientId, null, scope,
-                false, tokenExpiresInBuffer, null);
-        OAuthClientService clientImpl = null;
-
-        // If parameters in storage and parameters are the same as arguments passed get the client from storage
-        if (params != null && params.equals(newParams)) {
-            clientImpl = getOAuthClientService(handle, OAuthRfc8628ClientService.class);
-        }
-        // If no client with parameters or with different parameters create or update (if parameters are different)
-        // client in storage.
-        if (clientImpl == null) {
-            clientImpl = OAuthRfc8628ClientService.createInstance(handle, oAuthStoreHandler, httpClientFactory,
-                    newParams);
-            oauthClientServiceCache.put(handle, clientImpl);
-        }
-        return clientImpl;
-    }
-
-    @Override
-    public @Nullable OAuthClientService getOAuthClientService(String handle, Class<?> targetClassType) {
+    public @Nullable OAuthClientService getOAuthClientService(String handle) {
         OAuthClientService clientImpl = oauthClientServiceCache.get(handle);
 
         if (clientImpl == null || clientImpl.isClosed()) {
             // This happens after reboot, or client was closed without factory knowing; create a new client
             // the store has the handle/config data
-
-            // create a regular OAuthClientServiceImpl class
-            if (targetClassType == OAuthClientServiceImpl.class) {
-                clientImpl = OAuthClientServiceImpl.getInstance(handle, oAuthStoreHandler, tokenExpiresInBuffer,
-                        httpClientFactory);
-            } else
-
-            // create an OAuthRfc8628ClientService class
-            if (targetClassType == OAuthRfc8628ClientService.class) {
-                clientImpl = OAuthRfc8628ClientService.getInstance(handle, oAuthStoreHandler, tokenExpiresInBuffer,
-                        httpClientFactory);
-            }
-
+            clientImpl = OAuthClientServiceImpl.getInstance(handle, oAuthStoreHandler, tokenExpiresInBuffer,
+                    httpClientFactory);
             if (clientImpl == null) {
                 return null;
             }

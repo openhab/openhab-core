@@ -21,7 +21,6 @@ import org.openhab.core.auth.client.oauth2.OAuthClientService;
 import org.openhab.core.auth.client.oauth2.OAuthException;
 import org.openhab.core.auth.client.oauth2.OAuthFactory;
 import org.openhab.core.auth.client.oauth2.OAuthResponseException;
-import org.openhab.core.auth.oauth2client.internal.OAuthClientServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -105,11 +104,11 @@ public abstract class AbstractTestAgent implements TestAgent {
                 return null;
             } else {
                 logger.info("Using existing handle: {}", this.handle);
-                oauthClientService = oauthFactory.getOAuthClientService(this.handle, OAuthClientServiceImpl.class);
+                oauthClientService = oauthFactory.getOAuthClientService(this.handle);
             }
         } else {
             this.handle = handle;
-            oauthClientService = oauthFactory.getOAuthClientService(this.handle, OAuthClientServiceImpl.class);
+            oauthClientService = oauthFactory.getOAuthClientService(this.handle);
         }
         return oauthClientService;
     }
@@ -124,7 +123,7 @@ public abstract class AbstractTestAgent implements TestAgent {
             oauthClientService = testCreateClient();
         } else {
             logger.debug("getting oauth client by handle: {}", handle);
-            oauthClientService = oauthFactory.getOAuthClientService(handle, OAuthClientServiceImpl.class);
+            oauthClientService = oauthFactory.getOAuthClientService(handle);
         }
         AccessTokenResponse accessTokenResponse = oauthClientService
                 .getAccessTokenByResourceOwnerPasswordCredentials(username, password, scope);

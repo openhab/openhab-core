@@ -65,7 +65,7 @@ public class OAuthClientServiceImpl implements OAuthClientService {
 
     private final transient Logger logger = LoggerFactory.getLogger(OAuthClientServiceImpl.class);
 
-    protected @NonNullByDefault({}) OAuthStoreHandler storeHandler;
+    private @NonNullByDefault({}) OAuthStoreHandler storeHandler;
 
     // Constructor params - static
     private final String handle;
@@ -74,13 +74,14 @@ public class OAuthClientServiceImpl implements OAuthClientService {
     private final @Nullable GsonBuilder gsonBuilder;
     private final List<AccessTokenRefreshListener> accessTokenRefreshListeners = new ArrayList<>();
 
-    protected PersistedParams persistedParams = new PersistedParams();
+    private PersistedParams persistedParams = new PersistedParams();
 
     private @Nullable Fields extraAuthFields = null;
+    private @Nullable Rfc8628Connector rfc8628Connector = null;
 
     private volatile boolean closed = false;
 
-    protected OAuthClientServiceImpl(String handle, int tokenExpiresInSeconds, HttpClientFactory httpClientFactory,
+    private OAuthClientServiceImpl(String handle, int tokenExpiresInSeconds, HttpClientFactory httpClientFactory,
             @Nullable GsonBuilder gsonBuilder) {
         this.handle = handle;
         this.tokenExpiresInSeconds = tokenExpiresInSeconds;
@@ -392,8 +393,16 @@ public class OAuthClientServiceImpl implements OAuthClientService {
     public void close() {
         closed = true;
         storeHandler = null;
-
         logger.debug("closing oauth client, handle: {}", handle);
+        closeRfc8628Connector();
+    }
+
+    private synchronized void closeRfc8628Connector() {
+        Rfc8628Connector connector = this.rfc8628Connector;
+        if (connector != null) {
+            connector.close();
+        }
+        this.rfc8628Connector = null;
     }
 
     @Override
@@ -443,6 +452,11 @@ public class OAuthClientServiceImpl implements OAuthClientService {
 
     @Override
     public @Nullable String getUserAuthenticationUri() throws OAuthException, IOException, OAuthResponseException {
-        throw new UnsupportedOperationException("RFC-8628 not implemented in this class");
+        closeRfc8628Connector();
+        Rfc8628Connector connector = new Rfc8628Connector(this, handle, storeHandler, httpClientFactory, gsonBuilder,
+                persistedParams.tokenUrl, persistedParams.authorizationUrl, persistedParams.clientId,
+                persistedParams.scope);
+        this.rfc8628Connector = connector;
+        return connector.getUserAuthenticationUri();
     }
 }
