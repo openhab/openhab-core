@@ -143,7 +143,7 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
              * Retrieve existing AccessTokenResponse from oAuth service (if any)
              */
             AccessTokenResponse atr = oAuthClientService.getAccessTokenResponse();
-            logger.trace("getUserAuthenticationUri() got token:\n{}", atr);
+            logger.trace("getUserAuthenticationUri() has atr:{}", atr);
 
             if (atr != null) {
                 /*
@@ -164,7 +164,7 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
              * Retrieve existing DeviceCodeResponse from oAuth service storage (if any)
              */
             DeviceCodeResponse dcr = oAuthStoreHandler.loadDeviceCodeResponse(handle);
-            logger.trace("getUserAuthenticationUri() loaded dcr:\n{}", dcr);
+            logger.trace("getUserAuthenticationUri() loaded dcr:{}", dcr);
 
             if (dcr == null || dcr.isExpired(Instant.now(), 0)) {
                 /*
@@ -180,7 +180,7 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
              * => try to get the AccessTokenResponse from it
              */
             atr = getAccessTokenResponse(dcr);
-            logger.trace("getUserAuthenticationUri() dcr => acr:\n{}\n{}", dcr, atr);
+            logger.trace("getUserAuthenticationUri() dcr:{} yielded atr:{}", dcr, atr);
 
             if (atr == null) {
                 /*
@@ -205,7 +205,7 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
              * If we got to this point the DeviceCodeResponse exists:
              * => confirm that it is valid
              */
-            logger.trace("getUserAuthenticationUri() check expired:\n{}", dcr);
+            logger.trace("getUserAuthenticationUri() check dcr:{}", dcr);
             if (dcr.isExpired(Instant.now(), 0)) {
                 /*
                  * The DeviceCodeResponse is not valid:
@@ -221,17 +221,17 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
              * => schedule a repeated task to poll for an AccessTokenResponse from the DeviceCodeResponse
              * => return the user URI from the DeviceCodeResponse
              */
-            logger.trace("getUserAuthenticationUri() store and poll start:\n{}", dcr);
+            logger.trace("getUserAuthenticationUri() proceed with dcr:{}", dcr);
             loopDeviceCodeResponse = dcr;
             oAuthStoreHandler.saveDeviceCodeResponse(handle, dcr);
             accessTokenResponsePollSchedule = scheduler.scheduleWithFixedDelay(() -> accessTokenResponsePoll(),
                     dcr.getInterval(), dcr.getInterval(), TimeUnit.SECONDS);
             return dcr.getVerificationUriComplete();
         } catch (GeneralSecurityException e) {
-            logger.debug("getUserAuthenticationUri() error {}", e.getMessage(), e);
+            logger.debug("getUserAuthenticationUri() error:{}", e.getMessage());
             throw new OAuthException(e);
         } catch (OAuthException | IOException | OAuthResponseException e) {
-            logger.debug("getUserAuthenticationUri() error {}", e.getMessage(), e);
+            logger.debug("getUserAuthenticationUri() error:{}", e.getMessage());
             throw e;
         }
     }
@@ -262,21 +262,22 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
         request.timeout(HTTP_TIMEOUT_MILLISECONDS, TimeUnit.MILLISECONDS);
         request.param(PARAM_CLIENT_ID, clientIdParameter);
         request.param(PARAM_ID_SCOPE, scopeParameter);
-        logger.trace("getDeviceCodeResponse() request: {}", request);
+        logger.trace("getDeviceCodeResponse() request:{}", request);
 
         try {
             ContentResponse response = request.send();
             String content = response.getContentAsString();
-            logger.trace("getDeviceCodeResponse() response:\n{}", content);
+            logger.trace("getDeviceCodeResponse() response:{}", content);
 
             if (response.getStatus() == HttpStatus.OK_200) {
                 DeviceCodeResponse dcr = gson.fromJson(content, DeviceCodeResponse.class);
                 if (dcr != null) {
-                    logger.trace("getDeviceCodeResponse() return:\n{}", dcr);
+                    dcr.setCreatedOn(Instant.now());
+                    logger.trace("getDeviceCodeResponse() return:{}", dcr);
                     return dcr;
                 }
             }
-            throw new OAuthException("getDeviceCodeResponse() error " + response);
+            throw new OAuthException("getDeviceCodeResponse() error:" + response);
         } catch (Exception e) {
             throw new OAuthException("getDeviceCodeResponse() error", e);
         }
@@ -305,17 +306,18 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
         request.param(PARAM_CLIENT_ID, clientIdParameter);
         request.param(PARAM_GRANT_TYPE, PARAM_GRANT_TYPE_VALUE);
         request.param(PARAM_DEVICE_CODE, dcr.getDeviceCode());
-        logger.trace("getAccessTokenResponse() request: {}", request);
+        logger.trace("getAccessTokenResponse() request:{}", request);
 
         try {
             ContentResponse response = request.send();
             String content = response.getContentAsString();
-            logger.trace("getAccessTokenResponse() response:\n{}", content);
+            logger.trace("getAccessTokenResponse() response:{}", content);
 
             if (response.getStatus() == HttpStatus.OK_200) {
                 AccessTokenResponse atr = gson.fromJson(content, AccessTokenResponse.class);
                 if (atr != null) {
-                    logger.trace("getAccessTokenResponse() return:\n{}", atr);
+                    atr.setCreatedOn(Instant.now());
+                    logger.trace("getAccessTokenResponse() return:{}", atr);
                     return atr;
                 }
             }
@@ -342,7 +344,7 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
      */
     private synchronized void accessTokenResponsePoll() {
         DeviceCodeResponse dcr = loopDeviceCodeResponse;
-        logger.trace("accessTokenResponsePoll() start:\n{}", dcr);
+        logger.trace("accessTokenResponsePoll() start dcr:{}", dcr);
 
         Instant now = Instant.now();
         boolean stopPolling = false;
@@ -357,12 +359,12 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
             try {
                 atr = getAccessTokenResponse(dcr);
             } catch (OAuthException e) {
-                logger.debug("accessTokenResponsePoll() error: {}", e.getMessage(), e);
+                logger.debug("accessTokenResponsePoll() error:{}", e.getMessage());
                 stopPolling = true;
             }
         }
 
-        logger.trace("accessTokenResponsePoll() continue:\n{}\n{}", dcr, atr);
+        logger.trace("accessTokenResponsePoll() continue with dcr:{}, atr:{}", dcr, atr);
         if (atr != null) {
             /*
              * The AccessTokenResponse is OK:
@@ -372,7 +374,7 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
             try {
                 oAuthClientService.importAccessTokenResponse(atr);
             } catch (OAuthException e) {
-                logger.debug("accessTokenResponsePoll() error: {}", e.getMessage(), e);
+                logger.debug("accessTokenResponsePoll() error:{}", e.getMessage());
             }
             stopPolling = true;
         } else
@@ -399,6 +401,6 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
             loopDeviceCodeResponse = dcr;
         }
 
-        logger.trace("accessTokenResponsePoll() done:\n{}\n{}\nstopPolling [{}]", dcr, atr, stopPolling);
+        logger.trace("accessTokenResponsePoll() done with dcr:{}, atr:{}, stopPolling:{}", dcr, atr, stopPolling);
     }
 }
