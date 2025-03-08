@@ -15,14 +15,12 @@ package org.openhab.core.auth.oauth2client.internal;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.time.Instant;
-import java.util.Objects;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.api.ContentResponse;
 import org.eclipse.jetty.client.api.Request;
 import org.eclipse.jetty.http.HttpMethod;
@@ -76,7 +74,6 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
 
     private @Nullable ScheduledFuture<?> accessTokenResponsePollSchedule;
     private @Nullable DeviceCodeResponse loopDeviceCodeResponse;
-    private @Nullable HttpClient httpClient;
 
     /**
      * Create an analog of the {link OAuthConnector} that implements the oAuth RFC-8628 Device Code
@@ -160,11 +157,8 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
             /*
              * Prepare for a new polling cycle:
              * => stop any prior AccessTokenResponse polling schedule
-             * => close any prior HTTP client
-             * => create a new HTTP client
              */
-            close();
-            httpClient = createHttpClient(accessTokenRequestUrl);
+            stopAccessTokenResponsePollSchedule();
 
             /*
              * Retrieve existing DeviceCodeResponse from oAuth service storage (if any)
@@ -263,7 +257,7 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
      * @throws OAuthException
      */
     private synchronized DeviceCodeResponse getDeviceCodeResponse() throws OAuthException {
-        Request request = Objects.requireNonNull(httpClient).newRequest(deviceCodeRequestUrl);
+        Request request = httpClientFactory.getCommonHttpClient().newRequest(deviceCodeRequestUrl);
         request.method(HttpMethod.POST);
         request.timeout(HTTP_TIMEOUT_MILLISECONDS, TimeUnit.MILLISECONDS);
         request.param(PARAM_CLIENT_ID, clientIdParameter);
@@ -305,7 +299,7 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
      */
     private synchronized @Nullable AccessTokenResponse getAccessTokenResponse(DeviceCodeResponse dcr)
             throws OAuthException {
-        Request request = Objects.requireNonNull(httpClient).newRequest(accessTokenRequestUrl);
+        Request request = httpClientFactory.getCommonHttpClient().newRequest(accessTokenRequestUrl);
         request.method(HttpMethod.POST);
         request.timeout(HTTP_TIMEOUT_MILLISECONDS, TimeUnit.MILLISECONDS);
         request.param(PARAM_CLIENT_ID, clientIdParameter);
@@ -340,8 +334,6 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
     @Override
     public void close() {
         stopAccessTokenResponsePollSchedule();
-        shutdownQuietly(httpClient);
-        httpClient = null;
     }
 
     /**

@@ -62,7 +62,7 @@ public class OAuthConnector {
 
     private static final String HTTP_CLIENT_CONSUMER_NAME = "OAuthConnector";
 
-    private final HttpClientFactory httpClientFactory;
+    protected final HttpClientFactory httpClientFactory;
 
     private final @Nullable Fields extraFields;
 
@@ -372,7 +372,7 @@ public class OAuthConnector {
      * @throws OAuthException If any exception is thrown while starting the http client.
      * @see org.openhab.core.io.net.http.ExtensibleTrustManager
      */
-    protected HttpClient createHttpClient(String tokenUrl) throws OAuthException {
+    private HttpClient createHttpClient(String tokenUrl) throws OAuthException {
         HttpClient httpClient = httpClientFactory.createHttpClient(HTTP_CLIENT_CONSUMER_NAME);
         if (!httpClient.isStarted()) {
             try {
@@ -384,7 +384,7 @@ public class OAuthConnector {
         return httpClient;
     }
 
-    protected void shutdownQuietly(@Nullable HttpClient httpClient) {
+    private void shutdownQuietly(@Nullable HttpClient httpClient) {
         try {
             if (httpClient != null) {
                 httpClient.stop();
