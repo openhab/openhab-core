@@ -12,106 +12,140 @@
  */
 package org.openhab.core.auth.client.oauth2;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.Instant;
-
-import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
+import java.util.Objects;
 
 /**
- * This {@link DeviceCodeResponse} wraps an {@link AccessTokenResponse} and re-purposes some
- * of its fields to encapsulate the data from RFC-8628 device code responses. This allows us
- * to use the existing {@link AccessTokenResponse} storage mechanism to store and load the
- * {@link DeviceCodeResponse} data too.
+ * This {@link DeviceCodeResponse} is a DTO with fields that encapsulate the data from RFC-8628 device code responses.
+ * See {@link AccessTokenResponse} for reference.
  *
  * @author Andrew Fiddian-Green - Initial contribution
  */
-@NonNullByDefault
 public final class DeviceCodeResponse implements Serializable, Cloneable {
+    /**
+     * For Serializable
+     */
+    @Serial
     private static final long serialVersionUID = 4261783375996959200L;
 
-    /**
-     * Create a {@link DeviceCodeResponse} from the given {@link AccessTokenResponse}.
-     * Returns null if the AccessTokenResponse is null.
-     */
-    public static @Nullable DeviceCodeResponse createFromAccessTokenResponse(@Nullable AccessTokenResponse atr) {
-        return atr != null ? new DeviceCodeResponse(atr) : null;
-    }
-
-    /**
-     * Get the inner {@link AccessTokenResponse} from the given {@link DeviceCodeResponse}.
-     * Returns null if the DeviceCodeResponse is null.
-     */
-    public static @Nullable AccessTokenResponse getAccessTokenResponse(@Nullable DeviceCodeResponse dcr) {
-        return dcr != null ? dcr.getAccessTokenResponse() : null;
-    }
-
-    private final AccessTokenResponse atr;
-
-    public DeviceCodeResponse() {
-        atr = new AccessTokenResponse();
-        atr.setCreatedOn(Instant.now());
-    }
-
-    public DeviceCodeResponse(AccessTokenResponse atr) {
-        this.atr = atr;
-    }
+    private String deviceCode;
+    private long expiresIn;
+    private long interval;
+    private String userCode;
+    private String verificationUri;
+    private String verificationUriComplete;
+    private Instant createdOn;
 
     @Override
-    public boolean equals(@Nullable Object other) {
-        if (this == other) {
-            return true;
+    public Object clone() {
+        try {
+            return super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new IllegalStateException("not possible", e);
         }
-        if (other instanceof DeviceCodeResponse that) {
-            return this.atr.equals(that.atr);
-        }
-        return false;
     }
 
-    public AccessTokenResponse getAccessTokenResponse() {
-        return atr;
+    public Instant getCreatedOn() {
+        return createdOn;
     }
 
     public String getDeviceCode() {
-        return atr.getAccessToken();
+        return deviceCode;
     }
 
     public long getExpiresIn() {
-        return atr.getExpiresIn();
+        return expiresIn;
     }
 
-    public int getInterval() {
-        return Integer.parseInt(atr.getState());
+    public long getInterval() {
+        return interval;
     }
 
-    public String getUserAuthenticationUri() {
-        return atr.getRefreshToken();
+    public String getUserCode() {
+        return userCode;
     }
 
+    public String getVerificationUri() {
+        return verificationUri;
+    }
+
+    public String getVerificationUriComplete() {
+        return verificationUriComplete;
+    }
+
+    /**
+     * Calculate if the device code response is expired against the given time.
+     * It also returns true even if the token is not initialized (i.e. object newly created).
+     *
+     * @param givenTime To calculate if the token is expired against the givenTime.
+     * @param tokenExpiresInBuffer A positive integer in seconds to act as additional buffer to the calculation.
+     *            This causes the OAuthToken to expire earlier then the stated expiry-time given
+     *            by the authorization server.
+     * @return true if object is not-initialized, or expired, or expired early due to buffer
+     */
     public boolean isExpired(Instant givenTime, int tokenExpiresInBuffer) {
-        return atr.isExpired(givenTime, tokenExpiresInBuffer);
+        return createdOn == null
+                || createdOn.plusSeconds(expiresIn).minusSeconds(tokenExpiresInBuffer).isBefore(givenTime);
+    }
+
+    public void setCreatedOn(Instant createdOn) {
+        this.createdOn = createdOn;
     }
 
     public void setDeviceCode(String deviceCode) {
-        atr.setAccessToken(deviceCode);
+        this.deviceCode = deviceCode;
     }
 
-    public void setExpiresIn(int expiresIn) {
-        atr.setExpiresIn(expiresIn);
+    public void setExpiresIn(long expiresIn) {
+        this.expiresIn = expiresIn;
     }
 
-    public void setInterval(int interval) {
-        atr.setState(String.valueOf(interval));
+    public void setInterval(long interval) {
+        this.interval = interval;
     }
 
-    public void setUserAuthenticationUri(String userUri) {
-        atr.setRefreshToken(userUri);
+    public void setUserCode(String userCode) {
+        this.userCode = userCode;
+    }
+
+    public void setVerificationUri(String verificationUri) {
+        this.verificationUri = verificationUri;
+    }
+
+    public void setVerificationUriComplete(String verificationUriComplete) {
+        this.verificationUriComplete = verificationUriComplete;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        DeviceCodeResponse other = (DeviceCodeResponse) obj;
+        return Objects.equals(createdOn, other.createdOn) && Objects.equals(deviceCode, other.deviceCode)
+                && expiresIn == other.expiresIn && interval == other.interval
+                && Objects.equals(userCode, other.userCode) && Objects.equals(verificationUri, other.verificationUri)
+                && Objects.equals(verificationUriComplete, other.verificationUriComplete);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(createdOn, deviceCode, expiresIn, interval, userCode, verificationUri,
+                verificationUriComplete);
     }
 
     @Override
     public String toString() {
-        return "DeviceCodeResponse [deviceCode=" + getDeviceCode() + ", userAuthenticationUri="
-                + getUserAuthenticationUri() + ", interval=" + getInterval() + ", expiresIn=" + getExpiresIn()
-                + ", createdOn=" + atr.getCreatedOn() + "]";
+        return "DeviceCodeResponse [deviceCode=" + deviceCode + ", expiresIn=" + expiresIn + ", interval=" + interval
+                + ", userCode=" + userCode + ", verificationUri=" + verificationUri + ", verificationUriComplete="
+                + verificationUriComplete + ", createdOn=" + createdOn + "]";
     }
 }

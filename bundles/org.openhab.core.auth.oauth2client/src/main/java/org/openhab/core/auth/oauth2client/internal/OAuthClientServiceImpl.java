@@ -77,7 +77,7 @@ public class OAuthClientServiceImpl implements OAuthClientService {
     private PersistedParams persistedParams = new PersistedParams();
 
     private @Nullable Fields extraAuthFields = null;
-    private @Nullable Rfc8628Connector rfc8628Connector = null;
+    private @Nullable OAuthConnectorRFC8628 oAuthConnectorRFC8628 = null;
 
     private volatile boolean closed = false;
 
@@ -394,15 +394,15 @@ public class OAuthClientServiceImpl implements OAuthClientService {
         closed = true;
         storeHandler = null;
         logger.debug("closing oauth client, handle: {}", handle);
-        closeRfc8628Connector();
+        closeOAuthConnectorRFC8628();
     }
 
-    private synchronized void closeRfc8628Connector() {
-        Rfc8628Connector connector = this.rfc8628Connector;
+    private synchronized void closeOAuthConnectorRFC8628() {
+        OAuthConnectorRFC8628 connector = this.oAuthConnectorRFC8628;
         if (connector != null) {
             connector.close();
         }
-        this.rfc8628Connector = null;
+        this.oAuthConnectorRFC8628 = null;
     }
 
     @Override
@@ -452,11 +452,26 @@ public class OAuthClientServiceImpl implements OAuthClientService {
 
     @Override
     public @Nullable String getUserAuthenticationUri() throws OAuthException, IOException, OAuthResponseException {
-        closeRfc8628Connector();
-        Rfc8628Connector connector = new Rfc8628Connector(this, handle, storeHandler, httpClientFactory, gsonBuilder,
-                persistedParams.tokenUrl, persistedParams.authorizationUrl, persistedParams.clientId,
+        closeOAuthConnectorRFC8628();
+
+        if (persistedParams.tokenUrl == null) {
+            throw new OAuthException("Missing accessTokenRequestUrl");
+        }
+        if (persistedParams.authorizationUrl == null) {
+            throw new OAuthException("Missing deviceCodeRequestUrl");
+        }
+        if (persistedParams.clientId == null) {
+            throw new OAuthException("Missing client ID");
+        }
+        if (persistedParams.scope == null) {
+            throw new OAuthException("Missing scope");
+        }
+
+        OAuthConnectorRFC8628 connector = new OAuthConnectorRFC8628(this, handle, storeHandler, httpClientFactory,
+                gsonBuilder, persistedParams.tokenUrl, persistedParams.authorizationUrl, persistedParams.clientId,
                 persistedParams.scope);
-        this.rfc8628Connector = connector;
+
+        oAuthConnectorRFC8628 = connector;
         return connector.getUserAuthenticationUri();
     }
 }

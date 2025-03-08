@@ -15,7 +15,7 @@ package org.openhab.core.auth.oauth2client.internal;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.time.Instant;
-import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -37,23 +37,20 @@ import org.openhab.core.io.net.http.HttpClientFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 /**
- * The {@link Rfc8628Connector} is an analog of {link OAuthConnector} that provides
- * an implementation of the oAuth RFC-8628 Device Code Grant Flow authentication process.
+ * The {@link OAuthConnectorRFC8628} extends {@link OAuthConnector} to implement
+ * the oAuth RFC-8628 Device Code Grant Flow authentication process.
  *
  * @see <a href="https://datatracker.ietf.org/doc/html/rfc8628">RFC-8628</a>
  *
  * @author Andrew Fiddian-Green - Initial contribution
  */
 @NonNullByDefault
-public class Rfc8628Connector implements AutoCloseable {
+public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseable {
 
-    private static final String RFC_8628_SUFFIX = "-rfc8628";
-    private static final String RESOURCE_ID = "oAuth" + RFC_8628_SUFFIX;
-    private static final int TIMEOUT_MILLISECONDS = 5000;
+    private final Logger logger = LoggerFactory.getLogger(OAuthConnectorRFC8628.class);
 
     // URL parameter names
     private static final String PARAM_ID_SCOPE = "scope";
@@ -64,25 +61,15 @@ public class Rfc8628Connector implements AutoCloseable {
     // URL parameter values
     private static final String PARAM_GRANT_TYPE_VALUE = "urn:ietf:params:oauth:grant-type:device_code";
 
-    // JSON element names
-    private static final String JSON_ACCESS_TOKEN = "access_token";
-    private static final String JSON_REFRESH_TOKEN = "refresh_token";
-    private static final String JSON_TOKEN_TYPE = "token_type";
-    private static final String JSON_INTERVAL = "interval";
-    private static final String JSON_EXPIRES_IN = "expires_in";
-    private static final String JSON_USER_AUTH_URI = "verification_uri_complete";
-    private static final String JSON_DEVICE_CODE = PARAM_DEVICE_CODE;
-
-    private final Logger logger = LoggerFactory.getLogger(Rfc8628Connector.class);
+    private static final String SCHEDULER_POOL_NAME = "oauth-rfc8628";
+    private static final int HTTP_TIMEOUT_MILLISECONDS = 5000;
 
     private final OAuthClientService oAuthClientService;
     private final OAuthStoreHandler oAuthStoreHandler;
-    private final HttpClientFactory httpClientFactory;
     private final ScheduledExecutorService scheduler;
     private final String handle;
-    private final Gson gson;
 
-    private final String accesTokenRequestUrl;
+    private final String accessTokenRequestUrl;
     private final String deviceCodeRequestUrl;
     private final String clientIdParameter;
     private final String scopeParameter;
@@ -105,36 +92,22 @@ public class Rfc8628Connector implements AutoCloseable {
      * @param deviceCodeRequestUrl the URL that provides {@link DeviceCodeResponse} responses
      * @param clientId the RFC-8628 request client id parameter
      * @param scope the RFC-8628 request scope parameter
+     *
      * @throws OAuthException
      */
-    public Rfc8628Connector(OAuthClientService oAuthClientService, String handle, OAuthStoreHandler oAuthStoreHandler,
-            HttpClientFactory httpClientFactory, @Nullable GsonBuilder gsonBuilder,
-            @Nullable String accessTokenRequestUrl, @Nullable String deviceCodeRequestUrl, @Nullable String clientId,
-            @Nullable String scope) throws OAuthException {
-
-        if (accessTokenRequestUrl == null) {
-            throw new OAuthException("Missing accessTokenRequestUrl");
-        }
-        if (deviceCodeRequestUrl == null) {
-            throw new OAuthException("Missing deviceCodeRequestUrl");
-        }
-        if (clientId == null) {
-            throw new OAuthException("Missing client ID");
-        }
-        if (scope == null) {
-            throw new OAuthException("Missing scope");
-        }
-
-        this.handle = handle + RFC_8628_SUFFIX;
+    public OAuthConnectorRFC8628(OAuthClientService oAuthClientService, String handle,
+            OAuthStoreHandler oAuthStoreHandler, HttpClientFactory httpClientFactory, @Nullable GsonBuilder gsonBuilder,
+            String accessTokenRequestUrl, String deviceCodeRequestUrl, String clientId, String scope)
+            throws OAuthException {
+        super(httpClientFactory, null, gsonBuilder != null ? gsonBuilder : new GsonBuilder());
         this.oAuthClientService = oAuthClientService;
         this.oAuthStoreHandler = oAuthStoreHandler;
-        this.httpClientFactory = httpClientFactory;
-        this.gson = gsonBuilder != null ? gsonBuilder.create() : new Gson();
-        this.scheduler = ThreadPoolManager.getScheduledPool(RESOURCE_ID);
+        this.scheduler = ThreadPoolManager.getScheduledPool(SCHEDULER_POOL_NAME);
         this.deviceCodeRequestUrl = deviceCodeRequestUrl;
-        this.accesTokenRequestUrl = accessTokenRequestUrl;
+        this.accessTokenRequestUrl = accessTokenRequestUrl;
         this.clientIdParameter = clientId;
         this.scopeParameter = scope;
+        this.handle = handle;
     }
 
     /**
@@ -160,6 +133,7 @@ public class Rfc8628Connector implements AutoCloseable {
     public synchronized @Nullable String getUserAuthenticationUri()
             throws OAuthException, IOException, OAuthResponseException {
         try {
+            logger.trace("getUserAuthenticationUri() start..");
             if (oAuthClientService.isClosed()) {
                 /*
                  * The oAuth service is closed:
@@ -168,7 +142,13 @@ public class Rfc8628Connector implements AutoCloseable {
                 throw new OAuthException("OAuthClientService closed");
             }
 
-            if (oAuthClientService.getAccessTokenResponse() == null) {
+            /*
+             * Retrieve existing AccessTokenResponse from oAuth service (if any)
+             */
+            AccessTokenResponse atr = oAuthClientService.getAccessTokenResponse();
+            logger.trace("getUserAuthenticationUri() got token:\n{}", atr);
+
+            if (atr != null) {
                 /*
                  * The AccessTokenResponse exists:
                  * => no further user authentication is needed
@@ -179,62 +159,80 @@ public class Rfc8628Connector implements AutoCloseable {
 
             /*
              * Prepare for a new polling cycle:
-             * => cancel any prior scheduler task
+             * => stop any prior AccessTokenResponse polling schedule
+             * => close any prior HTTP client
+             * => create a new HTTP client
              */
-            stopAccessTokenResponsePollSchedule();
+            close();
+            httpClient = createHttpClient(accessTokenRequestUrl);
 
             /*
-             * Retrieve the prior DeviceCodeResponse from the oAuth service storage (if any)
+             * Retrieve existing DeviceCodeResponse from oAuth service storage (if any)
              */
-            DeviceCodeResponse dcr;
-            dcr = DeviceCodeResponse.createFromAccessTokenResponse(oAuthStoreHandler.loadAccessTokenResponse(handle));
+            DeviceCodeResponse dcr = oAuthStoreHandler.loadDeviceCodeResponse(handle);
+            logger.trace("getUserAuthenticationUri() loaded dcr:\n{}", dcr);
 
-            if (dcr != null) {
+            if (dcr == null || dcr.isExpired(Instant.now(), 0)) {
                 /*
-                 * The DeviceCodeResponse exists:
-                 * => try to get the AccessTokenResponse from it
-                 */
-                AccessTokenResponse atr = getAccessTokenResponse(dcr);
-
-                if (atr != null) {
-                    /*
-                     * The AccessTokenResponse exists:
-                     * => import the AccessTokenResponse into the oAuth service storage
-                     * => no further user authentication is needed
-                     * => return null
-                     */
-                    oAuthClientService.importAccessTokenResponse(atr);
-                    return null;
-                }
-
-                /*
-                 * The AccessTokenResponse is missing:
-                 * => probably the prior DeviceCodeResponse was bad
+                 * The DeviceCodeResponse from storage is missing or invalid:
                  * => try to get a new DeviceCodeResponse
+                 * => note: this causes an exit by thrown an exception if the call fails
                  */
                 dcr = getDeviceCodeResponse();
             }
 
-            if (dcr == null || dcr.isExpired(Instant.now(), 0)) {
+            /*
+             * If we got here without exception then the DeviceCodeResponse exists:
+             * => try to get the AccessTokenResponse from it
+             */
+            atr = getAccessTokenResponse(dcr);
+            logger.trace("getUserAuthenticationUri() dcr => acr:\n{}\n{}", dcr, atr);
+
+            if (atr == null) {
                 /*
-                 * The (eventually new) DeviceCodeResponse is (also) not valid:
-                 * => throw an exception
+                 * The AccessTokenResponse is missing:
+                 * => probably the prior DeviceCodeResponse was bad
+                 * => make one more try to get a new DeviceCodeResponse
+                 * => note: this causes an exit by a thrown an exception if the call fails
                  */
-                throw new OAuthException("DeviceCodeResponse missing or expired");
+                dcr = getDeviceCodeResponse();
+            } else {
+                /*
+                 * The AccessTokenResponse exists:
+                 * => import the AccessTokenResponse into the oAuth service storage
+                 * => no further user authentication is needed
+                 * => exit by returning null
+                 */
+                oAuthClientService.importAccessTokenResponse(atr);
+                return null;
             }
 
             /*
-             * The DeviceCodeResponse is OK:
+             * If we got to this point the DeviceCodeResponse exists:
+             * => confirm that it is valid
+             */
+            logger.trace("getUserAuthenticationUri() check expired:\n{}", dcr);
+            if (dcr.isExpired(Instant.now(), 0)) {
+                /*
+                 * The DeviceCodeResponse is not valid:
+                 * => exit by throwing an exception
+                 */
+                throw new OAuthException("DeviceCodeResponse expired");
+            }
+
+            /*
+             * If we got to this point the DeviceCodeResponse is OK:
              * => cache the DeviceCodeResponse across polling cycles in 'loopDeviceCodeResponse'
              * => save the DeviceCodeResponse in the oAuth service storage
              * => schedule a repeated task to poll for an AccessTokenResponse from the DeviceCodeResponse
              * => return the user URI from the DeviceCodeResponse
              */
+            logger.trace("getUserAuthenticationUri() store and poll start:\n{}", dcr);
             loopDeviceCodeResponse = dcr;
-            oAuthStoreHandler.saveAccessTokenResponse(handle, DeviceCodeResponse.getAccessTokenResponse(dcr));
+            oAuthStoreHandler.saveDeviceCodeResponse(handle, dcr);
             accessTokenResponsePollSchedule = scheduler.scheduleWithFixedDelay(() -> accessTokenResponsePoll(),
                     dcr.getInterval(), dcr.getInterval(), TimeUnit.SECONDS);
-            return dcr.getUserAuthenticationUri();
+            return dcr.getVerificationUriComplete();
         } catch (GeneralSecurityException e) {
             logger.debug("getUserAuthenticationUri() error {}", e.getMessage(), e);
             throw new OAuthException(e);
@@ -265,35 +263,23 @@ public class Rfc8628Connector implements AutoCloseable {
      * @throws OAuthException
      */
     private synchronized DeviceCodeResponse getDeviceCodeResponse() throws OAuthException {
-        Request request = getHttpClient().newRequest(deviceCodeRequestUrl);
+        Request request = Objects.requireNonNull(httpClient).newRequest(deviceCodeRequestUrl);
         request.method(HttpMethod.POST);
-        request.timeout(TIMEOUT_MILLISECONDS, TimeUnit.MILLISECONDS);
+        request.timeout(HTTP_TIMEOUT_MILLISECONDS, TimeUnit.MILLISECONDS);
         request.param(PARAM_CLIENT_ID, clientIdParameter);
         request.param(PARAM_ID_SCOPE, scopeParameter);
-        logger.trace("getDeviceCodeResponse() => {}", request);
+        logger.trace("getDeviceCodeResponse() request: {}", request);
 
         try {
             ContentResponse response = request.send();
             String content = response.getContentAsString();
-            logger.trace("getDeviceCodeResponse() <= {}", content);
+            logger.trace("getDeviceCodeResponse() response:\n{}", content);
 
             if (response.getStatus() == HttpStatus.OK_200) {
-                Map<?, ?> jsonMap = gson.fromJson(content, Map.class);
-                if (jsonMap != null) {
-                    String userAuthenticationUri = asString(jsonMap.get(JSON_USER_AUTH_URI));
-                    String deviceCode = asString(jsonMap.get(JSON_DEVICE_CODE));
-                    int expiresIn = asInt(jsonMap.get(JSON_EXPIRES_IN));
-                    int interval = asInt(jsonMap.get(JSON_INTERVAL));
-
-                    if (deviceCode != null && userAuthenticationUri != null && expiresIn > 0 && interval > 0) {
-                        DeviceCodeResponse dcr = new DeviceCodeResponse();
-                        dcr.setDeviceCode(deviceCode);
-                        dcr.setUserAuthenticationUri(userAuthenticationUri);
-                        dcr.setExpiresIn(expiresIn);
-                        dcr.setInterval(interval);
-                        logger.trace("getDeviceCodeResponse() {}", dcr);
-                        return dcr;
-                    }
+                DeviceCodeResponse dcr = gson.fromJson(content, DeviceCodeResponse.class);
+                if (dcr != null) {
+                    logger.trace("getDeviceCodeResponse() return:\n{}", dcr);
+                    return dcr;
                 }
             }
             throw new OAuthException("getDeviceCodeResponse() error " + response);
@@ -319,39 +305,25 @@ public class Rfc8628Connector implements AutoCloseable {
      */
     private synchronized @Nullable AccessTokenResponse getAccessTokenResponse(DeviceCodeResponse dcr)
             throws OAuthException {
-        Request request = getHttpClient().newRequest(accesTokenRequestUrl);
+        Request request = Objects.requireNonNull(httpClient).newRequest(accessTokenRequestUrl);
         request.method(HttpMethod.POST);
-        request.timeout(TIMEOUT_MILLISECONDS, TimeUnit.MILLISECONDS);
+        request.timeout(HTTP_TIMEOUT_MILLISECONDS, TimeUnit.MILLISECONDS);
         request.param(PARAM_CLIENT_ID, clientIdParameter);
         request.param(PARAM_GRANT_TYPE, PARAM_GRANT_TYPE_VALUE);
         request.param(PARAM_DEVICE_CODE, dcr.getDeviceCode());
-        logger.trace("getAccessTokenResponse() => {}", request);
+        logger.trace("getAccessTokenResponse() request: {}", request);
 
         try {
             ContentResponse response = request.send();
             String content = response.getContentAsString();
-            logger.trace("getAccessTokenResponse() <= {}", content);
+            logger.trace("getAccessTokenResponse() response:\n{}", content);
 
             if (response.getStatus() == HttpStatus.OK_200) {
-                Map<?, ?> jsonMap = gson.fromJson(content, Map.class);
-                if (jsonMap != null) {
-                    String accessToken = asString(jsonMap.get(JSON_ACCESS_TOKEN));
-                    String accessTokenType = asString(jsonMap.get(JSON_TOKEN_TYPE));
-                    String refreshToken = asString(jsonMap.get(JSON_REFRESH_TOKEN));
-                    int expiresIn = asInt(jsonMap.get(JSON_EXPIRES_IN));
-
-                    if (accessToken != null && refreshToken != null && accessTokenType != null && expiresIn > 0) {
-                        AccessTokenResponse atr = new AccessTokenResponse();
-                        atr.setCreatedOn(Instant.now());
-                        atr.setAccessToken(accessToken);
-                        atr.setTokenType(accessTokenType);
-                        atr.setExpiresIn(expiresIn);
-                        atr.setRefreshToken(refreshToken);
-                        logger.trace("getAccessTokenResponse() {}", atr);
-                        return atr;
-                    }
+                AccessTokenResponse atr = gson.fromJson(content, AccessTokenResponse.class);
+                if (atr != null) {
+                    logger.trace("getAccessTokenResponse() return:\n{}", atr);
+                    return atr;
                 }
-                throw new OAuthException("getAccessTokenResponse() error");
             }
 
             /*
@@ -365,35 +337,11 @@ public class Rfc8628Connector implements AutoCloseable {
         }
     }
 
-    private HttpClient getHttpClient() throws OAuthException {
-        HttpClient httpClient = this.httpClient;
-        if (httpClient == null) {
-            httpClient = httpClientFactory.createHttpClient(RESOURCE_ID);
-            try {
-                httpClient.setConnectTimeout(TIMEOUT_MILLISECONDS);
-                httpClient.start();
-            } catch (Exception e) {
-                throw new OAuthException("getHttpClient() error " + e.getMessage());
-            }
-        }
-        return httpClient;
-    }
-
-    private void stopHttpClient() {
-        try {
-            if (httpClient != null) {
-                httpClient.stop();
-            }
-        } catch (Exception e) {
-            // nothing to do
-        }
-        httpClient = null;
-    }
-
     @Override
     public void close() {
         stopAccessTokenResponsePollSchedule();
-        stopHttpClient();
+        shutdownQuietly(httpClient);
+        httpClient = null;
     }
 
     /**
@@ -401,12 +349,13 @@ public class Rfc8628Connector implements AutoCloseable {
      * variable becomes true, in order to poll for an {@link AccessTokenResponse}
      */
     private synchronized void accessTokenResponsePoll() {
-        boolean stopPolling = false;
+        DeviceCodeResponse dcr = loopDeviceCodeResponse;
+        logger.trace("accessTokenResponsePoll() start:\n{}", dcr);
 
         Instant now = Instant.now();
-        DeviceCodeResponse dcr = loopDeviceCodeResponse;
-
+        boolean stopPolling = false;
         AccessTokenResponse atr = null;
+
         if (dcr != null && !dcr.isExpired(now, 0)) {
             /*
              * The DeviceCodeResponse is OK:
@@ -416,11 +365,12 @@ public class Rfc8628Connector implements AutoCloseable {
             try {
                 atr = getAccessTokenResponse(dcr);
             } catch (OAuthException e) {
-                logger.debug("accessTokenResponsePoll() error {}", e.getMessage(), e);
+                logger.debug("accessTokenResponsePoll() error: {}", e.getMessage(), e);
                 stopPolling = true;
             }
         }
 
+        logger.trace("accessTokenResponsePoll() continue:\n{}\n{}", dcr, atr);
         if (atr != null) {
             /*
              * The AccessTokenResponse is OK:
@@ -430,7 +380,7 @@ public class Rfc8628Connector implements AutoCloseable {
             try {
                 oAuthClientService.importAccessTokenResponse(atr);
             } catch (OAuthException e) {
-                logger.debug("accessTokenResponsePoll() error {}", e.getMessage(), e);
+                logger.debug("accessTokenResponsePoll() error: {}", e.getMessage(), e);
             }
             stopPolling = true;
         } else
@@ -447,22 +397,16 @@ public class Rfc8628Connector implements AutoCloseable {
             /*
              * Polling shall be stopped:
              * => stop the AccessTokenResponse polling schedule
-             * => stop the HTTP client
+             * => close the HTTP client
              */
             close();
         } else {
             /*
-             * Cache the DeviceCodeResponse for the next poll
+             * Cache the DeviceCodeResponse for the next iteration
              */
             loopDeviceCodeResponse = dcr;
         }
-    }
 
-    private int asInt(@Nullable Object obj) {
-        return obj instanceof Number number ? number.intValue() : 0;
-    }
-
-    private @Nullable String asString(@Nullable Object obj) {
-        return obj instanceof String string ? string : null;
+        logger.trace("accessTokenResponsePoll() done:\n{}\n{}\nstopPolling [{}]", dcr, atr, stopPolling);
     }
 }
