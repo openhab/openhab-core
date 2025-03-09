@@ -350,6 +350,8 @@ public class OAuthClientServiceImpl implements OAuthClientService {
 
         if (lastAccessToken.isExpired(Instant.now(), tokenExpiresInSeconds)
                 && lastAccessToken.getRefreshToken() != null) {
+            // TODO remove logger call
+            logger.trace("TODO: calling refreshToken expires:{} last: {}", tokenExpiresInSeconds, lastAccessToken);
             return refreshToken();
         }
         return lastAccessToken;
@@ -455,13 +457,13 @@ public class OAuthClientServiceImpl implements OAuthClientService {
         closeOAuthConnectorRFC8628();
 
         if (persistedParams.tokenUrl == null) {
-            throw new OAuthException("Missing accessTokenRequestUrl");
+            throw new OAuthException("Missing access token request url");
         }
         if (persistedParams.authorizationUrl == null) {
-            throw new OAuthException("Missing deviceCodeRequestUrl");
+            throw new OAuthException("Missing device code request url");
         }
         if (persistedParams.clientId == null) {
-            throw new OAuthException("Missing client ID");
+            throw new OAuthException("Missing client id");
         }
         if (persistedParams.scope == null) {
             throw new OAuthException("Missing scope");

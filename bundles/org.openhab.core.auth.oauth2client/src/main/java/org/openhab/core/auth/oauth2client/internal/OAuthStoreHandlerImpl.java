@@ -229,7 +229,7 @@ public class OAuthStoreHandlerImpl implements OAuthStoreHandler {
         if (storageCipher.isEmpty()) {
             return decryptedToken; // do nothing if no cipher
         }
-        logger.debug("Decrypting token: {}", accessTokenResponse);
+        logger.debug("Decrypting: {}", accessTokenResponse);
         decryptedToken.setAccessToken(storageCipher.get().decrypt(accessTokenResponse.getAccessToken()));
         decryptedToken.setRefreshToken(storageCipher.get().decrypt(accessTokenResponse.getRefreshToken()));
         return decryptedToken;
@@ -240,7 +240,7 @@ public class OAuthStoreHandlerImpl implements OAuthStoreHandler {
         if (storageCipher.isEmpty()) {
             return dcrDecrypted; // do nothing if no cipher
         }
-        logger.debug("Decrypting token: {}", dcr);
+        logger.debug("Decrypting: {}", dcr);
         dcrDecrypted.setDeviceCode(storageCipher.get().decrypt(dcr.getDeviceCode()));
         dcrDecrypted.setUserCode(storageCipher.get().decrypt(dcr.getUserCode()));
         dcrDecrypted.setVerificationUriComplete(storageCipher.get().decrypt(dcr.getVerificationUriComplete()));

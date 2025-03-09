@@ -48,8 +48,6 @@ import com.google.gson.GsonBuilder;
 @NonNullByDefault
 public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseable {
 
-    private final Logger logger = LoggerFactory.getLogger(OAuthConnectorRFC8628.class);
-
     // URL parameter names
     private static final String PARAM_ID_SCOPE = "scope";
     private static final String PARAM_CLIENT_ID = "client_id";
@@ -59,8 +57,14 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
     // URL parameter values
     private static final String PARAM_GRANT_TYPE_VALUE = "urn:ietf:params:oauth:grant-type:device_code";
 
+    // logger strings
+    private static final String LOG_NULL_ATR = "AccessTokenResponse [null]";
+    private static final Object LOG_NULL_DCR = "DeviceCodeResponse [null]";
+
     private static final String SCHEDULER_POOL_NAME = "oauth-rfc8628";
     private static final int HTTP_TIMEOUT_MILLISECONDS = 5000;
+
+    private final Logger logger = LoggerFactory.getLogger(OAuthConnectorRFC8628.class);
 
     private final OAuthClientService oAuthClientService;
     private final OAuthStoreHandler oAuthStoreHandler;
@@ -72,13 +76,13 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
     private final String clientIdParameter;
     private final String scopeParameter;
 
-    private @Nullable ScheduledFuture<?> accessTokenResponsePollSchedule;
-    private @Nullable DeviceCodeResponse loopDeviceCodeResponse;
+    private @Nullable ScheduledFuture<?> atrPollTaskSchedule;
+    private @Nullable DeviceCodeResponse dcrCached;
 
     /**
      * Create an analog of the {link OAuthConnector} that implements the oAuth RFC-8628 Device Code
-     * Grant Flow authentication process. The parameters are as follows (whereby (*) means that the
-     * parameters would usually be those of the calling {@link OAuthClientService}:
+     * Grant Flow authentication process. The parameters are as follows -- whereby (*) means that the
+     * parameters would usually be from the private fields of the calling {@link OAuthClientService}.
      *
      * @param oAuthClientService the calling {@link OAuthClientService}
      * @param handle an oAuth storage handle (*)
@@ -129,25 +133,31 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
      */
     public synchronized @Nullable String getUserAuthenticationUri()
             throws OAuthException, IOException, OAuthResponseException {
+        /*
+         * 'finally' control variable to create a poll task schedule with the given interval
+         */
+        long createNewAtrPollTaskScheduleSeconds = 0;
+        Instant now = Instant.now();
+
         try {
             logger.trace("getUserAuthenticationUri() start..");
             if (oAuthClientService.isClosed()) {
                 /*
-                 * The oAuth service is closed:
+                 * The service is closed:
                  * => throw an exception
                  */
                 throw new OAuthException("OAuthClientService closed");
             }
 
             /*
-             * Retrieve existing AccessTokenResponse from oAuth service (if any)
+             * Retrieve local AccessTokenResponse from service (if any)
              */
             AccessTokenResponse atr = oAuthClientService.getAccessTokenResponse();
-            logger.trace("getUserAuthenticationUri() has atr:{}", atr);
+            logger.trace("getUserAuthenticationUri() loaded from service: {}", atr != null ? atr : LOG_NULL_ATR);
 
             if (atr != null) {
                 /*
-                 * The AccessTokenResponse exists:
+                 * The local AccessTokenResponse exists:
                  * => no further user authentication is needed
                  * => return null
                  */
@@ -155,93 +165,113 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
             }
 
             /*
-             * Prepare for a new polling cycle:
-             * => stop any prior AccessTokenResponse polling schedule
-             */
-            stopAccessTokenResponsePollSchedule();
-
-            /*
-             * Retrieve existing DeviceCodeResponse from oAuth service storage (if any)
+             * Load local DeviceCodeResponse from service storage (if any)
              */
             DeviceCodeResponse dcr = oAuthStoreHandler.loadDeviceCodeResponse(handle);
-            logger.trace("getUserAuthenticationUri() loaded dcr:{}", dcr);
+            logger.trace("getUserAuthenticationUri() loaded from storage: {}", dcr != null ? dcr : LOG_NULL_DCR);
 
-            if (dcr == null || dcr.isExpired(Instant.now(), 0)) {
+            if (dcr == null || dcr.isExpired(now, 0)) {
                 /*
-                 * The DeviceCodeResponse from storage is missing or invalid:
-                 * => try to get a new DeviceCodeResponse
-                 * => note: this causes an exit by thrown an exception if the call fails
+                 * The local DeviceCodeResponse is missing or expired:
+                 * => fetch a DeviceCodeResponse from the remote server
+                 * => note: if the call fails it throws an exception
                  */
                 dcr = getDeviceCodeResponse();
+                logger.trace("getUserAuthenticationUri() fetched from remote: {}", dcr);
             }
 
             /*
-             * If we got here without exception then the DeviceCodeResponse exists:
-             * => try to get the AccessTokenResponse from it
+             * If we got here without exception then the (local or remote) DeviceCodeResponse exists:
+             * => try to fetch an AccessTokenResponse for it from the remote server
+             * => if the fetch fails-soft (authentication not yet done) it returns a null AccessTokenResponse
+             * => if the fetch fails-hard it throws an exception
              */
             atr = getAccessTokenResponse(dcr);
-            logger.trace("getUserAuthenticationUri() dcr:{} yielded atr:{}", dcr, atr);
+            logger.trace("getUserAuthenticationUri() fetched from remote: {}", atr != null ? atr : LOG_NULL_ATR);
 
             if (atr == null) {
                 /*
-                 * The AccessTokenResponse is missing:
-                 * => probably the prior DeviceCodeResponse was bad
-                 * => make one more try to get a new DeviceCodeResponse
-                 * => note: this causes an exit by a thrown an exception if the call fails
+                 * The fetched AccessTokenResponse is missing:
+                 * => perhaps the DeviceCodeResponse was bad
+                 * => make one more try to fetch a new DeviceCodeResponse
+                 * => note: if the fetch fails it throws an exception
                  */
                 dcr = getDeviceCodeResponse();
+                logger.trace("getUserAuthenticationUri() fetched from remote (retry): {}", dcr);
             } else {
                 /*
-                 * The AccessTokenResponse exists:
-                 * => import the AccessTokenResponse into the oAuth service storage
+                 * The fetched AccessTokenResponse exists:
+                 * => import the AccessTokenResponse into the service storage
                  * => no further user authentication is needed
                  * => exit by returning null
                  */
                 oAuthClientService.importAccessTokenResponse(atr);
+                logger.trace("getUserAuthenticationUri() imported into service: {}", atr);
                 return null;
             }
 
             /*
-             * If we got to this point the DeviceCodeResponse exists:
+             * If we got to this point the (local or remote) DeviceCodeResponse exists:
              * => confirm that it is valid
              */
-            logger.trace("getUserAuthenticationUri() check dcr:{}", dcr);
-            if (dcr.isExpired(Instant.now(), 0)) {
+            if (dcr.isExpired(now, 0)) {
                 /*
-                 * The DeviceCodeResponse is not valid:
+                 * The (local or remote) DeviceCodeResponse is expired:
                  * => exit by throwing an exception
                  */
                 throw new OAuthException("DeviceCodeResponse expired");
             }
 
+            if (dcr.getInterval() <= 0) {
+                /*
+                 * The (local or remote) DeviceCodeResponse interval is not valid:
+                 * => exit by throwing an exception
+                 */
+                throw new OAuthException("DeviceCodeResponse interval invalid");
+            }
+
             /*
-             * If we got to this point the DeviceCodeResponse is OK:
-             * => cache the DeviceCodeResponse across polling cycles in 'loopDeviceCodeResponse'
-             * => save the DeviceCodeResponse in the oAuth service storage
-             * => schedule a repeated task to poll for an AccessTokenResponse from the DeviceCodeResponse
+             * If we got to this point the (local or remote) DeviceCodeResponse is OK:
+             * => cache the DeviceCodeResponse across polling cycles
+             * => save the DeviceCodeResponse in the service storage
+             * => schedule a new AccessTokenResponse poll task
              * => return the user URI from the DeviceCodeResponse
              */
-            logger.trace("getUserAuthenticationUri() proceed with dcr:{}", dcr);
-            loopDeviceCodeResponse = dcr;
+            logger.trace("getUserAuthenticationUri() service save, cache, schedule poll, return URI of: {}", dcr);
+            createNewAtrPollTaskScheduleSeconds = dcr.getInterval();
             oAuthStoreHandler.saveDeviceCodeResponse(handle, dcr);
-            accessTokenResponsePollSchedule = scheduler.scheduleWithFixedDelay(() -> accessTokenResponsePoll(),
-                    dcr.getInterval(), dcr.getInterval(), TimeUnit.SECONDS);
+            dcrCached = dcr;
             return dcr.getVerificationUriComplete();
         } catch (GeneralSecurityException e) {
-            logger.debug("getUserAuthenticationUri() error:{}", e.getMessage());
+            logger.debug("getUserAuthenticationUri() error: {}", e.getMessage());
+            createNewAtrPollTaskScheduleSeconds = 0;
             throw new OAuthException(e);
         } catch (OAuthException | IOException | OAuthResponseException e) {
-            logger.debug("getUserAuthenticationUri() error:{}", e.getMessage());
+            logger.debug("getUserAuthenticationUri() error: {}", e.getMessage());
+            createNewAtrPollTaskScheduleSeconds = 0;
             throw e;
+        } finally {
+            cancelAtrPollTaskSchedule();
+            if (createNewAtrPollTaskScheduleSeconds > 0) {
+                createAtrPollTaskSchedule(createNewAtrPollTaskScheduleSeconds);
+            } else {
+                dcrCached = null;
+            }
         }
     }
 
-    private synchronized void stopAccessTokenResponsePollSchedule() {
-        ScheduledFuture<?> scheduledFuture = accessTokenResponsePollSchedule;
-        if (scheduledFuture != null) {
-            scheduledFuture.cancel(false);
+    private synchronized void cancelAtrPollTaskSchedule() {
+        ScheduledFuture<?> future = atrPollTaskSchedule;
+        if (future != null) {
+            future.cancel(false);
+            logger.trace("cancelAtrPollTaskSchedule() cancelled schedule of poll tasks");
         }
-        accessTokenResponsePollSchedule = null;
+        atrPollTaskSchedule = null;
+    }
+
+    private void createAtrPollTaskSchedule(long seconds) {
+        atrPollTaskSchedule = scheduler.scheduleWithFixedDelay(() -> atrPollTask(), seconds, seconds, TimeUnit.SECONDS);
+        logger.trace("createAtrPollTaskSchedule() created schedule of poll tasks every {}s", seconds);
     }
 
     /**
@@ -262,22 +292,22 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
         request.timeout(HTTP_TIMEOUT_MILLISECONDS, TimeUnit.MILLISECONDS);
         request.param(PARAM_CLIENT_ID, clientIdParameter);
         request.param(PARAM_ID_SCOPE, scopeParameter);
-        logger.trace("getDeviceCodeResponse() request:{}", request);
+        logger.trace("getDeviceCodeResponse() request: {}", request);
 
         try {
             ContentResponse response = request.send();
             String content = response.getContentAsString();
-            logger.trace("getDeviceCodeResponse() response:{}", content);
+            logger.trace("getDeviceCodeResponse() response: {}", content);
 
             if (response.getStatus() == HttpStatus.OK_200) {
                 DeviceCodeResponse dcr = gson.fromJson(content, DeviceCodeResponse.class);
                 if (dcr != null) {
                     dcr.setCreatedOn(Instant.now());
-                    logger.trace("getDeviceCodeResponse() return:{}", dcr);
+                    logger.trace("getDeviceCodeResponse() return: {}", dcr);
                     return dcr;
                 }
             }
-            throw new OAuthException("getDeviceCodeResponse() error:" + response);
+            throw new OAuthException("getDeviceCodeResponse() error: " + response);
         } catch (Exception e) {
             throw new OAuthException("getDeviceCodeResponse() error", e);
         }
@@ -306,18 +336,18 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
         request.param(PARAM_CLIENT_ID, clientIdParameter);
         request.param(PARAM_GRANT_TYPE, PARAM_GRANT_TYPE_VALUE);
         request.param(PARAM_DEVICE_CODE, dcr.getDeviceCode());
-        logger.trace("getAccessTokenResponse() request:{}", request);
+        logger.trace("getAccessTokenResponse() request: {}", request);
 
         try {
             ContentResponse response = request.send();
             String content = response.getContentAsString();
-            logger.trace("getAccessTokenResponse() response:{}", content);
+            logger.trace("getAccessTokenResponse() response: {}", content);
 
             if (response.getStatus() == HttpStatus.OK_200) {
                 AccessTokenResponse atr = gson.fromJson(content, AccessTokenResponse.class);
                 if (atr != null) {
                     atr.setCreatedOn(Instant.now());
-                    logger.trace("getAccessTokenResponse() return:{}", atr);
+                    logger.trace("getAccessTokenResponse() return: {}", atr);
                     return atr;
                 }
             }
@@ -335,72 +365,60 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
 
     @Override
     public void close() {
-        stopAccessTokenResponsePollSchedule();
+        cancelAtrPollTaskSchedule();
     }
 
     /**
-     * This method is called repeatedly on the scheduler, until the 'stopPolling' loop control
-     * variable becomes true, in order to poll for an {@link AccessTokenResponse}
+     * This method is called repeatedly on the scheduler to poll for an {@link AccessTokenResponse}. It cancels its
+     * own scheduler when either a) an AccessTokenResponse is returned, or b) the cached {@link DeviceCodeResponse}
+     * expires.
      */
-    private synchronized void accessTokenResponsePoll() {
-        DeviceCodeResponse dcr = loopDeviceCodeResponse;
-        logger.trace("accessTokenResponsePoll() start dcr:{}", dcr);
+    private synchronized void atrPollTask() {
+        /*
+         * 'finally' control variable to cancel the poll task schedule
+         */
+        boolean cancelSchedule = false;
+        try {
+            DeviceCodeResponse dcr = dcrCached;
+            logger.trace("atrPollTask() started with cached: {}", dcr);
 
-        Instant now = Instant.now();
-        boolean stopPolling = false;
-        AccessTokenResponse atr = null;
+            if (dcr != null && !dcr.isExpired(Instant.now(), 0)) {
+                /*
+                 * The cached DeviceCodeResponse is still valid:
+                 * => get an AccessTokenResponse from it
+                 * => in case of error, cancel the polling schedule
+                 */
+                try {
+                    AccessTokenResponse atr = getAccessTokenResponse(dcr);
+                    logger.trace("atrPollTask() fetched from remote: {}", atr != null ? atr : LOG_NULL_ATR);
 
-        if (dcr != null && !dcr.isExpired(now, 0)) {
-            /*
-             * The DeviceCodeResponse is OK:
-             * => get an AccessTokenResponse from it
-             * => in case of error, stop polling
-             */
-            try {
-                atr = getAccessTokenResponse(dcr);
-            } catch (OAuthException e) {
-                logger.debug("accessTokenResponsePoll() error:{}", e.getMessage());
-                stopPolling = true;
+                    if (atr != null) {
+                        /*
+                         * The AccessTokenResponse is OK:
+                         * => import the AccessTokenResponse into the service
+                         * => cancel the polling schedule
+                         */
+                        oAuthClientService.importAccessTokenResponse(atr);
+                        logger.debug("atrPollTask() imported into service: {}", atr);
+                        cancelSchedule = true;
+                    }
+                } catch (OAuthException e) {
+                    logger.debug("atrPollTask() error: {}", e.getMessage());
+                    cancelSchedule = true;
+                }
+            } else {
+                /*
+                 * The cached DeviceCodeResponse is missing or has expired:
+                 * => cancel the polling schedule
+                 */
+                cancelSchedule = true;
             }
-        }
-
-        logger.trace("accessTokenResponsePoll() continue with dcr:{}, atr:{}", dcr, atr);
-        if (atr != null) {
-            /*
-             * The AccessTokenResponse is OK:
-             * => import the AccessTokenResponse into the oAuth service
-             * => stop polling
-             */
-            try {
-                oAuthClientService.importAccessTokenResponse(atr);
-            } catch (OAuthException e) {
-                logger.debug("accessTokenResponsePoll() error:{}", e.getMessage());
+        } finally {
+            if (cancelSchedule) {
+                dcrCached = null;
+                cancelAtrPollTaskSchedule();
             }
-            stopPolling = true;
-        } else
-
-        if (dcr == null || dcr.isExpired(now, 0)) {
-            /*
-             * The DeviceCodeResponse has expired:
-             * => stop polling
-             */
-            stopPolling = true;
+            logger.trace("atrPollTask() finished");
         }
-
-        if (stopPolling) {
-            /*
-             * Polling shall be stopped:
-             * => stop the AccessTokenResponse polling schedule
-             * => close the HTTP client
-             */
-            close();
-        } else {
-            /*
-             * Cache the DeviceCodeResponse for the next iteration
-             */
-            loopDeviceCodeResponse = dcr;
-        }
-
-        logger.trace("accessTokenResponsePoll() done with dcr:{}, atr:{}, stopPolling:{}", dcr, atr, stopPolling);
     }
 }
