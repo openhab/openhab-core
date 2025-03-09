@@ -4,4 +4,7 @@ Private-Package: \
   org.knowm.xchart.*
 Import-Package: \
   de.erichseifert.vectorgraphics2d.*;resolution:=optional,\
+  de.rototor.pdfbox.*;resolution:=optional,\
+  com.madgag.*;resolution:=optional,\
+  org.apache.pdfbox.*;resolution:=optional,\
   *
