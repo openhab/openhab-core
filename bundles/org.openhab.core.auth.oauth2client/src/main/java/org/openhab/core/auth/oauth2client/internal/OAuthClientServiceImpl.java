@@ -350,8 +350,6 @@ public class OAuthClientServiceImpl implements OAuthClientService {
 
         if (lastAccessToken.isExpired(Instant.now(), tokenExpiresInSeconds)
                 && lastAccessToken.getRefreshToken() != null) {
-            // TODO remove logger call
-            logger.trace("TODO: calling refreshToken expires:{} last: {}", tokenExpiresInSeconds, lastAccessToken);
             return refreshToken();
         }
         return lastAccessToken;
