@@ -101,7 +101,6 @@ public interface ModelRepository {
      * @param out the output stream to write the generated syntax to
      * @param modelType the model type
      * @param modelContent the content of the model
-     * @return the corresponding syntax
      */
     void generateSyntaxFromModel(OutputStream out, String modelType, EObject modelContent);
 }
