@@ -100,7 +100,7 @@ public abstract class AbstractThingFileGenerator implements ThingFileGenerator {
      * as in this configuration description, and any parameter having the default value is ignored.
      * If not, the parameters are provided sorted by natural order of their names.
      *
-     * @param thing the channel
+     * @param channel the channel
      * @param hideDefaultParameters true to hide the configuration parameters having the default value
      * @return the sorted list of configuration parameters for the channel
      */
