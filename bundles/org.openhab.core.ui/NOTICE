@@ -15,10 +15,10 @@ https://github.com/openhab/openhab-core
 
 == Third-party Content
 
-xchart-3.1.0
+xchart-3.8.8
 * License: Apache License, 2.0
 * Project: http://knowm.org/open-source/xchart
-* Source: https://github.com/timmolter/XChart/tree/xchart-3.1.0
+* Source: https://github.com/knowm/XChart/tree/xchart-3.8.8
 
 == Third-party license(s)
 

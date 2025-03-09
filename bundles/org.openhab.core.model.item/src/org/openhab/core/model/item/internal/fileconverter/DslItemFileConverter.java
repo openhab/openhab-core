@@ -13,6 +13,7 @@
 package org.openhab.core.model.item.internal.fileconverter;
 
 import java.io.OutputStream;
+import java.math.BigDecimal;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -191,6 +192,11 @@ public class DslItemFileConverter extends AbstractItemFileGenerator {
             } else {
                 property = null;
             }
+        } else if (value instanceof Double doubleValue) {
+            // It was discovered that configuration parameter value of an item metadata can be of type Double
+            // when the metadata is added through Main UI.
+            // A conversion to a BigDecimal is then required to avoid an exception later when generating DSL
+            property.getValue().add(BigDecimal.valueOf(doubleValue));
         } else {
             property.getValue().add(value);
         }
