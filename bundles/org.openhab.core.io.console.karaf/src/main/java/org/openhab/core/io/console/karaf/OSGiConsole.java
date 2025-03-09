@@ -10,11 +10,14 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.io.console.karaf.internal;
+package org.openhab.core.io.console.karaf;
 
+import java.io.IOException;
 import java.io.PrintStream;
 
+import org.apache.karaf.shell.api.console.Session;
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.io.console.Console;
 
 /**
@@ -26,10 +29,12 @@ public class OSGiConsole implements Console {
 
     private final String scope;
     private final PrintStream out;
+    private final Session session;
 
-    public OSGiConsole(final String scope, PrintStream out) {
+    public OSGiConsole(final String scope, PrintStream out, Session session) {
         this.scope = scope;
         this.out = out;
+        this.session = session;
     }
 
     @Override
@@ -50,5 +55,13 @@ public class OSGiConsole implements Console {
     @Override
     public void printUsage(final String s) {
         out.println(String.format("Usage: %s:%s", scope, s));
+    }
+
+    public String readLine(String prompt, final @Nullable Character mask) throws IOException {
+        return session.readLine(prompt, mask);
+    }
+
+    public Session getSession() {
+        return session;
     }
 }
