@@ -21,6 +21,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.api.ContentResponse;
 import org.eclipse.jetty.client.api.Request;
 import org.eclipse.jetty.http.HttpMethod;
@@ -48,6 +49,8 @@ import com.google.gson.GsonBuilder;
 @NonNullByDefault
 public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseable {
 
+    private static final String OAUTH_RFC8628 = "oauth-rfc8628";
+
     // URL parameter names
     private static final String PARAM_ID_SCOPE = "scope";
     private static final String PARAM_CLIENT_ID = "client_id";
@@ -61,7 +64,6 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
     private static final String LOG_NULL_ATR = "AccessTokenResponse [null]";
     private static final Object LOG_NULL_DCR = "DeviceCodeResponse [null]";
 
-    private static final String SCHEDULER_POOL_NAME = "oauth-rfc8628";
     private static final int HTTP_TIMEOUT_MILLISECONDS = 5000;
 
     private final Logger logger = LoggerFactory.getLogger(OAuthConnectorRFC8628.class);
@@ -78,6 +80,7 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
 
     private @Nullable ScheduledFuture<?> atrPollTaskSchedule;
     private @Nullable DeviceCodeResponse dcrCached;
+    private @Nullable HttpClient httpClient;
 
     /**
      * Create an analog of the {link OAuthConnector} that implements the oAuth RFC-8628 Device Code
@@ -103,7 +106,7 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
         super(httpClientFactory, null, gsonBuilder != null ? gsonBuilder : new GsonBuilder());
         this.oAuthClientService = oAuthClientService;
         this.oAuthStoreHandler = oAuthStoreHandler;
-        this.scheduler = ThreadPoolManager.getScheduledPool(SCHEDULER_POOL_NAME);
+        this.scheduler = ThreadPoolManager.getScheduledPool(OAUTH_RFC8628);
         this.deviceCodeRequestUrl = deviceCodeRequestUrl;
         this.accessTokenRequestUrl = accessTokenRequestUrl;
         this.clientIdParameter = clientId;
@@ -260,20 +263,6 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
         }
     }
 
-    private synchronized void cancelAtrPollTaskSchedule() {
-        ScheduledFuture<?> future = atrPollTaskSchedule;
-        if (future != null) {
-            future.cancel(false);
-            logger.trace("cancelAtrPollTaskSchedule() cancelled schedule of poll tasks");
-        }
-        atrPollTaskSchedule = null;
-    }
-
-    private void createAtrPollTaskSchedule(long seconds) {
-        atrPollTaskSchedule = scheduler.scheduleWithFixedDelay(() -> atrPollTask(), seconds, seconds, TimeUnit.SECONDS);
-        logger.trace("createAtrPollTaskSchedule() created schedule of poll tasks every {}s", seconds);
-    }
-
     /**
      * Start the first steps of the Device Code Grant Flow authentication process as follows:
      *
@@ -287,12 +276,12 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
      * @throws OAuthException
      */
     private synchronized DeviceCodeResponse getDeviceCodeResponse() throws OAuthException {
-        Request request = httpClientFactory.getCommonHttpClient().newRequest(deviceCodeRequestUrl);
+        Request request = createHttpClient().newRequest(deviceCodeRequestUrl);
         request.method(HttpMethod.POST);
         request.timeout(HTTP_TIMEOUT_MILLISECONDS, TimeUnit.MILLISECONDS);
         request.param(PARAM_CLIENT_ID, clientIdParameter);
         request.param(PARAM_ID_SCOPE, scopeParameter);
-        logger.trace("getDeviceCodeResponse() request: {}", request);
+        logger.trace("getDeviceCodeResponse() request: {}", request.getURI());
 
         try {
             ContentResponse response = request.send();
@@ -330,13 +319,13 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
      */
     private synchronized @Nullable AccessTokenResponse getAccessTokenResponse(DeviceCodeResponse dcr)
             throws OAuthException {
-        Request request = httpClientFactory.getCommonHttpClient().newRequest(accessTokenRequestUrl);
+        Request request = createHttpClient().newRequest(accessTokenRequestUrl);
         request.method(HttpMethod.POST);
         request.timeout(HTTP_TIMEOUT_MILLISECONDS, TimeUnit.MILLISECONDS);
         request.param(PARAM_CLIENT_ID, clientIdParameter);
         request.param(PARAM_GRANT_TYPE, PARAM_GRANT_TYPE_VALUE);
         request.param(PARAM_DEVICE_CODE, dcr.getDeviceCode());
-        logger.trace("getAccessTokenResponse() request: {}", request);
+        logger.trace("getAccessTokenResponse() request: {}", request.getURI());
 
         try {
             ContentResponse response = request.send();
@@ -365,7 +354,37 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
 
     @Override
     public void close() {
+        dcrCached = null;
         cancelAtrPollTaskSchedule();
+        closeHttpClient();
+    }
+
+    private synchronized void cancelAtrPollTaskSchedule() {
+        ScheduledFuture<?> future = atrPollTaskSchedule;
+        if (future != null) {
+            future.cancel(false);
+            logger.trace("cancelAtrPollTaskSchedule() cancelled schedule of poll tasks");
+        }
+        atrPollTaskSchedule = null;
+    }
+
+    private void closeHttpClient() {
+        shutdownQuietly(httpClient);
+        httpClient = null;
+    }
+
+    private void createAtrPollTaskSchedule(long seconds) {
+        atrPollTaskSchedule = scheduler.scheduleWithFixedDelay(() -> atrPollTask(), seconds, seconds, TimeUnit.SECONDS);
+        logger.trace("createAtrPollTaskSchedule() created schedule of poll tasks every {}s", seconds);
+    }
+
+    private HttpClient createHttpClient() throws OAuthException {
+        HttpClient httpClient = this.httpClient;
+        if (httpClient == null) {
+            httpClient = createHttpClient(OAUTH_RFC8628);
+            this.httpClient = httpClient;
+        }
+        return httpClient;
     }
 
     /**
@@ -375,9 +394,9 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
      */
     private synchronized void atrPollTask() {
         /*
-         * 'finally' control variable to cancel the poll task schedule
+         * 'finally' control variable to cancel the poll task schedule and close the http client
          */
-        boolean cancelSchedule = false;
+        boolean close = false;
         try {
             DeviceCodeResponse dcr = dcrCached;
             logger.trace("atrPollTask() started with cached: {}", dcr);
@@ -400,25 +419,24 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
                          */
                         oAuthClientService.importAccessTokenResponse(atr);
                         logger.debug("atrPollTask() imported into service: {}", atr);
-                        cancelSchedule = true;
+                        close = true;
                     }
                 } catch (OAuthException e) {
                     logger.debug("atrPollTask() error: {}", e.getMessage());
-                    cancelSchedule = true;
+                    close = true;
                 }
             } else {
                 /*
                  * The cached DeviceCodeResponse is missing or has expired:
                  * => cancel the polling schedule
                  */
-                cancelSchedule = true;
+                close = true;
             }
         } finally {
-            if (cancelSchedule) {
-                dcrCached = null;
-                cancelAtrPollTaskSchedule();
+            if (close) {
+                close();
             }
-            logger.trace("atrPollTask() finished");
+            logger.trace("atrPollTask() done");
         }
     }
 }
