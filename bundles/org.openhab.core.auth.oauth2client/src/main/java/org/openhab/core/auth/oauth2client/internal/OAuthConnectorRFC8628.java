@@ -83,7 +83,7 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
     private @Nullable HttpClient httpClient;
 
     /**
-     * Create an analog of the {link OAuthConnector} that implements the oAuth RFC-8628 Device Code
+     * Create an extension of the {link OAuthConnector} that implements the oAuth RFC-8628 Device Code
      * Grant Flow authentication process. The parameters are as follows -- whereby (*) means that the
      * parameters would usually be from the private fields of the calling {@link OAuthClientService}.
      *
@@ -254,11 +254,11 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
             createNewAtrPollTaskScheduleSeconds = 0;
             throw e;
         } finally {
-            cancelAtrPollTaskSchedule();
             if (createNewAtrPollTaskScheduleSeconds > 0) {
+                cancelAtrPollTaskSchedule();
                 createAtrPollTaskSchedule(createNewAtrPollTaskScheduleSeconds);
             } else {
-                dcrCached = null;
+                close();
             }
         }
     }
@@ -267,7 +267,7 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
      * Start the first steps of the Device Code Grant Flow authentication process as follows:
      *
      * <ul>
-     * <li>Step 1: create a request and POST it to the authorization url</li>
+     * <li>Step 1: create a request and POST it to the authentication (device code) url</li>
      * <li>Step 2: process the response and create a {@link DeviceCodeResponse}</li>
      * </ul>
      *
@@ -308,7 +308,7 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
      * following steps:
      *
      * <ul>
-     * <li>Step 4: repeatedly create a request and POST it to the token url</li>
+     * <li>Step 4: repeatedly create a request and POST it to the access token url</li>
      * <li>Step 5: repeatedly read the response and eventually create a {@link AccessTokenResponse}</li>
      * </ul>
      *
@@ -342,7 +342,7 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
             }
 
             /*
-             * Return null without throwing a exception since other HTTP responses
+             * Return null without throwing an exception since other HTTP responses
              * are allowed during AccessTokenResponse polling before the user has
              * completed the verification process
              */
@@ -388,9 +388,9 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
     }
 
     /**
-     * This method is called repeatedly on the scheduler to poll for an {@link AccessTokenResponse}. It cancels its
-     * own scheduler when either a) an AccessTokenResponse is returned, or b) the cached {@link DeviceCodeResponse}
-     * expires.
+     * This method is called repeatedly on the scheduler to poll for an {@link AccessTokenResponse}.
+     * It cancels its own scheduler when either a) an AccessTokenResponse is returned, or b) the
+     * cached {@link DeviceCodeResponse} expires.
      */
     private synchronized void atrPollTask() {
         /*
