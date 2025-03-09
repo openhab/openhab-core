@@ -52,7 +52,7 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
     private static final String OAUTH_RFC8628 = "oauth-rfc8628";
 
     // URL parameter names
-    private static final String PARAM_ID_SCOPE = "scope";
+    private static final String PARAM_SCOPE = "scope";
     private static final String PARAM_CLIENT_ID = "client_id";
     private static final String PARAM_DEVICE_CODE = "device_code";
     private static final String PARAM_GRANT_TYPE = "grant_type";
@@ -280,7 +280,7 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
         request.method(HttpMethod.POST);
         request.timeout(HTTP_TIMEOUT_MILLISECONDS, TimeUnit.MILLISECONDS);
         request.param(PARAM_CLIENT_ID, clientIdParameter);
-        request.param(PARAM_ID_SCOPE, scopeParameter);
+        request.param(PARAM_SCOPE, scopeParameter);
         logger.trace("getDeviceCodeResponse() request: {}", request.getURI());
 
         try {
