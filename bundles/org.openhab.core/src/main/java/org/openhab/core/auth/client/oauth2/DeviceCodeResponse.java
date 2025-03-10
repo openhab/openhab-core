@@ -77,13 +77,12 @@ public final class DeviceCodeResponse implements Serializable, Cloneable {
 
     /**
      * Calculate if the device code response is expired against the given time.
-     * It also returns true even if the token is not initialized (i.e. object newly created).
+     * It also returns true even if the response is not initialized (i.e. newly created).
      *
-     * @param givenTime To calculate if the token is expired against the givenTime.
+     * @param givenTime To calculate if the response is expired against the givenTime.
      * @param tokenExpiresInBuffer A positive integer in seconds to act as additional buffer to the calculation.
-     *            This causes the OAuthToken to expire earlier then the stated expiry-time given
-     *            by the authorization server.
-     * @return true if object is not-initialized, or expired, or expired early due to buffer
+     *            This causes the response to expire earlier then the stated expiry-time given.
+     * @return true if object is not-initialized, or expired, or expired early due to buffer.
      */
     public boolean isExpired(Instant givenTime, int tokenExpiresInBuffer) {
         return createdOn == null
