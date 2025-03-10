@@ -90,6 +90,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * @author Yannick Schaus - Added filter to getAll
  * @author Markus Rathgeb - Migrated to JAX-RS Whiteboard Specification
  * @author Wouter Born - Migrated to OpenAPI annotations
+ * @author Andrew Fiddian-Green - Added semanticEquipmentTag
  */
 @Component
 @JaxrsResource
@@ -188,7 +189,7 @@ public class ThingTypeResource implements RESTResource {
                 thingType.getCategory(), thingType.isListed(), parameters, channelDefinitions,
                 convertToChannelGroupDefinitionDTOs(thingType.getChannelGroupDefinitions(), locale),
                 thingType.getSupportedBridgeTypeUIDs(), thingType.getProperties(), thingType instanceof BridgeType,
-                parameterGroups, thingType.getExtensibleChannelTypeIds());
+                parameterGroups, thingType.getExtensibleChannelTypeIds(), thingType.getSemanticEquipmentTag());
     }
 
     private List<ChannelGroupDefinitionDTO> convertToChannelGroupDefinitionDTOs(

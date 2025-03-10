@@ -140,6 +140,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * @author Dimitar Ivanov - replaced Firmware UID with thing UID and firmware version
  * @author Markus Rathgeb - Migrated to JAX-RS Whiteboard Specification
  * @author Wouter Born - Migrated to OpenAPI annotations
+ * @author Andrew Fiddian-Green - Added semanticEquipmentTag
  */
 @Component
 @JaxrsResource
@@ -326,14 +327,15 @@ public class ThingResource implements RESTResource {
                 lastModified = Date.from(Instant.now().truncatedTo(ChronoUnit.SECONDS));
             }
 
-            thingStream = dtoMapper.limitToFields(thingStream, "UID,label,bridgeUID,thingTypeUID,location,editable");
+            thingStream = dtoMapper.limitToFields(thingStream,
+                    "UID,label,bridgeUID,thingTypeUID,location,editable,semanticEquipmentTag");
             return Response.ok(new Stream2JSONInputStream(thingStream)).lastModified(lastModified)
                     .cacheControl(RESTConstants.CACHE_CONTROL).build();
         }
 
         if (summary != null && summary) {
             thingStream = dtoMapper.limitToFields(thingStream,
-                    "UID,label,bridgeUID,thingTypeUID,statusInfo,firmwareStatus,location,editable");
+                    "UID,label,bridgeUID,thingTypeUID,statusInfo,firmwareStatus,location,editable,semanticEquipmentTag");
         }
         return Response.ok(new Stream2JSONInputStream(thingStream)).build();
     }
