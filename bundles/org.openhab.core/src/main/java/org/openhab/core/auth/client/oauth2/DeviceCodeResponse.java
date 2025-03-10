@@ -133,7 +133,7 @@ public final class DeviceCodeResponse implements Serializable, Cloneable {
         }
         DeviceCodeResponse other = (DeviceCodeResponse) obj;
         return Objects.equals(createdOn, other.createdOn) && Objects.equals(deviceCode, other.deviceCode)
-                && expiresIn == other.expiresIn && interval == other.interval
+                && expiresIn == other.expiresIn && Objects.equals(interval, other.interval)
                 && Objects.equals(userCode, other.userCode) && Objects.equals(verificationUri, other.verificationUri)
                 && Objects.equals(verificationUriComplete, other.verificationUriComplete);
     }
