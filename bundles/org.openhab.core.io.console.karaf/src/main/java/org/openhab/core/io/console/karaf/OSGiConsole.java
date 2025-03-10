@@ -18,6 +18,7 @@ import java.io.PrintStream;
 import org.apache.karaf.shell.api.console.Session;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.jline.reader.LineReader;
 import org.openhab.core.io.console.Console;
 
 /**
@@ -57,8 +58,22 @@ public class OSGiConsole implements Console {
         out.println(String.format("Usage: %s:%s", scope, s));
     }
 
+    @Override
     public String readLine(String prompt, final @Nullable Character mask) throws IOException {
-        return session.readLine(prompt, mask);
+        // Prevent readLine() from logging a warning
+        // see:
+        // https://github.com/apache/karaf/blob/ad427cd12543dc78e095bbaa4608d7ca3d5ea4d8/shell/core/src/main/java/org/apache/karaf/shell/impl/console/ConsoleSessionImpl.java#L549
+        // https://github.com/jline/jline3/blob/ee4886bf24f40288a4044f9b4b74917b58103e49/reader/src/main/java/org/jline/reader/LineReaderBuilder.java#L90
+        String previousSetting = System.setProperty(LineReader.PROP_SUPPORT_PARSEDLINE, "true");
+        try {
+            return session.readLine(prompt, mask);
+        } finally {
+            if (previousSetting != null) {
+                System.setProperty(LineReader.PROP_SUPPORT_PARSEDLINE, previousSetting);
+            } else {
+                System.clearProperty(LineReader.PROP_SUPPORT_PARSEDLINE);
+            }
+        }
     }
 
     public Session getSession() {
