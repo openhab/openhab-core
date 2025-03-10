@@ -324,12 +324,13 @@ public interface OAuthClientService extends AutoCloseable {
      *
      * @see <a href="https://datatracker.ietf.org/doc/html/rfc8628">RFC-8628</a>
      *
-     * @return if a non null URI is returned it means the user is expected to open it and authenticate themselves.
+     * @return either null or a {@link DeviceCodeResponse} containing the verification uri's where the
+     *         user is expected authenticate themselves
      *
      * @throws OAuthException
      * @throws IOException
      * @throws OAuthResponseException
      */
     @Nullable
-    String getUserAuthenticationUri() throws OAuthException, IOException, OAuthResponseException;
+    DeviceCodeResponse getDeviceCodeResponse() throws OAuthException, IOException, OAuthResponseException;
 }

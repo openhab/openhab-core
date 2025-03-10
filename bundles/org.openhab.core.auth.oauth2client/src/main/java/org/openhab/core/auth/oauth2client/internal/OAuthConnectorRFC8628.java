@@ -128,13 +128,14 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
      *
      * @see <a href="https://datatracker.ietf.org/doc/html/rfc8628">RFC-8628</a>
      *
-     * @return if a non null URI is returned it means the user is expected to open it and authenticate themselves.
+     * @return either null or a {@link DeviceCodeResponse} containing the verification uri's where the
+     *         user is expected authenticate themselves
      *
      * @throws OAuthException
      * @throws IOException
      * @throws OAuthResponseException
      */
-    public synchronized @Nullable String getUserAuthenticationUri()
+    public synchronized @Nullable DeviceCodeResponse getDeviceCodeResponse()
             throws OAuthException, IOException, OAuthResponseException {
         /*
          * 'finally' control variable to create a poll task schedule with the given interval
@@ -179,7 +180,7 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
                  * => fetch a DeviceCodeResponse from the remote server
                  * => note: if the call fails it throws an exception
                  */
-                dcr = getDeviceCodeResponse();
+                dcr = fetchDeviceCodeResponse();
                 logger.trace("getUserAuthenticationUri() fetched from remote: {}", dcr);
             }
 
@@ -189,7 +190,7 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
              * => if the fetch fails-soft (authentication not yet done) it returns a null AccessTokenResponse
              * => if the fetch fails-hard it throws an exception
              */
-            atr = getAccessTokenResponse(dcr);
+            atr = fetchAccessTokenResponse(dcr);
             logger.trace("getUserAuthenticationUri() fetched from remote: {}", atr != null ? atr : LOG_NULL_ATR);
 
             if (atr == null) {
@@ -199,7 +200,7 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
                  * => make one more try to fetch a new DeviceCodeResponse
                  * => note: if the fetch fails it throws an exception
                  */
-                dcr = getDeviceCodeResponse();
+                dcr = fetchDeviceCodeResponse();
                 logger.trace("getUserAuthenticationUri() fetched from remote (retry): {}", dcr);
             } else {
                 /*
@@ -225,9 +226,14 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
                 throw new OAuthException("DeviceCodeResponse expired");
             }
 
-            if (dcr.getInterval() <= 0) {
+            /*
+             * RFC-8628 says 'interval' is an OPTIONAL field that defaults to 5 if absent
+             * => set interval to the actual or default value
+             */
+            long interval = dcr.getInterval() != null ? dcr.getInterval() : 5;
+            if (interval <= 0) {
                 /*
-                 * The (local or remote) DeviceCodeResponse interval is not valid:
+                 * The interval is not valid:
                  * => exit by throwing an exception
                  */
                 throw new OAuthException("DeviceCodeResponse interval invalid");
@@ -238,13 +244,13 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
              * => cache the DeviceCodeResponse across polling cycles
              * => save the DeviceCodeResponse in the service storage
              * => schedule a new AccessTokenResponse poll task
-             * => return the user URI from the DeviceCodeResponse
+             * => return the DeviceCodeResponse
              */
-            logger.trace("getUserAuthenticationUri() service save, cache, schedule poll, return URI of: {}", dcr);
-            createNewAtrPollTaskScheduleSeconds = dcr.getInterval();
+            logger.trace("getUserAuthenticationUri() service save, cache, schedule poll, return: {}", dcr);
+            createNewAtrPollTaskScheduleSeconds = interval;
             oAuthStoreHandler.saveDeviceCodeResponse(handle, dcr);
             dcrCached = dcr;
-            return dcr.getVerificationUriComplete();
+            return (DeviceCodeResponse) dcr.clone();
         } catch (GeneralSecurityException e) {
             logger.debug("getUserAuthenticationUri() error: {}", e.getMessage());
             createNewAtrPollTaskScheduleSeconds = 0;
@@ -275,30 +281,30 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
      *
      * @throws OAuthException
      */
-    private synchronized DeviceCodeResponse getDeviceCodeResponse() throws OAuthException {
+    private synchronized DeviceCodeResponse fetchDeviceCodeResponse() throws OAuthException {
         Request request = createHttpClient().newRequest(deviceCodeRequestUrl);
         request.method(HttpMethod.POST);
         request.timeout(HTTP_TIMEOUT_MILLISECONDS, TimeUnit.MILLISECONDS);
         request.param(PARAM_CLIENT_ID, clientIdParameter);
         request.param(PARAM_SCOPE, scopeParameter);
-        logger.trace("getDeviceCodeResponse() request: {}", request.getURI());
+        logger.trace("fetchDeviceCodeResponse() request: {}", request.getURI());
 
         try {
             ContentResponse response = request.send();
             String content = response.getContentAsString();
-            logger.trace("getDeviceCodeResponse() response: {}", content);
+            logger.trace("fetchDeviceCodeResponse() response: {}", content);
 
             if (response.getStatus() == HttpStatus.OK_200) {
                 DeviceCodeResponse dcr = gson.fromJson(content, DeviceCodeResponse.class);
                 if (dcr != null) {
                     dcr.setCreatedOn(Instant.now());
-                    logger.trace("getDeviceCodeResponse() return: {}", dcr);
+                    logger.trace("fetchDeviceCodeResponse() return: {}", dcr);
                     return dcr;
                 }
             }
-            throw new OAuthException("getDeviceCodeResponse() error: " + response);
+            throw new OAuthException("fetchDeviceCodeResponse() error: " + response);
         } catch (Exception e) {
-            throw new OAuthException("getDeviceCodeResponse() error", e);
+            throw new OAuthException("fetchDeviceCodeResponse() error", e);
         }
     }
 
@@ -317,7 +323,7 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
      * @return an {@link AccessTokenResponse} object or null
      * @throws OAuthException
      */
-    private synchronized @Nullable AccessTokenResponse getAccessTokenResponse(DeviceCodeResponse dcr)
+    private synchronized @Nullable AccessTokenResponse fetchAccessTokenResponse(DeviceCodeResponse dcr)
             throws OAuthException {
         Request request = createHttpClient().newRequest(accessTokenRequestUrl);
         request.method(HttpMethod.POST);
@@ -325,18 +331,18 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
         request.param(PARAM_CLIENT_ID, clientIdParameter);
         request.param(PARAM_GRANT_TYPE, PARAM_GRANT_TYPE_VALUE);
         request.param(PARAM_DEVICE_CODE, dcr.getDeviceCode());
-        logger.trace("getAccessTokenResponse() request: {}", request.getURI());
+        logger.trace("fetchAccessTokenResponse() request: {}", request.getURI());
 
         try {
             ContentResponse response = request.send();
             String content = response.getContentAsString();
-            logger.trace("getAccessTokenResponse() response: {}", content);
+            logger.trace("fetchAccessTokenResponse() response: {}", content);
 
             if (response.getStatus() == HttpStatus.OK_200) {
                 AccessTokenResponse atr = gson.fromJson(content, AccessTokenResponse.class);
                 if (atr != null) {
                     atr.setCreatedOn(Instant.now());
-                    logger.trace("getAccessTokenResponse() return: {}", atr);
+                    logger.trace("fetchAccessTokenResponse() return: {}", atr);
                     return atr;
                 }
             }
@@ -348,7 +354,7 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
              */
             return null;
         } catch (Exception e) {
-            throw new OAuthException("getAccessTokenResponse() error", e);
+            throw new OAuthException("fetchAccessTokenResponse() error", e);
         }
     }
 
@@ -408,7 +414,7 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
                  * => in case of error, cancel the polling schedule
                  */
                 try {
-                    AccessTokenResponse atr = getAccessTokenResponse(dcr);
+                    AccessTokenResponse atr = fetchAccessTokenResponse(dcr);
                     logger.trace("atrPollTask() fetched from remote: {}", atr != null ? atr : LOG_NULL_ATR);
 
                     if (atr != null) {

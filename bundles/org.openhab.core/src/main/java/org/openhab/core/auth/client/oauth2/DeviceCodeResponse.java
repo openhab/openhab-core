@@ -19,6 +19,9 @@ import java.util.Objects;
 
 /**
  * This {@link DeviceCodeResponse} is a DTO with fields that encapsulate the data from RFC-8628 device code responses.
+ * <p>
+ * Note: RFC-8628 says 'verificationUriComplete' and 'interval' are OPTIONAL fields.
+ * <p>
  * See {@link AccessTokenResponse} for reference.
  *
  * @author Andrew Fiddian-Green - Initial contribution
@@ -32,10 +35,10 @@ public final class DeviceCodeResponse implements Serializable, Cloneable {
 
     private String deviceCode;
     private long expiresIn;
-    private long interval;
+    private Long interval; // optional
     private String userCode;
     private String verificationUri;
-    private String verificationUriComplete;
+    private String verificationUriComplete; // optional
     private Instant createdOn;
 
     @Override
@@ -59,7 +62,7 @@ public final class DeviceCodeResponse implements Serializable, Cloneable {
         return expiresIn;
     }
 
-    public long getInterval() {
+    public Long getInterval() {
         return interval;
     }
 
@@ -101,7 +104,7 @@ public final class DeviceCodeResponse implements Serializable, Cloneable {
         this.expiresIn = expiresIn;
     }
 
-    public void setInterval(long interval) {
+    public void setInterval(Long interval) {
         this.interval = interval;
     }
 

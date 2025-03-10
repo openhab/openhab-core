@@ -218,6 +218,9 @@ public class OAuthStoreHandlerImpl implements OAuthStoreHandler {
         if (dcr.getUserCode() != null) {
             dcrEncrypted.setUserCode(encrypt(dcr.getUserCode()));
         }
+        if (dcr.getVerificationUri() != null) {
+            dcrEncrypted.setVerificationUri(encrypt(dcr.getVerificationUri()));
+        }
         if (dcr.getVerificationUriComplete() != null) {
             dcrEncrypted.setVerificationUriComplete(encrypt(dcr.getVerificationUriComplete()));
         }
@@ -243,6 +246,7 @@ public class OAuthStoreHandlerImpl implements OAuthStoreHandler {
         logger.debug("Decrypting: {}", dcr);
         dcrDecrypted.setDeviceCode(storageCipher.get().decrypt(dcr.getDeviceCode()));
         dcrDecrypted.setUserCode(storageCipher.get().decrypt(dcr.getUserCode()));
+        dcrDecrypted.setVerificationUri(storageCipher.get().decrypt(dcr.getVerificationUri()));
         dcrDecrypted.setVerificationUriComplete(storageCipher.get().decrypt(dcr.getVerificationUriComplete()));
         return dcrDecrypted;
     }
