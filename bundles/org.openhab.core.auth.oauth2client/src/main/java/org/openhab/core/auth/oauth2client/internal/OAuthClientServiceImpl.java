@@ -475,4 +475,9 @@ public class OAuthClientServiceImpl implements OAuthClientService {
         oAuthConnectorRFC8628 = connector;
         return connector.getDeviceCodeResponse();
     }
+
+    @Override
+    public void notifyAccessTokenResponse(AccessTokenResponse atr) {
+        accessTokenRefreshListeners.forEach(l -> l.onAccessTokenResponse(atr));
+    }
 }

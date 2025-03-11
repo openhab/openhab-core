@@ -333,4 +333,9 @@ public interface OAuthClientService extends AutoCloseable {
      */
     @Nullable
     DeviceCodeResponse getDeviceCodeResponse() throws OAuthException;
+
+    /**
+     * Notify the service listeners about the given {@link AccessTokenResponse}.
+     */
+    void notifyAccessTokenResponse(AccessTokenResponse accessTokenResponse);
 }

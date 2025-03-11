@@ -209,10 +209,12 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
                 /*
                  * The fetched AccessTokenResponse exists:
                  * => import the AccessTokenResponse into the service storage
+                 * => notify service AccessTokenRefreshListeners
                  * => no further user authentication is needed
                  * => exit by returning null
                  */
                 oAuthClientService.importAccessTokenResponse(atr);
+                oAuthClientService.notifyAccessTokenResponse(atr);
                 logger.trace("getDeviceCodeResponse() imported into service: {}", atr);
                 return null;
             }
@@ -428,9 +430,11 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
                     /*
                      * The AccessTokenResponse is OK:
                      * => import the AccessTokenResponse into the service
+                     * => notify service AccessTokenRefreshListeners
                      * => cancel the polling schedule
                      */
                     oAuthClientService.importAccessTokenResponse(atr);
+                    oAuthClientService.notifyAccessTokenResponse(atr);
                     logger.trace("atrPollTask() imported into service: {}", atr);
                     close = true;
                 }
