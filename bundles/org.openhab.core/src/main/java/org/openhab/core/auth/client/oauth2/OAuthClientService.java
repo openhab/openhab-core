@@ -332,5 +332,5 @@ public interface OAuthClientService extends AutoCloseable {
      * @throws OAuthResponseException
      */
     @Nullable
-    DeviceCodeResponse getDeviceCodeResponse() throws OAuthException, IOException, OAuthResponseException;
+    DeviceCodeResponse getDeviceCodeResponse() throws OAuthException;
 }

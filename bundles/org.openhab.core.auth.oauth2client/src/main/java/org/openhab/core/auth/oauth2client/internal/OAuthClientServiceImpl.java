@@ -452,8 +452,7 @@ public class OAuthClientServiceImpl implements OAuthClientService {
     }
 
     @Override
-    public @Nullable DeviceCodeResponse getDeviceCodeResponse()
-            throws OAuthException, IOException, OAuthResponseException {
+    public @Nullable DeviceCodeResponse getDeviceCodeResponse() throws OAuthException {
         closeOAuthConnectorRFC8628();
 
         if (persistedParams.tokenUrl == null) {
