@@ -203,9 +203,13 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
              */
             try {
                 atr = fetchAccessTokenResponse(dcr);
-                logger.trace("getDeviceCodeResponse() fetched from remote: {}", atr);
             } catch (OAuthResponseException e) {
+                /*
+                 * An AccessTokenResponse was not returned
+                 * => so atr remains null; as it was prior to calling fetchAccessTokenResponse()
+                 */
             }
+            logger.trace("getDeviceCodeResponse() fetched from remote: {}", atr != null ? atr : LOG_NULL_ATR);
 
             if (atr != null) {
                 /*
@@ -222,7 +226,7 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
             }
 
             /*
-             * If we got to this point we have a good DeviceCodeResponse but no AccessTokenResponse:
+             * If we got to this point we have a good DeviceCodeResponse but AccessTokenResponse is null:
              * => cache the DeviceCodeResponse across polling cycles
              * => save the DeviceCodeResponse in the service storage
              * => schedule a new AccessTokenResponse poll task
