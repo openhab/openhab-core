@@ -60,8 +60,10 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
     private static final String PARAM_DEVICE_CODE = "device_code";
     private static final String PARAM_GRANT_TYPE = "grant_type";
 
-    // special HTTP 400 error message for RFC-8628
+    // HTTP 400 error messages for RFC-8628
     private static final String SLOW_DOWN = "slow_down";
+    private static final String ACCESS_DENIED = "access_denied";
+    private static final String EXPIRED_TOKEN = "expired_token";
 
     // URL parameter values
     private static final String PARAM_GRANT_TYPE_VALUE = "urn:ietf:params:oauth:grant-type:device_code";
@@ -441,13 +443,19 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
             } catch (OAuthResponseException e) {
                 String error = e.getError();
                 logger.trace("atrPollTask() poll response error: {}", error);
-                if (SLOW_DOWN.equals(error)) {
-                    ScheduledFuture<?> future = atrPollTaskSchedule;
-                    if (future != null) {
-                        long priorDelay = future.getDelay(TimeUnit.SECONDS);
-                        cancelAtrPollTaskSchedule();
-                        createAtrPollTaskSchedule(priorDelay + 1);
-                    }
+                switch (error) {
+                    case ACCESS_DENIED, EXPIRED_TOKEN:
+                        close = true;
+                        break;
+
+                    case SLOW_DOWN:
+                        ScheduledFuture<?> future = atrPollTaskSchedule;
+                        if (future != null) {
+                            long priorDelay = future.getDelay(TimeUnit.SECONDS);
+                            cancelAtrPollTaskSchedule();
+                            createAtrPollTaskSchedule(priorDelay + 1);
+                        }
+                        break;
                 }
             } catch (OAuthException e) {
                 logger.debug("atrPollTask() error: {}", e.getMessage());
