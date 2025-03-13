@@ -129,6 +129,7 @@ public class ThingManagerImpl implements ReadyTracker, ThingManager, ThingTracke
 
     // time after we try to initialize a thing even if the thing-type is not registered (in s)
     private static final int MAX_CHECK_PREREQUISITE_TIME = 120;
+    private static final int MAX_BRIDGE_NESTING = 50;
     private static final ReadyMarker READY_MARKER_THINGS_LOADED = new ReadyMarker("things", "handler");
     private static final String THING_STATUS_STORAGE_NAME = "thing_status_storage";
     private static final String FORCE_REMOVE_THREAD_POOL_NAME = "forceRemove";
@@ -1175,7 +1176,30 @@ public class ThingManagerImpl implements ReadyTracker, ThingManager, ThingTracke
     @Override
     public void onReadyMarkerAdded(ReadyMarker readyMarker) {
         startLevelSetterJob = scheduler.scheduleWithFixedDelay(() -> {
-            if (things.values().stream().anyMatch(t -> !ThingHandlerHelper.isHandlerInitialized(t) && t.isEnabled())) {
+            // check if all things are ready
+            for (Thing thing : things.values()) {
+                if (!thing.isEnabled() || ThingHandlerHelper.isHandlerInitialized(thing)) {
+                    continue;
+                }
+
+                int bridgeNestingLevel = 0;
+                boolean bridgeDisabled = false;
+                Bridge bridge = getBridge(thing.getBridgeUID());
+                while (bridge != null) {
+                    if (!bridge.isEnabled()) {
+                        bridgeDisabled = true;
+                        break;
+                    }
+                    bridge = getBridge(bridge.getBridgeUID());
+                    if (bridgeNestingLevel++ > MAX_BRIDGE_NESTING) {
+                        logger.warn("Bridge nesting is too deep for thing '{}'", thing.getUID());
+                        return;
+                    }
+                }
+                if (bridgeDisabled) {
+                    logger.debug("Thing '{}' is not ready because its bridge is disabled.", thing.getUID());
+                    continue;
+                }
                 return;
             }
             readyService.markReady(READY_MARKER_THINGS_LOADED);
