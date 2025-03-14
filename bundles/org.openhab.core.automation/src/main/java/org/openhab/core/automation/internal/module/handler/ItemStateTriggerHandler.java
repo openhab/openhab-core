@@ -25,6 +25,7 @@ import org.openhab.core.automation.handler.TriggerHandlerCallback;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventFilter;
 import org.openhab.core.events.EventSubscriber;
+import org.openhab.core.events.TopicEventFilter;
 import org.openhab.core.events.TopicPrefixEventFilter;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.events.GroupItemStateChangedEvent;
@@ -73,21 +74,29 @@ public class ItemStateTriggerHandler extends BaseTriggerModuleHandler implements
             ItemRegistry itemRegistry) {
         super(module);
         this.itemName = (String) module.getConfiguration().get(CFG_ITEMNAME);
-        this.eventFilter = new TopicPrefixEventFilter("openhab/items/" + itemName + "/");
+        boolean isWildcard = itemName.contains("?") || itemName.contains("*");
+        if (isWildcard) {
+            this.eventFilter = new TopicEventFilter(
+                    "^openhab/items/" + itemName.replace("?", ".?").replace("*", ".*?") + "/.*$");
+        } else {
+            this.eventFilter = new TopicPrefixEventFilter("openhab/items/" + itemName + "/");
+        }
         this.state = (String) module.getConfiguration().get(CFG_STATE);
         this.previousState = (String) module.getConfiguration().get(CFG_PREVIOUS_STATE);
         this.ruleUID = ruleUID;
         if (UPDATE_MODULE_TYPE_ID.equals(module.getTypeUID())) {
-            this.types = Set.of(ItemStateUpdatedEvent.TYPE, GroupStateUpdatedEvent.TYPE, ItemAddedEvent.TYPE,
-                    ItemRemovedEvent.TYPE);
+            this.types = isWildcard ? Set.of(ItemStateUpdatedEvent.TYPE, GroupStateUpdatedEvent.TYPE)
+                    : Set.of(ItemStateUpdatedEvent.TYPE, GroupStateUpdatedEvent.TYPE, ItemAddedEvent.TYPE,
+                            ItemRemovedEvent.TYPE);
         } else {
-            this.types = Set.of(ItemStateChangedEvent.TYPE, GroupItemStateChangedEvent.TYPE, ItemAddedEvent.TYPE,
-                    ItemRemovedEvent.TYPE);
+            this.types = isWildcard ? Set.of(ItemStateChangedEvent.TYPE, GroupItemStateChangedEvent.TYPE)
+                    : Set.of(ItemStateChangedEvent.TYPE, GroupItemStateChangedEvent.TYPE, ItemAddedEvent.TYPE,
+                            ItemRemovedEvent.TYPE);
         }
         this.bundleContext = bundleContext;
         eventSubscriberRegistration = this.bundleContext.registerService(EventSubscriber.class.getName(), this, null);
 
-        if (itemRegistry.get(itemName) == null) {
+        if (!isWildcard && itemRegistry.get(itemName) == null) {
             logger.warn("Item '{}' needed for rule '{}' is missing. Trigger '{}' will not work.", itemName, ruleUID,
                     module.getId());
         }
