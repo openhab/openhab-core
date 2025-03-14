@@ -225,6 +225,7 @@ public abstract class AbstractFileProvider<@NonNull E> implements Provider<E> {
      * @param url a specified URL for import.
      */
     protected void importFile(String parserType, URL url) {
+        logger.debug("Reading file \"{}\"", url);
         Parser<E> parser = parsers.get(parserType);
         if (parser != null) {
             InputStream is = null;
@@ -258,7 +259,7 @@ public abstract class AbstractFileProvider<@NonNull E> implements Provider<E> {
                 List<URL> value = Objects.requireNonNull(urls.computeIfAbsent(parserType, k -> new ArrayList<>()));
                 value.add(url);
             }
-            logger.debug("Parser {} not available", parserType, new Exception());
+            logger.debug("Couldn't parse \"{}\", no \"{}\" parser available", url, parserType);
         }
     }
 
