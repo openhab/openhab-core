@@ -24,7 +24,7 @@ import org.openhab.core.model.yaml.YamlElementName;
  * @author Jan N. Klug - Initial contribution
  */
 @YamlElementName("secondType")
-public class SecondTypeDTO implements YamlElement {
+public class SecondTypeDTO implements YamlElement, Cloneable {
     public String id;
     public String label;
 
@@ -38,12 +38,29 @@ public class SecondTypeDTO implements YamlElement {
 
     @Override
     public @NonNull String getId() {
-        return id;
+        return id == null ? "" : id;
+    }
+
+    @Override
+    public void setId(@NonNull String id) {
+        this.id = id;
+    }
+
+    @Override
+    public YamlElement cloneWithoutId() {
+        SecondTypeDTO copy;
+        try {
+            copy = (SecondTypeDTO) super.clone();
+            copy.id = null;
+            return copy;
+        } catch (CloneNotSupportedException e) {
+            return new SecondTypeDTO();
+        }
     }
 
     @Override
     public boolean isValid() {
-        return id != null;
+        return id != null && !id.isBlank();
     }
 
     @Override

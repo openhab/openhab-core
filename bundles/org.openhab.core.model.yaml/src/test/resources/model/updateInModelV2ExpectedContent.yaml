@@ -1,0 +1,7 @@
+version: 2
+readOnly: false
+firstType:
+  element1:
+    description: newDescription1
+  element2:
+    description: description2
