@@ -15,6 +15,7 @@ package org.openhab.core.audio.internal.fake;
 import java.io.IOException;
 import java.util.Locale;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -78,6 +79,18 @@ public class AudioSinkFake implements AudioSink {
             isStreamStopped = true;
         }
         isStreamProcessed = true;
+    }
+
+    @Override
+    public CompletableFuture<@Nullable Void> processAndComplete(@Nullable AudioStream audioStream) {
+        this.audioStream = audioStream;
+        if (audioStream != null) {
+            audioFormat = audioStream.getFormat();
+        } else {
+            isStreamStopped = true;
+        }
+        isStreamProcessed = true;
+        return CompletableFuture.completedFuture(null);
     }
 
     public @Nullable AudioFormat getAudioFormat() {
