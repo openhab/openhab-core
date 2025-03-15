@@ -129,16 +129,15 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
      * <ul>
      * <li>Step 1: create a request and POST it to the 'device authorize url'</li>
      * <li>Step 2: process the response and create a {@link DeviceCodeResponse}</li>
-     * <li>Step 3: the user goes off to authenticate themselves at the 'user authentication url</li>
+     * <li>Step 3: the user goes off to authenticate themselves at the 'user authentication url'</li>
      * <li>Step 4: repeatedly create a request and POST it to the 'token url'</li>
      * <li>Step 5: repeatedly read the response and eventually create a {@link AccessTokenResponse}</li>
      * </ul>
      *
      * @see <a href="https://datatracker.ietf.org/doc/html/rfc8628">RFC-8628</a>
      *
-     * @return either null or a {@link DeviceCodeResponse} containing the verification uri's where the
-     *         user is expected authenticate themselves
-     *
+     * @return either null or a {@link DeviceCodeResponse} containing the verification uri's where
+     *         users are expected authenticate themselves
      * @throws OAuthException
      */
     public synchronized @Nullable DeviceCodeResponse getDeviceCodeResponse() throws OAuthException {

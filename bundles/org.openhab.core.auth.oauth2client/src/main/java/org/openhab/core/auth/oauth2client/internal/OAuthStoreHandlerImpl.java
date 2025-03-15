@@ -52,6 +52,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializer;
+import com.google.gson.JsonSyntaxException;
 
 /**
  * This class handles the storage directly. It is internal to the OAuthClientService and there is
@@ -346,7 +347,7 @@ public class OAuthStoreHandlerImpl implements OAuthStoreHandler {
                 if (ACCESS_TOKEN_RESPONSE.equals(recordType)) {
                     try {
                         return gson.fromJson(value, AccessTokenResponse.class);
-                    } catch (Exception e) {
+                    } catch (JsonSyntaxException e) {
                         logger.error(
                                 "Unable to deserialize json, discarding AccessTokenResponse.  "
                                         + "Please check json against standard or with oauth provider. json:\n{}",
@@ -356,23 +357,23 @@ public class OAuthStoreHandlerImpl implements OAuthStoreHandler {
                 } else if (SERVICE_CONFIGURATION.equals(recordType)) {
                     try {
                         return gson.fromJson(value, PersistedParams.class);
-                    } catch (Exception e) {
+                    } catch (JsonSyntaxException e) {
                         logger.error("Unable to deserialize json, discarding PersistedParams. json:\n{}", value, e);
                         return null;
                     }
                 } else if (LAST_USED.equals(recordType)) {
                     try {
                         return gson.fromJson(value, Instant.class);
-                    } catch (Exception e) {
-                        logger.info("Unable to deserialize json, reset LAST_USED to now.  json:\n{}", value);
+                    } catch (JsonSyntaxException e) {
+                        logger.info("Unable to deserialize json, reset LAST_USED to now. json:\n{}", value);
                         return Instant.now();
                     }
                 } else if (DEVICE_CODE_RESPONSE.equals(recordType)) {
                     try {
                         return gson.fromJson(value, DeviceCodeResponse.class);
-                    } catch (Exception e) {
+                    } catch (JsonSyntaxException e) {
                         logger.error(
-                                "Unable to deserialize json, discarding DeviceCodeResponse.  "
+                                "Unable to deserialize json, discarding DeviceCodeResponse. "
                                         + "Please check json against standard or with oauth provider. json:\n{}",
                                 value, e);
                         return null;
