@@ -18,7 +18,8 @@ import java.time.Instant;
 import java.util.Objects;
 
 /**
- * This {@link DeviceCodeResponse} is a DTO with fields that encapsulate the data from RFC-8628 device code responses.
+ * This {@link DeviceCodeResponseDTO} is a DTO with fields that encapsulate the data from RFC-8628 device code
+ * responses.
  * <p>
  * Note: RFC-8628 says 'verificationUriComplete' and 'interval' are OPTIONAL fields.
  * <p>
@@ -26,7 +27,7 @@ import java.util.Objects;
  *
  * @author Andrew Fiddian-Green - Initial contribution
  */
-public final class DeviceCodeResponse implements Serializable, Cloneable {
+public final class DeviceCodeResponseDTO implements Serializable, Cloneable {
     /**
      * For Serializable
      */
@@ -131,7 +132,7 @@ public final class DeviceCodeResponse implements Serializable, Cloneable {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        DeviceCodeResponse other = (DeviceCodeResponse) obj;
+        DeviceCodeResponseDTO other = (DeviceCodeResponseDTO) obj;
         return Objects.equals(createdOn, other.createdOn) && Objects.equals(deviceCode, other.deviceCode)
                 && expiresIn == other.expiresIn && Objects.equals(interval, other.interval)
                 && Objects.equals(userCode, other.userCode) && Objects.equals(verificationUri, other.verificationUri)
@@ -146,7 +147,7 @@ public final class DeviceCodeResponse implements Serializable, Cloneable {
 
     @Override
     public String toString() {
-        return "DeviceCodeResponse [deviceCode=" + deviceCode + ", expiresIn=" + expiresIn + ", interval=" + interval
+        return "DeviceCodeResponseDTO [deviceCode=" + deviceCode + ", expiresIn=" + expiresIn + ", interval=" + interval
                 + ", userCode=" + userCode + ", verificationUri=" + verificationUri + ", verificationUriComplete="
                 + verificationUriComplete + ", createdOn=" + createdOn + "]";
     }

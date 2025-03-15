@@ -33,7 +33,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.auth.client.oauth2.AccessTokenResponse;
-import org.openhab.core.auth.client.oauth2.DeviceCodeResponse;
+import org.openhab.core.auth.client.oauth2.DeviceCodeResponseDTO;
 import org.openhab.core.auth.client.oauth2.StorageCipher;
 import org.openhab.core.auth.oauth2client.internal.cipher.SymmetricKeyCipher;
 import org.openhab.core.library.types.DateTimeType;
@@ -152,8 +152,8 @@ public class OAuthStoreHandlerImpl implements OAuthStoreHandler {
     }
 
     @Override
-    public @Nullable DeviceCodeResponse loadDeviceCodeResponse(String handle) throws GeneralSecurityException {
-        DeviceCodeResponse dcr = (DeviceCodeResponse) storageFacade.get(handle, DEVICE_CODE_RESPONSE);
+    public @Nullable DeviceCodeResponseDTO loadDeviceCodeResponse(String handle) throws GeneralSecurityException {
+        DeviceCodeResponseDTO dcr = (DeviceCodeResponseDTO) storageFacade.get(handle, DEVICE_CODE_RESPONSE);
         if (dcr == null) {
             // device code response does not exist
             return null;
@@ -162,13 +162,13 @@ public class OAuthStoreHandlerImpl implements OAuthStoreHandler {
     }
 
     @Override
-    public void saveDeviceCodeResponse(String handle, @Nullable DeviceCodeResponse dcrArg) {
-        DeviceCodeResponse dcr = dcrArg;
+    public void saveDeviceCodeResponse(String handle, @Nullable DeviceCodeResponseDTO dcrArg) {
+        DeviceCodeResponseDTO dcr = dcrArg;
         if (dcr == null) {
-            dcr = new DeviceCodeResponse(); // put empty
+            dcr = new DeviceCodeResponseDTO(); // put empty
         }
 
-        DeviceCodeResponse dcrEncrypted;
+        DeviceCodeResponseDTO dcrEncrypted;
         try {
             dcrEncrypted = encryptDeviceCodeResponse(dcr);
         } catch (GeneralSecurityException e) {
@@ -211,8 +211,8 @@ public class OAuthStoreHandlerImpl implements OAuthStoreHandler {
         return encryptedAccessToken;
     }
 
-    private DeviceCodeResponse encryptDeviceCodeResponse(DeviceCodeResponse dcr) throws GeneralSecurityException {
-        DeviceCodeResponse dcrEncrypted = (DeviceCodeResponse) dcr.clone();
+    private DeviceCodeResponseDTO encryptDeviceCodeResponse(DeviceCodeResponseDTO dcr) throws GeneralSecurityException {
+        DeviceCodeResponseDTO dcrEncrypted = (DeviceCodeResponseDTO) dcr.clone();
         if (dcr.getDeviceCode() != null) {
             dcrEncrypted.setDeviceCode(encrypt(dcr.getDeviceCode()));
         }
@@ -239,8 +239,8 @@ public class OAuthStoreHandlerImpl implements OAuthStoreHandler {
         return decryptedToken;
     }
 
-    private DeviceCodeResponse decryptDeviceCodeResponse(DeviceCodeResponse dcr) throws GeneralSecurityException {
-        DeviceCodeResponse dcrDecrypted = (DeviceCodeResponse) dcr.clone();
+    private DeviceCodeResponseDTO decryptDeviceCodeResponse(DeviceCodeResponseDTO dcr) throws GeneralSecurityException {
+        DeviceCodeResponseDTO dcrDecrypted = (DeviceCodeResponseDTO) dcr.clone();
         if (storageCipher.isEmpty()) {
             return dcrDecrypted; // do nothing if no cipher
         }
@@ -370,7 +370,7 @@ public class OAuthStoreHandlerImpl implements OAuthStoreHandler {
                     }
                 } else if (DEVICE_CODE_RESPONSE.equals(recordType)) {
                     try {
-                        return gson.fromJson(value, DeviceCodeResponse.class);
+                        return gson.fromJson(value, DeviceCodeResponseDTO.class);
                     } catch (JsonSyntaxException e) {
                         logger.error(
                                 "Unable to deserialize json, discarding DeviceCodeResponse. "
@@ -407,7 +407,7 @@ public class OAuthStoreHandlerImpl implements OAuthStoreHandler {
             }
         }
 
-        public void put(String handle, @Nullable DeviceCodeResponse dcr) {
+        public void put(String handle, @Nullable DeviceCodeResponseDTO dcr) {
             storageLock.lock();
             try {
                 if (dcr == null) {

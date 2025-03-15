@@ -30,7 +30,7 @@ import org.eclipse.jetty.client.api.Request;
 import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.http.HttpStatus;
 import org.openhab.core.auth.client.oauth2.AccessTokenResponse;
-import org.openhab.core.auth.client.oauth2.DeviceCodeResponse;
+import org.openhab.core.auth.client.oauth2.DeviceCodeResponseDTO;
 import org.openhab.core.auth.client.oauth2.OAuthClientService;
 import org.openhab.core.auth.client.oauth2.OAuthException;
 import org.openhab.core.auth.client.oauth2.OAuthResponseException;
@@ -87,7 +87,7 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
     private final String scopeParameter;
 
     private @Nullable ScheduledFuture<?> atrPollTaskSchedule;
-    private @Nullable DeviceCodeResponse dcrCached;
+    private @Nullable DeviceCodeResponseDTO dcrCached;
     private @Nullable HttpClient httpClient;
 
     /**
@@ -101,7 +101,7 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
      * @param httpClientFactory a {@link HttpClientFactory} (*)
      * @param gsonBuilder a {@link GsonBuilder} (may be null) (*)
      * @param accessTokenRequestUrl the URL that provides {@link AccessTokenResponse} responses
-     * @param deviceCodeRequestUrl the URL that provides {@link DeviceCodeResponse} responses
+     * @param deviceCodeRequestUrl the URL that provides {@link DeviceCodeResponseDTO} responses
      * @param clientId the RFC-8628 request client id parameter
      * @param scope the RFC-8628 request scope parameter
      *
@@ -128,7 +128,7 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
      *
      * <ul>
      * <li>Step 1: create a request and POST it to the 'device authorize url'</li>
-     * <li>Step 2: process the response and create a {@link DeviceCodeResponse}</li>
+     * <li>Step 2: process the response and create a {@link DeviceCodeResponseDTO}</li>
      * <li>Step 3: the user goes off to authenticate themselves at the 'user authentication url'</li>
      * <li>Step 4: repeatedly create a request and POST it to the 'token url'</li>
      * <li>Step 5: repeatedly read the response and eventually create a {@link AccessTokenResponse}</li>
@@ -136,11 +136,11 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
      *
      * @see <a href="https://datatracker.ietf.org/doc/html/rfc8628">RFC-8628</a>
      *
-     * @return either null or a {@link DeviceCodeResponse} containing the verification uri's where
+     * @return either null or a {@link DeviceCodeResponseDTO} containing the verification uri's where
      *         users are expected authenticate themselves
      * @throws OAuthException
      */
-    public synchronized @Nullable DeviceCodeResponse getDeviceCodeResponse() throws OAuthException {
+    public synchronized @Nullable DeviceCodeResponseDTO getDeviceCodeResponse() throws OAuthException {
         /*
          * 'finally' control variable to create a poll task schedule with the given interval
          */
@@ -175,7 +175,7 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
                 return null;
             }
 
-            DeviceCodeResponse dcr;
+            DeviceCodeResponseDTO dcr;
             try {
                 /*
                  * Load local DeviceCodeResponse from service storage (if any) and check it is valid
@@ -235,7 +235,7 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
             createNewAtrPollTaskScheduleSeconds = Objects.requireNonNull(dcr.getInterval());
             oAuthStoreHandler.saveDeviceCodeResponse(handle, dcr);
             dcrCached = dcr;
-            return (DeviceCodeResponse) dcr.clone();
+            return (DeviceCodeResponseDTO) dcr.clone();
         } catch (OAuthException e) {
             logger.debug("getDeviceCodeResponse() error: {}", e.getMessage());
             createNewAtrPollTaskScheduleSeconds = 0;
@@ -251,14 +251,14 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
     }
 
     /**
-     * Check the validity of the given {@link DeviceCodeResponse}
+     * Check the validity of the given {@link DeviceCodeResponseDTO}
      *
-     * @param dcr the incoming {@link DeviceCodeResponse} (may be null)
-     * @return a fully valid {@link DeviceCodeResponse} (guaranteed non null)
+     * @param dcr the incoming {@link DeviceCodeResponseDTO} (may be null)
+     * @return a fully valid {@link DeviceCodeResponseDTO} (guaranteed non null)
      *
      * @throws OAuthException
      */
-    private DeviceCodeResponse checkDeviceCodeResponse(@Nullable DeviceCodeResponse dcr) throws OAuthException {
+    private DeviceCodeResponseDTO checkDeviceCodeResponse(@Nullable DeviceCodeResponseDTO dcr) throws OAuthException {
         if (dcr == null) {
             throw new OAuthException("DeviceCodeResponse is null");
         }
@@ -277,14 +277,14 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
      *
      * <ul>
      * <li>Step 1: create a request and POST it to the authentication (device code) url</li>
-     * <li>Step 2: process the response and create a {@link DeviceCodeResponse}</li>
+     * <li>Step 2: process the response and create a {@link DeviceCodeResponseDTO}</li>
      * </ul>
      *
-     * @return a new {@link DeviceCodeResponse} object (non null)
+     * @return a new {@link DeviceCodeResponseDTO} object (non null)
      *
      * @throws OAuthException
      */
-    private synchronized DeviceCodeResponse fetchDeviceCodeResponse() throws OAuthException {
+    private synchronized DeviceCodeResponseDTO fetchDeviceCodeResponse() throws OAuthException {
         Request request = createHttpClient().newRequest(deviceCodeRequestUrl);
         request.method(HttpMethod.POST);
         request.timeout(HTTP_TIMEOUT_MILLISECONDS, TimeUnit.MILLISECONDS);
@@ -298,7 +298,7 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
             logger.trace("fetchDeviceCodeResponse() response: {}", content);
 
             if (response.getStatus() == HttpStatus.OK_200) {
-                DeviceCodeResponse dcr = gson.fromJson(content, DeviceCodeResponse.class);
+                DeviceCodeResponseDTO dcr = gson.fromJson(content, DeviceCodeResponseDTO.class);
                 if (dcr != null) {
                     dcr.setCreatedOn(Instant.now());
                     // in RFC-8628 'interval' is OPTIONAL so if absent use default
@@ -325,13 +325,13 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
      * <li>Step 5: repeatedly read the response and eventually create a {@link AccessTokenResponse}</li>
      * </ul>
      *
-     * @param dcr the {@link DeviceCodeResponse}
+     * @param dcr the {@link DeviceCodeResponseDTO}
      *
      * @return an {@link AccessTokenResponse} object or null
      * @throws OAuthResponseException if the response content is an OAuth JSON error packet
      * @throws OAuthException for any other errors
      */
-    private synchronized @Nullable AccessTokenResponse fetchAccessTokenResponse(DeviceCodeResponse dcr)
+    private synchronized @Nullable AccessTokenResponse fetchAccessTokenResponse(DeviceCodeResponseDTO dcr)
             throws OAuthException, OAuthResponseException {
         Request request = createHttpClient().newRequest(accessTokenRequestUrl);
         request.method(HttpMethod.POST);
@@ -410,7 +410,7 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
     /**
      * This method is called repeatedly on the scheduler to poll for an {@link AccessTokenResponse}.
      * It cancels its own scheduler when either a) an AccessTokenResponse is returned, or b) the
-     * cached {@link DeviceCodeResponse} expires.
+     * cached {@link DeviceCodeResponseDTO} expires.
      */
     private synchronized void atrPollTask() {
         /*
@@ -418,7 +418,7 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
          */
         boolean close = false;
         try {
-            DeviceCodeResponse dcr = dcrCached;
+            DeviceCodeResponseDTO dcr = dcrCached;
             logger.trace("atrPollTask() started with cached: {}", dcr);
             try {
                 dcr = checkDeviceCodeResponse(dcr);

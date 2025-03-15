@@ -17,7 +17,7 @@ import java.security.GeneralSecurityException;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.auth.client.oauth2.AccessTokenResponse;
-import org.openhab.core.auth.client.oauth2.DeviceCodeResponse;
+import org.openhab.core.auth.client.oauth2.DeviceCodeResponseDTO;
 
 /**
  * This is for OAuth client internal use.
@@ -53,7 +53,7 @@ public interface OAuthStoreHandler {
     void saveAccessTokenResponse(String handle, @Nullable AccessTokenResponse accessTokenResponse);
 
     /**
-     * Get a {@link DeviceCodeResponse} from the store. The device code is encrypted and therefore will be decrypted
+     * Get a {@link DeviceCodeResponseDTO} from the store. The device code is encrypted and therefore will be decrypted
      * before returning.
      *
      * If the storage is not available, it is still possible to get the DeviceCodeResponse from memory cache.
@@ -65,7 +65,7 @@ public interface OAuthStoreHandler {
      * @throws GeneralSecurityException when the token cannot be decrypted.
      */
     @Nullable
-    DeviceCodeResponse loadDeviceCodeResponse(String handle) throws GeneralSecurityException;
+    DeviceCodeResponseDTO loadDeviceCodeResponse(String handle) throws GeneralSecurityException;
 
     /**
      * Save the {@code DeviceCodeResponse} by the handle
@@ -74,7 +74,7 @@ public interface OAuthStoreHandler {
      *            access tokens, configs.
      * @param deviceCodeResponse This can be null, which explicitly removes the DeviceCodeResponse from store.
      */
-    void saveDeviceCodeResponse(String handle, @Nullable DeviceCodeResponse deviceCodeResponse);
+    void saveDeviceCodeResponse(String handle, @Nullable DeviceCodeResponseDTO deviceCodeResponse);
 
     /**
      * Remove the token for the given handler. No exception is thrown in all cases

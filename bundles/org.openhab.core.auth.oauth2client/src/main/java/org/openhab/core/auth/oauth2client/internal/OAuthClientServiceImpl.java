@@ -31,7 +31,7 @@ import org.eclipse.jetty.util.Fields;
 import org.eclipse.jetty.util.UrlEncoded;
 import org.openhab.core.auth.client.oauth2.AccessTokenRefreshListener;
 import org.openhab.core.auth.client.oauth2.AccessTokenResponse;
-import org.openhab.core.auth.client.oauth2.DeviceCodeResponse;
+import org.openhab.core.auth.client.oauth2.DeviceCodeResponseDTO;
 import org.openhab.core.auth.client.oauth2.OAuthClientService;
 import org.openhab.core.auth.client.oauth2.OAuthException;
 import org.openhab.core.auth.client.oauth2.OAuthResponseException;
@@ -452,7 +452,7 @@ public class OAuthClientServiceImpl implements OAuthClientService {
     }
 
     @Override
-    public @Nullable DeviceCodeResponse getDeviceCodeResponse() throws OAuthException {
+    public @Nullable DeviceCodeResponseDTO getDeviceCodeResponse() throws OAuthException {
         closeOAuthConnectorRFC8628();
 
         if (persistedParams.tokenUrl == null) {
