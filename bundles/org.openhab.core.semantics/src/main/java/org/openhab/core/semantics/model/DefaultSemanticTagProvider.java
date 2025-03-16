@@ -152,8 +152,8 @@ public class DefaultSemanticTagProvider implements SemanticTagProvider {
                 "Frequency", "", ""));
         defaultTags.add(new SemanticTagImpl("Property_Gas", //
                 "Gas", "", ""));
-        defaultTags.add(new SemanticTagImpl("Property_Application", //
-                "Application", "", ""));
+        defaultTags.add(new SemanticTagImpl("Property_App", //
+                "App", "Software program", "Application"));
         defaultTags.add(new SemanticTagImpl("Property_Channel", //
                 "Channel", "", ""));
         defaultTags.add(new SemanticTagImpl("Property_Mode", //

@@ -55,7 +55,7 @@ Property,Voltage,,Voltage,,
 Property,Current,,Current,,
 Property,Frequency,,Frequency,,
 Property,Gas,,Gas,,
-Property,Application,,Application,,
+Property,App,,App,Application,"Software program"
 Property,Channel,,Channel,,
 Property,Mode,,Mode,,
 Property,SoundVolume,,Sound Volume,,
