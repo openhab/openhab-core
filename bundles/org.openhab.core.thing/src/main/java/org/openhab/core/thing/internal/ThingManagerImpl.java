@@ -1173,40 +1173,45 @@ public class ThingManagerImpl implements ReadyTracker, ThingManager, ThingTracke
         updateInstructions.keySet().removeIf(key -> thingHandlerFactory.equals(key.factory()));
     }
 
+    private boolean allEnabledThingsAreInitialized() {
+        for (Thing thing : things.values()) {
+            if (!thing.isEnabled() || ThingHandlerHelper.isHandlerInitialized(thing)) {
+                continue;
+            }
+
+            int bridgeNestingLevel = 0;
+            boolean bridgeDisabled = false;
+            Bridge bridge = getBridge(thing.getBridgeUID());
+            while (bridge != null) {
+                if (!bridge.isEnabled()) {
+                    bridgeDisabled = true;
+                    break;
+                }
+                bridge = getBridge(bridge.getBridgeUID());
+                if (bridgeNestingLevel++ > MAX_BRIDGE_NESTING) {
+                    logger.warn("Bridge nesting is too deep for thing '{}'", thing.getUID());
+                    return false;
+                }
+            }
+            if (bridgeDisabled) {
+                logger.debug("Thing '{}' is not ready because its bridge is disabled.", thing.getUID());
+                continue;
+            }
+            return false;
+        }
+        return true;
+    }
+
     @Override
     public void onReadyMarkerAdded(ReadyMarker readyMarker) {
         startLevelSetterJob = scheduler.scheduleWithFixedDelay(() -> {
-            // check if all things are ready
-            for (Thing thing : things.values()) {
-                if (!thing.isEnabled() || ThingHandlerHelper.isHandlerInitialized(thing)) {
-                    continue;
+            if (allEnabledThingsAreInitialized()) {
+                readyService.markReady(READY_MARKER_THINGS_LOADED);
+                if (startLevelSetterJob != null) {
+                    startLevelSetterJob.cancel(false);
                 }
-
-                int bridgeNestingLevel = 0;
-                boolean bridgeDisabled = false;
-                Bridge bridge = getBridge(thing.getBridgeUID());
-                while (bridge != null) {
-                    if (!bridge.isEnabled()) {
-                        bridgeDisabled = true;
-                        break;
-                    }
-                    bridge = getBridge(bridge.getBridgeUID());
-                    if (bridgeNestingLevel++ > MAX_BRIDGE_NESTING) {
-                        logger.warn("Bridge nesting is too deep for thing '{}'", thing.getUID());
-                        return;
-                    }
-                }
-                if (bridgeDisabled) {
-                    logger.debug("Thing '{}' is not ready because its bridge is disabled.", thing.getUID());
-                    continue;
-                }
-                return;
+                readyService.unregisterTracker(this);
             }
-            readyService.markReady(READY_MARKER_THINGS_LOADED);
-            if (startLevelSetterJob != null) {
-                startLevelSetterJob.cancel(false);
-            }
-            readyService.unregisterTracker(this);
         }, CHECK_INTERVAL, CHECK_INTERVAL, TimeUnit.SECONDS);
         prerequisiteCheckerJob = scheduler.scheduleWithFixedDelay(this::checkMissingPrerequisites, CHECK_INTERVAL,
                 CHECK_INTERVAL, TimeUnit.SECONDS);
