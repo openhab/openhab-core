@@ -236,7 +236,19 @@ public class FolderObserver implements WatchService.WatchEventListener {
     }
 
     private void checkPath(final Path path, final WatchService.Kind kind) {
+        String fileName = path.getFileName().toString();
         try {
+            // Checking isHidden() on a deleted file will throw an IOException on some file systems,
+            // so deal with deletion first.
+            if (kind == DELETE) {
+                synchronized (FolderObserver.class) {
+                    modelRepository.removeModel(fileName);
+                    namePathMap.remove(fileName);
+                    logger.debug("Removed '{}' model ", fileName);
+                }
+                return;
+            }
+
             if (Files.isHidden(path)) {
                 // we omit parsing of hidden files possibly created by editors or operating systems
                 if (logger.isDebugEnabled()) {
@@ -246,7 +258,6 @@ public class FolderObserver implements WatchService.WatchEventListener {
             }
 
             synchronized (FolderObserver.class) {
-                String fileName = path.getFileName().toString();
                 if (kind == CREATE || kind == MODIFY) {
                     String extension = getExtension(fileName);
                     if (parsers.contains(extension)) {
@@ -267,10 +278,6 @@ public class FolderObserver implements WatchService.WatchEventListener {
                                     path.toAbsolutePath());
                         }
                     }
-                } else if (kind == WatchService.Kind.DELETE) {
-                    modelRepository.removeModel(fileName);
-                    namePathMap.remove(fileName);
-                    logger.debug("Removed '{}' model ", fileName);
                 }
             }
         } catch (Exception e) {
