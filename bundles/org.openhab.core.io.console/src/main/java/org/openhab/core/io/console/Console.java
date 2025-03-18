@@ -12,7 +12,10 @@
  */
 package org.openhab.core.io.console;
 
+import java.io.IOException;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * This interface must be implemented by consoles which want to use the {@link ConsoleInterpreter}.
@@ -38,4 +41,16 @@ public interface Console {
      * @param s the main usage string (console independent)
      */
     void printUsage(String s);
+
+    /**
+     * Reads a line from the console. The prompt is displayed before the line is read.
+     *
+     * @param prompt the prompt to display
+     * @param mask the character to use for masking input (e.g. '*'), or null if no masking is required
+     * @return the line read from the console
+     * @throws IOException if an I/O error occurs
+     */
+    default String readLine(String prompt, final @Nullable Character mask) throws IOException {
+        throw new UnsupportedOperationException("readLine not supported");
+    }
 }
