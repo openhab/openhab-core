@@ -215,7 +215,7 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, State
             } else if (itemCfg instanceof PersistenceGroupConfig persistenceGroupConfig) {
                 try {
                     Item gItem = itemRegistry.getItem(persistenceGroupConfig.getGroup());
-                    if (gItem instanceof GroupItem gItem2 && gItem2.getAllMembers().contains(item)) {
+                    if (gItem instanceof GroupItem gItem2 && gItem2.getAllStateMembers().contains(item)) {
                         applies = true;
                     }
                 } catch (ItemNotFoundException e) {
@@ -259,7 +259,7 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, State
                 try {
                     Item gItem = itemRegistry.getItem(groupName);
                     if (gItem instanceof GroupItem groupItem) {
-                        items.addAll(groupItem.getAllMembers());
+                        items.addAll(groupItem.getAllStateMembers());
                     }
                 } catch (ItemNotFoundException e) {
                     logger.debug("Item group '{}' does not exist.", groupName);
