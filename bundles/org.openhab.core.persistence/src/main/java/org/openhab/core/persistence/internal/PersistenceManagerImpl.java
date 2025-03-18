@@ -570,13 +570,33 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, State
                 return;
             }
             GenericItem genericItem = (GenericItem) item;
-            if (!UnDefType.NULL.equals(item.getState())) {
+            State state = item.getState();
+            State lastState = null;
+            ZonedDateTime lastStateUpdate = null;
+            ZonedDateTime lastStateChange = null;
+            if (UnDefType.NULL.equals(state)) {
+                state = persistedItem.getState();
+                lastState = persistedItem.getLastState();
+                lastStateUpdate = persistedItem.getTimestamp();
+                lastStateChange = persistedItem.getLastStateChange();
+            } else {
                 // someone else already restored the state or a new state was set
-                return;
+                // try restoring the previous state if not yet set
+                if (item.getLastState() != null && item.getLastState() != UnDefType.NULL) {
+                    // there is already a previous state, nothing to restore
+                    return;
+                }
+                lastStateUpdate = item.getLastStateUpdate();
+                if (state.equals(persistedItem.getState())) {
+                    lastState = persistedItem.getLastState();
+                    lastStateChange = persistedItem.getLastStateChange();
+                } else {
+                    lastState = persistedItem.getState();
+                    lastStateChange = item.getLastStateChange();
+                }
             }
             genericItem.removeStateChangeListener(PersistenceManagerImpl.this);
-            genericItem.setState(persistedItem.getState(), persistedItem.getLastState(), persistedItem.getTimestamp(),
-                    persistedItem.getLastStateChange());
+            genericItem.setState(state, lastState, lastStateUpdate, lastStateChange);
             genericItem.addStateChangeListener(PersistenceManagerImpl.this);
             if (logger.isDebugEnabled()) {
                 logger.debug("Restored item state from '{}' for item '{}' -> '{}'",
