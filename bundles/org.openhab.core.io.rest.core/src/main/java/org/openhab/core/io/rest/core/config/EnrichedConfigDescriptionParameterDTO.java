@@ -16,6 +16,7 @@ import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
@@ -26,12 +27,16 @@ import org.openhab.core.config.core.dto.ParameterOptionDTO;
 /**
  * This is an enriched data transfer object that is used to serialize config descriptions parameters with a list of
  * default values if a configuration description defines <code>multiple="true"</code>.
+ * 
+ * The default values are split by a comma. Individual values that contain a comma
+ * must be escaped with a backslash character. The backslash character will be
+ * removed from the value.
  *
  * @author Christoph Weitkamp - Initial contribution
  */
 public class EnrichedConfigDescriptionParameterDTO extends ConfigDescriptionParameterDTO {
 
-    private static final String DEFAULT_LIST_DELIMITER = ",";
+    private static final Pattern DEFAULT_LIST_SPLITTER = Pattern.compile("(?<!\\\\),");
 
     public Collection<String> defaultValues;
 
@@ -45,9 +50,10 @@ public class EnrichedConfigDescriptionParameterDTO extends ConfigDescriptionPara
                 unitLabel, verify);
 
         if (multiple && defaultValue != null) {
-            if (defaultValue.contains(DEFAULT_LIST_DELIMITER)) {
-                defaultValues = Stream.of(defaultValue.split(DEFAULT_LIST_DELIMITER)).map(String::trim)
-                        .filter(v -> !v.isEmpty()).toList();
+            String[] values = DEFAULT_LIST_SPLITTER.split(defaultValue);
+            if (values.length > 1) {
+                defaultValues = Stream.of(values).map(s -> s.trim().replace("\\,", ",")).filter(v -> !v.isEmpty())
+                        .toList();
             } else {
                 defaultValues = Set.of(defaultValue);
             }
