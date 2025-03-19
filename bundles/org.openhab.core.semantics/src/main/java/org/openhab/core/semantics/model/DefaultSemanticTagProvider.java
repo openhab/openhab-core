@@ -122,6 +122,8 @@ public class DefaultSemanticTagProvider implements SemanticTagProvider {
                 "Humidity", "", "Moisture"));
         defaultTags.add(new SemanticTagImpl("Property_Presence", //
                 "Presence", "", ""));
+        defaultTags.add(new SemanticTagImpl("Property_Airflow", //
+                "Airflow", "", ""));
         defaultTags.add(new SemanticTagImpl("Property_Pressure", //
                 "Pressure", "", ""));
         defaultTags.add(new SemanticTagImpl("Property_Smoke", //
@@ -150,6 +152,12 @@ public class DefaultSemanticTagProvider implements SemanticTagProvider {
                 "Frequency", "", ""));
         defaultTags.add(new SemanticTagImpl("Property_Gas", //
                 "Gas", "", ""));
+        defaultTags.add(new SemanticTagImpl("Property_App", //
+                "App", "Software program", "Application"));
+        defaultTags.add(new SemanticTagImpl("Property_Channel", //
+                "Channel", "", ""));
+        defaultTags.add(new SemanticTagImpl("Property_Mode", //
+                "Mode", "", ""));
         defaultTags.add(new SemanticTagImpl("Property_SoundVolume", //
                 "Sound Volume", "", ""));
         defaultTags.add(new SemanticTagImpl("Property_Oil", //
