@@ -10,5 +10,6 @@ Import-Package: \
 Export-Package: \
  com.codahale.metrics.*;-split-package:=merge-first,\
  io.micrometer.core.*;-split-package:=merge-first,\
+ io.micrometer.common.*;-split-package:=merge-first,\
  org.HdrHistogram.*;-split-package:=merge-first,\
  org.LatencyUtils.*;-split-package:=merge-first
