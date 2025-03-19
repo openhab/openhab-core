@@ -62,6 +62,7 @@ public class ThingDescriptionReaderTest {
         assertThat(thingTypeXmlResult.getUID().toString(), is("hue:lamp"));
         assertThat(thingTypeXmlResult.label, is("HUE Lamp"));
         assertThat(thingTypeXmlResult.description, is("My own great HUE Lamp."));
+        assertThat(thingTypeXmlResult.semanticEquipmentTag, is("LightBulb"));
 
         assertThat(channelGroupTypeXmlResults.size(), is(1));
 

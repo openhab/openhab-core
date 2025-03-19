@@ -35,6 +35,7 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader;
  * @author Michael Grammling - Initial contribution
  * @author Thomas Höfer - Added thing and thing type properties
  * @author Andre Fuechsel - Added representationProperty
+ * @author Andrew Fiddian-Green - Added semanticEquipmentTag
  */
 @NonNullByDefault
 public class BridgeTypeConverter extends ThingTypeConverter {
@@ -49,8 +50,8 @@ public class BridgeTypeConverter extends ThingTypeConverter {
         return new BridgeTypeXmlResult(new ThingTypeUID(getUID(attributes, context)),
                 readSupportedBridgeTypeUIDs(nodeIterator, context), readLabel(nodeIterator),
                 readDescription(nodeIterator), readCategory(nodeIterator), getListed(attributes),
-                getExtensibleChannelTypeIds(attributes), getChannelTypeReferenceObjects(nodeIterator),
-                getProperties(nodeIterator), getRepresentationProperty(nodeIterator),
-                getConfigDescriptionObjects(nodeIterator));
+                getExtensibleChannelTypeIds(attributes), getSemanticEquipmentTag(nodeIterator),
+                getChannelTypeReferenceObjects(nodeIterator), getProperties(nodeIterator),
+                getRepresentationProperty(nodeIterator), getConfigDescriptionObjects(nodeIterator));
     }
 }

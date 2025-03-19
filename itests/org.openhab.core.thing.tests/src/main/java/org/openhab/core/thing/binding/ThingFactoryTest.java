@@ -68,9 +68,12 @@ import org.openhab.core.thing.type.ThingTypeBuilder;
  * @author Alex Tugarev - Adapted for constructor modification of ConfigDescriptionParameter
  * @author Thomas Höfer - Thing type constructor modified because of thing properties introduction
  * @author Wouter Born - Migrate tests from Groovy to Java
+ * @author Andrew Fiddian-Green - Added semanticEquipmentTag
  */
 @NonNullByDefault
 public class ThingFactoryTest extends JavaOSGiTest {
+
+    private static final String SEMANTIC_EQUIPMENT_TAG = "MotionDetector";
 
     @Test
     public void createSimpleThing() {
@@ -348,5 +351,14 @@ public class ThingFactoryTest extends JavaOSGiTest {
                     }
                 });
         registerService(channelGroupTypeProvider);
+    }
+
+    @Test
+    public void createThingWithTag() {
+        ThingType thingType = ThingTypeBuilder.instance(new ThingTypeUID("bindingId:thingType"), "label")
+                .withSemanticEquipmentTag(SEMANTIC_EQUIPMENT_TAG).build();
+        Thing thing = ThingFactory.createThing(thingType, new ThingUID(thingType.getUID(), "thingId"),
+                new Configuration());
+        assertThat(thing.getSemanticEquipmentTag(), is(SEMANTIC_EQUIPMENT_TAG));
     }
 }

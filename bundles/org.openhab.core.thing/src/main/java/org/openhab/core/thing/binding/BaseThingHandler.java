@@ -62,6 +62,7 @@ import org.slf4j.LoggerFactory;
  * @author Kai Kreuzer - Refactored isLinked method to not use deprecated functions anymore
  * @author Christoph Weitkamp - Moved OSGI ServiceTracker from BaseThingHandler to ThingHandlerCallback
  * @author Jan N. Klug - added time series support
+ * @author Andrew Fiddian-Green - Added semanticEquipmentTag
  */
 @NonNullByDefault
 public abstract class BaseThingHandler implements ThingHandler {
@@ -446,7 +447,8 @@ public abstract class BaseThingHandler implements ThingHandler {
         return ThingBuilder.create(this.thing.getThingTypeUID(), this.thing.getUID())
                 .withBridge(this.thing.getBridgeUID()).withChannels(this.thing.getChannels())
                 .withConfiguration(this.thing.getConfiguration()).withLabel(this.thing.getLabel())
-                .withLocation(this.thing.getLocation()).withProperties(this.thing.getProperties());
+                .withLocation(this.thing.getLocation()).withProperties(this.thing.getProperties())
+                .withSemanticEquipmentTag(this.thing.getSemanticEquipmentTag());
     }
 
     /**
@@ -458,7 +460,7 @@ public abstract class BaseThingHandler implements ThingHandler {
      * {@link ThingHandlerCallback#validateConfigurationParameters(Thing, Map)}. It is also necessary to ensure that all
      * channel configurations are valid by calling
      * {@link ThingHandlerCallback#validateConfigurationParameters(Channel, Map)}.
-     * 
+     *
      * @param thing thing, that was updated and should be persisted
      */
     @SuppressWarnings("PMD.CompareObjectsWithEquals")
