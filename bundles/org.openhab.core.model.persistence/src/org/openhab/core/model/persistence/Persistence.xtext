@@ -32,7 +32,7 @@ FilterDetails:
 ;
 
 ThresholdFilter:
-	'>' (relative?='%')? value=DECIMAL unit=STRING?
+	'>' (relative?='%')? value=DECIMAL unit=(UNIT|STRING)?
 ;
 
 TimeFilter:
@@ -48,11 +48,11 @@ NotEqualsFilter:
 ;
 
 IncludeFilter:
-  '[]' lower=DECIMAL upper=DECIMAL unit=STRING?
+  '[]' lower=DECIMAL upper=DECIMAL unit=(UNIT|STRING)?
 ;
 
 NotIncludeFilter:
-  '][' lower=DECIMAL upper=DECIMAL unit=STRING?
+  '][' lower=DECIMAL upper=DECIMAL unit=(UNIT|STRING)?
 ;
 
 
@@ -90,5 +90,9 @@ AliasConfiguration:
 ;
 
 DECIMAL returns ecore::EBigDecimal :
-	'-'? INT ('.' INT)?
+    '-'? INT ('.' INT)?
+;
+
+UNIT:
+    (('^' INT)|'²'|'³'|'/'|'*'|'·'|'°'|'µ'|'%'|'‰'|'Ω'|'Å'|'('|')'|ID)+
 ;
