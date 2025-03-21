@@ -51,8 +51,8 @@
 	</feature>
 
 	<feature name="openhab.tp-commons-net" description="The Apache Commons Net library" version="${project.version}">
-		<capability>openhab.tp;feature=commons-net;version=3.9.0</capability>
-		<bundle dependency="true">mvn:commons-net/commons-net/3.9.0</bundle>
+		<capability>openhab.tp;feature=commons-net;version=3.11.1</capability>
+		<bundle dependency="true">mvn:commons-net/commons-net/3.11.1</bundle>
 	</feature>
 
 	<feature name="openhab.tp-gson" description="Gson" version="${project.version}">
@@ -189,9 +189,9 @@
 	</feature>
 
 	<feature name="openhab.tp-jose4j" description="jose4j JWT library" version="${project.version}">
-		<capability>openhab.tp;feature=jose4j;version=0.9.5</capability>
+		<capability>openhab.tp;feature=jose4j;version=0.9.6</capability>
 		<bundle start-level="10">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.activation-api-1.2.1/1.2.1_3</bundle>
-		<bundle>mvn:org.bitbucket.b_c/jose4j/0.9.5</bundle>
+		<bundle>mvn:org.bitbucket.b_c/jose4j/0.9.6</bundle>
 	</feature>
 
 	<feature name="openhab.tp-jupnp" description="UPnP/DLNA library for Java" version="${project.version}">
