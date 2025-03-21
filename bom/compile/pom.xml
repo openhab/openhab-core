@@ -290,6 +290,9 @@
     <dependency>
       <groupId>com.neuronrobotics</groupId>
       <artifactId>nrjavaserial</artifactId>
+      <!-- deliberately kept at older version for more flexibility,
+      internally, we use 5.2.1.OH1 which still uses same API,
+      see https://github.com/openhab/openhab-core/pull/1464 -->
       <version>3.14.0</version>
       <scope>compile</scope>
       <exclusions>
