@@ -15,21 +15,17 @@ package org.openhab.core.io.rest.core.fileformat;
 import java.util.Map;
 
 /**
- * This is a data transfer object that is used to serialize a metadata.
+ * This is a data transfer object to serialize a channel link for an item contained in a file format.
  *
  * @author Laurent Garnier - Initial contribution
  */
-public class MetadataDTO {
+public class FileFormatChannelLinkDTO {
 
-    public String itemName;
-    public String namespace;
-    public String value;
+    public String channelUID;
     public Map<String, Object> configuration;
 
-    public MetadataDTO(String itemName, String namespace, String value, Map<String, Object> configuration) {
-        this.itemName = itemName;
-        this.namespace = namespace;
-        this.value = value;
+    public FileFormatChannelLinkDTO(String channelUID, Map<String, Object> configuration) {
+        this.channelUID = channelUID;
         this.configuration = configuration;
     }
 }

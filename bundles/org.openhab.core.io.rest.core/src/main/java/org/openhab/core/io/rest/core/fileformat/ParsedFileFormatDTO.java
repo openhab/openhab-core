@@ -15,7 +15,7 @@ package org.openhab.core.io.rest.core.fileformat;
 import java.util.List;
 
 /**
- * This is a data transfer object that is used to serialize the result of file format parsing.
+ * This is a data transfer object to serialize the result of file format parsing.
  *
  * @author Laurent Garnier - Initial contribution
  */

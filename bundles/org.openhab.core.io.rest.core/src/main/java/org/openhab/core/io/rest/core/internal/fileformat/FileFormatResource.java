@@ -56,7 +56,8 @@ import org.openhab.core.config.discovery.inbox.Inbox;
 import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
 import org.openhab.core.io.rest.core.fileformat.FileFormatDTO;
-import org.openhab.core.io.rest.core.fileformat.MetadataDTO;
+import org.openhab.core.io.rest.core.fileformat.FileFormatItemDTO;
+import org.openhab.core.io.rest.core.fileformat.FileFormatItemDTOMapper;
 import org.openhab.core.io.rest.core.fileformat.ParsedFileFormatDTO;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
@@ -65,8 +66,6 @@ import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.Metadata;
 import org.openhab.core.items.MetadataKey;
 import org.openhab.core.items.MetadataRegistry;
-import org.openhab.core.items.dto.ItemDTO;
-import org.openhab.core.items.dto.ItemDTOMapper;
 import org.openhab.core.items.fileconverter.ItemFileGenerator;
 import org.openhab.core.items.fileconverter.ItemFileParser;
 import org.openhab.core.thing.Bridge;
@@ -83,7 +82,6 @@ import org.openhab.core.thing.fileconverter.ThingFileGenerator;
 import org.openhab.core.thing.fileconverter.ThingFileParser;
 import org.openhab.core.thing.link.ItemChannelLink;
 import org.openhab.core.thing.link.ItemChannelLinkRegistry;
-import org.openhab.core.thing.link.dto.ItemChannelLinkDTO;
 import org.openhab.core.thing.type.BridgeType;
 import org.openhab.core.thing.type.ChannelType;
 import org.openhab.core.thing.type.ChannelTypeRegistry;
@@ -548,26 +546,9 @@ public class FileFormatResource implements RESTResource {
         ParsedFileFormatDTO dto = new ParsedFileFormatDTO();
         dto.warnings = warnings.isEmpty() ? null : warnings;
         dto.items = new ArrayList<>();
-        dto.channelLinks = new ArrayList<>();
-        dto.metadata = new ArrayList<>();
         items.forEach(item -> {
-            dto.items.add(ItemDTOMapper.map(item));
+            dto.items.add(FileFormatItemDTOMapper.map(item, metadata));
         });
-        metadata.forEach(md -> {
-            if ("channel".equals(md.getUID().getNamespace())) {
-                dto.channelLinks.add(new ItemChannelLinkDTO(md.getUID().getItemName(), md.getValue(),
-                        md.getConfiguration().isEmpty() ? null : md.getConfiguration()));
-            } else {
-                dto.metadata.add(new MetadataDTO(md.getUID().getItemName(), md.getUID().getNamespace(), md.getValue(),
-                        md.getConfiguration().isEmpty() ? null : md.getConfiguration()));
-            }
-        });
-        if (dto.channelLinks.isEmpty()) {
-            dto.channelLinks = null;
-        }
-        if (dto.metadata.isEmpty()) {
-            dto.metadata = null;
-        }
         return dto;
     }
 
@@ -594,7 +575,7 @@ public class FileFormatResource implements RESTResource {
         }
         List<Item> items = new ArrayList<>();
         Collection<Metadata> metadata = new ArrayList<>();
-        for (ItemDTO itemData : data.items) {
+        for (FileFormatItemDTO itemData : data.items) {
             String name = itemData.name;
             if (name == null || name.isEmpty()) {
                 errors.add("Item name missing in items data!");
@@ -603,7 +584,7 @@ public class FileFormatResource implements RESTResource {
 
             Item item;
             try {
-                item = ItemDTOMapper.map(itemData, itemBuilderFactory);
+                item = FileFormatItemDTOMapper.map(itemData, itemBuilderFactory);
                 if (item == null) {
                     errors.add("Invalid item type in items data!");
                     return null;
@@ -613,19 +594,7 @@ public class FileFormatResource implements RESTResource {
                 return null;
             }
             items.add(item);
-        }
-
-        if (data.channelLinks != null) {
-            for (ItemChannelLinkDTO link : data.channelLinks) {
-                MetadataKey key = new MetadataKey("channel", link.itemName);
-                metadata.add(new Metadata(key, link.channelUID, link.configuration));
-            }
-        }
-        if (data.metadata != null) {
-            for (MetadataDTO md : data.metadata) {
-                MetadataKey key = new MetadataKey(md.namespace, md.itemName);
-                metadata.add(new Metadata(key, md.value, md.configuration));
-            }
+            metadata.addAll(FileFormatItemDTOMapper.mapMetadata(itemData));
         }
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();

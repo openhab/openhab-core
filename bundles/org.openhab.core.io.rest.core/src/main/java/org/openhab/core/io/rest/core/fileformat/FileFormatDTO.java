@@ -14,20 +14,16 @@ package org.openhab.core.io.rest.core.fileformat;
 
 import java.util.List;
 
-import org.openhab.core.items.dto.ItemDTO;
 import org.openhab.core.thing.dto.ThingDTO;
-import org.openhab.core.thing.link.dto.ItemChannelLinkDTO;
 
 /**
- * This is a data transfer object that is used to serialize different components that can be embedded
- * inside a file format, like items, metadata, channel links, things, ...
+ * This is a data transfer object to serialize the different components that can be contained
+ * in a file format (items, things, ...).
  *
  * @author Laurent Garnier - Initial contribution
  */
 public class FileFormatDTO {
 
-    public List<ItemDTO> items;
-    public List<MetadataDTO> metadata;
-    public List<ItemChannelLinkDTO> channelLinks;
+    public List<FileFormatItemDTO> items;
     public List<ThingDTO> things;
 }
