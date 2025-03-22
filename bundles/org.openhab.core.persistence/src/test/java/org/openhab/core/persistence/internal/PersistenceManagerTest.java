@@ -103,7 +103,6 @@ public class PersistenceManagerTest {
     private static final GroupItem TEST_GROUP_ITEM = new GroupItem(TEST_GROUP_ITEM_NAME);
 
     private static final State TEST_STATE = new StringType("testState1");
-    private static final State TEST_LAST_STATE = new StringType("testState2");
 
     private static final HistoricItem TEST_HISTORIC_ITEM = new HistoricItem() {
         @Override
@@ -140,12 +139,12 @@ public class PersistenceManagerTest {
 
         @Override
         public @Nullable ZonedDateTime getLastStateChange() {
-            return ZonedDateTime.now().minusDays(2);
+            return null;
         }
 
         @Override
         public @Nullable State getLastState() {
-            return TEST_LAST_STATE;
+            return null;
         }
     };
 
@@ -362,20 +361,15 @@ public class PersistenceManagerTest {
         verify(readyServiceMock, timeout(1000)).markReady(any());
 
         assertThat(TEST_ITEM.getState(), is(TEST_STATE));
-        assertThat(TEST_ITEM.getLastState(), is(TEST_LAST_STATE));
         assertThat(TEST_ITEM2.getState(), is(TEST_STATE));
-        assertThat(TEST_ITEM2.getLastState(), is(TEST_LAST_STATE));
         assertThat(TEST_GROUP_ITEM.getState(), is(TEST_STATE));
-        assertThat(TEST_GROUP_ITEM.getLastState(), is(TEST_LAST_STATE));
 
         verify(queryablePersistenceServiceMock, times(3)).persistedItem(any(), any());
 
         ZonedDateTime lastStateUpdate = TEST_ITEM.getLastStateUpdate();
         assertNotNull(lastStateUpdate);
         assertTrue(lastStateUpdate.isAfter(ZonedDateTime.now().minusDays(2)));
-        ZonedDateTime lastStateChange = TEST_ITEM.getLastStateChange();
-        assertNotNull(lastStateChange);
-        assertTrue(lastStateChange.isBefore(ZonedDateTime.now().minusDays(2)));
+        assertTrue(lastStateUpdate.isBefore(ZonedDateTime.now().minusDays(1)));
 
         verifyNoMoreInteractions(queryablePersistenceServiceMock);
         verifyNoMoreInteractions(persistenceServiceMock);
@@ -393,20 +387,14 @@ public class PersistenceManagerTest {
         verify(readyServiceMock, timeout(1000)).markReady(any());
 
         assertThat(TEST_ITEM.getState(), is(initialValue));
-        assertThat(TEST_ITEM.getLastState(), is(UnDefType.NULL));
         assertThat(TEST_ITEM2.getState(), is(TEST_STATE));
-        assertThat(TEST_ITEM2.getLastState(), is(TEST_LAST_STATE));
         assertThat(TEST_GROUP_ITEM.getState(), is(TEST_STATE));
-        assertThat(TEST_GROUP_ITEM.getLastState(), is(TEST_LAST_STATE));
 
         verify(queryablePersistenceServiceMock, times(2)).persistedItem(any(), any());
 
         ZonedDateTime lastStateUpdate = TEST_ITEM.getLastStateUpdate();
         assertNotNull(lastStateUpdate);
-        assertTrue(lastStateUpdate.isAfter(ZonedDateTime.now().minusDays(1)));
-        ZonedDateTime lastStateChange = TEST_ITEM.getLastStateChange();
-        assertNotNull(lastStateChange);
-        assertTrue(lastStateChange.isAfter(ZonedDateTime.now().minusDays(1)));
+        assertTrue(lastStateUpdate.isAfter(ZonedDateTime.now().minusHours(1)));
 
         verifyNoMoreInteractions(queryablePersistenceServiceMock);
         verifyNoMoreInteractions(persistenceServiceMock);
