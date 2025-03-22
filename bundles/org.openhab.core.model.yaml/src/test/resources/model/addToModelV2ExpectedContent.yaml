@@ -1,12 +1,12 @@
-version: 1
+version: 2
 readOnly: false
 firstType:
-  - uid: element1
+  element1:
     description: description1
-  - uid: element2
+  element2:
     description: description2
-  - uid: element3
+  element3:
     description: description3
 secondType:
-  - id: elt1
+  elt1:
     label: My label

@@ -29,6 +29,7 @@ import org.openhab.core.model.yaml.internal.YamlModelRepositoryImpl;
  *
  * @author Laurent Garnier - Initial contribution
  * @author Jan N. Klug - Refactoring and improvements to JavaDoc
+ * @author Laurent Garnier - Added methods setId and cloneWithoutId
  */
 public interface YamlElement {
 
@@ -47,6 +48,20 @@ public interface YamlElement {
      */
     @NonNull
     String getId();
+
+    /**
+     * Set the identifier of this element.
+     *
+     * @param id the identifier as a string
+     */
+    void setId(@NonNull String id);
+
+    /**
+     * Clone this element putting the identifier to null.
+     *
+     * @return the cloned element
+     */
+    YamlElement cloneWithoutId();
 
     /**
      * Check if this element is valid and should be included in the model.
