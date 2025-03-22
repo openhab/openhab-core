@@ -170,7 +170,7 @@ public final class Units extends CustomUnits {
             MultiplyConverter.ofRational(BigInteger.valueOf(100000), BigInteger.ONE)));
     public static final Unit<Pressure> MILLIBAR = addUnit(MetricPrefix.MILLI(BAR));
     public static final Unit<Radioactivity> BECQUEREL = addUnit(tech.units.indriya.unit.Units.BECQUEREL);
-    public static final Unit<Radioactivity> CURIE = addUnit(NonSI.CURIE);
+    public static final Unit<Radioactivity> CURIE = addUnit(BECQUEREL.multiply(37000000000L));
     public static final Unit<Radioactivity> MILLI_CURIE = addUnit(MetricPrefix.MILLI(CURIE));
     public static final Unit<Radioactivity> MICRO_CURIE = addUnit(MetricPrefix.MICRO(CURIE));
     public static final Unit<Radioactivity> NANO_CURIE = addUnit(MetricPrefix.NANO(CURIE));
