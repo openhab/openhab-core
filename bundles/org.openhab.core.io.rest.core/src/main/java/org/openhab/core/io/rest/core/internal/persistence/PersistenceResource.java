@@ -67,6 +67,7 @@ import org.openhab.core.persistence.PersistenceServiceRegistry;
 import org.openhab.core.persistence.QueryablePersistenceService;
 import org.openhab.core.persistence.config.PersistenceAllConfig;
 import org.openhab.core.persistence.dto.ItemHistoryDTO;
+import org.openhab.core.persistence.dto.ItemHistoryDTO.HistoryDataBean;
 import org.openhab.core.persistence.dto.PersistenceServiceConfigurationDTO;
 import org.openhab.core.persistence.dto.PersistenceServiceDTO;
 import org.openhab.core.persistence.registry.ManagedPersistenceServiceConfigurationProvider;
@@ -499,20 +500,55 @@ public class PersistenceResource implements RESTResource {
 
         // only add the item state if it was requested and the boundary end was not added
         // if the boundary end was added, there is no need to add the item state moved to the end time
-        if (itemState && !addedBoundaryEnd) {
+        if (!addedBoundaryEnd) {
             try {
                 long time = Instant.now().toEpochMilli();
                 // if the current time is after the requested end time, move the item state to the end time
                 if (time > dateTimeEnd.toInstant().toEpochMilli()) {
                     time = dateTimeEnd.toInstant().toEpochMilli();
                 }
+
                 State state = itemRegistry.getItem(itemName).getState();
                 if (state instanceof UnDefType) {
-                    logger.debug("State of item '{}' is undefined, not adding it to the response.", itemName);
+                    logger.debug("State of item '{}' is undefined, not processing it into the response.", itemName);
                 } else {
-                    logger.debug("Adding state of item '{}' to the response: {} - {}", itemName, time, state);
-                    dto.addData(time, state);
-                    quantity++;
+                    dto.sortData();
+
+                    Iterator<HistoryDataBean> iter = dto.data.iterator();
+                    boolean endLoop = false;
+                    HistoryDataBean lastBean = null;
+                    while (!endLoop && iter.hasNext()) {
+                        HistoryDataBean bean = iter.next();
+
+                        if (bean.time < time) {
+                            lastBean = bean;
+                        } else {
+                            endLoop = true;
+                        }
+                    }
+
+                    String currentStateSt = state.toString();
+                    if (lastBean != null && lastBean.state.equals(currentStateSt)) {
+                        if (itemState) {
+                            logger.debug("Ignore state of item '{}' as it is already in dto data: {} - {}", itemName,
+                                    time, state);
+                            lastBean.time = time;
+                        } else {
+                            logger.debug(
+                                    "Remove state of item '{}' as we don't want it, and it is already in dto data: {} - {}",
+                                    itemName, time, state);
+
+                            dto.data.remove(lastBean);
+                            quantity--;
+                        }
+                    } else {
+                        if (itemState) {
+                            logger.debug("Adding state of item '{}' to the response: {} - {}", itemName, time, state);
+                            dto.addData(time, state);
+                            quantity++;
+                        }
+                    }
+
                     dto.sortData();
                 }
             } catch (ItemNotFoundException e) {
@@ -523,6 +559,7 @@ public class PersistenceResource implements RESTResource {
 
         dto.datapoints = Long.toString(quantity);
         return dto;
+
     }
 
     /**
