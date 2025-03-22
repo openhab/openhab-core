@@ -98,8 +98,12 @@ public class YamlModelRepositoryImplTest {
 
         verify(firstTypeListener).addedModel(eq(MODEL_NAME), firstTypeCaptor.capture());
         verify(firstTypeListener).addedModel(eq(MODEL2_NAME), firstTypeCaptor.capture());
+        verify(firstTypeListener, never()).updatedModel(any(), any());
+        verify(firstTypeListener, never()).removedModel(any(), any());
         verify(secondTypeListener1).addedModel(eq(MODEL_NAME), secondTypeCaptor1.capture());
         verify(secondTypeListener1).addedModel(eq(MODEL2_NAME), secondTypeCaptor1.capture());
+        verify(secondTypeListener1, never()).updatedModel(any(), any());
+        verify(secondTypeListener1, never()).removedModel(any(), any());
         verify(secondTypeListener2).addedModel(eq(MODEL_NAME), secondTypeCaptor2.capture());
         verify(secondTypeListener2).addedModel(eq(MODEL2_NAME), secondTypeCaptor2.capture());
         verify(secondTypeListener2, never()).updatedModel(any(), any());
@@ -153,8 +157,12 @@ public class YamlModelRepositoryImplTest {
 
         verify(firstTypeListener).addedModel(eq(MODEL_NAME), firstTypeCaptor.capture());
         verify(firstTypeListener).addedModel(eq(MODEL2_NAME), firstTypeCaptor.capture());
+        verify(firstTypeListener, never()).updatedModel(any(), any());
+        verify(firstTypeListener, never()).removedModel(any(), any());
         verify(secondTypeListener1).addedModel(eq(MODEL_NAME), secondTypeCaptor1.capture());
         verify(secondTypeListener1).addedModel(eq(MODEL2_NAME), secondTypeCaptor1.capture());
+        verify(secondTypeListener1, never()).updatedModel(any(), any());
+        verify(secondTypeListener1, never()).removedModel(any(), any());
         verify(secondTypeListener2).addedModel(eq(MODEL_NAME), secondTypeCaptor2.capture());
         verify(secondTypeListener2).addedModel(eq(MODEL2_NAME), secondTypeCaptor2.capture());
         verify(secondTypeListener2, never()).updatedModel(any(), any());
