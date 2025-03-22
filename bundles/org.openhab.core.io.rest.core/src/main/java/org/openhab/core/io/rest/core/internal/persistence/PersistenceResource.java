@@ -559,7 +559,6 @@ public class PersistenceResource implements RESTResource {
 
         dto.datapoints = Long.toString(quantity);
         return dto;
-
     }
 
     /**
