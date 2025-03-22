@@ -14,6 +14,7 @@ package org.openhab.core.model.core;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.emf.ecore.EObject;
@@ -28,6 +29,7 @@ import org.eclipse.jdt.annotation.Nullable;
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Laurent Garnier - Added method generateSyntaxFromModel
+ * @author Laurent Garnier - Added methods addStandaloneModel and removeStandaloneModel
  */
 @NonNullByDefault
 public interface ModelRepository {
@@ -94,6 +96,27 @@ public interface ModelRepository {
      * @param listener the listener to remove
      */
     void removeModelRepositoryChangeListener(ModelRepositoryChangeListener listener);
+
+    /**
+     * Adds a standalone model to the repository
+     * A standalone model will be loaded without triggering any listener.
+     *
+     * @param modelType the model type
+     * @param inputStream an input stream with the model's content
+     * @param errors the list to be used to fill the errors
+     * @param warnings the list to be used to fill the warnings
+     * @return the created model name if it was successfully processed, null otherwise
+     */
+    @Nullable
+    String addStandaloneModel(String modelType, InputStream inputStream, List<String> errors, List<String> warnings);
+
+    /**
+     * Removes a standalone model from the repository
+     *
+     * @param name the name of the model to remove
+     * @return true, if model was removed, false, if it did not exist
+     */
+    boolean removeStandaloneModel(String name);
 
     /**
      * Generate the syntax from a provided model content.

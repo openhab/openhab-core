@@ -38,7 +38,9 @@ public interface ThingFileGenerator {
      *
      * @param out the output stream to write the generated syntax to
      * @param things the things
+     * @param hideDefaultChannels true to hide the non extensible channels having a default configuration
      * @param hideDefaultParameters true to hide the configuration parameters having the default value
      */
-    void generateFileFormat(OutputStream out, List<Thing> things, boolean hideDefaultParameters);
+    void generateFileFormat(OutputStream out, List<Thing> things, boolean hideDefaultChannels,
+            boolean hideDefaultParameters);
 }
