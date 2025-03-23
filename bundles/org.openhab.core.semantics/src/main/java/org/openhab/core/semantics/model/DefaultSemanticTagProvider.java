@@ -80,6 +80,7 @@ public class DefaultSemanticTagProvider implements SemanticTagProvider {
         defaultTags.add(DefaultSemanticTags.Property.COLOR_TEMPERATURE);
         defaultTags.add(DefaultSemanticTags.Property.HUMIDITY);
         defaultTags.add(DefaultSemanticTags.Property.PRESENCE);
+        defaultTags.add(DefaultSemanticTags.Property.AIRFLOW);
         defaultTags.add(DefaultSemanticTags.Property.PRESSURE);
         defaultTags.add(DefaultSemanticTags.Property.SMOKE);
         defaultTags.add(DefaultSemanticTags.Property.NOISE);
@@ -94,6 +95,9 @@ public class DefaultSemanticTagProvider implements SemanticTagProvider {
         defaultTags.add(DefaultSemanticTags.Property.CURRENT);
         defaultTags.add(DefaultSemanticTags.Property.FREQUENCY);
         defaultTags.add(DefaultSemanticTags.Property.GAS);
+        defaultTags.add(DefaultSemanticTags.Property.APP);
+        defaultTags.add(DefaultSemanticTags.Property.CHANNEL);
+        defaultTags.add(DefaultSemanticTags.Property.MODE);
         defaultTags.add(DefaultSemanticTags.Property.SOUND_VOLUME);
         defaultTags.add(DefaultSemanticTags.Property.OIL);
         defaultTags.add(DefaultSemanticTags.Property.DURATION);

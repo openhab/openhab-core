@@ -238,6 +238,11 @@ public class DefaultSemanticTags {
                 "Presence", //
                 "", //
                 "");
+        public static final SemanticTag AIRFLOW = new SemanticTagImpl( //
+                "Property_Airflow", //
+                "Airflow", //
+                "", //
+                "");
         public static final SemanticTag PRESSURE = new SemanticTagImpl( //
                 "Property_Pressure", //
                 "Pressure", //
@@ -306,6 +311,21 @@ public class DefaultSemanticTags {
         public static final SemanticTag GAS = new SemanticTagImpl( //
                 "Property_Gas", //
                 "Gas", //
+                "", //
+                "");
+        public static final SemanticTag APP = new SemanticTagImpl( //
+                "Property_App", //
+                "App", //
+                "Software program", //
+                "Application");
+        public static final SemanticTag CHANNEL = new SemanticTagImpl( //
+                "Property_Channel", //
+                "Channel", //
+                "", //
+                "");
+        public static final SemanticTag MODE = new SemanticTagImpl( //
+                "Property_Mode", //
+                "Mode", //
                 "", //
                 "");
         public static final SemanticTag SOUND_VOLUME = new SemanticTagImpl( //
