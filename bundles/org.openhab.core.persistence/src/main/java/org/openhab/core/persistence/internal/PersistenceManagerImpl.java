@@ -596,8 +596,7 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, State
                 }
             }
             genericItem.removeStateChangeListener(PersistenceManagerImpl.this);
-            genericItem.setState(persistedItem.getState(), persistedItem.getLastState(), persistedItem.getTimestamp(),
-                    persistedItem.getLastStateChange());
+            genericItem.setState(state, lastState, lastStateUpdate, lastStateChange);
             genericItem.addStateChangeListener(PersistenceManagerImpl.this);
             if (logger.isDebugEnabled()) {
                 logger.debug("Restored item state from '{}' for item '{}' -> '{}'",
