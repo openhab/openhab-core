@@ -425,7 +425,7 @@ public class UnitsTest {
     @Test
     public void testYearMonthDay() {
         QuantityType<?> year = QuantityType.valueOf("1 y");
-        assertThat(year.toString(), is("1 year"));
+        assertThat(year.toString(), is("1 yr"));
         QuantityType<?> converted = year.toUnit("d");
         assertThat(converted.doubleValue(), is(closeTo(365.2425, DEFAULT_ERROR)));
         QuantityType<?> converted2 = year.toUnit("mo");
