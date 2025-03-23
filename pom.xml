@@ -292,12 +292,12 @@ Import-Package: \\
             <dependency>
               <groupId>org.codehaus.plexus</groupId>
               <artifactId>plexus-compiler-eclipse</artifactId>
-              <version>2.12.1</version>
+              <version>2.15.0</version>
             </dependency>
             <dependency>
               <groupId>org.eclipse.jdt</groupId>
               <artifactId>ecj</artifactId>
-              <version>3.39.0</version>
+              <version>3.41.0</version>
             </dependency>
           </dependencies>
         </plugin>
@@ -632,7 +632,7 @@ Import-Package: \\
             <configuration>
               <rules>
                 <requireMavenVersion>
-                  <version>3.6.3</version>
+                  <version>3.9.6</version>
                 </requireMavenVersion>
                 <requireJavaVersion>
                   <version>[21.0,22.0)</version>
