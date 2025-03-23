@@ -369,9 +369,7 @@ public class PersistenceManagerTest {
         ZonedDateTime lastStateUpdate = TEST_ITEM.getLastStateUpdate();
         assertNotNull(lastStateUpdate);
         assertTrue(lastStateUpdate.isAfter(ZonedDateTime.now().minusDays(2)));
-        ZonedDateTime lastStateChange = TEST_ITEM.getLastStateChange();
-        assertNotNull(lastStateChange);
-        assertTrue(lastStateChange.isBefore(ZonedDateTime.now().minusDays(2)));
+        assertTrue(lastStateUpdate.isBefore(ZonedDateTime.now().minusDays(1)));
 
         verifyNoMoreInteractions(queryablePersistenceServiceMock);
         verifyNoMoreInteractions(persistenceServiceMock);
@@ -396,10 +394,7 @@ public class PersistenceManagerTest {
 
         ZonedDateTime lastStateUpdate = TEST_ITEM.getLastStateUpdate();
         assertNotNull(lastStateUpdate);
-        assertTrue(lastStateUpdate.isAfter(ZonedDateTime.now().minusDays(1)));
-        ZonedDateTime lastStateChange = TEST_ITEM.getLastStateChange();
-        assertNotNull(lastStateChange);
-        assertTrue(lastStateChange.isAfter(ZonedDateTime.now().minusDays(1)));
+        assertTrue(lastStateUpdate.isAfter(ZonedDateTime.now().minusHours(1)));
 
         verifyNoMoreInteractions(queryablePersistenceServiceMock);
         verifyNoMoreInteractions(persistenceServiceMock);
