@@ -147,7 +147,7 @@ class RulesJvmModelInferrer extends ScriptJvmModelInferrer {
                         parameters += rule.toParameter(VAR_RECEIVED_COMMAND, commandTypeRef)
                     }
                     if ((containsStateChangeTrigger(rule) || containsStateUpdateTrigger(rule)) && !containsParam(parameters, VAR_NEW_STATE)) {
-                        val stateTypeRef = ruleModel.newTypeRef(State)
+                        val stateTypeRef = typeRef(State)
                         parameters += rule.toParameter(VAR_NEW_STATE, stateTypeRef)
                     }
                     if (containsStateChangeTrigger(rule) && !containsParam(parameters, VAR_PREVIOUS_STATE)) {
@@ -155,11 +155,11 @@ class RulesJvmModelInferrer extends ScriptJvmModelInferrer {
                         parameters += rule.toParameter(VAR_PREVIOUS_STATE, stateTypeRef)
                     }
                     if (containsStateChangeTrigger(rule) || containsStateUpdateTrigger(rule)) {
-                        val lastStateUpdateTypeRef = ruleModel.newTypeRef(ZonedDateTime)
+                        val lastStateUpdateTypeRef = typeRef(ZonedDateTime)
                         parameters += rule.toParameter(VAR_LAST_STATE_UPDATE, lastStateUpdateTypeRef)
                     }
                     if (containsStateChangeTrigger(rule)) {
-                        val lastStateChangeTypeRef = ruleModel.newTypeRef(ZonedDateTime)
+                        val lastStateChangeTypeRef = typeRef(ZonedDateTime)
                         parameters += rule.toParameter(VAR_LAST_STATE_CHANGE, lastStateChangeTypeRef)
                     }
                     if (containsEventTrigger(rule)) {
