@@ -55,7 +55,8 @@ public interface ChartProvider {
      * @param groups The groups to display on the chart
      * @param dpi The DPI (dots per inch) value, can be <code>null</code>
      * @param interpolation The interpolation between two datapoint (<code>linear</code> or <code>step</code>),
-     *            <code>null</code> defaults to <code>linear</code>)
+     *            <code>null</code> defaults to <code>linear</code> for numeric values and to <code>step</code> for
+     *            binary values
      * @param legend Show the legend? If <code>null</code>, the ChartProvider should make his own decision.
      * @return BufferedImage object if the chart is rendered correctly,
      *         otherwise null.
@@ -86,7 +87,8 @@ public interface ChartProvider {
      * @param dpi The DPI (dots per inch) value, can be <code>null</code>
      * @param yAxisDecimalPattern The format pattern for the y-axis labels
      * @param interpolation The interpolation between two datapoint (<code>linear</code> or <code>step</code>),
-     *            <code>null</code> defaults to <code>linear</code>)
+     *            <code>null</code> defaults to <code>linear</code> for numeric values and to <code>step</code> for
+     *            binary values
      * @param legend Show the legend? If <code>null</code>, the ChartProvider should make his own decision.
      * @return BufferedImage object if the chart is rendered correctly,
      *         otherwise null.
