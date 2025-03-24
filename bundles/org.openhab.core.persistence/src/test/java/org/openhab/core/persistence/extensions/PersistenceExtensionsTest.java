@@ -2278,7 +2278,7 @@ public class PersistenceExtensionsTest {
         // 0 - 1 hour back in time
         createTestCachedValuesPersistenceService(now, historicHours, futureHours);
 
-        // Testing that riemannSum calculates the correct average over the last 27 hours
+        // Testing that average calculates the correct average over the last 27 hours
         State average = PersistenceExtensions.averageSince(numberItem, now.minusHours(historicHours),
                 TestCachedValuesPersistenceService.ID);
         assertNotNull(average);
@@ -2286,7 +2286,7 @@ public class PersistenceExtensionsTest {
         assertNotNull(dt);
         assertThat(dt.doubleValue(), is(closeTo((100.0 + 50.0) / historicHours, 0.01)));
 
-        // Testing that riemannSum calculates the correct average over the last 24 hours
+        // Testing that average calculates the correct average over the last 24 hours
         average = PersistenceExtensions.averageSince(numberItem, now.minusHours(historicHours).plusHours(3),
                 TestCachedValuesPersistenceService.ID);
         assertNotNull(average);
@@ -2294,7 +2294,7 @@ public class PersistenceExtensionsTest {
         assertNotNull(dt);
         assertThat(dt.doubleValue(), is(closeTo(50.0 / (historicHours - 3.0), 0.01)));
 
-        // Testing that riemannSum calculates the correct average over the last 30 minutes
+        // Testing that average calculates the correct average over the last 30 minutes
         average = PersistenceExtensions.averageSince(numberItem, now.minusMinutes(30),
                 TestCachedValuesPersistenceService.ID);
         assertNotNull(average);
@@ -2317,7 +2317,7 @@ public class PersistenceExtensionsTest {
         // 0 - 26 hour forward in time
         createTestCachedValuesPersistenceService(now, historicHours, futureHours);
 
-        // Testing that riemannSum calculates the correct average over the next 27 hours
+        // Testing that average calculates the correct average over the next 27 hours
         State average = PersistenceExtensions.averageUntil(numberItem, now.plusHours(futureHours),
                 TestCachedValuesPersistenceService.ID);
         assertNotNull(average);
@@ -2325,7 +2325,7 @@ public class PersistenceExtensionsTest {
         assertNotNull(dt);
         assertThat(dt.doubleValue(), is(closeTo((100.0 + 50.0) / futureHours, 0.01)));
 
-        // Testing that riemannSum calculates the correct average over the next 25 hours
+        // Testing that average calculates the correct average over the next 25 hours
         average = PersistenceExtensions.averageUntil(numberItem, now.plusHours(futureHours).minusHours(2),
                 TestCachedValuesPersistenceService.ID);
         assertNotNull(average);
@@ -2333,7 +2333,7 @@ public class PersistenceExtensionsTest {
         assertNotNull(dt);
         assertThat(dt.doubleValue(), is(closeTo(50.0 / (futureHours - 2.0), 0.01)));
 
-        // Testing that riemannSum calculates the correct average over the next 30 minutes hours
+        // Testing that average calculates the correct average over the next 30 minutes hours
         average = PersistenceExtensions.averageUntil(numberItem, now.plusMinutes(30),
                 TestCachedValuesPersistenceService.ID);
         assertNotNull(average);
