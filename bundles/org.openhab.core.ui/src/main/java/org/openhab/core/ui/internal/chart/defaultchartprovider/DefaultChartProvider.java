@@ -192,8 +192,8 @@ public class DefaultChartProvider implements ChartProvider {
         // axis
         styler.setAxisTickLabelsFont(chartTheme.getAxisTickLabelsFont(dpi));
         styler.setAxisTickLabelsColor(chartTheme.getAxisTickLabelsColor());
-        styler.setXAxisMin(startTime.toInstant().toEpochMilli());
-        styler.setXAxisMax(endTime.toInstant().toEpochMilli());
+        styler.setXAxisMin((double) startTime.toInstant().toEpochMilli());
+        styler.setXAxisMax((double) endTime.toInstant().toEpochMilli());
         int yAxisSpacing = Math.max(height / 10, chartTheme.getAxisTickLabelsFont(dpi).getSize());
         if (yAxisDecimalPattern != null) {
             styler.setYAxisDecimalPattern(yAxisDecimalPattern);
