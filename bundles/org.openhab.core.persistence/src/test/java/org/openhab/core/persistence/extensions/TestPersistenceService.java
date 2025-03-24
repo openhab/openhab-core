@@ -257,15 +257,15 @@ public class TestPersistenceService implements QueryablePersistenceService {
         }
     }
 
-    static double riemannSum(@Nullable Integer beginYear, @Nullable Integer endYear, RiemannType type) {
-        return riemannSumInternal(beginYear, endYear, type, false);
+    static double testRiemannSum(@Nullable Integer beginYear, @Nullable Integer endYear, RiemannType type) {
+        return testRiemannSum(beginYear, endYear, type, false);
     }
 
-    static double riemannSumCelsius(@Nullable Integer beginYear, @Nullable Integer endYear, RiemannType type) {
-        return riemannSumInternal(beginYear, endYear, type, true);
+    static double testRiemannSumCelsius(@Nullable Integer beginYear, @Nullable Integer endYear, RiemannType type) {
+        return testRiemannSum(beginYear, endYear, type, true);
     }
 
-    private static double riemannSumInternal(@Nullable Integer beginYear, @Nullable Integer endYear, RiemannType type,
+    private static double testRiemannSum(@Nullable Integer beginYear, @Nullable Integer endYear, RiemannType type,
             boolean kelvinOffset) {
         ZonedDateTime now = ZonedDateTime.now();
         int begin = beginYear != null ? (beginYear < HISTORIC_START ? HISTORIC_START : beginYear) : now.getYear() + 1;
@@ -404,7 +404,7 @@ public class TestPersistenceService implements QueryablePersistenceService {
         return sum;
     }
 
-    static double average(@Nullable Integer beginYear, @Nullable Integer endYear) {
+    static double testAverage(@Nullable Integer beginYear, @Nullable Integer endYear) {
         ZonedDateTime now = ZonedDateTime.now();
         ZonedDateTime beginDate = beginYear != null
                 ? ZonedDateTime.of(beginYear >= HISTORIC_START ? beginYear : HISTORIC_START, 1, 1, 0, 0, 0, 0,
@@ -412,12 +412,12 @@ public class TestPersistenceService implements QueryablePersistenceService {
                 : now;
         ZonedDateTime endDate = endYear != null ? ZonedDateTime.of(endYear, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault())
                 : now;
-        double sum = riemannSum(beginYear, endYear, RiemannType.LEFT);
+        double sum = testRiemannSum(beginYear, endYear, RiemannType.LEFT);
         long duration = Duration.between(beginDate, endDate).toSeconds();
         return 1.0 * sum / duration;
     }
 
-    static double median(@Nullable Integer beginYear, @Nullable Integer endYear) {
+    static double testMedian(@Nullable Integer beginYear, @Nullable Integer endYear) {
         ZonedDateTime now = ZonedDateTime.now();
         int begin = beginYear != null ? beginYear : now.getYear() + 1;
         int end = endYear != null ? endYear : now.getYear();
