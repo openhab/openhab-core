@@ -23,8 +23,8 @@ jobs:
         os: [ 'ubuntu-24.04' ]
     name: Build (Java ${{ matrix.java }}, ${{ matrix.os }})
     runs-on: ${{ matrix.os }}
-    # typical duration is ~20min, set twice the amount as limit (default is 6h)
-    timeout-minutes: 40
+    # typical duration is ~15min, set twice the amount as limit (default is 6h)
+    timeout-minutes: 30
     steps:
       - name: Checkout
         if: github.head_ref == ''
@@ -66,7 +66,9 @@ jobs:
 
       - name: Build
         id: build
-        run: './.github/scripts/maven-build'
+        # this target includes spotless, build, test, itest
+        # (spotless done with build - will add 1 min, but build is faster than sat)
+        run: './.github/scripts/maven-build verify -B -T 1.5C -U -DskipChecks'
         env:
           MAVEN_OPTS: >-
             -Xmx2g
@@ -80,21 +82,6 @@ jobs:
         with:
           name: build-log-java-${{ matrix.java }}-${{ matrix.os }}
           path: build.log
-
-      - name: Upload SAT Summary Report
-        if: ${{ always() && ((steps.build.outcome == 'success') || (steps.build.outcome == 'failure')) }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: sat-summary-report
-          path: target/summary_report.html
-
-      - name: Report SAT Errors as Annotations
-        if: ${{ matrix.java == '21' && always() && ((steps.build.outcome == 'success') || (steps.build.outcome == 'failure')) }}
-        uses: ghys/checkstyle-github-action@main
-        with:
-          title: CheckStyle Violations
-          path: '**/checkstyle-result.xml'
-          mode: inline
 
       # this will identify modifications to files under source control during the workflow run;
       # untracked files will be included as well!
@@ -112,3 +99,85 @@ jobs:
         run: |
           echo "::error::Files have changed: $CHANGED_FILES"
           exit 1
+
+  checks:
+    strategy:
+      fail-fast: false
+      matrix:
+          type: [ 'SAT', 'JavaDoc' ]
+          java: [ '21' ]
+          os: [ 'ubuntu-24.04' ]
+    name: ${{matrix.type}}
+    runs-on: ${{ matrix.os }}
+    # typical duration is ~15min, set twice the amount as limit (default is 6h)
+    timeout-minutes: 30
+    env:
+      MAVEN_OPTS: >-
+        -Xmx2g
+        -Dmaven.wagon.http.retryHandler.count=5
+        -Dmaven.wagon.httpconnectionManager.ttlSeconds=25
+        -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
+    steps:
+      - name: Checkout
+        if: github.head_ref == ''
+        uses: actions/checkout@v4
+
+      - name: Checkout merge
+        if: github.head_ref != ''
+        uses: actions/checkout@v4
+        with:
+          ref: refs/pull/${{github.event.pull_request.number}}/merge
+
+      - name: Set up Cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.m2/repository
+            !~/.m2/repository/org/openhab
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Set up Java ${{ matrix.java }}
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: ${{ matrix.java }}
+
+      # pinning to SHA to mitigate possible supply chain attacks
+      - name: Set up Maven ${{ matrix.maven }}
+        uses: stCarolas/setup-maven@d6af6abeda15e98926a57b5aa970a96bb37f97d1 # v5
+        with:
+          maven-version: ${{ matrix.maven }}
+
+      - name: JavaDoc
+        if: ${{ matrix.type == 'javadoc' }}
+        id: javadoc
+        run: './.github/scripts/maven-build javadoc:javadoc javadoc:aggregate -Dfeatures.verify.skip=true -Dspotless.check.skip=true'
+
+      - name: Upload JavaDoc
+        if: ${{ always() && (steps.javadoc.outcome == 'success') }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: javadoc
+          path: target/site/apidocs/
+
+      - name: Static Code Analysis
+        if: ${{ matrix.type == 'sat' }}
+        id: sat
+        run: './.github/scripts/maven-build install -B -T 1.5C -U -Dspotless.check.skip=true -Dmaven.test.skip -Dfeatures.verify.skip=true -Dmaven.compiler.failOnError=false'
+
+      - name: Upload SAT Summary Report
+        if: ${{ always() && ((steps.sat.outcome == 'success') || (steps.sat.outcome == 'failure')) }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: sat-summary-report
+          path: target/summary_report.html
+
+      - name: Report SAT Errors as Annotations
+        if: ${{ matrix.java == '21' && always() && ((steps.sat.outcome == 'success') || (steps.sat.outcome == 'failure')) }}
+        uses: ghys/checkstyle-github-action@main
+        with:
+          title: CheckStyle Violations
+          path: '**/checkstyle-result.xml'
+          mode: inline
