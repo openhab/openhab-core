@@ -59,7 +59,7 @@ jobs:
           maven-version: ${{ matrix.maven }}
 
       - name: Register Problem Matchers
-        if: ${{ matrix.java == '17' }}
+        if: ${{ matrix.java == '21' }}
         id: problem_matchers
         run: |
           echo "::add-matcher::.github/openhab-compile-problems.json"
