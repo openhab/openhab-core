@@ -301,7 +301,7 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, State
     }
 
     public void addPersistenceListenners(Collection<String> oldItemNames) {
-        itemRegistry.getItems().forEach(this::addItemToPersistenceListenners);        
+        itemRegistry.getItems().forEach(this::addItemToPersistenceListenners);
     }
 
     public void addToPersistenceServiceContainer(Collection<String> oldItemNames) {
@@ -601,8 +601,8 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, State
                 // try restoring the previous state if not yet set
                 if (item.getLastState() != null && item.getLastState() != UnDefType.NULL) {
                     // there is already a previous state, nothing to restore
-                return;
-            }
+                    return;
+                }
                 lastStateUpdate = item.getLastStateUpdate();
                 if (state.equals(persistedItem.getState())) {
                     lastState = persistedItem.getLastState();
