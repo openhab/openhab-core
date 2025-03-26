@@ -78,7 +78,8 @@ public class ThingStatusTriggerHandler extends BaseTriggerModuleHandler implemen
         }
         this.bundleContext = bundleContext;
 
-        this.eventTopicFilter = new TopicEventFilter("^openhab/things/" + thingUID.replace("*", ".*?") + "/.*$");
+        this.eventTopicFilter = new TopicEventFilter(
+                "^openhab/things/" + thingUID.replace("?", ".?").replace("*", ".*?") + "/.*$");
 
         eventSubscriberRegistration = this.bundleContext.registerService(EventSubscriber.class.getName(), this, null);
     }

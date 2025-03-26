@@ -25,6 +25,7 @@ import org.openhab.core.automation.handler.TriggerHandlerCallback;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventFilter;
 import org.openhab.core.events.EventSubscriber;
+import org.openhab.core.events.TopicEventFilter;
 import org.openhab.core.events.TopicPrefixEventFilter;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.events.ItemAddedEvent;
@@ -67,13 +68,20 @@ public class ItemCommandTriggerHandler extends BaseTriggerModuleHandler implemen
             ItemRegistry itemRegistry) {
         super(module);
         this.itemName = (String) module.getConfiguration().get(CFG_ITEMNAME);
-        this.eventFilter = new TopicPrefixEventFilter("openhab/items/" + itemName + "/");
+        boolean isWildcard = itemName.contains("?") || itemName.contains("*");
+        if (isWildcard) {
+            this.eventFilter = new TopicEventFilter(
+                    "^openhab/items/" + itemName.replace("?", ".?").replace("*", ".*?") + "/.*$");
+            this.types = Set.of(ItemCommandEvent.TYPE);
+        } else {
+            this.eventFilter = new TopicPrefixEventFilter("openhab/items/" + itemName + "/");
+            this.types = Set.of(ItemCommandEvent.TYPE, ItemAddedEvent.TYPE, ItemRemovedEvent.TYPE);
+        }
         this.command = (String) module.getConfiguration().get(CFG_COMMAND);
         this.bundleContext = bundleContext;
         this.ruleUID = ruleUID;
-        this.types = Set.of(ItemCommandEvent.TYPE, ItemAddedEvent.TYPE, ItemRemovedEvent.TYPE);
         eventSubscriberRegistration = this.bundleContext.registerService(EventSubscriber.class.getName(), this, null);
-        if (itemRegistry.get(itemName) == null) {
+        if (!isWildcard && itemRegistry.get(itemName) == null) {
             logger.warn("Item '{}' needed for rule '{}' is missing. Trigger '{}' will not work.", itemName, ruleUID,
                     module.getId());
         }
