@@ -41,6 +41,7 @@ public class ThreadPoolMetric implements OpenhabCoreMeterBinder {
     private static final String POOLNAME_TAG_NAME = "pool";
     private final Set<Tag> tags = new HashSet<>();
     private @Nullable MeterRegistry meterRegistry;
+    private Set<ExecutorServiceMetrics> executorServiceMetricsSet = new HashSet<>();
 
     public ThreadPoolMetric(Collection<Tag> tags) {
         this.tags.addAll(tags);
@@ -66,7 +67,9 @@ public class ThreadPoolMetric implements OpenhabCoreMeterBinder {
         }
         Set<Tag> tagsWithPoolname = new HashSet<>(tags);
         tagsWithPoolname.add(Tag.of(POOLNAME_TAG_NAME, poolName));
-        new ExecutorServiceMetrics(es, poolName, tagsWithPoolname).bindTo(meterRegistry);
+        ExecutorServiceMetrics metrics = new ExecutorServiceMetrics(es, poolName, tagsWithPoolname);
+        metrics.bindTo(meterRegistry);
+        executorServiceMetricsSet.add(metrics);
     }
 
     @Override
@@ -81,5 +84,6 @@ public class ThreadPoolMetric implements OpenhabCoreMeterBinder {
             }
         }
         this.meterRegistry = null;
+        executorServiceMetricsSet.clear();
     }
 }
