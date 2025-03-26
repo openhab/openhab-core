@@ -423,6 +423,12 @@
       <version>5.16.0</version>
       <scope>compile</scope>
     </dependency>
+    <!-- transitive dependency of junit, required by javadoc in compile bom! -->
+    <dependency>
+      <groupId>org.apiguardian</groupId>
+      <artifactId>apiguardian-api</artifactId>
+      <version>1.1.2</version>
+    </dependency>
   </dependencies>
 
 </project>
