@@ -12,6 +12,8 @@
  */
 package org.openhab.core.items.events;
 
+import java.time.ZonedDateTime;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.types.State;
@@ -31,6 +33,7 @@ public class ItemStateUpdatedEvent extends ItemEvent {
     public static final String TYPE = ItemStateUpdatedEvent.class.getSimpleName();
 
     protected final State itemState;
+    protected final @Nullable ZonedDateTime lastStateUpdate;
 
     /**
      * Constructs a new item state event.
@@ -39,12 +42,14 @@ public class ItemStateUpdatedEvent extends ItemEvent {
      * @param payload the payload
      * @param itemName the item name
      * @param itemState the item state
+     * @param lastStateUpdate the last state update
      * @param source the source, can be null
      */
     protected ItemStateUpdatedEvent(String topic, String payload, String itemName, State itemState,
-            @Nullable String source) {
+            @Nullable ZonedDateTime lastStateUpdate, @Nullable String source) {
         super(topic, payload, itemName, source);
         this.itemState = itemState;
+        this.lastStateUpdate = lastStateUpdate;
     }
 
     @Override
@@ -59,6 +64,15 @@ public class ItemStateUpdatedEvent extends ItemEvent {
      */
     public State getItemState() {
         return itemState;
+    }
+
+    /**
+     * Gets the timestamp of the previous state update that occurred prior to this event.
+     *
+     * @return the last state update
+     */
+    public @Nullable ZonedDateTime getLastStateUpdate() {
+        return lastStateUpdate;
     }
 
     @Override
