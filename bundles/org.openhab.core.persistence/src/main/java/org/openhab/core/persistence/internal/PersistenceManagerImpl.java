@@ -296,12 +296,29 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, State
 
     @Override
     public void allItemsChanged(Collection<String> oldItemNames) {
-        itemRegistry.getItems().forEach(this::added);
+        addPersistenceListenners(oldItemNames);
+        addToPersistenceServiceContainer(oldItemNames);
+    }
+
+    public void addPersistenceListenners(Collection<String> oldItemNames) {
+        itemRegistry.getItems().forEach(this::addItemToPersistenceListenners);
+    }
+
+    public void addToPersistenceServiceContainer(Collection<String> oldItemNames) {
+        itemRegistry.getItems().forEach(this::addItemToPersistenceServiceContainer);
     }
 
     @Override
     public void added(Item item) {
+        addItemToPersistenceListenners(item);
+        addItemToPersistenceServiceContainer(item);
+    }
+
+    public void addItemToPersistenceServiceContainer(Item item) {
         persistenceServiceContainers.values().forEach(container -> container.addItem(item));
+    }
+
+    public void addItemToPersistenceListenners(Item item) {
         if (item instanceof GenericItem genericItem) {
             genericItem.addStateChangeListener(this);
             genericItem.addTimeSeriesListener(this);
