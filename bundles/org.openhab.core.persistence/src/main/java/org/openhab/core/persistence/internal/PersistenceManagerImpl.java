@@ -74,6 +74,7 @@ import org.openhab.core.service.ReadyService.ReadyTracker;
 import org.openhab.core.service.StartLevelService;
 import org.openhab.core.types.State;
 import org.openhab.core.types.TimeSeries;
+import org.openhab.core.types.TimeSeries.Entry;
 import org.openhab.core.types.UnDefType;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -339,6 +340,7 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, State
             // discard empty time series
             return;
         }
+
         persistenceServiceContainers.values().stream()
                 .filter(psc -> psc.persistenceService instanceof ModifiablePersistenceService)
                 .forEach(container -> Stream
@@ -375,6 +377,33 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, State
                                         }
                                     });
                         }));
+
+        State state = item.getState();
+        if (UnDefType.NULL.equals(state)) {
+            Iterator<Entry> iter = timeSeries.getStates().iterator();
+            Instant entryTs = null;
+            State entryState = null;
+            Instant now = Instant.now();
+            boolean endLoop = false;
+
+            while (!endLoop && iter.hasNext()) {
+                Entry entry = iter.next();
+                if (entry.timestamp().isBefore(now)) {
+                    entryTs = entry.timestamp();
+                    entryState = entry.state();
+                } else {
+                    endLoop = true;
+                }
+            }
+
+            GenericItem genericItem = (GenericItem) item;
+            if (entryState != null) {
+                ZonedDateTime zdt = entryTs.atZone(ZoneId.systemDefault());
+                genericItem.removeStateChangeListener(PersistenceManagerImpl.this);
+                genericItem.setState(entryState, null, zdt, null);
+                genericItem.addStateChangeListener(PersistenceManagerImpl.this);
+            }
+        }
     }
 
     @Override
