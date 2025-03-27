@@ -16,6 +16,8 @@ import static org.openhab.core.tools.i18n.plugin.Translations.TranslationsEntry.
 import static org.openhab.core.tools.i18n.plugin.Translations.TranslationsGroup.group;
 import static org.openhab.core.tools.i18n.plugin.Translations.TranslationsSection.section;
 
+import java.net.URI;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -24,7 +26,9 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import java.util.stream.Stream.Builder;
 
+import org.apache.maven.plugin.logging.Log;
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.addon.AddonInfo;
 import org.openhab.core.addon.internal.xml.AddonInfoXmlResult;
 import org.openhab.core.config.core.ConfigDescription;
@@ -52,6 +56,12 @@ import org.openhab.core.types.StateDescription;
 public class XmlToTranslationsConverter {
 
     private static final Pattern OPTION_ESCAPE_PATTERN = Pattern.compile("([ :=])");
+    private final Log log;
+    private List<String> processedURIs = new ArrayList<>();
+
+    public XmlToTranslationsConverter(Log log) {
+        this.log = log;
+    }
 
     public Translations convert(BundleInfo bundleInfo) {
         String addonId = bundleInfo.getAddonId();
@@ -59,30 +69,58 @@ public class XmlToTranslationsConverter {
     }
 
     private Translations addonTranslations(BundleInfo bundleInfo) {
-        return Translations.translations( //
-                addonSection(bundleInfo), //
-                addonConfigSection(bundleInfo), //
-                thingTypesSection(bundleInfo), //
-                thingTypesConfigSection(bundleInfo), //
-                channelGroupTypesSection(bundleInfo), //
-                channelTypesSection(bundleInfo), //
-                channelTypesConfigSection(bundleInfo));
+        Builder<TranslationsSection> translationsBuilder = Stream.builder();
+        translationsBuilder.add(addonSection(bundleInfo));
+        translationsBuilder.add(addonConfigSection(bundleInfo));
+        translationsBuilder.add(thingTypesSection(bundleInfo));
+        translationsBuilder.add(thingTypesConfigSection(bundleInfo));
+        translationsBuilder.add(channelGroupTypesSection(bundleInfo));
+        translationsBuilder.add(channelTypesSection(bundleInfo));
+        translationsBuilder.add(channelTypesConfigSection(bundleInfo));
+
+        // Process the rest of config descriptions
+        Builder<TranslationsGroup> groupBuilder = Stream.builder();
+        bundleInfo.getConfigDescriptions().stream().map(this::translateConfigDescription).reduce(Stream::concat)
+                .orElseGet(Stream::empty).forEach(groupBuilder::add);
+
+        List<TranslationsGroup> groups = groupBuilder.build().toList();
+        if (!groups.isEmpty()) {
+            translationsBuilder.add(section(groups.stream()));
+        }
+
+        return Translations.translations(translationsBuilder.build());
+    }
+
+    private Stream<TranslationsGroup> translateConfigDescription(ConfigDescription configDescription) {
+        return translateConfigDescription(configDescription, null);
+    }
+
+    private Stream<TranslationsGroup> translateConfigDescription(ConfigDescription configDescription,
+            @Nullable String configKeyPrefix) {
+        String UID = configDescription.getUID().toString();
+        if (processedURIs.contains(UID)) {
+            return Stream.empty();
+        }
+        processedURIs.add(UID);
+        String keyPrefix = configKeyPrefix != null ? configKeyPrefix
+                : UID.replaceFirst(":", ".config.").replace(":", ".");
+        Builder<TranslationsGroup> streamBuilder = Stream.builder();
+        configDescriptionGroupParameters(keyPrefix, configDescription.getParameterGroups()).forEach(streamBuilder::add);
+        configDescriptionParameters(keyPrefix, configDescription.getParameters()).forEach(streamBuilder::add);
+        return streamBuilder.build();
+    }
+
+    private TranslationsSection configDescriptionsSection(BundleInfo bundleInfo) {
+        Builder<TranslationsGroup> groupsBuilder = Stream.builder();
+
+        bundleInfo.getConfigDescriptions().stream().map(this::translateConfigDescription).reduce(Stream::concat)
+                .orElseGet(Stream::empty).forEach(groupsBuilder::add);
+
+        return section(groupsBuilder.build());
     }
 
     private Translations configTranslations(BundleInfo bundleInfo) {
-        Builder<TranslationsGroup> groupsBuilder = Stream.builder();
-
-        bundleInfo.getConfigDescriptions().stream().map(configDescription -> {
-            Object[] uid = configDescription.getUID().toString().split(":");
-            String configKeyPrefix = String.format("%s.config" + ".%s".repeat(uid.length - 1), uid);
-            Builder<TranslationsGroup> streamBuilder = Stream.builder();
-            configDescriptionGroupParameters(configKeyPrefix, configDescription.getParameterGroups())
-                    .forEach(streamBuilder::add);
-            configDescriptionParameters(configKeyPrefix, configDescription.getParameters()).forEach(streamBuilder::add);
-            return streamBuilder.build();
-        }).reduce(Stream::concat).orElseGet(Stream::empty).forEach(groupsBuilder::add);
-
-        return Translations.translations(section(groupsBuilder.build()));
+        return Translations.translations(configDescriptionsSection(bundleInfo));
     }
 
     private TranslationsSection addonSection(BundleInfo bundleInfo) {
@@ -109,15 +147,28 @@ public class XmlToTranslationsConverter {
         if (addonInfoXml == null) {
             return section(header);
         }
-        ConfigDescription addonConfig = addonInfoXml.configDescription();
-        if (addonConfig == null) {
-            return section(header);
+
+        Builder<TranslationsGroup> groupsBuilder = Stream.builder();
+
+        String configDescriptionURI = addonInfoXml.addonInfo().getConfigDescriptionURI();
+        if (configDescriptionURI != null) {
+            try {
+                Optional<ConfigDescription> configDescription = bundleInfo
+                        .getConfigDescription(new URI(configDescriptionURI));
+                configDescription.map(this::translateConfigDescription).orElseGet(Stream::empty)
+                        .forEach(groupsBuilder::add);
+            } catch (java.net.URISyntaxException e) {
+                log.warn("Invalid URI for config description: " + configDescriptionURI);
+            }
         }
 
-        String keyPrefix = String.format("addon.config.%s", bundleInfo.getAddonId());
-        return section(header,
-                Stream.concat(configDescriptionGroupParameters(keyPrefix, addonConfig.getParameterGroups()),
-                        configDescriptionParameters(keyPrefix, addonConfig.getParameters())));
+        ConfigDescription addonConfig = addonInfoXml.configDescription();
+        if (addonConfig != null) {
+            String keyPrefix = String.format("addon.config.%s", bundleInfo.getAddonId());
+            translateConfigDescription(addonConfig, keyPrefix).forEach(groupsBuilder::add);
+        }
+
+        return section(header, groupsBuilder.build());
     }
 
     private TranslationsSection thingTypesSection(BundleInfo bundleInfo) {
@@ -195,15 +246,8 @@ public class XmlToTranslationsConverter {
 
         Builder<TranslationsGroup> groupsBuilder = Stream.builder();
 
-        configDescriptionStream.map(configDescription -> {
-            String configKeyPrefix = String.format("%s.config.%s.%s",
-                    (Object[]) configDescription.getUID().toString().split(":"));
-            Builder<TranslationsGroup> streamBuilder = Stream.builder();
-            configDescriptionGroupParameters(configKeyPrefix, configDescription.getParameterGroups())
-                    .forEach(streamBuilder::add);
-            configDescriptionParameters(configKeyPrefix, configDescription.getParameters()).forEach(streamBuilder::add);
-            return streamBuilder.build();
-        }).reduce(Stream::concat).orElseGet(Stream::empty).forEach(groupsBuilder::add);
+        configDescriptionStream.map(this::translateConfigDescription).reduce(Stream::concat).orElseGet(Stream::empty)
+                .forEach(groupsBuilder::add);
 
         return section(header, groupsBuilder.build());
     }
@@ -317,17 +361,8 @@ public class XmlToTranslationsConverter {
 
         Builder<TranslationsGroup> groupsBuilder = Stream.builder();
 
-        configDescriptionStream.map(configDescription -> {
-            String configKeyPrefix = String.format("%s.config.%s.%s",
-                    (Object[]) configDescription.getUID().toString().split(":"));
-
-            Builder<TranslationsGroup> streamBuilder = Stream.builder();
-            configDescriptionGroupParameters(configKeyPrefix, configDescription.getParameterGroups())
-                    .forEach(streamBuilder::add);
-            configDescriptionParameters(configKeyPrefix, configDescription.getParameters()).forEach(streamBuilder::add);
-
-            return streamBuilder.build();
-        }).reduce(Stream::concat).orElseGet(Stream::empty).forEach(groupsBuilder::add);
+        configDescriptionStream.map(this::translateConfigDescription).reduce(Stream::concat).orElseGet(Stream::empty)
+                .forEach(groupsBuilder::add);
 
         return section(header, groupsBuilder.build());
     }
