@@ -75,10 +75,24 @@ public interface PersistenceService {
     void store(Item item, @Nullable String alias);
 
     /**
-     * Provides suggested persistence strategies that can be used in the UI as a suggestion for configuration. These
-     * persistence strategies are not applied automatically.
+     * Provides default persistence strategies that are used for all items if no user defined configuration is found.
+     *
+     * This method has been deprecated and {@link #getSuggestedStrategies()} should be used instead. These
+     * persistence strategies are no longer applied automatically.
      *
      * @return The suggested persistence strategies
      */
-    List<PersistenceStrategy> getDefaultStrategies();
+    @Deprecated
+    default List<PersistenceStrategy> getDefaultStrategies() {
+        return List.of();
+    }
+
+    /**
+     * Provides suggested persistence strategies that can be used in the UI as a suggestion for configuration.
+     *
+     * @return The suggested persistence strategies
+     */
+    default List<PersistenceStrategy> getSuggestedStrategies() {
+        return getDefaultStrategies();
+    }
 }

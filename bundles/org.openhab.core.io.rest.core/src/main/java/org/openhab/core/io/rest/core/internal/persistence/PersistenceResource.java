@@ -342,7 +342,7 @@ public class PersistenceResource implements RESTResource {
             @Parameter(description = "Id of the persistence service.") @PathParam("serviceId") String serviceId) {
         PersistenceService service = persistenceServiceRegistry.get(serviceId);
         if (service != null) {
-            return JSONResponse.createResponse(Status.OK, service.getDefaultStrategies(), null);
+            return JSONResponse.createResponse(Status.OK, service.getSuggestedStrategies(), null);
         }
         return Response.status(Status.NOT_FOUND).build();
     }
