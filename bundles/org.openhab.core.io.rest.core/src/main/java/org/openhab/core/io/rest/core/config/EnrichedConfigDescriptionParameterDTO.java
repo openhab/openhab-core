@@ -15,11 +15,11 @@ package org.openhab.core.io.rest.core.config;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
-import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
+import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
+import org.openhab.core.config.core.ConfigDescriptionParameterBuilder;
+import org.openhab.core.config.core.ConfigUtil;
 import org.openhab.core.config.core.dto.ConfigDescriptionParameterDTO;
 import org.openhab.core.config.core.dto.FilterCriteriaDTO;
 import org.openhab.core.config.core.dto.ParameterOptionDTO;
@@ -36,10 +36,9 @@ import org.openhab.core.config.core.dto.ParameterOptionDTO;
  */
 public class EnrichedConfigDescriptionParameterDTO extends ConfigDescriptionParameterDTO {
 
-    private static final Pattern DEFAULT_LIST_SPLITTER = Pattern.compile("(?<!\\\\),");
-
     public Collection<String> defaultValues;
 
+    @SuppressWarnings("unchecked")
     public EnrichedConfigDescriptionParameterDTO(String name, Type type, BigDecimal minimum, BigDecimal maximum,
             BigDecimal stepsize, String pattern, Boolean required, Boolean readOnly, Boolean multiple, String context,
             String defaultValue, String label, String description, List<ParameterOptionDTO> options,
@@ -50,12 +49,10 @@ public class EnrichedConfigDescriptionParameterDTO extends ConfigDescriptionPara
                 unitLabel, verify);
 
         if (multiple && defaultValue != null) {
-            String[] values = DEFAULT_LIST_SPLITTER.split(defaultValue);
-            if (values.length > 1) {
-                defaultValues = Stream.of(values).map(s -> s.trim().replace("\\,", ",")).filter(v -> !v.isEmpty())
-                        .toList();
-            } else {
-                defaultValues = Set.of(defaultValue);
+            ConfigDescriptionParameter parameter = ConfigDescriptionParameterBuilder.create(name, type)
+                    .withMultiple(multiple).withDefault(defaultValue).withMultipleLimit(multipleLimit).build();
+            if (ConfigUtil.getDefaultValueAsCorrectType(parameter) instanceof List defaultValues) {
+                this.defaultValues = (Collection<String>) defaultValues;
             }
         }
     }

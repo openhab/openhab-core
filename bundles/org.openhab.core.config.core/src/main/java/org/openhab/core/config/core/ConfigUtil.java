@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -51,7 +52,7 @@ import org.slf4j.LoggerFactory;
 @NonNullByDefault
 public class ConfigUtil {
 
-    private static final String DEFAULT_LIST_DELIMITER = ",";
+    private static final Pattern DEFAULT_LIST_SPLITTER = Pattern.compile("(?<!\\\\),");
 
     /**
      * Maps the provided (default) value of the given {@link ConfigDescriptionParameter} to the corresponding Java type.
@@ -61,10 +62,29 @@ public class ConfigUtil {
      *
      * @param parameter the {@link ConfigDescriptionParameter} which default value should be normalized (must not be
      *            null)
-     * @return the given value as the corresponding Java type or <code>null</code> if the value could not be converted
+     * @return the default value as the corresponding Java type, or
+     *         a <code>List</code> of the corresponding Java type if the parameter contains multiple values.
+     *         Returns <code>null</code> if the value could not be converted.
      */
     public static @Nullable Object getDefaultValueAsCorrectType(ConfigDescriptionParameter parameter) {
-        return getDefaultValueAsCorrectType(parameter.getName(), parameter.getType(), parameter.getDefault());
+        if (parameter.isMultiple()) {
+            List<Object> defaultValues = Stream.of(DEFAULT_LIST_SPLITTER.split(parameter.getDefault())) //
+                    .map(value -> value.trim().replace("\\,", ",")) //
+                    .filter(not(String::isEmpty)) //
+                    .map(value -> getDefaultValueAsCorrectType(parameter.getName(), parameter.getType(), value)) //
+                    .filter(Objects::nonNull) //
+                    .toList();
+
+            Integer multipleLimit = parameter.getMultipleLimit();
+            if (multipleLimit != null && defaultValues.size() > multipleLimit.intValue()) {
+                LoggerFactory.getLogger(ConfigUtil.class).warn(
+                        "Number of default values ({}) for parameter '{}' is greater than multiple limit ({})",
+                        defaultValues.size(), parameter.getName(), multipleLimit);
+            }
+            return defaultValues;
+        } else {
+            return getDefaultValueAsCorrectType(parameter.getName(), parameter.getType(), parameter.getDefault());
+        }
     }
 
     static @Nullable Object getDefaultValueAsCorrectType(String parameterName, Type parameterType,
@@ -117,33 +137,9 @@ public class ConfigUtil {
             for (ConfigDescriptionParameter parameter : configDescription.getParameters()) {
                 String defaultValue = parameter.getDefault();
                 if (defaultValue != null && configuration.get(parameter.getName()) == null) {
-                    if (parameter.isMultiple()) {
-                        if (defaultValue.contains(DEFAULT_LIST_DELIMITER)) {
-                            List<Object> values = (List<Object>) Stream.of(defaultValue.split(DEFAULT_LIST_DELIMITER))
-                                    .map(String::trim) //
-                                    .filter(not(String::isEmpty)) //
-                                    .map(value -> ConfigUtil.getDefaultValueAsCorrectType(parameter.getName(),
-                                            parameter.getType(), value)) //
-                                    .filter(Objects::nonNull) //
-                                    .toList();
-                            Integer multipleLimit = parameter.getMultipleLimit();
-                            if (multipleLimit != null && values.size() > multipleLimit.intValue()) {
-                                LoggerFactory.getLogger(ConfigUtil.class).warn(
-                                        "Number of default values ({}) for parameter '{}' is greater than multiple limit ({})",
-                                        values.size(), parameter.getName(), multipleLimit);
-                            }
-                            configuration.put(parameter.getName(), values);
-                        } else {
-                            Object value = ConfigUtil.getDefaultValueAsCorrectType(parameter);
-                            if (value != null) {
-                                configuration.put(parameter.getName(), List.of(value));
-                            }
-                        }
-                    } else {
-                        Object value = ConfigUtil.getDefaultValueAsCorrectType(parameter);
-                        if (value != null) {
-                            configuration.put(parameter.getName(), value);
-                        }
+                    Object value = ConfigUtil.getDefaultValueAsCorrectType(parameter);
+                    if (value != null) {
+                        configuration.put(parameter.getName(), value);
                     }
                 }
             }
