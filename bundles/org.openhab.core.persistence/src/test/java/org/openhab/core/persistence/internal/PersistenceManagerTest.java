@@ -626,7 +626,7 @@ public class PersistenceManagerTest {
         }
 
         @Override
-        public List<PersistenceStrategy> getDefaultStrategies() {
+        public List<PersistenceStrategy> getSuggestedStrategies() {
             return List.of();
         }
 
