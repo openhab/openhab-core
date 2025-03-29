@@ -289,7 +289,7 @@ public class OAuthClientServiceImpl implements OAuthClientService {
     }
 
     @Override
-    public AccessTokenResponse refreshToken() throws OAuthException, IOException, OAuthResponseException {
+    public synchronized AccessTokenResponse refreshToken() throws OAuthException, IOException, OAuthResponseException {
         if (isClosed()) {
             throw new OAuthException(EXCEPTION_MESSAGE_CLOSED);
         }
@@ -331,7 +331,7 @@ public class OAuthClientServiceImpl implements OAuthClientService {
     }
 
     @Override
-    public @Nullable AccessTokenResponse getAccessTokenResponse()
+    public synchronized @Nullable AccessTokenResponse getAccessTokenResponse()
             throws OAuthException, IOException, OAuthResponseException {
         if (isClosed()) {
             throw new OAuthException(EXCEPTION_MESSAGE_CLOSED);
