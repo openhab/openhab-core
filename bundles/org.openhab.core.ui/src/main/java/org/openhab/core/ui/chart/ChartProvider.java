@@ -54,6 +54,9 @@ public interface ChartProvider {
      * @param items The items to display on the chart
      * @param groups The groups to display on the chart
      * @param dpi The DPI (dots per inch) value, can be <code>null</code>
+     * @param interpolation The interpolation between two datapoint (<code>linear</code> or <code>step</code>),
+     *            <code>null</code> defaults to <code>linear</code> for numeric values and to <code>step</code> for
+     *            binary values
      * @param legend Show the legend? If <code>null</code>, the ChartProvider should make his own decision.
      * @return BufferedImage object if the chart is rendered correctly,
      *         otherwise null.
@@ -62,7 +65,8 @@ public interface ChartProvider {
      */
     BufferedImage createChart(@Nullable String service, @Nullable String theme, ZonedDateTime startTime,
             ZonedDateTime endTime, int height, int width, @Nullable String items, @Nullable String groups,
-            @Nullable Integer dpi, @Nullable Boolean legend) throws ItemNotFoundException;
+            @Nullable Integer dpi, @Nullable String interpolation, @Nullable Boolean legend)
+            throws ItemNotFoundException;
 
     /**
      * Creates a chart object. This sets the initial parameters for the chart
@@ -82,6 +86,9 @@ public interface ChartProvider {
      * @param groups The groups to display on the chart
      * @param dpi The DPI (dots per inch) value, can be <code>null</code>
      * @param yAxisDecimalPattern The format pattern for the y-axis labels
+     * @param interpolation The interpolation between two datapoint (<code>linear</code> or <code>step</code>),
+     *            <code>null</code> defaults to <code>linear</code> for numeric values and to <code>step</code> for
+     *            binary values
      * @param legend Show the legend? If <code>null</code>, the ChartProvider should make his own decision.
      * @return BufferedImage object if the chart is rendered correctly,
      *         otherwise null.
@@ -90,9 +97,10 @@ public interface ChartProvider {
      */
     default BufferedImage createChart(@Nullable String service, @Nullable String theme, ZonedDateTime startTime,
             ZonedDateTime endTime, int height, int width, @Nullable String items, @Nullable String groups,
-            @Nullable Integer dpi, @Nullable String yAxisDecimalPattern, @Nullable Boolean legend)
-            throws ItemNotFoundException {
-        return createChart(service, theme, startTime, endTime, height, width, items, groups, dpi, legend);
+            @Nullable Integer dpi, @Nullable String yAxisDecimalPattern, @Nullable String interpolation,
+            @Nullable Boolean legend) throws ItemNotFoundException {
+        return createChart(service, theme, startTime, endTime, height, width, items, groups, dpi, interpolation,
+                legend);
     }
 
     /**
