@@ -113,7 +113,7 @@ jobs:
     timeout-minutes: 30
     env:
       MAVEN_OPTS: >-
-        -Xmx2g
+        -Xmx4g
         -Dmaven.wagon.http.retryHandler.count=5
         -Dmaven.wagon.httpconnectionManager.ttlSeconds=25
         -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
@@ -165,7 +165,7 @@ jobs:
       - name: Static Code Analysis
         if: ${{ matrix.type == 'sat' }}
         id: sat
-        run: './.github/scripts/maven-build install -B -T 1.5C -U -Dspotless.check.skip=true -Dmaven.test.skip -Dfeatures.verify.skip=true -Dmaven.compiler.failOnError=false'
+        run: './.github/scripts/maven-build install -B -T 1.25C -U -Dspotless.check.skip=true -Dmaven.test.skip -Dfeatures.verify.skip=true'
 
       - name: Upload SAT Summary Report
         if: ${{ always() && ((steps.sat.outcome == 'success') || (steps.sat.outcome == 'failure')) }}
