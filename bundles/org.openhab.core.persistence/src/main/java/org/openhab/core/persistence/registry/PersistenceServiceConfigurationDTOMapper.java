@@ -150,7 +150,7 @@ public class PersistenceServiceConfigurationDTOMapper {
         throw new IllegalArgumentException("Filter '" + string + "' unknown for service '" + serviceId + "'");
     }
 
-    private static String persistenceConfigToString(PersistenceConfig config) {
+    public static String persistenceConfigToString(PersistenceConfig config) {
         if (config instanceof PersistenceAllConfig) {
             return "*";
         } else if (config instanceof PersistenceGroupConfig persistenceGroupConfig) {
