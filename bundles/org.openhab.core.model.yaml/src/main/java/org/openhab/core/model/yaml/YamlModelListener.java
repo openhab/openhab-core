@@ -18,12 +18,13 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
  * The {@link YamlModelListener} interface is responsible for managing a particular model type
- * with data processed from YAML configuration files.
+ * with data processed from YAML configuration files having a version that is supported by this manager.
  * <p />
  * Implementors are notified whenever a YAML model changed that contains elements of the given type. They MUST declare
  * at least {@link YamlModelListener} as service to automatically register them with the repository.
  *
  * @author Laurent Garnier - Initial contribution
+ * @author Laurent Garnier - Added basic version management
  */
 @NonNullByDefault
 public interface YamlModelListener<T extends YamlElement> {
@@ -62,4 +63,19 @@ public interface YamlModelListener<T extends YamlElement> {
      * @return the DTO element class
      */
     Class<T> getElementClass();
+
+    /**
+     * Indicates whether a YAML file version is supported.
+     *
+     * @param version the YAML file version to check
+     * @return true if the version is supported
+     */
+    boolean isVersionSupported(int version);
+
+    /**
+     * Indicates whether this manager is deprecated.
+     *
+     * @return true if this manager is deprecated
+     */
+    boolean isDeprecated();
 }
