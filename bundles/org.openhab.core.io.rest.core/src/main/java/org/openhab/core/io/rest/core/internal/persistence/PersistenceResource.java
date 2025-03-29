@@ -12,6 +12,7 @@
  */
 package org.openhab.core.io.rest.core.internal.persistence;
 
+import java.io.IOException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
@@ -44,11 +45,13 @@ import javax.ws.rs.core.UriInfo;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.auth.Role;
+import org.openhab.core.config.core.Configuration;
 import org.openhab.core.i18n.TimeZoneProvider;
 import org.openhab.core.io.rest.JSONResponse;
 import org.openhab.core.io.rest.LocaleService;
 import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
+import org.openhab.core.io.rest.core.config.ConfigurationService;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemNotFoundException;
 import org.openhab.core.items.ItemRegistry;
@@ -65,15 +68,14 @@ import org.openhab.core.persistence.PersistenceManager;
 import org.openhab.core.persistence.PersistenceService;
 import org.openhab.core.persistence.PersistenceServiceRegistry;
 import org.openhab.core.persistence.QueryablePersistenceService;
-import org.openhab.core.persistence.config.PersistenceAllConfig;
 import org.openhab.core.persistence.dto.ItemHistoryDTO;
 import org.openhab.core.persistence.dto.PersistenceServiceConfigurationDTO;
 import org.openhab.core.persistence.dto.PersistenceServiceDTO;
+import org.openhab.core.persistence.dto.PersistenceStrategyDTO;
 import org.openhab.core.persistence.registry.ManagedPersistenceServiceConfigurationProvider;
 import org.openhab.core.persistence.registry.PersistenceServiceConfiguration;
 import org.openhab.core.persistence.registry.PersistenceServiceConfigurationDTOMapper;
 import org.openhab.core.persistence.registry.PersistenceServiceConfigurationRegistry;
-import org.openhab.core.persistence.strategy.PersistenceStrategy;
 import org.openhab.core.types.State;
 import org.openhab.core.types.TypeParser;
 import org.openhab.core.types.UnDefType;
@@ -109,6 +111,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * @author Markus Rathgeb - Migrated to JAX-RS Whiteboard Specification
  * @author Wouter Born - Migrated to OpenAPI annotations
  * @author Mark Herwege - Implement aliases
+ * @author Mark Herwege - Make default strategy to be only a configuration suggestion
  */
 @Component
 @JaxrsResource
@@ -129,6 +132,11 @@ public class PersistenceResource implements RESTResource {
     private static final String QUERYABLE = "Queryable";
     private static final String STANDARD = "Standard";
 
+    // Reasons for persistence configuration problems
+    private static final String PERSISTENCE_PROBLEM_NO_DEFAULT = "no default";
+    private static final String PERSISTENCE_PROBLEM_NO_STRATEGY = "no strategy";
+    private static final String PERSISTENCE_PROBLEM_NO_ITEMS = "no items";
+
     private final ItemRegistry itemRegistry;
     private final LocaleService localeService;
     private final PersistenceServiceRegistry persistenceServiceRegistry;
@@ -136,6 +144,7 @@ public class PersistenceResource implements RESTResource {
     private final PersistenceServiceConfigurationRegistry persistenceServiceConfigurationRegistry;
     private final ManagedPersistenceServiceConfigurationProvider managedPersistenceServiceConfigurationProvider;
     private final TimeZoneProvider timeZoneProvider;
+    private final ConfigurationService configurationService;
 
     @Activate
     public PersistenceResource( //
@@ -145,7 +154,8 @@ public class PersistenceResource implements RESTResource {
             final @Reference PersistenceManager persistenceManager,
             final @Reference PersistenceServiceConfigurationRegistry persistenceServiceConfigurationRegistry,
             final @Reference ManagedPersistenceServiceConfigurationProvider managedPersistenceServiceConfigurationProvider,
-            final @Reference TimeZoneProvider timeZoneProvider) {
+            final @Reference TimeZoneProvider timeZoneProvider,
+            final @Reference ConfigurationService configurationService) {
         this.itemRegistry = itemRegistry;
         this.localeService = localeService;
         this.persistenceServiceRegistry = persistenceServiceRegistry;
@@ -153,6 +163,7 @@ public class PersistenceResource implements RESTResource {
         this.persistenceServiceConfigurationRegistry = persistenceServiceConfigurationRegistry;
         this.managedPersistenceServiceConfigurationProvider = managedPersistenceServiceConfigurationProvider;
         this.timeZoneProvider = timeZoneProvider;
+        this.configurationService = configurationService;
     }
 
     @GET
@@ -180,25 +191,11 @@ public class PersistenceResource implements RESTResource {
     public Response httpGetPersistenceServiceConfiguration(@Context HttpHeaders headers,
             @Parameter(description = "Id of the persistence service.") @PathParam("serviceId") String serviceId) {
         PersistenceServiceConfiguration configuration = persistenceServiceConfigurationRegistry.get(serviceId);
-        boolean editable = managedPersistenceServiceConfigurationProvider.get(serviceId) != null;
-
-        if (configuration == null) {
-            PersistenceService service = persistenceServiceRegistry.get(serviceId);
-            if (service != null) {
-                List<PersistenceStrategy> strategies = service.getDefaultStrategies();
-                List<PersistenceItemConfiguration> configs = List
-                        .of(new PersistenceItemConfiguration(List.of(new PersistenceAllConfig()), strategies, null));
-                Map<String, String> aliases = Map.of();
-                configuration = new PersistenceServiceConfiguration(serviceId, configs, aliases, strategies, strategies,
-                        List.of());
-                editable = true;
-            }
-        }
 
         if (configuration != null) {
             PersistenceServiceConfigurationDTO configurationDTO = PersistenceServiceConfigurationDTOMapper
                     .map(configuration);
-            configurationDTO.editable = editable;
+            configurationDTO.editable = managedPersistenceServiceConfigurationProvider.get(serviceId) != null;
             return JSONResponse.createResponse(Status.OK, configurationDTO, null);
         } else {
             return Response.status(Status.NOT_FOUND).build();
@@ -342,6 +339,69 @@ public class PersistenceResource implements RESTResource {
                     + DateTimeType.DATE_PATTERN_WITH_TZ_AND_MS + "]", required = true) @QueryParam("time") String time,
             @Parameter(description = "The state to store.", required = true) @QueryParam("state") String value) {
         return putItemState(serviceId, itemName, value, time);
+    }
+
+    @GET
+    @RolesAllowed({ Role.ADMIN })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Path("strategysuggestions/{serviceId: [a-zA-Z0-9]+}")
+    @Operation(operationId = "getPersistenceServiceStrategySuggestions", summary = "Gets a persistence service suggested strategies.", security = {
+            @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
+                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = PersistenceStrategyDTO.class), uniqueItems = true))),
+                    @ApiResponse(responseCode = "404", description = "Suggested strategies not found.") })
+    public Response httpGetPersistenceServiceStrategySuggestions(@Context HttpHeaders headers,
+            @Parameter(description = "Id of the persistence service.") @PathParam("serviceId") String serviceId) {
+        PersistenceService service = persistenceServiceRegistry.get(serviceId);
+        if (service != null) {
+            return JSONResponse.createResponse(Status.OK, service.getSuggestedStrategies(), null);
+        }
+        return Response.status(Status.NOT_FOUND).build();
+    }
+
+    @GET
+    @RolesAllowed({ Role.ADMIN })
+    @Produces({ MediaType.APPLICATION_JSON })
+    @Path("persistencehealth")
+    @Operation(operationId = "getPersistenceHealth", summary = "Gets configuration problems with persistence services.", security = {
+            @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
+                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = PersistenceStrategyDTO.class), uniqueItems = true))),
+                    @ApiResponse(responseCode = "404", description = "Suggested strategies not found.") })
+    public Response httpGetPersistenceHealth(@Context HttpHeaders headers) {
+        List<PersistenceServiceProblem> persistenceProblems = new ArrayList<>();
+        Set<PersistenceService> persistenceServices = persistenceServiceRegistry.getAll();
+
+        if (persistenceServices.size() >= 1) {
+            try {
+                Configuration configuration = configurationService.get("org.openhab.persistence");
+                if (configuration == null || configuration.get("default") == null) {
+                    persistenceProblems.add(new PersistenceServiceProblem(PERSISTENCE_PROBLEM_NO_DEFAULT, null, null));
+                }
+            } catch (IOException e) {
+                logger.warn("Unable to retrieve configuration for 'org.openhab.persistence'.", e.getMessage());
+            }
+        }
+
+        for (PersistenceService service : persistenceServices) {
+            String serviceId = service.getId();
+            PersistenceServiceConfiguration serviceConfig = persistenceServiceConfigurationRegistry.get(serviceId);
+            if (serviceConfig != null) {
+                List<PersistenceItemConfiguration> configs = serviceConfig.getConfigs();
+                if (configs.isEmpty()) {
+                    persistenceProblems
+                            .add(new PersistenceServiceProblem(PERSISTENCE_PROBLEM_NO_ITEMS, serviceId, null));
+                } else {
+                    for (PersistenceItemConfiguration config : configs) {
+                        if (config.strategies().isEmpty()) {
+                            List<String> items = config.items().stream()
+                                    .map(PersistenceServiceConfigurationDTOMapper::persistenceConfigToString).toList();
+                            persistenceProblems.add(
+                                    new PersistenceServiceProblem(PERSISTENCE_PROBLEM_NO_STRATEGY, serviceId, items));
+                        }
+                    }
+                }
+            }
+        }
+        return JSONResponse.createResponse(Status.OK, persistenceProblems, null);
     }
 
     private ZonedDateTime convertTime(String sTime) {
@@ -712,5 +772,9 @@ public class PersistenceResource implements RESTResource {
         persistenceManager.handleExternalPersistenceDataChange(mService, item);
 
         return Response.status(Status.OK).build();
+    }
+
+    public record PersistenceServiceProblem(String reason, @Nullable String serviceId, @Nullable List<String> items) {
+
     }
 }
