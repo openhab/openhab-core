@@ -166,6 +166,10 @@ public class DefaultSemanticTagProvider implements SemanticTagProvider {
                 "Duration", "", ""));
         defaultTags.add(new SemanticTagImpl("Property_Level", //
                 "Level", "", ""));
+        defaultTags.add(new SemanticTagImpl("Property_Level_SignalStrength", //
+                "SignalStrength", "", ""));
+        defaultTags.add(new SemanticTagImpl("Property_Level_SignalStrength_RSSI", //
+                "RSSI", "Received Signal Strength Indicator", ""));
         defaultTags.add(new SemanticTagImpl("Property_Opening", //
                 "Opening", "", ""));
         defaultTags.add(new SemanticTagImpl("Property_Timestamp", //
