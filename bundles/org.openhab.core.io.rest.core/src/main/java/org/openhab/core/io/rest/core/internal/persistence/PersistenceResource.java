@@ -344,13 +344,13 @@ public class PersistenceResource implements RESTResource {
     @GET
     @RolesAllowed({ Role.ADMIN })
     @Produces({ MediaType.APPLICATION_JSON })
-    @Path("strategysuggestions/{serviceId: [a-zA-Z0-9]+}")
+    @Path("strategysuggestions")
     @Operation(operationId = "getPersistenceServiceStrategySuggestions", summary = "Gets a persistence service suggested strategies.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = PersistenceStrategyDTO.class), uniqueItems = true))),
                     @ApiResponse(responseCode = "404", description = "Suggested strategies not found.") })
     public Response httpGetPersistenceServiceStrategySuggestions(@Context HttpHeaders headers,
-            @Parameter(description = "Id of the persistence service.") @PathParam("serviceId") String serviceId) {
+            @Parameter(description = "Id of the persistence service.") @QueryParam("serviceId") String serviceId) {
         PersistenceService service = persistenceServiceRegistry.get(serviceId);
         if (service != null) {
             return JSONResponse.createResponse(Status.OK, service.getSuggestedStrategies(), null);
