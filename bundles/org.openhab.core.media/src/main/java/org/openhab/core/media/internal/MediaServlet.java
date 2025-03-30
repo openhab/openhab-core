@@ -31,6 +31,8 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.media.MediaHTTPServer;
 import org.openhab.core.media.MediaService;
+import org.openhab.core.media.model.MediaEntry;
+import org.openhab.core.media.model.MediaRegistry;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -90,7 +92,8 @@ public class MediaServlet extends HttpServlet implements MediaHTTPServer {
     }
 
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doGet(@Nullable HttpServletRequest req, @Nullable HttpServletResponse resp)
+            throws ServletException, IOException {
         String requestURI = req.getRequestURI();
         if (requestURI == null) {
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "requestURI is null");
@@ -98,35 +101,25 @@ public class MediaServlet extends HttpServlet implements MediaHTTPServer {
         }
 
         String qs = req.getQueryString();
-        String aa = req.getParameter("aa");
+        String path = req.getParameter("path");
 
         ServletOutputStream stream = resp.getOutputStream();
         final StringBuilder sb = new StringBuilder(5000);
 
-        sb.append("<a href=" + requestURI + "?aa=root>root</a><br/>");
-        if (aa == null) {
-        } else if (aa.equals("root")) {
-            sb.append("<a href=" + requestURI + "?aa=a001>a001</a><br/>");
-            sb.append("<a href=" + requestURI + "?aa=a002>a002</a><br/>");
-            sb.append("<a href=" + requestURI + "?aa=a003>a003</a><br/>");
-        } else if (aa.equals("a001")) {
-            sb.append("<a href=" + requestURI + "?aa=a001>a001-1</a><br/>");
-            sb.append("<a href=" + requestURI + "?aa=a001>a001-2</a><br/>");
-            sb.append("<a href=" + requestURI + "?aa=a001>a001-3</a><br/>");
-        } else if (aa.equals("a002")) {
-            sb.append("<a href=" + requestURI + "?aa=a002>a002-1</a><br/>");
-            sb.append("<a href=" + requestURI + "?aa=a002>a002-2</a><br/>");
-            sb.append("<a href=" + requestURI + "?aa=a002>a002-3</a><br/>");
-        } else if (aa.equals("a003")) {
-            sb.append("<a href=" + requestURI + "?aa=a003>a003-1</a><br/>");
-            sb.append("<a href=" + requestURI + "?aa=a003>a003-2</a><br/>");
-            sb.append("<a href=" + requestURI + "?aa=a003>a003-3</a><br/>");
+        if (path == null) {
+            path = "/Root";
+        }
+        sb.append("<a href=" + requestURI + "?path=/Root>Root</a><br/>");
+
+        MediaRegistry mediaRegistry = mediaService.getMediaRegistry();
+        MediaEntry currentEntry = mediaRegistry.getChildForPath(path);
+
+        for (String key : currentEntry.getChilds().keySet()) {
+            MediaEntry entry = currentEntry.getChilds().get(key);
+            sb.append("<a href=" + requestURI + "?path=" + entry.getPath() + ">" + entry.getPath() + " - "
+                    + entry.getName() + "</a><br/>");
         }
 
-        List<String> playList = mediaService.getPlayList();
-        for (String st : playList) {
-            sb.append("<a href=" + requestURI + "?aa=" + st + ">" + st + "</a><br/>");
-        }
         resp.setContentType("text/html");
         stream.write(sb.toString().getBytes(StandardCharsets.UTF_8));
 
