@@ -10,22 +10,25 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.media;
+package org.openhab.core.media.model;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.core.media.model.MediaEntry;
-import org.openhab.core.media.model.MediaRegistry;
 
 /**
- * This is an interface that is implemented by {@link org.openhab.core.audio.internal.AudioServlet} and which allows
- * exposing audio streams through HTTP.
- * Streams are only served a single time and then discarded.
  *
  * @author Laurent Arnal - Initial contribution
  */
 @NonNullByDefault
-public interface MediaService {
-    void registerMediaEntry(MediaEntry mediaEntry);
+public class MediaAlbum extends MediaEntry {
+    public String albumName;
 
-    public MediaRegistry getMediaRegistry();
+    public MediaAlbum(String albumName) {
+        this.albumName = albumName;
+
+    }
+
+    @Override
+    public String getName() {
+        return albumName;
+    }
 }
