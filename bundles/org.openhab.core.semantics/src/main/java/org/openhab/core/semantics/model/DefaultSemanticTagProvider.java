@@ -140,6 +140,16 @@ public class DefaultSemanticTagProvider implements SemanticTagProvider {
                 "CO2", "", "Carbon Dioxide"));
         defaultTags.add(new SemanticTagImpl("Property_CO", //
                 "CO", "", "Carbon Monoxide"));
+        defaultTags.add(new SemanticTagImpl("Property_Radon", //
+                "Radon", "", ""));
+        defaultTags.add(new SemanticTagImpl("Property_AirQuality", //
+                "Air Quality", "", ""));
+        defaultTags.add(new SemanticTagImpl("Property_AirQuality_AQI", //
+                "AQI", "", "Air Quality Index"));
+        defaultTags.add(new SemanticTagImpl("Property_AirQuality_PM25", //
+                "PM2.5", "Particulate Matter 2.5", ""));
+        defaultTags.add(new SemanticTagImpl("Property_AirQuality_VOC", //
+                "VOC", "", "TVOC, Volatile Organic Compounds"));
         defaultTags.add(new SemanticTagImpl("Property_Energy", //
                 "Energy", "", ""));
         defaultTags.add(new SemanticTagImpl("Property_Power", //
