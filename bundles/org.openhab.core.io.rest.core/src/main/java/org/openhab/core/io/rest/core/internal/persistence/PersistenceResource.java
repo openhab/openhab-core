@@ -370,14 +370,14 @@ public class PersistenceResource implements RESTResource {
         List<PersistenceServiceProblem> persistenceProblems = new ArrayList<>();
         Set<PersistenceService> persistenceServices = persistenceServiceRegistry.getAll();
 
-        if (persistenceServices.size() >= 1) {
+        if (persistenceServices.size() > 1) {
             try {
                 Configuration configuration = configurationService.get("org.openhab.persistence");
                 if (configuration == null || configuration.get("default") == null) {
                     persistenceProblems.add(new PersistenceServiceProblem(PERSISTENCE_PROBLEM_NO_DEFAULT, null, null));
                 }
             } catch (IOException e) {
-                logger.warn("Unable to retrieve configuration for 'org.openhab.persistence'.", e.getMessage());
+                logger.warn("Unable to retrieve configuration for 'org.openhab.persistence': {}", e.getMessage());
             }
         }
 
