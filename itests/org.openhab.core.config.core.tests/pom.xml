@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.openhab.core.itests</groupId>
     <artifactId>org.openhab.core.reactor.itests</artifactId>
-    <version>4.3.4-SNAPSHOT</version>
+    <version>4.3.4</version>
   </parent>
 
   <artifactId>org.openhab.core.config.core.tests</artifactId>
