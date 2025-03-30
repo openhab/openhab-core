@@ -12,11 +12,10 @@
  */
 package org.openhab.core.media.internal;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.media.MediaService;
+import org.openhab.core.media.model.MediaEntry;
+import org.openhab.core.media.model.MediaRegistry;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 
@@ -30,20 +29,20 @@ import org.osgi.service.component.annotations.Component;
 @Component(immediate = true)
 public class MediaServiceImpl implements MediaService {
 
-    public List<String> playList = new ArrayList<String>();
+    public MediaRegistry registry = new MediaRegistry();
 
     @Activate
     public MediaServiceImpl() {
     }
 
     @Override
-    public void registerPlayList(String name) {
-        playList.add(name);
+    public void registerMediaEntry(MediaEntry mediaEntry) {
+        registry.addChild(mediaEntry.getName(), mediaEntry);
     }
 
     @Override
-    public List<String> getPlayList() {
-        return playList;
+    public MediaRegistry getMediaRegistry() {
+        return registry;
     }
 
 }
