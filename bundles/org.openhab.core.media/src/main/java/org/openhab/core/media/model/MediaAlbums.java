@@ -25,4 +25,9 @@ public class MediaAlbums extends MediaEntry {
     public String getName() {
         return "Albums";
     }
+
+    @Override
+    public String getKey() {
+        return "Albums";
+    }
 }
