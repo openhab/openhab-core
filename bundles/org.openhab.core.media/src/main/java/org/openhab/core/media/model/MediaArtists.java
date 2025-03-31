@@ -24,4 +24,10 @@ public class MediaArtists extends MediaEntry {
     public String getName() {
         return "Artists";
     }
+
+    @Override
+    public String getKey() {
+        return "Artists";
+    }
+
 }

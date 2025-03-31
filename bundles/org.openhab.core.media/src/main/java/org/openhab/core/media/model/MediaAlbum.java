@@ -21,14 +21,20 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 @NonNullByDefault
 public class MediaAlbum extends MediaEntry {
     public String albumName;
+    private String key;
 
-    public MediaAlbum(String albumName) {
+    public MediaAlbum(String key, String albumName) {
         this.albumName = albumName;
+        this.key = key;
 
     }
 
     @Override
     public String getName() {
         return albumName;
+    }
+
+    public String getKey() {
+        return key;
     }
 }
