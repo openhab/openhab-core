@@ -20,7 +20,13 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  */
 @NonNullByDefault
 public class MediaPlayLists extends MediaEntry {
+    @Override
     public String getName() {
+        return "PlayLists";
+    }
+
+    @Override
+    public String getKey() {
         return "PlayLists";
     }
 }

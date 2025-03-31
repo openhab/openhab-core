@@ -21,14 +21,20 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 @NonNullByDefault
 public class MediaTrack extends MediaEntry {
     public String trackName;
+    private String key;
 
-    public MediaTrack(String trackName) {
+    public MediaTrack(String key, String trackName) {
         this.trackName = trackName;
+        this.key = key;
 
     }
 
     @Override
     public String getName() {
         return trackName;
+    }
+
+    public String getKey() {
+        return key;
     }
 }
