@@ -47,6 +47,10 @@ public abstract class MediaEntry {
         return "Root";
     }
 
+    public String getKey() {
+        return "Root";
+    }
+
     public @Nullable MediaEntry getParent() {
         return parent;
     }
@@ -69,7 +73,7 @@ public abstract class MediaEntry {
         if (parent == null) {
             return "/Root";
         } else {
-            return parent.getPath() + "/" + getName();
+            return parent.getPath() + "/" + getKey();
         }
     }
 
