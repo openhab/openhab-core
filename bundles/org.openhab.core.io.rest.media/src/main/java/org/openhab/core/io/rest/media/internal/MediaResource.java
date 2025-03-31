@@ -31,6 +31,8 @@ import org.openhab.core.auth.Role;
 import org.openhab.core.io.rest.LocaleService;
 import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
+import org.openhab.core.media.MediaService;
+import org.openhab.core.media.model.MediaEntry;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -67,11 +69,13 @@ public class MediaResource implements RESTResource {
     /** The URI path to this resource */
     public static final String PATH_MEDIA = "media";
 
+    private final MediaService mediaService;
     private final LocaleService localeService;
 
     @Activate
     public MediaResource( //
-            final @Reference LocaleService localeService) {
+            final @Reference MediaService mediaService, final @Reference LocaleService localeService) {
+        this.mediaService = mediaService;
         this.localeService = localeService;
     }
 
@@ -83,8 +87,13 @@ public class MediaResource implements RESTResource {
     public Response getSources(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language) {
         final Locale locale = localeService.getLocale(language);
-        List<MediaSourceDTO> dtos = new ArrayList<>(1);
-        dtos.add(new MediaSourceDTO("id", "label"));
+
+        List<MediaSourceDTO> dtos = new ArrayList<>(mediaService.getMediaRegistry().getChilds().size());
+        for (String key : mediaService.getMediaRegistry().getChilds().keySet()) {
+            MediaEntry entry = mediaService.getMediaRegistry().getChilds().get(key);
+            dtos.add(new MediaSourceDTO(entry.getKey(), entry.getName()));
+        }
+
         return Response.ok(dtos).build();
     }
 
