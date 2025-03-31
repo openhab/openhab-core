@@ -21,12 +21,19 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 @NonNullByDefault
 public class MediaPlayList extends MediaEntry {
     private String name;
+    private String key;
 
-    public MediaPlayList(String name) {
+    public MediaPlayList(String key, String name) {
         this.name = name;
+        this.key = key;
     }
 
+    @Override
     public String getName() {
         return name;
+    }
+
+    public String getKey() {
+        return key;
     }
 }

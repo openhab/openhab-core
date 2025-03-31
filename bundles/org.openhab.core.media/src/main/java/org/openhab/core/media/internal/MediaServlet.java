@@ -109,18 +109,26 @@ public class MediaServlet extends HttpServlet implements MediaHTTPServer {
         if (path == null) {
             path = "/Root";
         }
-        sb.append("<a href=" + requestURI + "?path=/Root>Root</a><br/>");
 
         MediaRegistry mediaRegistry = mediaService.getMediaRegistry();
         MediaEntry currentEntry = mediaRegistry.getChildForPath(path);
 
-        for (String key : currentEntry.getChilds().keySet()) {
-            MediaEntry entry = currentEntry.getChilds().get(key);
-            sb.append("<a href=" + requestURI + "?path=" + entry.getPath() + ">" + entry.getPath() + " - "
-                    + entry.getName() + "</a><br/>");
+        MediaEntry recurseEntry = currentEntry;
+        while (!recurseEntry.getName().equals("Root")) {
+            sb.insert(0, " > <a href=" + requestURI + "?path=" + recurseEntry.getPath() + ">" + recurseEntry.getName()
+                    + "</a>");
+            recurseEntry = recurseEntry.getParent();
         }
 
-        resp.setContentType("text/html");
+        sb.insert(0, "<a href=" + requestURI + "?path=/Root>Root</a>");
+
+        sb.append("<br/><br/>");
+        for (String key : currentEntry.getChilds().keySet()) {
+            MediaEntry entry = currentEntry.getChilds().get(key);
+            sb.append("<a href=" + requestURI + "?path=" + entry.getPath() + ">" + entry.getName() + "</a><br/>");
+        }
+
+        resp.setContentType("text/html; charset=utf-8");
         stream.write(sb.toString().getBytes(StandardCharsets.UTF_8));
 
     }

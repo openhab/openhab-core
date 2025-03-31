@@ -21,13 +21,20 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 @NonNullByDefault
 public class MediaSource extends MediaEntry {
     public String sourceName;
+    private String key;
 
-    public MediaSource(String sourceName) {
+    public MediaSource(String key, String sourceName) {
         this.sourceName = sourceName;
+        this.key = key;
 
     }
 
+    @Override
     public String getName() {
         return sourceName;
+    }
+
+    public String getKey() {
+        return key;
     }
 }
