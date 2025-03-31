@@ -20,14 +20,20 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  */
 @NonNullByDefault
 public class MediaArtist extends MediaEntry {
-    public String artistName;
+    private String artistName;
+    private String key;
 
-    public MediaArtist(String artistName) {
+    public MediaArtist(String key, String artistName) {
         this.artistName = artistName;
+        this.key = key;
 
     }
 
     public String getArtistName() {
         return artistName;
+    }
+
+    public String getKey() {
+        return key;
     }
 }
