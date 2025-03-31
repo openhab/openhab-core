@@ -66,6 +66,7 @@ import org.openhab.core.persistence.PersistenceItemConfiguration;
 import org.openhab.core.persistence.PersistenceItemInfo;
 import org.openhab.core.persistence.PersistenceManager;
 import org.openhab.core.persistence.PersistenceService;
+import org.openhab.core.persistence.PersistenceServiceProblem;
 import org.openhab.core.persistence.PersistenceServiceRegistry;
 import org.openhab.core.persistence.QueryablePersistenceService;
 import org.openhab.core.persistence.dto.ItemHistoryDTO;
@@ -131,11 +132,6 @@ public class PersistenceResource implements RESTResource {
     private static final String MODIFYABLE = "Modifiable";
     private static final String QUERYABLE = "Queryable";
     private static final String STANDARD = "Standard";
-
-    // Reasons for persistence configuration problems
-    private static final String PERSISTENCE_PROBLEM_NO_DEFAULT = "no default";
-    private static final String PERSISTENCE_PROBLEM_NO_STRATEGY = "no strategy";
-    private static final String PERSISTENCE_PROBLEM_NO_ITEMS = "no items";
 
     private final ItemRegistry itemRegistry;
     private final LocaleService localeService;
@@ -374,7 +370,8 @@ public class PersistenceResource implements RESTResource {
             try {
                 Configuration configuration = configurationService.get("org.openhab.persistence");
                 if (configuration == null || configuration.get("default") == null) {
-                    persistenceProblems.add(new PersistenceServiceProblem(PERSISTENCE_PROBLEM_NO_DEFAULT, null, null));
+                    persistenceProblems.add(new PersistenceServiceProblem(
+                            PersistenceServiceProblem.PERSISTENCE_NO_DEFAULT, null, null, true));
                 }
             } catch (IOException e) {
                 logger.warn("Unable to retrieve configuration for 'org.openhab.persistence': {}", e.getMessage());
@@ -384,18 +381,22 @@ public class PersistenceResource implements RESTResource {
         for (PersistenceService service : persistenceServices) {
             String serviceId = service.getId();
             PersistenceServiceConfiguration serviceConfig = persistenceServiceConfigurationRegistry.get(serviceId);
-            if (serviceConfig != null) {
+            if (serviceConfig == null) {
+                persistenceProblems.add(new PersistenceServiceProblem(PersistenceServiceProblem.PERSISTENCE_NO_CONFIG,
+                        serviceId, null, true));
+            } else {
+                boolean editable = managedPersistenceServiceConfigurationProvider.get(serviceId) != null;
                 List<PersistenceItemConfiguration> configs = serviceConfig.getConfigs();
                 if (configs.isEmpty()) {
-                    persistenceProblems
-                            .add(new PersistenceServiceProblem(PERSISTENCE_PROBLEM_NO_ITEMS, serviceId, null));
+                    persistenceProblems.add(new PersistenceServiceProblem(
+                            PersistenceServiceProblem.PERSISTENCE_NO_ITEMS, serviceId, null, editable));
                 } else {
                     for (PersistenceItemConfiguration config : configs) {
                         if (config.strategies().isEmpty()) {
                             List<String> items = config.items().stream()
                                     .map(PersistenceServiceConfigurationDTOMapper::persistenceConfigToString).toList();
-                            persistenceProblems.add(
-                                    new PersistenceServiceProblem(PERSISTENCE_PROBLEM_NO_STRATEGY, serviceId, items));
+                            persistenceProblems.add(new PersistenceServiceProblem(
+                                    PersistenceServiceProblem.PERSISTENCE_NO_STRATEGY, serviceId, items, editable));
                         }
                     }
                 }
@@ -772,9 +773,5 @@ public class PersistenceResource implements RESTResource {
         persistenceManager.handleExternalPersistenceDataChange(mService, item);
 
         return Response.status(Status.OK).build();
-    }
-
-    public record PersistenceServiceProblem(String reason, @Nullable String serviceId, @Nullable List<String> items) {
-
     }
 }
