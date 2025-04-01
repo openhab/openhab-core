@@ -212,13 +212,13 @@
     <dependency>
       <groupId>si.uom</groupId>
       <artifactId>si-units</artifactId>
-      <version>2.1</version>
+      <version>2.2</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>tech.units</groupId>
       <artifactId>indriya</artifactId>
-      <version>2.2</version>
+      <version>2.2.2</version>
       <scope>compile</scope>
     </dependency>
 
@@ -290,6 +290,9 @@
     <dependency>
       <groupId>com.neuronrobotics</groupId>
       <artifactId>nrjavaserial</artifactId>
+      <!-- deliberately kept at older version for more flexibility,
+      internally, we use 5.2.1.OH1 which still uses same API,
+      see https://github.com/openhab/openhab-core/pull/1464 -->
       <version>3.14.0</version>
       <scope>compile</scope>
       <exclusions>
@@ -397,7 +400,7 @@
     <dependency>
       <groupId>org.bitbucket.b_c</groupId>
       <artifactId>jose4j</artifactId>
-      <version>0.9.5</version>
+      <version>0.9.6</version>
       <scope>compile</scope>
     </dependency>
 
@@ -419,6 +422,12 @@
       <artifactId>jna-platform</artifactId>
       <version>5.16.0</version>
       <scope>compile</scope>
+    </dependency>
+    <!-- transitive dependency of junit, required by javadoc in compile bom! -->
+    <dependency>
+      <groupId>org.apiguardian</groupId>
+      <artifactId>apiguardian-api</artifactId>
+      <version>1.1.2</version>
     </dependency>
   </dependencies>
 

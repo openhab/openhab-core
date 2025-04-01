@@ -245,7 +245,7 @@ public class ThingManagerImpl implements ReadyTracker, ThingManager, ThingTracke
                     "Provider for thing {0} cannot be determined because it is not known to the registry",
                     thing.getUID().getAsString()));
         }
-        if (provider instanceof ManagedProvider<Thing, ThingUID> managedProvider) {
+        if (provider instanceof ManagedProvider managedProvider) {
             managedProvider.update(thing);
         } else {
             logger.debug("Only updating thing {} in the registry because provider {} is not managed.",

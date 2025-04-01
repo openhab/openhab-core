@@ -34,6 +34,7 @@ import org.openhab.core.items.Item;
 import org.openhab.core.library.items.NumberItem;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.QuantityType;
+import org.openhab.core.library.unit.Units;
 import org.openhab.core.persistence.FilterCriteria;
 import org.openhab.core.persistence.FilterCriteria.Ordering;
 import org.openhab.core.persistence.HistoricItem;
@@ -69,6 +70,7 @@ import org.slf4j.LoggerFactory;
  * @author Mark Herwege - handle persisted GroupItem with QuantityType
  * @author Mark Herwege - add median methods
  * @author Mark Herwege - use item lastChange and lastUpdate methods if not in peristence
+ * @author Mark Herwege - add Riemann sum methods
  */
 @Component(immediate = true)
 @NonNullByDefault
@@ -77,6 +79,13 @@ public class PersistenceExtensions {
     private static @Nullable PersistenceServiceRegistry registry;
     private static @Nullable PersistenceServiceConfigurationRegistry configRegistry;
     private static @Nullable TimeZoneProvider timeZoneProvider;
+
+    public static enum RiemannType {
+        LEFT,
+        MIDPOINT,
+        RIGHT,
+        TRAPEZOIDAL
+    }
 
     @Activate
     public PersistenceExtensions(@Reference PersistenceServiceRegistry registry,
@@ -1153,6 +1162,7 @@ public class PersistenceExtensions {
 
     /**
      * Gets the variance of the state of the given {@link Item} since a certain point in time.
+     * A left approximation type is used for the Riemann sum.
      * The default {@link PersistenceService} is used.
      *
      * @param item the {@link Item} to get the variance for
@@ -1162,11 +1172,27 @@ public class PersistenceExtensions {
      *         if there is no persisted state for the given <code>item</code> at the given <code>timestamp</code>
      */
     public static @Nullable State varianceSince(Item item, ZonedDateTime timestamp) {
-        return internalVarianceBetween(item, timestamp, null, null);
+        return internalVarianceBetween(item, timestamp, null, null, null);
+    }
+
+    /**
+     * Gets the variance of the state of the given {@link Item} since a certain point in time.
+     * The default {@link PersistenceService} is used.
+     *
+     * @param item the {@link Item} to get the variance for
+     * @param timestamp the point in time from which to compute the variance
+     * @param type LEFT, RIGHT, MIDPOINT or TRAPEZOIDAL representing approximation types for Riemann sums
+     * @return the variance between then and now, or <code>null</code> if <code>timestamp</code> is in the future, if
+     *         there is no default persistence service available, or it is not a {@link QueryablePersistenceService}, or
+     *         if there is no persisted state for the given <code>item</code> at the given <code>timestamp</code>
+     */
+    public static @Nullable State varianceSince(Item item, ZonedDateTime timestamp, @Nullable RiemannType type) {
+        return internalVarianceBetween(item, timestamp, null, type, null);
     }
 
     /**
      * Gets the variance of the state of the given {@link Item} until a certain point in time.
+     * A left approximation type is used for the Riemann sum.
      * The default {@link PersistenceService} is used.
      *
      * @param item the {@link Item} to get the variance for
@@ -1176,59 +1202,27 @@ public class PersistenceExtensions {
      *         if there is no persisted state for the given <code>item</code> at the given <code>timestamp</code>
      */
     public static @Nullable State varianceUntil(Item item, ZonedDateTime timestamp) {
-        return internalVarianceBetween(item, null, timestamp, null);
-    }
-
-    /**
-     * Gets the variance of the state of the given {@link Item} between two certain point in time.
-     * The default {@link PersistenceService} is used.
-     *
-     * @param item the {@link Item} to get the variance for
-     * @param begin the point in time from which to compute the variance
-     * @param end the end time for the computation
-     * @return the variance between both points of time, or <code>null</code> if <code>begin</code> is after
-     *         <code>end</code>, if there is no default persistence service available, or it is not a
-     *         {@link QueryablePersistenceService}, or if there is no persisted state for the
-     *         given <code>item</code> between <code>begin</code> and <code>end</code>
-     */
-    public static @Nullable State varianceBetween(Item item, ZonedDateTime begin, ZonedDateTime end) {
-        return internalVarianceBetween(item, begin, end, null);
-    }
-
-    /**
-     * Gets the variance of the state of the given {@link Item} since a certain point in time.
-     * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
-     *
-     * @param item the {@link Item} to get the variance for
-     * @param timestamp the point in time from which to compute the variance
-     * @param serviceId the name of the {@link PersistenceService} to use
-     * @return the variance between then and now, or <code>null</code> if <code>timestamp</code> is in the future, if
-     *         the persistence service given by <code>serviceId</code> is not available, or it is not a
-     *         {@link QueryablePersistenceService}, or if there is no persisted state for the given <code>item</code> at
-     *         the given <code>timestamp</code>
-     */
-    public static @Nullable State varianceSince(Item item, ZonedDateTime timestamp, @Nullable String serviceId) {
-        return internalVarianceBetween(item, timestamp, null, serviceId);
+        return internalVarianceBetween(item, null, timestamp, null, null);
     }
 
     /**
      * Gets the variance of the state of the given {@link Item} until a certain point in time.
-     * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
+     * The default {@link PersistenceService} is used.
      *
      * @param item the {@link Item} to get the variance for
      * @param timestamp the point in time to which to compute the variance
-     * @param serviceId the name of the {@link PersistenceService} to use
-     * @return the variance between now and then, or <code>null</code> if <code>timestamp</code> is in the past, if the
-     *         persistence service given by <code>serviceId</code> is not available, or it is not a
-     *         {@link QueryablePersistenceService}, or if there is no persisted state for the given <code>item</code> at
-     *         the given <code>timestamp</code>
+     * @param type LEFT, RIGHT, MIDPOINT or TRAPEZOIDAL representing approximation types for Riemann sums
+     * @return the variance between now and then, or <code>null</code> if <code>timestamp</code> is in the past, if
+     *         there is no default persistence service available, or it is not a {@link QueryablePersistenceService}, or
+     *         if there is no persisted state for the given <code>item</code> at the given <code>timestamp</code>
      */
-    public static @Nullable State varianceUntil(Item item, ZonedDateTime timestamp, @Nullable String serviceId) {
-        return internalVarianceBetween(item, null, timestamp, serviceId);
+    public static @Nullable State varianceUntil(Item item, ZonedDateTime timestamp, @Nullable RiemannType type) {
+        return internalVarianceBetween(item, null, timestamp, type, null);
     }
 
     /**
      * Gets the variance of the state of the given {@link Item} between two points in time.
+     * A left approximation type is used for the Riemann sum.
      * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
      *
      * @param item the {@link Item} to get the variance for
@@ -1243,11 +1237,136 @@ public class PersistenceExtensions {
      */
     public static @Nullable State varianceBetween(Item item, ZonedDateTime begin, ZonedDateTime end,
             @Nullable String serviceId) {
-        return internalVarianceBetween(item, begin, end, serviceId);
+        return internalVarianceBetween(item, begin, end, null, serviceId);
+    }
+
+    /**
+     * Gets the variance of the state of the given {@link Item} between two certain point in time.
+     * The default {@link PersistenceService} is used.
+     *
+     * @param item the {@link Item} to get the variance for
+     * @param begin the point in time from which to compute the variance
+     * @param end the end time for the computation
+     * @param type LEFT, RIGHT, MIDPOINT or TRAPEZOIDAL representing approximation types for Riemann sums
+     * @return the variance between both points of time, or <code>null</code> if <code>begin</code> is after
+     *         <code>end</code>, if there is no default persistence service available, or it is not a
+     *         {@link QueryablePersistenceService}, or if there is no persisted state for the
+     *         given <code>item</code> between <code>begin</code> and <code>end</code>
+     */
+    public static @Nullable State varianceBetween(Item item, ZonedDateTime begin, ZonedDateTime end,
+            @Nullable RiemannType type) {
+        return internalVarianceBetween(item, begin, end, type, null);
+    }
+
+    /**
+     * Gets the variance of the state of the given {@link Item} since a certain point in time.
+     * A left approximation type is used for the Riemann sum.
+     * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
+     *
+     * @param item the {@link Item} to get the variance for
+     * @param timestamp the point in time from which to compute the variance
+     * @param serviceId the name of the {@link PersistenceService} to use
+     * @return the variance between then and now, or <code>null</code> if <code>timestamp</code> is in the future, if
+     *         the persistence service given by <code>serviceId</code> is not available, or it is not a
+     *         {@link QueryablePersistenceService}, or if there is no persisted state for the given <code>item</code> at
+     *         the given <code>timestamp</code>
+     */
+    public static @Nullable State varianceSince(Item item, ZonedDateTime timestamp, @Nullable String serviceId) {
+        return internalVarianceBetween(item, timestamp, null, null, serviceId);
+    }
+
+    /**
+     * Gets the variance of the state of the given {@link Item} since a certain point in time.
+     * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
+     *
+     * @param item the {@link Item} to get the variance for
+     * @param timestamp the point in time from which to compute the variance
+     * @param type LEFT, RIGHT, MIDPOINT or TRAPEZOIDAL representing approximation types for Riemann sums
+     * @param serviceId the name of the {@link PersistenceService} to use
+     * @return the variance between then and now, or <code>null</code> if <code>timestamp</code> is in the future, if
+     *         the persistence service given by <code>serviceId</code> is not available, or it is not a
+     *         {@link QueryablePersistenceService}, or if there is no persisted state for the given <code>item</code> at
+     *         the given <code>timestamp</code>
+     */
+    public static @Nullable State varianceSince(Item item, ZonedDateTime timestamp, @Nullable RiemannType type,
+            @Nullable String serviceId) {
+        return internalVarianceBetween(item, timestamp, null, type, serviceId);
+    }
+
+    /**
+     * Gets the variance of the state of the given {@link Item} until a certain point in time.
+     * A left approximation type is used for the Riemann sum.
+     * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
+     *
+     * @param item the {@link Item} to get the variance for
+     * @param timestamp the point in time to which to compute the variance
+     * @param serviceId the name of the {@link PersistenceService} to use
+     * @return the variance between now and then, or <code>null</code> if <code>timestamp</code> is in the past, if the
+     *         persistence service given by <code>serviceId</code> is not available, or it is not a
+     *         {@link QueryablePersistenceService}, or if there is no persisted state for the given <code>item</code> at
+     *         the given <code>timestamp</code>
+     */
+    public static @Nullable State varianceUntil(Item item, ZonedDateTime timestamp, @Nullable String serviceId) {
+        return internalVarianceBetween(item, null, timestamp, null, serviceId);
+    }
+
+    /**
+     * Gets the variance of the state of the given {@link Item} until a certain point in time.
+     * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
+     *
+     * @param item the {@link Item} to get the variance for
+     * @param timestamp the point in time to which to compute the variance
+     * @param type LEFT, RIGHT, MIDPOINT or TRAPEZOIDAL representing approximation types for Riemann sums
+     * @param serviceId the name of the {@link PersistenceService} to use
+     * @return the variance between now and then, or <code>null</code> if <code>timestamp</code> is in the past, if the
+     *         persistence service given by <code>serviceId</code> is not available, or it is not a
+     *         {@link QueryablePersistenceService}, or if there is no persisted state for the given <code>item</code> at
+     *         the given <code>timestamp</code>
+     */
+    public static @Nullable State varianceUntil(Item item, ZonedDateTime timestamp, @Nullable RiemannType type,
+            @Nullable String serviceId) {
+        return internalVarianceBetween(item, null, timestamp, type, serviceId);
+    }
+
+    /**
+     * Gets the variance of the state of the given {@link Item} between two certain point in time.
+     * A left approximation type is used for the Riemann sum.
+     * The default {@link PersistenceService} is used.
+     *
+     * @param item the {@link Item} to get the variance for
+     * @param begin the point in time from which to compute the variance
+     * @param end the end time for the computation
+     * @return the variance between both points of time, or <code>null</code> if <code>begin</code> is after
+     *         <code>end</code>, if there is no default persistence service available, or it is not a
+     *         {@link QueryablePersistenceService}, or if there is no persisted state for the
+     *         given <code>item</code> between <code>begin</code> and <code>end</code>
+     */
+    public static @Nullable State varianceBetween(Item item, ZonedDateTime begin, ZonedDateTime end) {
+        return internalVarianceBetween(item, begin, end, null, null);
+    }
+
+    /**
+     * Gets the variance of the state of the given {@link Item} between two points in time.
+     * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
+     *
+     * @param item the {@link Item} to get the variance for
+     * @param begin the point in time from which to compute
+     * @param end the end time for the computation
+     * @param type LEFT, RIGHT, MIDPOINT or TRAPEZOIDAL representing approximation types for Riemann sums
+     * @param serviceId the name of the {@link PersistenceService} to use
+     * @return the variance between both points of time, or <code>null</code> if <code>begin</code> is after
+     *         <code>end</code>, if the persistence service given by
+     *         <code>serviceId</code> is not available, or it is not a {@link QueryablePersistenceService}, or it is not
+     *         a {@link QueryablePersistenceService}, or if there is no persisted state for the
+     *         given <code>item</code> between <code>begin</code> and <code>end</code>
+     */
+    public static @Nullable State varianceBetween(Item item, ZonedDateTime begin, ZonedDateTime end,
+            @Nullable RiemannType type, @Nullable String serviceId) {
+        return internalVarianceBetween(item, begin, end, type, serviceId);
     }
 
     private static @Nullable State internalVarianceBetween(Item item, @Nullable ZonedDateTime begin,
-            @Nullable ZonedDateTime end, @Nullable String serviceId) {
+            @Nullable ZonedDateTime end, @Nullable RiemannType type, @Nullable String serviceId) {
         String effectiveServiceId = serviceId == null ? getDefaultServiceId() : serviceId;
         if (effectiveServiceId == null) {
             return null;
@@ -1256,7 +1375,7 @@ public class PersistenceExtensions {
         if (result == null) {
             return null;
         }
-        State averageState = internalAverageBetween(item, begin, end, effectiveServiceId);
+        State averageState = internalAverageBetween(item, begin, end, type, effectiveServiceId);
 
         if (averageState != null) {
             Item baseItem = item instanceof GroupItem groupItem ? groupItem.getBaseItem() : item;
@@ -1297,6 +1416,7 @@ public class PersistenceExtensions {
 
     /**
      * Gets the standard deviation of the state of the given {@link Item} since a certain point in time.
+     * A left approximation type is used for the Riemann sum.
      * The default {@link PersistenceService} is used.
      *
      * <b>Note:</b> If you need variance and standard deviation at the same time do not query both as it is a costly
@@ -1310,11 +1430,31 @@ public class PersistenceExtensions {
      *         the given <code>timestamp</code>
      */
     public static @Nullable State deviationSince(Item item, ZonedDateTime timestamp) {
-        return internalDeviationBetween(item, timestamp, null, null);
+        return internalDeviationBetween(item, timestamp, null, null, null);
+    }
+
+    /**
+     * Gets the standard deviation of the state of the given {@link Item} since a certain point in time.
+     * The default {@link PersistenceService} is used.
+     *
+     * <b>Note:</b> If you need variance and standard deviation at the same time do not query both as it is a costly
+     * operation. Get the variance only, it is the squared deviation.
+     *
+     * @param item the {@link Item} to get the standard deviation for
+     * @param timestamp the point in time from which to compute the standard deviation
+     * @param type LEFT, RIGHT, MIDPOINT or TRAPEZOIDAL representing approximation types for Riemann sums
+     * @return the standard deviation between then and now, or <code>null</code> if <code>timestamp</code> is in the
+     *         future, if there is no default persistence service available, or it is not a
+     *         {@link QueryablePersistenceService}, or if there is no persisted state for the given <code>item</code> at
+     *         the given <code>timestamp</code>
+     */
+    public static @Nullable State deviationSince(Item item, ZonedDateTime timestamp, @Nullable RiemannType type) {
+        return internalDeviationBetween(item, timestamp, null, type, null);
     }
 
     /**
      * Gets the standard deviation of the state of the given {@link Item} until a certain point in time.
+     * A left approximation type is used for the Riemann sum.
      * The default {@link PersistenceService} is used.
      *
      * <b>Note:</b> If you need variance and standard deviation at the same time do not query both as it is a costly
@@ -1328,11 +1468,31 @@ public class PersistenceExtensions {
      *         the given <code>timestamp</code>
      */
     public static @Nullable State deviationUntil(Item item, ZonedDateTime timestamp) {
-        return internalDeviationBetween(item, timestamp, null, null);
+        return internalDeviationBetween(item, timestamp, null, null, null);
+    }
+
+    /**
+     * Gets the standard deviation of the state of the given {@link Item} until a certain point in time.
+     * The default {@link PersistenceService} is used.
+     *
+     * <b>Note:</b> If you need variance and standard deviation at the same time do not query both as it is a costly
+     * operation. Get the variance only, it is the squared deviation.
+     *
+     * @param item the {@link Item} to get the standard deviation for
+     * @param timestamp the point in time to which to compute the standard deviation
+     * @param type LEFT, RIGHT, MIDPOINT or TRAPEZOIDAL representing approximation types for Riemann sums
+     * @return the standard deviation between now and then, or <code>null</code> if <code>timestamp</code> is in the
+     *         past, if there is no default persistence service available, or it is not a
+     *         {@link QueryablePersistenceService}, or if there is no persisted state for the given <code>item</code> at
+     *         the given <code>timestamp</code>
+     */
+    public static @Nullable State deviationUntil(Item item, ZonedDateTime timestamp, @Nullable RiemannType type) {
+        return internalDeviationBetween(item, timestamp, null, type, null);
     }
 
     /**
      * Gets the standard deviation of the state of the given {@link Item} between two points in time.
+     * A left approximation type is used for the Riemann sum.
      * The default {@link PersistenceService} is used.
      *
      * <b>Note:</b> If you need variance and standard deviation at the same time do not query both as it is a costly
@@ -1347,11 +1507,33 @@ public class PersistenceExtensions {
      *         given <code>item</code> between <code>begin</code> and <code>end</code>
      */
     public static @Nullable State deviationBetween(Item item, ZonedDateTime begin, ZonedDateTime end) {
-        return internalDeviationBetween(item, begin, end, null);
+        return internalDeviationBetween(item, begin, end, null, null);
+    }
+
+    /**
+     * Gets the standard deviation of the state of the given {@link Item} between two points in time.
+     * The default {@link PersistenceService} is used.
+     *
+     * <b>Note:</b> If you need variance and standard deviation at the same time do not query both as it is a costly
+     * operation. Get the variance only, it is the squared deviation.
+     *
+     * @param item the {@link Item} to get the standard deviation for
+     * @param begin the point in time from which to compute
+     * @param end the end time for the computation
+     * @param type LEFT, RIGHT, MIDPOINT or TRAPEZOIDAL representing approximation types for Riemann sums
+     * @return the standard deviation between both points of time, or <code>null</code> if <code>begin</code> is after
+     *         <code>end</code>, if there is no default persistence service available, or it is not a
+     *         {@link QueryablePersistenceService}, or if there is no persisted state for the
+     *         given <code>item</code> between <code>begin</code> and <code>end</code>
+     */
+    public static @Nullable State deviationBetween(Item item, ZonedDateTime begin, ZonedDateTime end,
+            @Nullable RiemannType type) {
+        return internalDeviationBetween(item, begin, end, type, null);
     }
 
     /**
      * Gets the standard deviation of the state of the given {@link Item} since a certain point in time.
+     * A left approximation type is used for the Riemann sum.
      * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
      *
      * <b>Note:</b> If you need variance and standard deviation at the same time do not query both as it is a costly
@@ -1366,11 +1548,33 @@ public class PersistenceExtensions {
      *         the given <code>timestamp</code>
      */
     public static @Nullable State deviationSince(Item item, ZonedDateTime timestamp, @Nullable String serviceId) {
-        return internalDeviationBetween(item, timestamp, null, serviceId);
+        return internalDeviationBetween(item, timestamp, null, null, serviceId);
+    }
+
+    /**
+     * Gets the standard deviation of the state of the given {@link Item} since a certain point in time.
+     * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
+     *
+     * <b>Note:</b> If you need variance and standard deviation at the same time do not query both as it is a costly
+     * operation. Get the variance only, it is the squared deviation.
+     *
+     * @param item the {@link Item} to get the standard deviation for
+     * @param timestamp the point in time from which to compute the standard deviation
+     * @param type LEFT, RIGHT, MIDPOINT or TRAPEZOIDAL representing approximation types for Riemann sums
+     * @param serviceId the name of the {@link PersistenceService} to use
+     * @return the standard deviation between then and now, or <code>null</code> if <code>timestamp</code> is in the
+     *         future, if the persistence service given by <code>serviceId</code> is not available, or it is not a
+     *         {@link QueryablePersistenceService}, or if there is no persisted state for the given <code>item</code> at
+     *         the given <code>timestamp</code>
+     */
+    public static @Nullable State deviationSince(Item item, ZonedDateTime timestamp, @Nullable RiemannType type,
+            @Nullable String serviceId) {
+        return internalDeviationBetween(item, timestamp, null, type, serviceId);
     }
 
     /**
      * Gets the standard deviation of the state of the given {@link Item} until a certain point in time.
+     * A left approximation type is used for the Riemann sum.
      * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
      *
      * <b>Note:</b> If you need variance and standard deviation at the same time do not query both as it is a costly
@@ -1385,11 +1589,33 @@ public class PersistenceExtensions {
      *         the given <code>timestamp</code>
      */
     public static @Nullable State deviationUntil(Item item, ZonedDateTime timestamp, @Nullable String serviceId) {
-        return internalDeviationBetween(item, null, timestamp, serviceId);
+        return internalDeviationBetween(item, null, timestamp, null, serviceId);
+    }
+
+    /**
+     * Gets the standard deviation of the state of the given {@link Item} until a certain point in time.
+     * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
+     *
+     * <b>Note:</b> If you need variance and standard deviation at the same time do not query both as it is a costly
+     * operation. Get the variance only, it is the squared deviation.
+     *
+     * @param item the {@link Item} to get the standard deviation for
+     * @param timestamp the point in time to which to compute the standard deviation
+     * @param type LEFT, RIGHT, MIDPOINT or TRAPEZOIDAL representing approximation types for Riemann sums
+     * @param serviceId the name of the {@link PersistenceService} to use
+     * @return the standard deviation between now and then, or <code>null</code> if <code>timestamp</code> is in the
+     *         past, if the persistence service given by <code>serviceId</code> is not available, or it is not a
+     *         {@link QueryablePersistenceService}, or if there is no persisted state for the given <code>item</code> at
+     *         the given <code>timestamp</code>
+     */
+    public static @Nullable State deviationUntil(Item item, ZonedDateTime timestamp, @Nullable RiemannType type,
+            @Nullable String serviceId) {
+        return internalDeviationBetween(item, null, timestamp, type, serviceId);
     }
 
     /**
      * Gets the standard deviation of the state of the given {@link Item} between two points in time.
+     * A left approximation type is used for the Riemann sum.
      * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
      *
      * <b>Note:</b> If you need variance and standard deviation at the same time do not query both as it is a costly
@@ -1407,16 +1633,39 @@ public class PersistenceExtensions {
      */
     public static @Nullable State deviationBetween(Item item, ZonedDateTime begin, ZonedDateTime end,
             @Nullable String serviceId) {
-        return internalDeviationBetween(item, begin, end, serviceId);
+        return internalDeviationBetween(item, begin, end, null, serviceId);
+    }
+
+    /**
+     * Gets the standard deviation of the state of the given {@link Item} between two points in time.
+     * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
+     *
+     * <b>Note:</b> If you need variance and standard deviation at the same time do not query both as it is a costly
+     * operation. Get the variance only, it is the squared deviation.
+     *
+     * @param item the {@link Item} to get the standard deviation for
+     * @param begin the point in time from which to compute
+     * @param end the end time for the computation
+     * @param type LEFT, RIGHT, MIDPOINT or TRAPEZOIDAL representing approximation types for Riemann sums
+     * @param serviceId the name of the {@link PersistenceService} to use
+     * @return the standard deviation between both points of time, or <code>null</code> if <code>begin</code> is after
+     *         <code>end</code>, if the persistence service given by
+     *         <code>serviceId</code> is not available, or it is not a {@link QueryablePersistenceService}, or it is not
+     *         a {@link QueryablePersistenceService}, or if there is no persisted state for the
+     *         given <code>item</code> between <code>begin</code> and <code>end</code>
+     */
+    public static @Nullable State deviationBetween(Item item, ZonedDateTime begin, ZonedDateTime end,
+            @Nullable RiemannType type, @Nullable String serviceId) {
+        return internalDeviationBetween(item, begin, end, type, serviceId);
     }
 
     private static @Nullable State internalDeviationBetween(Item item, @Nullable ZonedDateTime begin,
-            @Nullable ZonedDateTime end, @Nullable String serviceId) {
+            @Nullable ZonedDateTime end, @Nullable RiemannType type, @Nullable String serviceId) {
         String effectiveServiceId = serviceId == null ? getDefaultServiceId() : serviceId;
         if (effectiveServiceId == null) {
             return null;
         }
-        State variance = internalVarianceBetween(item, begin, end, effectiveServiceId);
+        State variance = internalVarianceBetween(item, begin, end, type, effectiveServiceId);
 
         if (variance != null) {
             DecimalType dt = variance.as(DecimalType.class);
@@ -1439,6 +1688,7 @@ public class PersistenceExtensions {
 
     /**
      * Gets the average value of the state of a given {@link Item} since a certain point in time.
+     * A left approximation type is used for the Riemann sum.
      * The default {@link PersistenceService} is used.
      *
      * @param item the {@link Item} to get the average value for
@@ -1448,11 +1698,27 @@ public class PersistenceExtensions {
      *         {@link QueryablePersistenceService}. The current state is included in the calculation.
      */
     public static @Nullable State averageSince(Item item, ZonedDateTime timestamp) {
-        return internalAverageBetween(item, timestamp, null, null);
+        return internalAverageBetween(item, timestamp, null, null, null);
+    }
+
+    /**
+     * Gets the average value of the state of a given {@link Item} since a certain point in time.
+     * The default {@link PersistenceService} is used.
+     *
+     * @param item the {@link Item} to get the average value for
+     * @param timestamp the point in time from which to search for the average value
+     * @param type LEFT, RIGHT, MIDPOINT or TRAPEZOIDAL representing approximation types for Riemann sums
+     * @return the average value since <code>timestamp</code> or <code>null</code> if no
+     *         previous states could be found or if the default persistence service does not refer to an available
+     *         {@link QueryablePersistenceService}. The current state is included in the calculation.
+     */
+    public static @Nullable State averageSince(Item item, ZonedDateTime timestamp, @Nullable RiemannType type) {
+        return internalAverageBetween(item, timestamp, null, type, null);
     }
 
     /**
      * Gets the average value of the state of a given {@link Item} until a certain point in time.
+     * A left approximation type is used for the Riemann sum.
      * The default {@link PersistenceService} is used.
      *
      * @param item the {@link Item} to get the average value for
@@ -1462,11 +1728,27 @@ public class PersistenceExtensions {
      *         {@link QueryablePersistenceService}. The current state is included in the calculation.
      */
     public static @Nullable State averageUntil(Item item, ZonedDateTime timestamp) {
-        return internalAverageBetween(item, null, timestamp, null);
+        return internalAverageBetween(item, null, timestamp, null, null);
+    }
+
+    /**
+     * Gets the average value of the state of a given {@link Item} until a certain point in time.
+     * The default {@link PersistenceService} is used.
+     *
+     * @param item the {@link Item} to get the average value for
+     * @param timestamp the point in time to which to search for the average value
+     * @param type LEFT, RIGHT, MIDPOINT or TRAPEZOIDAL representing approximation types for Riemann sums
+     * @return the average value until <code>timestamp</code> or <code>null</code> if no
+     *         future states could be found or if the default persistence service does not refer to an available
+     *         {@link QueryablePersistenceService}. The current state is included in the calculation.
+     */
+    public static @Nullable State averageUntil(Item item, ZonedDateTime timestamp, @Nullable RiemannType type) {
+        return internalAverageBetween(item, null, timestamp, type, null);
     }
 
     /**
      * Gets the average value of the state of a given {@link Item} between two certain points in time.
+     * A left approximation type is used for the Riemann sum.
      * The default {@link PersistenceService} is used.
      *
      * @param item the {@link Item} to get the average value for
@@ -1477,11 +1759,29 @@ public class PersistenceExtensions {
      *         {@link QueryablePersistenceService}.
      */
     public static @Nullable State averageBetween(Item item, ZonedDateTime begin, ZonedDateTime end) {
-        return internalAverageBetween(item, begin, end, null);
+        return internalAverageBetween(item, begin, end, null, null);
+    }
+
+    /**
+     * Gets the average value of the state of a given {@link Item} between two certain points in time.
+     * The default {@link PersistenceService} is used.
+     *
+     * @param item the {@link Item} to get the average value for
+     * @param begin the point in time from which to start the summation
+     * @param end the point in time to which to start the summation
+     * @param type LEFT, RIGHT, MIDPOINT or TRAPEZOIDAL representing approximation types for Riemann sums
+     * @return the average value between <code>begin</code> and <code>end</code> or <code>null</code> if no
+     *         states could be found or if the default persistence service does not refer to an available
+     *         {@link QueryablePersistenceService}.
+     */
+    public static @Nullable State averageBetween(Item item, ZonedDateTime begin, ZonedDateTime end,
+            @Nullable RiemannType type) {
+        return internalAverageBetween(item, begin, end, type, null);
     }
 
     /**
      * Gets the average value of the state of a given {@link Item} since a certain point in time.
+     * A left approximation type is used for the Riemann sum.
      * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
      *
      * @param item the {@link Item} to get the average value for
@@ -1493,11 +1793,30 @@ public class PersistenceExtensions {
      *         calculation.
      */
     public static @Nullable State averageSince(Item item, ZonedDateTime timestamp, @Nullable String serviceId) {
-        return internalAverageBetween(item, timestamp, null, serviceId);
+        return internalAverageBetween(item, timestamp, null, null, serviceId);
+    }
+
+    /**
+     * Gets the average value of the state of a given {@link Item} since a certain point in time.
+     * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
+     *
+     * @param item the {@link Item} to get the average value for
+     * @param timestamp the point in time from which to search for the average value
+     * @param type LEFT, RIGHT, MIDPOINT or TRAPEZOIDAL representing approximation types for Riemann sums
+     * @param serviceId the name of the {@link PersistenceService} to use
+     * @return the average value since <code>timestamp</code>, or <code>null</code> if no
+     *         previous states could be found or if the persistence service given by <code>serviceId</code> does not
+     *         refer to an available {@link QueryablePersistenceService}. The current state is included in the
+     *         calculation.
+     */
+    public static @Nullable State averageSince(Item item, ZonedDateTime timestamp, @Nullable RiemannType type,
+            @Nullable String serviceId) {
+        return internalAverageBetween(item, timestamp, null, type, serviceId);
     }
 
     /**
      * Gets the average value of the state of a given {@link Item} until a certain point in time.
+     * A left approximation type is used for the Riemann sum.
      * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
      *
      * @param item the {@link Item} to get the average value for
@@ -1509,11 +1828,30 @@ public class PersistenceExtensions {
      *         calculation.
      */
     public static @Nullable State averageUntil(Item item, ZonedDateTime timestamp, @Nullable String serviceId) {
-        return internalAverageBetween(item, null, timestamp, serviceId);
+        return internalAverageBetween(item, null, timestamp, null, serviceId);
+    }
+
+    /**
+     * Gets the average value of the state of a given {@link Item} until a certain point in time.
+     * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
+     *
+     * @param item the {@link Item} to get the average value for
+     * @param timestamp the point in time to which to search for the average value
+     * @param type LEFT, RIGHT, MIDPOINT or TRAPEZOIDAL representing approximation types for Riemann sums
+     * @param serviceId the name of the {@link PersistenceService} to use
+     * @return the average value until <code>timestamp</code>, or <code>null</code> if no
+     *         future states could be found or if the persistence service given by <code>serviceId</code> does not
+     *         refer to an available {@link QueryablePersistenceService}. The current state is included in the
+     *         calculation.
+     */
+    public static @Nullable State averageUntil(Item item, ZonedDateTime timestamp, @Nullable RiemannType type,
+            @Nullable String serviceId) {
+        return internalAverageBetween(item, null, timestamp, type, serviceId);
     }
 
     /**
      * Gets the average value of the state of a given {@link Item} between two certain points in time.
+     * A left approximation type is used for the Riemann sum.
      * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
      *
      * @param item the {@link Item} to get the average value for
@@ -1526,11 +1864,29 @@ public class PersistenceExtensions {
      */
     public static @Nullable State averageBetween(Item item, ZonedDateTime begin, ZonedDateTime end,
             @Nullable String serviceId) {
-        return internalAverageBetween(item, begin, end, serviceId);
+        return internalAverageBetween(item, begin, end, null, serviceId);
+    }
+
+    /**
+     * Gets the average value of the state of a given {@link Item} between two certain points in time.
+     * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
+     *
+     * @param item the {@link Item} to get the average value for
+     * @param begin the point in time from which to start the summation
+     * @param end the point in time to which to start the summation
+     * @param type LEFT, RIGHT, MIDPOINT or TRAPEZOIDAL representing approximation types for Riemann sums
+     * @param serviceId the name of the {@link PersistenceService} to use
+     * @return the average value between <code>begin</code> and <code>end</code>, or <code>null</code> if no
+     *         states could be found or if the persistence service given by <code>serviceId</code> does not
+     *         refer to an available {@link QueryablePersistenceService}
+     */
+    public static @Nullable State averageBetween(Item item, ZonedDateTime begin, ZonedDateTime end,
+            @Nullable RiemannType type, @Nullable String serviceId) {
+        return internalAverageBetween(item, begin, end, type, serviceId);
     }
 
     private static @Nullable State internalAverageBetween(Item item, @Nullable ZonedDateTime begin,
-            @Nullable ZonedDateTime end, @Nullable String serviceId) {
+            @Nullable ZonedDateTime end, @Nullable RiemannType type, @Nullable String serviceId) {
         String effectiveServiceId = serviceId == null ? getDefaultServiceId() : serviceId;
         if (effectiveServiceId == null) {
             return null;
@@ -1549,46 +1905,396 @@ public class PersistenceExtensions {
             return null;
         }
         Iterator<HistoricItem> it = result.iterator();
-
-        BigDecimal sum = BigDecimal.ZERO;
-
-        HistoricItem lastItem = null;
-        ZonedDateTime firstTimestamp = null;
+        // Remove initial part of history that does not have any values persisted
+        if (beginTime.isBefore(now)) {
+            if (it.hasNext()) {
+                beginTime = it.next().getTimestamp();
+            }
+            it = result.iterator();
+        }
 
         Item baseItem = item instanceof GroupItem groupItem ? groupItem.getBaseItem() : item;
         Unit<?> unit = baseItem instanceof NumberItem numberItem ? numberItem.getUnit() : null;
 
+        BigDecimal sum = riemannSum(beginTime, endTime, it, unit, type);
+        BigDecimal totalDuration = BigDecimal.valueOf(Duration.between(beginTime, endTime).toMillis());
+        if (totalDuration.signum() == 0) {
+            return null;
+        }
+        BigDecimal average = sum.divide(totalDuration, MathContext.DECIMAL64);
+        if (unit != null) {
+            return new QuantityType<>(average, unit);
+        }
+        return new DecimalType(average);
+    }
+
+    /**
+     * Gets the Riemann sum of the states of a given {@link Item} since a certain point in time.
+     * This can be used as an approximation for integrating the curve represented by discrete values.
+     * A left approximation type is used for the Riemann sum.
+     * The time dimension in the result is in seconds, therefore if you do not use QuantityType results, you may have to
+     * multiply or divide to get the result in the expected scale.
+     * The default {@link PersistenceService} is used.
+     *
+     * @param item the {@link Item} to get the riemannSum value for
+     * @param timestamp the point in time from which to search for the riemannSum value
+     * @return the Riemann sum since <code>timestamp</code> or <code>null</code> if no
+     *         previous states could be found or if the default persistence service does not refer to an available
+     *         {@link QueryablePersistenceService}. The current state is included in the calculation.
+     */
+    public static @Nullable State riemannSumSince(Item item, ZonedDateTime timestamp) {
+        return internalRiemannSumBetween(item, timestamp, null, null, null);
+    }
+
+    /**
+     * Gets the Riemann sum of the states of a given {@link Item} since a certain point in time.
+     * This can be used as an approximation for integrating the curve represented by discrete values.
+     * The time dimension in the result is in seconds, therefore if you do not use QuantityType results, you may have to
+     * multiply or divide to get the result in the expected scale.
+     * The default {@link PersistenceService} is used.
+     *
+     * @param item the {@link Item} to get the riemannSum value for
+     * @param timestamp the point in time from which to search for the riemannSum value
+     * @param type LEFT, RIGHT, MIDPOINT or TRAPEZOIDAL representing approximation types for Riemann sums
+     * @return the Riemann sum since <code>timestamp</code> or <code>null</code> if no
+     *         previous states could be found or if the default persistence service does not refer to an available
+     *         {@link QueryablePersistenceService}. The current state is included in the calculation.
+     */
+    public static @Nullable State riemannSumSince(Item item, ZonedDateTime timestamp, @Nullable RiemannType type) {
+        return internalRiemannSumBetween(item, timestamp, null, type, null);
+    }
+
+    /**
+     * Gets the Riemann sum of the states of a given {@link Item} until a certain point in time.
+     * This can be used as an approximation for integrating the curve represented by discrete values.
+     * A left approximation type is used for the Riemann sum.
+     * The time dimension in the result is in seconds, therefore if you do not use QuantityType results, you may have to
+     * multiply or divide to get the result in the expected scale.
+     * The default {@link PersistenceService} is used.
+     *
+     * @param item the {@link Item} to get the riemannSum value for
+     * @param timestamp the point in time to which to search for the riemannSum value
+     * @return the Riemann sum until <code>timestamp</code> or <code>null</code> if no
+     *         future states could be found or if the default persistence service does not refer to an available
+     *         {@link QueryablePersistenceService}. The current state is included in the calculation.
+     */
+    public static @Nullable State riemannSumUntil(Item item, ZonedDateTime timestamp) {
+        return internalRiemannSumBetween(item, null, timestamp, null, null);
+    }
+
+    /**
+     * Gets the Riemann sum of the states of a given {@link Item} until a certain point in time.
+     * This can be used as an approximation for integrating the curve represented by discrete values.
+     * The time dimension in the result is in seconds, therefore if you do not use QuantityType results, you may have to
+     * multiply or divide to get the result in the expected scale.
+     * The default {@link PersistenceService} is used.
+     *
+     * @param item the {@link Item} to get the riemannSum value for
+     * @param timestamp the point in time to which to search for the riemannSum value
+     * @param type LEFT, RIGHT, MIDPOINT or TRAPEZOIDAL representing approximation types for Riemann sums
+     * @return the Riemann sum until <code>timestamp</code> or <code>null</code> if no
+     *         future states could be found or if the default persistence service does not refer to an available
+     *         {@link QueryablePersistenceService}. The current state is included in the calculation.
+     */
+    public static @Nullable State riemannSumUntil(Item item, ZonedDateTime timestamp, @Nullable RiemannType type) {
+        return internalRiemannSumBetween(item, null, timestamp, type, null);
+    }
+
+    /**
+     * Gets the Riemann sum of the states of a given {@link Item} between two certain points in time.
+     * This can be used as an approximation for integrating the curve represented by discrete values.
+     * A left approximation type is used for the Riemann sum.
+     * The time dimension in the result is in seconds, therefore if you do not use QuantityType results, you may have to
+     * multiply or divide to get the result in the expected scale.
+     * The default {@link PersistenceService} is used.
+     *
+     * @param item the {@link Item} to get the riemannSum value for
+     * @param begin the point in time from which to start the summation
+     * @param end the point in time to which to start the summation
+     * @return the Riemann sum between <code>begin</code> and <code>end</code> or <code>null</code> if no
+     *         states could be found or if the default persistence service does not refer to an available
+     *         {@link QueryablePersistenceService}.
+     */
+    public static @Nullable State riemannSumBetween(Item item, ZonedDateTime begin, ZonedDateTime end) {
+        return internalRiemannSumBetween(item, begin, end, null, null);
+    }
+
+    /**
+     * Gets the Riemann sum of the states of a given {@link Item} between two certain points in time.
+     * This can be used as an approximation for integrating the curve represented by discrete values.
+     * The time dimension in the result is in seconds, therefore if you do not use QuantityType results, you may have to
+     * multiply or divide to get the result in the expected scale.
+     * The default {@link PersistenceService} is used.
+     *
+     * @param item the {@link Item} to get the riemannSum value for
+     * @param begin the point in time from which to start the summation
+     * @param end the point in time to which to start the summation
+     * @param type LEFT, RIGHT, MIDPOINT or TRAPEZOIDAL representing approximation types for Riemann sums
+     * @return the Riemann sum between <code>begin</code> and <code>end</code> or <code>null</code> if no
+     *         states could be found or if the default persistence service does not refer to an available
+     *         {@link QueryablePersistenceService}.
+     */
+    public static @Nullable State riemannSumBetween(Item item, ZonedDateTime begin, ZonedDateTime end,
+            @Nullable RiemannType type) {
+        return internalRiemannSumBetween(item, begin, end, type, null);
+    }
+
+    /**
+     * Gets the Riemann sum of the states of a given {@link Item} since a certain point in time.
+     * This can be used as an approximation for integrating the curve represented by discrete values.
+     * A left approximation type is used for the Riemann sum.
+     * The time dimension in the result is in seconds, therefore if you do not use QuantityType results, you may have to
+     * multiply or divide to get the result in the expected scale.
+     * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
+     *
+     * @param item the {@link Item} to get the riemannSum value for
+     * @param timestamp the point in time from which to search for the riemannSum value
+     * @param serviceId the name of the {@link PersistenceService} to use
+     * @return the Riemann sum since <code>timestamp</code>, or <code>null</code> if no
+     *         previous states could be found or if the persistence service given by <code>serviceId</code> does not
+     *         refer to an available {@link QueryablePersistenceService}. The current state is included in the
+     *         calculation.
+     */
+    public static @Nullable State riemannSumSince(Item item, ZonedDateTime timestamp, @Nullable String serviceId) {
+        return internalRiemannSumBetween(item, timestamp, null, null, serviceId);
+    }
+
+    /**
+     * Gets the Riemann sum of the states of a given {@link Item} since a certain point in time.
+     * This can be used as an approximation for integrating the curve represented by discrete values.
+     * The time dimension in the result is in seconds, therefore if you do not use QuantityType results, you may have to
+     * multiply or divide to get the result in the expected scale.
+     * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
+     *
+     * @param item the {@link Item} to get the riemannSum value for
+     * @param timestamp the point in time from which to search for the riemannSum value
+     * @param type LEFT, RIGHT, MIDPOINT or TRAPEZOIDAL representing approximation types for Riemann sums
+     * @param serviceId the name of the {@link PersistenceService} to use
+     * @return the Riemann sum since <code>timestamp</code>, or <code>null</code> if no
+     *         previous states could be found or if the persistence service given by <code>serviceId</code> does not
+     *         refer to an available {@link QueryablePersistenceService}. The current state is included in the
+     *         calculation.
+     */
+    public static @Nullable State riemannSumSince(Item item, ZonedDateTime timestamp, @Nullable RiemannType type,
+            @Nullable String serviceId) {
+        return internalRiemannSumBetween(item, timestamp, null, type, serviceId);
+    }
+
+    /**
+     * Gets the Riemann sum of the states of a given {@link Item} until a certain point in time.
+     * This can be used as an approximation for integrating the curve represented by discrete values.
+     * A left approximation type is used for the Riemann sum.
+     * The time dimension in the result is in seconds, therefore if you do not use QuantityType results, you may have to
+     * multiply or divide to get the result in the expected scale.
+     * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
+     *
+     * @param item the {@link Item} to get the riemannSum value for
+     * @param timestamp the point in time to which to search for the riemannSum value
+     * @param serviceId the name of the {@link PersistenceService} to use
+     * @return the Riemann sum until <code>timestamp</code>, or <code>null</code> if no
+     *         future states could be found or if the persistence service given by <code>serviceId</code> does not
+     *         refer to an available {@link QueryablePersistenceService}. The current state is included in the
+     *         calculation.
+     */
+    public static @Nullable State riemannSumUntil(Item item, ZonedDateTime timestamp, @Nullable String serviceId) {
+        return internalRiemannSumBetween(item, null, timestamp, null, serviceId);
+    }
+
+    /**
+     * Gets the Riemann sum of the states of a given {@link Item} until a certain point in time.
+     * This can be used as an approximation for integrating the curve represented by discrete values.
+     * The time dimension in the result is in seconds, therefore if you do not use QuantityType results, you may have to
+     * multiply or divide to get the result in the expected scale.
+     * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
+     *
+     * @param item the {@link Item} to get the riemannSum value for
+     * @param timestamp the point in time to which to search for the riemannSum value
+     * @param type LEFT, RIGHT, MIDPOINT or TRAPEZOIDAL representing approximation types for Riemann sums
+     * @param serviceId the name of the {@link PersistenceService} to use
+     * @return the Riemann sum until <code>timestamp</code>, or <code>null</code> if no
+     *         future states could be found or if the persistence service given by <code>serviceId</code> does not
+     *         refer to an available {@link QueryablePersistenceService}. The current state is included in the
+     *         calculation.
+     */
+    public static @Nullable State riemannSumUntil(Item item, ZonedDateTime timestamp, @Nullable RiemannType type,
+            @Nullable String serviceId) {
+        return internalRiemannSumBetween(item, null, timestamp, type, serviceId);
+    }
+
+    /**
+     * Gets the Riemann sum of the states of a given {@link Item} between two certain points in time.
+     * This can be used as an approximation for integrating the curve represented by discrete values.
+     * A left approximation type is used for the Riemann sum.
+     * The time dimension in the result is in seconds, therefore if you do not use QuantityType results, you may have to
+     * multiply or divide to get the result in the expected scale.
+     * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
+     *
+     * @param item the {@link Item} to get the riemannSum value for
+     * @param begin the point in time from which to start the summation
+     * @param end the point in time to which to start the summation
+     * @param serviceId the name of the {@link PersistenceService} to use
+     * @return the Riemann sum between <code>begin</code> and <code>end</code>, or <code>null</code> if no
+     *         states could be found or if the persistence service given by <code>serviceId</code> does not
+     *         refer to an available {@link QueryablePersistenceService}
+     */
+    public static @Nullable State riemannSumBetween(Item item, ZonedDateTime begin, ZonedDateTime end,
+            @Nullable String serviceId) {
+        return internalRiemannSumBetween(item, begin, end, null, serviceId);
+    }
+
+    /**
+     * Gets the Riemann sum of the states of a given {@link Item} between two certain points in time.
+     * This can be used as an approximation for integrating the curve represented by discrete values.
+     * The time dimension in the result is in seconds, therefore if you do not use QuantityType results, you may have to
+     * multiply or divide to get the result in the expected scale.
+     * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
+     *
+     * @param item the {@link Item} to get the riemannSum value for
+     * @param begin the point in time from which to start the summation
+     * @param end the point in time to which to start the summation
+     * @param type LEFT, RIGHT, MIDPOINT or TRAPEZOIDAL representing approximation types for Riemann sums
+     * @param serviceId the name of the {@link PersistenceService} to use
+     * @return the Riemann sum between <code>begin</code> and <code>end</code>, or <code>null</code> if no
+     *         states could be found or if the persistence service given by <code>serviceId</code> does not
+     *         refer to an available {@link QueryablePersistenceService}
+     */
+    public static @Nullable State riemannSumBetween(Item item, ZonedDateTime begin, ZonedDateTime end,
+            @Nullable RiemannType type, @Nullable String serviceId) {
+        return internalRiemannSumBetween(item, begin, end, type, serviceId);
+    }
+
+    private static @Nullable State internalRiemannSumBetween(Item item, @Nullable ZonedDateTime begin,
+            @Nullable ZonedDateTime end, @Nullable RiemannType type, @Nullable String serviceId) {
+        String effectiveServiceId = serviceId == null ? getDefaultServiceId() : serviceId;
+        if (effectiveServiceId == null) {
+            return null;
+        }
+        ZonedDateTime now = ZonedDateTime.now();
+        ZonedDateTime beginTime = Objects.requireNonNullElse(begin, now);
+        ZonedDateTime endTime = Objects.requireNonNullElse(end, now);
+
+        Iterable<HistoricItem> result = getAllStatesBetweenWithBoundaries(item, begin, end, effectiveServiceId);
+        if (result == null) {
+            return null;
+        }
+        Iterator<HistoricItem> it = result.iterator();
+        // Remove initial part of history that does not have any values persisted
+        if (beginTime.isBefore(now)) {
+            if (it.hasNext()) {
+                beginTime = it.next().getTimestamp();
+            }
+            it = result.iterator();
+        }
+
+        Item baseItem = item instanceof GroupItem groupItem ? groupItem.getBaseItem() : item;
+        Unit<?> unit = (baseItem instanceof NumberItem numberItem)
+                && (numberItem.getUnit() instanceof Unit<?> numberItemUnit) ? numberItemUnit.getSystemUnit() : null;
+        BigDecimal sum = riemannSum(beginTime, endTime, it, unit, type).scaleByPowerOfTen(-3);
+        if (unit != null) {
+            return new QuantityType<>(sum, unit.multiply(Units.SECOND));
+        }
+        return new DecimalType(sum);
+    }
+
+    private static BigDecimal riemannSum(ZonedDateTime begin, ZonedDateTime end, Iterator<HistoricItem> it,
+            @Nullable Unit<?> unit, @Nullable RiemannType type) {
+        RiemannType riemannType = type == null ? RiemannType.LEFT : type;
+
+        BigDecimal sum = BigDecimal.ZERO;
+        HistoricItem prevItem = null;
+        HistoricItem nextItem = null;
+        DecimalType prevState = null;
+        DecimalType nextState = null;
+        Duration prevDuration = Duration.ZERO;
+        Duration nextDuration = Duration.ZERO;
+
+        boolean midpointStartBucket = true; // The start and end buckets for the midpoint calculation should be
+                                            // considered for the full length, this flag is used to find the start
+                                            // bucket
+        if ((riemannType == RiemannType.MIDPOINT) && it.hasNext()) {
+            prevItem = it.next();
+            prevState = getPersistedValue(prevItem, unit);
+        }
+
         while (it.hasNext()) {
-            HistoricItem thisItem = it.next();
-            if (lastItem != null) {
-                DecimalType dtState = getPersistedValue(lastItem, unit);
-                if (dtState != null) {
-                    BigDecimal value = dtState.toBigDecimal();
-                    BigDecimal weight = BigDecimal
-                            .valueOf(Duration.between(lastItem.getTimestamp(), thisItem.getTimestamp()).toMillis());
-                    sum = sum.add(value.multiply(weight));
-                }
+            nextItem = it.next();
+            BigDecimal weight = BigDecimal.ZERO;
+            BigDecimal value = BigDecimal.ZERO;
+            switch (riemannType) {
+                case LEFT:
+                    if (prevItem != null) {
+                        prevState = getPersistedValue(prevItem, unit);
+                        if (prevState != null) {
+                            value = prevState.toBigDecimal();
+                            weight = BigDecimal.valueOf(
+                                    Duration.between(prevItem.getTimestamp(), nextItem.getTimestamp()).toMillis());
+                        }
+                    }
+                    prevItem = nextItem;
+                    break;
+                case RIGHT:
+                    nextState = getPersistedValue(nextItem, unit);
+                    if (nextState != null) {
+                        value = nextState.toBigDecimal();
+                        if (prevItem == null) {
+                            weight = BigDecimal.valueOf(Duration.between(begin, nextItem.getTimestamp()).toMillis());
+                        } else {
+                            weight = BigDecimal.valueOf(
+                                    Duration.between(prevItem.getTimestamp(), nextItem.getTimestamp()).toMillis());
+                        }
+                    }
+                    prevItem = nextItem;
+                    break;
+                case TRAPEZOIDAL:
+                    if (prevItem != null) {
+                        prevState = getPersistedValue(prevItem, unit);
+                        nextState = getPersistedValue(nextItem, unit);
+                        if (prevState != null && nextState != null) {
+                            value = prevState.toBigDecimal().add(nextState.toBigDecimal())
+                                    .divide(BigDecimal.valueOf(2));
+                            weight = BigDecimal.valueOf(
+                                    Duration.between(prevItem.getTimestamp(), nextItem.getTimestamp()).toMillis());
+                        }
+                    }
+                    prevItem = nextItem;
+                    break;
+                case MIDPOINT:
+                    if (prevItem != null) {
+                        DecimalType currentState = getPersistedValue(prevItem, unit);
+                        if (currentState != null) {
+                            value = currentState.toBigDecimal();
+                            if (midpointStartBucket && !prevDuration.isZero() && prevState != null) {
+                                // Add half of the start bucket with the start value (left approximation)
+                                sum = sum.add(prevState.toBigDecimal()
+                                        .multiply(BigDecimal.valueOf(prevDuration.dividedBy(2).toMillis())));
+                                midpointStartBucket = false;
+                            }
+                            nextDuration = Duration.between(prevItem.getTimestamp(), nextItem.getTimestamp());
+                            weight = prevDuration.isZero() || nextDuration.isZero() ? BigDecimal.ZERO
+                                    : BigDecimal.valueOf(prevDuration.plus(nextDuration).dividedBy(2).toMillis());
+                            if (!nextDuration.isZero()) {
+                                prevDuration = nextDuration;
+                            }
+                            prevState = currentState;
+                        }
+                    }
+                    prevItem = nextItem;
+                    break;
             }
-
-            if (firstTimestamp == null) {
-                firstTimestamp = thisItem.getTimestamp();
-            }
-            lastItem = thisItem;
+            sum = sum.add(value.multiply(weight));
         }
 
-        if (firstTimestamp != null) {
-            BigDecimal totalDuration = BigDecimal.valueOf(Duration.between(firstTimestamp, endTime).toMillis());
-            if (totalDuration.signum() == 0) {
-                return null;
+        if ((riemannType == RiemannType.MIDPOINT) && (prevItem != null)) {
+            // Add half of the end bucket with the end value (right approximation)
+            DecimalType dtState = getPersistedValue(prevItem, unit);
+            if (dtState != null) {
+                BigDecimal value = dtState.toBigDecimal();
+                BigDecimal weight = BigDecimal.valueOf(prevDuration.dividedBy(2).toMillis());
+                sum = sum.add(value.multiply(weight));
             }
-            BigDecimal average = sum.divide(totalDuration, MathContext.DECIMAL64);
-            if (unit != null) {
-                return new QuantityType<>(average, unit);
-            }
-            return new DecimalType(average);
         }
 
-        return null;
+        return sum;
     }
 
     /**
@@ -1727,6 +2433,8 @@ public class PersistenceExtensions {
 
     /**
      * Gets the sum of the state of a given <code>item</code> since a certain point in time.
+     * This method does not calculate a Riemann sum and therefore cannot be used as an approximation for the integral
+     * value.
      * The default persistence service is used.
      *
      * @param item the item for which we will sum its persisted state values since <code>timestamp</code>
@@ -1740,6 +2448,8 @@ public class PersistenceExtensions {
 
     /**
      * Gets the sum of the state of a given <code>item</code> until a certain point in time.
+     * This method does not calculate a Riemann sum and therefore cannot be used as an approximation for the integral
+     * value.
      * The default persistence service is used.
      *
      * @param item the item for which we will sum its persisted state values to <code>timestamp</code>
@@ -1753,6 +2463,8 @@ public class PersistenceExtensions {
 
     /**
      * Gets the sum of the state of a given <code>item</code> between two certain points in time.
+     * This method does not calculate a Riemann sum and therefore cannot be used as an approximation for the integral
+     * value.
      * The default persistence service is used.
      *
      * @param item the item for which we will sum its persisted state values between <code>begin</code> and
@@ -1769,6 +2481,8 @@ public class PersistenceExtensions {
 
     /**
      * Gets the sum of the state of a given <code>item</code> since a certain point in time.
+     * This method does not calculate a Riemann sum and therefore cannot be used as an approximation for the integral
+     * value.
      * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
      *
      * @param item the item for which we will sum its persisted state values since <code>timestamp</code>
@@ -1783,6 +2497,8 @@ public class PersistenceExtensions {
 
     /**
      * Gets the sum of the state of a given <code>item</code> until a certain point in time.
+     * This method does not calculate a Riemann sum and therefore cannot be used as an approximation for the integral
+     * value.
      * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
      *
      * @param item the item for which we will sum its persisted state values to <code>timestamp</code>
@@ -1797,6 +2513,8 @@ public class PersistenceExtensions {
 
     /**
      * Gets the sum of the state of a given <code>item</code> between two certain points in time.
+     * This method does not calculate a Riemann sum and therefore cannot be used as an approximation for the integral
+     * value.
      * The {@link PersistenceService} identified by the <code>serviceId</code> is used.
      *
      * @param item the item for which we will sum its persisted state values between <code>begin</code> and

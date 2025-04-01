@@ -25,13 +25,13 @@
 		<!-- Apache Commons -->
 		<bundle dependency="true">mvn:org.apache.commons/commons-lang3/3.17.0</bundle>
 		<!-- Measurement -->
-		<bundle dependency="true">mvn:jakarta.annotation/jakarta.annotation-api/2.0.0</bundle>
+		<bundle dependency="true">mvn:jakarta.annotation/jakarta.annotation-api/2.1.1</bundle>
 		<bundle dependency="true">mvn:jakarta.inject/jakarta.inject-api/1.0.5</bundle>
 		<bundle dependency="true">mvn:javax.measure/unit-api/2.2</bundle>
 		<!-- The si.uom:si-units manifest has no Export-Package entry. As workaround this OSGi-ify bundle is used. -->
-		<bundle dependency="true">mvn:org.openhab.osgiify/si.uom.si-units/2.1</bundle>
-		<bundle dependency="true">mvn:si.uom/si-quantity/2.1</bundle>
-		<bundle dependency="true">mvn:tech.units/indriya/2.2</bundle>
+		<bundle dependency="true">mvn:org.openhab.osgiify/si.uom.si-units/2.2</bundle>
+		<bundle dependency="true">mvn:si.uom/si-quantity/2.2</bundle>
+		<bundle dependency="true">mvn:tech.units/indriya/2.2.2</bundle>
 		<bundle dependency="true">mvn:tech.uom.lib/uom-lib-common/2.2</bundle>
 		<bundle dependency="true">mvn:org.apiguardian/apiguardian-api/1.1.2</bundle>
 		<bundle dependency="true">mvn:org.osgi/org.osgi.service.component.annotations/1.5.1</bundle>
@@ -51,8 +51,8 @@
 	</feature>
 
 	<feature name="openhab.tp-commons-net" description="The Apache Commons Net library" version="${project.version}">
-		<capability>openhab.tp;feature=commons-net;version=3.9.0</capability>
-		<bundle dependency="true">mvn:commons-net/commons-net/3.9.0</bundle>
+		<capability>openhab.tp;feature=commons-net;version=3.11.1</capability>
+		<bundle dependency="true">mvn:commons-net/commons-net/3.11.1</bundle>
 	</feature>
 
 	<feature name="openhab.tp-gson" description="Gson" version="${project.version}">
@@ -189,9 +189,9 @@
 	</feature>
 
 	<feature name="openhab.tp-jose4j" description="jose4j JWT library" version="${project.version}">
-		<capability>openhab.tp;feature=jose4j;version=0.9.5</capability>
+		<capability>openhab.tp;feature=jose4j;version=0.9.6</capability>
 		<bundle start-level="10">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.activation-api-1.2.1/1.2.1_3</bundle>
-		<bundle>mvn:org.bitbucket.b_c/jose4j/0.9.5</bundle>
+		<bundle>mvn:org.bitbucket.b_c/jose4j/0.9.6</bundle>
 	</feature>
 
 	<feature name="openhab.tp-jupnp" description="UPnP/DLNA library for Java" version="${project.version}">

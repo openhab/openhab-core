@@ -41,6 +41,7 @@ import org.openhab.core.persistence.FilterCriteria.Ordering;
 import org.openhab.core.persistence.HistoricItem;
 import org.openhab.core.persistence.PersistenceItemInfo;
 import org.openhab.core.persistence.QueryablePersistenceService;
+import org.openhab.core.persistence.extensions.PersistenceExtensions.RiemannType;
 import org.openhab.core.persistence.strategy.PersistenceStrategy;
 import org.openhab.core.types.State;
 
@@ -49,6 +50,7 @@ import org.openhab.core.types.State;
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Mark Herwege - Allow future values
+ * @author Mark Herwege - Adapt test expected value logic for Riemann sums
  */
 @NonNullByDefault
 public class TestPersistenceService implements QueryablePersistenceService {
@@ -86,6 +88,8 @@ public class TestPersistenceService implements QueryablePersistenceService {
     static final int FUTURE_END = 2100;
     static final int AFTER_END = 2110;
     static final DecimalType STATE = new DecimalType(HISTORIC_END);
+
+    static final double KELVIN_OFFSET = 273.15;
 
     private final ItemRegistry itemRegistry;
 
@@ -176,6 +180,7 @@ public class TestPersistenceService implements QueryablePersistenceService {
                 }
                 final int year = i;
                 results.add(new HistoricItem() {
+
                     @Override
                     public ZonedDateTime getTimestamp() {
                         return ZonedDateTime.of(year, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault());
@@ -201,6 +206,7 @@ public class TestPersistenceService implements QueryablePersistenceService {
             if (filter.getOrdering() == Ordering.DESCENDING) {
                 Collections.reverse(results);
             }
+
             Stream<HistoricItem> stream = results.stream();
             if (filter.getPageNumber() > 0) {
                 stream = stream.skip(filter.getPageSize() * filter.getPageNumber());
@@ -234,20 +240,171 @@ public class TestPersistenceService implements QueryablePersistenceService {
     }
 
     static DecimalType value(long year) {
+        return value(year, false);
+    }
+
+    private static DecimalType value(long year, boolean kelvinOffset) {
         if (year < HISTORIC_START) {
             return DecimalType.ZERO;
         } else if (year <= HISTORIC_END) {
-            return new DecimalType(year);
+            return new DecimalType(year + (kelvinOffset ? KELVIN_OFFSET : 0));
         } else if (year < FUTURE_START) {
-            return new DecimalType(HISTORIC_END);
+            return new DecimalType(HISTORIC_END + (kelvinOffset ? KELVIN_OFFSET : 0));
         } else if (year <= FUTURE_END) {
-            return new DecimalType(year);
+            return new DecimalType(year + (kelvinOffset ? KELVIN_OFFSET : 0));
         } else {
-            return new DecimalType(FUTURE_END);
+            return new DecimalType(FUTURE_END + (kelvinOffset ? KELVIN_OFFSET : 0));
         }
     }
 
-    static double average(@Nullable Integer beginYear, @Nullable Integer endYear) {
+    static double testRiemannSum(@Nullable Integer beginYear, @Nullable Integer endYear, RiemannType type) {
+        return testRiemannSum(beginYear, endYear, type, false);
+    }
+
+    static double testRiemannSumCelsius(@Nullable Integer beginYear, @Nullable Integer endYear, RiemannType type) {
+        return testRiemannSum(beginYear, endYear, type, true);
+    }
+
+    private static double testRiemannSum(@Nullable Integer beginYear, @Nullable Integer endYear, RiemannType type,
+            boolean kelvinOffset) {
+        ZonedDateTime now = ZonedDateTime.now();
+        int begin = beginYear != null ? (beginYear < HISTORIC_START ? HISTORIC_START : beginYear) : now.getYear() + 1;
+        int end = endYear != null ? endYear : now.getYear();
+        double sum = 0;
+        int index = begin;
+        long duration = 0;
+        long nextDuration = 0;
+        switch (type) {
+            case LEFT:
+                if (beginYear == null) {
+                    duration = Duration
+                            .between(now, ZonedDateTime.of(now.getYear() + 1, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()))
+                            .toSeconds();
+                }
+                while (index < end) {
+                    int bucketStart = index;
+                    double value = value(index, kelvinOffset).doubleValue();
+                    while ((index < end - 1) && (value(index).longValue() == value(index + 1).longValue())) {
+                        index++;
+                    }
+                    index++;
+                    duration += Duration
+                            .between(ZonedDateTime.of(bucketStart, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()),
+                                    ZonedDateTime.of(index, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()))
+                            .toSeconds();
+                    if (endYear == null && index == end) {
+                        duration += Duration
+                                .between(ZonedDateTime.of(now.getYear(), 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()), now)
+                                .toSeconds();
+                    }
+                    sum += value * duration;
+                    duration = 0;
+                }
+                break;
+            case RIGHT:
+                if (beginYear == null) {
+                    duration = Duration
+                            .between(now, ZonedDateTime.of(now.getYear() + 1, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()))
+                            .toSeconds();
+                }
+                while (index < end) {
+                    int bucketStart = index;
+                    while ((index < end - 1) && (value(index).longValue() == value(index + 1).longValue())) {
+                        index++;
+                    }
+                    index++;
+                    double value = value(index, kelvinOffset).doubleValue();
+                    duration += Duration
+                            .between(ZonedDateTime.of(bucketStart, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()),
+                                    ZonedDateTime.of(index, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()))
+                            .toSeconds();
+                    if (endYear == null && index == end) {
+                        duration += Duration
+                                .between(ZonedDateTime.of(now.getYear(), 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()), now)
+                                .toSeconds();
+                    }
+                    sum += value * duration;
+                    duration = 0;
+                }
+                break;
+            case TRAPEZOIDAL:
+                if (beginYear == null) {
+                    duration = Duration
+                            .between(now, ZonedDateTime.of(now.getYear() + 1, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()))
+                            .toSeconds();
+                }
+                while (index < end) {
+                    int bucketStart = index;
+                    double value = value(index, kelvinOffset).doubleValue();
+                    while ((index < end - 1) && (value(index).longValue() == value(index + 1).longValue())) {
+                        index++;
+                    }
+                    index++;
+                    value = (value + value(index, kelvinOffset).doubleValue()) / 2.0;
+                    duration += Duration
+                            .between(ZonedDateTime.of(bucketStart, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()),
+                                    ZonedDateTime.of(index, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()))
+                            .toSeconds();
+                    if (endYear == null && index == end) {
+                        duration += Duration
+                                .between(ZonedDateTime.of(now.getYear(), 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()), now)
+                                .toSeconds();
+                    }
+                    sum += value * duration;
+                    duration = 0;
+                }
+                break;
+            case MIDPOINT:
+                int nextIndex = begin;
+                boolean startBucket = true;
+                double startValue = value(begin, kelvinOffset).doubleValue();
+                if (beginYear == null) {
+                    duration = Duration.between(now, ZonedDateTime.of(begin, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()))
+                            .toSeconds();
+                }
+                while (index < end - 1 && nextIndex < end) {
+                    int bucketStart = index;
+                    while ((index < end - 1) && (value(index).longValue() == value(index + 1).longValue())) {
+                        index++;
+                    }
+                    index++;
+                    double value = value(index, kelvinOffset).doubleValue();
+                    duration += Duration
+                            .between(ZonedDateTime.of(bucketStart, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()),
+                                    ZonedDateTime.of(index, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()))
+                            .toSeconds();
+                    if (startBucket) {
+                        sum += startValue * duration / 2.0;
+                        startBucket = false;
+                    }
+                    bucketStart = index;
+                    nextIndex = index;
+                    while ((nextIndex < end - 1)
+                            && (value(nextIndex).longValue() == value(nextIndex + 1).longValue())) {
+                        nextIndex++;
+                    }
+                    nextIndex++;
+                    nextDuration = Duration
+                            .between(ZonedDateTime.of(bucketStart, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()),
+                                    ZonedDateTime.of(nextIndex, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()))
+                            .toSeconds();
+                    if (endYear == null && nextIndex == end) {
+                        nextDuration += Duration
+                                .between(ZonedDateTime.of(now.getYear(), 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()), now)
+                                .toSeconds();
+                    }
+                    sum += value * (duration + nextDuration) / 2.0;
+                    duration = 0;
+                }
+                double endValue = value(end, kelvinOffset).doubleValue();
+                long endDuration = nextDuration;
+                sum += endValue * endDuration / 2.0;
+                break;
+        }
+        return sum;
+    }
+
+    static double testAverage(@Nullable Integer beginYear, @Nullable Integer endYear) {
         ZonedDateTime now = ZonedDateTime.now();
         ZonedDateTime beginDate = beginYear != null
                 ? ZonedDateTime.of(beginYear >= HISTORIC_START ? beginYear : HISTORIC_START, 1, 1, 0, 0, 0, 0,
@@ -255,22 +412,12 @@ public class TestPersistenceService implements QueryablePersistenceService {
                 : now;
         ZonedDateTime endDate = endYear != null ? ZonedDateTime.of(endYear, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault())
                 : now;
-        int begin = beginYear != null ? beginYear : now.getYear() + 1;
-        int end = endYear != null ? endYear : now.getYear();
-        long sum = LongStream.range(begin, end).map(y -> value(y).longValue() * Duration
-                .between(ZonedDateTime.of(Long.valueOf(y).intValue(), 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()),
-                        ZonedDateTime.of(Long.valueOf(y + 1).intValue(), 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()))
-                .toMillis()).sum();
-        sum += beginYear == null ? value(now.getYear()).longValue() * Duration
-                .between(now, ZonedDateTime.of(now.getYear() + 1, 1, 1, 0, 0, 0, 0, ZoneId.systemDefault())).toMillis()
-                : 0;
-        sum += endYear == null ? value(now.getYear()).longValue() * Duration
-                .between(ZonedDateTime.of(now.getYear(), 1, 1, 0, 0, 0, 0, ZoneId.systemDefault()), now).toMillis() : 0;
-        long duration = Duration.between(beginDate, endDate).toMillis();
+        double sum = testRiemannSum(beginYear, endYear, RiemannType.LEFT);
+        long duration = Duration.between(beginDate, endDate).toSeconds();
         return 1.0 * sum / duration;
     }
 
-    static double median(@Nullable Integer beginYear, @Nullable Integer endYear) {
+    static double testMedian(@Nullable Integer beginYear, @Nullable Integer endYear) {
         ZonedDateTime now = ZonedDateTime.now();
         int begin = beginYear != null ? beginYear : now.getYear() + 1;
         int end = endYear != null ? endYear : now.getYear();

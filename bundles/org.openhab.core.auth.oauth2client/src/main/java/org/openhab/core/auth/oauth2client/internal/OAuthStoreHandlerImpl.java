@@ -33,6 +33,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.auth.client.oauth2.AccessTokenResponse;
+import org.openhab.core.auth.client.oauth2.DeviceCodeResponseDTO;
 import org.openhab.core.auth.client.oauth2.StorageCipher;
 import org.openhab.core.auth.oauth2client.internal.cipher.SymmetricKeyCipher;
 import org.openhab.core.library.types.DateTimeType;
@@ -51,6 +52,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializer;
+import com.google.gson.JsonSyntaxException;
 
 /**
  * This class handles the storage directly. It is internal to the OAuthClientService and there is
@@ -73,6 +75,7 @@ import com.google.gson.JsonSerializer;
  * The recycle is performed when then instance is deactivated
  *
  * @author Gary Tse - Initial contribution
+ * @author Andrew Fiddian-Green - added RFC-8628 support
  */
 @NonNullByDefault
 @Component(property = "CIPHER_TARGET=SymmetricKeyCipher")
@@ -149,6 +152,33 @@ public class OAuthStoreHandlerImpl implements OAuthStoreHandler {
     }
 
     @Override
+    public @Nullable DeviceCodeResponseDTO loadDeviceCodeResponse(String handle) throws GeneralSecurityException {
+        DeviceCodeResponseDTO dcr = (DeviceCodeResponseDTO) storageFacade.get(handle, DEVICE_CODE_RESPONSE);
+        if (dcr == null) {
+            // device code response does not exist
+            return null;
+        }
+        return decryptDeviceCodeResponse(dcr);
+    }
+
+    @Override
+    public void saveDeviceCodeResponse(String handle, @Nullable DeviceCodeResponseDTO dcrArg) {
+        DeviceCodeResponseDTO dcr = dcrArg;
+        if (dcr == null) {
+            dcr = new DeviceCodeResponseDTO(); // put empty
+        }
+
+        DeviceCodeResponseDTO dcrEncrypted;
+        try {
+            dcrEncrypted = encryptDeviceCodeResponse(dcr);
+        } catch (GeneralSecurityException e) {
+            logger.warn("Unable to encrypt token, storing as-is", e);
+            dcrEncrypted = dcr;
+        }
+        storageFacade.put(handle, dcrEncrypted);
+    }
+
+    @Override
     public void remove(String handle) {
         storageFacade.removeByHandle(handle);
     }
@@ -181,15 +211,45 @@ public class OAuthStoreHandlerImpl implements OAuthStoreHandler {
         return encryptedAccessToken;
     }
 
+    private DeviceCodeResponseDTO encryptDeviceCodeResponse(DeviceCodeResponseDTO dcr) throws GeneralSecurityException {
+        DeviceCodeResponseDTO dcrEncrypted = (DeviceCodeResponseDTO) dcr.clone();
+        if (dcr.getDeviceCode() != null) {
+            dcrEncrypted.setDeviceCode(encrypt(dcr.getDeviceCode()));
+        }
+        if (dcr.getUserCode() != null) {
+            dcrEncrypted.setUserCode(encrypt(dcr.getUserCode()));
+        }
+        if (dcr.getVerificationUri() != null) {
+            dcrEncrypted.setVerificationUri(encrypt(dcr.getVerificationUri()));
+        }
+        if (dcr.getVerificationUriComplete() != null) {
+            dcrEncrypted.setVerificationUriComplete(encrypt(dcr.getVerificationUriComplete()));
+        }
+        return dcrEncrypted;
+    }
+
     private AccessTokenResponse decryptToken(AccessTokenResponse accessTokenResponse) throws GeneralSecurityException {
         AccessTokenResponse decryptedToken = (AccessTokenResponse) accessTokenResponse.clone();
         if (storageCipher.isEmpty()) {
             return decryptedToken; // do nothing if no cipher
         }
-        logger.debug("Decrypting token: {}", accessTokenResponse);
+        logger.debug("Decrypting: {}", accessTokenResponse);
         decryptedToken.setAccessToken(storageCipher.get().decrypt(accessTokenResponse.getAccessToken()));
         decryptedToken.setRefreshToken(storageCipher.get().decrypt(accessTokenResponse.getRefreshToken()));
         return decryptedToken;
+    }
+
+    private DeviceCodeResponseDTO decryptDeviceCodeResponse(DeviceCodeResponseDTO dcr) throws GeneralSecurityException {
+        DeviceCodeResponseDTO dcrDecrypted = (DeviceCodeResponseDTO) dcr.clone();
+        if (storageCipher.isEmpty()) {
+            return dcrDecrypted; // do nothing if no cipher
+        }
+        logger.debug("Decrypting: {}", dcr);
+        dcrDecrypted.setDeviceCode(storageCipher.get().decrypt(dcr.getDeviceCode()));
+        dcrDecrypted.setUserCode(storageCipher.get().decrypt(dcr.getUserCode()));
+        dcrDecrypted.setVerificationUri(storageCipher.get().decrypt(dcr.getVerificationUri()));
+        dcrDecrypted.setVerificationUriComplete(storageCipher.get().decrypt(dcr.getVerificationUriComplete()));
+        return dcrDecrypted;
     }
 
     private @Nullable String encrypt(String token) throws GeneralSecurityException {
@@ -287,7 +347,7 @@ public class OAuthStoreHandlerImpl implements OAuthStoreHandler {
                 if (ACCESS_TOKEN_RESPONSE.equals(recordType)) {
                     try {
                         return gson.fromJson(value, AccessTokenResponse.class);
-                    } catch (Exception e) {
+                    } catch (JsonSyntaxException e) {
                         logger.error(
                                 "Unable to deserialize json, discarding AccessTokenResponse.  "
                                         + "Please check json against standard or with oauth provider. json:\n{}",
@@ -297,16 +357,26 @@ public class OAuthStoreHandlerImpl implements OAuthStoreHandler {
                 } else if (SERVICE_CONFIGURATION.equals(recordType)) {
                     try {
                         return gson.fromJson(value, PersistedParams.class);
-                    } catch (Exception e) {
+                    } catch (JsonSyntaxException e) {
                         logger.error("Unable to deserialize json, discarding PersistedParams. json:\n{}", value, e);
                         return null;
                     }
                 } else if (LAST_USED.equals(recordType)) {
                     try {
                         return gson.fromJson(value, Instant.class);
-                    } catch (Exception e) {
-                        logger.info("Unable to deserialize json, reset LAST_USED to now.  json:\n{}", value);
+                    } catch (JsonSyntaxException e) {
+                        logger.info("Unable to deserialize json, reset LAST_USED to now. json:\n{}", value);
                         return Instant.now();
+                    }
+                } else if (DEVICE_CODE_RESPONSE.equals(recordType)) {
+                    try {
+                        return gson.fromJson(value, DeviceCodeResponseDTO.class);
+                    } catch (JsonSyntaxException e) {
+                        logger.error(
+                                "Unable to deserialize json, discarding DeviceCodeResponse. "
+                                        + "Please check json against standard or with oauth provider. json:\n{}",
+                                value, e);
+                        return null;
                     }
                 }
                 return null;
@@ -323,6 +393,28 @@ public class OAuthStoreHandlerImpl implements OAuthStoreHandler {
                 } else {
                     String gsonAccessTokenStr = gson.toJson(accessTokenResponse);
                     storage.put(ACCESS_TOKEN_RESPONSE.getKey(handle), gsonAccessTokenStr);
+                    String gsonDateStr = gson.toJson(Instant.now());
+                    storage.put(LAST_USED.getKey(handle), gsonDateStr);
+
+                    if (!allHandles.contains(handle)) {
+                        // update all handles index
+                        allHandles.add(handle);
+                        storage.put(STORE_KEY_INDEX_OF_HANDLES, gson.toJson(allHandles));
+                    }
+                }
+            } finally {
+                storageLock.unlock();
+            }
+        }
+
+        public void put(String handle, @Nullable DeviceCodeResponseDTO dcr) {
+            storageLock.lock();
+            try {
+                if (dcr == null) {
+                    storage.put(DEVICE_CODE_RESPONSE.getKey(handle), (String) null);
+                } else {
+                    String gsonDcrString = gson.toJson(dcr);
+                    storage.put(DEVICE_CODE_RESPONSE.getKey(handle), gsonDcrString);
                     String gsonDateStr = gson.toJson(Instant.now());
                     storage.put(LAST_USED.getKey(handle), gsonDateStr);
 
@@ -364,6 +456,7 @@ public class OAuthStoreHandlerImpl implements OAuthStoreHandler {
             try {
                 if (allHandles.remove(handle)) { // entry exists and successfully removed
                     storage.remove(ACCESS_TOKEN_RESPONSE.getKey(handle));
+                    storage.remove(DEVICE_CODE_RESPONSE.getKey(handle));
                     storage.remove(LAST_USED.getKey(handle));
                     storage.remove(SERVICE_CONFIGURATION.getKey(handle));
                     storage.put(STORE_KEY_INDEX_OF_HANDLES, gson.toJson(allHandles)); // update all handles

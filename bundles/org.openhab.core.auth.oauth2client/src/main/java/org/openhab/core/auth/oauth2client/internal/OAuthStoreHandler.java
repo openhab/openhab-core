@@ -17,11 +17,13 @@ import java.security.GeneralSecurityException;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.auth.client.oauth2.AccessTokenResponse;
+import org.openhab.core.auth.client.oauth2.DeviceCodeResponseDTO;
 
 /**
  * This is for OAuth client internal use.
  *
  * @author Gary Tse - Initial contribution
+ * @author Andrew Fiddian-Green - added RFC-8628 support
  */
 @NonNullByDefault
 public interface OAuthStoreHandler {
@@ -49,6 +51,30 @@ public interface OAuthStoreHandler {
      * @param accessTokenResponse This can be null, which explicitly removes the AccessTokenResponse from store.
      */
     void saveAccessTokenResponse(String handle, @Nullable AccessTokenResponse accessTokenResponse);
+
+    /**
+     * Get a {@link DeviceCodeResponseDTO} from the store. The device code is encrypted and therefore will be decrypted
+     * before returning.
+     *
+     * If the storage is not available, it is still possible to get the DeviceCodeResponse from memory cache.
+     * However, the last-used statistics will be broken. It is a measured risk to take.
+     *
+     * @param handle the handle given by the call
+     *            {@code OAuthFactory#createOAuthClientService(String, String, String, String, String, Boolean)}
+     * @return DeviceCodeResponse if available, null if not.
+     * @throws GeneralSecurityException when the token cannot be decrypted.
+     */
+    @Nullable
+    DeviceCodeResponseDTO loadDeviceCodeResponse(String handle) throws GeneralSecurityException;
+
+    /**
+     * Save the {@code DeviceCodeResponse} by the handle
+     *
+     * @param handle unique string used as a handle/ reference to the OAuth client service, and the underlying
+     *            access tokens, configs.
+     * @param deviceCodeResponse This can be null, which explicitly removes the DeviceCodeResponse from store.
+     */
+    void saveDeviceCodeResponse(String handle, @Nullable DeviceCodeResponseDTO deviceCodeResponse);
 
     /**
      * Remove the token for the given handler. No exception is thrown in all cases
