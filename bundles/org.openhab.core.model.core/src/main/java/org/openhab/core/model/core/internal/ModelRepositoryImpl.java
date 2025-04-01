@@ -51,7 +51,7 @@ import org.slf4j.LoggerFactory;
  * @author Oliver Libutzki - Added reloadAllModelsOfType method
  * @author Simon Kaufmann - added validation of models before loading them
  * @author Laurent Garnier - Added method generateSyntaxFromModel
- * @author Laurent Garnier - Added methods addStandaloneModel and removeStandaloneModel
+ * @author Laurent Garnier - Added methods createIsolatedModel and removeIsolatedModel
  */
 @Component(immediate = true)
 @NonNullByDefault
@@ -104,7 +104,7 @@ public class ModelRepositoryImpl implements ModelRepository {
     }
 
     public boolean addOrRefreshModel(String name, final InputStream originalInputStream, @Nullable List<String> errors,
-            @Nullable List<String> warnings, boolean standalone) {
+            @Nullable List<String> warnings, boolean isolated) {
         logger.info("Loading model '{}'", name);
         Resource resource = null;
         byte[] bytes;
@@ -120,14 +120,14 @@ public class ModelRepositoryImpl implements ModelRepository {
                 warnings.addAll(newWarnings);
             }
             if (!valid) {
-                if (!standalone) {
+                if (!isolated) {
                     logger.warn("Configuration model '{}' has errors, therefore ignoring it: {}", name,
                             String.join("\n", newErrors));
                 }
                 removeModel(name);
                 return false;
             }
-            if (!standalone && !newWarnings.isEmpty()) {
+            if (!isolated && !newWarnings.isEmpty()) {
                 logger.info("Validation issues found in configuration model '{}', using it anyway:\n{}", name,
                         String.join("\n", newWarnings));
             }
@@ -148,7 +148,7 @@ public class ModelRepositoryImpl implements ModelRepository {
                         resource = resourceSet.createResource(URI.createURI(name));
                         if (resource != null) {
                             resource.load(inputStream, resourceOptions);
-                            if (!standalone) {
+                            if (!isolated) {
                                 notifyListeners(name, EventType.ADDED);
                             }
                             return true;
@@ -161,7 +161,7 @@ public class ModelRepositoryImpl implements ModelRepository {
                 synchronized (resourceSet) {
                     resource.unload();
                     resource.load(inputStream, resourceOptions);
-                    if (!standalone) {
+                    if (!isolated) {
                         notifyListeners(name, EventType.MODIFIED);
                     }
                     return true;
@@ -181,12 +181,12 @@ public class ModelRepositoryImpl implements ModelRepository {
         return removeModel(name, false);
     }
 
-    private boolean removeModel(String name, boolean standalone) {
+    private boolean removeModel(String name, boolean isolated) {
         Resource resource = getResource(name);
         if (resource != null) {
             synchronized (resourceSet) {
                 // do not physically delete it, but remove it from the resource set
-                if (!standalone) {
+                if (!isolated) {
                     notifyListeners(name, EventType.REMOVED);
                 }
                 resourceSet.getResources().remove(resource);
@@ -263,14 +263,14 @@ public class ModelRepositoryImpl implements ModelRepository {
     }
 
     @Override
-    public @Nullable String addStandaloneModel(String modelType, InputStream inputStream, List<String> errors,
+    public @Nullable String createIsolatedModel(String modelType, InputStream inputStream, List<String> errors,
             List<String> warnings) {
-        String name = "tmp_syntax_%d.%s".formatted(++counter, modelType);
+        String name = "tmp_isolated_model_%d.%s".formatted(++counter, modelType);
         return addOrRefreshModel(name, inputStream, errors, warnings, true) ? name : null;
     }
 
     @Override
-    public boolean removeStandaloneModel(String name) {
+    public boolean removeIsolatedModel(String name) {
         return removeModel(name, true);
     }
 

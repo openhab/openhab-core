@@ -40,7 +40,7 @@ import org.openhab.core.items.fileconverter.AbstractItemFileGenerator;
 import org.openhab.core.items.fileconverter.ItemFileGenerator;
 import org.openhab.core.items.fileconverter.ItemFileParser;
 import org.openhab.core.model.core.ModelRepository;
-import org.openhab.core.model.item.internal.StandaloneItemProvider;
+import org.openhab.core.model.item.internal.GenericItemProvider;
 import org.openhab.core.model.items.ItemModel;
 import org.openhab.core.model.items.ItemsFactory;
 import org.openhab.core.model.items.ModelBinding;
@@ -69,15 +69,15 @@ public class DslItemFileConverter extends AbstractItemFileGenerator implements I
     private final Logger logger = LoggerFactory.getLogger(DslItemFileConverter.class);
 
     private final ModelRepository modelRepository;
-    private final StandaloneItemProvider standaloneItemProvider;
+    private final GenericItemProvider itemProvider;
     private final ConfigDescriptionRegistry configDescriptionRegistry;
 
     @Activate
     public DslItemFileConverter(final @Reference ModelRepository modelRepository,
-            final @Reference StandaloneItemProvider standaloneItemProvider,
+            final @Reference GenericItemProvider itemProvider,
             final @Reference ConfigDescriptionRegistry configDescriptionRegistry) {
         this.modelRepository = modelRepository;
-        this.standaloneItemProvider = standaloneItemProvider;
+        this.itemProvider = itemProvider;
         this.configDescriptionRegistry = configDescriptionRegistry;
     }
 
@@ -270,9 +270,9 @@ public class DslItemFileConverter extends AbstractItemFileGenerator implements I
     public boolean parseFileFormat(String syntax, List<Item> items, List<Metadata> metadata, List<String> errors,
             List<String> warnings) {
         ByteArrayInputStream inputStream = new ByteArrayInputStream(syntax.getBytes());
-        String modelName = modelRepository.addStandaloneModel("items", inputStream, errors, warnings);
+        String modelName = modelRepository.createIsolatedModel("items", inputStream, errors, warnings);
         if (modelName != null) {
-            items.addAll(standaloneItemProvider.getItemsFromStandaloneModel(modelName));
+            items.addAll(itemProvider.getItemsFromModel(modelName));
             // TODO retrieve metadata
             for (Item item : items) {
                 MetadataKey key;
@@ -293,7 +293,7 @@ public class DslItemFileConverter extends AbstractItemFileGenerator implements I
                 md = new Metadata(key, "myBinding:myTypoe:myThing#channel2", null);
                 metadata.add(md);
             }
-            modelRepository.removeStandaloneModel(modelName);
+            modelRepository.removeIsolatedModel(modelName);
             return true;
         }
         return false;

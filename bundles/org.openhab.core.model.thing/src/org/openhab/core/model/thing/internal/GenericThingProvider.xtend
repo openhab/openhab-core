@@ -73,8 +73,8 @@ import org.slf4j.LoggerFactory
  * @author Markus Rathgeb - Add locale provider support
  * @author Laurent Garnier - Add interface StandaloneThingProvider
  */
-@Component(immediate=true, service=#[ThingProvider, StandaloneThingProvider])
-class GenericThingProvider extends AbstractProviderLazyNullness<Thing> implements ThingProvider, StandaloneThingProvider, ModelRepositoryChangeListener, ReadyService.ReadyTracker {
+@Component(immediate=true, service=#[ ThingProvider, GenericThingProvider ])
+class GenericThingProvider extends AbstractProviderLazyNullness<Thing> implements ThingProvider, ModelRepositoryChangeListener, ReadyService.ReadyTracker {
 
     static final String XML_THING_TYPE = "openhab.xmlThingTypes";
 
@@ -491,7 +491,7 @@ class GenericThingProvider extends AbstractProviderLazyNullness<Thing> implement
         }
     }
 
-    override List<Thing> getThingsFromStandaloneModel(String modelName) {
+    def public List<Thing> getThingsFromIsolatedModel(String modelName) {
         val things = newArrayList()
         if (modelRepository !== null && modelName.endsWith("things")) {
             logger.debug("Read standalone things from model '{}'", modelName);

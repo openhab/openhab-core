@@ -29,7 +29,7 @@ import org.eclipse.jdt.annotation.Nullable;
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Laurent Garnier - Added method generateSyntaxFromModel
- * @author Laurent Garnier - Added methods addStandaloneModel and removeStandaloneModel
+ * @author Laurent Garnier - Added methods createIsolatedModel and removeIsolatedModel
  */
 @NonNullByDefault
 public interface ModelRepository {
@@ -98,8 +98,10 @@ public interface ModelRepository {
     void removeModelRepositoryChangeListener(ModelRepositoryChangeListener listener);
 
     /**
-     * Adds a standalone model to the repository
-     * A standalone model will be loaded without triggering any listener.
+     * Creates an isolated model in the repository
+     *
+     * An isolated model is a temporary model that will be loaded without triggering any listener
+     * and so without impacting any object registry.
      *
      * @param modelType the model type
      * @param inputStream an input stream with the model's content
@@ -108,15 +110,15 @@ public interface ModelRepository {
      * @return the created model name if it was successfully processed, null otherwise
      */
     @Nullable
-    String addStandaloneModel(String modelType, InputStream inputStream, List<String> errors, List<String> warnings);
+    String createIsolatedModel(String modelType, InputStream inputStream, List<String> errors, List<String> warnings);
 
     /**
-     * Removes a standalone model from the repository
+     * Removes an isolated model from the repository
      *
      * @param name the name of the model to remove
      * @return true, if model was removed, false, if it did not exist
      */
-    boolean removeStandaloneModel(String name);
+    boolean removeIsolatedModel(String name);
 
     /**
      * Generate the syntax from a provided model content.

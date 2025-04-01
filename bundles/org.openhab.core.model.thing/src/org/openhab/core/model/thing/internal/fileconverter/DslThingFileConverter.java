@@ -25,7 +25,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.ConfigDescriptionRegistry;
 import org.openhab.core.model.core.ModelRepository;
-import org.openhab.core.model.thing.internal.StandaloneThingProvider;
+import org.openhab.core.model.thing.internal.GenericThingProvider;
 import org.openhab.core.model.thing.thing.ModelBridge;
 import org.openhab.core.model.thing.thing.ModelChannel;
 import org.openhab.core.model.thing.thing.ModelProperty;
@@ -62,17 +62,16 @@ public class DslThingFileConverter extends AbstractThingFileGenerator implements
     private final Logger logger = LoggerFactory.getLogger(DslThingFileConverter.class);
 
     private final ModelRepository modelRepository;
-    private final StandaloneThingProvider standaloneThingProvider;
+    private final GenericThingProvider thingProvider;
 
     @Activate
     public DslThingFileConverter(final @Reference ModelRepository modelRepository,
-            final @Reference StandaloneThingProvider standaloneThingProvider,
-            final @Reference ThingTypeRegistry thingTypeRegistry,
+            final @Reference GenericThingProvider thingProvider, final @Reference ThingTypeRegistry thingTypeRegistry,
             final @Reference ChannelTypeRegistry channelTypeRegistry,
             final @Reference ConfigDescriptionRegistry configDescRegistry) {
         super(thingTypeRegistry, channelTypeRegistry, configDescRegistry);
         this.modelRepository = modelRepository;
-        this.standaloneThingProvider = standaloneThingProvider;
+        this.thingProvider = thingProvider;
     }
 
     @Override
@@ -213,10 +212,10 @@ public class DslThingFileConverter extends AbstractThingFileGenerator implements
     @Override
     public boolean parseFileFormat(String syntax, List<Thing> things, List<String> errors, List<String> warnings) {
         ByteArrayInputStream inputStream = new ByteArrayInputStream(syntax.getBytes());
-        String modelName = modelRepository.addStandaloneModel("things", inputStream, errors, warnings);
+        String modelName = modelRepository.createIsolatedModel("things", inputStream, errors, warnings);
         if (modelName != null) {
-            things.addAll(standaloneThingProvider.getThingsFromStandaloneModel(modelName));
-            modelRepository.removeStandaloneModel(modelName);
+            things.addAll(thingProvider.getThingsFromIsolatedModel(modelName));
+            modelRepository.removeIsolatedModel(modelName);
             return true;
         }
         return false;
