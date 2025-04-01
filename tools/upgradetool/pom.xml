@@ -73,6 +73,11 @@
       <artifactId>org.eclipse.jdt.annotation</artifactId>
       <version>2.2.600</version>
     </dependency>
+    <dependency>
+      <groupId>org.openhab.core.bundles</groupId>
+      <artifactId>org.openhab.core.persistence</artifactId>
+      <version>5.0.0-SNAPSHOT</version>
+    </dependency>
   </dependencies>
 
   <build>
