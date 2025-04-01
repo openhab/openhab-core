@@ -13,6 +13,7 @@
 package org.openhab.core.media;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.openhab.core.media.model.MediaEntry;
 
 /**
  * This is an interface
@@ -20,6 +21,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * @author Laurent Arnal - Initial contribution
  */
 @NonNullByDefault
-public interface MediaServiceFactory {
-
+public interface MediaListenner {
+    void refreshEntry(MediaEntry mediaEntry);
 }
