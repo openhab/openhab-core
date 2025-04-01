@@ -113,6 +113,10 @@ public class MediaServlet extends HttpServlet implements MediaHTTPServer {
         MediaRegistry mediaRegistry = mediaService.getMediaRegistry();
         MediaEntry currentEntry = mediaRegistry.getChildForPath(path);
 
+        if (mediaService.getMediaListenner() != null && currentEntry != null) {
+            mediaService.getMediaListenner().refreshEntry(currentEntry);
+        }
+
         MediaEntry recurseEntry = currentEntry;
         while (!recurseEntry.getName().equals("Root")) {
             sb.insert(0, " > <a href=" + requestURI + "?path=" + recurseEntry.getPath() + ">" + recurseEntry.getName()

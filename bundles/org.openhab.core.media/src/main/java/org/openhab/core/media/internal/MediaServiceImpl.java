@@ -13,6 +13,8 @@
 package org.openhab.core.media.internal;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.media.MediaListenner;
 import org.openhab.core.media.MediaService;
 import org.openhab.core.media.model.MediaEntry;
 import org.openhab.core.media.model.MediaRegistry;
@@ -29,6 +31,7 @@ import org.osgi.service.component.annotations.Component;
 @Component(immediate = true)
 public class MediaServiceImpl implements MediaService {
 
+    public @Nullable MediaListenner listenner = null;
     public MediaRegistry registry = new MediaRegistry();
 
     @Activate
@@ -43,6 +46,17 @@ public class MediaServiceImpl implements MediaService {
     @Override
     public MediaRegistry getMediaRegistry() {
         return registry;
+    }
+
+    @Override
+    public void setMediaListenner(MediaListenner listenner) {
+        this.listenner = listenner;
+    }
+
+    @Override
+    public @Nullable MediaListenner getMediaListenner() {
+        // TODO Auto-generated method stub
+        return listenner;
     }
 
 }
