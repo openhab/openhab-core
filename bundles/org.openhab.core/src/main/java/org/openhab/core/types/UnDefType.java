@@ -30,7 +30,7 @@ public enum UnDefType implements PrimitiveType, State {
 
     @Override
     public String format(String pattern) {
-        return String.format(pattern, this.toString());
+        return pattern.formatted(this.toString());
     }
 
     @Override

@@ -15,6 +15,9 @@ package org.openhab.core.common;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
+
 /**
  * Thread factory that applies a thread name constructed by a supplied identifier.
  *
@@ -25,12 +28,13 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  * @author Markus Rathgeb - Initial contribution
  */
+@NonNullByDefault
 public class NamedThreadFactory implements ThreadFactory {
 
     private final boolean daemonize;
     private final int priority;
 
-    private final ThreadGroup group;
+    private final @Nullable ThreadGroup group;
     private final AtomicInteger threadNumber = new AtomicInteger(1);
     private final String namePrefix;
 
@@ -81,7 +85,7 @@ public class NamedThreadFactory implements ThreadFactory {
     }
 
     @Override
-    public Thread newThread(Runnable runnable) {
+    public Thread newThread(@Nullable Runnable runnable) {
         final Thread thread = new Thread(group, runnable, namePrefix + threadNumber.getAndIncrement(), 0);
         if (thread.isDaemon() != daemonize) {
             thread.setDaemon(daemonize);
