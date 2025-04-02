@@ -31,6 +31,7 @@ import org.openhab.core.types.State;
 import org.openhab.core.types.UnDefType;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonParser;
 
 /**
  * {@link ItemEventFactoryTest} tests the {@link ItemEventFactory}.
@@ -96,7 +97,7 @@ public class ItemEventFactoryTest {
 
         assertEquals(ITEM_COMMAND_EVENT_TYPE, event.getType());
         assertEquals(ITEM_COMMAND_EVENT_TOPIC, event.getTopic());
-        assertEquals(ITEM_COMMAND_EVENT_PAYLOAD, event.getPayload());
+        assertEquals(JsonParser.parseString(ITEM_COMMAND_EVENT_PAYLOAD), JsonParser.parseString(event.getPayload()));
         assertEquals(ITEM_NAME, event.getItemName());
         assertEquals(SOURCE, event.getSource());
         assertEquals(OnOffType.class, event.getItemCommand().getClass());
@@ -189,7 +190,7 @@ public class ItemEventFactoryTest {
 
         assertThat(event.getType(), is(ITEM_STATE_EVENT_TYPE));
         assertThat(event.getTopic(), is(ITEM_STATE_EVENT_TOPIC));
-        assertThat(event.getPayload(), is(ITEM_STATE_EVENT_PAYLOAD));
+        assertThat(JsonParser.parseString(event.getPayload()), is(JsonParser.parseString(ITEM_STATE_EVENT_PAYLOAD)));
         assertThat(event.getItemName(), is(ITEM_NAME));
         assertThat(event.getSource(), is(SOURCE));
         assertEquals(OnOffType.class, event.getItemState().getClass());
