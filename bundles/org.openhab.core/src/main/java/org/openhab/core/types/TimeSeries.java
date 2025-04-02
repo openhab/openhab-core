@@ -30,7 +30,7 @@ import org.eclipse.jdt.annotation.Nullable;
  */
 @NonNullByDefault
 public class TimeSeries {
-    private final TreeSet<Entry> states = new TreeSet<>(Comparator.comparing(e -> e.timestamp));
+    private final TreeSet<Entry> states = new TreeSet<>(Comparator.comparing(Entry::timestamp));
     private final Policy policy;
 
     public TimeSeries(Policy policy) {

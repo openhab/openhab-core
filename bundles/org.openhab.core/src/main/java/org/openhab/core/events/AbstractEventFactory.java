@@ -12,12 +12,20 @@
  */
 package org.openhab.core.events;
 
+import java.io.IOException;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.TypeAdapter;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
+import com.google.gson.stream.JsonWriter;
 
 /**
  * The {@link AbstractEventFactory} defines an abstract implementation of the {@link EventFactory} interface. Subclasses
@@ -31,7 +39,8 @@ public abstract class AbstractEventFactory implements EventFactory {
 
     private final Set<String> supportedEventTypes;
 
-    private static final Gson JSONCONVERTER = new Gson();
+    private static final Gson JSONCONVERTER = new GsonBuilder()
+            .registerTypeAdapter(ZonedDateTime.class, new ZonedDateTimeAdapter()).create();
 
     /**
      * Must be called in subclass constructor to define the supported event types.
@@ -118,6 +127,27 @@ public abstract class AbstractEventFactory implements EventFactory {
     protected static void checkNotNullOrEmpty(@Nullable String string, String argumentName) {
         if (string == null || string.isEmpty()) {
             throw new IllegalArgumentException("The argument '" + argumentName + "' must not be null or empty.");
+        }
+    }
+
+    public static class ZonedDateTimeAdapter extends TypeAdapter<ZonedDateTime> {
+
+        @Override
+        public void write(JsonWriter out, @Nullable ZonedDateTime value) throws IOException {
+            if (value == null) {
+                out.nullValue();
+            } else {
+                out.value(value.format(DateTimeFormatter.ISO_ZONED_DATE_TIME));
+            }
+        }
+
+        @Override
+        public @Nullable ZonedDateTime read(JsonReader in) throws IOException {
+            if (in.peek() == JsonToken.NULL) {
+                in.nextNull();
+                return null;
+            }
+            return ZonedDateTime.parse(in.nextString(), DateTimeFormatter.ISO_ZONED_DATE_TIME);
         }
     }
 }

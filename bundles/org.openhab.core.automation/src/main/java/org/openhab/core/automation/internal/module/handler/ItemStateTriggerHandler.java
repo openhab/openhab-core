@@ -25,6 +25,7 @@ import org.openhab.core.automation.handler.TriggerHandlerCallback;
 import org.openhab.core.events.Event;
 import org.openhab.core.events.EventFilter;
 import org.openhab.core.events.EventSubscriber;
+import org.openhab.core.events.TopicEventFilter;
 import org.openhab.core.events.TopicPrefixEventFilter;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.events.GroupItemStateChangedEvent;
@@ -73,21 +74,29 @@ public class ItemStateTriggerHandler extends BaseTriggerModuleHandler implements
             ItemRegistry itemRegistry) {
         super(module);
         this.itemName = (String) module.getConfiguration().get(CFG_ITEMNAME);
-        this.eventFilter = new TopicPrefixEventFilter("openhab/items/" + itemName + "/");
+        boolean isWildcard = itemName.contains("?") || itemName.contains("*");
+        if (isWildcard) {
+            this.eventFilter = new TopicEventFilter(
+                    "^openhab/items/" + itemName.replace("?", ".?").replace("*", ".*?") + "/.*$");
+        } else {
+            this.eventFilter = new TopicPrefixEventFilter("openhab/items/" + itemName + "/");
+        }
         this.state = (String) module.getConfiguration().get(CFG_STATE);
         this.previousState = (String) module.getConfiguration().get(CFG_PREVIOUS_STATE);
         this.ruleUID = ruleUID;
         if (UPDATE_MODULE_TYPE_ID.equals(module.getTypeUID())) {
-            this.types = Set.of(ItemStateUpdatedEvent.TYPE, GroupStateUpdatedEvent.TYPE, ItemAddedEvent.TYPE,
-                    ItemRemovedEvent.TYPE);
+            this.types = isWildcard ? Set.of(ItemStateUpdatedEvent.TYPE, GroupStateUpdatedEvent.TYPE)
+                    : Set.of(ItemStateUpdatedEvent.TYPE, GroupStateUpdatedEvent.TYPE, ItemAddedEvent.TYPE,
+                            ItemRemovedEvent.TYPE);
         } else {
-            this.types = Set.of(ItemStateChangedEvent.TYPE, GroupItemStateChangedEvent.TYPE, ItemAddedEvent.TYPE,
-                    ItemRemovedEvent.TYPE);
+            this.types = isWildcard ? Set.of(ItemStateChangedEvent.TYPE, GroupItemStateChangedEvent.TYPE)
+                    : Set.of(ItemStateChangedEvent.TYPE, GroupItemStateChangedEvent.TYPE, ItemAddedEvent.TYPE,
+                            ItemRemovedEvent.TYPE);
         }
         this.bundleContext = bundleContext;
         eventSubscriberRegistration = this.bundleContext.registerService(EventSubscriber.class.getName(), this, null);
 
-        if (itemRegistry.get(itemName) == null) {
+        if (!isWildcard && itemRegistry.get(itemName) == null) {
             logger.warn("Item '{}' needed for rule '{}' is missing. Trigger '{}' will not work.", itemName, ruleUID,
                     module.getId());
         }
@@ -123,13 +132,14 @@ public class ItemStateTriggerHandler extends BaseTriggerModuleHandler implements
         if (callback != null) {
             logger.trace("Received Event: Source: {} Topic: {} Type: {}  Payload: {}", event.getSource(),
                     event.getTopic(), event.getType(), event.getPayload());
-            Map<String, Object> values = new HashMap<>();
+            Map<String, @Nullable Object> values = new HashMap<>();
             if (event instanceof ItemStateUpdatedEvent updatedEvent
                     && UPDATE_MODULE_TYPE_ID.equals(module.getTypeUID())) {
                 String state = this.state;
                 State itemState = updatedEvent.getItemState();
                 if ((state == null || state.equals(itemState.toFullString()))) {
                     values.put("state", itemState);
+                    values.put("lastStateUpdate", updatedEvent.getLastStateUpdate());
                 }
             } else if (event instanceof ItemStateChangedEvent changedEvent
                     && CHANGE_MODULE_TYPE_ID.equals(module.getTypeUID())) {
@@ -139,6 +149,8 @@ public class ItemStateTriggerHandler extends BaseTriggerModuleHandler implements
                 if (stateMatches(this.state, itemState) && stateMatches(this.previousState, oldItemState)) {
                     values.put("oldState", oldItemState);
                     values.put("newState", itemState);
+                    values.put("lastStateUpdate", changedEvent.getLastStateUpdate());
+                    values.put("lastStateChange", changedEvent.getLastStateChange());
                 }
             }
             if (!values.isEmpty()) {

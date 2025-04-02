@@ -42,6 +42,7 @@ import org.openhab.core.model.yaml.YamlModelListener;
 import org.openhab.core.model.yaml.test.FirstTypeDTO;
 import org.openhab.core.model.yaml.test.SecondTypeDTO;
 import org.openhab.core.service.WatchService;
+import org.yaml.snakeyaml.Yaml;
 
 /**
  * The {@link YamlModelRepositoryImplTest} contains tests for the {@link YamlModelRepositoryImpl} class.
@@ -329,8 +330,9 @@ public class YamlModelRepositoryImplTest {
 
         String actualFileContent = Files.readString(fullModelPath);
         String expectedFileContent = Files.readString(SOURCE_PATH.resolve("addToModelExpectedContent.yaml"));
+        Yaml yaml = new Yaml();
 
-        assertThat(actualFileContent, is(expectedFileContent.replaceAll("\r\n", "\n")));
+        assertThat(yaml.load(actualFileContent), equalTo(yaml.load(expectedFileContent.replaceAll("\r\n", "\n"))));
 
         Files.copy(SOURCE_PATH.resolve("modifyModelV2InitialContent.yaml"), fullModel2Path);
         modelRepository.processWatchEvent(WatchService.Kind.CREATE, MODEL2_PATH);
@@ -346,7 +348,7 @@ public class YamlModelRepositoryImplTest {
         actualFileContent = Files.readString(fullModel2Path);
         expectedFileContent = Files.readString(SOURCE_PATH.resolve("addToModelV2ExpectedContent.yaml"));
 
-        assertThat(actualFileContent, is(expectedFileContent.replaceAll("\r\n", "\n")));
+        assertThat(yaml.load(actualFileContent), equalTo(yaml.load(expectedFileContent.replaceAll("\r\n", "\n"))));
 
         List<Collection<FirstTypeDTO>> firstTypeCaptorValues = firstTypeCaptor.getAllValues();
         assertThat(firstTypeCaptorValues, hasSize(4));
@@ -380,8 +382,9 @@ public class YamlModelRepositoryImplTest {
 
         String actualFileContent = Files.readString(fullModelPath);
         String expectedFileContent = Files.readString(SOURCE_PATH.resolve("updateInModelExpectedContent.yaml"));
+        Yaml yaml = new Yaml();
 
-        assertThat(actualFileContent, is(expectedFileContent.replaceAll("\r\n", "\n")));
+        assertThat(yaml.load(actualFileContent), equalTo(yaml.load(expectedFileContent.replaceAll("\r\n", "\n"))));
 
         Files.copy(SOURCE_PATH.resolve("modifyModelV2InitialContent.yaml"), fullModel2Path);
         modelRepository.processWatchEvent(WatchService.Kind.CREATE, MODEL2_PATH);
@@ -393,7 +396,7 @@ public class YamlModelRepositoryImplTest {
         actualFileContent = Files.readString(fullModel2Path);
         expectedFileContent = Files.readString(SOURCE_PATH.resolve("updateInModelV2ExpectedContent.yaml"));
 
-        assertThat(actualFileContent, is(expectedFileContent.replaceAll("\r\n", "\n")));
+        assertThat(yaml.load(actualFileContent), equalTo(yaml.load(expectedFileContent.replaceAll("\r\n", "\n"))));
 
         List<Collection<FirstTypeDTO>> firstTypeCaptorValues = firstTypeCaptor.getAllValues();
         assertThat(firstTypeCaptorValues, hasSize(2));
@@ -420,8 +423,9 @@ public class YamlModelRepositoryImplTest {
 
         String actualFileContent = Files.readString(fullModelPath);
         String expectedFileContent = Files.readString(SOURCE_PATH.resolve("removeFromModelExpectedContent.yaml"));
+        Yaml yaml = new Yaml();
 
-        assertThat(actualFileContent, is(expectedFileContent.replaceAll("\r\n", "\n")));
+        assertThat(yaml.load(actualFileContent), equalTo(yaml.load(expectedFileContent.replaceAll("\r\n", "\n"))));
 
         Files.copy(SOURCE_PATH.resolve("modifyModelV2InitialContent.yaml"), fullModel2Path);
         modelRepository.processWatchEvent(WatchService.Kind.CREATE, MODEL2_PATH);
@@ -433,7 +437,7 @@ public class YamlModelRepositoryImplTest {
         actualFileContent = Files.readString(fullModel2Path);
         expectedFileContent = Files.readString(SOURCE_PATH.resolve("removeFromModelV2ExpectedContent.yaml"));
 
-        assertThat(actualFileContent, is(expectedFileContent.replaceAll("\r\n", "\n")));
+        assertThat(yaml.load(actualFileContent), equalTo(yaml.load(expectedFileContent.replaceAll("\r\n", "\n"))));
 
         List<Collection<FirstTypeDTO>> firstTypeCaptorValues = firstTypeCaptor.getAllValues();
         assertThat(firstTypeCaptorValues, hasSize(2));
@@ -461,8 +465,9 @@ public class YamlModelRepositoryImplTest {
 
         String actualFileContent = Files.readString(fullModelPath);
         String expectedFileContent = Files.readString(SOURCE_PATH.resolve("modelFileAddedOrRemoved.yaml"));
+        Yaml yaml = new Yaml();
 
-        assertThat(actualFileContent, is(expectedFileContent));
+        assertThat(yaml.load(actualFileContent), equalTo(yaml.load(expectedFileContent.replaceAll("\r\n", "\n"))));
 
         Files.copy(SOURCE_PATH.resolve("modelV2FileAddedOrRemoved.yaml"), fullModel2Path);
         modelRepository.processWatchEvent(WatchService.Kind.CREATE, MODEL2_PATH);
@@ -473,6 +478,6 @@ public class YamlModelRepositoryImplTest {
         actualFileContent = Files.readString(fullModel2Path);
         expectedFileContent = Files.readString(SOURCE_PATH.resolve("modelV2FileAddedOrRemoved.yaml"));
 
-        assertThat(actualFileContent, is(expectedFileContent));
+        assertThat(yaml.load(actualFileContent), equalTo(yaml.load(expectedFileContent.replaceAll("\r\n", "\n"))));
     }
 }

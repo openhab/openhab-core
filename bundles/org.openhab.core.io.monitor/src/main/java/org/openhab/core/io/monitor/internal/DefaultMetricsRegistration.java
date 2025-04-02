@@ -91,7 +91,6 @@ public class DefaultMetricsRegistration implements ReadyService.ReadyTracker, Me
         meters.add(new ThingStateMetric(bundleContext, thingRegistry, tags));
         meters.add(new EventCountMetric(bundleContext, tags));
         meters.add(new RuleMetric(bundleContext, tags, ruleRegistry));
-        meters.add(new ThreadPoolMetric(tags));
 
         meters.forEach(m -> m.bindTo(registry));
     }

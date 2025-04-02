@@ -242,14 +242,15 @@ public abstract class GenericItem implements ActiveItem {
     public void setState(State state, @Nullable State lastState, @Nullable ZonedDateTime lastStateUpdate,
             @Nullable ZonedDateTime lastStateChange) {
         State oldState = this.state;
+        ZonedDateTime oldStateUpdate = this.lastStateUpdate;
         this.state = state;
         this.lastState = lastState != null ? lastState : this.lastState;
         this.lastStateUpdate = lastStateUpdate != null ? lastStateUpdate : this.lastStateUpdate;
         this.lastStateChange = lastStateChange != null ? lastStateChange : this.lastStateChange;
         notifyListeners(oldState, state);
-        sendStateUpdatedEvent(state);
+        sendStateUpdatedEvent(state, lastStateUpdate);
         if (!oldState.equals(state)) {
-            sendStateChangedEvent(state, oldState);
+            sendStateChangedEvent(state, oldState, lastStateUpdate, lastStateChange);
         }
     }
 
@@ -270,9 +271,9 @@ public abstract class GenericItem implements ActiveItem {
             lastState = oldState; // update before we notify listeners
         }
         notifyListeners(oldState, state);
-        sendStateUpdatedEvent(state);
+        sendStateUpdatedEvent(state, lastStateUpdate);
         if (stateChanged) {
-            sendStateChangedEvent(state, oldState);
+            sendStateChangedEvent(state, oldState, lastStateUpdate, lastStateChange);
             lastStateChange = now; // update after we've notified listeners
         }
         lastStateUpdate = now;
@@ -322,17 +323,19 @@ public abstract class GenericItem implements ActiveItem {
         }
     }
 
-    private void sendStateUpdatedEvent(State newState) {
+    private void sendStateUpdatedEvent(State newState, @Nullable ZonedDateTime lastStateUpdate) {
         EventPublisher eventPublisher1 = this.eventPublisher;
         if (eventPublisher1 != null) {
-            eventPublisher1.post(ItemEventFactory.createStateUpdatedEvent(this.name, newState, null));
+            eventPublisher1.post(ItemEventFactory.createStateUpdatedEvent(this.name, newState, lastStateUpdate, null));
         }
     }
 
-    private void sendStateChangedEvent(State newState, State oldState) {
+    private void sendStateChangedEvent(State newState, State oldState, @Nullable ZonedDateTime lastStateUpdate,
+            @Nullable ZonedDateTime lastStateChange) {
         EventPublisher eventPublisher1 = this.eventPublisher;
         if (eventPublisher1 != null) {
-            eventPublisher1.post(ItemEventFactory.createStateChangedEvent(this.name, newState, oldState));
+            eventPublisher1.post(ItemEventFactory.createStateChangedEvent(this.name, newState, oldState,
+                    lastStateUpdate, lastStateChange));
         }
     }
 

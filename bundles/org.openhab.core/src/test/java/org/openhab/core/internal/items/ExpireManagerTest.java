@@ -142,7 +142,7 @@ class ExpireManagerTest {
         Event event = ItemEventFactory.createCommandEvent(ITEMNAME, new DecimalType(1));
         expireManager.receive(event);
         Thread.sleep(1500L);
-        event = ItemEventFactory.createStateChangedEvent(ITEMNAME, new DecimalType(2), new DecimalType(1));
+        event = ItemEventFactory.createStateChangedEvent(ITEMNAME, new DecimalType(2), new DecimalType(1), null, null);
         expireManager.receive(event);
         Thread.sleep(1500L);
         verify(eventPublisherMock, never()).post(any());
@@ -194,7 +194,7 @@ class ExpireManagerTest {
         Event event = ItemEventFactory.createStateEvent(ITEMNAME, new DecimalType(1));
         expireManager.receive(event);
         Thread.sleep(1500L);
-        event = ItemEventFactory.createStateChangedEvent(ITEMNAME, new DecimalType(2), new DecimalType(1));
+        event = ItemEventFactory.createStateChangedEvent(ITEMNAME, new DecimalType(2), new DecimalType(1), null, null);
         expireManager.receive(event);
         Thread.sleep(1500L);
         verify(eventPublisherMock, never()).post(any());
