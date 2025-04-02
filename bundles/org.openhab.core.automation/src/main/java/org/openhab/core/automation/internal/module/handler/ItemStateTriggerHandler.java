@@ -132,13 +132,14 @@ public class ItemStateTriggerHandler extends BaseTriggerModuleHandler implements
         if (callback != null) {
             logger.trace("Received Event: Source: {} Topic: {} Type: {}  Payload: {}", event.getSource(),
                     event.getTopic(), event.getType(), event.getPayload());
-            Map<String, Object> values = new HashMap<>();
+            Map<String, @Nullable Object> values = new HashMap<>();
             if (event instanceof ItemStateUpdatedEvent updatedEvent
                     && UPDATE_MODULE_TYPE_ID.equals(module.getTypeUID())) {
                 String state = this.state;
                 State itemState = updatedEvent.getItemState();
                 if ((state == null || state.equals(itemState.toFullString()))) {
                     values.put("state", itemState);
+                    values.put("lastStateUpdate", updatedEvent.getLastStateUpdate());
                 }
             } else if (event instanceof ItemStateChangedEvent changedEvent
                     && CHANGE_MODULE_TYPE_ID.equals(module.getTypeUID())) {
@@ -148,6 +149,8 @@ public class ItemStateTriggerHandler extends BaseTriggerModuleHandler implements
                 if (stateMatches(this.state, itemState) && stateMatches(this.previousState, oldItemState)) {
                     values.put("oldState", oldItemState);
                     values.put("newState", itemState);
+                    values.put("lastStateUpdate", changedEvent.getLastStateUpdate());
+                    values.put("lastStateChange", changedEvent.getLastStateChange());
                 }
             }
             if (!values.isEmpty()) {

@@ -16,6 +16,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.time.ZonedDateTime;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 import org.openhab.core.events.Event;
@@ -225,8 +227,10 @@ public class ItemEventFactoryTest {
 
     @Test
     public void testCreateGroupStateChangedEventRawType() throws Exception {
+        ZonedDateTime lastStateUpdate = ZonedDateTime.now();
+        ZonedDateTime lastStateChange = ZonedDateTime.now().minusMinutes(1);
         GroupItemStateChangedEvent giEventSource = ItemEventFactory.createGroupStateChangedEvent(GROUP_NAME, ITEM_NAME,
-                NEW_RAW_ITEM_STATE, RAW_ITEM_STATE);
+                NEW_RAW_ITEM_STATE, RAW_ITEM_STATE, lastStateUpdate, lastStateChange);
 
         Event giEventParsed = factory.createEvent(giEventSource.getType(), giEventSource.getTopic(),
                 giEventSource.getPayload(), giEventSource.getSource());
@@ -242,5 +246,7 @@ public class ItemEventFactoryTest {
         assertNull(groupItemStateChangedEvent.getSource());
         assertEquals(NEW_RAW_ITEM_STATE, groupItemStateChangedEvent.getItemState());
         assertEquals(RAW_ITEM_STATE, groupItemStateChangedEvent.getOldItemState());
+        assertEquals(lastStateUpdate, groupItemStateChangedEvent.getLastStateUpdate());
+        assertEquals(lastStateChange, groupItemStateChangedEvent.getLastStateChange());
     }
 }
