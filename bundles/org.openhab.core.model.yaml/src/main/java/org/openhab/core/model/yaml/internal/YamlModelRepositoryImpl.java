@@ -551,38 +551,33 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
         if (mapNode != null) {
             Iterator<String> it = mapNode.fieldNames();
             while (it.hasNext()) {
-                elements.addAll(parseJsonNode(mapNode, it.next(), elementClass));
+                String id = it.next();
+                @Nullable
+                T elt = null;
+                JsonNode node = mapNode.get(id);
+                if (node.isEmpty()) {
+                    try {
+                        elt = elementClass.getDeclaredConstructor().newInstance();
+                        elt.setId(id);
+                    } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+                            | InvocationTargetException | NoSuchMethodException | SecurityException e) {
+                        logger.warn("Could not create new instance of {}", elementClass);
+                    }
+
+                } else {
+                    try {
+                        elt = objectMapper.treeToValue(node, elementClass);
+                        elt.setId(id);
+                    } catch (JsonProcessingException e) {
+                        logger.warn("Could not parse element {} to {}: {}", node, elementClass, e.getMessage());
+                    }
+                }
+                if (elt != null && elt.isValid()) {
+                    elements.add(elt);
+                }
             }
         }
         return elements;
-    }
-
-    // To be not used for version 1
-    private <T extends YamlElement> List<T> parseJsonNode(@Nullable JsonNode mapNode, String id,
-            Class<T> elementClass) {
-        @Nullable
-        T elt = null;
-        if (mapNode != null && mapNode.has(id)) {
-            JsonNode node = mapNode.get(id);
-            if (node.isEmpty()) {
-                try {
-                    elt = elementClass.getDeclaredConstructor().newInstance();
-                    elt.setId(id);
-                } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
-                        | InvocationTargetException | NoSuchMethodException | SecurityException e) {
-                    logger.warn("Could not create new instance of {}", elementClass);
-                }
-
-            } else {
-                try {
-                    elt = objectMapper.treeToValue(node, elementClass);
-                    elt.setId(id);
-                } catch (JsonProcessingException e) {
-                    logger.warn("Could not parse element {} to {}: {}", node, elementClass, e.getMessage());
-                }
-            }
-        }
-        return elt != null && elt.isValid() ? List.of(elt) : List.of();
     }
 
     // Usable whatever the format version
