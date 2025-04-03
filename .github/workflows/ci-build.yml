@@ -153,7 +153,7 @@ jobs:
       - name: JavaDoc
         if: ${{ matrix.type == 'javadoc' }}
         id: javadoc
-        run: './.github/scripts/maven-build javadoc:javadoc javadoc:aggregate -Dfeatures.verify.skip=true -Dspotless.check.skip=true'
+        run: './.github/scripts/maven-build -B -T 1.25C -U install javadoc:javadoc javadoc:aggregate -Dspotless.check.skip=true -Dmaven.test.skip -Dfeatures.verify.skip=true -DskipChecks'
 
       - name: Upload JavaDoc
         if: ${{ always() && (steps.javadoc.outcome == 'success') }}
