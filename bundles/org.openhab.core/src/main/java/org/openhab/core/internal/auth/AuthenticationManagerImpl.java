@@ -15,6 +15,7 @@ package org.openhab.core.internal.auth;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.auth.Authentication;
 import org.openhab.core.auth.AuthenticationException;
 import org.openhab.core.auth.AuthenticationManager;
@@ -34,6 +35,7 @@ import org.slf4j.LoggerFactory;
  * @author Łukasz Dywicki - Initial contribution
  */
 @Component
+@NonNullByDefault
 public class AuthenticationManagerImpl implements AuthenticationManager {
 
     private final Logger logger = LoggerFactory.getLogger(AuthenticationManagerImpl.class);
@@ -43,23 +45,23 @@ public class AuthenticationManagerImpl implements AuthenticationManager {
     @Override
     public Authentication authenticate(Credentials credentials) throws AuthenticationException {
         boolean unmatched = true;
+        Class<? extends Credentials> credentialsClazz = credentials.getClass();
         for (AuthenticationProvider provider : providers) {
-            if (provider.supports(credentials.getClass())) {
+            if (provider.supports(credentialsClazz)) {
                 unmatched = false;
                 try {
                     Authentication authentication = provider.authenticate(credentials);
                     return authentication;
                 } catch (AuthenticationException e) {
-                    logger.info("Failed to authenticate credentials {} with provider {}", credentials.getClass(),
-                            provider, e);
+                    logger.info("Failed to authenticate credentials {} with provider {}", credentialsClazz, provider);
                 }
             }
         }
 
         if (unmatched) {
-            throw new UnsupportedCredentialsException("Unsupported credentials specified " + credentials.getClass());
+            throw new UnsupportedCredentialsException("Unsupported credentials specified " + credentialsClazz);
         }
-        throw new AuthenticationException("Could not authenticate credentials " + credentials.getClass());
+        throw new AuthenticationException("Could not authenticate credentials " + credentialsClazz);
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)

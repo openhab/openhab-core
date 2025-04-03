@@ -96,7 +96,7 @@ public class ProfileCallbackImpl implements ProfileCallback {
                     } else {
                         logger.debug(
                                 "Not delegating command '{}' for item '{}' to handler for channel '{}', "
-                                        + "because it was not possible to convcert it to an accepted type).",
+                                        + "because it was not possible to convert it to an accepted type).",
                                 command, link.getItemName(), link.getLinkedUID());
                     }
                 } else {

@@ -20,6 +20,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Consumer;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.service.ReadyMarker;
 import org.openhab.core.service.ReadyMarkerFilter;
 import org.openhab.core.service.ReadyService;
@@ -33,6 +34,7 @@ import org.slf4j.LoggerFactory;
  * @author Simon Kaufmann - Initial contribution
  */
 @Component
+@NonNullByDefault
 public class ReadyServiceImpl implements ReadyService {
 
     private final Logger logger = LoggerFactory.getLogger(ReadyServiceImpl.class);

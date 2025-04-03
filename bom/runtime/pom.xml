@@ -411,7 +411,7 @@
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
-      <version>2.17.0</version>
+      <version>2.18.0</version>
     </dependency>
     <dependency>
       <groupId>org.apache.commons</groupId>
@@ -422,7 +422,7 @@
     <dependency>
       <groupId>commons-net</groupId>
       <artifactId>commons-net</artifactId>
-      <version>3.9.0</version>
+      <version>3.11.1</version>
       <scope>compile</scope>
     </dependency>
 
@@ -494,13 +494,7 @@
     <dependency>
       <groupId>jakarta.annotation</groupId>
       <artifactId>jakarta.annotation-api</artifactId>
-      <version>2.0.0</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>jakarta.inject</groupId>
-      <artifactId>jakarta.inject-api</artifactId>
-      <version>2.0.0</version>
+      <version>2.1.1</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
@@ -513,19 +507,19 @@
     <dependency>
       <groupId>org.openhab.osgiify</groupId>
       <artifactId>si.uom.si-units</artifactId>
-      <version>2.1</version>
+      <version>2.2</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>si.uom</groupId>
       <artifactId>si-quantity</artifactId>
-      <version>2.1</version>
+      <version>2.2</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>tech.units</groupId>
       <artifactId>indriya</artifactId>
-      <version>2.2</version>
+      <version>2.2.2</version>
       <scope>compile</scope>
     </dependency>
 
@@ -923,37 +917,40 @@
     <dependency>
       <groupId>org.glassfish.hk2</groupId>
       <artifactId>hk2-api</artifactId>
-      <version>2.4.0-b34</version>
+      <version>3.1.1</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.glassfish.hk2.external</groupId>
       <artifactId>aopalliance-repackaged</artifactId>
-      <version>2.4.0-b34</version>
+      <version>3.1.1</version>
       <scope>compile</scope>
     </dependency>
+    <!-- 2.5.0-b62 was the last before switching to jakarta namespace,
+      artifact id javax.inject -> jakarta.inject
+    -->
     <dependency>
-      <groupId>org.glassfish.hk2.external</groupId>
-      <artifactId>javax.inject</artifactId>
-      <version>2.4.0-b34</version>
+      <groupId>jakarta.inject</groupId>
+      <artifactId>jakarta.inject-api</artifactId>
+      <version>2.0.1</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.glassfish.hk2</groupId>
       <artifactId>hk2-locator</artifactId>
-      <version>2.4.0-b34</version>
+      <version>3.1.1</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.glassfish.hk2</groupId>
       <artifactId>osgi-resource-locator</artifactId>
-      <version>1.0.3</version>
+      <version>3.0.0</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.glassfish.hk2</groupId>
       <artifactId>hk2-utils</artifactId>
-      <version>2.4.0-b34</version>
+      <version>3.1.1</version>
       <scope>compile</scope>
     </dependency>
 
@@ -969,7 +966,7 @@
     <dependency>
       <groupId>org.bitbucket.b_c</groupId>
       <artifactId>jose4j</artifactId>
-      <version>0.9.5</version>
+      <version>0.9.6</version>
       <scope>compile</scope>
     </dependency>
 

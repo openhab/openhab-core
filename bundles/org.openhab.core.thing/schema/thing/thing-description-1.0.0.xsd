@@ -216,7 +216,7 @@
 
 	<xs:complexType name="tags">
 		<xs:sequence>
-			<xs:element name="tag" type="xs:string" minOccurs="1" maxOccurs="unbounded"/>
+			<xs:element name="tag" type="thing-description:semanticPropertyOrPointTag" minOccurs="1" maxOccurs="2"/>
 		</xs:sequence>
 	</xs:complexType>
 

@@ -27,6 +27,7 @@ import org.apache.karaf.shell.api.console.Session;
 import org.openhab.core.io.console.Console;
 import org.openhab.core.io.console.ConsoleInterpreter;
 import org.openhab.core.io.console.extensions.ConsoleCommandExtension;
+import org.openhab.core.io.console.karaf.OSGiConsole;
 
 /**
  * This class wraps OH ConsoleCommandExtensions to commands for Apache Karaf
@@ -68,7 +69,7 @@ public class CommandWrapper implements Command, Action {
     public Object execute(Session session, List<Object> argList) throws Exception {
         String[] args = argList.stream().map(Object::toString).toArray(String[]::new);
         PrintStream out = Process.Utils.current().out();
-        final Console console = new OSGiConsole(getScope(), out);
+        final Console console = new OSGiConsole(getScope(), out, session);
 
         if (args.length == 1 && "--help".equals(args[0])) {
             for (final String usage : command.getUsages()) {

@@ -12,6 +12,7 @@
  */
 package org.openhab.core.items;
 
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -122,14 +123,25 @@ public class GroupItem extends GenericItem implements StateChangeListener, Metad
     }
 
     /**
-     * Returns the direct members of this {@link GroupItem} and recursively all
-     * members of the potentially contained {@link GroupItem}s as well. The {@link GroupItem}s itself aren't contained.
+     * Returns the direct members of this {@link GroupItem} and recursively all members of the potentially contained
+     * {@link GroupItem}s as well. The {@link GroupItem}s itself aren't contained.
      * The returned items are unique.
      *
      * @return all members of this and all contained {@link GroupItem}s
      */
     public Set<Item> getAllMembers() {
         return Collections.unmodifiableSet(new LinkedHashSet<>(getMembers((Item i) -> !(i instanceof GroupItem))));
+    }
+
+    /**
+     * Returns the direct members of this {@link GroupItem} and recursively all members of the potentially contained
+     * {@link GroupItem}s as well. The {@link GroupItem}s itself are contained if they can have a state.
+     * The returned items are unique.
+     *
+     * @return all members of this and all contained {@link GroupItem}s
+     */
+    public Set<Item> getAllStateMembers() {
+        return Collections.unmodifiableSet(new LinkedHashSet<>(getStateMembers(getMembers())));
     }
 
     private void collectMembers(Collection<Item> allMembers, Collection<Item> members) {
@@ -354,19 +366,22 @@ public class GroupItem extends GenericItem implements StateChangeListener, Metad
         State oldState = this.state;
         State newState = oldState;
         ItemStateConverter itemStateConverter = this.itemStateConverter;
+        ZonedDateTime lastStateUpdate = this.lastStateUpdate;
+        ZonedDateTime lastStateChange = this.lastStateChange;
         if (function instanceof GroupFunction groupFunction && baseItem != null && itemStateConverter != null) {
             State calculatedState = groupFunction.calculate(getStateMembers(getMembers()));
             newState = itemStateConverter.convertToAcceptedState(calculatedState, baseItem);
             setState(newState);
-            sendGroupStateUpdatedEvent(item.getName(), newState);
+            sendGroupStateUpdatedEvent(item.getName(), newState, lastStateUpdate);
         }
         if (!oldState.equals(newState)) {
-            sendGroupStateChangedEvent(item.getName(), newState, oldState);
+            sendGroupStateChangedEvent(item.getName(), newState, oldState, lastStateUpdate, lastStateChange);
         }
     }
 
     @Override
     public void setState(State state) {
+        ZonedDateTime now = ZonedDateTime.now();
         State oldState = this.state;
         Item baseItem = this.baseItem;
         if (baseItem instanceof GenericItem item) {
@@ -376,6 +391,10 @@ public class GroupItem extends GenericItem implements StateChangeListener, Metad
             this.state = state;
         }
         notifyListeners(oldState, state);
+        if (!oldState.equals(state)) {
+            lastStateChange = now;
+        }
+        lastStateUpdate = now;
     }
 
     @Override
@@ -394,18 +413,20 @@ public class GroupItem extends GenericItem implements StateChangeListener, Metad
         }
     }
 
-    private void sendGroupStateUpdatedEvent(String memberName, State state) {
+    private void sendGroupStateUpdatedEvent(String memberName, State state, @Nullable ZonedDateTime lastStateUpdate) {
         EventPublisher eventPublisher1 = this.eventPublisher;
         if (eventPublisher1 != null) {
-            eventPublisher1.post(ItemEventFactory.createGroupStateUpdatedEvent(getName(), memberName, state, null));
+            eventPublisher1.post(
+                    ItemEventFactory.createGroupStateUpdatedEvent(getName(), memberName, state, lastStateUpdate, null));
         }
     }
 
-    private void sendGroupStateChangedEvent(String memberName, State newState, State oldState) {
+    private void sendGroupStateChangedEvent(String memberName, State newState, State oldState,
+            @Nullable ZonedDateTime lastStateUpdate, @Nullable ZonedDateTime lastStateChange) {
         EventPublisher eventPublisher1 = this.eventPublisher;
         if (eventPublisher1 != null) {
-            eventPublisher1
-                    .post(ItemEventFactory.createGroupStateChangedEvent(getName(), memberName, newState, oldState));
+            eventPublisher1.post(ItemEventFactory.createGroupStateChangedEvent(getName(), memberName, newState,
+                    oldState, lastStateUpdate, lastStateChange));
         }
     }
 

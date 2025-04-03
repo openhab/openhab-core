@@ -28,6 +28,7 @@ import org.eclipse.xtext.validation.Check
 import java.math.BigDecimal
 import org.openhab.core.model.sitemap.sitemap.Input
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils
+import org.openhab.core.model.sitemap.sitemap.Chart
 
 //import org.eclipse.xtext.validation.Check
 /**
@@ -38,6 +39,7 @@ import org.eclipse.xtext.nodemodel.util.NodeModelUtils
 class SitemapValidator extends AbstractSitemapValidator {
 
     val ALLOWED_HINTS = #["text", "number", "date", "time", "datetime"]
+    val ALLOWED_INTERPOLATION = #["linear", "step"]
     
     @Check
     def void checkFramesInFrame(Frame frame) {
@@ -159,6 +161,16 @@ class SitemapValidator extends AbstractSitemapValidator {
             val line = node.getStartLine()
             error("Input on item '" + i.item + "' has invalid inputHint '" + i.inputHint + "' at line " + line,
                 SitemapPackage.Literals.INPUT.getEStructuralFeature(SitemapPackage.INPUT__INPUT_HINT))
+        }
+    }
+
+    @Check
+    def void checkInterpolationParameter(Chart i) {
+        if (i.interpolation !== null && !ALLOWED_INTERPOLATION.contains(i.interpolation)) {
+            val node = NodeModelUtils.getNode(i)
+            val line = node.getStartLine()
+            error("Input on item '" + i.item + "' has invalid interpolation '" + i.interpolation + "' at line " + line,
+                SitemapPackage.Literals.INPUT.getEStructuralFeature(SitemapPackage.CHART__INTERPOLATION))
         }
     }
 }

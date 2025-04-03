@@ -285,6 +285,7 @@ public class ChartServlet extends HttpServlet {
         }
 
         String yAxisDecimalPattern = req.getParameter("yAxisDecimalPattern");
+        String interpolation = req.getParameter("interpolation");
 
         // Read out parameter 'legend'
         String legendParam = req.getParameter("legend");
@@ -305,7 +306,7 @@ public class ChartServlet extends HttpServlet {
         try {
             BufferedImage chart = provider.createChart(serviceName, req.getParameter("theme"), beginEnd.begin(),
                     beginEnd.end(), height, width, req.getParameter("items"), req.getParameter("groups"), dpi,
-                    yAxisDecimalPattern, legend);
+                    yAxisDecimalPattern, interpolation, legend);
             // Set the content type to that provided by the chart provider
             res.setContentType("image/" + provider.getChartType());
             try (ImageOutputStream imageOutputStream = ImageIO.createImageOutputStream(res.getOutputStream())) {

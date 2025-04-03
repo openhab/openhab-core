@@ -19,13 +19,15 @@ import org.eclipse.jdt.annotation.Nullable;
  * Enum of types being used in the store
  *
  * @author Gary Tse - Initial contribution
+ * @author Andrew Fiddian-Green - added RFC-8628 support
  */
 @NonNullByDefault
 public enum StorageRecordType {
 
     LAST_USED(".LastUsed"),
     ACCESS_TOKEN_RESPONSE(".AccessTokenResponse"),
-    SERVICE_CONFIGURATION(".ServiceConfiguration");
+    SERVICE_CONFIGURATION(".ServiceConfiguration"),
+    DEVICE_CODE_RESPONSE(".DeviceCodeResponse");
 
     private String suffix;
 

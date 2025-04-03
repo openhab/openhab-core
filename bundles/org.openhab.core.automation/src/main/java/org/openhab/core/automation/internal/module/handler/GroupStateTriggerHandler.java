@@ -122,12 +122,13 @@ public class GroupStateTriggerHandler extends BaseTriggerModuleHandler implement
                 if (item != null && item.getGroupNames().contains(groupName)) {
                     State state = isEvent.getItemState();
                     if ((this.state == null || state.toFullString().equals(this.state))) {
-                        Map<String, Object> values = new HashMap<>();
+                        Map<String, @Nullable Object> values = new HashMap<>();
                         if (group != null) {
                             values.put("triggeringGroup", group);
                         }
                         values.put("triggeringItem", item);
                         values.put("state", state);
+                        values.put("lastStateUpdate", isEvent.getLastStateUpdate());
                         values.put("event", event);
                         cb.triggered(this.module, values);
                     }
@@ -142,13 +143,15 @@ public class GroupStateTriggerHandler extends BaseTriggerModuleHandler implement
                     State oldState = iscEvent.getOldItemState();
 
                     if (stateMatches(this.state, state) && stateMatches(this.previousState, oldState)) {
-                        Map<String, Object> values = new HashMap<>();
+                        Map<String, @Nullable Object> values = new HashMap<>();
                         if (group != null) {
                             values.put("triggeringGroup", group);
                         }
                         values.put("triggeringItem", item);
                         values.put("oldState", oldState);
                         values.put("newState", state);
+                        values.put("lastStateUpdate", iscEvent.getLastStateUpdate());
+                        values.put("lastStateChange", iscEvent.getLastStateChange());
                         values.put("event", event);
                         cb.triggered(this.module, values);
                     }

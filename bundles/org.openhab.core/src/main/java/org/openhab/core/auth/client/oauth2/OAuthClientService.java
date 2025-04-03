@@ -122,12 +122,12 @@ public interface OAuthClientService extends AutoCloseable {
      *            returned by the oauth provider. It is encoded in application/x-www-form-urlencoded format
      *            as stated in RFC 6749 section 4.1.2.
      *            To quote from the RFC:
-     * 
+     *
      *            <pre>{@code
      *            HTTP/1.1 302 Found
      *            Location: https://client.example.com/cb?code=SplxlOBeZQQYbYS6WxSbIA&state=xyz
      *            }</pre>
-     * 
+     *
      * @return AuthorizationCode This authorizationCode can be used in the call {#getOAuthTokenByAuthCode(String)}
      * @throws OAuthException If the state from redirectURLwithParams does not exactly match the expectedState, or
      *             exceptions arise while parsing redirectURLwithParams.
@@ -309,4 +309,32 @@ public interface OAuthClientService extends AutoCloseable {
      * @return the OAuth service
      */
     OAuthClientService withGsonBuilder(GsonBuilder gsonBuilder);
+
+    /**
+     * Begins the RFC-8628 Device Code Grant Flow authentication process.
+     * Specifically it executes the following steps as described in the article in the link below:
+     *
+     * <ul>
+     * <li>Step 1: create a request and POST it to the 'device authorize url'</li>
+     * <li>Step 2: process the response and create a {@link DeviceCodeResponseDTO}</li>
+     * <li>Step 3: the user goes off to authenticate themselves at the 'user authentication url'</li>
+     * <li>Step 4: repeatedly create a request and POST it to the 'token url'</li>
+     * <li>Step 5: repeatedly read the response and eventually create a {@link AccessTokenResponse}</li>
+     * </ul>
+     *
+     * @see <a href="https://datatracker.ietf.org/doc/html/rfc8628">RFC-8628</a>
+     *
+     * @return either null or a {@link DeviceCodeResponseDTO} containing the verification uri's where
+     *         users are expected authenticate themselves
+     * @throws OAuthException
+     * @throws IOException
+     * @throws OAuthResponseException
+     */
+    @Nullable
+    DeviceCodeResponseDTO getDeviceCodeResponse() throws OAuthException;
+
+    /**
+     * Notify the service listeners about the given {@link AccessTokenResponse}.
+     */
+    void notifyAccessTokenResponse(AccessTokenResponse accessTokenResponse);
 }

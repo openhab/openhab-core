@@ -36,7 +36,7 @@
     <dependency>
       <groupId>commons-cli</groupId>
       <artifactId>commons-cli</artifactId>
-      <version>1.5.0</version>
+      <version>1.9.0</version>
     </dependency>
     <dependency>
       <groupId>org.osgi</groupId>
@@ -61,12 +61,12 @@
     <dependency>
       <groupId>si.uom</groupId>
       <artifactId>si-units</artifactId>
-      <version>2.1</version>
+      <version>2.2</version>
     </dependency>
     <dependency>
       <groupId>tech.units</groupId>
       <artifactId>indriya</artifactId>
-      <version>2.2</version>
+      <version>2.2.2</version>
     </dependency>
     <dependency>
       <groupId>org.eclipse.jdt</groupId>
