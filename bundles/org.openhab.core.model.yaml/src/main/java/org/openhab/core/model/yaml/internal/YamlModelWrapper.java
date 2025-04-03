@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -24,12 +25,20 @@ import com.fasterxml.jackson.databind.JsonNode;
  * The {@link YamlModelWrapper} is used to store the information read from a model in the model cache.
  *
  * @author Jan N. Klug - Initial contribution
+ * @author Laurent Garnier - Introduce version 2 using map instead of table
  */
 @NonNullByDefault
 public class YamlModelWrapper {
     private final int version;
     private final boolean readOnly;
-    private final Map<String, List<JsonNode>> nodes = new ConcurrentHashMap<>();
+    /**
+     * Nodes as a list in version 1
+     */
+    private final Map<String, List<JsonNode>> nodesV1 = new ConcurrentHashMap<>();
+    /**
+     * Nodes as a map in version >= 2
+     */
+    private final Map<String, @Nullable JsonNode> nodes = new ConcurrentHashMap<>();
 
     public YamlModelWrapper(int version, boolean readOnly) {
         this.version = version;
@@ -44,7 +53,21 @@ public class YamlModelWrapper {
         return readOnly;
     }
 
-    public Map<String, List<JsonNode>> getNodes() {
+    /**
+     * Get the nodes for version 1
+     *
+     * @return the nodes
+     */
+    public Map<String, List<JsonNode>> getNodesV1() {
+        return nodesV1;
+    }
+
+    /**
+     * Get the nodes for version >= 2
+     *
+     * @return the nodes
+     */
+    public Map<String, @Nullable JsonNode> getNodes() {
         return nodes;
     }
 }

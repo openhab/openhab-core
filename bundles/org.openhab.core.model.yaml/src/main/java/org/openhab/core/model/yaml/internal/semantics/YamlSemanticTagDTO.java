@@ -27,9 +27,10 @@ import org.slf4j.LoggerFactory;
  * in a YAML configuration file.
  *
  * @author Laurent Garnier - Initial contribution
+ * @author Laurent Garnier - Added methods setId and cloneWithoutId
  */
 @YamlElementName("tags")
-public class YamlSemanticTagDTO implements YamlElement {
+public class YamlSemanticTagDTO implements YamlElement, Cloneable {
 
     private final Logger logger = LoggerFactory.getLogger(YamlSemanticTagDTO.class);
 
@@ -43,12 +44,30 @@ public class YamlSemanticTagDTO implements YamlElement {
 
     @Override
     public @NonNull String getId() {
-        return uid;
+        return uid == null ? "" : uid;
+    }
+
+    @Override
+    public void setId(@NonNull String id) {
+        uid = id;
+    }
+
+    @Override
+    public YamlElement cloneWithoutId() {
+        YamlSemanticTagDTO copy;
+        try {
+            copy = (YamlSemanticTagDTO) super.clone();
+            copy.uid = null;
+            return copy;
+        } catch (CloneNotSupportedException e) {
+            // Will never happen
+            return new YamlSemanticTagDTO();
+        }
     }
 
     @Override
     public boolean isValid() {
-        if (uid == null) {
+        if (uid == null || uid.isBlank()) {
             logger.debug("uid missing");
             return false;
         }
