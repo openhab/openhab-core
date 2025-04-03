@@ -26,6 +26,7 @@ import org.openhab.core.thing.firmware.dto.FirmwareStatusDTO;
  * @author Kai Kreuzer - Removed links and items
  * @author Chris Jackson - Added 'editable' flag
  * @author Wouter Born - Let (Enriched)ThingDTO extend AbstractThingDTO so both can define their own "channels" type
+ * @author Andrew Fiddian-Green - Added semanticEquipmentTag
  */
 public class EnrichedThingDTO extends AbstractThingDTO {
 
@@ -46,7 +47,7 @@ public class EnrichedThingDTO extends AbstractThingDTO {
     EnrichedThingDTO(ThingDTO thingDTO, List<EnrichedChannelDTO> channels, ThingStatusInfo statusInfo,
             FirmwareStatusDTO firmwareStatus, boolean editable) {
         super(thingDTO.thingTypeUID, thingDTO.UID, thingDTO.label, thingDTO.bridgeUID, thingDTO.configuration,
-                thingDTO.properties, thingDTO.location);
+                thingDTO.properties, thingDTO.location, thingDTO.semanticEquipmentTag);
         this.channels = channels;
         this.statusInfo = statusInfo;
         this.firmwareStatus = firmwareStatus;

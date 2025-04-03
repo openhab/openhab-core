@@ -41,6 +41,7 @@ import org.slf4j.LoggerFactory;
  *         values
  * @author Thomas Höfer - added thing and thing type properties
  * @author Chris Jackson - Added properties, label, description
+ * @author Andrew Fiddian-Green - Added semanticEquipmentTag
  */
 @NonNullByDefault
 public class ThingFactory {
@@ -91,7 +92,8 @@ public class ThingFactory {
         List<Channel> channels = ThingFactoryHelper.createChannels(thingType, thingUID, configDescriptionRegistry);
 
         return createThingBuilder(thingType, thingUID).withConfiguration(configuration).withChannels(channels)
-                .withProperties(thingType.getProperties()).withBridge(bridgeUID).build();
+                .withProperties(thingType.getProperties()).withBridge(bridgeUID)
+                .withSemanticEquipmentTag(thingType.getSemanticEquipmentTag()).build();
     }
 
     public static @Nullable Thing createThing(ThingUID thingUID, Configuration configuration,

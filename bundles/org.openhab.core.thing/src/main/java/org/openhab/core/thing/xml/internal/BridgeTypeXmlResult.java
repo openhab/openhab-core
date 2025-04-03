@@ -33,17 +33,19 @@ import com.thoughtworks.xstream.converters.ConversionException;
  * @author Michael Grammling - Initial contribution
  * @author Thomas Höfer - Added thing and thing type properties
  * @author Andre Fuechsel - Added representationProperty
+ * @author Andrew Fiddian-Green - Added semanticEquipmentTag
  */
 @NonNullByDefault
 public class BridgeTypeXmlResult extends ThingTypeXmlResult {
 
     public BridgeTypeXmlResult(ThingTypeUID bridgeTypeUID, @Nullable List<String> supportedBridgeTypeUIDs, String label,
             @Nullable String description, @Nullable String category, boolean listed,
-            @Nullable List<String> extensibleChannelTypeIds,
+            @Nullable List<String> extensibleChannelTypeIds, @Nullable String semanticEquipmentTag,
             @Nullable List<ChannelXmlResult>[] channelTypeReferenceObjects, @Nullable List<NodeValue> properties,
             @Nullable String representationProperty, Object[] configDescriptionObjects) {
         super(bridgeTypeUID, supportedBridgeTypeUIDs, label, description, category, listed, extensibleChannelTypeIds,
-                channelTypeReferenceObjects, properties, representationProperty, configDescriptionObjects);
+                semanticEquipmentTag, channelTypeReferenceObjects, properties, representationProperty,
+                configDescriptionObjects);
     }
 
     @Override
@@ -59,6 +61,6 @@ public class BridgeTypeXmlResult extends ThingTypeXmlResult {
                 + ", channelTypeReferences=" + channelTypeReferences + ", channelGroupTypeReferences="
                 + channelGroupTypeReferences + ", extensibelChannelTypeIds=" + extensibleChannelTypeIds
                 + ", properties=" + properties + ", configDescriptionURI=" + configDescriptionURI
-                + ", configDescription=" + configDescription + "]";
+                + ", configDescription=" + configDescription + ", semanticEquipmentTag=" + semanticEquipmentTag + "]";
     }
 }

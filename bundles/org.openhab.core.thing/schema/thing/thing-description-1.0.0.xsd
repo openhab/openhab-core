@@ -26,6 +26,7 @@
 			<xs:element name="label" type="xs:string"/>
 			<xs:element name="description" type="xs:string" minOccurs="0"/>
 			<xs:element name="category" type="xs:string" minOccurs="0"/>
+			<xs:element name="semantic-equipment-tag" type="thing-description:semanticEquipmentTag" minOccurs="0"/>
 			<xs:choice minOccurs="0">
 				<xs:element name="channels" type="thing-description:channels"/>
 				<xs:element name="channel-groups" type="thing-description:channelGroups"/>
@@ -293,7 +294,7 @@
 			<xs:enumeration value="Current"/>
 			<xs:enumeration value="Frequency"/>
 			<xs:enumeration value="Gas"/>
-			<xs:enumeration value="Application"/>
+			<xs:enumeration value="App"/>
 			<xs:enumeration value="Channel"/>
 			<xs:enumeration value="Mode"/>
 			<xs:enumeration value="SoundVolume"/>
@@ -319,6 +320,66 @@
 			<xs:enumeration value="Tampered"/>
 			<xs:enumeration value="Tilt"/>
 			<!-- End Allowed Semantic Point Tag Values -->
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="semanticEquipmentTag">
+		<xs:restriction base="xs:string">
+			<!-- Begin Allowed Semantic Equipment Tag Values -->
+			<xs:enumeration value="AlarmSystem"/>
+			<xs:enumeration value="Battery"/>
+			<xs:enumeration value="Blinds"/>
+			<xs:enumeration value="Boiler"/>
+			<xs:enumeration value="Camera"/>
+			<xs:enumeration value="Car"/>
+			<xs:enumeration value="CleaningRobot"/>
+			<xs:enumeration value="Door"/>
+			<xs:enumeration value="BackDoor"/>
+			<xs:enumeration value="CellarDoor"/>
+			<xs:enumeration value="FrontDoor"/>
+			<xs:enumeration value="GarageDoor"/>
+			<xs:enumeration value="Gate"/>
+			<xs:enumeration value="InnerDoor"/>
+			<xs:enumeration value="SideDoor"/>
+			<xs:enumeration value="Doorbell"/>
+			<xs:enumeration value="Fan"/>
+			<xs:enumeration value="CeilingFan"/>
+			<xs:enumeration value="KitchenHood"/>
+			<xs:enumeration value="HVAC"/>
+			<xs:enumeration value="Inverter"/>
+			<xs:enumeration value="LawnMower"/>
+			<xs:enumeration value="Lightbulb"/>
+			<xs:enumeration value="LightStripe"/>
+			<xs:enumeration value="Lock"/>
+			<xs:enumeration value="NetworkAppliance"/>
+			<xs:enumeration value="PowerOutlet"/>
+			<xs:enumeration value="Projector"/>
+			<xs:enumeration value="Pump"/>
+			<xs:enumeration value="RadiatorControl"/>
+			<xs:enumeration value="Receiver"/>
+			<xs:enumeration value="RemoteControl"/>
+			<xs:enumeration value="Screen"/>
+			<xs:enumeration value="Television"/>
+			<xs:enumeration value="Sensor"/>
+			<xs:enumeration value="MotionDetector"/>
+			<xs:enumeration value="SmokeDetector"/>
+			<xs:enumeration value="Siren"/>
+			<xs:enumeration value="Smartphone"/>
+			<xs:enumeration value="Speaker"/>
+			<xs:enumeration value="Valve"/>
+			<xs:enumeration value="VoiceAssistant"/>
+			<xs:enumeration value="WallSwitch"/>
+			<xs:enumeration value="WebService"/>
+			<xs:enumeration value="WeatherService"/>
+			<xs:enumeration value="WhiteGood"/>
+			<xs:enumeration value="Dishwasher"/>
+			<xs:enumeration value="Dryer"/>
+			<xs:enumeration value="Freezer"/>
+			<xs:enumeration value="Oven"/>
+			<xs:enumeration value="Refrigerator"/>
+			<xs:enumeration value="WashingMachine"/>
+			<xs:enumeration value="Window"/>
+			<!-- End Allowed Semantic Equipment Tag Values -->
 		</xs:restriction>
 	</xs:simpleType>
 </xs:schema>
