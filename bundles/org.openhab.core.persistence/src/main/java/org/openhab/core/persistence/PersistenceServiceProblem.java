@@ -32,9 +32,10 @@ public record PersistenceServiceProblem(String reason, @Nullable String serviceI
         boolean editable) {
 
     // Reasons for persistence configuration problems.
-    // If one of these constants is used as reason, th UI can use these values to give a more descriptive message.
+    // If one of these constants is used as reason, the UI can use these values to give a more descriptive message.
     public static final String PERSISTENCE_NO_DEFAULT = "PERSISTENCE_NO_DEFAULT";
     public static final String PERSISTENCE_NO_CONFIG = "PERSISTENCE_SERVICE_NO_CONFIG";
     public static final String PERSISTENCE_NO_ITEMS = "PERSISTENCE_SERVICE_NO_ITEMS";
     public static final String PERSISTENCE_NO_STRATEGY = "PERSISTENCE_SERVICE_ITEMS_NO_STRATEGY";
+    public static final String PERSISTENCE_NO_STORE_STRATEGY = "PERSISTENCE_SERVICE_ITEMS_NO_STORE_STRATEGY";
 }

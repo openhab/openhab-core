@@ -77,6 +77,7 @@ import org.openhab.core.persistence.registry.ManagedPersistenceServiceConfigurat
 import org.openhab.core.persistence.registry.PersistenceServiceConfiguration;
 import org.openhab.core.persistence.registry.PersistenceServiceConfigurationDTOMapper;
 import org.openhab.core.persistence.registry.PersistenceServiceConfigurationRegistry;
+import org.openhab.core.persistence.strategy.PersistenceStrategy;
 import org.openhab.core.types.State;
 import org.openhab.core.types.TypeParser;
 import org.openhab.core.types.UnDefType;
@@ -392,11 +393,17 @@ public class PersistenceResource implements RESTResource {
                             PersistenceServiceProblem.PERSISTENCE_NO_ITEMS, serviceId, null, editable));
                 } else {
                     for (PersistenceItemConfiguration config : configs) {
-                        if (config.strategies().isEmpty()) {
-                            List<String> items = config.items().stream()
-                                    .map(PersistenceServiceConfigurationDTOMapper::persistenceConfigToString).toList();
+                        List<PersistenceStrategy> strategies = config.strategies();
+                        List<String> items = config.items().stream()
+                                .map(PersistenceServiceConfigurationDTOMapper::persistenceConfigToString).toList();
+                        if (strategies.isEmpty()) {
                             persistenceProblems.add(new PersistenceServiceProblem(
                                     PersistenceServiceProblem.PERSISTENCE_NO_STRATEGY, serviceId, items, editable));
+                        } else if (strategies.size() == 1
+                                && PersistenceStrategy.Globals.RESTORE.equals(strategies.get(0))) {
+                            persistenceProblems.add(new PersistenceServiceProblem(
+                                    PersistenceServiceProblem.PERSISTENCE_NO_STORE_STRATEGY, serviceId, items,
+                                    editable));
                         }
                     }
                 }
