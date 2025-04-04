@@ -44,9 +44,9 @@ import org.osgi.service.component.annotations.Activate;
 @NonNullByDefault
 public abstract class AbstractThingFileGenerator implements ThingFileGenerator {
 
-    private final ThingTypeRegistry thingTypeRegistry;
-    private final ChannelTypeRegistry channelTypeRegistry;
-    private final ConfigDescriptionRegistry configDescRegistry;
+    protected final ThingTypeRegistry thingTypeRegistry;
+    protected final ChannelTypeRegistry channelTypeRegistry;
+    protected final ConfigDescriptionRegistry configDescRegistry;
 
     @Activate
     public AbstractThingFileGenerator(ThingTypeRegistry thingTypeRegistry, ChannelTypeRegistry channelTypeRegistry,

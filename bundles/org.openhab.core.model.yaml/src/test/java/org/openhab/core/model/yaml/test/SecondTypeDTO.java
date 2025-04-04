@@ -12,9 +12,11 @@
  */
 package org.openhab.core.model.yaml.test;
 
+import java.util.List;
 import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.model.yaml.YamlElement;
 import org.openhab.core.model.yaml.YamlElementName;
 
@@ -59,7 +61,7 @@ public class SecondTypeDTO implements YamlElement, Cloneable {
     }
 
     @Override
-    public boolean isValid() {
+    public boolean isValid(@Nullable List<@NonNull String> errors, @Nullable List<@NonNull String> warnings) {
         return id != null && !id.isBlank();
     }
 
