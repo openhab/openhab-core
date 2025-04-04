@@ -23,7 +23,6 @@ import org.eclipse.jdt.annotation.Nullable;
  *            be used to allow the consumer (e.g. UI) to tailor the message.
  * @param serviceId persistence service
  * @param items list of persistence item definitions
- * @param strategy persistence strategy selected for the list of items
  * @param editable true if this is a managed service
  *
  * @author Mark Herwege - Persistence health API endpoint
