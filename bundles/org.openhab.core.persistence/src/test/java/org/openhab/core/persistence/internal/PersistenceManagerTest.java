@@ -575,7 +575,7 @@ public class PersistenceManagerTest {
                 : List.of(strategy);
 
         PersistenceServiceConfiguration serviceConfiguration = new PersistenceServiceConfiguration(serviceId,
-                List.of(itemConfiguration), Map.of(), List.of(), strategies, filters);
+                List.of(itemConfiguration), Map.of(), strategies, filters);
         manager.added(serviceConfiguration);
 
         return serviceConfiguration;
@@ -626,7 +626,7 @@ public class PersistenceManagerTest {
         }
 
         @Override
-        public List<PersistenceStrategy> getDefaultStrategies() {
+        public List<PersistenceStrategy> getSuggestedStrategies() {
             return List.of();
         }
 
