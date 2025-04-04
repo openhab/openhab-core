@@ -19,21 +19,19 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * @author Laurent Arnal - Initial contribution
  */
 @NonNullByDefault
-public class MediaArtist extends MediaEntry {
-    private String artistName;
-    private String key;
+public class MediaArtist extends MediaCollection {
+    private String artUri = "";
 
     public MediaArtist(String key, String artistName) {
-        this.artistName = artistName;
-        this.key = key;
-
+        super(key, artistName);
     }
 
-    public String getArtistName() {
-        return artistName;
+    public void setArtUri(String artUri) {
+        this.artUri = artUri;
     }
 
-    public String getKey() {
-        return key;
+    public String getArtUri() {
+        return this.artUri;
     }
+
 }
