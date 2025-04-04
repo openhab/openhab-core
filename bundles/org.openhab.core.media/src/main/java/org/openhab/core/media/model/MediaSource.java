@@ -19,22 +19,27 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * @author Laurent Arnal - Initial contribution
  */
 @NonNullByDefault
-public class MediaSource extends MediaEntry {
-    public String sourceName;
-    private String key;
+public class MediaSource extends MediaCollection {
+    public String artUri = "/static/playlist.png";
 
     public MediaSource(String key, String sourceName) {
-        this.sourceName = sourceName;
-        this.key = key;
+        super(key, sourceName);
+    }
 
+    public MediaSource(String key, String sourceName, String artUri) {
+        super(key, sourceName);
+
+        this.artUri = artUri;
     }
 
     @Override
-    public String getName() {
-        return sourceName;
+    public String getArtUri() {
+        return artUri;
     }
 
-    public String getKey() {
-        return key;
+    @Override
+    public void setArtUri(String artUri) {
+        this.artUri = artUri;
     }
+
 }

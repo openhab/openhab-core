@@ -12,47 +12,84 @@
  */
 package org.openhab.core.media.model;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author Laurent Arnal - Initial contribution
  */
 @NonNullByDefault
-public abstract class MediaEntry {
-    private Map<String, MediaEntry> childs;
+public class MediaEntry {
+    private final Logger logger = LoggerFactory.getLogger(MediaEntry.class);
+
     private @Nullable MediaEntry parent;
     private @Nullable MediaRegistry registry;
+    private String key;
+    private String name;
 
-    public MediaEntry() {
-        childs = new HashMap<String, MediaEntry>();
+    public MediaEntry(String key, String name) {
+        this.name = name;
+        this.key = key;
     }
 
-    public void addChild(String key, MediaEntry mediaEntry) {
-        mediaEntry.parent = this;
+    public <T extends @Nullable MediaEntry> T registerEntry(String key, MediaAllocator<T> allocator) {
         registry = getMediaRegistry();
-        registry.addPath(mediaEntry.getPath(), mediaEntry);
-        childs.put(key, mediaEntry);
+
+        String entryPath = getPath() + "/" + key;
+        T result = (T) registry.getEntry(entryPath);
+        if (result == null) {
+            result = allocator.alloc();
+            result.setParent(this);
+            if (registry != null) {
+                registry.addEntry(result);
+            }
+
+            addChild(key, result);
+        }
+
+        return result;
     }
 
-    public Map<String, MediaEntry> getChilds() {
-        return childs;
+    public void addChild(String key, MediaEntry childEntry) {
+
+    }
+
+    public @Nullable MediaSource getMediaSource() {
+        if (this instanceof MediaSource) {
+            if (parent instanceof MediaSource) {
+                return (MediaSource) parent;
+            }
+            return (MediaSource) this;
+        }
+
+        if (parent != null) {
+            return parent.getMediaSource();
+        }
+
+        return null;
     }
 
     public String getName() {
-        return "Root";
+        return name;
     }
 
     public String getKey() {
-        return "Root";
+        return key;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public @Nullable MediaEntry getParent() {
         return parent;
+    }
+
+    public void setParent(MediaEntry parent) {
+        this.parent = parent;
     }
 
     public @Nullable MediaRegistry getMediaRegistry() {
@@ -70,11 +107,36 @@ public abstract class MediaEntry {
     }
 
     public String getPath() {
-        if (parent == null) {
-            return "/Root";
-        } else {
+        if (parent != null) {
             return parent.getPath() + "/" + getKey();
+
+        } else {
+            return "/Root";
         }
+    }
+
+    public String getSubPath() {
+        if (parent != null && !(parent instanceof MediaSource)) {
+            return parent.getSubPath() + "/" + getKey();
+
+        } else {
+            return "/" + getKey();
+        }
+    }
+
+    public int getLevel() {
+        if (parent != null) {
+            return parent.getLevel() + 1;
+        } else {
+            return 0;
+        }
+    }
+
+    private String empty = "                                                                       ";
+
+    public void print() {
+        int level = getLevel();
+        logger.debug(String.format("%s %d - MediaEntry %s - %s", empty.substring(0, level * 4), level, key, name));
     }
 
 }

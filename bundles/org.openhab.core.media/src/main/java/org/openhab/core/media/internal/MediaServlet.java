@@ -30,9 +30,16 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.media.MediaHTTPServer;
+import org.openhab.core.media.MediaListenner;
 import org.openhab.core.media.MediaService;
+import org.openhab.core.media.model.MediaAlbum;
+import org.openhab.core.media.model.MediaArtist;
+import org.openhab.core.media.model.MediaCollection;
 import org.openhab.core.media.model.MediaEntry;
+import org.openhab.core.media.model.MediaPlayList;
 import org.openhab.core.media.model.MediaRegistry;
+import org.openhab.core.media.model.MediaSource;
+import org.openhab.core.media.model.MediaTrack;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -111,25 +118,113 @@ public class MediaServlet extends HttpServlet implements MediaHTTPServer {
         }
 
         MediaRegistry mediaRegistry = mediaService.getMediaRegistry();
-        MediaEntry currentEntry = mediaRegistry.getChildForPath(path);
+        MediaEntry currentEntry = mediaRegistry.getEntry(path);
 
-        if (mediaService.getMediaListenner() != null && currentEntry != null) {
-            mediaService.getMediaListenner().refreshEntry(currentEntry);
+        if (currentEntry != null) {
+            MediaSource mediaSource = currentEntry.getMediaSource();
+            if (mediaSource != null) {
+                MediaListenner mediaListenner = mediaService.getMediaListenner(mediaSource.getKey());
+                if (mediaListenner != null) {
+                    mediaListenner.refreshEntry(currentEntry);
+                }
+            }
         }
 
         MediaEntry recurseEntry = currentEntry;
-        while (!recurseEntry.getName().equals("Root")) {
+        while (recurseEntry != null) {
             sb.insert(0, " > <a href=" + requestURI + "?path=" + recurseEntry.getPath() + ">" + recurseEntry.getName()
                     + "</a>");
             recurseEntry = recurseEntry.getParent();
         }
 
-        sb.insert(0, "<a href=" + requestURI + "?path=/Root>Root</a>");
-
         sb.append("<br/><br/>");
-        for (String key : currentEntry.getChilds().keySet()) {
-            MediaEntry entry = currentEntry.getChilds().get(key);
-            sb.append("<a href=" + requestURI + "?path=" + entry.getPath() + ">" + entry.getName() + "</a><br/>");
+
+        if (currentEntry instanceof MediaCollection) {
+            MediaCollection col = (MediaCollection) currentEntry;
+            int idx = 0;
+
+            if (currentEntry instanceof MediaAlbum) {
+                MediaAlbum album = (MediaAlbum) currentEntry;
+                sb.append("Album:" + album.getName());
+                sb.append("<img src=\"" + album.getArtUri() + "\"/>");
+            }
+
+            for (String key : col.getChilds().keySet()) {
+                MediaEntry entry = col.getChilds().get(key);
+
+                if (entry instanceof MediaAlbum) {
+                    MediaAlbum album = (MediaAlbum) entry;
+                    sb.append(
+                            "<div style=\"width:200px;height:200px;float:left;margin:20px;background-color:#303030;color:#ffffff;\">");
+                    sb.append("<a href=\"" + requestURI + "?path=" + entry.getPath()
+                            + "\" style=\"text-decoration: none;color:#ffffff;\">");
+                    sb.append(entry.getName());
+                    sb.append("<br/>");
+                    sb.append("<img width=160 src=\"" + album.getArtUri() + "\">");
+                    sb.append("</a>");
+                    sb.append("<br/>");
+                    sb.append("</div>");
+                    idx++;
+                } else if (entry instanceof MediaArtist) {
+                    MediaArtist artist = (MediaArtist) entry;
+                    sb.append(
+                            "<div style=\"width:200px;height:200px;float:left;margin:20px;background-color:#303030;color:#ffffff;\">");
+                    sb.append("<a href=\"" + requestURI + "?path=" + entry.getPath()
+                            + "\" style=\"text-decoration: none;color:#ffffff;\">");
+                    sb.append(entry.getName());
+                    sb.append("<br/>");
+                    sb.append("<img width=160 src=\"" + artist.getArtUri() + "\">");
+                    sb.append("</a>");
+                    sb.append("<br/>");
+                    sb.append("</div>");
+                    idx++;
+                } else if (entry instanceof MediaTrack) {
+                    MediaTrack track = (MediaTrack) entry;
+                    sb.append("<div style=\"vertical-align:middle;padding:10px;\">");
+                    sb.append("<a href=\"" + requestURI + "?path=" + entry.getPath()
+                            + "\" style=\"text-decoration: none;color:#000000;vertical-align:middle;\">");
+                    if (track.getArtUri().indexOf("Arrow") >= 0) {
+                        sb.append("<img src=\"" + track.getArtUri() + "\" style=\"vertical-align:middle;\">");
+                    } else {
+                        sb.append("<img width=80 src=\"" + track.getArtUri() + "\" style=\"vertical-align:middle;\">");
+                    }
+                    sb.append("&nbsp;&nbsp;&nbsp;&nbsp;");
+                    sb.append(entry.getName());
+                    sb.append("</a>");
+                    sb.append("<br/>");
+                    sb.append("</div>");
+                    idx++;
+                } else if (entry instanceof MediaPlayList) {
+                    MediaPlayList playList = (MediaPlayList) entry;
+                    sb.append(
+                            "<div style=\"width:200px;height:200px;float:left;margin:20px;background-color:#303030;color:#ffffff;\">");
+                    sb.append("<a href=\"" + requestURI + "?path=" + entry.getPath()
+                            + "\" style=\"text-decoration: none;color:#ffffff;\">");
+                    sb.append(entry.getName());
+                    sb.append("<br/>");
+                    sb.append("<img width=160 src=\"" + playList.getArtUri() + "\">");
+                    sb.append("</a>");
+                    sb.append("<br/>");
+                    sb.append("</div>");
+                    idx++;
+                } else if (entry instanceof MediaCollection) {
+                    MediaCollection collection = (MediaCollection) entry;
+                    sb.append(
+                            "<div style=\"width:200px;height:200px;float:left;margin:20px;background-color:#ffffff;color:#000000;border:solid 1px;border-radius:10px;padding:10px;\">");
+                    sb.append("<a href=\"" + requestURI + "?path=" + entry.getPath()
+                            + "\" style=\"text-decoration: none;color:#000000;\">");
+                    sb.append(entry.getName());
+                    sb.append("<br/>");
+                    sb.append("<img width=160 src=\"" + collection.getArtUri() + "\">");
+                    sb.append("</a>");
+                    sb.append("<br/>");
+                    sb.append("</div>");
+                    idx++;
+                } else {
+                    sb.append(
+                            "<a href=" + requestURI + "?path=" + entry.getPath() + ">" + entry.getName() + "</a><br/>");
+                }
+            }
         }
 
         resp.setContentType("text/html; charset=utf-8");

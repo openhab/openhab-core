@@ -12,11 +12,13 @@
  */
 package org.openhab.core.media.internal;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.media.MediaListenner;
 import org.openhab.core.media.MediaService;
-import org.openhab.core.media.model.MediaEntry;
 import org.openhab.core.media.model.MediaRegistry;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
@@ -30,6 +32,7 @@ import org.osgi.service.component.annotations.Component;
 @NonNullByDefault
 @Component(immediate = true)
 public class MediaServiceImpl implements MediaService {
+    private Map<String, MediaListenner> mediaListenner = new HashMap<String, MediaListenner>();
 
     public @Nullable MediaListenner listenner = null;
     public MediaRegistry registry = new MediaRegistry();
@@ -39,24 +42,27 @@ public class MediaServiceImpl implements MediaService {
     }
 
     @Override
-    public void registerMediaEntry(MediaEntry mediaEntry) {
-        registry.addChild(mediaEntry.getName(), mediaEntry);
-    }
-
-    @Override
     public MediaRegistry getMediaRegistry() {
         return registry;
     }
 
     @Override
-    public void setMediaListenner(MediaListenner listenner) {
-        this.listenner = listenner;
+    public void addMediaListenner(String key, MediaListenner listenner) {
+        mediaListenner.put(key, listenner);
     }
 
     @Override
-    public @Nullable MediaListenner getMediaListenner() {
+    public @Nullable MediaListenner getMediaListenner(String key) {
         // TODO Auto-generated method stub
-        return listenner;
+        if (mediaListenner.containsKey(key)) {
+            return mediaListenner.get(key);
+        }
+
+        return null;
+    }
+
+    public Map<String, MediaListenner> getMediaListenners() {
+        return mediaListenner;
     }
 
 }
