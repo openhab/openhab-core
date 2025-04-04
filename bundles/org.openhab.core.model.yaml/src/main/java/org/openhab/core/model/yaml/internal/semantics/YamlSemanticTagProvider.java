@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory;
  * These semantic tags are automatically exposed to the {@link org.openhab.core.semantics.SemanticTagRegistry}.
  *
  * @author Laurent Garnier - Initial contribution
+ * @author Laurent Garnier - Added basic version management
  */
 @NonNullByDefault
 @Component(immediate = true, service = { SemanticTagProvider.class, YamlSemanticTagProvider.class,
@@ -106,5 +107,15 @@ public class YamlSemanticTagProvider extends AbstractProvider<SemanticTag>
 
     private SemanticTag mapSemanticTag(YamlSemanticTagDTO tagDTO) {
         return new SemanticTagImpl(tagDTO.uid, tagDTO.label, tagDTO.description, tagDTO.synonyms);
+    }
+
+    @Override
+    public boolean isVersionSupported(int version) {
+        return version >= 1;
+    }
+
+    @Override
+    public boolean isDeprecated() {
+        return false;
     }
 }

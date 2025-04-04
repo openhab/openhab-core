@@ -15,8 +15,8 @@ package org.openhab.core.model.yaml.internal;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.hamcrest.Matchers.contains;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 import java.io.IOException;
@@ -49,6 +49,7 @@ import org.yaml.snakeyaml.Yaml;
  *
  * @author Jan N. Klug - Initial contribution
  * @author Laurent Garnier - Extended tests to cover version 2
+ * @author Laurent Garnier - Added one test for version management
  */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -80,8 +81,14 @@ public class YamlModelRepositoryImplTest {
         when(watchServiceMock.getWatchPath()).thenReturn(watchPath);
 
         when(firstTypeListener.getElementClass()).thenReturn(FirstTypeDTO.class);
+        when(firstTypeListener.isVersionSupported(anyInt())).thenReturn(true);
+        when(firstTypeListener.isDeprecated()).thenReturn(false);
         when(secondTypeListener1.getElementClass()).thenReturn(SecondTypeDTO.class);
+        when(secondTypeListener1.isVersionSupported(anyInt())).thenReturn(true);
+        when(secondTypeListener1.isDeprecated()).thenReturn(false);
         when(secondTypeListener2.getElementClass()).thenReturn(SecondTypeDTO.class);
+        when(secondTypeListener2.isVersionSupported(anyInt())).thenReturn(true);
+        when(secondTypeListener2.isDeprecated()).thenReturn(false);
     }
 
     @Test
@@ -479,5 +486,111 @@ public class YamlModelRepositoryImplTest {
         expectedFileContent = Files.readString(SOURCE_PATH.resolve("modelV2FileAddedOrRemoved.yaml"));
 
         assertThat(yaml.load(actualFileContent), equalTo(yaml.load(expectedFileContent)));
+    }
+
+    @Test
+    public void testExistingProviderForVersion() throws IOException {
+        // Provider supporting only version 1
+        when(firstTypeListener.isVersionSupported(eq(1))).thenReturn(true);
+        when(firstTypeListener.isVersionSupported(eq(2))).thenReturn(false);
+        when(firstTypeListener.isDeprecated()).thenReturn(false);
+
+        Files.copy(SOURCE_PATH.resolve("modelFileAddedOrRemoved.yaml"), fullModelPath);
+
+        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
+        modelRepository.addYamlModelListener(firstTypeListener);
+
+        modelRepository.processWatchEvent(WatchService.Kind.CREATE, MODEL_PATH);
+
+        verify(firstTypeListener).addedModel(eq(MODEL_NAME), firstTypeCaptor.capture());
+        verify(firstTypeListener, never()).updatedModel(any(), any());
+        verify(firstTypeListener, never()).removedModel(any(), any());
+
+        Collection<FirstTypeDTO> firstTypeElements = firstTypeCaptor.getValue();
+        assertThat(firstTypeElements, hasSize(2));
+        assertThat(firstTypeElements,
+                containsInAnyOrder(new FirstTypeDTO("First1", "Description1"), new FirstTypeDTO("First2", null)));
+    }
+
+    @Test
+    public void testExistingDeprecatedProviderForVersion() throws IOException {
+        // Provider supporting only version 1 and deprecated
+        when(firstTypeListener.isVersionSupported(eq(1))).thenReturn(true);
+        when(firstTypeListener.isVersionSupported(eq(2))).thenReturn(false);
+        when(firstTypeListener.isDeprecated()).thenReturn(true);
+
+        Files.copy(SOURCE_PATH.resolve("modelFileAddedOrRemoved.yaml"), fullModelPath);
+
+        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
+        modelRepository.addYamlModelListener(firstTypeListener);
+
+        modelRepository.processWatchEvent(WatchService.Kind.CREATE, MODEL_PATH);
+
+        verify(firstTypeListener).addedModel(eq(MODEL_NAME), firstTypeCaptor.capture());
+        verify(firstTypeListener, never()).updatedModel(any(), any());
+        verify(firstTypeListener, never()).removedModel(any(), any());
+
+        Collection<FirstTypeDTO> firstTypeElements = firstTypeCaptor.getValue();
+        assertThat(firstTypeElements, hasSize(2));
+        assertThat(firstTypeElements,
+                containsInAnyOrder(new FirstTypeDTO("First1", "Description1"), new FirstTypeDTO("First2", null)));
+    }
+
+    @Test
+    public void testNoProviderForVersion() throws IOException {
+        // Provider supporting only version 2
+        when(firstTypeListener.isVersionSupported(eq(1))).thenReturn(false);
+        when(firstTypeListener.isVersionSupported(eq(2))).thenReturn(true);
+        when(firstTypeListener.isDeprecated()).thenReturn(false);
+
+        Files.copy(SOURCE_PATH.resolve("modelFileAddedOrRemoved.yaml"), fullModelPath);
+
+        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
+        modelRepository.addYamlModelListener(firstTypeListener);
+
+        modelRepository.processWatchEvent(WatchService.Kind.CREATE, MODEL_PATH);
+
+        verify(firstTypeListener, never()).addedModel(any(), any());
+        verify(firstTypeListener, never()).updatedModel(any(), any());
+        verify(firstTypeListener, never()).removedModel(any(), any());
+    }
+
+    @Test
+    public void testDifferentProvidersDependingOnVersion() throws IOException {
+        // secondTypeListener1 supports version 1 only
+        when(secondTypeListener1.isVersionSupported(eq(1))).thenReturn(true);
+        when(secondTypeListener1.isVersionSupported(eq(2))).thenReturn(false);
+        when(secondTypeListener1.isDeprecated()).thenReturn(false);
+        // secondTypeListener2 supports version 2 only
+        when(secondTypeListener2.isVersionSupported(eq(1))).thenReturn(false);
+        when(secondTypeListener2.isVersionSupported(eq(2))).thenReturn(true);
+        when(secondTypeListener2.isDeprecated()).thenReturn(false);
+
+        Files.copy(SOURCE_PATH.resolve("modelFileAddedOrRemoved.yaml"), fullModelPath);
+        Files.copy(SOURCE_PATH.resolve("modelV2FileAddedOrRemoved.yaml"), fullModel2Path);
+
+        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
+        modelRepository.addYamlModelListener(secondTypeListener1);
+        modelRepository.addYamlModelListener(secondTypeListener2);
+
+        modelRepository.processWatchEvent(WatchService.Kind.CREATE, MODEL_PATH);
+        modelRepository.processWatchEvent(WatchService.Kind.CREATE, MODEL2_PATH);
+
+        verify(secondTypeListener1).addedModel(eq(MODEL_NAME), secondTypeCaptor1.capture());
+        verify(secondTypeListener1, never()).addedModel(eq(MODEL2_NAME), any());
+        verify(secondTypeListener1, never()).updatedModel(any(), any());
+        verify(secondTypeListener1, never()).removedModel(any(), any());
+        verify(secondTypeListener2).addedModel(eq(MODEL2_NAME), secondTypeCaptor2.capture());
+        verify(secondTypeListener2, never()).addedModel(eq(MODEL_NAME), any());
+        verify(secondTypeListener2, never()).updatedModel(any(), any());
+        verify(secondTypeListener2, never()).removedModel(any(), any());
+
+        Collection<SecondTypeDTO> secondTypeElements = secondTypeCaptor1.getValue();
+        assertThat(secondTypeElements, hasSize(1));
+        assertThat(secondTypeElements, contains(new SecondTypeDTO("Second1", "Label1")));
+
+        secondTypeElements = secondTypeCaptor2.getValue();
+        assertThat(secondTypeElements, hasSize(1));
+        assertThat(secondTypeElements, contains(new SecondTypeDTO("Second1", "Label1")));
     }
 }
