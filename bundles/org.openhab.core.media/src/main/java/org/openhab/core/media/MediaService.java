@@ -14,7 +14,6 @@ package org.openhab.core.media;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.media.model.MediaEntry;
 import org.openhab.core.media.model.MediaRegistry;
 
 /**
@@ -24,11 +23,9 @@ import org.openhab.core.media.model.MediaRegistry;
  */
 @NonNullByDefault
 public interface MediaService {
-    void registerMediaEntry(MediaEntry mediaEntry);
-
     public MediaRegistry getMediaRegistry();
 
-    public void setMediaListenner(MediaListenner mediaListenner);
+    public void addMediaListenner(String key, MediaListenner mediaListenner);
 
-    public @Nullable MediaListenner getMediaListenner();
+    public @Nullable MediaListenner getMediaListenner(String key);
 }

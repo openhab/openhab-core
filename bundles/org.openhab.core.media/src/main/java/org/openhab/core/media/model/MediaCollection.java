@@ -12,6 +12,9 @@
  */
 package org.openhab.core.media.model;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
@@ -20,22 +23,54 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  */
 @NonNullByDefault
 public class MediaCollection extends MediaEntry {
-    private String name;
-    private String key;
+    private Map<String, MediaEntry> childs;
+    public String artUri = "/static/playlist.png";
 
     public MediaCollection(String key, String name) {
-        this.name = name;
-        this.key = key;
+        super(key, name);
 
+        if (name.indexOf("Artistes") >= 0) {
+            artUri = "/static/Artists.png";
+        } else if (name.indexOf("Albums") >= 0) {
+            artUri = "/static/Albums.png";
+        } else if (name.indexOf("Dossiers") >= 0) {
+            artUri = "/static/Folder.png";
+        }
+
+        childs = new HashMap<String, MediaEntry>();
+    }
+
+    public MediaCollection(String key, String name, String artUri) {
+        super(key, name);
+
+        this.artUri = artUri;
+        childs = new HashMap<String, MediaEntry>();
+    }
+
+    public Map<String, MediaEntry> getChilds() {
+        return childs;
     }
 
     @Override
-    public String getName() {
-        return name;
+    public void print() {
+        super.print();
+
+        for (MediaEntry child : childs.values()) {
+            child.print();
+        }
     }
 
     @Override
-    public String getKey() {
-        return key;
+    public void addChild(String key, MediaEntry childEntry) {
+        childs.put(key, childEntry);
     }
+
+    public String getArtUri() {
+        return artUri;
+    }
+
+    public void setArtUri(String artUri) {
+        this.artUri = artUri;
+    }
+
 }
