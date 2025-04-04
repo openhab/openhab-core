@@ -27,6 +27,7 @@ import org.openhab.core.library.items.DateTimeItem;
 import org.openhab.core.library.items.DimmerItem;
 import org.openhab.core.library.items.ImageItem;
 import org.openhab.core.library.items.LocationItem;
+import org.openhab.core.library.items.MediaBrowserItem;
 import org.openhab.core.library.items.NumberItem;
 import org.openhab.core.library.items.PlayerItem;
 import org.openhab.core.library.items.RollershutterItem;
@@ -56,12 +57,13 @@ public class CoreItemFactory implements ItemFactory {
     public static final String LOCATION = "Location";
     public static final String NUMBER = "Number";
     public static final String PLAYER = "Player";
+    public static final String MEDIA_BROWSER = "MediaBrowser";
     public static final String ROLLERSHUTTER = "Rollershutter";
     public static final String STRING = "String";
     public static final String SWITCH = "Switch";
 
     public static final Set<String> VALID_ITEM_TYPES = Set.of( //
-            CALL, COLOR, CONTACT, DATETIME, DIMMER, IMAGE, LOCATION, NUMBER, PLAYER, ROLLERSHUTTER, STRING, SWITCH //
+            CALL, COLOR, CONTACT, DATETIME, DIMMER, IMAGE, LOCATION, NUMBER, PLAYER, ROLLERSHUTTER, STRING, SWITCH,MEDIA_BROWSER //
     );
 
     private final UnitProvider unitProvider;
@@ -88,6 +90,7 @@ public class CoreItemFactory implements ItemFactory {
             case LOCATION -> new LocationItem(itemName);
             case NUMBER -> new NumberItem(itemTypeName, itemName, unitProvider);
             case PLAYER -> new PlayerItem(itemName);
+            case MEDIA_BROWSER -> new MediaBrowserItem(itemName);
             case ROLLERSHUTTER -> new RollershutterItem(itemName);
             case STRING -> new StringItem(itemName);
             case SWITCH -> new SwitchItem(itemName);
