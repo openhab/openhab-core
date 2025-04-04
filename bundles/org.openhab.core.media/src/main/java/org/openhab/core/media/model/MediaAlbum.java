@@ -19,22 +19,39 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * @author Laurent Arnal - Initial contribution
  */
 @NonNullByDefault
-public class MediaAlbum extends MediaEntry {
-    public String albumName;
-    private String key;
+public class MediaAlbum extends MediaCollection {
+
+    private String artUri = "";
+    private String artist = "";
+    private String genre = "";
 
     public MediaAlbum(String key, String albumName) {
-        this.albumName = albumName;
-        this.key = key;
+        super(key, albumName);
 
     }
 
-    @Override
-    public String getName() {
-        return albumName;
+    public void setArtUri(String artUri) {
+        this.artUri = artUri;
     }
 
-    public String getKey() {
-        return key;
+    public void setArtist(String artist) {
+        this.artist = artist;
     }
+
+    public void setGenre(String genre) {
+        this.genre = genre;
+    }
+
+    public String getGenre() {
+        return this.genre;
+    }
+
+    public String getArtist() {
+        return this.artist;
+    }
+
+    public String getArtUri() {
+        return this.artUri;
+    }
+
 }

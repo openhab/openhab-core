@@ -17,28 +17,36 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author Laurent Arnal - Initial contribution
  */
 @NonNullByDefault
-public class MediaRegistry extends MediaEntry {
-    private Map<String, MediaEntry> entries;
+public class MediaRegistry extends MediaCollection {
+    private final Logger logger = LoggerFactory.getLogger(MediaEntry.class);
+    private Map<String, MediaEntry> pathToEntry;
 
     public MediaRegistry() {
-        entries = new HashMap<String, MediaEntry>();
+        super("Root", "Registry");
+        pathToEntry = new HashMap<String, MediaEntry>();
+        pathToEntry.put("/Root", this);
     }
 
-    public void addPath(String key, MediaEntry mediaEntry) {
-        entries.put(mediaEntry.getPath(), mediaEntry);
+    public void addEntry(MediaEntry mediaEntry) {
+        pathToEntry.put(mediaEntry.getPath(), mediaEntry);
     }
 
-    public @Nullable MediaEntry getChildForPath(String path) {
-        if (path.equals("/Root")) {
-            return this;
-        } else {
-            return entries.get(path);
-        }
+    public @Nullable MediaEntry getEntry(String path) {
+        return pathToEntry.get(path);
+    }
+
+    @Override
+    public void print() {
+        logger.debug("Registry:");
+        super.print();
+
     }
 }
