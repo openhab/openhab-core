@@ -24,6 +24,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ScheduledExecutorService;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -35,6 +36,7 @@ import org.openhab.core.auth.client.oauth2.DeviceCodeResponseDTO;
 import org.openhab.core.auth.client.oauth2.OAuthClientService;
 import org.openhab.core.auth.client.oauth2.OAuthException;
 import org.openhab.core.auth.client.oauth2.OAuthResponseException;
+import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.io.net.http.HttpClientFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,8 +65,11 @@ public class OAuthClientServiceImpl implements OAuthClientService {
     public static final int DEFAULT_TOKEN_EXPIRES_IN_BUFFER_SECOND = 10;
 
     private static final String EXCEPTION_MESSAGE_CLOSED = "Client service is closed";
+    private static final String THREADPOOL_NAME = "oAuthClientService";
 
     private final transient Logger logger = LoggerFactory.getLogger(OAuthClientServiceImpl.class);
+
+    protected final ScheduledExecutorService scheduler = ThreadPoolManager.getScheduledPool(THREADPOOL_NAME);
 
     private @NonNullByDefault({}) OAuthStoreHandler storeHandler;
 
@@ -328,7 +333,7 @@ public class OAuthClientServiceImpl implements OAuthClientService {
         }
         // store it
         storeHandler.saveAccessTokenResponse(handle, accessTokenResponse);
-        accessTokenRefreshListeners.forEach(l -> l.onAccessTokenResponse(accessTokenResponse));
+        notifyAccessTokenResponse(accessTokenResponse);
         return accessTokenResponse;
     }
 
@@ -478,6 +483,6 @@ public class OAuthClientServiceImpl implements OAuthClientService {
 
     @Override
     public void notifyAccessTokenResponse(AccessTokenResponse atr) {
-        accessTokenRefreshListeners.forEach(l -> l.onAccessTokenResponse(atr));
+        scheduler.submit(() -> accessTokenRefreshListeners.forEach(l -> l.onAccessTokenResponse(atr)));
     }
 }
