@@ -52,6 +52,7 @@ import org.openhab.core.library.items.DateTimeItem;
 import org.openhab.core.library.items.DimmerItem;
 import org.openhab.core.library.items.ImageItem;
 import org.openhab.core.library.items.LocationItem;
+import org.openhab.core.library.items.MediaBrowserItem;
 import org.openhab.core.library.items.NumberItem;
 import org.openhab.core.library.items.PlayerItem;
 import org.openhab.core.library.items.RollershutterItem;
@@ -312,6 +313,8 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
                 return SitemapFactory.eINSTANCE.createText();
             }
         } else if (PlayerItem.class.equals(itemType)) {
+            return createPlayerButtons();
+        } else if (MediaBrowserItem.class.equals(itemType)) {
             return createPlayerButtons();
         } else if (RollershutterItem.class.equals(itemType) //
                 || SwitchItem.class.equals(itemType)) {
