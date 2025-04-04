@@ -296,12 +296,12 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, State
 
     @Override
     public void allItemsChanged(Collection<String> oldItemNames) {
-        addPersistenceListenners(oldItemNames);
+        addPersistenceListeners(oldItemNames);
         addToPersistenceServiceContainer(oldItemNames);
     }
 
-    public void addPersistenceListenners(Collection<String> oldItemNames) {
-        itemRegistry.getItems().forEach(this::addItemToPersistenceListenners);
+    public void addPersistenceListeners(Collection<String> oldItemNames) {
+        itemRegistry.getItems().forEach(this::addItemToPersistenceListeners);
     }
 
     public void addToPersistenceServiceContainer(Collection<String> oldItemNames) {
@@ -310,7 +310,7 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, State
 
     @Override
     public void added(Item item) {
-        addItemToPersistenceListenners(item);
+        addItemToPersistenceListeners(item);
         addItemToPersistenceServiceContainer(item);
     }
 
@@ -318,7 +318,7 @@ public class PersistenceManagerImpl implements ItemRegistryChangeListener, State
         persistenceServiceContainers.values().forEach(container -> container.addItem(item));
     }
 
-    public void addItemToPersistenceListenners(Item item) {
+    public void addItemToPersistenceListeners(Item item) {
         if (item instanceof GenericItem genericItem) {
             genericItem.addStateChangeListener(this);
             genericItem.addTimeSeriesListener(this);
