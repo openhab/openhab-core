@@ -20,21 +20,18 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  */
 @NonNullByDefault
 public class MediaTrack extends MediaEntry {
-    public String trackName;
-    private String key;
+    private String artUri = "/static/Arrow.png";
 
     public MediaTrack(String key, String trackName) {
-        this.trackName = trackName;
-        this.key = key;
-
+        super(key, trackName);
     }
 
-    @Override
-    public String getName() {
-        return trackName;
+    public void setArtUri(String artUri) {
+        this.artUri = artUri;
     }
 
-    public String getKey() {
-        return key;
+    public String getArtUri() {
+        return this.artUri;
     }
+
 }
