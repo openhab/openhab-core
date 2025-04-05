@@ -23,6 +23,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeParseException;
 import java.util.Base64;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -61,6 +62,7 @@ import com.google.gson.JsonSyntaxException;
 public class OAuthConnector {
 
     private static final String HTTP_CLIENT_CONSUMER_NAME = "OAuthConnector";
+    private static final int TIMEOUT_SECONDS = 10;
 
     protected final HttpClientFactory httpClientFactory;
 
@@ -273,7 +275,8 @@ public class OAuthConnector {
     }
 
     private Request getMethod(HttpClient httpClient, String tokenUrl) {
-        Request request = httpClient.newRequest(tokenUrl).method(HttpMethod.POST);
+        Request request = httpClient.newRequest(tokenUrl).method(HttpMethod.POST).timeout(TIMEOUT_SECONDS,
+                TimeUnit.SECONDS);
         request.header(HttpHeader.ACCEPT, "application/json");
         request.header(HttpHeader.ACCEPT_CHARSET, StandardCharsets.UTF_8.name());
         return request;
