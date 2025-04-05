@@ -33,6 +33,12 @@
       <version>${project.version}</version>
       <scope>compile</scope>
     </dependency>
+    <dependency>
+      <groupId>org.openhab.core.bundles</groupId>
+      <artifactId>org.openhab.core.io.net</artifactId>
+      <version>${project.version}</version>
+      <scope>compile</scope>
+    </dependency>
 
   </dependencies>
 

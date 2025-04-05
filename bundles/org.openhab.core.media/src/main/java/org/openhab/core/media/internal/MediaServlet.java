@@ -15,10 +15,16 @@ package org.openhab.core.media.internal;
 import java.io.IOException;
 import java.io.Serial;
 import java.nio.charset.StandardCharsets;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -28,7 +34,15 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.jetty.client.HttpClient;
+import org.eclipse.jetty.client.api.ContentResponse;
+import org.eclipse.jetty.client.api.Request;
+import org.eclipse.jetty.http.HttpMethod;
+import org.eclipse.jetty.http.HttpStatus;
+import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.openhab.core.common.ThreadPoolManager;
+import org.openhab.core.io.net.http.HttpClientFactory;
+import org.openhab.core.io.net.http.TrustAllTrustManager;
 import org.openhab.core.media.MediaHTTPServer;
 import org.openhab.core.media.MediaListenner;
 import org.openhab.core.media.MediaService;
@@ -79,23 +93,107 @@ public class MediaServlet extends HttpServlet implements MediaHTTPServer {
 
     private final ScheduledExecutorService threadPool = ThreadPoolManager
             .getScheduledPool(ThreadPoolManager.THREAD_POOL_NAME_COMMON);
+
+    private final HttpClientFactory httpClientFactory;
+    private final HttpClient httpClient;
+
+    private String baseUri = "";
+
     @Nullable
     ScheduledFuture<?> periodicCleaner;
 
+    private static final int REQUEST_BUFFER_SIZE = 8000;
+    private static final int RESPONSE_BUFFER_SIZE = 200000;
+
     @Activate
-    public MediaServlet(@Reference MediaService mediaService) {
+    public MediaServlet(@Reference MediaService mediaService, @Reference HttpClientFactory httpClientFactory) {
         super();
         logger.info("constructor");
         this.mediaService = mediaService;
+        this.httpClientFactory = httpClientFactory;
+
+        SslContextFactory sslContextFactory = new SslContextFactory.Client();
+        try {
+            SSLContext sslContext = SSLContext.getInstance("SSL");
+            sslContext.init(null, new TrustManager[] { TrustAllTrustManager.getInstance() }, null);
+            sslContextFactory.setSslContext(sslContext);
+        } catch (NoSuchAlgorithmException e) {
+            logger.warn("An exception occurred while requesting the SSL encryption algorithm : '{}'", e.getMessage(),
+                    e);
+        } catch (KeyManagementException e) {
+            logger.warn("An exception occurred while initialising the SSL context : '{}'", e.getMessage(), e);
+        }
+
+        this.httpClient = httpClientFactory.createHttpClient("media");
+        // , sslContextFactory);
+        this.httpClient.setFollowRedirects(false);
+        this.httpClient.setRequestBufferSize(REQUEST_BUFFER_SIZE);
+        this.httpClient.setResponseBufferSize(RESPONSE_BUFFER_SIZE);
+
     }
 
     @Activate
     protected void activate(ComponentContext componentContext) {
         logger.info("activate");
+        try {
+            httpClient.start();
+        } catch (Exception e) {
+            logger.warn("Unable to start Jetty HttpClient {}", e.getMessage());
+        }
+
+        this.addProxySource("lyrionUpnp", "http://192.168.254.1:9000/");
     }
 
     @Deactivate
     protected synchronized void deactivate() {
+    }
+
+    private Map<String, String> proxyRegistry = new HashMap<String, String>();
+
+    public void addProxySource(String source, String uri) {
+        proxyRegistry.put(source, uri);
+    }
+
+    private void handleProxy(@Nullable HttpServletRequest req, @Nullable HttpServletResponse resp)
+            throws ServletException, IOException {
+        ServletOutputStream stream = resp.getOutputStream();
+
+        try {
+            String urlPath = req.getPathInfo();
+            int idxProxy = urlPath.indexOf("proxy/");
+            urlPath = urlPath.substring(idxProxy + 6);
+
+            int idxProxyName = urlPath.indexOf("/");
+            String proxyName = urlPath.substring(0, idxProxyName);
+
+            if (!proxyRegistry.containsKey(proxyName)) {
+                throw new Exception(String.format("proxyName %s not registered", proxyName));
+            }
+            String targetUri = proxyRegistry.get(proxyName);
+
+            urlPath = urlPath.substring(idxProxyName + 1);
+
+            String uri = targetUri + urlPath;
+
+            Request request = httpClient.newRequest(uri);
+
+            request = request.agent("Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0");
+            request = request.method(HttpMethod.GET);
+            ContentResponse result = request.send();
+
+            if (result.getStatus() == HttpStatus.OK_200) {
+                byte[] contents = result.getContent();
+                resp.setContentType(result.getMediaType());
+                stream.write(contents, 0, contents.length);
+            } else {
+                resp.setStatus(404);
+            }
+
+        } catch (Exception ex) {
+            throw new ServletException("Error", ex);
+
+        }
+
     }
 
     @Override
@@ -107,8 +205,15 @@ public class MediaServlet extends HttpServlet implements MediaHTTPServer {
             return;
         }
 
+        baseUri = req.getScheme() + "://" + req.getServerName() + ":" + req.getServerPort() + req.getServletPath();
+
         String qs = req.getQueryString();
         String path = req.getParameter("path");
+        String urlPath = req.getPathInfo();
+        if (urlPath != null && urlPath.startsWith("/proxy")) {
+            handleProxy(req, resp);
+            return;
+        }
 
         ServletOutputStream stream = resp.getOutputStream();
         final StringBuilder sb = new StringBuilder(5000);
@@ -146,7 +251,7 @@ public class MediaServlet extends HttpServlet implements MediaHTTPServer {
             if (currentEntry instanceof MediaAlbum) {
                 MediaAlbum album = (MediaAlbum) currentEntry;
                 sb.append("Album:" + album.getName());
-                sb.append("<img src=\"" + album.getArtUri() + "\"/>");
+                sb.append("<img src=\"" + handleImageProxy(album.getArtUri()) + "\"/>");
             }
 
             for (String key : col.getChilds().keySet()) {
@@ -160,7 +265,7 @@ public class MediaServlet extends HttpServlet implements MediaHTTPServer {
                             + "\" style=\"text-decoration: none;color:#ffffff;\">");
                     sb.append(entry.getName());
                     sb.append("<br/>");
-                    sb.append("<img width=160 src=\"" + album.getArtUri() + "\">");
+                    sb.append("<img width=160 src=\"" + handleImageProxy(album.getArtUri()) + "\">");
                     sb.append("</a>");
                     sb.append("<br/>");
                     sb.append("</div>");
@@ -184,9 +289,11 @@ public class MediaServlet extends HttpServlet implements MediaHTTPServer {
                     sb.append("<a href=\"" + requestURI + "?path=" + entry.getPath()
                             + "\" style=\"text-decoration: none;color:#000000;vertical-align:middle;\">");
                     if (track.getArtUri().indexOf("Arrow") >= 0) {
-                        sb.append("<img src=\"" + track.getArtUri() + "\" style=\"vertical-align:middle;\">");
+                        sb.append("<img src=\"" + handleImageProxy(track.getArtUri())
+                                + "\" style=\"vertical-align:middle;\">");
                     } else {
-                        sb.append("<img width=80 src=\"" + track.getArtUri() + "\" style=\"vertical-align:middle;\">");
+                        sb.append("<img width=80 src=\"" + handleImageProxy(track.getArtUri())
+                                + "\" style=\"vertical-align:middle;\">");
                     }
                     sb.append("&nbsp;&nbsp;&nbsp;&nbsp;");
                     sb.append(entry.getName());
@@ -202,7 +309,7 @@ public class MediaServlet extends HttpServlet implements MediaHTTPServer {
                             + "\" style=\"text-decoration: none;color:#ffffff;\">");
                     sb.append(entry.getName());
                     sb.append("<br/>");
-                    sb.append("<img width=160 src=\"" + playList.getArtUri() + "\">");
+                    sb.append("<img width=160 src=\"" + handleImageProxy(playList.getArtUri()) + "\">");
                     sb.append("</a>");
                     sb.append("<br/>");
                     sb.append("</div>");
@@ -215,7 +322,7 @@ public class MediaServlet extends HttpServlet implements MediaHTTPServer {
                             + "\" style=\"text-decoration: none;color:#000000;\">");
                     sb.append(entry.getName());
                     sb.append("<br/>");
-                    sb.append("<img width=160 src=\"" + collection.getArtUri() + "\">");
+                    sb.append("<img width=160 src=\"" + handleImageProxy(collection.getArtUri()) + "\">");
                     sb.append("</a>");
                     sb.append("<br/>");
                     sb.append("</div>");
@@ -230,6 +337,12 @@ public class MediaServlet extends HttpServlet implements MediaHTTPServer {
         resp.setContentType("text/html; charset=utf-8");
         stream.write(sb.toString().getBytes(StandardCharsets.UTF_8));
 
+    }
+
+    public String handleImageProxy(String uri) {
+        uri = uri.replace("http://192.168.254.1:9000/", baseUri + "/proxy/lyrionUpnp/");
+        uri = uri.replace("http://192.168.0.1:9000/", baseUri + "/proxy/lyrionUpnp/");
+        return uri;
     }
 
 }
