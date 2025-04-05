@@ -20,7 +20,6 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  */
 @NonNullByDefault
 public class MediaSource extends MediaCollection {
-    public String artUri = "/static/playlist.png";
 
     public MediaSource(String key, String sourceName) {
         super(key, sourceName);
@@ -29,16 +28,6 @@ public class MediaSource extends MediaCollection {
     public MediaSource(String key, String sourceName, String artUri) {
         super(key, sourceName);
 
-        this.artUri = artUri;
-    }
-
-    @Override
-    public String getArtUri() {
-        return artUri;
-    }
-
-    @Override
-    public void setArtUri(String artUri) {
         this.artUri = artUri;
     }
 
