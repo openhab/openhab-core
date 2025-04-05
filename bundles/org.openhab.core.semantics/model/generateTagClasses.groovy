@@ -237,7 +237,7 @@ def updateThingDescriptionXsd() {
 
             if (tagSection) {
                 tempFile.write(doNotEdit + "\n")
-                for (tag in tagsByType[tagSection]) {
+                tagsByType[tagSection].collect().sort { a, b -> a.Tag.toUpperCase() <=> b.Tag.toUpperCase() }.each { tag ->
                     tempFile.write("""\t\t\t<xs:enumeration value="${tag.Tag}"/>\n""")
                 }
             }
