@@ -142,6 +142,8 @@ public class MediaServlet extends HttpServlet implements MediaHTTPServer {
         }
 
         this.addProxySource("lyrionUpnp", "http://192.168.254.1:9000/");
+        this.addProxySource("emby", "http://192.168.254.1:8096/");
+
     }
 
     @Deactivate
@@ -342,6 +344,7 @@ public class MediaServlet extends HttpServlet implements MediaHTTPServer {
     public String handleImageProxy(String uri) {
         uri = uri.replace("http://192.168.254.1:9000/", baseUri + "/proxy/lyrionUpnp/");
         uri = uri.replace("http://192.168.0.1:9000/", baseUri + "/proxy/lyrionUpnp/");
+        uri = uri.replace("http://192.168.254.1:8096/", baseUri + "/proxy/emby/");
         return uri;
     }
 

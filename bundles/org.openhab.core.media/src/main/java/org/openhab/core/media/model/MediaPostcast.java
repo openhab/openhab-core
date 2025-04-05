@@ -21,19 +21,9 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 @NonNullByDefault
 public class MediaPostcast extends MediaCollection {
 
-    private String artUri = "";
-
     public MediaPostcast(String key, String albumName) {
         super(key, albumName);
 
-    }
-
-    public void setArtUri(String artUri) {
-        this.artUri = artUri;
-    }
-
-    public String getArtUri() {
-        return this.artUri;
     }
 
 }
