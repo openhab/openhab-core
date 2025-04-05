@@ -85,7 +85,6 @@ public class DefaultSemanticTagProvider implements SemanticTagProvider {
         defaultTags.add(DefaultSemanticTags.Point.OPEN_LEVEL);
         defaultTags.add(DefaultSemanticTags.Point.OPEN_STATE);
         defaultTags.add(DefaultSemanticTags.Point.TAMPERED);
-        defaultTags.add(DefaultSemanticTags.Point.TILT);
         defaultTags.add(DefaultSemanticTags.Property.AIR_QUALITY);
         defaultTags.add(DefaultSemanticTags.Property.AQI);
         defaultTags.add(DefaultSemanticTags.Property.CO);
@@ -130,6 +129,7 @@ public class DefaultSemanticTagProvider implements SemanticTagProvider {
         defaultTags.add(DefaultSemanticTags.Property.SOUND_VOLUME);
         defaultTags.add(DefaultSemanticTags.Property.SPEED);
         defaultTags.add(DefaultSemanticTags.Property.TEMPERATURE);
+        defaultTags.add(DefaultSemanticTags.Property.TILT);
         defaultTags.add(DefaultSemanticTags.Property.TIMESTAMP);
         defaultTags.add(DefaultSemanticTags.Property.ULTRAVIOLET);
         defaultTags.add(DefaultSemanticTags.Property.VENTILATION);

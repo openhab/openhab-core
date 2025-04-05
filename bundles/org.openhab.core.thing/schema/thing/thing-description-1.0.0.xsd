@@ -318,6 +318,7 @@
 			<xs:enumeration value="SoundVolume"/>
 			<xs:enumeration value="Speed"/>
 			<xs:enumeration value="Temperature"/>
+			<xs:enumeration value="Tilt"/>
 			<xs:enumeration value="Timestamp"/>
 			<xs:enumeration value="Ultraviolet"/>
 			<xs:enumeration value="Ventilation"/>
@@ -340,7 +341,6 @@
 			<xs:enumeration value="Status"/>
 			<xs:enumeration value="Switch"/>
 			<xs:enumeration value="Tampered"/>
-			<xs:enumeration value="Tilt"/>
 			<!-- End Allowed Semantic Point Tag Values -->
 		</xs:restriction>
 	</xs:simpleType>
