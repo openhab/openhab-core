@@ -21,11 +21,11 @@ import java.util.stream.Collectors
 
 baseDir = Paths.get(getClass().protectionDomain.codeSource.location.toURI()).getParent().getParent().toAbsolutePath()
 header = header()
-tagsByType = [:]
+tagTypes = ["Location": 1, "Property": 2, "Point": 3, "Equipment": 4] // determines the order of the types in the file
+tagsByType = tagTypes.keySet().collectEntries { [(it): []] }
 
 def tagSets = new TreeMap<String, String>()
 
-tagTypes = ["Location": 1, "Property": 2, "Point": 3, "Equipment": 4] // determines the order of the types in the file
 tags = loadCsv("${baseDir}/model/SemanticTags.csv")
 
 def labelsFile = new FileWriter("${baseDir}/src/main/resources/tags.properties")
@@ -39,15 +39,11 @@ tags.each { line ->
 
     appendLabelsFile(labelsFile, line, tagSet)
 
-    if (!tagsByType.containsKey(line.Type)) {
-        tagsByType[line.Type] = []
-    }
-    tagsByType[line.Type].add(line)
-
     if (!tagTypes.containsKey(line.Type)) {
         println "Unrecognized type " + line.Type
         return
     }
+    tagsByType[line.Type].add(line)
 }
 
 labelsFile.close()
@@ -184,10 +180,13 @@ public class DefaultSemanticTagProvider implements SemanticTagProvider {
         defaultTags.add(DefaultSemanticTags.POINT);
         defaultTags.add(DefaultSemanticTags.PROPERTY);
 """)
-    tags.each { line ->
-        def constantName = line.Type + "." + camelToUpperCasedSnake(line.Tag)
-        file.write("""        defaultTags.add(DefaultSemanticTags.${constantName});
+
+    tagsByType.each { type, lines ->
+        lines.collect().sort { a, b -> a.Tag.toUpperCase() <=> b.Tag.toUpperCase() }.each { line ->
+            def constantName = line.Type + "." + camelToUpperCasedSnake(line.Tag)
+            file.write("""        defaultTags.add(DefaultSemanticTags.${constantName});
 """)
+        }
     }
     file.write("""    }
 
