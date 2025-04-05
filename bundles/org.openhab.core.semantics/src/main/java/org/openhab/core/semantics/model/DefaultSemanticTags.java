@@ -491,11 +491,6 @@ public class DefaultSemanticTags {
                 "Temperature", //
                 "", //
                 "Temperatures");
-        public static final SemanticTag TILT = new SemanticTagImpl( //
-                "Property_Tilt", //
-                "Tilt", //
-                "", //
-                "");
         public static final SemanticTag TIMESTAMP = new SemanticTagImpl( //
                 "Property_Timestamp", //
                 "Timestamp", //

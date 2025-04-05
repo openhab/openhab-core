@@ -180,13 +180,12 @@ public class DefaultSemanticTagProvider implements SemanticTagProvider {
         defaultTags.add(DefaultSemanticTags.PROPERTY);
         defaultTags.add(DefaultSemanticTags.EQUIPMENT);
 """)
-
-    tagsByType.each { type, lines ->
-        lines.collect().sort { a, b -> a.Tag.toUpperCase() <=> b.Tag.toUpperCase() }.each { line ->
-            def constantName = line.Type + "." + camelToUpperCasedSnake(line.Tag)
-            file.write("""        defaultTags.add(DefaultSemanticTags.${constantName});
+    // these must be created in the hierarchy order
+    // because the parents must exist before the children are added
+    tags.each { line ->
+        def constantName = line.Type + "." + camelToUpperCasedSnake(line.Tag)
+        file.write("""        defaultTags.add(DefaultSemanticTags.${constantName});
 """)
-        }
     }
     file.write("""    }
 

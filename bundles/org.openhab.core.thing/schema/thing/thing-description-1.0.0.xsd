@@ -318,7 +318,6 @@
 			<xs:enumeration value="SoundVolume"/>
 			<xs:enumeration value="Speed"/>
 			<xs:enumeration value="Temperature"/>
-			<xs:enumeration value="Tilt"/>
 			<xs:enumeration value="Timestamp"/>
 			<xs:enumeration value="Ultraviolet"/>
 			<xs:enumeration value="Ventilation"/>
