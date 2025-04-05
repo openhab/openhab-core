@@ -21,17 +21,12 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 @NonNullByDefault
 public class MediaAlbum extends MediaCollection {
 
-    private String artUri = "";
     private String artist = "";
     private String genre = "";
 
     public MediaAlbum(String key, String albumName) {
         super(key, albumName);
 
-    }
-
-    public void setArtUri(String artUri) {
-        this.artUri = artUri;
     }
 
     public void setArtist(String artist) {
@@ -48,10 +43,6 @@ public class MediaAlbum extends MediaCollection {
 
     public String getArtist() {
         return this.artist;
-    }
-
-    public String getArtUri() {
-        return this.artUri;
     }
 
 }
