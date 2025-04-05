@@ -21,14 +21,17 @@ import java.util.stream.Collectors
 
 baseDir = Paths.get(getClass().protectionDomain.codeSource.location.toURI()).getParent().getParent().toAbsolutePath()
 header = header()
-tagsByType = [:]
+tagTypes = ["Location": 1, "Point": 2, "Property": 3, "Equipment": 4] // determines the order of the types in the file
+tagsByType = tagTypes.keySet().collectEntries { [(it): []] }
 
 def tagSets = new TreeMap<String, String>()
+
+tags = loadCsv("${baseDir}/model/SemanticTags.csv")
 
 def labelsFile = new FileWriter("${baseDir}/src/main/resources/tags.properties")
 labelsFile.write("# Generated content - do not edit!\n")
 
-for (line in tagsCsv()) {
+tags.each { line ->
     println "Processing Tag $line.Tag"
 
     def tagSet = (line.Parent ? tagSets.get(line.Parent) : line.Type) + "_" + line.Tag
@@ -36,18 +39,11 @@ for (line in tagsCsv()) {
 
     appendLabelsFile(labelsFile, line, tagSet)
 
-    if (!tagsByType.containsKey(line.Type)) {
-        tagsByType[line.Type] = []
+    if (!tagTypes.containsKey(line.Type)) {
+        println "Unrecognized type " + line.Type
+        return
     }
     tagsByType[line.Type].add(line)
-
-    switch(line.Type) {
-        case "Location"            : break;
-        case "Equipment"           : break;
-        case "Point"               : break;
-        case "Property"            : break;
-        default : println "Unrecognized type " + line.Type
-    }
 }
 
 labelsFile.close()
@@ -61,8 +57,37 @@ for (String tagSet : tagSets) {
     println tagSet
 }
 
-def tagsCsv() {
-    return parseCsv(new FileReader("${baseDir}/model/SemanticTags.csv"), separator: ',')
+def loadCsv(def semanticTagsCsv) {
+    tags = parseCsv(new FileReader(semanticTagsCsv), separator: ',').collect()
+    sorted = sortAndGroupByHierarchy(tags)
+    if (tags == sorted) {
+        return tags
+    }
+
+    sortedTagsFile = new FileWriter(semanticTagsCsv)
+    sortedTagsFile.write(sorted.first().toMap().keySet().join(",") + "\n") // csv header
+    sorted.each { line ->
+        fields = line.toMap().values().stream().map { quoted(it) }.toList()
+        sortedTagsFile.write(fields.join(",") + "\n")
+    }
+    sortedTagsFile.close()
+    return sorted
+}
+
+def sortAndGroupByHierarchy(def tags) {
+    result = tags.collect().sort { a, b -> tagTypes[a.Type] <=> tagTypes[b.Type] ?: a.Parent <=> b.Parent ?: a.Tag <=> b.Tag }
+    for (i = 0; i < result.size(); i++) {
+        (children, result) = result.split { it.Parent == result[i].Tag }
+        result.addAll(i + 1, children)
+    }
+    return result
+}
+
+def quoted(def str) {
+    if (str.contains(",")) {
+        return '"' + str + '"'
+    }
+    return str
 }
 
 def appendLabelsFile(FileWriter file, def line, String tagSet) {
@@ -150,12 +175,14 @@ public class DefaultSemanticTagProvider implements SemanticTagProvider {
 
     public DefaultSemanticTagProvider() {
         this.defaultTags = new ArrayList<>();
-        defaultTags.add(DefaultSemanticTags.EQUIPMENT);
         defaultTags.add(DefaultSemanticTags.LOCATION);
         defaultTags.add(DefaultSemanticTags.POINT);
         defaultTags.add(DefaultSemanticTags.PROPERTY);
-""")    
-    for (line in tagsCsv()) {
+        defaultTags.add(DefaultSemanticTags.EQUIPMENT);
+""")
+    // these must be created in the hierarchy order
+    // because the parents must exist before the children are added
+    tags.each { line ->
         def constantName = line.Type + "." + camelToUpperCasedSnake(line.Tag)
         file.write("""        defaultTags.add(DefaultSemanticTags.${constantName});
 """)
@@ -208,7 +235,7 @@ def updateThingDescriptionXsd() {
 
             if (tagSection) {
                 tempFile.write(doNotEdit + "\n")
-                for (tag in tagsByType[tagSection]) {
+                tagsByType[tagSection].collect().sort { a, b -> a.Tag.toUpperCase() <=> b.Tag.toUpperCase() }.each { tag ->
                     tempFile.write("""\t\t\t<xs:enumeration value="${tag.Tag}"/>\n""")
                 }
             }
