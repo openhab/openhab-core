@@ -35,10 +35,10 @@ public class DefaultSemanticTagProvider implements SemanticTagProvider {
 
     public DefaultSemanticTagProvider() {
         this.defaultTags = new ArrayList<>();
-        defaultTags.add(DefaultSemanticTags.EQUIPMENT);
         defaultTags.add(DefaultSemanticTags.LOCATION);
         defaultTags.add(DefaultSemanticTags.POINT);
         defaultTags.add(DefaultSemanticTags.PROPERTY);
+        defaultTags.add(DefaultSemanticTags.EQUIPMENT);
         defaultTags.add(DefaultSemanticTags.Location.APARTMENT);
         defaultTags.add(DefaultSemanticTags.Location.ATTIC);
         defaultTags.add(DefaultSemanticTags.Location.BASEMENT);
@@ -75,6 +75,17 @@ public class DefaultSemanticTagProvider implements SemanticTagProvider {
         defaultTags.add(DefaultSemanticTags.Location.TERRACE);
         defaultTags.add(DefaultSemanticTags.Location.THIRD_FLOOR);
         defaultTags.add(DefaultSemanticTags.Location.VERANDA);
+        defaultTags.add(DefaultSemanticTags.Point.ALARM);
+        defaultTags.add(DefaultSemanticTags.Point.CONTROL);
+        defaultTags.add(DefaultSemanticTags.Point.LOW_BATTERY);
+        defaultTags.add(DefaultSemanticTags.Point.MEASUREMENT);
+        defaultTags.add(DefaultSemanticTags.Point.OPEN_LEVEL);
+        defaultTags.add(DefaultSemanticTags.Point.OPEN_STATE);
+        defaultTags.add(DefaultSemanticTags.Point.SETPOINT);
+        defaultTags.add(DefaultSemanticTags.Point.STATUS);
+        defaultTags.add(DefaultSemanticTags.Point.SWITCH);
+        defaultTags.add(DefaultSemanticTags.Point.TAMPERED);
+        defaultTags.add(DefaultSemanticTags.Point.TILT);
         defaultTags.add(DefaultSemanticTags.Property.AIRCONDITIONING);
         defaultTags.add(DefaultSemanticTags.Property.AIRFLOW);
         defaultTags.add(DefaultSemanticTags.Property.AIR_QUALITY);
@@ -127,17 +138,6 @@ public class DefaultSemanticTagProvider implements SemanticTagProvider {
         defaultTags.add(DefaultSemanticTags.Property.VOLTAGE);
         defaultTags.add(DefaultSemanticTags.Property.WATER);
         defaultTags.add(DefaultSemanticTags.Property.WIND);
-        defaultTags.add(DefaultSemanticTags.Point.ALARM);
-        defaultTags.add(DefaultSemanticTags.Point.CONTROL);
-        defaultTags.add(DefaultSemanticTags.Point.LOW_BATTERY);
-        defaultTags.add(DefaultSemanticTags.Point.MEASUREMENT);
-        defaultTags.add(DefaultSemanticTags.Point.OPEN_LEVEL);
-        defaultTags.add(DefaultSemanticTags.Point.OPEN_STATE);
-        defaultTags.add(DefaultSemanticTags.Point.SETPOINT);
-        defaultTags.add(DefaultSemanticTags.Point.STATUS);
-        defaultTags.add(DefaultSemanticTags.Point.SWITCH);
-        defaultTags.add(DefaultSemanticTags.Point.TAMPERED);
-        defaultTags.add(DefaultSemanticTags.Point.TILT);
         defaultTags.add(DefaultSemanticTags.Equipment.ACCENT_LIGHT);
         defaultTags.add(DefaultSemanticTags.Equipment.AIR_CONDITIONER);
         defaultTags.add(DefaultSemanticTags.Equipment.AIR_FILTER);

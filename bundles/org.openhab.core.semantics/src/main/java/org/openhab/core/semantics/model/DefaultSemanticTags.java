@@ -212,6 +212,64 @@ public class DefaultSemanticTags {
                 "Terraces, Deck, Decks");
     }
 
+    public static class Point {
+        public static final SemanticTag ALARM = new SemanticTagImpl( //
+                "Point_Alarm", //
+                "Alarm", //
+                "", //
+                "");
+        public static final SemanticTag CONTROL = new SemanticTagImpl( //
+                "Point_Control", //
+                "Control", //
+                "", //
+                "");
+        public static final SemanticTag SWITCH = new SemanticTagImpl( //
+                "Point_Control_Switch", //
+                "Switch", //
+                "", //
+                "");
+        public static final SemanticTag MEASUREMENT = new SemanticTagImpl( //
+                "Point_Measurement", //
+                "Measurement", //
+                "", //
+                "");
+        public static final SemanticTag SETPOINT = new SemanticTagImpl( //
+                "Point_Setpoint", //
+                "Setpoint", //
+                "", //
+                "");
+        public static final SemanticTag STATUS = new SemanticTagImpl( //
+                "Point_Status", //
+                "Status", //
+                "", //
+                "");
+        public static final SemanticTag LOW_BATTERY = new SemanticTagImpl( //
+                "Point_Status_LowBattery", //
+                "LowBattery", //
+                "", //
+                "");
+        public static final SemanticTag OPEN_LEVEL = new SemanticTagImpl( //
+                "Point_Status_OpenLevel", //
+                "OpenLevel", //
+                "", //
+                "");
+        public static final SemanticTag OPEN_STATE = new SemanticTagImpl( //
+                "Point_Status_OpenState", //
+                "OpenState", //
+                "", //
+                "");
+        public static final SemanticTag TAMPERED = new SemanticTagImpl( //
+                "Point_Status_Tampered", //
+                "Tampered", //
+                "", //
+                "");
+        public static final SemanticTag TILT = new SemanticTagImpl( //
+                "Point_Status_Tilt", //
+                "Tilt", //
+                "", //
+                "");
+    }
+
     public static class Property {
         public static final SemanticTag AIR_QUALITY = new SemanticTagImpl( //
                 "Property_AirQuality", //
@@ -471,64 +529,6 @@ public class DefaultSemanticTags {
         public static final SemanticTag WIND = new SemanticTagImpl( //
                 "Property_Wind", //
                 "Wind", //
-                "", //
-                "");
-    }
-
-    public static class Point {
-        public static final SemanticTag ALARM = new SemanticTagImpl( //
-                "Point_Alarm", //
-                "Alarm", //
-                "", //
-                "");
-        public static final SemanticTag CONTROL = new SemanticTagImpl( //
-                "Point_Control", //
-                "Control", //
-                "", //
-                "");
-        public static final SemanticTag SWITCH = new SemanticTagImpl( //
-                "Point_Control_Switch", //
-                "Switch", //
-                "", //
-                "");
-        public static final SemanticTag MEASUREMENT = new SemanticTagImpl( //
-                "Point_Measurement", //
-                "Measurement", //
-                "", //
-                "");
-        public static final SemanticTag SETPOINT = new SemanticTagImpl( //
-                "Point_Setpoint", //
-                "Setpoint", //
-                "", //
-                "");
-        public static final SemanticTag STATUS = new SemanticTagImpl( //
-                "Point_Status", //
-                "Status", //
-                "", //
-                "");
-        public static final SemanticTag LOW_BATTERY = new SemanticTagImpl( //
-                "Point_Status_LowBattery", //
-                "LowBattery", //
-                "", //
-                "");
-        public static final SemanticTag OPEN_LEVEL = new SemanticTagImpl( //
-                "Point_Status_OpenLevel", //
-                "OpenLevel", //
-                "", //
-                "");
-        public static final SemanticTag OPEN_STATE = new SemanticTagImpl( //
-                "Point_Status_OpenState", //
-                "OpenState", //
-                "", //
-                "");
-        public static final SemanticTag TAMPERED = new SemanticTagImpl( //
-                "Point_Status_Tampered", //
-                "Tampered", //
-                "", //
-                "");
-        public static final SemanticTag TILT = new SemanticTagImpl( //
-                "Point_Status_Tilt", //
-                "Tilt", //
                 "", //
                 "");
     }

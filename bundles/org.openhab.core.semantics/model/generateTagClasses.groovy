@@ -21,7 +21,7 @@ import java.util.stream.Collectors
 
 baseDir = Paths.get(getClass().protectionDomain.codeSource.location.toURI()).getParent().getParent().toAbsolutePath()
 header = header()
-tagTypes = ["Location": 1, "Property": 2, "Point": 3, "Equipment": 4] // determines the order of the types in the file
+tagTypes = ["Location": 1, "Point": 2, "Property": 3, "Equipment": 4] // determines the order of the types in the file
 tagsByType = tagTypes.keySet().collectEntries { [(it): []] }
 
 def tagSets = new TreeMap<String, String>()
@@ -175,10 +175,10 @@ public class DefaultSemanticTagProvider implements SemanticTagProvider {
 
     public DefaultSemanticTagProvider() {
         this.defaultTags = new ArrayList<>();
-        defaultTags.add(DefaultSemanticTags.EQUIPMENT);
         defaultTags.add(DefaultSemanticTags.LOCATION);
         defaultTags.add(DefaultSemanticTags.POINT);
         defaultTags.add(DefaultSemanticTags.PROPERTY);
+        defaultTags.add(DefaultSemanticTags.EQUIPMENT);
 """)
 
     tagsByType.each { type, lines ->
