@@ -40,6 +40,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
 
 /**
  * The {@link OAuthConnectorRFC8628} extends {@link OAuthConnector} to implement
@@ -292,9 +293,10 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
         request.param(PARAM_SCOPE, scopeParameter);
         logger.trace("fetchDeviceCodeResponse() request: {}", request.getURI());
 
+        String content = null;
         try {
             ContentResponse response = request.send();
-            String content = response.getContentAsString();
+            content = response.getContentAsString();
             logger.trace("fetchDeviceCodeResponse() response: {}", content);
 
             if (response.getStatus() == HttpStatus.OK_200) {
@@ -310,6 +312,9 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
                 }
             }
             throw new OAuthException("fetchDeviceCodeResponse() error: " + response);
+        } catch (JsonSyntaxException e) {
+            logger.warn("fetchDeviceCodeResponse() error parsing content:{}", content);
+            throw new OAuthException("fetchDeviceCodeResponse() error", e);
         } catch (InterruptedException | TimeoutException | ExecutionException e) {
             throw new OAuthException("fetchDeviceCodeResponse() error", e);
         }
@@ -341,9 +346,10 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
         request.param(PARAM_DEVICE_CODE, dcr.getDeviceCode());
         logger.trace("fetchAccessTokenResponse() request: {}", request.getURI());
 
+        String content = null;
         try {
             ContentResponse response = request.send();
-            String content = response.getContentAsString();
+            content = response.getContentAsString();
             logger.trace("fetchAccessTokenResponse() response: {}", content);
 
             switch (response.getStatus()) {
@@ -367,6 +373,9 @@ public class OAuthConnectorRFC8628 extends OAuthConnector implements AutoCloseab
              * completed the verification process
              */
             return null;
+        } catch (JsonSyntaxException e) {
+            logger.warn("fetchAccessTokenResponse() error parsing content:{}", content);
+            throw new OAuthException("fetchAccessTokenResponse() error", e);
         } catch (InterruptedException | TimeoutException | ExecutionException e) {
             throw new OAuthException("fetchAccessTokenResponse() error", e);
         }
