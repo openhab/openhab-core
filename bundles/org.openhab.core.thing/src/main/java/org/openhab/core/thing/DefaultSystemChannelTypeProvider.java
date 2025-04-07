@@ -24,6 +24,8 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.i18n.LocalizedKey;
 import org.openhab.core.library.CoreItemFactory;
+import org.openhab.core.semantics.model.DefaultSemanticTags.Point;
+import org.openhab.core.semantics.model.DefaultSemanticTags.Property;
 import org.openhab.core.thing.i18n.ChannelTypeI18nLocalizationService;
 import org.openhab.core.thing.type.ChannelType;
 import org.openhab.core.thing.type.ChannelTypeBuilder;
@@ -121,7 +123,7 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
                             new StateOption("2", "average"), new StateOption("3", "good"),
                             new StateOption("4", "excellent")))
                     .build())
-            .withTags(List.of("Measurement", "SignalStrength")).build();
+            .withTags(List.of(Point.MEASUREMENT.getName(), Property.SIGNAL_STRENGTH.getName())).build();
 
     /**
      * Low battery default system wide {@link ChannelType}. Represents a low battery warning with possible values
@@ -132,7 +134,8 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
             .withDescription("Low battery warning with possible values on (low battery) and off (battery ok)")
             .withCategory("LowBattery")
             .withStateDescriptionFragment(StateDescriptionFragmentBuilder.create().withReadOnly(true).build())
-            .withTags(List.of("Alarm", "LowBattery")).build();
+            // TODO shift LowBattery from Point child to Property child
+            .withTags(List.of(Point.ALARM.getName(), Point.LOW_BATTERY.getName())).build();
 
     /**
      * Battery level default system wide {@link ChannelType}. Represents the battery level as a percentage.
@@ -143,7 +146,7 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
             .withStateDescriptionFragment(StateDescriptionFragmentBuilder.create().withMinimum(BigDecimal.ZERO)
                     .withMaximum(new BigDecimal(100)).withStep(BigDecimal.ONE).withReadOnly(true).withPattern("%.0f %%")
                     .build())
-            .withTags(List.of("Measurement", "Energy")).build();
+            .withTags(List.of(Point.MEASUREMENT.getName(), Property.ENERGY.getName())).build();
 
     /**
      * System wide trigger {@link ChannelType} without event options.
@@ -188,7 +191,7 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
     public static final ChannelType SYSTEM_POWER = ChannelTypeBuilder
             .state(SYSTEM_CHANNEL_TYPE_UID_POWER, "Power", CoreItemFactory.SWITCH)
             .withDescription("Device is operable when channel has state ON").withCategory("Switch")
-            .withTags(List.of("Switch", "Power")).build();
+            .withTags(List.of(Point.SWITCH.getName(), Property.POWER.getName())).build();
 
     /**
      * Location: default system wide {@link ChannelType} which displays a location
@@ -198,7 +201,8 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
             .withDescription("Location in lat./lon./height coordinates")
             .withStateDescriptionFragment(StateDescriptionFragmentBuilder.create().withReadOnly(true)
                     .withPattern("%2$s°N %3$s°E %1$sm").build())
-            .withTag("Measurement").build();
+            // TODO add a Property for geographic location coordinate
+            .withTag(Point.MEASUREMENT.getName()).build();
 
     /**
      * Motion: default system wide {@link ChannelType} which indications whether motion was detected (state ON)
@@ -207,7 +211,7 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
             .state(SYSTEM_CHANNEL_TYPE_UID_MOTION, "Motion", CoreItemFactory.SWITCH)
             .withDescription("Motion detected by the device").withCategory("Motion")
             .withStateDescriptionFragment(StateDescriptionFragmentBuilder.create().withReadOnly(true).build())
-            .withTags(List.of("Status", "Presence")).build();
+            .withTags(List.of(Point.STATUS.getName(), Property.PRESENCE.getName())).build();
 
     /**
      * Brightness: default system wide {@link ChannelType} which allows changing the brightness from 0-100%
@@ -217,7 +221,7 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
             .withDescription("Controls the brightness and switches the light on and off").withCategory("Light")
             .withStateDescriptionFragment(StateDescriptionFragmentBuilder.create().withMinimum(BigDecimal.ZERO)
                     .withMaximum(new BigDecimal(100)).withPattern("%d %%").build())
-            .withTags(List.of("Control", "Brightness")).build();
+            .withTags(List.of(Point.CONTROL.getName(), Property.BRIGHTNESS.getName())).build();
 
     /**
      * Color: default system wide {@link ChannelType} which allows changing the color
@@ -225,7 +229,7 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
     public static final ChannelType SYSTEM_COLOR = ChannelTypeBuilder
             .state(SYSTEM_CHANNEL_TYPE_UID_COLOR, "Color", CoreItemFactory.COLOR)
             .withDescription("Controls the color of the light").withCategory("ColorLight")
-            .withTags(List.of("Control", "Light")).build();
+            .withTags(List.of(Point.CONTROL.getName(), Property.LIGHT.getName())).build();
 
     /**
      * Color-temperature: default system wide {@link ChannelType} which allows changing the color temperature in percent
@@ -236,7 +240,7 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
             .withCategory("ColorLight")
             .withStateDescriptionFragment(StateDescriptionFragmentBuilder.create().withMinimum(BigDecimal.ZERO)
                     .withMaximum(new BigDecimal(100)).withPattern("%.0f").build())
-            .withTags(List.of("Control", "ColorTemperature")).build();
+            .withTags(List.of(Point.CONTROL.getName(), Property.COLOR_TEMPERATURE.getName())).build();
 
     /**
      * Color-temperature: default system wide {@link ChannelType} which allows changing the color temperature in Kelvin
@@ -247,7 +251,7 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
             .withCategory("ColorLight").isAdvanced(true)
             .withStateDescriptionFragment(StateDescriptionFragmentBuilder.create().withMinimum(new BigDecimal(1000))
                     .withMaximum(new BigDecimal(10000)).withPattern("%.0f K").build())
-            .withTags(List.of("Control", "ColorTemperature")).build();
+            .withTags(List.of(Point.CONTROL.getName(), Property.COLOR_TEMPERATURE.getName())).build();
 
     // media channels
 
@@ -259,7 +263,8 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
             .withDescription("Change the sound volume of a device")
             .withStateDescriptionFragment(StateDescriptionFragmentBuilder.create().withMinimum(BigDecimal.ZERO)
                     .withMaximum(new BigDecimal(100)).withPattern("%d %%").build())
-            .withCategory("SoundVolume").withTags(List.of("Control", "SoundVolume")).build();
+            .withCategory("SoundVolume").withTags(List.of(Point.CONTROL.getName(), Property.SOUND_VOLUME.getName()))
+            .build();
 
     /**
      * Mute: default system wide {@link ChannelType} which allows muting and un-muting audio
@@ -267,14 +272,16 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
     public static final ChannelType SYSTEM_MUTE = ChannelTypeBuilder
             .state(SYSTEM_CHANNEL_TYPE_UID_MUTE, "Mute", CoreItemFactory.SWITCH)
             .withDescription("Mute audio of the device").withCategory("SoundVolume_Mute")
-            .withTags(List.of("Switch", "SoundVolume")).build();
+            .withTags(List.of(Point.SWITCH.getName(), Property.SOUND_VOLUME.getName())).build();
 
     /**
      * Media-control: system wide {@link ChannelType} which controls a media player
      */
     public static final ChannelType SYSTEM_MEDIA_CONTROL = ChannelTypeBuilder
             .state(SYSTEM_CHANNEL_TYPE_UID_MEDIA_CONTROL, "Media Control", CoreItemFactory.PLAYER)
-            .withCategory("MediaControl").withTag("Control").build();
+            .withCategory("MediaControl")
+            // TODO add a Property for media control (stop/play/rwd/fwd/pause)
+            .withTag(Point.CONTROL.getName()).build();
 
     /**
      * Media-title: default system wide {@link ChannelType} which displays the title of a (played) song
@@ -283,7 +290,7 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
             .state(SYSTEM_CHANNEL_TYPE_UID_MEDIA_TITLE, "Media Title", CoreItemFactory.STRING)
             .withDescription("Title of a (played) media file")
             .withStateDescriptionFragment(StateDescriptionFragmentBuilder.create().withReadOnly(true).build())
-            .withTag("Status").build();
+            .withTag(Point.STATUS.getName()).build();
 
     /**
      * Media-artist: default system wide {@link ChannelType} which displays the artist of a (played) song
@@ -292,7 +299,7 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
             .state(SYSTEM_CHANNEL_TYPE_UID_MEDIA_ARTIST, "Media Artist", CoreItemFactory.STRING)
             .withDescription("Artist of a (played) media file")
             .withStateDescriptionFragment(StateDescriptionFragmentBuilder.create().withReadOnly(true).build())
-            .withTag("Status").build();
+            .withTag(Point.STATUS.getName()).build();
 
     // weather channels
 
@@ -304,7 +311,7 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
             .withDescription("Current wind direction expressed as an angle").withCategory("Wind")
             .withStateDescriptionFragment(StateDescriptionFragmentBuilder.create().withMinimum(BigDecimal.ZERO)
                     .withMaximum(new BigDecimal(360)).withReadOnly(true).withPattern("%.0f %unit%").build())
-            .withTags(List.of("Measurement", "Wind")).build();
+            .withTags(List.of(Point.MEASUREMENT.getName(), Property.WIND.getName())).build();
 
     /**
      * Wind-speed: system wide {@link ChannelType} which shows the wind speed
@@ -314,7 +321,7 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
             .withDescription("Current wind speed").withCategory("Wind")
             .withStateDescriptionFragment(
                     StateDescriptionFragmentBuilder.create().withReadOnly(true).withPattern("%.1f %unit%").build())
-            .withTags(List.of("Measurement", "Wind")).build();
+            .withTags(List.of(Point.MEASUREMENT.getName(), Property.WIND.getName())).build();
 
     /**
      * Outdoor-temperature: system wide {@link ChannelType} which shows the outdoor temperature
@@ -324,7 +331,7 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
             .withDescription("Current outdoor temperature").withCategory("Temperature")
             .withStateDescriptionFragment(
                     StateDescriptionFragmentBuilder.create().withReadOnly(true).withPattern("%.1f %unit%").build())
-            .withTags(List.of("Measurement", "Temperature")).build();
+            .withTags(List.of(Point.MEASUREMENT.getName(), Property.TEMPERATURE.getName())).build();
 
     /**
      * Indoor-temperature: system wide {@link ChannelType} which shows the indoor temperature
@@ -334,7 +341,7 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
             .withDescription("Current indoor temperature").withCategory("Temperature")
             .withStateDescriptionFragment(
                     StateDescriptionFragmentBuilder.create().withReadOnly(true).withPattern("%.1f %unit%").build())
-            .withTags(List.of("Measurement", "Temperature")).build();
+            .withTags(List.of(Point.MEASUREMENT.getName(), Property.TEMPERATURE.getName())).build();
 
     /**
      * Atmospheric-humidity: system wide {@link ChannelType} which shows the atmospheric humidity
@@ -344,7 +351,7 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
             .withUnitHint("%").withDescription("Current atmospheric relative humidity").withCategory("Humidity")
             .withStateDescriptionFragment(
                     StateDescriptionFragmentBuilder.create().withReadOnly(true).withPattern("%.0f %%").build())
-            .withTags(List.of("Measurement", "Humidity")).build();
+            .withTags(List.of(Point.MEASUREMENT.getName(), Property.HUMIDITY.getName())).build();
 
     /**
      * Barometric-pressure: system wide {@link ChannelType} which shows the barometric pressure
@@ -354,7 +361,7 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
             .withDescription("Current barometric pressure").withCategory("Pressure")
             .withStateDescriptionFragment(
                     StateDescriptionFragmentBuilder.create().withReadOnly(true).withPattern("%.3f %unit%").build())
-            .withTags(List.of("Measurement", "Pressure")).build();
+            .withTags(List.of(Point.MEASUREMENT.getName(), Property.PRESSURE.getName())).build();
 
     // Energy
 
@@ -366,7 +373,7 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
             .withDescription("Current electric power").withCategory("Energy")
             .withStateDescriptionFragment(
                     StateDescriptionFragmentBuilder.create().withReadOnly(true).withPattern("%.1f %unit%").build())
-            .withTags(List.of("Measurement", "Power")).build();
+            .withTags(List.of(Point.MEASUREMENT.getName(), Property.POWER.getName())).build();
 
     /**
      * Electric-current: system wide {@link ChannelType} which shows the electric current
@@ -376,7 +383,7 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
             .withDescription("Current electric current").withCategory("Energy")
             .withStateDescriptionFragment(
                     StateDescriptionFragmentBuilder.create().withReadOnly(true).withPattern("%.1f %unit%").build())
-            .withTags(List.of("Measurement", "Current")).build();
+            .withTags(List.of(Point.MEASUREMENT.getName(), Property.CURRENT.getName())).build();
 
     /**
      * Electric-voltage: system wide {@link ChannelType} which shows the electric voltage
@@ -386,7 +393,7 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
             .withDescription("Current electric voltage").withCategory("Energy")
             .withStateDescriptionFragment(
                     StateDescriptionFragmentBuilder.create().withReadOnly(true).withPattern("%.1f %unit%").build())
-            .withTags(List.of("Measurement", "Voltage")).build();
+            .withTags(List.of(Point.MEASUREMENT.getName(), Property.VOLTAGE.getName())).build();
 
     /**
      * Electrical-energy: system wide {@link ChannelType} which shows the electrical energy
@@ -396,16 +403,17 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
             .withDescription("Current electric energy").withCategory("Energy")
             .withStateDescriptionFragment(
                     StateDescriptionFragmentBuilder.create().withReadOnly(true).withPattern("%.1f %unit%").build())
-            .withTags(List.of("Measurement", "Energy")).build();
+            .withTags(List.of(Point.MEASUREMENT.getName(), Property.ENERGY.getName())).build();
 
     /**
      * UV Index: system wide {@link ChannelType} which shows the UV Index
      */
     public static final ChannelType SYSTEM_UV_INDEX = ChannelTypeBuilder
             .state(SYSTEM_CHANNEL_TYPE_UID_UV_INDEX, "UV Index", CoreItemFactory.NUMBER)
-            .withDescription("Current UV index").withStateDescriptionFragment(StateDescriptionFragmentBuilder.create()
-                    .withReadOnly(true).withPattern("%d").withMinimum(BigDecimal.ONE).build())
-            .withTags(List.of("Measurement", "Ultraviolet")).build();
+            .withDescription("Current UV index")
+            .withStateDescriptionFragment(StateDescriptionFragmentBuilder.create().withReadOnly(true).withPattern("%d")
+                    .withMinimum(BigDecimal.ONE).build())
+            .withTags(List.of(Point.MEASUREMENT.getName(), Property.ULTRAVIOLET.getName())).build();
 
     private static final Collection<ChannelType> CHANNEL_TYPES = List.of(SYSTEM_CHANNEL_SIGNAL_STRENGTH,
             SYSTEM_CHANNEL_LOW_BATTERY, SYSTEM_CHANNEL_BATTERY_LEVEL, SYSTEM_TRIGGER, SYSTEM_RAWBUTTON, SYSTEM_BUTTON,
