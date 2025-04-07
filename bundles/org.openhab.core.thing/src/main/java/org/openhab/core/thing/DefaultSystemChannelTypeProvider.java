@@ -121,7 +121,7 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
                             new StateOption("2", "average"), new StateOption("3", "good"),
                             new StateOption("4", "excellent")))
                     .build())
-            .withTags(List.of("Measurement", "Level")).build();
+            .withTags(List.of("Measurement", "SignalStrength")).build();
 
     /**
      * Low battery default system wide {@link ChannelType}. Represents a low battery warning with possible values
@@ -132,7 +132,7 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
             .withDescription("Low battery warning with possible values on (low battery) and off (battery ok)")
             .withCategory("LowBattery")
             .withStateDescriptionFragment(StateDescriptionFragmentBuilder.create().withReadOnly(true).build())
-            .withTags(List.of("LowBattery", "Energy")).build();
+            .withTags(List.of("Alarm", "LowBattery")).build();
 
     /**
      * Battery level default system wide {@link ChannelType}. Represents the battery level as a percentage.
@@ -217,7 +217,7 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
             .withDescription("Controls the brightness and switches the light on and off").withCategory("Light")
             .withStateDescriptionFragment(StateDescriptionFragmentBuilder.create().withMinimum(BigDecimal.ZERO)
                     .withMaximum(new BigDecimal(100)).withPattern("%d %%").build())
-            .withTags(List.of("Control", "Light")).build();
+            .withTags(List.of("Control", "Brightness")).build();
 
     /**
      * Color: default system wide {@link ChannelType} which allows changing the color
