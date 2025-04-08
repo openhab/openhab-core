@@ -48,6 +48,8 @@ import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 
 /**
@@ -89,6 +91,29 @@ public class OAuthConnector {
         this.extraFields = extraFields;
         gson = gsonBuilder.setDateFormat(DateTimeType.DATE_PATTERN_JSON_COMPAT)
                 .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+                .registerTypeAdapter(OAuthResponseException.class,
+                        (JsonDeserializer<OAuthResponseException>) (json, typeOfT, context) -> {
+                            OAuthResponseException result = new OAuthResponseException();
+                            JsonObject jsonObject = json.getAsJsonObject();
+                            JsonElement jsonElement;
+                            jsonElement = jsonObject.get("error");
+                            if (jsonElement != null) {
+                                result.setError(jsonElement.getAsString());
+                            }
+                            jsonElement = jsonObject.get("error_description");
+                            if (jsonElement != null) {
+                                result.setErrorDescription(jsonElement.getAsString());
+                            }
+                            jsonElement = jsonObject.get("error_uri");
+                            if (jsonElement != null) {
+                                result.setErrorUri(jsonElement.getAsString());
+                            }
+                            jsonElement = jsonObject.get("state");
+                            if (jsonElement != null) {
+                                result.setState(jsonElement.getAsString());
+                            }
+                            return result;
+                        })
                 .registerTypeAdapter(Instant.class, (JsonDeserializer<Instant>) (json, typeOfT, context) -> {
                     try {
                         return Instant.parse(json.getAsString());
