@@ -78,13 +78,10 @@ public class DefaultSemanticTagProvider implements SemanticTagProvider {
         defaultTags.add(DefaultSemanticTags.Point.ALARM);
         defaultTags.add(DefaultSemanticTags.Point.CONTROL);
         defaultTags.add(DefaultSemanticTags.Point.SWITCH);
+        defaultTags.add(DefaultSemanticTags.Point.FORECAST);
         defaultTags.add(DefaultSemanticTags.Point.MEASUREMENT);
         defaultTags.add(DefaultSemanticTags.Point.SETPOINT);
         defaultTags.add(DefaultSemanticTags.Point.STATUS);
-        defaultTags.add(DefaultSemanticTags.Point.LOW_BATTERY);
-        defaultTags.add(DefaultSemanticTags.Point.OPEN_LEVEL);
-        defaultTags.add(DefaultSemanticTags.Point.OPEN_STATE);
-        defaultTags.add(DefaultSemanticTags.Point.TAMPERED);
         defaultTags.add(DefaultSemanticTags.Property.AIR_QUALITY);
         defaultTags.add(DefaultSemanticTags.Property.AQI);
         defaultTags.add(DefaultSemanticTags.Property.CO);
@@ -110,6 +107,8 @@ public class DefaultSemanticTagProvider implements SemanticTagProvider {
         defaultTags.add(DefaultSemanticTags.Property.ILLUMINANCE);
         defaultTags.add(DefaultSemanticTags.Property.LEVEL);
         defaultTags.add(DefaultSemanticTags.Property.LIGHT);
+        defaultTags.add(DefaultSemanticTags.Property.LOW_BATTERY);
+        defaultTags.add(DefaultSemanticTags.Property.MEDIA_CONTROL);
         defaultTags.add(DefaultSemanticTags.Property.MODE);
         defaultTags.add(DefaultSemanticTags.Property.AUTO_MANUAL);
         defaultTags.add(DefaultSemanticTags.Property.ENABLED_DISABLED);
@@ -117,7 +116,11 @@ public class DefaultSemanticTagProvider implements SemanticTagProvider {
         defaultTags.add(DefaultSemanticTags.Property.OIL);
         defaultTags.add(DefaultSemanticTags.Property.ON_OFF);
         defaultTags.add(DefaultSemanticTags.Property.OPEN_CLOSED);
+        defaultTags.add(DefaultSemanticTags.Property.OPEN_LEVEL);
+        defaultTags.add(DefaultSemanticTags.Property.OPEN_STATE);
         defaultTags.add(DefaultSemanticTags.Property.OPENING);
+        defaultTags.add(DefaultSemanticTags.Property.POSITION);
+        defaultTags.add(DefaultSemanticTags.Property.GEO_LOCATION);
         defaultTags.add(DefaultSemanticTags.Property.POWER);
         defaultTags.add(DefaultSemanticTags.Property.PRESENCE);
         defaultTags.add(DefaultSemanticTags.Property.PRESSURE);
@@ -128,6 +131,7 @@ public class DefaultSemanticTagProvider implements SemanticTagProvider {
         defaultTags.add(DefaultSemanticTags.Property.SMOKE);
         defaultTags.add(DefaultSemanticTags.Property.SOUND_VOLUME);
         defaultTags.add(DefaultSemanticTags.Property.SPEED);
+        defaultTags.add(DefaultSemanticTags.Property.TAMPERED);
         defaultTags.add(DefaultSemanticTags.Property.TEMPERATURE);
         defaultTags.add(DefaultSemanticTags.Property.TILT);
         defaultTags.add(DefaultSemanticTags.Property.TIMESTAMP);

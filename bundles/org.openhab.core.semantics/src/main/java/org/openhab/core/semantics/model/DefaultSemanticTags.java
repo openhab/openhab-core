@@ -228,6 +228,11 @@ public class DefaultSemanticTags {
                 "Switch", //
                 "", //
                 "");
+        public static final SemanticTag FORECAST = new SemanticTagImpl( //
+                "Point_Forecast", //
+                "Forecast", //
+                "", //
+                "");
         public static final SemanticTag MEASUREMENT = new SemanticTagImpl( //
                 "Point_Measurement", //
                 "Measurement", //
@@ -241,26 +246,6 @@ public class DefaultSemanticTags {
         public static final SemanticTag STATUS = new SemanticTagImpl( //
                 "Point_Status", //
                 "Status", //
-                "", //
-                "");
-        public static final SemanticTag LOW_BATTERY = new SemanticTagImpl( //
-                "Point_Status_LowBattery", //
-                "LowBattery", //
-                "", //
-                "");
-        public static final SemanticTag OPEN_LEVEL = new SemanticTagImpl( //
-                "Point_Status_OpenLevel", //
-                "OpenLevel", //
-                "", //
-                "");
-        public static final SemanticTag OPEN_STATE = new SemanticTagImpl( //
-                "Point_Status_OpenState", //
-                "OpenState", //
-                "", //
-                "");
-        public static final SemanticTag TAMPERED = new SemanticTagImpl( //
-                "Point_Status_Tampered", //
-                "Tampered", //
                 "", //
                 "");
     }
@@ -391,6 +376,16 @@ public class DefaultSemanticTags {
                 "Light", //
                 "", //
                 "Lights, Lighting");
+        public static final SemanticTag LOW_BATTERY = new SemanticTagImpl( //
+                "Property_LowBattery", //
+                "Low Battery", //
+                "", //
+                "");
+        public static final SemanticTag MEDIA_CONTROL = new SemanticTagImpl( //
+                "Property_MediaControl", //
+                "Media Control", //
+                "", //
+                "");
         public static final SemanticTag MODE = new SemanticTagImpl( //
                 "Property_Mode", //
                 "Mode", //
@@ -426,9 +421,29 @@ public class DefaultSemanticTags {
                 "Open Closed", //
                 "", //
                 "");
+        public static final SemanticTag OPEN_LEVEL = new SemanticTagImpl( //
+                "Property_OpenLevel", //
+                "Open Level", //
+                "", //
+                "");
+        public static final SemanticTag OPEN_STATE = new SemanticTagImpl( //
+                "Property_OpenState", //
+                "Open State", //
+                "", //
+                "");
         public static final SemanticTag OPENING = new SemanticTagImpl( //
                 "Property_Opening", //
                 "Opening", //
+                "", //
+                "");
+        public static final SemanticTag POSITION = new SemanticTagImpl( //
+                "Property_Position", //
+                "Position", //
+                "", //
+                "");
+        public static final SemanticTag GEO_LOCATION = new SemanticTagImpl( //
+                "Property_Position_GeoLocation", //
+                "Geo Location", //
                 "", //
                 "");
         public static final SemanticTag POWER = new SemanticTagImpl( //
@@ -479,6 +494,11 @@ public class DefaultSemanticTags {
         public static final SemanticTag SPEED = new SemanticTagImpl( //
                 "Property_Speed", //
                 "Speed", //
+                "", //
+                "");
+        public static final SemanticTag TAMPERED = new SemanticTagImpl( //
+                "Property_Tampered", //
+                "Tampered", //
                 "", //
                 "");
         public static final SemanticTag TEMPERATURE = new SemanticTagImpl( //
