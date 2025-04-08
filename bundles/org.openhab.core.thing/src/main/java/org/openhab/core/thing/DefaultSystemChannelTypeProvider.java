@@ -134,8 +134,7 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
             .withDescription("Low battery warning with possible values on (low battery) and off (battery ok)")
             .withCategory("LowBattery")
             .withStateDescriptionFragment(StateDescriptionFragmentBuilder.create().withReadOnly(true).build())
-            // TODO shift LowBattery from Point child to Property child
-            .withTags(Point.ALARM, Point.LOW_BATTERY).build();
+            .withTags(Point.ALARM, Property.LOW_BATTERY).build();
 
     /**
      * Battery level default system wide {@link ChannelType}. Represents the battery level as a percentage.
@@ -201,8 +200,7 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
             .withDescription("Location in lat./lon./height coordinates")
             .withStateDescriptionFragment(StateDescriptionFragmentBuilder.create().withReadOnly(true)
                     .withPattern("%2$s°N %3$s°E %1$sm").build())
-            // TODO add a Property for geographic location coordinate
-            .withTags(Point.MEASUREMENT).build();
+            .withTags(Point.MEASUREMENT, Property.GEO_LOCATION).build();
 
     /**
      * Motion: default system wide {@link ChannelType} which indications whether motion was detected (state ON)
@@ -229,7 +227,7 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
     public static final ChannelType SYSTEM_COLOR = ChannelTypeBuilder
             .state(SYSTEM_CHANNEL_TYPE_UID_COLOR, "Color", CoreItemFactory.COLOR)
             .withDescription("Controls the color of the light").withCategory("ColorLight")
-            .withTags(Point.CONTROL, Property.LIGHT).build();
+            .withTags(Point.CONTROL, Property.COLOR).build();
 
     /**
      * Color-temperature: default system wide {@link ChannelType} which allows changing the color temperature in percent
@@ -278,9 +276,7 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
      */
     public static final ChannelType SYSTEM_MEDIA_CONTROL = ChannelTypeBuilder
             .state(SYSTEM_CHANNEL_TYPE_UID_MEDIA_CONTROL, "Media Control", CoreItemFactory.PLAYER)
-            .withCategory("MediaControl")
-            // TODO add a Property for media control (stop/play/rwd/fwd/pause)
-            .withTags(Point.CONTROL).build();
+            .withCategory("MediaControl").withTags(Point.CONTROL, Property.MEDIA_CONTROL).build();
 
     /**
      * Media-title: default system wide {@link ChannelType} which displays the title of a (played) song
