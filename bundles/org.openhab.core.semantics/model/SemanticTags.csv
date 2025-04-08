@@ -56,6 +56,7 @@ Property,Airflow,,Airflow,,
 Property,App,,App,Application,Software program
 Property,Brightness,,Brightness,,
 Property,Channel,,Channel,,
+Property,Color,,Color,,
 Property,ColorTemperature,,Color Temperature,,
 Property,Current,,Current,,
 Property,Duration,,Duration,,

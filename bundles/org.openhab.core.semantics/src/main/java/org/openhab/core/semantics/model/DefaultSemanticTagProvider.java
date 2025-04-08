@@ -96,6 +96,7 @@ public class DefaultSemanticTagProvider implements SemanticTagProvider {
         defaultTags.add(DefaultSemanticTags.Property.APP);
         defaultTags.add(DefaultSemanticTags.Property.BRIGHTNESS);
         defaultTags.add(DefaultSemanticTags.Property.CHANNEL);
+        defaultTags.add(DefaultSemanticTags.Property.COLOR);
         defaultTags.add(DefaultSemanticTags.Property.COLOR_TEMPERATURE);
         defaultTags.add(DefaultSemanticTags.Property.CURRENT);
         defaultTags.add(DefaultSemanticTags.Property.DURATION);

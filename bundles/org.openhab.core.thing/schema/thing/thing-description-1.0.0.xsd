@@ -285,6 +285,7 @@
 			<xs:enumeration value="Channel"/>
 			<xs:enumeration value="CO"/>
 			<xs:enumeration value="CO2"/>
+			<xs:enumeration value="Color"/>
 			<xs:enumeration value="ColorTemperature"/>
 			<xs:enumeration value="Current"/>
 			<xs:enumeration value="Duration"/>

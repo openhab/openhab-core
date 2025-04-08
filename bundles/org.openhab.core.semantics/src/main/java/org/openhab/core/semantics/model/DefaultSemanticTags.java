@@ -321,6 +321,11 @@ public class DefaultSemanticTags {
                 "Channel", //
                 "", //
                 "");
+        public static final SemanticTag COLOR = new SemanticTagImpl( //
+                "Property_Color", //
+                "Color", //
+                "", //
+                "");
         public static final SemanticTag COLOR_TEMPERATURE = new SemanticTagImpl( //
                 "Property_ColorTemperature", //
                 "Color Temperature", //
