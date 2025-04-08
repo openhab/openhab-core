@@ -297,18 +297,18 @@ public class OAuthClientServiceImpl implements OAuthClientService {
         if (isClosed()) {
             throw new OAuthException(EXCEPTION_MESSAGE_CLOSED);
         }
-        return refreshTokenInner(false);
+        return refreshTokenInner(true);
     }
 
     /**
-     * Inner private method for refreshToken. If 'allowUnexpired' is true then only fetch a new token if
-     * the prior token is not expired, otherwise return the prior token. If 'allowUnexpired' is false
+     * Inner private method for refreshToken. If 'forceRefresh' is false then only fetch a new token if
+     * the prior token is not expired, otherwise return the prior token. If 'forceRefresh' is true
      * then always fetch a new token.
      *
-     * @param allowUnexpired determines whether to check token expiry
+     * @param forceRefresh determines whether to force a refresh or check for token expiry
      * @return either the prior AccessTokenResponse or a new one
      */
-    private AccessTokenResponse refreshTokenInner(boolean allowUnexpired)
+    private AccessTokenResponse refreshTokenInner(boolean forceRefresh)
             throws OAuthException, IOException, OAuthResponseException {
         AccessTokenResponse accessTokenResponse = null;
 
@@ -331,7 +331,7 @@ public class OAuthClientServiceImpl implements OAuthClientService {
                 throw new OAuthException("tokenUrl is required but null");
             }
 
-            if (!allowUnexpired || lastAccessToken.isExpired(Instant.now(), tokenExpiresInSeconds)) {
+            if (forceRefresh || lastAccessToken.isExpired(Instant.now(), tokenExpiresInSeconds)) {
                 GsonBuilder gsonBuilder = this.gsonBuilder;
                 OAuthConnector connector = gsonBuilder == null ? new OAuthConnector(httpClientFactory, extraAuthFields)
                         : new OAuthConnector(httpClientFactory, extraAuthFields, gsonBuilder);
@@ -376,7 +376,7 @@ public class OAuthClientServiceImpl implements OAuthClientService {
 
         if (lastAccessToken.isExpired(Instant.now(), tokenExpiresInSeconds)
                 && lastAccessToken.getRefreshToken() != null) {
-            return refreshTokenInner(true);
+            return refreshTokenInner(false);
         }
         return lastAccessToken;
     }
