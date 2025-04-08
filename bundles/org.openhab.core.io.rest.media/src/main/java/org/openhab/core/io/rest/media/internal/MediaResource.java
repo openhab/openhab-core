@@ -21,6 +21,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -31,8 +32,12 @@ import org.openhab.core.auth.Role;
 import org.openhab.core.io.rest.LocaleService;
 import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
+import org.openhab.core.media.MediaListenner;
 import org.openhab.core.media.MediaService;
+import org.openhab.core.media.model.MediaCollection;
 import org.openhab.core.media.model.MediaEntry;
+import org.openhab.core.media.model.MediaRegistry;
+import org.openhab.core.media.model.MediaSource;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -85,16 +90,48 @@ public class MediaResource implements RESTResource {
     @Operation(operationId = "getMediaSources", summary = "Get the list of all sources.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = MediaSourceDTO.class)))) })
     public Response getSources(
-            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language) {
+            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
+            @QueryParam("path") @Parameter(description = "path of the ressource") @Nullable String path) {
         final Locale locale = localeService.getLocale(language);
 
-        List<MediaSourceDTO> dtos = new ArrayList<>(mediaService.getMediaRegistry().getChilds().size());
-        for (String key : mediaService.getMediaRegistry().getChilds().keySet()) {
-            MediaEntry entry = mediaService.getMediaRegistry().getChilds().get(key);
-            dtos.add(new MediaSourceDTO(entry.getKey(), entry.getName()));
+        MediaRegistry registry = mediaService.getMediaRegistry();
+
+        if (path == null || path.isEmpty()) {
+            path = "/Root";
+        }
+        MediaEntry entry = registry.getEntry(path);
+
+        MediaSource mediaSource = entry.getMediaSource();
+        if (mediaSource != null) {
+            MediaListenner mediaListenner = mediaService.getMediaListenner(mediaSource.getKey());
+            if (mediaListenner != null) {
+                mediaListenner.refreshEntry(entry);
+            }
         }
 
-        return Response.ok(dtos).build();
+        if (entry instanceof MediaCollection) {
+            MediaCollection col = (MediaCollection) entry;
+
+            List<MediaSourceDTO> dtos = new ArrayList<>(col.getChilds().size());
+            for (String key : col.getChilds().keySet()) {
+                MediaEntry subEntry = col.getChilds().get(key);
+
+                MediaSourceDTO dto = new MediaSourceDTO(subEntry.getKey(), subEntry.getPath(), subEntry.getName());
+                if (subEntry instanceof MediaCollection) {
+                    String artUri = ((MediaCollection) subEntry).getArtUri();
+                    dto.setArtUri(artUri);
+
+                }
+                dtos.add(dto);
+            }
+            return Response.ok(dtos).build();
+        } else {
+            List<MediaSourceDTO> dtos = new ArrayList<>(1);
+            MediaSourceDTO dto = new MediaSourceDTO(entry.getKey(), entry.getPath(), entry.getName());
+            dtos.add(dto);
+            return Response.ok(dtos).build();
+        }
+
     }
 
 }
