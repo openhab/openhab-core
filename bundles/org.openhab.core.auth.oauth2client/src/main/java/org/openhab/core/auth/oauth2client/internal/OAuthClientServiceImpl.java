@@ -24,7 +24,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.ScheduledExecutorService;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -36,7 +35,6 @@ import org.openhab.core.auth.client.oauth2.DeviceCodeResponseDTO;
 import org.openhab.core.auth.client.oauth2.OAuthClientService;
 import org.openhab.core.auth.client.oauth2.OAuthException;
 import org.openhab.core.auth.client.oauth2.OAuthResponseException;
-import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.io.net.http.HttpClientFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,11 +63,10 @@ public class OAuthClientServiceImpl implements OAuthClientService {
     public static final int DEFAULT_TOKEN_EXPIRES_IN_BUFFER_SECOND = 10;
 
     private static final String EXCEPTION_MESSAGE_CLOSED = "Client service is closed";
-    private static final String THREADPOOL_NAME = "oAuthClientService";
 
     private final transient Logger logger = LoggerFactory.getLogger(OAuthClientServiceImpl.class);
 
-    protected final ScheduledExecutorService scheduler = ThreadPoolManager.getScheduledPool(THREADPOOL_NAME);
+    private final Object refreshTokenProcessLock = new Object();
 
     private @NonNullByDefault({}) OAuthStoreHandler storeHandler;
 
@@ -296,49 +293,53 @@ public class OAuthClientServiceImpl implements OAuthClientService {
     }
 
     @Override
-    public synchronized AccessTokenResponse refreshToken() throws OAuthException, IOException, OAuthResponseException {
+    public AccessTokenResponse refreshToken() throws OAuthException, IOException, OAuthResponseException {
         if (isClosed()) {
             throw new OAuthException(EXCEPTION_MESSAGE_CLOSED);
         }
 
-        AccessTokenResponse lastAccessToken;
-        try {
-            lastAccessToken = storeHandler.loadAccessTokenResponse(handle);
-        } catch (GeneralSecurityException e) {
-            throw new OAuthException("Cannot decrypt access token from store", e);
-        }
-        if (lastAccessToken == null) {
-            throw new OAuthException(
-                    "Cannot refresh token because last access token is not available from handle: " + handle);
-        }
-        if (lastAccessToken.getRefreshToken() == null) {
-            throw new OAuthException("Cannot refresh token because last access token did not have a refresh token");
-        }
-        String tokenUrl = persistedParams.tokenUrl;
-        if (tokenUrl == null) {
-            throw new OAuthException("tokenUrl is required but null");
+        AccessTokenResponse accessTokenResponse = null;
+        synchronized (refreshTokenProcessLock) {
+            AccessTokenResponse lastAccessToken;
+            try {
+                lastAccessToken = storeHandler.loadAccessTokenResponse(handle);
+            } catch (GeneralSecurityException e) {
+                throw new OAuthException("Cannot decrypt access token from store", e);
+            }
+            if (lastAccessToken == null) {
+                throw new OAuthException(
+                        "Cannot refresh token because last access token is not available from handle: " + handle);
+            }
+            if (lastAccessToken.getRefreshToken() == null) {
+                throw new OAuthException("Cannot refresh token because last access token did not have a refresh token");
+            }
+            String tokenUrl = persistedParams.tokenUrl;
+            if (tokenUrl == null) {
+                throw new OAuthException("tokenUrl is required but null");
+            }
+
+            GsonBuilder gsonBuilder = this.gsonBuilder;
+            OAuthConnector connector = gsonBuilder == null ? new OAuthConnector(httpClientFactory, extraAuthFields)
+                    : new OAuthConnector(httpClientFactory, extraAuthFields, gsonBuilder);
+            accessTokenResponse = connector.grantTypeRefreshToken(tokenUrl, lastAccessToken.getRefreshToken(),
+                    persistedParams.clientId, persistedParams.clientSecret, persistedParams.scope,
+                    Boolean.TRUE.equals(persistedParams.supportsBasicAuth));
+
+            // The service may not return the refresh token so use the last refresh token otherwise it's not stored.
+            String refreshToken = accessTokenResponse.getRefreshToken();
+            if (refreshToken == null || refreshToken.isBlank()) {
+                accessTokenResponse.setRefreshToken(lastAccessToken.getRefreshToken());
+            }
+            // store it
+            storeHandler.saveAccessTokenResponse(handle, accessTokenResponse);
         }
 
-        GsonBuilder gsonBuilder = this.gsonBuilder;
-        OAuthConnector connector = gsonBuilder == null ? new OAuthConnector(httpClientFactory, extraAuthFields)
-                : new OAuthConnector(httpClientFactory, extraAuthFields, gsonBuilder);
-        AccessTokenResponse accessTokenResponse = connector.grantTypeRefreshToken(tokenUrl,
-                lastAccessToken.getRefreshToken(), persistedParams.clientId, persistedParams.clientSecret,
-                persistedParams.scope, Boolean.TRUE.equals(persistedParams.supportsBasicAuth));
-
-        // The service may not return the refresh token so use the last refresh token otherwise it's not stored.
-        String refreshToken = accessTokenResponse.getRefreshToken();
-        if (refreshToken == null || refreshToken.isBlank()) {
-            accessTokenResponse.setRefreshToken(lastAccessToken.getRefreshToken());
-        }
-        // store it
-        storeHandler.saveAccessTokenResponse(handle, accessTokenResponse);
         notifyAccessTokenResponse(accessTokenResponse);
         return accessTokenResponse;
     }
 
     @Override
-    public synchronized @Nullable AccessTokenResponse getAccessTokenResponse()
+    public @Nullable AccessTokenResponse getAccessTokenResponse()
             throws OAuthException, IOException, OAuthResponseException {
         if (isClosed()) {
             throw new OAuthException(EXCEPTION_MESSAGE_CLOSED);
@@ -483,6 +484,6 @@ public class OAuthClientServiceImpl implements OAuthClientService {
 
     @Override
     public void notifyAccessTokenResponse(AccessTokenResponse atr) {
-        scheduler.submit(() -> accessTokenRefreshListeners.forEach(l -> l.onAccessTokenResponse(atr)));
+        accessTokenRefreshListeners.forEach(l -> l.onAccessTokenResponse(atr));
     }
 }
