@@ -21,15 +21,17 @@ import org.eclipse.jdt.annotation.Nullable;
  * @author Laurent Arnal - Initial contribution
  */
 @NonNullByDefault
-public class MediaSourceDTO {
+public class MediaDTO {
     public String id;
     public String path;
+    public String type;
     public @Nullable String artUri;
     public @Nullable String label;
 
-    public MediaSourceDTO(String id, String path, @Nullable String label) {
+    public MediaDTO(String id, String path, String type, String label) {
         this.id = id;
         this.path = path;
+        this.type = type;
         this.label = label;
     }
 
