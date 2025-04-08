@@ -18,9 +18,11 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.items.GenericItem;
 import org.openhab.core.library.CoreItemFactory;
+import org.openhab.core.library.types.MediaType;
 import org.openhab.core.library.types.NextPreviousType;
 import org.openhab.core.library.types.PlayPauseType;
 import org.openhab.core.library.types.RewindFastforwardType;
+import org.openhab.core.library.types.StringType;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.RefreshType;
 import org.openhab.core.types.State;
@@ -36,9 +38,9 @@ import org.openhab.core.types.UnDefType;
 public class PlayerItem extends GenericItem {
 
     private static final List<Class<? extends State>> ACCEPTED_DATA_TYPES = List.of(PlayPauseType.class,
-            RewindFastforwardType.class, UnDefType.class);
+            RewindFastforwardType.class, StringType.class, MediaType.class, UnDefType.class);
     private static final List<Class<? extends Command>> ACCEPTED_COMMAND_TYPES = List.of(PlayPauseType.class,
-            RewindFastforwardType.class, NextPreviousType.class, RefreshType.class);
+            RewindFastforwardType.class, NextPreviousType.class, StringType.class, MediaType.class, RefreshType.class);
 
     public PlayerItem(String name) {
         super(CoreItemFactory.PLAYER, name);
@@ -63,7 +65,7 @@ public class PlayerItem extends GenericItem {
      *
      * @param command the command to be sent
      */
-    public void send(PlayPauseType command) {
+    public void send(MediaType command) {
         internalSend(command, null);
     }
 
@@ -129,8 +131,8 @@ public class PlayerItem extends GenericItem {
 
     @Override
     public void setTimeSeries(TimeSeries timeSeries) {
-        if (timeSeries.getStates()
-                .allMatch(s -> s.state() instanceof PlayPauseType || s.state() instanceof RewindFastforwardType)) {
+        if (timeSeries.getStates().allMatch(s -> s.state() instanceof PlayPauseType
+                || s.state() instanceof RewindFastforwardType || s.state() instanceof MediaType)) {
             applyTimeSeries(timeSeries);
         } else {
             logSetTypeError(timeSeries);

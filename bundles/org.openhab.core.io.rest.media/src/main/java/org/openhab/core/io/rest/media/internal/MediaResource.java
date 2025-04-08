@@ -12,8 +12,6 @@
  */
 package org.openhab.core.io.rest.media.internal;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 
 import javax.annotation.security.RolesAllowed;
@@ -88,7 +86,7 @@ public class MediaResource implements RESTResource {
     @Path("/sources")
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "getMediaSources", summary = "Get the list of all sources.", responses = {
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = MediaSourceDTO.class)))) })
+            @ApiResponse(responseCode = "200", description = "OK", content = @Content(array = @ArraySchema(schema = @Schema(implementation = MediaDTO.class)))) })
     public Response getSources(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @QueryParam("path") @Parameter(description = "path of the ressource") @Nullable String path) {
@@ -112,24 +110,28 @@ public class MediaResource implements RESTResource {
         if (entry instanceof MediaCollection) {
             MediaCollection col = (MediaCollection) entry;
 
-            List<MediaSourceDTO> dtos = new ArrayList<>(col.getChilds().size());
+            MediaDTOCollection dtoCollection = new MediaDTOCollection(entry.getKey(), entry.getPath(),
+                    entry.getClass().getTypeName(), entry.getName());
+            String artUriCol = col.getArtUri();
+            dtoCollection.setArtUri(artUriCol);
+
             for (String key : col.getChilds().keySet()) {
                 MediaEntry subEntry = col.getChilds().get(key);
 
-                MediaSourceDTO dto = new MediaSourceDTO(subEntry.getKey(), subEntry.getPath(), subEntry.getName());
+                MediaDTO dto = new MediaDTO(subEntry.getKey(), subEntry.getPath(), subEntry.getClass().getTypeName(),
+                        subEntry.getName());
                 if (subEntry instanceof MediaCollection) {
                     String artUri = ((MediaCollection) subEntry).getArtUri();
                     dto.setArtUri(artUri);
 
                 }
-                dtos.add(dto);
+                dtoCollection.addMediaDTO(dto);
             }
-            return Response.ok(dtos).build();
+            return Response.ok(dtoCollection).build();
         } else {
-            List<MediaSourceDTO> dtos = new ArrayList<>(1);
-            MediaSourceDTO dto = new MediaSourceDTO(entry.getKey(), entry.getPath(), entry.getName());
-            dtos.add(dto);
-            return Response.ok(dtos).build();
+            MediaDTO dto = new MediaDTO(entry.getKey(), entry.getPath(), entry.getClass().getTypeName(),
+                    entry.getName());
+            return Response.ok(dto).build();
         }
 
     }
