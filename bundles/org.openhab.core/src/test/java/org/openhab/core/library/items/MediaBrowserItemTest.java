@@ -28,7 +28,7 @@ public class MediaBrowserItemTest {
 
     @Test
     public void setPlayPause() {
-        PlayerItem item = new PlayerItem("test");
+        MediaBrowserItem item = new MediaBrowserItem("test");
         item.setState(PlayPauseType.PLAY);
         assertEquals(PlayPauseType.PLAY, item.getState());
 
@@ -38,7 +38,7 @@ public class MediaBrowserItemTest {
 
     @Test
     public void setRewindFastforward() {
-        PlayerItem item = new PlayerItem("test");
+        MediaBrowserItem item = new MediaBrowserItem("test");
         item.setState(RewindFastforwardType.REWIND);
         assertEquals(RewindFastforwardType.REWIND, item.getState());
 
@@ -48,13 +48,13 @@ public class MediaBrowserItemTest {
 
     @Test
     public void testUndefType() {
-        PlayerItem item = new PlayerItem("test");
+        MediaBrowserItem item = new MediaBrowserItem("test");
         StateUtil.testUndefStates(item);
     }
 
     @Test
     public void testAcceptedStates() {
-        PlayerItem item = new PlayerItem("test");
+        MediaBrowserItem item = new MediaBrowserItem("test");
         StateUtil.testAcceptedStates(item);
     }
 }

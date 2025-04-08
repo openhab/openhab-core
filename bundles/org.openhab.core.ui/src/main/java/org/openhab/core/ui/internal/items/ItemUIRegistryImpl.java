@@ -316,7 +316,7 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         } else if (PlayerItem.class.equals(itemType)) {
             return createPlayerButtons();
         } else if (MediaBrowserItem.class.equals(itemType)) {
-            return createPlayerButtons();
+            return createMediaBrowserButtons();
         } else if (RollershutterItem.class.equals(itemType) //
                 || SwitchItem.class.equals(itemType)) {
             return SitemapFactory.eINSTANCE.createSwitch();
@@ -329,18 +329,54 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         final Switch playerItemSwitch = SitemapFactory.eINSTANCE.createSwitch();
         final List<Mapping> mappings = playerItemSwitch.getMappings();
         Mapping commandMapping;
+
         mappings.add(commandMapping = SitemapFactory.eINSTANCE.createMapping());
         commandMapping.setCmd(NextPreviousType.PREVIOUS.name());
         commandMapping.setLabel("<<");
+
         mappings.add(commandMapping = SitemapFactory.eINSTANCE.createMapping());
         commandMapping.setCmd(PlayPauseType.PAUSE.name());
         commandMapping.setLabel("||");
+
         mappings.add(commandMapping = SitemapFactory.eINSTANCE.createMapping());
         commandMapping.setCmd(PlayPauseType.PLAY.name());
         commandMapping.setLabel(">");
+
         mappings.add(commandMapping = SitemapFactory.eINSTANCE.createMapping());
         commandMapping.setCmd(NextPreviousType.NEXT.name());
         commandMapping.setLabel(">>");
+
+        // mappings.add(commandMapping = SitemapFactory.eINSTANCE.createMapping());
+        // commandMapping.setCmd(MediaType.CHANGE.name());
+        // commandMapping.setLabel(".");
+        return playerItemSwitch;
+    }
+
+    private Switch createMediaBrowserButtons() {
+        final Switch playerItemSwitch = SitemapFactory.eINSTANCE.createSwitch();
+        final List<Mapping> mappings = playerItemSwitch.getMappings();
+        Mapping commandMapping;
+
+        mappings.add(commandMapping = SitemapFactory.eINSTANCE.createMapping());
+        commandMapping.setCmd(NextPreviousType.PREVIOUS.name());
+        commandMapping.setLabel("<<");
+
+        mappings.add(commandMapping = SitemapFactory.eINSTANCE.createMapping());
+        commandMapping.setCmd(PlayPauseType.PAUSE.name());
+        commandMapping.setLabel("||");
+
+        mappings.add(commandMapping = SitemapFactory.eINSTANCE.createMapping());
+        commandMapping.setCmd(PlayPauseType.PLAY.name());
+        commandMapping.setLabel(">");
+
+        mappings.add(commandMapping = SitemapFactory.eINSTANCE.createMapping());
+        commandMapping.setCmd(NextPreviousType.NEXT.name());
+        commandMapping.setLabel(">>");
+
+        // mappings.add(commandMapping = SitemapFactory.eINSTANCE.createMapping());
+        // commandMapping.setCmd(MediaType.CHANGE.name());
+        // commandMapping.setLabel(".");
+
         return playerItemSwitch;
     }
 
