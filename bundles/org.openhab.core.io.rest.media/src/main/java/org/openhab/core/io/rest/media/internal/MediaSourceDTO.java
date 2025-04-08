@@ -23,10 +23,17 @@ import org.eclipse.jdt.annotation.Nullable;
 @NonNullByDefault
 public class MediaSourceDTO {
     public String id;
+    public String path;
+    public @Nullable String artUri;
     public @Nullable String label;
 
-    public MediaSourceDTO(String id, @Nullable String label) {
+    public MediaSourceDTO(String id, String path, @Nullable String label) {
         this.id = id;
+        this.path = path;
         this.label = label;
+    }
+
+    public void setArtUri(String artUri) {
+        this.artUri = artUri;
     }
 }
