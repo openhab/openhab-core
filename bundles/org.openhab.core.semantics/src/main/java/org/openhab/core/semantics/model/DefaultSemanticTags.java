@@ -554,6 +554,11 @@ public class DefaultSemanticTags {
     }
 
     public static class Equipment {
+        public static final SemanticTag ALARM_DEVICE = new SemanticTagImpl( //
+                "Equipment_AlarmDevice", //
+                "Alarm Device", //
+                "", //
+                "");
         public static final SemanticTag ALARM_SYSTEM = new SemanticTagImpl( //
                 "Equipment_AlarmSystem", //
                 "Alarm System", //

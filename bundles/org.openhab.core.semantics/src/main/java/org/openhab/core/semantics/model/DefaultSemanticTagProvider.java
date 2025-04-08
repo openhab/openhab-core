@@ -142,6 +142,7 @@ public class DefaultSemanticTagProvider implements SemanticTagProvider {
         defaultTags.add(DefaultSemanticTags.Property.VOLTAGE);
         defaultTags.add(DefaultSemanticTags.Property.WATER);
         defaultTags.add(DefaultSemanticTags.Property.WIND);
+        defaultTags.add(DefaultSemanticTags.Equipment.ALARM_DEVICE);
         defaultTags.add(DefaultSemanticTags.Equipment.ALARM_SYSTEM);
         defaultTags.add(DefaultSemanticTags.Equipment.AUDIO_VISUAL);
         defaultTags.add(DefaultSemanticTags.Equipment.MEDIA_PLAYER);

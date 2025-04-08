@@ -359,6 +359,7 @@
 			<xs:enumeration value="AirFilter"/>
 			<xs:enumeration value="AirFryer"/>
 			<xs:enumeration value="AirQualitySensor"/>
+			<xs:enumeration value="AlarmDevice"/>
 			<xs:enumeration value="AlarmSystem"/>
 			<xs:enumeration value="Aquarium"/>
 			<xs:enumeration value="AudioVisual"/>
