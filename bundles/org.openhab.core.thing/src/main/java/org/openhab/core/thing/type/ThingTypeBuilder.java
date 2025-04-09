@@ -18,6 +18,7 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.semantics.SemanticTag;
 import org.openhab.core.thing.ThingTypeUID;
 
 /**
@@ -206,5 +207,9 @@ public class ThingTypeBuilder {
     public ThingTypeBuilder withSemanticEquipmentTag(String semanticEquipmentTag) {
         this.semanticEquipmentTag = semanticEquipmentTag;
         return this;
+    }
+
+    public ThingTypeBuilder withSemanticEquipmentTag(SemanticTag semanticEquipmentTag) {
+        return withSemanticEquipmentTag(semanticEquipmentTag.getName());
     }
 }
