@@ -52,7 +52,6 @@ import org.openhab.core.library.items.DateTimeItem;
 import org.openhab.core.library.items.DimmerItem;
 import org.openhab.core.library.items.ImageItem;
 import org.openhab.core.library.items.LocationItem;
-import org.openhab.core.library.items.MediaBrowserItem;
 import org.openhab.core.library.items.NumberItem;
 import org.openhab.core.library.items.PlayerItem;
 import org.openhab.core.library.items.RollershutterItem;
@@ -314,8 +313,6 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
             }
         } else if (PlayerItem.class.equals(itemType)) {
             return createPlayerButtons();
-        } else if (MediaBrowserItem.class.equals(itemType)) {
-            return createMediaBrowserButtons();
         } else if (RollershutterItem.class.equals(itemType) //
                 || SwitchItem.class.equals(itemType)) {
             return SitemapFactory.eINSTANCE.createSwitch();
@@ -348,34 +345,6 @@ public class ItemUIRegistryImpl implements ItemUIRegistry {
         // mappings.add(commandMapping = SitemapFactory.eINSTANCE.createMapping());
         // commandMapping.setCmd(MediaType.CHANGE.name());
         // commandMapping.setLabel(".");
-        return playerItemSwitch;
-    }
-
-    private Switch createMediaBrowserButtons() {
-        final Switch playerItemSwitch = SitemapFactory.eINSTANCE.createSwitch();
-        final List<Mapping> mappings = playerItemSwitch.getMappings();
-        Mapping commandMapping;
-
-        mappings.add(commandMapping = SitemapFactory.eINSTANCE.createMapping());
-        commandMapping.setCmd(NextPreviousType.PREVIOUS.name());
-        commandMapping.setLabel("<<");
-
-        mappings.add(commandMapping = SitemapFactory.eINSTANCE.createMapping());
-        commandMapping.setCmd(PlayPauseType.PAUSE.name());
-        commandMapping.setLabel("||");
-
-        mappings.add(commandMapping = SitemapFactory.eINSTANCE.createMapping());
-        commandMapping.setCmd(PlayPauseType.PLAY.name());
-        commandMapping.setLabel(">");
-
-        mappings.add(commandMapping = SitemapFactory.eINSTANCE.createMapping());
-        commandMapping.setCmd(NextPreviousType.NEXT.name());
-        commandMapping.setLabel(">>");
-
-        // mappings.add(commandMapping = SitemapFactory.eINSTANCE.createMapping());
-        // commandMapping.setCmd(MediaType.CHANGE.name());
-        // commandMapping.setLabel(".");
-
         return playerItemSwitch;
     }
 
