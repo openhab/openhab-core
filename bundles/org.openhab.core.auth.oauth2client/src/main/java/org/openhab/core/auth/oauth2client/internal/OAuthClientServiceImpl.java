@@ -64,6 +64,8 @@ public class OAuthClientServiceImpl implements OAuthClientService {
 
     private final transient Logger logger = LoggerFactory.getLogger(OAuthClientServiceImpl.class);
 
+    private final Object refreshTokenProcessLock = new Object();
+
     private @NonNullByDefault({}) OAuthStoreHandler storeHandler;
 
     // Constructor params - static
@@ -289,49 +291,72 @@ public class OAuthClientServiceImpl implements OAuthClientService {
     }
 
     @Override
-    public synchronized AccessTokenResponse refreshToken() throws OAuthException, IOException, OAuthResponseException {
+    public AccessTokenResponse refreshToken() throws OAuthException, IOException, OAuthResponseException {
         if (isClosed()) {
             throw new OAuthException(EXCEPTION_MESSAGE_CLOSED);
         }
+        return refreshTokenInner(true);
+    }
 
-        AccessTokenResponse lastAccessToken;
-        try {
-            lastAccessToken = storeHandler.loadAccessTokenResponse(handle);
-        } catch (GeneralSecurityException e) {
-            throw new OAuthException("Cannot decrypt access token from store", e);
-        }
-        if (lastAccessToken == null) {
-            throw new OAuthException(
-                    "Cannot refresh token because last access token is not available from handle: " + handle);
-        }
-        if (lastAccessToken.getRefreshToken() == null) {
-            throw new OAuthException("Cannot refresh token because last access token did not have a refresh token");
-        }
-        String tokenUrl = persistedParams.tokenUrl;
-        if (tokenUrl == null) {
-            throw new OAuthException("tokenUrl is required but null");
+    /**
+     * Inner private method for refreshToken. If 'forceRefresh' is false then only fetch a new token if
+     * the prior token is not expired, otherwise return the prior token. If 'forceRefresh' is true
+     * then always fetch a new token.
+     *
+     * @param forceRefresh determines whether to force a refresh or check for token expiry
+     * @return either the prior AccessTokenResponse or a new one
+     */
+    private AccessTokenResponse refreshTokenInner(boolean forceRefresh)
+            throws OAuthException, IOException, OAuthResponseException {
+        AccessTokenResponse accessTokenResponse = null;
+
+        synchronized (refreshTokenProcessLock) {
+            AccessTokenResponse lastAccessToken;
+            try {
+                lastAccessToken = storeHandler.loadAccessTokenResponse(handle);
+            } catch (GeneralSecurityException e) {
+                throw new OAuthException("Cannot decrypt access token from store", e);
+            }
+            if (lastAccessToken == null) {
+                throw new OAuthException(
+                        "Cannot refresh token because last access token is not available from handle: " + handle);
+            }
+            if (lastAccessToken.getRefreshToken() == null) {
+                throw new OAuthException("Cannot refresh token because last access token did not have a refresh token");
+            }
+            String tokenUrl = persistedParams.tokenUrl;
+            if (tokenUrl == null) {
+                throw new OAuthException("tokenUrl is required but null");
+            }
+
+            if (forceRefresh || lastAccessToken.isExpired(Instant.now(), tokenExpiresInSeconds)) {
+                GsonBuilder gsonBuilder = this.gsonBuilder;
+                OAuthConnector connector = gsonBuilder == null ? new OAuthConnector(httpClientFactory, extraAuthFields)
+                        : new OAuthConnector(httpClientFactory, extraAuthFields, gsonBuilder);
+                accessTokenResponse = connector.grantTypeRefreshToken(tokenUrl, lastAccessToken.getRefreshToken(),
+                        persistedParams.clientId, persistedParams.clientSecret, persistedParams.scope,
+                        Boolean.TRUE.equals(persistedParams.supportsBasicAuth));
+
+                // The service may not return the refresh token so use the last refresh token otherwise it's not stored.
+                String refreshToken = accessTokenResponse.getRefreshToken();
+                if (refreshToken == null || refreshToken.isBlank()) {
+                    accessTokenResponse.setRefreshToken(lastAccessToken.getRefreshToken());
+                }
+
+                // store it
+                storeHandler.saveAccessTokenResponse(handle, accessTokenResponse);
+            } else {
+                // No need to refresh the token, just return the last one
+                return lastAccessToken;
+            }
         }
 
-        GsonBuilder gsonBuilder = this.gsonBuilder;
-        OAuthConnector connector = gsonBuilder == null ? new OAuthConnector(httpClientFactory, extraAuthFields)
-                : new OAuthConnector(httpClientFactory, extraAuthFields, gsonBuilder);
-        AccessTokenResponse accessTokenResponse = connector.grantTypeRefreshToken(tokenUrl,
-                lastAccessToken.getRefreshToken(), persistedParams.clientId, persistedParams.clientSecret,
-                persistedParams.scope, Boolean.TRUE.equals(persistedParams.supportsBasicAuth));
-
-        // The service may not return the refresh token so use the last refresh token otherwise it's not stored.
-        String refreshToken = accessTokenResponse.getRefreshToken();
-        if (refreshToken == null || refreshToken.isBlank()) {
-            accessTokenResponse.setRefreshToken(lastAccessToken.getRefreshToken());
-        }
-        // store it
-        storeHandler.saveAccessTokenResponse(handle, accessTokenResponse);
-        accessTokenRefreshListeners.forEach(l -> l.onAccessTokenResponse(accessTokenResponse));
+        notifyAccessTokenResponse(accessTokenResponse);
         return accessTokenResponse;
     }
 
     @Override
-    public synchronized @Nullable AccessTokenResponse getAccessTokenResponse()
+    public @Nullable AccessTokenResponse getAccessTokenResponse()
             throws OAuthException, IOException, OAuthResponseException {
         if (isClosed()) {
             throw new OAuthException(EXCEPTION_MESSAGE_CLOSED);
@@ -349,7 +374,7 @@ public class OAuthClientServiceImpl implements OAuthClientService {
 
         if (lastAccessToken.isExpired(Instant.now(), tokenExpiresInSeconds)
                 && lastAccessToken.getRefreshToken() != null) {
-            return refreshToken();
+            return refreshTokenInner(false);
         }
         return lastAccessToken;
     }
