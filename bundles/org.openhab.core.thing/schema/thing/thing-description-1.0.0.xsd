@@ -295,6 +295,7 @@
 			<xs:enumeration value="Gas"/>
 			<xs:enumeration value="GeoLocation"/>
 			<xs:enumeration value="Heating"/>
+			<xs:enumeration value="HomeAway"/>
 			<xs:enumeration value="Humidity"/>
 			<xs:enumeration value="Illuminance"/>
 			<xs:enumeration value="Level"/>

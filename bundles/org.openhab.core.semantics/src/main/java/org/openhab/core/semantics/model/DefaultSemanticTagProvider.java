@@ -104,6 +104,7 @@ public class DefaultSemanticTagProvider implements SemanticTagProvider {
         defaultTags.add(DefaultSemanticTags.Property.FREQUENCY);
         defaultTags.add(DefaultSemanticTags.Property.GAS);
         defaultTags.add(DefaultSemanticTags.Property.HEATING);
+        defaultTags.add(DefaultSemanticTags.Property.HOME_AWAY);
         defaultTags.add(DefaultSemanticTags.Property.HUMIDITY);
         defaultTags.add(DefaultSemanticTags.Property.ILLUMINANCE);
         defaultTags.add(DefaultSemanticTags.Property.LEVEL);

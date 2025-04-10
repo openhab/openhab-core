@@ -361,6 +361,11 @@ public class DefaultSemanticTags {
                 "Heating", //
                 "", //
                 "");
+        public static final SemanticTag HOME_AWAY = new SemanticTagImpl( //
+                "Property_HomeAway", //
+                "Home Away", //
+                "", //
+                "");
         public static final SemanticTag HUMIDITY = new SemanticTagImpl( //
                 "Property_Humidity", //
                 "Humidity", //
