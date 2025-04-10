@@ -153,7 +153,6 @@ public class DefaultSemanticTagProvider implements SemanticTagProvider {
         defaultTags.add(DefaultSemanticTags.Equipment.BLINDS);
         defaultTags.add(DefaultSemanticTags.Equipment.CAMERA);
         defaultTags.add(DefaultSemanticTags.Equipment.CLEANING_ROBOT);
-        defaultTags.add(DefaultSemanticTags.Equipment.CLOUD_SERVICE);
         defaultTags.add(DefaultSemanticTags.Equipment.COMPUTER);
         defaultTags.add(DefaultSemanticTags.Equipment.CONTACT);
         defaultTags.add(DefaultSemanticTags.Equipment.CONTROL_DEVICE);
