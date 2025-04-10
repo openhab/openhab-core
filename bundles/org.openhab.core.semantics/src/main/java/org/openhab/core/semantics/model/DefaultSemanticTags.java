@@ -614,11 +614,21 @@ public class DefaultSemanticTags {
                 "Cleaning Robot", //
                 "", //
                 "Cleaning Robots, Vacuum robot, Vacuum robots");
+        public static final SemanticTag CLOUD_SERVICE = new SemanticTagImpl( //
+                "Equipment_CloudService", //
+                "Cloud Service", //
+                "", //
+                "");
         public static final SemanticTag COMPUTER = new SemanticTagImpl( //
                 "Equipment_Computer", //
                 "Computer", //
                 "", //
                 "");
+        public static final SemanticTag CONTACT = new SemanticTagImpl( //
+                "Equipment_Contact", //
+                "Contact", //
+                "", //
+                "Door Contact, Window Contact");
         public static final SemanticTag CONTROL_DEVICE = new SemanticTagImpl( //
                 "Equipment_ControlDevice", //
                 "Control Device", //

@@ -376,8 +376,10 @@
 			<xs:enumeration value="Chandelier"/>
 			<xs:enumeration value="Chlorinator"/>
 			<xs:enumeration value="CleaningRobot"/>
+			<xs:enumeration value="CloudService"/>
 			<xs:enumeration value="CO2Sensor"/>
 			<xs:enumeration value="Computer"/>
+			<xs:enumeration value="Contact"/>
 			<xs:enumeration value="ControlDevice"/>
 			<xs:enumeration value="Cooktop"/>
 			<xs:enumeration value="COSensor"/>
