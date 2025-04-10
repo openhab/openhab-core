@@ -251,6 +251,7 @@ public class DefaultSemanticTagProvider implements SemanticTagProvider {
         defaultTags.add(DefaultSemanticTags.Equipment.OCCUPANCY_SENSOR);
         defaultTags.add(DefaultSemanticTags.Equipment.MOTION_DETECTOR);
         defaultTags.add(DefaultSemanticTags.Equipment.TEMPERATURE_SENSOR);
+        defaultTags.add(DefaultSemanticTags.Equipment.VIBRATION_SENSOR);
         defaultTags.add(DefaultSemanticTags.Equipment.WATER_METER);
         defaultTags.add(DefaultSemanticTags.Equipment.WATER_QUALITY_SENSOR);
         defaultTags.add(DefaultSemanticTags.Equipment.WEATHER_STATION);

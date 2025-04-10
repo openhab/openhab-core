@@ -1099,6 +1099,11 @@ public class DefaultSemanticTags {
                 "Temperature Sensor", //
                 "", //
                 "");
+        public static final SemanticTag VIBRATION_SENSOR = new SemanticTagImpl( //
+                "Equipment_Sensor_VibrationSensor", //
+                "Vibration Sensor", //
+                "", //
+                "");
         public static final SemanticTag WATER_METER = new SemanticTagImpl( //
                 "Equipment_Sensor_WaterMeter", //
                 "Water Meter", //

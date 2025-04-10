@@ -485,6 +485,7 @@
 			<xs:enumeration value="UPS"/>
 			<xs:enumeration value="Valve"/>
 			<xs:enumeration value="Vehicle"/>
+			<xs:enumeration value="VibrationSensor"/>
 			<xs:enumeration value="VoiceAssistant"/>
 			<xs:enumeration value="WallLight"/>
 			<xs:enumeration value="WallSwitch"/>
