@@ -305,7 +305,6 @@
 			<xs:enumeration value="Noise"/>
 			<xs:enumeration value="Oil"/>
 			<xs:enumeration value="OnOff"/>
-			<xs:enumeration value="OpenClosed"/>
 			<xs:enumeration value="Opening"/>
 			<xs:enumeration value="OpenLevel"/>
 			<xs:enumeration value="OpenState"/>

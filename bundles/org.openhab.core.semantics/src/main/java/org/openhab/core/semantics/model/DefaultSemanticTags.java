@@ -421,26 +421,21 @@ public class DefaultSemanticTags {
                 "On Off", //
                 "", //
                 "");
-        public static final SemanticTag OPEN_CLOSED = new SemanticTagImpl( //
-                "Property_OpenClosed", //
-                "Open Closed", //
-                "", //
-                "");
-        public static final SemanticTag OPEN_LEVEL = new SemanticTagImpl( //
-                "Property_OpenLevel", //
-                "Open Level", //
-                "", //
-                "");
-        public static final SemanticTag OPEN_STATE = new SemanticTagImpl( //
-                "Property_OpenState", //
-                "Open State", //
-                "", //
-                "");
         public static final SemanticTag OPENING = new SemanticTagImpl( //
                 "Property_Opening", //
                 "Opening", //
                 "", //
                 "");
+        public static final SemanticTag OPEN_LEVEL = new SemanticTagImpl( //
+                "Property_Opening_OpenLevel", //
+                "Open Level", //
+                "", //
+                "");
+        public static final SemanticTag OPEN_STATE = new SemanticTagImpl( //
+                "Property_Opening_OpenState", //
+                "Open State", //
+                "", //
+                "Open Closed");
         public static final SemanticTag POSITION = new SemanticTagImpl( //
                 "Property_Position", //
                 "Position", //
