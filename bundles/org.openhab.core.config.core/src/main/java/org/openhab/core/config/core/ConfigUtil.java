@@ -68,6 +68,9 @@ public class ConfigUtil {
      */
     public static @Nullable Object getDefaultValueAsCorrectType(ConfigDescriptionParameter parameter) {
         if (parameter.isMultiple()) {
+            if (parameter.getDefault() == null) {
+                return null;
+            }
             List<Object> defaultValues = Stream.of(DEFAULT_LIST_SPLITTER.split(parameter.getDefault())) //
                     .map(value -> value.trim().replace("\\,", ",")) //
                     .filter(not(String::isEmpty)) //
