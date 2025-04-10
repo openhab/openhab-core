@@ -149,6 +149,10 @@ public class UpnpDiscoveryService extends AbstractDiscoveryService
     protected void startScan() {
         for (RemoteDevice device : upnpService.getRegistry().getRemoteDevices()) {
             remoteDeviceAdded(upnpService.getRegistry(), device);
+
+            for (RemoteDevice childDevice : device.getEmbeddedDevices()) {
+                remoteDeviceAdded(upnpService.getRegistry(), childDevice);
+            }
         }
         upnpService.getRegistry().addListener(this);
         upnpService.getControlPoint().search();
