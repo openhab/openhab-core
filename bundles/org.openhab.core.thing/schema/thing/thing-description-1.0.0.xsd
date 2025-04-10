@@ -377,7 +377,7 @@
 			<xs:enumeration value="CleaningRobot"/>
 			<xs:enumeration value="CO2Sensor"/>
 			<xs:enumeration value="Computer"/>
-			<xs:enumeration value="Contact"/>
+			<xs:enumeration value="ContactSensor"/>
 			<xs:enumeration value="ControlDevice"/>
 			<xs:enumeration value="Cooktop"/>
 			<xs:enumeration value="COSensor"/>
@@ -394,6 +394,7 @@
 			<xs:enumeration value="EVSE"/>
 			<xs:enumeration value="ExhaustFan"/>
 			<xs:enumeration value="Fan"/>
+			<xs:enumeration value="FireDetector"/>
 			<xs:enumeration value="Firewall"/>
 			<xs:enumeration value="FloodLight"/>
 			<xs:enumeration value="FloorHeating"/>
