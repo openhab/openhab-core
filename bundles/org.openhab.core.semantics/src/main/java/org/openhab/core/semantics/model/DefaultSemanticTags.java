@@ -228,6 +228,11 @@ public class DefaultSemanticTags {
                 "Switch", //
                 "", //
                 "");
+        public static final SemanticTag FORECAST = new SemanticTagImpl( //
+                "Point_Forecast", //
+                "Forecast", //
+                "", //
+                "");
         public static final SemanticTag MEASUREMENT = new SemanticTagImpl( //
                 "Point_Measurement", //
                 "Measurement", //
@@ -241,26 +246,6 @@ public class DefaultSemanticTags {
         public static final SemanticTag STATUS = new SemanticTagImpl( //
                 "Point_Status", //
                 "Status", //
-                "", //
-                "");
-        public static final SemanticTag LOW_BATTERY = new SemanticTagImpl( //
-                "Point_Status_LowBattery", //
-                "LowBattery", //
-                "", //
-                "");
-        public static final SemanticTag OPEN_LEVEL = new SemanticTagImpl( //
-                "Point_Status_OpenLevel", //
-                "OpenLevel", //
-                "", //
-                "");
-        public static final SemanticTag OPEN_STATE = new SemanticTagImpl( //
-                "Point_Status_OpenState", //
-                "OpenState", //
-                "", //
-                "");
-        public static final SemanticTag TAMPERED = new SemanticTagImpl( //
-                "Point_Status_Tampered", //
-                "Tampered", //
                 "", //
                 "");
     }
@@ -336,6 +321,11 @@ public class DefaultSemanticTags {
                 "Channel", //
                 "", //
                 "");
+        public static final SemanticTag COLOR = new SemanticTagImpl( //
+                "Property_Color", //
+                "Color", //
+                "", //
+                "");
         public static final SemanticTag COLOR_TEMPERATURE = new SemanticTagImpl( //
                 "Property_ColorTemperature", //
                 "Color Temperature", //
@@ -391,6 +381,16 @@ public class DefaultSemanticTags {
                 "Light", //
                 "", //
                 "Lights, Lighting");
+        public static final SemanticTag LOW_BATTERY = new SemanticTagImpl( //
+                "Property_LowBattery", //
+                "Low Battery", //
+                "", //
+                "");
+        public static final SemanticTag MEDIA_CONTROL = new SemanticTagImpl( //
+                "Property_MediaControl", //
+                "Media Control", //
+                "", //
+                "");
         public static final SemanticTag MODE = new SemanticTagImpl( //
                 "Property_Mode", //
                 "Mode", //
@@ -404,6 +404,16 @@ public class DefaultSemanticTags {
         public static final SemanticTag ENABLED_DISABLED = new SemanticTagImpl( //
                 "Property_Mode_EnabledDisabled", //
                 "Enabled Disabled", //
+                "", //
+                "");
+        public static final SemanticTag MOISTURE = new SemanticTagImpl( //
+                "Property_Moisture", //
+                "Moisture", //
+                "", //
+                "");
+        public static final SemanticTag MOTION = new SemanticTagImpl( //
+                "Property_Motion", //
+                "Motion", //
                 "", //
                 "");
         public static final SemanticTag NOISE = new SemanticTagImpl( //
@@ -421,14 +431,29 @@ public class DefaultSemanticTags {
                 "On Off", //
                 "", //
                 "");
-        public static final SemanticTag OPEN_CLOSED = new SemanticTagImpl( //
-                "Property_OpenClosed", //
-                "Open Closed", //
-                "", //
-                "");
         public static final SemanticTag OPENING = new SemanticTagImpl( //
                 "Property_Opening", //
                 "Opening", //
+                "", //
+                "");
+        public static final SemanticTag OPEN_LEVEL = new SemanticTagImpl( //
+                "Property_Opening_OpenLevel", //
+                "Open Level", //
+                "", //
+                "");
+        public static final SemanticTag OPEN_STATE = new SemanticTagImpl( //
+                "Property_Opening_OpenState", //
+                "Open State", //
+                "", //
+                "Open Closed");
+        public static final SemanticTag POSITION = new SemanticTagImpl( //
+                "Property_Position", //
+                "Position", //
+                "", //
+                "");
+        public static final SemanticTag GEO_LOCATION = new SemanticTagImpl( //
+                "Property_Position_GeoLocation", //
+                "Geo Location", //
                 "", //
                 "");
         public static final SemanticTag POWER = new SemanticTagImpl( //
@@ -481,6 +506,11 @@ public class DefaultSemanticTags {
                 "Speed", //
                 "", //
                 "");
+        public static final SemanticTag TAMPERED = new SemanticTagImpl( //
+                "Property_Tampered", //
+                "Tampered", //
+                "", //
+                "");
         public static final SemanticTag TEMPERATURE = new SemanticTagImpl( //
                 "Property_Temperature", //
                 "Temperature", //
@@ -529,6 +559,11 @@ public class DefaultSemanticTags {
     }
 
     public static class Equipment {
+        public static final SemanticTag ALARM_DEVICE = new SemanticTagImpl( //
+                "Equipment_AlarmDevice", //
+                "Alarm Device", //
+                "", //
+                "");
         public static final SemanticTag ALARM_SYSTEM = new SemanticTagImpl( //
                 "Equipment_AlarmSystem", //
                 "Alarm System", //
@@ -1009,11 +1044,36 @@ public class DefaultSemanticTags {
                 "CO Sensor", //
                 "", //
                 "");
+        public static final SemanticTag CONTACT_SENSOR = new SemanticTagImpl( //
+                "Equipment_Sensor_ContactSensor", //
+                "Contact Sensor", //
+                "", //
+                "Door Contact, Window Contact");
         public static final SemanticTag ELECTRIC_METER = new SemanticTagImpl( //
                 "Equipment_Sensor_ElectricMeter", //
                 "Electric Meter", //
                 "", //
                 "");
+        public static final SemanticTag FIRE_DETECTOR = new SemanticTagImpl( //
+                "Equipment_Sensor_FireDetector", //
+                "Fire Detector", //
+                "", //
+                "");
+        public static final SemanticTag FLAME_DETECTOR = new SemanticTagImpl( //
+                "Equipment_Sensor_FireDetector_FlameDetector", //
+                "Flame Detector", //
+                "", //
+                "");
+        public static final SemanticTag HEAT_DETECTOR = new SemanticTagImpl( //
+                "Equipment_Sensor_FireDetector_HeatDetector", //
+                "Heat Detector", //
+                "", //
+                "");
+        public static final SemanticTag SMOKE_DETECTOR = new SemanticTagImpl( //
+                "Equipment_Sensor_FireDetector_SmokeDetector", //
+                "Smoke Detector", //
+                "", //
+                "Smoke Detectors");
         public static final SemanticTag GAS_METER = new SemanticTagImpl( //
                 "Equipment_Sensor_GasMeter", //
                 "Gas Meter", //
@@ -1024,11 +1084,6 @@ public class DefaultSemanticTags {
                 "Glass Break Detector", //
                 "", //
                 "");
-        public static final SemanticTag HEAT_DETECTOR = new SemanticTagImpl( //
-                "Equipment_Sensor_HeatDetector", //
-                "Heat Detector", //
-                "", //
-                "Flame detector");
         public static final SemanticTag HUMIDITY_SENSOR = new SemanticTagImpl( //
                 "Equipment_Sensor_HumiditySensor", //
                 "Humidity Sensor", //
@@ -1054,14 +1109,14 @@ public class DefaultSemanticTags {
                 "Motion Detector", //
                 "", //
                 "Motion Detectors, Motion Sensor, Motion Sensors");
-        public static final SemanticTag SMOKE_DETECTOR = new SemanticTagImpl( //
-                "Equipment_Sensor_SmokeDetector", //
-                "Smoke Detector", //
-                "", //
-                "Smoke Detectors");
         public static final SemanticTag TEMPERATURE_SENSOR = new SemanticTagImpl( //
                 "Equipment_Sensor_TemperatureSensor", //
                 "Temperature Sensor", //
+                "", //
+                "");
+        public static final SemanticTag VIBRATION_SENSOR = new SemanticTagImpl( //
+                "Equipment_Sensor_VibrationSensor", //
+                "Vibration Sensor", //
                 "", //
                 "");
         public static final SemanticTag WATER_METER = new SemanticTagImpl( //
