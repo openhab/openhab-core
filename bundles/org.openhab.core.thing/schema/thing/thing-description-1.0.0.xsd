@@ -302,6 +302,7 @@
 			<xs:enumeration value="LowBattery"/>
 			<xs:enumeration value="MediaControl"/>
 			<xs:enumeration value="Mode"/>
+			<xs:enumeration value="Moisture"/>
 			<xs:enumeration value="Motion"/>
 			<xs:enumeration value="Noise"/>
 			<xs:enumeration value="Oil"/>

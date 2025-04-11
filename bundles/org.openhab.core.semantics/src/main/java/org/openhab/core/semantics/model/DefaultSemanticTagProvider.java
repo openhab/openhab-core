@@ -113,6 +113,7 @@ public class DefaultSemanticTagProvider implements SemanticTagProvider {
         defaultTags.add(DefaultSemanticTags.Property.MODE);
         defaultTags.add(DefaultSemanticTags.Property.AUTO_MANUAL);
         defaultTags.add(DefaultSemanticTags.Property.ENABLED_DISABLED);
+        defaultTags.add(DefaultSemanticTags.Property.MOISTURE);
         defaultTags.add(DefaultSemanticTags.Property.MOTION);
         defaultTags.add(DefaultSemanticTags.Property.NOISE);
         defaultTags.add(DefaultSemanticTags.Property.OIL);

@@ -406,6 +406,11 @@ public class DefaultSemanticTags {
                 "Enabled Disabled", //
                 "", //
                 "");
+        public static final SemanticTag MOISTURE = new SemanticTagImpl( //
+                "Property_Moisture", //
+                "Moisture", //
+                "", //
+                "");
         public static final SemanticTag MOTION = new SemanticTagImpl( //
                 "Property_Motion", //
                 "Motion", //
