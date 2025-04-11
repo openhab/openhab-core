@@ -94,6 +94,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * This resource is registered with the Jersey servlet.
  *
  * @author Laurent Garnier - Initial contribution
+ * @author Laurent Garnier - Add YAML output for things
  */
 @Component
 @JaxrsResource
@@ -107,6 +108,15 @@ public class FileFormatResource implements RESTResource {
 
     /** The URI path to this resource */
     public static final String PATH_FILE_FORMAT = "file-format";
+
+    private static final String DSL_THINGS_EXAMPLE = "Bridge binding:typeBridge:idBridge \"Label brigde\" @ \"Location bridge\" [stringParam=\"my value\"] {" //
+            + "\n    Thing type id \"Label thing\" @ \"Location thing\" [booleanParam=true, decimalParam=2.5]\n}";
+    private static final String DSL_THING_EXAMPLE = "Thing binding:type:idBridge:id \"Label thing\" @ \"Location thing\" (binding:typeBridge:idBridge) [stringParam=\"my value\", booleanParam=true, decimalParam=2.5]";
+    private static final String YAML_THINGS_EXAMPLE = "version: 2\nthings:\n" //
+            + "  binding:typeBridge:idBridge:\n    isBridge: true\n    label: Label bridge\n    location: Location bridge\n    config:\n      stringParam: my value\n"
+            + "  binding:type:idBridge:id:\n    bridge: binding:typeBridge:idBridge\n    label: Label thing\n    location: Location thing\n    config:\n      booleanParam: true\n      decimalParam: 2.5";
+    private static final String YAML_THING_EXAMPLE = "version: 2\nthings:\n" //
+            + "  binding:type:idBridge:id:\n    bridge: binding:typeBridge:idBridge\n    label: Label thing\n    location: Location thing\n    config:\n      stringParam: my value\n      booleanParam: true\n      decimalParam: 2.5";
 
     private final Logger logger = LoggerFactory.getLogger(FileFormatResource.class);
 
@@ -216,16 +226,28 @@ public class FileFormatResource implements RESTResource {
     @GET
     @RolesAllowed({ Role.ADMIN })
     @Path("/things")
-    @Produces("text/vnd.openhab.dsl.thing")
+    @Produces({ "text/vnd.openhab.dsl.thing", "application/yaml" })
     @Operation(operationId = "createFileFormatForAllThings", summary = "Create file format for all existing things in registry.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
-                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = "text/vnd.openhab.dsl.thing", schema = @Schema(example = "Bridge binding:typeBridge:idBridge \"Label\" @ \"Location\" [stringParam=\"my value\"] {\n    Thing type id \"Label\" @ \"Location\" [booleanParam=true, decimalParam=2.5]\n}"))),
+                    @ApiResponse(responseCode = "200", description = "OK", content = {
+                            @Content(mediaType = "text/vnd.openhab.dsl.thing", schema = @Schema(example = DSL_THINGS_EXAMPLE)),
+                            @Content(mediaType = "application/yaml", schema = @Schema(example = YAML_THINGS_EXAMPLE)) }),
                     @ApiResponse(responseCode = "415", description = "Unsupported media type.") })
     public Response createFileFormatForAllThings(final @Context HttpHeaders httpHeaders,
             @DefaultValue("true") @QueryParam("hideDefaultParameters") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters) {
         String acceptHeader = httpHeaders.getHeaderString(HttpHeaders.ACCEPT);
-        String format = "text/vnd.openhab.dsl.thing".equals(acceptHeader) ? "DSL" : null;
-        ThingFileGenerator generator = format == null ? null : thingFileGenerators.get(format);
+        ThingFileGenerator generator;
+        switch (acceptHeader) {
+            case "text/vnd.openhab.dsl.thing":
+                generator = thingFileGenerators.get("DSL");
+                break;
+            case "application/yaml":
+                generator = thingFileGenerators.get("YAML");
+                break;
+            default:
+                generator = null;
+                break;
+        }
         if (generator == null) {
             return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE)
                     .entity("Unsupported media type '" + acceptHeader + "'!").build();
@@ -238,18 +260,30 @@ public class FileFormatResource implements RESTResource {
     @GET
     @RolesAllowed({ Role.ADMIN })
     @Path("/things/{thingUID}")
-    @Produces("text/vnd.openhab.dsl.thing")
+    @Produces({ "text/vnd.openhab.dsl.thing", "application/yaml" })
     @Operation(operationId = "createFileFormatForThing", summary = "Create file format for an existing thing in things or discovery registry.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
-                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = "text/vnd.openhab.dsl.thing", schema = @Schema(example = "Thing binding:type:idBridge:id \"Label\" @ \"Location\" (binding:typeBridge:idBridge) [stringParam=\"my value\", booleanParam=true, decimalParam=2.5]"))),
+                    @ApiResponse(responseCode = "200", description = "OK", content = {
+                            @Content(mediaType = "text/vnd.openhab.dsl.thing", schema = @Schema(example = DSL_THING_EXAMPLE)),
+                            @Content(mediaType = "application/yaml", schema = @Schema(example = YAML_THING_EXAMPLE)) }),
                     @ApiResponse(responseCode = "404", description = "Thing not found in things or discovery registry or thing type not found."),
                     @ApiResponse(responseCode = "415", description = "Unsupported media type.") })
     public Response createFileFormatForThing(final @Context HttpHeaders httpHeaders,
             @DefaultValue("true") @QueryParam("hideDefaultParameters") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters,
             @PathParam("thingUID") @Parameter(description = "thingUID") String thingUID) {
         String acceptHeader = httpHeaders.getHeaderString(HttpHeaders.ACCEPT);
-        String format = "text/vnd.openhab.dsl.thing".equals(acceptHeader) ? "DSL" : null;
-        ThingFileGenerator generator = format == null ? null : thingFileGenerators.get(format);
+        ThingFileGenerator generator;
+        switch (acceptHeader) {
+            case "text/vnd.openhab.dsl.thing":
+                generator = thingFileGenerators.get("DSL");
+                break;
+            case "application/yaml":
+                generator = thingFileGenerators.get("YAML");
+                break;
+            default:
+                generator = null;
+                break;
+        }
         if (generator == null) {
             return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE)
                     .entity("Unsupported media type '" + acceptHeader + "'!").build();

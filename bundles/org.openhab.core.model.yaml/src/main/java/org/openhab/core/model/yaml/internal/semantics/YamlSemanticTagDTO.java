@@ -19,8 +19,6 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.model.yaml.YamlElement;
 import org.openhab.core.model.yaml.YamlElementName;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The {@link YamlSemanticTagDTO} is a data transfer object used to serialize a semantic tag
@@ -31,8 +29,6 @@ import org.slf4j.LoggerFactory;
  */
 @YamlElementName("tags")
 public class YamlSemanticTagDTO implements YamlElement, Cloneable {
-
-    private final Logger logger = LoggerFactory.getLogger(YamlSemanticTagDTO.class);
 
     public String uid;
     public String label;
@@ -66,9 +62,11 @@ public class YamlSemanticTagDTO implements YamlElement, Cloneable {
     }
 
     @Override
-    public boolean isValid() {
+    public boolean isValid(@Nullable List<@NonNull String> errors, @Nullable List<@NonNull String> warnings) {
         if (uid == null || uid.isBlank()) {
-            logger.debug("uid missing");
+            if (errors != null) {
+                errors.add("tag uid is missing");
+            }
             return false;
         }
         return true;
