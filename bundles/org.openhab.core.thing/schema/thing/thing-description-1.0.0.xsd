@@ -295,7 +295,6 @@
 			<xs:enumeration value="Gas"/>
 			<xs:enumeration value="GeoLocation"/>
 			<xs:enumeration value="Heating"/>
-			<xs:enumeration value="HomeAway"/>
 			<xs:enumeration value="Humidity"/>
 			<xs:enumeration value="Illuminance"/>
 			<xs:enumeration value="Level"/>
@@ -303,6 +302,7 @@
 			<xs:enumeration value="LowBattery"/>
 			<xs:enumeration value="MediaControl"/>
 			<xs:enumeration value="Mode"/>
+			<xs:enumeration value="Motion"/>
 			<xs:enumeration value="Noise"/>
 			<xs:enumeration value="Oil"/>
 			<xs:enumeration value="OnOff"/>
@@ -397,6 +397,7 @@
 			<xs:enumeration value="Fan"/>
 			<xs:enumeration value="FireDetector"/>
 			<xs:enumeration value="Firewall"/>
+			<xs:enumeration value="FlameDetector"/>
 			<xs:enumeration value="FloodLight"/>
 			<xs:enumeration value="FloorHeating"/>
 			<xs:enumeration value="FoodProcessor"/>

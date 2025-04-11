@@ -361,11 +361,6 @@ public class DefaultSemanticTags {
                 "Heating", //
                 "", //
                 "");
-        public static final SemanticTag HOME_AWAY = new SemanticTagImpl( //
-                "Property_HomeAway", //
-                "Home Away", //
-                "", //
-                "");
         public static final SemanticTag HUMIDITY = new SemanticTagImpl( //
                 "Property_Humidity", //
                 "Humidity", //
@@ -409,6 +404,11 @@ public class DefaultSemanticTags {
         public static final SemanticTag ENABLED_DISABLED = new SemanticTagImpl( //
                 "Property_Mode_EnabledDisabled", //
                 "Enabled Disabled", //
+                "", //
+                "");
+        public static final SemanticTag MOTION = new SemanticTagImpl( //
+                "Property_Motion", //
+                "Motion", //
                 "", //
                 "");
         public static final SemanticTag NOISE = new SemanticTagImpl( //
@@ -619,11 +619,6 @@ public class DefaultSemanticTags {
                 "Computer", //
                 "", //
                 "");
-        public static final SemanticTag CONTACT_SENSOR = new SemanticTagImpl( //
-                "Equipment_ContactSensor", //
-                "Contact Sensor", //
-                "", //
-                "Door Contact, Window Contact");
         public static final SemanticTag CONTROL_DEVICE = new SemanticTagImpl( //
                 "Equipment_ControlDevice", //
                 "Control Device", //
@@ -1044,6 +1039,11 @@ public class DefaultSemanticTags {
                 "CO Sensor", //
                 "", //
                 "");
+        public static final SemanticTag CONTACT_SENSOR = new SemanticTagImpl( //
+                "Equipment_Sensor_ContactSensor", //
+                "Contact Sensor", //
+                "", //
+                "Door Contact, Window Contact");
         public static final SemanticTag ELECTRIC_METER = new SemanticTagImpl( //
                 "Equipment_Sensor_ElectricMeter", //
                 "Electric Meter", //
@@ -1051,14 +1051,19 @@ public class DefaultSemanticTags {
                 "");
         public static final SemanticTag FIRE_DETECTOR = new SemanticTagImpl( //
                 "Equipment_Sensor_FireDetector", //
-                "Smoke Detector", //
+                "Fire Detector", //
                 "", //
-                "Smoke Detectors");
+                "");
+        public static final SemanticTag FLAME_DETECTOR = new SemanticTagImpl( //
+                "Equipment_Sensor_FireDetector_FlameDetector", //
+                "Flame Detector", //
+                "", //
+                "");
         public static final SemanticTag HEAT_DETECTOR = new SemanticTagImpl( //
                 "Equipment_Sensor_FireDetector_HeatDetector", //
                 "Heat Detector", //
                 "", //
-                "Flame Detector");
+                "");
         public static final SemanticTag SMOKE_DETECTOR = new SemanticTagImpl( //
                 "Equipment_Sensor_FireDetector_SmokeDetector", //
                 "Smoke Detector", //

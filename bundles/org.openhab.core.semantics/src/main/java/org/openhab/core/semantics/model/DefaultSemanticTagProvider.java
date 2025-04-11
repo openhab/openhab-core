@@ -104,7 +104,6 @@ public class DefaultSemanticTagProvider implements SemanticTagProvider {
         defaultTags.add(DefaultSemanticTags.Property.FREQUENCY);
         defaultTags.add(DefaultSemanticTags.Property.GAS);
         defaultTags.add(DefaultSemanticTags.Property.HEATING);
-        defaultTags.add(DefaultSemanticTags.Property.HOME_AWAY);
         defaultTags.add(DefaultSemanticTags.Property.HUMIDITY);
         defaultTags.add(DefaultSemanticTags.Property.ILLUMINANCE);
         defaultTags.add(DefaultSemanticTags.Property.LEVEL);
@@ -114,6 +113,7 @@ public class DefaultSemanticTagProvider implements SemanticTagProvider {
         defaultTags.add(DefaultSemanticTags.Property.MODE);
         defaultTags.add(DefaultSemanticTags.Property.AUTO_MANUAL);
         defaultTags.add(DefaultSemanticTags.Property.ENABLED_DISABLED);
+        defaultTags.add(DefaultSemanticTags.Property.MOTION);
         defaultTags.add(DefaultSemanticTags.Property.NOISE);
         defaultTags.add(DefaultSemanticTags.Property.OIL);
         defaultTags.add(DefaultSemanticTags.Property.ON_OFF);
@@ -155,7 +155,6 @@ public class DefaultSemanticTagProvider implements SemanticTagProvider {
         defaultTags.add(DefaultSemanticTags.Equipment.CAMERA);
         defaultTags.add(DefaultSemanticTags.Equipment.CLEANING_ROBOT);
         defaultTags.add(DefaultSemanticTags.Equipment.COMPUTER);
-        defaultTags.add(DefaultSemanticTags.Equipment.CONTACT_SENSOR);
         defaultTags.add(DefaultSemanticTags.Equipment.CONTROL_DEVICE);
         defaultTags.add(DefaultSemanticTags.Equipment.BUTTON);
         defaultTags.add(DefaultSemanticTags.Equipment.DIAL);
@@ -240,8 +239,10 @@ public class DefaultSemanticTagProvider implements SemanticTagProvider {
         defaultTags.add(DefaultSemanticTags.Equipment.AIR_QUALITY_SENSOR);
         defaultTags.add(DefaultSemanticTags.Equipment.CO2_SENSOR);
         defaultTags.add(DefaultSemanticTags.Equipment.CO_SENSOR);
+        defaultTags.add(DefaultSemanticTags.Equipment.CONTACT_SENSOR);
         defaultTags.add(DefaultSemanticTags.Equipment.ELECTRIC_METER);
         defaultTags.add(DefaultSemanticTags.Equipment.FIRE_DETECTOR);
+        defaultTags.add(DefaultSemanticTags.Equipment.FLAME_DETECTOR);
         defaultTags.add(DefaultSemanticTags.Equipment.HEAT_DETECTOR);
         defaultTags.add(DefaultSemanticTags.Equipment.SMOKE_DETECTOR);
         defaultTags.add(DefaultSemanticTags.Equipment.GAS_METER);
