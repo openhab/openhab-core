@@ -38,9 +38,9 @@ import org.openhab.core.types.UnDefType;
 public class PlayerItem extends GenericItem {
 
     private static final List<Class<? extends State>> ACCEPTED_DATA_TYPES = List.of(PlayPauseType.class,
-            RewindFastforwardType.class, StringType.class, MediaType.class, UnDefType.class);
+            RewindFastforwardType.class, MediaType.class, StringType.class, UnDefType.class);
     private static final List<Class<? extends Command>> ACCEPTED_COMMAND_TYPES = List.of(PlayPauseType.class,
-            RewindFastforwardType.class, NextPreviousType.class, StringType.class, MediaType.class, RefreshType.class);
+            RewindFastforwardType.class, NextPreviousType.class, MediaType.class, StringType.class, RefreshType.class);
 
     public PlayerItem(String name) {
         super(CoreItemFactory.PLAYER, name);

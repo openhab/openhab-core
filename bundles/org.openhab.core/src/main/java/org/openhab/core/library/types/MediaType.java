@@ -12,11 +12,16 @@
  */
 package org.openhab.core.library.types;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.types.Command;
+import org.openhab.core.types.ComplexType;
 import org.openhab.core.types.PrimitiveType;
 import org.openhab.core.types.State;
 
@@ -26,16 +31,21 @@ import org.openhab.core.types.State;
  * @author Laurent Arnal - Initial contribution
  */
 @NonNullByDefault
-public class MediaType implements PrimitiveType, State, Command {
+public class MediaType implements ComplexType, State, Command {
 
-    private final String value;
+    public static final String KEY_COMMAND = "command";
+    public static final String KEY_PARAM = "param";
+
+    private final MediaCommandType command;
+    private final String param;
 
     public MediaType() {
-        this("");
+        this(MediaCommandType.NONE, "");
     }
 
-    public MediaType(@Nullable String value) {
-        this.value = value != null ? value : "";
+    public MediaType(MediaCommandType command, @Nullable String param) {
+        this.command = command;
+        this.param = param != null ? param : "";
     }
 
     @Override
@@ -45,21 +55,44 @@ public class MediaType implements PrimitiveType, State, Command {
 
     @Override
     public String toFullString() {
-        return value;
+        return this.command.toFullString() + "," + param;
     }
 
-    public static StringType valueOf(@Nullable String value) {
-        return new StringType(value);
+    public static MediaType valueOf(String value) {
+        List<String> constituents = Arrays.stream(value.split(",")).map(String::trim).toList();
+        if (constituents.size() == 2) {
+            String commandSt = constituents.getFirst();
+            MediaCommandType command = MediaCommandType.valueOf(commandSt);
+            return new MediaType(command, constituents.get(1));
+        } else {
+            throw new IllegalArgumentException(value + " is not a valid HSBType syntax");
+        }
     }
 
     @Override
     public String format(String pattern) {
-        return String.format(pattern, value);
+        return String.format(pattern, param);
     }
 
     @Override
     public int hashCode() {
-        return value.hashCode();
+        return param.hashCode();
+    }
+
+    @Override
+    public SortedMap<String, PrimitiveType> getConstituents() {
+        TreeMap<String, PrimitiveType> map = new TreeMap<>();
+        map.put(KEY_COMMAND, getCommand());
+        map.put(KEY_PARAM, getCommand());
+        return map;
+    }
+
+    public MediaCommandType getCommand() {
+        return command;
+    }
+
+    public StringType getParam() {
+        return new StringType(param);
     }
 
     @Override
@@ -71,12 +104,12 @@ public class MediaType implements PrimitiveType, State, Command {
             return false;
         }
         if (obj instanceof String) {
-            return obj.equals(value);
+            return obj.equals(param);
         }
         if (getClass() != obj.getClass()) {
             return false;
         }
         MediaType other = (MediaType) obj;
-        return Objects.equals(this.value, other.value);
+        return Objects.equals(this.param, other.param);
     }
 }
