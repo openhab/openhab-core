@@ -341,6 +341,11 @@ public class DefaultSemanticTags {
                 "Duration", //
                 "", //
                 "");
+        public static final SemanticTag ENABLED = new SemanticTagImpl( //
+                "Property_Enabled", //
+                "Enabled", //
+                "", //
+                "");
         public static final SemanticTag ENERGY = new SemanticTagImpl( //
                 "Property_Energy", //
                 "Energy", //
@@ -396,16 +401,6 @@ public class DefaultSemanticTags {
                 "Mode", //
                 "", //
                 "");
-        public static final SemanticTag AUTO_MANUAL = new SemanticTagImpl( //
-                "Property_Mode_AutoManual", //
-                "Auto Manual", //
-                "", //
-                "");
-        public static final SemanticTag ENABLED_DISABLED = new SemanticTagImpl( //
-                "Property_Mode_EnabledDisabled", //
-                "Enabled Disabled", //
-                "", //
-                "");
         public static final SemanticTag MOISTURE = new SemanticTagImpl( //
                 "Property_Moisture", //
                 "Moisture", //
@@ -424,11 +419,6 @@ public class DefaultSemanticTags {
         public static final SemanticTag OIL = new SemanticTagImpl( //
                 "Property_Oil", //
                 "Oil", //
-                "", //
-                "");
-        public static final SemanticTag ON_OFF = new SemanticTagImpl( //
-                "Property_OnOff", //
-                "On Off", //
                 "", //
                 "");
         public static final SemanticTag OPENING = new SemanticTagImpl( //
@@ -1048,7 +1038,7 @@ public class DefaultSemanticTags {
                 "Equipment_Sensor_ContactSensor", //
                 "Contact Sensor", //
                 "", //
-                "Door Contact, Window Contact");
+                "");
         public static final SemanticTag ELECTRIC_METER = new SemanticTagImpl( //
                 "Equipment_Sensor_ElectricMeter", //
                 "Electric Meter", //

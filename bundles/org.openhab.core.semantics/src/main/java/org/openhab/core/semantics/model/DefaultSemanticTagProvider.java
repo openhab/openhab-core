@@ -100,6 +100,7 @@ public class DefaultSemanticTagProvider implements SemanticTagProvider {
         defaultTags.add(DefaultSemanticTags.Property.COLOR_TEMPERATURE);
         defaultTags.add(DefaultSemanticTags.Property.CURRENT);
         defaultTags.add(DefaultSemanticTags.Property.DURATION);
+        defaultTags.add(DefaultSemanticTags.Property.ENABLED);
         defaultTags.add(DefaultSemanticTags.Property.ENERGY);
         defaultTags.add(DefaultSemanticTags.Property.FREQUENCY);
         defaultTags.add(DefaultSemanticTags.Property.GAS);
@@ -111,13 +112,10 @@ public class DefaultSemanticTagProvider implements SemanticTagProvider {
         defaultTags.add(DefaultSemanticTags.Property.LOW_BATTERY);
         defaultTags.add(DefaultSemanticTags.Property.MEDIA_CONTROL);
         defaultTags.add(DefaultSemanticTags.Property.MODE);
-        defaultTags.add(DefaultSemanticTags.Property.AUTO_MANUAL);
-        defaultTags.add(DefaultSemanticTags.Property.ENABLED_DISABLED);
         defaultTags.add(DefaultSemanticTags.Property.MOISTURE);
         defaultTags.add(DefaultSemanticTags.Property.MOTION);
         defaultTags.add(DefaultSemanticTags.Property.NOISE);
         defaultTags.add(DefaultSemanticTags.Property.OIL);
-        defaultTags.add(DefaultSemanticTags.Property.ON_OFF);
         defaultTags.add(DefaultSemanticTags.Property.OPENING);
         defaultTags.add(DefaultSemanticTags.Property.OPEN_LEVEL);
         defaultTags.add(DefaultSemanticTags.Property.OPEN_STATE);

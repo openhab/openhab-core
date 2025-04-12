@@ -280,7 +280,6 @@
 			<xs:enumeration value="AirQuality"/>
 			<xs:enumeration value="App"/>
 			<xs:enumeration value="AQI"/>
-			<xs:enumeration value="AutoManual"/>
 			<xs:enumeration value="Brightness"/>
 			<xs:enumeration value="Channel"/>
 			<xs:enumeration value="CO"/>
@@ -289,7 +288,7 @@
 			<xs:enumeration value="ColorTemperature"/>
 			<xs:enumeration value="Current"/>
 			<xs:enumeration value="Duration"/>
-			<xs:enumeration value="EnabledDisabled"/>
+			<xs:enumeration value="Enabled"/>
 			<xs:enumeration value="Energy"/>
 			<xs:enumeration value="Frequency"/>
 			<xs:enumeration value="Gas"/>
@@ -306,7 +305,6 @@
 			<xs:enumeration value="Motion"/>
 			<xs:enumeration value="Noise"/>
 			<xs:enumeration value="Oil"/>
-			<xs:enumeration value="OnOff"/>
 			<xs:enumeration value="Opening"/>
 			<xs:enumeration value="OpenLevel"/>
 			<xs:enumeration value="OpenState"/>
