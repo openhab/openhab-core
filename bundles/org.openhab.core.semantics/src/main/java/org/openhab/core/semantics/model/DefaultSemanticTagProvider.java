@@ -149,10 +149,11 @@ public class DefaultSemanticTagProvider implements SemanticTagProvider {
         defaultTags.add(DefaultSemanticTags.Equipment.MEDIA_PLAYER);
         defaultTags.add(DefaultSemanticTags.Equipment.RECEIVER);
         defaultTags.add(DefaultSemanticTags.Equipment.SCREEN);
+        defaultTags.add(DefaultSemanticTags.Equipment.PROJECTOR);
         defaultTags.add(DefaultSemanticTags.Equipment.TELEVISION);
+        defaultTags.add(DefaultSemanticTags.Equipment.SPEAKER);
         defaultTags.add(DefaultSemanticTags.Equipment.BATTERY);
         defaultTags.add(DefaultSemanticTags.Equipment.BED);
-        defaultTags.add(DefaultSemanticTags.Equipment.BLINDS);
         defaultTags.add(DefaultSemanticTags.Equipment.CAMERA);
         defaultTags.add(DefaultSemanticTags.Equipment.CLEANING_ROBOT);
         defaultTags.add(DefaultSemanticTags.Equipment.COMPUTER);
@@ -232,7 +233,6 @@ public class DefaultSemanticTagProvider implements SemanticTagProvider {
         defaultTags.add(DefaultSemanticTags.Equipment.WIND_GENERATOR);
         defaultTags.add(DefaultSemanticTags.Equipment.PRINTER);
         defaultTags.add(DefaultSemanticTags.Equipment.PRINTER3D);
-        defaultTags.add(DefaultSemanticTags.Equipment.PROJECTOR);
         defaultTags.add(DefaultSemanticTags.Equipment.PUMP);
         defaultTags.add(DefaultSemanticTags.Equipment.WATER_FEATURE);
         defaultTags.add(DefaultSemanticTags.Equipment.REMOTE_CONTROL);
@@ -260,7 +260,6 @@ public class DefaultSemanticTagProvider implements SemanticTagProvider {
         defaultTags.add(DefaultSemanticTags.Equipment.WEATHER_STATION);
         defaultTags.add(DefaultSemanticTags.Equipment.SIREN);
         defaultTags.add(DefaultSemanticTags.Equipment.SMARTPHONE);
-        defaultTags.add(DefaultSemanticTags.Equipment.SPEAKER);
         defaultTags.add(DefaultSemanticTags.Equipment.TOOL);
         defaultTags.add(DefaultSemanticTags.Equipment.TRACKER);
         defaultTags.add(DefaultSemanticTags.Equipment.VALVE);
@@ -295,6 +294,7 @@ public class DefaultSemanticTagProvider implements SemanticTagProvider {
         defaultTags.add(DefaultSemanticTags.Equipment.WASHING_MACHINE);
         defaultTags.add(DefaultSemanticTags.Equipment.WINDOW);
         defaultTags.add(DefaultSemanticTags.Equipment.WINDOW_COVERING);
+        defaultTags.add(DefaultSemanticTags.Equipment.BLINDS);
         defaultTags.add(DefaultSemanticTags.Equipment.DRAPES);
     }
 

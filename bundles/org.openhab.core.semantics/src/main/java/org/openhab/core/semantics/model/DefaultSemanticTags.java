@@ -589,11 +589,21 @@ public class DefaultSemanticTags {
                 "Screen", //
                 "", //
                 "Screens");
+        public static final SemanticTag PROJECTOR = new SemanticTagImpl( //
+                "Equipment_AudioVisual_Screen_Projector", //
+                "Projector", //
+                "", //
+                "Projectors, Beamer, Beamers");
         public static final SemanticTag TELEVISION = new SemanticTagImpl( //
-                "Equipment_AudioVisual_Television", //
+                "Equipment_AudioVisual_Screen_Television", //
                 "Television", //
                 "", //
                 "Televisions, TV, TVs");
+        public static final SemanticTag SPEAKER = new SemanticTagImpl( //
+                "Equipment_AudioVisual_Speaker", //
+                "Speaker", //
+                "", //
+                "Speakers");
         public static final SemanticTag BATTERY = new SemanticTagImpl( //
                 "Equipment_Battery", //
                 "Battery", //
@@ -604,11 +614,6 @@ public class DefaultSemanticTags {
                 "Bed", //
                 "", //
                 "");
-        public static final SemanticTag BLINDS = new SemanticTagImpl( //
-                "Equipment_Blinds", //
-                "Blinds", //
-                "", //
-                "Rollershutter, Rollershutters, Roller shutter, Roller shutters, Shutter, Shutters");
         public static final SemanticTag CAMERA = new SemanticTagImpl( //
                 "Equipment_Camera", //
                 "Camera", //
@@ -1004,11 +1009,6 @@ public class DefaultSemanticTags {
                 "3D Printer", //
                 "", //
                 "");
-        public static final SemanticTag PROJECTOR = new SemanticTagImpl( //
-                "Equipment_Projector", //
-                "Projector", //
-                "", //
-                "Projectors, Beamer, Beamers");
         public static final SemanticTag PUMP = new SemanticTagImpl( //
                 "Equipment_Pump", //
                 "Pump", //
@@ -1144,11 +1144,6 @@ public class DefaultSemanticTags {
                 "Smartphone", //
                 "", //
                 "Smartphones, Phone, Phones");
-        public static final SemanticTag SPEAKER = new SemanticTagImpl( //
-                "Equipment_Speaker", //
-                "Speaker", //
-                "", //
-                "Speakers");
         public static final SemanticTag TOOL = new SemanticTagImpl( //
                 "Equipment_Tool", //
                 "Tool", //
@@ -1319,6 +1314,11 @@ public class DefaultSemanticTags {
                 "Window Covering", //
                 "", //
                 "");
+        public static final SemanticTag BLINDS = new SemanticTagImpl( //
+                "Equipment_WindowCovering_Blinds", //
+                "Blinds", //
+                "", //
+                "Rollershutter, Rollershutters, Roller shutter, Roller shutters, Shutter, Shutters");
         public static final SemanticTag DRAPES = new SemanticTagImpl( //
                 "Equipment_WindowCovering_Drapes", //
                 "Drapes", //
