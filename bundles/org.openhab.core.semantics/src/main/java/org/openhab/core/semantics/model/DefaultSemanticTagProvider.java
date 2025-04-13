@@ -144,11 +144,12 @@ public class DefaultSemanticTagProvider implements SemanticTagProvider {
         defaultTags.add(DefaultSemanticTags.Equipment.ALARM_DEVICE);
         defaultTags.add(DefaultSemanticTags.Equipment.ALARM_SYSTEM);
         defaultTags.add(DefaultSemanticTags.Equipment.AUDIO_VISUAL);
+        defaultTags.add(DefaultSemanticTags.Equipment.DISPLAY);
+        defaultTags.add(DefaultSemanticTags.Equipment.PROJECTOR);
+        defaultTags.add(DefaultSemanticTags.Equipment.TELEVISION);
         defaultTags.add(DefaultSemanticTags.Equipment.MEDIA_PLAYER);
         defaultTags.add(DefaultSemanticTags.Equipment.RECEIVER);
         defaultTags.add(DefaultSemanticTags.Equipment.SCREEN);
-        defaultTags.add(DefaultSemanticTags.Equipment.PROJECTOR);
-        defaultTags.add(DefaultSemanticTags.Equipment.TELEVISION);
         defaultTags.add(DefaultSemanticTags.Equipment.SPEAKER);
         defaultTags.add(DefaultSemanticTags.Equipment.BATTERY);
         defaultTags.add(DefaultSemanticTags.Equipment.BED);

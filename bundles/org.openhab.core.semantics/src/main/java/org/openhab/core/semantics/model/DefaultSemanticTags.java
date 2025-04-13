@@ -564,6 +564,21 @@ public class DefaultSemanticTags {
                 "Audio Visual", //
                 "", //
                 "");
+        public static final SemanticTag DISPLAY = new SemanticTagImpl( //
+                "Equipment_AudioVisual_Display", //
+                "Display", //
+                "", //
+                "");
+        public static final SemanticTag PROJECTOR = new SemanticTagImpl( //
+                "Equipment_AudioVisual_Display_Projector", //
+                "Projector", //
+                "", //
+                "Projectors, Beamer, Beamers");
+        public static final SemanticTag TELEVISION = new SemanticTagImpl( //
+                "Equipment_AudioVisual_Display_Television", //
+                "Television", //
+                "", //
+                "Televisions, TV, TVs");
         public static final SemanticTag MEDIA_PLAYER = new SemanticTagImpl( //
                 "Equipment_AudioVisual_MediaPlayer", //
                 "Media Player", //
@@ -579,16 +594,6 @@ public class DefaultSemanticTags {
                 "Screen", //
                 "", //
                 "Screens");
-        public static final SemanticTag PROJECTOR = new SemanticTagImpl( //
-                "Equipment_AudioVisual_Screen_Projector", //
-                "Projector", //
-                "", //
-                "Projectors, Beamer, Beamers");
-        public static final SemanticTag TELEVISION = new SemanticTagImpl( //
-                "Equipment_AudioVisual_Screen_Television", //
-                "Television", //
-                "", //
-                "Televisions, TV, TVs");
         public static final SemanticTag SPEAKER = new SemanticTagImpl( //
                 "Equipment_AudioVisual_Speaker", //
                 "Speaker", //

@@ -384,6 +384,7 @@
 			<xs:enumeration value="Dehumidifier"/>
 			<xs:enumeration value="Dial"/>
 			<xs:enumeration value="Dishwasher"/>
+			<xs:enumeration value="Display"/>
 			<xs:enumeration value="Door"/>
 			<xs:enumeration value="Doorbell"/>
 			<xs:enumeration value="Downlight"/>
