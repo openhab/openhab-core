@@ -152,6 +152,10 @@ public class DslItemFileConverter extends AbstractItemFileGenerator {
                 ModelProperty property = buildModelProperty(param.name(), param.value());
                 if (property != null) {
                     binding.getProperties().add(property);
+                } else {
+                    logger.warn(
+                            "Item \"{}\": configuration parameter \"{}\" for channel link \"{}\" is ignored because its value type is not supported!",
+                            item.getName(), param.name(), md.getValue());
                 }
             }
             model.getBindings().add(binding);
@@ -167,6 +171,10 @@ public class DslItemFileConverter extends AbstractItemFileGenerator {
                 ModelProperty property = buildModelProperty(param.name(), param.value());
                 if (property != null) {
                     binding.getProperties().add(property);
+                } else {
+                    logger.warn(
+                            "Item \"{}\": configuration parameter \"{}\" for metadata namespace \"{}\" is ignored because its value type is not supported!",
+                            item.getName(), param.name(), namespace);
                 }
                 if ("stateDescription".equals(namespace) && "pattern".equals(param.name())) {
                     statePattern = param.value().toString();
@@ -188,17 +196,28 @@ public class DslItemFileConverter extends AbstractItemFileGenerator {
         property.setKey(key);
         if (value instanceof List<?> list) {
             if (!list.isEmpty()) {
-                property.getValue().addAll(list);
+                for (Object val : list) {
+                    if (val instanceof String || val instanceof BigDecimal || val instanceof Boolean) {
+                        property.getValue().add(val);
+                    } else if (val instanceof Double doubleValue) {
+                        property.getValue().add(BigDecimal.valueOf(doubleValue));
+                    } else {
+                        property = null;
+                        break;
+                    }
+                }
             } else {
                 property = null;
             }
+        } else if (value instanceof String || value instanceof BigDecimal || value instanceof Boolean) {
+            property.getValue().add(value);
         } else if (value instanceof Double doubleValue) {
             // It was discovered that configuration parameter value of an item metadata can be of type Double
             // when the metadata is added through Main UI.
             // A conversion to a BigDecimal is then required to avoid an exception later when generating DSL
             property.getValue().add(BigDecimal.valueOf(doubleValue));
         } else {
-            property.getValue().add(value);
+            property = null;
         }
         return property;
     }
