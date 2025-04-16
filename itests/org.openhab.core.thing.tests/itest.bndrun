@@ -74,4 +74,5 @@ Fragment-Host: org.openhab.core.thing
 	org.openhab.core.thing.tests;version='[5.0.0,5.0.1)',\
 	org.openhab.core.transform;version='[5.0.0,5.0.1)',\
 	biz.aQute.tester.junit-platform;version='[7.1.0,7.1.1)',\
-	org.ops4j.pax.logging.pax-logging-api;version='[2.2.8,2.2.9)'
+	org.ops4j.pax.logging.pax-logging-api;version='[2.2.8,2.2.9)',\
+	org.openhab.core.semantics;version='[5.0.0,5.0.1)'
