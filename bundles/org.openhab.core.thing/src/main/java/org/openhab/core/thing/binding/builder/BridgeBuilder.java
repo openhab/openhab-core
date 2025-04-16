@@ -18,6 +18,7 @@ import java.util.Map;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.Configuration;
+import org.openhab.core.semantics.SemanticTag;
 import org.openhab.core.thing.Bridge;
 import org.openhab.core.thing.Channel;
 import org.openhab.core.thing.ChannelUID;
@@ -127,5 +128,10 @@ public class BridgeBuilder extends ThingBuilder {
     @Override
     public BridgeBuilder withSemanticEquipmentTag(@Nullable String semanticEquipmentTag) {
         return (BridgeBuilder) super.withSemanticEquipmentTag(semanticEquipmentTag);
+    }
+
+    @Override
+    public BridgeBuilder withSemanticEquipmentTag(SemanticTag semanticEquipmentTag) {
+        return withSemanticEquipmentTag(semanticEquipmentTag.getName());
     }
 }

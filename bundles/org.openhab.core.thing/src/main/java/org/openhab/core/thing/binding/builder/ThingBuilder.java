@@ -23,6 +23,7 @@ import java.util.Objects;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.Configuration;
+import org.openhab.core.semantics.SemanticTag;
 import org.openhab.core.thing.Channel;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.Thing;
@@ -263,6 +264,10 @@ public class ThingBuilder {
     public ThingBuilder withSemanticEquipmentTag(@Nullable String semanticEquipmentTag) {
         this.semanticEquipmentTag = semanticEquipmentTag;
         return this;
+    }
+
+    public ThingBuilder withSemanticEquipmentTag(SemanticTag semanticEquipmentTag) {
+        return withSemanticEquipmentTag(semanticEquipmentTag.getName());
     }
 
     protected Thing populate(ThingImpl thing) {

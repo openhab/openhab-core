@@ -20,6 +20,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.registry.Identifiable;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.items.Item;
+import org.openhab.core.semantics.SemanticTag;
 import org.openhab.core.thing.binding.ThingHandler;
 
 /**
@@ -246,4 +247,6 @@ public interface Thing extends Identifiable<ThingUID> {
      * @param semanticEquipmentTag the semantic (equipment) tag or {@code null} if no tag has been configured.
      */
     void setSemanticEquipmentTag(@Nullable String semanticEquipmentTag);
+
+    void setSemanticEquipmentTag(@Nullable SemanticTag semanticEquipmentTag);
 }
