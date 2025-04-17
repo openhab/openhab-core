@@ -339,7 +339,8 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
          * @param item the item to which we are bound
          * @param configString the string that the user specified in the metadata
          * @param configuration the configuration map
-         * @throws IllegalArgumentException if it is ill-formatted
+         * @throws IllegalArgumentException if it is ill-formatted, or the configuration contains an unknown key,
+         *             or any setting is specified more than once
          */
         public ExpireConfig(Item item, String configString, Map<String, Object> configuration)
                 throws IllegalArgumentException {
