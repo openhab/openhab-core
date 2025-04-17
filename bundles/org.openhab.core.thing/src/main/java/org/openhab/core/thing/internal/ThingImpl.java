@@ -20,6 +20,7 @@ import java.util.Map;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.Configuration;
+import org.openhab.core.semantics.SemanticTag;
 import org.openhab.core.thing.Channel;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.Thing;
@@ -298,5 +299,10 @@ public class ThingImpl implements Thing {
     @Override
     public void setSemanticEquipmentTag(@Nullable String semanticEquipmentTag) {
         this.semanticEquipmentTag = semanticEquipmentTag;
+    }
+
+    @Override
+    public void setSemanticEquipmentTag(@Nullable SemanticTag semanticEquipmentTag) {
+        setSemanticEquipmentTag(semanticEquipmentTag.getName());
     }
 }
