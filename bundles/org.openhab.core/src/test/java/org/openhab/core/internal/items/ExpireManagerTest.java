@@ -445,6 +445,13 @@ class ExpireManagerTest {
                 () -> new ExpireManager.ExpireConfig(testItem, "1h", Map.of("unknownKey", "unknownValue")));
     }
 
+    @Test
+    void testNegativeDuration() {
+        Item testItem = new SwitchItem(ITEMNAME);
+        assertThrows(IllegalArgumentException.class, () -> new ExpireManager.ExpireConfig(testItem, "-1h", Map.of()));
+        assertThrows(IllegalArgumentException.class, () -> new ExpireManager.ExpireConfig(testItem, "-PT1H", Map.of()));
+    }
+
     private Metadata config(String metadata) {
         return new Metadata(METADATA_KEY, metadata, null);
     }

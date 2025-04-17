@@ -359,6 +359,10 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
 
             durationString = durationStr;
             duration = parseDuration(durationString);
+            if (duration.isNegative()) {
+                throw new IllegalArgumentException(
+                        "Expire duration for item " + item.getName() + " must be a positive value");
+            }
 
             String stateOrCommand = ((commaPos >= 0) && (configString.length() - 1) > commaPos)
                     ? configString.substring(commaPos + 1).trim()
