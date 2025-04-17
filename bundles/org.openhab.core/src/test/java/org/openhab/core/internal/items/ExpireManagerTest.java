@@ -438,6 +438,13 @@ class ExpireManagerTest {
                 () -> new ExpireManager.ExpireConfig(testItem, "1h", Map.of("command", "ON", "state", "ON")));
     }
 
+    @Test
+    void testUnknownConfigKeys() {
+        Item testItem = new SwitchItem(ITEMNAME);
+        assertThrows(IllegalArgumentException.class,
+                () -> new ExpireManager.ExpireConfig(testItem, "1h", Map.of("unknownKey", "unknownValue")));
+    }
+
     private Metadata config(String metadata) {
         return new Metadata(METADATA_KEY, metadata, null);
     }

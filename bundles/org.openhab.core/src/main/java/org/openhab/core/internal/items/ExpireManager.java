@@ -14,6 +14,7 @@ package org.openhab.core.internal.items;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -294,6 +295,8 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
         static final String CONFIG_STATE = "state";
         static final String CONFIG_IGNORE_STATE_UPDATES = "ignoreStateUpdates";
         static final String CONFIG_IGNORE_COMMANDS = "ignoreCommands";
+        static final Set<String> CONFIG_KEYS = Set.of(CONFIG_DURATION, CONFIG_COMMAND, CONFIG_STATE,
+                CONFIG_IGNORE_STATE_UPDATES, CONFIG_IGNORE_COMMANDS);
 
         private static final StringType STRING_TYPE_NULL_HYPHEN = new StringType("'NULL'");
         private static final StringType STRING_TYPE_NULL = new StringType("NULL");
@@ -419,6 +422,13 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
                 // default is to post Undefined state
                 expireCommand = null;
                 expireState = UnDefType.UNDEF;
+            }
+
+            if (!CONFIG_KEYS.containsAll(configuration.keySet())) {
+                Set<String> unknownKeys = new HashSet<String>(configuration.keySet());
+                unknownKeys.removeAll(CONFIG_KEYS);
+                throw new IllegalArgumentException(
+                        "Expire configuration for item " + item.getName() + " contains unknown keys: " + unknownKeys);
             }
         }
 
