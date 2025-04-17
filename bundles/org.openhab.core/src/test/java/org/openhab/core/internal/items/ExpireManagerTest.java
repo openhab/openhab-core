@@ -277,6 +277,13 @@ class ExpireManagerTest {
         assertFalse(cfg.ignoreStateUpdates);
         assertFalse(cfg.ignoreCommands);
 
+        cfg = new ExpireManager.ExpireConfig(testItem, "", Map.of("duration", "5h 3m 2s"));
+        assertEquals(Duration.ofHours(5).plusMinutes(3).plusSeconds(2), cfg.duration);
+        assertEquals(UnDefType.UNDEF, cfg.expireState);
+        assertNull(cfg.expireCommand);
+        assertFalse(cfg.ignoreStateUpdates);
+        assertFalse(cfg.ignoreCommands);
+
         cfg = new ExpireManager.ExpireConfig(testItem, "1h,OFF", Map.of());
         assertEquals(Duration.ofHours(1), cfg.duration);
         assertEquals(OnOffType.OFF, cfg.expireState);
@@ -291,7 +298,21 @@ class ExpireManagerTest {
         assertFalse(cfg.ignoreStateUpdates);
         assertFalse(cfg.ignoreCommands);
 
+        cfg = new ExpireManager.ExpireConfig(testItem, "1h", Map.of("state", "OFF"));
+        assertEquals(Duration.ofHours(1), cfg.duration);
+        assertEquals(OnOffType.OFF, cfg.expireState);
+        assertNull(cfg.expireCommand);
+        assertFalse(cfg.ignoreStateUpdates);
+        assertFalse(cfg.ignoreCommands);
+
         cfg = new ExpireManager.ExpireConfig(testItem, "1h,command=OFF", Map.of());
+        assertEquals(Duration.ofHours(1), cfg.duration);
+        assertNull(cfg.expireState);
+        assertEquals(OnOffType.OFF, cfg.expireCommand);
+        assertFalse(cfg.ignoreStateUpdates);
+        assertFalse(cfg.ignoreCommands);
+
+        cfg = new ExpireManager.ExpireConfig(testItem, "1h", Map.of("command", "OFF"));
         assertEquals(Duration.ofHours(1), cfg.duration);
         assertNull(cfg.expireState);
         assertEquals(OnOffType.OFF, cfg.expireCommand);
@@ -366,6 +387,43 @@ class ExpireManagerTest {
         assertEquals(Duration.ofHours(1), cfg.duration);
         assertEquals(new StringType("UNDEF"), cfg.expireState);
         assertNull(cfg.expireCommand);
+    }
+
+    @Test
+    void testValueVsConfigPrecedence() {
+        Item testItem = new SwitchItem(ITEMNAME);
+
+        ExpireConfig cfg = new ExpireManager.ExpireConfig(testItem, "1h", Map.of("duration", "2h"));
+        assertEquals(Duration.ofHours(1), cfg.duration);
+
+        cfg = new ExpireManager.ExpireConfig(testItem, "1h,state=ON", Map.of("state", "OFF"));
+        assertEquals(OnOffType.ON, cfg.expireState);
+        assertNull(cfg.expireCommand);
+
+        cfg = new ExpireManager.ExpireConfig(testItem, "1h,state=ON", Map.of("command", "OFF"));
+        assertEquals(Duration.ofHours(1), cfg.duration);
+        assertEquals(OnOffType.ON, cfg.expireState);
+        assertNull(cfg.expireCommand);
+
+        cfg = new ExpireManager.ExpireConfig(testItem, "1h,command=ON", Map.of("command", "OFF"));
+        assertEquals(Duration.ofHours(1), cfg.duration);
+        assertEquals(OnOffType.ON, cfg.expireCommand);
+        assertNull(cfg.expireState);
+
+        cfg = new ExpireManager.ExpireConfig(testItem, "1h,command=ON", Map.of("state", "OFF"));
+        assertEquals(Duration.ofHours(1), cfg.duration);
+        assertEquals(OnOffType.ON, cfg.expireCommand);
+        assertNull(cfg.expireState);
+
+        cfg = new ExpireManager.ExpireConfig(testItem, "1h,command=ON", Map.of("command", "OFF", "state", "OFF"));
+        assertEquals(Duration.ofHours(1), cfg.duration);
+        assertEquals(OnOffType.ON, cfg.expireCommand);
+        assertNull(cfg.expireState);
+
+        cfg = new ExpireManager.ExpireConfig(testItem, "1h", Map.of("command", "ON", "state", "OFF"));
+        assertEquals(Duration.ofHours(1), cfg.duration);
+        assertEquals(OnOffType.ON, cfg.expireCommand);
+        assertNull(cfg.expireState);
     }
 
     private Metadata config(String metadata) {
