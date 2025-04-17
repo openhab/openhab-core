@@ -52,6 +52,7 @@ import org.osgi.service.component.annotations.Reference;
  * @author Christoph Weitkamp - Added support for translation
  * @author Stefan Triller - Added more system channels
  * @author Christoph Weitkamp - factored out common i18n aspects into ThingTypeI18nLocalizationService
+ * @author Andrew Fiddian-Green - Added system Point and Property tags
  */
 @NonNullByDefault
 @Component
