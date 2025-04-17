@@ -277,6 +277,7 @@ public class DefaultSemanticTagProvider implements SemanticTagProvider {
         defaultTags.add(DefaultSemanticTags.Equipment.SWIMMING_POOL);
         defaultTags.add(DefaultSemanticTags.Equipment.WHITE_GOOD);
         defaultTags.add(DefaultSemanticTags.Equipment.AIR_FRYER);
+        defaultTags.add(DefaultSemanticTags.Equipment.COFFEE_MAKER);
         defaultTags.add(DefaultSemanticTags.Equipment.COOKTOP);
         defaultTags.add(DefaultSemanticTags.Equipment.DISHWASHER);
         defaultTags.add(DefaultSemanticTags.Equipment.DRYER);
