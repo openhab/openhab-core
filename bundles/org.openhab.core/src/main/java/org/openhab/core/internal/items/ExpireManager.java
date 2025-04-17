@@ -303,8 +303,8 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
         protected static final String COMMAND_PREFIX = CONFIG_COMMAND + "=";
         protected static final String STATE_PREFIX = CONFIG_STATE + "=";
 
-        protected static final Pattern DURATION_PATTERN = Pattern
-                .compile("(?:([0-9]+)H)?\\s*(?:([0-9]+)M)?\\s*(?:([0-9]+)S)?", Pattern.CASE_INSENSITIVE);
+        protected static final Pattern DURATION_PATTERN = Pattern.compile(
+                "(?:([0-9]+)D)?\\s*(?:([0-9]+)H)?\\s*(?:([0-9]+)M)?\\s*(?:([0-9]+)S)?", Pattern.CASE_INSENSITIVE);
 
         final @Nullable Command expireCommand;
         final @Nullable State expireState;
@@ -321,7 +321,8 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
          * {@code &lt;duration&gt;[,(state=|command=|)&lt;stateOrCommand&gt;]}<br>
          * if neither state= or command= is present, assume state
          * 
-         * {@code duration} is a string of the form "1h15m30s" or "1h" or "15m" or "30s"
+         * {@code duration} is a string of the form "1d1h15m30s" or "1d" or "1h" or "15m" or "30s",
+         * or an ISO-8601 duration string (e.g. "PT1H15M30S").
          * 
          * {@code configuration} is a map of configuration keys and values:
          * - {@code duration}: the duration string
@@ -443,21 +444,31 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
         }
 
         private Duration parseDuration(String durationString) throws IllegalArgumentException {
+            try {
+                return Duration.parse(durationString);
+            } catch (Exception e) {
+                // ignore
+            }
+
             Matcher m = DURATION_PATTERN.matcher(durationString);
-            if (!m.matches() || (m.group(1) == null && m.group(2) == null && m.group(3) == null)) {
+            if (!m.matches()
+                    || (m.group(1) == null && m.group(2) == null && m.group(3) == null && m.group(4) == null)) {
                 throw new IllegalArgumentException(
-                        "Invalid duration: " + durationString + ". Expected something like: '1h 15m 30s'");
+                        "Invalid duration: " + durationString + ". Expected something like: '1d 1h 15m 30s'");
             }
 
             Duration duration = Duration.ZERO;
             if (m.group(1) != null) {
-                duration = duration.plus(Duration.ofHours(Long.parseLong(m.group(1))));
+                duration = duration.plus(Duration.ofDays(Long.parseLong(m.group(1))));
             }
             if (m.group(2) != null) {
-                duration = duration.plus(Duration.ofMinutes(Long.parseLong(m.group(2))));
+                duration = duration.plus(Duration.ofHours(Long.parseLong(m.group(2))));
             }
             if (m.group(3) != null) {
-                duration = duration.plus(Duration.ofSeconds(Long.parseLong(m.group(3))));
+                duration = duration.plus(Duration.ofMinutes(Long.parseLong(m.group(3))));
+            }
+            if (m.group(4) != null) {
+                duration = duration.plus(Duration.ofSeconds(Long.parseLong(m.group(4))));
             }
             return duration;
         }

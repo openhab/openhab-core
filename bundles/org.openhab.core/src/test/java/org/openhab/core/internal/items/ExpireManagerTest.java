@@ -277,7 +277,35 @@ class ExpireManagerTest {
         assertFalse(cfg.ignoreStateUpdates);
         assertFalse(cfg.ignoreCommands);
 
+        cfg = new ExpireManager.ExpireConfig(testItem, "7d 5h 3m 2s", Map.of());
+        assertEquals(Duration.ofDays(7).plusHours(5).plusMinutes(3).plusSeconds(2), cfg.duration);
+        assertEquals(UnDefType.UNDEF, cfg.expireState);
+        assertNull(cfg.expireCommand);
+        assertFalse(cfg.ignoreStateUpdates);
+        assertFalse(cfg.ignoreCommands);
+
+        cfg = new ExpireManager.ExpireConfig(testItem, "PT5H3M2S", Map.of());
+        assertEquals(Duration.ofHours(5).plusMinutes(3).plusSeconds(2), cfg.duration);
+        assertEquals(UnDefType.UNDEF, cfg.expireState);
+        assertNull(cfg.expireCommand);
+        assertFalse(cfg.ignoreStateUpdates);
+        assertFalse(cfg.ignoreCommands);
+
+        cfg = new ExpireManager.ExpireConfig(testItem, "P7DT5H3M2S", Map.of());
+        assertEquals(Duration.ofDays(7).plusHours(5).plusMinutes(3).plusSeconds(2), cfg.duration);
+        assertEquals(UnDefType.UNDEF, cfg.expireState);
+        assertNull(cfg.expireCommand);
+        assertFalse(cfg.ignoreStateUpdates);
+        assertFalse(cfg.ignoreCommands);
+
         cfg = new ExpireManager.ExpireConfig(testItem, "", Map.of("duration", "5h 3m 2s"));
+        assertEquals(Duration.ofHours(5).plusMinutes(3).plusSeconds(2), cfg.duration);
+        assertEquals(UnDefType.UNDEF, cfg.expireState);
+        assertNull(cfg.expireCommand);
+        assertFalse(cfg.ignoreStateUpdates);
+        assertFalse(cfg.ignoreCommands);
+
+        cfg = new ExpireManager.ExpireConfig(testItem, "", Map.of("duration", "PT5H3M2S"));
         assertEquals(Duration.ofHours(5).plusMinutes(3).plusSeconds(2), cfg.duration);
         assertEquals(UnDefType.UNDEF, cfg.expireState);
         assertNull(cfg.expireCommand);
