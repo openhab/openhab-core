@@ -330,8 +330,6 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
          * - {@code ignoreStateUpdates}: if true, ignore state updates
          * - {@code ignoreCommands}: if true, ignore commands
          * 
-         * - In general, the value string for duration, state, and command take precedence over the configuration map.
-         * - When both command and state are specified, the command takes precedence.
          * - When neither command nor state is specified, the default is to post an {@link UNDEF} state.
          *
          * @param item the item to which we are bound
@@ -346,7 +344,11 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
             String stateString = null;
 
             String durationStr = (commaPos >= 0) ? configString.substring(0, commaPos).trim() : configString.trim();
-            if (durationStr.isEmpty()) {
+            if (configuration.containsKey(CONFIG_DURATION)) {
+                if (!durationStr.isEmpty()) {
+                    throw new IllegalArgumentException("Expire duration for item " + item.getName()
+                            + " is specified in both the value string and the configuration");
+                }
                 durationStr = configuration.get(CONFIG_DURATION).toString();
             }
 
@@ -360,7 +362,24 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
             ignoreStateUpdates = getBooleanConfigValue(configuration, CONFIG_IGNORE_STATE_UPDATES);
             ignoreCommands = getBooleanConfigValue(configuration, CONFIG_IGNORE_COMMANDS);
 
+            if (configuration.containsKey(CONFIG_COMMAND)) {
+                commandString = configuration.get(CONFIG_COMMAND).toString();
+            }
+
+            if (configuration.containsKey(CONFIG_STATE)) {
+                if (commandString != null) {
+                    throw new IllegalArgumentException(
+                            "Expire configuration for item " + item.getName() + " contains both command and state");
+                }
+                stateString = configuration.get(CONFIG_STATE).toString();
+            }
+
             if ((stateOrCommand != null) && (!stateOrCommand.isEmpty())) {
+                if (commandString != null || stateString != null) {
+                    throw new IllegalArgumentException("Expire state/command for item " + item.getName()
+                            + " is specified in both the value string and the configuration");
+                }
+
                 if (stateOrCommand.startsWith(COMMAND_PREFIX)) {
                     commandString = stateOrCommand.substring(COMMAND_PREFIX.length());
                 } else {
@@ -369,10 +388,6 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
                     }
                     stateString = stateOrCommand;
                 }
-            } else if (configuration.containsKey(CONFIG_COMMAND)) {
-                commandString = configuration.get(CONFIG_COMMAND).toString();
-            } else if (configuration.containsKey(CONFIG_STATE)) {
-                stateString = configuration.get(CONFIG_STATE).toString();
             }
 
             if (commandString != null) {

@@ -390,40 +390,24 @@ class ExpireManagerTest {
     }
 
     @Test
-    void testValueVsConfigPrecedence() {
+    void testValueVsConfigMix() {
         Item testItem = new SwitchItem(ITEMNAME);
 
-        ExpireConfig cfg = new ExpireManager.ExpireConfig(testItem, "1h", Map.of("duration", "2h"));
-        assertEquals(Duration.ofHours(1), cfg.duration);
-
-        cfg = new ExpireManager.ExpireConfig(testItem, "1h,state=ON", Map.of("state", "OFF"));
-        assertEquals(OnOffType.ON, cfg.expireState);
-        assertNull(cfg.expireCommand);
-
-        cfg = new ExpireManager.ExpireConfig(testItem, "1h,state=ON", Map.of("command", "OFF"));
-        assertEquals(Duration.ofHours(1), cfg.duration);
-        assertEquals(OnOffType.ON, cfg.expireState);
-        assertNull(cfg.expireCommand);
-
-        cfg = new ExpireManager.ExpireConfig(testItem, "1h,command=ON", Map.of("command", "OFF"));
-        assertEquals(Duration.ofHours(1), cfg.duration);
-        assertEquals(OnOffType.ON, cfg.expireCommand);
-        assertNull(cfg.expireState);
-
-        cfg = new ExpireManager.ExpireConfig(testItem, "1h,command=ON", Map.of("state", "OFF"));
-        assertEquals(Duration.ofHours(1), cfg.duration);
-        assertEquals(OnOffType.ON, cfg.expireCommand);
-        assertNull(cfg.expireState);
-
-        cfg = new ExpireManager.ExpireConfig(testItem, "1h,command=ON", Map.of("command", "OFF", "state", "OFF"));
-        assertEquals(Duration.ofHours(1), cfg.duration);
-        assertEquals(OnOffType.ON, cfg.expireCommand);
-        assertNull(cfg.expireState);
-
-        cfg = new ExpireManager.ExpireConfig(testItem, "1h", Map.of("command", "ON", "state", "OFF"));
-        assertEquals(Duration.ofHours(1), cfg.duration);
-        assertEquals(OnOffType.ON, cfg.expireCommand);
-        assertNull(cfg.expireState);
+        assertThrows(IllegalArgumentException.class,
+                () -> new ExpireManager.ExpireConfig(testItem, "1h", Map.of("duration", "1h")));
+        assertThrows(IllegalArgumentException.class,
+                () -> new ExpireManager.ExpireConfig(testItem, "1h,state=ON", Map.of("state", "ON")));
+        assertThrows(IllegalArgumentException.class,
+                () -> new ExpireManager.ExpireConfig(testItem, "1h,state=ON", Map.of("command", "ON")));
+        assertThrows(IllegalArgumentException.class,
+                () -> new ExpireManager.ExpireConfig(testItem, "1h,command=ON", Map.of("command", "ON")));
+        assertThrows(IllegalArgumentException.class,
+                () -> new ExpireManager.ExpireConfig(testItem, "1h,command=ON", Map.of("state", "ON")));
+        assertThrows(IllegalArgumentException.class, //
+                () -> new ExpireManager.ExpireConfig(testItem, "1h,command=ON",
+                        Map.of("command", "ON", "state", "ON")));
+        assertThrows(IllegalArgumentException.class,
+                () -> new ExpireManager.ExpireConfig(testItem, "1h", Map.of("command", "ON", "state", "ON")));
     }
 
     private Metadata config(String metadata) {
