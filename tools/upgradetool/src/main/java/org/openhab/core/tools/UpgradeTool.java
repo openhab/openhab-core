@@ -86,11 +86,15 @@ public class UpgradeTool {
                         || LINK_UPGRADE_SCRIPT_PROFILE.equals(commandLine.getOptionValue(OPT_COMMAND))) {
                     upgrader.linkUpgradeScriptProfile();
                 }
+                if (!commandLine.hasOption(OPT_COMMAND)
+                        || PERSISTENCE_NO_DEFAULT.equals(commandLine.getOptionValue(OPT_COMMAND))) {
+                    upgrader.persistenceCopyDefaultStrategyToItems();
+                }
             }
         } catch (ParseException e) {
             HelpFormatter formatter = new HelpFormatter();
-            String commands = Set.of(ITEM_COPY_UNIT_TO_METADATA, LINK_UPGRADE_JS_PROFILE, LINK_UPGRADE_SCRIPT_PROFILE)
-                    .toString();
+            String commands = Set.of(ITEM_COPY_UNIT_TO_METADATA, LINK_UPGRADE_JS_PROFILE, LINK_UPGRADE_SCRIPT_PROFILE,
+                    PERSISTENCE_NO_DEFAULT).toString();
             formatter.printHelp("upgradetool", "", options, "Available commands: " + commands, true);
         }
 
