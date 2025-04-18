@@ -248,5 +248,10 @@ public interface Thing extends Identifiable<ThingUID> {
      */
     void setSemanticEquipmentTag(@Nullable String semanticEquipmentTag);
 
+    /**
+     * Set the semantic (equipment) tag of the {@link Thing}.
+     *
+     * @param semanticEquipmentTag the semantic (equipment) tag or {@code null} if no tag has been configured.
+     */
     void setSemanticEquipmentTag(@Nullable SemanticTag semanticEquipmentTag);
 }
