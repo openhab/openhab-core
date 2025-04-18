@@ -200,6 +200,7 @@
 			<xs:enumeration value="Number:Volume"/>
 			<xs:enumeration value="Number:VolumetricFlowRate"/>
 			<xs:enumeration value="Player"/>
+			<xs:enumeration value="MediaBrowser"/>
 			<xs:enumeration value="Rollershutter"/>
 			<xs:enumeration value="String"/>
 			<xs:enumeration value="Switch"/>
