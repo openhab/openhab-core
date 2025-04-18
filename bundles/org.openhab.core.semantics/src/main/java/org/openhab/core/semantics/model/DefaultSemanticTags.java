@@ -1229,6 +1229,11 @@ public class DefaultSemanticTags {
                 "Air Fryer", //
                 "", //
                 "");
+        public static final SemanticTag COFFEE_MAKER = new SemanticTagImpl( //
+                "Equipment_WhiteGood_CoffeeMaker", //
+                "Coffee Maker", //
+                "", //
+                "Coffee Makers, Coffee Machine, Coffee Machines");
         public static final SemanticTag COOKTOP = new SemanticTagImpl( //
                 "Equipment_WhiteGood_Cooktop", //
                 "Cooktop", //
