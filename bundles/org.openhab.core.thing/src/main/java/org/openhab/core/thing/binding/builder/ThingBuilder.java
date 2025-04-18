@@ -266,6 +266,12 @@ public class ThingBuilder {
         return this;
     }
 
+    /**
+     * Set the semantic (equipment) tag for this thing
+     *
+     * @param semanticEquipmentTag semantic (equipment) tag for this thing
+     * @return the {@link ThingBuilder} itself
+     */
     public ThingBuilder withSemanticEquipmentTag(SemanticTag semanticEquipmentTag) {
         return withSemanticEquipmentTag(semanticEquipmentTag.getName());
     }
