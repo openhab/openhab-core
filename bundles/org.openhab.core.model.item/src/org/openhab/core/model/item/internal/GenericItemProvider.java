@@ -69,7 +69,8 @@ import org.slf4j.LoggerFactory;
  * @author Thomas Eichstaedt-Engelen - Initial contribution
  */
 @NonNullByDefault
-@Component(service = { ItemProvider.class, StateDescriptionFragmentProvider.class }, immediate = true)
+@Component(service = { ItemProvider.class, GenericItemProvider.class,
+        StateDescriptionFragmentProvider.class }, immediate = true)
 public class GenericItemProvider extends AbstractProvider<Item>
         implements ModelRepositoryChangeListener, ItemProvider, StateDescriptionFragmentProvider {
 
@@ -170,7 +171,7 @@ public class GenericItemProvider extends AbstractProvider<Item>
         return items;
     }
 
-    private Collection<Item> getItemsFromModel(String modelName) {
+    public List<Item> getItemsFromModel(String modelName) {
         logger.debug("Read items from model '{}'", modelName);
 
         List<Item> items = new ArrayList<>();
