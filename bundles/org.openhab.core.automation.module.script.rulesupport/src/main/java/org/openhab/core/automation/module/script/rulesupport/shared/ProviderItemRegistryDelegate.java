@@ -77,8 +77,16 @@ public class ProviderItemRegistryDelegate implements ItemRegistry {
 
     @Override
     public Item add(Item element) {
+        String itemName = element.getName();
+        // Check for item already existing here because the item might exist in a different provider, so we need to
+        // check the registry and not only the provider itself
+        if (get(itemName) != null) {
+            throw new IllegalArgumentException(
+                    "Cannot add item, because an item with same name (" + itemName + ") already exists.");
+        }
+
         itemProvider.add(element);
-        items.add(element.getName());
+        items.add(itemName);
 
         return element;
     }
