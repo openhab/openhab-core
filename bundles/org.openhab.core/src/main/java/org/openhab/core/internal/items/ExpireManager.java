@@ -14,6 +14,7 @@ package org.openhab.core.internal.items;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -289,19 +290,24 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
     }
 
     static class ExpireConfig {
+        static final String CONFIG_DURATION = "duration";
+        static final String CONFIG_COMMAND = "command";
+        static final String CONFIG_STATE = "state";
         static final String CONFIG_IGNORE_STATE_UPDATES = "ignoreStateUpdates";
         static final String CONFIG_IGNORE_COMMANDS = "ignoreCommands";
+        static final Set<String> CONFIG_KEYS = Set.of(CONFIG_DURATION, CONFIG_COMMAND, CONFIG_STATE,
+                CONFIG_IGNORE_STATE_UPDATES, CONFIG_IGNORE_COMMANDS);
 
         private static final StringType STRING_TYPE_NULL_HYPHEN = new StringType("'NULL'");
         private static final StringType STRING_TYPE_NULL = new StringType("NULL");
         private static final StringType STRING_TYPE_UNDEF_HYPHEN = new StringType("'UNDEF'");
         private static final StringType STRING_TYPE_UNDEF = new StringType("UNDEF");
 
-        protected static final String COMMAND_PREFIX = "command=";
-        protected static final String STATE_PREFIX = "state=";
+        protected static final String COMMAND_PREFIX = CONFIG_COMMAND + "=";
+        protected static final String STATE_PREFIX = CONFIG_STATE + "=";
 
-        protected static final Pattern DURATION_PATTERN = Pattern
-                .compile("(?:([0-9]+)H)?\\s*(?:([0-9]+)M)?\\s*(?:([0-9]+)S)?", Pattern.CASE_INSENSITIVE);
+        protected static final Pattern DURATION_PATTERN = Pattern.compile(
+                "(?:([0-9]+)D)?\\s*(?:([0-9]+)H)?\\s*(?:([0-9]+)M)?\\s*(?:([0-9]+)S)?", Pattern.CASE_INSENSITIVE);
 
         final @Nullable Command expireCommand;
         final @Nullable State expireState;
@@ -315,19 +321,48 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
          *
          * Valid syntax:
          *
-         * {@code &lt;duration&gt;[,(state=|command=|)&lt;stateOrCommand&gt;][,ignoreStateUpdates][,ignoreCommands]}<br>
+         * {@code &lt;duration&gt;[,(state=|command=|)&lt;stateOrCommand&gt;]}<br>
          * if neither state= or command= is present, assume state
+         * 
+         * {@code duration} is a string of the form "1d1h15m30s" or "1d" or "1h" or "15m" or "30s",
+         * or an ISO-8601 duration string (e.g. "PT1H15M30S").
+         * 
+         * {@code configuration} is a map of configuration keys and values:
+         * - {@code duration}: the duration string
+         * - {@code command}: the {@link Command} to send when the item expires
+         * - {@code state}: the {@link State} to send when the item expires
+         * - {@code ignoreStateUpdates}: if true, ignore state updates
+         * - {@code ignoreCommands}: if true, ignore commands
+         * 
+         * - When neither command nor state is specified, the default is to post an {@link UNDEF} state.
          *
          * @param item the item to which we are bound
-         * @param configString the string that the user specified in the metadate
-         * @throws IllegalArgumentException if it is ill-formatted
+         * @param configString the string that the user specified in the metadata
+         * @param configuration the configuration map
+         * @throws IllegalArgumentException if it is ill-formatted, or the configuration contains an unknown key,
+         *             or any setting is specified more than once
          */
         public ExpireConfig(Item item, String configString, Map<String, Object> configuration)
                 throws IllegalArgumentException {
             int commaPos = configString.indexOf(',');
+            String commandString = null;
+            String stateString = null;
 
-            durationString = (commaPos >= 0) ? configString.substring(0, commaPos).trim() : configString.trim();
+            String durationStr = (commaPos >= 0) ? configString.substring(0, commaPos).trim() : configString.trim();
+            if (configuration.containsKey(CONFIG_DURATION)) {
+                if (!durationStr.isEmpty()) {
+                    throw new IllegalArgumentException("Expire duration for item " + item.getName()
+                            + " is specified in both the value string and the configuration");
+                }
+                durationStr = configuration.get(CONFIG_DURATION).toString();
+            }
+
+            durationString = durationStr;
             duration = parseDuration(durationString);
+            if (duration.isNegative()) {
+                throw new IllegalArgumentException(
+                        "Expire duration for item " + item.getName() + " must be a positive value");
+            }
 
             String stateOrCommand = ((commaPos >= 0) && (configString.length() - 1) > commaPos)
                     ? configString.substring(commaPos + 1).trim()
@@ -336,39 +371,69 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
             ignoreStateUpdates = getBooleanConfigValue(configuration, CONFIG_IGNORE_STATE_UPDATES);
             ignoreCommands = getBooleanConfigValue(configuration, CONFIG_IGNORE_COMMANDS);
 
+            if (configuration.containsKey(CONFIG_COMMAND)) {
+                commandString = configuration.get(CONFIG_COMMAND).toString();
+            }
+
+            if (configuration.containsKey(CONFIG_STATE)) {
+                if (commandString != null) {
+                    throw new IllegalArgumentException(
+                            "Expire configuration for item " + item.getName() + " contains both command and state");
+                }
+                stateString = configuration.get(CONFIG_STATE).toString();
+            }
+
             if ((stateOrCommand != null) && (!stateOrCommand.isEmpty())) {
+                if (commandString != null || stateString != null) {
+                    throw new IllegalArgumentException("Expire state/command for item " + item.getName()
+                            + " is specified in both the value string and the configuration");
+                }
+
                 if (stateOrCommand.startsWith(COMMAND_PREFIX)) {
-                    String commandString = stateOrCommand.substring(COMMAND_PREFIX.length());
-                    expireCommand = TypeParser.parseCommand(item.getAcceptedCommandTypes(), commandString);
-                    expireState = null;
-                    if (expireCommand == null) {
-                        throw new IllegalArgumentException("The string '" + commandString
-                                + "' does not represent a valid command for item " + item.getName());
-                    }
+                    commandString = stateOrCommand.substring(COMMAND_PREFIX.length());
                 } else {
                     if (stateOrCommand.startsWith(STATE_PREFIX)) {
                         stateOrCommand = stateOrCommand.substring(STATE_PREFIX.length());
                     }
-                    String stateString = stateOrCommand;
-                    State state = TypeParser.parseState(item.getAcceptedDataTypes(), stateString);
-                    // do special handling to allow NULL and UNDEF as strings when being put in single quotes
-                    if (STRING_TYPE_NULL_HYPHEN.equals(state)) {
-                        expireState = STRING_TYPE_NULL;
-                    } else if (STRING_TYPE_UNDEF_HYPHEN.equals(state)) {
-                        expireState = STRING_TYPE_UNDEF;
-                    } else {
-                        expireState = state;
-                    }
-                    expireCommand = null;
-                    if (expireState == null) {
-                        throw new IllegalArgumentException("The string '" + stateString
-                                + "' does not represent a valid state for item " + item.getName());
-                    }
+                    stateString = stateOrCommand;
+                }
+            }
+
+            if (commandString != null) {
+                expireCommand = TypeParser.parseCommand(item.getAcceptedCommandTypes(), commandString);
+                expireState = null;
+                if (expireCommand == null) {
+                    throw new IllegalArgumentException("The string '" + commandString
+                            + "' does not represent a valid command for item " + item.getName());
+                }
+            } else if (stateString != null) {
+                // default is to post state
+                expireCommand = null;
+                State state = TypeParser.parseState(item.getAcceptedDataTypes(), stateString);
+                // do special handling to allow NULL and UNDEF as strings when being put in single quotes
+                if (STRING_TYPE_NULL_HYPHEN.equals(state)) {
+                    expireState = STRING_TYPE_NULL;
+                } else if (STRING_TYPE_UNDEF_HYPHEN.equals(state)) {
+                    expireState = STRING_TYPE_UNDEF;
+                } else {
+                    expireState = state;
+                }
+
+                if (expireState == null) {
+                    throw new IllegalArgumentException("The string '" + stateString
+                            + "' does not represent a valid state for item " + item.getName());
                 }
             } else {
                 // default is to post Undefined state
                 expireCommand = null;
                 expireState = UnDefType.UNDEF;
+            }
+
+            if (!CONFIG_KEYS.containsAll(configuration.keySet())) {
+                Set<String> unknownKeys = new HashSet<String>(configuration.keySet());
+                unknownKeys.removeAll(CONFIG_KEYS);
+                throw new IllegalArgumentException(
+                        "Expire configuration for item " + item.getName() + " contains unknown keys: " + unknownKeys);
             }
         }
 
@@ -394,21 +459,31 @@ public class ExpireManager implements EventSubscriber, RegistryChangeListener<It
         }
 
         private Duration parseDuration(String durationString) throws IllegalArgumentException {
+            try {
+                return Duration.parse(durationString);
+            } catch (Exception e) {
+                // ignore
+            }
+
             Matcher m = DURATION_PATTERN.matcher(durationString);
-            if (!m.matches() || (m.group(1) == null && m.group(2) == null && m.group(3) == null)) {
+            if (!m.matches()
+                    || (m.group(1) == null && m.group(2) == null && m.group(3) == null && m.group(4) == null)) {
                 throw new IllegalArgumentException(
-                        "Invalid duration: " + durationString + ". Expected something like: '1h 15m 30s'");
+                        "Invalid duration: " + durationString + ". Expected something like: '1d 1h 15m 30s'");
             }
 
             Duration duration = Duration.ZERO;
             if (m.group(1) != null) {
-                duration = duration.plus(Duration.ofHours(Long.parseLong(m.group(1))));
+                duration = duration.plus(Duration.ofDays(Long.parseLong(m.group(1))));
             }
             if (m.group(2) != null) {
-                duration = duration.plus(Duration.ofMinutes(Long.parseLong(m.group(2))));
+                duration = duration.plus(Duration.ofHours(Long.parseLong(m.group(2))));
             }
             if (m.group(3) != null) {
-                duration = duration.plus(Duration.ofSeconds(Long.parseLong(m.group(3))));
+                duration = duration.plus(Duration.ofMinutes(Long.parseLong(m.group(3))));
+            }
+            if (m.group(4) != null) {
+                duration = duration.plus(Duration.ofSeconds(Long.parseLong(m.group(4))));
             }
             return duration;
         }
