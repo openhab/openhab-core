@@ -953,7 +953,7 @@ public class DefaultSemanticTags {
                 "Equipment_PowerOutlet", //
                 "Power Outlet", //
                 "", //
-                "Power Outlets, Outlet, Outlets");
+                "Power Outlets, Outlet, Outlets, Smart Plug, Smart Plugs");
         public static final SemanticTag POWER_SUPPLY = new SemanticTagImpl( //
                 "Equipment_PowerSupply", //
                 "Power Supply", //
@@ -1238,7 +1238,7 @@ public class DefaultSemanticTags {
                 "Equipment_WhiteGood_Cooktop", //
                 "Cooktop", //
                 "", //
-                "");
+                "Hob");
         public static final SemanticTag DISHWASHER = new SemanticTagImpl( //
                 "Equipment_WhiteGood_Dishwasher", //
                 "Dishwasher", //
@@ -1248,7 +1248,7 @@ public class DefaultSemanticTags {
                 "Equipment_WhiteGood_Dryer", //
                 "Dryer", //
                 "", //
-                "Dryers");
+                "Dryers, Tumble Dryer, Tumble Dryers");
         public static final SemanticTag FOOD_PROCESSOR = new SemanticTagImpl( //
                 "Equipment_WhiteGood_FoodProcessor", //
                 "Food Processor", //
