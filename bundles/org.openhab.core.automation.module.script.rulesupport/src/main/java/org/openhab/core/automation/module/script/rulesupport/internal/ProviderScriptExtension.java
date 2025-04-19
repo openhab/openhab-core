@@ -23,8 +23,11 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.module.script.ScriptExtensionProvider;
 import org.openhab.core.automation.module.script.rulesupport.shared.ProviderItemRegistryDelegate;
+import org.openhab.core.automation.module.script.rulesupport.shared.ProviderThingRegistryDelegate;
 import org.openhab.core.automation.module.script.rulesupport.shared.ScriptedItemProvider;
+import org.openhab.core.automation.module.script.rulesupport.shared.ScriptedThingProvider;
 import org.openhab.core.items.ItemRegistry;
+import org.openhab.core.thing.ThingRegistry;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -38,19 +41,25 @@ import org.osgi.service.component.annotations.Reference;
 @Component(immediate = true)
 @NonNullByDefault
 public class ProviderScriptExtension implements ScriptExtensionProvider {
-    static final String PRESET_NAME = "provider";
-    static final String ITEM_REGISTRY_NAME = "itemRegistry";
+    private static final String PRESET_NAME = "provider";
+    private static final String ITEM_REGISTRY_NAME = "itemRegistry";
+    private static final String THING_REGISTRY_NAME = "thingRegistry";
 
     private final Map<String, Map<String, Object>> objectCache = new ConcurrentHashMap<>();
 
     private final ItemRegistry itemRegistry;
     private final ScriptedItemProvider itemProvider;
+    private final ThingRegistry thingRegistry;
+    private final ScriptedThingProvider thingProvider;
 
     @Activate
     public ProviderScriptExtension(final @Reference ItemRegistry itemRegistry,
-            final @Reference ScriptedItemProvider itemProvider) {
+            final @Reference ScriptedItemProvider itemProvider, final @Reference ThingRegistry thingRegistry,
+            final @Reference ScriptedThingProvider thingProvider) {
         this.itemRegistry = itemRegistry;
         this.itemProvider = itemProvider;
+        this.thingRegistry = thingRegistry;
+        this.thingProvider = thingProvider;
     }
 
     @Override
@@ -65,7 +74,7 @@ public class ProviderScriptExtension implements ScriptExtensionProvider {
 
     @Override
     public Collection<String> getTypes() {
-        return Set.of(ITEM_REGISTRY_NAME);
+        return Set.of(ITEM_REGISTRY_NAME, THING_REGISTRY_NAME);
     }
 
     @Override
@@ -78,20 +87,28 @@ public class ProviderScriptExtension implements ScriptExtensionProvider {
             return obj;
         }
 
-        if (ITEM_REGISTRY_NAME.equals(type)) {
-            ProviderItemRegistryDelegate itemRegistryDelegate = new ProviderItemRegistryDelegate(itemRegistry,
-                    itemProvider);
-            objects.put(ITEM_REGISTRY_NAME, itemRegistryDelegate);
-            return itemRegistryDelegate;
-        }
-
-        return obj;
+        return switch (type) {
+            case ITEM_REGISTRY_NAME -> {
+                ProviderItemRegistryDelegate itemRegistryDelegate = new ProviderItemRegistryDelegate(itemRegistry,
+                        itemProvider);
+                objects.put(ITEM_REGISTRY_NAME, itemRegistryDelegate);
+                yield itemRegistryDelegate;
+            }
+            case THING_REGISTRY_NAME -> {
+                ProviderThingRegistryDelegate thingRegistryDelegate = new ProviderThingRegistryDelegate(thingRegistry,
+                        thingProvider);
+                objects.put(THING_REGISTRY_NAME, thingRegistryDelegate);
+                yield thingRegistryDelegate;
+            }
+            default -> null;
+        };
     }
 
     @Override
     public Map<String, Object> importPreset(String scriptIdentifier, String preset) {
         if (PRESET_NAME.equals(preset)) {
-            return Map.of(ITEM_REGISTRY_NAME, Objects.requireNonNull(get(scriptIdentifier, ITEM_REGISTRY_NAME)));
+            return Map.of(ITEM_REGISTRY_NAME, Objects.requireNonNull(get(scriptIdentifier, ITEM_REGISTRY_NAME)),
+                    THING_REGISTRY_NAME, Objects.requireNonNull(get(scriptIdentifier, THING_REGISTRY_NAME)));
         }
 
         return Map.of();
@@ -105,6 +122,11 @@ public class ProviderScriptExtension implements ScriptExtensionProvider {
             if (itemRegistry != null) {
                 ProviderItemRegistryDelegate itemRegistryDelegate = (ProviderItemRegistryDelegate) itemRegistry;
                 itemRegistryDelegate.removeAllAddedByScript();
+            }
+            Object thingRegistry = objects.get(THING_REGISTRY_NAME);
+            if (thingRegistry != null) {
+                ProviderThingRegistryDelegate thingRegistryDelegate = (ProviderThingRegistryDelegate) thingRegistry;
+                thingRegistryDelegate.removeAllAddedByScript();
             }
         }
     }
