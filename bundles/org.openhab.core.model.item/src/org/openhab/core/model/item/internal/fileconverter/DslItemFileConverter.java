@@ -185,6 +185,10 @@ public class DslItemFileConverter extends AbstractItemFileGenerator {
             if (!(statePattern != null && binding.getProperties().size() == 1
                     && (patternInjected || statePattern.equals(defaultPattern)))) {
                 model.getBindings().add(binding);
+                // Avoid injecting the state pattern in label if already present in stateDescription metadata
+                if (patternInjected && statePattern != null) {
+                    model.setLabel(label);
+                }
             }
         }
 
