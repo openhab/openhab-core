@@ -13,6 +13,8 @@
 package org.openhab.core.io.websocket.log;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -265,8 +267,18 @@ public class LogWebSocket implements LogListener {
     }
 
     private LogDTO map(LogEntry logEntry) {
+        String stackTrace;
+        if (logEntry.getException() != null) {
+            StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw);
+            logEntry.getException().printStackTrace(pw);
+            stackTrace = sw.toString();
+        } else {
+            stackTrace = "";
+        }
+
         return new LogDTO(logEntry.getSequence(), logEntry.getLoggerName(), logEntry.getLogLevel(), logEntry.getTime(),
-                logEntry.getMessage());
+                logEntry.getMessage(), stackTrace);
     }
 
     private void stopDeferredScheduledFuture() {
