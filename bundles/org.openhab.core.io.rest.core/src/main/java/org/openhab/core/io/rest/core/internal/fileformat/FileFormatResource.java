@@ -376,12 +376,12 @@ public class FileFormatResource implements RESTResource {
     private List<Item> sortItems(Collection<Item> items) {
         List<Item> groups = items.stream().filter(item -> item instanceof GroupItem).sorted((item1, item2) -> {
             return item1.getName().compareTo(item2.getName());
-        }).collect(Collectors.toList());
+        }).toList();
 
         List<Item> topGroups = groups.stream().filter(group -> group.getGroupNames().isEmpty())
                 .sorted((group1, group2) -> {
                     return group1.getName().compareTo(group2.getName());
-                }).collect(Collectors.toList());
+                }).toList();
 
         List<Item> groupTree = new ArrayList<>();
         for (Item group : topGroups) {
@@ -409,9 +409,9 @@ public class FileFormatResource implements RESTResource {
                 return thingUID1.compareTo(thingUID2);
             }
             return item1.getName().compareTo(item2.getName());
-        }).collect(Collectors.toList());
+        }).toList();
 
-        return Stream.of(groupTree, nonGroups).flatMap(List::stream).collect(Collectors.toList());
+        return Stream.of(groupTree, nonGroups).flatMap(List::stream).toList();
     }
 
     private void fillGroupTree(List<Item> groups, Item item) {
@@ -419,7 +419,7 @@ public class FileFormatResource implements RESTResource {
             groups.add(group);
             List<Item> members = group.getMembers().stream().sorted((member1, member2) -> {
                 return member1.getName().compareTo(member2.getName());
-            }).collect(Collectors.toList());
+            }).toList();
             for (Item member : members) {
                 fillGroupTree(groups, member);
             }
@@ -435,12 +435,12 @@ public class FileFormatResource implements RESTResource {
     private List<Thing> sortThings(Collection<Thing> things) {
         List<Thing> thingTree = new ArrayList<>();
         Set<String> bindings = things.stream().map(thing -> thing.getUID().getBindingId()).collect(Collectors.toSet());
-        for (String binding : bindings.stream().sorted().collect(Collectors.toList())) {
+        for (String binding : bindings.stream().sorted().toList()) {
             List<Thing> topThings = things.stream()
                     .filter(thing -> thing.getUID().getBindingId().equals(binding) && thing.getBridgeUID() == null)
                     .sorted((thing1, thing2) -> {
                         return thing1.getUID().getAsString().compareTo(thing2.getUID().getAsString());
-                    }).collect(Collectors.toList());
+                    }).toList();
             for (Thing thing : topThings) {
                 fillThingTree(thingTree, thing);
             }
@@ -454,7 +454,7 @@ public class FileFormatResource implements RESTResource {
             if (thing instanceof Bridge bridge) {
                 List<Thing> subThings = bridge.getThings().stream().sorted((thing1, thing2) -> {
                     return thing1.getUID().getAsString().compareTo(thing2.getUID().getAsString());
-                }).collect(Collectors.toList());
+                }).toList();
                 for (Thing subThing : subThings) {
                     fillThingTree(things, subThing);
                 }
