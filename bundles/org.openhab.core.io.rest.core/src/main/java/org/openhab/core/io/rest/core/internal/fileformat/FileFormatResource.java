@@ -114,7 +114,7 @@ public class FileFormatResource implements RESTResource {
     public static final String PATH_FILE_FORMAT = "file-format";
 
     private static final String DSL_THINGS_EXAMPLE = """
-            Bridge binding:typeBridge:idBridge "Label brigde" @ "Location bridge" [stringParam="my value"] {
+            Bridge binding:typeBridge:idBridge "Label bridge" @ "Location bridge" [stringParam="my value"] {
                 Thing type id "Label thing" @ "Location thing" [booleanParam=true, decimalParam=2.5]
             }
             """;
