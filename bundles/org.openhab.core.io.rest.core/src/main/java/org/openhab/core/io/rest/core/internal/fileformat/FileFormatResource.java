@@ -389,7 +389,7 @@ public class FileFormatResource implements RESTResource {
         }
 
         if (groupTree.size() != groups.size()) {
-            logger.warn("Something want wrong when sorting groups; failback to a sort by name.");
+            logger.warn("Something went wrong when sorting groups; failback to a sort by name.");
             groupTree = groups;
         }
 
