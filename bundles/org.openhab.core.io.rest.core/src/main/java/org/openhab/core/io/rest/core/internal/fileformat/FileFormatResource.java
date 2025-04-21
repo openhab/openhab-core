@@ -12,6 +12,8 @@
  */
 package org.openhab.core.io.rest.core.internal.fileformat;
 
+import static org.openhab.core.config.discovery.inbox.InboxPredicates.forThingUID;
+
 import java.io.ByteArrayOutputStream;
 import java.net.URI;
 import java.util.ArrayList;
@@ -59,6 +61,7 @@ import org.openhab.core.items.fileconverter.ItemFileGenerator;
 import org.openhab.core.thing.Bridge;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingRegistry;
+import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
 import org.openhab.core.thing.binding.ThingFactory;
 import org.openhab.core.thing.fileconverter.ThingFileGenerator;
@@ -501,7 +504,6 @@ public class FileFormatResource implements RESTResource {
     }
 
     private List<Thing> getThings(List<String> thingUIDs) {
-        List<DiscoveryResult> allInbox = inbox.getAll();
         return thingUIDs.stream().distinct().map(uid -> {
             ThingUID thingUID = new ThingUID(uid);
             Thing thing = thingRegistry.get(thingUID);
@@ -509,19 +511,16 @@ public class FileFormatResource implements RESTResource {
                 return thing;
             }
 
-            int index = allInbox.indexOf(thingUID);
-            if (index == -1) {
-                throw new IllegalArgumentException(
-                        "Thing with UID '" + uid + "' not found in the things or discovery registry!");
-            }
+            DiscoveryResult discoveryResult = inbox.stream().filter(forThingUID(thingUID)).findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException(
+                            "Thing with UID '" + uid + "' not found in the things or discovery registry!"));
 
-            DiscoveryResult result = allInbox.get(index);
-            ThingType thingType = thingTypeRegistry.getThingType(result.getThingTypeUID());
+            ThingTypeUID thingTypeUID = discoveryResult.getThingTypeUID();
+            ThingType thingType = thingTypeRegistry.getThingType(thingTypeUID);
             if (thingType == null) {
-                throw new IllegalArgumentException(
-                        "Thing type with UID '" + result.getThingTypeUID() + "' does not exist!");
+                throw new IllegalArgumentException("Thing type with UID '" + thingTypeUID + "' does not exist!");
             }
-            return simulateThing(result, thingType);
+            return simulateThing(discoveryResult, thingType);
         }).toList();
     }
 }
