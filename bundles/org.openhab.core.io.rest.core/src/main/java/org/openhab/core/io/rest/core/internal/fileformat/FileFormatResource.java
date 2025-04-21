@@ -281,7 +281,7 @@ public class FileFormatResource implements RESTResource {
             items.add(item);
         }
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        generator.generateFileFormat(outputStream, items, getMetadata(items), hideDefaultParameters);
+        generator.generateFileFormat(outputStream, sortItems(items), getMetadata(items), hideDefaultParameters);
         return Response.ok(new String(outputStream.toByteArray())).build();
     }
 
