@@ -29,7 +29,6 @@ import java.util.stream.Stream;
 import javax.annotation.security.RolesAllowed;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -220,30 +219,6 @@ public class FileFormatResource implements RESTResource {
         thingFileGenerators.remove(thingFileGenerator.getFileFormatGenerator());
     }
 
-    @GET
-    @RolesAllowed({ Role.ADMIN })
-    @Path("/items")
-    @Produces("text/vnd.openhab.dsl.item")
-    @Operation(operationId = "createFileFormatForAllItems", summary = "Create file format for all existing items in registry.", security = {
-            @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
-                    @ApiResponse(responseCode = "200", description = "OK", content = {
-                            @Content(mediaType = "text/vnd.openhab.dsl.item", schema = @Schema(example = DSL_ITEMS_EXAMPLE)),
-                            @Content(mediaType = "application/yaml", schema = @Schema(example = YAML_ITEMS_EXAMPLE)) }),
-                    @ApiResponse(responseCode = "415", description = "Unsupported media type.") })
-    public Response createFileFormatForAllItems(final @Context HttpHeaders httpHeaders,
-            @DefaultValue("true") @QueryParam("hideDefaultParameters") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters) {
-        String acceptHeader = httpHeaders.getHeaderString(HttpHeaders.ACCEPT);
-        ItemFileGenerator generator = getItemFileGenerator(acceptHeader);
-        if (generator == null) {
-            return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE)
-                    .entity("Unsupported media type '" + acceptHeader + "'!").build();
-        }
-        Collection<Item> items = itemRegistry.getAll();
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        generator.generateFileFormat(outputStream, sortItems(items), getMetadata(items), hideDefaultParameters);
-        return Response.ok(new String(outputStream.toByteArray())).build();
-    }
-
     @POST
     @RolesAllowed({ Role.ADMIN })
     @Path("/items")
@@ -254,57 +229,34 @@ public class FileFormatResource implements RESTResource {
                     @ApiResponse(responseCode = "200", description = "OK", content = {
                             @Content(mediaType = "text/vnd.openhab.dsl.item", schema = @Schema(example = DSL_ITEMS_EXAMPLE)),
                             @Content(mediaType = "application/yaml", schema = @Schema(example = YAML_ITEMS_EXAMPLE)) }),
-                    @ApiResponse(responseCode = "400", description = "No item names provided."),
                     @ApiResponse(responseCode = "404", description = "One or more things not found in registry."),
                     @ApiResponse(responseCode = "415", description = "Unsupported media type.") })
     public Response createFileFormatForItems(final @Context HttpHeaders httpHeaders,
             @DefaultValue("true") @QueryParam("hideDefaultParameters") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters,
-            @Parameter(description = "Array of item names") List<String> itemNames) {
+            @Parameter(description = "Array of item names. If empty or omitted, return all Items.") @Nullable List<String> itemNames) {
         String acceptHeader = httpHeaders.getHeaderString(HttpHeaders.ACCEPT);
-        logger.debug("createFileFormatForItems: mediaType = {}, itemNames({}) = {}", acceptHeader, itemNames.size(),
-                itemNames);
-        if (itemNames.isEmpty()) {
-            return Response.status(Response.Status.BAD_REQUEST).entity("No item names provided!").build();
-        }
+        logger.debug("createFileFormatForItems: mediaType = {}, itemNames = {}", acceptHeader, itemNames);
         ItemFileGenerator generator = getItemFileGenerator(acceptHeader);
         if (generator == null) {
             return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE)
                     .entity("Unsupported media type '" + acceptHeader + "'!").build();
         }
-        List<Item> items = new ArrayList<>();
-        for (String itemname : itemNames) {
-            Item item = itemRegistry.get(itemname);
-            if (item == null) {
-                return Response.status(Response.Status.NOT_FOUND)
-                        .entity("Item with name '" + itemname + "' not found in the items registry!").build();
+        Collection<Item> items = null;
+        if (itemNames == null || itemNames.isEmpty()) {
+            items = itemRegistry.getAll();
+        } else {
+            items = new ArrayList<>();
+            for (String itemname : itemNames) {
+                Item item = itemRegistry.get(itemname);
+                if (item == null) {
+                    return Response.status(Response.Status.NOT_FOUND)
+                            .entity("Item with name '" + itemname + "' not found in the items registry!").build();
+                }
+                items.add(item);
             }
-            items.add(item);
         }
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         generator.generateFileFormat(outputStream, sortItems(items), getMetadata(items), hideDefaultParameters);
-        return Response.ok(new String(outputStream.toByteArray())).build();
-    }
-
-    @GET
-    @RolesAllowed({ Role.ADMIN })
-    @Path("/things")
-    @Produces({ "text/vnd.openhab.dsl.thing", "application/yaml" })
-    @Operation(operationId = "createFileFormatForAllThings", summary = "Create file format for all existing things in registry.", security = {
-            @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
-                    @ApiResponse(responseCode = "200", description = "OK", content = {
-                            @Content(mediaType = "text/vnd.openhab.dsl.thing", schema = @Schema(example = DSL_THINGS_EXAMPLE)),
-                            @Content(mediaType = "application/yaml", schema = @Schema(example = YAML_THINGS_EXAMPLE)) }),
-                    @ApiResponse(responseCode = "415", description = "Unsupported media type.") })
-    public Response createFileFormatForAllThings(final @Context HttpHeaders httpHeaders,
-            @DefaultValue("true") @QueryParam("hideDefaultParameters") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters) {
-        String acceptHeader = httpHeaders.getHeaderString(HttpHeaders.ACCEPT);
-        ThingFileGenerator generator = getThingFileGenerator(acceptHeader);
-        if (generator == null) {
-            return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE)
-                    .entity("Unsupported media type '" + acceptHeader + "'!").build();
-        }
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        generator.generateFileFormat(outputStream, sortThings(thingRegistry.getAll()), hideDefaultParameters);
         return Response.ok(new String(outputStream.toByteArray())).build();
     }
 
@@ -318,31 +270,31 @@ public class FileFormatResource implements RESTResource {
                     @ApiResponse(responseCode = "200", description = "OK", content = {
                             @Content(mediaType = "text/vnd.openhab.dsl.thing", schema = @Schema(example = DSL_THINGS_EXAMPLE)),
                             @Content(mediaType = "application/yaml", schema = @Schema(example = YAML_THINGS_EXAMPLE)) }),
-                    @ApiResponse(responseCode = "400", description = "No ThingUIDs provided."),
                     @ApiResponse(responseCode = "404", description = "One or more things not found in registry."),
                     @ApiResponse(responseCode = "415", description = "Unsupported media type.") })
     public Response createFileFormatForThings(final @Context HttpHeaders httpHeaders,
             @DefaultValue("true") @QueryParam("hideDefaultParameters") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters,
-            @Parameter(description = "Array of Thing UIDs") List<String> thingUIDs) {
+            @Parameter(description = "Array of Thing UIDs. If empty or omitted, return all Things from the Registry.") @Nullable List<String> thingUIDs) {
         String acceptHeader = httpHeaders.getHeaderString(HttpHeaders.ACCEPT);
-        logger.debug("createFileFormatForThings: mediaType = {}, thingUIDs({}) = {}", acceptHeader, thingUIDs.size(),
-                thingUIDs);
-        if (thingUIDs.isEmpty()) {
-            return Response.status(Response.Status.BAD_REQUEST).entity("No ThingUIDs provided!").build();
-        }
+        logger.debug("createFileFormatForThings: mediaType = {}, thingUIDs = {}", acceptHeader, thingUIDs);
         ThingFileGenerator generator = getThingFileGenerator(acceptHeader);
         if (generator == null) {
             return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE)
                     .entity("Unsupported media type '" + acceptHeader + "'!").build();
         }
-        try {
-            List<Thing> things = getThings(thingUIDs);
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            generator.generateFileFormat(outputStream, sortThings(things), hideDefaultParameters);
-            return Response.ok(new String(outputStream.toByteArray())).build();
-        } catch (IllegalArgumentException e) {
-            return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
+        Collection<Thing> things = null;
+        if (thingUIDs == null || thingUIDs.isEmpty()) {
+            things = thingRegistry.getAll();
+        } else {
+            try {
+                things = getThings(thingUIDs);
+            } catch (IllegalArgumentException e) {
+                return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
+            }
         }
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        generator.generateFileFormat(outputStream, sortThings(things), hideDefaultParameters);
+        return Response.ok(new String(outputStream.toByteArray())).build();
     }
 
     /*
