@@ -258,7 +258,7 @@ public class FileFormatResource implements RESTResource {
                     @ApiResponse(responseCode = "404", description = "One or more things not found in registry."),
                     @ApiResponse(responseCode = "415", description = "Unsupported media type.") })
     public Response createFileFormatForItems(final @Context HttpHeaders httpHeaders,
-            @QueryParam("hideDefaultParameters") @DefaultValue("true") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters,
+            @DefaultValue("true") @QueryParam("hideDefaultParameters") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters,
             @Parameter(description = "Array of item names") List<String> itemNames) {
         String acceptHeader = httpHeaders.getHeaderString(HttpHeaders.ACCEPT);
         logger.debug("createFileFormatForItems: mediaType = {}, itemNames({}) = {}", acceptHeader, itemNames.size(),
@@ -322,7 +322,7 @@ public class FileFormatResource implements RESTResource {
                     @ApiResponse(responseCode = "404", description = "One or more things not found in registry."),
                     @ApiResponse(responseCode = "415", description = "Unsupported media type.") })
     public Response createFileFormatForThings(final @Context HttpHeaders httpHeaders,
-            @QueryParam("hideDefaultParameters") @DefaultValue("true") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters,
+            @DefaultValue("true") @QueryParam("hideDefaultParameters") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters,
             @Parameter(description = "Array of Thing UIDs") List<String> thingUIDs) {
         String acceptHeader = httpHeaders.getHeaderString(HttpHeaders.ACCEPT);
         logger.debug("createFileFormatForThings: mediaType = {}, thingUIDs({}) = {}", acceptHeader, thingUIDs.size(),
