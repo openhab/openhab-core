@@ -338,7 +338,7 @@ public class FileFormatResource implements RESTResource {
         try {
             List<Thing> things = getThings(thingUIDs);
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            generator.generateFileFormat(outputStream, things, hideDefaultParameters);
+            generator.generateFileFormat(outputStream, sortThings(things), hideDefaultParameters);
             return Response.ok(new String(outputStream.toByteArray())).build();
         } catch (IllegalArgumentException e) {
             return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
