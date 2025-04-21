@@ -287,7 +287,7 @@ public class FileFormatResource implements RESTResource {
             things = thingRegistry.getAll();
         } else {
             try {
-                things = getThings(thingUIDs);
+                things = getThingsOrDiscoveryResult(thingUIDs);
             } catch (IllegalArgumentException e) {
                 return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
             }
@@ -455,7 +455,7 @@ public class FileFormatResource implements RESTResource {
         };
     }
 
-    private List<Thing> getThings(List<String> thingUIDs) {
+    private List<Thing> getThingsOrDiscoveryResult(List<String> thingUIDs) {
         return thingUIDs.stream().distinct().map(uid -> {
             ThingUID thingUID = new ThingUID(uid);
             Thing thing = thingRegistry.get(thingUID);
