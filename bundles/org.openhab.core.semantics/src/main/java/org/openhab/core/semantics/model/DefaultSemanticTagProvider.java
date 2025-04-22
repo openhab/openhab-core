@@ -151,7 +151,6 @@ public class DefaultSemanticTagProvider implements SemanticTagProvider {
         defaultTags.add(DefaultSemanticTags.Equipment.RECEIVER);
         defaultTags.add(DefaultSemanticTags.Equipment.SCREEN);
         defaultTags.add(DefaultSemanticTags.Equipment.SPEAKER);
-        defaultTags.add(DefaultSemanticTags.Equipment.BATTERY);
         defaultTags.add(DefaultSemanticTags.Equipment.BED);
         defaultTags.add(DefaultSemanticTags.Equipment.CAMERA);
         defaultTags.add(DefaultSemanticTags.Equipment.CLEANING_ROBOT);
@@ -223,6 +222,7 @@ public class DefaultSemanticTagProvider implements SemanticTagProvider {
         defaultTags.add(DefaultSemanticTags.Equipment.PET_FLAP);
         defaultTags.add(DefaultSemanticTags.Equipment.POWER_OUTLET);
         defaultTags.add(DefaultSemanticTags.Equipment.POWER_SUPPLY);
+        defaultTags.add(DefaultSemanticTags.Equipment.BATTERY);
         defaultTags.add(DefaultSemanticTags.Equipment.EVSE);
         defaultTags.add(DefaultSemanticTags.Equipment.GENERATOR);
         defaultTags.add(DefaultSemanticTags.Equipment.INVERTER);
@@ -296,6 +296,8 @@ public class DefaultSemanticTagProvider implements SemanticTagProvider {
         defaultTags.add(DefaultSemanticTags.Equipment.WINDOW_COVERING);
         defaultTags.add(DefaultSemanticTags.Equipment.BLINDS);
         defaultTags.add(DefaultSemanticTags.Equipment.DRAPES);
+        defaultTags.add(DefaultSemanticTags.Equipment.ZONE);
+        defaultTags.add(DefaultSemanticTags.Equipment.ALARM_ZONE);
     }
 
     @Override

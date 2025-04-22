@@ -599,11 +599,6 @@ public class DefaultSemanticTags {
                 "Speaker", //
                 "", //
                 "Speakers");
-        public static final SemanticTag BATTERY = new SemanticTagImpl( //
-                "Equipment_Battery", //
-                "Battery", //
-                "", //
-                "Batteries");
         public static final SemanticTag BED = new SemanticTagImpl( //
                 "Equipment_Bed", //
                 "Bed", //
@@ -959,6 +954,11 @@ public class DefaultSemanticTags {
                 "Power Supply", //
                 "", //
                 "");
+        public static final SemanticTag BATTERY = new SemanticTagImpl( //
+                "Equipment_PowerSupply_Battery", //
+                "Battery", //
+                "", //
+                "Batteries");
         public static final SemanticTag EVSE = new SemanticTagImpl( //
                 "Equipment_PowerSupply_EVSE", //
                 "Electric Vehicle Supply Equipment", //
@@ -1324,5 +1324,15 @@ public class DefaultSemanticTags {
                 "Drapes", //
                 "", //
                 "Curtains");
+        public static final SemanticTag ZONE = new SemanticTagImpl( //
+                "Equipment_Zone", //
+                "Zone", //
+                "", //
+                "");
+        public static final SemanticTag ALARM_ZONE = new SemanticTagImpl( //
+                "Equipment_Zone_AlarmZone", //
+                "Alarm Zone", //
+                "", //
+                "");
     }
 }
