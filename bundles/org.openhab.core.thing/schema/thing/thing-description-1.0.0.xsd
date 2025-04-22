@@ -360,6 +360,7 @@
 			<xs:enumeration value="AirQualitySensor"/>
 			<xs:enumeration value="AlarmDevice"/>
 			<xs:enumeration value="AlarmSystem"/>
+			<xs:enumeration value="AlarmZone"/>
 			<xs:enumeration value="Aquarium"/>
 			<xs:enumeration value="AudioVisual"/>
 			<xs:enumeration value="BackDoor"/>
@@ -508,6 +509,7 @@
 			<xs:enumeration value="Window"/>
 			<xs:enumeration value="WindowCovering"/>
 			<xs:enumeration value="WirelessAccessPoint"/>
+			<xs:enumeration value="Zone"/>
 			<!-- End Allowed Semantic Equipment Tag Values -->
 		</xs:restriction>
 	</xs:simpleType>
