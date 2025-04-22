@@ -112,7 +112,7 @@ public class SemanticsTest {
         indoorTagClass = semanticTagRegistryImpl.getTagClassById("Location_Indoor");
         bathroomTagClass = semanticTagRegistryImpl.getTagClassById("Location_Indoor_Room_Bathroom");
         cleaningRobotTagClass = semanticTagRegistryImpl.getTagClassById("Equipment_CleaningRobot");
-        batteryTagClass = semanticTagRegistryImpl.getTagClassById("Equipment_Battery");
+        batteryTagClass = semanticTagRegistryImpl.getTagClassById("Equipment_PowerSupply_Battery");
 
         when(itemRegistryMock.getItem("TestHouse")).thenReturn(indoorLocationItem);
         when(itemRegistryMock.getItem("TestBathRoom")).thenReturn(bathroomLocationItem);
