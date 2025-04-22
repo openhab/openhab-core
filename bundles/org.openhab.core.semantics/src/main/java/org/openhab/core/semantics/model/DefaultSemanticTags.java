@@ -411,6 +411,11 @@ public class DefaultSemanticTags {
                 "Motion", //
                 "", //
                 "");
+        public static final SemanticTag MUTE_STATE = new SemanticTagImpl( //
+                "Property_MuteState", //
+                "Mute State", //
+                "", //
+                "");
         public static final SemanticTag NOISE = new SemanticTagImpl( //
                 "Property_Noise", //
                 "Noise", //
