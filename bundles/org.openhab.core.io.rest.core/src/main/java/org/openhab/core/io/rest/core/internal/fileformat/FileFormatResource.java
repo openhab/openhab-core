@@ -142,7 +142,6 @@ public class FileFormatResource implements RESTResource {
             Switch MyItem "Label" <icon> (Group1, Group2) [Tag1, Tag2] { channel="binding:type:id:channelid", namespace="my value" [param="my param value"] }
             """;
 
-    // TODO: format to be confirmed
     private static final String YAML_ITEMS_EXAMPLE = """
             version: 2
             items:
@@ -150,12 +149,18 @@ public class FileFormatResource implements RESTResource {
                 type: Group
                 label: Label
               Group2:
-                type: Group:Switch:OR(ON,OFF)
+                type: Group
+                group:
+                  type: Switch
+                  function: Or
+                  parameters:
+                    - "ON"
+                    - "OFF"
                 label: Label
               MyItem:
                 type: Switch
                 label: Label
-                icon: icon
+                category: icon
                 groups:
                   - Group1
                   - Group2
@@ -163,8 +168,11 @@ public class FileFormatResource implements RESTResource {
                   - Tag1
                   - Tag2
                 channel: binding:type:id:channelid
-                namespace:
-                  param: my param value
+                metadata:
+                  namespace:
+                    value: my value
+                    config:
+                      param: my param value
             """;
 
     private final Logger logger = LoggerFactory.getLogger(FileFormatResource.class);
