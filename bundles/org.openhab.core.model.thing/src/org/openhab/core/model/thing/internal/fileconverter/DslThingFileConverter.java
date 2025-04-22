@@ -101,7 +101,8 @@ public class DslThingFileConverter extends AbstractThingFileGenerator {
             boolean topLevel, List<Thing> onlyThings, Set<Thing> handledThings) {
         ModelThing model;
         ModelBridge modelBridge;
-        if (preferPresentationAsTree && thing instanceof Bridge bridge && !bridge.getThings().isEmpty()) {
+        List<Thing> childThings = getChildThings(thing, onlyThings);
+        if (preferPresentationAsTree && thing instanceof Bridge && !childThings.isEmpty()) {
             modelBridge = ThingFactory.eINSTANCE.createModelBridge();
             modelBridge.setBridge(true);
             model = modelBridge;
@@ -135,8 +136,8 @@ public class DslThingFileConverter extends AbstractThingFileGenerator {
 
         if (preferPresentationAsTree && modelBridge != null) {
             modelBridge.setThingsHeader(false);
-            for (Thing child : getChildThings(thing)) {
-                if (onlyThings.contains(child) && !handledThings.contains(child)) {
+            for (Thing child : childThings) {
+                if (!handledThings.contains(child)) {
                     modelBridge.getThings()
                             .add(buildModelThing(child, hideDefaultParameters, true, false, onlyThings, handledThings));
                 }
