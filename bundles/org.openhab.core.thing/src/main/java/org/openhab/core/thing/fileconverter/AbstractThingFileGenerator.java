@@ -63,16 +63,18 @@ public abstract class AbstractThingFileGenerator implements ThingFileGenerator {
     }
 
     /**
-     * Get the child things of a bridge thing, ordered by UID.
+     * Get the child things of a bridge thing amongst a list of things, ordered by UID.
      *
      * @param thing the thing
+     * @param fromThings the list of things to look for
      * @return the sorted list of child things or an empty list if the thing is not a bridge thing
      */
-    protected List<Thing> getChildThings(Thing thing) {
+    protected List<Thing> getChildThings(Thing thing, List<Thing> fromThings) {
         if (thing instanceof Bridge bridge) {
-            return bridge.getThings().stream().sorted((thing1, thing2) -> {
-                return thing1.getUID().getAsString().compareTo(thing2.getUID().getAsString());
-            }).collect(Collectors.toList());
+            return fromThings.stream().filter(th -> bridge.getUID().equals(th.getBridgeUID()))
+                    .sorted((thing1, thing2) -> {
+                        return thing1.getUID().getAsString().compareTo(thing2.getUID().getAsString());
+                    }).collect(Collectors.toList());
         }
         return List.of();
     }
