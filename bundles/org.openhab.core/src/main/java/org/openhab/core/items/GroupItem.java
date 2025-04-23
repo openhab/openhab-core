@@ -141,7 +141,8 @@ public class GroupItem extends GenericItem implements StateChangeListener, Metad
      * @return all members of this and all contained {@link GroupItem}s
      */
     public Set<Item> getAllStateMembers() {
-        return Collections.unmodifiableSet(new LinkedHashSet<>(getStateMembers(getMembers())));
+        return Collections.unmodifiableSet(
+                new LinkedHashSet<>(getMembers((Item i) -> !(i instanceof GroupItem) || hasOwnState((GroupItem) i))));
     }
 
     private void collectMembers(Collection<Item> allMembers, Collection<Item> members) {
