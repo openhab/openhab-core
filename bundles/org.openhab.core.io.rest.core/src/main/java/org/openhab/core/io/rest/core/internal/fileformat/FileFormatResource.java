@@ -27,17 +27,19 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.annotation.security.RolesAllowed;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
-import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.auth.Role;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
@@ -58,6 +60,7 @@ import org.openhab.core.items.fileconverter.ItemFileGenerator;
 import org.openhab.core.thing.Bridge;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingRegistry;
+import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
 import org.openhab.core.thing.binding.ThingFactory;
 import org.openhab.core.thing.fileconverter.ThingFileGenerator;
@@ -109,14 +112,68 @@ public class FileFormatResource implements RESTResource {
     /** The URI path to this resource */
     public static final String PATH_FILE_FORMAT = "file-format";
 
-    private static final String DSL_THINGS_EXAMPLE = "Bridge binding:typeBridge:idBridge \"Label brigde\" @ \"Location bridge\" [stringParam=\"my value\"] {" //
-            + "\n    Thing type id \"Label thing\" @ \"Location thing\" [booleanParam=true, decimalParam=2.5]\n}";
-    private static final String DSL_THING_EXAMPLE = "Thing binding:type:idBridge:id \"Label thing\" @ \"Location thing\" (binding:typeBridge:idBridge) [stringParam=\"my value\", booleanParam=true, decimalParam=2.5]";
-    private static final String YAML_THINGS_EXAMPLE = "version: 2\nthings:\n" //
-            + "  binding:typeBridge:idBridge:\n    isBridge: true\n    label: Label bridge\n    location: Location bridge\n    config:\n      stringParam: my value\n"
-            + "  binding:type:idBridge:id:\n    bridge: binding:typeBridge:idBridge\n    label: Label thing\n    location: Location thing\n    config:\n      booleanParam: true\n      decimalParam: 2.5";
-    private static final String YAML_THING_EXAMPLE = "version: 2\nthings:\n" //
-            + "  binding:type:idBridge:id:\n    bridge: binding:typeBridge:idBridge\n    label: Label thing\n    location: Location thing\n    config:\n      stringParam: my value\n      booleanParam: true\n      decimalParam: 2.5";
+    private static final String DSL_THINGS_EXAMPLE = """
+            Bridge binding:typeBridge:idBridge "Label bridge" @ "Location bridge" [stringParam="my value"] {
+                Thing type id "Label thing" @ "Location thing" [booleanParam=true, decimalParam=2.5]
+            }
+            """;
+
+    private static final String YAML_THINGS_EXAMPLE = """
+            version: 2
+            things:
+              binding:typeBridge:idBridge:
+                isBridge: true
+                label: Label bridge
+                location: Location bridge
+                config:
+                  stringParam: my value
+              binding:type:idBridge:id:
+                bridge: binding:typeBridge:idBridge
+                label: Label thing
+                location: Location thing
+                config:
+                  booleanParam: true
+                  decimalParam: 2.5
+            """;
+
+    private static final String DSL_ITEMS_EXAMPLE = """
+            Group Group1 "Label"
+            Group:Switch:OR(ON,OFF) Group2 "Label"
+            Switch MyItem "Label" <icon> (Group1, Group2) [Tag1, Tag2] { channel="binding:type:id:channelid", namespace="my value" [param="my param value"] }
+            """;
+
+    private static final String YAML_ITEMS_EXAMPLE = """
+            version: 2
+            items:
+              Group1:
+                type: Group
+                label: Label
+              Group2:
+                type: Group
+                group:
+                  type: Switch
+                  function: Or
+                  parameters:
+                    - "ON"
+                    - "OFF"
+                label: Label
+              MyItem:
+                type: Switch
+                label: Label
+                category: icon
+                groups:
+                  - Group1
+                  - Group2
+                tags:
+                  - Tag1
+                  - Tag2
+                channel: binding:type:id:channelid
+                metadata:
+                  namespace:
+                    value: my value
+                    config:
+                      param: my param value
+            """;
 
     private final Logger logger = LoggerFactory.getLogger(FileFormatResource.class);
 
@@ -170,144 +227,81 @@ public class FileFormatResource implements RESTResource {
         thingFileGenerators.remove(thingFileGenerator.getFileFormatGenerator());
     }
 
-    @GET
+    @POST
     @RolesAllowed({ Role.ADMIN })
     @Path("/items")
-    @Produces("text/vnd.openhab.dsl.item")
-    @Operation(operationId = "createFileFormatForAllItems", summary = "Create file format for all existing items in registry.", security = {
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces({ "text/vnd.openhab.dsl.item", "application/yaml" })
+    @Operation(operationId = "createFileFormatForItems", summary = "Create file format for a list of items in registry.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
-                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = "text/vnd.openhab.dsl.item", schema = @Schema(example = "Group Group1 \"Label\"\nGroup:Switch:OR(ON,OFF) Group2 \"Label\"\nSwitch MyItem \"Label\" <icon> (Group1, Group2) [Tag1, Tag2] { channel=\"binding:type:id:channelid\", namespace=\"my value\" [param=\"my param value\"] }"))),
+                    @ApiResponse(responseCode = "200", description = "OK", content = {
+                            @Content(mediaType = "text/vnd.openhab.dsl.item", schema = @Schema(example = DSL_ITEMS_EXAMPLE)),
+                            @Content(mediaType = "application/yaml", schema = @Schema(example = YAML_ITEMS_EXAMPLE)) }),
+                    @ApiResponse(responseCode = "404", description = "One or more items not found in registry."),
                     @ApiResponse(responseCode = "415", description = "Unsupported media type.") })
-    public Response createFileFormatForAllItems(final @Context HttpHeaders httpHeaders,
-            @DefaultValue("true") @QueryParam("hideDefaultParameters") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters) {
+    public Response createFileFormatForItems(final @Context HttpHeaders httpHeaders,
+            @DefaultValue("true") @QueryParam("hideDefaultParameters") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters,
+            @Parameter(description = "Array of item names. If empty or omitted, return all Items.") @Nullable List<String> itemNames) {
         String acceptHeader = httpHeaders.getHeaderString(HttpHeaders.ACCEPT);
-        String format = "text/vnd.openhab.dsl.item".equals(acceptHeader) ? "DSL" : null;
-        ItemFileGenerator generator = format == null ? null : itemFileGenerators.get(format);
+        logger.debug("createFileFormatForItems: mediaType = {}, itemNames = {}", acceptHeader, itemNames);
+        ItemFileGenerator generator = getItemFileGenerator(acceptHeader);
         if (generator == null) {
             return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE)
                     .entity("Unsupported media type '" + acceptHeader + "'!").build();
         }
-        Collection<Item> items = itemRegistry.getAll();
+        Collection<Item> items = null;
+        if (itemNames == null || itemNames.isEmpty()) {
+            items = itemRegistry.getAll();
+        } else {
+            items = new ArrayList<>();
+            for (String itemname : itemNames) {
+                Item item = itemRegistry.get(itemname);
+                if (item == null) {
+                    return Response.status(Response.Status.NOT_FOUND)
+                            .entity("Item with name '" + itemname + "' not found in the items registry!").build();
+                }
+                items.add(item);
+            }
+        }
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         generator.generateFileFormat(outputStream, sortItems(items), getMetadata(items), hideDefaultParameters);
         return Response.ok(new String(outputStream.toByteArray())).build();
     }
 
-    @GET
-    @RolesAllowed({ Role.ADMIN })
-    @Path("/items/{itemname: [a-zA-Z_0-9]+}")
-    @Produces("text/vnd.openhab.dsl.item")
-    @Operation(operationId = "createFileFormatForItem", summary = "Create file format for an existing item in registry.", security = {
-            @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
-                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = "text/vnd.openhab.dsl.item", schema = @Schema(example = "Number MyItem \"Label\" <icon> (Group1, Group2) [Tag1, Tag2] { channel=\"binding:type:id:channelid\", namespace=\"my value\" [param=\"my param value\"] }"))),
-                    @ApiResponse(responseCode = "404", description = "Item not found in registry."),
-                    @ApiResponse(responseCode = "415", description = "Unsupported media type.") })
-    public Response createFileFormatForItem(final @Context HttpHeaders httpHeaders,
-            @DefaultValue("true") @QueryParam("hideDefaultParameters") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters,
-            @PathParam("itemname") @Parameter(description = "item name") String itemname) {
-        String acceptHeader = httpHeaders.getHeaderString(HttpHeaders.ACCEPT);
-        String format = "text/vnd.openhab.dsl.item".equals(acceptHeader) ? "DSL" : null;
-        ItemFileGenerator generator = format == null ? null : itemFileGenerators.get(format);
-        if (generator == null) {
-            return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE)
-                    .entity("Unsupported media type '" + acceptHeader + "'!").build();
-        }
-        Item item = itemRegistry.get(itemname);
-        if (item == null) {
-            return Response.status(Response.Status.NOT_FOUND)
-                    .entity("Item with name '" + itemname + "' not found in the items registry!").build();
-        }
-        List<Item> items = List.of(item);
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        generator.generateFileFormat(outputStream, items, getMetadata(items), hideDefaultParameters);
-        return Response.ok(new String(outputStream.toByteArray())).build();
-    }
-
-    @GET
+    @POST
     @RolesAllowed({ Role.ADMIN })
     @Path("/things")
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces({ "text/vnd.openhab.dsl.thing", "application/yaml" })
-    @Operation(operationId = "createFileFormatForAllThings", summary = "Create file format for all existing things in registry.", security = {
+    @Operation(operationId = "createFileFormatForThings", summary = "Create file format for a list of things in things or discovery registry.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = {
                             @Content(mediaType = "text/vnd.openhab.dsl.thing", schema = @Schema(example = DSL_THINGS_EXAMPLE)),
                             @Content(mediaType = "application/yaml", schema = @Schema(example = YAML_THINGS_EXAMPLE)) }),
+                    @ApiResponse(responseCode = "404", description = "One or more things not found in registry."),
                     @ApiResponse(responseCode = "415", description = "Unsupported media type.") })
-    public Response createFileFormatForAllThings(final @Context HttpHeaders httpHeaders,
-            @DefaultValue("true") @QueryParam("hideDefaultParameters") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters) {
-        String acceptHeader = httpHeaders.getHeaderString(HttpHeaders.ACCEPT);
-        ThingFileGenerator generator;
-        switch (acceptHeader) {
-            case "text/vnd.openhab.dsl.thing":
-                generator = thingFileGenerators.get("DSL");
-                break;
-            case "application/yaml":
-                generator = thingFileGenerators.get("YAML");
-                break;
-            default:
-                generator = null;
-                break;
-        }
-        if (generator == null) {
-            return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE)
-                    .entity("Unsupported media type '" + acceptHeader + "'!").build();
-        }
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        generator.generateFileFormat(outputStream, sortThings(thingRegistry.getAll()), hideDefaultParameters);
-        return Response.ok(new String(outputStream.toByteArray())).build();
-    }
-
-    @GET
-    @RolesAllowed({ Role.ADMIN })
-    @Path("/things/{thingUID}")
-    @Produces({ "text/vnd.openhab.dsl.thing", "application/yaml" })
-    @Operation(operationId = "createFileFormatForThing", summary = "Create file format for an existing thing in things or discovery registry.", security = {
-            @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
-                    @ApiResponse(responseCode = "200", description = "OK", content = {
-                            @Content(mediaType = "text/vnd.openhab.dsl.thing", schema = @Schema(example = DSL_THING_EXAMPLE)),
-                            @Content(mediaType = "application/yaml", schema = @Schema(example = YAML_THING_EXAMPLE)) }),
-                    @ApiResponse(responseCode = "404", description = "Thing not found in things or discovery registry or thing type not found."),
-                    @ApiResponse(responseCode = "415", description = "Unsupported media type.") })
-    public Response createFileFormatForThing(final @Context HttpHeaders httpHeaders,
+    public Response createFileFormatForThings(final @Context HttpHeaders httpHeaders,
             @DefaultValue("true") @QueryParam("hideDefaultParameters") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters,
-            @PathParam("thingUID") @Parameter(description = "thingUID") String thingUID) {
+            @Parameter(description = "Array of Thing UIDs. If empty or omitted, return all Things from the Registry.") @Nullable List<String> thingUIDs) {
         String acceptHeader = httpHeaders.getHeaderString(HttpHeaders.ACCEPT);
-        ThingFileGenerator generator;
-        switch (acceptHeader) {
-            case "text/vnd.openhab.dsl.thing":
-                generator = thingFileGenerators.get("DSL");
-                break;
-            case "application/yaml":
-                generator = thingFileGenerators.get("YAML");
-                break;
-            default:
-                generator = null;
-                break;
-        }
+        logger.debug("createFileFormatForThings: mediaType = {}, thingUIDs = {}", acceptHeader, thingUIDs);
+        ThingFileGenerator generator = getThingFileGenerator(acceptHeader);
         if (generator == null) {
             return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE)
                     .entity("Unsupported media type '" + acceptHeader + "'!").build();
         }
-        ThingUID aThingUID = new ThingUID(thingUID);
-        Thing thing = thingRegistry.get(aThingUID);
-        if (thing == null) {
-            List<DiscoveryResult> results = inbox.getAll().stream().filter(forThingUID(new ThingUID(thingUID)))
-                    .toList();
-            if (results.isEmpty()) {
-                return Response.status(Response.Status.NOT_FOUND)
-                        .entity("Thing with UID '" + thingUID + "' not found in the things or discovery registry!")
-                        .build();
+        Collection<Thing> things = null;
+        if (thingUIDs == null || thingUIDs.isEmpty()) {
+            things = thingRegistry.getAll();
+        } else {
+            try {
+                things = getThingsOrDiscoveryResult(thingUIDs);
+            } catch (IllegalArgumentException e) {
+                return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
             }
-            DiscoveryResult result = results.get(0);
-            ThingType thingType = thingTypeRegistry.getThingType(result.getThingTypeUID());
-            if (thingType == null) {
-                return Response.status(Response.Status.NOT_FOUND)
-                        .entity("Thing type with UID '" + result.getThingTypeUID() + "' does not exist!").build();
-            }
-            thing = simulateThing(result, thingType);
         }
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        generator.generateFileFormat(outputStream, List.of(thing), hideDefaultParameters);
+        generator.generateFileFormat(outputStream, sortThings(things), hideDefaultParameters);
         return Response.ok(new String(outputStream.toByteArray())).build();
     }
 
@@ -342,12 +336,12 @@ public class FileFormatResource implements RESTResource {
     private List<Item> sortItems(Collection<Item> items) {
         List<Item> groups = items.stream().filter(item -> item instanceof GroupItem).sorted((item1, item2) -> {
             return item1.getName().compareTo(item2.getName());
-        }).collect(Collectors.toList());
+        }).toList();
 
         List<Item> topGroups = groups.stream().filter(group -> group.getGroupNames().isEmpty())
                 .sorted((group1, group2) -> {
                     return group1.getName().compareTo(group2.getName());
-                }).collect(Collectors.toList());
+                }).toList();
 
         List<Item> groupTree = new ArrayList<>();
         for (Item group : topGroups) {
@@ -355,7 +349,7 @@ public class FileFormatResource implements RESTResource {
         }
 
         if (groupTree.size() != groups.size()) {
-            logger.warn("Something want wrong when sorting groups; failback to a sort by name.");
+            logger.warn("Something went wrong when sorting groups; failback to a sort by name.");
             groupTree = groups;
         }
 
@@ -375,9 +369,9 @@ public class FileFormatResource implements RESTResource {
                 return thingUID1.compareTo(thingUID2);
             }
             return item1.getName().compareTo(item2.getName());
-        }).collect(Collectors.toList());
+        }).toList();
 
-        return Stream.of(groupTree, nonGroups).flatMap(List::stream).collect(Collectors.toList());
+        return Stream.of(groupTree, nonGroups).flatMap(List::stream).toList();
     }
 
     private void fillGroupTree(List<Item> groups, Item item) {
@@ -385,7 +379,7 @@ public class FileFormatResource implements RESTResource {
             groups.add(group);
             List<Item> members = group.getMembers().stream().sorted((member1, member2) -> {
                 return member1.getName().compareTo(member2.getName());
-            }).collect(Collectors.toList());
+            }).toList();
             for (Item member : members) {
                 fillGroupTree(groups, member);
             }
@@ -401,12 +395,12 @@ public class FileFormatResource implements RESTResource {
     private List<Thing> sortThings(Collection<Thing> things) {
         List<Thing> thingTree = new ArrayList<>();
         Set<String> bindings = things.stream().map(thing -> thing.getUID().getBindingId()).collect(Collectors.toSet());
-        for (String binding : bindings.stream().sorted().collect(Collectors.toList())) {
+        for (String binding : bindings.stream().sorted().toList()) {
             List<Thing> topThings = things.stream()
                     .filter(thing -> thing.getUID().getBindingId().equals(binding) && thing.getBridgeUID() == null)
                     .sorted((thing1, thing2) -> {
                         return thing1.getUID().getAsString().compareTo(thing2.getUID().getAsString());
-                    }).collect(Collectors.toList());
+                    }).toList();
             for (Thing thing : topThings) {
                 fillThingTree(thingTree, thing);
             }
@@ -420,7 +414,7 @@ public class FileFormatResource implements RESTResource {
             if (thing instanceof Bridge bridge) {
                 List<Thing> subThings = bridge.getThings().stream().sorted((thing1, thing2) -> {
                     return thing1.getUID().getAsString().compareTo(thing2.getUID().getAsString());
-                }).collect(Collectors.toList());
+                }).toList();
                 for (Thing subThing : subThings) {
                     fillThingTree(things, subThing);
                 }
@@ -451,5 +445,42 @@ public class FileFormatResource implements RESTResource {
         Configuration config = new Configuration(configParams);
         return ThingFactory.createThing(thingType, result.getThingUID(), config, result.getBridgeUID(),
                 configDescRegistry);
+    }
+
+    private @Nullable ItemFileGenerator getItemFileGenerator(String mediaType) {
+        return switch (mediaType) {
+            case "text/vnd.openhab.dsl.item" -> itemFileGenerators.get("DSL");
+            case "application/yaml" -> itemFileGenerators.get("YAML");
+            default -> null;
+        };
+    }
+
+    private @Nullable ThingFileGenerator getThingFileGenerator(String mediaType) {
+        return switch (mediaType) {
+            case "text/vnd.openhab.dsl.thing" -> thingFileGenerators.get("DSL");
+            case "application/yaml" -> thingFileGenerators.get("YAML");
+            default -> null;
+        };
+    }
+
+    private List<Thing> getThingsOrDiscoveryResult(List<String> thingUIDs) {
+        return thingUIDs.stream().distinct().map(uid -> {
+            ThingUID thingUID = new ThingUID(uid);
+            Thing thing = thingRegistry.get(thingUID);
+            if (thing != null) {
+                return thing;
+            }
+
+            DiscoveryResult discoveryResult = inbox.stream().filter(forThingUID(thingUID)).findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException(
+                            "Thing with UID '" + uid + "' not found in the things or discovery registry!"));
+
+            ThingTypeUID thingTypeUID = discoveryResult.getThingTypeUID();
+            ThingType thingType = thingTypeRegistry.getThingType(thingTypeUID);
+            if (thingType == null) {
+                throw new IllegalArgumentException("Thing type with UID '" + thingTypeUID + "' does not exist!");
+            }
+            return simulateThing(discoveryResult, thingType);
+        }).toList();
     }
 }
