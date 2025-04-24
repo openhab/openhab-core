@@ -96,6 +96,10 @@ def appendLabelsFile(FileWriter file, def line, String tagSet) {
         file.write("," + line.Synonyms.replaceAll(", ", ","))
     }
     file.write("\n")
+    if (line.Description) {
+        file.write(tagSet + "__description=" + line.Description)
+        file.write("\n")
+    }
 }
 
 def camelToUpperCasedSnake(def tag) {
