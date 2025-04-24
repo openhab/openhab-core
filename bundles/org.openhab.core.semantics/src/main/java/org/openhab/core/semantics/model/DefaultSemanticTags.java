@@ -381,6 +381,11 @@ public class DefaultSemanticTags {
                 "Illuminance", //
                 "", //
                 "");
+        public static final SemanticTag INFO = new SemanticTagImpl( //
+                "Property_Info", //
+                "Information", //
+                "", //
+                "");
         public static final SemanticTag LEVEL = new SemanticTagImpl( //
                 "Property_Level", //
                 "Level", //

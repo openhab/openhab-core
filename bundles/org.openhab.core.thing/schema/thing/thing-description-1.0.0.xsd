@@ -296,6 +296,7 @@
 			<xs:enumeration value="Heating"/>
 			<xs:enumeration value="Humidity"/>
 			<xs:enumeration value="Illuminance"/>
+			<xs:enumeration value="Info"/>
 			<xs:enumeration value="Level"/>
 			<xs:enumeration value="Light"/>
 			<xs:enumeration value="LowBattery"/>

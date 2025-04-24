@@ -108,6 +108,7 @@ public class DefaultSemanticTagProvider implements SemanticTagProvider {
         defaultTags.add(DefaultSemanticTags.Property.HEATING);
         defaultTags.add(DefaultSemanticTags.Property.HUMIDITY);
         defaultTags.add(DefaultSemanticTags.Property.ILLUMINANCE);
+        defaultTags.add(DefaultSemanticTags.Property.INFO);
         defaultTags.add(DefaultSemanticTags.Property.LEVEL);
         defaultTags.add(DefaultSemanticTags.Property.LIGHT);
         defaultTags.add(DefaultSemanticTags.Property.LOW_BATTERY);
