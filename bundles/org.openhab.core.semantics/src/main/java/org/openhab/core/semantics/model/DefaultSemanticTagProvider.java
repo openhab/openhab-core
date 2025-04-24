@@ -76,6 +76,7 @@ public class DefaultSemanticTagProvider implements SemanticTagProvider {
         defaultTags.add(DefaultSemanticTags.Location.PORCH);
         defaultTags.add(DefaultSemanticTags.Location.TERRACE);
         defaultTags.add(DefaultSemanticTags.Point.ALARM);
+        defaultTags.add(DefaultSemanticTags.Point.CALCULATION);
         defaultTags.add(DefaultSemanticTags.Point.CONTROL);
         defaultTags.add(DefaultSemanticTags.Point.SWITCH);
         defaultTags.add(DefaultSemanticTags.Point.FORECAST);
@@ -143,6 +144,7 @@ public class DefaultSemanticTagProvider implements SemanticTagProvider {
         defaultTags.add(DefaultSemanticTags.Property.WIND);
         defaultTags.add(DefaultSemanticTags.Equipment.ALARM_DEVICE);
         defaultTags.add(DefaultSemanticTags.Equipment.ALARM_SYSTEM);
+        defaultTags.add(DefaultSemanticTags.Equipment.APPLICATION);
         defaultTags.add(DefaultSemanticTags.Equipment.AUDIO_VISUAL);
         defaultTags.add(DefaultSemanticTags.Equipment.DISPLAY);
         defaultTags.add(DefaultSemanticTags.Equipment.PROJECTOR);

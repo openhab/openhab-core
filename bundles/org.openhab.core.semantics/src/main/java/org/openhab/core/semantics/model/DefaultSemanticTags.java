@@ -218,6 +218,11 @@ public class DefaultSemanticTags {
                 "Alarm", //
                 "", //
                 "");
+        public static final SemanticTag CALCULATION = new SemanticTagImpl( //
+                "Point_Calculation", //
+                "Calculation", //
+                "", //
+                "");
         public static final SemanticTag CONTROL = new SemanticTagImpl( //
                 "Point_Control", //
                 "Control", //
@@ -559,6 +564,11 @@ public class DefaultSemanticTags {
                 "Alarm System", //
                 "", //
                 "Alarm Systems");
+        public static final SemanticTag APPLICATION = new SemanticTagImpl( //
+                "Equipment_Application", //
+                "Application", //
+                "", //
+                "App, Software program");
         public static final SemanticTag AUDIO_VISUAL = new SemanticTagImpl( //
                 "Equipment_AudioVisual", //
                 "Audio Visual", //
