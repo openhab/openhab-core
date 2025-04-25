@@ -57,7 +57,7 @@ Property,Airflow,,Airflow,,
 Property,App,,App,Application,Software program
 Property,Brightness,,Brightness,,Brightness of a light source
 Property,Channel,,Channel,,Radio or TV channel selection
-Property,Color,,Color,,Color of a light source
+Property,Color,,Color,,
 Property,ColorTemperature,,Color Temperature,,Color temperature of a light source
 Property,Current,,Current,,Electric current
 Property,Duration,,Duration,,Time duration
