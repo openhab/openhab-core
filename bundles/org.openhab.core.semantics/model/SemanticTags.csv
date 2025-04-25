@@ -195,7 +195,7 @@ Equipment,UPS,PowerSupply,UPS,Uninterruptible Power Supply,Uninterruptible power
 Equipment,WindGenerator,PowerSupply,Wind Generator,Wind Turbine,Wind generator
 Equipment,Printer,,Printer,,Printer
 Equipment,Printer3D,Printer,3D Printer,,3d printer
-Equipment,Pump,,Pump,Pumps,Fluid pump
+Equipment,Pump,,Pump,Pumps,
 Equipment,WaterFeature,Pump,Water Feature,"Waterfall, Pond Pump",Garden water feature
 Equipment,RemoteControl,,Remote Control,Remote Controls,Remote control device
 Equipment,Sensor,,Sensor,Sensors,Sensor
