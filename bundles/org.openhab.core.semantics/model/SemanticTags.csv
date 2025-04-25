@@ -111,7 +111,7 @@ Equipment,Display,AudioVisual,Display,,Visual display
 Equipment,Projector,Display,Projector,"Projectors, Beamer, Beamers",Projector
 Equipment,Television,Display,Television,"Televisions, TV, TVs",Television
 Equipment,MediaPlayer,AudioVisual,Media Player,,Media player
-Equipment,Receiver,AudioVisual,Receiver,"Receivers, Audio Receiver, Audio Receivers, AV Receiver, AV Receivers",Receiver
+Equipment,Receiver,AudioVisual,Receiver,"Receivers, Audio Receiver, Audio Receivers, AV Receiver, AV Receivers", AV Receiver
 Equipment,Screen,AudioVisual,Screen,Screens,Computer screen
 Equipment,Speaker,AudioVisual,Speaker,Speakers,Loudspeaker
 Equipment,Bed,,Bed,,Bed
