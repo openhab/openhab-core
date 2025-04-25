@@ -47,7 +47,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * The websocket supports only one line for the {@link PCMWebSocketAudioSource} (the audio is shared on the server),
  * the data transmission is instructed by the server (START_LISTENING and STOP_LISTENING commands).
  * <p>
- * The websocket supports multiple lines for the {@link PCMWebSocketAudioSink} (to accomplis that, the outgoing data
+ * The websocket supports multiple lines for the {@link PCMWebSocketAudioSink} (to accomplish that, the outgoing data
  * chucks are prefixed with a 6 byte header to transmit the identity and format specification, check
  * {@link PCMWebSocketAudioSink.PCMWebSocketOutputStream})
  *

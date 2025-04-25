@@ -52,8 +52,10 @@ import org.slf4j.LoggerFactory;
 @NonNullByDefault
 public class PCMWebSocketAudioSink implements AudioSink {
     /**
-     * Byte send to the sink after last chunk to indicate that streaming has ended.
-     * Should try to be sent event on and error as the client should be aware that data transmission has ended.
+     * Byte sent after the last chunk for a stream to indicate the stream has ended, so the client can dispose resources
+     * associated with the stream.
+     * It's sent on a finally clause that covers the audio transmission execution so it gets sent event if some
+     * exception interrupms the audio transmission.
      */
     private static final byte STREAM_TERMINATION_BYTE = (byte) 254;
     private static final Set<AudioFormat> SUPPORTED_FORMATS = Set.of(AudioFormat.WAV, AudioFormat.PCM_SIGNED);
