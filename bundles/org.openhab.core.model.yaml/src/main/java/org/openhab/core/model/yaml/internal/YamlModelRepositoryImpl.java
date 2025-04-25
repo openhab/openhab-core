@@ -147,14 +147,11 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public synchronized void processWatchEvent(Kind kind, Path path) {
         Path fullPath = watchPath.resolve(path);
-        String pathString = path.toString();
-        if (path.startsWith("automation") || !pathString.endsWith(".yaml")) {
+        String modelName = path.toString();
+        if (path.startsWith("automation") || !modelName.endsWith(".yaml")) {
             logger.trace("Ignored {}", fullPath);
             return;
         }
-
-        // strip extension for model name
-        String modelName = pathString.substring(0, pathString.lastIndexOf("."));
 
         try {
             if (kind == WatchService.Kind.DELETE) {
@@ -586,7 +583,7 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
         }
 
         try {
-            Path outFile = watchPath.resolve(modelName + ".yaml");
+            Path outFile = watchPath.resolve(modelName);
             String fileContent = objectMapper.writeValueAsString(rootNode);
             if (Files.exists(outFile) && !Files.isWritable(outFile)) {
                 logger.warn("Failed writing model {}: model exists but is read-only.", modelName);
