@@ -88,7 +88,7 @@ Property,Presence,,Presence,,Presence detection
 Property,Pressure,,Pressure,,
 Property,QualityOfService,,Quality of Service,,Quality of service
 Property,Rain,,Rain,,Rain measurement
-Property,SignalStrength,,Signal Strength,,Signal strength measurement
+Property,SignalStrength,,Signal Strength,,
 Property,RSSI,SignalStrength,RSSI,Received Signal Strength Indication,Received signal strength indication
 Property,Smoke,,Smoke,,Smoke detection
 Property,SoundVolume,,Sound Volume,,Sound volume level
