@@ -223,8 +223,8 @@ public class PCMWebSocketAudioSink implements AudioSink {
 
     /**
      * This is an {@link OutputStream} implementation for writing binary data to the websocket that
-     * will prefix each chunk with a header composed of 6 bytes.
-     * Header: 3 bytes (stream id) + 1 byte (stream sample rate) + 1 byte (stream bit depth) + 1 byte (channels).
+     * will prefix each chunk with a header composed of 8 bytes.
+     * Header: 2 bytes (stream id) + 4 byte (stream sample rate) + 1 byte (stream bit depth) + 1 byte (channels).
      */
     protected static class PCMWebSocketOutputStream extends OutputStream {
         private final byte[] header;

@@ -38,10 +38,10 @@ public final class PCMWebSocketStreamIdUtil {
      * <li>1 for channels</li>
      * </ul>
      */
-    public static int packetHeaderByteLength = 2 + 4 + 1 + 1;
+    public static final int PACKET_HEADER_BYTE_LENGTH = 2 + 4 + 1 + 1;
 
     public static AudioPacketData parseAudioPacket(byte[] bytes) throws IOException {
-        if (bytes.length < packetHeaderByteLength) {
+        if (bytes.length < PACKET_HEADER_BYTE_LENGTH) {
             throw new IOException("Audio packet byte length is too small, invalid data.");
         }
         var byteBuffer = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN);
@@ -55,7 +55,7 @@ public final class PCMWebSocketStreamIdUtil {
     }
 
     public static ByteBuffer generateAudioPacketHeader(int sampleRate, byte bitDepth, byte channels) {
-        var byteBuffer = ByteBuffer.allocate(packetHeaderByteLength).order(ByteOrder.LITTLE_ENDIAN);
+        var byteBuffer = ByteBuffer.allocate(PACKET_HEADER_BYTE_LENGTH).order(ByteOrder.LITTLE_ENDIAN);
         SecureRandom sr = new SecureRandom();
         byte[] rndBytes = new byte[2];
         sr.nextBytes(rndBytes);

@@ -107,10 +107,6 @@ public class PCMWebSocketConnection implements WebSocketListener {
         }
     }
 
-    private void spot() {
-        onRemoteSpot();
-    }
-
     @Override
     public void onWebSocketConnect(@Nullable Session sess) {
         if (sess == null) {
