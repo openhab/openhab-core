@@ -85,7 +85,7 @@ Property,Position,,Position,,Position measurement or control
 Property,GeoLocation,Position,Geo Location,,Geo location coordinate
 Property,Power,,Power,,
 Property,Presence,,Presence,,Presence detection
-Property,Pressure,,Pressure,,Fluid pressure measurement
+Property,Pressure,,Pressure,,
 Property,QualityOfService,,Quality of Service,,Quality of service
 Property,Rain,,Rain,,Rain measurement
 Property,SignalStrength,,Signal Strength,,Signal strength measurement
