@@ -69,7 +69,7 @@ Property,Heating,,Heating,,Related to heating
 Property,Humidity,,Humidity,Moisture,Humidity value
 Property,Illuminance,,Illuminance,,Illuminance value
 Property,Info,,Information,,General information
-Property,Level,,Level,,Fluid level
+Property,Level,,Level,,
 Property,Light,,Light,"Lights, Lighting",Control or status of a light
 Property,LowBattery,,Low Battery,,Low battery indication
 Property,MediaControl,,Media Control,,Audio- or visual- media control
