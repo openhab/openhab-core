@@ -39,13 +39,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
- * The {@link PCMWebSocketConnection} represents a WebSocket connection used to transmit pcm audio
+ * The {@link PCMWebSocketConnection} represents a WebSocket connection used to transmit PCM audio.
  * <p>
  * The websocket uses the text protocol for send commands represented by {@link WebSocketCommand} and the binary
- * protocol to transmit the audio data
+ * protocol to transmit the audio data.
  * <p>
  * The websocket supports only one line for the {@link PCMWebSocketAudioSource} (the audio is shared on the server),
- * the data transmission is instructed by the server (START_LISTENING and STOP_LISTENING commands)
+ * the data transmission is instructed by the server (START_LISTENING and STOP_LISTENING commands).
  * <p>
  * The websocket supports multiple lines for the {@link PCMWebSocketAudioSink} (to accomplis that, the outgoing data
  * chucks are prefixed with a 6 byte header to transmit the identity and format specification, check
@@ -144,7 +144,13 @@ public class PCMWebSocketConnection implements WebSocketListener {
         logger.trace("Received binary data of length {}", len);
         PCMWebSocketAudioSource audioSource = this.audioSource;
         if (payload != null && audioSource != null) {
-            var streamData = PCMWebSocketStreamIdUtil.parseAudioPacket(payload);
+            PCMWebSocketStreamIdUtil.AudioPacketData streamData;
+            try {
+                streamData = PCMWebSocketStreamIdUtil.parseAudioPacket(payload);
+            } catch (IOException e) {
+                logger.warn("Exception processing binary message: {}", e.getMessage());
+                return;
+            }
             audioSource.writeToStreams(streamData.id(), streamData.sampleRate(), streamData.bitDepth(),
                     streamData.channels(), streamData.audioData());
         }
@@ -231,7 +237,7 @@ public class PCMWebSocketConnection implements WebSocketListener {
         if (id.isBlank()) {
             throw new IOException("Unable to register audio components");
         }
-        String label = "UI (" + id + ")";
+        String label = "PCM Audio WebSocket (" + id + ")";
         logger.debug("Registering dialog components for '{}'", id);
         this.initialized = true;
         // register source

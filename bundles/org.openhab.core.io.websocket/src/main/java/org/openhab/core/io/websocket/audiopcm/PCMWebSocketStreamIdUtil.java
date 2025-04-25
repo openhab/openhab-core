@@ -12,6 +12,7 @@
  */
 package org.openhab.core.io.websocket.audiopcm;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.security.SecureRandom;
@@ -27,23 +28,27 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 public class PCMWebSocketStreamIdUtil {
     /**
      * Packet header length in bytes:
-     * 2 for id
-     * 4 for sample rate as int little-endian
-     * 1 for bitDepth
-     * 1 for channels
+     * <ul>
+     * <li>2 for id</li>
+     * <li>4 for sample rate as int little-endian</li>
+     * <li>1 for bitDepth</li>
+     * <li>1 for channels</li>
+     * </ul>
      */
     public static int packetHeaderByteLength = 2 + 4 + 1 + 1;
 
-    public static AudioPacketData parseAudioPacket(byte[] bytes) {
-        assert (bytes.length >= packetHeaderByteLength);
+    public static AudioPacketData parseAudioPacket(byte[] bytes) throws IOException {
+        if (bytes.length < packetHeaderByteLength) {
+            throw new IOException("Audio packet byte length is too small, invalid data.");
+        }
         var byteBuffer = ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN);
         byte[] idBytes = new byte[] { byteBuffer.get(), byteBuffer.get() };
         int sampleRate = byteBuffer.getInt();
         byte bitDepth = byteBuffer.get();
         byte channels = byteBuffer.get();
-        byte[] data = new byte[byteBuffer.remaining()];
-        byteBuffer.get(data);
-        return new AudioPacketData(idBytes, sampleRate, bitDepth, channels, data);
+        byte[] audioBytes = new byte[byteBuffer.remaining()];
+        byteBuffer.get(audioBytes);
+        return new AudioPacketData(idBytes, sampleRate, bitDepth, channels, audioBytes);
     }
 
     public static ByteBuffer generateAudioPacketHeader(int sampleRate, byte bitDepth, byte channels) {

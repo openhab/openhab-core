@@ -35,20 +35,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This is an {@link AudioSource} implementation connected to the {@link PCMWebSocketConnection} that allow to
- * a single pcm audio line through the websocket which is shared across the active {@link AudioStream} instances.
+ * This is an {@link AudioSource} implementation connected to a {@link PCMWebSocketConnection} supporting
+ * a single PCM audio line through a WebSocket connection and shared across all active {@link AudioStream} instances.
  *
  * @author Miguel Álvarez Díez - Initial contribution
  */
 @NonNullByDefault
 public class PCMWebSocketAudioSource implements AudioSource {
-    private final Logger logger = LoggerFactory.getLogger(PCMWebSocketAudioSource.class);
-    public static int supportedBitDepth = 16;
-    public static int supportedSampleRate = 16000;
-    public static int supportedChannels = 1;
+    private static final int SUPPORTED_BIT_DEPTH = 16;
+    private static final int SUPPORTED_SAMPLE_RATE = 16000;
+    private static final int SUPPORTED_CHANNELS = 1;
     public static AudioFormat supportedFormat = new AudioFormat(AudioFormat.CONTAINER_WAVE,
-            AudioFormat.CODEC_PCM_SIGNED, false, supportedBitDepth, null, (long) supportedSampleRate,
-            supportedChannels);
+            AudioFormat.CODEC_PCM_SIGNED, false, SUPPORTED_BIT_DEPTH, null, (long) SUPPORTED_SAMPLE_RATE,
+            SUPPORTED_CHANNELS);
+    private final Logger logger = LoggerFactory.getLogger(PCMWebSocketAudioSource.class);
     private final String sourceId;
     private final String sourceLabel;
     private final PCMWebSocketConnection websocket;
@@ -105,18 +105,17 @@ public class PCMWebSocketAudioSource implements AudioSource {
 
     public void writeToStreams(byte[] id, int sampleRate, int bitDepth, int channels, byte[] payload) {
         if (streamGroup.isEmpty()) {
-            logger.debug("Source already disposed ignoring data");
+            logger.debug("Source already disposed, ignoring data");
             return;
         }
         if (this.streamId == null) {
             this.streamId = id;
         } else if (!Arrays.equals(this.streamId, id)) {
-            // source is only ready to handle a single data line
-            logger.warn("Ignoring data from source stream {}", id);
+            logger.warn("Only one concurrent data line is supported, ignoring data from source stream {}", id);
             return;
         }
-        boolean needsConvert = sampleRate != supportedSampleRate || bitDepth != supportedBitDepth
-                || channels != supportedChannels;
+        boolean needsConvert = sampleRate != SUPPORTED_SAMPLE_RATE || bitDepth != SUPPORTED_BIT_DEPTH
+                || channels != SUPPORTED_CHANNELS;
         if (!needsConvert) {
             streamGroup.write(payload);
             return;
@@ -128,11 +127,11 @@ public class PCMWebSocketAudioSource implements AudioSource {
                         this.sourceAudioPipedOutput, (sampleRate * (bitDepth / 8) * channels) * 2);
                 logger.debug(
                         "Enabling converting pcm audio for the audio source stream: sample rate {}, bit depth {}, channels {} => sample rate {}, bit depth {}, channels {}",
-                        sampleRate, bitDepth, channels, supportedSampleRate, supportedBitDepth, supportedChannels);
+                        sampleRate, bitDepth, channels, SUPPORTED_SAMPLE_RATE, SUPPORTED_BIT_DEPTH, SUPPORTED_CHANNELS);
                 this.sourceAudioStream = PCMWebSocketAudioUtil.getPCMStreamNormalized(sourceAudioPipedInput, sampleRate,
-                        bitDepth, channels, supportedSampleRate, supportedBitDepth, supportedChannels);
+                        bitDepth, channels, SUPPORTED_SAMPLE_RATE, SUPPORTED_BIT_DEPTH, SUPPORTED_CHANNELS);
                 sourceWriteTask = scheduler.submit(() -> {
-                    int bytesPer250ms = (supportedSampleRate * (supportedBitDepth / 8) * supportedChannels) / 4;
+                    int bytesPer250ms = (SUPPORTED_SAMPLE_RATE * (SUPPORTED_BIT_DEPTH / 8) * SUPPORTED_CHANNELS) / 4;
                     while (true) {
                         byte[] convertedPayload;
                         try {

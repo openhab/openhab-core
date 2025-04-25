@@ -41,8 +41,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This is an {@link AudioSink} implementation connected to the {@link PCMWebSocketConnection} that allow to
- * transmit concurrent pcm audio lines through the websocket.
+ * This is an {@link AudioSink} implementation connected to the {@link PCMWebSocketConnection} that allows to
+ * transmit concurrent PCM audio lines through WebSocket.
  * <p>
  * To identify the different audio lines the data chucks are prefixed by a header added by the
  * {@link PCMWebSocketOutputStream} class.
@@ -56,8 +56,8 @@ public class PCMWebSocketAudioSink implements AudioSink {
      * Should try to be sent event on and error as the client should be aware that data transmission has ended.
      */
     private static final byte STREAM_TERMINATION_BYTE = (byte) 254;
-    private final Set<AudioFormat> supportedFormats = Set.of(AudioFormat.WAV, AudioFormat.PCM_SIGNED);
-    private final Set<Class<? extends AudioStream>> supportedStreams = Set.of(FixedLengthAudioStream.class,
+    private static final Set<AudioFormat> SUPPORTED_FORMATS = Set.of(AudioFormat.WAV, AudioFormat.PCM_SIGNED);
+    private static final Set<Class<? extends AudioStream>> SUPPORTED_STREAMS = Set.of(FixedLengthAudioStream.class,
             PipedAudioStream.class);
 
     private final Logger logger = LoggerFactory.getLogger(PCMWebSocketAudioSink.class);
@@ -67,11 +67,11 @@ public class PCMWebSocketAudioSink implements AudioSink {
     private final PCMWebSocketConnection websocket;
     private PercentType sinkVolume = new PercentType(100);
     @Nullable
-    Integer forceSampleRate;
+    private Integer forceSampleRate;
     @Nullable
-    Integer forceBitDepth;
+    private Integer forceBitDepth;
     @Nullable
-    Integer forceChannels;
+    private Integer forceChannels;
 
     public PCMWebSocketAudioSink(String id, String label, PCMWebSocketConnection websocket,
             @Nullable Integer forceSampleRate, @Nullable Integer forceBitDepth, @Nullable Integer forceChannels) {
@@ -124,12 +124,12 @@ public class PCMWebSocketAudioSink implements AudioSink {
             if (audioStream instanceof PipedAudioStream pipedAudioStream) {
                 pipedAudioStream.onClose(() -> transferenceAborted.set(true));
             }
-            var sampleRate = Objects.requireNonNull(audioFormat.getFrequency()).intValue();
-            var bitDepth = Objects.requireNonNull(audioFormat.getBitDepth());
-            var channels = Objects.requireNonNull(audioFormat.getChannels());
+            int sampleRate = Objects.requireNonNull(audioFormat.getFrequency()).intValue();
+            int bitDepth = Objects.requireNonNull(audioFormat.getBitDepth());
+            int channels = Objects.requireNonNull(audioFormat.getChannels());
             int targetSampleRate = Objects.requireNonNullElse(forceSampleRate, sampleRate);
-            var targetBitDepth = Objects.requireNonNullElse(forceBitDepth, bitDepth);
-            var targetChannels = Objects.requireNonNullElse(forceChannels, channels);
+            Integer targetBitDepth = Objects.requireNonNullElse(forceBitDepth, bitDepth);
+            Integer targetChannels = Objects.requireNonNullElse(forceChannels, channels);
             outputStream = new PCMWebSocketOutputStream(websocket, targetSampleRate, targetBitDepth.byteValue(),
                     targetChannels.byteValue());
             InputStream finalAudioStream;
@@ -186,6 +186,7 @@ public class PCMWebSocketAudioSink implements AudioSink {
                 logger.warn("Unable to send termination byte to sink {}", sinkId);
             }
         }
+        logger.debug("Sent {} bytes of audio", transferred);
         if (duration != -1) {
             Instant end = Instant.now();
             long millisSecondTimedToSendAudioData = Duration.between(start, end).toMillis();
@@ -199,12 +200,12 @@ public class PCMWebSocketAudioSink implements AudioSink {
 
     @Override
     public Set<AudioFormat> getSupportedFormats() {
-        return supportedFormats;
+        return SUPPORTED_FORMATS;
     }
 
     @Override
     public Set<Class<? extends AudioStream>> getSupportedStreams() {
-        return supportedStreams;
+        return SUPPORTED_STREAMS;
     }
 
     @Override

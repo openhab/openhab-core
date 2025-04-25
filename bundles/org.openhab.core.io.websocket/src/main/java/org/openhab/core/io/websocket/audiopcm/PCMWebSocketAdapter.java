@@ -42,7 +42,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The {@link PCMWebSocketAdapter} creates instances of {@link PCMWebSocketConnection} to handle pcm audio
+ * The {@link PCMWebSocketAdapter} creates instances of {@link PCMWebSocketConnection} to handle PCM audio streams.
  *
  * @author Miguel Álvarez Díez - Initial contribution
  */
@@ -103,7 +103,7 @@ public class PCMWebSocketAdapter implements WebSocketAdapter {
     @Override
     public Object createWebSocket(ServletUpgradeRequest servletUpgradeRequest,
             ServletUpgradeResponse servletUpgradeResponse) {
-        logger.debug("creating connection!");
+        logger.debug("creating connection");
         return new PCMWebSocketConnection(this, executor);
     }
 
@@ -116,7 +116,7 @@ public class PCMWebSocketAdapter implements WebSocketAdapter {
     }
 
     private void pingHandlers() {
-        var handlers = new ArrayList<>(webSocketConnections);
+        ArrayList<PCMWebSocketConnection> handlers = new ArrayList<>(webSocketConnections);
         for (var handler : handlers) {
             if (handler != null) {
                 boolean pinned = false;
@@ -150,7 +150,8 @@ public class PCMWebSocketAdapter implements WebSocketAdapter {
     }
 
     /**
-     * These interface provides the dialog initialization functionality to this websocket connections
+     * 
+     * The DialogProvider interface provides the dialog initialization functionality for WebSocket connections.
      */
     public interface DialogProvider {
         /**

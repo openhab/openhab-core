@@ -25,7 +25,10 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * @author Miguel Álvarez Díez - Initial contribution
  */
 @NonNullByDefault
-public class PCMWebSocketAudioUtil {
+public final class PCMWebSocketAudioUtil {
+    private PCMWebSocketAudioUtil() {
+    }
+
     /**
      * Ensure right PCM format by converting if needed (sample rate, channel)
      *
