@@ -83,7 +83,7 @@ Property,OpenLevel,Opening,Open Level,,Open position (analog) of a door or windo
 Property,OpenState,Opening,Open State,Open Closed,Open state (digital) of a door or window etc.
 Property,Position,,Position,,Position measurement or control
 Property,GeoLocation,Position,Geo Location,,Geo location coordinate
-Property,Power,,Power,,Power measurement
+Property,Power,,Power,,
 Property,Presence,,Presence,,Presence detection
 Property,Pressure,,Pressure,,Fluid pressure measurement
 Property,QualityOfService,,Quality of Service,,Quality of service
