@@ -194,7 +194,7 @@ Equipment,TransferSwitch,PowerSupply,Transfer Switch,,Electricity transfer switc
 Equipment,UPS,PowerSupply,UPS,Uninterruptible Power Supply,Uninterruptible power supply
 Equipment,WindGenerator,PowerSupply,Wind Generator,Wind Turbine,Wind generator
 Equipment,Printer,,Printer,,Printer
-Equipment,Printer3D,Printer,3D Printer,,3d printer
+Equipment,Printer3D,Printer,3D Printer,,3D printer
 Equipment,Pump,,Pump,Pumps,
 Equipment,WaterFeature,Pump,Water Feature,"Waterfall, Pond Pump",
 Equipment,RemoteControl,,Remote Control,Remote Controls,Remote control device
