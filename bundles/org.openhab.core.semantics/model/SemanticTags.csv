@@ -226,7 +226,7 @@ Equipment,Tool,,Tool,,Hand- or machine- tool
 Equipment,Tracker,,Tracker,,Location tracker
 Equipment,Valve,,Valve,Valves,Fluid valve
 Equipment,Vehicle,,Vehicle,,
-Equipment,Car,Vehicle,Car,,Motor car
+Equipment,Car,Vehicle,Car,,
 Equipment,VoiceAssistant,,Voice Assistant,Voice Assistants,Voice assistant device
 Equipment,WebService,,Web Service,Web Services,Web service
 Equipment,WeatherService,WebService,Weather Service,Weather Services,Weather service
