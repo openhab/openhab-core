@@ -173,7 +173,7 @@ Equipment,Sconce,LightSource,Sconce,,Sconce light
 Equipment,SpotLight,LightSource,Spot Light,,Spot light
 Equipment,TrackLight,LightSource,Track Light,,Track light
 Equipment,WallLight,LightSource,Wall Light,,Wall light
-Equipment,Lock,,Lock,Locks,Door- or window- lock
+Equipment,Lock,,Lock,Locks,
 Equipment,NetworkAppliance,,Network Appliance,Network Appliances,Network appliance
 Equipment,Firewall,NetworkAppliance,Firewall,,Firewall
 Equipment,NetworkSwitch,NetworkAppliance,Network Switch,,Network switch
