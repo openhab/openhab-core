@@ -43,7 +43,7 @@ Point,Forecast,,Forecast,,Read only analog predicted data point
 Point,Measurement,,Measurement,,Read only analog data point from a sensor
 Point,Setpoint,,Setpoint,,Read-Write analog data point for a controller
 Point,Status,,Status,,Read only data point indicating a status condition
-Property,AirQuality,,Air Quality,,Index of air quality
+Property,AirQuality,,Air Quality,,
 Property,AQI,AirQuality,AQI,Air Quality Index,Air Quality Index
 Property,CO,AirQuality,CO,Carbon Monoxide,Carbon monoxide
 Property,CO2,AirQuality,CO2,Carbon Dioxide,Carbon dioxide
