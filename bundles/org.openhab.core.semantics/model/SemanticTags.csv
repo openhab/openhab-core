@@ -95,7 +95,7 @@ Property,SoundVolume,,Sound Volume,,Sound volume level
 Property,Speed,,Speed,,Speed measurement or setting
 Property,Tampered,,Tampered,,Tampering detected
 Property,Temperature,,Temperature,Temperatures,Temperature measurement
-Property,Tilt,,Tilt,,Tilt of a blind, shade or shutter
+Property,Tilt,,Tilt,,"Tilt of a blind, shade or shutter"
 Property,Timestamp,,Timestamp,,Timestamp of an event
 Property,Ultraviolet,,Ultraviolet,UV,Ultraviolet measurement
 Property,Ventilation,,Ventilation,,Related to ventilation
