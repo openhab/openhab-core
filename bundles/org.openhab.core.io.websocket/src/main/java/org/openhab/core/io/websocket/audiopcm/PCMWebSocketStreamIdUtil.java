@@ -25,7 +25,10 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * @author Miguel Álvarez Díez - Initial contribution
  */
 @NonNullByDefault
-public class PCMWebSocketStreamIdUtil {
+public final class PCMWebSocketStreamIdUtil {
+    private PCMWebSocketStreamIdUtil() {
+    }
+
     /**
      * Packet header length in bytes:
      * <ul>
