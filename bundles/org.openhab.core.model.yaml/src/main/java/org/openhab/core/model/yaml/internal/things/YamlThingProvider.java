@@ -23,7 +23,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -176,7 +175,7 @@ public class YamlThingProvider extends AbstractProvider<Thing>
 
     @Override
     public Collection<Thing> getAll() {
-        return thingsMap.values().stream().flatMap(list -> list.stream()).collect(Collectors.toList());
+        return thingsMap.values().stream().flatMap(list -> list.stream()).toList();
     }
 
     @Override
