@@ -63,7 +63,7 @@ Property,Current,,Current,,Electric current
 Property,Duration,,Duration,,Time duration
 Property,Enabled,,Enabled,,Enabled state
 Property,Energy,,Energy,,Energy consumption or production
-Property,Frequency,,Frequency,,Electric frequency
+Property,Frequency,,Frequency,,
 Property,Gas,,Gas,,Gas measurement
 Property,Heating,,Heating,,Related to heating
 Property,Humidity,,Humidity,Moisture,Humidity value
