@@ -37,16 +37,16 @@ Location,Porch,Outdoor,Porch,Porches,
 Location,Terrace,Outdoor,Terrace,"Terraces, Deck, Decks",
 Point,Alarm,,Alarm,,Read only data point indicating an alarm condition
 Point,Calculation,,Calculation,,Read only analog calculated data point
-Point,Control,,Control,,Read/write analog data point
-Point,Switch,Control,Switch,,Read/write digital data point
+Point,Control,,Control,,Read-Write analog data point
+Point,Switch,Control,Switch,,Read-Write digital data point
 Point,Forecast,,Forecast,,Read only analog predicted data point
 Point,Measurement,,Measurement,,Read only analog data point from a sensor
-Point,Setpoint,,Setpoint,,Read/write analog data point for a controller
+Point,Setpoint,,Setpoint,,Read-Write analog data point for a controller
 Point,Status,,Status,,Read only data point indicating a status condition
 Property,AirQuality,,Air Quality,,Index of air quality
-Property,AQI,AirQuality,AQI,Air Quality Index,Aqi reading
-Property,CO,AirQuality,CO,Carbon Monoxide,Co reading
-Property,CO2,AirQuality,CO2,Carbon Dioxide,Co2 reading
+Property,AQI,AirQuality,AQI,Air Quality Index,Air Quality Index
+Property,CO,AirQuality,CO,Carbon Monoxide,Carbon monoxide
+Property,CO2,AirQuality,CO2,Carbon Dioxide,Carbon dioxide
 Property,Ozone,AirQuality,Ozone,,Ozone reading
 Property,ParticulateMatter,AirQuality,Particulate Matter,PM25,Particulate matter reading
 Property,Pollen,AirQuality,Pollen,,Pollen reading
@@ -56,13 +56,13 @@ Property,Airconditioning,,Airconditioning,,Related to airconditioning
 Property,Airflow,,Airflow,,Airflow measurement
 Property,App,,App,Application,Software program
 Property,Brightness,,Brightness,,Brightness of a light source
-Property,Channel,,Channel,,Radio or TV channel
+Property,Channel,,Channel,,Radio or TV channel selection
 Property,Color,,Color,,Color of a light source
 Property,ColorTemperature,,Color Temperature,,Color temperature of a light source
 Property,Current,,Current,,Electric current
 Property,Duration,,Duration,,Time duration
 Property,Enabled,,Enabled,,Enabled state
-Property,Energy,,Energy,,Energy consumption
+Property,Energy,,Energy,,Energy consumption or production
 Property,Frequency,,Frequency,,Electric frequency
 Property,Gas,,Gas,,Gas measurement
 Property,Heating,,Heating,,Related to heating
@@ -70,17 +70,17 @@ Property,Humidity,,Humidity,Moisture,Humidity value
 Property,Illuminance,,Illuminance,,Illuminance value
 Property,Info,,Information,,General information
 Property,Level,,Level,,Fluid level
-Property,Light,,Light,"Lights, Lighting",Control/status of a light
+Property,Light,,Light,"Lights, Lighting",Control or status of a light
 Property,LowBattery,,Low Battery,,Low battery indication
-Property,MediaControl,,Media Control,,Media control
+Property,MediaControl,,Media Control,,Audio- or visual- media control
 Property,Mode,,Mode,,Operating mode
 Property,Moisture,,Moisture,,Moisture value
 Property,Motion,,Motion,,Motion detected
 Property,Noise,,Noise,,Noise measurement
 Property,Oil,,Oil,,Oil measurement
-Property,Opening,,Opening,,Opening of a door/window etc.
-Property,OpenLevel,Opening,Open Level,,Open level of a door/window etc.
-Property,OpenState,Opening,Open State,Open Closed,Open state of a door/window etc.
+Property,Opening,,Opening,,Opening of a door or window etc.
+Property,OpenLevel,Opening,Open Level,,Open position (analog) of a door or window etc.
+Property,OpenState,Opening,Open State,Open Closed,Open state (digital) of a door or window etc.
 Property,Position,,Position,,Position measurement or control
 Property,GeoLocation,Position,Geo Location,,Geo location coordinate
 Property,Power,,Power,,Power measurement
@@ -92,10 +92,10 @@ Property,SignalStrength,,Signal Strength,,Signal strength measurement
 Property,RSSI,SignalStrength,RSSI,Received Signal Strength Indication,Received signal strength indication
 Property,Smoke,,Smoke,,Smoke detection
 Property,SoundVolume,,Sound Volume,,Sound volume level
-Property,Speed,,Speed,,Speed measurement/setting
+Property,Speed,,Speed,,Speed measurement or setting
 Property,Tampered,,Tampered,,Tampering detected
 Property,Temperature,,Temperature,Temperatures,Temperature measurement
-Property,Tilt,,Tilt,,Tilt of a shade or shutter
+Property,Tilt,,Tilt,,Tilt of a blind, shade or shutter
 Property,Timestamp,,Timestamp,,Timestamp of an event
 Property,Ultraviolet,,Ultraviolet,UV,Ultraviolet measurement
 Property,Ventilation,,Ventilation,,Related to ventilation
@@ -137,7 +137,7 @@ Equipment,DrinkingWater,,Drinking Water,Potable Water,Related to drinking water
 Equipment,HotWaterFaucet,DrinkingWater,Hot Water Faucet,"Hot Water Tap, Boiling Water Tap, Boiling Water Faucet",Hot water faucet
 Equipment,WaterFilter,DrinkingWater,Water Filter,,Water filter
 Equipment,WaterSoftener,DrinkingWater,Water Softener,,Water softener
-Equipment,HVAC,,HVAC,"Heating, Ventilation, Air Conditioning, A/C, A/Cs, AC",Related to HVAChvac
+Equipment,HVAC,,HVAC,"Heating, Ventilation, Air Conditioning, A/C, A/Cs, AC",Related to Heating Ventilation or AirConditioning
 Equipment,AirConditioner,HVAC,Air Conditioner,,Air conditioner
 Equipment,AirFilter,HVAC,Air Filter,,Air filter
 Equipment,Boiler,HVAC,Boiler,Boilers,Boiler
