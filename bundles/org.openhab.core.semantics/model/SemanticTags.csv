@@ -53,7 +53,7 @@ Property,Pollen,AirQuality,Pollen,,Pollen reading
 Property,Radon,AirQuality,Radon,,Radon reading
 Property,VOC,AirQuality,VOC,Volatile Organic Compounds,Volatile organic compounds reading
 Property,Airconditioning,,Airconditioning,,Related to airconditioning
-Property,Airflow,,Airflow,,Airflow measurement
+Property,Airflow,,Airflow,,
 Property,App,,App,Application,Software program
 Property,Brightness,,Brightness,,Brightness of a light source
 Property,Channel,,Channel,,Radio or TV channel selection
