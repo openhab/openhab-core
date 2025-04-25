@@ -54,8 +54,8 @@ public class PCMWebSocketAudioSink implements AudioSink {
     /**
      * Byte sent after the last chunk for a stream to indicate the stream has ended, so the client can dispose resources
      * associated with the stream.
-     * It's sent on a finally clause that covers the audio transmission execution so it gets sent event if some
-     * exception interrupms the audio transmission.
+     * It's sent on a finally clause that covers the audio transmission execution so it gets sent even if some
+     * exception interrupts the audio transmission.
      */
     private static final byte STREAM_TERMINATION_BYTE = (byte) 254;
     private static final Set<AudioFormat> SUPPORTED_FORMATS = Set.of(AudioFormat.WAV, AudioFormat.PCM_SIGNED);
