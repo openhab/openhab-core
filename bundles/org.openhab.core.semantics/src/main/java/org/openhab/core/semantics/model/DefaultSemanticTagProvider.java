@@ -76,6 +76,7 @@ public class DefaultSemanticTagProvider implements SemanticTagProvider {
         defaultTags.add(DefaultSemanticTags.Location.PORCH);
         defaultTags.add(DefaultSemanticTags.Location.TERRACE);
         defaultTags.add(DefaultSemanticTags.Point.ALARM);
+        defaultTags.add(DefaultSemanticTags.Point.CALCULATION);
         defaultTags.add(DefaultSemanticTags.Point.CONTROL);
         defaultTags.add(DefaultSemanticTags.Point.SWITCH);
         defaultTags.add(DefaultSemanticTags.Point.FORECAST);
@@ -107,6 +108,7 @@ public class DefaultSemanticTagProvider implements SemanticTagProvider {
         defaultTags.add(DefaultSemanticTags.Property.HEATING);
         defaultTags.add(DefaultSemanticTags.Property.HUMIDITY);
         defaultTags.add(DefaultSemanticTags.Property.ILLUMINANCE);
+        defaultTags.add(DefaultSemanticTags.Property.INFO);
         defaultTags.add(DefaultSemanticTags.Property.LEVEL);
         defaultTags.add(DefaultSemanticTags.Property.LIGHT);
         defaultTags.add(DefaultSemanticTags.Property.LOW_BATTERY);
@@ -124,6 +126,7 @@ public class DefaultSemanticTagProvider implements SemanticTagProvider {
         defaultTags.add(DefaultSemanticTags.Property.POWER);
         defaultTags.add(DefaultSemanticTags.Property.PRESENCE);
         defaultTags.add(DefaultSemanticTags.Property.PRESSURE);
+        defaultTags.add(DefaultSemanticTags.Property.PROGRESS);
         defaultTags.add(DefaultSemanticTags.Property.QUALITY_OF_SERVICE);
         defaultTags.add(DefaultSemanticTags.Property.RAIN);
         defaultTags.add(DefaultSemanticTags.Property.SIGNAL_STRENGTH);
@@ -143,6 +146,7 @@ public class DefaultSemanticTagProvider implements SemanticTagProvider {
         defaultTags.add(DefaultSemanticTags.Property.WIND);
         defaultTags.add(DefaultSemanticTags.Equipment.ALARM_DEVICE);
         defaultTags.add(DefaultSemanticTags.Equipment.ALARM_SYSTEM);
+        defaultTags.add(DefaultSemanticTags.Equipment.APPLICATION);
         defaultTags.add(DefaultSemanticTags.Equipment.AUDIO_VISUAL);
         defaultTags.add(DefaultSemanticTags.Equipment.DISPLAY);
         defaultTags.add(DefaultSemanticTags.Equipment.PROJECTOR);
