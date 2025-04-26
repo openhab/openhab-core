@@ -56,10 +56,10 @@ import org.yaml.snakeyaml.Yaml;
 @NonNullByDefault
 public class YamlModelRepositoryImplTest {
     private static final Path SOURCE_PATH = Path.of("src/test/resources/model");
-    private static final String MODEL_NAME = "model";
-    private static final Path MODEL_PATH = Path.of(MODEL_NAME + ".yaml");
-    private static final String MODEL2_NAME = "model2";
-    private static final Path MODEL2_PATH = Path.of(MODEL2_NAME + ".yaml");
+    private static final String MODEL_NAME = "model.yaml";
+    private static final Path MODEL_PATH = Path.of(MODEL_NAME);
+    private static final String MODEL2_NAME = "model2.yaml";
+    private static final Path MODEL2_PATH = Path.of(MODEL2_NAME);
 
     private @Mock @NonNullByDefault({}) WatchService watchServiceMock;
     private @TempDir @NonNullByDefault({}) Path watchPath;
