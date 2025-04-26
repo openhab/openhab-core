@@ -33,9 +33,9 @@ import org.openhab.core.model.yaml.internal.util.YamlElementUtils;
 @YamlElementName("things")
 public class YamlThingDTO implements YamlElement, Cloneable {
 
-    private static final Pattern THING_UID_SEGMENT_PATTERN = Pattern.compile("^[a-zA-Z0-9_][a-zA-Z0-9_-]*$");
+    private static final Pattern THING_UID_SEGMENT_PATTERN = Pattern.compile("[a-zA-Z0-9_][a-zA-Z0-9_-]*");
     private static final Pattern CHANNEL_ID_PATTERN = Pattern
-            .compile("^[a-zA-Z0-9_][a-zA-Z0-9_-]*(#[a-zA-Z0-9_][a-zA-Z0-9_-]*)?$");
+            .compile("[a-zA-Z0-9_][a-zA-Z0-9_-]*(#[a-zA-Z0-9_][a-zA-Z0-9_-]*)?");
 
     public String uid;
     public Boolean isBridge;
@@ -90,11 +90,10 @@ public class YamlThingDTO implements YamlElement, Cloneable {
             ok = false;
         }
         for (String segment : segments) {
-            if (!THING_UID_SEGMENT_PATTERN.matcher(segment).find()) {
+            if (!THING_UID_SEGMENT_PATTERN.matcher(segment).matches()) {
                 if (errors != null) {
-                    errors.add(
-                            "thing %s: segement \"%s\" in uid is not matching the expected syntax [a-zA-Z0-9_][a-zA-Z0-9_-]*"
-                                    .formatted(uid, segment));
+                    errors.add("thing %s: segment \"%s\" in uid is not matching the expected syntax %s".formatted(uid,
+                            segment, THING_UID_SEGMENT_PATTERN.pattern()));
                 }
                 ok = false;
             }
@@ -109,11 +108,10 @@ public class YamlThingDTO implements YamlElement, Cloneable {
                 ok = false;
             }
             for (String segment : segments) {
-                if (!THING_UID_SEGMENT_PATTERN.matcher(segment).find()) {
+                if (!THING_UID_SEGMENT_PATTERN.matcher(segment).matches()) {
                     if (errors != null) {
-                        errors.add(
-                                "thing %s: segement \"%s\" in bridge is not matching the expected syntax [a-zA-Z0-9_][a-zA-Z0-9_-]*"
-                                        .formatted(uid, segment));
+                        errors.add("thing %s: segment \"%s\" in bridge is not matching the expected syntax %s"
+                                .formatted(uid, segment, THING_UID_SEGMENT_PATTERN.pattern()));
                     }
                     ok = false;
                 }
@@ -122,11 +120,10 @@ public class YamlThingDTO implements YamlElement, Cloneable {
         if (channels != null) {
             for (Map.Entry<@NonNull String, @NonNull YamlChannelDTO> entry : channels.entrySet()) {
                 String channelId = entry.getKey();
-                if (!CHANNEL_ID_PATTERN.matcher(channelId).find()) {
+                if (!CHANNEL_ID_PATTERN.matcher(channelId).matches()) {
                     if (errors != null) {
-                        errors.add(
-                                "thing %s: channel id \"%s\" is not matching the expected syntax [a-zA-Z0-9_][a-zA-Z0-9_-]*(#[a-zA-Z0-9_][a-zA-Z0-9_-]*)?"
-                                        .formatted(uid, channelId));
+                        errors.add("thing %s: channel id \"%s\" is not matching the expected syntax %s".formatted(uid,
+                                channelId, CHANNEL_ID_PATTERN.pattern()));
                     }
                     ok = false;
                 }
