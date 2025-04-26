@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
@@ -83,6 +84,7 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
     private static final int DEFAULT_MODEL_VERSION = 2;
     private static final String VERSION = "version";
     private static final String READ_ONLY = "readOnly";
+    private static final Set<String> KNOWN_ELEMENTS = Set.of("tags", "things");
 
     private final Logger logger = LoggerFactory.getLogger(YamlModelRepositoryImpl.class);
 
@@ -274,10 +276,6 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
                     } else {
                         model.getNodes().put(elementName, newNodeElements);
                     }
-
-                    if (elementListeners.isEmpty()) {
-                        logger.warn("Element '{}' in model {} is unknown.", elementName, modelName);
-                    }
                 }
 
                 // remove removed elements
@@ -302,6 +300,8 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
                                 });
                             });
                 }
+
+                checkElementNames(modelName, model);
             } else {
                 logger.trace("Ignored {}", fullPath);
             }
@@ -347,21 +347,20 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
         elementListeners.computeIfAbsent(elementName, k -> new CopyOnWriteArrayList<>()).add(listener);
 
         // iterate over all models and notify the new listener of already existing models with this type
-        for (Map.Entry<String, YamlModelWrapper> model : modelCache.entrySet()) {
-            String modelName = model.getKey();
-            int modelVersion = model.getValue().getVersion();
+        modelCache.forEach((modelName, model) -> {
+            int modelVersion = model.getVersion();
             if (!listener.isVersionSupported(modelVersion)) {
-                continue;
+                return;
             }
             if (listener.isDeprecated()) {
                 logger.warn(
                         "Element {} in model {} version {} is still supported but deprecated, please consider migrating your model to a more recent version",
                         elementName, modelName, modelVersion);
             }
-            List<JsonNode> modelNodes = model.getValue().getNodesV1().getOrDefault(elementName, List.of());
-            JsonNode modelMapNode = model.getValue().getNodes().get(elementName);
+            List<JsonNode> modelNodes = model.getNodesV1().getOrDefault(elementName, List.of());
+            JsonNode modelMapNode = model.getNodes().get(elementName);
             if (modelNodes.isEmpty() && modelMapNode == null) {
-                continue;
+                return;
             }
             List<String> errors = new ArrayList<>();
             List<String> warnings = new ArrayList<>();
@@ -373,7 +372,8 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
                 logger.info("YAML model {}: {}", modelName, warning);
             });
             listener.addedModel(modelName, modelElements);
-        }
+            checkElementNames(modelName, model);
+        });
     }
 
     public void removeYamlModelListener(YamlModelListener<? extends YamlElement> listener) {
@@ -382,6 +382,17 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
             v.remove(listener);
             return v.isEmpty() ? null : v;
         });
+    }
+
+    private void checkElementNames(String modelName, YamlModelWrapper model) {
+        Set<String> elementListenerNames = elementListeners.keySet();
+        if (elementListenerNames.containsAll(KNOWN_ELEMENTS)) {
+            Set<String> modelElementNames = model.getVersion() == 1 ? model.getNodesV1().keySet()
+                    : model.getNodes().keySet();
+            modelElementNames.stream().filter(e -> !KNOWN_ELEMENTS.contains(e)).forEach(unknownElement -> {
+                logger.warn("Element '{}' in model {} is unknown.", unknownElement, modelName);
+            });
+        }
     }
 
     private String getElementName(Class<? extends YamlElement> elementClass) {
