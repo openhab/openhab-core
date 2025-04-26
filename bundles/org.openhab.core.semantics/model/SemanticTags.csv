@@ -52,11 +52,11 @@ Property,ParticulateMatter,AirQuality,Particulate Matter,PM25,Particulate matter
 Property,Pollen,AirQuality,Pollen,,Pollen reading
 Property,Radon,AirQuality,Radon,,Radon reading
 Property,VOC,AirQuality,VOC,Volatile Organic Compounds,Volatile organic compounds reading
-Property,Airconditioning,,Airconditioning,,Related to airconditioning
+Property,Airconditioning,,Airconditioning,,
 Property,Airflow,,Airflow,,
 Property,App,,App,Application,Software program
 Property,Brightness,,Brightness,,Brightness of a light source
-Property,Channel,,Channel,,Radio or TV channel selection
+Property,Channel,,Channel,,Media channel selection
 Property,Color,,Color,,
 Property,ColorTemperature,,Color Temperature,,Color temperature of a light source
 Property,Current,,Current,,Electric current
@@ -64,8 +64,8 @@ Property,Duration,,Duration,,Time duration
 Property,Enabled,,Enabled,,Enabled state
 Property,Energy,,Energy,,Energy consumption or production
 Property,Frequency,,Frequency,,
-Property,Gas,,Gas,,Gas measurement
-Property,Heating,,Heating,,Related to heating
+Property,Gas,,Gas,,
+Property,Heating,,Heating,,
 Property,Humidity,,Humidity,,Humidity value
 Property,Illuminance,,Illuminance,,Illuminance value
 Property,Info,,Information,,General information
@@ -98,7 +98,7 @@ Property,Temperature,,Temperature,Temperatures,Temperature measurement
 Property,Tilt,,Tilt,,"Tilt of a blind, shade or shutter"
 Property,Timestamp,,Timestamp,,Timestamp of an event
 Property,Ultraviolet,,Ultraviolet,UV,Ultraviolet measurement
-Property,Ventilation,,Ventilation,,Related to ventilation
+Property,Ventilation,,Ventilation,,
 Property,Vibration,,Vibration,,Vibration level
 Property,Voltage,,Voltage,,Electric voltage
 Property,Water,,Water,,Water measurement
@@ -112,14 +112,14 @@ Equipment,Projector,Display,Projector,"Projectors, Beamer, Beamers",Projector
 Equipment,Television,Display,Television,"Televisions, TV, TVs",Television
 Equipment,MediaPlayer,AudioVisual,Media Player,,Media player
 Equipment,Receiver,AudioVisual,Receiver,"Receivers, Audio Receiver, Audio Receivers, AV Receiver, AV Receivers", AV Receiver
-Equipment,Screen,AudioVisual,Screen,Screens,Computer screen
+Equipment,Screen,AudioVisual,Screen,Screens,Visual display screen
 Equipment,Speaker,AudioVisual,Speaker,Speakers,Loudspeaker
 Equipment,Bed,,Bed,,Bed
 Equipment,Camera,,Camera,Cameras,Camera
 Equipment,CleaningRobot,,Cleaning Robot,"Cleaning Robots, Vacuum robot, Vacuum robots",Cleaning robot
 Equipment,Computer,,Computer,,Computer
 Equipment,ControlDevice,,Control Device,,Control device
-Equipment,Button,ControlDevice,Button,,Push button
+Equipment,Button,ControlDevice,Button,,Push or touch button
 Equipment,Dial,ControlDevice,Dial,Rotary Dial,Rotary dial
 Equipment,Keypad,ControlDevice,Keypad,,Keypad
 Equipment,Slider,ControlDevice,Slider,,Slider control
@@ -133,11 +133,11 @@ Equipment,Gate,Door,Gate,Gates,Gate
 Equipment,InnerDoor,Door,Inner Door,Inner Doors,Inner door
 Equipment,SideDoor,Door,Side Door,Side Doors,Side door
 Equipment,Doorbell,,Doorbell,Doorbells,Doorbell
-Equipment,DrinkingWater,,Drinking Water,Potable Water,Related to drinking water
+Equipment,DrinkingWater,,Drinking Water,Potable Water,
 Equipment,HotWaterFaucet,DrinkingWater,Hot Water Faucet,"Hot Water Tap, Boiling Water Tap, Boiling Water Faucet",Hot water faucet
 Equipment,WaterFilter,DrinkingWater,Water Filter,,Water filter
 Equipment,WaterSoftener,DrinkingWater,Water Softener,,Water softener
-Equipment,HVAC,,HVAC,"Heating, Ventilation, Air Conditioning, A/C, A/Cs, AC",Related to Heating Ventilation or AirConditioning
+Equipment,HVAC,,HVAC,"Heating, Ventilation, Air Conditioning, A/C, A/Cs, AC",Heating Ventilation or AirConditioning
 Equipment,AirConditioner,HVAC,Air Conditioner,,Air conditioner
 Equipment,AirFilter,HVAC,Air Filter,,Air filter
 Equipment,Boiler,HVAC,Boiler,Boilers,Boiler
@@ -155,8 +155,8 @@ Equipment,RadiatorControl,HVAC,Radiator Control,"Radiator Controls, Radiator, Ra
 Equipment,SmartVent,HVAC,Smart Vent,,Smart ventilation device
 Equipment,Thermostat,HVAC,Thermostat,,Thermostat
 Equipment,WaterHeater,HVAC,Water Heater,Water Boiler,Water heater
-Equipment,Horticulture,,Horticulture,,Related to horticulture
-Equipment,Irrigation,Horticulture,Irrigation,"Sprinkler, Drip System",Related to irrigation
+Equipment,Horticulture,,Horticulture,,
+Equipment,Irrigation,Horticulture,Irrigation,"Sprinkler, Drip System",
 Equipment,LawnMower,Horticulture,Lawn Mower,Lawn Mowers,Lawn mower
 Equipment,SoilSensor,Horticulture,Soil Sensor,Moisture Sensor,Soil sensor
 Equipment,LightSource,,Light Source,"Lights, Lighting",Light source
@@ -179,7 +179,7 @@ Equipment,Firewall,NetworkAppliance,Firewall,,Firewall
 Equipment,NetworkSwitch,NetworkAppliance,Network Switch,,Network switch
 Equipment,Router,NetworkAppliance,Router,,Network router
 Equipment,WirelessAccessPoint,NetworkAppliance,Wireless Access Point,"Access Point, WAP, WiFi, WiFi Access Point",Wireless access point
-Equipment,PetCare,,Pet Care,,Related to pet care
+Equipment,PetCare,,Pet Care,,
 Equipment,Aquarium,PetCare,Aquarium,Fish Tank,Aquarium
 Equipment,PetFeeder,PetCare,Pet Feeder,,Pet feeder
 Equipment,PetFlap,PetCare,Pet Flap,"Cat Flap, Dog Flap",Pet flap
@@ -230,7 +230,7 @@ Equipment,Car,Vehicle,Car,,
 Equipment,VoiceAssistant,,Voice Assistant,Voice Assistants,Voice assistant device
 Equipment,WebService,,Web Service,Web Services,Web service
 Equipment,WeatherService,WebService,Weather Service,Weather Services,Weather service
-Equipment,Wellness,,Wellness,,Related to wellness
+Equipment,Wellness,,Wellness,,
 Equipment,Chlorinator,Wellness,Chlorinator,,Water chlorinator
 Equipment,Jacuzzi,Wellness,Jacuzzi,"Spa, Hot Tub, Whirlpool",Jacuzzi
 Equipment,PoolCover,Wellness,Pool Cover,,Swimming pool cover
