@@ -218,6 +218,11 @@ public class DefaultSemanticTags {
                 "Alarm", //
                 "", //
                 "");
+        public static final SemanticTag CALCULATION = new SemanticTagImpl( //
+                "Point_Calculation", //
+                "Calculation", //
+                "", //
+                "");
         public static final SemanticTag CONTROL = new SemanticTagImpl( //
                 "Point_Control", //
                 "Control", //
@@ -376,6 +381,11 @@ public class DefaultSemanticTags {
                 "Illuminance", //
                 "", //
                 "");
+        public static final SemanticTag INFO = new SemanticTagImpl( //
+                "Property_Info", //
+                "Information", //
+                "", //
+                "");
         public static final SemanticTag LEVEL = new SemanticTagImpl( //
                 "Property_Level", //
                 "Level", //
@@ -459,6 +469,11 @@ public class DefaultSemanticTags {
         public static final SemanticTag PRESSURE = new SemanticTagImpl( //
                 "Property_Pressure", //
                 "Pressure", //
+                "", //
+                "");
+        public static final SemanticTag PROGRESS = new SemanticTagImpl( //
+                "Property_Progress", //
+                "Progress", //
                 "", //
                 "");
         public static final SemanticTag QUALITY_OF_SERVICE = new SemanticTagImpl( //
@@ -559,6 +574,11 @@ public class DefaultSemanticTags {
                 "Alarm System", //
                 "", //
                 "Alarm Systems");
+        public static final SemanticTag APPLICATION = new SemanticTagImpl( //
+                "Equipment_Application", //
+                "Application", //
+                "", //
+                "Software program");
         public static final SemanticTag AUDIO_VISUAL = new SemanticTagImpl( //
                 "Equipment_AudioVisual", //
                 "Audio Visual", //
