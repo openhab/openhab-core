@@ -471,6 +471,11 @@ public class DefaultSemanticTags {
                 "Pressure", //
                 "", //
                 "");
+        public static final SemanticTag PROGRESS = new SemanticTagImpl( //
+                "Property_Progress", //
+                "Progress", //
+                "", //
+                "");
         public static final SemanticTag QUALITY_OF_SERVICE = new SemanticTagImpl( //
                 "Property_QualityOfService", //
                 "Quality of Service", //
