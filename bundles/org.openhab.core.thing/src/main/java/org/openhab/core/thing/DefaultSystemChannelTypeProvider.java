@@ -286,7 +286,7 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
             .state(SYSTEM_CHANNEL_TYPE_UID_MEDIA_TITLE, "Media Title", CoreItemFactory.STRING)
             .withDescription("Title of a (played) media file")
             .withStateDescriptionFragment(StateDescriptionFragmentBuilder.create().withReadOnly(true).build())
-            .withTags(Point.STATUS).build();
+            .withTags(Point.STATUS, Property.INFO).build();
 
     /**
      * Media-artist: default system wide {@link ChannelType} which displays the artist of a (played) song
@@ -295,7 +295,7 @@ public class DefaultSystemChannelTypeProvider implements ChannelTypeProvider {
             .state(SYSTEM_CHANNEL_TYPE_UID_MEDIA_ARTIST, "Media Artist", CoreItemFactory.STRING)
             .withDescription("Artist of a (played) media file")
             .withStateDescriptionFragment(StateDescriptionFragmentBuilder.create().withReadOnly(true).build())
-            .withTags(Point.STATUS).build();
+            .withTags(Point.STATUS, Property.INFO).build();
 
     // weather channels
 
