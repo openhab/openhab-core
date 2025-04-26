@@ -117,7 +117,7 @@ public class ItemEventFactory extends AbstractEventFactory {
         String memberName = getMemberName(topic);
         ItemStateUpdatedEventPayloadBean bean = deserializePayload(payload, ItemStateUpdatedEventPayloadBean.class);
         State state = getState(bean.getType(), bean.getValue());
-        ZonedDateTime lastStateUpdate = bean.getLastUpdate();
+        ZonedDateTime lastStateUpdate = bean.getLastStateUpdate();
         return new GroupStateUpdatedEvent(topic, payload, itemName, memberName, state, lastStateUpdate, null);
     }
 
@@ -158,7 +158,7 @@ public class ItemEventFactory extends AbstractEventFactory {
         String itemName = getItemName(topic);
         ItemStateUpdatedEventPayloadBean bean = deserializePayload(payload, ItemStateUpdatedEventPayloadBean.class);
         State state = getState(bean.getType(), bean.getValue());
-        ZonedDateTime lastStateUpdate = bean.getLastUpdate();
+        ZonedDateTime lastStateUpdate = bean.getLastStateUpdate();
         return new ItemStateUpdatedEvent(topic, payload, itemName, state, lastStateUpdate, null);
     }
 
@@ -581,7 +581,7 @@ public class ItemEventFactory extends AbstractEventFactory {
     private static class ItemStateUpdatedEventPayloadBean {
         private @NonNullByDefault({}) String type;
         private @NonNullByDefault({}) String value;
-        private @Nullable ZonedDateTime lastUpdate;
+        private @Nullable ZonedDateTime lastStateUpdate;
 
         /**
          * Default constructor for deserialization e.g. by Gson.
@@ -590,10 +590,10 @@ public class ItemEventFactory extends AbstractEventFactory {
         protected ItemStateUpdatedEventPayloadBean() {
         }
 
-        public ItemStateUpdatedEventPayloadBean(String type, String value, @Nullable ZonedDateTime lastUpdate) {
+        public ItemStateUpdatedEventPayloadBean(String type, String value, @Nullable ZonedDateTime lastStateUpdate) {
             this.type = type;
             this.value = value;
-            this.lastUpdate = lastUpdate;
+            this.lastStateUpdate = lastStateUpdate;
         }
 
         public String getType() {
@@ -604,8 +604,8 @@ public class ItemEventFactory extends AbstractEventFactory {
             return value;
         }
 
-        public @Nullable ZonedDateTime getLastUpdate() {
-            return lastUpdate;
+        public @Nullable ZonedDateTime getLastStateUpdate() {
+            return lastStateUpdate;
         }
     }
 
