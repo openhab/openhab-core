@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.openhab.core.bundles</groupId>
     <artifactId>org.openhab.core.reactor.bundles</artifactId>
-    <version>4.3.5-SNAPSHOT</version>
+    <version>4.3.5</version>
   </parent>
 
   <artifactId>org.openhab.core.io.jetty.certificate</artifactId>
