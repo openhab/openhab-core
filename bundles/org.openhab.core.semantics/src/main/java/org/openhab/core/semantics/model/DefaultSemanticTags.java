@@ -471,6 +471,11 @@ public class DefaultSemanticTags {
                 "Pressure", //
                 "", //
                 "");
+        public static final SemanticTag PROGRESS = new SemanticTagImpl( //
+                "Property_Progress", //
+                "Progress", //
+                "", //
+                "");
         public static final SemanticTag QUALITY_OF_SERVICE = new SemanticTagImpl( //
                 "Property_QualityOfService", //
                 "Quality of Service", //
@@ -573,7 +578,7 @@ public class DefaultSemanticTags {
                 "Equipment_Application", //
                 "Application", //
                 "", //
-                "App, Software program");
+                "Software program");
         public static final SemanticTag AUDIO_VISUAL = new SemanticTagImpl( //
                 "Equipment_AudioVisual", //
                 "Audio Visual", //
