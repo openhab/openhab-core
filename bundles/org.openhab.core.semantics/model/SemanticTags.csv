@@ -47,11 +47,11 @@ Property,AirQuality,,Air Quality,,
 Property,AQI,AirQuality,AQI,Air Quality Index,Air Quality Index
 Property,CO,AirQuality,CO,Carbon Monoxide,Carbon monoxide
 Property,CO2,AirQuality,CO2,Carbon Dioxide,Carbon dioxide
-Property,Ozone,AirQuality,Ozone,,Ozone reading
-Property,ParticulateMatter,AirQuality,Particulate Matter,PM25,Particulate matter reading
-Property,Pollen,AirQuality,Pollen,,Pollen reading
-Property,Radon,AirQuality,Radon,,Radon reading
-Property,VOC,AirQuality,VOC,Volatile Organic Compounds,Volatile organic compounds reading
+Property,Ozone,AirQuality,Ozone,,
+Property,ParticulateMatter,AirQuality,Particulate Matter,PM25,
+Property,Pollen,AirQuality,Pollen,,
+Property,Radon,AirQuality,Radon,,
+Property,VOC,AirQuality,VOC,Volatile Organic Compounds,
 Property,Airconditioning,,Airconditioning,,
 Property,Airflow,,Airflow,,
 Property,App,,App,Application,Software program
@@ -62,22 +62,22 @@ Property,ColorTemperature,,Color Temperature,,Color temperature of a light sourc
 Property,Current,,Current,,Electric current
 Property,Duration,,Duration,,Time duration
 Property,Enabled,,Enabled,,Enabled state
-Property,Energy,,Energy,,Energy consumption or production
+Property,Energy,,Energy,,
 Property,Frequency,,Frequency,,
 Property,Gas,,Gas,,
 Property,Heating,,Heating,,
-Property,Humidity,,Humidity,,Humidity value
-Property,Illuminance,,Illuminance,,Illuminance value
+Property,Humidity,,Humidity,,
+Property,Illuminance,,Illuminance,,
 Property,Info,,Information,,General information
 Property,Level,,Level,,
 Property,Light,,Light,"Lights, Lighting",Control or status of a light
 Property,LowBattery,,Low Battery,,Low battery indication
 Property,MediaControl,,Media Control,,Audio- or visual- media control
 Property,Mode,,Mode,,Operating mode
-Property,Moisture,,Moisture,,Moisture value
+Property,Moisture,,Moisture,,
 Property,Motion,,Motion,,Motion detected
-Property,Noise,,Noise,,Noise measurement
-Property,Oil,,Oil,,Oil measurement
+Property,Noise,,Noise,,
+Property,Oil,,Oil,,
 Property,Opening,,Opening,,Opening of a door or window etc.
 Property,OpenLevel,Opening,Open Level,,Open position (analog) of a door or window etc.
 Property,OpenState,Opening,Open State,Open Closed,Open state (digital) of a door or window etc.
@@ -87,25 +87,25 @@ Property,Power,,Power,,
 Property,Presence,,Presence,,Presence detection
 Property,Pressure,,Pressure,,
 Property,Progress,,Progress,,
-Property,QualityOfService,,Quality of Service,,Quality of service
-Property,Rain,,Rain,,Rain measurement
+Property,QualityOfService,,Quality of Service,,
+Property,Rain,,Rain,,
 Property,SignalStrength,,Signal Strength,,
-Property,RSSI,SignalStrength,RSSI,Received Signal Strength Indication,Received signal strength indication
+Property,RSSI,SignalStrength,RSSI,Received Signal Strength Indication,
 Property,Smoke,,Smoke,,Smoke detection
 Property,SoundVolume,,Sound Volume,,Sound volume level
-Property,Speed,,Speed,,Speed measurement or setting
+Property,Speed,,Speed,,
 Property,Tampered,,Tampered,,Tampering detected
-Property,Temperature,,Temperature,Temperatures,Temperature measurement
+Property,Temperature,,Temperature,Temperatures,
 Property,Tilt,,Tilt,,"Tilt of a blind, shade or shutter"
 Property,Timestamp,,Timestamp,,Timestamp of an event
-Property,Ultraviolet,,Ultraviolet,UV,Ultraviolet measurement
+Property,Ultraviolet,,Ultraviolet,UV,
 Property,Ventilation,,Ventilation,,
-Property,Vibration,,Vibration,,Vibration level
-Property,Voltage,,Voltage,,Electric voltage
-Property,Water,,Water,,Water measurement
+Property,Vibration,,Vibration,,
+Property,Voltage,,Voltage,,
+Property,Water,,Water,,
 Property,Wind,,Wind,,Wind speed or direction
-Equipment,AlarmDevice,,Alarm Device,,Alarm device
-Equipment,AlarmSystem,,Alarm System,Alarm Systems,Alarm system
+Equipment,AlarmDevice,,Alarm Device,,
+Equipment,AlarmSystem,,Alarm System,Alarm Systems,
 Equipment,Application,,Application,"App, Software program",Software program
 Equipment,AudioVisual,,Audio Visual,,Audio visual device
 Equipment,Display,AudioVisual,Display,,Visual display
@@ -114,150 +114,150 @@ Equipment,Television,Display,Television,"Televisions, TV, TVs",Television
 Equipment,MediaPlayer,AudioVisual,Media Player,,Media player
 Equipment,Receiver,AudioVisual,Receiver,"Receivers, Audio Receiver, Audio Receivers, AV Receiver, AV Receivers", AV Receiver
 Equipment,Screen,AudioVisual,Screen,Screens,Visual display screen
-Equipment,Speaker,AudioVisual,Speaker,Speakers,Loudspeaker
-Equipment,Bed,,Bed,,Bed
-Equipment,Camera,,Camera,Cameras,Camera
-Equipment,CleaningRobot,,Cleaning Robot,"Cleaning Robots, Vacuum robot, Vacuum robots",Cleaning robot
-Equipment,Computer,,Computer,,Computer
-Equipment,ControlDevice,,Control Device,,Control device
+Equipment,Speaker,AudioVisual,Speaker,Speakers,Loud-speaker
+Equipment,Bed,,Bed,,
+Equipment,Camera,,Camera,Cameras,
+Equipment,CleaningRobot,,Cleaning Robot,"Cleaning Robots, Vacuum robot, Vacuum robots",
+Equipment,Computer,,Computer,,
+Equipment,ControlDevice,,Control Device,,
 Equipment,Button,ControlDevice,Button,,Push or touch button
 Equipment,Dial,ControlDevice,Dial,Rotary Dial,Rotary dial
-Equipment,Keypad,ControlDevice,Keypad,,Keypad
+Equipment,Keypad,ControlDevice,Keypad,,
 Equipment,Slider,ControlDevice,Slider,,Slider control
 Equipment,WallSwitch,ControlDevice,Wall Switch,Wall Switches,Wall switch
-Equipment,Door,,Door,Doors,Door
-Equipment,BackDoor,Door,Back Door,Back Doors,Back door
-Equipment,CellarDoor,Door,Cellar Door,Cellar Doors,Cellar door
-Equipment,FrontDoor,Door,Front Door,"Front Doors, Frontdoor, Frontdoors",Front door
-Equipment,GarageDoor,Door,Garage Door,Garage Doors,Garage door
-Equipment,Gate,Door,Gate,Gates,Gate
-Equipment,InnerDoor,Door,Inner Door,Inner Doors,Inner door
-Equipment,SideDoor,Door,Side Door,Side Doors,Side door
-Equipment,Doorbell,,Doorbell,Doorbells,Doorbell
+Equipment,Door,,Door,Doors,
+Equipment,BackDoor,Door,Back Door,Back Doors,
+Equipment,CellarDoor,Door,Cellar Door,Cellar Doors,
+Equipment,FrontDoor,Door,Front Door,"Front Doors, Frontdoor, Frontdoors",
+Equipment,GarageDoor,Door,Garage Door,Garage Doors,
+Equipment,Gate,Door,Gate,Gates,
+Equipment,InnerDoor,Door,Inner Door,Inner Doors,
+Equipment,SideDoor,Door,Side Door,Side Doors,
+Equipment,Doorbell,,Doorbell,Doorbells,
 Equipment,DrinkingWater,,Drinking Water,Potable Water,
-Equipment,HotWaterFaucet,DrinkingWater,Hot Water Faucet,"Hot Water Tap, Boiling Water Tap, Boiling Water Faucet",Hot water faucet
-Equipment,WaterFilter,DrinkingWater,Water Filter,,Water filter
-Equipment,WaterSoftener,DrinkingWater,Water Softener,,Water softener
-Equipment,HVAC,,HVAC,"Heating, Ventilation, Air Conditioning, A/C, A/Cs, AC",Heating Ventilation or AirConditioning
-Equipment,AirConditioner,HVAC,Air Conditioner,,Air conditioner
-Equipment,AirFilter,HVAC,Air Filter,,Air filter
-Equipment,Boiler,HVAC,Boiler,Boilers,Boiler
-Equipment,Dehumidifier,HVAC,Dehumidifier,,Dehumidifier
-Equipment,Fan,HVAC,Fan,Fans,Fan
-Equipment,CeilingFan,Fan,Ceiling Fan,Ceiling Fans,Ceiling fan
-Equipment,ExhaustFan,Fan,Exhaust Fan,"Extract Fan, Toilet Fan",Exhaust fan
-Equipment,KitchenHood,Fan,Kitchen Hood,Kitchen Hoods,Kitchen hood
-Equipment,FloorHeating,HVAC,Floor Heating,"Underfloor Heating, Radiant Floor Heating",Floor heating
-Equipment,Furnace,HVAC,Furnace,"Wood Burner, Wood Heater",Furnace
-Equipment,HeatPump,HVAC,Heat Pump,,Heat pump
-Equipment,HeatRecovery,HVAC,Heat Recovery,Energy Recovery,Heat recovery
-Equipment,Humidifier,HVAC,Humidifier,,Humidifier
-Equipment,RadiatorControl,HVAC,Radiator Control,"Radiator Controls, Radiator, Radiators",Radiator control
+Equipment,HotWaterFaucet,DrinkingWater,Hot Water Faucet,"Hot Water Tap, Boiling Water Tap, Boiling Water Faucet",Hot water faucet or tap
+Equipment,WaterFilter,DrinkingWater,Water Filter,,
+Equipment,WaterSoftener,DrinkingWater,Water Softener,,
+Equipment,HVAC,,HVAC,"Heating, Ventilation, Air Conditioning, A/C, A/Cs, AC","Heating, Ventilation or AirConditioning"
+Equipment,AirConditioner,HVAC,Air Conditioner,,
+Equipment,AirFilter,HVAC,Air Filter,,
+Equipment,Boiler,HVAC,Boiler,Boilers,
+Equipment,Dehumidifier,HVAC,Dehumidifier,,
+Equipment,Fan,HVAC,Fan,Fans,
+Equipment,CeilingFan,Fan,Ceiling Fan,Ceiling Fans,
+Equipment,ExhaustFan,Fan,Exhaust Fan,"Extract Fan, Toilet Fan",
+Equipment,KitchenHood,Fan,Kitchen Hood,Kitchen Hoods,
+Equipment,FloorHeating,HVAC,Floor Heating,"Underfloor Heating, Radiant Floor Heating",
+Equipment,Furnace,HVAC,Furnace,"Wood Burner, Wood Heater",
+Equipment,HeatPump,HVAC,Heat Pump,,
+Equipment,HeatRecovery,HVAC,Heat Recovery,Energy Recovery,
+Equipment,Humidifier,HVAC,Humidifier,,
+Equipment,RadiatorControl,HVAC,Radiator Control,"Radiator Controls, Radiator, Radiators",
 Equipment,SmartVent,HVAC,Smart Vent,,Smart ventilation device
-Equipment,Thermostat,HVAC,Thermostat,,Thermostat
-Equipment,WaterHeater,HVAC,Water Heater,Water Boiler,Water heater
+Equipment,Thermostat,HVAC,Thermostat,,
+Equipment,WaterHeater,HVAC,Water Heater,Water Boiler,
 Equipment,Horticulture,,Horticulture,,
 Equipment,Irrigation,Horticulture,Irrigation,"Sprinkler, Drip System",
-Equipment,LawnMower,Horticulture,Lawn Mower,Lawn Mowers,Lawn mower
-Equipment,SoilSensor,Horticulture,Soil Sensor,Moisture Sensor,Soil sensor
-Equipment,LightSource,,Light Source,"Lights, Lighting",Light source
-Equipment,AccentLight,LightSource,Accent Light,,Accent light
-Equipment,Chandelier,LightSource,Chandelier,,Chandelier
-Equipment,Downlight,LightSource,Downlight,"Can Light, Pot Light",Downlight
-Equipment,FloodLight,LightSource,Flood Light,,Flood light
-Equipment,Lamp,LightSource,Lamp,,Lamp
-Equipment,LightStrip,LightSource,Light Strip,LED Strip,Light strip
-Equipment,LightStripe,LightSource,Light Stripe,Light Stripes,Light stripe
-Equipment,Lightbulb,LightSource,Light Bulb,"Lightbulbs, Bulb, Bulbs, Lamp, Lamps",Light bulb
+Equipment,LawnMower,Horticulture,Lawn Mower,Lawn Mowers,
+Equipment,SoilSensor,Horticulture,Soil Sensor,Moisture Sensor,
+Equipment,LightSource,,Light Source,"Lights, Lighting",
+Equipment,AccentLight,LightSource,Accent Light,,
+Equipment,Chandelier,LightSource,Chandelier,,
+Equipment,Downlight,LightSource,Downlight,"Can Light, Pot Light",
+Equipment,FloodLight,LightSource,Flood Light,,
+Equipment,Lamp,LightSource,Lamp,,
+Equipment,LightStrip,LightSource,Light Strip,LED Strip,
+Equipment,LightStripe,LightSource,Light Stripe,Light Stripes,
+Equipment,Lightbulb,LightSource,Light Bulb,"Lightbulbs, Bulb, Bulbs, Lamp, Lamps",
 Equipment,Pendant,LightSource,Pendant,,Pendant light
 Equipment,Sconce,LightSource,Sconce,,Sconce light
-Equipment,SpotLight,LightSource,Spot Light,,Spot light
-Equipment,TrackLight,LightSource,Track Light,,Track light
-Equipment,WallLight,LightSource,Wall Light,,Wall light
+Equipment,SpotLight,LightSource,Spot Light,,
+Equipment,TrackLight,LightSource,Track Light,,
+Equipment,WallLight,LightSource,Wall Light,,
 Equipment,Lock,,Lock,Locks,
-Equipment,NetworkAppliance,,Network Appliance,Network Appliances,Network appliance
-Equipment,Firewall,NetworkAppliance,Firewall,,Firewall
-Equipment,NetworkSwitch,NetworkAppliance,Network Switch,,Network switch
-Equipment,Router,NetworkAppliance,Router,,Network router
-Equipment,WirelessAccessPoint,NetworkAppliance,Wireless Access Point,"Access Point, WAP, WiFi, WiFi Access Point",Wireless access point
+Equipment,NetworkAppliance,,Network Appliance,Network Appliances,
+Equipment,Firewall,NetworkAppliance,Firewall,,
+Equipment,NetworkSwitch,NetworkAppliance,Network Switch,,
+Equipment,Router,NetworkAppliance,Router,,
+Equipment,WirelessAccessPoint,NetworkAppliance,Wireless Access Point,"Access Point, WAP, WiFi, WiFi Access Point",
 Equipment,PetCare,,Pet Care,,
-Equipment,Aquarium,PetCare,Aquarium,Fish Tank,Aquarium
-Equipment,PetFeeder,PetCare,Pet Feeder,,Pet feeder
-Equipment,PetFlap,PetCare,Pet Flap,"Cat Flap, Dog Flap",Pet flap
-Equipment,PowerOutlet,,Power Outlet,"Power Outlets, Outlet, Outlets, Smart Plug, Smart Plugs",Power outlet
-Equipment,PowerSupply,,Power Supply,,Power supply
-Equipment,Battery,PowerSupply,Battery,Batteries,Battery
-Equipment,EVSE,PowerSupply,Electric Vehicle Supply Equipment,"EV Charger, Car Charger",Electric vehicle supply equipment
+Equipment,Aquarium,PetCare,Aquarium,Fish Tank,
+Equipment,PetFeeder,PetCare,Pet Feeder,,
+Equipment,PetFlap,PetCare,Pet Flap,"Cat Flap, Dog Flap",
+Equipment,PowerOutlet,,Power Outlet,"Power Outlets, Outlet, Outlets, Smart Plug, Smart Plugs",
+Equipment,PowerSupply,,Power Supply,,
+Equipment,Battery,PowerSupply,Battery,Batteries,
+Equipment,EVSE,PowerSupply,Electric Vehicle Supply Equipment,"EV Charger, Car Charger",
 Equipment,Generator,PowerSupply,Generator,Emergency Generator,Electricity generator
 Equipment,Inverter,PowerSupply,Inverter,Inverters,Electrical power inverter
-Equipment,SolarPanel,PowerSupply,Solar Panel,,Solar panel
+Equipment,SolarPanel,PowerSupply,Solar Panel,,
 Equipment,TransferSwitch,PowerSupply,Transfer Switch,,Electricity transfer switch
-Equipment,UPS,PowerSupply,UPS,Uninterruptible Power Supply,Uninterruptible power supply
-Equipment,WindGenerator,PowerSupply,Wind Generator,Wind Turbine,Wind generator
-Equipment,Printer,,Printer,,Printer
-Equipment,Printer3D,Printer,3D Printer,,3D printer
+Equipment,UPS,PowerSupply,UPS,Uninterruptible Power Supply,
+Equipment,WindGenerator,PowerSupply,Wind Generator,Wind Turbine,
+Equipment,Printer,,Printer,,
+Equipment,Printer3D,Printer,3D Printer,,
 Equipment,Pump,,Pump,Pumps,
 Equipment,WaterFeature,Pump,Water Feature,"Waterfall, Pond Pump",
 Equipment,RemoteControl,,Remote Control,Remote Controls,Remote control device
-Equipment,Sensor,,Sensor,Sensors,Sensor
-Equipment,AirQualitySensor,Sensor,Air Quality Sensor,,Air quality sensor
-Equipment,CO2Sensor,Sensor,CO2 Sensor,,Co2 sensor
-Equipment,COSensor,Sensor,CO Sensor,,Co sensor
-Equipment,ContactSensor,Sensor,Contact Sensor,,Contact sensor
-Equipment,ElectricMeter,Sensor,Electric Meter,,Electric meter
-Equipment,FireDetector,Sensor,Fire Detector,,Fire detector
-Equipment,FlameDetector,FireDetector,Flame Detector,,Flame detector
-Equipment,HeatDetector,FireDetector,Heat Detector,,Heat detector
-Equipment,SmokeDetector,FireDetector,Smoke Detector,Smoke Detectors,Smoke detector
-Equipment,GasMeter,Sensor,Gas Meter,,Gas meter
-Equipment,GlassBreakDetector,Sensor,Glass Break Detector,,Glass break detector
-Equipment,HumiditySensor,Sensor,Humidity Sensor,Hygrometer,Humidity sensor
-Equipment,IlluminanceSensor,Sensor,Illuminance Sensor,,Illuminance sensor
-Equipment,LeakSensor,Sensor,Leak Sensor,,Leak sensor
-Equipment,OccupancySensor,Sensor,Occupancy Sensor,,Occupancy sensor
-Equipment,MotionDetector,OccupancySensor,Motion Detector,"Motion Detectors, Motion Sensor, Motion Sensors",Motion detector
-Equipment,TemperatureSensor,Sensor,Temperature Sensor,,Temperature sensor
-Equipment,VibrationSensor,Sensor,Vibration Sensor,,Vibration sensor
-Equipment,WaterMeter,Sensor,Water Meter,,Water meter
-Equipment,WaterQualitySensor,Sensor,Water Quality Sensor,,Water quality sensor
-Equipment,WeatherStation,Sensor,Weather Station,,Weather station
+Equipment,Sensor,,Sensor,Sensors,
+Equipment,AirQualitySensor,Sensor,Air Quality Sensor,,
+Equipment,CO2Sensor,Sensor,CO2 Sensor,,
+Equipment,COSensor,Sensor,CO Sensor,,
+Equipment,ContactSensor,Sensor,Contact Sensor,,
+Equipment,ElectricMeter,Sensor,Electric Meter,,
+Equipment,FireDetector,Sensor,Fire Detector,,
+Equipment,FlameDetector,FireDetector,Flame Detector,,
+Equipment,HeatDetector,FireDetector,Heat Detector,,
+Equipment,SmokeDetector,FireDetector,Smoke Detector,Smoke Detectors,
+Equipment,GasMeter,Sensor,Gas Meter,,
+Equipment,GlassBreakDetector,Sensor,Glass Break Detector,,
+Equipment,HumiditySensor,Sensor,Humidity Sensor,Hygrometer,
+Equipment,IlluminanceSensor,Sensor,Illuminance Sensor,,
+Equipment,LeakSensor,Sensor,Leak Sensor,,
+Equipment,OccupancySensor,Sensor,Occupancy Sensor,,
+Equipment,MotionDetector,OccupancySensor,Motion Detector,"Motion Detectors, Motion Sensor, Motion Sensors",
+Equipment,TemperatureSensor,Sensor,Temperature Sensor,,
+Equipment,VibrationSensor,Sensor,Vibration Sensor,,
+Equipment,WaterMeter,Sensor,Water Meter,,
+Equipment,WaterQualitySensor,Sensor,Water Quality Sensor,,
+Equipment,WeatherStation,Sensor,Weather Station,,
 Equipment,Siren,,Siren,Sirens,Alarm siren
-Equipment,Smartphone,,Smartphone,"Smartphones, Phone, Phones",Smartphone
+Equipment,Smartphone,,Smartphone,"Smartphones, Phone, Phones",
 Equipment,Tool,,Tool,,Hand- or machine- tool
 Equipment,Tracker,,Tracker,,Location tracker
-Equipment,Valve,,Valve,Valves,Fluid valve
+Equipment,Valve,,Valve,Valves,
 Equipment,Vehicle,,Vehicle,,
 Equipment,Car,Vehicle,Car,,
-Equipment,VoiceAssistant,,Voice Assistant,Voice Assistants,Voice assistant device
-Equipment,WebService,,Web Service,Web Services,Web service
-Equipment,WeatherService,WebService,Weather Service,Weather Services,Weather service
+Equipment,VoiceAssistant,,Voice Assistant,Voice Assistants,
+Equipment,WebService,,Web Service,Web Services,
+Equipment,WeatherService,WebService,Weather Service,Weather Services,
 Equipment,Wellness,,Wellness,,
 Equipment,Chlorinator,Wellness,Chlorinator,,Water chlorinator
-Equipment,Jacuzzi,Wellness,Jacuzzi,"Spa, Hot Tub, Whirlpool",Jacuzzi
+Equipment,Jacuzzi,Wellness,Jacuzzi,"Spa, Hot Tub, Whirlpool",
 Equipment,PoolCover,Wellness,Pool Cover,,Swimming pool cover
 Equipment,PoolHeater,Wellness,Pool Heater,,Swimming pool heater
-Equipment,Sauna,Wellness,Sauna,Steam Room,Sauna
-Equipment,Shower,Wellness,Shower,,Shower
-Equipment,SwimmingPool,Wellness,Swimming Pool,"Swimming Pool, Pool",Swimming pool
+Equipment,Sauna,Wellness,Sauna,Steam Room,
+Equipment,Shower,Wellness,Shower,,
+Equipment,SwimmingPool,Wellness,Swimming Pool,"Swimming Pool, Pool",
 Equipment,WhiteGood,,White Good,White Goods,White goods appliance
-Equipment,AirFryer,WhiteGood,Air Fryer,,Air fryer
-Equipment,CoffeeMaker,WhiteGood,Coffee Maker,"Coffee Makers, Coffee Machine, Coffee Machines",Coffee maker
+Equipment,AirFryer,WhiteGood,Air Fryer,,
+Equipment,CoffeeMaker,WhiteGood,Coffee Maker,"Coffee Makers, Coffee Machine, Coffee Machines",
 Equipment,Cooktop,WhiteGood,Cooktop,Hob,Cooktop appliance
-Equipment,Dishwasher,WhiteGood,Dishwasher,Dishwashers,Dishwasher
-Equipment,Dryer,WhiteGood,Dryer,"Dryers, Tumble Dryer, Tumble Dryers",Laundry dryer
-Equipment,FoodProcessor,WhiteGood,Food Processor,,Food processor
-Equipment,Freezer,WhiteGood,Freezer,Freezers,Freezer
+Equipment,Dishwasher,WhiteGood,Dishwasher,Dishwashers,
+Equipment,Dryer,WhiteGood,Dryer,"Dryers, Tumble Dryer, Tumble Dryers",Laundry (tumble) dryer
+Equipment,FoodProcessor,WhiteGood,Food Processor,,
+Equipment,Freezer,WhiteGood,Freezer,Freezers,
 Equipment,Fryer,WhiteGood,Fryer,,Deep fryer
-Equipment,IceMaker,WhiteGood,Ice Maker,,Ice maker
+Equipment,IceMaker,WhiteGood,Ice Maker,,
 Equipment,Microwave,WhiteGood,Microwave,,Microwave cooker
 Equipment,Mixer,WhiteGood,Mixer,,Food mixer
-Equipment,Oven,WhiteGood,Oven,Ovens,Oven
+Equipment,Oven,WhiteGood,Oven,Ovens,
 Equipment,Range,WhiteGood,Range,,Kitchen range
-Equipment,Refrigerator,WhiteGood,Refrigerator,Refrigerators,Refrigerator
-Equipment,Toaster,WhiteGood,Toaster,Toaster Oven,Toaster
-Equipment,WashingMachine,WhiteGood,Washing Machine,Washing Machines,Washing machine
-Equipment,Window,,Window,Windows,Window
-Equipment,WindowCovering,,Window Covering,,Window covering
+Equipment,Refrigerator,WhiteGood,Refrigerator,Refrigerators,
+Equipment,Toaster,WhiteGood,Toaster,Toaster Oven,
+Equipment,WashingMachine,WhiteGood,Washing Machine,Washing Machines,
+Equipment,Window,,Window,Windows,
+Equipment,WindowCovering,,Window Covering,,
 Equipment,Blinds,WindowCovering,Blinds,"Rollershutter, Rollershutters, Roller shutter, Roller shutters, Shutter, Shutters","Window blinds, shades or shutters"
 Equipment,Drapes,WindowCovering,Drapes,Curtains,Curtains or drapes
 Equipment,Zone,,Zone,,Equipment zone
