@@ -694,8 +694,10 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
             return Optional.of(objectMapper.treeToValue(node, elementClass));
         } catch (JsonProcessingException e) {
             if (errors != null) {
+                String msg = e.getMessage();
                 errors.add("Could not parse element %s to %s: %s".formatted(node.toPrettyString(),
-                        elementClass.getSimpleName(), e.getMessage()));
+                        elementClass.getSimpleName(),
+                        msg == null ? "" : msg.replace("at [Source: UNKNOWN; byte offset: #UNKNOWN] ", "")));
             }
             return Optional.empty();
         }
@@ -729,8 +731,10 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
                         elt.setId(id);
                     } catch (JsonProcessingException e) {
                         if (errors != null) {
+                            String msg = e.getMessage();
                             errors.add("could not parse element %s to %s: %s".formatted(node.toPrettyString(),
-                                    elementClass.getSimpleName(), e.getMessage()));
+                                    elementClass.getSimpleName(), msg == null ? ""
+                                            : msg.replace("at [Source: UNKNOWN; byte offset: #UNKNOWN] ", "")));
                         }
                     }
                 }
