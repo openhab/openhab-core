@@ -234,7 +234,6 @@ public class ModelRepositoryImpl implements ModelRepository {
 
     @Override
     public void generateSyntaxFromModel(OutputStream out, String modelType, EObject modelContent) {
-        String result = "";
         synchronized (resourceSet) {
             String name = "tmp_generated_syntax_%d.%s".formatted(++counter, modelType);
             Resource resource = resourceSet.createResource(URI.createURI(name));
