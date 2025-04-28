@@ -41,6 +41,8 @@ import org.openhab.core.model.yaml.YamlElement;
 import org.openhab.core.model.yaml.YamlElementName;
 import org.openhab.core.model.yaml.YamlModelListener;
 import org.openhab.core.model.yaml.YamlModelRepository;
+import org.openhab.core.model.yaml.internal.semantics.YamlSemanticTagDTO;
+import org.openhab.core.model.yaml.internal.things.YamlThingDTO;
 import org.openhab.core.service.WatchService;
 import org.openhab.core.service.WatchService.Kind;
 import org.osgi.service.component.annotations.Activate;
@@ -84,7 +86,10 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
     private static final int DEFAULT_MODEL_VERSION = 2;
     private static final String VERSION = "version";
     private static final String READ_ONLY = "readOnly";
-    private static final Set<String> KNOWN_ELEMENTS = Set.of("tags", "things");
+    private static final Set<String> KNOWN_ELEMENTS = Set.of( //
+            getElementName(YamlSemanticTagDTO.class), // "tags"
+            getElementName(YamlThingDTO.class) // "things"
+    );
 
     private final Logger logger = LoggerFactory.getLogger(YamlModelRepositoryImpl.class);
 
@@ -395,7 +400,7 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
         }
     }
 
-    private String getElementName(Class<? extends YamlElement> elementClass) {
+    private static String getElementName(Class<? extends YamlElement> elementClass) {
         YamlElementName annotation = elementClass.getAnnotation(YamlElementName.class);
         if (annotation == null) {
             throw new IllegalStateException("Class " + elementClass.getName()
