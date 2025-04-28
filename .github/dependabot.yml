@@ -17,8 +17,7 @@ updates:
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 10
-    labels:
-      - dependencies
+    labels: [ ]
     allow:
       - dependency-type: "development"
     ignore:
