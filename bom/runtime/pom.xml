@@ -22,7 +22,7 @@
     <jackson.version>2.18.2</jackson.version>
     <jetty.version>9.4.57.v20241219</jetty.version>
     <pax.logging.version>2.2.8</pax.logging.version>
-    <pax.web.version>8.0.30</pax.web.version>
+    <pax.web.version>9.0.20</pax.web.version>
     <swagger.version>2.2.28</swagger.version>
   </properties>
 
