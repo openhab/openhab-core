@@ -107,7 +107,7 @@
     <dependency>
       <groupId>org.eclipse.platform</groupId>
       <artifactId>org.eclipse.equinox.event</artifactId>
-      <version>1.6.200</version>
+      <version>1.7.200</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
