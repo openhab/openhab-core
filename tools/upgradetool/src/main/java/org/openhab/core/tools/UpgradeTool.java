@@ -50,7 +50,8 @@ public class UpgradeTool {
     private static final List<Upgrader> UPGRADERS = List.of( //
             new ItemUnitToMetadataUpgrader(), //
             new JSProfileUpgrader(), //
-            new ScriptProfileUpgrader() //
+            new ScriptProfileUpgrader(), //
+            new YamlConfigurationV1TagsUpgrader() // Added in 5.0
     );
 
     private static final Logger logger = LoggerFactory.getLogger(UpgradeTool.class);
