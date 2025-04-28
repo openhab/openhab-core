@@ -12,6 +12,7 @@
  */
 package org.openhab.core.internal.library.unit;
 
+import java.io.Serial;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.math.MathContext;
@@ -34,6 +35,7 @@ import tech.units.indriya.function.Calculus;
  */
 @NonNullByDefault
 public class CurrencyConverter extends AbstractConverter {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private final BigDecimal factor;

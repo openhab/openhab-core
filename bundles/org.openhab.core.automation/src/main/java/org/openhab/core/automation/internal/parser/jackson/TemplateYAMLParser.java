@@ -43,16 +43,16 @@ public class TemplateYAMLParser extends AbstractJacksonYAMLParser<Template> {
     public Set<Template> parse(InputStreamReader reader) throws ParsingException {
         try {
             Set<Template> templates = new HashSet<>();
-            JsonNode rootNode = yamlMapper.readTree(reader);
+            JsonNode rootNode = YAML_MAPPER.readTree(reader);
             if (rootNode.isArray()) {
-                List<RuleTemplateDTO> templateDtos = yamlMapper.convertValue(rootNode,
+                List<RuleTemplateDTO> templateDtos = YAML_MAPPER.convertValue(rootNode,
                         new TypeReference<List<RuleTemplateDTO>>() {
                         });
                 for (RuleTemplateDTO templateDTO : templateDtos) {
                     templates.add(RuleTemplateDTOMapper.map(templateDTO));
                 }
             } else {
-                RuleTemplateDTO templateDto = yamlMapper.convertValue(rootNode, new TypeReference<RuleTemplateDTO>() {
+                RuleTemplateDTO templateDto = YAML_MAPPER.convertValue(rootNode, new TypeReference<RuleTemplateDTO>() {
                 });
                 templates.add(RuleTemplateDTOMapper.map(templateDto));
             }

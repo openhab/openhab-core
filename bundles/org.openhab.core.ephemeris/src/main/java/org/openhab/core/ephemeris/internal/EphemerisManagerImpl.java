@@ -20,7 +20,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
@@ -223,7 +223,7 @@ public class EphemerisManagerImpl implements EphemerisManager, ConfigOptionProvi
     }
 
     private URL getUrl(String filename) throws FileNotFoundException {
-        if (Files.exists(Paths.get(filename))) {
+        if (Files.exists(Path.of(filename))) {
             try {
                 return (new URI("file:" + filename)).toURL();
             } catch (IllegalArgumentException | MalformedURLException | URISyntaxException e) {

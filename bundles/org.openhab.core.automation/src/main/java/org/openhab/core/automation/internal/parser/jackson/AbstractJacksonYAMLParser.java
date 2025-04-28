@@ -32,17 +32,17 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 public abstract class AbstractJacksonYAMLParser<T> implements Parser<T> {
 
     /** The YAML object mapper instance */
-    protected static final ObjectMapper yamlMapper;
+    protected static final ObjectMapper YAML_MAPPER;
 
     static {
-        yamlMapper = new ObjectMapper(new YAMLFactory());
-        yamlMapper.findAndRegisterModules();
+        YAML_MAPPER = new ObjectMapper(new YAMLFactory());
+        YAML_MAPPER.findAndRegisterModules();
     }
 
     @Override
     public void serialize(Set<T> dataObjects, OutputStreamWriter writer) throws Exception {
         for (T dataObject : dataObjects) {
-            yamlMapper.writeValue(writer, dataObject);
+            YAML_MAPPER.writeValue(writer, dataObject);
         }
     }
 }

@@ -722,7 +722,6 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
                             errors.add("could not create new instance of %s".formatted(elementClass.getSimpleName()));
                         }
                     }
-
                 } else {
                     try {
                         elt = objectMapper.treeToValue(node, elementClass);
