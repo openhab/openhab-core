@@ -32,6 +32,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -120,9 +122,9 @@ public class YamlModelRepositoryImplTest {
         List<Collection<FirstTypeDTO>> firstTypeCaptorValues = firstTypeCaptor.getAllValues();
         assertThat(firstTypeCaptorValues, hasSize(2));
         List<Collection<SecondTypeDTO>> secondTypeCaptor1Values = secondTypeCaptor1.getAllValues();
-        assertThat(firstTypeCaptorValues, hasSize(2));
+        assertThat(secondTypeCaptor1Values, hasSize(2));
         List<Collection<SecondTypeDTO>> secondTypeCaptor2Values = secondTypeCaptor2.getAllValues();
-        assertThat(firstTypeCaptorValues, hasSize(2));
+        assertThat(secondTypeCaptor2Values, hasSize(2));
 
         Collection<FirstTypeDTO> firstTypeElements = firstTypeCaptorValues.getFirst();
         Collection<SecondTypeDTO> secondTypeElements1 = secondTypeCaptor1Values.getFirst();
@@ -179,9 +181,9 @@ public class YamlModelRepositoryImplTest {
         List<Collection<FirstTypeDTO>> firstTypeCaptorValues = firstTypeCaptor.getAllValues();
         assertThat(firstTypeCaptorValues, hasSize(2));
         List<Collection<SecondTypeDTO>> secondTypeCaptor1Values = secondTypeCaptor1.getAllValues();
-        assertThat(firstTypeCaptorValues, hasSize(2));
+        assertThat(secondTypeCaptor1Values, hasSize(2));
         List<Collection<SecondTypeDTO>> secondTypeCaptor2Values = secondTypeCaptor2.getAllValues();
-        assertThat(firstTypeCaptorValues, hasSize(2));
+        assertThat(secondTypeCaptor2Values, hasSize(2));
 
         Collection<FirstTypeDTO> firstTypeElements = firstTypeCaptorValues.getFirst();
         Collection<SecondTypeDTO> secondTypeElements1 = secondTypeCaptor1Values.getFirst();
@@ -266,6 +268,50 @@ public class YamlModelRepositoryImplTest {
         // removed by update -second file
         assertThat(firstTypeCaptorValues.get(7), hasSize(1));
         assertThat(firstTypeCaptorValues.get(7), contains(new FirstTypeDTO("Third", "Third original")));
+    }
+
+    @ParameterizedTest
+    @CsvSource({ //
+            "modelFileUpdateRemovedElements.yaml,modelV2FileUpdateRemovedElements.yaml",
+            "modelFileUpdateRenamedElements.yaml,modelV2FileUpdateRenamedElements.yaml",
+            "modelFileUpdateRemovedVersion.yaml,modelV2FileUpdateRemovedVersion.yaml" //
+    })
+    public void testFileRemovedElements(String v1File, String v2File) throws IOException {
+        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
+        modelRepository.addYamlModelListener(firstTypeListener);
+
+        // File in v1 format
+        Files.copy(SOURCE_PATH.resolve("modelFileUpdatePost.yaml"), fullModelPath);
+        modelRepository.processWatchEvent(WatchService.Kind.CREATE, MODEL_PATH);
+        verify(firstTypeListener).addedModel(eq(MODEL_NAME), any());
+
+        Files.copy(SOURCE_PATH.resolve(v1File), fullModelPath, StandardCopyOption.REPLACE_EXISTING);
+        modelRepository.processWatchEvent(WatchService.Kind.MODIFY, MODEL_PATH);
+        verify(firstTypeListener).removedModel(eq(MODEL_NAME), firstTypeCaptor.capture());
+
+        Collection<FirstTypeDTO> firstTypeElements = firstTypeCaptor.getAllValues().getFirst();
+
+        // Check that the elements were removed
+        assertThat(firstTypeElements, hasSize(3));
+        assertThat(firstTypeElements, containsInAnyOrder(new FirstTypeDTO("First", "First original"),
+                new FirstTypeDTO("Second", "Second original"), new FirstTypeDTO("Third", "Third original")));
+
+        // File in v2 format
+        Files.copy(SOURCE_PATH.resolve("modelV2FileUpdatePost.yaml"), fullModel2Path);
+        modelRepository.processWatchEvent(WatchService.Kind.CREATE, MODEL2_PATH);
+        verify(firstTypeListener).addedModel(eq(MODEL2_NAME), any());
+
+        Files.copy(SOURCE_PATH.resolve(v2File), fullModel2Path, StandardCopyOption.REPLACE_EXISTING);
+        modelRepository.processWatchEvent(WatchService.Kind.MODIFY, MODEL2_PATH);
+        verify(firstTypeListener).removedModel(eq(MODEL2_NAME), firstTypeCaptor.capture());
+
+        assertThat(firstTypeCaptor.getAllValues(), hasSize(2));
+        firstTypeElements = firstTypeCaptor.getAllValues().getLast();
+
+        // Check that the elements were removed
+        assertThat(firstTypeElements, hasSize(3));
+        assertThat(firstTypeElements, containsInAnyOrder(new FirstTypeDTO("First", "First original"),
+                new FirstTypeDTO("Second", "Second original"), new FirstTypeDTO("Third", "Third original")));
     }
 
     @Test
