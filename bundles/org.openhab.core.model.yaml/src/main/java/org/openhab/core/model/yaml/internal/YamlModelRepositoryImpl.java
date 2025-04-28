@@ -230,8 +230,7 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
                     List<JsonNode> oldNodeV1Elements = model.getNodesV1().getOrDefault(elementName, List.of());
                     JsonNode oldNodeElements = model.getNodes().get(elementName);
 
-                    List<YamlModelListener<?>> elementListeners = getElementListeners(elementName, modelVersion);
-                    for (YamlModelListener<?> elementListener : elementListeners) {
+                    for (YamlModelListener<?> elementListener : getElementListeners(elementName, modelVersion)) {
                         Class<? extends YamlElement> elementClass = elementListener.getElementClass();
 
                         List<String> errors = new ArrayList<>();
