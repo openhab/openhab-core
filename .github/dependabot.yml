@@ -22,4 +22,3 @@ updates:
       - dependency-type: "development"
     ignore:
       - dependency-name: "org.openhab.core.*"
-      - dependency-name: "org.eclipse.smarthome.*"
