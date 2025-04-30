@@ -16,6 +16,7 @@ import static org.openhab.core.config.discovery.inbox.InboxPredicates.forThingUI
 
 import java.io.ByteArrayOutputStream;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -27,6 +28,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.annotation.security.RolesAllowed;
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.POST;
@@ -50,6 +52,8 @@ import org.openhab.core.config.discovery.DiscoveryResult;
 import org.openhab.core.config.discovery.inbox.Inbox;
 import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
+import org.openhab.core.io.rest.core.fileformat.FileFormatDTO;
+import org.openhab.core.io.rest.core.fileformat.extendedFileFormatDTO;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.ItemRegistry;
@@ -58,16 +62,26 @@ import org.openhab.core.items.MetadataKey;
 import org.openhab.core.items.MetadataRegistry;
 import org.openhab.core.items.fileconverter.ItemFileGenerator;
 import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingRegistry;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
 import org.openhab.core.thing.binding.ThingFactory;
+import org.openhab.core.thing.dto.ChannelDTO;
+import org.openhab.core.thing.dto.ThingDTO;
+import org.openhab.core.thing.dto.ThingDTOMapper;
 import org.openhab.core.thing.fileconverter.ThingFileGenerator;
+import org.openhab.core.thing.fileconverter.ThingFileParser;
 import org.openhab.core.thing.link.ItemChannelLink;
 import org.openhab.core.thing.link.ItemChannelLinkRegistry;
+import org.openhab.core.thing.type.BridgeType;
+import org.openhab.core.thing.type.ChannelType;
+import org.openhab.core.thing.type.ChannelTypeRegistry;
+import org.openhab.core.thing.type.ChannelTypeUID;
 import org.openhab.core.thing.type.ThingType;
 import org.openhab.core.thing.type.ThingTypeRegistry;
+import org.openhab.core.thing.util.ThingHelper;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -86,6 +100,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -98,6 +113,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  *
  * @author Laurent Garnier - Initial contribution
  * @author Laurent Garnier - Add YAML output for things
+ * @author Laurent Garnier - Add new API for conversion between file formats
  */
 @Component
 @JaxrsResource
@@ -183,9 +199,11 @@ public class FileFormatResource implements RESTResource {
     private final ThingRegistry thingRegistry;
     private final Inbox inbox;
     private final ThingTypeRegistry thingTypeRegistry;
+    private final ChannelTypeRegistry channelTypeRegistry;
     private final ConfigDescriptionRegistry configDescRegistry;
     private final Map<String, ItemFileGenerator> itemFileGenerators = new ConcurrentHashMap<>();
     private final Map<String, ThingFileGenerator> thingFileGenerators = new ConcurrentHashMap<>();
+    private final Map<String, ThingFileParser> thingFileParsers = new ConcurrentHashMap<>();
 
     @Activate
     public FileFormatResource(//
@@ -195,6 +213,7 @@ public class FileFormatResource implements RESTResource {
             final @Reference ThingRegistry thingRegistry, //
             final @Reference Inbox inbox, //
             final @Reference ThingTypeRegistry thingTypeRegistry, //
+            final @Reference ChannelTypeRegistry channelTypeRegistry, //
             final @Reference ConfigDescriptionRegistry configDescRegistry) {
         this.itemRegistry = itemRegistry;
         this.metadataRegistry = metadataRegistry;
@@ -202,6 +221,7 @@ public class FileFormatResource implements RESTResource {
         this.thingRegistry = thingRegistry;
         this.inbox = inbox;
         this.thingTypeRegistry = thingTypeRegistry;
+        this.channelTypeRegistry = channelTypeRegistry;
         this.configDescRegistry = configDescRegistry;
     }
 
@@ -225,6 +245,15 @@ public class FileFormatResource implements RESTResource {
 
     protected void removeThingFileGenerator(ThingFileGenerator thingFileGenerator) {
         thingFileGenerators.remove(thingFileGenerator.getFileFormatGenerator());
+    }
+
+    @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.MULTIPLE)
+    protected void addThingFileParser(ThingFileParser thingFileParser) {
+        thingFileParsers.put(thingFileParser.getFileFormatParser(), thingFileParser);
+    }
+
+    protected void removeThingFileParser(ThingFileParser thingFileParser) {
+        thingFileParsers.remove(thingFileParser.getFileFormatParser());
     }
 
     @POST
@@ -301,8 +330,109 @@ public class FileFormatResource implements RESTResource {
             }
         }
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        generator.generateFileFormat(outputStream, sortThings(things), hideDefaultParameters);
+        generator.generateFileFormat(outputStream, sortThings(things), true, hideDefaultParameters);
         return Response.ok(new String(outputStream.toByteArray())).build();
+    }
+
+    @POST
+    @RolesAllowed({ Role.ADMIN })
+    @Path("/create")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ "text/vnd.openhab.dsl.thing", "application/yaml" })
+    @Operation(operationId = "create", summary = "Create file format.", security = {
+            @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
+                    @ApiResponse(responseCode = "200", description = "OK", content = {
+                            @Content(mediaType = "text/vnd.openhab.dsl.thing", schema = @Schema(example = DSL_THINGS_EXAMPLE)),
+                            @Content(mediaType = "application/yaml", schema = @Schema(example = YAML_THINGS_EXAMPLE)) }),
+                    @ApiResponse(responseCode = "400", description = "Invalid JSON data."),
+                    @ApiResponse(responseCode = "415", description = "Unsupported media type.") })
+    public Response create(final @Context HttpHeaders httpHeaders,
+            @DefaultValue("false") @QueryParam("hideDefaultParameters") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters,
+            @DefaultValue("false") @QueryParam("hideDefaultChannels") @Parameter(description = "hide the non extensible channels having a default configuration") boolean hideDefaultChannels,
+            @RequestBody(description = "JSON data", required = true, content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = FileFormatDTO.class))) FileFormatDTO data) {
+        String acceptHeader = httpHeaders.getHeaderString(HttpHeaders.ACCEPT);
+        logger.debug("create: mediaType = {}", acceptHeader);
+
+        List<Thing> things = new ArrayList<>();
+        List<String> errors = new ArrayList<>();
+        if (!convertFromFileFormatDTO(data, things, errors)) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(String.join("\n", errors)).build();
+        }
+
+        String result = "";
+        ByteArrayOutputStream outputStream;
+        ThingFileGenerator thingGenerator = getThingFileGenerator(acceptHeader);
+        switch (acceptHeader) {
+            case "text/vnd.openhab.dsl.thing":
+                if (thingGenerator == null) {
+                    return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE)
+                            .entity("Unsupported media type '" + acceptHeader + "'!").build();
+                } else if (things.isEmpty()) {
+                    return Response.status(Response.Status.BAD_REQUEST).entity("No thing loaded from input").build();
+                }
+                outputStream = new ByteArrayOutputStream();
+                thingGenerator.generateFileFormat(outputStream, things, hideDefaultChannels, hideDefaultParameters);
+                result = new String(outputStream.toByteArray());
+                break;
+            case "application/yaml":
+                if (thingGenerator != null) {
+                    outputStream = new ByteArrayOutputStream();
+                    thingGenerator.generateFileFormat(outputStream, things, hideDefaultChannels, hideDefaultParameters);
+                    result = new String(outputStream.toByteArray());
+                }
+                break;
+            default:
+                return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE)
+                        .entity("Unsupported media type '" + acceptHeader + "'!").build();
+        }
+        return Response.ok(result).build();
+    }
+
+    @POST
+    @RolesAllowed({ Role.ADMIN })
+    @Path("/parse")
+    @Consumes({ "text/vnd.openhab.dsl.thing", "application/yaml" })
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(operationId = "parse", summary = "Parse file format.", security = {
+            @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
+                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = extendedFileFormatDTO.class))),
+                    @ApiResponse(responseCode = "400", description = "Invalid input data."),
+                    @ApiResponse(responseCode = "415", description = "Unsupported content type.") })
+    public Response parse(final @Context HttpHeaders httpHeaders,
+            @RequestBody(description = "file format syntax", required = true, content = {
+                    @Content(mediaType = "text/vnd.openhab.dsl.thing", schema = @Schema(example = DSL_THINGS_EXAMPLE)),
+                    @Content(mediaType = "application/yaml", schema = @Schema(example = YAML_THINGS_EXAMPLE)) }) String input) {
+        String contentTypetHeader = httpHeaders.getHeaderString(HttpHeaders.CONTENT_TYPE);
+        String acceptHeader = httpHeaders.getHeaderString(HttpHeaders.ACCEPT);
+        logger.debug("transform: contentType = {}, mediaType = {}", contentTypetHeader, acceptHeader);
+
+        // First parse the input
+        List<Thing> things = new ArrayList<>();
+        List<String> errors = new ArrayList<>();
+        List<String> warnings = new ArrayList<>();
+        ThingFileParser thingParser = getThingFileParser(contentTypetHeader);
+        switch (contentTypetHeader) {
+            case "text/vnd.openhab.dsl.thing":
+                if (thingParser == null) {
+                    return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE)
+                            .entity("Unsupported content type '" + contentTypetHeader + "'!").build();
+                } else if (!thingParser.parseFileFormat(input, things, errors, warnings)) {
+                    return Response.status(Response.Status.BAD_REQUEST).entity(String.join("\n", errors)).build();
+                } else if (things.isEmpty()) {
+                    return Response.status(Response.Status.BAD_REQUEST).entity("No thing loaded from input").build();
+                }
+                break;
+            case "application/yaml":
+                if (thingParser != null && !thingParser.parseFileFormat(input, things, errors, warnings)) {
+                    return Response.status(Response.Status.BAD_REQUEST).entity(String.join("\n", errors)).build();
+                }
+                break;
+            default:
+                return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE)
+                        .entity("Unsupported content type '" + contentTypetHeader + "'!").build();
+        }
+
+        return Response.ok(convertToFileFormatDTO(things, warnings)).build();
     }
 
     /*
@@ -463,6 +593,14 @@ public class FileFormatResource implements RESTResource {
         };
     }
 
+    private @Nullable ThingFileParser getThingFileParser(String contentType) {
+        return switch (contentType) {
+            case "text/vnd.openhab.dsl.thing" -> thingFileParsers.get("DSL");
+            case "application/yaml" -> thingFileParsers.get("YAML");
+            default -> null;
+        };
+    }
+
     private List<Thing> getThingsOrDiscoveryResult(List<String> thingUIDs) {
         return thingUIDs.stream().distinct().map(uid -> {
             ThingUID thingUID = new ThingUID(uid);
@@ -482,5 +620,180 @@ public class FileFormatResource implements RESTResource {
             }
             return simulateThing(discoveryResult, thingType);
         }).toList();
+    }
+
+    private boolean convertFromFileFormatDTO(FileFormatDTO data, List<Thing> things, List<String> errors) {
+        boolean ok = true;
+        if (data.things != null) {
+            for (ThingDTO thingBean : data.things) {
+                ThingUID thingUID = thingBean.UID == null ? null : new ThingUID(thingBean.UID);
+                ThingTypeUID thingTypeUID = new ThingTypeUID(thingBean.thingTypeUID);
+
+                ThingUID bridgeUID = null;
+
+                if (thingBean.bridgeUID != null) {
+                    bridgeUID = new ThingUID(thingBean.bridgeUID);
+                    if (thingUID != null && (!thingUID.getBindingId().equals(bridgeUID.getBindingId())
+                            || !thingUID.getBridgeIds().contains(bridgeUID.getId()))) {
+                        errors.add("Thing UID '" + thingUID + "' does not match bridge UID '" + bridgeUID + "'");
+                        ok = false;
+                        continue;
+                    }
+                }
+
+                // turn the ThingDTO's configuration into a Configuration
+                Configuration configuration = new Configuration(
+                        normalizeConfiguration(thingBean.configuration, thingTypeUID, thingUID));
+                if (thingUID != null) {
+                    normalizeChannels(thingBean, thingUID);
+                }
+
+                Thing thing = thingRegistry.createThingOfType(thingTypeUID, thingUID, bridgeUID, thingBean.label,
+                        configuration);
+
+                if (thing != null) {
+                    if (thingBean.properties != null) {
+                        for (Map.Entry<String, String> entry : thingBean.properties.entrySet()) {
+                            thing.setProperty(entry.getKey(), entry.getValue());
+                        }
+                    }
+                    if (thingBean.location != null) {
+                        thing.setLocation(thingBean.location);
+                    }
+                    if (thingBean.channels != null) {
+                        // The provided channels replace the channels provided by the thing type.
+                        ThingDTO thingChannels = new ThingDTO();
+                        thingChannels.channels = thingBean.channels;
+                        thing = ThingHelper.merge(thing, thingChannels);
+                    }
+                } else if (thingUID != null) {
+                    // if there wasn't any ThingFactory capable of creating the thing,
+                    // we create the Thing exactly the way we received it, i.e. we
+                    // cannot take its thing type into account for automatically
+                    // populating channels and properties.
+                    thing = ThingDTOMapper.map(thingBean,
+                            thingTypeRegistry.getThingType(thingTypeUID) instanceof BridgeType);
+                } else {
+                    errors.add("A thing UID must be provided, since no binding can create the thing!");
+                    ok = false;
+                    continue;
+                }
+
+                things.add(thing);
+            }
+        }
+        return ok;
+    }
+
+    private extendedFileFormatDTO convertToFileFormatDTO(List<Thing> things, List<String> warnings) {
+        extendedFileFormatDTO dto = new extendedFileFormatDTO();
+        dto.warnings = warnings.isEmpty() ? null : warnings;
+        if (!things.isEmpty()) {
+            dto.things = new ArrayList<>();
+            things.forEach(thing -> {
+                dto.things.add(ThingDTOMapper.map(thing));
+            });
+        }
+        return dto;
+    }
+
+    private @Nullable Map<String, @Nullable Object> normalizeConfiguration(
+            @Nullable Map<String, @Nullable Object> properties, ThingTypeUID thingTypeUID,
+            @Nullable ThingUID thingUID) {
+        if (properties == null || properties.isEmpty()) {
+            return properties;
+        }
+
+        ThingType thingType = thingTypeRegistry.getThingType(thingTypeUID);
+        if (thingType == null) {
+            return properties;
+        }
+
+        List<ConfigDescription> configDescriptions = new ArrayList<>(2);
+
+        URI descURI = thingType.getConfigDescriptionURI();
+        if (descURI != null) {
+            ConfigDescription typeConfigDesc = configDescRegistry.getConfigDescription(descURI);
+            if (typeConfigDesc != null) {
+                configDescriptions.add(typeConfigDesc);
+            }
+        }
+
+        if (thingUID != null) {
+            ConfigDescription thingConfigDesc = configDescRegistry
+                    .getConfigDescription(getConfigDescriptionURI(thingUID));
+            if (thingConfigDesc != null) {
+                configDescriptions.add(thingConfigDesc);
+            }
+        }
+
+        if (configDescriptions.isEmpty()) {
+            return properties;
+        }
+
+        return ConfigUtil.normalizeTypes(properties, configDescriptions);
+    }
+
+    private @Nullable Map<String, @Nullable Object> normalizeConfiguration(Map<String, @Nullable Object> properties,
+            ChannelTypeUID channelTypeUID, ChannelUID channelUID) {
+        if (properties == null || properties.isEmpty()) {
+            return properties;
+        }
+
+        ChannelType channelType = channelTypeRegistry.getChannelType(channelTypeUID);
+        if (channelType == null) {
+            return properties;
+        }
+
+        List<ConfigDescription> configDescriptions = new ArrayList<>(2);
+        URI descURI = channelType.getConfigDescriptionURI();
+        if (descURI != null) {
+            ConfigDescription typeConfigDesc = configDescRegistry.getConfigDescription(descURI);
+            if (typeConfigDesc != null) {
+                configDescriptions.add(typeConfigDesc);
+            }
+        }
+        if (getConfigDescriptionURI(channelUID) != null) {
+            ConfigDescription channelConfigDesc = configDescRegistry
+                    .getConfigDescription(getConfigDescriptionURI(channelUID));
+            if (channelConfigDesc != null) {
+                configDescriptions.add(channelConfigDesc);
+            }
+        }
+
+        if (configDescriptions.isEmpty()) {
+            return properties;
+        }
+
+        return ConfigUtil.normalizeTypes(properties, configDescriptions);
+    }
+
+    private void normalizeChannels(ThingDTO thingBean, ThingUID thingUID) {
+        if (thingBean.channels != null) {
+            for (ChannelDTO channelBean : thingBean.channels) {
+                if (channelBean.channelTypeUID != null) {
+                    channelBean.configuration = normalizeConfiguration(channelBean.configuration,
+                            new ChannelTypeUID(channelBean.channelTypeUID), new ChannelUID(thingUID, channelBean.id));
+                }
+            }
+        }
+    }
+
+    private URI getConfigDescriptionURI(ThingUID thingUID) {
+        String uriString = "thing:" + thingUID;
+        try {
+            return new URI(uriString);
+        } catch (URISyntaxException e) {
+            throw new BadRequestException("Invalid URI syntax: " + uriString);
+        }
+    }
+
+    private URI getConfigDescriptionURI(ChannelUID channelUID) {
+        String uriString = "channel:" + channelUID;
+        try {
+            return new URI(uriString);
+        } catch (URISyntaxException e) {
+            throw new BadRequestException("Invalid URI syntax: " + uriString);
+        }
     }
 }

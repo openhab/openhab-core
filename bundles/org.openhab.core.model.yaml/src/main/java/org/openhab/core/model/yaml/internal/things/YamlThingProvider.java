@@ -35,6 +35,7 @@ import org.openhab.core.i18n.LocaleProvider;
 import org.openhab.core.model.yaml.YamlElementName;
 import org.openhab.core.model.yaml.YamlModelListener;
 import org.openhab.core.model.yaml.YamlModelRepository;
+import org.openhab.core.model.yaml.internal.YamlModelRepositoryImpl;
 import org.openhab.core.service.ReadyMarker;
 import org.openhab.core.service.ReadyService;
 import org.openhab.core.service.StartLevelService;
@@ -120,7 +121,8 @@ public class YamlThingProvider extends AbstractProvider<Thing>
                                 thingsForModel.remove(oldThing);
                                 thingsForModel.add(newThing);
                                 logger.debug("Refreshing thing \'{}\' after successful retry", newThing.getUID());
-                                if (!ThingHelper.equals(oldThing, newThing)) {
+                                if (!ThingHelper.equals(oldThing, newThing)
+                                        && !YamlModelRepositoryImpl.isTemporaryModel(entry.getKey())) {
                                     notifyListenersAboutUpdatedElement(oldThing, newThing);
                                 }
                                 break;
@@ -175,7 +177,13 @@ public class YamlThingProvider extends AbstractProvider<Thing>
 
     @Override
     public Collection<Thing> getAll() {
-        return thingsMap.values().stream().flatMap(list -> list.stream()).toList();
+        // Ignore temporary models
+        return thingsMap.keySet().stream().filter(name -> !YamlModelRepositoryImpl.isTemporaryModel(name))
+                .map(name -> thingsMap.getOrDefault(name, List.of())).flatMap(list -> list.stream()).toList();
+    }
+
+    public Collection<Thing> getAllFromModel(String modelName) {
+        return thingsMap.getOrDefault(modelName, List.of());
     }
 
     @Override
@@ -201,7 +209,9 @@ public class YamlThingProvider extends AbstractProvider<Thing>
         modelThings.addAll(added);
         added.forEach(t -> {
             logger.debug("model {} added thing {}", modelName, t.getUID());
-            notifyListenersAboutAddedElement(t);
+            if (!YamlModelRepositoryImpl.isTemporaryModel(modelName)) {
+                notifyListenersAboutAddedElement(t);
+            }
         });
     }
 
@@ -215,11 +225,15 @@ public class YamlThingProvider extends AbstractProvider<Thing>
                 modelThings.remove(oldThing);
                 modelThings.add(t);
                 logger.debug("model {} updated thing {}", modelName, t.getUID());
-                notifyListenersAboutUpdatedElement(oldThing, t);
+                if (!YamlModelRepositoryImpl.isTemporaryModel(modelName)) {
+                    notifyListenersAboutUpdatedElement(oldThing, t);
+                }
             }, () -> {
                 modelThings.add(t);
                 logger.debug("model {} added thing {}", modelName, t.getUID());
-                notifyListenersAboutAddedElement(t);
+                if (!YamlModelRepositoryImpl.isTemporaryModel(modelName)) {
+                    notifyListenersAboutAddedElement(t);
+                }
             });
         });
     }
@@ -233,7 +247,9 @@ public class YamlThingProvider extends AbstractProvider<Thing>
             modelThings.stream().filter(th -> th.getUID().equals(t.getUID())).findFirst().ifPresentOrElse(oldThing -> {
                 modelThings.remove(oldThing);
                 logger.debug("model {} removed thing {}", modelName, t.getUID());
-                notifyListenersAboutRemovedElement(oldThing);
+                if (!YamlModelRepositoryImpl.isTemporaryModel(modelName)) {
+                    notifyListenersAboutRemovedElement(oldThing);
+                }
             }, () -> logger.debug("model {} thing {} not found", modelName, t.getUID()));
         });
     }

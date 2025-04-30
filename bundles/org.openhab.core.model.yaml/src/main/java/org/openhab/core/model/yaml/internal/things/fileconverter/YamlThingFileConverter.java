@@ -12,6 +12,7 @@
  */
 package org.openhab.core.model.yaml.internal.things.fileconverter;
 
+import java.io.ByteArrayInputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -26,12 +27,14 @@ import org.openhab.core.model.yaml.YamlElement;
 import org.openhab.core.model.yaml.YamlModelRepository;
 import org.openhab.core.model.yaml.internal.things.YamlChannelDTO;
 import org.openhab.core.model.yaml.internal.things.YamlThingDTO;
+import org.openhab.core.model.yaml.internal.things.YamlThingProvider;
 import org.openhab.core.thing.Bridge;
 import org.openhab.core.thing.Channel;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingUID;
 import org.openhab.core.thing.fileconverter.AbstractThingFileGenerator;
 import org.openhab.core.thing.fileconverter.ThingFileGenerator;
+import org.openhab.core.thing.fileconverter.ThingFileParser;
 import org.openhab.core.thing.type.ChannelKind;
 import org.openhab.core.thing.type.ChannelType;
 import org.openhab.core.thing.type.ChannelTypeRegistry;
@@ -48,20 +51,22 @@ import org.osgi.service.component.annotations.Reference;
  * @author Laurent Garnier - Initial contribution
  */
 @NonNullByDefault
-@Component(immediate = true, service = ThingFileGenerator.class)
-public class YamlThingFileConverter extends AbstractThingFileGenerator {
+@Component(immediate = true, service = { ThingFileGenerator.class, ThingFileParser.class })
+public class YamlThingFileConverter extends AbstractThingFileGenerator implements ThingFileParser {
 
     private final YamlModelRepository modelRepository;
+    private final YamlThingProvider thingProvider;
     private final LocaleProvider localeProvider;
 
     @Activate
     public YamlThingFileConverter(final @Reference YamlModelRepository modelRepository,
-            final @Reference ThingTypeRegistry thingTypeRegistry,
+            final @Reference YamlThingProvider thingProvider, final @Reference ThingTypeRegistry thingTypeRegistry,
             final @Reference ChannelTypeRegistry channelTypeRegistry,
             final @Reference ConfigDescriptionRegistry configDescRegistry,
             final @Reference LocaleProvider localeProvider) {
         super(thingTypeRegistry, channelTypeRegistry, configDescRegistry);
         this.modelRepository = modelRepository;
+        this.thingProvider = thingProvider;
         this.localeProvider = localeProvider;
     }
 
@@ -71,15 +76,16 @@ public class YamlThingFileConverter extends AbstractThingFileGenerator {
     }
 
     @Override
-    public synchronized void generateFileFormat(OutputStream out, List<Thing> things, boolean hideDefaultParameters) {
+    public synchronized void generateFileFormat(OutputStream out, List<Thing> things, boolean hideDefaultChannels,
+            boolean hideDefaultParameters) {
         List<YamlElement> elements = new ArrayList<>();
         things.forEach(thing -> {
-            elements.add(buildThingDTO(thing, hideDefaultParameters));
+            elements.add(buildThingDTO(thing, hideDefaultChannels, hideDefaultParameters));
         });
         modelRepository.generateSyntaxFromElements(out, elements);
     }
 
-    private YamlThingDTO buildThingDTO(Thing thing, boolean hideDefaultParameters) {
+    private YamlThingDTO buildThingDTO(Thing thing, boolean hideDefaultChannels, boolean hideDefaultParameters) {
         YamlThingDTO dto = new YamlThingDTO();
         dto.uid = thing.getUID().getAsString();
         dto.isBridge = thing instanceof Bridge ? true : null;
@@ -102,7 +108,8 @@ public class YamlThingFileConverter extends AbstractThingFileGenerator {
         dto.config = config.isEmpty() ? null : config;
 
         Map<String, YamlChannelDTO> channels = new LinkedHashMap<>();
-        getNonDefaultChannels(thing).forEach(channel -> {
+        List<Channel> channelList = hideDefaultChannels ? getNonDefaultChannels(thing) : thing.getChannels();
+        channelList.forEach(channel -> {
             channels.put(channel.getUID().getId(), buildChannelDTO(channel, hideDefaultParameters));
         });
         dto.channels = channels.isEmpty() ? null : channels;
@@ -139,5 +146,22 @@ public class YamlThingFileConverter extends AbstractThingFileGenerator {
         dto.config = config.isEmpty() ? null : config;
 
         return dto;
+    }
+
+    @Override
+    public String getFileFormatParser() {
+        return "YAML";
+    }
+
+    @Override
+    public boolean parseFileFormat(String syntax, List<Thing> things, List<String> errors, List<String> warnings) {
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(syntax.getBytes());
+        String modelName = modelRepository.createTemporaryModel(inputStream, errors, warnings);
+        if (modelName != null) {
+            things.addAll(thingProvider.getAllFromModel(modelName));
+            modelRepository.removeTemporaryModel(modelName);
+            return true;
+        }
+        return false;
     }
 }

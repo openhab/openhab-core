@@ -71,8 +71,9 @@ import org.slf4j.LoggerFactory
  *         factory cannot load a thing yet (bug 470368), 
  *         added delay until ThingTypes are fully loaded
  * @author Markus Rathgeb - Add locale provider support
+ * @author Laurent Garnier - Add method getThingsFromModel
  */
-@Component(immediate=true, service=ThingProvider)
+@Component(immediate=true, service=#[ ThingProvider, GenericThingProvider ])
 class GenericThingProvider extends AbstractProviderLazyNullness<Thing> implements ThingProvider, ModelRepositoryChangeListener, ReadyService.ReadyTracker {
 
     static final String XML_THING_TYPE = "openhab.xmlThingTypes";
@@ -122,25 +123,7 @@ class GenericThingProvider extends AbstractProviderLazyNullness<Thing> implement
                 return
             }
             flattenModelThings(model.things).map [
-                // Get the ThingHandlerFactories
-                val ThingUID thingUID = constructThingUID
-                if (thingUID === null) {
-                    // ignore the Thing because its definition is broken
-                    return null
-                }
-                val thingTypeUID = constructThingTypeUID(thingUID)
-                if (thingTypeUID === null) {
-                    // ignore the Thing because its definition is broken
-                    return null
-                }
-                val factory = thingHandlerFactories.findFirst [
-                    supportsThingType(thingTypeUID)
-                ]
-                if (factory === null && modelLoaded) {
-                    logger.info("No ThingHandlerFactory found for thing {} (thing-type is {}). Deferring initialization.",
-                        thingUID, thingTypeUID)
-                }
-                return factory
+                return getThingHandlerFactory
             ]?.filter [
                 // Drop it if there is no ThingHandlerFactory yet which can handle it
                 it !== null
@@ -149,6 +132,27 @@ class GenericThingProvider extends AbstractProviderLazyNullness<Thing> implement
                 createThingsFromModelForThingHandlerFactory(modelName, it)
             ]
         }
+    }
+
+    def private ThingHandlerFactory getThingHandlerFactory(ModelThing modelThing) {
+        val ThingUID thingUID = constructThingUID(modelThing)
+        if (thingUID === null) {
+            // ignore the Thing because its definition is broken
+            return null
+        }
+        val thingTypeUID = constructThingTypeUID(modelThing, thingUID)
+        if (thingTypeUID === null) {
+            // ignore the Thing because its definition is broken
+            return null
+        }
+        val factory = thingHandlerFactories.findFirst [
+              supportsThingType(thingTypeUID)
+        ]
+        if (factory == null && modelLoaded) {
+            logger.info("No ThingHandlerFactory found for thing {} (thing-type is {}). Deferring initialization.",
+                thingUID, thingTypeUID)
+        }
+        return factory
     }
 
     def private ThingUID constructThingUID(ModelThing modelThing) {
@@ -485,6 +489,23 @@ class GenericThingProvider extends AbstractProviderLazyNullness<Thing> implement
                 }
             }
         }
+    }
+
+    def public List<Thing> getThingsFromModel(String modelName) {
+        val things = newArrayList()
+        if (modelRepository !== null && modelName.endsWith("things")) {
+            logger.debug("Read things from model '{}'", modelName);
+            val model = modelRepository.getModel(modelName) as ThingModel
+            if (model !== null) {
+                flattenModelThings(model.things).forEach [
+                    val factory = getThingHandlerFactory
+                    if (factory !== null && loadedXmlThingTypes.contains(factory.bundleName)) {
+                        createThing(things, factory)
+                    }
+                ]
+            }
+        }
+        return things
     }
 
     def private Set<ThingUID> getAllThingUIDs(ThingModel model) {

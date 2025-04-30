@@ -14,6 +14,7 @@ package org.openhab.core.model.core;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.emf.ecore.EObject;
@@ -28,6 +29,7 @@ import org.eclipse.jdt.annotation.Nullable;
  *
  * @author Kai Kreuzer - Initial contribution
  * @author Laurent Garnier - Added method generateSyntaxFromModel
+ * @author Laurent Garnier - Added method createTemporaryModel
  */
 @NonNullByDefault
 public interface ModelRepository {
@@ -94,6 +96,21 @@ public interface ModelRepository {
      * @param listener the listener to remove
      */
     void removeModelRepositoryChangeListener(ModelRepositoryChangeListener listener);
+
+    /**
+     * Creates a temporary model in the repository
+     *
+     * A temporary model is not attached to a file on disk.
+     * A temporary model will be loaded without impacting any object registry.
+     *
+     * @param modelType the model type
+     * @param inputStream an input stream with the model's content
+     * @param errors the list to be used to fill the errors
+     * @param warnings the list to be used to fill the warnings
+     * @return the created model name if it was successfully processed, null otherwise
+     */
+    @Nullable
+    String createTemporaryModel(String modelType, InputStream inputStream, List<String> errors, List<String> warnings);
 
     /**
      * Generate the syntax from a provided model content.

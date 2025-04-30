@@ -12,16 +12,19 @@
  */
 package org.openhab.core.model.yaml;
 
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * The {@link YamlModelRepository} defines methods to update elements in a YAML model.
  *
  * @author Jan N. Klug - Initial contribution
  * @author Laurent Garnier - Added methods refreshModelElements and generateSyntaxFromElements
+ * @author Laurent Garnier - Added methods createTemporaryModel and removeTemporaryModel
  */
 @NonNullByDefault
 public interface YamlModelRepository {
@@ -46,4 +49,25 @@ public interface YamlModelRepository {
      * @param elements the list of elements to includ
      */
     void generateSyntaxFromElements(OutputStream out, List<YamlElement> elements);
+
+    /**
+     * Creates a temporary model in the repository
+     *
+     * A temporary model is not attached to a file on disk.
+     * A temporary model will be loaded without impacting any object registry.
+     *
+     * @param inputStream an input stream with the model's content
+     * @param errors the list to be used to fill the errors
+     * @param warnings the list to be used to fill the warnings
+     * @return the created model name if it was successfully processed, null otherwise
+     */
+    @Nullable
+    String createTemporaryModel(InputStream inputStream, List<String> errors, List<String> warnings);
+
+    /**
+     * Removes a temporary model from the repository
+     *
+     * @param modelName the name of the model to be removed
+     */
+    void removeTemporaryModel(String modelName);
 }
