@@ -125,7 +125,7 @@ public class YamlConfigurationV1TagsUpgrader implements Upgrader {
                 @Override
                 public FileVisitResult visitFileFailed(@NonNullByDefault({}) Path file,
                         @NonNullByDefault({}) IOException exc) throws IOException {
-                    logger.warn("Failed to process {}: {}", file.toAbsolutePath(), exc.getClass().getSimpleName());
+                    logger.warn("Failed to process {}: {}", file.toAbsolutePath(), exc.getMessage());
                     return FileVisitResult.CONTINUE;
                 }
             });
