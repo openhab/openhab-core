@@ -75,26 +75,20 @@ public class YamlThingDTO implements YamlElement, Cloneable {
     public boolean isValid(@Nullable List<@NonNull String> errors, @Nullable List<@NonNull String> warnings) {
         // Check that uid is present
         if (uid == null || uid.isBlank()) {
-            if (errors != null) {
-                errors.add("thing uid is missing");
-            }
+            addToList(errors, "invalid thing: uid is missing while mandatory");
             return false;
         }
         boolean ok = true;
         // Check that uid has at least 3 segments and each segment respects the expected syntax
         String[] segments = uid.split(AbstractUID.SEPARATOR);
         if (segments.length < 3) {
-            if (errors != null) {
-                errors.add("thing %s: uid contains insufficient segments".formatted(uid));
-            }
+            addToList(errors, "invalid thing \"%s\": not enough segments in uid; minimum 3 is expected".formatted(uid));
             ok = false;
         }
         for (String segment : segments) {
             if (!THING_UID_SEGMENT_PATTERN.matcher(segment).matches()) {
-                if (errors != null) {
-                    errors.add("thing %s: segment \"%s\" in uid is not matching the expected syntax %s".formatted(uid,
-                            segment, THING_UID_SEGMENT_PATTERN.pattern()));
-                }
+                addToList(errors, "invalid thing \"%s\": segment \"%s\" in uid not matching the expected syntax %s"
+                        .formatted(uid, segment, THING_UID_SEGMENT_PATTERN.pattern()));
                 ok = false;
             }
         }
@@ -102,17 +96,16 @@ public class YamlThingDTO implements YamlElement, Cloneable {
             // Check that bridge has at least 3 segments and each segment respects the expected syntax
             segments = bridge.split(AbstractUID.SEPARATOR);
             if (segments.length < 3) {
-                if (errors != null) {
-                    errors.add("thing %s: bridge \"%s\" contains insufficient segments".formatted(uid, bridge));
-                }
+                addToList(errors,
+                        "invalid thing \"%s\": not enough segments in value \"%s\" for \"bridge\" field; minimum 3 is expected"
+                                .formatted(uid, bridge));
                 ok = false;
             }
             for (String segment : segments) {
                 if (!THING_UID_SEGMENT_PATTERN.matcher(segment).matches()) {
-                    if (errors != null) {
-                        errors.add("thing %s: segment \"%s\" in bridge is not matching the expected syntax %s"
-                                .formatted(uid, segment, THING_UID_SEGMENT_PATTERN.pattern()));
-                    }
+                    addToList(errors,
+                            "invalid thing \"%s\": segment \"%s\" in \"bridge\" field not matching the expected syntax %s"
+                                    .formatted(uid, segment, THING_UID_SEGMENT_PATTERN.pattern()));
                     ok = false;
                 }
             }
@@ -121,28 +114,28 @@ public class YamlThingDTO implements YamlElement, Cloneable {
             for (Map.Entry<@NonNull String, @NonNull YamlChannelDTO> entry : channels.entrySet()) {
                 String channelId = entry.getKey();
                 if (!CHANNEL_ID_PATTERN.matcher(channelId).matches()) {
-                    if (errors != null) {
-                        errors.add("thing %s: channel id \"%s\" is not matching the expected syntax %s".formatted(uid,
-                                channelId, CHANNEL_ID_PATTERN.pattern()));
-                    }
+                    addToList(errors, "invalid thing \"%s\": channel id \"%s\" not matching the expected syntax %s"
+                            .formatted(uid, channelId, CHANNEL_ID_PATTERN.pattern()));
                     ok = false;
                 }
                 List<String> channelErrors = new ArrayList<>();
                 List<String> channelWarnings = new ArrayList<>();
                 ok &= entry.getValue().isValid(channelErrors, channelWarnings);
-                if (errors != null) {
-                    channelErrors.forEach(error -> {
-                        errors.add("thing %s channel %s: %s".formatted(uid, channelId, error));
-                    });
-                }
-                if (warnings != null) {
-                    channelWarnings.forEach(warning -> {
-                        warnings.add("thing %s channel %s: %s".formatted(uid, channelId, warning));
-                    });
-                }
+                channelErrors.forEach(error -> {
+                    addToList(errors, "invalid thing \"%s\": channel \"%s\": %s".formatted(uid, channelId, error));
+                });
+                channelWarnings.forEach(warning -> {
+                    addToList(warnings, "thing \"%s\": channel \"%s\": %s".formatted(uid, channelId, warning));
+                });
             }
         }
         return ok;
+    }
+
+    private void addToList(@Nullable List<@NonNull String> list, String value) {
+        if (list != null) {
+            list.add(value);
+        }
     }
 
     public boolean isBridge() {

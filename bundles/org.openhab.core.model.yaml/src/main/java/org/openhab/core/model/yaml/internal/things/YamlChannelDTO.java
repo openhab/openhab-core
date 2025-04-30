@@ -45,41 +45,41 @@ public class YamlChannelDTO {
         boolean ok = true;
         if (type != null) {
             if (!CHANNEL_TYPE_PATTERN.matcher(type).find()) {
-                errors.add(
-                        "type \"%s\" is not matching the expected syntax [a-zA-Z0-9_][a-zA-Z0-9_-]*".formatted(type));
+                errors.add("value \"%s\" for \"type\" field not matching the expected syntax %s".formatted(type,
+                        CHANNEL_TYPE_PATTERN.pattern()));
                 ok = false;
             }
             if (kind != null) {
-                warnings.add(
-                        "kind \"%s\" is ignored as a type is also provided; kind will be retrieved from the channel type"
-                                .formatted(kind));
+                warnings.add("\"kind\" field ignored; channel kind will be retrieved from the channel type");
             }
             if (itemType != null) {
+                warnings.add("\"itemType\" field ignored; item type will be retrieved from the channel type");
+            }
+            if (itemDimension != null) {
                 warnings.add(
-                        "itemType \"%s\" is ignored as a type is also provided; item type will be retrieved from the channel type"
-                                .formatted(itemType));
+                        "\"itemDimension\" field ignored; item type and dimension will be retrieved from the channel type");
             }
         } else if (itemType != null) {
             if (!YamlElementUtils.isValidItemType(itemType)) {
-                errors.add("itemType \"%s\" is invalid".formatted(itemType));
+                errors.add("invalid value \"%s\" for \"itemType\" field".formatted(itemType));
                 ok = false;
             } else if (YamlElementUtils.isNumberItemType(itemType)) {
                 if (!YamlElementUtils.isValidItemDimension(itemDimension)) {
-                    errors.add("itemDimension \"%s\" is invalid".formatted(itemDimension));
+                    errors.add("invalid value \"%s\" for \"itemDimension\" field".formatted(itemDimension));
                     ok = false;
                 }
             } else if (itemDimension != null) {
-                warnings.add("itemDimension \"%s\" is is ignored as item type is not Number".formatted(itemDimension));
+                warnings.add("\"itemDimension\" field ignored as item type is not Number");
             }
             try {
                 ChannelKind.parse(kind);
             } catch (IllegalArgumentException e) {
                 warnings.add(
-                        "kind \"%s\" is invalid (only \"state\" and \"trigger\" whatever the case are valid); \"state\" will be considered"
+                        "invalid value \"%s\" for \"kind\" field; only \"state\" and \"trigger\" whatever the case are valid; \"state\" will be considered"
                                 .formatted(kind != null ? kind : "null"));
             }
         } else {
-            errors.add("type or itemType is mandatory");
+            errors.add("one of the \"type\" and \"itemType\" fields is mandatory");
             ok = false;
         }
         return ok;
