@@ -227,8 +227,7 @@ public class YamlThingProvider extends AbstractProvider<Thing>
     @Override
     public void removedModel(String modelName, Collection<YamlThingDTO> elements) {
         List<Thing> removed = elements.stream().map(this::mapThing).filter(Objects::nonNull).toList();
-        Collection<Thing> modelThings = Objects
-                .requireNonNull(thingsMap.computeIfAbsent(modelName, k -> new ArrayList<>()));
+        Collection<Thing> modelThings = thingsMap.getOrDefault(modelName, List.of());
         removed.forEach(t -> {
             modelThings.stream().filter(th -> th.getUID().equals(t.getUID())).findFirst().ifPresentOrElse(oldThing -> {
                 modelThings.remove(oldThing);
@@ -236,6 +235,9 @@ public class YamlThingProvider extends AbstractProvider<Thing>
                 notifyListenersAboutRemovedElement(oldThing);
             }, () -> logger.debug("model {} thing {} not found", modelName, t.getUID()));
         });
+        if (modelThings.isEmpty()) {
+            thingsMap.remove(modelName);
+        }
     }
 
     @Reference(cardinality = ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC)
@@ -357,8 +359,7 @@ public class YamlThingProvider extends AbstractProvider<Thing>
             Map<String, YamlChannelDTO> channelsDto, List<ChannelDefinition> channelDefinitions) {
         Set<String> addedChannelIds = new HashSet<>();
         List<Channel> channels = new ArrayList<>();
-        channelsDto.entrySet().forEach(entry -> {
-            YamlChannelDTO channelDto = entry.getValue();
+        channelsDto.forEach((channelId, channelDto) -> {
             ChannelTypeUID channelTypeUID = null;
             ChannelKind kind = channelDto.getKind();
             String itemType = channelDto.getItemType();
@@ -386,11 +387,11 @@ public class YamlThingProvider extends AbstractProvider<Thing>
                 }
             }
 
-            Channel channel = ChannelBuilder.create(new ChannelUID(thingUID, entry.getKey()), itemType).withKind(kind)
+            Channel channel = ChannelBuilder.create(new ChannelUID(thingUID, channelId), itemType).withKind(kind)
                     .withConfiguration(configuration).withType(channelTypeUID).withLabel(label)
                     .withAutoUpdatePolicy(autoUpdatePolicy).build();
             channels.add(channel);
-            addedChannelIds.add(entry.getKey());
+            addedChannelIds.add(channelId);
         });
 
         channelDefinitions.forEach(channelDef -> {
