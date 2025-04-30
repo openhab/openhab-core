@@ -84,6 +84,8 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
     private static final String VERSION = "version";
     private static final String READ_ONLY = "readOnly";
 
+    private static final String UNWANTED_EXCEPTION_TEXT = "at [Source: UNKNOWN; byte offset: #UNKNOWN] ";
+
     private final Logger logger = LoggerFactory.getLogger(YamlModelRepositoryImpl.class);
 
     private final WatchService watchService;
@@ -696,8 +698,7 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
             if (errors != null) {
                 String msg = e.getMessage();
                 errors.add("Could not parse element %s to %s: %s".formatted(node.toPrettyString(),
-                        elementClass.getSimpleName(),
-                        msg == null ? "" : msg.replace("at [Source: UNKNOWN; byte offset: #UNKNOWN] ", "")));
+                        elementClass.getSimpleName(), msg == null ? "" : msg.replace(UNWANTED_EXCEPTION_TEXT, "")));
             }
             return Optional.empty();
         }
@@ -733,8 +734,8 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
                         if (errors != null) {
                             String msg = e.getMessage();
                             errors.add("could not parse element %s to %s: %s".formatted(node.toPrettyString(),
-                                    elementClass.getSimpleName(), msg == null ? ""
-                                            : msg.replace("at [Source: UNKNOWN; byte offset: #UNKNOWN] ", "")));
+                                    elementClass.getSimpleName(),
+                                    msg == null ? "" : msg.replace(UNWANTED_EXCEPTION_TEXT, "")));
                         }
                     }
                 }
