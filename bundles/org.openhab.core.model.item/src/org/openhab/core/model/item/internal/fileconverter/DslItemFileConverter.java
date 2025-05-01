@@ -82,6 +82,9 @@ public class DslItemFileConverter extends AbstractItemFileGenerator {
     @Override
     public synchronized void generateFileFormat(OutputStream out, List<Item> items, Collection<Metadata> metadata,
             boolean hideDefaultParameters) {
+        if (items.isEmpty()) {
+            return;
+        }
         ItemModel model = ItemsFactory.eINSTANCE.createItemModel();
         for (Item item : items) {
             model.getItems().add(buildModelItem(item, getChannelLinks(metadata, item.getName()),

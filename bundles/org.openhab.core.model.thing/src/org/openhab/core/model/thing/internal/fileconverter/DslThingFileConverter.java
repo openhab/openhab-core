@@ -76,6 +76,9 @@ public class DslThingFileConverter extends AbstractThingFileGenerator {
 
     @Override
     public synchronized void generateFileFormat(OutputStream out, List<Thing> things, boolean hideDefaultParameters) {
+        if (things.isEmpty()) {
+            return;
+        }
         ThingModel model = ThingFactory.eINSTANCE.createThingModel();
         Set<Thing> handledThings = new HashSet<>();
         for (Thing thing : things) {
