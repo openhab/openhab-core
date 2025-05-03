@@ -25,18 +25,6 @@
       <artifactId>org.openhab.core.io.rest.auth</artifactId>
       <version>${project.version}</version>
     </dependency>
-    <dependency>
-      <groupId>org.openhab.core.bundles</groupId>
-      <artifactId>org.openhab.core.audio</artifactId>
-      <version>${project.version}</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.openhab.core.bundles</groupId>
-      <artifactId>org.openhab.core.voice</artifactId>
-      <version>${project.version}</version>
-      <scope>compile</scope>
-    </dependency>
   </dependencies>
 
 </project>

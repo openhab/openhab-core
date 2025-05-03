@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.io.websocket.audiopcm;
+package org.openhab.core.audio.internal.audiopcm;
 
 import static java.nio.ByteBuffer.wrap;
 
@@ -28,9 +28,8 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse;
+import org.openhab.core.audio.AudioDialogProvider;
 import org.openhab.core.audio.AudioManager;
-import org.openhab.core.audio.AudioSink;
-import org.openhab.core.audio.AudioSource;
 import org.openhab.core.common.ThreadPoolManager;
 import org.openhab.core.io.websocket.WebSocketAdapter;
 import org.osgi.framework.BundleContext;
@@ -55,14 +54,16 @@ public class PCMWebSocketAdapter implements WebSocketAdapter {
     private final ScheduledExecutorService executor = ThreadPoolManager.getScheduledPool("audio-pcm-websocket");
     protected final BundleContext bundleContext;
     protected final AudioManager audioManager;
-    protected PCMWebSocketAdapter.@Nullable DialogProvider dialogProvider = null;
+    protected final AudioDialogProvider audioDialogProvider;
     private final ScheduledFuture<?> pingTask;
     private final Set<PCMWebSocketConnection> webSocketConnections = Collections.synchronizedSet(new HashSet<>());
 
     @Activate
-    public PCMWebSocketAdapter(BundleContext bundleContext, final @Reference AudioManager audioManager) {
+    public PCMWebSocketAdapter(BundleContext bundleContext, final @Reference AudioManager audioManager,
+            final @Reference AudioDialogProvider audioDialogProvider) {
         this.bundleContext = bundleContext;
         this.audioManager = audioManager;
+        this.audioDialogProvider = audioDialogProvider;
         this.pingTask = executor.scheduleWithFixedDelay(this::pingHandlers, 10, 5, TimeUnit.SECONDS);
     }
 
@@ -89,10 +90,6 @@ public class PCMWebSocketAdapter implements WebSocketAdapter {
             return webSocketConnections.stream()
                     .filter(speakerConnection -> speakerConnection.getId().equalsIgnoreCase(id)).findAny().orElse(null);
         }
-    }
-
-    public void setDialogProvider(DialogProvider dialogProvider) {
-        this.dialogProvider = dialogProvider;
     }
 
     @Override
@@ -147,24 +144,5 @@ public class PCMWebSocketAdapter implements WebSocketAdapter {
             onClientDisconnected(connection);
             connection.disconnect();
         }
-    }
-
-    /**
-     * 
-     * The DialogProvider interface provides the dialog initialization functionality for WebSocket connections.
-     */
-    public interface DialogProvider {
-        /**
-         * Starts a dialog and returns a runnable that triggers it
-         *
-         * @param webSocket the WebSocket connection associated with this dialog
-         * @param audioSink the audio sink to play sound
-         * @param audioSource the audio source to capture sound
-         * @param locationItem an Item name to scope dialog commands
-         * @param listeningItem an Item name to toggle while dialog is listening
-         * @return a {@link Runnable} instance to trigger dialog processing
-         */
-        Runnable startDialog(PCMWebSocketConnection webSocket, AudioSink audioSink, AudioSource audioSource,
-                @Nullable String locationItem, @Nullable String listeningItem);
     }
 }

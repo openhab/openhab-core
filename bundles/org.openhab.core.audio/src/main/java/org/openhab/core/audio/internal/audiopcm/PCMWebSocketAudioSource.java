@@ -10,13 +10,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.io.websocket.audiopcm;
+package org.openhab.core.audio.internal.audiopcm;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InterruptedIOException;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
+import java.io.*;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.Set;
@@ -25,11 +21,7 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.audio.AudioException;
-import org.openhab.core.audio.AudioFormat;
-import org.openhab.core.audio.AudioSource;
-import org.openhab.core.audio.AudioStream;
-import org.openhab.core.audio.PipedAudioStream;
+import org.openhab.core.audio.*;
 import org.openhab.core.common.ThreadPoolManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

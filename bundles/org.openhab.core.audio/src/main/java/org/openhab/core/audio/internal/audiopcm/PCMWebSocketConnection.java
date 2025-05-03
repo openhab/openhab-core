@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.io.websocket.audiopcm;
+package org.openhab.core.audio.internal.audiopcm;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -249,13 +249,13 @@ public class PCMWebSocketConnection implements WebSocketListener {
                 wsAdapter.bundleContext.registerService(AudioSink.class.getName(), audioSink, new Hashtable<>()));
         // init dialog
         if (clientOptions.startDialog) {
-            var dialogProvider = this.wsAdapter.dialogProvider;
+            var dialogProvider = this.wsAdapter.audioDialogProvider;
             if (dialogProvider == null) {
                 throw new IOException("Voice functionality is not ready");
             }
-            dialogTrigger = dialogProvider.startDialog(this, audioSink, audioSource,
+            dialogTrigger = dialogProvider.startDialog(audioSink, audioSource,
                     !clientOptions.locationItem.isBlank() ? clientOptions.locationItem : null,
-                    !clientOptions.listeningItem.isBlank() ? clientOptions.listeningItem : null);
+                    !clientOptions.listeningItem.isBlank() ? clientOptions.listeningItem : null, () -> disconnect());
         } else {
             dialogTrigger = null;
         }
