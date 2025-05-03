@@ -14,63 +14,22 @@ package org.openhab.core.automation.internal;
 
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.automation.Action;
-import org.openhab.core.automation.Condition;
+import org.openhab.core.automation.*;
 import org.openhab.core.automation.Module;
-import org.openhab.core.automation.ModuleHandlerCallback;
-import org.openhab.core.automation.Rule;
-import org.openhab.core.automation.RuleExecution;
-import org.openhab.core.automation.RuleManager;
-import org.openhab.core.automation.RuleRegistry;
-import org.openhab.core.automation.RuleStatus;
-import org.openhab.core.automation.RuleStatusDetail;
-import org.openhab.core.automation.RuleStatusInfo;
-import org.openhab.core.automation.Trigger;
 import org.openhab.core.automation.events.RuleStatusInfoEvent;
-import org.openhab.core.automation.handler.ActionHandler;
-import org.openhab.core.automation.handler.ConditionHandler;
-import org.openhab.core.automation.handler.ModuleHandler;
-import org.openhab.core.automation.handler.ModuleHandlerFactory;
-import org.openhab.core.automation.handler.TriggerHandler;
-import org.openhab.core.automation.handler.TriggerHandlerCallback;
+import org.openhab.core.automation.handler.*;
 import org.openhab.core.automation.internal.TriggerHandlerCallbackImpl.TriggerData;
 import org.openhab.core.automation.internal.composite.CompositeModuleHandlerFactory;
 import org.openhab.core.automation.internal.module.handler.SystemTriggerHandler;
-import org.openhab.core.automation.internal.ruleengine.WrappedAction;
-import org.openhab.core.automation.internal.ruleengine.WrappedCondition;
-import org.openhab.core.automation.internal.ruleengine.WrappedModule;
-import org.openhab.core.automation.internal.ruleengine.WrappedRule;
-import org.openhab.core.automation.internal.ruleengine.WrappedTrigger;
-import org.openhab.core.automation.type.ActionType;
-import org.openhab.core.automation.type.CompositeActionType;
-import org.openhab.core.automation.type.CompositeConditionType;
-import org.openhab.core.automation.type.CompositeTriggerType;
-import org.openhab.core.automation.type.ConditionType;
-import org.openhab.core.automation.type.Input;
-import org.openhab.core.automation.type.ModuleType;
-import org.openhab.core.automation.type.ModuleTypeRegistry;
-import org.openhab.core.automation.type.Output;
-import org.openhab.core.automation.type.TriggerType;
+import org.openhab.core.automation.internal.ruleengine.*;
+import org.openhab.core.automation.type.*;
 import org.openhab.core.automation.util.ReferenceResolver;
 import org.openhab.core.common.NamedThreadFactory;
 import org.openhab.core.common.registry.RegistryChangeListener;
@@ -84,12 +43,7 @@ import org.openhab.core.service.ReadyService.ReadyTracker;
 import org.openhab.core.service.StartLevelService;
 import org.openhab.core.storage.Storage;
 import org.openhab.core.storage.StorageService;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Deactivate;
-import org.osgi.service.component.annotations.Reference;
-import org.osgi.service.component.annotations.ReferenceCardinality;
-import org.osgi.service.component.annotations.ReferencePolicy;
+import org.osgi.service.component.annotations.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -1113,6 +1067,13 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
     }
 
     @Override
+    public Future<Map<String, Object>> scheduleRun(String uid) {
+        TriggerHandlerCallback triggerHandlerCallback = getTriggerHandlerCallback(uid);
+        ScheduledExecutorService scheduler = triggerHandlerCallback.getScheduler();
+        return scheduler.submit(() -> runNow(uid));
+    }
+
+    @Override
     public Map<String, Object> runNow(String ruleUID) {
         return runNow(ruleUID, false, null);
     }
@@ -1606,5 +1567,13 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
     @Override
     public Stream<RuleExecution> simulateRuleExecutions(ZonedDateTime from, ZonedDateTime until) {
         return new RuleExecutionSimulator(this.ruleRegistry, this).simulateRuleExecutions(from, until);
+    }
+
+    @Override
+    public Future<Map<String, Object>> scheduleRun(String uid, boolean considerConditions,
+            Map<String, Object> context) {
+        TriggerHandlerCallback triggerHandlerCallback = getTriggerHandlerCallback(uid);
+        ScheduledExecutorService scheduler = triggerHandlerCallback.getScheduler();
+        return scheduler.submit(() -> runNow(uid, considerConditions, context));
     }
 }
