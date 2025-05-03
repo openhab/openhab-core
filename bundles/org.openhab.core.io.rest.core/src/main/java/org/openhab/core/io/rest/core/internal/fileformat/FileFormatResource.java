@@ -402,20 +402,19 @@ public class FileFormatResource implements RESTResource {
             @RequestBody(description = "file format syntax", required = true, content = {
                     @Content(mediaType = "text/vnd.openhab.dsl.thing", schema = @Schema(example = DSL_THINGS_EXAMPLE)),
                     @Content(mediaType = "application/yaml", schema = @Schema(example = YAML_THINGS_EXAMPLE)) }) String input) {
-        String contentTypetHeader = httpHeaders.getHeaderString(HttpHeaders.CONTENT_TYPE);
-        String acceptHeader = httpHeaders.getHeaderString(HttpHeaders.ACCEPT);
-        logger.debug("transform: contentType = {}, mediaType = {}", contentTypetHeader, acceptHeader);
+        String contentTypeHeader = httpHeaders.getHeaderString(HttpHeaders.CONTENT_TYPE);
+        logger.debug("parse: contentType = {}", contentTypeHeader);
 
         // First parse the input
         List<Thing> things = new ArrayList<>();
         List<String> errors = new ArrayList<>();
         List<String> warnings = new ArrayList<>();
-        ThingFileParser thingParser = getThingFileParser(contentTypetHeader);
-        switch (contentTypetHeader) {
+        ThingFileParser thingParser = getThingFileParser(contentTypeHeader);
+        switch (contentTypeHeader) {
             case "text/vnd.openhab.dsl.thing":
                 if (thingParser == null) {
                     return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE)
-                            .entity("Unsupported content type '" + contentTypetHeader + "'!").build();
+                            .entity("Unsupported content type '" + contentTypeHeader + "'!").build();
                 } else if (!thingParser.parseFileFormat(input, things, errors, warnings)) {
                     return Response.status(Response.Status.BAD_REQUEST).entity(String.join("\n", errors)).build();
                 } else if (things.isEmpty()) {
@@ -429,7 +428,7 @@ public class FileFormatResource implements RESTResource {
                 break;
             default:
                 return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE)
-                        .entity("Unsupported content type '" + contentTypetHeader + "'!").build();
+                        .entity("Unsupported content type '" + contentTypeHeader + "'!").build();
         }
 
         return Response.ok(convertToFileFormatDTO(things, warnings)).build();
