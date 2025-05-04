@@ -12,18 +12,20 @@
  */
 package org.openhab.core.io.rest.core.fileformat;
 
-import java.util.List;
-
-import org.openhab.core.thing.dto.ThingDTO;
+import java.util.Map;
 
 /**
- * This is a data transfer object to serialize the different components that can be contained
- * in a file format (items, things, ...).
+ * This is a data transfer object to serialize a channel link for an item contained in a file format.
  *
  * @author Laurent Garnier - Initial contribution
  */
-public class FileFormatDTO {
+public class FileFormatChannelLinkDTO {
 
-    public List<FileFormatItemDTO> items;
-    public List<ThingDTO> things;
+    public String channelUID;
+    public Map<String, Object> configuration;
+
+    public FileFormatChannelLinkDTO(String channelUID, Map<String, Object> configuration) {
+        this.channelUID = channelUID;
+        this.configuration = configuration;
+    }
 }

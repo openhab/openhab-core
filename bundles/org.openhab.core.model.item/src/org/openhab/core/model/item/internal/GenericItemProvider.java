@@ -69,7 +69,8 @@ import org.slf4j.LoggerFactory;
  * @author Thomas Eichstaedt-Engelen - Initial contribution
  */
 @NonNullByDefault
-@Component(service = { ItemProvider.class, StateDescriptionFragmentProvider.class }, immediate = true)
+@Component(service = { ItemProvider.class, GenericItemProvider.class,
+        StateDescriptionFragmentProvider.class }, immediate = true)
 public class GenericItemProvider extends AbstractProvider<Item>
         implements ModelRepositoryChangeListener, ItemProvider, StateDescriptionFragmentProvider {
 
@@ -170,6 +171,10 @@ public class GenericItemProvider extends AbstractProvider<Item>
         return items;
     }
 
+    public Collection<Item> getAllFromModel(String modelName) {
+        return itemsMap.getOrDefault(modelName, List.of());
+    }
+
     private Collection<Item> getItemsFromModel(String modelName) {
         logger.debug("Read items from model '{}'", modelName);
 
@@ -206,7 +211,7 @@ public class GenericItemProvider extends AbstractProvider<Item>
         // create items and read new binding configuration
         if (!EventType.REMOVED.equals(type)) {
             for (ModelItem modelItem : model.getItems()) {
-                genericMetaDataProvider.removeMetadataByItemName(modelItem.getName());
+                genericMetaDataProvider.removeMetadataByItemName(modelName, modelItem.getName());
                 Item item = createItemFromModelItem(modelItem);
                 if (item != null) {
                     internalDispatchBindings(modelName, item, modelItem.getBindings());
@@ -389,7 +394,8 @@ public class GenericItemProvider extends AbstractProvider<Item>
                             bindingType, item.getName(), e);
                 }
             } else {
-                genericMetaDataProvider.addMetadata(bindingType, item.getName(), config, configuration.getProperties());
+                genericMetaDataProvider.addMetadata(modelName, bindingType, item.getName(), config,
+                        configuration.getProperties());
             }
         }
     }
@@ -416,7 +422,7 @@ public class GenericItemProvider extends AbstractProvider<Item>
                     processBindingConfigsFromModel(modelName, type);
                     for (Item oldItem : oldItems.values()) {
                         if (!newItems.containsKey(oldItem.getName())) {
-                            notifyAndCleanup(oldItem);
+                            notifyAndCleanup(modelName, oldItem);
                         }
                     }
                     break;
@@ -425,17 +431,22 @@ public class GenericItemProvider extends AbstractProvider<Item>
                     Collection<Item> itemsFromModel = getItemsFromModel(modelName);
                     itemsMap.remove(modelName);
                     for (Item item : itemsFromModel) {
-                        notifyAndCleanup(item);
+                        notifyAndCleanup(modelName, item);
                     }
                     break;
             }
         }
     }
 
-    private void notifyAndCleanup(Item oldItem) {
+    private void notifyAndCleanup(String modelName, Item oldItem) {
         notifyListenersAboutRemovedElement(oldItem);
         this.stateDescriptionFragments.remove(oldItem.getName());
-        genericMetaDataProvider.removeMetadataByItemName(oldItem.getName());
+        genericMetaDataProvider.removeMetadataByItemName(modelName, oldItem.getName());
+    }
+
+    public void processTemporaryModel(String modelName) {
+        itemsMap.put(modelName, getItemsFromModel(modelName));
+        processBindingConfigsFromModel(modelName, EventType.ADDED);
     }
 
     protected boolean hasItemChanged(Item item1, Item item2) {

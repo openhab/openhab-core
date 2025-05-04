@@ -12,6 +12,7 @@
  */
 package org.openhab.core.model.item.internal.fileconverter;
 
+import java.io.ByteArrayInputStream;
 import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.net.URI;
@@ -34,9 +35,13 @@ import org.openhab.core.items.GroupFunction;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
 import org.openhab.core.items.Metadata;
+import org.openhab.core.items.MetadataKey;
 import org.openhab.core.items.fileconverter.AbstractItemFileGenerator;
 import org.openhab.core.items.fileconverter.ItemFileGenerator;
+import org.openhab.core.items.fileconverter.ItemFileParser;
 import org.openhab.core.model.core.ModelRepository;
+import org.openhab.core.model.item.internal.GenericItemProvider;
+import org.openhab.core.model.item.internal.GenericMetadataProvider;
 import org.openhab.core.model.items.ItemModel;
 import org.openhab.core.model.items.ItemsFactory;
 import org.openhab.core.model.items.ModelBinding;
@@ -59,18 +64,24 @@ import org.slf4j.LoggerFactory;
  * @author Laurent Garnier - Initial contribution
  */
 @NonNullByDefault
-@Component(immediate = true, service = ItemFileGenerator.class)
-public class DslItemFileConverter extends AbstractItemFileGenerator {
+@Component(immediate = true, service = { ItemFileGenerator.class, ItemFileParser.class })
+public class DslItemFileConverter extends AbstractItemFileGenerator implements ItemFileParser {
 
     private final Logger logger = LoggerFactory.getLogger(DslItemFileConverter.class);
 
     private final ModelRepository modelRepository;
+    private final GenericItemProvider itemProvider;
+    private final GenericMetadataProvider metadataProvider;
     private final ConfigDescriptionRegistry configDescriptionRegistry;
 
     @Activate
     public DslItemFileConverter(final @Reference ModelRepository modelRepository,
+            final @Reference GenericItemProvider itemProvider,
+            final @Reference GenericMetadataProvider metadataProvider,
             final @Reference ConfigDescriptionRegistry configDescriptionRegistry) {
         this.modelRepository = modelRepository;
+        this.itemProvider = itemProvider;
+        this.metadataProvider = metadataProvider;
         this.configDescriptionRegistry = configDescriptionRegistry;
     }
 
@@ -275,5 +286,38 @@ public class DslItemFileConverter extends AbstractItemFileGenerator {
             handledNames.add(paramName);
         }
         return parameters;
+    }
+
+    @Override
+    public String getFileFormatParser() {
+        return "DSL";
+    }
+
+    @Override
+    public boolean parseFileFormat(String syntax, List<Item> items, List<Metadata> metadata, List<String> errors,
+            List<String> warnings) {
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(syntax.getBytes());
+        String modelName = modelRepository.createTemporaryModel("items", inputStream, errors, warnings);
+        if (modelName != null) {
+            itemProvider.processTemporaryModel(modelName);
+            items.addAll(itemProvider.getAllFromModel(modelName));
+            metadata.addAll(metadataProvider.getAllFromModel(modelName));
+            // TODO retrieve metadata
+            for (Item item : items) {
+                MetadataKey key;
+                Map<String, Object> config;
+                key = new MetadataKey("channel", item.getName());
+                config = Map.of("myChannelParam1", BigDecimal.valueOf(10.25), "myChannelParam2", false,
+                        "myChannelParam3", "My value");
+                Metadata md = new Metadata(key, "myBinding:myTypoe:myThing#channel1", config);
+                metadata.add(md);
+                key = new MetadataKey("channel", item.getName());
+                md = new Metadata(key, "myBinding:myTypoe:myThing#channel2", null);
+                metadata.add(md);
+            }
+            modelRepository.removeModel(modelName);
+            return true;
+        }
+        return false;
     }
 }

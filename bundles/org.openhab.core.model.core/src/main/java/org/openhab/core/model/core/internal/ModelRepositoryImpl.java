@@ -264,7 +264,7 @@ public class ModelRepositoryImpl implements ModelRepository {
         return addOrRefreshModel(name, inputStream, errors, warnings) ? name : null;
     }
 
-    private boolean isTemporaryModel(String modelName) {
+    public static boolean isTemporaryModel(String modelName) {
         return modelName.startsWith(PREFIX_TMP_MODEL);
     }
 

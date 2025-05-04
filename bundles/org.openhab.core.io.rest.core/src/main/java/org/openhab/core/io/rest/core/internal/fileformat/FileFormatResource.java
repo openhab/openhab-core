@@ -53,14 +53,18 @@ import org.openhab.core.config.discovery.inbox.Inbox;
 import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
 import org.openhab.core.io.rest.core.fileformat.FileFormatDTO;
+import org.openhab.core.io.rest.core.fileformat.FileFormatItemDTO;
+import org.openhab.core.io.rest.core.fileformat.FileFormatItemDTOMapper;
 import org.openhab.core.io.rest.core.fileformat.extendedFileFormatDTO;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
+import org.openhab.core.items.ItemBuilderFactory;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.Metadata;
 import org.openhab.core.items.MetadataKey;
 import org.openhab.core.items.MetadataRegistry;
 import org.openhab.core.items.fileconverter.ItemFileGenerator;
+import org.openhab.core.items.fileconverter.ItemFileParser;
 import org.openhab.core.thing.Bridge;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.Thing;
@@ -193,6 +197,7 @@ public class FileFormatResource implements RESTResource {
 
     private final Logger logger = LoggerFactory.getLogger(FileFormatResource.class);
 
+    private final ItemBuilderFactory itemBuilderFactory;
     private final ItemRegistry itemRegistry;
     private final MetadataRegistry metadataRegistry;
     private final ItemChannelLinkRegistry itemChannelLinkRegistry;
@@ -202,11 +207,13 @@ public class FileFormatResource implements RESTResource {
     private final ChannelTypeRegistry channelTypeRegistry;
     private final ConfigDescriptionRegistry configDescRegistry;
     private final Map<String, ItemFileGenerator> itemFileGenerators = new ConcurrentHashMap<>();
+    private final Map<String, ItemFileParser> itemFileParsers = new ConcurrentHashMap<>();
     private final Map<String, ThingFileGenerator> thingFileGenerators = new ConcurrentHashMap<>();
     private final Map<String, ThingFileParser> thingFileParsers = new ConcurrentHashMap<>();
 
     @Activate
     public FileFormatResource(//
+            final @Reference ItemBuilderFactory itemBuilderFactory, //
             final @Reference ItemRegistry itemRegistry, //
             final @Reference MetadataRegistry metadataRegistry,
             final @Reference ItemChannelLinkRegistry itemChannelLinkRegistry,
@@ -215,6 +222,7 @@ public class FileFormatResource implements RESTResource {
             final @Reference ThingTypeRegistry thingTypeRegistry, //
             final @Reference ChannelTypeRegistry channelTypeRegistry, //
             final @Reference ConfigDescriptionRegistry configDescRegistry) {
+        this.itemBuilderFactory = itemBuilderFactory;
         this.itemRegistry = itemRegistry;
         this.metadataRegistry = metadataRegistry;
         this.itemChannelLinkRegistry = itemChannelLinkRegistry;
@@ -236,6 +244,15 @@ public class FileFormatResource implements RESTResource {
 
     protected void removeItemFileGenerator(ItemFileGenerator itemFileGenerator) {
         itemFileGenerators.remove(itemFileGenerator.getFileFormatGenerator());
+    }
+
+    @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.MULTIPLE)
+    protected void addItemFileParser(ItemFileParser itemFileParser) {
+        itemFileParsers.put(itemFileParser.getFileFormatParser(), itemFileParser);
+    }
+
+    protected void removeItemFileParser(ItemFileParser itemFileParser) {
+        itemFileParsers.remove(itemFileParser.getFileFormatParser());
     }
 
     @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.MULTIPLE)
@@ -338,30 +355,35 @@ public class FileFormatResource implements RESTResource {
     @RolesAllowed({ Role.ADMIN })
     @Path("/create")
     @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ "text/vnd.openhab.dsl.thing", "application/yaml" })
+    @Produces({ "text/vnd.openhab.dsl.thing", "text/vnd.openhab.dsl.item", "application/yaml" })
     @Operation(operationId = "create", summary = "Create file format.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = {
                             @Content(mediaType = "text/vnd.openhab.dsl.thing", schema = @Schema(example = DSL_THINGS_EXAMPLE)),
+                            @Content(mediaType = "text/vnd.openhab.dsl.item", schema = @Schema(example = DSL_ITEMS_EXAMPLE)),
                             @Content(mediaType = "application/yaml", schema = @Schema(example = YAML_THINGS_EXAMPLE)) }),
                     @ApiResponse(responseCode = "400", description = "Invalid JSON data."),
                     @ApiResponse(responseCode = "415", description = "Unsupported media type.") })
     public Response create(final @Context HttpHeaders httpHeaders,
             @DefaultValue("false") @QueryParam("hideDefaultParameters") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters,
             @DefaultValue("false") @QueryParam("hideDefaultChannels") @Parameter(description = "hide the non extensible channels having a default configuration") boolean hideDefaultChannels,
+            @DefaultValue("false") @QueryParam("hideChannelLinksAndMetadata") @Parameter(description = "hide the channel links and metadata for items") boolean hideChannelLinksAndMetadata,
             @RequestBody(description = "JSON data", required = true, content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = FileFormatDTO.class))) FileFormatDTO data) {
         String acceptHeader = httpHeaders.getHeaderString(HttpHeaders.ACCEPT);
         logger.debug("create: mediaType = {}", acceptHeader);
 
         List<Thing> things = new ArrayList<>();
+        List<Item> items = new ArrayList<>();
+        List<Metadata> metadata = new ArrayList<>();
         List<String> errors = new ArrayList<>();
-        if (!convertFromFileFormatDTO(data, things, errors)) {
+        if (!convertFromFileFormatDTO(data, things, items, metadata, errors)) {
             return Response.status(Response.Status.BAD_REQUEST).entity(String.join("\n", errors)).build();
         }
 
         String result = "";
         ByteArrayOutputStream outputStream;
         ThingFileGenerator thingGenerator = getThingFileGenerator(acceptHeader);
+        ItemFileGenerator itemGenerator = getItemFileGenerator(acceptHeader);
         switch (acceptHeader) {
             case "text/vnd.openhab.dsl.thing":
                 if (thingGenerator == null) {
@@ -372,6 +394,18 @@ public class FileFormatResource implements RESTResource {
                 }
                 outputStream = new ByteArrayOutputStream();
                 thingGenerator.generateFileFormat(outputStream, things, hideDefaultChannels, hideDefaultParameters);
+                result = new String(outputStream.toByteArray());
+                break;
+            case "text/vnd.openhab.dsl.item":
+                if (itemGenerator == null) {
+                    return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE)
+                            .entity("Unsupported media type '" + acceptHeader + "'!").build();
+                } else if (items.isEmpty()) {
+                    return Response.status(Response.Status.BAD_REQUEST).entity("No item loaded from input").build();
+                }
+                outputStream = new ByteArrayOutputStream();
+                itemGenerator.generateFileFormat(outputStream, items,
+                        hideChannelLinksAndMetadata ? List.of() : metadata, hideDefaultParameters);
                 result = new String(outputStream.toByteArray());
                 break;
             case "application/yaml":
@@ -391,7 +425,7 @@ public class FileFormatResource implements RESTResource {
     @POST
     @RolesAllowed({ Role.ADMIN })
     @Path("/parse")
-    @Consumes({ "text/vnd.openhab.dsl.thing", "application/yaml" })
+    @Consumes({ "text/vnd.openhab.dsl.thing", "text/vnd.openhab.dsl.item", "application/yaml" })
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(operationId = "parse", summary = "Parse file format.", security = {
             @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
@@ -401,15 +435,19 @@ public class FileFormatResource implements RESTResource {
     public Response parse(final @Context HttpHeaders httpHeaders,
             @RequestBody(description = "file format syntax", required = true, content = {
                     @Content(mediaType = "text/vnd.openhab.dsl.thing", schema = @Schema(example = DSL_THINGS_EXAMPLE)),
+                    @Content(mediaType = "text/vnd.openhab.dsl.item", schema = @Schema(example = DSL_ITEMS_EXAMPLE)),
                     @Content(mediaType = "application/yaml", schema = @Schema(example = YAML_THINGS_EXAMPLE)) }) String input) {
         String contentTypeHeader = httpHeaders.getHeaderString(HttpHeaders.CONTENT_TYPE);
         logger.debug("parse: contentType = {}", contentTypeHeader);
 
         // First parse the input
         List<Thing> things = new ArrayList<>();
+        List<Item> items = new ArrayList<>();
+        List<Metadata> metadata = new ArrayList<>();
         List<String> errors = new ArrayList<>();
         List<String> warnings = new ArrayList<>();
         ThingFileParser thingParser = getThingFileParser(contentTypeHeader);
+        ItemFileParser itemParser = getItemFileParser(contentTypeHeader);
         switch (contentTypeHeader) {
             case "text/vnd.openhab.dsl.thing":
                 if (thingParser == null) {
@@ -419,6 +457,16 @@ public class FileFormatResource implements RESTResource {
                     return Response.status(Response.Status.BAD_REQUEST).entity(String.join("\n", errors)).build();
                 } else if (things.isEmpty()) {
                     return Response.status(Response.Status.BAD_REQUEST).entity("No thing loaded from input").build();
+                }
+                break;
+            case "text/vnd.openhab.dsl.item":
+                if (itemParser == null) {
+                    return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE)
+                            .entity("Unsupported content type '" + contentTypeHeader + "'!").build();
+                } else if (!itemParser.parseFileFormat(input, items, metadata, errors, warnings)) {
+                    return Response.status(Response.Status.BAD_REQUEST).entity(String.join("\n", errors)).build();
+                } else if (items.isEmpty()) {
+                    return Response.status(Response.Status.BAD_REQUEST).entity("No item loaded from input").build();
                 }
                 break;
             case "application/yaml":
@@ -431,7 +479,7 @@ public class FileFormatResource implements RESTResource {
                         .entity("Unsupported content type '" + contentTypeHeader + "'!").build();
         }
 
-        return Response.ok(convertToFileFormatDTO(things, warnings)).build();
+        return Response.ok(convertToFileFormatDTO(things, items, metadata, warnings)).build();
     }
 
     /*
@@ -592,6 +640,14 @@ public class FileFormatResource implements RESTResource {
         };
     }
 
+    private @Nullable ItemFileParser getItemFileParser(String contentType) {
+        return switch (contentType) {
+            case "text/vnd.openhab.dsl.item" -> itemFileParsers.get("DSL");
+            case "application/yaml" -> itemFileParsers.get("YAML");
+            default -> null;
+        };
+    }
+
     private @Nullable ThingFileParser getThingFileParser(String contentType) {
         return switch (contentType) {
             case "text/vnd.openhab.dsl.thing" -> thingFileParsers.get("DSL");
@@ -621,7 +677,8 @@ public class FileFormatResource implements RESTResource {
         }).toList();
     }
 
-    private boolean convertFromFileFormatDTO(FileFormatDTO data, List<Thing> things, List<String> errors) {
+    private boolean convertFromFileFormatDTO(FileFormatDTO data, List<Thing> things, List<Item> items,
+            List<Metadata> metadata, List<String> errors) {
         boolean ok = true;
         if (data.things != null) {
             for (ThingDTO thingBean : data.things) {
@@ -681,16 +738,49 @@ public class FileFormatResource implements RESTResource {
                 things.add(thing);
             }
         }
+        if (data.items != null) {
+            for (FileFormatItemDTO itemData : data.items) {
+                String name = itemData.name;
+                if (name == null || name.isEmpty()) {
+                    errors.add("Missing item name in items data!");
+                    ok = false;
+                    continue;
+                }
+
+                Item item;
+                try {
+                    item = FileFormatItemDTOMapper.map(itemData, itemBuilderFactory);
+                    if (item == null) {
+                        errors.add("Invalid item type in items data!");
+                        ok = false;
+                        continue;
+                    }
+                } catch (IllegalArgumentException e) {
+                    errors.add("Invalid item name in items data!");
+                    ok = false;
+                    continue;
+                }
+                items.add(item);
+                metadata.addAll(FileFormatItemDTOMapper.mapMetadata(itemData));
+            }
+        }
         return ok;
     }
 
-    private extendedFileFormatDTO convertToFileFormatDTO(List<Thing> things, List<String> warnings) {
+    private extendedFileFormatDTO convertToFileFormatDTO(List<Thing> things, List<Item> items, List<Metadata> metadata,
+            List<String> warnings) {
         extendedFileFormatDTO dto = new extendedFileFormatDTO();
         dto.warnings = warnings.isEmpty() ? null : warnings;
         if (!things.isEmpty()) {
             dto.things = new ArrayList<>();
             things.forEach(thing -> {
                 dto.things.add(ThingDTOMapper.map(thing));
+            });
+        }
+        if (!items.isEmpty()) {
+            dto.items = new ArrayList<>();
+            items.forEach(item -> {
+                dto.items.add(FileFormatItemDTOMapper.map(item, metadata));
             });
         }
         return dto;
