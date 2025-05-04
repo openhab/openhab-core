@@ -19,9 +19,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.CopyOnWriteArraySet;
-
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.Action;
@@ -34,27 +31,11 @@ import org.openhab.core.automation.util.ModuleBuilder;
 import org.openhab.core.automation.util.RuleBuilder;
 import org.openhab.core.common.registry.AbstractProvider;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
-import org.openhab.core.config.core.ConfigDescriptionRegistry;
 import org.openhab.core.config.core.Configuration;
-import org.openhab.core.i18n.LocaleProvider;
-import org.openhab.core.model.yaml.YamlElementName;
 import org.openhab.core.model.yaml.YamlModelListener;
-import org.openhab.core.model.yaml.YamlModelRepository;
-import org.openhab.core.service.ReadyMarker;
-import org.openhab.core.service.ReadyService;
-import org.openhab.core.service.StartLevelService;
-import org.openhab.core.thing.Channel;
-import org.openhab.core.thing.Thing;
-import org.openhab.core.thing.ThingTypeUID;
-import org.openhab.core.thing.ThingUID;
-import org.openhab.core.thing.binding.ThingHandlerFactory;
-import org.openhab.core.thing.util.ThingHelper;
-import org.openhab.core.util.BundleResolver;
-import org.osgi.framework.Bundle;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
-import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,93 +49,19 @@ import org.slf4j.LoggerFactory;
 @NonNullByDefault
 @Component(immediate = true, service = { RuleProvider.class, YamlRuleProvider.class, YamlModelListener.class })
 public class YamlRuleProvider extends AbstractProvider<Rule>
-        implements RuleProvider, YamlModelListener<YamlRuleDTO>, ReadyService.ReadyTracker {
-
-    private static final String XML_THING_TYPE = "openhab.xmlThingTypes"; //TODO: (Nad) Cleanup + JavaDocs
+        implements RuleProvider, YamlModelListener<YamlRuleDTO> { //TODO: (Nad) Cleanup + JavaDocs
 
     private final Logger logger = LoggerFactory.getLogger(YamlRuleProvider.class);
 
-    private final YamlModelRepository modelRepository;
-    private final BundleResolver bundleResolver;
-    private final ConfigDescriptionRegistry configDescriptionRegistry;
-    private final LocaleProvider localeProvider;
-
-    private final Set<String> loadedXmlThingTypes = new CopyOnWriteArraySet<>();
-
     private final Map<String, Collection<Rule>> rulesMap = new ConcurrentHashMap<>();
 
-    private final List<QueueContent> queue = new CopyOnWriteArrayList<>();
-
-    private final Runnable lazyRetryRunnable = new Runnable() {
-        @Override
-        public void run() {
-            logger.debug("Starting lazy retry thread");
-//            while (!queue.isEmpty()) {
-//                for (QueueContent qc : queue) {
-//                    logger.trace("Retry creating thing {}", qc.thingUID);
-//                    Rule newRule = qc.thingHandlerFactory.createThing(qc.thingTypeUID, qc.configuration, qc.thingUID,
-//                            qc.bridgeUID);
-//                    if (newRule != null) {
-//                        logger.debug("Successfully loaded thing \'{}\' during retry", qc.thingUID);
-//                        Rule oldRule = null;
-//                        for (Map.Entry<String, Collection<Rule>> entry : rulesMap.entrySet()) {
-//                            oldRule = entry.getValue().stream().filter(t -> t.getUID().equals(newRule.getUID()))
-//                                    .findFirst().orElse(null);
-//                            if (oldRule != null) {
-//                                mergeThing(newRule, oldRule);
-//                                Collection<Rule> thingsForModel = Objects
-//                                        .requireNonNull(rulesMap.get(entry.getKey()));
-//                                thingsForModel.remove(oldRule);
-//                                thingsForModel.add(newRule);
-//                                logger.debug("Refreshing thing \'{}\' after successful retry", newRule.getUID());
-//                                if (!ThingHelper.equals(oldRule, newRule)) {
-//                                    notifyListenersAboutUpdatedElement(oldRule, newRule);
-//                                }
-//                                break;
-//                            }
-//                        }
-//                        if (oldRule == null) {
-//                            logger.debug("Refreshing thing \'{}\' after retry failed because thing is not found",
-//                                    newRule.getUID());
-//                        }
-//                        queue.remove(qc);
-//                    }
-//                }
-//                if (!queue.isEmpty()) {
-//                    try {
-//                        Thread.sleep(1000);
-//                    } catch (InterruptedException e) {
-//                    }
-//                }
-//            }
-//            logger.debug("Lazy retry thread ran out of work. Good bye.");
-        }
-    };
-
-    private boolean modelLoaded = false;
-
-    private @Nullable Thread lazyRetryThread;
-
-    private record QueueContent(ThingHandlerFactory thingHandlerFactory, ThingTypeUID thingTypeUID,
-            Configuration configuration, ThingUID thingUID, @Nullable ThingUID bridgeUID) {
-    }
-
     @Activate
-    public YamlRuleProvider(final @Reference YamlModelRepository modelRepository,
-            final @Reference BundleResolver bundleResolver,
-            final @Reference ConfigDescriptionRegistry configDescriptionRegistry,
-            final @Reference LocaleProvider localeProvider) {
-        this.modelRepository = modelRepository;
-        this.bundleResolver = bundleResolver;
-        this.configDescriptionRegistry = configDescriptionRegistry;
-        this.localeProvider = localeProvider;
+    public YamlRuleProvider() {
     }
 
     @Deactivate
     public void deactivate() {
-        queue.clear();
         rulesMap.clear();
-        loadedXmlThingTypes.clear();
     }
 
     @Override
@@ -224,67 +131,10 @@ public class YamlRuleProvider extends AbstractProvider<Rule>
         }
     }
 
-    @Reference
-    public void setReadyService(final ReadyService readyService) {
-        readyService.registerTracker(this);
-    }
-
-    public void unsetReadyService(final ReadyService readyService) {
-        readyService.unregisterTracker(this);
-    }
-
-    @Override
-    public void onReadyMarkerAdded(ReadyMarker readyMarker) {
-        String type = readyMarker.getType();
-        if (StartLevelService.STARTLEVEL_MARKER_TYPE.equals(type)) {
-            modelLoaded = Integer.parseInt(readyMarker.getIdentifier()) >= StartLevelService.STARTLEVEL_MODEL;
-        } else if (XML_THING_TYPE.equals(type)) {
-            String bsn = readyMarker.getIdentifier();
-            loadedXmlThingTypes.add(bsn);
-//            thingHandlerFactories.stream().filter(factory -> bsn.equals(getBundleName(factory))).forEach(factory -> {
-//                thingHandlerFactoryAdded(factory);
-//            });
-        }
-    }
-
-    @Override
-    public void onReadyMarkerRemoved(ReadyMarker readyMarker) {
-        loadedXmlThingTypes.remove(readyMarker.getIdentifier());
-    }
-
-    private void thingHandlerFactoryAdded(ThingHandlerFactory thingHandlerFactory) {
-        String bundleName = getBundleName(thingHandlerFactory);
-        if (bundleName != null && loadedXmlThingTypes.contains(bundleName)) {
-            logger.debug("Refreshing models due to new thing handler factory {}",
-                    thingHandlerFactory.getClass().getSimpleName());
-            rulesMap.keySet().forEach(modelName -> {
-                modelRepository.refreshModelElements(modelName,
-                        getElementClass().getAnnotation(YamlElementName.class).value());
-            });
-        }
-    }
-
-    private @Nullable String getBundleName(ThingHandlerFactory thingHandlerFactory) {
-        Bundle bundle = bundleResolver.resolveBundle(thingHandlerFactory.getClass());
-        return bundle == null ? null : bundle.getSymbolicName();
-    }
-
     private @Nullable Rule mapRule(YamlRuleDTO ruleDto) {
-
-//        public String templateUID;
-//        public String name;
-//        public Set<@NonNull String> tags;
-//        public String description;
-//        public Visibility visibility;
-//        public Map<@NonNull String, @NonNull Object> configuration;
-//        public List<@NonNull ConfigDescriptionParameter> configurationDescriptions;
-//        public List<@NonNull YamlConditionDTO> conditions;
-//        public List<@NonNull YamlActionDTO> actions;
-//        public List<@NonNull YamlModuleDTO> triggers;
 
         String s;
         RuleBuilder ruleBuilder = RuleBuilder.create(ruleDto.uid);
-
         if ((s = ruleDto.name) != null) {
             ruleBuilder.withName(s);
         }
@@ -341,33 +191,6 @@ public class YamlRuleProvider extends AbstractProvider<Rule>
             ruleBuilder.withTriggers(triggers);
         }
 
-
         return ruleBuilder.build();
-    }
-
-    private void mergeThing(Thing target, Thing source) {
-        target.setLabel(source.getLabel());
-        target.setLocation(source.getLocation());
-        target.setBridgeUID(source.getBridgeUID());
-
-        source.getConfiguration().keySet().forEach(paramName -> {
-            target.getConfiguration().put(paramName, source.getConfiguration().get(paramName));
-        });
-
-        List<Channel> channelsToAdd = new ArrayList<>();
-        source.getChannels().forEach(channel -> {
-            Channel targetChannel = target.getChannels().stream().filter(c -> c.getUID().equals(channel.getUID()))
-                    .findFirst().orElse(null);
-            if (targetChannel != null) {
-                channel.getConfiguration().keySet().forEach(paramName -> {
-                    targetChannel.getConfiguration().put(paramName, channel.getConfiguration().get(paramName));
-                });
-            } else {
-                channelsToAdd.add(channel);
-            }
-        });
-
-        // add the channels only defined in source list to the target list
-        ThingHelper.addChannelsToThing(target, channelsToAdd);
     }
 }
