@@ -363,19 +363,10 @@ public class ItemResource implements RESTResource {
     @RolesAllowed({ Role.USER, Role.ADMIN })
     @Path("/{itemname: [a-zA-Z_0-9]+}/state")
     @Produces(MediaType.TEXT_PLAIN)
-    @Operation(operationId = "getOrSetItemState", summary = "Gets or sets the state of an item.", responses = {
+    @Operation(operationId = "getItemState", summary = "Gets the state of an item.", responses = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(schema = @Schema(implementation = String.class))),
-            @ApiResponse(responseCode = "202", description = "State accepted"),
-            @ApiResponse(responseCode = "400", description = "State cannot be parsed"),
             @ApiResponse(responseCode = "404", description = "Item not found") })
-    public Response getPlainItemState(
-            @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
-            @PathParam("itemname") @Parameter(description = "item name") String itemname,
-            @QueryParam("state") @Parameter(description = "valid item state (e.g. ON, OFF) to set", required = false) @Nullable String state) {
-        if (state != null) {
-            return sendItemStateInternal(language, itemname, state);
-        }
-
+    public Response getPlainItemState(@PathParam("itemname") @Parameter(description = "item name") String itemname) {
         // get item
         Item item = getItem(itemname);
 
@@ -503,18 +494,6 @@ public class ItemResource implements RESTResource {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response postItemCommandJson(@PathParam("itemname") String itemname, ValueContainer valueContainer) {
         return sendItemCommandInternal(itemname, valueContainer.value());
-    }
-
-    @GET
-    @RolesAllowed({ Role.USER, Role.ADMIN })
-    @Path("/{itemname: [a-zA-Z_0-9]+}/command")
-    @Operation(operationId = "sendItemCommandWebhook", summary = "Sends a command to an item.", description = "Allows to send a command to an item using webhooks.", responses = {
-            @ApiResponse(responseCode = "200", description = "OK"),
-            @ApiResponse(responseCode = "404", description = "Item not found"),
-            @ApiResponse(responseCode = "400", description = "Command cannot be parsed") })
-    public Response itemCommandWebhook(@PathParam("itemname") @Parameter(description = "item name") String itemname,
-            @QueryParam("command") @Parameter(description = "valid item command (e.g. ON, OFF, UP, DOWN, REFRESH)", required = true) String value) {
-        return sendItemCommandInternal(itemname, value);
     }
 
     private Response sendItemCommandInternal(String itemname, String value) {
