@@ -4,13 +4,13 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNull;
 
-public class YamlModuleDTO { //TODO: (Nad) Header + JavaDocs
+public class YamlModuleDTO { // TODO: (Nad) Header + JavaDocs
 
     public String id;
-    public String type;
     public String label;
     public String description;
-    public Map<@NonNull String, @NonNull Object> configuration;
+    public Map<@NonNull String, @NonNull Object> config;
+    public String type;
 
     @Override
     public String toString() {
@@ -28,8 +28,8 @@ public class YamlModuleDTO { //TODO: (Nad) Header + JavaDocs
         if (description != null) {
             builder.append("description=").append(description).append(", ");
         }
-        if (configuration != null) {
-            builder.append("configuration=").append(configuration);
+        if (config != null) {
+            builder.append("config=").append(config);
         }
         builder.append("]");
         return builder.toString();

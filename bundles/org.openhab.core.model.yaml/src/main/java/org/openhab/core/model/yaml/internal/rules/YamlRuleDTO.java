@@ -32,9 +32,10 @@ import org.openhab.core.model.yaml.YamlElementName;
  * @author Ravi Nadahar - Initial contribution
  */
 @YamlElementName("rules")
-public class YamlRuleDTO implements YamlElement, Cloneable { //TODO: (Nad) Cleanup + JavaDocs
+public class YamlRuleDTO implements YamlElement, Cloneable { // TODO: (Nad) Cleanup + JavaDocs
 
-    private static final Pattern THING_UID_SEGMENT_PATTERN = Pattern.compile("[a-zA-Z0-9_][a-zA-Z0-9_-]*"); //TODO: (Nad) Fix
+    // TODO: (Nad) Fix
+    private static final Pattern THING_UID_SEGMENT_PATTERN = Pattern.compile("[a-zA-Z0-9_][a-zA-Z0-9_-]*");
 
     public String uid;
     public String templateUID;
@@ -42,7 +43,7 @@ public class YamlRuleDTO implements YamlElement, Cloneable { //TODO: (Nad) Clean
     public Set<@NonNull String> tags;
     public String description;
     public Visibility visibility;
-    public Map<@NonNull String, @NonNull Object> configuration;
+    public Map<@NonNull String, @NonNull Object> config;
     public List<@NonNull ConfigDescriptionParameter> configurationDescriptions;
     public List<@NonNull YamlConditionDTO> conditions;
     public List<@NonNull YamlActionDTO> actions;
@@ -77,7 +78,7 @@ public class YamlRuleDTO implements YamlElement, Cloneable { //TODO: (Nad) Clean
     @Override
     public boolean isValid(@Nullable List<@NonNull String> errors, @Nullable List<@NonNull String> warnings) {
         // Check that uid is present
-        if (uid == null || uid.isBlank()) {
+        if (uid == null || uid.isBlank()) { // TODO: (Nad) Make validation
             addToList(errors, "invalid thing: uid is missing while mandatory");
             return false;
         }
@@ -102,8 +103,8 @@ public class YamlRuleDTO implements YamlElement, Cloneable { //TODO: (Nad) Clean
 
     @Override
     public int hashCode() {
-        return Objects.hash(actions, conditions, configuration, configurationDescriptions, description, name, tags,
-            templateUID, triggers, uid, visibility);
+        return Objects.hash(actions, conditions, config, configurationDescriptions, description, name, tags,
+                templateUID, triggers, uid, visibility);
     }
 
     @Override
@@ -116,12 +117,12 @@ public class YamlRuleDTO implements YamlElement, Cloneable { //TODO: (Nad) Clean
         }
         YamlRuleDTO other = (YamlRuleDTO) obj;
         return Objects.equals(actions, other.actions) && Objects.equals(conditions, other.conditions)
-            && Objects.equals(configuration, other.configuration)
-            && Objects.equals(configurationDescriptions, other.configurationDescriptions)
-            && Objects.equals(description, other.description) && Objects.equals(name, other.name)
-            && Objects.equals(tags, other.tags) && Objects.equals(templateUID, other.templateUID)
-            && Objects.equals(triggers, other.triggers) && Objects.equals(uid, other.uid)
-            && visibility == other.visibility;
+                && Objects.equals(config, other.config)
+                && Objects.equals(configurationDescriptions, other.configurationDescriptions)
+                && Objects.equals(description, other.description) && Objects.equals(name, other.name)
+                && Objects.equals(tags, other.tags) && Objects.equals(templateUID, other.templateUID)
+                && Objects.equals(triggers, other.triggers) && Objects.equals(uid, other.uid)
+                && visibility == other.visibility;
     }
 
     @Override
@@ -146,8 +147,8 @@ public class YamlRuleDTO implements YamlElement, Cloneable { //TODO: (Nad) Clean
         if (visibility != null) {
             builder.append("visibility=").append(visibility).append(", ");
         }
-        if (configuration != null) {
-            builder.append("configuration=").append(configuration).append(", ");
+        if (config != null) {
+            builder.append("config=").append(config).append(", ");
         }
         if (configurationDescriptions != null) {
             builder.append("configurationDescriptions=").append(configurationDescriptions).append(", ");

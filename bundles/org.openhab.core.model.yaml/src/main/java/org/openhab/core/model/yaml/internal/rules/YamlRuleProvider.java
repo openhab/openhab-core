@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.Action;
@@ -48,8 +49,11 @@ import org.slf4j.LoggerFactory;
  */
 @NonNullByDefault
 @Component(immediate = true, service = { RuleProvider.class, YamlRuleProvider.class, YamlModelListener.class })
-public class YamlRuleProvider extends AbstractProvider<Rule>
-        implements RuleProvider, YamlModelListener<YamlRuleDTO> { //TODO: (Nad) Cleanup + JavaDocs
+public class YamlRuleProvider extends AbstractProvider<Rule> implements RuleProvider, YamlModelListener<YamlRuleDTO> { // TODO:
+                                                                                                                       // (Nad)
+                                                                                                                       // Cleanup
+                                                                                                                       // +
+                                                                                                                       // JavaDocs
 
     private final Logger logger = LoggerFactory.getLogger(YamlRuleProvider.class);
 
@@ -102,16 +106,17 @@ public class YamlRuleProvider extends AbstractProvider<Rule>
         Collection<Rule> modelRules = Objects
                 .requireNonNull(rulesMap.computeIfAbsent(modelName, k -> new ArrayList<>()));
         updated.forEach(r -> {
-            modelRules.stream().filter(rule -> rule.getUID().equals(r.getUID())).findFirst().ifPresentOrElse(oldRule -> {
-                modelRules.remove(oldRule);
-                modelRules.add(r);
-                logger.debug("model {} updated rule {}", modelName, r.getUID());
-                notifyListenersAboutUpdatedElement(oldRule, r);
-            }, () -> {
-                modelRules.add(r);
-                logger.debug("model {} added rule {}", modelName, r.getUID());
-                notifyListenersAboutAddedElement(r);
-            });
+            modelRules.stream().filter(rule -> rule.getUID().equals(r.getUID())).findFirst()
+                    .ifPresentOrElse(oldRule -> {
+                        modelRules.remove(oldRule);
+                        modelRules.add(r);
+                        logger.debug("model {} updated rule {}", modelName, r.getUID());
+                        notifyListenersAboutUpdatedElement(oldRule, r);
+                    }, () -> {
+                        modelRules.add(r);
+                        logger.debug("model {} added rule {}", modelName, r.getUID());
+                        notifyListenersAboutAddedElement(r);
+                    });
         });
     }
 
@@ -120,11 +125,12 @@ public class YamlRuleProvider extends AbstractProvider<Rule>
         List<Rule> removed = elements.stream().map(this::mapRule).filter(Objects::nonNull).toList();
         Collection<Rule> modelRules = rulesMap.getOrDefault(modelName, List.of());
         removed.forEach(r -> {
-            modelRules.stream().filter(rule -> rule.getUID().equals(r.getUID())).findFirst().ifPresentOrElse(oldRule -> {
-                modelRules.remove(oldRule);
-                logger.debug("model {} removed rule {}", modelName, r.getUID());
-                notifyListenersAboutRemovedElement(oldRule);
-            }, () -> logger.debug("model {} rule {} not found", modelName, r.getUID()));
+            modelRules.stream().filter(rule -> rule.getUID().equals(r.getUID())).findFirst()
+                    .ifPresentOrElse(oldRule -> {
+                        modelRules.remove(oldRule);
+                        logger.debug("model {} removed rule {}", modelName, r.getUID());
+                        notifyListenersAboutRemovedElement(oldRule);
+                    }, () -> logger.debug("model {} rule {} not found", modelName, r.getUID()));
         });
         if (modelRules.isEmpty()) {
             rulesMap.remove(modelName);
@@ -152,7 +158,7 @@ public class YamlRuleProvider extends AbstractProvider<Rule>
         if (visibility != null) {
             ruleBuilder.withVisibility(visibility);
         }
-        Map<String, Object> configuration = ruleDto.configuration;
+        Map<String, Object> configuration = ruleDto.config;
         if (configuration != null) {
             ruleBuilder.withConfiguration(new Configuration(configuration));
         }
@@ -165,8 +171,8 @@ public class YamlRuleProvider extends AbstractProvider<Rule>
             List<Condition> conditions = new ArrayList<>(conditionDTOs.size());
             for (YamlConditionDTO conditionDto : conditionDTOs) {
                 conditions.add(ModuleBuilder.createCondition().withId(conditionDto.id).withTypeUID(conditionDto.type)
-                    .withConfiguration(new Configuration(conditionDto.configuration)).withInputs(conditionDto.inputs)
-                    .withLabel(conditionDto.label).withDescription(conditionDto.description).build());
+                        .withConfiguration(new Configuration(conditionDto.config)).withInputs(conditionDto.inputs)
+                        .withLabel(conditionDto.label).withDescription(conditionDto.description).build());
             }
             ruleBuilder.withConditions(conditions);
         }
@@ -175,8 +181,8 @@ public class YamlRuleProvider extends AbstractProvider<Rule>
             List<Action> actions = new ArrayList<>(actionDTOs.size());
             for (YamlActionDTO actionDto : actionDTOs) {
                 actions.add(ModuleBuilder.createAction().withId(actionDto.id).withTypeUID(actionDto.type)
-                    .withConfiguration(new Configuration(actionDto.configuration)).withInputs(actionDto.inputs)
-                    .withLabel(actionDto.label).withDescription(actionDto.description).build());
+                        .withConfiguration(new Configuration(actionDto.config)).withInputs(actionDto.inputs)
+                        .withLabel(actionDto.label).withDescription(actionDto.description).build());
             }
             ruleBuilder.withActions(actions);
         }
@@ -185,8 +191,8 @@ public class YamlRuleProvider extends AbstractProvider<Rule>
             List<Trigger> triggers = new ArrayList<>(triggerDTOs.size());
             for (YamlModuleDTO triggerDto : triggerDTOs) {
                 triggers.add(ModuleBuilder.createTrigger().withId(triggerDto.id).withTypeUID(triggerDto.type)
-                    .withConfiguration(new Configuration(triggerDto.configuration)).withLabel(triggerDto.label)
-                    .withDescription(triggerDto.description).build());
+                        .withConfiguration(new Configuration(triggerDto.config)).withLabel(triggerDto.label)
+                        .withDescription(triggerDto.description).build());
             }
             ruleBuilder.withTriggers(triggers);
         }

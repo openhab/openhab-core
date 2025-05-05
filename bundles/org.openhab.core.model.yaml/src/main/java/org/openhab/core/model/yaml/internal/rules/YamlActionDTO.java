@@ -17,7 +17,7 @@ public class YamlActionDTO extends YamlModuleDTO {
             builder.append("id=").append(id).append(", ");
         }
         if (type != null) {
-            builder.append("typeUID=").append(type).append(", ");
+            builder.append("type=").append(type).append(", ");
         }
         if (label != null) {
             builder.append("label=").append(label).append(", ");
@@ -25,8 +25,8 @@ public class YamlActionDTO extends YamlModuleDTO {
         if (description != null) {
             builder.append("description=").append(description).append(", ");
         }
-        if (configuration != null) {
-            builder.append("configuration=").append(configuration);
+        if (config != null) {
+            builder.append("config=").append(config);
         }
         builder.append("]");
         return builder.toString();
