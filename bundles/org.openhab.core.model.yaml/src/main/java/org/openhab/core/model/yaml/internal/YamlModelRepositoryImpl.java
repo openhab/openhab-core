@@ -784,7 +784,7 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
                         elt.setId(id);
                     } catch (JsonProcessingException e) {
                         if (errors != null) {
-                            errors.add("could not parse element %s to %s: %s".formatted(node.toPrettyString(),
+                            errors.add("could not parse element with ID %s to %s: %s".formatted(id,
                                     elementClass.getSimpleName(), e.getMessage()));
                         }
                     }
