@@ -94,6 +94,8 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
             getElementName(YamlThingDTO.class) // "things"
     );
 
+    private static final String UNWANTED_EXCEPTION_TEXT = "at [Source: UNKNOWN; byte offset: #UNKNOWN] ";
+
     private final Logger logger = LoggerFactory.getLogger(YamlModelRepositoryImpl.class);
 
     private final WatchService watchService;
@@ -750,8 +752,9 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
             return Optional.of(objectMapper.treeToValue(node, elementClass));
         } catch (JsonProcessingException e) {
             if (errors != null) {
+                String msg = e.getMessage();
                 errors.add("Could not parse element %s to %s: %s".formatted(node.toPrettyString(),
-                        elementClass.getSimpleName(), e.getMessage()));
+                        elementClass.getSimpleName(), msg == null ? "" : msg.replace(UNWANTED_EXCEPTION_TEXT, "")));
             }
             return Optional.empty();
         }
@@ -784,8 +787,10 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
                         elt.setId(id);
                     } catch (JsonProcessingException e) {
                         if (errors != null) {
+                            String msg = e.getMessage();
                             errors.add("could not parse element with ID %s to %s: %s".formatted(id,
-                                    elementClass.getSimpleName(), e.getMessage()));
+                                    elementClass.getSimpleName(),
+                                    msg == null ? "" : msg.replace(UNWANTED_EXCEPTION_TEXT, "")));
                         }
                     }
                 }
