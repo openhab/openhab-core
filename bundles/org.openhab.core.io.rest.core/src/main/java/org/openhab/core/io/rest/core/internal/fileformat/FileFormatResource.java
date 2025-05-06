@@ -278,9 +278,9 @@ public class FileFormatResource implements RESTResource {
             return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE)
                     .entity("Unsupported media type '" + acceptHeader + "'!").build();
         }
-        Collection<Item> items = null;
+        List<Item> items;
         if (itemNames == null || itemNames.isEmpty()) {
-            items = itemRegistry.getAll();
+            items = getAllItemsSorted();
         } else {
             items = new ArrayList<>();
             for (String itemname : itemNames) {
@@ -293,7 +293,7 @@ public class FileFormatResource implements RESTResource {
             }
         }
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        generator.generateFileFormat(outputStream, sortItems(items), getMetadata(items), hideDefaultParameters);
+        generator.generateFileFormat(outputStream, items, getMetadata(items), hideDefaultParameters);
         return Response.ok(new String(outputStream.toByteArray())).build();
     }
 
@@ -319,9 +319,9 @@ public class FileFormatResource implements RESTResource {
             return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE)
                     .entity("Unsupported media type '" + acceptHeader + "'!").build();
         }
-        Collection<Thing> things = null;
+        List<Thing> things;
         if (thingUIDs == null || thingUIDs.isEmpty()) {
-            things = thingRegistry.getAll();
+            things = getAllThingsSorted();
         } else {
             try {
                 things = getThingsOrDiscoveryResult(thingUIDs);
@@ -330,7 +330,7 @@ public class FileFormatResource implements RESTResource {
             }
         }
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        generator.generateFileFormat(outputStream, sortThings(things), true, hideDefaultParameters);
+        generator.generateFileFormat(outputStream, things, true, hideDefaultParameters);
         return Response.ok(new String(outputStream.toByteArray())).build();
     }
 
@@ -455,14 +455,15 @@ public class FileFormatResource implements RESTResource {
     }
 
     /*
-     * Sort the items in such a way:
+     * Get all items from registry sorted in such a way:
      * - group items are before non group items
      * - group items are sorted to have as much as possible ancestors before their children
      * - items not linked to a channel are before items linked to a channel
      * - items linked to a channel are grouped by thing UID
      * - items linked to the same thing UID are sorted by item name
      */
-    private List<Item> sortItems(Collection<Item> items) {
+    private List<Item> getAllItemsSorted() {
+        Collection<Item> items = itemRegistry.getAll();
         List<Item> groups = items.stream().filter(item -> item instanceof GroupItem).sorted((item1, item2) -> {
             return item1.getName().compareTo(item2.getName());
         }).toList();
@@ -516,12 +517,13 @@ public class FileFormatResource implements RESTResource {
     }
 
     /*
-     * Sort the things in such a way:
+     * Get all things from registry sorted in such a way:
      * - things are grouped by binding, sorted by natural order of binding name
      * - all things of a binding are sorted to follow the tree, that is bridge thing is before its sub-things
      * - all things of a binding at a certain tree depth are sorted by thing UID
      */
-    private List<Thing> sortThings(Collection<Thing> things) {
+    private List<Thing> getAllThingsSorted() {
+        Collection<Thing> things = thingRegistry.getAll();
         List<Thing> thingTree = new ArrayList<>();
         Set<String> bindings = things.stream().map(thing -> thing.getUID().getBindingId()).collect(Collectors.toSet());
         for (String binding : bindings.stream().sorted().toList()) {
