@@ -292,11 +292,13 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
                         }
 
                         List<JsonNode> removedNodes = e.getValue();
-                        getElementListeners(elementName, modelVersion).forEach(listener -> {
-                            List removedElements = parseJsonNodesV1(removedNodes, listener.getElementClass(), null,
-                                    null);
-                            listener.removedModel(modelName, removedElements);
-                        });
+                        if (removedNodes != null) {
+                            getElementListeners(elementName, modelVersion).forEach(listener -> {
+                                List removedElements = parseJsonNodesV1(removedNodes, listener.getElementClass(), null,
+                                        null);
+                                listener.removedModel(modelName, removedElements);
+                            });
+                        }
                         return true;
                     });
                 } else {
