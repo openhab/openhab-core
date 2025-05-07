@@ -26,6 +26,8 @@ import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.model.yaml.YamlElement;
 import org.openhab.core.model.yaml.YamlElementName;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 /**
  * The {@link YamlRuleDTO} is a data transfer object used to serialize a rule in a YAML configuration file.
  *
@@ -45,7 +47,7 @@ public class YamlRuleDTO implements YamlElement, Cloneable { // TODO: (Nad) Clea
     public Visibility visibility;
     public Map<@NonNull String, @NonNull Object> config;
     public List<@NonNull ConfigDescriptionParameter> configurationDescriptions;
-    public List<@NonNull YamlConditionDTO> conditions;
+    public JsonNode conditions;
     public List<@NonNull YamlActionDTO> actions;
     public List<@NonNull YamlModuleDTO> triggers;
 

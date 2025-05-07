@@ -14,8 +14,10 @@ package org.openhab.core.model.yaml.internal.rules;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -40,6 +42,11 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 /**
  * {@link YamlRuleProvider} is an OSGi service, that allows definition of rules in YAML configuration files. Files can
  * be added, updated or removed at runtime. The rules are automatically registered with
@@ -47,13 +54,9 @@ import org.slf4j.LoggerFactory;
  *
  * @author Ravi Nadahar - Initial contribution
  */
-@NonNullByDefault
+@NonNullByDefault // TODO: (Nad) Cleanup + JavaDocs
 @Component(immediate = true, service = { RuleProvider.class, YamlRuleProvider.class, YamlModelListener.class })
-public class YamlRuleProvider extends AbstractProvider<Rule> implements RuleProvider, YamlModelListener<YamlRuleDTO> { // TODO:
-                                                                                                                       // (Nad)
-                                                                                                                       // Cleanup
-                                                                                                                       // +
-                                                                                                                       // JavaDocs
+public class YamlRuleProvider extends AbstractProvider<Rule> implements RuleProvider, YamlModelListener<YamlRuleDTO> {
 
     private final Logger logger = LoggerFactory.getLogger(YamlRuleProvider.class);
 
@@ -89,8 +92,15 @@ public class YamlRuleProvider extends AbstractProvider<Rule> implements RuleProv
     }
 
     @Override
-    public void addedModel(String modelName, Collection<YamlRuleDTO> elements) {
-        List<Rule> added = elements.stream().map(this::mapRule).filter(Objects::nonNull).toList();
+    public void addedModel(String modelName, ObjectMapper yamlMapper, Collection<YamlRuleDTO> elements) {
+        List<Rule> added = elements.stream().map(r -> {
+            try {
+                return mapRule(r, yamlMapper);
+            } catch (JsonProcessingException e) {
+                logger.warn("Failed to add rule \"{}\" to model {}: {}", r, modelName, e.getMessage());
+            }
+            return null;
+        }).filter(Objects::nonNull).toList();
         Collection<Rule> modelRules = Objects
                 .requireNonNull(rulesMap.computeIfAbsent(modelName, k -> new ArrayList<>()));
         modelRules.addAll(added);
@@ -101,8 +111,15 @@ public class YamlRuleProvider extends AbstractProvider<Rule> implements RuleProv
     }
 
     @Override
-    public void updatedModel(String modelName, Collection<YamlRuleDTO> elements) {
-        List<Rule> updated = elements.stream().map(this::mapRule).filter(Objects::nonNull).toList();
+    public void updatedModel(String modelName, ObjectMapper yamlMapper, Collection<YamlRuleDTO> elements) {
+        List<Rule> updated = elements.stream().map(r -> {
+            try {
+                return mapRule(r, yamlMapper);
+            } catch (JsonProcessingException e) {
+                logger.warn("Failed to update rule \"{}\" for model {}: {}", r, modelName, e.getMessage());
+            }
+            return null;
+        }).filter(Objects::nonNull).toList();
         Collection<Rule> modelRules = Objects
                 .requireNonNull(rulesMap.computeIfAbsent(modelName, k -> new ArrayList<>()));
         updated.forEach(r -> {
@@ -117,12 +134,19 @@ public class YamlRuleProvider extends AbstractProvider<Rule> implements RuleProv
                         logger.debug("model {} added rule {}", modelName, r.getUID());
                         notifyListenersAboutAddedElement(r);
                     });
-        });
+        }); // TODO: (Nad) Remember to create tests
     }
 
     @Override
-    public void removedModel(String modelName, Collection<YamlRuleDTO> elements) {
-        List<Rule> removed = elements.stream().map(this::mapRule).filter(Objects::nonNull).toList();
+    public void removedModel(String modelName, ObjectMapper yamlMapper, Collection<YamlRuleDTO> elements) {
+        List<Rule> removed = elements.stream().map(r -> {
+            try {
+                return mapRule(r, yamlMapper);
+            } catch (JsonProcessingException e) {
+                logger.warn("Failed to remove rule \"{}\" from model {}: {}", r, modelName, e.getMessage());
+            }
+            return null;
+        }).filter(Objects::nonNull).toList();
         Collection<Rule> modelRules = rulesMap.getOrDefault(modelName, List.of());
         removed.forEach(r -> {
             modelRules.stream().filter(rule -> rule.getUID().equals(r.getUID())).findFirst()
@@ -137,9 +161,10 @@ public class YamlRuleProvider extends AbstractProvider<Rule> implements RuleProv
         }
     }
 
-    private @Nullable Rule mapRule(YamlRuleDTO ruleDto) {
+    private @Nullable Rule mapRule(YamlRuleDTO ruleDto, ObjectMapper yamlMapper) throws JsonProcessingException {
 
         String s;
+        JsonNode node;
         RuleBuilder ruleBuilder = RuleBuilder.create(ruleDto.uid);
         if ((s = ruleDto.name) != null) {
             ruleBuilder.withName(s);
@@ -166,13 +191,57 @@ public class YamlRuleProvider extends AbstractProvider<Rule> implements RuleProv
         if (configurationDescriptions != null) {
             ruleBuilder.withConfigurationDescriptions(configurationDescriptions);
         }
-        List<YamlConditionDTO> conditionDTOs = ruleDto.conditions;
-        if (conditionDTOs != null) {
-            List<Condition> conditions = new ArrayList<>(conditionDTOs.size());
-            for (YamlConditionDTO conditionDto : conditionDTOs) {
-                conditions.add(ModuleBuilder.createCondition().withId(conditionDto.id).withTypeUID(conditionDto.type)
+        if ((node = ruleDto.conditions) != null) {
+            List<Condition> conditions = new ArrayList<>();
+            YamlConditionDTO conditionDto;
+            if (node.isArray()) {
+                JsonNode element;
+                boolean generateIds = false;
+                List<YamlConditionDTO> conditionDtos = new ArrayList<>();
+                for (Iterator<JsonNode> iterator = node.iterator(); iterator.hasNext();) {
+                    element = iterator.next();
+                    try {
+                        conditionDto = yamlMapper.treeToValue(element, YamlConditionDTO.class);
+                        generateIds |= conditionDto.id == null || conditionDto.id.isBlank();
+                        conditionDtos.add(conditionDto);
+                    } catch (RuntimeException e) {
+                        throw new JsonMappingException(null, "Failed to process YAML rule condition:\n" + element.toPrettyString() + "\n" + e.getMessage(), e);
+                    }
+                }
+                while (generateIds) {
+                    int id = 0;
+                    for (;;) {
+                        String ids = Integer.toString(++id);
+                        if (!conditionDtos.stream().anyMatch(m -> ids.equals(m.id))) {
+                            break;
+                        }
+                    }
+                    final String ids2 = Integer.toString(id);
+                    conditionDtos.stream().filter(m -> m.id == null || m.id.isBlank()).findFirst().ifPresent(m -> m.id = ids2);
+                    generateIds = conditionDtos.stream().anyMatch(m -> m.id == null || m.id.isBlank());
+                }
+                for (YamlConditionDTO mDto : conditionDtos) {
+                    try {
+                        conditions.add(ModuleBuilder.createCondition().withId(mDto.id).withTypeUID(mDto.type)
+                        .withConfiguration(new Configuration(mDto.config)).withInputs(mDto.inputs)
+                        .withLabel(mDto.label).withDescription(mDto.description).build());
+                    } catch (RuntimeException e) {
+                        throw new JsonMappingException(null, "Failed to process YAML rule condition: \"" + mDto + "\": " + e.getMessage(), e);
+                    }
+                }
+            } else {
+                Entry<String, JsonNode> entry;
+                for (Iterator<Entry<String, JsonNode>> iterator = node.fields(); iterator.hasNext();) {
+                    entry = iterator.next();
+                    try {
+                        conditionDto = yamlMapper.treeToValue(entry.getValue(), YamlConditionDTO.class);
+                        conditions.add(ModuleBuilder.createCondition().withId(entry.getKey()).withTypeUID(conditionDto.type)
                         .withConfiguration(new Configuration(conditionDto.config)).withInputs(conditionDto.inputs)
                         .withLabel(conditionDto.label).withDescription(conditionDto.description).build());
+                    } catch (RuntimeException e) {
+                        throw new JsonMappingException(null, "Failed to process YAML rule condition:\n" + entry.getValue().toPrettyString() + "\n" + e.getMessage(), e);
+                    }
+                }
             }
             ruleBuilder.withConditions(conditions);
         }
