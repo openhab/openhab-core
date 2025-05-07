@@ -634,9 +634,9 @@ public class FileFormatResource implements RESTResource {
 
                 if (thingBean.bridgeUID != null) {
                     bridgeUID = new ThingUID(thingBean.bridgeUID);
-                    if (thingUID != null && (!thingUID.getBindingId().equals(bridgeUID.getBindingId())
-                            || !thingUID.getBridgeIds().contains(bridgeUID.getId()))) {
-                        errors.add("Thing UID '" + thingUID + "' does not match bridge UID '" + bridgeUID + "'");
+                    if (thingUID != null && !thingUID.getBindingId().equals(bridgeUID.getBindingId())) {
+                        errors.add("Thing UID '" + thingUID + "' and bridge UID '" + bridgeUID
+                                + "' are from different bindings");
                         ok = false;
                         continue;
                     }
