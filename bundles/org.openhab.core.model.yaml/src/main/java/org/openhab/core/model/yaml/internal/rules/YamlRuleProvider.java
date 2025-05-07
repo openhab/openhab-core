@@ -26,6 +26,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.automation.Action;
 import org.openhab.core.automation.Condition;
+import org.openhab.core.automation.Module;
 import org.openhab.core.automation.Rule;
 import org.openhab.core.automation.RuleProvider;
 import org.openhab.core.automation.Trigger;
@@ -97,7 +98,7 @@ public class YamlRuleProvider extends AbstractProvider<Rule> implements RuleProv
             try {
                 return mapRule(r, yamlMapper);
             } catch (JsonProcessingException e) {
-                logger.warn("Failed to add rule \"{}\" to model {}: {}", r, modelName, e.getMessage());
+                logger.warn("Failed to add rule \"{}\" to model {}: {}", r.uid, modelName, e.getMessage());
             }
             return null;
         }).filter(Objects::nonNull).toList();
@@ -116,7 +117,7 @@ public class YamlRuleProvider extends AbstractProvider<Rule> implements RuleProv
             try {
                 return mapRule(r, yamlMapper);
             } catch (JsonProcessingException e) {
-                logger.warn("Failed to update rule \"{}\" for model {}: {}", r, modelName, e.getMessage());
+                logger.warn("Failed to update rule \"{}\" for model {}: {}", r.uid, modelName, e.getMessage());
             }
             return null;
         }).filter(Objects::nonNull).toList();
@@ -143,7 +144,7 @@ public class YamlRuleProvider extends AbstractProvider<Rule> implements RuleProv
             try {
                 return mapRule(r, yamlMapper);
             } catch (JsonProcessingException e) {
-                logger.warn("Failed to remove rule \"{}\" from model {}: {}", r, modelName, e.getMessage());
+                logger.warn("Failed to remove rule \"{}\" from model {}: {}", r.uid, modelName, e.getMessage());
             }
             return null;
         }).filter(Objects::nonNull).toList();
@@ -162,7 +163,6 @@ public class YamlRuleProvider extends AbstractProvider<Rule> implements RuleProv
     }
 
     private @Nullable Rule mapRule(YamlRuleDTO ruleDto, ObjectMapper yamlMapper) throws JsonProcessingException {
-
         String s;
         JsonNode node;
         RuleBuilder ruleBuilder = RuleBuilder.create(ruleDto.uid);
@@ -192,80 +192,103 @@ public class YamlRuleProvider extends AbstractProvider<Rule> implements RuleProv
             ruleBuilder.withConfigurationDescriptions(configurationDescriptions);
         }
         if ((node = ruleDto.conditions) != null) {
-            List<Condition> conditions = new ArrayList<>();
-            YamlConditionDTO conditionDto;
-            if (node.isArray()) {
-                JsonNode element;
-                boolean generateIds = false;
-                List<YamlConditionDTO> conditionDtos = new ArrayList<>();
-                for (Iterator<JsonNode> iterator = node.iterator(); iterator.hasNext();) {
-                    element = iterator.next();
-                    try {
-                        conditionDto = yamlMapper.treeToValue(element, YamlConditionDTO.class);
-                        generateIds |= conditionDto.id == null || conditionDto.id.isBlank();
-                        conditionDtos.add(conditionDto);
-                    } catch (RuntimeException e) {
-                        throw new JsonMappingException(null, "Failed to process YAML rule condition:\n" + element.toPrettyString() + "\n" + e.getMessage(), e);
-                    }
-                }
-                while (generateIds) {
-                    int id = 0;
-                    for (;;) {
-                        String ids = Integer.toString(++id);
-                        if (!conditionDtos.stream().anyMatch(m -> ids.equals(m.id))) {
-                            break;
-                        }
-                    }
-                    final String ids2 = Integer.toString(id);
-                    conditionDtos.stream().filter(m -> m.id == null || m.id.isBlank()).findFirst().ifPresent(m -> m.id = ids2);
-                    generateIds = conditionDtos.stream().anyMatch(m -> m.id == null || m.id.isBlank());
-                }
-                for (YamlConditionDTO mDto : conditionDtos) {
-                    try {
-                        conditions.add(ModuleBuilder.createCondition().withId(mDto.id).withTypeUID(mDto.type)
-                        .withConfiguration(new Configuration(mDto.config)).withInputs(mDto.inputs)
-                        .withLabel(mDto.label).withDescription(mDto.description).build());
-                    } catch (RuntimeException e) {
-                        throw new JsonMappingException(null, "Failed to process YAML rule condition: \"" + mDto + "\": " + e.getMessage(), e);
-                    }
-                }
-            } else {
-                Entry<String, JsonNode> entry;
-                for (Iterator<Entry<String, JsonNode>> iterator = node.fields(); iterator.hasNext();) {
-                    entry = iterator.next();
-                    try {
-                        conditionDto = yamlMapper.treeToValue(entry.getValue(), YamlConditionDTO.class);
-                        conditions.add(ModuleBuilder.createCondition().withId(entry.getKey()).withTypeUID(conditionDto.type)
-                        .withConfiguration(new Configuration(conditionDto.config)).withInputs(conditionDto.inputs)
-                        .withLabel(conditionDto.label).withDescription(conditionDto.description).build());
-                    } catch (RuntimeException e) {
-                        throw new JsonMappingException(null, "Failed to process YAML rule condition:\n" + entry.getValue().toPrettyString() + "\n" + e.getMessage(), e);
-                    }
-                }
-            }
-            ruleBuilder.withConditions(conditions);
+            ruleBuilder.withConditions(mapModules(node, yamlMapper, Condition.class, YamlConditionDTO.class));
         }
-        List<YamlActionDTO> actionDTOs = ruleDto.actions;
-        if (actionDTOs != null) {
-            List<Action> actions = new ArrayList<>(actionDTOs.size());
-            for (YamlActionDTO actionDto : actionDTOs) {
-                actions.add(ModuleBuilder.createAction().withId(actionDto.id).withTypeUID(actionDto.type)
-                        .withConfiguration(new Configuration(actionDto.config)).withInputs(actionDto.inputs)
-                        .withLabel(actionDto.label).withDescription(actionDto.description).build());
-            }
-            ruleBuilder.withActions(actions);
+        if ((node = ruleDto.actions) != null) {
+            ruleBuilder.withActions(mapModules(node, yamlMapper, Action.class, YamlActionDTO.class));
         }
-        List<YamlModuleDTO> triggerDTOs = ruleDto.triggers;
-        if (triggerDTOs != null) {
-            List<Trigger> triggers = new ArrayList<>(triggerDTOs.size());
-            for (YamlModuleDTO triggerDto : triggerDTOs) {
-                triggers.add(ModuleBuilder.createTrigger().withId(triggerDto.id).withTypeUID(triggerDto.type)
-                        .withConfiguration(new Configuration(triggerDto.config)).withLabel(triggerDto.label)
-                        .withDescription(triggerDto.description).build());
-            }
-            ruleBuilder.withTriggers(triggers);
+        if ((node = ruleDto.triggers) != null) {
+            ruleBuilder.withTriggers(mapModules(node, yamlMapper, Trigger.class, YamlModuleDTO.class));
         }
 
         return ruleBuilder.build();
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T extends Module, D extends YamlModuleDTO> List<T> mapModules(JsonNode node, ObjectMapper yamlMapper,
+            Class<T> targetClazz, Class<D> dtoClazz) throws JsonProcessingException {
+        List<T> modules = new ArrayList<>();
+        D moduleDto;
+        if (node.isArray()) {
+            JsonNode element;
+            boolean generateIds = false;
+            List<D> moduleDtos = new ArrayList<>();
+            for (Iterator<JsonNode> iterator = node.iterator(); iterator.hasNext();) {
+                element = iterator.next();
+                try {
+                    moduleDto = yamlMapper.treeToValue(element, dtoClazz);
+                    generateIds |= moduleDto.id == null || moduleDto.id.isBlank();
+                    moduleDtos.add(moduleDto);
+                } catch (RuntimeException e) {
+                    throw new JsonMappingException(null, "Failed to process YAML rule " + targetClazz.getSimpleName()
+                            + ":\n" + element.toPrettyString() + "\n" + e.getMessage(), e);
+                }
+            }
+            while (generateIds) {
+                int id = 0;
+                for (;;) {
+                    String ids = Integer.toString(++id);
+                    if (!moduleDtos.stream().anyMatch(m -> ids.equals(m.id))) {
+                        break;
+                    }
+                }
+                final String ids2 = Integer.toString(id);
+                moduleDtos.stream().filter(m -> m.id == null || m.id.isBlank()).findFirst().ifPresent(m -> m.id = ids2);
+                generateIds = moduleDtos.stream().anyMatch(m -> m.id == null || m.id.isBlank());
+            }
+            for (D mDto : moduleDtos) {
+                try {
+                    if (targetClazz.isAssignableFrom(Condition.class) && mDto instanceof YamlConditionDTO cDto) {
+                        modules.add((T) ModuleBuilder.createCondition().withId(mDto.id).withTypeUID(mDto.type)
+                                .withConfiguration(new Configuration(mDto.config)).withInputs(cDto.inputs)
+                                .withLabel(mDto.label).withDescription(mDto.description).build());
+                    } else if (targetClazz.isAssignableFrom(Action.class) && mDto instanceof YamlActionDTO aDto) {
+                        modules.add((T) ModuleBuilder.createAction().withId(mDto.id).withTypeUID(mDto.type)
+                                .withConfiguration(new Configuration(mDto.config)).withInputs(aDto.inputs)
+                                .withLabel(mDto.label).withDescription(mDto.description).build());
+                    } else if (targetClazz.isAssignableFrom(Trigger.class)) {
+                        modules.add((T) ModuleBuilder.createTrigger().withId(mDto.id).withTypeUID(mDto.type)
+                                .withConfiguration(new Configuration(mDto.config)).withLabel(mDto.label)
+                                .withDescription(mDto.description).build());
+                    } else {
+                        throw new IllegalArgumentException("Invalid combination of target and dto classes: "
+                                + targetClazz.getSimpleName() + " <-> " + dtoClazz.getSimpleName());
+                    }
+                } catch (RuntimeException e) {
+                    throw new JsonMappingException(null, "Failed to process YAML rule " + targetClazz.getSimpleName()
+                            + ": \"" + mDto + "\": " + e.getMessage(), e);
+                }
+            }
+        } else {
+            Entry<String, JsonNode> entry;
+            for (Iterator<Entry<String, JsonNode>> iterator = node.fields(); iterator.hasNext();) {
+                entry = iterator.next();
+                try {
+                    moduleDto = yamlMapper.treeToValue(entry.getValue(), dtoClazz);
+                    if (targetClazz.isAssignableFrom(Condition.class) && moduleDto instanceof YamlConditionDTO cDto) {
+                        modules.add(
+                                (T) ModuleBuilder.createCondition().withId(entry.getKey()).withTypeUID(moduleDto.type)
+                                        .withConfiguration(new Configuration(moduleDto.config)).withInputs(cDto.inputs)
+                                        .withLabel(moduleDto.label).withDescription(moduleDto.description).build());
+                    } else if (targetClazz.isAssignableFrom(Action.class) && moduleDto instanceof YamlActionDTO aDto) {
+                        modules.add((T) ModuleBuilder.createAction().withId(entry.getKey()).withTypeUID(moduleDto.type)
+                                .withConfiguration(new Configuration(moduleDto.config)).withInputs(aDto.inputs)
+                                .withLabel(moduleDto.label).withDescription(moduleDto.description).build());
+                    } else if (targetClazz.isAssignableFrom(Trigger.class)) {
+                        modules.add((T) ModuleBuilder.createTrigger().withId(entry.getKey()).withTypeUID(moduleDto.type)
+                                .withConfiguration(new Configuration(moduleDto.config)).withLabel(moduleDto.label)
+                                .withDescription(moduleDto.description).build());
+                    } else {
+                        throw new IllegalArgumentException("Invalid combination of target and dto classes: "
+                                + targetClazz.getSimpleName() + " <-> " + dtoClazz.getSimpleName());
+                    }
+                } catch (RuntimeException e) {
+                    throw new JsonMappingException(null, "Failed to process YAML rule condition:\n"
+                            + entry.getValue().toPrettyString() + "\n" + e.getMessage(), e);
+                }
+            }
+        }
+
+        return modules;
     }
 }

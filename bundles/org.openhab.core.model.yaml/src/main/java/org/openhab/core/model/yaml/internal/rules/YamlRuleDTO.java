@@ -48,8 +48,8 @@ public class YamlRuleDTO implements YamlElement, Cloneable { // TODO: (Nad) Clea
     public Map<@NonNull String, @NonNull Object> config;
     public List<@NonNull ConfigDescriptionParameter> configurationDescriptions;
     public JsonNode conditions;
-    public List<@NonNull YamlActionDTO> actions;
-    public List<@NonNull YamlModuleDTO> triggers;
+    public JsonNode actions;
+    public JsonNode triggers;
 
     public YamlRuleDTO() {
     }
