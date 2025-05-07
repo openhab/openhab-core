@@ -114,7 +114,7 @@ input.submit:hover {
 			<input class="field" type="{repeatPasswordFieldType}" placeholder="{repeatPasswordPlaceholder}" name="password_repeat" />
 		</div>
 		<div>
-			<input class="field" type="{tokenNameFieldType}" placeholder="{tokenNamePlaceholder}" name="token_name" />
+			<input class="field" type="{tokenNameFieldType}" placeholder="{tokenNamePlaceholder}" name="token_name" required pattern="[a-zA-Z0-9]+" />
 		</div>
 		<div>
 			<input class="field" type="{tokenScopeFieldType}" placeholder="{tokenScopePlaceholder}" name="token_scope" />
