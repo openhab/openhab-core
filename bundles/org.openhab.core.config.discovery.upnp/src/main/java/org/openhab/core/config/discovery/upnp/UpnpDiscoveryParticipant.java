@@ -79,4 +79,14 @@ public interface UpnpDiscoveryParticipant {
     default long getRemovalGracePeriodSeconds(RemoteDevice device) {
         return 0;
     }
+
+    /**
+     * The discovery always notifies participants about discovered root devices. And if the participant also
+     * wants to be notified about embedded child devices then it shall override this method.
+     *
+     * @return true if the participant wants to be also notified about embedded child devices.
+     */
+    default boolean notifyChildDevices() {
+        return false;
+    }
 }
