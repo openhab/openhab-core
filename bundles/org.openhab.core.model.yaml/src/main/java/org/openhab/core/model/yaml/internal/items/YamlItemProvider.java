@@ -33,6 +33,7 @@ import org.openhab.core.items.dto.GroupFunctionDTO;
 import org.openhab.core.items.dto.ItemDTOMapper;
 import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.model.yaml.YamlModelListener;
+import org.openhab.core.model.yaml.internal.YamlModelRepositoryImpl;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -75,7 +76,9 @@ public class YamlItemProvider extends AbstractProvider<Item> implements ItemProv
 
     @Override
     public Collection<Item> getAll() {
-        return itemsMap.values().stream().flatMap(list -> list.stream()).toList();
+        // Ignore isolated models
+        return itemsMap.keySet().stream().filter(name -> !YamlModelRepositoryImpl.isIsolatedModel(name))
+                .map(name -> itemsMap.getOrDefault(name, List.of())).flatMap(list -> list.stream()).toList();
     }
 
     public Collection<Item> getAllFromModel(String modelName) {
@@ -114,7 +117,9 @@ public class YamlItemProvider extends AbstractProvider<Item> implements ItemProv
         added.forEach((item, itemDTO) -> {
             String name = item.getName();
             logger.debug("model {} added item {}", modelName, name);
-            notifyListenersAboutAddedElement(item);
+            if (!YamlModelRepositoryImpl.isIsolatedModel(modelName)) {
+                notifyListenersAboutAddedElement(item);
+            }
             processChannelLinks(modelName, name, itemDTO);
             processMetadata(modelName, name, itemDTO);
         });
@@ -138,11 +143,15 @@ public class YamlItemProvider extends AbstractProvider<Item> implements ItemProv
                 modelItems.remove(oldItem);
                 modelItems.add(item);
                 logger.debug("model {} updated item {}", modelName, name);
-                notifyListenersAboutUpdatedElement(oldItem, item);
+                if (!YamlModelRepositoryImpl.isIsolatedModel(modelName)) {
+                    notifyListenersAboutUpdatedElement(oldItem, item);
+                }
             }, () -> {
                 modelItems.add(item);
                 logger.debug("model {} added item {}", modelName, name);
-                notifyListenersAboutAddedElement(item);
+                if (!YamlModelRepositoryImpl.isIsolatedModel(modelName)) {
+                    notifyListenersAboutAddedElement(item);
+                }
             });
             processChannelLinks(modelName, name, itemDTO);
             processMetadata(modelName, name, itemDTO);
@@ -159,7 +168,9 @@ public class YamlItemProvider extends AbstractProvider<Item> implements ItemProv
             modelItems.stream().filter(i -> i.getName().equals(name)).findFirst().ifPresentOrElse(oldItem -> {
                 modelItems.remove(oldItem);
                 logger.debug("model {} removed item {}", modelName, name);
-                notifyListenersAboutRemovedElement(oldItem);
+                if (!YamlModelRepositoryImpl.isIsolatedModel(modelName)) {
+                    notifyListenersAboutRemovedElement(oldItem);
+                }
             }, () -> logger.debug("model {} item {} not found", modelName, name));
             processChannelLinks(modelName, name, null);
             processMetadata(modelName, name, null);
