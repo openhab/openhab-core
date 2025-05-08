@@ -34,10 +34,9 @@ import com.fasterxml.jackson.databind.JsonNode;
  * @author Ravi Nadahar - Initial contribution
  */
 @YamlElementName("rules")
-public class YamlRuleDTO implements YamlElement, Cloneable { // TODO: (Nad) Cleanup + JavaDocs
+public class YamlRuleDTO implements YamlElement, Cloneable {
 
-    // TODO: (Nad) Fix
-    private static final Pattern THING_UID_SEGMENT_PATTERN = Pattern.compile("[a-zA-Z0-9_][a-zA-Z0-9_-]*");
+    protected static final Pattern UID_SEGMENT_PATTERN = Pattern.compile("[a-zA-Z0-9_][a-zA-Z0-9_-]*");
 
     public String uid;
     public String templateUID;
@@ -51,6 +50,9 @@ public class YamlRuleDTO implements YamlElement, Cloneable { // TODO: (Nad) Clea
     public JsonNode actions;
     public JsonNode triggers;
 
+    /**
+     * Creates a new instance.
+     */
     public YamlRuleDTO() {
     }
 
@@ -80,19 +82,33 @@ public class YamlRuleDTO implements YamlElement, Cloneable { // TODO: (Nad) Clea
     @Override
     public boolean isValid(@Nullable List<@NonNull String> errors, @Nullable List<@NonNull String> warnings) {
         // Check that uid is present
-        if (uid == null || uid.isBlank()) { // TODO: (Nad) Make validation
-            addToList(errors, "invalid thing: uid is missing while mandatory");
+        if (uid == null || uid.isBlank()) {
+            addToList(errors, "invalid rule: uid is missing");
             return false;
         }
         boolean ok = true;
-        // Check that uid has at least 3 segments and each segment respects the expected syntax
+        // Check that uid only contains valid characters
         String[] segments = uid.split(AbstractUID.SEPARATOR);
         for (String segment : segments) {
-            if (!THING_UID_SEGMENT_PATTERN.matcher(segment).matches()) {
-                addToList(errors, "invalid thing \"%s\": segment \"%s\" in uid not matching the expected syntax %s"
-                        .formatted(uid, segment, THING_UID_SEGMENT_PATTERN.pattern()));
+            if (!UID_SEGMENT_PATTERN.matcher(segment).matches()) {
+                addToList(errors, "invalid rule \"%s\": segment \"%s\" in the uid doesn't match the expected syntax %s"
+                        .formatted(uid, segment, UID_SEGMENT_PATTERN.pattern()));
                 ok = false;
             }
+        }
+
+        // Check that name is present
+        if (name == null || name.isBlank()) {
+            addToList(errors, "invalid rule \"%s\": name is missing".formatted(uid));
+            ok = false;
+        }
+
+        // Check that the rule either has configuration (rule stub) or that it has at least one module
+        if ((config == null || config.isEmpty()) && (triggers == null || !triggers.elements().hasNext())
+                && (conditions == null || !conditions.elements().hasNext())
+                && (actions == null || !actions.elements().hasNext())) {
+            addToList(errors, "invalid rule \"%s\": the rule is empty");
+            ok = false;
         }
         return ok;
     }

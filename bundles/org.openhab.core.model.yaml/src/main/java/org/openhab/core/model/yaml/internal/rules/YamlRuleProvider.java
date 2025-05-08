@@ -84,7 +84,7 @@ public class YamlRuleProvider extends AbstractProvider<Rule> implements RuleProv
 
     @Override
     public boolean isVersionSupported(int version) {
-        return version >= 2;
+        return version >= 1;
     }
 
     @Override
