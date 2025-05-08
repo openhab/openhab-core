@@ -45,7 +45,7 @@ public class YamlRuleDTO implements YamlElement, Cloneable {
     public String description;
     public Visibility visibility;
     public Map<@NonNull String, @NonNull Object> config;
-    public List<@NonNull ConfigDescriptionParameter> configurationDescriptions;
+    public List<@NonNull ConfigDescriptionParameter> configDescriptions;
     public JsonNode conditions;
     public JsonNode actions;
     public JsonNode triggers;
@@ -121,7 +121,7 @@ public class YamlRuleDTO implements YamlElement, Cloneable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(actions, conditions, config, configurationDescriptions, description, name, tags,
+        return Objects.hash(actions, conditions, config, configDescriptions, description, name, tags,
                 templateUID, triggers, uid, visibility);
     }
 
@@ -136,7 +136,7 @@ public class YamlRuleDTO implements YamlElement, Cloneable {
         YamlRuleDTO other = (YamlRuleDTO) obj;
         return Objects.equals(actions, other.actions) && Objects.equals(conditions, other.conditions)
                 && Objects.equals(config, other.config)
-                && Objects.equals(configurationDescriptions, other.configurationDescriptions)
+                && Objects.equals(configDescriptions, other.configDescriptions)
                 && Objects.equals(description, other.description) && Objects.equals(name, other.name)
                 && Objects.equals(tags, other.tags) && Objects.equals(templateUID, other.templateUID)
                 && Objects.equals(triggers, other.triggers) && Objects.equals(uid, other.uid)
@@ -168,8 +168,8 @@ public class YamlRuleDTO implements YamlElement, Cloneable {
         if (config != null) {
             builder.append("config=").append(config).append(", ");
         }
-        if (configurationDescriptions != null) {
-            builder.append("configurationDescriptions=").append(configurationDescriptions).append(", ");
+        if (configDescriptions != null) {
+            builder.append("configDescriptions=").append(configDescriptions).append(", ");
         }
         if (conditions != null) {
             builder.append("conditions=").append(conditions).append(", ");

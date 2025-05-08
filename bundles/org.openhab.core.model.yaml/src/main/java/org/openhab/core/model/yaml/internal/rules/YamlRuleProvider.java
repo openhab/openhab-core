@@ -187,7 +187,7 @@ public class YamlRuleProvider extends AbstractProvider<Rule> implements RuleProv
         if (configuration != null) {
             ruleBuilder.withConfiguration(new Configuration(configuration));
         }
-        List<ConfigDescriptionParameter> configurationDescriptions = ruleDto.configurationDescriptions;
+        List<ConfigDescriptionParameter> configurationDescriptions = ruleDto.configDescriptions;
         if (configurationDescriptions != null) {
             ruleBuilder.withConfigurationDescriptions(configurationDescriptions);
         }
