@@ -99,6 +99,7 @@ public class YamlModelRepositoryImplTest {
         Files.copy(SOURCE_PATH.resolve("modelV2FileAddedOrRemoved.yaml"), fullModel2Path);
 
         YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
+        modelRepository.ignoreFolderRestriction();
         modelRepository.addYamlModelListener(firstTypeListener);
         modelRepository.addYamlModelListener(secondTypeListener1);
         modelRepository.addYamlModelListener(secondTypeListener2);
@@ -157,6 +158,7 @@ public class YamlModelRepositoryImplTest {
         Files.copy(SOURCE_PATH.resolve("modelV2FileAddedOrRemoved.yaml"), fullModel2Path);
 
         YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
+        modelRepository.ignoreFolderRestriction();
 
         modelRepository.processWatchEvent(WatchService.Kind.CREATE, MODEL_PATH);
         modelRepository.processWatchEvent(WatchService.Kind.CREATE, MODEL2_PATH);
@@ -213,6 +215,7 @@ public class YamlModelRepositoryImplTest {
     @Test
     public void testFileUpdated() throws IOException {
         YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
+        modelRepository.ignoreFolderRestriction();
         modelRepository.addYamlModelListener(firstTypeListener);
 
         // File in v1 format
@@ -278,6 +281,7 @@ public class YamlModelRepositoryImplTest {
     })
     public void testFileRemovedElements(String v1File, String v2File) throws IOException {
         YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
+        modelRepository.ignoreFolderRestriction();
         modelRepository.addYamlModelListener(firstTypeListener);
 
         // File in v1 format
@@ -317,7 +321,7 @@ public class YamlModelRepositoryImplTest {
     @Test
     public void testFileRemoved() throws IOException {
         YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
-
+        modelRepository.ignoreFolderRestriction();
         modelRepository.addYamlModelListener(firstTypeListener);
 
         // File in v1 format
@@ -365,6 +369,7 @@ public class YamlModelRepositoryImplTest {
         Files.copy(SOURCE_PATH.resolve("modifyModelInitialContent.yaml"), fullModelPath);
 
         YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
+        modelRepository.ignoreFolderRestriction();
         modelRepository.addYamlModelListener(firstTypeListener);
         modelRepository.addYamlModelListener(secondTypeListener1);
         modelRepository.processWatchEvent(WatchService.Kind.CREATE, MODEL_PATH);
@@ -423,6 +428,7 @@ public class YamlModelRepositoryImplTest {
         Files.copy(SOURCE_PATH.resolve("modifyModelInitialContent.yaml"), fullModelPath);
 
         YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
+        modelRepository.ignoreFolderRestriction();
         modelRepository.addYamlModelListener(firstTypeListener);
         modelRepository.processWatchEvent(WatchService.Kind.CREATE, MODEL_PATH);
 
@@ -464,6 +470,7 @@ public class YamlModelRepositoryImplTest {
         Files.copy(SOURCE_PATH.resolve("modifyModelInitialContent.yaml"), fullModelPath);
 
         YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
+        modelRepository.ignoreFolderRestriction();
         modelRepository.processWatchEvent(WatchService.Kind.CREATE, MODEL_PATH);
 
         FirstTypeDTO removed = new FirstTypeDTO("element1", "description1");
@@ -505,6 +512,7 @@ public class YamlModelRepositoryImplTest {
         Files.copy(SOURCE_PATH.resolve("modelFileAddedOrRemoved.yaml"), fullModelPath);
 
         YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
+        modelRepository.ignoreFolderRestriction();
         modelRepository.processWatchEvent(WatchService.Kind.CREATE, MODEL_PATH);
 
         FirstTypeDTO added = new FirstTypeDTO("element3", "description3");
@@ -544,6 +552,7 @@ public class YamlModelRepositoryImplTest {
         Files.copy(SOURCE_PATH.resolve("modelFileAddedOrRemoved.yaml"), fullModelPath);
 
         YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
+        modelRepository.ignoreFolderRestriction();
         modelRepository.addYamlModelListener(firstTypeListener);
 
         modelRepository.processWatchEvent(WatchService.Kind.CREATE, MODEL_PATH);
@@ -568,6 +577,7 @@ public class YamlModelRepositoryImplTest {
         Files.copy(SOURCE_PATH.resolve("modelFileAddedOrRemoved.yaml"), fullModelPath);
 
         YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
+        modelRepository.ignoreFolderRestriction();
         modelRepository.addYamlModelListener(firstTypeListener);
 
         modelRepository.processWatchEvent(WatchService.Kind.CREATE, MODEL_PATH);
@@ -592,6 +602,7 @@ public class YamlModelRepositoryImplTest {
         Files.copy(SOURCE_PATH.resolve("modelFileAddedOrRemoved.yaml"), fullModelPath);
 
         YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
+        modelRepository.ignoreFolderRestriction();
         modelRepository.addYamlModelListener(firstTypeListener);
 
         modelRepository.processWatchEvent(WatchService.Kind.CREATE, MODEL_PATH);
@@ -616,6 +627,7 @@ public class YamlModelRepositoryImplTest {
         Files.copy(SOURCE_PATH.resolve("modelV2FileAddedOrRemoved.yaml"), fullModel2Path);
 
         YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
+        modelRepository.ignoreFolderRestriction();
         modelRepository.addYamlModelListener(secondTypeListener1);
         modelRepository.addYamlModelListener(secondTypeListener2);
 

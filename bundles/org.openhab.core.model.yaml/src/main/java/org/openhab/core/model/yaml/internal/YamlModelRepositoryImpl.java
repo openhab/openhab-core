@@ -90,6 +90,7 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
             getElementName(YamlSemanticTagDTO.class), // "tags"
             getElementName(YamlThingDTO.class) // "things"
     );
+    private static final Set<String> RESTRICTED_SUB_FOLDERS = Set.of("tags", "items", "things", "yaml");
 
     private static final String UNWANTED_EXCEPTION_TEXT = "at [Source: UNKNOWN; byte offset: #UNKNOWN] ";
 
@@ -97,6 +98,7 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
 
     private final WatchService watchService;
     private final Path watchPath;
+    private boolean folderRestrictionIgnored;
     private final ObjectMapper objectMapper;
 
     private final Map<String, List<YamlModelListener<?>>> elementListeners = new ConcurrentHashMap<>();
@@ -153,13 +155,19 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
         watchService.unregisterListener(this);
     }
 
+    // Method for unit tests
+    protected void ignoreFolderRestriction() {
+        folderRestrictionIgnored = true;
+    }
+
     // The method is "synchronized" to avoid concurrent files processing
     @Override
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public synchronized void processWatchEvent(Kind kind, Path path) {
         Path fullPath = watchPath.resolve(path);
         String modelName = path.toString();
-        if (path.startsWith("automation") || !modelName.endsWith(".yaml")) {
+        if (!modelName.endsWith(".yaml") || (!folderRestrictionIgnored
+                && !RESTRICTED_SUB_FOLDERS.stream().anyMatch(sf -> path.startsWith(sf)))) {
             logger.trace("Ignored {}", fullPath);
             return;
         }
