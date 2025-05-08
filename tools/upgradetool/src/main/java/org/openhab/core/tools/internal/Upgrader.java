@@ -12,13 +12,12 @@
  */
 package org.openhab.core.tools.internal;
 
-import static org.openhab.core.thing.DefaultSystemChannelTypeProvider.SYSTEM_CHANNEL_TYPE_UID_ATMOSPHERIC_HUMIDITY;
-import static org.openhab.core.thing.DefaultSystemChannelTypeProvider.SYSTEM_CHANNEL_TYPE_UID_BATTERY_LEVEL;
-import static org.openhab.core.thing.DefaultSystemChannelTypeProvider.SYSTEM_CHANNEL_TYPE_UID_COLOR_TEMPERATURE_ABS;
+import static org.openhab.core.thing.DefaultSystemChannelTypeProvider.*;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.ZonedDateTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
@@ -30,6 +29,8 @@ import org.openhab.core.items.ManagedItemProvider;
 import org.openhab.core.items.Metadata;
 import org.openhab.core.items.MetadataKey;
 import org.openhab.core.library.items.NumberItem;
+import org.openhab.core.persistence.dto.PersistenceItemConfigurationDTO;
+import org.openhab.core.persistence.dto.PersistenceServiceConfigurationDTO;
 import org.openhab.core.storage.json.internal.JsonStorage;
 import org.openhab.core.thing.dto.ThingDTO;
 import org.openhab.core.thing.internal.link.ItemChannelLinkConfigDescriptionProvider;
@@ -43,12 +44,14 @@ import org.slf4j.LoggerFactory;
  *
  * @author Jan N. Klug - Initial contribution
  * @author Florian Hotze - Add script profile upgrade
+ * @author Mark Herwege - Add removing default persistence strategy
  */
 @NonNullByDefault
 public class Upgrader {
     public static final String ITEM_COPY_UNIT_TO_METADATA = "itemCopyUnitToMetadata";
     public static final String LINK_UPGRADE_JS_PROFILE = "linkUpgradeJsProfile";
     public static final String LINK_UPGRADE_SCRIPT_PROFILE = "linkUpgradeScriptProfile";
+    public static final String PERSISTENCE_NO_DEFAULT = "persistenceCopyDefaultStrategyToItems";
 
     private final Logger logger = LoggerFactory.getLogger(Upgrader.class);
     private final String baseDir;
@@ -276,6 +279,53 @@ public class Upgrader {
 
         linkStorage.flush();
         upgradeRecords.put(LINK_UPGRADE_SCRIPT_PROFILE, new UpgradeRecord(ZonedDateTime.now()));
+        upgradeRecords.flush();
+    }
+
+    /**
+     * Upgrades the PersistenceServiceConfiguration database, removing default strategies and setting strategies on each
+     * configuration that has no strategy defined.
+     * See <a href="https://github.com/openhab/openhab-core/pull/4682">openhab/openhab-core#4682</a>.
+     */
+    public void persistenceCopyDefaultStrategyToItems() {
+        if (!checkUpgradeRecord(PERSISTENCE_NO_DEFAULT)) {
+            return;
+        }
+
+        Path persistenceJsonDatabasePath = Path.of(baseDir, "jsondb",
+                "org.openhab.core.persistence.PersistenceServiceConfiguration.json");
+        logger.info("Setting default strategy on persistence configurations without strategy '{}'",
+                persistenceJsonDatabasePath);
+
+        if (!Files.isWritable(persistenceJsonDatabasePath)) {
+            logger.error("Cannot access persistence configuration database '{}', check path and access rights.",
+                    persistenceJsonDatabasePath);
+            return;
+        }
+        JsonStorage<PersistenceServiceConfigurationDTO> persistenceStorage = new JsonStorage<>(
+                persistenceJsonDatabasePath.toFile(), null, 5, 0, 0, List.of());
+
+        List.copyOf(persistenceStorage.getKeys()).forEach(serviceId -> {
+            PersistenceServiceConfigurationDTO serviceConfigDTO = Objects
+                    .requireNonNull(persistenceStorage.get(serviceId));
+            Collection<String> defaults = serviceConfigDTO.defaults;
+            if (defaults != null) {
+                Collection<PersistenceItemConfigurationDTO> configs = serviceConfigDTO.configs;
+                configs.forEach(config -> {
+                    Collection<String> strategies = config.strategies;
+                    if (strategies.isEmpty()) {
+                        config.strategies = defaults;
+                    }
+                });
+                serviceConfigDTO.defaults = null;
+
+                persistenceStorage.put(serviceId, serviceConfigDTO);
+                logger.info("{}: updated strategy configurations and removed default strategies", serviceId);
+            }
+        });
+
+        persistenceStorage.flush();
+        upgradeRecords.put(PERSISTENCE_NO_DEFAULT, new UpgradeRecord(ZonedDateTime.now()));
         upgradeRecords.flush();
     }
 

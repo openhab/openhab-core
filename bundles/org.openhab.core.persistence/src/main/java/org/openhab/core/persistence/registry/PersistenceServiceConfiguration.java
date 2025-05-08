@@ -27,23 +27,22 @@ import org.openhab.core.persistence.strategy.PersistenceStrategy;
  *
  * @author Jan N. Klug - Initial contribution
  * @author Mark Herwege - Implement aliases
+ * @author Mark Herwege - Make default strategy to be only a configuration suggestion
  */
 @NonNullByDefault
 public class PersistenceServiceConfiguration implements Identifiable<String> {
     private final String serviceId;
     private final List<PersistenceItemConfiguration> configs;
     private final Map<String, String> aliases;
-    private final List<PersistenceStrategy> defaults;
     private final List<PersistenceStrategy> strategies;
     private final List<PersistenceFilter> filters;
 
     public PersistenceServiceConfiguration(String serviceId, Collection<PersistenceItemConfiguration> configs,
-            Map<String, String> aliases, Collection<PersistenceStrategy> defaults,
-            Collection<PersistenceStrategy> strategies, Collection<PersistenceFilter> filters) {
+            Map<String, String> aliases, Collection<PersistenceStrategy> strategies,
+            Collection<PersistenceFilter> filters) {
         this.serviceId = serviceId;
         this.configs = List.copyOf(configs);
         this.aliases = Map.copyOf(aliases);
-        this.defaults = List.copyOf(defaults);
         this.strategies = List.copyOf(strategies);
         this.filters = List.copyOf(filters);
     }
@@ -69,15 +68,6 @@ public class PersistenceServiceConfiguration implements Identifiable<String> {
      */
     public Map<String, String> getAliases() {
         return aliases;
-    }
-
-    /**
-     * Get the default strategies.
-     *
-     * @return an unmodifiable list of the default strategies
-     */
-    public List<PersistenceStrategy> getDefaults() {
-        return defaults;
     }
 
     /**
