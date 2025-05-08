@@ -96,6 +96,10 @@ public class YamlChannelDTOTest {
         ch2.label = "A label";
         assertTrue(ch1.equals(ch2));
 
+        ch1.description = "A description";
+        ch2.description = "A description";
+        assertTrue(ch1.equals(ch2));
+
         ch1.config = Map.of("param1", "value", "param2", 50, "param3", true, "param4", List.of("val 1", "val 2"));
         ch2.config = Map.of("param1", "value", "param2", 50, "param3", true, "param4", List.of("val 1", "val 2"));
         assertTrue(ch1.equals(ch2));
@@ -215,6 +219,31 @@ public class YamlChannelDTOTest {
         assertFalse(ch1.equals(ch2));
         ch1.label = "A label";
         ch2.label = "A label";
+        assertTrue(ch1.equals(ch2));
+    }
+
+    @Test
+    public void testEqualsWithDescription() throws IOException {
+        YamlChannelDTO ch1 = new YamlChannelDTO();
+        YamlChannelDTO ch2 = new YamlChannelDTO();
+
+        ch1.itemType = "String";
+        ch2.itemType = "String";
+
+        ch1.description = null;
+        ch2.description = null;
+        assertTrue(ch1.equals(ch2));
+        ch1.description = "A description";
+        ch2.description = null;
+        assertFalse(ch1.equals(ch2));
+        ch1.description = null;
+        ch2.description = "A description";
+        assertFalse(ch1.equals(ch2));
+        ch1.description = "A description";
+        ch2.description = "A different description";
+        assertFalse(ch1.equals(ch2));
+        ch1.description = "A description";
+        ch2.description = "A description";
         assertTrue(ch1.equals(ch2));
     }
 
