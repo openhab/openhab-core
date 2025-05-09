@@ -89,10 +89,11 @@ public class FileTransformationProviderTest {
 
     @Test
     public void testAddingConfigurationIsPropagated() throws IOException {
-        Files.writeString(transformationPath.resolve(ADDED_FILENAME), ADDED_CONTENT);
+        Path path = transformationPath.resolve(ADDED_FILENAME);
+        Files.writeString(path, ADDED_CONTENT);
         Transformation addedConfiguration = new Transformation(ADDED_FILENAME.toString(), ADDED_FILENAME.toString(),
                 FOO_TYPE, Map.of(FUNCTION, ADDED_CONTENT));
-        provider.processWatchEvent(CREATE, ADDED_FILENAME);
+        provider.processWatchEvent(CREATE, path);
 
         // assert registry is notified and internal cache updated
         Mockito.verify(listenerMock).added(provider, addedConfiguration);
@@ -101,10 +102,11 @@ public class FileTransformationProviderTest {
 
     @Test
     public void testUpdatingConfigurationIsPropagated() throws IOException {
-        Files.writeString(transformationPath.resolve(INITIAL_FILENAME), "updated");
+        Path path = transformationPath.resolve(INITIAL_FILENAME);
+        Files.writeString(path, "updated");
         Transformation updatedConfiguration = new Transformation(INITIAL_FILENAME.toString(),
                 INITIAL_FILENAME.toString(), FOO_TYPE, Map.of(FUNCTION, "updated"));
-        provider.processWatchEvent(MODIFY, INITIAL_FILENAME);
+        provider.processWatchEvent(MODIFY, path);
 
         Mockito.verify(listenerMock).updated(provider, INITIAL_CONFIGURATION, updatedConfiguration);
         assertThat(provider.getAll(), contains(updatedConfiguration));
@@ -113,7 +115,7 @@ public class FileTransformationProviderTest {
 
     @Test
     public void testDeletingConfigurationIsPropagated() {
-        provider.processWatchEvent(DELETE, INITIAL_FILENAME);
+        provider.processWatchEvent(DELETE, transformationPath.resolve(INITIAL_FILENAME));
 
         Mockito.verify(listenerMock).removed(provider, INITIAL_CONFIGURATION);
         assertThat(provider.getAll(), not(contains(INITIAL_CONFIGURATION)));
@@ -128,7 +130,7 @@ public class FileTransformationProviderTest {
 
         Transformation expected = new Transformation(fileName, fileName, FOO_TYPE, Map.of(FUNCTION, INITIAL_CONTENT));
 
-        provider.processWatchEvent(CREATE, Path.of(fileName));
+        provider.processWatchEvent(CREATE, path);
         assertThat(provider.getAll(), hasItem(expected));
     }
 
@@ -137,8 +139,8 @@ public class FileTransformationProviderTest {
         Path extensionMissing = Path.of("extensionMissing");
         Path path = transformationPath.resolve(extensionMissing);
         Files.writeString(path, INITIAL_CONTENT);
-        provider.processWatchEvent(CREATE, extensionMissing);
-        provider.processWatchEvent(MODIFY, extensionMissing);
+        provider.processWatchEvent(CREATE, path);
+        provider.processWatchEvent(MODIFY, path);
 
         Mockito.verify(listenerMock, never()).added(any(), any());
         Mockito.verify(listenerMock, never()).updated(any(), any(), any());
@@ -149,8 +151,8 @@ public class FileTransformationProviderTest {
         Path extensionIgnored = Path.of("extensionIgnore.txt");
         Path path = transformationPath.resolve(extensionIgnored);
         Files.writeString(path, INITIAL_CONTENT);
-        provider.processWatchEvent(CREATE, extensionIgnored);
-        provider.processWatchEvent(MODIFY, extensionIgnored);
+        provider.processWatchEvent(CREATE, path);
+        provider.processWatchEvent(MODIFY, path);
 
         Mockito.verify(listenerMock, never()).added(any(), any());
         Mockito.verify(listenerMock, never()).updated(any(), any(), any());

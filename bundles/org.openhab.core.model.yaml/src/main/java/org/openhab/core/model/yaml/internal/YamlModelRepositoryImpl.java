@@ -130,8 +130,7 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
                 public FileVisitResult visitFile(@NonNullByDefault({}) Path file,
                         @NonNullByDefault({}) BasicFileAttributes attrs) throws IOException {
                     if (attrs.isRegularFile()) {
-                        Path relativePath = watchPath.relativize(file);
-                        processWatchEvent(CREATE, relativePath);
+                        processWatchEvent(CREATE, file);
                     }
                     return FileVisitResult.CONTINUE;
                 }
@@ -157,18 +156,18 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
     @Override
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public synchronized void processWatchEvent(Kind kind, Path path) {
-        Path fullPath = watchPath.resolve(path);
-        String modelName = path.toString();
-        if (path.startsWith("automation") || !modelName.endsWith(".yaml")) {
-            logger.trace("Ignored {}", fullPath);
+        Path relativePath = watchPath.relativize(path);
+        String modelName = relativePath.toString();
+        if (relativePath.startsWith("automation") || !modelName.endsWith(".yaml")) {
+            logger.trace("Ignored {}", path);
             return;
         }
 
         try {
             if (kind == WatchService.Kind.DELETE) {
                 removeModel(modelName);
-            } else if (!Files.isHidden(fullPath) && Files.isReadable(fullPath) && !Files.isDirectory(fullPath)) {
-                JsonNode fileContent = objectMapper.readTree(fullPath.toFile());
+            } else if (!Files.isHidden(path) && Files.isReadable(path) && !Files.isDirectory(path)) {
+                JsonNode fileContent = objectMapper.readTree(path.toFile());
 
                 // check version
                 JsonNode versionNode = fileContent.get(VERSION);
@@ -309,7 +308,7 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
 
                 checkElementNames(modelName, model);
             } else {
-                logger.trace("Ignored {}", fullPath);
+                logger.trace("Ignored {}", path);
             }
         } catch (IOException e) {
             logger.warn("Failed to process model {}: {}", modelName, e.getMessage());

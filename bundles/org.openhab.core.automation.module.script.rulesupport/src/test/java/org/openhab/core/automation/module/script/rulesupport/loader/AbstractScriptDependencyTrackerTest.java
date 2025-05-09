@@ -92,7 +92,7 @@ public class AbstractScriptDependencyTrackerTest {
         scriptDependencyTracker.addChangeTracker(listener2);
 
         scriptDependencyTracker.startTracking("scriptId", depPath.toString());
-        scriptDependencyTracker.processWatchEvent(WatchService.Kind.CREATE, DEPENDENCY);
+        scriptDependencyTracker.processWatchEvent(WatchService.Kind.CREATE, depPath);
 
         verify(listener1).onDependencyChange(eq("scriptId"));
         verify(listener2).onDependencyChange(eq("scriptId"));
@@ -108,7 +108,7 @@ public class AbstractScriptDependencyTrackerTest {
 
         scriptDependencyTracker.startTracking("scriptId1", depPath.toString());
         scriptDependencyTracker.startTracking("scriptId2", depPath.toString());
-        scriptDependencyTracker.processWatchEvent(WatchService.Kind.MODIFY, DEPENDENCY);
+        scriptDependencyTracker.processWatchEvent(WatchService.Kind.MODIFY, depPath);
 
         verify(listener).onDependencyChange(eq("scriptId1"));
         verify(listener).onDependencyChange(eq("scriptId2"));
@@ -123,8 +123,8 @@ public class AbstractScriptDependencyTrackerTest {
 
         scriptDependencyTracker.startTracking("scriptId", depPath.toString());
         scriptDependencyTracker.startTracking("scriptId", depPath2.toString());
-        scriptDependencyTracker.processWatchEvent(WatchService.Kind.MODIFY, DEPENDENCY);
-        scriptDependencyTracker.processWatchEvent(WatchService.Kind.DELETE, DEPENDENCY2);
+        scriptDependencyTracker.processWatchEvent(WatchService.Kind.MODIFY, depPath);
+        scriptDependencyTracker.processWatchEvent(WatchService.Kind.DELETE, depPath2);
 
         verify(listener, times(2)).onDependencyChange(eq("scriptId"));
         verifyNoMoreInteractions(listener);
@@ -139,7 +139,7 @@ public class AbstractScriptDependencyTrackerTest {
         scriptDependencyTracker.startTracking("scriptId1", depPath.toString());
         scriptDependencyTracker.startTracking("scriptId2", depPath2.toString());
 
-        scriptDependencyTracker.processWatchEvent(WatchService.Kind.CREATE, DEPENDENCY);
+        scriptDependencyTracker.processWatchEvent(WatchService.Kind.CREATE, depPath);
 
         verify(listener).onDependencyChange(eq("scriptId1"));
         verifyNoMoreInteractions(listener);

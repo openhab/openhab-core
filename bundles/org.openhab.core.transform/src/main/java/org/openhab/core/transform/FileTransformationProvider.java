@@ -67,8 +67,7 @@ public class FileTransformationProvider implements WatchService.WatchEventListen
         watchService.registerListener(this, transformationPath);
         // read initial contents
         try (Stream<Path> files = Files.walk(transformationPath)) {
-            files.filter(Files::isRegularFile).map(transformationPath::relativize)
-                    .forEach(f -> processWatchEvent(CREATE, f));
+            files.filter(Files::isRegularFile).forEach(f -> processWatchEvent(CREATE, f));
         } catch (IOException e) {
             logger.warn("Could not list files in '{}', transformation configurations might be missing: {}",
                     transformationPath, e.getMessage());
@@ -96,8 +95,8 @@ public class FileTransformationProvider implements WatchService.WatchEventListen
     }
 
     @Override
-    public void processWatchEvent(WatchService.Kind kind, Path path) {
-        Path finalPath = transformationPath.resolve(path);
+    public void processWatchEvent(WatchService.Kind kind, Path fullPath) {
+        Path path = transformationPath.relativize(fullPath);
         try {
             if (kind == DELETE) {
                 Transformation oldElement = transformationConfigurations.remove(path);
@@ -105,7 +104,7 @@ public class FileTransformationProvider implements WatchService.WatchEventListen
                     logger.trace("Removed configuration from file '{}", path);
                     listeners.forEach(listener -> listener.removed(this, oldElement));
                 }
-            } else if (Files.isRegularFile(finalPath) && !Files.isHidden(finalPath)
+            } else if (Files.isRegularFile(fullPath) && !Files.isHidden(fullPath)
                     && ((kind == CREATE) || (kind == MODIFY))) {
                 String fileName = path.getFileName().toString();
                 Matcher m = FILENAME_PATTERN.matcher(fileName);
@@ -122,7 +121,7 @@ public class FileTransformationProvider implements WatchService.WatchEventListen
                     return;
                 }
 
-                String content = new String(Files.readAllBytes(finalPath));
+                String content = new String(Files.readAllBytes(fullPath));
                 String uid = path.toString();
 
                 Transformation newElement = new Transformation(uid, uid, fileExtension, Map.of(FUNCTION, content));

@@ -290,7 +290,7 @@ public class WatchServiceImpl implements WatchService, DirectoryChangeListener {
     private record Listener(Path rootPath, WatchEventListener watchEventListener) {
 
         void notify(Path path, Kind kind) {
-            watchEventListener.processWatchEvent(kind, rootPath.relativize(path));
+            watchEventListener.processWatchEvent(kind, path);
         }
 
         static Predicate<Listener> isListener(WatchEventListener watchEventListener) {

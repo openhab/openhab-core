@@ -79,7 +79,7 @@ public abstract class AbstractScriptDependencyTracker
 
     @Override
     public void processWatchEvent(WatchService.Kind kind, Path path) {
-        File file = libraryPath.resolve(path).toFile();
+        File file = path.toFile();
         if (kind == DELETE || (!file.isHidden() && file.canRead() && (kind == CREATE || kind == MODIFY))) {
             dependencyChanged(file.toString());
         }

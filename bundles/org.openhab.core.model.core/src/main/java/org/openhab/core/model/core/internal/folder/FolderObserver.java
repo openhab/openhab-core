@@ -59,6 +59,7 @@ import org.slf4j.LoggerFactory;
 @Component(name = "org.openhab.core.folder", immediate = true, configurationPid = "org.openhab.folder", configurationPolicy = ConfigurationPolicy.REQUIRE)
 public class FolderObserver implements WatchService.WatchEventListener {
     private final WatchService watchService;
+    private final Path watchPath;
     private final Logger logger = LoggerFactory.getLogger(FolderObserver.class);
 
     /* the model repository is provided as a service */
@@ -88,6 +89,7 @@ public class FolderObserver implements WatchService.WatchEventListener {
         this.modelRepository = modelRepo;
         this.readyService = readyService;
         this.watchService = watchService;
+        this.watchPath = watchService.getWatchPath();
     }
 
     @Reference(cardinality = ReferenceCardinality.AT_LEAST_ONE, policy = ReferencePolicy.DYNAMIC)
@@ -127,7 +129,7 @@ public class FolderObserver implements WatchService.WatchEventListener {
                 continue;
             }
 
-            Path folderPath = watchService.getWatchPath().resolve(folderName);
+            Path folderPath = watchPath.resolve(folderName);
             if (Files.exists(folderPath) && Files.isDirectory(folderPath)) {
                 String[] validExtensions = ((String) config.get(folderName)).split(",");
                 folderFileExtMap.put(folderName, Set.of(validExtensions));
@@ -191,7 +193,7 @@ public class FolderObserver implements WatchService.WatchEventListener {
                 continue;
             }
 
-            Path folderPath = watchService.getWatchPath().resolve(folderName);
+            Path folderPath = watchPath.resolve(folderName);
             logger.debug("Adding files in '{}' to the model", folderPath);
             try (DirectoryStream<Path> stream = Files.newDirectoryStream(folderPath,
                     new FileExtensionsFilter(validExtensions))) {
@@ -287,7 +289,8 @@ public class FolderObserver implements WatchService.WatchEventListener {
     }
 
     @Override
-    public void processWatchEvent(WatchService.Kind kind, Path path) {
+    public void processWatchEvent(WatchService.Kind kind, Path absolutePath) {
+        Path path = watchPath.relativize(absolutePath);
         if (path.getNameCount() != 2) {
             logger.trace("{} event for {} ignored (only depth 1 allowed)", kind, path);
             return;
@@ -310,7 +313,6 @@ public class FolderObserver implements WatchService.WatchEventListener {
             return;
         }
 
-        Path resolvedPath = watchService.getWatchPath().resolve(path);
-        checkPath(resolvedPath, kind);
+        checkPath(absolutePath, kind);
     }
 }
