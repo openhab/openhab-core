@@ -90,7 +90,8 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
             getElementName(YamlSemanticTagDTO.class), // "tags"
             getElementName(YamlThingDTO.class) // "things"
     );
-    private static final Set<String> RESTRICTED_SUB_FOLDERS = Set.of("tags", "items", "things", "yaml");
+    private static final Set<Path> WATCHED_FOLDERS = Set.of(Path.of("tags"), Path.of("items"), Path.of("things"),
+            Path.of("yaml"));
 
     private static final String UNWANTED_EXCEPTION_TEXT = "at [Source: UNKNOWN; byte offset: #UNKNOWN] ";
 
@@ -166,8 +167,10 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
     public synchronized void processWatchEvent(Kind kind, Path path) {
         Path fullPath = watchPath.resolve(path);
         String modelName = path.toString();
-        if (!modelName.endsWith(".yaml") || (!folderRestrictionIgnored
-                && !RESTRICTED_SUB_FOLDERS.stream().anyMatch(sf -> path.startsWith(sf)))) {
+        if (!folderRestrictionIgnored && !WATCHED_FOLDERS.stream().anyMatch(f -> path.startsWith(f))) {
+            return;
+        }
+        if (!modelName.endsWith(".yaml")) {
             logger.trace("Ignored {}", fullPath);
             return;
         }
