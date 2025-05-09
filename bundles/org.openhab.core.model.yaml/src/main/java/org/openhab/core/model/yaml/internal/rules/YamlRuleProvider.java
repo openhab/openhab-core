@@ -169,7 +169,7 @@ public class YamlRuleProvider extends AbstractProvider<Rule> implements RuleProv
         if ((s = ruleDto.name) != null) {
             ruleBuilder.withName(s);
         }
-        if ((s = ruleDto.templateUID) != null) {
+        if ((s = ruleDto.templateUid) != null) {
             ruleBuilder.withTemplateUID(s);
         }
         Set<String> tags = ruleDto.tags;
@@ -179,7 +179,7 @@ public class YamlRuleProvider extends AbstractProvider<Rule> implements RuleProv
         if ((s = ruleDto.description) != null) {
             ruleBuilder.withDescription(s);
         }
-        Visibility visibility = ruleDto.visibility;
+        Visibility visibility = ruleDto.getVisibility();
         if (visibility != null) {
             ruleBuilder.withVisibility(visibility);
         }

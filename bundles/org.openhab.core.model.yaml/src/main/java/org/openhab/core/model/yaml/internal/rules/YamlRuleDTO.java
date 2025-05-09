@@ -39,11 +39,11 @@ public class YamlRuleDTO implements YamlElement, Cloneable {
     protected static final Pattern UID_SEGMENT_PATTERN = Pattern.compile("[a-zA-Z0-9_][a-zA-Z0-9_-]*");
 
     public String uid;
-    public String templateUID;
+    public String templateUid;
     public String name;
     public Set<@NonNull String> tags;
     public String description;
-    public Visibility visibility;
+    public String visibility;
     public Map<@NonNull String, @NonNull Object> config;
     public List<@NonNull ConfigDescriptionParameter> configDescriptions;
     public JsonNode conditions;
@@ -64,6 +64,18 @@ public class YamlRuleDTO implements YamlElement, Cloneable {
     @Override
     public void setId(@NonNull String id) {
         uid = id;
+    }
+
+    /**
+     * Parses the string value in {@link #visibility} into a {@link Visibility} instance. Leading and trailing
+     * whitespace is ignored, and so is letter case. If the parsing fails, this method returns
+     * {@link Visibility#VISIBLE}.
+     *
+     * @return The resulting {@link Visibility}.
+     */
+    public Visibility getVisibility() {
+        Visibility result = Visibility.typeOf(visibility);
+        return result == null ? Visibility.VISIBLE : result;
     }
 
     @Override
@@ -122,7 +134,7 @@ public class YamlRuleDTO implements YamlElement, Cloneable {
     @Override
     public int hashCode() {
         return Objects.hash(actions, conditions, config, configDescriptions, description, name, tags,
-                templateUID, triggers, uid, visibility);
+                templateUid, triggers, uid, visibility);
     }
 
     @Override
@@ -138,7 +150,7 @@ public class YamlRuleDTO implements YamlElement, Cloneable {
                 && Objects.equals(config, other.config)
                 && Objects.equals(configDescriptions, other.configDescriptions)
                 && Objects.equals(description, other.description) && Objects.equals(name, other.name)
-                && Objects.equals(tags, other.tags) && Objects.equals(templateUID, other.templateUID)
+                && Objects.equals(tags, other.tags) && Objects.equals(templateUid, other.templateUid)
                 && Objects.equals(triggers, other.triggers) && Objects.equals(uid, other.uid)
                 && visibility == other.visibility;
     }
@@ -150,8 +162,8 @@ public class YamlRuleDTO implements YamlElement, Cloneable {
         if (uid != null) {
             builder.append("uid=").append(uid).append(", ");
         }
-        if (templateUID != null) {
-            builder.append("templateUID=").append(templateUID).append(", ");
+        if (templateUid != null) {
+            builder.append("templateUID=").append(templateUid).append(", ");
         }
         if (name != null) {
             builder.append("name=").append(name).append(", ");
