@@ -21,5 +21,5 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * @author Yannick Schaus - Removed AudioSource information
  */
 @NonNullByDefault
-public class KSpottedEvent implements KSEvent {
+public class KSpottedEvent extends DTTriggeredEvent implements KSEvent {
 }

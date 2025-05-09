@@ -17,8 +17,8 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 /**
  * A tagging interface for keyword spotting events.
  *
- * @author Kelly Davis - Initial contribution
+ * @author Miguel Álvarez Díez - Initial contribution
  */
 @NonNullByDefault
-public interface KSEvent extends DTEvent {
+public interface DTEvent {
 }
