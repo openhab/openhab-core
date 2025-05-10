@@ -41,7 +41,7 @@ import org.osgi.service.component.annotations.Reference;
  * @author Kai Kreuzer - Initial contribution
  * @author Alexander Kostadinov - Initial contribution
  */
-@Component(immediate = true)
+@Component(immediate = true, service = { CoreItemFactory.class, ItemFactory.class })
 @NonNullByDefault
 public class CoreItemFactory implements ItemFactory {
 

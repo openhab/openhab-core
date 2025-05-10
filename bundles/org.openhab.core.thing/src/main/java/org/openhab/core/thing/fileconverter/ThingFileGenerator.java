@@ -34,11 +34,21 @@ public interface ThingFileGenerator {
     String getFileFormatGenerator();
 
     /**
-     * Generate the file format for a sorted list of things.
+     * Define the list of things to be generated and associate them to an identifier.
      *
-     * @param out the output stream to write the generated syntax to
+     * @param id the identifier of the file format generation
      * @param things the things
+     * @param hideDefaultChannels true to hide the non extensible channels having a default configuration
      * @param hideDefaultParameters true to hide the configuration parameters having the default value
      */
-    void generateFileFormat(OutputStream out, List<Thing> things, boolean hideDefaultParameters);
+    void setThingsToBeGenerated(String id, List<Thing> things, boolean hideDefaultChannels,
+            boolean hideDefaultParameters);
+
+    /**
+     * Generate the file format for all data that were associated to the provided identifier.
+     *
+     * @param id the identifier of the file format generation
+     * @param out the output stream to write to
+     */
+    void generateFileFormat(String id, OutputStream out);
 }

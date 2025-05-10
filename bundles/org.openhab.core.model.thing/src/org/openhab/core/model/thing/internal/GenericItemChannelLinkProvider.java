@@ -40,15 +40,17 @@ import org.slf4j.LoggerFactory;
  *
  * @author Oliver Libutzki - Initial contribution
  * @author Alex Tugarev - Added parsing of multiple Channel UIDs
+ * @author Laurent Garnier - Store channel links per context (model) + do not notify the registry for isolated models
  */
 @NonNullByDefault
-@Component(immediate = true, service = { ItemChannelLinkProvider.class, BindingConfigReader.class })
+@Component(immediate = true, service = { GenericItemChannelLinkProvider.class, ItemChannelLinkProvider.class,
+        BindingConfigReader.class })
 public class GenericItemChannelLinkProvider extends AbstractProvider<ItemChannelLink>
         implements BindingConfigReader, ItemChannelLinkProvider {
 
     private final Logger logger = LoggerFactory.getLogger(GenericItemChannelLinkProvider.class);
-    /** caches binding configurations. maps itemNames to {@link ItemChannelLink}s */
-    protected Map<String, Map<ChannelUID, ItemChannelLink>> itemChannelLinkMap = new ConcurrentHashMap<>();
+    /** caches binding configurations. maps context to a map mapping itemNames to {@link ItemChannelLink}s */
+    protected Map<String, Map<String, Map<ChannelUID, ItemChannelLink>>> itemChannelLinkMap = new ConcurrentHashMap<>();
 
     private Map<String, Set<ChannelUID>> addedItemChannels = new ConcurrentHashMap<>();
 
@@ -110,17 +112,21 @@ public class GenericItemChannelLinkProvider extends AbstractProvider<ItemChannel
             previousItemNames.remove(itemName);
         }
 
+        Map<String, Map<ChannelUID, ItemChannelLink>> channelLinkMap = Objects
+                .requireNonNull(itemChannelLinkMap.computeIfAbsent(context, k -> new ConcurrentHashMap<>()));
         // Create a HashMap with an initial capacity of 2 (the default is 16) to save memory because most items have
         // only one channel. A capacity of 2 is enough to avoid resizing the HashMap in most cases, whereas 1 would
         // trigger a resize as soon as one element is added.
         Map<ChannelUID, ItemChannelLink> links = Objects
-                .requireNonNull(itemChannelLinkMap.computeIfAbsent(itemName, k -> new HashMap<>(2)));
+                .requireNonNull(channelLinkMap.computeIfAbsent(itemName, k -> new HashMap<>(2)));
 
         ItemChannelLink oldLink = links.put(channelUIDObject, itemChannelLink);
-        if (oldLink == null) {
-            notifyListenersAboutAddedElement(itemChannelLink);
-        } else {
-            notifyListenersAboutUpdatedElement(oldLink, itemChannelLink);
+        if (isValidContextForListeners(context)) {
+            if (oldLink == null) {
+                notifyListenersAboutAddedElement(itemChannelLink);
+            } else {
+                notifyListenersAboutUpdatedElement(oldLink, itemChannelLink);
+            }
         }
         addedItemChannels.computeIfAbsent(itemName, k -> new HashSet<>(2)).add(channelUIDObject);
     }
@@ -141,29 +147,48 @@ public class GenericItemChannelLinkProvider extends AbstractProvider<ItemChannel
         if (previousItemNames == null) {
             return;
         }
+        Map<String, Map<ChannelUID, ItemChannelLink>> channelLinkMap = (itemChannelLinkMap.getOrDefault(context,
+                new HashMap<>()));
         for (String itemName : previousItemNames) {
             // we remove all binding configurations that were not processed
-            Map<ChannelUID, ItemChannelLink> links = itemChannelLinkMap.remove(itemName);
-            if (links != null) {
+            Map<ChannelUID, ItemChannelLink> links = channelLinkMap.remove(itemName);
+            if (links != null && isValidContextForListeners(context)) {
                 links.values().forEach(this::notifyListenersAboutRemovedElement);
             }
         }
         Optional.ofNullable(contextMap.get(context)).ifPresent(ctx -> ctx.removeAll(previousItemNames));
 
         addedItemChannels.forEach((itemName, addedChannelUIDs) -> {
-            Map<ChannelUID, ItemChannelLink> links = itemChannelLinkMap.getOrDefault(itemName, Map.of());
+            Map<ChannelUID, ItemChannelLink> links = channelLinkMap.getOrDefault(itemName, Map.of());
             Set<ChannelUID> removedChannelUIDs = new HashSet<>(links.keySet());
             removedChannelUIDs.removeAll(addedChannelUIDs);
             removedChannelUIDs.forEach(removedChannelUID -> {
                 ItemChannelLink link = links.remove(removedChannelUID);
-                notifyListenersAboutRemovedElement(link);
+                if (link != null && isValidContextForListeners(context)) {
+                    notifyListenersAboutRemovedElement(link);
+                }
             });
         });
         addedItemChannels.clear();
+        if (channelLinkMap.isEmpty()) {
+            itemChannelLinkMap.remove(context);
+        }
     }
 
     @Override
     public Collection<ItemChannelLink> getAll() {
-        return itemChannelLinkMap.values().stream().flatMap(m -> m.values().stream()).toList();
+        return itemChannelLinkMap.keySet().stream().filter(context -> isValidContextForListeners(context))
+                .map(name -> itemChannelLinkMap.getOrDefault(name, Map.of())).flatMap(m -> m.values().stream())
+                .flatMap(m -> m.values().stream()).toList();
+    }
+
+    public Collection<ItemChannelLink> getAllFromContext(String context) {
+        return itemChannelLinkMap.getOrDefault(context, Map.of()).values().stream().flatMap(m -> m.values().stream())
+                .toList();
+    }
+
+    private boolean isValidContextForListeners(String context) {
+        // Ignore isolated models
+        return !context.startsWith("tmp_");
     }
 }
