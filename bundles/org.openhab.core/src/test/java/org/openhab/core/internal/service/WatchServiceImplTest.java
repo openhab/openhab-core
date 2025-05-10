@@ -225,12 +225,12 @@ public class WatchServiceImplTest extends JavaTest {
         assertThat(listener.events, empty());
     }
 
-    private void assertEvent(Path path, Kind kind) throws InterruptedException {
+    private void assertEvent(Path fullPath, Kind kind) throws InterruptedException {
         waitForAssert(() -> assertThat(listener.events, not(empty())));
         Thread.sleep(500);
 
         assertThat(listener.events, hasSize(1));
-        assertThat(listener.events, hasItem(new Event(path, kind)));
+        assertThat(listener.events, hasItem(new Event(fullPath, kind)));
         listener.events.clear();
     }
 
@@ -238,11 +238,11 @@ public class WatchServiceImplTest extends JavaTest {
         List<Event> events = new CopyOnWriteArrayList<>();
 
         @Override
-        public void processWatchEvent(Kind kind, Path path) {
-            events.add(new Event(path, kind));
+        public void processWatchEvent(Kind kind, Path fullPath) {
+            events.add(new Event(fullPath, kind));
         }
     }
 
-    record Event(Path path, Kind kind) {
+    record Event(Path fullPath, Kind kind) {
     }
 }

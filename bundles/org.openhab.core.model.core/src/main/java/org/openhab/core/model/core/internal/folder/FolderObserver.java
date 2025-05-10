@@ -289,8 +289,8 @@ public class FolderObserver implements WatchService.WatchEventListener {
     }
 
     @Override
-    public void processWatchEvent(WatchService.Kind kind, Path absolutePath) {
-        Path path = watchPath.relativize(absolutePath);
+    public void processWatchEvent(WatchService.Kind kind, Path fullPath) {
+        Path path = watchPath.relativize(fullPath);
         if (path.getNameCount() != 2) {
             logger.trace("{} event for {} ignored (only depth 1 allowed)", kind, path);
             return;
@@ -313,6 +313,6 @@ public class FolderObserver implements WatchService.WatchEventListener {
             return;
         }
 
-        checkPath(absolutePath, kind);
+        checkPath(fullPath, kind);
     }
 }

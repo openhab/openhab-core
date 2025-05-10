@@ -155,19 +155,19 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
     // The method is "synchronized" to avoid concurrent files processing
     @Override
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public synchronized void processWatchEvent(Kind kind, Path path) {
-        Path relativePath = watchPath.relativize(path);
+    public synchronized void processWatchEvent(Kind kind, Path fullPath) {
+        Path relativePath = watchPath.relativize(fullPath);
         String modelName = relativePath.toString();
         if (relativePath.startsWith("automation") || !modelName.endsWith(".yaml")) {
-            logger.trace("Ignored {}", path);
+            logger.trace("Ignored {}", fullPath);
             return;
         }
 
         try {
             if (kind == WatchService.Kind.DELETE) {
                 removeModel(modelName);
-            } else if (!Files.isHidden(path) && Files.isReadable(path) && !Files.isDirectory(path)) {
-                JsonNode fileContent = objectMapper.readTree(path.toFile());
+            } else if (!Files.isHidden(fullPath) && Files.isReadable(fullPath) && !Files.isDirectory(fullPath)) {
+                JsonNode fileContent = objectMapper.readTree(fullPath.toFile());
 
                 // check version
                 JsonNode versionNode = fileContent.get(VERSION);
@@ -308,7 +308,7 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
 
                 checkElementNames(modelName, model);
             } else {
-                logger.trace("Ignored {}", path);
+                logger.trace("Ignored {}", fullPath);
             }
         } catch (IOException e) {
             logger.warn("Failed to process model {}: {}", modelName, e.getMessage());

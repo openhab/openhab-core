@@ -136,11 +136,10 @@ public class FileTransformationProviderTest {
 
     @Test
     public void testMissingExtensionIsIgnored() throws IOException {
-        Path extensionMissing = Path.of("extensionMissing");
-        Path path = transformationPath.resolve(extensionMissing);
-        Files.writeString(path, INITIAL_CONTENT);
-        provider.processWatchEvent(CREATE, path);
-        provider.processWatchEvent(MODIFY, path);
+        Path extensionMissing = transformationPath.resolve("extensionMissing");
+        Files.writeString(extensionMissing, INITIAL_CONTENT);
+        provider.processWatchEvent(CREATE, extensionMissing);
+        provider.processWatchEvent(MODIFY, extensionMissing);
 
         Mockito.verify(listenerMock, never()).added(any(), any());
         Mockito.verify(listenerMock, never()).updated(any(), any(), any());
@@ -148,11 +147,10 @@ public class FileTransformationProviderTest {
 
     @Test
     public void testIgnoredExtensionIsIgnored() throws IOException {
-        Path extensionIgnored = Path.of("extensionIgnore.txt");
-        Path path = transformationPath.resolve(extensionIgnored);
-        Files.writeString(path, INITIAL_CONTENT);
-        provider.processWatchEvent(CREATE, path);
-        provider.processWatchEvent(MODIFY, path);
+        Path extensionIgnored = transformationPath.resolve("extensionIgnore.txt");
+        Files.writeString(extensionIgnored, INITIAL_CONTENT);
+        provider.processWatchEvent(CREATE, extensionIgnored);
+        provider.processWatchEvent(MODIFY, extensionIgnored);
 
         Mockito.verify(listenerMock, never()).added(any(), any());
         Mockito.verify(listenerMock, never()).updated(any(), any(), any());
