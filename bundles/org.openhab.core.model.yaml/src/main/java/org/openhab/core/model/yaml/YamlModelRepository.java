@@ -21,7 +21,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * The {@link YamlModelRepository} defines methods to update elements in a YAML model.
  *
  * @author Jan N. Klug - Initial contribution
- * @author Laurent Garnier - Added methods refreshModelElements and generateSyntaxFromElements
+ * @author Laurent Garnier - Added method generateSyntaxFromElements
  */
 @NonNullByDefault
 public interface YamlModelRepository {
@@ -30,14 +30,6 @@ public interface YamlModelRepository {
     void removeElementFromModel(String modelName, YamlElement element);
 
     void updateElementInModel(String modelName, YamlElement element);
-
-    /**
-     * Triggers the refresh of a certain type of elements in a given model.
-     *
-     * @param modelName the model name
-     * @param elementName the type of elements to refresh
-     */
-    void refreshModelElements(String modelName, String elementName);
 
     /**
      * Generate the YAML syntax from a provided list of elements.
