@@ -431,7 +431,12 @@ public class YamlThingProvider extends AbstractProvider<Thing>
     }
 
     private void mergeThing(Thing target, Thing source) {
-        target.setLabel(source.getLabel());
+        String label = source.getLabel();
+        if (label == null) {
+            ThingType thingType = thingTypeRegistry.getThingType(target.getThingTypeUID(), localeProvider.getLocale());
+            label = thingType != null ? thingType.getLabel() : null;
+        }
+        target.setLabel(label);
         target.setLocation(source.getLocation());
         target.setBridgeUID(source.getBridgeUID());
 
