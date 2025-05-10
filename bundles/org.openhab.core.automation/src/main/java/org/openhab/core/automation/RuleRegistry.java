@@ -85,4 +85,13 @@ public interface RuleRegistry extends Registry<Rule, String> {
      * @return collection of {@link Rule}s having specified tags.
      */
     Collection<Rule> getByTags(String... tags);
+
+    /**
+     * This method triggers a new generation of the rule from its template by reverting the rule to its
+     * "rule stub" state only containing the template configuration.
+     *
+     * @param ruleUID the UID of the {@link Rule}.
+     * @throws IllegalArgumentException if the rule doesn't exist or isn't linked to a template.
+     */
+    void regenerateFromTemplate(String ruleUID);
 }
