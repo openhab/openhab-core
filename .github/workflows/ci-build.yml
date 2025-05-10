@@ -11,12 +11,10 @@ on:
       - 'main'
     paths-ignore:
       - '.github/**/*.md'
-    types: [opened,synchronize,reopened,labeled]
   workflow_dispatch:
 
 jobs:
   build:
-    if: ${{ (github.event_name == 'pull_request' && github.event.action != 'labeled') || github.event_name == 'push' || github.event_name == 'workflow_dispatch' || github.event.label.name == 'rebuild' }}
     strategy:
       fail-fast: false
       matrix:
