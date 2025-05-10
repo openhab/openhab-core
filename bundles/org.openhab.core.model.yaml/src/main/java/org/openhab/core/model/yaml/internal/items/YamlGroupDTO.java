@@ -35,7 +35,7 @@ public class YamlGroupDTO {
     public String type;
     public String dimension;
     public String function;
-    public @Nullable List<@NonNull String> parameters;
+    public List<@NonNull String> parameters;
 
     public YamlGroupDTO() {
     }

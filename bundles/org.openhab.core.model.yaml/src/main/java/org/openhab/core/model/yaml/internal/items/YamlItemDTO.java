@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.eclipse.jdt.annotation.NonNull;
@@ -48,7 +49,7 @@ public class YamlItemDTO implements YamlElement, Cloneable {
     public String unit;
     public Boolean autoupdate;
     public List<@NonNull String> groups;
-    public List<@NonNull String> tags;
+    public Set<@NonNull String> tags;
     public String channel;
     public Map<@NonNull String, @NonNull Map<@NonNull String, @NonNull Object>> channels;
     public Map<@NonNull String, @NonNull YamlMetadataDTO> metadata;
@@ -267,7 +268,7 @@ public class YamlItemDTO implements YamlElement, Cloneable {
                 && Objects.equals(icon, other.icon) && Objects.equals(format, other.format)
                 && Objects.equals(unit, other.unit) && Objects.equals(autoupdate, other.autoupdate)
                 && YamlElementUtils.equalsListStrings(groups, other.groups)
-                && YamlElementUtils.equalsListStrings(tags, other.tags) && Objects.equals(channel, other.channel)
+                && YamlElementUtils.equalsSetStrings(tags, other.tags) && Objects.equals(channel, other.channel)
                 && equalsChannels(channels, other.channels) && equalsMetadata(metadata, other.metadata);
     }
 

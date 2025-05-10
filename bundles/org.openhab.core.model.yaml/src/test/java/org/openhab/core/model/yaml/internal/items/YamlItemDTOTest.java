@@ -16,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
@@ -101,7 +102,7 @@ public class YamlItemDTOTest {
         item.groups = List.of("group1", "group2");
         assertTrue(item.isValid(null, null));
 
-        item.tags = List.of("Tag1", "Tag 2");
+        item.tags = Set.of("Tag1", "Tag 2");
         assertTrue(item.isValid(null, null));
 
         item.channel = "binding:type:uid:channelid";
@@ -145,8 +146,10 @@ public class YamlItemDTOTest {
         item2.groups = List.of("group1", "group2");
         assertTrue(item1.equals(item2));
 
-        item1.tags = List.of("Tag1\", \"Tag 2");
-        item2.tags = List.of("Tag1\", \"Tag 2");
+        item1.tags = Set.of("Tag1", "Tag 2");
+        item2.tags = Set.of("Tag1", "Tag 2");
+        assertTrue(item1.equals(item2));
+        item2.tags = Set.of("Tag 2", "Tag1");
         assertTrue(item1.equals(item2));
 
         item1.group = new YamlGroupDTO();

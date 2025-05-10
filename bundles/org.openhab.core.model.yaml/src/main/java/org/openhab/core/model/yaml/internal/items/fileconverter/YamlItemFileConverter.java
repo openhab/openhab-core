@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -145,7 +146,7 @@ public class YamlItemFileConverter extends AbstractItemFileGenerator {
             });
         }
         if (!item.getTags().isEmpty()) {
-            dto.tags = new ArrayList<>();
+            dto.tags = new LinkedHashSet<>();
             item.getTags().stream().sorted().collect(Collectors.toList()).forEach(tag -> {
                 dto.tags.add(tag);
             });
