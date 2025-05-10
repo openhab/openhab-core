@@ -30,6 +30,8 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 /**
  * {@link YamlSemanticTagProvider} is an OSGi service, that allows to define semantic tags
  * in YAML configuration files in folder conf/tags.
@@ -69,7 +71,7 @@ public class YamlSemanticTagProvider extends AbstractProvider<SemanticTag>
     }
 
     @Override
-    public void addedModel(String modelName, Collection<YamlSemanticTagDTO> elements) {
+    public void addedModel(String modelName, ObjectMapper yamlMapper, Collection<YamlSemanticTagDTO> elements) {
         List<SemanticTag> added = elements.stream().map(this::mapSemanticTag)
                 .sorted(Comparator.comparing(SemanticTag::getUID)).toList();
         tags.addAll(added);
@@ -80,7 +82,7 @@ public class YamlSemanticTagProvider extends AbstractProvider<SemanticTag>
     }
 
     @Override
-    public void updatedModel(String modelName, Collection<YamlSemanticTagDTO> elements) {
+    public void updatedModel(String modelName, ObjectMapper yamlMapper, Collection<YamlSemanticTagDTO> elements) {
         List<SemanticTag> updated = elements.stream().map(this::mapSemanticTag).toList();
         updated.forEach(t -> {
             tags.stream().filter(tag -> tag.getUID().equals(t.getUID())).findFirst().ifPresentOrElse(oldTag -> {
@@ -93,7 +95,7 @@ public class YamlSemanticTagProvider extends AbstractProvider<SemanticTag>
     }
 
     @Override
-    public void removedModel(String modelName, Collection<YamlSemanticTagDTO> elements) {
+    public void removedModel(String modelName, ObjectMapper yamlMapper, Collection<YamlSemanticTagDTO> elements) {
         List<SemanticTag> removed = elements.stream().map(this::mapSemanticTag)
                 .sorted(Comparator.comparing(SemanticTag::getUID).reversed()).toList();
         removed.forEach(t -> {

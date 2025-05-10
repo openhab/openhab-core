@@ -41,6 +41,7 @@ import org.openhab.core.model.yaml.YamlElement;
 import org.openhab.core.model.yaml.YamlElementName;
 import org.openhab.core.model.yaml.YamlModelListener;
 import org.openhab.core.model.yaml.YamlModelRepository;
+import org.openhab.core.model.yaml.internal.rules.YamlRuleDTO;
 import org.openhab.core.model.yaml.internal.semantics.YamlSemanticTagDTO;
 import org.openhab.core.model.yaml.internal.things.YamlThingDTO;
 import org.openhab.core.service.WatchService;
@@ -87,6 +88,7 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
     private static final String VERSION = "version";
     private static final String READ_ONLY = "readOnly";
     private static final Set<String> KNOWN_ELEMENTS = Set.of( //
+            getElementName(YamlRuleDTO.class), // "rules"
             getElementName(YamlSemanticTagDTO.class), // "tags"
             getElementName(YamlThingDTO.class) // "things"
     );
@@ -266,13 +268,13 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
                         }
 
                         if (!addedElements.isEmpty()) {
-                            elementListener.addedModel(modelName, addedElements);
+                            elementListener.addedModel(modelName, objectMapper, addedElements);
                         }
                         if (!removedElements.isEmpty()) {
-                            elementListener.removedModel(modelName, removedElements);
+                            elementListener.removedModel(modelName, objectMapper, removedElements);
                         }
                         if (!updatedElements.isEmpty()) {
-                            elementListener.updatedModel(modelName, updatedElements);
+                            elementListener.updatedModel(modelName, objectMapper, updatedElements);
                         }
                     }
 
@@ -292,7 +294,7 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
                                 getElementListeners(removedElement, modelVersion).forEach(listener -> {
                                     List removedElements = parseJsonNodesV1(removedNodes, listener.getElementClass(),
                                             null, null);
-                                    listener.removedModel(modelName, removedElements);
+                                    listener.removedModel(modelName, objectMapper, removedElements);
                                 });
                             });
                 } else {
@@ -302,7 +304,7 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
                                 getElementListeners(removedElement, modelVersion).forEach(listener -> {
                                     List removedElements = parseJsonMapNode(removedNode, listener.getElementClass(),
                                             null, null);
-                                    listener.removedModel(modelName, removedElements);
+                                    listener.removedModel(modelName, objectMapper, removedElements);
                                 });
                             });
                 }
@@ -329,7 +331,7 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
             if (!removedNodes.isEmpty()) {
                 getElementListeners(elementName, version).forEach(listener -> {
                     List removedElements = parseJsonNodesV1(removedNodes, listener.getElementClass(), null, null);
-                    listener.removedModel(modelName, removedElements);
+                    listener.removedModel(modelName, objectMapper, removedElements);
                 });
             }
         }
@@ -339,7 +341,7 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
             if (removedMapNode != null) {
                 getElementListeners(elementName, version).forEach(listener -> {
                     List removedElements = parseJsonMapNode(removedMapNode, listener.getElementClass(), null, null);
-                    listener.removedModel(modelName, removedElements);
+                    listener.removedModel(modelName, objectMapper, removedElements);
                 });
             }
         }
@@ -377,7 +379,7 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
             warnings.forEach(warning -> {
                 logger.info("YAML model {}: {}", modelName, warning);
             });
-            listener.addedModel(modelName, modelElements);
+            listener.addedModel(modelName, objectMapper, modelElements);
             checkElementNames(modelName, model);
         });
     }
@@ -452,7 +454,7 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
                 logger.info("YAML model {}: {}", modelName, warning);
             });
             if (!newElements.isEmpty()) {
-                l.addedModel(modelName, newElements);
+                l.addedModel(modelName, objectMapper, newElements);
             }
         }
 
@@ -500,7 +502,7 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
         for (YamlModelListener<?> l : getElementListeners(elementName, model.getVersion())) {
             List oldElements = parseJsonNodes(removedNodes, mapRemovedNode, l.getElementClass(), null, null);
             if (!oldElements.isEmpty()) {
-                l.removedModel(modelName, oldElements);
+                l.removedModel(modelName, objectMapper, oldElements);
             }
         }
 
@@ -558,7 +560,7 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
                 logger.info("YAML model {}: {}", modelName, warning);
             });
             if (!newElements.isEmpty()) {
-                l.updatedModel(modelName, newElements);
+                l.updatedModel(modelName, objectMapper, newElements);
             }
         }
 
@@ -589,7 +591,7 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
             List elements = parseJsonNodes(modelNodes != null ? modelNodes : List.of(), modelMapNode, elementClass,
                     null, null);
             if (!elements.isEmpty()) {
-                listener.updatedModel(modelName, elements);
+                listener.updatedModel(modelName, objectMapper, elements);
             }
         });
     }

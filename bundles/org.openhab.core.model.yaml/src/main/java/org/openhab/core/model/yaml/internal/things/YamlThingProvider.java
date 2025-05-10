@@ -68,6 +68,8 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 /**
  * {@link YamlThingProvider} is an OSGi service, that allows to define things in YAML configuration files.
  * Files can be added, updated or removed at runtime.
@@ -194,7 +196,7 @@ public class YamlThingProvider extends AbstractProvider<Thing>
     }
 
     @Override
-    public void addedModel(String modelName, Collection<YamlThingDTO> elements) {
+    public void addedModel(String modelName, ObjectMapper yamlMapper, Collection<YamlThingDTO> elements) {
         List<Thing> added = elements.stream().map(this::mapThing).filter(Objects::nonNull).toList();
         Collection<Thing> modelThings = Objects
                 .requireNonNull(thingsMap.computeIfAbsent(modelName, k -> new ArrayList<>()));
@@ -206,7 +208,7 @@ public class YamlThingProvider extends AbstractProvider<Thing>
     }
 
     @Override
-    public void updatedModel(String modelName, Collection<YamlThingDTO> elements) {
+    public void updatedModel(String modelName, ObjectMapper yamlMapper, Collection<YamlThingDTO> elements) {
         List<Thing> updated = elements.stream().map(this::mapThing).filter(Objects::nonNull).toList();
         Collection<Thing> modelThings = Objects
                 .requireNonNull(thingsMap.computeIfAbsent(modelName, k -> new ArrayList<>()));
@@ -225,7 +227,7 @@ public class YamlThingProvider extends AbstractProvider<Thing>
     }
 
     @Override
-    public void removedModel(String modelName, Collection<YamlThingDTO> elements) {
+    public void removedModel(String modelName, ObjectMapper yamlMapper, Collection<YamlThingDTO> elements) {
         List<Thing> removed = elements.stream().map(this::mapThing).filter(Objects::nonNull).toList();
         Collection<Thing> modelThings = thingsMap.getOrDefault(modelName, List.of());
         removed.forEach(t -> {

@@ -16,6 +16,8 @@ import java.util.Collection;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 /**
  * The {@link YamlModelListener} interface is responsible for managing a particular model type
  * with data processed from YAML configuration files having a version that is supported by this manager.
@@ -35,26 +37,29 @@ public interface YamlModelListener<T extends YamlElement> {
      * elements from that model.
      *
      * @param modelName the name of the model
+     * @param yamlMapper the {@link ObjectMapper} to use for parsing YAML
      * @param elements the collection of added elements
      */
-    void addedModel(String modelName, Collection<T> elements);
+    void addedModel(String modelName, ObjectMapper yamlMapper, Collection<T> elements);
 
     /**
      * Method called by the model repository when elements from a model are updated. Only changed elements are contained
      * in the collection.
      *
      * @param modelName the name of the model
+     * @param yamlMapper the {@link ObjectMapper} to use for parsing YAML
      * @param elements the collection of updated elements
      */
-    void updatedModel(String modelName, Collection<T> elements);
+    void updatedModel(String modelName, ObjectMapper yamlMapper, Collection<T> elements);
 
     /**
      * Method called by the model repository when elements from a model are removed.
      *
      * @param modelName the name of the model
+     * @param yamlMapper the {@link ObjectMapper} to use for parsing YAML
      * @param elements the collection of removed elements
      */
-    void removedModel(String modelName, Collection<T> elements);
+    void removedModel(String modelName, ObjectMapper yamlMapper, Collection<T> elements);
 
     /**
      * Get the DTO class to be used for each object of this model type. The DTO class MUST implement {@link YamlElement}
