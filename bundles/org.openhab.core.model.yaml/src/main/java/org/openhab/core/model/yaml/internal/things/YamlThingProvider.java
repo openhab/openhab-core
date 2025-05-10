@@ -285,7 +285,7 @@ public class YamlThingProvider extends AbstractProvider<Thing>
                     thingHandlerFactory.getClass().getSimpleName());
             thingsMap.keySet().forEach(modelName -> {
                 modelRepository.refreshModelElements(modelName,
-                        getElementClass().getAnnotation(YamlElementName.class).value());
+                        Objects.requireNonNull(getElementClass().getAnnotation(YamlElementName.class)).value());
             });
         }
     }
