@@ -17,6 +17,10 @@
   <name>openHAB Core :: Tools :: Upgrade tool</name>
   <description>A tool for upgrading openHAB</description>
 
+  <properties>
+    <jackson.version>2.18.2</jackson.version>
+  </properties>
+
   <dependencies>
     <dependency>
       <groupId>org.openhab.core.bundles</groupId>
@@ -72,6 +76,18 @@
       <groupId>org.eclipse.jdt</groupId>
       <artifactId>org.eclipse.jdt.annotation</artifactId>
       <version>2.2.600</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-core</artifactId>
+      <version>${jackson.version}</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.dataformat</groupId>
+      <artifactId>jackson-dataformat-yaml</artifactId>
+      <version>${jackson.version}</version>
+      <scope>compile</scope>
     </dependency>
   </dependencies>
 
