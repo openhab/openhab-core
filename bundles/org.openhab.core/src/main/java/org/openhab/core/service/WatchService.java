@@ -119,9 +119,9 @@ public interface WatchService {
          * Notify Listener about watch event
          *
          * @param kind the {@link Kind} of this event
-         * @param path the relative path of the file associated with this event
+         * @param fullPath the absolute path of the file associated with this event
          */
-        void processWatchEvent(Kind kind, Path path);
+        void processWatchEvent(Kind kind, Path fullPath);
     }
 
     enum Kind {

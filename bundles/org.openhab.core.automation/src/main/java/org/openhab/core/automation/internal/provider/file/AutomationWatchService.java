@@ -58,8 +58,7 @@ public class AutomationWatchService implements WatchService.WatchEventListener {
     }
 
     @Override
-    public void processWatchEvent(WatchService.Kind kind, Path path) {
-        Path fullPath = watchingDir.resolve(path);
+    public void processWatchEvent(WatchService.Kind kind, Path fullPath) {
         try {
             if (kind == WatchService.Kind.DELETE) {
                 provider.removeResources(fullPath.toFile());

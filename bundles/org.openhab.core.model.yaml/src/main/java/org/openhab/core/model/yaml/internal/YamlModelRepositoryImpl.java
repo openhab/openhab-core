@@ -130,8 +130,7 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
                 public FileVisitResult visitFile(@NonNullByDefault({}) Path file,
                         @NonNullByDefault({}) BasicFileAttributes attrs) throws IOException {
                     if (attrs.isRegularFile()) {
-                        Path relativePath = watchPath.relativize(file);
-                        processWatchEvent(CREATE, relativePath);
+                        processWatchEvent(CREATE, file);
                     }
                     return FileVisitResult.CONTINUE;
                 }
@@ -156,10 +155,10 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
     // The method is "synchronized" to avoid concurrent files processing
     @Override
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    public synchronized void processWatchEvent(Kind kind, Path path) {
-        Path fullPath = watchPath.resolve(path);
-        String modelName = path.toString();
-        if (path.startsWith("automation") || !modelName.endsWith(".yaml")) {
+    public synchronized void processWatchEvent(Kind kind, Path fullPath) {
+        Path relativePath = watchPath.relativize(fullPath);
+        String modelName = relativePath.toString();
+        if (relativePath.startsWith("automation") || !modelName.endsWith(".yaml")) {
             logger.trace("Ignored {}", fullPath);
             return;
         }
