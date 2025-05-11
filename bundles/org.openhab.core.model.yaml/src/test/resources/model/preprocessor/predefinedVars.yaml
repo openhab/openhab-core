@@ -1,0 +1,4 @@
+file: ${__FILE__}
+filename: ${__FILE_NAME__}
+ext: ${__FILE_EXT__}
+path: ${__PATH__}
