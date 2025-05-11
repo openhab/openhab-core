@@ -95,9 +95,17 @@ public class UpgradeTool {
 
             System.setProperty(org.slf4j.simple.SimpleLogger.DEFAULT_LOG_LEVEL_KEY, loglevel);
 
+            boolean force = commandLine.hasOption(OPT_FORCE);
+            String command = commandLine.hasOption(OPT_COMMAND) ? commandLine.getOptionValue(OPT_COMMAND) : null;
+
+            if (command != null && UPGRADERS.stream().filter(u -> u.getName().equals(command)).findAny().isEmpty()) {
+                println("Unknown command: " + command);
+                System.exit(0);
+            }
+
             String userdataDir = commandLine.hasOption(OPT_USERDATA_DIR) ? commandLine.getOptionValue(OPT_USERDATA_DIR)
                     : System.getenv("OPENHAB_USERDATA");
-            if (userdataDir == null || userdataDir.isBlank()) {
+            if (command == null && (userdataDir == null || userdataDir.isBlank())) {
                 println("Please either set the environment variable ${OPENHAB_USERDATA} or provide a directory through the --userdata option.");
                 System.exit(0);
                 return;
@@ -109,14 +117,6 @@ public class UpgradeTool {
                 println("Please either set the environment variable ${OPENHAB_CONF} or provide a directory through the --conf option.");
                 System.exit(0);
                 return;
-            }
-
-            boolean force = commandLine.hasOption(OPT_FORCE);
-            String command = commandLine.hasOption(OPT_COMMAND) ? commandLine.getOptionValue(OPT_COMMAND) : null;
-
-            if (command != null && UPGRADERS.stream().filter(u -> u.getName().equals(command)).findAny().isEmpty()) {
-                println("Unknown command: " + command);
-                System.exit(0);
             }
 
             Path upgradeJsonDatabasePath = Path.of(userdataDir, "jsondb", "org.openhab.core.tools.UpgradeTool");
@@ -135,7 +135,13 @@ public class UpgradeTool {
                 try {
                     logger.info("Executing {}: {}", upgraderName, upgrader.getDescription());
                     if (upgrader.execute(userdataDir, confDir)) {
-                        updateUpgradeRecord(upgraderName);
+                        if (userdataDir != null) {
+                            updateUpgradeRecord(upgraderName);
+                        } else {
+                            logger.warn(
+                                    "The Upgrade record for '{}' is not updated because user data directory wasn't specified",
+                                    upgraderName);
+                        }
                     }
                 } catch (Exception e) {
                     logger.error("Error executing upgrader {}: {}", upgraderName, e.getMessage());
