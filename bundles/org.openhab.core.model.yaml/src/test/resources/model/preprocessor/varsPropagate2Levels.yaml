@@ -1,0 +1,6 @@
+variables:
+  var: toplevel
+
+toplevel: !include
+  file: "${__FILE_NAME__}.inc.yaml"
+

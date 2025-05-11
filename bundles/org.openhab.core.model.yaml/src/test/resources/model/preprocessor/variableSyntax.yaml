@@ -1,0 +1,14 @@
+variables:
+  exist: value1
+  empty:
+
+empty_no_default: ${empty}
+absent_no_default: ${absent}
+
+exists: ${exist-default} # => value1
+empty: ${empty-default} # => ""
+absent: ${absent-default} # => default
+
+exists_with_colon: ${exist:-default} # => value1
+empty_with_colon: ${empty:-default} # => default
+absent_with_colon: ${absent:-default} # => default
