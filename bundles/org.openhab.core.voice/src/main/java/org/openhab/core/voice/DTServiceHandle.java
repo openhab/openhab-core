@@ -15,7 +15,7 @@ package org.openhab.core.voice;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * A handle to a {@link DTService}
+ * A handle to a {@link DTService}.
  *
  * @author Miguel Álvarez Díez - Initial contribution
  */

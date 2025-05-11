@@ -32,7 +32,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Allows the audio bundle to register a dialog that can be triggered programmatically
+ * Allows the audio bundle to register a dialog that can be triggered programmatically.
  *
  * @author Miguel Álvarez - Initial contribution
  */

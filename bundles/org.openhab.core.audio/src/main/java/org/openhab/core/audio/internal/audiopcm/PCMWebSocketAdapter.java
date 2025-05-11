@@ -139,7 +139,7 @@ public class PCMWebSocketAdapter implements WebSocketAdapter {
 
     private void disconnectAll() {
         logger.debug("Disconnecting {} clients...", webSocketConnections.size());
-        var connections = new ArrayList<>(webSocketConnections);
+        ArrayList<PCMWebSocketConnection> connections = new ArrayList<>(webSocketConnections);
         for (var connection : connections) {
             onClientDisconnected(connection);
             connection.disconnect();

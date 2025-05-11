@@ -156,6 +156,7 @@ public class DialogProcessor implements KSListener, STTListener {
      * Starts a persistent dialog
      * 
      * @throws IllegalStateException if keyword spot service is misconfigured
+     * @return {@link DTServiceHandle} or null if dialog fails to start
      */
     public @Nullable DTServiceHandle start() throws IllegalStateException {
         DTService dtService = dialogContext.dt();
