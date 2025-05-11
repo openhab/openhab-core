@@ -20,6 +20,7 @@ import java.util.Map;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.Configuration;
+import org.openhab.core.semantics.SemanticTag;
 import org.openhab.core.thing.Channel;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.Thing;
@@ -44,6 +45,7 @@ import org.openhab.core.thing.binding.builder.ThingStatusInfoBuilder;
  * @author Thomas Höfer - Added thing and thing type properties
  * @author Simon Kaufmann - Added label
  * @author Christoph Weitkamp - Added method {@code getChannel(ChannelUID)}
+ * @author Andrew Fiddian-Green - Added semanticEquipmentTag
  */
 @NonNullByDefault
 public class ThingImpl implements Thing {
@@ -63,6 +65,8 @@ public class ThingImpl implements Thing {
     private @NonNullByDefault({}) ThingTypeUID thingTypeUID;
 
     private @Nullable String location;
+
+    private @Nullable String semanticEquipmentTag;
 
     private transient volatile ThingStatusInfo status = ThingStatusInfoBuilder
             .create(ThingStatus.UNINITIALIZED, ThingStatusDetail.NONE).build();
@@ -258,6 +262,8 @@ public class ThingImpl implements Thing {
         sb.append(getStatus());
         sb.append(", StatusInfo=");
         sb.append(getStatusInfo());
+        sb.append(", SemanticEquipmentTag=");
+        sb.append(getSemanticEquipmentTag());
         sb.append(")");
         return sb.toString();
     }
@@ -283,5 +289,20 @@ public class ThingImpl implements Thing {
         }
         ThingImpl other = (ThingImpl) obj;
         return uid.equals(other.uid);
+    }
+
+    @Override
+    public @Nullable String getSemanticEquipmentTag() {
+        return semanticEquipmentTag;
+    }
+
+    @Override
+    public void setSemanticEquipmentTag(@Nullable String semanticEquipmentTag) {
+        this.semanticEquipmentTag = semanticEquipmentTag;
+    }
+
+    @Override
+    public void setSemanticEquipmentTag(@Nullable SemanticTag semanticEquipmentTag) {
+        setSemanticEquipmentTag(semanticEquipmentTag.getName());
     }
 }

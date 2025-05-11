@@ -104,6 +104,7 @@ import org.osgi.service.jaxrs.whiteboard.propertytypes.JaxrsResource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -111,6 +112,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -172,6 +174,7 @@ public class ItemResource implements RESTResource {
     }
 
     private final Logger logger = LoggerFactory.getLogger(ItemResource.class);
+    private final Gson gson = new Gson();
 
     private final DTOMapper dtoMapper;
     private final EventPublisher eventPublisher;
@@ -422,14 +425,29 @@ public class ItemResource implements RESTResource {
     @RolesAllowed({ Role.USER, Role.ADMIN })
     @Path("/{itemname: [a-zA-Z_0-9]+}/state")
     @Consumes(MediaType.TEXT_PLAIN)
-    @Operation(operationId = "updateItemState", summary = "Updates the state of an item.", responses = {
-            @ApiResponse(responseCode = "202", description = "Accepted"),
-            @ApiResponse(responseCode = "404", description = "Item not found"),
-            @ApiResponse(responseCode = "400", description = "Item state null") })
-    public Response putItemState(
+    @Operation(operationId = "updateItemState", summary = "Updates the state of an item.", requestBody = @RequestBody(description = "Valid item state (e.g., ON, OFF) either as plain text or JSON", required = true, content = {
+            @Content(mediaType = MediaType.TEXT_PLAIN, schema = @Schema(type = "string", example = "ON")),
+            @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(type = "string", example = "{ \"value\": \"ON\" }")) }), responses = {
+                    @ApiResponse(responseCode = "202", description = "Accepted"),
+                    @ApiResponse(responseCode = "404", description = "Item not found"),
+                    @ApiResponse(responseCode = "400", description = "State cannot be parsed") })
+    public Response putItemStatePlain(
             @HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Parameter(description = "language") @Nullable String language,
             @PathParam("itemname") @Parameter(description = "item name") String itemname,
             @Parameter(description = "valid item state (e.g. ON, OFF)", required = true) String value) {
+        return sendItemStateInternal(language, itemname, value);
+    }
+
+    @PUT
+    @RolesAllowed({ Role.USER, Role.ADMIN })
+    @Path("/{itemname: [a-zA-Z_0-9]+}/state")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response putItemStateJson(@HeaderParam(HttpHeaders.ACCEPT_LANGUAGE) @Nullable String language,
+            @PathParam("itemname") String itemname, ValueContainer valueContainer) {
+        return sendItemStateInternal(language, itemname, valueContainer.value());
+    }
+
+    private Response sendItemStateInternal(@Nullable String language, String itemname, String value) {
         final Locale locale = localeService.getLocale(language);
         final ZoneId zoneId = timeZoneProvider.getTimeZone();
 
@@ -459,12 +477,26 @@ public class ItemResource implements RESTResource {
     @RolesAllowed({ Role.USER, Role.ADMIN })
     @Path("/{itemname: [a-zA-Z_0-9]+}")
     @Consumes(MediaType.TEXT_PLAIN)
-    @Operation(operationId = "sendItemCommand", summary = "Sends a command to an item.", responses = {
-            @ApiResponse(responseCode = "200", description = "OK"),
-            @ApiResponse(responseCode = "404", description = "Item not found"),
-            @ApiResponse(responseCode = "400", description = "Item command null") })
-    public Response postItemCommand(@PathParam("itemname") @Parameter(description = "item name") String itemname,
+    @Operation(operationId = "sendItemCommand", summary = "Sends a command to an item.", requestBody = @RequestBody(description = "Valid item command (e.g., ON, OFF) either as plain text or JSON", required = true, content = {
+            @Content(mediaType = MediaType.TEXT_PLAIN, schema = @Schema(type = "string", example = "ON")),
+            @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(type = "string", example = "{ \"value\": \"ON\" }")) }), responses = {
+                    @ApiResponse(responseCode = "200", description = "OK"),
+                    @ApiResponse(responseCode = "404", description = "Item not found"),
+                    @ApiResponse(responseCode = "400", description = "Command cannot be parsed") })
+    public Response postItemCommandPlain(@PathParam("itemname") @Parameter(description = "item name") String itemname,
             @Parameter(description = "valid item command (e.g. ON, OFF, UP, DOWN, REFRESH)", required = true) String value) {
+        return sendItemCommandInternal(itemname, value);
+    }
+
+    @POST
+    @RolesAllowed({ Role.USER, Role.ADMIN })
+    @Path("/{itemname: [a-zA-Z_0-9]+}")
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response postItemCommandJson(@PathParam("itemname") String itemname, ValueContainer valueContainer) {
+        return sendItemCommandInternal(itemname, valueContainer.value());
+    }
+
+    private Response sendItemCommandInternal(String itemname, String value) {
         Item item = getItem(itemname);
         Command command = null;
         if (item != null) {
@@ -1005,5 +1037,8 @@ public class ItemResource implements RESTResource {
 
     private boolean isEditable(String itemName) {
         return managedItemProvider.get(itemName) != null;
+    }
+
+    private record ValueContainer(String value) {
     }
 }

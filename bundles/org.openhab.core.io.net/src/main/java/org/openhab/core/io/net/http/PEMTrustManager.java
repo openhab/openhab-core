@@ -19,6 +19,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.Socket;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -113,7 +115,11 @@ public final class PEMTrustManager extends X509ExtendedTrustManager {
      * @throws CertificateInstantiationException
      */
     public static PEMTrustManager getInstanceFromServer(String url) throws MalformedURLException, CertificateException {
-        return getInstanceFromServer(new URL(url));
+        try {
+            return getInstanceFromServer((new URI(url)).toURL());
+        } catch (IllegalArgumentException | URISyntaxException e) {
+            throw new MalformedURLException(e.getMessage());
+        }
     }
 
     /**

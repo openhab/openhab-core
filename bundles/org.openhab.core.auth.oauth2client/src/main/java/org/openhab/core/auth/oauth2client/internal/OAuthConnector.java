@@ -23,6 +23,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeParseException;
 import java.util.Base64;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -47,6 +48,8 @@ import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 
 /**
@@ -61,13 +64,15 @@ import com.google.gson.JsonSyntaxException;
 public class OAuthConnector {
 
     private static final String HTTP_CLIENT_CONSUMER_NAME = "OAuthConnector";
+    private static final int TIMEOUT_SECONDS = 10;
 
-    private final HttpClientFactory httpClientFactory;
+    protected final HttpClientFactory httpClientFactory;
 
     private final @Nullable Fields extraFields;
 
     private final Logger logger = LoggerFactory.getLogger(OAuthConnector.class);
-    private final Gson gson;
+
+    protected final Gson gson;
 
     public OAuthConnector(HttpClientFactory httpClientFactory) {
         this(httpClientFactory, null, new GsonBuilder());
@@ -86,6 +91,29 @@ public class OAuthConnector {
         this.extraFields = extraFields;
         gson = gsonBuilder.setDateFormat(DateTimeType.DATE_PATTERN_JSON_COMPAT)
                 .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+                .registerTypeAdapter(OAuthResponseException.class,
+                        (JsonDeserializer<OAuthResponseException>) (json, typeOfT, context) -> {
+                            OAuthResponseException result = new OAuthResponseException();
+                            JsonObject jsonObject = json.getAsJsonObject();
+                            JsonElement jsonElement;
+                            jsonElement = jsonObject.get("error");
+                            if (jsonElement != null) {
+                                result.setError(jsonElement.getAsString());
+                            }
+                            jsonElement = jsonObject.get("error_description");
+                            if (jsonElement != null) {
+                                result.setErrorDescription(jsonElement.getAsString());
+                            }
+                            jsonElement = jsonObject.get("error_uri");
+                            if (jsonElement != null) {
+                                result.setErrorUri(jsonElement.getAsString());
+                            }
+                            jsonElement = jsonObject.get("state");
+                            if (jsonElement != null) {
+                                result.setState(jsonElement.getAsString());
+                            }
+                            return result;
+                        })
                 .registerTypeAdapter(Instant.class, (JsonDeserializer<Instant>) (json, typeOfT, context) -> {
                     try {
                         return Instant.parse(json.getAsString());
@@ -272,7 +300,8 @@ public class OAuthConnector {
     }
 
     private Request getMethod(HttpClient httpClient, String tokenUrl) {
-        Request request = httpClient.newRequest(tokenUrl).method(HttpMethod.POST);
+        Request request = httpClient.newRequest(tokenUrl).method(HttpMethod.POST).timeout(TIMEOUT_SECONDS,
+                TimeUnit.SECONDS);
         request.header(HttpHeader.ACCEPT, "application/json");
         request.header(HttpHeader.ACCEPT_CHARSET, StandardCharsets.UTF_8.name());
         return request;
@@ -371,7 +400,7 @@ public class OAuthConnector {
      * @throws OAuthException If any exception is thrown while starting the http client.
      * @see org.openhab.core.io.net.http.ExtensibleTrustManager
      */
-    private HttpClient createHttpClient(String tokenUrl) throws OAuthException {
+    protected HttpClient createHttpClient(String tokenUrl) throws OAuthException {
         HttpClient httpClient = httpClientFactory.createHttpClient(HTTP_CLIENT_CONSUMER_NAME);
         if (!httpClient.isStarted()) {
             try {
@@ -383,7 +412,7 @@ public class OAuthConnector {
         return httpClient;
     }
 
-    private void shutdownQuietly(@Nullable HttpClient httpClient) {
+    protected void shutdownQuietly(@Nullable HttpClient httpClient) {
         try {
             if (httpClient != null) {
                 httpClient.stop();

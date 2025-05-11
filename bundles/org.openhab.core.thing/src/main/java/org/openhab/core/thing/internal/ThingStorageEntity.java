@@ -18,6 +18,7 @@ import org.openhab.core.thing.dto.ThingDTO;
  * The {@link ThingStorageEntity} is an entity for Thing storage
  *
  * @author Jan N. Klug - Initial contribution
+ * @author Andrew Fiddian-Green - Added semanticEquipmentTag
  */
 public class ThingStorageEntity extends ThingDTO {
     public boolean isBridge = false;
@@ -28,7 +29,7 @@ public class ThingStorageEntity extends ThingDTO {
 
     public ThingStorageEntity(ThingDTO thingDTO, boolean isBridge) {
         super(thingDTO.thingTypeUID, thingDTO.UID, thingDTO.label, thingDTO.bridgeUID, thingDTO.channels,
-                thingDTO.configuration, thingDTO.properties, thingDTO.location);
+                thingDTO.configuration, thingDTO.properties, thingDTO.location, thingDTO.semanticEquipmentTag);
         this.isBridge = isBridge;
     }
 }

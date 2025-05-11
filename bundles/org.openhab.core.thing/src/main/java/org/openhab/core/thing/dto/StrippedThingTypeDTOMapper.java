@@ -23,6 +23,7 @@ import org.openhab.core.thing.type.ThingType;
  * objects (DTOs).
  *
  * @author Miki Jankov - Initial contribution
+ * @author Andrew Fiddian-Green - Added semanticEquipmentTag
  */
 @NonNullByDefault
 public class StrippedThingTypeDTOMapper {
@@ -36,6 +37,6 @@ public class StrippedThingTypeDTOMapper {
     public static StrippedThingTypeDTO map(ThingType thingType, Locale locale) {
         return new StrippedThingTypeDTO(thingType.getUID().toString(), thingType.getLabel(), thingType.getDescription(),
                 thingType.getCategory(), thingType.isListed(), thingType.getSupportedBridgeTypeUIDs(),
-                thingType instanceof BridgeType);
+                thingType instanceof BridgeType, thingType.getSemanticEquipmentTag());
     }
 }

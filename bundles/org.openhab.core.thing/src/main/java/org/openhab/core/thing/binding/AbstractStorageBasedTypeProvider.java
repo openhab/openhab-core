@@ -59,6 +59,7 @@ import org.openhab.core.types.StateOption;
  * persist those for future thing initializations
  *
  * @author Jan N. Klug - Initial contribution
+ * @author Andrew Fiddian-Green - Added semanticEquipmentTag
  */
 @NonNullByDefault
 public abstract class AbstractStorageBasedTypeProvider
@@ -395,6 +396,7 @@ public abstract class AbstractStorageBasedTypeProvider
         public Map<String, String> properties = Map.of();
         public boolean isListed = false;
         public boolean isBridge = false;
+        public @Nullable String semanticEquipmentTag;
     }
 
     static class ChannelDefinitionEntity {

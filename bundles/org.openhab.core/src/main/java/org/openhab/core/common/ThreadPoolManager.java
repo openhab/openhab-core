@@ -18,6 +18,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
@@ -219,13 +221,18 @@ public class ThreadPoolManager {
         return new HashSet<>(pools.keySet());
     }
 
-    static class UnstoppableExecutorService<T extends ExecutorService> implements ExecutorService {
+    // needs to be of a class supported by micrometer-core, see ExecutorServiceMetrics.java,
+    // originally this class was intended to be defined as "implements ExecutorService"
+    static class UnstoppableExecutorService<T extends ExecutorService> extends ThreadPoolExecutor {
 
         protected final Logger logger = LoggerFactory.getLogger(getClass());
         protected final T delegate;
         protected final String threadPoolName;
 
         private UnstoppableExecutorService(String threadPoolName, T delegate) {
+            // although nearly all methods of ThreadPoolExecutor are overwritten, super() needs to be
+            // called with valid parameters
+            super(0, 1, 0, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(1));
             this.threadPoolName = threadPoolName;
             this.delegate = delegate;
         }
@@ -303,6 +310,61 @@ public class ThreadPoolManager {
 
         T getDelegate() {
             return delegate;
+        }
+
+        // the following methods of ThreadPoolExecutor will be queried for collection of metrics,
+        // they need to be replaced and the query is to be delegated to out ThreadPoolExecutor
+        // referenced in variable "delegate"
+
+        // not part of monitoring
+        // public long getTaskCount() {}
+
+        @Override
+        public long getCompletedTaskCount() {
+            // executor_completed_tasks_total
+            return ((ThreadPoolExecutor) delegate).getCompletedTaskCount();
+        }
+
+        @Override
+        public int getActiveCount() {
+            // executor_active_threads
+            return ((ThreadPoolExecutor) delegate).getActiveCount();
+        }
+
+        @Override
+        public int getMaximumPoolSize() {
+            // executor_pool_max_threads
+            return ((ThreadPoolExecutor) delegate).getMaximumPoolSize();
+        }
+
+        // not part of monitoring
+        // public int getLargestPoolSize() {}
+
+        @Override
+        public int getCorePoolSize() {
+            // executor_pool_core_threads
+            return ((ThreadPoolExecutor) delegate).getCorePoolSize();
+        }
+
+        @Override
+        public int getPoolSize() {
+            // executor_pool_size_threads
+            return ((ThreadPoolExecutor) delegate).getPoolSize();
+        }
+
+        @Override
+        public BlockingQueue<Runnable> getQueue() {
+            return new ArrayBlockingQueue<Runnable>(1) {
+                public int remainingCapacity() {
+                    // executor_queue_remaining_tasks
+                    return ((ThreadPoolExecutor) delegate).getQueue().remainingCapacity();
+                }
+
+                public int size() {
+                    // executor_queued_tasks
+                    return ((ThreadPoolExecutor) delegate).getQueue().size();
+                }
+            };
         }
     }
 

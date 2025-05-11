@@ -42,9 +42,11 @@ To build this project from the sources, Maven takes care of everything:
 
 - set `MAVEN_OPTS` to `-Xms512m -Xmx1024m`
 - change into the openhab-core directory (`cd openhab-core`)
-- run `mvn clean install` to compile and package all sources
+- run `mvn clean spotless:apply install` to compile and package all sources
 
 If there are tests that are failing occasionally on your local build, run `mvn -DskipTests=true clean install` instead to skip them.
+
+For an even quicker build, run `mvn clean install -T1C -DskipChecks -DskipTests -Dspotless.check.skip=true`.
 
 ## How to contribute
 

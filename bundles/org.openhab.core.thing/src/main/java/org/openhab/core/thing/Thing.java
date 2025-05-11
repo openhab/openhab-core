@@ -20,6 +20,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.common.registry.Identifiable;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.items.Item;
+import org.openhab.core.semantics.SemanticTag;
 import org.openhab.core.thing.binding.ThingHandler;
 
 /**
@@ -35,6 +36,7 @@ import org.openhab.core.thing.binding.ThingHandler;
  * @author Kai Kreuzer - Removed linked items from Thing
  * @author Yordan Zhelev - Added method for getting the enabled status
  * @author Christoph Weitkamp - Added method {@code getChannel(ChannelUID)}
+ * @author Andrew Fiddian-Green - Added semanticEquipmentTag
  */
 @NonNullByDefault
 public interface Thing extends Identifiable<ThingUID> {
@@ -230,4 +232,26 @@ public interface Thing extends Identifiable<ThingUID> {
      * @return Returns {@code true} if the thing is enabled. Return {@code false} otherwise.
      */
     boolean isEnabled();
+
+    /**
+     * Get the semantic (equipment) tag of the {@link Thing}.
+     *
+     * @return the semantic (equipment) tag or {@code null} if no tag has been configured.
+     */
+    @Nullable
+    String getSemanticEquipmentTag();
+
+    /**
+     * Set the semantic (equipment) tag of the {@link Thing}.
+     *
+     * @param semanticEquipmentTag the semantic (equipment) tag or {@code null} if no tag has been configured.
+     */
+    void setSemanticEquipmentTag(@Nullable String semanticEquipmentTag);
+
+    /**
+     * Set the semantic (equipment) tag of the {@link Thing}.
+     *
+     * @param semanticEquipmentTag the semantic (equipment) tag or {@code null} if no tag has been configured.
+     */
+    void setSemanticEquipmentTag(@Nullable SemanticTag semanticEquipmentTag);
 }

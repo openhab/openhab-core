@@ -12,9 +12,11 @@
  */
 package org.openhab.core.model.yaml.test;
 
+import java.util.List;
 import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.model.yaml.YamlElement;
 import org.openhab.core.model.yaml.YamlElementName;
 
@@ -24,7 +26,7 @@ import org.openhab.core.model.yaml.YamlElementName;
  * @author Jan N. Klug - Initial contribution
  */
 @YamlElementName("firstType")
-public class FirstTypeDTO implements YamlElement {
+public class FirstTypeDTO implements YamlElement, Cloneable {
     public String uid;
     public String description;
 
@@ -38,12 +40,29 @@ public class FirstTypeDTO implements YamlElement {
 
     @Override
     public @NonNull String getId() {
-        return uid;
+        return uid == null ? "" : uid;
     }
 
     @Override
-    public boolean isValid() {
-        return uid != null;
+    public void setId(@NonNull String id) {
+        uid = id;
+    }
+
+    @Override
+    public YamlElement cloneWithoutId() {
+        FirstTypeDTO copy;
+        try {
+            copy = (FirstTypeDTO) super.clone();
+            copy.uid = null;
+            return copy;
+        } catch (CloneNotSupportedException e) {
+            return new FirstTypeDTO();
+        }
+    }
+
+    @Override
+    public boolean isValid(@Nullable List<@NonNull String> errors, @Nullable List<@NonNull String> warnings) {
+        return uid != null && !uid.isBlank();
     }
 
     @Override

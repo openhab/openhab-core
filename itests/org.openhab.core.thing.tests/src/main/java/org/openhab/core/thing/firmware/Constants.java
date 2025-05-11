@@ -133,7 +133,7 @@ public class Constants {
 
     private static URL newURL(String url) {
         try {
-            return new URL(url);
+            return URI.create(url).toURL();
         } catch (MalformedURLException e) {
             throw new UncheckedIOException(e);
         }

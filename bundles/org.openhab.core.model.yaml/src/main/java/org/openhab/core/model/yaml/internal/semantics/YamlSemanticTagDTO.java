@@ -19,19 +19,16 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.model.yaml.YamlElement;
 import org.openhab.core.model.yaml.YamlElementName;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The {@link YamlSemanticTagDTO} is a data transfer object used to serialize a semantic tag
  * in a YAML configuration file.
  *
  * @author Laurent Garnier - Initial contribution
+ * @author Laurent Garnier - Added methods setId and cloneWithoutId
  */
 @YamlElementName("tags")
-public class YamlSemanticTagDTO implements YamlElement {
-
-    private final Logger logger = LoggerFactory.getLogger(YamlSemanticTagDTO.class);
+public class YamlSemanticTagDTO implements YamlElement, Cloneable {
 
     public String uid;
     public String label;
@@ -43,13 +40,33 @@ public class YamlSemanticTagDTO implements YamlElement {
 
     @Override
     public @NonNull String getId() {
-        return uid;
+        return uid == null ? "" : uid;
     }
 
     @Override
-    public boolean isValid() {
-        if (uid == null) {
-            logger.debug("uid missing");
+    public void setId(@NonNull String id) {
+        uid = id;
+    }
+
+    @Override
+    public YamlElement cloneWithoutId() {
+        YamlSemanticTagDTO copy;
+        try {
+            copy = (YamlSemanticTagDTO) super.clone();
+            copy.uid = null;
+            return copy;
+        } catch (CloneNotSupportedException e) {
+            // Will never happen
+            return new YamlSemanticTagDTO();
+        }
+    }
+
+    @Override
+    public boolean isValid(@Nullable List<@NonNull String> errors, @Nullable List<@NonNull String> warnings) {
+        if (uid == null || uid.isBlank()) {
+            if (errors != null) {
+                errors.add("tag uid is missing");
+            }
             return false;
         }
         return true;

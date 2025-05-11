@@ -218,13 +218,12 @@ public abstract class AbstractScriptFileWatcher implements WatchService.WatchEve
     }
 
     @Override
-    public void processWatchEvent(WatchService.Kind kind, Path path) {
+    public void processWatchEvent(WatchService.Kind kind, Path fullPath) {
         if (!initialized.isDone()) {
             // discard events if the initial import has not finished
             return;
         }
 
-        Path fullPath = watchPath.resolve(path);
         File file = fullPath.toFile();
 
         // Subdirectory events are filtered out by WatchService, so we only need to deal with files

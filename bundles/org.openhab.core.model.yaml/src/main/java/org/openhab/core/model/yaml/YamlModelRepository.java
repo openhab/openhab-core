@@ -12,12 +12,16 @@
  */
 package org.openhab.core.model.yaml;
 
+import java.io.OutputStream;
+import java.util.List;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
  * The {@link YamlModelRepository} defines methods to update elements in a YAML model.
  *
  * @author Jan N. Klug - Initial contribution
+ * @author Laurent Garnier - Added method generateSyntaxFromElements
  */
 @NonNullByDefault
 public interface YamlModelRepository {
@@ -26,4 +30,12 @@ public interface YamlModelRepository {
     void removeElementFromModel(String modelName, YamlElement element);
 
     void updateElementInModel(String modelName, YamlElement element);
+
+    /**
+     * Generate the YAML syntax from a provided list of elements.
+     *
+     * @param out the output stream to write the generated syntax to
+     * @param elements the list of elements to includ
+     */
+    void generateSyntaxFromElements(OutputStream out, List<YamlElement> elements);
 }

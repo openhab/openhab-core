@@ -16,10 +16,12 @@ import java.net.URI;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.semantics.SemanticTag;
 import org.openhab.core.thing.type.ChannelType;
 import org.openhab.core.thing.type.ChannelTypeBuilder;
 import org.openhab.core.thing.type.ChannelTypeUID;
@@ -77,6 +79,12 @@ abstract class AbstractChannelTypeBuilder<@NonNull T extends ChannelTypeBuilder<
     @Override
     public T withTags(Collection<String> tags) {
         this.tags.addAll(tags);
+        return (T) this;
+    }
+
+    @Override
+    public T withTags(SemanticTag... tags) {
+        this.tags.addAll(Stream.of(tags).map(t -> t.getName()).toList());
         return (T) this;
     }
 

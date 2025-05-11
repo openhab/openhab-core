@@ -13,11 +13,11 @@
 package org.openhab.core.model.rule.jvmmodel
 
 import com.google.inject.Inject
+import java.time.ZonedDateTime
 import java.util.Set
 import org.openhab.core.items.Item
 import org.openhab.core.items.ItemRegistry
 import org.openhab.core.thing.ThingRegistry
-import org.openhab.core.thing.events.ChannelTriggeredEvent
 import org.openhab.core.types.Command
 import org.openhab.core.types.State
 import org.openhab.core.model.rule.rules.ChangedEventTrigger
@@ -33,14 +33,12 @@ import org.openhab.core.model.rule.rules.ThingStateChangedEventTrigger
 import org.openhab.core.model.rule.rules.UpdateEventTrigger
 import org.openhab.core.model.script.jvmmodel.ScriptJvmModelInferrer
 import org.openhab.core.model.script.scoping.StateAndCommandProvider
-import org.eclipse.xtext.naming.IQualifiedNameProvider
 import org.eclipse.xtext.xbase.jvmmodel.IJvmDeclaredTypeAcceptor
 import org.eclipse.xtext.xbase.jvmmodel.JvmTypesBuilder
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.eclipse.xtext.common.types.JvmFormalParameter
 import org.eclipse.emf.common.util.EList
-import org.openhab.core.events.Event
 import org.openhab.core.automation.module.script.rulesupport.shared.ValueCache
 
 /**
@@ -54,13 +52,12 @@ import org.openhab.core.automation.module.script.rulesupport.shared.ValueCache
  */
 class RulesJvmModelInferrer extends ScriptJvmModelInferrer {
 
-    private final Logger logger = LoggerFactory.getLogger(RulesJvmModelInferrer)
+    final Logger logger = LoggerFactory.getLogger(RulesJvmModelInferrer)
 
     /**
-     * conveninence API to build and initialize JvmTypes and their members.
+     * convenience API to build and initialize JvmTypes and their members.
      */
     @Inject extension JvmTypesBuilder
-    @Inject extension IQualifiedNameProvider
 
     @Inject
     ItemRegistry itemRegistry
@@ -82,7 +79,7 @@ class RulesJvmModelInferrer extends ScriptJvmModelInferrer {
      */
     def dispatch void infer(RuleModel ruleModel, IJvmDeclaredTypeAcceptor acceptor, boolean isPreIndexingPhase) {
         val className = ruleModel.eResource.URI.lastSegment.split("\\.").head.toFirstUpper + "Rules"
-        acceptor.accept(ruleModel.toClass(className)).initializeLater [
+        acceptor.accept(ruleModel.toClass(className), [
             members += ruleModel.variables.map [
                 toField(name, type?.cloneWithProxies) => [ field |
                     field.static = true
@@ -97,7 +94,7 @@ class RulesJvmModelInferrer extends ScriptJvmModelInferrer {
             types.forEach [ type |
                 val name = type.toString
                 if (fieldNames.add(name)) {
-                    members += ruleModel.toField(name, ruleModel.newTypeRef(type.class)) [
+                    members += ruleModel.toField(name, typeRef(type.class)) [
                         static = true
                     ]
                 } else {
@@ -108,7 +105,7 @@ class RulesJvmModelInferrer extends ScriptJvmModelInferrer {
             itemRegistry?.items?.forEach [ item |
                 val name = item.name
                 if (fieldNames.add(name)) {
-                    members += ruleModel.toField(item.name, ruleModel.newTypeRef(item.class)) [
+                    members += ruleModel.toField(item.name, typeRef(item.class)) [
                         static = true
                     ]
                 } else {
@@ -120,7 +117,7 @@ class RulesJvmModelInferrer extends ScriptJvmModelInferrer {
             things?.forEach [ thing |
                 val name = thing.getUID().toString()
                 if (fieldNames.add(name)) {
-                    members += ruleModel.toField(name, ruleModel.newTypeRef(thing.class)) [
+                    members += ruleModel.toField(name, typeRef(thing.class)) [
                         static = true
                     ]
                 } else {
@@ -129,53 +126,61 @@ class RulesJvmModelInferrer extends ScriptJvmModelInferrer {
             ]
 
             members += ruleModel.rules.map [ rule |
-                rule.toMethod("_" + rule.name, ruleModel.newTypeRef(Void.TYPE)) [
+                rule.toMethod("_" + rule.name, typeRef(Void.TYPE)) [
                     static = true
-                    val privateCacheTypeRef = ruleModel.newTypeRef(ValueCache)
+                    val privateCacheTypeRef = typeRef(ValueCache)
                     parameters += rule.toParameter(VAR_PRIVATE_CACHE, privateCacheTypeRef)
-                    val sharedCacheTypeRef = ruleModel.newTypeRef(ValueCache)
+                    val sharedCacheTypeRef = typeRef(ValueCache)
                     parameters += rule.toParameter(VAR_SHARED_CACHE, sharedCacheTypeRef)
                     if ((containsCommandTrigger(rule)) || (containsStateChangeTrigger(rule)) || (containsStateUpdateTrigger(rule))) {
-                        val groupTypeRef = ruleModel.newTypeRef(Item)
+                        val groupTypeRef = typeRef(Item)
                         parameters += rule.toParameter(VAR_TRIGGERING_GROUP, groupTypeRef)
-                        val groupNameRef = ruleModel.newTypeRef(String)
+                        val groupNameRef = typeRef(String)
                         parameters += rule.toParameter(VAR_TRIGGERING_GROUP_NAME, groupNameRef)
-                        val itemTypeRef = ruleModel.newTypeRef(Item)
+                        val itemTypeRef = typeRef(Item)
                         parameters += rule.toParameter(VAR_TRIGGERING_ITEM, itemTypeRef)
-                        val itemNameRef = ruleModel.newTypeRef(String)
+                        val itemNameRef = typeRef(String)
                         parameters += rule.toParameter(VAR_TRIGGERING_ITEM_NAME, itemNameRef)
                     }
                     if (containsCommandTrigger(rule)) {
-                        val commandTypeRef = ruleModel.newTypeRef(Command)
+                        val commandTypeRef = typeRef(Command)
                         parameters += rule.toParameter(VAR_RECEIVED_COMMAND, commandTypeRef)
                     }
+                    if ((containsStateChangeTrigger(rule) || containsStateUpdateTrigger(rule)) && !containsParam(parameters, VAR_NEW_STATE)) {
+                        val stateTypeRef = typeRef(State)
+                        parameters += rule.toParameter(VAR_NEW_STATE, stateTypeRef)
+                    }
                     if (containsStateChangeTrigger(rule) && !containsParam(parameters, VAR_PREVIOUS_STATE)) {
-                        val stateTypeRef = ruleModel.newTypeRef(State)
+                        val stateTypeRef = typeRef(State)
                         parameters += rule.toParameter(VAR_PREVIOUS_STATE, stateTypeRef)
                     }
+                    if (containsStateChangeTrigger(rule) || containsStateUpdateTrigger(rule)) {
+                        val lastStateUpdateTypeRef = typeRef(ZonedDateTime)
+                        parameters += rule.toParameter(VAR_LAST_STATE_UPDATE, lastStateUpdateTypeRef)
+                    }
+                    if (containsStateChangeTrigger(rule)) {
+                        val lastStateChangeTypeRef = typeRef(ZonedDateTime)
+                        parameters += rule.toParameter(VAR_LAST_STATE_CHANGE, lastStateChangeTypeRef)
+                    }
                     if (containsEventTrigger(rule)) {
-                        val eventTypeRef = ruleModel.newTypeRef(String)
+                        val eventTypeRef = typeRef(String)
                         parameters += rule.toParameter(VAR_RECEIVED_EVENT, eventTypeRef)
-                        val channelRef = ruleModel.newTypeRef(String)
+                        val channelRef = typeRef(String)
                         parameters += rule.toParameter(VAR_TRIGGERING_CHANNEL, channelRef)
                     }
                     if (containsThingStateChangedEventTrigger(rule)) {
-                        val thingRef = ruleModel.newTypeRef(String)
+                        val thingRef = typeRef(String)
                         parameters += rule.toParameter(VAR_TRIGGERING_THING, thingRef)
-                        val oldStatusRef = ruleModel.newTypeRef(String)
+                        val oldStatusRef = typeRef(String)
                         parameters += rule.toParameter(VAR_PREVIOUS_STATUS, oldStatusRef)
-                        val newStatusRef = ruleModel.newTypeRef(String)
+                        val newStatusRef = typeRef(String)
                         parameters += rule.toParameter(VAR_NEW_STATUS, newStatusRef)
-                    }
-                    if ((containsStateChangeTrigger(rule) || containsStateUpdateTrigger(rule)) && !containsParam(parameters, VAR_NEW_STATE)) {
-                        val stateTypeRef = ruleModel.newTypeRef(State)
-                        parameters += rule.toParameter(VAR_NEW_STATE, stateTypeRef)
                     }
 
                     body = rule.script
                 ]
             ]
-        ]
+        ])
     }
 
     def private boolean containsParam(EList<JvmFormalParameter> params, String param) {

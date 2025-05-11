@@ -37,7 +37,7 @@ public class XmlToTranslationsConverterTest {
         BundleInfoReader reader = new BundleInfoReader(new SystemStreamLog());
         BundleInfo bundleInfo = reader.readBundleInfo(Path.of("src/test/resources/acmeweather.bundle/OH-INF"));
 
-        XmlToTranslationsConverter converter = new XmlToTranslationsConverter();
+        XmlToTranslationsConverter converter = new XmlToTranslationsConverter(new SystemStreamLog());
         Translations translations = converter.convert(bundleInfo);
 
         assertThat(translations.hasTranslations(), is(true));
@@ -65,7 +65,7 @@ public class XmlToTranslationsConverterTest {
         BundleInfoReader reader = new BundleInfoReader(new SystemStreamLog());
         BundleInfo bundleInfo = reader.readBundleInfo(Path.of("src/test/resources/acmetts.bundle/OH-INF"));
 
-        XmlToTranslationsConverter converter = new XmlToTranslationsConverter();
+        XmlToTranslationsConverter converter = new XmlToTranslationsConverter(new SystemStreamLog());
         Translations translations = converter.convert(bundleInfo);
 
         assertThat(translations.hasTranslations(), is(true));
@@ -86,7 +86,7 @@ public class XmlToTranslationsConverterTest {
         BundleInfoReader reader = new BundleInfoReader(new SystemStreamLog());
         BundleInfo bundleInfo = reader.readBundleInfo(Path.of("src/test/resources/infoless.bundle/OH-INF"));
 
-        XmlToTranslationsConverter converter = new XmlToTranslationsConverter();
+        XmlToTranslationsConverter converter = new XmlToTranslationsConverter(new SystemStreamLog());
         Translations translations = converter.convert(bundleInfo);
 
         assertThat(translations.hasTranslations(), is(false));

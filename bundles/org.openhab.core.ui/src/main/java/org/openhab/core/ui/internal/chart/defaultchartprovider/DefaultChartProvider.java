@@ -32,7 +32,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.knowm.xchart.XYChart;
 import org.knowm.xchart.XYChartBuilder;
 import org.knowm.xchart.XYSeries;
-import org.knowm.xchart.style.Styler;
+import org.knowm.xchart.style.AxesChartStyler.TextAlignment;
 import org.knowm.xchart.style.Styler.LegendPosition;
 import org.knowm.xchart.style.XYStyler;
 import org.knowm.xchart.style.markers.None;
@@ -49,6 +49,8 @@ import org.openhab.core.persistence.HistoricItem;
 import org.openhab.core.persistence.PersistenceService;
 import org.openhab.core.persistence.PersistenceServiceRegistry;
 import org.openhab.core.persistence.QueryablePersistenceService;
+import org.openhab.core.persistence.registry.PersistenceServiceConfiguration;
+import org.openhab.core.persistence.registry.PersistenceServiceConfigurationRegistry;
 import org.openhab.core.types.State;
 import org.openhab.core.ui.chart.ChartProvider;
 import org.openhab.core.ui.internal.chart.ChartServlet;
@@ -68,6 +70,7 @@ import org.slf4j.LoggerFactory;
  * @author Holger Reichert - Support for themes, DPI, legend hiding
  * @author Christoph Weitkamp - Consider default persistence service
  * @author Jan N. Klug - Add y-axis label formatter
+ * @author Mark Herwege - Implement aliases
  */
 @NonNullByDefault
 @Component(immediate = true)
@@ -106,16 +109,22 @@ public class DefaultChartProvider implements ChartProvider {
 
     private static final int DPI_DEFAULT = 96;
 
+    private static final String INTERPOLATION_LINEAR = "linear";
+    private static final String INTERPOLATION_STEP = "step";
+
     private final Logger logger = LoggerFactory.getLogger(DefaultChartProvider.class);
 
     private final ItemUIRegistry itemUIRegistry;
     private final PersistenceServiceRegistry persistenceServiceRegistry;
+    private final PersistenceServiceConfigurationRegistry persistenceServiceConfigurationRegistry;
 
     @Activate
     public DefaultChartProvider(final @Reference ItemUIRegistry itemUIRegistry,
-            final @Reference PersistenceServiceRegistry persistenceServiceRegistry) {
+            final @Reference PersistenceServiceRegistry persistenceServiceRegistry,
+            final @Reference PersistenceServiceConfigurationRegistry persistenceServiceConfigurationRegistry) {
         this.itemUIRegistry = itemUIRegistry;
         this.persistenceServiceRegistry = persistenceServiceRegistry;
+        this.persistenceServiceConfigurationRegistry = persistenceServiceConfigurationRegistry;
 
         if (logger.isDebugEnabled()) {
             logger.debug("Available themes for default chart provider: {}", String.join(", ", CHART_THEMES.keySet()));
@@ -130,20 +139,21 @@ public class DefaultChartProvider implements ChartProvider {
     @Override
     public BufferedImage createChart(@Nullable String serviceId, @Nullable String theme, ZonedDateTime startTime,
             ZonedDateTime endTime, int height, int width, @Nullable String items, @Nullable String groups,
-            @Nullable Integer dpiValue, @Nullable Boolean legend)
+            @Nullable Integer dpiValue, @Nullable String interpolation, @Nullable Boolean legend)
             throws ItemNotFoundException, IllegalArgumentException {
-        return createChart(serviceId, theme, startTime, endTime, height, width, items, groups, dpiValue, null, legend);
+        return createChart(serviceId, theme, startTime, endTime, height, width, items, groups, dpiValue, null,
+                interpolation, legend);
     }
 
     @Override
     public BufferedImage createChart(@Nullable String serviceId, @Nullable String theme, ZonedDateTime startTime,
             ZonedDateTime endTime, int height, int width, @Nullable String items, @Nullable String groups,
-            @Nullable Integer dpiValue, @Nullable String yAxisDecimalPattern, @Nullable Boolean legend)
-            throws ItemNotFoundException, IllegalArgumentException {
+            @Nullable Integer dpiValue, @Nullable String yAxisDecimalPattern, @Nullable String interpolation,
+            @Nullable Boolean legend) throws ItemNotFoundException, IllegalArgumentException {
         logger.debug(
-                "Rendering chart: service: '{}', theme: '{}', startTime: '{}', endTime: '{}', width: '{}', height: '{}', items: '{}', groups: '{}', dpi: '{}', yAxisDecimalPattern: '{}', legend: '{}'",
+                "Rendering chart: service: '{}', theme: '{}', startTime: '{}', endTime: '{}', width: '{}', height: '{}', items: '{}', groups: '{}', dpi: '{}', yAxisDecimalPattern: '{}', interpolation: '{}', legend: '{}'",
                 serviceId, theme, startTime, endTime, width, height, items, groups, dpiValue, yAxisDecimalPattern,
-                legend);
+                interpolation, legend);
 
         // If a persistence service is specified, find the provider, or use the default provider
         PersistenceService service = (serviceId == null) ? persistenceServiceRegistry.getDefault()
@@ -195,7 +205,7 @@ public class DefaultChartProvider implements ChartProvider {
             styler.setYAxisDecimalPattern(yAxisDecimalPattern);
         }
         styler.setYAxisTickMarkSpacingHint(yAxisSpacing);
-        styler.setYAxisLabelAlignment(Styler.TextAlignment.Right);
+        styler.setYAxisLabelAlignment(TextAlignment.Right);
         // chart
         styler.setChartBackgroundColor(chartTheme.getChartBackgroundColor());
         styler.setChartFontColor(chartTheme.getChartFontColor());
@@ -219,7 +229,7 @@ public class DefaultChartProvider implements ChartProvider {
             for (String itemName : itemNames) {
                 Item item = itemUIRegistry.getItem(itemName);
                 if (addItem(chart, persistenceService, startTime, endTime, item, seriesCounter, chartTheme, dpi,
-                        legendPositionDecider)) {
+                        interpolation, legendPositionDecider)) {
                     seriesCounter++;
                 }
             }
@@ -233,7 +243,7 @@ public class DefaultChartProvider implements ChartProvider {
                 if (item instanceof GroupItem groupItem) {
                     for (Item member : groupItem.getMembers()) {
                         if (addItem(chart, persistenceService, startTime, endTime, member, seriesCounter, chartTheme,
-                                dpi, legendPositionDecider)) {
+                                dpi, interpolation, legendPositionDecider)) {
                             seriesCounter++;
                         }
                     }
@@ -307,7 +317,7 @@ public class DefaultChartProvider implements ChartProvider {
 
     private boolean addItem(XYChart chart, QueryablePersistenceService service, ZonedDateTime timeBegin,
             ZonedDateTime timeEnd, Item item, int seriesCounter, ChartTheme chartTheme, int dpi,
-            LegendPositionDecider legendPositionDecider) {
+            @Nullable String interpolation, LegendPositionDecider legendPositionDecider) {
         Color color = chartTheme.getLineColor(seriesCounter);
 
         // Get the item label
@@ -333,10 +343,13 @@ public class DefaultChartProvider implements ChartProvider {
         // after the start of the graph (or not at all if there's no change during the graph period)
         filter = new FilterCriteria();
         filter.setEndDate(timeBegin);
-        filter.setItemName(item.getName());
+        String itemName = item.getName();
+        PersistenceServiceConfiguration config = persistenceServiceConfigurationRegistry.get(service.getId());
+        String alias = config != null ? config.getAliases().get(itemName) : null;
+        filter.setItemName(itemName);
         filter.setPageSize(1);
         filter.setOrdering(Ordering.DESCENDING);
-        result = service.query(filter);
+        result = service.query(filter, alias);
         if (result.iterator().hasNext()) {
             HistoricItem historicItem = result.iterator().next();
 
@@ -352,13 +365,15 @@ public class DefaultChartProvider implements ChartProvider {
         filter.setOrdering(Ordering.ASCENDING);
 
         // Get the data from the persistence store
-        result = service.query(filter);
+        result = service.query(filter, alias);
 
         // Iterate through the data
         for (HistoricItem historicItem : result) {
             // For 'binary' states, we need to replicate the data
             // to avoid diagonal lines
-            if (state instanceof OnOffType || state instanceof OpenClosedType) {
+            if (state != null && INTERPOLATION_STEP.equals(interpolation)
+                    || ((state instanceof OnOffType || state instanceof OpenClosedType)
+                            && !INTERPOLATION_LINEAR.equals(interpolation))) {
                 xData.add(Date.from(historicItem.getInstant().minus(1, ChronoUnit.MILLIS)));
                 yData.add(convertData(state));
             }

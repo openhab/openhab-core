@@ -108,7 +108,7 @@ public class GenerateDefaultTranslationsMojo extends AbstractI18nMojo {
     }
 
     protected String generateDefaultTranslations(Path defaultTranslationsPath) {
-        XmlToTranslationsConverter xmlConverter = new XmlToTranslationsConverter();
+        XmlToTranslationsConverter xmlConverter = new XmlToTranslationsConverter(getLog());
         Translations generatedTranslations = xmlConverter.convert(bundleInfo);
 
         JsonToTranslationsConverter jsonConverter = new JsonToTranslationsConverter();

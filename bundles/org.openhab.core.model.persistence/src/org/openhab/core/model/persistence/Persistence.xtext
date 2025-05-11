@@ -11,6 +11,7 @@ PersistenceModel:
 	'}'
 	('Filters' '{' filters+=Filter* '}')?
 	('Items' '{' configs+=PersistenceConfiguration* '}')?
+	('Aliases' '{' aliases+=AliasConfiguration* '}')?
 ;
 
 Strategy:
@@ -31,7 +32,7 @@ FilterDetails:
 ;
 
 ThresholdFilter:
-	'>' (relative?='%')? value=DECIMAL unit=STRING?
+	'>' (relative?='%')? value=DECIMAL unit=(UNIT|STRING)?
 ;
 
 TimeFilter:
@@ -39,27 +40,27 @@ TimeFilter:
 ;
 
 EqualsFilter:
-   '=' values+=STRING (',' values+=STRING)*
+	'=' values+=STRING (',' values+=STRING)*
 ;
 
 NotEqualsFilter:
-   '!' values+=STRING (',' values+=STRING)*
+	'!' values+=STRING (',' values+=STRING)*
 ;
 
 IncludeFilter:
-  '[]' lower=DECIMAL upper=DECIMAL unit=STRING?
+	'[]' lower=DECIMAL upper=DECIMAL unit=(UNIT|STRING)?
 ;
 
 NotIncludeFilter:
-  '][' lower=DECIMAL upper=DECIMAL unit=STRING?
+	'][' lower=DECIMAL upper=DECIMAL unit=(UNIT|STRING)?
 ;
 
 
 PersistenceConfiguration:
 	items+=(AllConfig | ItemConfig | GroupConfig | ItemExcludeConfig | GroupExcludeConfig)
-	   (',' items+=(AllConfig | ItemConfig | GroupConfig | ItemExcludeConfig | GroupExcludeConfig))* ('->' alias=STRING)? 
+		(',' items+=(AllConfig | ItemConfig | GroupConfig | ItemExcludeConfig | GroupExcludeConfig))* 
 	((':' ('strategy' '=' strategies+=[Strategy|ID] (',' strategies+=[Strategy|ID])*)? 
-		 ('filter' '=' filters+=[Filter|ID] (',' filters+=[Filter|ID])*)?) 
+			('filter' '=' filters+=[Filter|ID] (',' filters+=[Filter|ID])*)?) 
 		| ';')
 ;
 
@@ -77,13 +78,21 @@ GroupConfig:
 ;
 
 ItemExcludeConfig:
-    '!' itemExclude=ID
+	'!' itemExclude=ID
 ;
 
 GroupExcludeConfig:
-    '!' groupExclude=ID '*'
+	'!' groupExclude=ID '*'
+;
+
+AliasConfiguration:
+	item=ID '->' alias=(ID|STRING)
 ;
 
 DECIMAL returns ecore::EBigDecimal :
 	'-'? INT ('.' INT)?
+;
+
+UNIT:
+	(('^' INT)|'²'|'³'|'/'|'*'|'·'|'°'|'µ'|'%'|'‰'|'Ω'|'Å'|'('|')'|ID)+
 ;

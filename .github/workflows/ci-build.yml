@@ -23,6 +23,8 @@ jobs:
         os: [ 'ubuntu-24.04' ]
     name: Build (Java ${{ matrix.java }}, ${{ matrix.os }})
     runs-on: ${{ matrix.os }}
+    # typical duration is ~15min, set twice the amount as limit (default is 6h)
+    timeout-minutes: 30
     steps:
       - name: Checkout
         if: github.head_ref == ''
@@ -50,20 +52,23 @@ jobs:
           distribution: 'temurin'
           java-version: ${{ matrix.java }}
 
+      # pinning to SHA to mitigate possible supply chain attacks
       - name: Set up Maven ${{ matrix.maven }}
-        uses: stCarolas/setup-maven@v5
+        uses: stCarolas/setup-maven@d6af6abeda15e98926a57b5aa970a96bb37f97d1 # v5
         with:
           maven-version: ${{ matrix.maven }}
 
       - name: Register Problem Matchers
-        if: ${{ matrix.java == '17' }}
+        if: ${{ matrix.java == '21' }}
         id: problem_matchers
         run: |
           echo "::add-matcher::.github/openhab-compile-problems.json"
 
       - name: Build
         id: build
-        run: './.github/scripts/maven-build'
+        # this target includes spotless, build, test, itest
+        # (spotless done with build - will add 1 min, but build is faster than sat)
+        run: './.github/scripts/maven-build verify -B -T 1.5C -U -DskipChecks'
         env:
           MAVEN_OPTS: >-
             -Xmx2g
@@ -78,24 +83,14 @@ jobs:
           name: build-log-java-${{ matrix.java }}-${{ matrix.os }}
           path: build.log
 
-      - name: Upload SAT Summary Report
-        if: ${{ always() && ((steps.build.outcome == 'success') || (steps.build.outcome == 'failure')) }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: sat-summary-report
-          path: target/summary_report.html
-
-      - name: Report SAT Errors as Annotations
-        if: ${{ matrix.java == '21' && always() && ((steps.build.outcome == 'success') || (steps.build.outcome == 'failure')) }}
-        uses: ghys/checkstyle-github-action@main
-        with:
-          title: CheckStyle Violations
-          path: '**/checkstyle-result.xml'
-          mode: inline
-
+      # this will identify modifications to files under source control during the workflow run;
+      # untracked files will be included as well!
       - name: Verify Changed Files
-        uses: tj-actions/verify-changed-files@v20
         id: verify-changed-files
+        run: |
+          set -o pipefail
+          changed_files=$(echo -n "$(git diff --name-only HEAD && git ls-files --others --exclude-standard)"|tr '\n' ' ')
+          echo "changed_files=$changed_files" >> $GITHUB_OUTPUT
 
       - name: Fail on Changed Files
         if: steps.verify-changed-files.outputs.changed_files != ''
@@ -104,3 +99,93 @@ jobs:
         run: |
           echo "::error::Files have changed: $CHANGED_FILES"
           exit 1
+
+  checks:
+    strategy:
+      fail-fast: false
+      matrix:
+          type: [ 'SAT', 'JavaDoc' ]
+          java: [ '21' ]
+          os: [ 'ubuntu-24.04' ]
+    name: ${{matrix.type}}
+    runs-on: ${{ matrix.os }}
+    # typical duration is ~15min, set twice the amount as limit (default is 6h)
+    timeout-minutes: 30
+    env:
+      MAVEN_OPTS: >-
+        -Xmx4g
+        -Dmaven.wagon.http.retryHandler.count=5
+        -Dmaven.wagon.httpconnectionManager.ttlSeconds=25
+        -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
+    steps:
+      - name: Checkout
+        if: github.head_ref == ''
+        uses: actions/checkout@v4
+
+      - name: Checkout merge
+        if: github.head_ref != ''
+        uses: actions/checkout@v4
+        with:
+          ref: refs/pull/${{github.event.pull_request.number}}/merge
+
+      - name: Set up Cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.m2/repository
+            !~/.m2/repository/org/openhab
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Set up Java ${{ matrix.java }}
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: ${{ matrix.java }}
+
+      # pinning to SHA to mitigate possible supply chain attacks
+      - name: Set up Maven ${{ matrix.maven }}
+        uses: stCarolas/setup-maven@d6af6abeda15e98926a57b5aa970a96bb37f97d1 # v5
+        with:
+          maven-version: ${{ matrix.maven }}
+
+      - name: JavaDoc
+        if: ${{ matrix.type == 'javadoc' }}
+        id: javadoc
+        run: './.github/scripts/maven-build -B -T 1.25C -U install javadoc:javadoc javadoc:aggregate -Dspotless.check.skip=true -Dmaven.test.skip -Dfeatures.verify.skip=true -DskipChecks'
+
+      - name: Upload JavaDoc
+        if: ${{ always() && (steps.javadoc.outcome == 'success') }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: javadoc
+          path: target/site/apidocs/
+
+      - name: Static Code Analysis
+        if: ${{ matrix.type == 'sat' }}
+        id: sat
+        run: './.github/scripts/maven-build install -B -T 1.25C -U -Dspotless.check.skip=true -Dmaven.test.skip -Dfeatures.verify.skip=true'
+
+      - name: Upload SAT Summary Report
+        if: ${{ always() && ((steps.sat.outcome == 'success') || (steps.sat.outcome == 'failure')) }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: sat-summary-report
+          path: target/summary_report.html
+
+      - name: Report SAT Errors as Annotations
+        if: ${{ matrix.java == '21' && always() && ((steps.sat.outcome == 'success') || (steps.sat.outcome == 'failure')) }}
+        uses: ghys/checkstyle-github-action@main
+        with:
+          title: CheckStyle Violations
+          path: '**/checkstyle-result.xml'
+          mode: inline
+
+      - name: Remove Label
+        if: ${{ always() && github.event.label.name == 'rebuild' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR: ${{ github.event.number }}
+        run: |
+          gh pr edit $PR --remove-label rebuild

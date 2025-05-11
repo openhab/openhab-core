@@ -23,6 +23,7 @@ import java.util.Objects;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.Configuration;
+import org.openhab.core.semantics.SemanticTag;
 import org.openhab.core.thing.Channel;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.Thing;
@@ -36,6 +37,7 @@ import org.openhab.core.thing.util.ThingHelper;
  *
  * @author Dennis Nobel - Initial contribution
  * @author Kai Kreuzer - Refactoring to make BridgeBuilder a subclass
+ * @author Andrew Fiddian-Green - Added semanticEquipmentTag
  */
 @NonNullByDefault
 public class ThingBuilder {
@@ -48,6 +50,7 @@ public class ThingBuilder {
     private @Nullable ThingUID bridgeUID;
     private @Nullable Map<String, String> properties;
     private @Nullable String location;
+    private @Nullable String semanticEquipmentTag;
 
     protected ThingBuilder(ThingTypeUID thingTypeUID, ThingUID thingUID) {
         this.thingUID = thingUID;
@@ -86,7 +89,8 @@ public class ThingBuilder {
     public static ThingBuilder create(Thing thing) {
         return ThingBuilder.create(thing.getThingTypeUID(), thing.getUID()).withBridge(thing.getBridgeUID())
                 .withChannels(thing.getChannels()).withConfiguration(thing.getConfiguration())
-                .withLabel(thing.getLabel()).withLocation(thing.getLocation()).withProperties(thing.getProperties());
+                .withLabel(thing.getLabel()).withLocation(thing.getLocation()).withProperties(thing.getProperties())
+                .withSemanticEquipmentTag(thing.getSemanticEquipmentTag());
     }
 
     /**
@@ -251,6 +255,27 @@ public class ThingBuilder {
         return this;
     }
 
+    /**
+     * Set the semantic (equipment) tag for this thing
+     *
+     * @param semanticEquipmentTag a string with semantic (equipment) tag for this thing
+     * @return the {@link ThingBuilder} itself
+     */
+    public ThingBuilder withSemanticEquipmentTag(@Nullable String semanticEquipmentTag) {
+        this.semanticEquipmentTag = semanticEquipmentTag;
+        return this;
+    }
+
+    /**
+     * Set the semantic (equipment) tag for this thing
+     *
+     * @param semanticEquipmentTag semantic (equipment) tag for this thing
+     * @return the {@link ThingBuilder} itself
+     */
+    public ThingBuilder withSemanticEquipmentTag(SemanticTag semanticEquipmentTag) {
+        return withSemanticEquipmentTag(semanticEquipmentTag.getName());
+    }
+
     protected Thing populate(ThingImpl thing) {
         thing.setLabel(label);
         thing.setChannels(channels);
@@ -262,6 +287,7 @@ public class ThingBuilder {
             }
         }
         thing.setLocation(location);
+        thing.setSemanticEquipmentTag(semanticEquipmentTag);
         return thing;
     }
 

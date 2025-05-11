@@ -13,6 +13,7 @@
 package org.openhab.core.model.core;
 
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Set;
 
 import org.eclipse.emf.ecore.EObject;
@@ -26,6 +27,7 @@ import org.eclipse.jdt.annotation.Nullable;
  * come from.
  *
  * @author Kai Kreuzer - Initial contribution
+ * @author Laurent Garnier - Added method generateSyntaxFromModel
  */
 @NonNullByDefault
 public interface ModelRepository {
@@ -92,4 +94,13 @@ public interface ModelRepository {
      * @param listener the listener to remove
      */
     void removeModelRepositoryChangeListener(ModelRepositoryChangeListener listener);
+
+    /**
+     * Generate the syntax from a provided model content.
+     *
+     * @param out the output stream to write the generated syntax to
+     * @param modelType the model type
+     * @param modelContent the content of the model
+     */
+    void generateSyntaxFromModel(OutputStream out, String modelType, EObject modelContent);
 }

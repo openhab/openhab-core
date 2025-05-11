@@ -23,6 +23,7 @@ import java.util.Map;
  * @author Stefan Bußweiler - Added new thing status handling
  * @author Simon Kaufmann - Added label
  * @author Wouter Born - Let (Enriched)ThingDTO extend AbstractThingDTO so both can define their own "channels" type
+ * @author Andrew Fiddian-Green - Added semanticEquipmentTag
  */
 public class ThingDTO extends AbstractThingDTO {
 
@@ -32,8 +33,9 @@ public class ThingDTO extends AbstractThingDTO {
     }
 
     protected ThingDTO(String thingTypeUID, String uid, String label, String bridgeUID, List<ChannelDTO> channels,
-            Map<String, Object> configuration, Map<String, String> properties, String location) {
-        super(thingTypeUID, uid, label, bridgeUID, configuration, properties, location);
+            Map<String, Object> configuration, Map<String, String> properties, String location,
+            String semanticEquipmentTag) {
+        super(thingTypeUID, uid, label, bridgeUID, configuration, properties, location, semanticEquipmentTag);
         this.channels = channels;
     }
 }

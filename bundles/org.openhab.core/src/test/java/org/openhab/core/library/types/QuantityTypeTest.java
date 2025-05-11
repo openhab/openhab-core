@@ -649,13 +649,14 @@ public class QuantityTypeTest {
 
     @Test
     public void testMireds() {
-        QuantityType<Temperature> colorTemp = new QuantityType<>("2700 K");
+        // test value is selected to prevent any round-trip rounding errors
+        QuantityType<Temperature> colorTemp = new QuantityType<>("2000 K");
         QuantityType<?> mireds = colorTemp.toInvertibleUnit(Units.MIRED);
-        assertEquals(370, mireds.intValue());
+        assertEquals(500, mireds.intValue());
         assertThat(colorTemp.equals(mireds), is(true));
         assertThat(mireds.equals(colorTemp), is(true));
         QuantityType<?> andBack = mireds.toInvertibleUnit(Units.KELVIN);
-        assertEquals(2700, andBack.intValue());
+        assertEquals(2000, andBack.intValue());
     }
 
     @Test
@@ -663,5 +664,68 @@ public class QuantityTypeTest {
         QuantityType<Temperature> c = new QuantityType<>("1 °C");
         QuantityType<Temperature> f = c.toUnitRelative(ImperialUnits.FAHRENHEIT);
         assertEquals(1.8, f.doubleValue());
+    }
+
+    @Test
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public void testIncrementalAdd() {
+        assertEquals(new QuantityType("50 °C"), new QuantityType("20 °C").add(new QuantityType("30 °C")));
+        assertEquals(new QuantityType("50 °C"), new QuantityType("20 °C").add(new QuantityType("30 K")));
+        assertEquals(new QuantityType("50 °C"), new QuantityType("20 °C").add(new QuantityType("54 °F")));
+        assertEquals(new QuantityType("50 K"), new QuantityType("20 K").add(new QuantityType("30 °C")));
+        assertEquals(new QuantityType("50 K"), new QuantityType("20 K").add(new QuantityType("30 K")));
+        assertEquals(new QuantityType("50 K"), new QuantityType("20 K").add(new QuantityType("54 °F")));
+    }
+
+    @Test
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public void testIncrementalSubtract() {
+        assertEquals(new QuantityType("20 °C"), new QuantityType("50 °C").subtract(new QuantityType("30 °C")));
+        assertEquals(new QuantityType("20 °C"), new QuantityType("50 °C").subtract(new QuantityType("30 K")));
+        assertEquals(new QuantityType("20 °C"), new QuantityType("50 °C").subtract(new QuantityType("54 °F")));
+        assertEquals(new QuantityType("20 K"), new QuantityType("50 K").subtract(new QuantityType("30 °C")));
+        assertEquals(new QuantityType("20 K"), new QuantityType("50 K").subtract(new QuantityType("30 K")));
+        assertEquals(new QuantityType("20 K"), new QuantityType("50 K").subtract(new QuantityType("54 °F")));
+    }
+
+    @Test
+    public void testEquals() {
+        QuantityType<Temperature> temp1 = new QuantityType<>("293.15 K");
+        QuantityType<Temperature> temp2 = new QuantityType<>("20 °C");
+        assertTrue(temp1.equals(temp2));
+        assertTrue(temp2.equals(temp1));
+        temp2 = new QuantityType<>("-5 °C");
+        assertFalse(temp1.equals(temp2));
+
+        temp1 = new QuantityType<>("100000 K");
+        temp2 = new QuantityType<>("10 mirek");
+        assertTrue(temp1.equals(temp2));
+        assertTrue(temp2.equals(temp1));
+        temp2 = new QuantityType<>("20 mirek");
+        assertFalse(temp1.equals(temp2));
+
+        temp1 = new QuantityType<>("0.1 MK");
+        temp2 = new QuantityType<>("10 mirek");
+        assertTrue(temp1.equals(temp2));
+        assertTrue(temp2.equals(temp1));
+        temp2 = new QuantityType<>("20 mirek");
+        assertFalse(temp1.equals(temp2));
+    }
+
+    @Test
+    public void testCompareTo() {
+        QuantityType<Temperature> temp1 = new QuantityType<>("293.15 K");
+        QuantityType<Temperature> temp2 = new QuantityType<>("20 °C");
+        assertEquals(0, temp1.compareTo(temp2));
+        temp2 = new QuantityType<>("-5 °C");
+        assertEquals(1, temp1.compareTo(temp2));
+        temp2 = new QuantityType<>("50 °C");
+        assertEquals(-1, temp1.compareTo(temp2));
+
+        QuantityType<Temperature> temp3 = new QuantityType<>("100000 K");
+        QuantityType<Temperature> temp4 = new QuantityType<>("10 mirek");
+        assertThrows(IllegalArgumentException.class, () -> {
+            temp3.compareTo(temp4);
+        });
     }
 }

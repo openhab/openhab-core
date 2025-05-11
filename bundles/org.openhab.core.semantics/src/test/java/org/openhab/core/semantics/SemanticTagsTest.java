@@ -15,7 +15,12 @@ package org.openhab.core.semantics;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.BeforeEach;
@@ -81,6 +86,25 @@ public class SemanticTagsTest {
         cleaningRobotTagClass = SemanticTags.getById("Equipment_CleaningRobot");
         measurementTagClass = SemanticTags.getById("Point_Measurement");
         temperatureTagClass = SemanticTags.getById("Property_Temperature");
+    }
+
+    @Test
+    public void ensureTagsAreUnique() {
+        try (BufferedReader reader = new BufferedReader(new FileReader("model/SemanticTags.csv"))) {
+            Set<String> tags = new HashSet<>();
+            String line;
+            reader.readLine(); // Skip the header line
+            while ((line = reader.readLine()) != null) {
+                // We're only interested in the second column,
+                // so quoted fields in synonyms/description are not a problem
+                String[] columns = line.split(",");
+                String tag = columns[1].trim(); // Tag is in the second column
+                assertTrue(tags.add(tag), "Duplicate tag found: " + tag);
+            }
+        } catch (IOException e) {
+            fail("Failed to read SemanticTags.csv. Current dir: " + System.getProperty("user.dir") + " Error: "
+                    + e.getMessage());
+        }
     }
 
     @Test

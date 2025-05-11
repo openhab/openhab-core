@@ -89,38 +89,22 @@ public class CompareConditionHandler extends BaseConditionModuleHandler {
                     case "GT":
                     case ">":
                         // Greater
-                        if (toCompare == null) {
-                            return false;
-                        } else {
-                            return compare(toCompare, rightValue) > 0;
-                        }
+                        return (toCompare != null) && (compare(toCompare, rightValue) > 0);
                     case "gte":
                     case "GTE":
                     case ">=":
                     case "=>":
                         // Greater or equal
-                        if (toCompare == null) {
-                            return false;
-                        } else {
-                            return compare(toCompare, rightValue) >= 0;
-                        }
+                        return (toCompare != null) && (compare(toCompare, rightValue) >= 0);
                     case "lt":
                     case "LT":
                     case "<":
-                        if (toCompare == null) {
-                            return false;
-                        } else {
-                            return compare(toCompare, rightValue) < 0;
-                        }
+                        return (toCompare != null) && (compare(toCompare, rightValue) < 0);
                     case "lte":
                     case "LTE":
                     case "<=":
                     case "=<":
-                        if (toCompare == null) {
-                            return false;
-                        } else {
-                            return compare(toCompare, rightValue) <= 0;
-                        }
+                        return (toCompare != null) && (compare(toCompare, rightValue) <= 0);
                     case "matches":
                         // Matcher...
                         if (toCompare instanceof String string1 && rightValue instanceof String string2) {

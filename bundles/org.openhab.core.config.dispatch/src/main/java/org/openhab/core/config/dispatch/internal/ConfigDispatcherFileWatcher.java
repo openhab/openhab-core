@@ -63,8 +63,7 @@ public class ConfigDispatcherFileWatcher implements WatchService.WatchEventListe
     }
 
     @Override
-    public void processWatchEvent(WatchService.Kind kind, Path path) {
-        Path fullPath = watchService.getWatchPath().resolve(SERVICES_FOLDER).resolve(path);
+    public void processWatchEvent(WatchService.Kind kind, Path fullPath) {
         try {
             if (kind == WatchService.Kind.CREATE || kind == WatchService.Kind.MODIFY) {
                 if (!Files.isHidden(fullPath) && fullPath.toString().endsWith(".cfg")) {
@@ -73,13 +72,13 @@ public class ConfigDispatcherFileWatcher implements WatchService.WatchEventListe
             } else if (kind == WatchService.Kind.DELETE) {
                 // Detect if a service specific configuration file was removed. We want to
                 // notify the service in this case with an updated empty configuration.
-                if (Files.isHidden(fullPath) || Files.isDirectory(fullPath) || !fullPath.toString().endsWith(".cfg")) {
+                if (!fullPath.toString().endsWith(".cfg")) {
                     return;
                 }
                 configDispatcher.fileRemoved(fullPath.toString());
             }
         } catch (IOException e) {
-            logger.error("Failed to process watch event {} for {}", kind, path, e);
+            logger.error("Failed to process watch event {} for {}", kind, fullPath, e);
         }
     }
 }

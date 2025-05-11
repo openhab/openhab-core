@@ -15,10 +15,11 @@ package org.openhab.core.io.rest.core.config;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Stream;
 
+import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionParameter.Type;
+import org.openhab.core.config.core.ConfigDescriptionParameterBuilder;
+import org.openhab.core.config.core.ConfigUtil;
 import org.openhab.core.config.core.dto.ConfigDescriptionParameterDTO;
 import org.openhab.core.config.core.dto.FilterCriteriaDTO;
 import org.openhab.core.config.core.dto.ParameterOptionDTO;
@@ -26,15 +27,18 @@ import org.openhab.core.config.core.dto.ParameterOptionDTO;
 /**
  * This is an enriched data transfer object that is used to serialize config descriptions parameters with a list of
  * default values if a configuration description defines <code>multiple="true"</code>.
+ * 
+ * The default values are split by a comma. Individual values that contain a comma
+ * must be escaped with a backslash character. The backslash character will be
+ * removed from the value.
  *
  * @author Christoph Weitkamp - Initial contribution
  */
 public class EnrichedConfigDescriptionParameterDTO extends ConfigDescriptionParameterDTO {
 
-    private static final String DEFAULT_LIST_DELIMITER = ",";
-
     public Collection<String> defaultValues;
 
+    @SuppressWarnings("unchecked")
     public EnrichedConfigDescriptionParameterDTO(String name, Type type, BigDecimal minimum, BigDecimal maximum,
             BigDecimal stepsize, String pattern, Boolean required, Boolean readOnly, Boolean multiple, String context,
             String defaultValue, String label, String description, List<ParameterOptionDTO> options,
@@ -45,11 +49,10 @@ public class EnrichedConfigDescriptionParameterDTO extends ConfigDescriptionPara
                 unitLabel, verify);
 
         if (multiple && defaultValue != null) {
-            if (defaultValue.contains(DEFAULT_LIST_DELIMITER)) {
-                defaultValues = Stream.of(defaultValue.split(DEFAULT_LIST_DELIMITER)).map(String::trim)
-                        .filter(v -> !v.isEmpty()).toList();
-            } else {
-                defaultValues = Set.of(defaultValue);
+            ConfigDescriptionParameter parameter = ConfigDescriptionParameterBuilder.create(name, type)
+                    .withMultiple(multiple).withDefault(defaultValue).withMultipleLimit(multipleLimit).build();
+            if (ConfigUtil.getDefaultValueAsCorrectType(parameter) instanceof List defaultValues) {
+                this.defaultValues = (Collection<String>) defaultValues;
             }
         }
     }

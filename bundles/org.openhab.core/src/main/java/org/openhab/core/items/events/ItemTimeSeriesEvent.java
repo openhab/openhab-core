@@ -60,6 +60,6 @@ public class ItemTimeSeriesEvent extends ItemEvent {
 
     @Override
     public String toString() {
-        return String.format("Item '%s' shall process timeseries %s", itemName, timeSeries.getStates().toList());
+        return String.format("Item '%s' shall process timeseries with %d values.", itemName, timeSeries.size());
     }
 }

@@ -15,6 +15,7 @@ package org.openhab.core.io.net.http;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
 
+import java.net.URI;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -45,7 +46,7 @@ public class HttpRequestBuilderTest extends BaseHttpUtilTest {
 
         assertEquals("Some content", result);
 
-        verify(httpClientMock).newRequest(URL);
+        verify(httpClientMock).newRequest(URI.create(URL));
         verify(requestMock).method(HttpMethod.GET);
         verify(requestMock).send();
     }

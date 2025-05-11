@@ -12,7 +12,10 @@
  */
 package org.openhab.core.model.yaml;
 
+import java.util.List;
+
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.model.yaml.internal.YamlModelRepositoryImpl;
 
 /**
@@ -29,6 +32,8 @@ import org.openhab.core.model.yaml.internal.YamlModelRepositoryImpl;
  *
  * @author Laurent Garnier - Initial contribution
  * @author Jan N. Klug - Refactoring and improvements to JavaDoc
+ * @author Laurent Garnier - Added methods setId and cloneWithoutId
+ * @author Laurent Garnier - Added parameters to method isValid
  */
 public interface YamlElement {
 
@@ -49,6 +54,20 @@ public interface YamlElement {
     String getId();
 
     /**
+     * Set the identifier of this element.
+     *
+     * @param id the identifier as a string
+     */
+    void setId(@NonNull String id);
+
+    /**
+     * Clone this element putting the identifier to null.
+     *
+     * @return the cloned element
+     */
+    YamlElement cloneWithoutId();
+
+    /**
      * Check if this element is valid and should be included in the model.
      * <p />
      * <p />
@@ -59,7 +78,10 @@ public interface YamlElement {
      * <li>MAY perform additional checks</li>
      * </ul>
      *
+     * @param errors a list of error messages to fill with fatal invalid controls; can be null to ignore messages
+     * @param warnings a list of warning messages to fill with non-fatal invalid controls; can be null to ignore
+     *            messages
      * @return {@code true} if all the checks are completed successfully
      */
-    boolean isValid();
+    boolean isValid(@Nullable List<@NonNull String> errors, @Nullable List<@NonNull String> warnings);
 }

@@ -49,8 +49,6 @@ public class ConfigDispatcherFileWatcherTest {
         configDispatcherFileWatcher = new ConfigDispatcherFileWatcher(configDispatcherMock, watchService);
         verify(configDispatcherMock).processConfigFile(any());
 
-        when(watchService.getWatchPath()).thenReturn(tempDir.toAbsolutePath());
-
         cfgPath = tempDir.resolve("myPath.cfg");
         nonCfgPath = tempDir.resolve("myPath");
 

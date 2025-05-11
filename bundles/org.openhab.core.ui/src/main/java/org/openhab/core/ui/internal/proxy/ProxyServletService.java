@@ -17,7 +17,6 @@ import java.io.Serial;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.Base64;
 import java.util.Hashtable;
 import java.util.List;
@@ -295,9 +294,15 @@ public class ProxyServletService extends HttpServlet {
     }
 
     private URI createURIFromString(String url) throws MalformedURLException, URISyntaxException {
-        // URI in this context should be valid URL. Therefore before creating URI, create URL,
+        URI uri = new URI(url);
+        // URI in this context should be valid URL. Therefore before returning URI, create URL,
         // which validates the string.
-        return new URL(url).toURI();
+        try {
+            uri.toURL();
+        } catch (IllegalArgumentException e) {
+            throw new MalformedURLException(e.getMessage());
+        }
+        return uri;
     }
 
     /**

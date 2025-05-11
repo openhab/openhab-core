@@ -58,6 +58,12 @@ public class ConfigurationTest {
         public @NonNullByDefault({}) String listField;
     }
 
+    public static record ConfigRecord(int intField, String stringField, boolean booleanField, List<String> listField,
+            Set<String> setField, org.openhab.core.config.core.ConfigurationTest.ConfigClass.MyEnum enumField) {
+        @SuppressWarnings("unused")
+        private static final String CONSTANT = "SOME_CONSTANT";
+    }
+
     @Test
     public void assertGetConfigAsWorks() {
         Configuration configuration = new Configuration();
@@ -70,6 +76,27 @@ public class ConfigurationTest {
         configuration.put("notExisitingProperty", true);
 
         ConfigClass configClass = configuration.as(ConfigClass.class);
+
+        assertThat(configClass.intField, is(equalTo(1)));
+        assertThat(configClass.booleanField, is(false));
+        assertThat(configClass.stringField, is("test"));
+        assertThat(configClass.enumField, is(ConfigClass.MyEnum.ON));
+        assertThat(configClass.listField, is(hasItems("one", "two", "three")));
+        assertThat(configClass.setField, is(hasItems("one", "two", "three")));
+    }
+
+    @Test
+    public void assertGetConfigAsWorksForRecord() {
+        Configuration configuration = new Configuration();
+        configuration.put("intField", 1);
+        configuration.put("booleanField", false);
+        configuration.put("stringField", "test");
+        configuration.put("enumField", "ON");
+        configuration.put("listField", List.of("one", "two", "three"));
+        configuration.put("setField", List.of("one", "two", "three"));
+        configuration.put("notExisitingProperty", true);
+
+        ConfigRecord configClass = configuration.as(ConfigRecord.class);
 
         assertThat(configClass.intField, is(equalTo(1)));
         assertThat(configClass.booleanField, is(false));

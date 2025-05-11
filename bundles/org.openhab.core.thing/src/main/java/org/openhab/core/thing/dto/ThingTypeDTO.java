@@ -25,6 +25,7 @@ import org.openhab.core.config.core.dto.ConfigDescriptionParameterGroupDTO;
  * @author Thomas Höfer - Added thing and thing type properties
  * @author Chris Jackson - Added parameter groups
  * @author Miki Jankov - Introducing StrippedThingTypeDTO
+ * @author Andrew Fiddian-Green - Added semanticEquipmentTag
  */
 public class ThingTypeDTO extends StrippedThingTypeDTO {
 
@@ -42,7 +43,7 @@ public class ThingTypeDTO extends StrippedThingTypeDTO {
             List<ConfigDescriptionParameterDTO> configParameters, List<ChannelDefinitionDTO> channels,
             List<ChannelGroupDefinitionDTO> channelGroups, List<String> supportedBridgeTypeUIDs,
             Map<String, String> properties, boolean bridge, List<ConfigDescriptionParameterGroupDTO> parameterGroups,
-            List<String> extensibleChannelTypeIds) {
+            List<String> extensibleChannelTypeIds, String semanticEquipmentTag) {
         this.UID = uid;
         this.label = label;
         this.description = description;
@@ -56,5 +57,6 @@ public class ThingTypeDTO extends StrippedThingTypeDTO {
         this.bridge = bridge;
         this.parameterGroups = parameterGroups;
         this.extensibleChannelTypeIds = extensibleChannelTypeIds;
+        this.semanticEquipmentTag = semanticEquipmentTag;
     }
 }

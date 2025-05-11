@@ -74,9 +74,9 @@ import org.slf4j.LoggerFactory;
 public abstract class BasicConditionHandlerTest extends JavaOSGiTest {
     private final Logger logger = LoggerFactory.getLogger(BasicConditionHandlerTest.class);
     private VolatileStorageService volatileStorageService = new VolatileStorageService();
-    private @NonNullByDefault({}) RuleRegistry ruleRegistry;
-    private @NonNullByDefault({}) RuleManager ruleEngine;
-    private @Nullable Event itemEvent;
+    protected @NonNullByDefault({}) RuleRegistry ruleRegistry;
+    protected @NonNullByDefault({}) RuleManager ruleEngine;
+    protected @Nullable Event itemEvent;
     private @NonNullByDefault({}) StartLevelService startLevelService;
 
     /**
@@ -128,7 +128,7 @@ public abstract class BasicConditionHandlerTest extends JavaOSGiTest {
     }
 
     @Test
-    public void assertThatConditionWorksInRule() throws ItemNotFoundException {
+    public void assertThatConditionWorksInRule() throws ItemNotFoundException, InterruptedException {
         String testItemName1 = "TriggeredItem";
         String testItemName2 = "SwitchedItem";
 
@@ -191,7 +191,7 @@ public abstract class BasicConditionHandlerTest extends JavaOSGiTest {
         logger.info("Rule is enabled and idle");
 
         logger.info("Send and wait for item state is ON");
-        eventPublisher.post(ItemEventFactory.createStateUpdatedEvent(testItemName1, OnOffType.ON));
+        eventPublisher.post(ItemEventFactory.createStateUpdatedEvent(testItemName1, OnOffType.ON, null));
 
         waitForAssert(() -> {
             assertThat(itemEvent, is(notNullValue()));
@@ -207,10 +207,9 @@ public abstract class BasicConditionHandlerTest extends JavaOSGiTest {
 
         // prepare the execution
         itemEvent = null;
-        eventPublisher.post(ItemEventFactory.createStateUpdatedEvent(testItemName1, OnOffType.ON));
-        waitForAssert(() -> {
-            assertThat(itemEvent, is(nullValue()));
-        });
+        eventPublisher.post(ItemEventFactory.createStateUpdatedEvent(testItemName1, OnOffType.ON, null));
+        Thread.sleep(200); // without this, the assertion will be immediately fulfilled regardless of event processing
+        assertThat(itemEvent, is(nullValue()));
     }
 
     /**

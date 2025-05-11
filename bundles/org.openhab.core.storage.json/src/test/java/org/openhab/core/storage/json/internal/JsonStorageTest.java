@@ -18,6 +18,8 @@ import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.time.Instant;
@@ -306,8 +308,8 @@ public class JsonStorageTest extends JavaTest {
 
     private static URL newURL(String url) {
         try {
-            return new URL(url);
-        } catch (MalformedURLException e) {
+            return (new URI(url)).toURL();
+        } catch (MalformedURLException | URISyntaxException e) {
             throw new IllegalArgumentException(e);
         }
     }

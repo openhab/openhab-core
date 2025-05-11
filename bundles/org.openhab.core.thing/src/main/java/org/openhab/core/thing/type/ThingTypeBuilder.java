@@ -18,12 +18,14 @@ import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.semantics.SemanticTag;
 import org.openhab.core.thing.ThingTypeUID;
 
 /**
  * A {@link ThingType} builder.
  *
  * @author Henning Treu - Initial contribution
+ * @author Andrew Fiddian-Green - Added semanticEquipmentTag
  */
 @NonNullByDefault
 public class ThingTypeBuilder {
@@ -42,6 +44,7 @@ public class ThingTypeBuilder {
     private final String bindingId;
     private final String thingTypeId;
     private String label;
+    private @Nullable String semanticEquipmentTag;
 
     /**
      * Create and return a {@link ThingTypeBuilder} with the given {@code bindingId}, {@code thingTypeId} and
@@ -99,6 +102,7 @@ public class ThingTypeBuilder {
         configDescriptionURI = thingType.getConfigDescriptionURI();
         listed = thingType.isListed();
         category = thingType.getCategory();
+        semanticEquipmentTag = thingType.getSemanticEquipmentTag();
     }
 
     /**
@@ -120,7 +124,7 @@ public class ThingTypeBuilder {
 
         return new ThingType(new ThingTypeUID(bindingId, thingTypeId), supportedBridgeTypeUIDs, label, description,
                 category, listed, representationProperty, channelDefinitions, channelGroupDefinitions, properties,
-                configDescriptionURI, extensibleChannelTypeIds);
+                configDescriptionURI, extensibleChannelTypeIds, semanticEquipmentTag);
     }
 
     /**
@@ -142,7 +146,7 @@ public class ThingTypeBuilder {
 
         return new BridgeType(new ThingTypeUID(bindingId, thingTypeId), supportedBridgeTypeUIDs, label, description,
                 category, listed, representationProperty, channelDefinitions, channelGroupDefinitions, properties,
-                configDescriptionURI, extensibleChannelTypeIds);
+                configDescriptionURI, extensibleChannelTypeIds, semanticEquipmentTag);
     }
 
     public ThingTypeBuilder withLabel(String label) {
@@ -198,5 +202,14 @@ public class ThingTypeBuilder {
     public ThingTypeBuilder withSupportedBridgeTypeUIDs(List<String> supportedBridgeTypeUIDs) {
         this.supportedBridgeTypeUIDs = supportedBridgeTypeUIDs;
         return this;
+    }
+
+    public ThingTypeBuilder withSemanticEquipmentTag(String semanticEquipmentTag) {
+        this.semanticEquipmentTag = semanticEquipmentTag;
+        return this;
+    }
+
+    public ThingTypeBuilder withSemanticEquipmentTag(SemanticTag semanticEquipmentTag) {
+        return withSemanticEquipmentTag(semanticEquipmentTag.getName());
     }
 }

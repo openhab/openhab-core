@@ -15,20 +15,36 @@ package org.openhab.core.io.websocket.log;
 import java.util.Date;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.core.io.websocket.event.EventDTO;
 import org.osgi.service.log.LogLevel;
 
 /**
- * The {@link EventDTO} is used for serialization and deserialization of events
+ * The {@link LogDTO} is used for serialization and deserialization of log messages
  *
  * @author Jan N. Klug - Initial contribution
+ * @author Chris Jackson - Add sequence and make Comparable based on sequence
  */
 @NonNullByDefault
-public class LogDTO {
-    public @Nullable String loggerName;
-    public @Nullable LogLevel level;
-    public @Nullable Date timestamp;
+public class LogDTO implements Comparable<LogDTO> {
+    public String loggerName;
+    public LogLevel level;
+    public Date timestamp;
     public long unixtime;
-    public @Nullable String message;
+    public String message;
+    public String stackTrace;
+    public long sequence;
+
+    public LogDTO(long sequence, String loggerName, LogLevel level, long unixtime, String message, String stackTrace) {
+        this.sequence = sequence;
+        this.loggerName = loggerName;
+        this.level = level;
+        this.timestamp = new Date(unixtime);
+        this.unixtime = unixtime;
+        this.message = message;
+        this.stackTrace = stackTrace;
+    }
+
+    @Override
+    public int compareTo(LogDTO o) {
+        return (int) (sequence - o.sequence);
+    }
 }
