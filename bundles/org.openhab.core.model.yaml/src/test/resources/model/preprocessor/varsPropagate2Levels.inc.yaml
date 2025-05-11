@@ -1,0 +1,6 @@
+variables:
+  var: level2
+
+data: !include
+  file: "${__FILE_NAME__}.inc.yaml"
+

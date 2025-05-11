@@ -1,0 +1,16 @@
+packages:
+  package1: !include
+    file: packaging.inc.yaml
+    vars:
+      thingname: package1
+      label: label1
+
+  package2: !include
+    file: packaging.inc.yaml
+    vars:
+      thingname: package2
+      label: label2
+
+things:
+  thing1:
+    thing1_property: thing1
