@@ -57,6 +57,7 @@ import org.openhab.core.i18n.TranslationProvider;
 import org.openhab.core.library.types.PercentType;
 import org.openhab.core.storage.Storage;
 import org.openhab.core.storage.StorageService;
+import org.openhab.core.voice.DTServiceHandle;
 import org.openhab.core.voice.DialogContext;
 import org.openhab.core.voice.DialogRegistration;
 import org.openhab.core.voice.KSService;
@@ -608,10 +609,14 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     }
 
     @Override
-    public void startDialog(DialogContext context) throws IllegalStateException {
-        var ksService = context.ks();
+    public @Nullable DTServiceHandle startDialog(DialogContext context) throws IllegalStateException {
+        var dtService = context.dt();
         var ksKeyword = context.keyword();
-        if (ksService == null || ksKeyword == null) {
+        if (dtService == null) {
+            throw new IllegalStateException(
+                    "Invalid dialog context for persistent dialog: missing dialog trigger implementation");
+        }
+        if (dtService instanceof KSService && (ksKeyword == null || ksKeyword.isEmpty())) {
             throw new IllegalStateException(
                     "Invalid dialog context for persistent dialog: missing keyword spot configuration");
         }
@@ -619,7 +624,8 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
         if (b == null) {
             throw new IllegalStateException("Bundle is not (yet?) set.");
         }
-        if (!checkLocales(ksService.getSupportedLocales(), context.locale())
+        if ((dtService instanceof KSService ksService
+                && !checkLocales(ksService.getSupportedLocales(), context.locale()))
                 || !checkLocales(context.stt().getSupportedLocales(), context.locale()) || !context.hlis().stream()
                         .allMatch(interpreter -> checkLocales(interpreter.getSupportedLocales(), context.locale()))) {
             throw new IllegalStateException("Cannot start dialog as provided locale is not supported by all services.");
@@ -631,7 +637,7 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
                 processor = new DialogProcessor(context, this, this.eventPublisher, this.activeDialogGroups,
                         this.i18nProvider, b);
                 dialogProcessors.put(context.source().getId(), processor);
-                processor.start();
+                return processor.start();
             } else {
                 throw new IllegalStateException(
                         String.format("Cannot start dialog as a dialog is already started for audio source '%s'.",
@@ -785,8 +791,8 @@ public class VoiceManagerImpl implements VoiceManager, ConfigOptionProvider, Dia
     protected void removeKSService(KSService ksService) {
         this.ksServices.remove(ksService.getId());
         stopDialogs(dialog -> {
-            var ks = dialog.dialogContext.ks();
-            return ks != null && ks.getId().equals(ksService.getId());
+            var dt = dialog.dialogContext.dt();
+            return dt != null && dt.getId().equals(ksService.getId());
         });
     }
 
