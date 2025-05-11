@@ -10,7 +10,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.core.audio.internal.audiopcm;
+package org.openhab.core.io.websocket.audio.internal;
 
 import static java.nio.ByteBuffer.wrap;
 
