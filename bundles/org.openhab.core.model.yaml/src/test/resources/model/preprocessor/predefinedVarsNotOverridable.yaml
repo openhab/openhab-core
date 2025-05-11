@@ -1,0 +1,18 @@
+variables:
+  __FILE__: main
+  __FILE_NAME__: main
+  __FILE_EXT__: main
+  __PATH__: main
+
+file: ${__FILE__}
+filename: ${__FILE_NAME__}
+ext: ${__FILE_EXT__}
+path: ${__PATH__}
+
+include: !include
+  file: "${__FILE_NAME__}.inc.yaml"
+  vars:
+    __FILE__: includevar
+    __FILE_NAME__: includevar
+    __FILE_EXT__: includevar
+    __PATH__: includevar

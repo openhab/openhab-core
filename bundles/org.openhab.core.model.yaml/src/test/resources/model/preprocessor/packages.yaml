@@ -1,0 +1,28 @@
+packages:
+  package1: !include
+    file: package1.inc.yaml
+    vars:
+      thingname: thing1
+      label: label1
+
+  package2: !include
+    file: package1.inc.yaml
+    vars:
+      thingname: thing2
+      label: label2
+
+  package3: !include
+    file: package2.inc.yaml
+    vars:
+      thingname: thing4
+      label: package
+
+things:
+  thing3:
+    label: label3
+
+  thing4:
+    label: main
+    config:
+      mainprop: main
+      commonprop: overridden
