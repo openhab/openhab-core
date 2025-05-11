@@ -60,10 +60,12 @@ public class UpgradeTool {
     private static Options getOptions() {
         Options options = new Options();
 
-        options.addOption(Option.builder().longOpt(OPT_USERDATA_DIR).desc("USERDATA directory to process")
+        options.addOption(Option.builder().longOpt(OPT_USERDATA_DIR).desc(
+                "USERDATA directory to process. Enclose it in double quotes to ensure that any backslashes are not ignored by your command shell.")
                 .numberOfArgs(1).build());
-        options.addOption(
-                Option.builder().longOpt(OPT_CONF_DIR).desc("CONF directory to process").numberOfArgs(1).build());
+        options.addOption(Option.builder().longOpt(OPT_CONF_DIR).desc(
+                "CONF directory to process. Enclose it in double quotes to ensure that any backslashes are not ignored by your command shell.")
+                .numberOfArgs(1).build());
         options.addOption(Option.builder().longOpt(OPT_COMMAND).numberOfArgs(1)
                 .desc("command to execute (executes all if omitted)").build());
         options.addOption(Option.builder().longOpt(OPT_LIST_COMMANDS).desc("list available commands").build());
@@ -111,6 +113,8 @@ public class UpgradeTool {
                 return;
             } else if (userdataDir != null) {
                 logger.info("Using userdataDir: {}", userdataDir);
+                Path upgradeJsonDatabasePath = Path.of(userdataDir, "jsondb", "org.openhab.core.tools.UpgradeTool");
+                upgradeRecords = new JsonStorage<>(upgradeJsonDatabasePath.toFile(), null, 5, 0, 0, List.of());
             }
 
             String confDir = commandLine.hasOption(OPT_CONF_DIR) ? commandLine.getOptionValue(OPT_CONF_DIR)
@@ -122,9 +126,6 @@ public class UpgradeTool {
             } else {
                 logger.info("Using confDir: {}", confDir);
             }
-
-            Path upgradeJsonDatabasePath = Path.of(userdataDir, "jsondb", "org.openhab.core.tools.UpgradeTool");
-            upgradeRecords = new JsonStorage<>(upgradeJsonDatabasePath.toFile(), null, 5, 0, 0, List.of());
 
             UPGRADERS.forEach(upgrader -> {
                 String upgraderName = upgrader.getName();
@@ -139,13 +140,7 @@ public class UpgradeTool {
                 try {
                     logger.info("Executing {}: {}", upgraderName, upgrader.getDescription());
                     if (upgrader.execute(userdataDir, confDir)) {
-                        if (userdataDir != null) {
-                            updateUpgradeRecord(upgraderName);
-                        } else {
-                            logger.warn(
-                                    "The Upgrade record for '{}' is not updated because user data directory wasn't specified",
-                                    upgraderName);
-                        }
+                        updateUpgradeRecord(upgraderName);
                     }
                 } catch (Exception e) {
                     logger.error("Error executing upgrader {}: {}", upgraderName, e.getMessage());
