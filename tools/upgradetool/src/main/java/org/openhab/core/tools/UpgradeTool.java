@@ -109,6 +109,8 @@ public class UpgradeTool {
                 println("Please either set the environment variable ${OPENHAB_USERDATA} or provide a directory through the --userdata option.");
                 System.exit(0);
                 return;
+            } else if (userdataDir != null) {
+                logger.info("Using userdataDir: {}", userdataDir);
             }
 
             String confDir = commandLine.hasOption(OPT_CONF_DIR) ? commandLine.getOptionValue(OPT_CONF_DIR)
@@ -117,6 +119,8 @@ public class UpgradeTool {
                 println("Please either set the environment variable ${OPENHAB_CONF} or provide a directory through the --conf option.");
                 System.exit(0);
                 return;
+            } else {
+                logger.info("Using confDir: {}", confDir);
             }
 
             Path upgradeJsonDatabasePath = Path.of(userdataDir, "jsondb", "org.openhab.core.tools.UpgradeTool");
