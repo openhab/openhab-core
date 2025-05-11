@@ -38,11 +38,8 @@ public class YamlElementUtils {
 
     public static boolean equalsConfig(@Nullable Map<String, Object> first, @Nullable Map<String, Object> second) {
         if (first != null && second != null) {
-            if (first.size() != second.size()) {
-                return false;
-            } else {
-                return first.entrySet().stream().allMatch(e -> equalsConfigValue(e.getValue(), second.get(e.getKey())));
-            }
+            return first.size() != second.size() ? false
+                    : first.entrySet().stream().allMatch(e -> equalsConfigValue(e.getValue(), second.get(e.getKey())));
         } else {
             return first == null && second == null;
         }
@@ -52,6 +49,22 @@ public class YamlElementUtils {
         return (first instanceof List firstList && second instanceof List secondList)
                 ? Arrays.equals(firstList.toArray(), secondList.toArray())
                 : first.equals(second);
+    }
+
+    public static boolean equalsListStrings(@Nullable List<String> first, @Nullable List<String> second) {
+        if (first != null && second != null) {
+            return Arrays.equals(first.toArray(), second.toArray());
+        } else {
+            return first == null && second == null;
+        }
+    }
+
+    public static boolean equalsSetStrings(@Nullable Set<String> first, @Nullable Set<String> second) {
+        if (first != null && second != null) {
+            return first.size() != second.size() ? false : first.containsAll(second);
+        } else {
+            return first == null && second == null;
+        }
     }
 
     public static @Nullable String getAdjustedItemType(@Nullable String type) {
