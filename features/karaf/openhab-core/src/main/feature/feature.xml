@@ -57,6 +57,7 @@
 		<feature dependency="true">asm</feature>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.thing/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.transform/${project.version}</bundle>
+		<feature dependency="true">openhab-core-io-websocket</feature>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.audio/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.voice/${project.version}</bundle>
 		<bundle>mvn:org.openhab.core.bundles/org.openhab.core.io.console/${project.version}</bundle>
