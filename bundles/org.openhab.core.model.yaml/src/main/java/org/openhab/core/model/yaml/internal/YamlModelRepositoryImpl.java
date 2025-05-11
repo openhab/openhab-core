@@ -45,6 +45,7 @@ import org.openhab.core.model.yaml.YamlModelRepository;
 import org.openhab.core.model.yaml.internal.items.YamlItemDTO;
 import org.openhab.core.model.yaml.internal.semantics.YamlSemanticTagDTO;
 import org.openhab.core.model.yaml.internal.things.YamlThingDTO;
+import org.openhab.core.model.yaml.internal.util.preprocessor.YamlPreprocessor;
 import org.openhab.core.service.WatchService;
 import org.openhab.core.service.WatchService.Kind;
 import org.osgi.service.component.annotations.Activate;
@@ -81,6 +82,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLParser;
  * @author Laurent Garnier - new parameters to retrieve errors and warnings when loading a file
  * @author Laurent Garnier - Added methods addElementsToBeGenerated, generateFileFormat, createIsolatedModel and
  *         removeIsolatedModel
+ * @author Jimmy Tanagra - Added Yaml preprocessor to support !include, !secret, variable substitutions, and packages
  */
 @NonNullByDefault
 @Component(immediate = true)
@@ -89,6 +91,8 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
     private static final String VERSION = "version";
     private static final String READ_ONLY = "readOnly";
     private static final Set<String> KNOWN_ELEMENTS = Set.of( //
+            // "version", "readOnly" are reserved keys
+            // "variables" and "packages" are reserved elements for YamlPreprocessor
             getElementName(YamlSemanticTagDTO.class), // "tags"
             getElementName(YamlThingDTO.class), // "things"
             getElementName(YamlItemDTO.class) // "items"
@@ -122,8 +126,8 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
                 .enable(YAMLGenerator.Feature.MINIMIZE_QUOTES) // use quotes only where necessary
                 .enable(YAMLGenerator.Feature.ALWAYS_QUOTE_NUMBERS_AS_STRINGS) // use quotes for numbers stored as
                                                                                // strings
-                .enable(YAMLParser.Feature.PARSE_BOOLEAN_LIKE_WORDS_AS_STRINGS).build(); // do not parse ON/OFF/... as
-                                                                                         // booleans
+                .enable(YAMLParser.Feature.PARSE_BOOLEAN_LIKE_WORDS_AS_STRINGS) // do not parse ON/OFF/... as booleans
+                .build();
         this.objectMapper = new ObjectMapper(yamlFactory);
         objectMapper.findAndRegisterModules();
         objectMapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE);
@@ -187,7 +191,8 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
     public synchronized void processWatchEvent(Kind kind, Path fullPath) {
         Path relativePath = mainWatchPath.relativize(fullPath);
         String modelName = relativePath.toString();
-        if (!modelName.endsWith(".yaml") && !modelName.endsWith(".yml")) {
+        if ((!modelName.endsWith(".yaml") && !modelName.endsWith(".yml")) || modelName.endsWith(".inc.yaml")
+                || modelName.endsWith(".inc.yml")) {
             logger.trace("Ignored {}", fullPath);
             return;
         }
@@ -198,7 +203,8 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
             if (kind == WatchService.Kind.DELETE) {
                 removeModel(modelName);
             } else if (!Files.isHidden(fullPath) && Files.isReadable(fullPath) && !Files.isDirectory(fullPath)) {
-                processModelContent(modelName, kind, objectMapper.readTree(fullPath.toFile()), errors, warnings);
+                processModelContent(modelName, kind, objectMapper.valueToTree(YamlPreprocessor.load(fullPath)), errors,
+                        warnings);
             } else {
                 logger.trace("Ignored {}", fullPath);
             }
