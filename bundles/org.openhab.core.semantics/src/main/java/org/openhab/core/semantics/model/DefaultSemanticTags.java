@@ -607,7 +607,7 @@ public class DefaultSemanticTags {
         public static final SemanticTag RECEIVER = new SemanticTagImpl( //
                 "Equipment_AudioVisual_Receiver", //
                 "Receiver", //
-                " AV Receiver", //
+                "Audio-(visual) receiver, amplifier, tuner, sound processor", //
                 "Receivers, Audio Receiver, Audio Receivers, AV Receiver, AV Receivers");
         public static final SemanticTag SCREEN = new SemanticTagImpl( //
                 "Equipment_AudioVisual_Screen", //
