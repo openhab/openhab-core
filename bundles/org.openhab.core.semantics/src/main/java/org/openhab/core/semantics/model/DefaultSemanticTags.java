@@ -1217,12 +1217,12 @@ public class DefaultSemanticTags {
         public static final SemanticTag POOL_COVER = new SemanticTagImpl( //
                 "Equipment_Wellness_PoolCover", //
                 "Pool Cover", //
-                "Swimming pool cover", //
+                "Swimming or wellness pool cover", //
                 "");
         public static final SemanticTag POOL_HEATER = new SemanticTagImpl( //
                 "Equipment_Wellness_PoolHeater", //
                 "Pool Heater", //
-                "Swimming pool heater", //
+                "Swimming or wellness pool heater", //
                 "");
         public static final SemanticTag SAUNA = new SemanticTagImpl( //
                 "Equipment_Wellness_Sauna", //

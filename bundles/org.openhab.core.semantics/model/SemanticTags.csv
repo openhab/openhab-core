@@ -234,8 +234,8 @@ Equipment,WeatherService,WebService,Weather Service,Weather Services,
 Equipment,Wellness,,Wellness,,
 Equipment,Chlorinator,Wellness,Chlorinator,,Water chlorinator
 Equipment,Jacuzzi,Wellness,Jacuzzi,"Spa, Hot Tub, Whirlpool",
-Equipment,PoolCover,Wellness,Pool Cover,,Swimming pool cover
-Equipment,PoolHeater,Wellness,Pool Heater,,Swimming pool heater
+Equipment,PoolCover,Wellness,Pool Cover,,Swimming or wellness pool cover
+Equipment,PoolHeater,Wellness,Pool Heater,,Swimming or wellness pool heater
 Equipment,Sauna,Wellness,Sauna,Steam Room,
 Equipment,Shower,Wellness,Shower,,
 Equipment,SwimmingPool,Wellness,Swimming Pool,"Swimming Pool, Pool",
