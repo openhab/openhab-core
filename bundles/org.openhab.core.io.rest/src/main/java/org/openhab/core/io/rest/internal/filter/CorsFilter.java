@@ -100,6 +100,11 @@ public class CorsFilter implements ContainerResponseFilter {
      *
      * @param requestContext
      * @param responseContext
+     */    /**
+     * Process the CORS request and response.
+     *
+     * @param requestContext The request context
+     * @param responseContext The response context
      */
     private void processRequest(ContainerRequestContext requestContext, ContainerResponseContext responseContext) {
         // Process the request only if if is an acceptable request method and if it is different from an OPTIONS request
@@ -107,8 +112,16 @@ public class CorsFilter implements ContainerResponseFilter {
         if (ACCEPTED_HTTP_METHODS_LIST.contains(requestContext.getMethod())
                 && !HTTP_OPTIONS_METHOD.equals(requestContext.getMethod())) {
             String origin = getValue(requestContext.getHeaders(), ORIGIN_HEADER);
-            if (origin != null && !origin.isBlank()) {
-                responseContext.getHeaders().add(ACCESS_CONTROL_ALLOW_ORIGIN_HEADER, origin);
+            if (origin != null && !origin.isBlank() && isOriginAllowed(origin)) {
+                // Only add CORS headers if the origin is allowed
+                if (anyOriginAllowed) {
+                    responseContext.getHeaders().add(ACCESS_CONTROL_ALLOW_ORIGIN_HEADER, "*");
+                } else {
+                    responseContext.getHeaders().add(ACCESS_CONTROL_ALLOW_ORIGIN_HEADER, origin);
+                }
+                
+                // Add the Vary header
+                appendVaryHeader(responseContext);
             }
         }
     }
@@ -118,6 +131,27 @@ public class CorsFilter implements ContainerResponseFilter {
      *
      * @param requestContext
      * @param responseContext
+     * @return true if it is a preflight request that has been processed.
+     */    /**
+     * Configuration property for allowed origins
+     */
+    private static final String ALLOWED_ORIGINS_PROPERTY = "allowed.origins";
+    
+    /**
+     * Set of origins allowed to make cross-origin requests
+     */
+    private final Set<String> allowedOrigins = new HashSet<>();
+    
+    /**
+     * Whether any origin is allowed to make CORS requests
+     */
+    private boolean anyOriginAllowed = false;
+    
+    /**
+     * Process a preflight CORS request.
+     *
+     * @param requestContext The request context
+     * @param responseContext The response context
      * @return true if it is a preflight request that has been processed.
      */
     private boolean processPreflight(ContainerRequestContext requestContext, ContainerResponseContext responseContext) {
@@ -131,17 +165,49 @@ public class CorsFilter implements ContainerResponseFilter {
                     && !realRequestMethod.isBlank();
 
             if (isCorsPreflight) {
-                responseContext.getHeaders().add(ACCESS_CONTROL_ALLOW_ORIGIN_HEADER, origin);
-                responseContext.getHeaders().add(ACCESS_CONTROL_ALLOW_METHODS_HEADER, ACCEPTED_HTTP_METHODS);
-                responseContext.getHeaders().add(ACCESS_CONTROL_ALLOW_HEADERS, CONTENT_TYPE_HEADER);
-                responseContext.getHeaders().add(ACCESS_CONTROL_ALLOW_HEADERS, AUTHORIZATION_HEADER);
+                // Validate the origin before setting CORS headers
+                if (isOriginAllowed(origin)) {
+                    // Validate the requested method is allowed
+                    if (ACCEPTED_HTTP_METHODS_LIST.contains(realRequestMethod)) {
+                        // Add CORS headers conditionally based on origin validation
+                        if (anyOriginAllowed) {
+                            responseContext.getHeaders().add(ACCESS_CONTROL_ALLOW_ORIGIN_HEADER, "*");
+                        } else {
+                            responseContext.getHeaders().add(ACCESS_CONTROL_ALLOW_ORIGIN_HEADER, origin);
+                        }
+                        
+                        responseContext.getHeaders().add(ACCESS_CONTROL_ALLOW_METHODS_HEADER, ACCEPTED_HTTP_METHODS);
+                        responseContext.getHeaders().add(ACCESS_CONTROL_ALLOW_HEADERS, CONTENT_TYPE_HEADER);
+                        responseContext.getHeaders().add(ACCESS_CONTROL_ALLOW_HEADERS, AUTHORIZATION_HEADER);
 
-                // Add the accepted request headers
-                appendVaryHeader(responseContext);
+                        // Add the accepted request headers
+                        appendVaryHeader(responseContext);
+                    }
+                }
             }
         }
 
         return isCorsPreflight;
+    }
+    
+    /**
+     * Determines if the specified origin is allowed to make CORS requests.
+     * 
+     * @param origin The origin.
+     * @return {@code true} if the origin is allowed; {@code false} otherwise.
+     */
+    private boolean isOriginAllowed(final String origin) {
+        if (anyOriginAllowed) {
+            return true;
+        }
+
+        // If 'origin' is null, deny the request
+        if (origin == null) {
+            return false;
+        }
+
+        // Check against the allowed origins
+        return allowedOrigins.contains(origin);
     }
 
     /**
@@ -174,17 +240,54 @@ public class CorsFilter implements ContainerResponseFilter {
             // If it is already present and its value is not the Wildcard, append the Origin header.
             responseContext.getHeaders().putSingle(VARY_HEADER, varyHeader + HEADERS_SEPARATOR + ORIGIN_HEADER);
         }
-    }
-
-    @Activate
+    }    @Activate
     protected void activate(@Nullable Map<String, Object> properties) {
         if (properties != null) {
             String corsPropertyValue = (String) properties.get(Constants.CORS_PROPERTY);
             this.isEnabled = "true".equalsIgnoreCase(corsPropertyValue);
+            
+            // Process allowed origins configuration
+            String allowedOriginsValue = (String) properties.get(ALLOWED_ORIGINS_PROPERTY);
+            processAllowedOrigins(allowedOriginsValue);
         }
 
         if (this.isEnabled) {
-            logger.info("enabled CORS for REST API.");
+            if (anyOriginAllowed) {
+                logger.info("enabled CORS for REST API with any origin allowed.");
+            } else {
+                logger.info("enabled CORS for REST API with {} allowed origins.", allowedOrigins.size());
+            }
+        }
+    }
+    
+    /**
+     * Process the allowed origins configuration.
+     * 
+     * @param allowedOriginsValue Comma-separated list of allowed origins or "*" for any origin
+     */
+    private void processAllowedOrigins(String allowedOriginsValue) {
+        allowedOrigins.clear();
+        anyOriginAllowed = false;
+        
+        if (allowedOriginsValue == null || allowedOriginsValue.trim().isEmpty()) {
+            // Default to localhost origins for security if not configured
+            allowedOrigins.add("http://localhost");
+            allowedOrigins.add("https://localhost");
+            return;
+        }
+        
+        if ("*".equals(allowedOriginsValue.trim())) {
+            anyOriginAllowed = true;
+            logger.warn("SECURITY WARNING: CORS is configured to allow requests from any origin!");
+            return;
+        }
+        
+        // Process comma-separated list of origins
+        for (String origin : allowedOriginsValue.split(",")) {
+            String trimmed = origin.trim();
+            if (!trimmed.isEmpty()) {
+                allowedOrigins.add(trimmed);
+            }
         }
     }
 }
