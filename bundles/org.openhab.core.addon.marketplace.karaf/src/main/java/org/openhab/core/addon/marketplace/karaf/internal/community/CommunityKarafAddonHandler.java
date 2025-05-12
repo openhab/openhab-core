@@ -165,7 +165,7 @@ public class CommunityKarafAddonHandler implements MarketplaceAddonHandler {
                             "The local cache folder doesn't contain a single file: " + addonPath, null);
                 }
                 try {
-                    karService.install(karFiles.get(0).toUri(), false);
+                    karService.install(karFiles.getFirst().toUri(), false);
                 } catch (Exception e) {
                     throw new MarketplaceHandlerException(
                             "Cannot install KAR from marketplace cache: " + e.getMessage(), e);

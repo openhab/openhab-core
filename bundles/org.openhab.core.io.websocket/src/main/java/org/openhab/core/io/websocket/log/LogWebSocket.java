@@ -198,7 +198,7 @@ public class LogWebSocket implements LogListener {
         lastSentTime = System.currentTimeMillis();
 
         // Remove any duplicates from the live log buffer
-        long newestSequence = logs.get(0).getSequence();
+        long newestSequence = logs.getFirst().getSequence();
         synchronized (deferredLogs) {
             Iterator<LogDTO> iterator = deferredLogs.iterator();
             while (iterator.hasNext()) {

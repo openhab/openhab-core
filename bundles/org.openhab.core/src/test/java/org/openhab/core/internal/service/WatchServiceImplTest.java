@@ -48,6 +48,7 @@ import org.osgi.framework.BundleContext;
 @MockitoSettings(strictness = Strictness.LENIENT)
 public class WatchServiceImplTest extends JavaTest {
     private static final String SUB_DIR_PATH_NAME = "subDir";
+    private static final String SUB_DIR2_PATH_NAME = "subDir2";
     private static final String TEST_FILE_NAME = "testFile";
 
     public @Mock @NonNullByDefault({}) WatchServiceImpl.WatchServiceConfiguration configurationMock;
@@ -78,19 +79,18 @@ public class WatchServiceImplTest extends JavaTest {
         watchService.registerListener(listener, rootPath, false);
 
         Path testFile = rootPath.resolve(TEST_FILE_NAME);
-        Path relativeTestFilePath = Path.of(TEST_FILE_NAME);
 
         Files.writeString(testFile, "initial content", StandardCharsets.UTF_8);
-        assertEvent(relativeTestFilePath, Kind.CREATE);
+        assertEvent(testFile, Kind.CREATE);
 
         Files.writeString(testFile, "modified content", StandardCharsets.UTF_8);
-        assertEvent(relativeTestFilePath, Kind.MODIFY);
+        assertEvent(testFile, Kind.MODIFY);
 
         Files.writeString(testFile, "modified content", StandardCharsets.UTF_8);
         assertNoEvent();
 
         Files.delete(testFile);
-        assertEvent(relativeTestFilePath, Kind.DELETE);
+        assertEvent(testFile, Kind.DELETE);
     }
 
     @Test
@@ -101,19 +101,18 @@ public class WatchServiceImplTest extends JavaTest {
         watchService.registerListener(listener, rootPath, true);
 
         Path testFile = rootPath.resolve(SUB_DIR_PATH_NAME).resolve(TEST_FILE_NAME);
-        Path relativeTestFilePath = Path.of(SUB_DIR_PATH_NAME, TEST_FILE_NAME);
 
         Files.writeString(testFile, "initial content", StandardCharsets.UTF_8);
-        assertEvent(relativeTestFilePath, Kind.CREATE);
+        assertEvent(testFile, Kind.CREATE);
 
         Files.writeString(testFile, "modified content", StandardCharsets.UTF_8);
-        assertEvent(relativeTestFilePath, Kind.MODIFY);
+        assertEvent(testFile, Kind.MODIFY);
 
         Files.writeString(testFile, "modified content", StandardCharsets.UTF_8);
         assertNoEvent();
 
         Files.delete(testFile);
-        assertEvent(relativeTestFilePath, Kind.DELETE);
+        assertEvent(testFile, Kind.DELETE);
     }
 
     @Test
@@ -122,21 +121,21 @@ public class WatchServiceImplTest extends JavaTest {
 
         // listener is only listening to sub-dir of root
         watchService.registerListener(listener, Path.of(SUB_DIR_PATH_NAME), false);
+        watchService.registerListener(listener, Path.of(SUB_DIR2_PATH_NAME), false);
 
         Path testFile = rootPath.resolve(SUB_DIR_PATH_NAME).resolve(TEST_FILE_NAME);
-        Path relativeTestFilePath = Path.of(TEST_FILE_NAME);
 
         Files.writeString(testFile, "initial content", StandardCharsets.UTF_8);
-        assertEvent(relativeTestFilePath, Kind.CREATE);
+        assertEvent(testFile, Kind.CREATE);
 
         Files.writeString(testFile, "modified content", StandardCharsets.UTF_8);
-        assertEvent(relativeTestFilePath, Kind.MODIFY);
+        assertEvent(testFile, Kind.MODIFY);
 
         Files.writeString(testFile, "modified content", StandardCharsets.UTF_8);
         assertNoEvent();
 
         Files.delete(testFile);
-        assertEvent(relativeTestFilePath, Kind.DELETE);
+        assertEvent(testFile, Kind.DELETE);
     }
 
     @Test
@@ -168,22 +167,56 @@ public class WatchServiceImplTest extends JavaTest {
         assertNoEvent();
 
         Path testFile = subDirSubDir.resolve(TEST_FILE_NAME);
-        Path relativeTestFilePath = rootPath.relativize(testFile);
 
         Files.writeString(testFile, "initial content", StandardCharsets.UTF_8);
-        assertEvent(relativeTestFilePath, Kind.CREATE);
+        assertEvent(testFile, Kind.CREATE);
 
         Files.writeString(testFile, "modified content", StandardCharsets.UTF_8);
-        assertEvent(relativeTestFilePath, Kind.MODIFY);
+        assertEvent(testFile, Kind.MODIFY);
 
         Files.writeString(testFile, "modified content", StandardCharsets.UTF_8);
         assertNoEvent();
 
         Files.delete(testFile);
-        assertEvent(relativeTestFilePath, Kind.DELETE);
+        assertEvent(testFile, Kind.DELETE);
 
         Files.delete(subDirSubDir);
         assertNoEvent();
+    }
+
+    @Test
+    public void testWatchMultiplePaths() throws IOException, InterruptedException {
+        Files.createDirectories(rootPath.resolve(SUB_DIR_PATH_NAME));
+        Files.createDirectories(rootPath.resolve(SUB_DIR2_PATH_NAME));
+
+        watchService.registerListener(listener, List.of(Path.of(SUB_DIR_PATH_NAME), Path.of(SUB_DIR2_PATH_NAME)), true);
+
+        Path testFile = rootPath.resolve(SUB_DIR_PATH_NAME).resolve(TEST_FILE_NAME);
+        Path testFile2 = rootPath.resolve(SUB_DIR2_PATH_NAME).resolve(TEST_FILE_NAME);
+
+        Files.writeString(testFile, "initial content", StandardCharsets.UTF_8);
+        assertEvent(testFile, Kind.CREATE);
+
+        Files.writeString(testFile, "modified content", StandardCharsets.UTF_8);
+        assertEvent(testFile, Kind.MODIFY);
+
+        Files.writeString(testFile, "modified content", StandardCharsets.UTF_8);
+        assertNoEvent();
+
+        Files.writeString(testFile2, "initial content", StandardCharsets.UTF_8);
+        assertEvent(testFile2, Kind.CREATE);
+
+        Files.writeString(testFile2, "modified content", StandardCharsets.UTF_8);
+        assertEvent(testFile2, Kind.MODIFY);
+
+        Files.writeString(testFile2, "modified content", StandardCharsets.UTF_8);
+        assertNoEvent();
+
+        Files.delete(testFile);
+        assertEvent(testFile, Kind.DELETE);
+
+        Files.delete(testFile2);
+        assertEvent(testFile2, Kind.DELETE);
     }
 
     private void assertNoEvent() throws InterruptedException {
@@ -192,12 +225,12 @@ public class WatchServiceImplTest extends JavaTest {
         assertThat(listener.events, empty());
     }
 
-    private void assertEvent(Path path, Kind kind) throws InterruptedException {
+    private void assertEvent(Path fullPath, Kind kind) throws InterruptedException {
         waitForAssert(() -> assertThat(listener.events, not(empty())));
         Thread.sleep(500);
 
         assertThat(listener.events, hasSize(1));
-        assertThat(listener.events, hasItem(new Event(path, kind)));
+        assertThat(listener.events, hasItem(new Event(fullPath, kind)));
         listener.events.clear();
     }
 
@@ -205,11 +238,11 @@ public class WatchServiceImplTest extends JavaTest {
         List<Event> events = new CopyOnWriteArrayList<>();
 
         @Override
-        public void processWatchEvent(Kind kind, Path path) {
-            events.add(new Event(path, kind));
+        public void processWatchEvent(Kind kind, Path fullPath) {
+            events.add(new Event(fullPath, kind));
         }
     }
 
-    record Event(Path path, Kind kind) {
+    record Event(Path fullPath, Kind kind) {
     }
 }

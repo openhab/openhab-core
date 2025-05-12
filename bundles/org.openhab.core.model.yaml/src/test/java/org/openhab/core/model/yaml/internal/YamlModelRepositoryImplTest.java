@@ -32,6 +32,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -56,10 +58,10 @@ import org.yaml.snakeyaml.Yaml;
 @NonNullByDefault
 public class YamlModelRepositoryImplTest {
     private static final Path SOURCE_PATH = Path.of("src/test/resources/model");
-    private static final String MODEL_NAME = "model";
-    private static final Path MODEL_PATH = Path.of(MODEL_NAME + ".yaml");
-    private static final String MODEL2_NAME = "model2";
-    private static final Path MODEL2_PATH = Path.of(MODEL2_NAME + ".yaml");
+    private static final String MODEL_NAME = "model.yaml";
+    private static final Path MODEL_PATH = Path.of(MODEL_NAME);
+    private static final String MODEL2_NAME = "model2.yaml";
+    private static final Path MODEL2_PATH = Path.of(MODEL2_NAME);
 
     private @Mock @NonNullByDefault({}) WatchService watchServiceMock;
     private @TempDir @NonNullByDefault({}) Path watchPath;
@@ -101,8 +103,8 @@ public class YamlModelRepositoryImplTest {
         modelRepository.addYamlModelListener(secondTypeListener1);
         modelRepository.addYamlModelListener(secondTypeListener2);
 
-        modelRepository.processWatchEvent(WatchService.Kind.CREATE, MODEL_PATH);
-        modelRepository.processWatchEvent(WatchService.Kind.CREATE, MODEL2_PATH);
+        modelRepository.processWatchEvent(WatchService.Kind.CREATE, fullModelPath);
+        modelRepository.processWatchEvent(WatchService.Kind.CREATE, fullModel2Path);
 
         verify(firstTypeListener).addedModel(eq(MODEL_NAME), firstTypeCaptor.capture());
         verify(firstTypeListener).addedModel(eq(MODEL2_NAME), firstTypeCaptor.capture());
@@ -120,9 +122,9 @@ public class YamlModelRepositoryImplTest {
         List<Collection<FirstTypeDTO>> firstTypeCaptorValues = firstTypeCaptor.getAllValues();
         assertThat(firstTypeCaptorValues, hasSize(2));
         List<Collection<SecondTypeDTO>> secondTypeCaptor1Values = secondTypeCaptor1.getAllValues();
-        assertThat(firstTypeCaptorValues, hasSize(2));
+        assertThat(secondTypeCaptor1Values, hasSize(2));
         List<Collection<SecondTypeDTO>> secondTypeCaptor2Values = secondTypeCaptor2.getAllValues();
-        assertThat(firstTypeCaptorValues, hasSize(2));
+        assertThat(secondTypeCaptor2Values, hasSize(2));
 
         Collection<FirstTypeDTO> firstTypeElements = firstTypeCaptorValues.getFirst();
         Collection<SecondTypeDTO> secondTypeElements1 = secondTypeCaptor1Values.getFirst();
@@ -156,8 +158,8 @@ public class YamlModelRepositoryImplTest {
 
         YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
 
-        modelRepository.processWatchEvent(WatchService.Kind.CREATE, MODEL_PATH);
-        modelRepository.processWatchEvent(WatchService.Kind.CREATE, MODEL2_PATH);
+        modelRepository.processWatchEvent(WatchService.Kind.CREATE, fullModelPath);
+        modelRepository.processWatchEvent(WatchService.Kind.CREATE, fullModel2Path);
 
         modelRepository.addYamlModelListener(firstTypeListener);
         modelRepository.addYamlModelListener(secondTypeListener1);
@@ -179,9 +181,9 @@ public class YamlModelRepositoryImplTest {
         List<Collection<FirstTypeDTO>> firstTypeCaptorValues = firstTypeCaptor.getAllValues();
         assertThat(firstTypeCaptorValues, hasSize(2));
         List<Collection<SecondTypeDTO>> secondTypeCaptor1Values = secondTypeCaptor1.getAllValues();
-        assertThat(firstTypeCaptorValues, hasSize(2));
+        assertThat(secondTypeCaptor1Values, hasSize(2));
         List<Collection<SecondTypeDTO>> secondTypeCaptor2Values = secondTypeCaptor2.getAllValues();
-        assertThat(firstTypeCaptorValues, hasSize(2));
+        assertThat(secondTypeCaptor2Values, hasSize(2));
 
         Collection<FirstTypeDTO> firstTypeElements = firstTypeCaptorValues.getFirst();
         Collection<SecondTypeDTO> secondTypeElements1 = secondTypeCaptor1Values.getFirst();
@@ -215,23 +217,23 @@ public class YamlModelRepositoryImplTest {
 
         // File in v1 format
         Files.copy(SOURCE_PATH.resolve("modelFileUpdatePost.yaml"), fullModelPath);
-        modelRepository.processWatchEvent(WatchService.Kind.CREATE, MODEL_PATH);
+        modelRepository.processWatchEvent(WatchService.Kind.CREATE, fullModelPath);
         verify(firstTypeListener).addedModel(eq(MODEL_NAME), any());
 
         Files.copy(SOURCE_PATH.resolve("modelFileUpdatePre.yaml"), fullModelPath, StandardCopyOption.REPLACE_EXISTING);
-        modelRepository.processWatchEvent(WatchService.Kind.MODIFY, MODEL_PATH);
+        modelRepository.processWatchEvent(WatchService.Kind.MODIFY, fullModelPath);
         verify(firstTypeListener, times(2)).addedModel(eq(MODEL_NAME), firstTypeCaptor.capture());
         verify(firstTypeListener).updatedModel(eq(MODEL_NAME), firstTypeCaptor.capture());
         verify(firstTypeListener).removedModel(eq(MODEL_NAME), firstTypeCaptor.capture());
 
         // File in v2 format
         Files.copy(SOURCE_PATH.resolve("modelV2FileUpdatePost.yaml"), fullModel2Path);
-        modelRepository.processWatchEvent(WatchService.Kind.CREATE, MODEL2_PATH);
+        modelRepository.processWatchEvent(WatchService.Kind.CREATE, fullModel2Path);
         verify(firstTypeListener).addedModel(eq(MODEL2_NAME), any());
 
         Files.copy(SOURCE_PATH.resolve("modelV2FileUpdatePre.yaml"), fullModel2Path,
                 StandardCopyOption.REPLACE_EXISTING);
-        modelRepository.processWatchEvent(WatchService.Kind.MODIFY, MODEL2_PATH);
+        modelRepository.processWatchEvent(WatchService.Kind.MODIFY, fullModel2Path);
         verify(firstTypeListener, times(2)).addedModel(eq(MODEL2_NAME), firstTypeCaptor.capture());
         verify(firstTypeListener).updatedModel(eq(MODEL2_NAME), firstTypeCaptor.capture());
         verify(firstTypeListener).removedModel(eq(MODEL2_NAME), firstTypeCaptor.capture());
@@ -268,6 +270,50 @@ public class YamlModelRepositoryImplTest {
         assertThat(firstTypeCaptorValues.get(7), contains(new FirstTypeDTO("Third", "Third original")));
     }
 
+    @ParameterizedTest
+    @CsvSource({ //
+            "modelFileUpdateRemovedElements.yaml,modelV2FileUpdateRemovedElements.yaml",
+            "modelFileUpdateRenamedElements.yaml,modelV2FileUpdateRenamedElements.yaml",
+            "modelFileUpdateRemovedVersion.yaml,modelV2FileUpdateRemovedVersion.yaml" //
+    })
+    public void testFileRemovedElements(String v1File, String v2File) throws IOException {
+        YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
+        modelRepository.addYamlModelListener(firstTypeListener);
+
+        // File in v1 format
+        Files.copy(SOURCE_PATH.resolve("modelFileUpdatePost.yaml"), fullModelPath);
+        modelRepository.processWatchEvent(WatchService.Kind.CREATE, fullModelPath);
+        verify(firstTypeListener).addedModel(eq(MODEL_NAME), any());
+
+        Files.copy(SOURCE_PATH.resolve(v1File), fullModelPath, StandardCopyOption.REPLACE_EXISTING);
+        modelRepository.processWatchEvent(WatchService.Kind.MODIFY, fullModelPath);
+        verify(firstTypeListener).removedModel(eq(MODEL_NAME), firstTypeCaptor.capture());
+
+        Collection<FirstTypeDTO> firstTypeElements = firstTypeCaptor.getAllValues().getFirst();
+
+        // Check that the elements were removed
+        assertThat(firstTypeElements, hasSize(3));
+        assertThat(firstTypeElements, containsInAnyOrder(new FirstTypeDTO("First", "First original"),
+                new FirstTypeDTO("Second", "Second original"), new FirstTypeDTO("Third", "Third original")));
+
+        // File in v2 format
+        Files.copy(SOURCE_PATH.resolve("modelV2FileUpdatePost.yaml"), fullModel2Path);
+        modelRepository.processWatchEvent(WatchService.Kind.CREATE, fullModel2Path);
+        verify(firstTypeListener).addedModel(eq(MODEL2_NAME), any());
+
+        Files.copy(SOURCE_PATH.resolve(v2File), fullModel2Path, StandardCopyOption.REPLACE_EXISTING);
+        modelRepository.processWatchEvent(WatchService.Kind.MODIFY, fullModel2Path);
+        verify(firstTypeListener).removedModel(eq(MODEL2_NAME), firstTypeCaptor.capture());
+
+        assertThat(firstTypeCaptor.getAllValues(), hasSize(2));
+        firstTypeElements = firstTypeCaptor.getAllValues().getLast();
+
+        // Check that the elements were removed
+        assertThat(firstTypeElements, hasSize(3));
+        assertThat(firstTypeElements, containsInAnyOrder(new FirstTypeDTO("First", "First original"),
+                new FirstTypeDTO("Second", "Second original"), new FirstTypeDTO("Third", "Third original")));
+    }
+
     @Test
     public void testFileRemoved() throws IOException {
         YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
@@ -276,8 +322,8 @@ public class YamlModelRepositoryImplTest {
 
         // File in v1 format
         Files.copy(SOURCE_PATH.resolve("modelFileUpdatePost.yaml"), fullModelPath);
-        modelRepository.processWatchEvent(WatchService.Kind.CREATE, MODEL_PATH);
-        modelRepository.processWatchEvent(WatchService.Kind.DELETE, MODEL_PATH);
+        modelRepository.processWatchEvent(WatchService.Kind.CREATE, fullModelPath);
+        modelRepository.processWatchEvent(WatchService.Kind.DELETE, fullModelPath);
 
         verify(firstTypeListener).addedModel(eq(MODEL_NAME), firstTypeCaptor.capture());
         verify(firstTypeListener, never()).updatedModel(any(), any());
@@ -285,8 +331,8 @@ public class YamlModelRepositoryImplTest {
 
         // File in v2 format
         Files.copy(SOURCE_PATH.resolve("modelV2FileUpdatePost.yaml"), fullModel2Path);
-        modelRepository.processWatchEvent(WatchService.Kind.CREATE, MODEL2_PATH);
-        modelRepository.processWatchEvent(WatchService.Kind.DELETE, MODEL2_PATH);
+        modelRepository.processWatchEvent(WatchService.Kind.CREATE, fullModel2Path);
+        modelRepository.processWatchEvent(WatchService.Kind.DELETE, fullModel2Path);
 
         verify(firstTypeListener).addedModel(eq(MODEL2_NAME), firstTypeCaptor.capture());
         verify(firstTypeListener, never()).updatedModel(any(), any());
@@ -321,7 +367,7 @@ public class YamlModelRepositoryImplTest {
         YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
         modelRepository.addYamlModelListener(firstTypeListener);
         modelRepository.addYamlModelListener(secondTypeListener1);
-        modelRepository.processWatchEvent(WatchService.Kind.CREATE, MODEL_PATH);
+        modelRepository.processWatchEvent(WatchService.Kind.CREATE, fullModelPath);
 
         FirstTypeDTO added = new FirstTypeDTO("element3", "description3");
         modelRepository.addElementToModel(MODEL_NAME, added);
@@ -342,7 +388,7 @@ public class YamlModelRepositoryImplTest {
         assertThat(yaml.load(actualFileContent), equalTo(yaml.load(expectedFileContent)));
 
         Files.copy(SOURCE_PATH.resolve("modifyModelV2InitialContent.yaml"), fullModel2Path);
-        modelRepository.processWatchEvent(WatchService.Kind.CREATE, MODEL2_PATH);
+        modelRepository.processWatchEvent(WatchService.Kind.CREATE, fullModel2Path);
         modelRepository.addElementToModel(MODEL2_NAME, added);
         modelRepository.addElementToModel(MODEL2_NAME, added2);
         verify(firstTypeListener, times(2)).addedModel(eq(MODEL2_NAME), firstTypeCaptor.capture());
@@ -378,7 +424,7 @@ public class YamlModelRepositoryImplTest {
 
         YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
         modelRepository.addYamlModelListener(firstTypeListener);
-        modelRepository.processWatchEvent(WatchService.Kind.CREATE, MODEL_PATH);
+        modelRepository.processWatchEvent(WatchService.Kind.CREATE, fullModelPath);
 
         FirstTypeDTO updated = new FirstTypeDTO("element1", "newDescription1");
         modelRepository.updateElementInModel(MODEL_NAME, updated);
@@ -394,7 +440,7 @@ public class YamlModelRepositoryImplTest {
         assertThat(yaml.load(actualFileContent), equalTo(yaml.load(expectedFileContent)));
 
         Files.copy(SOURCE_PATH.resolve("modifyModelV2InitialContent.yaml"), fullModel2Path);
-        modelRepository.processWatchEvent(WatchService.Kind.CREATE, MODEL2_PATH);
+        modelRepository.processWatchEvent(WatchService.Kind.CREATE, fullModel2Path);
         modelRepository.updateElementInModel(MODEL2_NAME, updated);
         verify(firstTypeListener).addedModel(eq(MODEL2_NAME), any());
         verify(firstTypeListener).updatedModel(eq(MODEL2_NAME), firstTypeCaptor.capture());
@@ -418,7 +464,7 @@ public class YamlModelRepositoryImplTest {
         Files.copy(SOURCE_PATH.resolve("modifyModelInitialContent.yaml"), fullModelPath);
 
         YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
-        modelRepository.processWatchEvent(WatchService.Kind.CREATE, MODEL_PATH);
+        modelRepository.processWatchEvent(WatchService.Kind.CREATE, fullModelPath);
 
         FirstTypeDTO removed = new FirstTypeDTO("element1", "description1");
         modelRepository.addYamlModelListener(firstTypeListener);
@@ -435,7 +481,7 @@ public class YamlModelRepositoryImplTest {
         assertThat(yaml.load(actualFileContent), equalTo(yaml.load(expectedFileContent)));
 
         Files.copy(SOURCE_PATH.resolve("modifyModelV2InitialContent.yaml"), fullModel2Path);
-        modelRepository.processWatchEvent(WatchService.Kind.CREATE, MODEL2_PATH);
+        modelRepository.processWatchEvent(WatchService.Kind.CREATE, fullModel2Path);
         modelRepository.removeElementFromModel(MODEL2_NAME, removed);
         verify(firstTypeListener).addedModel(eq(MODEL2_NAME), any());
         verify(firstTypeListener, never()).updatedModel(any(), any());
@@ -459,7 +505,7 @@ public class YamlModelRepositoryImplTest {
         Files.copy(SOURCE_PATH.resolve("modelFileAddedOrRemoved.yaml"), fullModelPath);
 
         YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
-        modelRepository.processWatchEvent(WatchService.Kind.CREATE, MODEL_PATH);
+        modelRepository.processWatchEvent(WatchService.Kind.CREATE, fullModelPath);
 
         FirstTypeDTO added = new FirstTypeDTO("element3", "description3");
         modelRepository.addElementToModel(MODEL_NAME, added);
@@ -477,7 +523,7 @@ public class YamlModelRepositoryImplTest {
         assertThat(yaml.load(actualFileContent), equalTo(yaml.load(expectedFileContent)));
 
         Files.copy(SOURCE_PATH.resolve("modelV2FileAddedOrRemoved.yaml"), fullModel2Path);
-        modelRepository.processWatchEvent(WatchService.Kind.CREATE, MODEL2_PATH);
+        modelRepository.processWatchEvent(WatchService.Kind.CREATE, fullModel2Path);
         modelRepository.addElementToModel(MODEL2_NAME, added);
         modelRepository.removeElementFromModel(MODEL2_NAME, removed);
         modelRepository.updateElementInModel(MODEL2_NAME, updated);
@@ -500,7 +546,7 @@ public class YamlModelRepositoryImplTest {
         YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
         modelRepository.addYamlModelListener(firstTypeListener);
 
-        modelRepository.processWatchEvent(WatchService.Kind.CREATE, MODEL_PATH);
+        modelRepository.processWatchEvent(WatchService.Kind.CREATE, fullModelPath);
 
         verify(firstTypeListener).addedModel(eq(MODEL_NAME), firstTypeCaptor.capture());
         verify(firstTypeListener, never()).updatedModel(any(), any());
@@ -524,7 +570,7 @@ public class YamlModelRepositoryImplTest {
         YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
         modelRepository.addYamlModelListener(firstTypeListener);
 
-        modelRepository.processWatchEvent(WatchService.Kind.CREATE, MODEL_PATH);
+        modelRepository.processWatchEvent(WatchService.Kind.CREATE, fullModelPath);
 
         verify(firstTypeListener).addedModel(eq(MODEL_NAME), firstTypeCaptor.capture());
         verify(firstTypeListener, never()).updatedModel(any(), any());
@@ -548,7 +594,7 @@ public class YamlModelRepositoryImplTest {
         YamlModelRepositoryImpl modelRepository = new YamlModelRepositoryImpl(watchServiceMock);
         modelRepository.addYamlModelListener(firstTypeListener);
 
-        modelRepository.processWatchEvent(WatchService.Kind.CREATE, MODEL_PATH);
+        modelRepository.processWatchEvent(WatchService.Kind.CREATE, fullModelPath);
 
         verify(firstTypeListener, never()).addedModel(any(), any());
         verify(firstTypeListener, never()).updatedModel(any(), any());
@@ -573,8 +619,8 @@ public class YamlModelRepositoryImplTest {
         modelRepository.addYamlModelListener(secondTypeListener1);
         modelRepository.addYamlModelListener(secondTypeListener2);
 
-        modelRepository.processWatchEvent(WatchService.Kind.CREATE, MODEL_PATH);
-        modelRepository.processWatchEvent(WatchService.Kind.CREATE, MODEL2_PATH);
+        modelRepository.processWatchEvent(WatchService.Kind.CREATE, fullModelPath);
+        modelRepository.processWatchEvent(WatchService.Kind.CREATE, fullModel2Path);
 
         verify(secondTypeListener1).addedModel(eq(MODEL_NAME), secondTypeCaptor1.capture());
         verify(secondTypeListener1, never()).addedModel(eq(MODEL2_NAME), any());

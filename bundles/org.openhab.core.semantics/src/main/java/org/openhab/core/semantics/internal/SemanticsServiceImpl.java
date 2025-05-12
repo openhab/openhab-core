@@ -313,7 +313,7 @@ public class SemanticsServiceImpl implements SemanticsService, RegistryChangeLis
                 }
             }
         } else if (Equipment.class.isAssignableFrom(semanticTag)) {
-            if (parentLocations.size() > 0 && parentEquipments.size() > 0) {
+            if (!parentLocations.isEmpty() && !parentEquipments.isEmpty()) {
                 warnings.add(String.format(
                         "It belongs to location(s) %s and equipment(s) %s. An Equipment can only belong to one Location or another Equipment, but not both.",
                         parentLocations.toString(), parentEquipments.toString()));
@@ -333,7 +333,7 @@ public class SemanticsServiceImpl implements SemanticsService, RegistryChangeLis
                 warnings.add(String.format("It is a %s item, not a group. A location should be a Group Item.",
                         item.getType()));
             }
-            if (parentEquipments.size() > 0) {
+            if (!parentEquipments.isEmpty()) {
                 warnings.add(String.format(
                         "It belongs to equipment(s) %s. A Location can only belong to another Location, not Equipment.",
                         parentEquipments.toString()));

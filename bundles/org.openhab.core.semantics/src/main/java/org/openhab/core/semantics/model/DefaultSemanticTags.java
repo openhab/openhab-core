@@ -223,6 +223,11 @@ public class DefaultSemanticTags {
                 "Calculation", //
                 "Read only analog calculated data point", //
                 "");
+        public static final SemanticTag CALCULATION = new SemanticTagImpl( //
+                "Point_Calculation", //
+                "Calculation", //
+                "", //
+                "");
         public static final SemanticTag CONTROL = new SemanticTagImpl( //
                 "Point_Control", //
                 "Control", //

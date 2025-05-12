@@ -108,7 +108,6 @@ public interface QueryablePersistenceService extends PersistenceService {
      *
      * @param itemName name of item
      * @param alias alias of item
-     *
      * @return a {@link PersistedItem} or null if the item has not been persisted
      */
     default @Nullable PersistedItem persistedItem(String itemName, @Nullable String alias) {
