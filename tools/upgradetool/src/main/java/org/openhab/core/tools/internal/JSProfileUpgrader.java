@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.storage.json.internal.JsonStorage;
 import org.openhab.core.thing.internal.link.ItemChannelLinkConfigDescriptionProvider;
@@ -47,8 +48,15 @@ public class JSProfileUpgrader implements Upgrader {
     }
 
     @Override
-    public boolean execute(String userdataDir, String confDir) {
-        Path linkJsonDatabasePath = Path.of(userdataDir, "jsondb", "org.openhab.core.thing.link.ItemChannelLink.json");
+    public boolean execute(@Nullable Path userdataPath, @Nullable Path confPath) {
+        if (userdataPath == null) {
+            logger.error("{} skipped: no userdata directory found.", getName());
+            return false;
+        }
+
+        userdataPath = userdataPath.resolve("jsondb");
+
+        Path linkJsonDatabasePath = userdataPath.resolve("org.openhab.core.thing.link.ItemChannelLink.json");
         logger.info("Upgrading JS profile configuration in database '{}'", linkJsonDatabasePath);
 
         if (!Files.isWritable(linkJsonDatabasePath)) {

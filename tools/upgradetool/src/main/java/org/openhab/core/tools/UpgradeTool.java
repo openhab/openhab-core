@@ -47,6 +47,9 @@ public class UpgradeTool {
     private static final String OPT_LOG = "log";
     private static final String OPT_FORCE = "force";
 
+    private static final String ENV_USERDATA = "OPENHAB_USERDATA";
+    private static final String ENV_CONF = "OPENHAB_CONF";
+
     private static final List<Upgrader> UPGRADERS = List.of( //
             new ItemUnitToMetadataUpgrader(), //
             new JSProfileUpgrader(), //
@@ -105,26 +108,15 @@ public class UpgradeTool {
                 System.exit(0);
             }
 
-            String userdataDir = commandLine.hasOption(OPT_USERDATA_DIR) ? commandLine.getOptionValue(OPT_USERDATA_DIR)
-                    : System.getenv("OPENHAB_USERDATA");
-            if (command == null && (userdataDir == null || userdataDir.isBlank())) {
-                println("Please either set the environment variable ${OPENHAB_USERDATA} or provide a directory through the --userdata option.");
-                System.exit(0);
-                return;
-            } else if (userdataDir != null) {
-                logger.info("Using userdataDir: {}", userdataDir);
-                Path upgradeJsonDatabasePath = Path.of(userdataDir, "jsondb", "org.openhab.core.tools.UpgradeTool");
-                upgradeRecords = new JsonStorage<>(upgradeJsonDatabasePath.toFile(), null, 5, 0, 0, List.of());
-            }
+            Path userdataPath = getPath("userdata", commandLine, OPT_USERDATA_DIR, ENV_USERDATA);
+            Path confPath = getPath("conf", commandLine, OPT_CONF_DIR, ENV_CONF);
 
-            String confDir = commandLine.hasOption(OPT_CONF_DIR) ? commandLine.getOptionValue(OPT_CONF_DIR)
-                    : System.getenv("OPENHAB_CONF");
-            if (confDir == null || confDir.isBlank()) {
-                println("Please either set the environment variable ${OPENHAB_CONF} or provide a directory through the --conf option.");
-                System.exit(0);
-                return;
+            if (userdataPath != null) {
+                Path upgradeJsonDatabasePath = userdataPath
+                        .resolve(Path.of("jsondb", "org.openhab.core.tools.UpgradeTool"));
+                upgradeRecords = new JsonStorage<>(upgradeJsonDatabasePath.toFile(), null, 5, 0, 0, List.of());
             } else {
-                logger.info("Using confDir: {}", confDir);
+                logger.warn("Upgrade records storage is not initialized.");
             }
 
             UPGRADERS.forEach(upgrader -> {
@@ -139,7 +131,7 @@ public class UpgradeTool {
                 }
                 try {
                     logger.info("Executing {}: {}", upgraderName, upgrader.getDescription());
-                    if (upgrader.execute(userdataDir, confDir)) {
+                    if (upgrader.execute(userdataPath, confPath)) {
                         updateUpgradeRecord(upgraderName);
                     }
                 } catch (Exception e) {
@@ -154,6 +146,40 @@ public class UpgradeTool {
         System.exit(0);
     }
 
+    /**
+     * Returns the path to the given directory, either from the command line or from the environment variable.
+     * If neither is set, it defaults to a relative subdirectory of the given pathName ('./userdata' or './conf').
+     *
+     * @param pathName the name of the directory (e.g., "userdata" or "conf").
+     * @param commandLine a CommandLine instance.
+     * @param option the command line option for the directory (e.g., "userdata" or "conf").
+     * @param env the environment variable name for the directory (e.g., "OPENHAB_USERDATA" or "OPENHAB_CONF").
+     * @return the absolute path to the directory, or null if it does not exist.
+     */
+    private static @Nullable Path getPath(String pathName, CommandLine commandLine, String option, String env) {
+        Path path = Path.of(pathName);
+
+        String optionValue = commandLine.getOptionValue(option);
+        String envValue = System.getenv(env);
+
+        if (optionValue != null && !optionValue.isBlank()) {
+            path = Path.of(optionValue);
+        } else if (envValue != null && !envValue.isBlank()) {
+            path = Path.of(envValue);
+        }
+
+        path = path.toAbsolutePath();
+
+        if (path.toFile().isDirectory()) {
+            return path;
+        } else {
+            logger.warn(
+                    "The '{}' directory '{}' does not exist. Some tasks may fail. To set it, either set the environment variable ${{}} or provide a directory through the --{} option.",
+                    pathName, path, env, option);
+            return null;
+        }
+    }
+
     private static @Nullable String lastExecuted(String upgrader) {
         JsonStorage<UpgradeRecord> records = upgradeRecords;
         if (records != null) {
@@ -161,8 +187,6 @@ public class UpgradeTool {
             if (upgradeRecord != null) {
                 return upgradeRecord.executionDate;
             }
-        } else {
-            logger.error("Upgrade records storage is not initialized.");
         }
         return null;
     }
@@ -172,8 +196,6 @@ public class UpgradeTool {
         if (records != null) {
             records.put(upgrader, new UpgradeRecord(ZonedDateTime.now()));
             records.flush();
-        } else {
-            logger.error("Upgrade records storage is not initialized.");
         }
     }
 

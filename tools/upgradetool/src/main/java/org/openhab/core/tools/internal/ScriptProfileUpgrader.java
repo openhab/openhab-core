@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Objects;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.storage.json.internal.JsonStorage;
 import org.openhab.core.thing.internal.link.ItemChannelLinkConfigDescriptionProvider;
@@ -31,7 +32,7 @@ import org.slf4j.LoggerFactory;
  * for the separation of {@code toHandlerScript} into
  * {@code commandFromItemScript} and {@code stateFromItemScript}.
  * See <a href="https://github.com/openhab/openhab-core/pull/4058">openhab/openhab-core#4058</a>.
- * 
+ *
  * @author Florian Hotze - Initial contribution
  * @author Jimmy Tanagra - Refactored into a separate class
  */
@@ -50,8 +51,14 @@ public class ScriptProfileUpgrader implements Upgrader {
     }
 
     @Override
-    public boolean execute(String userdataDir, String confDir) {
-        Path linkJsonDatabasePath = Path.of(userdataDir, "jsondb", "org.openhab.core.thing.link.ItemChannelLink.json");
+    public boolean execute(@Nullable Path userdataPath, @Nullable Path confPath) {
+        if (userdataPath == null) {
+            logger.error("{} skipped: no userdata directory found.", getName());
+            return false;
+        }
+
+        Path linkJsonDatabasePath = userdataPath
+                .resolve(Path.of("jsondb", "org.openhab.core.thing.link.ItemChannelLink.json"));
         logger.info("Upgrading script profile configuration in database '{}'", linkJsonDatabasePath);
 
         if (!Files.isWritable(linkJsonDatabasePath)) {
