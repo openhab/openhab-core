@@ -12,11 +12,14 @@
  */
 package org.openhab.core.tools;
 
+import java.nio.file.Path;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 
 /**
  * The {@link Upgrader} provides an interface for upgrading openHAB configuration files.
- * 
+ *
  * Implementing class MUST provide a no-argument constructor.
  *
  * @author Jimmy Tanagra - Initial contribution
@@ -30,11 +33,11 @@ public interface Upgrader {
     /**
      * Executes the upgrade process.
      *
-     * @param userdataDir the OPENHAB_USERDATA directory for the upgrade,
+     * @param userdataPath the OPENHAB_USERDATA directory for the upgrade,
      *            or a custom path given by the user as --userdata argument
-     * @param confDir the OPENHAB_CONF directory for the upgrade,
+     * @param confPath the OPENHAB_CONF directory for the upgrade,
      *            or a custom path given by the user as --conf argument
      * @return true if the upgrade was successful, false otherwise
      */
-    boolean execute(String userdataDir, String confDir);
+    boolean execute(@Nullable Path userdataPath, @Nullable Path confPath);
 }

@@ -24,6 +24,7 @@ import java.util.Objects;
 import javax.measure.Unit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.items.ManagedItemProvider;
 import org.openhab.core.items.Metadata;
 import org.openhab.core.items.MetadataKey;
@@ -57,13 +58,19 @@ public class ItemUnitToMetadataUpgrader implements Upgrader {
     }
 
     @Override
-    public boolean execute(String userdataDir, String confDir) {
+    public boolean execute(@Nullable Path userdataPath, @Nullable Path confPath) {
+        if (userdataPath == null) {
+            logger.error("{} skipped: no userdata directory found.", getName());
+            return false;
+        }
+
+        userdataPath = userdataPath.resolve("jsondb");
         boolean noLink;
 
-        Path itemJsonDatabasePath = Path.of(userdataDir, "jsondb", "org.openhab.core.items.Item.json");
-        Path metadataJsonDatabasePath = Path.of(userdataDir, "jsondb", "org.openhab.core.items.Metadata.json");
-        Path linkJsonDatabasePath = Path.of(userdataDir, "jsondb", "org.openhab.core.thing.link.ItemChannelLink.json");
-        Path thingJsonDatabasePath = Path.of(userdataDir, "jsondb", "org.openhab.core.thing.Thing.json");
+        Path itemJsonDatabasePath = userdataPath.resolve("org.openhab.core.items.Item.json");
+        Path metadataJsonDatabasePath = userdataPath.resolve("org.openhab.core.items.Metadata.json");
+        Path linkJsonDatabasePath = userdataPath.resolve("org.openhab.core.thing.link.ItemChannelLink.json");
+        Path thingJsonDatabasePath = userdataPath.resolve("org.openhab.core.thing.Thing.json");
         logger.info("Copying item unit from state description to metadata in database '{}'", itemJsonDatabasePath);
 
         if (!Files.isReadable(itemJsonDatabasePath)) {

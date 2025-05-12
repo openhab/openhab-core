@@ -20,6 +20,7 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.tools.Upgrader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,16 +38,16 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLParser;
 
 /**
  * The {@link YamlConfigurationV1TagsUpgrader} upgrades YAML Tags Configuration from List to Map.
- * 
+ *
  * Convert list to map format for tags in V1 configuration files.
- * 
+ *
  * Input file criteria:
  * - Search only in CONF/tags/, or in the given directory, and its subdirectories
  * - Contains a version key with value 1
  * - it must contain a tags key that is a list
  * - The tags list must contain a uid key
  * - If the above criteria are not met, the file will not be modified
- * 
+ *
  * Output file will
  * - Retain `version: 1`
  * - convert tags list to a map with uid as key and the rest as map
@@ -54,9 +55,9 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLParser;
  * - other keys will be unchanged
  * - A backup of the original file will be created with the extension `.yaml.org`
  * - If an .org file already exists, append a number to the end, e.g. `.org.1`
- * 
+ *
  * @since 5.0.0
- * 
+ *
  * @author Jimmy Tanagra - Initial contribution
  */
 @NonNullByDefault
@@ -96,16 +97,22 @@ public class YamlConfigurationV1TagsUpgrader implements Upgrader {
     }
 
     @Override
-    public boolean execute(String userdataDir, String confDir) {
-        String confEnv = System.getenv("OPENHAB_CONF");
-        // If confDir is set to OPENHAB_CONF, look inside /tags/ subdirectory
-        // otherwise use the given confDir as is
-        if (confEnv != null && !confEnv.isBlank() && confEnv.equals(confDir)) {
-            confDir = Path.of(confEnv, "tags").toString();
+    public boolean execute(@Nullable Path userdataPath, @Nullable Path confPath) {
+        if (confPath == null) {
+            logger.error("{} skipped: no conf directory found.", getName());
+            return false;
         }
-        Path configPath = Path.of(confDir).toAbsolutePath();
-        logger.info("Upgrading YAML tags configurations in '{}'", configPath);
 
+        String confEnv = System.getenv("OPENHAB_CONF");
+        // If confPath is set to OPENHAB_CONF, look inside /tags/ subdirectory
+        // otherwise use the given confPath as is
+        if (confEnv != null && !confEnv.isBlank() && Path.of(confEnv).toAbsolutePath().equals(confPath)) {
+            confPath = confPath.resolve("tags");
+        }
+
+        logger.info("Upgrading YAML tags configurations in '{}'", confPath);
+
+        Path configPath = confPath; // make configPath "effectively final" inside the lambda below
         try {
             Files.walkFileTree(configPath, new SimpleFileVisitor<>() {
                 @Override
@@ -115,7 +122,6 @@ public class YamlConfigurationV1TagsUpgrader implements Upgrader {
                         Path relativePath = configPath.relativize(file);
                         String modelName = relativePath.toString();
                         if (!relativePath.startsWith("automation") && modelName.endsWith(".yaml")) {
-                            logger.info("Checking {}", file);
                             convertTagsListToMap(file);
                         }
                     }
@@ -142,15 +148,17 @@ public class YamlConfigurationV1TagsUpgrader implements Upgrader {
 
             JsonNode versionNode = fileContent.get(VERSION);
             if (versionNode == null || !versionNode.canConvertToInt() || versionNode.asInt() != 1) {
+                logger.debug("{} skipped: it doesn't contain a version key", filePath);
                 return;
             }
 
             JsonNode tagsNode = fileContent.get("tags");
             if (tagsNode == null || !tagsNode.isArray()) {
+                logger.debug("{} skipped: it doesn't contain a 'tags' array.", filePath);
                 return;
             }
 
-            logger.info("Found v1 yaml file with tags list {}", filePath);
+            logger.debug("{} found containing v1 yaml file with a 'tags' array", filePath);
             fileContent.properties().forEach(entry -> {
                 String key = entry.getKey();
                 JsonNode node = entry.getValue();
@@ -187,7 +195,7 @@ public class YamlConfigurationV1TagsUpgrader implements Upgrader {
         try {
             Files.move(filePath, backupPath);
             Files.writeString(filePath, content);
-            logger.info("Converted {} to map format, and the original file saved as {}", filePath, backupPath);
+            logger.info("{} converted to map format, and the original file saved as {}", filePath, backupPath);
         } catch (IOException e) {
             logger.error("Failed to save YAML file {}: {}", filePath, e.getMessage());
         }
