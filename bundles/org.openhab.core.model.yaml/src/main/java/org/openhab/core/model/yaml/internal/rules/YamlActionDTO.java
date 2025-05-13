@@ -2,9 +2,20 @@ package org.openhab.core.model.yaml.internal.rules;
 
 import java.util.Map;
 
-public class YamlActionDTO extends YamlModuleDTO {
+import org.eclipse.jdt.annotation.NonNull;
+import org.openhab.core.automation.Action;
 
-    public Map<String, String> inputs;
+public class YamlActionDTO extends YamlModuleDTO { // TODO: (Nad) Header + JavaDocs
+
+    public Map<@NonNull String, @NonNull String> inputs;
+
+    public YamlActionDTO() {
+    }
+
+    public YamlActionDTO(@NonNull Action action) {
+        super(action);
+        this.inputs = action.getInputs();
+    }
 
     @Override
     public String toString() {

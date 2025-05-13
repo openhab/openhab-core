@@ -3,6 +3,7 @@ package org.openhab.core.model.yaml.internal.rules;
 import java.util.Map;
 
 import org.eclipse.jdt.annotation.NonNull;
+import org.openhab.core.automation.Module;
 
 public class YamlModuleDTO { // TODO: (Nad) Header + JavaDocs
 
@@ -11,6 +12,17 @@ public class YamlModuleDTO { // TODO: (Nad) Header + JavaDocs
     public String description;
     public Map<@NonNull String, @NonNull Object> config;
     public String type;
+
+    public YamlModuleDTO() {
+    }
+
+    public YamlModuleDTO(@NonNull Module module) {
+        this.id = module.getId();
+        this.label = module.getLabel();
+        this.description = module.getDescription();
+        this.config = module.getConfiguration().getProperties(); // TODO: (Nad) Translate?
+        this.type = module.getTypeUID(); // TODO: (Nad) Translate
+    }
 
     @Override
     public String toString() {

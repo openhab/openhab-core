@@ -2,9 +2,20 @@ package org.openhab.core.model.yaml.internal.rules;
 
 import java.util.Map;
 
-public class YamlConditionDTO extends YamlModuleDTO {
+import org.eclipse.jdt.annotation.NonNull;
+import org.openhab.core.automation.Condition;
 
-    public Map<String, String> inputs;
+public class YamlConditionDTO extends YamlModuleDTO { // TODO: (Nad) Header + JavaDocs
+
+    public Map<@NonNull String, @NonNull String> inputs;
+
+    public YamlConditionDTO() {
+    }
+
+    public YamlConditionDTO(@NonNull Condition condition) {
+        super(condition);
+        this.inputs = condition.getInputs();
+    }
 
     @Override
     public String toString() {
