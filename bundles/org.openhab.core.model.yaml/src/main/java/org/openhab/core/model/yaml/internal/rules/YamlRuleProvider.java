@@ -22,11 +22,13 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.automation.Action;
+import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.Rule;
 import org.openhab.core.automation.RuleProvider;
+import org.openhab.core.automation.Trigger;
 import org.openhab.core.automation.Visibility;
 import org.openhab.core.automation.util.RuleBuilder;
-import org.openhab.core.common.registry.AbstractProvider;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.model.yaml.YamlModelListener;
@@ -45,7 +47,8 @@ import org.slf4j.LoggerFactory;
  */
 @NonNullByDefault
 @Component(immediate = true, service = { RuleProvider.class, YamlRuleProvider.class, YamlModelListener.class })
-public class YamlRuleProvider extends AbstractProvider<Rule> implements RuleProvider, YamlModelListener<YamlRuleDTO> {
+public class YamlRuleProvider extends AbstractYamlRuleProvider<Rule>
+        implements RuleProvider, YamlModelListener<YamlRuleDTO> {
 
     private final Logger logger = LoggerFactory.getLogger(YamlRuleProvider.class);
 
@@ -157,9 +160,22 @@ public class YamlRuleProvider extends AbstractProvider<Rule> implements RuleProv
         if (configurationDescriptions != null) {
             ruleBuilder.withConfigurationDescriptions(configurationDescriptions);
         }
-        ruleBuilder.withConditions(ruleDto.conditions);
-        ruleBuilder.withActions(ruleDto.actions);
-        ruleBuilder.withTriggers(ruleDto.triggers);
+        List<YamlModuleDTO> triggerDTOs = ruleDto.triggers;
+        List<YamlConditionDTO> conditionDTOs = ruleDto.conditions;
+        List<YamlActionDTO> actionDTOs = ruleDto.actions;
+        List<Trigger> triggers = null;
+        if (triggerDTOs != null) {
+            triggers = mapModules(triggerDTOs, extractModuleIds(conditionDTOs, actionDTOs), Trigger.class);
+            ruleBuilder.withTriggers(triggers);
+        }
+        List<Condition> conditions = null;
+        if (conditionDTOs != null) {
+            conditions = mapModules(conditionDTOs, extractModuleIds(triggers, actionDTOs), Condition.class);
+            ruleBuilder.withConditions(conditions);
+        }
+        if (actionDTOs != null) {
+            ruleBuilder.withActions(mapModules(actionDTOs, extractModuleIds(triggers, conditions), Action.class));
+        }
 
         return ruleBuilder.build();
     }

@@ -12,6 +12,9 @@
  */
 package org.openhab.core.model.yaml.internal.rules;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -20,14 +23,21 @@ import java.util.regex.Pattern;
 
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.automation.Action;
+import org.openhab.core.automation.Condition;
+import org.openhab.core.automation.Rule;
+import org.openhab.core.automation.Trigger;
 import org.openhab.core.automation.Visibility;
-import org.openhab.core.automation.internal.ActionImpl;
-import org.openhab.core.automation.internal.ConditionImpl;
-import org.openhab.core.automation.internal.TriggerImpl;
 import org.openhab.core.common.AbstractUID;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
+import org.openhab.core.io.dto.ModularDTO;
+import org.openhab.core.io.dto.SerializationException;
 import org.openhab.core.model.yaml.YamlElement;
 import org.openhab.core.model.yaml.YamlElementName;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * The {@link YamlRuleDTO} is a data transfer object used to serialize a rule in a YAML configuration file.
@@ -35,7 +45,7 @@ import org.openhab.core.model.yaml.YamlElementName;
  * @author Ravi Nadahar - Initial contribution
  */
 @YamlElementName("rules")
-public class YamlRuleDTO implements YamlElement, Cloneable {
+public class YamlRuleDTO implements ModularDTO<YamlRuleDTO, ObjectMapper, JsonNode>, YamlElement, Cloneable {
 
     protected static final Pattern UID_SEGMENT_PATTERN = Pattern.compile("[a-zA-Z0-9_][a-zA-Z0-9_-]*");
 
@@ -47,14 +57,54 @@ public class YamlRuleDTO implements YamlElement, Cloneable {
     public String visibility;
     public Map<@NonNull String, @NonNull Object> config;
     public List<@NonNull ConfigDescriptionParameter> configDescriptions;
-    public List<@NonNull ConditionImpl> conditions;
-    public List<@NonNull ActionImpl> actions;
-    public List<@NonNull TriggerImpl> triggers;
+    public List<@NonNull YamlConditionDTO> conditions;
+    public List<@NonNull YamlActionDTO> actions;
+    public List<@NonNull YamlModuleDTO> triggers;
 
     /**
      * Creates a new instance.
      */
     public YamlRuleDTO() {
+    }
+
+    /**
+     * Creates a new instance based on the specified {@link Rule}.
+     *
+     * @param rule the {@link Rule}.
+     */
+    public YamlRuleDTO(@NonNull Rule rule) {
+        this.uid = rule.getUID();
+        this.templateUid = rule.getTemplateUID();
+        this.label = rule.getName();
+        this.tags = rule.getTags();
+        this.description = rule.getDescription();
+        this.visibility = rule.getVisibility().name();
+        this.config = rule.getConfiguration().getProperties();
+        this.configDescriptions = rule.getConfigurationDescriptions();
+        List<@NonNull Action> actions = rule.getActions();
+        if (!actions.isEmpty()) {
+            List<YamlActionDTO> actionDtos = new ArrayList<>(actions.size());
+            for (Action action : actions) {
+                actionDtos.add(new YamlActionDTO(action));
+            }
+            this.actions = actionDtos;
+        }
+        List<@NonNull Condition> conditions = rule.getConditions();
+        if (!conditions.isEmpty()) {
+            List<YamlConditionDTO> conditionsDtos = new ArrayList<>(conditions.size());
+            for (Condition condition : conditions) {
+                conditionsDtos.add(new YamlConditionDTO(condition));
+            }
+            this.conditions = conditionsDtos;
+        }
+        List<@NonNull Trigger> triggers = rule.getTriggers();
+        if (!triggers.isEmpty()) {
+            List<YamlModuleDTO> triggerDtos = new ArrayList<>(triggers.size());
+            for (Trigger trigger : triggers) {
+                triggerDtos.add(new YamlModuleDTO(trigger));
+            }
+            this.triggers = triggerDtos;
+        }
     }
 
     @Override
@@ -77,6 +127,64 @@ public class YamlRuleDTO implements YamlElement, Cloneable {
     public Visibility getVisibility() {
         Visibility result = Visibility.typeOf(visibility);
         return result == null ? Visibility.VISIBLE : result;
+    }
+
+    @Override
+    public @NonNull YamlRuleDTO toDto(@NonNull JsonNode node, @NonNull ObjectMapper mapper)
+            throws SerializationException {
+        YamlPartialRuleDTO partial;
+        YamlRuleDTO result = new YamlRuleDTO();
+        try {
+            partial = mapper.treeToValue(node, YamlPartialRuleDTO.class);
+            result.uid = partial.uid;
+            result.templateUid = partial.templateUid;
+            result.label = partial.label;
+            result.tags = partial.tags;
+            result.description = partial.description;
+            result.visibility = partial.visibility;
+            result.config = partial.config;
+            result.configDescriptions = partial.configDescriptions;
+
+            if (partial.actions != null && !partial.actions.isEmpty()) {
+                if (!partial.actions.isArray()) {
+                    throw new SerializationException("Expected actions to be an array node");
+                }
+                List<YamlActionDTO> actions = new ArrayList<>(partial.actions.size());
+                JsonNode actionNode;
+                for (Iterator<JsonNode> iterator = partial.actions.elements(); iterator.hasNext();) {
+                    actionNode = iterator.next();
+                    actions.add(mapper.treeToValue(actionNode, YamlActionDTO.class));
+                }
+                result.actions = actions;
+            }
+            if (partial.conditions != null && !partial.conditions.isEmpty()) {
+                if (!partial.conditions.isArray()) {
+                    throw new SerializationException("Expected conditions to be an array node");
+                }
+                List<YamlConditionDTO> conditions = new ArrayList<>(partial.conditions.size());
+                JsonNode conditionNode;
+                for (Iterator<JsonNode> iterator = partial.conditions.elements(); iterator.hasNext();) {
+                    conditionNode = iterator.next();
+                    conditions.add(mapper.treeToValue(conditionNode, YamlConditionDTO.class));
+                }
+                result.conditions = conditions;
+            }
+            if (partial.triggers != null && !partial.triggers.isEmpty()) {
+                if (!partial.triggers.isArray()) {
+                    throw new SerializationException("Expected triggers to be an array node");
+                }
+                List<YamlModuleDTO> triggers = new ArrayList<>(partial.triggers.size());
+                JsonNode triggerNode;
+                for (Iterator<JsonNode> iterator = partial.triggers.elements(); iterator.hasNext();) {
+                    triggerNode = iterator.next();
+                    triggers.add(mapper.treeToValue(triggerNode, YamlModuleDTO.class));
+                }
+                result.triggers = triggers;
+            }
+        } catch (JsonProcessingException | IllegalArgumentException e) {
+            throw new SerializationException(e.getMessage(), e);
+        }
+        return result;
     }
 
     @Override
@@ -122,7 +230,42 @@ public class YamlRuleDTO implements YamlElement, Cloneable {
             addToList(errors, "invalid rule \"%s\": the rule is empty".formatted(uid));
             ok = false;
         }
+
+        // Check that module IDs are unique
+        Set<String> ids = new HashSet<>();
+        ok &= enumerateModuleIds(triggers, ids, errors);
+        ok &= enumerateModuleIds(conditions, ids, errors);
+        ok &= enumerateModuleIds(actions, ids, errors);
+
         return ok;
+    }
+
+    private boolean enumerateModuleIds(@Nullable List<@NonNull ? extends YamlModuleDTO> modules,
+            @NonNull Set<String> ids, @Nullable List<@NonNull String> errors) {
+        if (modules == null) {
+            return true;
+        }
+        String id;
+        for (YamlModuleDTO module : modules) {
+            if ((id = module.id) == null || id.isBlank()) {
+                continue;
+            }
+            if (ids.contains(id)) {
+                String moduleType;
+                if (module instanceof YamlActionDTO) {
+                    moduleType = "action";
+                } else if (module instanceof YamlConditionDTO) {
+                    moduleType = "condition";
+                } else {
+                    moduleType = "trigger";
+                }
+                addToList(errors, "illegal " + moduleType + " ID '" + id
+                        + "' - IDs must be unique across all modules in the rule");
+                return false;
+            }
+            ids.add(id);
+        }
+        return true;
     }
 
     private void addToList(@Nullable List<@NonNull String> list, String value) {
@@ -193,5 +336,22 @@ public class YamlRuleDTO implements YamlElement, Cloneable {
         }
         builder.append("]");
         return builder.toString();
+    }
+
+    /**
+     * A data transfer object for partial deserialization of a rule.
+     */
+    protected static class YamlPartialRuleDTO {
+        public String uid;
+        public String templateUid;
+        public String label;
+        public Set<@NonNull String> tags;
+        public String description;
+        public String visibility;
+        public Map<@NonNull String, @NonNull Object> config;
+        public List<@NonNull ConfigDescriptionParameter> configDescriptions;
+        public JsonNode conditions;
+        public JsonNode actions;
+        public JsonNode triggers;
     }
 }
