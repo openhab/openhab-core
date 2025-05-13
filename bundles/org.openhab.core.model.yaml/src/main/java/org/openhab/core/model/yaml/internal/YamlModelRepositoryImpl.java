@@ -94,7 +94,8 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
 
     private static final String UNWANTED_EXCEPTION_TEXT = "at [Source: UNKNOWN; byte offset: #UNKNOWN] ";
 
-    private static final List<Path> WATCHED_PATHS = Stream.of("things", "items", "tags", "yaml").map(Path::of).toList();
+    private static final List<Path> WATCHED_PATHS = Stream.of("things", "items", "tags", "settings").map(Path::of)
+            .toList();
 
     private final Logger logger = LoggerFactory.getLogger(YamlModelRepositoryImpl.class);
 
