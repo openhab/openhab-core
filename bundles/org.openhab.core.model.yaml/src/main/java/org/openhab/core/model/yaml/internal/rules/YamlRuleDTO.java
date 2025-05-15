@@ -144,9 +144,12 @@ public class YamlRuleDTO implements ModularDTO<YamlRuleDTO, ObjectMapper, JsonNo
                 }
                 List<YamlActionDTO> actions = new ArrayList<>(partial.actions.size());
                 JsonNode actionNode;
+                YamlActionDTO action;
                 for (Iterator<JsonNode> iterator = partial.actions.elements(); iterator.hasNext();) {
                     actionNode = iterator.next();
-                    actions.add(mapper.treeToValue(actionNode, YamlActionDTO.class));
+                    action = mapper.treeToValue(actionNode, YamlActionDTO.class);
+                    action.type = ModuleTypeAliases.aliasToType(Action.class, action.type);
+                    actions.add(action);
                 }
                 result.actions = actions;
             }
@@ -156,9 +159,12 @@ public class YamlRuleDTO implements ModularDTO<YamlRuleDTO, ObjectMapper, JsonNo
                 }
                 List<YamlConditionDTO> conditions = new ArrayList<>(partial.conditions.size());
                 JsonNode conditionNode;
+                YamlConditionDTO condition;
                 for (Iterator<JsonNode> iterator = partial.conditions.elements(); iterator.hasNext();) {
                     conditionNode = iterator.next();
-                    conditions.add(mapper.treeToValue(conditionNode, YamlConditionDTO.class));
+                    condition = mapper.treeToValue(conditionNode, YamlConditionDTO.class);
+                    condition.type = ModuleTypeAliases.aliasToType(Condition.class, condition.type);
+                    conditions.add(condition);
                 }
                 result.conditions = conditions;
             }
@@ -168,9 +174,12 @@ public class YamlRuleDTO implements ModularDTO<YamlRuleDTO, ObjectMapper, JsonNo
                 }
                 List<YamlModuleDTO> triggers = new ArrayList<>(partial.triggers.size());
                 JsonNode triggerNode;
+                YamlModuleDTO trigger;
                 for (Iterator<JsonNode> iterator = partial.triggers.elements(); iterator.hasNext();) {
                     triggerNode = iterator.next();
-                    triggers.add(mapper.treeToValue(triggerNode, YamlModuleDTO.class));
+                    trigger = mapper.treeToValue(triggerNode, YamlModuleDTO.class);
+                    trigger.type = ModuleTypeAliases.aliasToType(Trigger.class, trigger.type);
+                    triggers.add(trigger);
                 }
                 result.triggers = triggers;
             }
