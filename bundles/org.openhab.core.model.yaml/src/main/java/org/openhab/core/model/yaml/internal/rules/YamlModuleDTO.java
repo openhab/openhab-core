@@ -38,7 +38,7 @@ public class YamlModuleDTO {
         this.id = module.getId();
         this.label = module.getLabel();
         this.description = module.getDescription();
-        this.config = module.getConfiguration().getProperties();
+        this.type = ModuleTypeAliases.typeToAlias(module.getClass(), module.getTypeUID());
         this.type = module.getTypeUID();
     }
 
