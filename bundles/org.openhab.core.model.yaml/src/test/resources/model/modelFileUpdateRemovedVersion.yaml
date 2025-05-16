@@ -3,9 +3,9 @@
 # version: 1 => removed in this update
 
 firstType:
-  - uid: First
+  First:
     description: First original
-  - uid: Second
+  Second:
     description: Second original
-  - uid: Third
+  Third:
     description: Third original

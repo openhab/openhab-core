@@ -157,7 +157,7 @@ public class YamlThingProvider extends AbstractProvider<Thing>
 
     @Override
     public boolean isVersionSupported(int version) {
-        return version >= 2;
+        return version >= 1;
     }
 
     @Override

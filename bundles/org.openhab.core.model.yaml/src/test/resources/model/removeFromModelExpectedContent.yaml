@@ -1,5 +1,5 @@
 version: 1
 readOnly: false
 firstType:
-  - uid: element2
+  element2:
     description: description2

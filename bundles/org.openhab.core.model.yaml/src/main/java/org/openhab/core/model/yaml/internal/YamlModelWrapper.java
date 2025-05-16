@@ -12,7 +12,6 @@
  */
 package org.openhab.core.model.yaml.internal;
 
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -25,19 +24,12 @@ import com.fasterxml.jackson.databind.JsonNode;
  * The {@link YamlModelWrapper} is used to store the information read from a model in the model cache.
  *
  * @author Jan N. Klug - Initial contribution
- * @author Laurent Garnier - Introduce version 2 using map instead of table
+ * @author Laurent Garnier - Map used instead of table
  */
 @NonNullByDefault
 public class YamlModelWrapper {
     private final int version;
     private final boolean readOnly;
-    /**
-     * Nodes as a list in version 1
-     */
-    private final Map<String, List<JsonNode>> nodesV1 = new ConcurrentHashMap<>();
-    /**
-     * Nodes as a map in version >= 2
-     */
     private final Map<String, @Nullable JsonNode> nodes = new ConcurrentHashMap<>();
 
     public YamlModelWrapper(int version, boolean readOnly) {
@@ -53,20 +45,6 @@ public class YamlModelWrapper {
         return readOnly;
     }
 
-    /**
-     * Get the nodes for version 1
-     *
-     * @return the nodes
-     */
-    public Map<String, List<JsonNode>> getNodesV1() {
-        return nodesV1;
-    }
-
-    /**
-     * Get the nodes for version >= 2
-     *
-     * @return the nodes
-     */
     public Map<String, @Nullable JsonNode> getNodes() {
         return nodes;
     }
