@@ -210,6 +210,11 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
                         // all processable sub-elements are container nodes (not array)
                         logger.trace("Element {} in model {} is not a container object, ignoring it", elementName,
                                 modelName);
+                        if (getElementName(YamlSemanticTagDTO.class).equals(elementName) && node.isArray()) {
+                            logger.warn(
+                                    "Your YAML model {} contains custom tags with an old and now unsupported syntax. An upgrade of this model is required to upgrade to the new syntax. This can be done by running the upgrade tool.",
+                                    modelName);
+                        }
                         continue;
                     }
                     JsonNode newNodeElements = node;
