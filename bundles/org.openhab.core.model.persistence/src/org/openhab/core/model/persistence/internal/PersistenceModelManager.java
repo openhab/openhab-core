@@ -116,8 +116,7 @@ public class PersistenceModelManager extends AbstractProvider<PersistenceService
                 if (model != null) {
                     PersistenceServiceConfiguration newConfiguration = new PersistenceServiceConfiguration(serviceName,
                             mapConfigs(model.getConfigs()), mapAliases(model.getAliases()),
-                            mapStrategies(model.getDefaults()), mapStrategies(model.getStrategies()),
-                            mapFilters(model.getFilters()));
+                            mapStrategies(model.getStrategies()), mapFilters(model.getFilters()));
                     PersistenceServiceConfiguration oldConfiguration = configurations.put(serviceName,
                             newConfiguration);
                     if (oldConfiguration == null) {
