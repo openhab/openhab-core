@@ -138,6 +138,8 @@ public class YamlRuleDTO implements ModularDTO<YamlRuleDTO, ObjectMapper, JsonNo
             result.config = partial.config;
             result.configDescriptions = partial.configDescriptions;
 
+            Map<@NonNull String, @NonNull Object> config;
+            String translatedType;
             if (partial.actions != null && !partial.actions.isEmpty()) {
                 if (!partial.actions.isArray()) {
                     throw new SerializationException("Expected actions to be an array node");
@@ -149,6 +151,11 @@ public class YamlRuleDTO implements ModularDTO<YamlRuleDTO, ObjectMapper, JsonNo
                     actionNode = iterator.next();
                     action = mapper.treeToValue(actionNode, YamlActionDTO.class);
                     action.type = ModuleTypeAliases.aliasToType(Action.class, action.type);
+                    if ((config = action.config) != null && config.containsKey("script") && config.get("type") instanceof String type) {
+                        if (!type.equals(translatedType = MIMETypeAliases.aliasToType(type))) {
+                            config.put("type", translatedType);
+                        }
+                    }
                     actions.add(action);
                 }
                 result.actions = actions;
@@ -164,6 +171,11 @@ public class YamlRuleDTO implements ModularDTO<YamlRuleDTO, ObjectMapper, JsonNo
                     conditionNode = iterator.next();
                     condition = mapper.treeToValue(conditionNode, YamlConditionDTO.class);
                     condition.type = ModuleTypeAliases.aliasToType(Condition.class, condition.type);
+                    if ((config = condition.config) != null && config.containsKey("script") && config.get("type") instanceof String type) {
+                        if (!type.equals(translatedType = MIMETypeAliases.aliasToType(type))) {
+                            config.put("type", translatedType);
+                        }
+                    }
                     conditions.add(condition);
                 }
                 result.conditions = conditions;
@@ -179,6 +191,11 @@ public class YamlRuleDTO implements ModularDTO<YamlRuleDTO, ObjectMapper, JsonNo
                     triggerNode = iterator.next();
                     trigger = mapper.treeToValue(triggerNode, YamlModuleDTO.class);
                     trigger.type = ModuleTypeAliases.aliasToType(Trigger.class, trigger.type);
+                    if ((config = trigger.config) != null && config.containsKey("script") && config.get("type") instanceof String type) {
+                        if (!type.equals(translatedType = MIMETypeAliases.aliasToType(type))) {
+                            config.put("type", translatedType);
+                        }
+                    }
                     triggers.add(trigger);
                 }
                 result.triggers = triggers;
