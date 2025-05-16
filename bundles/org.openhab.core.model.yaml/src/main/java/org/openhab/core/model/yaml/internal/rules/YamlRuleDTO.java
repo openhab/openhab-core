@@ -152,6 +152,7 @@ public class YamlRuleDTO implements ModularDTO<YamlRuleDTO, ObjectMapper, JsonNo
                     actionNode = iterator.next();
                     action = mapper.treeToValue(actionNode, YamlActionDTO.class);
                     action.type = ModuleTypeAliases.aliasToType(Action.class, action.type);
+                    translateMIMETypeAliases(action);
                     actions.add(action);
                 }
                 result.actions = actions;
@@ -167,6 +168,7 @@ public class YamlRuleDTO implements ModularDTO<YamlRuleDTO, ObjectMapper, JsonNo
                     conditionNode = iterator.next();
                     condition = mapper.treeToValue(conditionNode, YamlConditionDTO.class);
                     condition.type = ModuleTypeAliases.aliasToType(Condition.class, condition.type);
+                    translateMIMETypeAliases(condition);
                     conditions.add(condition);
                 }
                 result.conditions = conditions;
@@ -182,6 +184,7 @@ public class YamlRuleDTO implements ModularDTO<YamlRuleDTO, ObjectMapper, JsonNo
                     triggerNode = iterator.next();
                     trigger = mapper.treeToValue(triggerNode, YamlModuleDTO.class);
                     trigger.type = ModuleTypeAliases.aliasToType(Trigger.class, trigger.type);
+                    translateMIMETypeAliases(trigger);
                     triggers.add(trigger);
                 }
                 result.triggers = triggers;
@@ -190,6 +193,17 @@ public class YamlRuleDTO implements ModularDTO<YamlRuleDTO, ObjectMapper, JsonNo
             throw new SerializationException(e.getMessage(), e);
         }
         return result;
+    }
+
+    private void translateMIMETypeAliases(YamlModuleDTO module) {
+        Map<@NonNull String, @NonNull Object> config;
+        String translatedType;
+        if ((config = module.config) != null && config.containsKey("script")
+                && config.get("type") instanceof String type) {
+            if (!type.equals(translatedType = MIMETypeAliases.aliasToType(type))) {
+                config.put("type", translatedType);
+            }
+        }
     }
 
     @Override
