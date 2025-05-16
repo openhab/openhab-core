@@ -12,6 +12,7 @@
  */
 package org.openhab.core.model.yaml.internal.rules;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -42,7 +43,13 @@ public class YamlModuleDTO {
         this.label = module.getLabel();
         this.description = module.getDescription();
         this.type = ModuleTypeAliases.typeToAlias(module.getClass(), module.getTypeUID());
-        this.type = module.getTypeUID();
+        this.config = new LinkedHashMap<>(module.getConfiguration().getProperties());
+        if (this.config.containsKey("script") && this.config.get("type") instanceof String type) {
+            String typeAlias = MIMETypeAliases.mimeTypeToAlias(type);
+            if (!type.equals(typeAlias)) {
+                this.config.put("type", typeAlias);
+            }
+        }
     }
 
     @Override
