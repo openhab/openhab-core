@@ -75,7 +75,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLParser;
  * @author Jan N. Klug - Refactored for multiple types per file and add modifying possibility
  * @author Laurent Garnier - Map used instead of table
  * @author Laurent Garnier - Added basic version management
- * @author Laurent Garnier - Added methods refreshModelElements and generateSyntaxFromElements + new parameters
+ * @author Laurent Garnier - Added method generateSyntaxFromElements + new parameters
  *         for method isValid
  */
 @NonNullByDefault
@@ -486,33 +486,6 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
         }
 
         writeModel(modelName);
-    }
-
-    @Override
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    public void refreshModelElements(String modelName, String elementName) {
-        logger.info("Refreshing {} from YAML model {}", elementName, modelName);
-        YamlModelWrapper model = modelCache.get(modelName);
-        if (model == null) {
-            logger.warn("Failed to refresh model {} because it is not known.", modelName);
-            return;
-        }
-
-        JsonNode modelMapNode = model.getNodes().get(elementName);
-        if (modelMapNode == null) {
-            logger.warn("Failed to refresh model {} because type {} is not known in the model.", modelName,
-                    elementName);
-            return;
-        }
-
-        getElementListeners(elementName, model.getVersion()).forEach(listener -> {
-            Class<? extends YamlElement> elementClass = listener.getElementClass();
-
-            List elements = parseJsonMapNode(modelMapNode, elementClass, null, null);
-            if (!elements.isEmpty()) {
-                listener.updatedModel(modelName, elements);
-            }
-        });
     }
 
     private void writeModel(String modelName) {
