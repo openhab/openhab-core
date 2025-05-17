@@ -37,10 +37,13 @@ import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.core.io.dto.ModularDTO;
+import org.openhab.core.io.dto.SerializationException;
 import org.openhab.core.model.yaml.YamlElement;
 import org.openhab.core.model.yaml.YamlElementName;
 import org.openhab.core.model.yaml.YamlModelListener;
 import org.openhab.core.model.yaml.YamlModelRepository;
+import org.openhab.core.model.yaml.internal.rules.YamlRuleDTO;
 import org.openhab.core.model.yaml.internal.semantics.YamlSemanticTagDTO;
 import org.openhab.core.model.yaml.internal.things.YamlThingDTO;
 import org.openhab.core.service.WatchService;
@@ -87,6 +90,7 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
     private static final String VERSION = "version";
     private static final String READ_ONLY = "readOnly";
     private static final Set<String> KNOWN_ELEMENTS = Set.of( //
+            getElementName(YamlRuleDTO.class), // "rules"
             getElementName(YamlSemanticTagDTO.class), // "tags"
             getElementName(YamlThingDTO.class) // "things"
     );
@@ -678,8 +682,12 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
     private <T extends YamlElement> Optional<T> parseJsonNode(JsonNode node, Class<T> elementClass,
             @Nullable List<String> errors, @Nullable List<String> warnings) {
         try {
-            return Optional.of(objectMapper.treeToValue(node, elementClass));
-        } catch (JsonProcessingException e) {
+            if (ModularDTO.class.isAssignableFrom(elementClass)) {
+                return Optional.ofNullable(modularToDto(node, elementClass, errors));
+            } else {
+                return Optional.of(objectMapper.treeToValue(node, elementClass));
+            }
+        } catch (JsonProcessingException | SerializationException e) {
             if (errors != null) {
                 String msg = e.getMessage();
                 errors.add("Could not parse element %s to %s: %s".formatted(node.toPrettyString(),
@@ -701,20 +709,22 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
                 T elt = null;
                 JsonNode node = mapNode.get(id);
                 if (node.isEmpty()) {
-                    try {
-                        elt = elementClass.getDeclaredConstructor().newInstance();
+                    elt = createElement(elementClass, errors);
+                    if (elt != null) {
                         elt.setId(id);
-                    } catch (InstantiationException | IllegalAccessException | IllegalArgumentException
-                            | InvocationTargetException | NoSuchMethodException | SecurityException e) {
-                        if (errors != null) {
-                            errors.add("could not create new instance of %s".formatted(elementClass.getSimpleName()));
-                        }
                     }
                 } else {
                     try {
-                        elt = objectMapper.treeToValue(node, elementClass);
-                        elt.setId(id);
-                    } catch (JsonProcessingException e) {
+                        if (ModularDTO.class.isAssignableFrom(elementClass)) {
+                            elt = modularToDto(node, elementClass, errors);
+                            if (elt != null) {
+                                elt.setId(id);
+                            }
+                        } else {
+                            elt = objectMapper.treeToValue(node, elementClass);
+                            elt.setId(id);
+                        }
+                    } catch (JsonProcessingException | SerializationException e) {
                         if (errors != null) {
                             String msg = e.getMessage();
                             errors.add("could not parse element %s to %s: %s".formatted(node.toPrettyString(),
@@ -729,6 +739,31 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
             }
         }
         return elements;
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T extends YamlElement> @Nullable T modularToDto(JsonNode node, Class<T> elementClass,
+            @Nullable List<String> errors) throws SerializationException {
+        @Nullable
+        T result = createElement(elementClass, errors);
+        if (result != null) {
+            result = (T) ((ModularDTO<?, ObjectMapper, JsonNode>) result).toDto(node, objectMapper);
+        }
+        return result;
+    }
+
+    private <T extends YamlElement> @Nullable T createElement(Class<T> elementClass, @Nullable List<String> errors) {
+        @Nullable
+        T result = null;
+        try {
+            result = elementClass.getDeclaredConstructor().newInstance();
+        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
+                | NoSuchMethodException | SecurityException e) {
+            if (errors != null) {
+                errors.add("could not create new instance of %s".formatted(elementClass.getSimpleName()));
+            }
+        }
+        return result;
     }
 
     // Usable whatever the format version
