@@ -735,7 +735,8 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
             Iterator<String> it = mapNode.fieldNames();
             while (it.hasNext()) {
                 String id = it.next();
-                @Nullable T elt = null;
+                @Nullable
+                T elt = null;
                 JsonNode node = mapNode.get(id);
                 if (node.isEmpty()) {
                     elt = createElement(elementClass, errors);
@@ -773,7 +774,8 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
     @SuppressWarnings("unchecked")
     private <T extends YamlElement> @Nullable T modularToDto(JsonNode node, Class<T> elementClass,
             @Nullable List<String> errors) throws SerializationException {
-        @Nullable T result = createElement(elementClass, errors);
+        @Nullable
+        T result = createElement(elementClass, errors);
         if (result != null) {
             result = (T) ((ModularDTO<?, ObjectMapper, JsonNode>) result).toDto(node, objectMapper);
         }
@@ -781,7 +783,8 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
     }
 
     private <T extends YamlElement> @Nullable T createElement(Class<T> elementClass, @Nullable List<String> errors) {
-        @Nullable T result = null;
+        @Nullable
+        T result = null;
         try {
             result = elementClass.getDeclaredConstructor().newInstance();
         } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
