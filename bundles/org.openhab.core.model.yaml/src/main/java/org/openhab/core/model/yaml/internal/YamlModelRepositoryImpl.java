@@ -29,7 +29,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -61,7 +60,6 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
@@ -75,7 +73,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLParser;
  *
  * @author Laurent Garnier - Initial contribution
  * @author Jan N. Klug - Refactored for multiple types per file and add modifying possibility
- * @author Laurent Garnier - Introduce version 2 using map instead of table
+ * @author Laurent Garnier - Map used instead of table
  * @author Laurent Garnier - Added basic version management
  * @author Laurent Garnier - Added method generateSyntaxFromElements + new parameters
  *         for method isValid
@@ -83,7 +81,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLParser;
 @NonNullByDefault
 @Component(immediate = true)
 public class YamlModelRepositoryImpl implements WatchService.WatchEventListener, YamlModelRepository {
-    private static final int DEFAULT_MODEL_VERSION = 2;
+    private static final int DEFAULT_MODEL_VERSION = 1;
     private static final String VERSION = "version";
     private static final String READ_ONLY = "readOnly";
     private static final Set<String> KNOWN_ELEMENTS = Set.of( //
@@ -208,27 +206,19 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
                     newElementNames.add(elementName);
                     JsonNode node = element.getValue();
 
-                    List<JsonNode> newNodeV1Elements = new ArrayList<>();
-                    JsonNode newNodeElements = null;
-
-                    if (modelVersion == 1) {
-                        if (!node.isArray()) {
-                            // all processable sub-elements are arrays
-                            logger.trace("Element {} in model {} is not an array, ignoring it", elementName, modelName);
-                            continue;
-                        }
-                        node.elements().forEachRemaining(newNodeV1Elements::add);
-                    } else {
-                        if (!node.isContainerNode() || node.isArray()) {
-                            // all processable sub-elements are container nodes (not array)
-                            logger.trace("Element {} in model {} is not a container object, ignoring it", elementName,
+                    if (!node.isContainerNode() || node.isArray()) {
+                        // all processable sub-elements are container nodes (not array)
+                        logger.trace("Element {} in model {} is not a container object, ignoring it", elementName,
+                                modelName);
+                        if (getElementName(YamlSemanticTagDTO.class).equals(elementName) && node.isArray()) {
+                            logger.warn(
+                                    "Your YAML model {} contains custom tags with an old and now unsupported syntax. An upgrade of this model is required to upgrade to the new syntax. This can be done by running the upgrade tool.",
                                     modelName);
-                            continue;
                         }
-                        newNodeElements = node;
+                        continue;
                     }
+                    JsonNode newNodeElements = node;
 
-                    List<JsonNode> oldNodeV1Elements = model.getNodesV1().getOrDefault(elementName, List.of());
                     JsonNode oldNodeElements = model.getNodes().get(elementName);
 
                     for (YamlModelListener<?> elementListener : getElementListeners(elementName, modelVersion)) {
@@ -238,9 +228,9 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
                         List<String> warnings = new ArrayList<>();
 
                         Map<String, ? extends YamlElement> oldElements = listToMap(
-                                parseJsonNodes(oldNodeV1Elements, oldNodeElements, elementClass, null, null));
+                                parseJsonMapNode(oldNodeElements, elementClass, null, null));
                         Map<String, ? extends YamlElement> newElements = listToMap(
-                                parseJsonNodes(newNodeV1Elements, newNodeElements, elementClass, errors, warnings));
+                                parseJsonMapNode(newNodeElements, elementClass, errors, warnings));
 
                         errors.forEach(error -> {
                             logger.warn("YAML model {}: {}", modelName, error);
@@ -276,47 +266,23 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
                     }
 
                     // replace cache
-                    if (modelVersion == 1) {
-                        model.getNodesV1().put(elementName, newNodeV1Elements);
-                    } else {
-                        model.getNodes().put(elementName, newNodeElements);
-                    }
+                    model.getNodes().put(elementName, newNodeElements);
                 }
 
                 // remove removed elements
-                if (modelVersion == 1) {
-                    model.getNodesV1().entrySet().removeIf(e -> {
-                        String elementName = e.getKey();
-                        if (newElementNames.contains(elementName)) {
-                            return false;
-                        }
+                model.getNodes().entrySet().removeIf(e -> {
+                    String elementName = e.getKey();
+                    if (newElementNames.contains(elementName)) {
+                        return false;
+                    }
 
-                        List<JsonNode> removedNodes = e.getValue();
-                        if (removedNodes != null) {
-                            getElementListeners(elementName, modelVersion).forEach(listener -> {
-                                List removedElements = parseJsonNodesV1(removedNodes, listener.getElementClass(), null,
-                                        null);
-                                listener.removedModel(modelName, removedElements);
-                            });
-                        }
-                        return true;
+                    JsonNode removedNode = e.getValue();
+                    getElementListeners(elementName, modelVersion).forEach(listener -> {
+                        List removedElements = parseJsonMapNode(removedNode, listener.getElementClass(), null, null);
+                        listener.removedModel(modelName, removedElements);
                     });
-                } else {
-                    model.getNodes().entrySet().removeIf(e -> {
-                        String elementName = e.getKey();
-                        if (newElementNames.contains(elementName)) {
-                            return false;
-                        }
-
-                        JsonNode removedNode = e.getValue();
-                        getElementListeners(elementName, modelVersion).forEach(listener -> {
-                            List removedElements = parseJsonMapNode(removedNode, listener.getElementClass(), null,
-                                    null);
-                            listener.removedModel(modelName, removedElements);
-                        });
-                        return true;
-                    });
-                }
+                    return true;
+                });
 
                 checkElementNames(modelName, model);
             } else {
@@ -335,16 +301,6 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
         }
         logger.info("Removing YAML model {}", modelName);
         int version = removedModel.getVersion();
-        for (Map.Entry<String, List<JsonNode>> modelEntry : removedModel.getNodesV1().entrySet()) {
-            String elementName = modelEntry.getKey();
-            List<JsonNode> removedNodes = modelEntry.getValue();
-            if (!removedNodes.isEmpty()) {
-                getElementListeners(elementName, version).forEach(listener -> {
-                    List removedElements = parseJsonNodesV1(removedNodes, listener.getElementClass(), null, null);
-                    listener.removedModel(modelName, removedElements);
-                });
-            }
-        }
         for (Map.Entry<String, @Nullable JsonNode> modelEntry : removedModel.getNodes().entrySet()) {
             String elementName = modelEntry.getKey();
             JsonNode removedMapNode = modelEntry.getValue();
@@ -376,14 +332,13 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
                         "Element {} in model {} version {} is still supported but deprecated, please consider migrating your model to a more recent version",
                         elementName, modelName, modelVersion);
             }
-            List<JsonNode> modelNodes = model.getNodesV1().getOrDefault(elementName, List.of());
             JsonNode modelMapNode = model.getNodes().get(elementName);
-            if (modelNodes.isEmpty() && modelMapNode == null) {
+            if (modelMapNode == null) {
                 return;
             }
             List<String> errors = new ArrayList<>();
             List<String> warnings = new ArrayList<>();
-            List modelElements = parseJsonNodes(modelNodes, modelMapNode, elementClass, errors, warnings);
+            List modelElements = parseJsonMapNode(modelMapNode, elementClass, errors, warnings);
             errors.forEach(error -> {
                 logger.warn("YAML model {}: {}", modelName, error);
             });
@@ -406,8 +361,7 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
     private void checkElementNames(String modelName, YamlModelWrapper model) {
         Set<String> elementListenerNames = elementListeners.keySet();
         if (elementListenerNames.containsAll(KNOWN_ELEMENTS)) {
-            Set<String> modelElementNames = model.getVersion() == 1 ? model.getNodesV1().keySet()
-                    : model.getNodes().keySet();
+            Set<String> modelElementNames = model.getNodes().keySet();
             modelElementNames.stream().filter(e -> !KNOWN_ELEMENTS.contains(e)).forEach(unknownElement -> {
                 logger.warn("Element '{}' in model {} is unknown.", unknownElement, modelName);
             });
@@ -435,29 +389,19 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
             return;
         }
 
-        List<JsonNode> addedNodes = new ArrayList<>();
-        JsonNode mapAddedNode = null;
-        if (model.getVersion() == 1) {
-            List<JsonNode> modelNodes = Objects
-                    .requireNonNull(model.getNodesV1().computeIfAbsent(elementName, k -> new CopyOnWriteArrayList<>()));
-            JsonNode newNode = objectMapper.convertValue(element, JsonNode.class);
-            modelNodes.add(newNode);
-            addedNodes.add(newNode);
+        JsonNode mapAddedNode = objectMapper.valueToTree(Map.of(id, element.cloneWithoutId()));
+        JsonNode modelMapNode = model.getNodes().get(elementName);
+        if (modelMapNode == null) {
+            model.getNodes().put(elementName, mapAddedNode);
         } else {
-            mapAddedNode = objectMapper.valueToTree(Map.of(id, element.cloneWithoutId()));
-            JsonNode modelMapNode = model.getNodes().get(elementName);
-            if (modelMapNode == null) {
-                model.getNodes().put(elementName, mapAddedNode);
-            } else {
-                JsonNode newNode = objectMapper.convertValue(element.cloneWithoutId(), JsonNode.class);
-                ((ObjectNode) modelMapNode).set(id, newNode);
-            }
+            JsonNode newNode = objectMapper.convertValue(element.cloneWithoutId(), JsonNode.class);
+            ((ObjectNode) modelMapNode).set(id, newNode);
         }
         // notify listeners
         for (YamlModelListener<?> l : getElementListeners(elementName, model.getVersion())) {
             List<String> errors = new ArrayList<>();
             List<String> warnings = new ArrayList<>();
-            List newElements = parseJsonNodes(addedNodes, mapAddedNode, l.getElementClass(), errors, warnings);
+            List newElements = parseJsonMapNode(mapAddedNode, l.getElementClass(), errors, warnings);
             errors.forEach(error -> {
                 logger.warn("YAML model {}: {}", modelName, error);
             });
@@ -487,31 +431,21 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
             return;
         }
 
-        List<JsonNode> modelNodes = model.getNodesV1().get(elementName);
         JsonNode modelMapNode = model.getNodes().get(elementName);
-        if (modelNodes == null && modelMapNode == null) {
+        if (modelMapNode == null) {
             logger.warn("Failed to remove {} from model {} because type {} is not known in the model.", element,
                     modelName, elementName);
             return;
         }
-        JsonNode toRemove = modelNodes == null ? null : findNodeById(modelNodes, element.getClass(), id);
-        boolean found = modelMapNode == null ? false : modelMapNode.has(id);
-        if (toRemove == null && !found) {
+        if (!modelMapNode.has(id)) {
             logger.warn("Failed to remove {} from model {} because element is not in model.", element, modelName);
             return;
         }
-        List<JsonNode> removedNodes = new ArrayList<>();
-        JsonNode mapRemovedNode = null;
-        if (toRemove != null) {
-            modelNodes.remove(toRemove);
-            removedNodes.add(toRemove);
-        } else if (found) {
-            ((ObjectNode) modelMapNode).remove(id);
-            mapRemovedNode = objectMapper.valueToTree(Map.of(id, element.cloneWithoutId()));
-        }
+        ((ObjectNode) modelMapNode).remove(id);
+        JsonNode mapRemovedNode = objectMapper.valueToTree(Map.of(id, element.cloneWithoutId()));
         // notify listeners
         for (YamlModelListener<?> l : getElementListeners(elementName, model.getVersion())) {
-            List oldElements = parseJsonNodes(removedNodes, mapRemovedNode, l.getElementClass(), null, null);
+            List oldElements = parseJsonMapNode(mapRemovedNode, l.getElementClass(), null, null);
             if (!oldElements.isEmpty()) {
                 l.removedModel(modelName, oldElements);
             }
@@ -535,35 +469,24 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
             return;
         }
 
-        List<JsonNode> modelNodes = model.getNodesV1().get(elementName);
         JsonNode modelMapNode = model.getNodes().get(elementName);
-        if (modelNodes == null && modelMapNode == null) {
+        if (modelMapNode == null) {
             logger.warn("Failed to update {} in model {} because type {} is not known in the model.", element,
                     modelName, elementName);
             return;
         }
-        JsonNode oldElement = modelNodes == null ? null : findNodeById(modelNodes, element.getClass(), id);
-        boolean found = modelMapNode == null ? false : modelMapNode.has(id);
-        if (oldElement == null && !found) {
+        if (!modelMapNode.has(id)) {
             logger.warn("Failed to update {} in model {} because element is not in model.", element, modelName);
             return;
         }
-        List<JsonNode> updatedNodes = new ArrayList<>();
-        JsonNode mapUpdatedNode = null;
-        if (oldElement != null) {
-            JsonNode newNode = objectMapper.convertValue(element, JsonNode.class);
-            modelNodes.set(modelNodes.indexOf(oldElement), newNode);
-            updatedNodes.add(newNode);
-        } else if (found) {
-            JsonNode newNode = objectMapper.convertValue(element.cloneWithoutId(), JsonNode.class);
-            ((ObjectNode) modelMapNode).set(id, newNode);
-            mapUpdatedNode = objectMapper.valueToTree(Map.of(id, element.cloneWithoutId()));
-        }
+        JsonNode newNode = objectMapper.convertValue(element.cloneWithoutId(), JsonNode.class);
+        ((ObjectNode) modelMapNode).set(id, newNode);
+        JsonNode mapUpdatedNode = objectMapper.valueToTree(Map.of(id, element.cloneWithoutId()));
         // notify listeners
         for (YamlModelListener<?> l : getElementListeners(elementName, model.getVersion())) {
             List<String> errors = new ArrayList<>();
             List<String> warnings = new ArrayList<>();
-            List newElements = parseJsonNodes(updatedNodes, mapUpdatedNode, l.getElementClass(), errors, warnings);
+            List newElements = parseJsonMapNode(mapUpdatedNode, l.getElementClass(), errors, warnings);
             errors.forEach(error -> {
                 logger.warn("YAML model {}: {}", modelName, error);
             });
@@ -596,17 +519,9 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
 
         rootNode.put(VERSION, model.getVersion());
         rootNode.put(READ_ONLY, model.isReadOnly());
-        if (model.getVersion() == 1) {
-            for (Map.Entry<String, List<JsonNode>> elementNodes : model.getNodesV1().entrySet()) {
-                ArrayNode arrayNode = nodeFactory.arrayNode();
-                elementNodes.getValue().forEach(arrayNode::add);
-                rootNode.set(elementNodes.getKey(), arrayNode);
-            }
-        } else {
-            for (Map.Entry<String, @Nullable JsonNode> elementNodes : model.getNodes().entrySet()) {
-                if (elementNodes.getValue() != null) {
-                    rootNode.set(elementNodes.getKey(), elementNodes.getValue());
-                }
+        for (Map.Entry<String, @Nullable JsonNode> elementNodes : model.getNodes().entrySet()) {
+            if (elementNodes.getValue() != null) {
+                rootNode.set(elementNodes.getKey(), elementNodes.getValue());
             }
         }
 
@@ -668,42 +583,10 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
         return getElementListeners(elementName).stream().filter(l -> l.isVersionSupported(version)).toList();
     }
 
-    // To be used only for version 1
-    private <T extends YamlElement> @Nullable JsonNode findNodeById(List<JsonNode> nodes, Class<T> elementClass,
-            String id) {
-        return nodes.stream().filter(node -> {
-            Optional<T> parsedNode = parseJsonNode(node, elementClass, null, null);
-            return parsedNode.filter(yamlDTO -> id.equals(yamlDTO.getId())).isPresent();
-        }).findAny().orElse(null);
-    }
-
     private Map<String, ? extends YamlElement> listToMap(List<? extends YamlElement> elements) {
         return elements.stream().collect(Collectors.toMap(YamlElement::getId, e -> e));
     }
 
-    // To be used only for version 1
-    private <T extends YamlElement> List<T> parseJsonNodesV1(List<JsonNode> nodes, Class<T> elementClass,
-            @Nullable List<String> errors, @Nullable List<String> warnings) {
-        return nodes.stream().map(nE -> parseJsonNode(nE, elementClass, errors, warnings)).flatMap(Optional::stream)
-                .filter(elt -> elt.isValid(errors, warnings)).toList();
-    }
-
-    // To be used only for version 1
-    private <T extends YamlElement> Optional<T> parseJsonNode(JsonNode node, Class<T> elementClass,
-            @Nullable List<String> errors, @Nullable List<String> warnings) {
-        try {
-            return Optional.of(objectMapper.treeToValue(node, elementClass));
-        } catch (JsonProcessingException e) {
-            if (errors != null) {
-                String msg = e.getMessage();
-                errors.add("Could not parse element %s to %s: %s".formatted(node.toPrettyString(),
-                        elementClass.getSimpleName(), msg == null ? "" : msg.replace(UNWANTED_EXCEPTION_TEXT, "")));
-            }
-            return Optional.empty();
-        }
-    }
-
-    // To be not used for version 1
     private <T extends YamlElement> List<T> parseJsonMapNode(@Nullable JsonNode mapNode, Class<T> elementClass,
             @Nullable List<String> errors, @Nullable List<String> warnings) {
         List<T> elements = new ArrayList<>();
@@ -742,15 +625,6 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
                 }
             }
         }
-        return elements;
-    }
-
-    // Usable whatever the format version
-    private <T extends YamlElement> List<T> parseJsonNodes(List<JsonNode> nodes, @Nullable JsonNode mapNode,
-            Class<T> elementClass, @Nullable List<String> errors, @Nullable List<String> warnings) {
-        List<T> elements = new ArrayList<>();
-        elements.addAll(parseJsonNodesV1(nodes, elementClass, errors, warnings));
-        elements.addAll(parseJsonMapNode(mapNode, elementClass, errors, warnings));
         return elements;
     }
 }
