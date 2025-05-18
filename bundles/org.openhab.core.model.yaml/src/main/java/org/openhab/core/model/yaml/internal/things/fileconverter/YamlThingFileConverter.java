@@ -118,12 +118,15 @@ public class YamlThingFileConverter extends AbstractThingFileGenerator {
             ChannelType channelType = channelTypeRegistry.getChannelType(channelTypeUID, localeProvider.getLocale());
             dto.label = channelType != null && channelType.getLabel().equals(channel.getLabel()) ? null
                     : channel.getLabel();
+            String descr = channelType != null ? channelType.getDescription() : null;
+            dto.description = descr != null && descr.equals(channel.getDescription()) ? null : channel.getDescription();
         } else {
             dto.kind = channel.getKind() == ChannelKind.STATE ? null : "trigger";
             String itemType = channel.getAcceptedItemType();
             dto.itemType = itemType != null ? ItemUtil.getMainItemType(itemType) : null;
             dto.itemDimension = ItemUtil.getItemTypeExtension(itemType);
             dto.label = channel.getLabel();
+            dto.description = channel.getDescription();
         }
 
         Map<String, Object> config = new LinkedHashMap<>();

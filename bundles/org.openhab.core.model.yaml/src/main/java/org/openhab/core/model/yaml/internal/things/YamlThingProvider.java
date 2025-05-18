@@ -380,6 +380,7 @@ public class YamlThingProvider extends AbstractProvider<Thing>
             ChannelKind kind = channelDto.getKind();
             String itemType = channelDto.getItemType();
             String label = channelDto.label;
+            String description = channelDto.description;
             AutoUpdatePolicy autoUpdatePolicy = null;
             Configuration configuration = new Configuration(channelDto.config);
             if (channelDto.type != null) {
@@ -392,6 +393,9 @@ public class YamlThingProvider extends AbstractProvider<Thing>
                     if (label == null) {
                         label = channelType.getLabel();
                     }
+                    if (description == null) {
+                        description = channelType.getDescription();
+                    }
                     autoUpdatePolicy = channelType.getAutoUpdatePolicy();
                     URI descUriO = channelType.getConfigDescriptionURI();
                     if (descUriO != null) {
@@ -403,9 +407,15 @@ public class YamlThingProvider extends AbstractProvider<Thing>
                 }
             }
 
-            Channel channel = ChannelBuilder.create(new ChannelUID(thingUID, channelId), itemType).withKind(kind)
-                    .withConfiguration(configuration).withType(channelTypeUID).withLabel(label)
-                    .withAutoUpdatePolicy(autoUpdatePolicy).build();
+            ChannelBuilder builder = ChannelBuilder.create(new ChannelUID(thingUID, channelId), itemType).withKind(kind)
+                    .withConfiguration(configuration).withType(channelTypeUID).withAutoUpdatePolicy(autoUpdatePolicy);
+            if (label != null) {
+                builder.withLabel(label);
+            }
+            if (description != null) {
+                builder.withDescription(description);
+            }
+            Channel channel = builder.build();
             channels.add(channel);
             addedChannelIds.add(channelId);
         });

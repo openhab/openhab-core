@@ -270,12 +270,18 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
                 }
 
                 // remove removed elements
-                model.getNodes().keySet().stream().filter(e -> !newElementNames.contains(e)).forEach(removedElement -> {
-                    JsonNode removedNode = model.getNodes().remove(removedElement);
-                    getElementListeners(removedElement, modelVersion).forEach(listener -> {
+                model.getNodes().entrySet().removeIf(e -> {
+                    String elementName = e.getKey();
+                    if (newElementNames.contains(elementName)) {
+                        return false;
+                    }
+
+                    JsonNode removedNode = e.getValue();
+                    getElementListeners(elementName, modelVersion).forEach(listener -> {
                         List removedElements = parseJsonMapNode(removedNode, listener.getElementClass(), null, null);
                         listener.removedModel(modelName, removedElements);
                     });
+                    return true;
                 });
 
                 checkElementNames(modelName, model);
@@ -287,6 +293,7 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
         }
     }
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     private void removeModel(String modelName) {
         YamlModelWrapper removedModel = modelCache.remove(modelName);
         if (removedModel == null) {
@@ -311,7 +318,8 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
     public void addYamlModelListener(YamlModelListener<? extends YamlElement> listener) {
         Class<? extends YamlElement> elementClass = listener.getElementClass();
         String elementName = getElementName(elementClass);
-        elementListeners.computeIfAbsent(elementName, k -> new CopyOnWriteArrayList<>()).add(listener);
+        Objects.requireNonNull(elementListeners.computeIfAbsent(elementName, k -> new CopyOnWriteArrayList<>()))
+                .add(listener);
 
         // iterate over all models and notify the new listener of already existing models with this type
         modelCache.forEach((modelName, model) -> {
