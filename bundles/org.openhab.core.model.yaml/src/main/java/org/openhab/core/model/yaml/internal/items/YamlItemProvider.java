@@ -255,13 +255,13 @@ public class YamlItemProvider extends AbstractProvider<Item> implements ItemProv
     private void processMetadata(String modelName, String itemName, @Nullable YamlItemDTO itemDTO) {
         Map<String, YamlMetadataDTO> metadata = new HashMap<>();
         if (itemDTO != null) {
-            boolean hasAutuupdateMetadata = false;
+            boolean hasAutoUpdateMetadata = false;
             boolean hasUnitMetadata = false;
             boolean hasStateDescriptionMetadata = false;
             if (itemDTO.metadata != null) {
                 for (Map.Entry<String, YamlMetadataDTO> entry : itemDTO.metadata.entrySet()) {
                     if ("autoupdate".equals(entry.getKey())) {
-                        hasAutuupdateMetadata = true;
+                        hasAutoUpdateMetadata = true;
                     } else if ("unit".equals(entry.getKey())) {
                         hasUnitMetadata = true;
                     } else if ("stateDescription".equals(entry.getKey())) {
@@ -284,7 +284,7 @@ public class YamlItemProvider extends AbstractProvider<Item> implements ItemProv
                     metadata.put(entry.getKey(), mdDTO);
                 }
             }
-            if (!hasAutuupdateMetadata && itemDTO.autoupdate != null) {
+            if (!hasAutoUpdateMetadata && itemDTO.autoupdate != null) {
                 YamlMetadataDTO mdDTO = new YamlMetadataDTO();
                 mdDTO.value = String.valueOf(itemDTO.autoupdate);
                 metadata.put("autoupdate", mdDTO);
