@@ -36,6 +36,7 @@ public class YamlChannelDTO {
     public String itemType;
     public String itemDimension;
     public String label;
+    public String description;
     public Map<@NonNull String, @NonNull Object> config;
 
     public YamlChannelDTO() {
@@ -99,7 +100,7 @@ public class YamlChannelDTO {
 
     @Override
     public int hashCode() {
-        return Objects.hash(type, getKind(), getItemType(), label);
+        return Objects.hash(type, getKind(), getItemType(), label, description);
     }
 
     @Override
@@ -112,6 +113,7 @@ public class YamlChannelDTO {
         YamlChannelDTO other = (YamlChannelDTO) obj;
         return Objects.equals(type, other.type) && getKind() == other.getKind()
                 && Objects.equals(getItemType(), other.getItemType()) && Objects.equals(label, other.label)
+                && Objects.equals(description, other.description)
                 && YamlElementUtils.equalsConfig(config, other.config);
     }
 }
