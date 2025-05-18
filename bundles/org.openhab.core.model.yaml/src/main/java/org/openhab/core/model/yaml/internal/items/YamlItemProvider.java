@@ -89,7 +89,7 @@ public class YamlItemProvider extends AbstractProvider<Item> implements ItemProv
 
     @Override
     public boolean isVersionSupported(int version) {
-        return version >= 2;
+        return version >= 1;
     }
 
     @Override
