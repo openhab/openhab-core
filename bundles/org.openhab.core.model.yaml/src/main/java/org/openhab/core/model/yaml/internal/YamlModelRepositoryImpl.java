@@ -285,25 +285,37 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
 
                 // remove removed elements
                 if (modelVersion == 1) {
-                    model.getNodesV1().keySet().stream().filter(e -> !newElementNames.contains(e))
-                            .forEach(removedElement -> {
-                                List<JsonNode> removedNodes = model.getNodesV1().remove(removedElement);
-                                getElementListeners(removedElement, modelVersion).forEach(listener -> {
-                                    List removedElements = parseJsonNodesV1(removedNodes, listener.getElementClass(),
-                                            null, null);
-                                    listener.removedModel(modelName, removedElements);
-                                });
+                    model.getNodesV1().entrySet().removeIf(e -> {
+                        String elementName = e.getKey();
+                        if (newElementNames.contains(elementName)) {
+                            return false;
+                        }
+
+                        List<JsonNode> removedNodes = e.getValue();
+                        if (removedNodes != null) {
+                            getElementListeners(elementName, modelVersion).forEach(listener -> {
+                                List removedElements = parseJsonNodesV1(removedNodes, listener.getElementClass(), null,
+                                        null);
+                                listener.removedModel(modelName, removedElements);
                             });
+                        }
+                        return true;
+                    });
                 } else {
-                    model.getNodes().keySet().stream().filter(e -> !newElementNames.contains(e))
-                            .forEach(removedElement -> {
-                                JsonNode removedNode = model.getNodes().remove(removedElement);
-                                getElementListeners(removedElement, modelVersion).forEach(listener -> {
-                                    List removedElements = parseJsonMapNode(removedNode, listener.getElementClass(),
-                                            null, null);
-                                    listener.removedModel(modelName, removedElements);
-                                });
-                            });
+                    model.getNodes().entrySet().removeIf(e -> {
+                        String elementName = e.getKey();
+                        if (newElementNames.contains(elementName)) {
+                            return false;
+                        }
+
+                        JsonNode removedNode = e.getValue();
+                        getElementListeners(elementName, modelVersion).forEach(listener -> {
+                            List removedElements = parseJsonMapNode(removedNode, listener.getElementClass(), null,
+                                    null);
+                            listener.removedModel(modelName, removedElements);
+                        });
+                        return true;
+                    });
                 }
 
                 checkElementNames(modelName, model);
@@ -315,6 +327,7 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
         }
     }
 
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     private void removeModel(String modelName) {
         YamlModelWrapper removedModel = modelCache.remove(modelName);
         if (removedModel == null) {
@@ -349,7 +362,8 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
     public void addYamlModelListener(YamlModelListener<? extends YamlElement> listener) {
         Class<? extends YamlElement> elementClass = listener.getElementClass();
         String elementName = getElementName(elementClass);
-        elementListeners.computeIfAbsent(elementName, k -> new CopyOnWriteArrayList<>()).add(listener);
+        Objects.requireNonNull(elementListeners.computeIfAbsent(elementName, k -> new CopyOnWriteArrayList<>()))
+                .add(listener);
 
         // iterate over all models and notify the new listener of already existing models with this type
         modelCache.forEach((modelName, model) -> {
@@ -424,8 +438,8 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
         List<JsonNode> addedNodes = new ArrayList<>();
         JsonNode mapAddedNode = null;
         if (model.getVersion() == 1) {
-            List<JsonNode> modelNodes = model.getNodesV1().computeIfAbsent(elementName,
-                    k -> new CopyOnWriteArrayList<>());
+            List<JsonNode> modelNodes = Objects
+                    .requireNonNull(model.getNodesV1().computeIfAbsent(elementName, k -> new CopyOnWriteArrayList<>()));
             JsonNode newNode = objectMapper.convertValue(element, JsonNode.class);
             modelNodes.add(newNode);
             addedNodes.add(newNode);
