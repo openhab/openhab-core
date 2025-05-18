@@ -33,6 +33,7 @@ import org.openhab.core.config.core.ConfigUtil;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.i18n.LocaleProvider;
 import org.openhab.core.model.yaml.YamlModelListener;
+import org.openhab.core.model.yaml.internal.YamlModelRepositoryImpl;
 import org.openhab.core.service.ReadyMarker;
 import org.openhab.core.service.ReadyService;
 import org.openhab.core.service.StartLevelService;
@@ -147,7 +148,13 @@ public class YamlThingProvider extends AbstractProvider<Thing>
 
     @Override
     public Collection<Thing> getAll() {
-        return thingsMap.values().stream().flatMap(list -> list.stream()).toList();
+        // Ignore isolated models
+        return thingsMap.keySet().stream().filter(name -> !YamlModelRepositoryImpl.isIsolatedModel(name))
+                .map(name -> thingsMap.getOrDefault(name, List.of())).flatMap(list -> list.stream()).toList();
+    }
+
+    public Collection<Thing> getAllFromModel(String modelName) {
+        return thingsMap.getOrDefault(modelName, List.of());
     }
 
     @Override
@@ -173,7 +180,9 @@ public class YamlThingProvider extends AbstractProvider<Thing>
         modelThings.addAll(added);
         added.forEach(t -> {
             logger.debug("model {} added thing {}", modelName, t.getUID());
-            notifyListenersAboutAddedElement(t);
+            if (!YamlModelRepositoryImpl.isIsolatedModel(modelName)) {
+                notifyListenersAboutAddedElement(t);
+            }
         });
     }
 
@@ -187,11 +196,15 @@ public class YamlThingProvider extends AbstractProvider<Thing>
                 modelThings.remove(oldThing);
                 modelThings.add(t);
                 logger.debug("model {} updated thing {}", modelName, t.getUID());
-                notifyListenersAboutUpdatedElement(oldThing, t);
+                if (!YamlModelRepositoryImpl.isIsolatedModel(modelName)) {
+                    notifyListenersAboutUpdatedElement(oldThing, t);
+                }
             }, () -> {
                 modelThings.add(t);
                 logger.debug("model {} added thing {}", modelName, t.getUID());
-                notifyListenersAboutAddedElement(t);
+                if (!YamlModelRepositoryImpl.isIsolatedModel(modelName)) {
+                    notifyListenersAboutAddedElement(t);
+                }
             });
         });
     }
@@ -204,7 +217,9 @@ public class YamlThingProvider extends AbstractProvider<Thing>
             modelThings.stream().filter(th -> th.getUID().equals(t.getUID())).findFirst().ifPresentOrElse(oldThing -> {
                 modelThings.remove(oldThing);
                 logger.debug("model {} removed thing {}", modelName, t.getUID());
-                notifyListenersAboutRemovedElement(oldThing);
+                if (!YamlModelRepositoryImpl.isIsolatedModel(modelName)) {
+                    notifyListenersAboutRemovedElement(oldThing);
+                }
             }, () -> logger.debug("model {} thing {} not found", modelName, t.getUID()));
         });
         if (modelThings.isEmpty()) {
@@ -293,7 +308,8 @@ public class YamlThingProvider extends AbstractProvider<Thing>
         if (newThing != null) {
             logger.debug("Successfully loaded thing \'{}\' during retry", thingUID);
             Thing oldThing = null;
-            for (Collection<Thing> modelThings : thingsMap.values()) {
+            for (Map.Entry<String, Collection<Thing>> entry : thingsMap.entrySet()) {
+                Collection<Thing> modelThings = entry.getValue();
                 oldThing = modelThings.stream().filter(t -> t.getUID().equals(newThing.getUID())).findFirst()
                         .orElse(null);
                 if (oldThing != null) {
@@ -301,7 +317,8 @@ public class YamlThingProvider extends AbstractProvider<Thing>
                     modelThings.remove(oldThing);
                     modelThings.add(newThing);
                     logger.debug("Refreshing thing \'{}\' after successful retry", newThing.getUID());
-                    if (!ThingHelper.equals(oldThing, newThing)) {
+                    if (!ThingHelper.equals(oldThing, newThing)
+                            && !YamlModelRepositoryImpl.isIsolatedModel(entry.getKey())) {
                         notifyListenersAboutUpdatedElement(oldThing, newThing);
                     }
                     break;

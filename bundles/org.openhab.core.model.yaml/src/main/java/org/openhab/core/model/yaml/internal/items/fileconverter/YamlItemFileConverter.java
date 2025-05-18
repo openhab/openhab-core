@@ -12,6 +12,7 @@
  */
 package org.openhab.core.model.yaml.internal.items.fileconverter;
 
+import java.io.ByteArrayInputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -26,6 +27,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.config.core.ConfigDescription;
 import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.ConfigDescriptionRegistry;
@@ -38,12 +40,16 @@ import org.openhab.core.items.ItemUtil;
 import org.openhab.core.items.Metadata;
 import org.openhab.core.items.fileconverter.AbstractItemFileGenerator;
 import org.openhab.core.items.fileconverter.ItemFileGenerator;
+import org.openhab.core.items.fileconverter.ItemFileParser;
 import org.openhab.core.library.CoreItemFactory;
 import org.openhab.core.model.yaml.YamlElement;
 import org.openhab.core.model.yaml.YamlModelRepository;
+import org.openhab.core.model.yaml.internal.items.YamlChannelLinkProvider;
 import org.openhab.core.model.yaml.internal.items.YamlGroupDTO;
 import org.openhab.core.model.yaml.internal.items.YamlItemDTO;
+import org.openhab.core.model.yaml.internal.items.YamlItemProvider;
 import org.openhab.core.model.yaml.internal.items.YamlMetadataDTO;
+import org.openhab.core.model.yaml.internal.items.YamlMetadataProvider;
 import org.openhab.core.types.State;
 import org.openhab.core.types.StateDescription;
 import org.osgi.service.component.annotations.Activate;
@@ -56,17 +62,25 @@ import org.osgi.service.component.annotations.Reference;
  * @author Laurent Garnier - Initial contribution
  */
 @NonNullByDefault
-@Component(immediate = true, service = ItemFileGenerator.class)
-public class YamlItemFileConverter extends AbstractItemFileGenerator {
+@Component(immediate = true, service = { ItemFileGenerator.class, ItemFileParser.class })
+public class YamlItemFileConverter extends AbstractItemFileGenerator implements ItemFileParser {
 
     private final YamlModelRepository modelRepository;
+    private final YamlItemProvider itemProvider;
+    private final YamlMetadataProvider metadataProvider;
+    private final YamlChannelLinkProvider channelLinkProvider;
     private final ConfigDescriptionRegistry configDescriptionRegistry;
 
     @Activate
     public YamlItemFileConverter(final @Reference YamlModelRepository modelRepository,
+            final @Reference YamlItemProvider itemProvider, final @Reference YamlMetadataProvider metadataProvider,
+            final @Reference YamlChannelLinkProvider channelLinkProvider,
             final @Reference ConfigDescriptionRegistry configDescRegistry) {
         super();
         this.modelRepository = modelRepository;
+        this.itemProvider = itemProvider;
+        this.metadataProvider = metadataProvider;
+        this.channelLinkProvider = channelLinkProvider;
         this.configDescriptionRegistry = configDescRegistry;
     }
 
@@ -76,14 +90,19 @@ public class YamlItemFileConverter extends AbstractItemFileGenerator {
     }
 
     @Override
-    public void generateFileFormat(OutputStream out, List<Item> items, Collection<Metadata> metadata,
+    public void setItemsToBeGenerated(String id, List<Item> items, Collection<Metadata> metadata,
             boolean hideDefaultParameters) {
         List<YamlElement> elements = new ArrayList<>();
         items.forEach(item -> {
             elements.add(buildItemDTO(item, getChannelLinks(metadata, item.getName()),
                     getMetadata(metadata, item.getName()), hideDefaultParameters));
         });
-        modelRepository.generateSyntaxFromElements(out, elements);
+        modelRepository.addElementsToBeGenerated(id, elements);
+    }
+
+    @Override
+    public void generateFileFormat(String id, OutputStream out) {
+        modelRepository.generateFileFormat(id, out);
     }
 
     private YamlItemDTO buildItemDTO(Item item, List<Metadata> channelLinks, List<Metadata> metadata,
@@ -249,5 +268,31 @@ public class YamlItemFileConverter extends AbstractItemFileGenerator {
             handledNames.add(paramName);
         }
         return parameters;
+    }
+
+    @Override
+    public String getFileFormatParser() {
+        return "YAML";
+    }
+
+    @Override
+    public @Nullable String startParsingFileFormat(String syntax, List<String> errors, List<String> warnings) {
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(syntax.getBytes());
+        return modelRepository.createIsolatedModel(inputStream, errors, warnings);
+    }
+
+    @Override
+    public Collection<Item> getParsedItems(String modelName) {
+        return itemProvider.getAllFromModel(modelName);
+    }
+
+    @Override
+    public Collection<Metadata> getParsedMetadata(String modelName) {
+        return metadataProvider.getAllFromModel(modelName);
+    }
+
+    @Override
+    public void finishParsingFileFormat(String modelName) {
+        modelRepository.removeIsolatedModel(modelName);
     }
 }

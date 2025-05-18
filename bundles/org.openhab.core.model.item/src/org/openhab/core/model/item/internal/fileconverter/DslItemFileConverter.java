@@ -12,6 +12,7 @@
  */
 package org.openhab.core.model.item.internal.fileconverter;
 
+import java.io.ByteArrayInputStream;
 import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.net.URI;
@@ -22,6 +23,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -36,7 +38,10 @@ import org.openhab.core.items.Item;
 import org.openhab.core.items.Metadata;
 import org.openhab.core.items.fileconverter.AbstractItemFileGenerator;
 import org.openhab.core.items.fileconverter.ItemFileGenerator;
+import org.openhab.core.items.fileconverter.ItemFileParser;
 import org.openhab.core.model.core.ModelRepository;
+import org.openhab.core.model.item.internal.GenericItemProvider;
+import org.openhab.core.model.item.internal.GenericMetadataProvider;
 import org.openhab.core.model.items.ItemModel;
 import org.openhab.core.model.items.ItemsFactory;
 import org.openhab.core.model.items.ModelBinding;
@@ -59,18 +64,26 @@ import org.slf4j.LoggerFactory;
  * @author Laurent Garnier - Initial contribution
  */
 @NonNullByDefault
-@Component(immediate = true, service = ItemFileGenerator.class)
-public class DslItemFileConverter extends AbstractItemFileGenerator {
+@Component(immediate = true, service = { ItemFileGenerator.class, ItemFileParser.class })
+public class DslItemFileConverter extends AbstractItemFileGenerator implements ItemFileParser {
 
     private final Logger logger = LoggerFactory.getLogger(DslItemFileConverter.class);
 
+    private final Map<String, ItemModel> elementsToGenerate = new ConcurrentHashMap<>();
+
     private final ModelRepository modelRepository;
+    private final GenericItemProvider itemProvider;
+    private final GenericMetadataProvider metadataProvider;
     private final ConfigDescriptionRegistry configDescriptionRegistry;
 
     @Activate
     public DslItemFileConverter(final @Reference ModelRepository modelRepository,
+            final @Reference GenericItemProvider itemProvider,
+            final @Reference GenericMetadataProvider metadataProvider,
             final @Reference ConfigDescriptionRegistry configDescriptionRegistry) {
         this.modelRepository = modelRepository;
+        this.itemProvider = itemProvider;
+        this.metadataProvider = metadataProvider;
         this.configDescriptionRegistry = configDescriptionRegistry;
     }
 
@@ -80,7 +93,7 @@ public class DslItemFileConverter extends AbstractItemFileGenerator {
     }
 
     @Override
-    public synchronized void generateFileFormat(OutputStream out, List<Item> items, Collection<Metadata> metadata,
+    public void setItemsToBeGenerated(String id, List<Item> items, Collection<Metadata> metadata,
             boolean hideDefaultParameters) {
         if (items.isEmpty()) {
             return;
@@ -90,7 +103,15 @@ public class DslItemFileConverter extends AbstractItemFileGenerator {
             model.getItems().add(buildModelItem(item, getChannelLinks(metadata, item.getName()),
                     getMetadata(metadata, item.getName()), hideDefaultParameters));
         }
-        modelRepository.generateSyntaxFromModel(out, "items", model);
+        elementsToGenerate.put(id, model);
+    }
+
+    @Override
+    public void generateFileFormat(String id, OutputStream out) {
+        ItemModel model = elementsToGenerate.remove(id);
+        if (model != null) {
+            modelRepository.generateFileFormat(out, "items", model);
+        }
     }
 
     private ModelItem buildModelItem(Item item, List<Metadata> channelLinks, List<Metadata> metadata,
@@ -278,5 +299,31 @@ public class DslItemFileConverter extends AbstractItemFileGenerator {
             handledNames.add(paramName);
         }
         return parameters;
+    }
+
+    @Override
+    public String getFileFormatParser() {
+        return "DSL";
+    }
+
+    @Override
+    public @Nullable String startParsingFileFormat(String syntax, List<String> errors, List<String> warnings) {
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(syntax.getBytes());
+        return modelRepository.createIsolatedModel("items", inputStream, errors, warnings);
+    }
+
+    @Override
+    public Collection<Item> getParsedItems(String modelName) {
+        return itemProvider.getAllFromModel(modelName);
+    }
+
+    @Override
+    public Collection<Metadata> getParsedMetadata(String modelName) {
+        return metadataProvider.getAllFromModel(modelName);
+    }
+
+    @Override
+    public void finishParsingFileFormat(String modelName) {
+        modelRepository.removeModel(modelName);
     }
 }
