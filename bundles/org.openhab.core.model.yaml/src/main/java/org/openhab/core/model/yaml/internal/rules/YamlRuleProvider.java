@@ -28,10 +28,10 @@ import org.openhab.core.automation.Rule;
 import org.openhab.core.automation.RuleProvider;
 import org.openhab.core.automation.Trigger;
 import org.openhab.core.automation.util.RuleBuilder;
-import org.openhab.core.config.core.ConfigDescriptionParameter;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.io.dto.SerializationException;
 import org.openhab.core.model.yaml.YamlModelListener;
+import org.openhab.core.model.yaml.internal.config.YamlConfigDescriptionParameterDTO;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -158,9 +158,10 @@ public class YamlRuleProvider extends AbstractYamlRuleProvider<Rule>
         if (configuration != null) {
             ruleBuilder.withConfiguration(new Configuration(configuration));
         }
-        List<ConfigDescriptionParameter> configurationDescriptions = ruleDto.configDescriptions;
-        if (configurationDescriptions != null) {
-            ruleBuilder.withConfigurationDescriptions(configurationDescriptions);
+        List<YamlConfigDescriptionParameterDTO> configDescriptionDtos = ruleDto.configDescriptions;
+        if (configDescriptionDtos != null) {
+            ruleBuilder.withConfigurationDescriptions(
+                    YamlConfigDescriptionParameterDTO.mapConfigDescriptions(configDescriptionDtos));
         }
         List<YamlModuleDTO> triggerDTOs = ruleDto.triggers;
         List<YamlConditionDTO> conditionDTOs = ruleDto.conditions;
