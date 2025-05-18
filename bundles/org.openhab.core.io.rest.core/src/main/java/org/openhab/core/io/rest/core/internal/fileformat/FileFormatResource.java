@@ -160,7 +160,7 @@ public class FileFormatResource implements RESTResource {
               MyItem:
                 type: Switch
                 label: Label
-                category: icon
+                icon: icon
                 groups:
                   - Group1
                   - Group2
