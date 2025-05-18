@@ -1,0 +1,36 @@
+version: 1
+rules:
+  basic:basicyamlrule:
+    label: Basic YAML Rule
+    visibility: VISIBLE
+    config: {}
+    triggers:
+      - config:
+          startlevel: 100
+        type: core.SystemStartlevelTrigger
+      - id: "22"
+        config:
+          time: 14:05
+        type: timer.TimeOfDayTrigger
+    conditions:
+      - inputs: {}
+        config:
+          offset: 0
+        type: ephemeris.WeekdayCondition
+      - inputs: {}
+        config:
+          offset: 2
+        type: ephemeris.WeekdayCondition
+    actions:
+      - inputs: {}
+        id: "1"
+        config:
+          itemName: SleepSetTemperature
+          command: "21.0"
+        type: core.ItemCommandAction
+      - inputs: {}
+        id: "11"
+        config:
+          sink: webaudio
+          text: The sleep temperature has been set
+        type: media.SayAction
