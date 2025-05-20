@@ -44,6 +44,7 @@ import org.openhab.core.model.yaml.YamlModelListener;
 import org.openhab.core.model.yaml.YamlModelRepository;
 import org.openhab.core.model.yaml.internal.items.YamlItemDTO;
 import org.openhab.core.model.yaml.internal.rules.YamlRuleDTO;
+import org.openhab.core.model.yaml.internal.rules.YamlRuleTemplateDTO;
 import org.openhab.core.model.yaml.internal.semantics.YamlSemanticTagDTO;
 import org.openhab.core.model.yaml.internal.things.YamlThingDTO;
 import org.openhab.core.service.WatchService;
@@ -90,6 +91,7 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
     private static final String READ_ONLY = "readOnly";
     private static final Set<String> KNOWN_ELEMENTS = Set.of( //
             getElementName(YamlRuleDTO.class), // "rules"
+            getElementName(YamlRuleTemplateDTO.class), // "ruleTemplates"
             getElementName(YamlSemanticTagDTO.class), // "tags"
             getElementName(YamlThingDTO.class), // "things"
             getElementName(YamlItemDTO.class) // "items"
