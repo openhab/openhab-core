@@ -1,0 +1,44 @@
+version: 1
+ruleTemplates:
+  basic:yaml-rule-template:
+    label: Basic YAML Rule Template
+    description: A YAML rule made from a template.
+    visibility: VISIBLE
+    tags:
+      - Basic
+    configDescriptions:
+      - name: startLevel
+        type: INTEGER
+        default: 80
+        min: 40
+        max: 100
+        label: Start Level
+        description: The start level which will trigger the rule.
+        required: true
+    triggers:
+      - config:
+          startlevel: '{{startLevel}}'
+        type: core.SystemStartlevelTrigger
+      - id: timeofday
+        config:
+          time: 14:05
+        type: timer.TimeOfDayTrigger
+    conditions:
+      - config:
+          offset: 0
+        type: ephemeris.WeekdayCondition
+      - config:
+          offset: 2
+        type: ephemeris.WeekdayCondition
+    actions:
+      - id: "1"
+        config:
+          itemName: SleepSetTemperature
+          command: "21.0"
+        type: core.ItemCommandAction
+      - inputs: {}
+        id: "2"
+        config:
+          sink: webaudio
+          text: The sleep temperature has been set
+        type: media.SayAction
