@@ -41,12 +41,14 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
- * The {@link YamlRuleTemplateDTO} is a data transfer object used to serialize a rule template in a YAML configuration file.
+ * The {@link YamlRuleTemplateDTO} is a data transfer object used to serialize a rule template in a YAML configuration
+ * file.
  *
  * @author Ravi Nadahar - Initial contribution
  */
 @YamlElementName("ruleTemplates")
-public class YamlRuleTemplateDTO implements ModularDTO<YamlRuleTemplateDTO, ObjectMapper, JsonNode>, YamlElement, Cloneable {
+public class YamlRuleTemplateDTO
+        implements ModularDTO<YamlRuleTemplateDTO, ObjectMapper, JsonNode>, YamlElement, Cloneable {
 
     protected static final Pattern UID_SEGMENT_PATTERN = Pattern.compile("[a-zA-Z0-9_][a-zA-Z0-9_-]*");
 
@@ -243,8 +245,9 @@ public class YamlRuleTemplateDTO implements ModularDTO<YamlRuleTemplateDTO, Obje
         String[] segments = uid.split(AbstractUID.SEPARATOR);
         for (String segment : segments) {
             if (!UID_SEGMENT_PATTERN.matcher(segment).matches()) {
-                addToList(errors, "invalid rule template \"%s\": segment \"%s\" in the uid doesn't match the expected syntax %s"
-                        .formatted(uid, segment, UID_SEGMENT_PATTERN.pattern()));
+                addToList(errors,
+                        "invalid rule template \"%s\": segment \"%s\" in the uid doesn't match the expected syntax %s"
+                                .formatted(uid, segment, UID_SEGMENT_PATTERN.pattern()));
                 ok = false;
             }
         }
@@ -256,8 +259,8 @@ public class YamlRuleTemplateDTO implements ModularDTO<YamlRuleTemplateDTO, Obje
         }
 
         // Check that the rule template has at least one module
-        if ((triggers == null || triggers.isEmpty())
-                && (conditions == null || conditions.isEmpty()) && (actions == null || actions.isEmpty())) {
+        if ((triggers == null || triggers.isEmpty()) && (conditions == null || conditions.isEmpty())
+                && (actions == null || actions.isEmpty())) {
             addToList(errors, "invalid rule template \"%s\": the template is empty".formatted(uid));
             ok = false;
         }
@@ -307,8 +310,8 @@ public class YamlRuleTemplateDTO implements ModularDTO<YamlRuleTemplateDTO, Obje
 
     @Override
     public int hashCode() {
-        return Objects.hash(actions, conditions, configDescriptions, description, label, tags,
-                triggers, uid, visibility);
+        return Objects.hash(actions, conditions, configDescriptions, description, label, tags, triggers, uid,
+                visibility);
     }
 
     @Override
@@ -323,9 +326,8 @@ public class YamlRuleTemplateDTO implements ModularDTO<YamlRuleTemplateDTO, Obje
         return Objects.equals(actions, other.actions) && Objects.equals(conditions, other.conditions)
                 && Objects.equals(configDescriptions, other.configDescriptions)
                 && Objects.equals(description, other.description) && Objects.equals(label, other.label)
-                && Objects.equals(tags, other.tags)
-                && Objects.equals(triggers, other.triggers) && Objects.equals(uid, other.uid)
-                && visibility == other.visibility;
+                && Objects.equals(tags, other.tags) && Objects.equals(triggers, other.triggers)
+                && Objects.equals(uid, other.uid) && visibility == other.visibility;
     }
 
     @Override
@@ -364,7 +366,7 @@ public class YamlRuleTemplateDTO implements ModularDTO<YamlRuleTemplateDTO, Obje
     }
 
     /**
-     * A data transfer object for partial deserialization of a  template.
+     * A data transfer object for partial deserialization of a template.
      */
     protected static class YamlPartialRuleTemplateDTO {
         public String uid;
