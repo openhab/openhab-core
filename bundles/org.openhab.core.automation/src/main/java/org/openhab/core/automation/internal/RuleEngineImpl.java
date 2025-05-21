@@ -39,6 +39,7 @@ import org.openhab.core.automation.Condition;
 import org.openhab.core.automation.Module;
 import org.openhab.core.automation.ModuleHandlerCallback;
 import org.openhab.core.automation.Rule;
+import org.openhab.core.automation.Rule.TemplateState;
 import org.openhab.core.automation.RuleExecution;
 import org.openhab.core.automation.RuleManager;
 import org.openhab.core.automation.RuleRegistry;
@@ -838,8 +839,17 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
             return false;
         }
 
-        // Set the module handlers and so check if all handlers are available.
         final String ruleUID = rule.getUID();
+        TemplateState templateState = rule.unwrap().getTemplateState();
+        if (templateState == TemplateState.TEMPLATE_MISSING || templateState == TemplateState.PENDING) {
+            setStatus(ruleUID,
+                    new RuleStatusInfo(RuleStatus.UNINITIALIZED,
+                            templateState == TemplateState.TEMPLATE_MISSING ? RuleStatusDetail.TEMPLATE_MISSING_ERROR
+                                    : RuleStatusDetail.TEMPLATE_PENDING));
+            return false;
+        }
+
+        // Set the module handlers and so check if all handlers are available.
         final String errMsgs = setModuleHandlers(ruleUID, rule.getModules());
         if (errMsgs != null) {
             setStatus(ruleUID,
@@ -1562,7 +1572,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
      */
     private void compileRules() {
         getScheduledExecutor().submit(() -> {
-            ruleRegistry.getAll().stream() //
+            ruleRegistry.stream() //
                     .filter(r -> isEnabled(r.getUID())) //
                     .forEach(r -> compileRule(r.getUID()));
             executeRulesWithStartLevel();
@@ -1571,7 +1581,7 @@ public class RuleEngineImpl implements RuleManager, RegistryChangeListener<Modul
 
     private void executeRulesWithStartLevel() {
         getScheduledExecutor().submit(() -> {
-            ruleRegistry.getAll().stream() //
+            ruleRegistry.stream() //
                     .filter(this::mustTrigger) //
                     .forEach(r -> runNow(r.getUID(), true,
                             Map.of(SystemTriggerHandler.OUT_STARTLEVEL, StartLevelService.STARTLEVEL_RULES, "event",

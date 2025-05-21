@@ -118,4 +118,9 @@ public class RuleSupportRuleRegistryDelegate implements RuleRegistry {
     public Collection<Rule> getByTags(String... tags) {
         return ruleRegistry.getByTags(tags);
     }
+
+    @Override
+    public void regenerateFromTemplate(String ruleUID) {
+        ruleRegistry.regenerateFromTemplate(ruleUID);
+    }
 }
