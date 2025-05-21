@@ -15,10 +15,10 @@ package org.openhab.core.voice;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * A tagging interface for keyword spotting events.
+ * A {@link DTEvent} fired when the {@link DTService} wants to trigger the dialog.
  *
- * @author Kelly Davis - Initial contribution
+ * @author Miguel Álvarez Díez - Initial contribution
  */
 @NonNullByDefault
-public interface KSEvent extends DTEvent {
+public class DTTriggeredEvent implements DTEvent {
 }
