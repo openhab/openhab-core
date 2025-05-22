@@ -210,7 +210,7 @@ public class YamlModelRepositoryImpl implements WatchService.WatchEventListener,
 
                     if (!node.isContainerNode() || node.isArray()) {
                         // all processable sub-elements are container nodes (not array)
-                        logger.trace("Element {} in model {} is not a container object, ignoring it", elementName,
+                        logger.warn("Element {} in model {} is not a container object, ignoring it", elementName,
                                 modelName);
                         if (getElementName(YamlSemanticTagDTO.class).equals(elementName) && node.isArray()) {
                             logger.warn(
