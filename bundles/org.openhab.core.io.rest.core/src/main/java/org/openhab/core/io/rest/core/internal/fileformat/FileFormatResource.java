@@ -16,17 +16,20 @@ import static org.openhab.core.config.discovery.inbox.InboxPredicates.forThingUI
 
 import java.io.ByteArrayOutputStream;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.annotation.security.RolesAllowed;
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.POST;
@@ -50,24 +53,40 @@ import org.openhab.core.config.discovery.DiscoveryResult;
 import org.openhab.core.config.discovery.inbox.Inbox;
 import org.openhab.core.io.rest.RESTConstants;
 import org.openhab.core.io.rest.RESTResource;
+import org.openhab.core.io.rest.core.fileformat.ExtendedFileFormatDTO;
+import org.openhab.core.io.rest.core.fileformat.FileFormatDTO;
+import org.openhab.core.io.rest.core.fileformat.FileFormatItemDTO;
+import org.openhab.core.io.rest.core.fileformat.FileFormatItemDTOMapper;
 import org.openhab.core.items.GroupItem;
 import org.openhab.core.items.Item;
+import org.openhab.core.items.ItemBuilderFactory;
 import org.openhab.core.items.ItemRegistry;
 import org.openhab.core.items.Metadata;
 import org.openhab.core.items.MetadataKey;
 import org.openhab.core.items.MetadataRegistry;
 import org.openhab.core.items.fileconverter.ItemFileGenerator;
+import org.openhab.core.items.fileconverter.ItemFileParser;
 import org.openhab.core.thing.Bridge;
+import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingRegistry;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.ThingUID;
 import org.openhab.core.thing.binding.ThingFactory;
+import org.openhab.core.thing.dto.ChannelDTO;
+import org.openhab.core.thing.dto.ThingDTO;
+import org.openhab.core.thing.dto.ThingDTOMapper;
 import org.openhab.core.thing.fileconverter.ThingFileGenerator;
+import org.openhab.core.thing.fileconverter.ThingFileParser;
 import org.openhab.core.thing.link.ItemChannelLink;
 import org.openhab.core.thing.link.ItemChannelLinkRegistry;
+import org.openhab.core.thing.type.BridgeType;
+import org.openhab.core.thing.type.ChannelType;
+import org.openhab.core.thing.type.ChannelTypeRegistry;
+import org.openhab.core.thing.type.ChannelTypeUID;
 import org.openhab.core.thing.type.ThingType;
 import org.openhab.core.thing.type.ThingTypeRegistry;
+import org.openhab.core.thing.util.ThingHelper;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
@@ -86,6 +105,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -98,6 +118,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  *
  * @author Laurent Garnier - Initial contribution
  * @author Laurent Garnier - Add YAML output for things
+ * @author Laurent Garnier - Add new API for conversion between file format and JSON
  */
 @Component
 @JaxrsResource
@@ -175,33 +196,45 @@ public class FileFormatResource implements RESTResource {
                       param: my param value
             """;
 
+    private static final String GEN_ID_PATTERN = "gen_file_format_%d";
+
     private final Logger logger = LoggerFactory.getLogger(FileFormatResource.class);
 
+    private final ItemBuilderFactory itemBuilderFactory;
     private final ItemRegistry itemRegistry;
     private final MetadataRegistry metadataRegistry;
     private final ItemChannelLinkRegistry itemChannelLinkRegistry;
     private final ThingRegistry thingRegistry;
     private final Inbox inbox;
     private final ThingTypeRegistry thingTypeRegistry;
+    private final ChannelTypeRegistry channelTypeRegistry;
     private final ConfigDescriptionRegistry configDescRegistry;
     private final Map<String, ItemFileGenerator> itemFileGenerators = new ConcurrentHashMap<>();
+    private final Map<String, ItemFileParser> itemFileParsers = new ConcurrentHashMap<>();
     private final Map<String, ThingFileGenerator> thingFileGenerators = new ConcurrentHashMap<>();
+    private final Map<String, ThingFileParser> thingFileParsers = new ConcurrentHashMap<>();
+
+    private int counter;
 
     @Activate
     public FileFormatResource(//
+            final @Reference ItemBuilderFactory itemBuilderFactory, //
             final @Reference ItemRegistry itemRegistry, //
             final @Reference MetadataRegistry metadataRegistry,
             final @Reference ItemChannelLinkRegistry itemChannelLinkRegistry,
             final @Reference ThingRegistry thingRegistry, //
             final @Reference Inbox inbox, //
             final @Reference ThingTypeRegistry thingTypeRegistry, //
+            final @Reference ChannelTypeRegistry channelTypeRegistry, //
             final @Reference ConfigDescriptionRegistry configDescRegistry) {
+        this.itemBuilderFactory = itemBuilderFactory;
         this.itemRegistry = itemRegistry;
         this.metadataRegistry = metadataRegistry;
         this.itemChannelLinkRegistry = itemChannelLinkRegistry;
         this.thingRegistry = thingRegistry;
         this.inbox = inbox;
         this.thingTypeRegistry = thingTypeRegistry;
+        this.channelTypeRegistry = channelTypeRegistry;
         this.configDescRegistry = configDescRegistry;
     }
 
@@ -219,12 +252,30 @@ public class FileFormatResource implements RESTResource {
     }
 
     @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.MULTIPLE)
+    protected void addItemFileParser(ItemFileParser itemFileParser) {
+        itemFileParsers.put(itemFileParser.getFileFormatParser(), itemFileParser);
+    }
+
+    protected void removeItemFileParser(ItemFileParser itemFileParser) {
+        itemFileParsers.remove(itemFileParser.getFileFormatParser());
+    }
+
+    @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.MULTIPLE)
     protected void addThingFileGenerator(ThingFileGenerator thingFileGenerator) {
         thingFileGenerators.put(thingFileGenerator.getFileFormatGenerator(), thingFileGenerator);
     }
 
     protected void removeThingFileGenerator(ThingFileGenerator thingFileGenerator) {
         thingFileGenerators.remove(thingFileGenerator.getFileFormatGenerator());
+    }
+
+    @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.MULTIPLE)
+    protected void addThingFileParser(ThingFileParser thingFileParser) {
+        thingFileParsers.put(thingFileParser.getFileFormatParser(), thingFileParser);
+    }
+
+    protected void removeThingFileParser(ThingFileParser thingFileParser) {
+        thingFileParsers.remove(thingFileParser.getFileFormatParser());
     }
 
     @POST
@@ -264,7 +315,9 @@ public class FileFormatResource implements RESTResource {
             }
         }
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        generator.generateFileFormat(outputStream, items, getMetadata(items), hideDefaultParameters);
+        String genId = GEN_ID_PATTERN.formatted(++counter);
+        generator.setItemsToBeGenerated(genId, items, getMetadata(items), hideDefaultParameters);
+        generator.generateFileFormat(genId, outputStream);
         return Response.ok(new String(outputStream.toByteArray())).build();
     }
 
@@ -301,8 +354,190 @@ public class FileFormatResource implements RESTResource {
             }
         }
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        generator.generateFileFormat(outputStream, things, hideDefaultParameters);
+        String genId = GEN_ID_PATTERN.formatted(++counter);
+        generator.setThingsToBeGenerated(genId, things, true, hideDefaultParameters);
+        generator.generateFileFormat(genId, outputStream);
         return Response.ok(new String(outputStream.toByteArray())).build();
+    }
+
+    @POST
+    @RolesAllowed({ Role.ADMIN })
+    @Path("/create")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ "text/vnd.openhab.dsl.thing", "text/vnd.openhab.dsl.item", "application/yaml" })
+    @Operation(operationId = "create", summary = "Create file format.", security = {
+            @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
+                    @ApiResponse(responseCode = "200", description = "OK", content = {
+                            @Content(mediaType = "text/vnd.openhab.dsl.thing", schema = @Schema(example = DSL_THINGS_EXAMPLE)),
+                            @Content(mediaType = "text/vnd.openhab.dsl.item", schema = @Schema(example = DSL_ITEMS_EXAMPLE)),
+                            @Content(mediaType = "application/yaml", schema = @Schema(example = YAML_THINGS_EXAMPLE)) }),
+                    @ApiResponse(responseCode = "400", description = "Invalid JSON data."),
+                    @ApiResponse(responseCode = "415", description = "Unsupported media type.") })
+    public Response create(final @Context HttpHeaders httpHeaders,
+            @DefaultValue("false") @QueryParam("hideDefaultParameters") @Parameter(description = "hide the configuration parameters having the default value") boolean hideDefaultParameters,
+            @DefaultValue("false") @QueryParam("hideDefaultChannels") @Parameter(description = "hide the non extensible channels having a default configuration") boolean hideDefaultChannels,
+            @DefaultValue("false") @QueryParam("hideChannelLinksAndMetadata") @Parameter(description = "hide the channel links and metadata for items") boolean hideChannelLinksAndMetadata,
+            @RequestBody(description = "JSON data", required = true, content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = FileFormatDTO.class))) FileFormatDTO data) {
+        String acceptHeader = httpHeaders.getHeaderString(HttpHeaders.ACCEPT);
+        logger.debug("create: mediaType = {}", acceptHeader);
+
+        List<Thing> things = new ArrayList<>();
+        List<Item> items = new ArrayList<>();
+        List<Metadata> metadata = new ArrayList<>();
+        List<String> errors = new ArrayList<>();
+        if (!convertFromFileFormatDTO(data, things, items, metadata, errors)) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(String.join("\n", errors)).build();
+        }
+
+        ThingFileGenerator thingGenerator = getThingFileGenerator(acceptHeader);
+        ItemFileGenerator itemGenerator = getItemFileGenerator(acceptHeader);
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        String genId = GEN_ID_PATTERN.formatted(++counter);
+        switch (acceptHeader) {
+            case "text/vnd.openhab.dsl.thing":
+                if (thingGenerator == null) {
+                    return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE)
+                            .entity("Unsupported media type '" + acceptHeader + "'!").build();
+                } else if (things.isEmpty()) {
+                    return Response.status(Response.Status.BAD_REQUEST).entity("No thing loaded from input").build();
+                }
+                thingGenerator.setThingsToBeGenerated(genId, things, hideDefaultChannels, hideDefaultParameters);
+                thingGenerator.generateFileFormat(genId, outputStream);
+                break;
+            case "text/vnd.openhab.dsl.item":
+                if (itemGenerator == null) {
+                    return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE)
+                            .entity("Unsupported media type '" + acceptHeader + "'!").build();
+                } else if (items.isEmpty()) {
+                    return Response.status(Response.Status.BAD_REQUEST).entity("No item loaded from input").build();
+                }
+                itemGenerator.setItemsToBeGenerated(genId, items, hideChannelLinksAndMetadata ? List.of() : metadata,
+                        hideDefaultParameters);
+                itemGenerator.generateFileFormat(genId, outputStream);
+                break;
+            case "application/yaml":
+                if (thingGenerator != null) {
+                    thingGenerator.setThingsToBeGenerated(genId, things, hideDefaultChannels, hideDefaultParameters);
+                }
+                if (itemGenerator != null) {
+                    itemGenerator.setItemsToBeGenerated(genId, items,
+                            hideChannelLinksAndMetadata ? List.of() : metadata, hideDefaultParameters);
+                }
+                if (thingGenerator != null) {
+                    thingGenerator.generateFileFormat(genId, outputStream);
+                } else if (itemGenerator != null) {
+                    itemGenerator.generateFileFormat(genId, outputStream);
+                }
+                break;
+            default:
+                return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE)
+                        .entity("Unsupported media type '" + acceptHeader + "'!").build();
+        }
+        return Response.ok(new String(outputStream.toByteArray())).build();
+    }
+
+    @POST
+    @RolesAllowed({ Role.ADMIN })
+    @Path("/parse")
+    @Consumes({ "text/vnd.openhab.dsl.thing", "text/vnd.openhab.dsl.item", "application/yaml" })
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(operationId = "parse", summary = "Parse file format.", security = {
+            @SecurityRequirement(name = "oauth2", scopes = { "admin" }) }, responses = {
+                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ExtendedFileFormatDTO.class))),
+                    @ApiResponse(responseCode = "400", description = "Invalid input data."),
+                    @ApiResponse(responseCode = "415", description = "Unsupported content type.") })
+    public Response parse(final @Context HttpHeaders httpHeaders,
+            @RequestBody(description = "file format syntax", required = true, content = {
+                    @Content(mediaType = "text/vnd.openhab.dsl.thing", schema = @Schema(example = DSL_THINGS_EXAMPLE)),
+                    @Content(mediaType = "text/vnd.openhab.dsl.item", schema = @Schema(example = DSL_ITEMS_EXAMPLE)),
+                    @Content(mediaType = "application/yaml", schema = @Schema(example = YAML_THINGS_EXAMPLE)) }) String input) {
+        String contentTypeHeader = httpHeaders.getHeaderString(HttpHeaders.CONTENT_TYPE);
+        logger.debug("parse: contentType = {}", contentTypeHeader);
+
+        // First parse the input
+        Collection<Thing> things = List.of();
+        Collection<Item> items = List.of();
+        Collection<Metadata> metadata = List.of();
+        Collection<ItemChannelLink> channelLinks = List.of();
+        List<String> errors = new ArrayList<>();
+        List<String> warnings = new ArrayList<>();
+        ThingFileParser thingParser = getThingFileParser(contentTypeHeader);
+        ItemFileParser itemParser = getItemFileParser(contentTypeHeader);
+        String modelName = null;
+        String modelName2 = null;
+        switch (contentTypeHeader) {
+            case "text/vnd.openhab.dsl.thing":
+                if (thingParser == null) {
+                    return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE)
+                            .entity("Unsupported content type '" + contentTypeHeader + "'!").build();
+                }
+                modelName = thingParser.startParsingFileFormat(input, errors, warnings);
+                if (modelName == null) {
+                    return Response.status(Response.Status.BAD_REQUEST).entity(String.join("\n", errors)).build();
+                }
+                things = thingParser.getParsedThings(modelName);
+                if (things.isEmpty()) {
+                    thingParser.finishParsingFileFormat(modelName);
+                    return Response.status(Response.Status.BAD_REQUEST).entity("No thing loaded from input").build();
+                }
+                break;
+            case "text/vnd.openhab.dsl.item":
+                if (itemParser == null) {
+                    return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE)
+                            .entity("Unsupported content type '" + contentTypeHeader + "'!").build();
+                }
+                modelName2 = itemParser.startParsingFileFormat(input, errors, warnings);
+                if (modelName2 == null) {
+                    return Response.status(Response.Status.BAD_REQUEST).entity(String.join("\n", errors)).build();
+                }
+                items = itemParser.getParsedItems(modelName2);
+                if (items.isEmpty()) {
+                    itemParser.finishParsingFileFormat(modelName2);
+                    return Response.status(Response.Status.BAD_REQUEST).entity("No item loaded from input").build();
+                }
+                metadata = itemParser.getParsedMetadata(modelName2);
+                // We need to go through the thing parser to retrieve the items channel links
+                // But there is no need to parse again the input
+                if (thingParser != null) {
+                    channelLinks = thingParser.getParsedChannelLinks(modelName2);
+                }
+                break;
+            case "application/yaml":
+                if (thingParser != null) {
+                    modelName = thingParser.startParsingFileFormat(input, errors, warnings);
+                    if (modelName == null) {
+                        return Response.status(Response.Status.BAD_REQUEST).entity(String.join("\n", errors)).build();
+                    }
+                    things = thingParser.getParsedThings(modelName);
+                    channelLinks = thingParser.getParsedChannelLinks(modelName);
+                }
+                if (itemParser != null) {
+                    // Avoid parsing the input a second time
+                    if (modelName == null) {
+                        modelName2 = itemParser.startParsingFileFormat(input, errors, warnings);
+                        if (modelName2 == null) {
+                            return Response.status(Response.Status.BAD_REQUEST).entity(String.join("\n", errors))
+                                    .build();
+                        }
+                    }
+                    items = itemParser
+                            .getParsedItems(modelName != null ? modelName : Objects.requireNonNull(modelName2));
+                    metadata = itemParser
+                            .getParsedMetadata(modelName != null ? modelName : Objects.requireNonNull(modelName2));
+                }
+                break;
+            default:
+                return Response.status(Response.Status.UNSUPPORTED_MEDIA_TYPE)
+                        .entity("Unsupported content type '" + contentTypeHeader + "'!").build();
+        }
+        ExtendedFileFormatDTO result = convertToFileFormatDTO(things, items, metadata, channelLinks, warnings);
+        if (modelName != null && thingParser != null) {
+            thingParser.finishParsingFileFormat(modelName);
+        }
+        if (modelName2 != null && itemParser != null) {
+            itemParser.finishParsingFileFormat(modelName2);
+        }
+        return Response.ok(result).build();
     }
 
     /*
@@ -465,6 +700,23 @@ public class FileFormatResource implements RESTResource {
         };
     }
 
+    private @Nullable ItemFileParser getItemFileParser(String contentType) {
+        return switch (contentType) {
+            case "text/vnd.openhab.dsl.item" -> itemFileParsers.get("DSL");
+            case "application/yaml" -> itemFileParsers.get("YAML");
+            default -> null;
+        };
+    }
+
+    private @Nullable ThingFileParser getThingFileParser(String contentType) {
+        return switch (contentType) {
+            case "text/vnd.openhab.dsl.thing" -> thingFileParsers.get("DSL");
+            case "text/vnd.openhab.dsl.item" -> thingFileParsers.get("DSL");
+            case "application/yaml" -> thingFileParsers.get("YAML");
+            default -> null;
+        };
+    }
+
     private List<Thing> getThingsOrDiscoveryResult(List<String> thingUIDs) {
         return thingUIDs.stream().distinct().map(uid -> {
             ThingUID thingUID = new ThingUID(uid);
@@ -484,5 +736,214 @@ public class FileFormatResource implements RESTResource {
             }
             return simulateThing(discoveryResult, thingType);
         }).toList();
+    }
+
+    private boolean convertFromFileFormatDTO(FileFormatDTO data, List<Thing> things, List<Item> items,
+            List<Metadata> metadata, List<String> errors) {
+        boolean ok = true;
+        if (data.things != null) {
+            for (ThingDTO thingBean : data.things) {
+                ThingUID thingUID = thingBean.UID == null ? null : new ThingUID(thingBean.UID);
+                ThingTypeUID thingTypeUID = new ThingTypeUID(thingBean.thingTypeUID);
+
+                ThingUID bridgeUID = null;
+
+                if (thingBean.bridgeUID != null) {
+                    bridgeUID = new ThingUID(thingBean.bridgeUID);
+                    if (thingUID != null && !thingUID.getBindingId().equals(bridgeUID.getBindingId())) {
+                        errors.add("Thing UID '" + thingUID + "' and bridge UID '" + bridgeUID
+                                + "' are from different bindings");
+                        ok = false;
+                        continue;
+                    }
+                }
+
+                // turn the ThingDTO's configuration into a Configuration
+                Configuration configuration = new Configuration(
+                        normalizeConfiguration(thingBean.configuration, thingTypeUID, thingUID));
+                if (thingUID != null) {
+                    normalizeChannels(thingBean, thingUID);
+                }
+
+                Thing thing = thingRegistry.createThingOfType(thingTypeUID, thingUID, bridgeUID, thingBean.label,
+                        configuration);
+
+                if (thing != null) {
+                    if (thingBean.properties != null) {
+                        for (Map.Entry<String, String> entry : thingBean.properties.entrySet()) {
+                            thing.setProperty(entry.getKey(), entry.getValue());
+                        }
+                    }
+                    if (thingBean.location != null) {
+                        thing.setLocation(thingBean.location);
+                    }
+                    if (thingBean.channels != null) {
+                        // The provided channels replace the channels provided by the thing type.
+                        ThingDTO thingChannels = new ThingDTO();
+                        thingChannels.channels = thingBean.channels;
+                        thing = ThingHelper.merge(thing, thingChannels);
+                    }
+                } else if (thingUID != null) {
+                    // if there wasn't any ThingFactory capable of creating the thing,
+                    // we create the Thing exactly the way we received it, i.e. we
+                    // cannot take its thing type into account for automatically
+                    // populating channels and properties.
+                    thing = ThingDTOMapper.map(thingBean,
+                            thingTypeRegistry.getThingType(thingTypeUID) instanceof BridgeType);
+                } else {
+                    errors.add("A thing UID must be provided, since no binding can create the thing!");
+                    ok = false;
+                    continue;
+                }
+
+                things.add(thing);
+            }
+        }
+        if (data.items != null) {
+            for (FileFormatItemDTO itemData : data.items) {
+                String name = itemData.name;
+                if (name == null || name.isEmpty()) {
+                    errors.add("Missing item name in items data!");
+                    ok = false;
+                    continue;
+                }
+
+                Item item;
+                try {
+                    item = FileFormatItemDTOMapper.map(itemData, itemBuilderFactory);
+                    if (item == null) {
+                        errors.add("Invalid item type in items data!");
+                        ok = false;
+                        continue;
+                    }
+                } catch (IllegalArgumentException e) {
+                    errors.add("Invalid item name in items data!");
+                    ok = false;
+                    continue;
+                }
+                items.add(item);
+                metadata.addAll(FileFormatItemDTOMapper.mapMetadata(itemData));
+            }
+        }
+        return ok;
+    }
+
+    private ExtendedFileFormatDTO convertToFileFormatDTO(Collection<Thing> things, Collection<Item> items,
+            Collection<Metadata> metadata, Collection<ItemChannelLink> channelLinks, List<String> warnings) {
+        ExtendedFileFormatDTO dto = new ExtendedFileFormatDTO();
+        dto.warnings = warnings.isEmpty() ? null : warnings;
+        if (!things.isEmpty()) {
+            dto.things = new ArrayList<>();
+            things.forEach(thing -> {
+                dto.things.add(ThingDTOMapper.map(thing));
+            });
+        }
+        if (!items.isEmpty()) {
+            dto.items = new ArrayList<>();
+            items.forEach(item -> {
+                dto.items.add(FileFormatItemDTOMapper.map(item, metadata, channelLinks));
+            });
+        }
+        return dto;
+    }
+
+    private @Nullable Map<String, @Nullable Object> normalizeConfiguration(
+            @Nullable Map<String, @Nullable Object> properties, ThingTypeUID thingTypeUID,
+            @Nullable ThingUID thingUID) {
+        if (properties == null || properties.isEmpty()) {
+            return properties;
+        }
+
+        ThingType thingType = thingTypeRegistry.getThingType(thingTypeUID);
+        if (thingType == null) {
+            return properties;
+        }
+
+        List<ConfigDescription> configDescriptions = new ArrayList<>(2);
+
+        URI descURI = thingType.getConfigDescriptionURI();
+        if (descURI != null) {
+            ConfigDescription typeConfigDesc = configDescRegistry.getConfigDescription(descURI);
+            if (typeConfigDesc != null) {
+                configDescriptions.add(typeConfigDesc);
+            }
+        }
+
+        if (thingUID != null) {
+            ConfigDescription thingConfigDesc = configDescRegistry
+                    .getConfigDescription(getConfigDescriptionURI(thingUID));
+            if (thingConfigDesc != null) {
+                configDescriptions.add(thingConfigDesc);
+            }
+        }
+
+        if (configDescriptions.isEmpty()) {
+            return properties;
+        }
+
+        return ConfigUtil.normalizeTypes(properties, configDescriptions);
+    }
+
+    private @Nullable Map<String, @Nullable Object> normalizeConfiguration(Map<String, @Nullable Object> properties,
+            ChannelTypeUID channelTypeUID, ChannelUID channelUID) {
+        if (properties == null || properties.isEmpty()) {
+            return properties;
+        }
+
+        ChannelType channelType = channelTypeRegistry.getChannelType(channelTypeUID);
+        if (channelType == null) {
+            return properties;
+        }
+
+        List<ConfigDescription> configDescriptions = new ArrayList<>(2);
+        URI descURI = channelType.getConfigDescriptionURI();
+        if (descURI != null) {
+            ConfigDescription typeConfigDesc = configDescRegistry.getConfigDescription(descURI);
+            if (typeConfigDesc != null) {
+                configDescriptions.add(typeConfigDesc);
+            }
+        }
+        if (getConfigDescriptionURI(channelUID) != null) {
+            ConfigDescription channelConfigDesc = configDescRegistry
+                    .getConfigDescription(getConfigDescriptionURI(channelUID));
+            if (channelConfigDesc != null) {
+                configDescriptions.add(channelConfigDesc);
+            }
+        }
+
+        if (configDescriptions.isEmpty()) {
+            return properties;
+        }
+
+        return ConfigUtil.normalizeTypes(properties, configDescriptions);
+    }
+
+    private void normalizeChannels(ThingDTO thingBean, ThingUID thingUID) {
+        if (thingBean.channels != null) {
+            for (ChannelDTO channelBean : thingBean.channels) {
+                if (channelBean.channelTypeUID != null) {
+                    channelBean.configuration = normalizeConfiguration(channelBean.configuration,
+                            new ChannelTypeUID(channelBean.channelTypeUID), new ChannelUID(thingUID, channelBean.id));
+                }
+            }
+        }
+    }
+
+    private URI getConfigDescriptionURI(ThingUID thingUID) {
+        String uriString = "thing:" + thingUID;
+        try {
+            return new URI(uriString);
+        } catch (URISyntaxException e) {
+            throw new BadRequestException("Invalid URI syntax: " + uriString);
+        }
+    }
+
+    private URI getConfigDescriptionURI(ChannelUID channelUID) {
+        String uriString = "channel:" + channelUID;
+        try {
+            return new URI(uriString);
+        } catch (URISyntaxException e) {
+            throw new BadRequestException("Invalid URI syntax: " + uriString);
+        }
     }
 }

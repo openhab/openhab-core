@@ -23,6 +23,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.openhab.core.common.registry.AbstractProvider;
 import org.openhab.core.config.core.Configuration;
 import org.openhab.core.items.ItemProvider;
+import org.openhab.core.model.yaml.internal.YamlModelRepositoryImpl;
 import org.openhab.core.model.yaml.internal.util.YamlElementUtils;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.link.ItemChannelLink;
@@ -41,7 +42,8 @@ import org.slf4j.LoggerFactory;
  * @author Laurent Garnier - Initial contribution
  */
 @NonNullByDefault
-@Component(immediate = true, service = { ItemChannelLinkProvider.class, YamlChannelLinkProvider.class })
+@Component(immediate = true, service = { YamlChannelLinkProvider.class, ItemChannelLinkProvider.class,
+        YamlChannelLinkProvider.class })
 public class YamlChannelLinkProvider extends AbstractProvider<ItemChannelLink> implements ItemChannelLinkProvider {
 
     private final Logger logger = LoggerFactory.getLogger(YamlChannelLinkProvider.class);
@@ -51,7 +53,9 @@ public class YamlChannelLinkProvider extends AbstractProvider<ItemChannelLink> i
 
     @Override
     public Collection<ItemChannelLink> getAll() {
-        return itemsChannelLinksMap.values().stream().flatMap(m -> m.values().stream())
+        // Ignore isolated models
+        return itemsChannelLinksMap.keySet().stream().filter(name -> !YamlModelRepositoryImpl.isIsolatedModel(name))
+                .map(name -> itemsChannelLinksMap.getOrDefault(name, Map.of())).flatMap(m -> m.values().stream())
                 .flatMap(m -> m.values().stream()).toList();
     }
 
@@ -99,21 +103,27 @@ public class YamlChannelLinkProvider extends AbstractProvider<ItemChannelLink> i
             ItemChannelLink oldLink = links.get(channelUIDObject);
             if (oldLink == null) {
                 links.put(channelUIDObject, itemChannelLink);
-                logger.debug("notify added item channel link {}", itemChannelLink.getUID());
-                notifyListenersAboutAddedElement(itemChannelLink);
+                logger.debug("model {} added channel link {}", modelName, itemChannelLink.getUID());
+                if (!YamlModelRepositoryImpl.isIsolatedModel(modelName)) {
+                    notifyListenersAboutAddedElement(itemChannelLink);
+                }
             } else if (!YamlElementUtils.equalsConfig(configuration.getProperties(),
                     oldLink.getConfiguration().getProperties())) {
                 links.put(channelUIDObject, itemChannelLink);
-                logger.debug("notify updated item channel link {}", itemChannelLink.getUID());
-                notifyListenersAboutUpdatedElement(oldLink, itemChannelLink);
+                logger.debug("model {} updated channel link {}", modelName, itemChannelLink.getUID());
+                if (!YamlModelRepositoryImpl.isIsolatedModel(modelName)) {
+                    notifyListenersAboutUpdatedElement(oldLink, itemChannelLink);
+                }
             }
         }
 
         linksToBeRemoved.forEach(uid -> {
             ItemChannelLink link = links.remove(uid);
             if (link != null) {
-                logger.debug("notify removed item channel link {}", link.getUID());
-                notifyListenersAboutRemovedElement(link);
+                logger.debug("model {} removed channel link {}", modelName, link.getUID());
+                if (!YamlModelRepositoryImpl.isIsolatedModel(modelName)) {
+                    notifyListenersAboutRemovedElement(link);
+                }
             }
         });
         if (links.isEmpty()) {
