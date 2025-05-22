@@ -89,6 +89,8 @@ public class YamlPreprocessorTest {
     }
 
     @Test
+    // After the preprocessor, the variables and packages sections should be removed
+    // from the resulting data structure
     void extraElementsRemovedTest() throws IOException {
         Map<String, Object> data = (Map<String, Object>) YamlPreprocessor
                 .load(SOURCE_PATH.resolve("extraElementsRemoved.yaml"));
@@ -235,5 +237,7 @@ public class YamlPreprocessorTest {
         assertThat(YamlPreprocessor.getNestedValue(data, "things", "thing4", "config", "pkgprop"), equalTo("package"));
         assertThat(YamlPreprocessor.getNestedValue(data, "things", "thing4", "config", "commonprop"),
                 equalTo("overridden"));
+
+        assertThat(YamlPreprocessor.getNestedValue(data, "list", "test1"), equalTo(List.of("main1", "package1")));
     }
 }
