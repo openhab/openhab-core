@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,6 +41,7 @@ import org.yaml.snakeyaml.nodes.Tag;
  *
  * @author Jimmy Tanagra - Initial contribution
  */
+@NonNullByDefault
 class ModelConstructor extends Constructor {
 
     private static final Tag INCLUDE_TAG = new Tag("!include");
@@ -69,7 +71,7 @@ class ModelConstructor extends Constructor {
 
     public class ConstructInterpolation extends AbstractConstruct {
 
-        public Object construct(Node node) {
+        public Object construct(@Nullable Node node) {
             ScalarNode scalarNode = (ScalarNode) node;
 
             String value = (String) constructScalar(scalarNode);
@@ -131,7 +133,8 @@ class ModelConstructor extends Constructor {
          * @param defaultValue - default value or the error in the template
          * @return the value to resolve in the template
          */
-        private String resolveVariable(String name, @Nullable String separator, @Nullable String defaultValue) {
+        private @Nullable String resolveVariable(String name, @Nullable String separator,
+                @Nullable String defaultValue) {
             String value = variables.get(name);
             if (value != null && !value.isEmpty()) {
                 return value.toString();
@@ -165,7 +168,7 @@ class ModelConstructor extends Constructor {
         // Return an empty string for null values so that the keys are not removed from the map
         // This matches the behavior of Jackson's parser, otherwise some tests will fail
         @Override
-        public Object construct(Node node) {
+        public Object construct(@Nullable Node node) {
             if (node != null) {
                 constructScalar((ScalarNode) node);
             }
@@ -176,7 +179,7 @@ class ModelConstructor extends Constructor {
     private class ConstructInclude extends AbstractConstruct {
 
         @Override
-        public Object construct(Node node) {
+        public Object construct(@Nullable Node node) {
             logger.debug("Constructing !include node: {}", node);
             if (node instanceof ScalarNode scalarNode) {
                 String value = constructScalar(scalarNode).trim();
