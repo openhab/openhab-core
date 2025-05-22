@@ -25,6 +25,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -176,6 +177,12 @@ public class CacheScriptExtension implements ScriptExtensionProvider {
             return Objects.requireNonNull(cache.computeIfAbsent(key, k -> supplier.get()));
         }
 
+        @Override
+        @Nullable
+        public Object compute(String key, BiFunction<String, @Nullable Object, @Nullable Object> remappingFunction) {
+            return cache.compute(key, (k, v) -> remappingFunction.apply(k, v));
+        }
+
         private Collection<Object> values() {
             return cache.values();
         }
@@ -238,6 +245,24 @@ public class CacheScriptExtension implements ScriptExtensionProvider {
                 Object value = Objects.requireNonNull(sharedCache.computeIfAbsent(key, k -> supplier.get()));
 
                 logger.trace("GET with supplier to cache from '{}': '{}' -> '{}'", scriptIdentifier, key, value);
+                return value;
+            } finally {
+                cacheLock.unlock();
+            }
+        }
+
+        @Override
+        @Nullable
+        public Object compute(String key, BiFunction<String, @Nullable Object, @Nullable Object> remappingFunction) {
+            cacheLock.lock();
+            try {
+                Object value = sharedCache.compute(key, (k, v) -> remappingFunction.apply(k, v));
+                if (value == null) {
+                    sharedCacheKeyAccessors.remove(key);
+                } else {
+                    rememberAccessToKey(key);
+                }
+                logger.trace("COMPUTE to cache from '{}': '{}' -> '{}'", scriptIdentifier, key, value);
                 return value;
             } finally {
                 cacheLock.unlock();
