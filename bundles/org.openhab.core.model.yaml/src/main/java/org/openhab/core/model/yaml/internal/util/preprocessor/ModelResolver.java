@@ -14,6 +14,7 @@ package org.openhab.core.model.yaml.internal.util.preprocessor;
 
 import java.util.regex.Pattern;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.yaml.snakeyaml.nodes.Tag;
 import org.yaml.snakeyaml.resolver.Resolver;
@@ -31,6 +32,7 @@ import org.yaml.snakeyaml.resolver.Resolver;
  *
  * @author Jimmy Tanagra - Initial contribution
  */
+@NonNullByDefault
 class ModelResolver extends Resolver {
     public static final Pattern BOOL = Pattern.compile("^(?:true|false)$", Pattern.CASE_INSENSITIVE);
 
