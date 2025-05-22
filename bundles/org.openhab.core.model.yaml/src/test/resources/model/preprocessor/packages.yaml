@@ -17,6 +17,9 @@ packages:
       thingname: thing4
       label: package
 
+  package_list: !include
+    file: package_list.inc.yaml
+
 things:
   thing3:
     label: label3
@@ -26,3 +29,7 @@ things:
     config:
       mainprop: main
       commonprop: overridden
+
+list:
+  test1:
+    - main1

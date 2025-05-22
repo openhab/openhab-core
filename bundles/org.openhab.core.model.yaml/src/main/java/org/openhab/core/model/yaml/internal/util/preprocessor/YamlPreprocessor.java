@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -206,54 +207,27 @@ public class YamlPreprocessor {
         return mainData;
     }
 
+    @SuppressWarnings("unchecked")
     private static Map<String, Object> mergeElements(Map<String, Object> mainData, Map<String, Object> packageData) {
-        for (Map.Entry<String, Object> entry : packageData.entrySet()) {
-            String key = entry.getKey();
-            Object pkgValue = entry.getValue();
+        packageData.forEach((key, value) -> {
             if (mainData.containsKey(key)) {
                 Object mainValue = mainData.get(key);
-                if (mainValue instanceof Map && pkgValue instanceof Map) {
-                    // Recursive merge for nested maps
-                    @SuppressWarnings("unchecked")
+                if (mainValue instanceof Map && value instanceof Map) {
                     Map<String, Object> mainMap = (Map<String, Object>) mainValue;
-                    @SuppressWarnings("unchecked")
-                    Map<String, Object> pkgMap = (Map<String, Object>) pkgValue;
+                    Map<String, Object> pkgMap = (Map<String, Object>) value;
                     mergeElements(mainMap, pkgMap);
+                } else if (mainValue instanceof List && value instanceof List) {
+                    List<Object> mainList = (List<Object>) mainValue;
+                    List<Object> pkgList = (List<Object>) value;
+                    mainData.put(key, Stream.concat(mainList.stream(), pkgList.stream()).toList());
                 }
-                // If not both maps, preserve mainData's value (do nothing)
+                // if the value is not a map or list, keep the main value
             } else {
-                mainData.put(key, pkgValue);
+                mainData.put(key, value);
             }
-        }
+        });
         return mainData;
     }
-
-    // if (packages == null) {
-    // return mainData;
-    // }
-    // if (!(packages instanceof Map)) {
-    // LOGGER.warn("{} is not a map", PACKAGES_KEY);
-    // return mainData;
-    // }
-    // Yaml yaml = new Yaml();
-    // packages.forEach((packageName, pkg) -> { // packageName (key) is not used
-    // if (pkg instanceof Map) { // content of the included package, e.g. { things: { ... }, items: { ... } }
-    // Map<String, Object> packageData = (Map<String, Object>) pkg;
-    // packageData.forEach((mainElement, pkgElements) -> {
-    // mainData.merge(mainElement, pkgElements, (existingValue, newValue) -> {
-    // if (existingValue instanceof Map && newValue instanceof Map) {
-    // ((Map<String, Object>) existingValue).merge((Map<String, Object>) newValue);
-    // return existingValue;
-    // }
-    // return newValue;
-    // });
-    // });
-    // } else {
-    // LOGGER.warn("Package '{}' is not a map: {}", packageName, pkg);
-    // }
-    // });
-    // return mainData;
-    // }
 
     static Yaml newYaml(Map<String, String> variables) {
         return new Yaml(new ModelConstructor(variables), new Representer(new DumperOptions()), new DumperOptions(),
