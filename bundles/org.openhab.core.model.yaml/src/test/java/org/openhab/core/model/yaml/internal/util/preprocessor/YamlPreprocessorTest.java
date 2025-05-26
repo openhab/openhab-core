@@ -60,7 +60,7 @@ public class YamlPreprocessorTest {
             assertThat(yaml.load(value), equalTo(value));
         });
 
-        List.of("off", "Off", "OFF", "oF").forEach(value -> {
+        List.of("off", "Off", "OFF", "oFf").forEach(value -> {
             assertThat(yaml.load(value), equalTo(value));
         });
 
