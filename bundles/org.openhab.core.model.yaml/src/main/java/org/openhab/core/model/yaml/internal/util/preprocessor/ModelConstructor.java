@@ -51,8 +51,19 @@ class ModelConstructor extends Constructor {
     // ${var} - if var is not set, return empty string
     // ${var-default} - if var is set but empty, return empty
     // ${var:-default} - if var is set but empty, return default
-    private static final Pattern VARIABLE_PATTERN = Pattern
-            .compile("\\$\\{\\s*((?<name>\\w+)((?<separator>:?-)(?<default>.*)?)?)\\s*\\}");
+    private static final Pattern VARIABLE_PATTERN = Pattern.compile("""
+            \\$\\{
+                (?<name>\\w+)
+                (?:
+                    (?<separator>:?-)
+                    (?:
+                        '(?<defaultsq>[^']*)' |   # single-quoted default (capture inside quotes)
+                        "(?<defaultdq>[^"]*)" |   # double-quoted default (capture inside quotes)
+                        (?<default>[^}]*)         # unquoted default
+                    )
+                )?
+            \\}
+            """, Pattern.COMMENTS);
 
     private final Logger logger = LoggerFactory.getLogger(ModelConstructor.class);
 
@@ -92,10 +103,14 @@ class ModelConstructor extends Constructor {
             do {
                 interpolated = matcher.replaceAll(match -> {
                     String variableName = match.group("name");
-                    String defaultValue = match.group("default");
                     String separator = match.group("separator");
+                    String defaultSingleQuoted = match.group("defaultsq");
+                    String defaultDoubleQuoted = match.group("defaultdq");
+                    String defaultUnquoted = match.group("default");
                     try {
-                        String resolved = resolveVariable(variableName, separator, defaultValue);
+                        String resolved = resolveVariable(variableName, separator,
+                                defaultDoubleQuoted != null ? defaultDoubleQuoted
+                                        : defaultSingleQuoted != null ? defaultSingleQuoted : defaultUnquoted);
                         logger.debug("Interpolating variable {} => {}", variableName, resolved);
                         return resolved;
                     } catch (MissingVariableException e) {

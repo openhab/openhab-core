@@ -136,6 +136,11 @@ public class YamlPreprocessorTest {
         assertThat(data.get("exists_with_colon"), equalTo("value1"));
         assertThat(data.get("empty_with_colon"), equalTo("default"));
         assertThat(data.get("absent_with_colon"), equalTo("default"));
+
+        assertThat(data.get("absent_default_multiple"), equalTo("foobar"));
+        assertThat(data.get("absent_default_single_quoted"), equalTo("{foo}"));
+        assertThat(data.get("absent_default_double_quoted"), equalTo("{foo}"));
+        assertThat(data.get("absent_with_empty_default"), equalTo(""));
     }
 
     @Test
