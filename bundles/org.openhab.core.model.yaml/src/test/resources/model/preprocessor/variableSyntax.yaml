@@ -12,3 +12,9 @@ absent: ${absent-default} # => default
 exists_with_colon: ${exist:-default} # => value1
 empty_with_colon: ${empty:-default} # => default
 absent_with_colon: ${absent:-default} # => default
+
+absent_default_multiple: "${absent:-foo}${absent:-bar}"
+absent_default_single_quoted: "${absent:-'{foo}'}"
+absent_default_double_quoted: "${absent:-\"{foo}\"}"
+
+absent_with_empty_default: ${absent:-}
