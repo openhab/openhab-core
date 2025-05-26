@@ -2,14 +2,14 @@
 	"conditions": [
 		{
 			"uid": "jsr223.ScriptedCondition",
-			"label": "Scripted condition",
-			"description": "allows the definition of a condition by a script",
+			"label": "Opaque Condition",
+			"description": "Evaluates a condition using external code. See the rule source for details.",
 			"visibility": "EXPERT",
 			"configDescriptions": [
 				{
 					"name": "privId",
 					"type": "TEXT",
-					"description": "the identifier of the private method",
+					"description": "The identifier of the private method",
 					"required": true
 				}
 			]
@@ -18,14 +18,14 @@
 	"actions": [
 		{
 			"uid": "jsr223.ScriptedAction",
-			"label": "Scripted action",
-			"description": "allows the execution of a method defined by a script",
+			"label": "Opaque Action",
+			"description": "Executes external code. See the rule source for details.",
 			"visibility": "EXPERT",
 			"configDescriptions": [
 				{
 					"name": "privId",
 					"type": "TEXT",
-					"description": "the identifier of the private method",
+					"description": "The identifier of the private method",
 					"required": true
 				}
 			],
@@ -33,8 +33,8 @@
 				{
 					"name": "result",
 					"type": "java.lang.Object",
-					"label": "result",
-					"description": "the script result.",
+					"label": "Result",
+					"description": "The script result",
 					"reference": ""
 				}
 			]
@@ -43,14 +43,14 @@
 	"triggers": [
 		{
 			"uid": "jsr223.ScriptedTrigger",
-			"label": "Scripted trigger",
-			"description": "allows the execution of a method defined by a script",
+			"label": "Opaque Trigger",
+			"description": "A trigger controlled by external code. See the rule source for details.",
 			"visibility": "EXPERT",
 			"configDescriptions": [
 				{
 					"name": "privId",
 					"type": "TEXT",
-					"description": "the identifier of the private method",
+					"description": "The identifier of the private method",
 					"required": true
 				}
 			],
@@ -58,8 +58,8 @@
 				{
 					"name": "triggerOutput",
 					"type": "java.lang.String",
-					"label": "TriggerOutput label",
-					"description": "Text from the trigger",
+					"label": "Trigger Output",
+					"description": "The text from the trigger",
 					"reference": "consoleInput",
 					"defaultValue": "dtag"
 				}
