@@ -13,6 +13,7 @@
 package org.openhab.core.model.yaml.internal.util.preprocessor;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -195,18 +196,8 @@ class ModelConstructor extends Constructor {
                     return Map.of();
                 }
 
-                Map<String, String> vars = new java.util.HashMap<>(variables);
-                Object varsObj = includeOptions.get("vars");
-                if (varsObj instanceof Map<?, ?> varsMap) {
-                    varsMap.forEach((key, val) -> {
-                        if (key instanceof String k && val != null) {
-                            vars.put(k, val.toString());
-                        }
-                    });
-                } else if (varsObj != null) {
-                    logger.warn("Invalid 'vars' in !include: {}. Expected a map.", varsObj);
-                }
-
+                Map<String, String> vars = Optional.ofNullable(includeOptions.get("vars")).filter(Map.class::isInstance)
+                        .map(Map.class::cast).orElse(Map.of());
                 return new IncludeObject(fileName, vars);
             } else {
                 logger.warn("Invalid !include argument type: {}", node.getClass().getName());
