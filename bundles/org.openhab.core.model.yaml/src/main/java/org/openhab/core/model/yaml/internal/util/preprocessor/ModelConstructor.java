@@ -107,16 +107,11 @@ class ModelConstructor extends Constructor {
                     String defaultSingleQuoted = match.group("defaultsq");
                     String defaultDoubleQuoted = match.group("defaultdq");
                     String defaultUnquoted = match.group("default");
-                    try {
-                        String resolved = resolveVariable(variableName, separator,
-                                defaultDoubleQuoted != null ? defaultDoubleQuoted
-                                        : defaultSingleQuoted != null ? defaultSingleQuoted : defaultUnquoted);
-                        logger.debug("Interpolating variable {} => {}", variableName, resolved);
-                        return resolved;
-                    } catch (MissingVariableException e) {
-                        logger.warn("{}", e.getMessage());
-                    }
-                    return "";
+                    String resolved = resolveVariable(variableName, separator,
+                            defaultDoubleQuoted != null ? defaultDoubleQuoted
+                                    : defaultSingleQuoted != null ? defaultSingleQuoted : defaultUnquoted);
+                    logger.debug("Interpolating variable {} => {}", variableName, resolved);
+                    return Matcher.quoteReplacement(resolved);
                 });
                 if (nestedLevel++ > MAX_VAR_NESTING_DEPTH) {
                     throw new YAMLException("Variable nesting is too deep in " + value);
@@ -167,14 +162,6 @@ class ModelConstructor extends Constructor {
                 }
             }
             return "";
-        }
-
-        public class MissingVariableException extends YAMLException {
-            private static final long serialVersionUID = 1L;
-
-            public MissingVariableException(String message) {
-                super(message);
-            }
         }
     }
 
